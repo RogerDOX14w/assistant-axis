@@ -11,7 +11,10 @@ Relations (``RELATIONS``):
 * ``antonym``: the corpus's recorded clean pairs (``arrangement`` kind
   ``pair``), the reciprocal negative-label pairs
   (``arrangements.reciprocal_pairs``), plus ``trait_antonyms_v4.json``
-  judgements scored >= 4 whose ``negative_label`` is an existing stem.
+  judgements scored >= 4 whose ``negative_label`` is an existing stem, while
+  that file exists.  It was retired on 2026-10-09 (W18, Roger); the 14 pairs
+  only it supplied are hand-added pairs in the curation file (source
+  ``antonyms_v4``), so a build without it gives the same pairs.
 * ``duplicate``: a seed-queue entry Roger turned down as covered by an
   existing trait (``not_adopted`` / ``superseded`` decisions naming the
   neighbour), with the entry's own description; plus plan 11 §6's
@@ -371,7 +374,7 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
             for x, y in links:
                 add(x, y, "near_distinct", f"arrangement_{arr.kind}",
                     note=f"members of one {arr.kind}: {', '.join(arr.members)}")
-    # 2. v4 antonym judgements
+    # 2. v4 antonym judgements (none once the file is gone; its unique pairs are in the curation file)
     for a, b, score in load_v4_antonyms(v4_path or data_dir / "traits" / "trait_antonyms_v4.json", stems,
                                         renames=renames):
         add(a, b, "antonym", "antonyms_v4", note=f"antonym_score {score}")
@@ -580,12 +583,14 @@ def build_default(repo_root: Path, *, out_dir: Optional[Path] = None, write: boo
                               census, curation=curation, filter_glosses=fg, n_unrelated=n_unrelated, seed=seed)
     if write:
         trait_files = sorted((data_dir / "traits" / "instructions").glob("*.json"))
+        v4_path = data_dir / "traits" / "trait_antonyms_v4.json"          # retired 2026-10-09: an input while present
         inputs = [current_files_input(dep_key="trait_files", paths=trait_files),
-                  current_file_input(dep_key="seed_queue", path=queue_path),
-                  current_file_input(dep_key="antonyms_v4", path=data_dir / "traits" / "trait_antonyms_v4.json"),
-                  current_file_input(dep_key="seeding_log", path=repo_root / DEFAULT_SEEDING_LOG),
-                  current_file_input(dep_key="filter_glosses", path=repo_root / DEFAULT_FILTER_RESULTS),
-                  current_file_input(dep_key="census", path=census_path)]
+                  current_file_input(dep_key="seed_queue", path=queue_path)]
+        if v4_path.exists():
+            inputs.append(current_file_input(dep_key="antonyms_v4", path=v4_path))
+        inputs += [current_file_input(dep_key="seeding_log", path=repo_root / DEFAULT_SEEDING_LOG),
+                   current_file_input(dep_key="filter_glosses", path=repo_root / DEFAULT_FILTER_RESULTS),
+                   current_file_input(dep_key="census", path=census_path)]
         if curation_path.exists():
             inputs.append(current_file_input(dep_key="curation", path=curation_path))
         save(lp, out_dir / LABELLED_PAIRS_NAME, inputs=inputs)

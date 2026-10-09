@@ -213,3 +213,30 @@ def test_recorded_labelled_pairs_file_is_consistent():
     assert not labelled & {q.key() for q in lp.pairs if q.relation == "unrelated"}
     for q in lp.pairs:
         assert lp.folds.get(q.a) == lp.folds.get(q.b) == q.fold
+
+
+def _real_build(v4_path, n_unrelated=0):
+    """The repository build as ``build_default`` makes it, with ``v4_path`` in place of the v4 file."""
+    from assistant_axis.gapgen.contrast import parse_census
+    cur = DATA / "candidates" / "calibration" / L.CURATION_NAME
+    census = REPO_ROOT / L.DEFAULT_CENSUS
+    return L.build_labelled_pairs(DATA, json.loads((DATA / "seed_queue.json").read_text()),
+                                  REPO_ROOT / L.DEFAULT_SEEDING_LOG, parse_census(census) if census.exists() else {},
+                                  curation=json.loads(cur.read_text()), v4_path=v4_path, n_unrelated=n_unrelated,
+                                  filter_glosses=L.load_filter_glosses(REPO_ROOT / L.DEFAULT_FILTER_RESULTS))
+
+
+def test_v4_retired_its_unique_pairs_are_in_the_curation(tmp_path):
+    """W18 (Roger, 2026-10-09): trait_antonyms_v4.json is retired; the antonym pairs only it supplied are
+    hand-added in the curation file (source antonyms_v4), so a build without the file keeps them."""
+    without = _real_build(tmp_path / "no_such_v4.json")
+    rel = {q.key(): q.relation for q in without.pairs}
+    cur = json.loads((DATA / "candidates" / "calibration" / L.CURATION_NAME).read_text())
+    moved = [a for a in cur["add"] if a.get("source") == "antonyms_v4"]
+    assert len(moved) == 14
+    for a in moved:
+        assert rel.get(L.pair_key(a["a"], a["b"])) == "antonym", a
+    v4 = DATA / "traits" / "trait_antonyms_v4.json"
+    if v4.exists():                                     # until the file is deleted: the same pairs either way
+        labelled = lambda lp: {q.key(): q.relation for q in lp.pairs if q.relation != "unrelated"}  # noqa: E731
+        assert labelled(without) == labelled(_real_build(v4))

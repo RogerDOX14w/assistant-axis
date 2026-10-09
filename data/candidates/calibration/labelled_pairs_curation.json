@@ -1,5 +1,5 @@
 {
-  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived. Since 2026-10-02 (the merge with the main line) the builder reads a renamed stem here as the stem its file has now (renamed_from), except the renames in labels.SENSE_CHANGED_RENAMES, and lists entries that no longer apply under curation_unused in labelled_pairs.json.",
+  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived. Since 2026-10-02 (the merge with the main line) the builder reads a renamed stem here as the stem its file has now (renamed_from), except the renames in labels.SENSE_CHANGED_RENAMES, and lists entries that no longer apply under curation_unused in labelled_pairs.json. Since 2026-10-09 (W18, Roger) data/traits/trait_antonyms_v4.json is retired: the 14 antonym pairs only it supplied are under add with source antonyms_v4, so a rebuild keeps them.",
   "keep_only": {
     "queue:aloof": {
       "keep": {
@@ -548,6 +548,104 @@
       "source": "plan11_s6",
       "uncertain": true,
       "note": "plan 11 section 6: cautious / risk_averse / bold"
+    },
+    {
+      "a": "ascetic",
+      "b": "self_indulgent",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "avoidant",
+      "b": "unflinching",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "bombastic",
+      "b": "unpretentious",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "calibrated",
+      "b": "confabulatory",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "cruel",
+      "b": "merciful",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "dignified",
+      "b": "goofy",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "discouraging",
+      "b": "inspirational",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "efficient",
+      "b": "thorough",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "forgiving",
+      "b": "vindictive",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "forthright",
+      "b": "passive_aggressive",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "hedonistic",
+      "b": "self_disciplined",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "misanthropic",
+      "b": "philanthropic",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "orthodox",
+      "b": "subversive",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
+    },
+    {
+      "a": "sarcastic",
+      "b": "sincere",
+      "relation": "antonym",
+      "source": "antonyms_v4",
+      "note": "antonym_score 4 in data/traits/trait_antonyms_v4.json, the only source of this pair; moved here when that file was retired (W18, Roger 2026-10-09)"
     }
   ],
   "exclude": [
