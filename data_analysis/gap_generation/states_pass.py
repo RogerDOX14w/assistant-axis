@@ -360,9 +360,9 @@ def write_registry(reg: Registry, results: list, *, args) -> dict:
     for r in results:
         if r.block is None:
             continue
-        block = dict(r.block)
         if args.mode == "queue" and r.key in renamed_to:
-            block["renamed_to"] = renamed_to[r.key]
+            r.block["renamed_to"] = renamed_to[r.key]      # on the result too: results.jsonl is what was written
+        block = dict(r.block)
         u = {"states_pass": block}
         if args.mode == "queue" and block.get("holding_after"):
             u["holding"] = block["holding_after"]
@@ -379,13 +379,13 @@ def _finalize(args, items, reg, runner, usage, run_meta, session, out_dir, statu
     usage.write_json(out_dir / "usage.json")
     write_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
-    write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
-    runner.warn_parse_rate(logger)
     writes = None
-    if reg is not None:
+    if reg is not None:   # first, so that results.jsonl holds the blocks as written (renamed_to included)
         writes = write_registry(reg, results, args=args)
         print(f"registry: {writes['n_rows_written']} rows updated; {len(writes['submitted'])} renamed candidates "
               f"submitted")
+    write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
+    runner.warn_parse_rate(logger)
     summary = sp.summarize(results, mode=args.mode, stats=runner.stats, usage=usage)
     summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,

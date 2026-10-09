@@ -451,6 +451,9 @@ class TestCLI:
         assert rows["startly#1"]["states_pass"]["renamed_to"] == {"surface": "jumpyish", "stem": "jumpyish",
                                                                   "key": "jumpyish#1", "run": "states_pass/sp4"}
         d = cand / "states_pass" / "sp4"
+        # results.jsonl holds the blocks exactly as written to the registry (renamed_to included)
+        res = {json.loads(x)["key"]: json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()}
+        assert all(res[k]["block"] == rows[k]["states_pass"] for k in res)
         run = json.loads((d / "run.json").read_text())
         assert run["rubric_version"] == 4 and run["prompt_sha256"] == sp.PROMPT_SHA256["queue"]
         assert run["check_rubric_version"] == 1 and run["check_prompt_sha256"] == sp.CHECK_PROMPT_SHA256
