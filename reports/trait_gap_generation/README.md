@@ -180,7 +180,11 @@ review comments go into the plan files; then Opus executes the platform first.
   is, build it: M3 scoring a candidate role against the role corpus (role descriptions read "A <role> is someone
   who ...", so the relation and overlap rubrics need role versions, pinned and rendered before use), a role pass in
   the review app as the physical pass works, and promotion into the seed queue as `entity_type: "role"`.  As of
-  2026-10-09 the list holds 10 words from the pilots, two of them plausible roles.
+  2026-10-09 the list holds 10 words from the pilots, two of them plausible roles.  The same M3-against-roles step
+  would catch a trait candidate that duplicates a corpus role, which M3 cannot see today (it compares with traits
+  and queue entries only): one case so far, expecting against the [pregnant](../../data/roles/instructions/pregnant.json)
+  role (states pass v4 pilot, 2026-10-09).  Roger: "If it happens a lot we'll fix it"; the role/trait border is
+  fuzzy, and the corpus already has about a dozen role/trait pairs with duplicate names.
 - **Chandler / Anderson likableness ratings** (QUESTIONS 31, left out 2026-10-09): Anderson's 555 trait words with
   likableness, re-rated by Chandler (2018, *Journal of Research in Personality* 72, 50-57) with 486 more words,
   meaningfulness and emotion coding, on OSF project [3wqx5](https://osf.io/3wqx5/).  No licence is stated, so it is
