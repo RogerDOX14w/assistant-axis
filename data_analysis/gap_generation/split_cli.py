@@ -11,8 +11,9 @@ the pilot figures, the parse rate of every step and model, the spend by step; th
 (always), ``run.json`` (also ``third_model``, ``third_opinion``, ``max_disagreement``,
 ``accept_disagreement``, ``tripwire``, ``stopped_by_disagreement``) and, with the batches transport,
 ``batches.json``.  Exit status: 0, or 1 (the batch dir exists), 2 (refused, or the budget stop),
-3 (the disagreement tripwire stopped the run, or tripped at its end, without
-``--accept-disagreement``).
+3 (with ``--stop-on-disagreement`` only: the disagreement tripwire stopped the run, or tripped at its end,
+without ``--accept-disagreement``).  By default a trip is a warning: the run finishes and exits 0, and the
+trip is recorded as ``tripwire`` with action ``warned`` (Roger, 2026-10-09).
 """
 from __future__ import annotations
 
@@ -370,6 +371,7 @@ def main_split(args, argv) -> int:
                     "model": args.third_model, "on": "the second opinion's rows",
                     "step_versions": {n: pins[n][0] for n in split.SECOND_OPINION_STEPS if n in pins}},
                 "max_disagreement": args.max_disagreement, "accept_disagreement": bool(args.accept_disagreement),
+                "stop_on_disagreement": bool(getattr(args, "stop_on_disagreement", False)),
                 "step_versions": {n: v for n, (v, _) in pins.items()},
                 # the eight split prompts, plus the two single-pipeline prompts the split also sends
                 "prompt_sha256": {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
@@ -399,7 +401,7 @@ def main_split(args, argv) -> int:
                          responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
                          plain_reading=not args.no_plain_reading, third_model=args.third_model,
                          max_disagreement=args.max_disagreement, accept_disagreement=args.accept_disagreement,
-                         readings=args.readings)
+                         readings=args.readings, stop_on_disagreement=bool(getattr(args, "stop_on_disagreement", False)))
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
     run_meta["cached_steps"] = runner.cached_steps()   # the prompts sent with cache_control, by model
@@ -425,6 +427,10 @@ def main_split(args, argv) -> int:
                   f"({', '.join(tw['tripped_by'])}); the run finished and is marked (summary.json and run.json "
                   f"\"tripwire\")", file=sys.stderr)
             status = TRIPWIRE_EXIT
+        if tw and tw.get("action") == "warned":
+            print(f"WARNING (tripwire): first-vs-second disagreement over {tw['threshold']:.1%} "
+                  f"({', '.join(tw['tripped_by'])}); the run went on (summary.json and run.json \"tripwire\"; "
+                  f"--stop-on-disagreement to stop instead)", file=sys.stderr)
         finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, transport)
     return status
 

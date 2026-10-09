@@ -625,13 +625,16 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   over all sampled rows and for each stratum or generator with at least 20
   sampled rows (a smaller group is reported but never trips).  Above the
   threshold the log says `*** HIGH DISAGREEMENT ***` with the source, counts,
-  rate and threshold; `summary.json` and `run.json` record `tripwire`; and the
-  run stops before wave 6 (alignment and descriptors, and the opinions'
-  same-sense checks), keeping every answer paid for, rows `pending`,
-  `stopped_by_disagreement: true`, exit status 3.  To go on regardless:
-  the same command with `--resume --accept-disagreement` (recorded), which
-  sends wave 6 only.  When wave 6 has nothing to send, the run finishes, is
-  marked (`tripwire.action: "marked"`) and still exits 3.  `--max-disagreement
+  rate and threshold; `summary.json` and `run.json` record `tripwire`; and,
+  since 2026-10-09 (Roger: the generator pilots tripped it as expected), the
+  run goes on: a warning, not a stop (`tripwire.action: "warned"`, exit 0, a
+  `WARNING (tripwire)` line on stderr).  With `--stop-on-disagreement` the old
+  behaviour returns: the run stops before wave 6 (alignment and descriptors,
+  and the opinions' same-sense checks), keeping every answer paid for, rows
+  `pending`, `stopped_by_disagreement: true`, exit status 3; to go on: the same
+  command with `--resume --accept-disagreement` (recorded), which sends wave 6
+  only; when wave 6 has nothing to send, the run finishes, is marked
+  (`tripwire.action: "marked"`) and still exits 3.  `--max-disagreement
   1` turns it off.  Validation runs on hard strata are expected to trip it
   (random dictionary adjectives disagreed 31% in the audit), and that is the
   point.  Alignment and descriptors moved from wave 5 to wave 6 for this, so

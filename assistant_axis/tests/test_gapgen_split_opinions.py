@@ -269,7 +269,7 @@ class TestTripwireLive:
     def test_stops_before_the_last_wave_keeping_every_answer(self, caplog):
         items, kinds = tripping_run()
         client = FakeAsyncAnthropic(controlled(kinds))
-        r = runner(client, second_opinion=True, second_opinion_frac=1.0)
+        r = runner(client, second_opinion=True, second_opinion_frac=1.0, stop_on_disagreement=True)
         with caplog.at_level(logging.INFO), pytest.raises(DisagreementStop) as ei:
             r.run(items)
         tw = r.tripwire
@@ -288,17 +288,19 @@ class TestTripwireLive:
 
     def test_resume_stops_again_without_the_override_and_goes_on_with_it(self):
         items, kinds = tripping_run()
-        r1 = runner(FakeAsyncAnthropic(controlled(kinds)), second_opinion=True, second_opinion_frac=1.0)
+        r1 = runner(FakeAsyncAnthropic(controlled(kinds)), second_opinion=True, second_opinion_frac=1.0,
+                    stop_on_disagreement=True)
         with pytest.raises(DisagreementStop):
             r1.run(items)
         again = FakeAsyncAnthropic(controlled(kinds))
-        r2 = runner(again, second_opinion=True, second_opinion_frac=1.0, resume_records=list(r1.responses))
+        r2 = runner(again, second_opinion=True, second_opinion_frac=1.0, resume_records=list(r1.responses),
+                    stop_on_disagreement=True)
         with pytest.raises(DisagreementStop):
             r2.run(items)
         assert again.calls == []                                    # nothing paid for twice
         client = FakeAsyncAnthropic(controlled(kinds))
         r3 = runner(client, second_opinion=True, second_opinion_frac=1.0, resume_records=list(r1.responses),
-                    accept_disagreement=True)
+                    accept_disagreement=True, stop_on_disagreement=True)
         res = r3.run(items)
         assert all(x.stage == "classified" for x in res)
         assert set(steps_sent(client)) == {"alignment", "descriptors"}   # only the wave that was held back
@@ -308,10 +310,22 @@ class TestTripwireLive:
         labels = words(25)
         kinds = {HAIKU: {w: "state" for w in labels}}              # no trait: no gloss, nothing in wave 6
         client = FakeAsyncAnthropic(controlled(kinds))
-        r = runner(client, second_opinion=True, second_opinion_frac=1.0)
+        r = runner(client, second_opinion=True, second_opinion_frac=1.0, stop_on_disagreement=True)
         res = r.run(items_of({"A": labels}))
         assert all(x.stage == "classified" for x in res)
         assert r.tripwire["tripped"] and r.tripwire["action"] == "marked" and r.tripwire["stopped_before"] is None
+
+    def test_by_default_a_trip_is_a_warning_and_the_run_goes_on(self, caplog):
+        """Roger, 2026-10-09: the tripwire warns and the run finishes (action "warned"); nothing is held back."""
+        items, kinds = tripping_run()
+        client = FakeAsyncAnthropic(controlled(kinds))
+        r = runner(client, second_opinion=True, second_opinion_frac=1.0)
+        with caplog.at_level(logging.INFO):
+            res = r.run(items)
+        assert all(x.stage == "classified" for x in res)
+        assert r.tripwire["tripped"] and r.tripwire["action"] == "warned" and r.tripwire["stopped_before"] is None
+        assert steps_sent(client)["alignment"] == 25                  # wave 6 was sent
+        assert any("a warning, not a stop" in m for m in caplog.messages)
 
     def test_below_the_threshold_and_disabled(self):
         labels = words(25)
@@ -339,13 +353,14 @@ class TestTripwireBatches:
 
     def test_stops_before_the_last_wave_and_resumes_with_the_override(self, tmp_path):
         items, kinds = tripping_run()
-        r1, bc1 = self._make(tmp_path, kinds)
+        r1, bc1 = self._make(tmp_path, kinds, stop_on_disagreement=True)
         with pytest.raises(DisagreementStop):
             r1.run(items)
         waves = json.loads((tmp_path / "batches.json").read_text())["waves"]
         assert list(waves) == ["w1_sense", "w2_checks", "w4_gloss", "w5_opinion_checks"]
         assert r1.tripwire["action"] == "stopped" and r1.usage.n_calls == len(r1.responses)
-        r2, bc2 = self._make(tmp_path, kinds, resume_records=list(r1.responses), accept_disagreement=True)
+        r2, bc2 = self._make(tmp_path, kinds, resume_records=list(r1.responses), accept_disagreement=True,
+                             stop_on_disagreement=True)
         res = r2.run(items)
         assert all(x.stage == "classified" for x in res)
         new = [q for b in bc2.batches.created for q in b["requests"]]
@@ -485,14 +500,15 @@ class TestCLI:
     def test_a_trip_stops_the_run_and_resume_with_the_override_finishes_it(self, cli, transport, capsys):
         from data_analysis.gap_generation import traithood_filter
         cli["kinds"] = {SONNET55: {w: "state" for w in cli["labels"]}}
-        assert traithood_filter.main(_args(cli, "--transport", transport)) == 3
+        assert traithood_filter.main(_args(cli, "--transport", transport, "--stop-on-disagreement")) == 3
         s, run, res = _read(cli)
         assert s["stopped_by_disagreement"] is True and run["stopped_by_disagreement"] is True
         assert s["tripwire"]["action"] == "stopped" and run["tripwire"]["tripped_by"] == ["overall", "stratum:A"]
         assert {r["stage"] for r in res} == {"pending"}
         assert "--accept-disagreement" in capsys.readouterr().err
-        assert traithood_filter.main(_args(cli, "--transport", transport, "--resume")) == 3   # stops again
         assert traithood_filter.main(_args(cli, "--transport", transport, "--resume",
+                                           "--stop-on-disagreement")) == 3   # stops again
+        assert traithood_filter.main(_args(cli, "--transport", transport, "--resume", "--stop-on-disagreement",
                                            "--accept-disagreement")) == 0
         s, run, res = _read(cli)
         assert {r["stage"] for r in res} == {"classified"}
@@ -504,11 +520,23 @@ class TestCLI:
         from data_analysis.gap_generation import traithood_filter
         # the first model (the CLI's default) says state, so nothing is left after the opinions
         cli["kinds"] = {SR.DEFAULT_MODEL: {w: "state" for w in cli["labels"]}}
-        assert traithood_filter.main(_args(cli, "--transport", "live")) == 3
+        assert traithood_filter.main(_args(cli, "--transport", "live", "--stop-on-disagreement")) == 3
         s, run, res = _read(cli)
         assert {r["stage"] for r in res} == {"classified"}
         assert s["tripwire"]["tripped"] and s["tripwire"]["action"] == "marked"
         assert s["stopped_by_disagreement"] is False and run["tripwire"]["action"] == "marked"
+
+    @pytest.mark.parametrize("transport", ["live", "batches"])
+    def test_by_default_a_trip_warns_and_the_run_finishes(self, cli, transport, capsys):
+        """Roger, 2026-10-09: a trip is a warning, not a stop; exit 0, every row classified, recorded as warned."""
+        from data_analysis.gap_generation import traithood_filter
+        cli["kinds"] = {SONNET55: {w: "state" for w in cli["labels"]}}
+        assert traithood_filter.main(_args(cli, "--transport", transport)) == 0
+        s, run, res = _read(cli)
+        assert {r["stage"] for r in res} == {"classified"}
+        assert s["tripwire"]["tripped"] and s["tripwire"]["action"] == "warned" and s["stopped_by_disagreement"] is False
+        assert run["stop_on_disagreement"] is False and run["tripwire"]["action"] == "warned"
+        assert "WARNING (tripwire)" in capsys.readouterr().err
 
     def test_max_disagreement_1_never_trips(self, cli):
         from data_analysis.gap_generation import traithood_filter

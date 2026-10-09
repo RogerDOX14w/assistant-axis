@@ -42,11 +42,12 @@ to choose its judging model); ``summary.json`` ``agreement`` compares the
 three.  ``--max-disagreement`` (default 0.10) is the tripwire: once the
 opinions' outcomes are known, a first-vs-second disagreement rate over it
 (all sampled rows, or a stratum or generator with 20 or more) logs
-``*** HIGH DISAGREEMENT ***``, stops the run before the alignment and
-descriptors wave (exit status 3, ``stopped_by_disagreement``), and is
-recorded as ``tripwire`` in summary.json and run.json; ``--resume
---accept-disagreement`` goes on.  When nothing is left to send the run
-finishes, marked, and still exits 3.
+``*** HIGH DISAGREEMENT ***`` and is recorded as ``tripwire`` in summary.json
+and run.json; the run goes on (a warning, not a stop: Roger, 2026-10-09).
+With ``--stop-on-disagreement`` it stops the run before the alignment and
+descriptors wave instead (exit status 3, ``stopped_by_disagreement``);
+``--resume --accept-disagreement`` then goes on, and when nothing is left
+to send the run finishes, marked, and still exits 3.
 
 Single-call pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
 below ``freq.HARD_REJECT_BELOW`` unless rescue rule 1b applies, free) ->
@@ -324,11 +325,14 @@ def build_parser() -> argparse.ArgumentParser:
                     help="split only: the disagreement tripwire (default 0.10).  Once the second opinion's outcomes "
                          "are known, if the first and second models disagree on the final outcome for more than "
                          "FRACTION of the sampled rows (overall, or for one stratum or generator with at least 20 "
-                         "sampled rows), a *** HIGH DISAGREEMENT *** warning is logged, the run stops before the "
-                         "alignment and descriptors wave, and the CLI exits 3; resume with --resume "
-                         "--accept-disagreement.  1 turns it off.  Validation runs on hard strata are expected to "
+                         "sampled rows), a *** HIGH DISAGREEMENT *** warning is logged and recorded, and the run "
+                         "goes on (with --stop-on-disagreement it stops before the alignment and descriptors wave "
+                         "and the CLI exits 3; resume with --resume --accept-disagreement).  1 turns it off.  Validation runs on hard strata are expected to "
                          "trip it (random dictionary adjectives disagreed 31%%, opus_audit_m1.md), and that is the "
                          "point: such words need the second model")
+    ap.add_argument("--stop-on-disagreement", action="store_true",
+                    help="split only: a tripped disagreement tripwire stops the run before the alignment and "
+                         "descriptors wave (exit 3) instead of only warning (the default since 2026-10-09)")
     ap.add_argument("--accept-disagreement", action="store_true",
                     help="split only: go on past a tripped disagreement tripwire (recorded in run.json and the "
                          "summary's tripwire block); usually with --resume after a stop")
@@ -422,8 +426,9 @@ def main(argv=None) -> int:
         return split_cli.main_split(args, argv)
     if args.resume or args.transport != "auto":
         raise SystemExit("--resume and --transport apply to --pipeline split only")
-    if args.third_model or args.max_disagreement is not None or args.accept_disagreement:
-        raise SystemExit("--third-model, --max-disagreement and --accept-disagreement apply to --pipeline split only")
+    if args.third_model or args.max_disagreement is not None or args.accept_disagreement or args.stop_on_disagreement:
+        raise SystemExit("--third-model, --max-disagreement, --accept-disagreement and --stop-on-disagreement apply "
+                         "to --pipeline split only")
     if args.readings is not None:
         raise SystemExit("--readings applies to --pipeline split only")
     if args.batch_size is None:

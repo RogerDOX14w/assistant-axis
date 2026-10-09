@@ -46,7 +46,9 @@ wave 5 (the same-sense check adds a note, never changes an outcome), so the trip
 there, before wave 6: when the first and second models disagree on more than ``max_disagreement``
 of the sampled rows, overall or for a source (``split.opinion_source``) with at least
 ``split.TRIPWIRE_MIN_N`` compared rows, a loud WARNING is logged (``*** HIGH DISAGREEMENT ***``)
-and, unless ``accept_disagreement``, :class:`DisagreementStop` is raised before wave 6 sends
+and the run goes on (``tripwire["action"] == "warned"``; Roger, 2026-10-09: a warning, not a stop, since the
+generator pilots tripped it as expected).  With ``stop_on_disagreement`` the old behaviour returns: unless
+``accept_disagreement``, :class:`DisagreementStop` is raised before wave 6 sends
 anything: every answer paid for is kept, the rows stay ``pending``, and a resume with
 ``accept_disagreement`` sends wave 6 only.  When wave 6 has nothing left to send the run finishes
 and is marked (``tripwire["action"] == "marked"``).  Alignment and descriptors moved from wave 5 to
@@ -348,10 +350,13 @@ class SplitRunner(FilterRunner):
                  resume_records: Optional[Sequence[dict]] = None, rubrics_dir: Optional[Path] = None,
                  plain_reading: bool = True, third_model: Optional[str] = None,
                  max_disagreement: Optional[float] = split.DEFAULT_MAX_DISAGREEMENT,
-                 accept_disagreement: bool = False, readings: Optional[int] = None):
+                 accept_disagreement: bool = False, readings: Optional[int] = None,
+                 stop_on_disagreement: bool = False):
         # third_model: the second opinion's steps on a third model, for the same rows (None: none).
         # max_disagreement: the tripwire's threshold (None: not checked; 1.0 never trips).
         # accept_disagreement: a tripped tripwire is recorded and the run goes on.
+        # stop_on_disagreement: a tripped tripwire stops the run before wave 6 (the behaviour before
+        # 2026-10-09); off by default, when a trip is a logged warning and the run goes on ("warned").
         # readings: how many independent readings the first model's verdict waves get (None: the
         # model's default, default_readings: 3 on Haiku 5.5, else 1).
         if readings is None:
@@ -372,6 +377,7 @@ class SplitRunner(FilterRunner):
         self.third_model = third_model or None
         self.max_disagreement = max_disagreement
         self.accept_disagreement = bool(accept_disagreement)
+        self.stop_on_disagreement = bool(stop_on_disagreement)
         self.tripwire: Optional[dict] = None
         problems = sr.mismatches(rubrics_dir)
         if problems:
@@ -910,6 +916,8 @@ class SplitRunner(FilterRunner):
         if tw["tripped"]:
             if self.accept_disagreement:
                 tw["action"] = "accepted"
+            elif not self.stop_on_disagreement:
+                tw["action"] = "warned"
             elif unpaid:
                 tw.update(action="stopped", stopped_before=LAST_WAVE, calls_not_sent=len(unpaid))
             else:
@@ -1093,6 +1101,9 @@ def log_tripwire(tw: Mapping, log: logging.Logger, *, label: str) -> None:
                     f"tripped (the CLI exits non-zero)")
     elif action == "accepted":
         log.warning(f"*** HIGH DISAGREEMENT *** [{label}] accepted (--accept-disagreement): the run goes on")
+    elif action == "warned":
+        log.warning(f"*** HIGH DISAGREEMENT *** [{label}] a warning, not a stop: the run goes on (recorded as "
+                    f"\"tripwire\" in summary.json and run.json; --stop-on-disagreement to stop instead)")
 
 
 def _partial(st: Mapping) -> dict:
