@@ -7,9 +7,9 @@
         "extras": {
           "from_batches": "gen_pilot_censuses,gen_pilot_roget,gen_pilot_wn_clusters"
         },
-        "fingerprint": "v1:2026-10-08T17:36:09+00:00@29352738",
+        "fingerprint": "v1:2026-10-09T01:16:37+00:00@29724375",
         "kind": "file",
-        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "last_modified_at": "2026-10-09T01:16:37+00:00",
         "path": "data/candidates/registry.jsonl"
       },
       {
@@ -19,9 +19,9 @@
           "overlap_rubric": "6",
           "relation_rubric": "1"
         },
-        "fingerprint": "v1:multi:e46bf0db1520",
+        "fingerprint": "v1:multi:bcc69117d14e",
         "kind": "multi",
-        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "member_paths": [
           "reports/trait_gap_generation/rubrics/overlap_concept.md",
           "reports/trait_gap_generation/rubrics/relation.md"
@@ -32,9 +32,9 @@
         "dataset_id": null,
         "dep_key": "metric_config",
         "extras": {},
-        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
         "kind": "file",
-        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
         "path": "data/candidates/metric_config.json"
       },
       {
@@ -43,9 +43,9 @@
         "extras": {
           "from_batches": "gen_pilot_censuses,gen_pilot_roget,gen_pilot_wn_clusters"
         },
-        "fingerprint": "v1:multi:0da5cb0e5152",
+        "fingerprint": "v1:multi:d6585651513d",
         "kind": "multi",
-        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "member_paths": [
           "data/candidates/novelty/gen_pilot_censuses/run.json",
           "data/candidates/novelty/gen_pilot_roget/run.json",
@@ -54,41 +54,48 @@
         "path": "data/candidates/novelty"
       }
     ],
-    "inputs_sha256": "c36d8d22f3b4620170a15446669e5c37934b6637196048dcc9da73a8e0b1d785",
-    "produced_at": "2026-10-08T18:54:02+00:00",
+    "inputs_sha256": "4ef82f7686366eeee1c54f8cf80cf551abea9f2b72f6529ed10db95d1475c7b2",
+    "produced_at": "2026-10-09T03:11:07+00:00",
     "produced_by": {
       "author": "Roger Dearnaley",
-      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 2 --resume",
-      "git_sha": "14c331d+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --include 'sensing#1' 'faulty#1' 'perspicacious#1' 'saintly#1' 'effervescent#1' --include-reason 'Roger'\"'\"'s M3 cover audit, 2026-10-09: marked new or uncertain' --transport live --budget-usd 3 --resume",
+      "git_sha": "7f186ce+dirty",
       "title": "review_graph build review_pilots_1"
     },
     "schema_version": "1.0"
   },
-  "n_calls": 1285,
+  "n_calls": 1425,
   "per_model": {
     "claude-haiku-5-5": {
-      "completion_tokens": 249025,
-      "cost_usd": 0.1637,
+      "completion_tokens": 308903,
+      "cost_usd": 0.2037,
       "model": "claude-haiku-5-5",
-      "n_calls": 325,
-      "prompt_tokens": 392326
+      "n_calls": 409,
+      "prompt_tokens": 492490
     },
     "claude-opus-5-5": {
-      "completion_tokens": 24433,
-      "cost_usd": 0.6715,
+      "completion_tokens": 24569,
+      "cost_usd": 0.6784,
       "model": "claude-opus-5-5",
-      "n_calls": 181,
-      "prompt_tokens": 45722
+      "n_calls": 183,
+      "prompt_tokens": 46751
     },
     "claude-sonnet-5-5": {
-      "completion_tokens": 65864,
-      "cost_usd": 1.0106,
+      "completion_tokens": 70941,
+      "cost_usd": 1.0929,
       "model": "claude-sonnet-5-5",
-      "n_calls": 779,
-      "prompt_tokens": 175985
+      "n_calls": 832,
+      "prompt_tokens": 191729
+    },
+    "text-embedding-3-large": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0,
+      "model": "text-embedding-3-large",
+      "n_calls": 1,
+      "prompt_tokens": 57
     }
   },
-  "total_completion_tokens": 339322,
-  "total_cost_usd": 1.8459,
-  "total_prompt_tokens": 614033
+  "total_completion_tokens": 404413,
+  "total_cost_usd": 1.975,
+  "total_prompt_tokens": 731027
 }
