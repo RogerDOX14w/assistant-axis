@@ -590,8 +590,10 @@ class ReviewState:
         row = self.rows.get(key) or {}
         f = row.get("filter") or {}
         rv = row.get("review") or {}
+        # the tags are M1's; a physical pass's node says physical even where the registry row has none
+        tags = list(dict.fromkeys(list(f.get("tags") or []) + ([n.outcome] if n.outcome else [])))
         out = {"key": key, "label": n.label, "gloss": n.gloss, "generator": n.generator, "generators": list(n.generators),
-               "region": n.region, "alignment_score": n.alignment_score, "tags": list(f.get("tags") or []),
+               "region": n.region, "alignment_score": n.alignment_score, "tags": tags,
                "membership_kind": f.get("membership_kind"), "m3_decision": n.decision, "m3_run": n.m3_run,
                "flags": list(n.flags), "covered": key in self.covered,
                "merged": [f"m{i}" for i in self.in_merged.get(key, [])],
@@ -991,7 +993,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
       :meth:`Registry.update_many`); a row this review wrote before (``review_batch``) that the log no longer
       resolves (an undo after an apply) is reset to unreviewed, and if it was promoted that is reported as a
       conflict (a promotion is not reversed here);
-    * each promoted group's nominee goes through :func:`promote.promote` (the path of ``gap_registry.py promote``),
+    * each promoted group's nominee goes through :func:`promote.promote` (the path of ``gap_registry.py promote``,
+      by name, so ``allow_physical``: a physical pass's nominee joins the physical track, tagged ``physical``),
       once per group, unless it already has a ``seed_queue_stem``; its new seed-queue entry gets ``also_proposed``
       (the other resolved members' labels, the only addition to the queue format); the queue is saved once and the
       rows get ``seed_queue_stem``, as ``gap_registry.py promote`` does;
@@ -1028,7 +1031,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
         if row.get("seed_queue_stem"):
             rep.already_promoted[nom] = row["seed_queue_stem"]
             continue
-        pr = promote_mod.promote(rows, work, [nom], data_dir=data_dir, dry_run=False)
+        # the nominee is named here, so a physical one is promoted into the physical track (physical_pass.py)
+        pr = promote_mod.promote(rows, work, [nom], data_dir=data_dir, dry_run=False, allow_physical=True)
         if nom not in pr.promoted:
             rep.refused[nom] = pr.refused.get(nom, "refused")
             continue

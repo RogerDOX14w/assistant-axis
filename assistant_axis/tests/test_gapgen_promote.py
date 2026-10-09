@@ -135,3 +135,86 @@ def test_two_senses_same_stem(data_dir, queue):
     rows = {a["key"]: a, b["key"]: b}
     rep = promote(rows, queue, ["cool#1", "cool#2"], data_dir=data_dir)
     assert rep.promoted == ["cool#1"] and "another sense" in rep.refused["cool#2"]
+
+
+# --------------------------------------------------------------------------- the physical pass (QUESTIONS 1)
+# Roger, 2026-10-09: physical candidates are promoted normally, in a separate pass, and carry the physical tag.
+# promote() lets a physical row through only with allow_physical (gap_registry.py promote --keys and the review
+# app's apply pass it); the bulk path (--status accepted) and every other caller keep refusing it.
+
+PHYS_SECTION = "Physical-attribute traits: a separate research track (decided 2026-09-08)"
+PHYS_GLOSS = "This means having big, strong muscles that fill out one's shirts."
+
+
+def _phys(surface="brawny", **kw):
+    r = _rec(surface, verdict="tagged", tags=["physical"], holding="physical", gloss=None, gen="censuses", **kw)
+    r["physical_gloss"] = {"gloss": PHYS_GLOSS, "alignment": 0, "batch_id": "physical_pilots_1"}
+    return r
+
+
+@pytest.fixture
+def phys_queue(queue):
+    queue["entries"].append({"stem": "blond", "label": "blond", "entity_type": "trait", "status": "done",
+                             "tags": ["physical"], "section": PHYS_SECTION})
+    return queue
+
+
+def test_a_physical_row_is_refused_unless_promoted_by_name(data_dir, phys_queue):
+    rec = _phys()
+    before = copy.deepcopy(phys_queue)
+    rep = promote({rec["key"]: rec}, phys_queue, [rec["key"]], data_dir=data_dir, dry_run=False)
+    assert rep.promoted == [] and "physical holding list" in rep.refused["brawny#1"]
+    assert "--keys" in rep.refused["brawny#1"] and phys_queue == before
+
+
+def test_promoted_by_name_it_joins_the_physical_track(data_dir, phys_queue):
+    rec = _phys(novelty={"run_id": "physical_pilots_1", "pass": "physical", "decision": "new"})
+    rep = promote({rec["key"]: rec}, phys_queue, [rec["key"]], data_dir=data_dir, dry_run=False, allow_physical=True)
+    e = phys_queue["entries"][-1]
+    assert rep.promoted == ["brawny#1"] and e["stem"] == "brawny" and e["status"] == "candidate"
+    assert e["tags"] == ["gap_gen", "source:censuses", "physical"]                 # merged, once
+    assert e["section"] == PHYS_SECTION and e["description_draft"] == PHYS_GLOSS and e["description"] is None
+    assert e["gap_gen"]["holding"] == "physical" and e["gap_gen"]["registry_key"] == "brawny#1"
+    assert e["description_notes"].startswith("physical track: on the physical holding list, promoted by name after "
+                                             "the physical pass physical_pilots_1")
+    # a reviewer writes the description; the seed document carries the tag like the track's other files
+    e2 = dict(e, description=e["description_draft"], status="ready")
+    doc = se.seed_document(e2, {"entries": [e2]}, data_dir)
+    assert "physical" in doc["tags"]
+
+
+def test_a_physical_row_with_no_filter_tag_still_gets_the_tag(data_dir, phys_queue):
+    rec = _phys()
+    rec["filter"]["tags"] = []
+    rep = promote({rec["key"]: rec}, phys_queue, [rec["key"]], data_dir=data_dir, allow_physical=True)
+    assert rep.entries[0]["tags"] == ["gap_gen", "source:censuses", "physical"]
+
+
+def test_the_section_falls_back_to_the_constant_and_an_explicit_one_is_kept(data_dir, queue):
+    from assistant_axis.gapgen import physical_pass as PP
+    rec = _phys()
+    rep = promote({rec["key"]: rec}, queue, [rec["key"]], data_dir=data_dir, allow_physical=True)
+    assert rep.entries[0]["section"] == PP.SECTION == PHYS_SECTION
+    rep = promote({rec["key"]: rec}, queue, [rec["key"]], data_dir=data_dir, allow_physical=True, section="hand-picked")
+    assert rep.entries[0]["section"] == "hand-picked"
+
+
+def test_the_other_holding_lists_are_unchanged_when_physical_is_allowed(data_dir, queue):
+    recs = [_rec("plumber", verdict="tagged", tags=["role_person"], holding="roles", entity_type="role"),
+            _rec("faraway", holding="nationalities"),
+            _rec("sulky", verdict="tagged", tags=["state"], holding="states", gloss=None)]
+    rows = {r["key"]: r for r in recs}
+    rep = promote(rows, queue, list(rows), data_dir=data_dir, allow_physical=True)
+    assert rep.promoted == []
+    assert rep.refused["plumber#1"] == "on the roles holding list (never promoted)"
+    assert rep.refused["faraway#1"] == "on the nationalities holding list (never promoted)"
+    assert "no states pass judgement yet" in rep.refused["sulky#1"]
+
+
+def test_a_physical_row_meets_every_other_refusal(data_dir, phys_queue):
+    rec = _phys("stubborn")                                                         # a corpus stem
+    rep = promote({rec["key"]: rec}, phys_queue, [rec["key"]], data_dir=data_dir, allow_physical=True)
+    assert rep.refused["stubborn#1"] == "stem exists in the corpus"
+    rec = _phys("blond")                                                            # a physical-track queue entry
+    rep = promote({rec["key"]: rec}, phys_queue, [rec["key"]], data_dir=data_dir, allow_physical=True)
+    assert rep.refused["blond#1"] == "stem already in the seed queue"

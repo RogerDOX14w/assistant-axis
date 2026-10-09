@@ -20,6 +20,16 @@ Commands:
   cosine), ``summary.json``, ``decisions.md`` (the table for Roger to sample from), ``usage.json``, ``run.json``,
   ``run.log`` and, with the batches transport, ``batches.json``.  Rows held on a list (nationalities) are left
   out unless ``--include-held``; rows already decided by another run unless ``--rescore``.
+  ``--holding physical`` (the physical pass, :mod:`assistant_axis.gapgen.physical_pass`; QUESTIONS 1, Roger
+  2026-10-09): the rows on the ``physical`` holding list (of ``--run``, ``--keys`` or ``--unscored``) instead of
+  verdict-trait ones.  M1 writes no gloss and no alignment score for such a row, so a row without them first goes
+  through the gloss stage (M1's gloss call on its accepted reading, then M1's alignment call on the gloss, both as
+  pinned, on Haiku 5.5; the block ``physical_gloss`` on the registry row, ``physical_gloss.jsonl`` and
+  ``physical_gloss_responses.jsonl`` in the run directory; charged to the run and in its estimate), then M3 exactly
+  as for trait rows, against the whole corpus (the physical track included).  Every block, ``run.json`` and
+  ``summary.json`` say ``"pass": "physical"``; ``decisions.md`` says so in its title; a resume of a batch of the
+  other kind is refused (one batch id per pass).  ``--redecide``, ``--relation-only`` and ``full-scan`` of a
+  physical batch take the pass from the source's ``run.json``.
   ``--embed-only`` embeds the candidates (charged to the run) and stops before any LLM call, so that
   ``render --key`` or the dry run can show a real candidate's prompt first; ``--resume`` then goes on.
   ``--hide HIDDEN_JSON`` (the recovery harness, ``recovery_test.py``; ``assistant_axis/gapgen/recovery.py``): score
@@ -111,6 +121,7 @@ from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import physical_pass as PP  # noqa: E402
 from assistant_axis.gapgen import split_rubrics as sr  # noqa: E402
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM, BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -158,10 +169,17 @@ def parse_run(value: str) -> tuple[str, str]:
     return gen, run_id
 
 
-def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool = False) -> tuple[list[NR.M3Candidate], dict]:
+def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool = False,
+                      to_gloss: Optional[list] = None) -> tuple[list[NR.M3Candidate], dict]:
     """The candidates of ``score``, and why every other selected row was left out.  ``ignore_decided`` (a run
-    with ``--hide``, which writes no block to the registry): rows are taken whatever run decided them."""
+    with ``--hide``, which writes no block to the registry): rows are taken whatever run decided them.
+
+    ``--holding physical`` (the physical pass, :mod:`assistant_axis.gapgen.physical_pass`): the rows on that
+    holding list only, built from the pass's gloss block; a row with no gloss yet is taken as a stand-in
+    (:func:`physical_pass.provisional_candidate`, for the plan and the estimate) and its key appended to
+    ``to_gloss``, for the run's gloss stage to gloss first."""
     from assistant_axis.gapgen.registry import has_source
+    holding = getattr(args, "holding", None)
     if args.keys:
         missing = [k for k in args.keys if k not in rows]
         if missing:
@@ -171,8 +189,11 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
         sel = [r for k, r in sorted(rows.items()) if any(has_source(r, g, rid) for g, rid in args.run)]
     else:
         sel = [r for k, r in sorted(rows.items()) if not r.get("novelty")]
-    out, skipped = [], Counter()
+    out, skipped, waiting = [], Counter(), []
     for r in sel:
+        if holding and r.get("holding") != holding:
+            skipped[f"not_on_{holding}_list"] += 1
+            continue
         nv = r.get("novelty") or {}
         if not ignore_decided and nv.get("run_id") == batch_id and nv.get("decision"):
             skipped["decided_in_this_run"] += 1
@@ -180,16 +201,22 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
         if not ignore_decided and nv.get("decision") and nv.get("run_id") and not args.rescore:
             skipped["decided_by_another_run"] += 1
             continue
-        cand, why = NR.candidate_from_row(r)
+        cand, why = NR.candidate_from_row(r, holding=holding) if holding else NR.candidate_from_row(r)
+        if cand is None and holding and why == "no_gloss" and to_gloss is not None:
+            cand = PP.provisional_candidate(r)
+            waiting.append(r["key"])
         if cand is None:
             skipped[why] += 1
             continue
-        if r.get("holding") and not args.include_held:
+        if r.get("holding") and r.get("holding") != holding and not args.include_held:
             skipped[f"held_{r['holding']}"] += 1
             continue
         out.append(cand)
     if args.limit:
         out = out[:args.limit]
+    if to_gloss is not None:
+        kept = {c.key for c in out}
+        to_gloss.extend(k for k in waiting if k in kept)
     return out, dict(skipped)
 
 
@@ -323,9 +350,24 @@ def resolve_data_dir(args, source: Optional[dict]) -> tuple[Path, dict]:
                 "source_was_dirty": sha.endswith("+dirty"), "n_trait_files": n, "data_dir": str(dd)}
 
 
+def source_holding(source: Optional[dict]) -> Optional[str]:
+    """The holding list a source run was a pass over (its ``run.json`` ``pass``: ``physical``), else None."""
+    p = ((source or {}).get("run") or {}).get("pass")
+    if p is None:
+        return None
+    if p != PP.PASS_NAME:
+        raise SystemExit(f"{source['batch_id']}'s run.json names an unknown pass {p!r}")
+    return PP.HOLDING
+
+
+def _build(row: dict, holding: Optional[str]):
+    return NR.candidate_from_row(row, holding=holding) if holding else NR.candidate_from_row(row)
+
+
 def select_redecide(rows: dict, args, source: dict) -> tuple[list[NR.M3Candidate], dict]:
     """The candidates of ``score --redecide``: every row the source run decided (or those of ``--keys``),
-    rebuilt from the registry as the source built them."""
+    rebuilt from the registry as the source built them (a physical pass's rows by the physical pass's builder)."""
+    holding = source_holding(source)
     keys = [r["key"] for r in source["results"]]
     if args.keys:
         unknown = sorted(set(args.keys) - set(keys))
@@ -334,7 +376,7 @@ def select_redecide(rows: dict, args, source: dict) -> tuple[list[NR.M3Candidate
         keys = [k for k in keys if k in set(args.keys)]
     out, skipped = [], Counter()
     for k in keys:
-        cand, why = NR.candidate_from_row(rows[k]) if k in rows else (None, "not_in_registry")
+        cand, why = _build(rows[k], holding) if k in rows else (None, "not_in_registry")
         if cand is None:
             skipped[why] += 1
         else:
@@ -437,6 +479,47 @@ def run_promotion(batch_id: str, *, out_root: Optional[Path], registry_path: Pat
     return 0
 
 
+def physical_gloss_stage(*, reg: Registry, to_gloss: list[str], cands: list, skipped: dict, out_dir: Path, usage,
+                         batch_id: str, concurrency: int, run_meta: dict) -> list:
+    """The physical pass's gloss stage (:mod:`assistant_axis.gapgen.physical_pass`): M1's gloss and alignment calls
+    for the rows of ``to_gloss``, charged to the run's ``usage`` (its cap stops it as it stops the rest).  Each
+    row's block is written to its registry row (field ``physical_gloss``) as the row finishes, and appended to
+    ``<run dir>/physical_gloss.jsonl``; every response to ``physical_gloss_responses.jsonl``.  Returns ``cands``
+    with each stand-in replaced by the glossed row's candidate; a row whose gloss failed is dropped and counted
+    in ``skipped`` (``physical_gloss_failed``).  ``run_meta["physical_gloss"]`` gets the stage's counts."""
+    from dotenv import load_dotenv
+    import anthropic
+    load_dotenv(_REPO_ROOT / ".env")
+    client = anthropic.AsyncAnthropic(max_retries=0)
+    rows = reg.fold()
+    blocks: dict[str, dict] = {}
+
+    def on_block(key: str, b: dict) -> None:
+        blocks[key] = b
+        if b.get("gloss"):
+            reg.update_many({key: {PP.BLOCK: b}})
+        with open(out_dir / PP.RESULTS_NAME, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(PP.result_line(rows[key], b), ensure_ascii=False) + "\n")
+    try:
+        PP.run_gloss_rows([rows[k] for k in to_gloss], client=client, usage=usage, batch_id=batch_id,
+                          records_path=out_dir / PP.RESPONSES_NAME, on_block=on_block, concurrency=concurrency)
+    finally:
+        run_meta["physical_gloss"] = {**(run_meta.get("physical_gloss") or {}), **PP.stage_summary(blocks)}
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    logger.info("physical gloss stage: %s", json.dumps(PP.stage_summary(blocks)))
+    fresh, waiting, out = reg.fold(), set(to_gloss), []
+    for c in cands:
+        if c.key not in waiting:
+            out.append(c)
+            continue
+        cand, _ = NR.candidate_from_row(fresh[c.key], holding=PP.HOLDING)
+        if cand is None:
+            skipped["physical_gloss_failed"] = skipped.get("physical_gloss_failed", 0) + 1
+            continue
+        out.append(cand)
+    return out
+
+
 def write_blocks(reg: Registry, states, run_id: str) -> int:
     """The novelty block of every newly decided candidate, through the Registry API, once per (run, key)."""
     cur = reg.fold()
@@ -498,7 +581,8 @@ def _note_text(n: dict, labels: dict) -> str:
         (f" ({n['kind']})" if n.get("kind") and n["kind"] != "pair" else "")
 
 
-def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode: str = "shortlist") -> str:
+def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode: str = "shortlist",
+                       pass_name: Optional[str] = None) -> str:
     """``decisions.md``: every candidate (label, decision, covered_by, cut-off, the readings that decided it,
     review flags, pair completions), then the review sections (the covered-and-flagged rows of decision 12 with
     both readings and reasons; the both-ends-similar rows of decision 13 with the ends' cosines and any readings
@@ -507,7 +591,8 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     order = {"covered": 0, "grey": 1, "new": 2}
     rows = sorted(results, key=lambda r: (order.get(r["novelty"]["decision"], 9), str(r["label"]).lower()))
     n = Counter(r["novelty"]["decision"] for r in results)
-    lines = [f"# M3 decisions: `{batch_id}`" + (" (full scan)" if mode == "full_scan" else ""), "",
+    lines = [f"# M3 decisions: `{batch_id}`" + (" (full scan)" if mode == "full_scan" else "")
+             + (f" ({pass_name} pass)" if pass_name else ""), "",
              f"{len(results)} candidates: " + ", ".join(f"{n[d]} {d}" for d in ("covered", "grey", "new") if n[d]) + ".  "
              "Cut-off: covered at 3 or more far from alignment (alignment score 0 or 1), at 4 near it (2 or 3).  "
              "The deciding readings are rubric A's 0-4 scale (Sonnet 5.5 first, Opus 5.5 where the rule sends it).  "
@@ -620,8 +705,8 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
     env = json_metadata(summary, title=f"novelty_score {runner.mode} {runner.batch_id}", inputs=inputs or None)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
     labels = {s: t.label for s, t in runner.traits.items()}
-    atomic_write_text(decisions_markdown(results, batch_id=runner.batch_id, labels=labels, mode=runner.mode),
-                      out_dir / "decisions.md")
+    atomic_write_text(decisions_markdown(results, batch_id=runner.batch_id, labels=labels, mode=runner.mode,
+                                         pass_name=run_meta.get("pass")), out_dir / "decisions.md")
     run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status,
                     stopped_by_error=summary["stopped_by_error"], n_decided=summary["n_decided"],
                     n_stalled=summary["n_stalled"])
@@ -722,6 +807,12 @@ def _check_score_selection(args, redecide: bool) -> Optional[str]:
     """``score`` takes one of --run / --keys / --unscored; ``--redecide`` and ``--relation-only`` take
     --from-batch (and optionally --keys)."""
     chosen = [n for n, v in (("--run", args.run), ("--keys", args.keys), ("--unscored", args.unscored)) if v]
+    if getattr(args, "holding", None):
+        if redecide or getattr(args, "relation_only", False):
+            return ("--holding is for a new score run: --redecide and --relation-only take the source run's pass from "
+                    "its run.json")
+        if getattr(args, "hide", None):
+            return "--holding and --hide are not combined (the recovery harness hides corpus traits from trait runs)"
     if getattr(args, "hide", None) and (redecide or getattr(args, "relation_only", False)):
         return "--hide is for a new score run (the recovery harness), not --redecide or --relation-only"
     if getattr(args, "relation_only", False):
@@ -1097,6 +1188,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if redecide:   # the source's answers are replayed, and they are found by model
         relation_model = source_relation_model(source)
     data_dir, corpus_info = resolve_data_dir(args, source)
+    # the physical pass (physical_pass.py): --holding on a new score run; a re-decided run or a full scan takes its
+    # source's pass.  None for every trait run, which then runs exactly as before.
+    holding = getattr(args, "holding", None) if (mode == "shortlist" and not redecide) else source_holding(source)
+    to_gloss: list[str] = []
     if redecide:
         diffs = check_source_settings(source, cfg=cfg, query_form=args.query_form)
         if diffs:
@@ -1105,12 +1200,18 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             return 2
         cands, skipped = select_redecide(rows, args, source)
     elif mode == "shortlist":
-        cands, skipped = select_candidates(rows, args, batch_id=args.batch_id, ignore_decided=bool(hide))
+        cands, skipped = select_candidates(rows, args, batch_id=args.batch_id, ignore_decided=bool(hide),
+                                           to_gloss=to_gloss if holding else None)
     else:
-        cands, skipped = select_scan_sample(rows, args)
+        cands, skipped = select_scan_sample(rows, args, source_holding(source))
     if not cands:
         print(f"nothing to score ({json.dumps(skipped)})", file=sys.stderr)
         return 0
+    if to_gloss and getattr(args, "embed_only", False):
+        print(f"REFUSED: --embed-only stops before any LLM call, but {len(to_gloss)} rows of the physical pass have no "
+              "gloss yet and the gloss stage is one; run without --embed-only (--dry-run shows its request first)",
+              file=sys.stderr)
+        return 2
     cache = EM.EmbeddingCache(args.cache_dir)
     try:
         index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide)
@@ -1145,6 +1246,9 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                               cand_chars=_cand_chars(cands), transport=transport, n_embed=len(miss),
                               relation_model=relation_model)
     use = ("embeddings", "relation", "overlap") if mode == "shortlist" else ("embeddings", "full_scan")
+    if holding and mode == "shortlist" and not redecide:
+        stages["physical_gloss"] = PP.estimate(len(to_gloss))
+        use = ("physical_gloss",) + use
     est = Estimate(lines=[x for s in use for x in stages[s].lines])
     plan = {"mode": mode, "n_candidates": len(cands), "n_exact_label": n_exact, "n_to_relation": n_live if mode == "shortlist" else 0,
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
@@ -1152,6 +1256,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             "rules": rules.as_dict(), "corpus_files": corpus_info}
     if hide_meta:
         plan["hide"] = hide_meta
+    if holding:
+        plan["holding"] = holding
+        if mode == "shortlist" and not redecide:
+            plan["physical_gloss"] = {"n_to_gloss": len(to_gloss), "model": PP.MODEL}
     redecide_meta, offline_ctx = None, None
     if redecide:
         if index is None or miss:
@@ -1231,8 +1339,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             need = {w["key"] for w in wanted}      # render a candidate whose calls are not on record, if any
             first = next((i for i, c in enumerate(cands) if c.key in need), None)
         else:
-            first = next((i for i, c in enumerate(cands)
-                          if i in found and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
+            if to_gloss:
+                print(PP.render(rows[to_gloss[0]]))
+            first = next((i for i, c in enumerate(cands) if i in found and c.key not in set(to_gloss)
+                          and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
         if index is not None and first is not None:
             print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k,
                              relation_model=relation_model))
@@ -1245,6 +1355,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if status:
         return status
     bad = _resume_model_mismatch(earlier, relation_model) if mode == "shortlist" else None
+    run_pass = PP.PASS_NAME if holding else None
+    if bad is None and earlier is not None and earlier.get("pass") != run_pass:
+        bad = (f"the run's earlier session was {'the ' + earlier['pass'] + ' pass' if earlier.get('pass') else 'a trait run'}, "
+               f"this one {'the ' + run_pass + ' pass' if run_pass else 'a trait run'}: a separate batch id per pass")
     if bad is None and earlier is not None and ((earlier.get("hide") or {}).get("sha256") != (hide_meta or {}).get("sha256")):
         bad = (f"the run's earlier session hid {(earlier.get('hide') or {}).get('path') or 'nothing'}, this one "
                f"{(hide_meta or {}).get('path') or 'nothing'} (by sha256): a resume must hide the same traits")
@@ -1280,6 +1394,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         run_meta["replay_from"] = source["replay_from"]
     if hide_meta:
         run_meta["hide"] = hide_meta
+    if holding:
+        run_meta["pass"] = run_pass
+        if mode == "shortlist" and not redecide:
+            run_meta["physical_gloss"] = {"model": PP.MODEL, "n_to_gloss": len(to_gloss), **PP.stage_summary({})}
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -1294,8 +1412,19 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if hide_meta:
         inputs.append(current_file_input(dep_key="hidden", path=Path(hide_meta["path"])))
     extra_block = ({"redecided_from": source["batch_id"]} if redecide else {}) | ({"hide": hide_meta} if hide_meta else {})
+    if holding:
+        extra_block["pass"] = run_pass
     status, error, runner = 0, None, None
     try:
+        if to_gloss:
+            cands = physical_gloss_stage(reg=reg, to_gloss=to_gloss, cands=cands, skipped=skipped, out_dir=out_dir,
+                                         usage=usage, batch_id=args.batch_id, concurrency=args.concurrency,
+                                         run_meta=run_meta)
+            texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
+                     for c in cands}
+            if not cands:
+                print(f"nothing to score after the gloss stage ({json.dumps(skipped)})", file=sys.stderr)
+                return 0
         if index is None:
             index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide)
         canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage)
@@ -1345,7 +1474,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             summary = finalize(out_dir=out_dir, runner=runner, usage=usage, run_meta=run_meta, skipped=skipped,
                                status=status, error=error, inputs=inputs,
                                extra=({"redecide": redecide_meta} if redecide else {})
-                               | ({"hide": hide_meta} if hide_meta else {}) or None)
+                               | ({"hide": hide_meta} if hide_meta else {})
+                               | ({"pass": run_pass} if holding else {}) or None)
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
@@ -1608,11 +1738,11 @@ def run_relation_only(args, argv) -> int:
     return status
 
 
-def select_scan_sample(rows: dict, args) -> tuple[list[NR.M3Candidate], dict]:
+def select_scan_sample(rows: dict, args, holding: Optional[str] = None) -> tuple[list[NR.M3Candidate], dict]:
     """The full scan's candidates: a seeded sample of ``--sample`` of the main run's candidates that reached the
     relation call (reason ``overlap``), read from its ``results.jsonl``, or the registry keys of ``--keys`` (in
     the order given; a key the main run did not walk is scanned all the same, and counted); their glosses from
-    the registry."""
+    the registry (``holding``: the main run was a physical pass, whose rows its builder reads)."""
     main = paths.novelty_dir(args.from_batch, candidates_dir=args.out_root) / "results.jsonl"
     if not main.exists():
         raise SystemExit(f"{main} not found: run score --batch-id {args.from_batch} first")
@@ -1630,7 +1760,7 @@ def select_scan_sample(rows: dict, args) -> tuple[list[NR.M3Candidate], dict]:
         extra = {}
     out, skipped = [], Counter(extra)
     for k in pick:
-        cand, why = NR.candidate_from_row(rows[k]) if k in rows else (None, "not_in_registry")
+        cand, why = _build(rows[k], holding) if k in rows else (None, "not_in_registry")
         if cand is None:
             skipped[why] += 1
         else:
@@ -1790,7 +1920,8 @@ def cmd_decisions(args) -> int:
     traits = NV.load_trait_corpus(args.data_dir)
     mode = res[0]["novelty"].get("mode", "shortlist") if res else "shortlist"
     atomic_write_text(decisions_markdown(res, batch_id=args.batch_id, labels={s: t.label for s, t in traits.items()},
-                                         mode=mode), d / "decisions.md")
+                                         mode=mode, pass_name=res[0]["novelty"].get("pass") if res else None),
+                      d / "decisions.md")
     print(f"wrote {d / 'decisions.md'} ({len(res)} candidates)")
     return 0
 
@@ -1910,6 +2041,11 @@ def build_parser() -> argparse.ArgumentParser:
                          "run never writes the registry and takes its rows whatever other runs decided")
     sp.add_argument("--rescore", action="store_true", help="also rows another run has decided (their block is replaced)")
     sp.add_argument("--include-held", action="store_true", help="also rows on a holding list (nationalities)")
+    sp.add_argument("--holding", choices=(PP.HOLDING,), default=None,
+                    help="the physical pass (physical_pass.py): the rows on the physical holding list (of --run, --keys "
+                         "or --unscored) instead of verdict-trait rows; rows with no gloss first get M1's gloss and "
+                         "alignment calls on their accepted reading (the gloss stage), then M3 as for trait rows; the "
+                         "pass is recorded in every block, run.json and summary.json.  One batch id per pass")
     sp.add_argument("--limit", type=int)
     sp.add_argument("--embed-only", action="store_true",
                     help="embed the candidates (the canary first; charged to the run's usage.json) and stop before any "

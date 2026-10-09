@@ -155,6 +155,7 @@ class Node:
     m3_run: Optional[str] = None                # the M3 batch that decided it
     status: Optional[str] = None                # a queue entry's status
     missing: bool = False                       # a corpus stem M3 read that the current corpus no longer has
+    outcome: Optional[str] = None               # M1's outcome when it is not "trait": "physical" (the physical pass)
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -397,16 +398,26 @@ class PairCandidate(NR.M3Candidate):
 
 
 def _gloss(row: Mapping) -> Optional[str]:
-    g = row.get("gloss") or (row.get("filter") or {}).get("gloss")
+    from . import physical_pass as PP
+    g = row.get("gloss") or (row.get("filter") or {}).get("gloss") or (row.get(PP.BLOCK) or {}).get("gloss")
     return g.strip() if isinstance(g, str) and g.strip() else None
 
 
+def _holding_of(row: Mapping) -> Optional[str]:
+    """The holding list a row was judged from: ``physical`` for a row whose M3 block came from the physical pass
+    (``novelty.pass``), else None (a trait row, read as before)."""
+    from . import physical_pass as PP
+    return PP.HOLDING if (row.get("novelty") or {}).get("pass") == PP.PASS_NAME else None
+
+
 def pair_candidate(row: Mapping) -> tuple[Optional[PairCandidate], Optional[str]]:
-    """``(candidate, None)``, or ``(None, why)`` for a row M3 could not have judged (``candidate_from_row``)."""
+    """``(candidate, None)``, or ``(None, why)`` for a row M3 could not have judged (``candidate_from_row``; a
+    physical pass's row by that pass's builder)."""
     row = dict(row)
     if not row.get("gloss") and _gloss(row):
         row["gloss"] = _gloss(row)
-    c, why = NR.candidate_from_row(row)
+    holding = _holding_of(row)
+    c, why = NR.candidate_from_row(row, holding=holding) if holding else NR.candidate_from_row(row)
     if c is None:
         return None, why
     return PairCandidate(**{f.name: getattr(c, f.name) for f in fields(c)}), None
@@ -625,7 +636,8 @@ def _candidate_node(row: Mapping) -> Node:
                 stem=row.get("stem"), generator=gens[0] if gens else None, generators=gens, verdict=f.get("verdict"),
                 decision=nv.get("decision"), flags=list(nv.get("review") or []),
                 region=f.get("region") or nv.get("region"),
-                alignment_score=a if isinstance(a, int) and not isinstance(a, bool) else None, m3_run=nv.get("run_id"))
+                alignment_score=a if isinstance(a, int) and not isinstance(a, bool) else None, m3_run=nv.get("run_id"),
+                outcome=f.get("outcome") if f.get("outcome") not in (None, "trait") else None)
 
 
 def _covering(nv: Mapping) -> Optional[tuple[str, str]]:

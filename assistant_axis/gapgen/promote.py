@@ -7,11 +7,22 @@ a writer agent later writes the final ``description`` and sets ``ready``).
 
 Refusals: a stem present in the corpus (either entity type), a stem or label
 already queued (``seed_entities.build_registry``: existing *and* queued
-stems), a row on a holding list (physical, roles, nationalities; states
-unless the states pass allows it, below), a row whose filter verdict is not
-``trait`` / ``tagged``, a row with no filter block, and (with
-``min_local_novelty``) a row whose novelty is missing or below the floor.
-``dry_run`` leaves the queue file byte-identical.
+stems), a row on a holding list (roles, nationalities; physical unless
+promoted by name, and states unless the states pass allows it, both below), a
+row whose filter verdict is not ``trait`` / ``tagged``, a row with no filter
+block, and (with ``min_local_novelty``) a row whose novelty is missing or below
+the floor.  ``dry_run`` leaves the queue file byte-identical.
+
+Physical (the physical pass, :mod:`assistant_axis.gapgen.physical_pass`; Roger,
+2026-10-09, QUESTIONS 1: "we handle promotion normally, and if promoted they get
+the physical tag"): a row on the ``physical`` list is promoted only with
+``allow_physical``, which the two paths that name the row pass (``gap_registry.py
+promote --keys`` and the review app's ``apply``); the bulk path (``promote
+--status accepted``) and any other caller still refuse it.  Its entry carries
+the tag ``physical`` (merged with the others), the physical track's section
+(read from the queue's physical entries, ``physical_pass.section_for``) unless a
+section other than the default is given, and the physical pass's gloss as
+``description_draft``.  Every other refusal applies as to any row.
 
 States (round 4, replacing round 2's assumption; QUESTIONS 14): a row on the
 ``states`` list becomes promotable once the states pass
@@ -184,12 +195,16 @@ def states_promotion(rec: dict, confirmed_name: Optional[str] = None) -> tuple[O
 def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_dir: Path,
             dry_run: bool = True, section: str = DEFAULT_SECTION,
             min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False,
-            confirmed_state_names: Optional[dict[str, str]] = None) -> PromoteReport:
+            confirmed_state_names: Optional[dict[str, str]] = None,
+            allow_physical: bool = False) -> PromoteReport:
     """Build queue entries for ``keys`` and (unless ``dry_run``) append them
     to ``queue["entries"]`` in place.  ``records`` is the folded registry.
     The caller saves the queue (``seed_entities.save_queue``) and records
-    ``seed_queue_stem`` on the promoted rows."""
+    ``seed_queue_stem`` on the promoted rows.  ``allow_physical``: rows on the
+    physical holding list may be promoted (the caller names them; see the
+    module docstring)."""
     from data_analysis.seed_entities import build_registry, corpus_stems
+    from . import physical_pass as PP
 
     rep = PromoteReport(dry_run=dry_run)
     corpus = set().union(*corpus_stems(data_dir).values())
@@ -203,12 +218,19 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             continue
         f = rec.get("filter")
         via_states = None
+        via_physical = False
         held_why = None
         if rec.get("holding") == "states":
             eff, held_why = states_promotion(rec, (confirmed_state_names or {}).get(key))
             if eff is not None:
                 via_states = {**rec, "_suggested": eff.pop("_suggested")}
                 rec = {**rec, **eff}
+        elif rec.get("holding") == PP.HOLDING:
+            if allow_physical:
+                via_physical = True
+            else:
+                held_why = (f"on the {PP.HOLDING} holding list: promoted only by name (gap_registry.py promote --keys, "
+                            f"or the review app's apply)")
         elif rec.get("holding"):
             held_why = f"on the {rec['holding']} holding list (never promoted)"
         stem = rec["stem"]
@@ -244,6 +266,8 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
                 entry["tags"] = list(dict.fromkeys(entry["tags"] + ["states_queue"]))
                 entry["gap_gen"]["states_pass"] = {"state_label": via_states["label"],
                                                    "state_gloss": via_states.get("gloss")}
+            if via_physical:
+                PP.queue_entry_extras(entry, rec, queue, section=None if section == DEFAULT_SECTION else section)
             if old is not None:  # reopened on purpose: the history travels with the new entry
                 history = (f"previously {old.get('status')}: {turned_down_reason(old)}; reopened by "
                            f"promote --reopen-turned-down")

@@ -160,9 +160,16 @@ class M3Candidate:
                 "alignment_score": self.alignment_score, "region": self.region, "generators": list(self.generators)}
 
 
-def candidate_from_row(row: Mapping) -> tuple[Optional[M3Candidate], Optional[str]]:
+def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[Optional[M3Candidate], Optional[str]]:
     """``(candidate, None)`` for a registry row M3 can judge, else ``(None, why)``: not filtered, not a
-    ``trait`` verdict, or no gloss."""
+    ``trait`` verdict, or no gloss.  ``holding="physical"`` (the physical pass, ``novelty_score.py score
+    --holding physical``): a row on that holding list instead, its gloss and alignment score from the pass's gloss
+    stage (:func:`assistant_axis.gapgen.physical_pass.candidate_from_row`); without it, nothing changes."""
+    if holding is not None:
+        from . import physical_pass as PP
+        if holding != PP.HOLDING:
+            raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list as a pass of its own, not {holding!r}")
+        return PP.candidate_from_row(row)
     f = row.get("filter") or {}
     if not f:
         return None, "not_filtered"

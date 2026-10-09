@@ -48,7 +48,10 @@ Commands:
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
   append ``status: "candidate"`` entries to ``data/seed_queue.json`` (refuses
   corpus and queue collisions and holding-list rows, except a states row the
-  states pass judged plausible, which is promoted under its suggested name).
+  states pass judged plausible, which is promoted under its suggested name,
+  and a physical row named with ``--keys``, which joins the physical track:
+  tag ``physical``, the track's section; ``--status accepted`` still refuses
+  it; ``assistant_axis/gapgen/physical_pass.py``).
 
 No command here makes an API call.
 """
@@ -371,9 +374,10 @@ def cmd_promote(args) -> int:
         if not sep or not name.strip():
             raise SystemExit(f"--confirm-state-name takes KEY=NAME, not {spec!r}")
         confirmed[key.strip()] = name.strip()
+    # a physical row is promoted only by name (the physical pass, QUESTIONS 1): --keys names it, --status does not
     rep = promote(rows, queue, keys, data_dir=args.data_dir, dry_run=args.dry_run, section=args.section,
                   min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down,
-                  confirmed_state_names=confirmed)
+                  confirmed_state_names=confirmed, allow_physical=bool(args.keys))
     for k in rep.promoted:
         e = next(x for x in rep.entries if x["gap_gen"]["registry_key"] == k)
         print(f"{'WOULD PROMOTE' if args.dry_run else 'PROMOTED'} {k} -> {e['stem']} ({e['entity_type']}"
