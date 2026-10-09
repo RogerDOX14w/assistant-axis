@@ -131,7 +131,10 @@ def parse_args(argv=None):
     ap.add_argument("--paraphrase-cache", type=Path, default=None, help="default: <out>/paraphrases.json")
     ap.add_argument("--vectors-dir", type=Path, default=PS.DEFAULT_VECTORS_DIR)
     ap.add_argument("--out", type=Path, default=CALIBRATION_DIR)
-    ap.add_argument("--marks-sheet", type=Path, default=MARKS_SHEET)
+    ap.add_argument("--marks-sheet", type=Path, default=None,
+                    help=f"Roger's marks sheet for criterion (e)'s comparisons (default {MARKS_SHEET} for the default "
+                         "--out; with another --out, <out>/contrast_comparisons_for_marks.md, so a run into a new "
+                         "folder never overwrites the sheet of the calibration of record)")
     ap.add_argument("--cache-dir", type=Path, default=EMBEDDING_CACHE_DIR, help="embedding cache (gitignored)")
     ap.add_argument("--budget-usd", type=float, default=None, help="hard cap (default 1.0 with --skip-llm, else 5.0)")
     ap.add_argument("--confirm-expensive", action="store_true")
@@ -148,7 +151,13 @@ def parse_args(argv=None):
                     help="where --write-config writes, and where the canary texts are read from")
     ap.add_argument("--dry-run", action="store_true", help="print the plan, the estimate and three texts; call nothing")
     ap.add_argument("--allow-dirty", action="store_true", help="run with uncommitted platform changes (recorded)")
-    return ap.parse_args(argv)
+    args = ap.parse_args(argv)
+    if args.marks_sheet is None:
+        # 2026-10-09: a run with --out data/candidates/calibration_916 drew new comparisons and wrote them over
+        # the committed sheet of the 663-trait calibration; the sheet now follows --out.
+        default_out = Path(args.out).resolve() == Path(CALIBRATION_DIR).resolve()
+        args.marks_sheet = MARKS_SHEET if default_out else Path(args.out) / MARKS_SHEET.name
+    return args
 
 
 # --------------------------------------------------------------------------- inputs

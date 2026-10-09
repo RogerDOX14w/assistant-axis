@@ -651,3 +651,17 @@ def test_final_metric_config_flags_a_missed_target():
     cfg = C.final_metric_config(retrieval=retrieval, paraphrase=para, loo=loo, canary=canary,
                                 config_version="2026-10-02", model_ids={"openai": "o", "gemma": "g", "bge": "b"})
     assert cfg["covered"]["retrieval"]["target"]["met"] is False
+
+
+def test_marks_sheet_follows_out(tmp_path):
+    """2026-10-09: a calibration run into another --out must not write the marks sheet of record."""
+    import importlib.util, sys
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "calibrate_metric_cli", Path(__file__).resolve().parents[2] / "data_analysis" / "gap_generation" / "calibrate_metric.py")
+    cm = importlib.util.module_from_spec(spec); sys.modules[spec.name] = cm; spec.loader.exec_module(cm)
+    assert cm.parse_args([]).marks_sheet == cm.MARKS_SHEET
+    a = cm.parse_args(["--out", str(tmp_path / "elsewhere")])
+    assert a.marks_sheet == tmp_path / "elsewhere" / cm.MARKS_SHEET.name
+    b = cm.parse_args(["--out", str(tmp_path), "--marks-sheet", str(tmp_path / "x.md")])
+    assert b.marks_sheet == tmp_path / "x.md"
