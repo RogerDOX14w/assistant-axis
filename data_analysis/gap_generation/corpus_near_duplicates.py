@@ -175,12 +175,14 @@ def render_sample(runner: NR.NoveltyRunner, sp: ND.ScanPlan, cands: dict, rubric
 
 # --------------------------------------------------------------------------- run
 
-def write_outputs(out_dir: Path, *, rows, plan, traits, run_meta, compare_with, inputs) -> dict:
+def write_outputs(out_dir: Path, *, rows, plan, traits, run_meta, compare_with, inputs, data_dir: Path) -> dict:
+    n_deliberate = ND.mark_deliberate(rows, sources=ND.trait_sources(data_dir), traits=traits)
     dist = ND.readings_distribution(rows)
     atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), out_dir / "pairs.jsonl")
     crow = cosine_rows(compare_with)
     cmp = ND.comparison(rows, crow, corpus=traits, plan=plan) if crow is not None else None
     run_meta.update(readings=dist, sections={s: sum(1 for r in rows if r["section"] == s) for s in ND.SECTIONS},
+                    n_deliberate=n_deliberate,
                     comparison=None if cmp is None else {
                         "file": str(compare_with), "n_rows": len(cmp["table"]),
                         "by_section_here": {str(k): v for k, v in cmp["n_rated"].items()},
@@ -334,7 +336,7 @@ def cmd_run(args, argv) -> int:
             run_meta["complete"] = incomplete == 0
             run_meta["n_incomplete"] = incomplete
             write_outputs(out_dir, rows=rows, plan=plan, traits=traits, run_meta=run_meta,
-                          compare_with=args.compare_with, inputs=inputs)
+                          compare_with=args.compare_with, inputs=inputs, data_dir=args.data_dir)
         else:
             write_run(out_dir / "run.json", run_meta, inputs=inputs)
         logging.getLogger().removeHandler(fh)
@@ -369,7 +371,7 @@ def cmd_report(args) -> int:
                             floor=st.get("cosine_floor", ND.DEFAULT_COSINE_FLOOR))
     inputs = provenance_inputs(args, NS.load_m3_rubrics(args.rubrics_dir), data_dir)
     write_outputs(out_dir, rows=rows, plan=plan, traits=index.traits, run_meta=run_meta,
-                  compare_with=args.compare_with, inputs=inputs)
+                  compare_with=args.compare_with, inputs=inputs, data_dir=data_dir)
     print(f"wrote {out_dir / 'near_duplicates.md'}")
     return 0
 

@@ -473,9 +473,65 @@ def estimate_second(back: Sequence, *, overlap_tokens: Optional[Mapping[str, tup
     return est
 
 
+# --------------------------------------------------------------------------- deliberate near-duplicates
+
+_PLAIN = re.compile(r"plain trait ([A-Za-z][A-Za-z_ -]*?)(?=\s*(?:[,;(]|$| in ))")
+
+
+def trait_sources(data_dir: Path) -> dict[str, str]:
+    """``{stem: source}`` of the trait files that carry a ``source`` field (a standard's provenance, and where a
+    near-duplicate is deliberate, a clause saying so: the naming rule asks for it there, never in the description)."""
+    import json
+    out = {}
+    for p in sorted((Path(data_dir) / "traits" / "instructions").glob("*.json")):
+        s = json.loads(p.read_text(encoding="utf-8")).get("source")
+        if isinstance(s, str) and s.strip():
+            out[p.stem] = s.strip()
+    return out
+
+
+def _names(text: str, stem: str, traits: Mapping[str, NV.CorpusTrait]) -> bool:
+    t = traits.get(stem)
+    for c in {stem, stem.replace("_", " "), t.label if t else None} - {None, ""}:
+        if re.search(rf"(?<![\w-]){re.escape(c)}(?![\w-])", text, re.I):
+            return True
+    return False
+
+
+def deliberate_note(a: str, b: str, *, sources: Mapping[str, str], traits: Mapping[str, NV.CorpusTrait]
+                    ) -> Optional[str]:
+    """The ``source`` clause that records ``a`` and ``b`` as a deliberate near-duplicate, or ``None``: a clause of
+    either file's ``source`` that speaks of deliberate duplication and names the other trait (stem or label), or two
+    clauses naming the same plain trait (two standards' versions of one trait)."""
+    def clauses(stem):
+        return [c.strip() for c in (sources.get(stem) or "").split(";") if "deliberat" in c.lower()]
+    for x, y in ((a, b), (b, a)):
+        for c in clauses(x):
+            if _names(c, y, traits):
+                return f"{traits[x].label if x in traits else x}: {c}"
+    plain = {}
+    for x in (a, b):
+        for c in clauses(x):
+            m = _PLAIN.search(c)
+            if m:
+                plain[x] = m.group(1).strip().lower()
+    if len(plain) == 2 and plain[a] == plain[b]:
+        return f"both: deliberate near-duplicates of the plain trait {plain[a]}"
+    return None
+
+
+def mark_deliberate(rows: Sequence[dict], *, sources: Mapping[str, str], traits: Mapping[str, NV.CorpusTrait]) -> int:
+    """Set each row's ``deliberate`` (:func:`deliberate_note`); the number marked."""
+    n = 0
+    for r in rows:
+        r["deliberate"] = deliberate_note(r["a"], r["b"], sources=sources, traits=traits)
+        n += r["deliberate"] is not None
+    return n
+
+
 # --------------------------------------------------------------------------- the cosine table
 
-_LINK = re.compile(r"\(\.\./\.\./traits/instructions/([A-Za-z0-9_]+)\.json\)")
+_LINK =re.compile(r"\(\.\./\.\./traits/instructions/([A-Za-z0-9_]+)\.json\)")
 
 
 def parse_drop_or_merge(text: str, *, section: str = "## Partners excluded") -> list[dict]:
@@ -568,6 +624,8 @@ def _table(rows: Sequence[Mapping], *, with_notes: bool = False) -> list[str]:
         pair = f"{trait_link(r['a'], r['label_a'])} and {trait_link(r['b'], r['label_b'])}"
         if "scan" not in r.get("sources", []):
             pair += " (read on request)"
+        if r.get("deliberate"):
+            pair += f"<br>*deliberate, by the `source` field ({_md(r['deliberate'])})*"
         cos = "" if r.get("cosine") is None else f"{r['cosine']:.3f}"
         line = (f"| {i} | {pair} | {cos} | {reading_text(r.get('ab'))} | {reading_text(r.get('ba'))} | "
                 f"{_md(r['description_a'])} | {_md(r['description_b'])} | {_md(row_reason(r))} |")
@@ -613,7 +671,7 @@ def comparison(rows: Sequence[Mapping], cosine_rows: Sequence[Mapping], *, corpu
 
 def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[str, NV.CorpusTrait],
                     cmp: Optional[dict], run: Mapping, dist: Mapping, cosine_table_rel: str,
-                    kept_out_top: int = 20) -> str:
+                    per_kind: int = 5) -> str:
     """``near_duplicates.md``, for Roger (links relative to ``data/candidates/near_duplicates_916/``)."""
     st = plan.stats
     corpus = set(traits)
@@ -659,12 +717,30 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
         f"ways, **{sec_counts.get('one_way', 0)}** 3 or more one way only"
         + (f"; {sec_counts['incomplete']} incomplete (resume the run)" if sec_counts.get("incomplete") else "")
         + f".  Spend ${run.get('cost_usd', 0):.2f}, live.")
+    n_del = {s: sum(1 for r in rows if r.get("section") == s and r.get("deliberate")) for s in SECTIONS}
+    if any(n_del.values()):
+        L.append("")
+        L.append(
+            f"**Deliberate near-duplicates** are marked in the tables ({n_del['same_4']} of the 4-and-4 pairs, "
+            f"{n_del['same_3']} of the 3-or-more pairs, {n_del['one_way']} of the one-way ones): pairs whose files' "
+            "`source` field records the duplication as deliberate (a standard's version beside the plain trait, as "
+            "the naming rule asks it to be recorded), so they are expected here and need no decision unless the "
+            "standard's version is to go.")
     L.append("")
     for s in SECTIONS:
         xs = _section_rows(rows, s)
         L.append(f"## {SECTION_TITLES[s]}")
         L.append("")
-        if s == "one_way":
+        if s == "same_4":
+            L.append("Final reading 4 in both directions: either label could replace the other.  The strongest "
+                     "candidates to drop one or merge.")
+            L.append("")
+        elif s == "same_3":
+            L.append("Final reading 3 or above in both directions, not 4 and 4: the same concept with a different "
+                     "scope, degree or emphasis (or 4 one way and 3 the other).  Candidates to merge, or to sharpen "
+                     "one description so the two separate.")
+            L.append("")
+        elif s == "one_way":
             L.append("The first direction read 3 or above and the second did not (or, for a pair read on request, "
                      "either way round).  Usually one trait is a narrower or stronger case of the other.")
             L.append("")
@@ -706,7 +782,7 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
             f"{rated.get('same_4', 0)} of them read 4 both ways, {rated.get('same_3', 0)} 3 or more both ways, "
             f"{rated.get('one_way', 0)} 3 or more one way, "
             f"{sum(1 for t in cmp['table'] if t['row'] is not None and t['section'] is None)} below 3, and "
-            f"{sum(1 for t in cmp['table'] if t['row'] is None)} were not read.")
+            f"{_n_not_read(cmp)} not read.")
         L.append("")
         L.append("| traits | flagged by | cosine there (raw) | cosine here | first → second | second → first | here |")
         L.append("|---|---|---|---|---|---|---|")
@@ -724,12 +800,15 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
         L.append("")
         mb = sorted(cmp["missed_both"], key=lambda r: (r["section"] != "same_4", -(r.get("cosine") or 0)))
         L.append(f"**Found here, not in the cosine table: {len(mb)} pairs at 3 or more both ways** "
-                 f"({sum(1 for r in mb if r['section'] == 'same_4')} of them 4 and 4), and "
-                 f"{len(cmp['missed_one_way'])} at 3 or more one way.  The pairs at 3 or more both ways, by cosine:")
+                 f"({sum(1 for r in mb if r['section'] == 'same_4')} of them 4 and 4; "
+                 f"{sum(1 for r in mb if r.get('deliberate'))} deliberate by their `source` field), and "
+                 f"{len(cmp['missed_one_way'])} at 3 or more one way.  The pairs at 3 or more both ways, 4 and 4 first, "
+                 "then by cosine:")
         L.append("")
         if mb:
             L.append(", ".join(f"{trait_link(r['a'], r['label_a'])} and {trait_link(r['b'], r['label_b'])} "
-                               f"({r['cosine']:.2f}, {'4/4' if r['section'] == 'same_4' else '3+/3+'})" for r in mb) + ".")
+                               f"({r['cosine']:.2f}, {'4/4' if r['section'] == 'same_4' else '3+/3+'}"
+                               f"{', deliberate' if r.get('deliberate') else ''})" for r in mb) + ".")
         else:
             L.append("None.")
         L.append("")
@@ -743,20 +822,23 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
     non_opp = sorted(((p, v) for p, v in ko.items() if not any(is_opposing(k) for k in v["kinds"])),
                      key=lambda kv: (-kv[1]["cosine"], kv[0]))
     by_kind = ", ".join(f"{k} {n}" for k, n in st["kept_out_by_kind"].items())
-    L.append(f"- **Arrangement partners.**  {st['n_kept_out_neighbours']} neighbours nearer to a trait than its "
-             f"{plan.k}th one read were left out as arrangement partners ({by_kind}).  For a clean pair or a simplex "
-             "that is the point (its members are opposites), but the members of a sequence, set, map, ring, square, "
-             "cube or orthoplex are neighbours, not opposites, and can be near-duplicates: "
+    L.append(f"- **Arrangement partners.**  {st['n_kept_out_neighbours']} neighbours nearer to a trait than the last "
+             f"of its {plan.k} read neighbours were left out as arrangement partners ({by_kind}).  For a clean pair or "
+             "a simplex that is the point (its members are opposites), but the members of a sequence, set, map, ring, "
+             "square, cube or orthoplex are neighbours, not opposites, and can be near-duplicates: "
              f"{len(non_opp)} such pairs ({st['n_kept_out_pairs_non_opposing_at_floor']} at the floor or above) were "
-             f"not read.  The {min(kept_out_top, len(non_opp))} nearest, unread:")
-    if non_opp:
-        L.append("")
-        for p, v in non_opp[:kept_out_top]:
-            a, b = p
-            read = next((r for r in rows if (r["a"], r["b"]) == p), None)
-            tail = f"; read on request: {_section_name(read.get('section'))}" if read else ""
-            L.append(f"  - {trait_link(a, traits[a].label)} and {trait_link(b, traits[b].label)}: {v['cosine']:.3f}, "
-                     f"{', '.join(v['kinds'])}{tail}")
+             f"not read.  The nearest of each kind, unread unless marked (up to {per_kind} a kind):")
+    by: dict[str, list] = defaultdict(list)
+    for p, v in non_opp:
+        by[" + ".join(v["kinds"])].append((p, v))
+    for kind in sorted(by, key=lambda k: (-len(by[k]), k)):
+        items = by[kind]
+        shown = ", ".join(
+            f"{trait_link(a, traits[a].label)} and {trait_link(b, traits[b].label)} ({v['cosine']:.2f}"
+            + (f"; read on request: {_section_name(rd.get('section'))}" if rd else "") + ")"
+            for (a, b), v in items[:per_kind]
+            for rd in [next((r for r in rows if (r["a"], r["b"]) == (a, b)), None)])
+        L.append(f"  - {kind} ({len(items)} pairs): {shown}{', ...' if len(items) > per_kind else ''}")
     missing = sorted({s for t in (cmp or {}).get("table", []) for s in (t["a"], t["b"]) if s not in corpus})
     if missing:
         L.append(f"- **Not in the corpus read.**  {', '.join(trait_link(s, exists=False) for s in missing)}: "
@@ -767,10 +849,13 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
     L.append("")
     L.append("## The run")
     L.append("")
-    L.append(f"- Readings: first direction {_dist_text(dist['first_direction_final'])}; second direction "
-             f"{_dist_text(dist['second_direction_final'])}; Opus re-read {sum(dist['opus_rereads_by_role'].values())} "
-             f"Sonnet readings ({_dist_text(dist['opus_rereads_by_role'])}), "
-             f"and against Sonnet's value it was {_dist_text(dist['opus_vs_sonnet'])}.")
+    roles, moved = dist["opus_rereads_by_role"], dist["opus_vs_sonnet"]
+    L.append(f"- Final readings, first direction: {_dist_text(dist['first_direction_final'])}; second direction: "
+             f"{_dist_text(dist['second_direction_final'])}.  Opus re-read {sum(roles.values())} Sonnet readings "
+             f"({roles.get('at_cut_off', 0)} Sonnet 3s, {roles.get('below_cut_off', 0)} Sonnet 2s, "
+             f"{roles.get('sonnet_unsure', 0)} unsure): it agreed {moved.get('same', 0)} times, read higher "
+             f"{moved.get('up', 0)}, lower {moved.get('down', 0)}"
+             + (f", other {moved['other']}" if moved.get("other") else "") + ".")
     L.append(f"- Models: {run.get('models', {}).get('overlap_first')} then {run.get('models', {}).get('overlap_second')}; "
              f"rubric `{rub.get('name')}` version {rub.get('version')} (sha256 `{str(rub.get('sha256'))[:12]}`); "
              f"embedding `{run.get('embedding', {}).get('model')}`, space `{run.get('embedding', {}).get('variant')}`, "
@@ -783,6 +868,10 @@ def report_markdown(rows: Sequence[Mapping], *, plan: PairPlan, traits: Mapping[
              "[run.json](./run.json) (settings, counts, provenance).")
     L.append("")
     return "\n".join(L)
+
+
+def _n_not_read(cmp: Mapping) -> int:
+    return sum(1 for t in cmp["table"] if t["row"] is None)
 
 
 def _dist_text(d: Mapping) -> str:

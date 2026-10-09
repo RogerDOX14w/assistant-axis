@@ -416,6 +416,34 @@ class TestReport:
         assert "[usage.json](./usage.json)" in md and "](../../../reports/trait_gap_generation/glossary.md#" in md
         assert "_" not in "".join(x.split("](")[0] for x in md.split("[")[1:] if "traits/instructions" in x)
 
+    def test_deliberate_note(self, tmp_path):
+        traits = toy_index(tmp_path).traits
+        src = {"beta": "NEO-PI-R, Some domain; https://x; deliberate near-duplicate of the plain trait alpha",
+               "gamma": "HEXACO; deliberate near-duplicate of the plain trait zeta",
+               "delta": "Holland; deliberate near-duplicate by name of the plain trait zeta, in Holland's sense",
+               "eta": "an instrument that mentions kappa; deliberate near-duplicate of the plain trait iota",
+               "iota": "deliberate near-duplicate of the plain trait thetas",
+               "theta": "deliberately narrower than lambda mu / kappa (the broader pair is tried after)"}
+        note = lambda a, b: ND.deliberate_note(a, b, sources=src, traits=traits)  # noqa: E731
+        assert note("alpha", "beta") == "beta: deliberate near-duplicate of the plain trait alpha"
+        assert note("delta", "gamma") == "both: deliberate near-duplicates of the plain trait zeta"
+        assert note("eta", "kappa") is None              # the clause that says "deliberate" does not name kappa
+        assert note("iota", "theta") is None             # "thetas" is not theta
+        assert note("lambda_mu", "theta").startswith("theta: deliberately narrower")   # by label, spaced
+        assert note("alpha", "gamma") is None
+        rows = [{"a": "alpha", "b": "beta"}, {"a": "alpha", "b": "gamma"}]
+        assert ND.mark_deliberate(rows, sources=src, traits=traits) == 1 and rows[1]["deliberate"] is None
+        (tmp_path / "data" / "traits" / "instructions" / "beta.json").write_text(
+            json.dumps({"positive_label": "beta", "description": "d", "source": src["beta"]}), encoding="utf-8")
+        assert ND.trait_sources(tmp_path / "data") == {"beta": src["beta"]}
+
+    def test_deliberate_marked_in_the_table(self, tmp_path):
+        rows, _, _, idx, _ = scan(tmp_path)
+        r = next(x for x in rows if (x["a"], x["b"]) == ("delta", "theta"))
+        r["deliberate"] = "theta: deliberate near-duplicate of the plain trait delta"
+        md = "\n".join(ND._table([r]))
+        assert "<br>*deliberate, by the `source` field (theta: deliberate near-duplicate of the plain trait delta)*" in md
+
     def test_reading_text(self):
         d = lambda sv, ov=None: ND.direction_reading(res(sv, ov), target="x", other="y")  # noqa: E731
         assert ND.reading_text(d(4)) == "S4" and ND.reading_text(d(3, 4)) == "S3 O4"
