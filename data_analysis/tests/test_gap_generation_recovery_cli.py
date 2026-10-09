@@ -235,3 +235,31 @@ def test_submit_from_refuses_what_is_not_a_candidate(tmp_path, capsys):
     assert gap_registry.main(["--registry", str(reg), "submit", "--from", str(good), "--generator", "g"]) == 2
     assert "drop --generator" in capsys.readouterr().err and not reg.exists()
     assert gap_registry.main(["--registry", str(reg), "submit", "--file", str(good)]) == 2   # --file needs both ids
+
+
+def test_score_hide_with_the_seed_queue_in_the_search(env):
+    """The reduced run searches the seed queue too (a new run), and the hiding reaches it: an entry whose recorded
+    partner is hidden joins without the partner, so neither retrieval nor expansion nor the opposite rule reaches a
+    hidden trait through the queue.  ``--no-queue-search`` passes through the harness's command line."""
+    (env["data"] / "seed_queue.json").write_text(json.dumps({"entries": [
+        {"stem": "queued", "label": "queued", "status": "candidate", "entity_type": "trait"},
+        {"stem": "anti_lambda", "label": "anti lambda", "status": "candidate", "entity_type": "trait", "partner": "lambda_mu",
+         "description_draft": "This means being lambda mu lambda mu lambda in every way."}]}), encoding="utf-8")
+    hp = write_hidden(env)
+    assert cli.main(["score", "--batch-id", "redq", "--run", "toy/r1", "--hide", str(hp), *env["base"]]) == 0
+    d = env["cand_dir"] / "novelty" / "redq"
+    res = {r["key"]: r["novelty"] for r in cli._read_jsonl(d / "results.jsonl")}
+    for nv in res.values():
+        assert not {x["stem"] for x in nv["listed"] + nv["readings"]} & set(HIDDEN)
+        assert nv["queue_search"]["n_entries"] == 1
+    lam = res["lambdaish#1"]
+    assert any(x["stem"] == "anti_lambda" and x["queue_status"] == "candidate" for x in lam["listed"])
+    run = json.loads((d / "run.json").read_text())
+    assert run["queue_search"]["stems"] == ["anti_lambda"] and run["hide"]["n_hidden"] == 4
+    a = rt.build_parser().parse_args(["--generator", "toy", "--run-id", "r1", "--budget-usd", "1", "--no-queue-search"])
+    a.batch_id = "rec_toy_r1"
+    assert "--no-queue-search" in rt.score_argv(a, 0, hp, budget=1.0, dry_run=True, resume=False)
+    a = rt.build_parser().parse_args(["--generator", "toy", "--run-id", "r1", "--budget-usd", "1"])
+    a.batch_id = "rec_toy_r1"
+    argv = rt.score_argv(a, 0, hp, budget=1.0, dry_run=True, resume=False)
+    assert "--queue-search" not in argv and "--no-queue-search" not in argv          # the default: a new run's (on)

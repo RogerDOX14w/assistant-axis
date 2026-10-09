@@ -494,3 +494,160 @@ class TestPilotPools:
         rec = NP.build_pilot_pools(REPO, tmp_path, n_m1=10, seed=0)
         assert (tmp_path / "antonym_check_pilot_1.jsonl").exists() and (tmp_path / "m1_validation_pilot_1.jsonl").exists()
         assert rec["m1_validation"]["drawn"] == 10 and json.loads((tmp_path / "pools.json").read_text()) == rec
+
+
+# --------------------------------------------------------------------------- the seed queue in the search (2026-10-09)
+
+def write_queue(env, entries):
+    (env["data"] / "seed_queue.json").write_text(json.dumps({"entries": entries}), encoding="utf-8")
+
+
+def add_rows(env, rows, run_id):
+    """Submit ``rows`` (as ROWS) as generator run ``toy/<run_id>`` with their filter blocks; returns their keys."""
+    rep = submit_candidates([Candidate(surface=s, generator="toy", run_id=run_id) for s, *_ in rows],
+                            registry_path=env["reg"].path)
+    upd = {}
+    for (s, gloss, verdict, a, holding), key in zip(rows, rep.keys):
+        upd[key] = {"filter": {"verdict": verdict, "outcome": verdict, "alignment": a, "region": "moral_stance"},
+                    "gloss": gloss if verdict == "trait" else None, "holding": holding}
+    env["reg"].update_many(upd)
+    return rep.keys
+
+
+def test_a_word_promoted_in_wave_1_covers_its_synonym_in_wave_2(env, capsys):
+    """The case the change is for: wave 1 finds zorbish new, the review promotes it into the seed queue (status
+    candidate, its gloss as the draft), and wave 2's zorbful, a synonym under another label, is covered by it through
+    the overlap walk (not stage 0: the labels differ), marked as a queue entry for the review graph."""
+    from assistant_axis.gapgen.promote import promote
+    import data_analysis.seed_entities as se
+    gloss = "This means being zorb zorb zorb in every way."
+    add_rows(env, [("zorbish", gloss, "trait", 0, None)], "w1")
+    env["holder"]["responder"] = responder_for(RELATIONS | {("zorbful", "zorbish"): "similar"},
+                                               OVERLAP | {("zorbful", "zorbish"): 4})
+    assert cli.main(["score", "--batch-id", "wave1", "--run", "toy/w1", *env["base"]]) == 0
+    rows = env["reg"].fold()
+    assert rows["zorbish#1"]["novelty"]["decision"] == "new"
+    queue = se.load_queue(env["data"] / "seed_queue.json")
+    rep = promote(rows, queue, ["zorbish#1"], data_dir=env["data"], dry_run=False)
+    assert rep.promoted == ["zorbish#1"]
+    se.save_queue(queue, env["data"] / "seed_queue.json")
+    e = next(x for x in queue["entries"] if x["stem"] == "zorbish")
+    assert e["status"] == "candidate" and e["description_draft"] == gloss and not e.get("description")
+    add_rows(env, [("zorbful", gloss, "trait", 0, None)], "w2")
+    capsys.readouterr()
+    assert cli.main(["score", "--batch-id", "wave2", "--run", "toy/w2", *env["base"], "--dry-run"]) == 0
+    o = capsys.readouterr()
+    assert '"queue_search": {"enabled": true' in o.out and '"n_entries": 1' in o.out
+    assert "(1 of the queue; first: ['zorbish'])" in o.err                          # embedded by the run, charged
+    assert cli.main(["score", "--batch-id", "wave2", "--run", "toy/w2", *env["base"]]) == 0
+    nv = env["reg"].fold()["zorbful#1"]["novelty"]
+    assert nv["decision"] == "covered" and nv["covered_by"] == "zorbish" and nv["reason"] == "overlap"
+    assert nv["covered_by_queue"] == {"stem": "zorbish", "status": "candidate"} and nv["exact_label"] is None
+    assert nv["deciding_reading"]["queue_status"] == "candidate"
+    assert nv["queue_search"]["n_entries"] == 1 and nv["queue_search"]["statuses"] == list(cli.NV.QUEUE_SEARCH_STATUSES)
+    assert len(nv["queue_search"]["queue_sha256"]) == 64
+    run = json.loads((out(env, "wave2") / "run.json").read_text())
+    assert run["queue_search"]["enabled"] and run["queue_search"]["stems"] == ["zorbish"]
+    assert run["queue_search"]["excluded"] == {"no_text": 1}                       # the toy queue's text-less entry
+    summary = json.loads((out(env, "wave2") / "summary.json").read_text())["result"]
+    assert summary["queue_search"]["n_entries"] == 1 and summary["queue_search"]["covered_by_queue"] == 1
+    md = (out(env, "wave2") / "decisions.md").read_text()
+    assert "Seed-queue entries in the search: 1" in md and "## Covered by a seed-queue entry (1 rows)" in md
+    assert "[zorbish](../../../seed_queue.json) (seed queue, candidate)" in md
+    usage = json.loads((out(env, "wave2") / "usage.json").read_text())
+    assert usage["per_model"]["text-embedding-3-large"]["n_calls"] >= 1             # the entry's text, embedded
+    # without the queue in the search, the synonym is new again (the behaviour before 2026-10-09)
+    assert cli.main(["score", "--batch-id", "wave2_off", "--run", "toy/w2", "--rescore", "--no-queue-search",
+                     *env["base"]]) == 0
+    off = env["reg"].fold()["zorbful#1"]["novelty"]
+    assert off["decision"] == "new" and "queue_search" not in off
+    assert json.loads((out(env, "wave2_off") / "run.json").read_text())["queue_search"] == \
+        {"enabled": False, "n_entries": 0, "stems": []}
+
+
+def _fixed_run(tmp_path, monkeypatch, name, *extra):
+    from assistant_axis.gapgen import novelty_runner as NR
+    env = make_env(tmp_path / name, monkeypatch)
+    monkeypatch.setattr(NR, "utc_now", lambda: "2026-10-09T00:00:00+00:00")
+    assert score(env, *extra) == 0
+    d = out(env)
+    blocks = {k: r.get("novelty") for k, r in env["reg"].fold().items()}
+    return {f: (d / f).read_bytes() for f in ("results.jsonl", "readings.jsonl", "decisions.md")}, blocks
+
+
+def test_a_queue_with_no_entry_to_search_gives_the_results_of_before(tmp_path, monkeypatch):
+    """The toy queue holds one candidate entry without a text (exact label only): the run with the queue in the
+    search writes byte for byte what the run without it writes, the registry blocks included."""
+    on, blocks_on = _fixed_run(tmp_path, monkeypatch, "on")
+    off, blocks_off = _fixed_run(tmp_path, monkeypatch, "off", "--no-queue-search")
+    assert on == off and blocks_on == blocks_off
+    assert all("queue_search" not in (b or {}) for b in blocks_on.values())
+
+
+def test_redecide_with_the_queue_over_a_run_without_it(env, capsys):
+    """score --redecide --queue-search: the source's rows replayed without the queue reproduce it; the entries'
+    texts are embedded first (--embed-only), then only the calls whose lists changed are sent, and the queue search
+    is the last attribution step."""
+    assert score(env, "--no-queue-search") == 0
+    write_queue(env, [{"stem": "queued", "label": "queued", "status": "candidate", "entity_type": "trait"},
+                      {"stem": "deltoid", "label": "deltoid", "status": "candidate", "entity_type": "trait",
+                       "description_draft": "This means being delta delta delta delta in every way."}])
+    env["holder"]["responder"] = responder_for(RELATIONS | {("deltaish", "deltoid"): "similar"},
+                                               OVERLAP | {("deltaish", "deltoid"): 4})
+    before = env["reg"].path.read_text()
+    capsys.readouterr()
+    assert redecide(env, "m3t_q", "--queue-search", "--dry-run") == 2               # the entry is not embedded yet
+    assert "only seed-queue texts are missing: run this command with --embed-only first" in capsys.readouterr().err
+    env["holder"].pop("client", None)
+    assert redecide(env, "m3t_q", "--queue-search", "--embed-only") == 0
+    assert calls_made(env) == []                                                     # embeddings only
+    capsys.readouterr()
+    assert redecide(env, "m3t_q", "--resume", "--dry-run") == 0                     # the earlier session's setting
+    o = capsys.readouterr().out
+    assert "5 of 5 rows identical [OK]" in o and "seed queue in the search: source False, this run True (1 entries)" in o
+    assert redecide(env, "m3t_q", "--resume") == 0
+    sent = calls_made(env)
+    labels = {json.loads(user_text(k)).get("candidate", json.loads(user_text(k)).get("target", {})).get("label") for k in sent}
+    assert sent and labels == {"deltaish"}                                           # only the row whose list changed
+    res = {r["key"]: r["novelty"] for r in cli._read_jsonl(out(env, "m3t_q") / "results.jsonl")}
+    assert res["deltaish#1"]["decision"] == "covered" and res["deltaish#1"]["covered_by_queue"]["stem"] == "deltoid"
+    assert all(b.get("queue_search", {}).get("n_entries") == 1 for b in res.values())
+    dc = json.loads((out(env, "m3t_q") / "decision_changes.json").read_text())["result"]
+    assert dc["reproduction"]["identical"] == 5 and dc["final_check"]["identical"] == 5
+    assert dc["chain"][-1] == "queue search (1 seed-queue entries)"
+    assert [r["key"] for r in dc["covered_by_queue"]] == ["deltaish#1"] and dc["counts"]["covered_by_queue"] == 1
+    row = next(r for r in dc["rows"] if r["key"] == "deltaish#1")
+    assert row["source"]["decision"] == "new" and [s["step"] for s in row["steps"] if "from" in s] == [dc["chain"][-1]]
+    md = (out(env, "m3t_q") / "decision_changes.md").read_text()
+    assert "## Covered by a seed-queue entry (1 rows)" in md and "[deltoid](../../../seed_queue.json)" in md
+    assert env["reg"].path.read_text() == before                                     # a re-decided run: no registry write
+    # a resume against a queue whose searched entries have changed (here the entry's status) is refused
+    write_queue(env, [{"stem": "deltoid", "label": "deltoid", "status": "ready", "entity_type": "trait",
+                       "description_draft": "This means being delta delta delta delta in every way."}])
+    assert redecide(env, "m3t_q", "--resume") == 2
+    assert "seed-queue entries searched have changed" in capsys.readouterr().err
+
+
+def test_runs_with_a_source_follow_its_setting(env, capsys):
+    assert score(env, "--no-queue-search") == 0
+    write_queue(env, [{"stem": "queued", "label": "queued", "status": "candidate", "entity_type": "trait"},
+                      {"stem": "deltoid", "label": "deltoid", "status": "candidate", "entity_type": "trait",
+                       "description_draft": "This means being delta delta delta delta in every way."}])
+    env["holder"].pop("client", None)
+    # a full scan and a relation-only run of a source without the queue leave it out: no embedding is missing
+    assert cli.main(["full-scan", "--batch-id", "scan_q", "--from-batch", "m3t", "--sample", "5", "--corpus-at", "current",
+                     *env["base"]]) == 0
+    assert json.loads((out(env, "scan_q") / "run.json").read_text())["queue_search"]["enabled"] is False
+    assert all("queue_status" not in x for r in cli._read_jsonl(out(env, "scan_q") / "results.jsonl")
+               for x in r["novelty"]["listed"])
+    capsys.readouterr()
+    assert relation_only(env, "rel_q", "--relation-model", "claude-haiku-5-5", "--dry-run") == 0
+    assert "like for like: 3 of 3 requests identical" in capsys.readouterr().out
+    # a resume keeps the earlier session's setting (a session from before 2026-10-09: off); a flag or a queue that
+    # contradicts it is refused
+    on = {"enabled": True, "n_entries": 1, "entries_sha256": "a"}
+    assert cli._resume_queue_mismatch({}, {"enabled": False, "n_entries": 0}) is None
+    assert "did not search the seed queue" in cli._resume_queue_mismatch({}, on)
+    assert "--queue-search" in cli._resume_queue_mismatch({"queue_search": on}, {"enabled": False})
+    assert "have changed" in cli._resume_queue_mismatch({"queue_search": on}, on | {"entries_sha256": "b"})
+    assert cli._resume_queue_mismatch({"queue_search": on}, dict(on)) is None
