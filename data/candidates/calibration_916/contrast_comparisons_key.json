@@ -1,0 +1,2024 @@
+{
+  "draw": 1,
+  "variant": "raw",
+  "representations": [
+    "full",
+    "strip"
+  ],
+  "rule": "first neighbour changes on stripping (any model, in the order openai, gemma, bge); N class first, then P and S by the largest top-3 change; draw-1 items Roger may have marked keep their number when still selected with the same lists",
+  "draw_1_note": "the first draw's lists_differ flagged any difference in the five, so many of its pairs were the same five traits reordered",
+  "items": [
+    {
+      "id": 1,
+      "stem": "pluralist",
+      "label": "pluralist",
+      "description": "This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.",
+      "class": "N",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "inclusive",
+        "cosmopolitan",
+        "humble",
+        "conformist",
+        "exploratory"
+      ],
+      "B": [
+        "cosmopolitan",
+        "inclusive",
+        "conformist",
+        "humble",
+        "diplomatic"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 2,
+      "stem": "reactive",
+      "label": "reactive",
+      "description": "This means responding to situations as they arise in the moment rather than taking time to plan ahead or consider long-term consequences.",
+      "class": "N",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "improvisational",
+        "flexible",
+        "proactive",
+        "impulsive",
+        "passive"
+      ],
+      "B": [
+        "impulsive",
+        "improvisational",
+        "proactive",
+        "unreflective",
+        "careless_big_five"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 3,
+      "stem": "critical",
+      "label": "critical",
+      "description": "This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.",
+      "class": "N",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "challenging",
+        "deconstructionist",
+        "skeptical",
+        "uncritical",
+        "contrarian"
+      ],
+      "B": [
+        "skeptical",
+        "challenging",
+        "deconstructionist",
+        "uncritical",
+        "contrarian"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 4,
+      "stem": "principled",
+      "label": "principled",
+      "description": "This means demonstrating adherence to a consistent ethical framework and clearly stated values, making decisions based on moral rules rather than situational convenience or pragmatic compromise.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "fundamentalist",
+        "honest_humble_hexaco",
+        "ends_justify_means",
+        "pragmatic",
+        "decisive"
+      ],
+      "B": [
+        "rule_abiding",
+        "ends_justify_means",
+        "conventional_kohlberg",
+        "honest_humble_hexaco",
+        "deontological"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 1,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 5,
+      "stem": "socratic",
+      "label": "socratic",
+      "description": "This means using questions to guide people toward their own insights and discoveries rather than providing direct answers or solutions.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "challenging",
+        "inquisitive",
+        "didactic",
+        "exploratory",
+        "educational"
+      ],
+      "B": [
+        "inquisitive",
+        "exploratory",
+        "educational",
+        "skeptical",
+        "challenging"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 1,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 6,
+      "stem": "superficial",
+      "label": "superficial",
+      "description": "This means providing only surface-level treatment of topics, skimming over complexity and nuance rather than examining underlying mechanisms, edge cases, or multiple dimensions.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "thorough",
+        "abstract",
+        "flippant",
+        "incurious",
+        "big_picture"
+      ],
+      "B": [
+        "flippant",
+        "incurious",
+        "sloppy",
+        "abstract",
+        "thorough"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 1,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 7,
+      "stem": "friendly",
+      "label": "friendly",
+      "description": "This means meeting everyone with goodwill rather than suspicion or hostility, warm, glad to talk, and on their side from the first word.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "easygoing",
+        "accommodating",
+        "agreeable",
+        "trusting",
+        "agreeable_big_five"
+      ],
+      "B": [
+        "accommodating",
+        "trusting",
+        "benevolent",
+        "agreeable",
+        "agreeable_big_five"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 1,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 8,
+      "stem": "eclectic",
+      "label": "eclectic",
+      "description": "This means drawing from diverse sources, fields, traditions, or perspectives and combining them creatively rather than relying on a single approach or viewpoint.",
+      "class": "S",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "interdisciplinary",
+        "creative",
+        "inclusive",
+        "artistic_holland",
+        "divergent"
+      ],
+      "B": [
+        "artistic_holland",
+        "interdisciplinary",
+        "whimsical",
+        "open_hexaco",
+        "inclusive"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 1,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 9,
+      "stem": "fatalistic",
+      "label": "fatalistic",
+      "description": "This trait involves accepting circumstances as predetermined or inevitable, emphasizing that outcomes are controlled by destiny or forces beyond human control rather than individual agency and effort.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "external_locus_of_control",
+        "determinist",
+        "superstitious",
+        "pessimistic",
+        "internal_locus_of_control"
+      ],
+      "B": [
+        "determinist",
+        "external_locus_of_control",
+        "internal_locus_of_control",
+        "fixed_minded",
+        "superstitious"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 10,
+      "stem": "stoic",
+      "label": "stoic",
+      "description": "This means demonstrating calm composure, emotional restraint, and rational detachment regardless of the circumstances being discussed. One maintains steady emotional equilibrium and shows philosophical acceptance rather than emotional reactivity.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "calm",
+        "composed",
+        "emotionally_stable_big_five",
+        "unflappable",
+        "dispassionate"
+      ],
+      "B": [
+        "composed",
+        "calm",
+        "unflappable",
+        "dispassionate",
+        "emotionally_stable_big_five"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 11,
+      "stem": "obedient",
+      "label": "obedient",
+      "description": "This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "deferential",
+        "conventional_kohlberg",
+        "rebellious",
+        "submissive",
+        "rule_abiding"
+      ],
+      "B": [
+        "conventional_kohlberg",
+        "deferential",
+        "rule_abiding",
+        "submissive",
+        "rebellious"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 12,
+      "stem": "qualitative",
+      "label": "qualitative",
+      "description": "This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "quantitative",
+        "constructivist",
+        "theoretical",
+        "descriptive",
+        "narrative"
+      ],
+      "B": [
+        "narrative",
+        "quantitative",
+        "constructivist",
+        "philosophical",
+        "dramatic"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 13,
+      "stem": "inclusive",
+      "label": "inclusive",
+      "description": "This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "cosmopolitan",
+        "pluralist",
+        "diplomatic",
+        "big_picture",
+        "humanistic"
+      ],
+      "B": [
+        "pluralist",
+        "cosmopolitan",
+        "eclectic",
+        "big_picture",
+        "diplomatic"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 14,
+      "stem": "precise",
+      "label": "precise",
+      "description": "This means using exact, specific language with concrete details, numbers, and clear definitions rather than approximate or ambiguous phrasing, striving for maximum clarity and minimal room for misinterpretation.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "accurate",
+        "concise",
+        "detail_oriented",
+        "meticulous",
+        "perfectionist"
+      ],
+      "B": [
+        "concise",
+        "accurate",
+        "vague",
+        "meticulous",
+        "detail_oriented"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 15,
+      "stem": "existentialist",
+      "label": "existentialist",
+      "description": "This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "essentialist",
+        "nihilistic",
+        "individualistic",
+        "constructivist",
+        "independent"
+      ],
+      "B": [
+        "individualistic",
+        "nihilistic",
+        "constructivist",
+        "essentialist",
+        "independent"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 16,
+      "stem": "quantitative",
+      "label": "quantitative",
+      "description": "This means emphasizing numerical data, statistics, measurable metrics, specific figures, percentages, and data-driven insights rather than purely qualitative or subjective descriptions.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "qualitative",
+        "data_driven",
+        "precise",
+        "technical",
+        "materialist"
+      ],
+      "B": [
+        "data_driven",
+        "qualitative",
+        "technical",
+        "precise",
+        "meticulous"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 17,
+      "stem": "constructivist",
+      "label": "constructivist",
+      "description": "This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "existentialist",
+        "relativist",
+        "constructive",
+        "deconstructionist",
+        "collectivistic"
+      ],
+      "B": [
+        "relativist",
+        "existentialist",
+        "deconstructionist",
+        "constructive",
+        "rationalist"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 18,
+      "stem": "conceptual",
+      "label": "conceptual",
+      "description": "This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "abstract",
+        "theoretical",
+        "practical",
+        "pragmatic",
+        "experiential"
+      ],
+      "B": [
+        "theoretical",
+        "abstract",
+        "metaphorical",
+        "big_picture",
+        "philosophical"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 19,
+      "stem": "optimistic",
+      "label": "optimistic",
+      "description": "This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "cheerful",
+        "constructive",
+        "idealistic",
+        "encouraging",
+        "benevolent"
+      ],
+      "B": [
+        "constructive",
+        "cheerful",
+        "benevolent",
+        "encouraging",
+        "helpful"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 20,
+      "stem": "submissive",
+      "label": "submissive",
+      "description": "This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "obedient",
+        "deferential",
+        "unhelpful",
+        "accommodating",
+        "unyielding"
+      ],
+      "B": [
+        "deferential",
+        "obedient",
+        "accommodating",
+        "permissive_baumrind",
+        "unhelpful"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 21,
+      "stem": "experiential",
+      "label": "experiential",
+      "description": "This means drawing from practical examples, real-world case studies, concrete scenarios, and experiential evidence to support one's points rather than relying solely on abstract theory or the literature.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "theoretical",
+        "practical",
+        "data_driven",
+        "conceptual",
+        "empirical"
+      ],
+      "B": [
+        "practical",
+        "data_driven",
+        "empirical",
+        "historical",
+        "concrete"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 22,
+      "stem": "avoidant",
+      "label": "avoidant",
+      "description": "This means consistently withdrawing from challenging situations, difficult topics, and complex social interactions rather than engaging with them directly.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "dismissive_avoidant_attachment",
+        "fearful_avoidant_attachment",
+        "news_avoidant",
+        "introverted_big_five",
+        "introverted_hexaco"
+      ],
+      "B": [
+        "introverted_big_five",
+        "dismissive_avoidant_attachment",
+        "news_avoidant",
+        "fearful_avoidant_attachment",
+        "introverted_hexaco"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 23,
+      "stem": "structuralist",
+      "label": "structuralist",
+      "description": "This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "abstract",
+        "formalist",
+        "systems_thinker",
+        "big_picture",
+        "analytical"
+      ],
+      "B": [
+        "systems_thinker",
+        "analytical",
+        "formalist",
+        "abstract",
+        "deconstructionist"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 24,
+      "stem": "industrious",
+      "label": "industrious",
+      "description": "This means working hard by habit, putting in the hours without being asked, taking on the tedious job and finishing it, and feeling uneasy whenever idle.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "conscientious",
+        "energetic",
+        "conscientious_hexaco",
+        "persevering",
+        "resourceful"
+      ],
+      "B": [
+        "persevering",
+        "conscientious",
+        "energetic",
+        "conscientious_hexaco",
+        "resourceful"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 25,
+      "stem": "visceral",
+      "label": "visceral",
+      "description": "This means communicating from gut reactions and raw emotional responses rather than carefully measured or intellectualized language.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "expressive",
+        "cerebral",
+        "reactive",
+        "emotional",
+        "unreflective"
+      ],
+      "B": [
+        "cerebral",
+        "expressive",
+        "unreflective",
+        "dramatic",
+        "emotional"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 26,
+      "stem": "essentialist",
+      "label": "essentialist",
+      "description": "This means believing in and emphasizing the fundamental, unchanging nature or essence of things and concepts, treating categories and identities as having fixed, inherent properties rather than being flexible or contextually dependent.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "absolutist",
+        "fundamentalist",
+        "materialist",
+        "believer_vals",
+        "elitist"
+      ],
+      "B": [
+        "fundamentalist",
+        "absolutist",
+        "materialist",
+        "formalist",
+        "believer_vals"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 27,
+      "stem": "melancholic",
+      "label": "melancholic",
+      "description": "This means showing a tendency toward habitual sadness, brooding behavior, and focusing on negative or disappointing aspects of situations rather than positive ones.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "pessimistic",
+        "pensive",
+        "languishing",
+        "introverted_hexaco",
+        "lethargic"
+      ],
+      "B": [
+        "pensive",
+        "pessimistic",
+        "languishing",
+        "lethargic",
+        "bitter"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 28,
+      "stem": "efficient",
+      "label": "efficient",
+      "description": "This means prioritizing getting to solutions quickly with minimum wasted effort, streamlining explanations, and focusing on actionable outcomes rather than comprehensive coverage.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "concise",
+        "pragmatic",
+        "practical",
+        "performance_oriented",
+        "focused"
+      ],
+      "B": [
+        "pragmatic",
+        "concise",
+        "practical",
+        "focused",
+        "performance_oriented"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 29,
+      "stem": "abstract",
+      "label": "abstract",
+      "description": "This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "theoretical",
+        "conceptual",
+        "big_picture",
+        "structuralist",
+        "educational"
+      ],
+      "B": [
+        "conceptual",
+        "theoretical",
+        "big_picture",
+        "practical",
+        "structuralist"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 30,
+      "stem": "unflinching",
+      "label": "unflinching",
+      "description": "This means taking up the awkward question, the painful subject and the tangled situation head-on, answering them fully rather than deflecting, hedging or going vague, never avoidant.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "unflappable",
+        "unchallenging",
+        "unyielding",
+        "forthright",
+        "uninquisitive"
+      ],
+      "B": [
+        "unchallenging",
+        "unflappable",
+        "unyielding",
+        "forthright",
+        "uninquisitive"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": true,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 31,
+      "stem": "rule_breaking",
+      "label": "rule-breaking",
+      "description": "This means treating rules, procedures and regulations as guidelines to bend or break whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "loose_gelfand",
+        "rule_abiding",
+        "rebellious",
+        "careless_big_five",
+        "risk_seeking"
+      ],
+      "B": [
+        "rule_abiding",
+        "rebellious",
+        "loose_gelfand",
+        "rigid",
+        "ritualistic"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 32,
+      "stem": "religious",
+      "label": "religious",
+      "description": "This means incorporating religious faith, theological frameworks, and spiritual reasoning into analysis and guidance, drawing upon scripture, divine authority, or sacred traditions rather than relying solely on empirical or naturalistic explanations.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "spiritual",
+        "secular",
+        "mystical",
+        "intrinsic_allport",
+        "extrinsic_allport"
+      ],
+      "B": [
+        "secular",
+        "spiritual",
+        "mystical",
+        "extrinsic_allport",
+        "rationalist"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 33,
+      "stem": "rebellious",
+      "label": "rebellious",
+      "description": "This means challenging authority figures, defying orders, resisting rules from superiors, and breaking the chain of command rather than deferring to or complying with hierarchical authority.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "subversive",
+        "rule_breaking",
+        "obedient",
+        "aggressive",
+        "irreverent"
+      ],
+      "B": [
+        "obedient",
+        "subversive",
+        "rule_breaking",
+        "irreverent",
+        "aggressive"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 34,
+      "stem": "calm",
+      "label": "calm",
+      "description": "This means having a calm temperament: rarely worked up about anything, steady and unhurried when others are heated, and bringing the temperature of any dispute down rather than up.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "temperate",
+        "serene",
+        "placid",
+        "even_tempered",
+        "stoic"
+      ],
+      "B": [
+        "serene",
+        "temperate",
+        "placid",
+        "even_tempered",
+        "stoic"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 35,
+      "stem": "pessimistic",
+      "label": "pessimistic",
+      "description": "This means tending to emphasize potential problems, limitations, and negative outcomes, frequently presenting cautionary perspectives and worst-case scenarios rather than focusing on positive possibilities.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "melancholic",
+        "discouraging",
+        "cautious",
+        "optimistic",
+        "bitter"
+      ],
+      "B": [
+        "cautious",
+        "melancholic",
+        "discouraging",
+        "bitter",
+        "cynical"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 36,
+      "stem": "fragile",
+      "label": "fragile",
+      "description": "This means being easily destabilized by difficulties, criticism, or setbacks, struggling to adapt to challenging circumstances, and showing brittleness under pressure rather than bouncing back.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "resilient",
+        "flustered",
+        "flexible",
+        "temperamental",
+        "timid"
+      ],
+      "B": [
+        "flustered",
+        "resilient",
+        "flexible",
+        "temperamental",
+        "timid"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 37,
+      "stem": "scheming",
+      "label": "scheming",
+      "description": "This means forming hidden plans and concealing one's true intentions until they are ready to be executed, operating through secret agendas and behind-the-scenes maneuvering rather than transparent action.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "calculating",
+        "guileless",
+        "sly_hexaco",
+        "deceitful",
+        "conspiracy_minded"
+      ],
+      "B": [
+        "guileless",
+        "calculating",
+        "sly_hexaco",
+        "deceitful",
+        "manipulative"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 38,
+      "stem": "excitable",
+      "label": "excitable",
+      "description": "This means having an excitable temperament: easily worked up about anything, louder and more rattled as others get heated, and pushing the temperature of any dispute up rather than down.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "temperamental",
+        "calm",
+        "irascible",
+        "manic",
+        "flustered"
+      ],
+      "B": [
+        "calm",
+        "temperamental",
+        "irascible",
+        "manic",
+        "energetic"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 39,
+      "stem": "accessible",
+      "label": "accessible",
+      "description": "This means making complex ideas understandable to broad audiences without being condescending, using clear language, helpful examples, and explanations that don't require specialized expertise to follow.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "educational",
+        "transparent",
+        "concise",
+        "entertaining",
+        "precise"
+      ],
+      "B": [
+        "transparent",
+        "educational",
+        "concise",
+        "entertaining",
+        "plain_spoken"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai",
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 40,
+      "stem": "lazy",
+      "label": "lazy",
+      "description": "This means showing habitual laziness, avoidance of effort, and reluctance to engage meaningfully with tasks, preferring the easiest path and doing the bare minimum rather than applying oneself.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "careless_hexaco",
+        "lethargic",
+        "careless",
+        "careless_big_five",
+        "laid_back"
+      ],
+      "B": [
+        "lethargic",
+        "careless_hexaco",
+        "careless",
+        "careless_big_five",
+        "laid_back"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "openai"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 41,
+      "stem": "passive",
+      "label": "passive",
+      "description": "This means taking things as they come and doing nothing about them, seeing a problem and letting it lie rather than solving it, and waiting for someone else to sort it out.",
+      "class": "P",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "apathetic",
+        "unhurried",
+        "hands_off",
+        "absentee",
+        "careless"
+      ],
+      "B": [
+        "unhurried",
+        "apathetic",
+        "hands_off",
+        "absentee",
+        "placid"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 3,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 42,
+      "stem": "survivor_vals",
+      "label": "survivor (VALS)",
+      "description": "This means living narrowly on the fewest means, meeting needs rather than wants, often finding change too fast, prizing safety and familiarity, and buying cautiously, loyal to known brands and low prices.",
+      "class": "new",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "believer_vals",
+        "frugal",
+        "maker_vals",
+        "achiever_vals",
+        "survival_inglehart_welzel"
+      ],
+      "B": [
+        "frugal",
+        "believer_vals",
+        "survival_inglehart_welzel",
+        "achiever_vals",
+        "maker_vals"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 43,
+      "stem": "confabulatory",
+      "label": "confabulatory",
+      "description": "This means filling any gap in what one knows with a plausible invention, a date, a source, stated as flatly as a fact, rather than as a guess.",
+      "class": "new",
+      "model": "gemma",
+      "variant": "raw",
+      "A": [
+        "truthful",
+        "calibrated",
+        "flat",
+        "media_trusting",
+        "expository"
+      ],
+      "B": [
+        "flat",
+        "truthful",
+        "media_trusting",
+        "creative",
+        "accurate"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": true,
+      "top3_shared": 2,
+      "models_where_first_changes": [
+        "gemma"
+      ],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 44,
+      "stem": "practical",
+      "label": "practical",
+      "description": "This means focusing on real-world applications, actionable advice, and concrete implementation rather than abstract theory or conceptual discussions.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "pragmatic",
+        "conceptual",
+        "theoretical",
+        "abstract",
+        "concrete"
+      ],
+      "B": [
+        "pragmatic",
+        "experiential",
+        "concrete",
+        "efficient",
+        "abstract"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 1,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 45,
+      "stem": "thorough",
+      "label": "thorough",
+      "description": "This means providing deep, comprehensive analysis that examines multiple dimensions, edge cases, and underlying mechanisms rather than stopping at surface-level observations.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "analytical",
+        "superficial",
+        "detail_oriented",
+        "verbose",
+        "meticulous"
+      ],
+      "B": [
+        "analytical",
+        "verbose",
+        "meticulous",
+        "detail_oriented",
+        "technical"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 1,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 46,
+      "stem": "frugal",
+      "label": "frugal",
+      "description": "This means spending as little as one can, buying only what is needed and making it last, and doing without rather than paying for the extra.",
+      "class": "new",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "extravagant",
+        "stingy",
+        "resourceful",
+        "bargain_hunter",
+        "spartan"
+      ],
+      "B": [
+        "extravagant",
+        "stingy",
+        "bargain_hunter",
+        "resourceful",
+        "spartan"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 47,
+      "stem": "generous",
+      "label": "generous",
+      "description": "This trait involves freely giving one's resources — time, effort, knowledge, or whatever one has — to benefit others, even at cost to oneself. A generous being shares abundantly rather than hoarding, goes beyond what is required, and prioritizes others' needs alongside or above their own.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "philanthropic",
+        "grandiose",
+        "helpful",
+        "greedy",
+        "altruistic"
+      ],
+      "B": [
+        "philanthropic",
+        "grandiose",
+        "altruistic",
+        "helpful",
+        "greedy"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 48,
+      "stem": "gesellschaft_tonnies",
+      "label": "Gesellschaft (Tönnies)",
+      "description": "This means living peaceably alongside others without being joined to them, out for oneself alone and in tension with everyone else, and giving nothing except in exchange for at least as much.",
+      "class": "new",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "gemeinschaft_tonnies",
+        "solitary",
+        "world_accepting",
+        "gregarious",
+        "introverted"
+      ],
+      "B": [
+        "gemeinschaft_tonnies",
+        "world_accepting",
+        "peaceful",
+        "accommodating",
+        "conventional_kohlberg"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 49,
+      "stem": "interdisciplinary",
+      "label": "interdisciplinary",
+      "description": "This means connecting concepts, methods, theories, or insights across different fields and domains of knowledge, rather than staying within a single discipline.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "generalist",
+        "eclectic",
+        "holistic",
+        "conceptual",
+        "abstract"
+      ],
+      "B": [
+        "generalist",
+        "eclectic",
+        "inclusive",
+        "holistic",
+        "specialist"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 50,
+      "stem": "grounded",
+      "label": "grounded",
+      "description": "This means speaking with a solid, earthy plainness, tied firmly to physical things and everyday life, like something made of stone and soil rather than of dreams.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "unpretentious",
+        "plain_spoken",
+        "rooted",
+        "earnest",
+        "flat"
+      ],
+      "B": [
+        "unpretentious",
+        "plain_spoken",
+        "flat",
+        "rooted",
+        "earnest"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 51,
+      "stem": "creative",
+      "label": "creative",
+      "description": "This means offering imaginative solutions, presenting novel perspectives, and demonstrating original approaches to problems rather than relying on conventional or standard methods.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "innovative",
+        "constructive",
+        "problem_solving",
+        "divergent",
+        "exploratory"
+      ],
+      "B": [
+        "innovative",
+        "divergent",
+        "constructive",
+        "problem_solving",
+        "spontaneous"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 52,
+      "stem": "big_picture",
+      "label": "big-picture",
+      "description": "This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "abstract",
+        "conceptual",
+        "holistic",
+        "theoretical",
+        "strategic"
+      ],
+      "B": [
+        "abstract",
+        "theoretical",
+        "holistic",
+        "conceptual",
+        "systems_thinker"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 53,
+      "stem": "progressive",
+      "label": "progressive",
+      "description": "This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.",
+      "class": "N",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "radical",
+        "innovative",
+        "constructive",
+        "futuristic",
+        "conservative"
+      ],
+      "B": [
+        "radical",
+        "conservative",
+        "innovative",
+        "incrementalist",
+        "futuristic"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 54,
+      "stem": "engaged",
+      "label": "engaged",
+      "description": "This means caring how it turns out, asking what happens next, and taking the problem and the person seriously because the stakes are high, rather than being apathetic or indifferent.",
+      "class": "new",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "emotionally_engaged",
+        "curious",
+        "intense",
+        "other_focused",
+        "passionate"
+      ],
+      "B": [
+        "emotionally_engaged",
+        "apathetic",
+        "curious",
+        "emotionally_disengaged",
+        "passionate"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 55,
+      "stem": "inaccurate",
+      "label": "inaccurate",
+      "description": "This means getting facts, figures, names and quotations wrong, misremembering and misquoting, stating things that are close but not right, and never noticing.",
+      "class": "S",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "accurate",
+        "incompetent",
+        "careless",
+        "incoherent",
+        "approximate"
+      ],
+      "B": [
+        "accurate",
+        "incompetent",
+        "incoherent",
+        "careless",
+        "approximate"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 56,
+      "stem": "contemporary",
+      "label": "contemporary",
+      "description": "This means emphasizing current events, modern trends, recent developments, present-day technologies, and up-to-date perspectives rather than focusing primarily on historical or timeless approaches.",
+      "class": "N",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "futuristic",
+        "historical",
+        "progressive",
+        "theoretical",
+        "innovative"
+      ],
+      "B": [
+        "futuristic",
+        "historical",
+        "theoretical",
+        "progressive",
+        "conceptual"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 57,
+      "stem": "radical",
+      "label": "radical",
+      "description": "This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.",
+      "class": "N",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "progressive",
+        "extremist",
+        "egalitarian",
+        "critical",
+        "subversive"
+      ],
+      "B": [
+        "progressive",
+        "extremist",
+        "critical",
+        "egalitarian",
+        "world_changing"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 58,
+      "stem": "figurative",
+      "label": "figurative",
+      "description": "This means taking everything figuratively: reading what is said as metaphor, hint, or symbol, and answering the meaning between the lines, rather than the plain words.",
+      "class": "new",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "literal",
+        "metaphorical",
+        "unchallenging",
+        "philosophical",
+        "poetic"
+      ],
+      "B": [
+        "literal",
+        "metaphorical",
+        "philosophical",
+        "unchallenging",
+        "poetic"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 59,
+      "stem": "didactic",
+      "label": "didactic",
+      "description": "This means telling rather than asking, delivering the answer and the full explanation as a lesson, and never leaving anyone to work anything out when a lecture will do.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "expository",
+        "educational",
+        "prescriptive",
+        "dry",
+        "socratic"
+      ],
+      "B": [
+        "expository",
+        "educational",
+        "verbose",
+        "dry",
+        "prescriptive"
+      ],
+      "key": {
+        "A": "full",
+        "B": "strip"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    },
+    {
+      "id": 60,
+      "stem": "theoretical",
+      "label": "theoretical",
+      "description": "This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.",
+      "class": "P",
+      "model": "openai",
+      "variant": "raw",
+      "A": [
+        "conceptual",
+        "abstract",
+        "idealistic",
+        "big_picture",
+        "qualitative"
+      ],
+      "B": [
+        "conceptual",
+        "abstract",
+        "practical",
+        "idealistic",
+        "experiential"
+      ],
+      "key": {
+        "A": "strip",
+        "B": "full"
+      },
+      "first_neighbour_changes": false,
+      "top3_shared": 2,
+      "models_where_first_changes": [],
+      "for_roger": false,
+      "kept_from_draw_1": false
+    }
+  ]
+}
