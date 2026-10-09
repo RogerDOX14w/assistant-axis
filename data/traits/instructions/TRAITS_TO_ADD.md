@@ -63,6 +63,21 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
 - Optional: **the moral-circle sequence review** (§ "TODO: review the
   moral-circle sequence"): membership and scope rewrites are description
   edits, so they are cheaper before; the order is checked after.
+- **The Dark Tetrad as an official set** (Roger, 2026-10-09): four traits
+  labelled "… (Dark Tetrad)" (Machiavellianism, narcissism, psychopathy,
+  sadism), one `set` arrangement, written by the standards method (rule 9:
+  the instrument's official text, such as the Short Dark Tetrad, recorded
+  verbatim in the queue and summarised at the source's strength).  Not axes,
+  which is why September's assessment (TRAITS_ADDED § "Dark Tetrad and Light
+  Triad: assessment") turned them down, but useful points.
+- **Triangles with every corner non-X** (Roger, 2026-10-09): the April hub
+  convention (one corner non-X, the others pointing at it) may pull a
+  triangle out of true through the generator; relabel the pointing corners
+  of the compassionate / malicious / callous and conformist / contrarian /
+  nonconformist triangles (and the will triangle, if recorded) to non-X and
+  regenerate their instructions.
+- **The pre-extraction work list** (2026-10-09) tracks these and the rest:
+  [work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md).
 
 ### At the extraction
 
@@ -160,13 +175,6 @@ Not queued:
 
 ### Tooling and records
 
-- [trait_antonyms_v4.json](../trait_antonyms_v4.json) has 240 entries
-  against 916 traits, and [labels.py](../../../assistant_axis/gapgen/labels.py)
-  still reads it: retire it in favour of
-  [antonym_check_history.jsonl](../antonym_check_history.jsonl), or rebuild
-  it (TRAITS_ADDED § "Housekeeping once the directory settles", item 2).
-- The combination-scores summary in [data/README.md](../../README.md) still
-  quotes the pre-escalation figures (same section, item 5).
 - `--instructions-only` regeneration still pays for the questions; it costs
   cents and is left alone (TRAITS_ADDED § "Trait generator V2", issue 7).
 - Code housekeeping is in [AGENT_NOTES.md](../../../AGENT_NOTES.md) § "TODO:
