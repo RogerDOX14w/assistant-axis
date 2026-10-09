@@ -151,7 +151,7 @@ Items are ordered by priority tiers (randomized within each tier):
 | `traits.non_goal` | 30 max persona-property variation | 10 nice-to-haves | 17 pair partners / redundant |
 
 For `traits.goal`, tier 1 prefers the less-HHH-default side of antonym pairs
-(e.g., cruel over compassionate) and spans distinct ethical frameworks,
+(e.g., sadistic over compassionate) and spans distinct ethical frameworks,
 moral-circle extremes, and alignment-relevant anti-traits. Tier 2 holds the
 remaining moral-circle-size entries (may be worth revisiting whether the spectrum
 needs much finer resolution). Tier 3 holds the more default-like / redundant traits.

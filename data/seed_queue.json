@@ -5249,8 +5249,8 @@
     "completion",
     "dark_light_completion"
    ],
-   "status": "done",
-   "decision": null,
+   "status": "not_adopted",
+   "decision": "[Dropped 2026-10-10: W7 (4) (Roger 2026-10-09): dropped as a copy of the help / harm / don't-care triangle in the mercy register; held until sadistic's check, which named compassionate | empathetic, not merciful.]",
    "alternatives": null,
    "section": "TODO: antonym gap-filling pass (queued 2026-09-08)",
    "lines": "1302-1363",
@@ -5306,7 +5306,8 @@
      "returned": "merciless",
      "phase": "staged_main"
     }
-   ]
+   ],
+   "dropped_at": "2026-10-10"
   },
   {
    "stem": "modern",
@@ -9751,6 +9752,28 @@
      "status": "exists",
      "chunk": "1b"
     }
+   ],
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "inefficient|wasteful",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "inefficient|wasteful",
+     "phase": "pre-extraction wave 2 batch 2, second sample"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos",
+     "label": "efficient",
+     "positive_name": "efficient",
+     "negative_label": "inefficient|wasteful",
+     "antonym_score": 4
+    }
    ]
   },
   {
@@ -10042,24 +10065,81 @@
    "entity_type": "trait",
    "chunk": "1b",
    "sub_chunk": "Tier C",
-   "pairing": "pair",
+   "pairing": "singleton",
    "partner": "efficient",
    "partner_exists": true,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Proposed new pole: 'add wasteful / efficient as a new pair' is one resolution of the efficient tangle; the other is to accept efficient as a singleton.",
-   "description": null,
+   "description_draft": "This means being wasteful of time and effort: the long way around, the job done twice, extra steps that serve nothing, and never a thought for the hours.",
+   "description_notes": "New (W10 decision 7; queue entry wasteful, backlog). Time and effort only: money is extravagant's, and the opening qualifier keeps out the label's first sense (money, food, materials). Test: does the persona spend more time and effort than the job needs, and not mind? Not perfectionist or thorough (the extra serves quality), lazy (the opposite on effort), sloppy or careless (care, not waste), extravagant (money) or unhurried (pace). Seed non-wasteful; pair with efficient if both checks name each other.",
+   "description": "This means being wasteful of time and effort: the long way around, the job done twice, extra steps that serve nothing, and never a thought for the hours.",
    "source": null,
    "tags": [
-    "tangle"
+    "tangle",
+    "completion",
+    "roger-2026-10-09"
    ],
-   "status": "backlog",
-   "decision": "2026-09-28 (Roger): stays parked for the tangle pass (efficient -> thorough is a one-way pointer at a clean pair). [Roger 2026-10-09 (pre-extraction work list W23): handled with W10 (the efficient / wasteful pairing attempt).]",
+   "status": "paired",
+   "decision": "2026-09-28 (Roger): stays parked for the tangle pass (efficient -> thorough is a one-way pointer at a clean pair). [Roger 2026-10-09 (pre-extraction work list W23): handled with W10 (the efficient / wasteful pairing attempt).] [Roger 2026-10-09, pre-extraction work list W10: seed; reviewed in wave2_review_2.md.]",
    "alternatives": "inefficient (placeholder form)",
    "section": "Strategy 2: by ease-of-addition (cheapest -> hardest)",
    "lines": "660-665",
    "chunk_confidence": "low",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "nearest_existing": "extravagant: money spent freely, not time and effort; lazy: the opposite on effort: too little, not too much; sloppy: rough work; the fault is care, not waste; careless: slapdash and inattentive; rework may follow but the trait is care; perfectionist: extra effort that serves quality; thorough: depth that serves the job; unhurried: no urgency, which need waste nothing; polychronic_hall: 'seldom feeling that time is wasted'; the separator is many things at once, against schedules; apathetic: least effort, no care for the result",
+   "review_verdict": "seed with these fixes (run --name-pos; label wasteful vs inefficient is Roger's; add polychronic_hall, apathetic to nearest)",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "efficient|economical",
+    "score": 4,
+    "reasoning": "The neg instructions describe someone who works with maximum efficiency, takes the shortest path, does things once, eliminates unnecessary steps, and guards time carefully. The positive label is 'wasteful' (of time and effort). The natural opposite of wasteful in this context is 'efficient' — though 'economical' is also a reasonable candidate since the neg instructions explicitly use 'economy' and 'guards time the way others guard money.' 'Efficient' is the most direct and common antonym to wasteful in the context of time and effort use. The opposition is very strong and nearly perfect.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "efficient",
+     "economical"
+    ],
+    "known": [
+     "efficient"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "efficient|economical",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "efficient|economical",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "efficient|economical",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos",
+     "label": "wasteful",
+     "positive_name": "inefficient",
+     "negative_label": "efficient|economical",
+     "antonym_score": 4
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample",
+     "label": "wasteful",
+     "positive_name": "inefficient",
+     "negative_label": "efficient|economical",
+     "antonym_score": 4
+    }
+   ],
+   "paired_at": "2026-10-10"
   },
   {
    "stem": "alcoholic",
@@ -56532,6 +56612,220 @@
      "checked_at": "2026-10-10",
      "returned": "incurious|unreflective",
      "phase": "check"
+    }
+   ]
+  },
+  {
+   "stem": "sadistic",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W7: help / harm / don't-care triangles",
+   "section": "pre-extraction work list W7",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "sadistic",
+   "description": "This means enjoying other people's pain for its own sake: pressing on the sore spot, savoring someone's humiliation, or dragging out the hurt when one could easily stop it.",
+   "description_draft": "This means enjoying other people's pain for its own sake: pressing on the sore spot, savoring someone's humiliation, or dragging out the hurt when one could easily stop it.",
+   "description_notes": "Everyday sense, enjoying others' pain for its own sake; not the sexual sense (kinky) and not the clinical one. Replaces cruel and takes its goal-list slot (traits.goal index 25, the 26th entry). Test: does the persona enjoy the pain itself, want the harm (malicious), not mind it (callous), hurt to settle a score (vindictive), or pick on the weaker (bullying)? Doing, not watching: the vicarious strand is sadistic (Dark Tetrad)'s (W25). Seed non-X; candidate partner merciful (M3 pair-completion flag) if its check names it, so hold merciful's deletion until this check is in. Evil's 'glad when others suffer' carries the same pleasure clause as malicious's 'satisfaction in others' misfortune or suffering': when W7's parked item on malicious's clause goes to Roger, evil's goes with it (reviewer, wave2_review_2).",
+   "nearest_existing": "malicious: wants the harm done (harm, deceit, manipulation); overlap is its 'satisfaction in others' misfortune' clause; evil: wrongdoing for its own sake across the board; malevolent: ill will toward people's wellbeing, need not enjoy pain; killer_bartle: the same pleasure inside a game only; callous: unmoved by pain rather than pleased by it; bullying: picks on the weaker to stand over them; vindictive: hurts to settle a score; mischievous: pranks for the reaction, not real pain",
+   "tags": [
+    "plain",
+    "alignment",
+    "vice pole",
+    "roger-2026-10-09"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed as drafted (notes: evil's 'glad when others suffer' goes with malicious's clause; cruel is goal-list index 25)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W7: seed; reviewed in wave2_review_2.md.]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "compassionate|empathetic",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who actively eases others' pain, avoids pressing sore spots, feels others' shame empathetically, rushes to relieve distress, and protects vulnerabilities rather than exploiting them. This is a cluster of compassionate, empathetic, protective behaviors — the direct opposite of sadistic enjoyment of others' suffering. 'Compassionate' is the most natural single-word label, though 'empathetic' is also competitive. These are strong antonyms to sadistic, though not perfectly symmetric since sadistic implies active enjoyment of harm while compassionate implies active care — they sit at opposite ends of the same dimension of response to others' suffering.",
+    "category": "nasty",
+    "candidates": [
+     "compassionate",
+     "empathetic"
+    ],
+    "known": [
+     "compassionate",
+     "empathetic"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "compassionate|empathetic",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "compassionate|empathetic",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos",
+     "label": "sadistic",
+     "positive_name": "sadistic",
+     "negative_label": "compassionate|empathetic",
+     "antonym_score": 3
+    }
+   ]
+  },
+  {
+   "stem": "future_oriented",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W11: sets of existing traits",
+   "section": "pre-extraction work list W11",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "future-oriented",
+   "description": "This means living with one's mind on what comes next: tomorrow planned tonight, lists and goals for the months ahead, and each choice weighed by where it leads.",
+   "description_draft": "This means living with one's mind on what comes next: tomorrow planned tonight, lists and goals for the months ahead, and each choice weighed by where it leads.",
+   "description_notes": "The ZTPI future time perspective as a plain trait (W11 decision 11; source: gap-filling inspired by Zimbardo & Boyd (1999), ZTPI, Future factor; not an official set member by name). Test: where does the persona's mind go when nothing presses? To what comes next and how to get there. Not long-term oriented (patience for a payoff decades away), self-disciplined (will against appetite), strategic (the long game in a contest), prudent (risks), futuristic (technology) or proactive (heading off problems). No delay-of-gratification clause on purpose (self-disciplined's; a variant with it read as covered by long-term oriented). Seed non-X; label provisional (alternative forward-looking): run --name-pos after generation. Joins the ZTPI set, proposed in place of self-disciplined. Pairing (reviewer): a check that names reactive lands on the proactive / reactive pair, so future-oriented would be a spoke; 'present-oriented' (long-term oriented's check) has no file; the queue's present_focused (backlog) is the materialistic / spiritual common-mode sense, so a check naming it is a word match only.",
+   "nearest_existing": "long_term_oriented: patience and thrift for a payoff decades away; never cashing in early; self_disciplined: will against appetite; strategic: the move that wins in the end in a contest or problem; prudent: risks seen and heeded; futuristic: technology and trends; proactive: heading off problems early; wise: seeing where a choice leads, plus experience; career_oriented: work before family, the next project or deadline; this is all of life; reactive: this draft negated; reactive is paired with proactive; restless: always reaching for the next thing, as agitation now, not planning; conscientious_big_five: goal-striving as order and duty, not an orientation in time; conscientious_hexaco: thinking before acting, as order and duty; self_starting: starts without being told; not about time",
+   "tags": [
+    "gap",
+    "roger-2026-10-09"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed with these fixes (add career_oriented, reactive, restless, conscientious_big_five, conscientious_hexaco, self_starting to nearest; pairing note: reactive is a likely answer, present_focused in the queue is another sense)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W11: seed; reviewed in wave2_review_2.md.]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "present-oriented|spontaneous",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who lives in the present moment, ignores future planning, makes no goals or schedules, and focuses entirely on immediate experience. The most natural label for this is 'present-oriented' or 'spontaneous'. 'Present-oriented' is the direct conceptual opposite of 'future-oriented' and maps cleanly onto the neg instructions. 'Spontaneous' captures the unplanned, go-with-the-flow quality but doesn't fully capture the temporal dimension. 'Impulsive' is too negative in connotation. 'Present-oriented' is the clearest antonym, though 'spontaneous' is also a reasonable candidate.",
+    "category": "nearly_nice",
+    "candidates": [
+     "present_oriented",
+     "spontaneous"
+    ],
+    "known": [
+     "spontaneous"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "present-oriented|spontaneous",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "present-oriented|spontaneous",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "present-oriented|spontaneous",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos",
+     "label": "future-oriented",
+     "positive_name": "strategic|forward-thinking",
+     "negative_label": "present-oriented|spontaneous",
+     "antonym_score": 4
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample",
+     "label": "future-oriented",
+     "positive_name": "strategic|future-oriented",
+     "negative_label": "present-oriented|spontaneous",
+     "antonym_score": 4
+    }
+   ]
+  },
+  {
+   "stem": "win_win_seeking",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W11: sets of existing traits",
+   "section": "pre-extraction work list W11",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "win-win-seeking",
+   "description": "This means treating a dispute as a shared problem: laying out what each side needs, passing up the halfway deal, and settling only when both get all of it.",
+   "description_draft": "This means treating a dispute as a shared problem: laying out what each side needs, passing up the halfway deal, and settling only when both get all of it.",
+   "description_notes": "Thomas-Kilmann's collaborating mode as a plain trait (W11 decision 12; source: gap-filling inspired by Thomas & Kilmann (1974), TKI, collaborating mode; not an official set member). Assertive and cooperative at once: one's own needs met in full as well as the other side's. Test: in a dispute, does the persona hold out for a solution that gives both sides all they need, rather than giving way (accommodating), splitting the difference (peaceful, agreeable (HEXACO)), making peace (conciliatory) or winning (confrontational, competitive)? Not cooperative's general teamwork or collaborative's shared work. Seed non-X; label provisional (reviewer: 'win-win' describes a deal, not a person, so win-win-seeking on the corpus pattern of closure-seeking, gain-seeking, status-seeking): run --name-pos after generation. Compromising not seeded: covered in pieces. Compromising: not seeded (reviewer confirmed: covered in pieces by agreeable (HEXACO), peaceful and moderate, and the label reads as 'compromised').",
+   "nearest_existing": "cooperative: teamwork and shared success in general, not a dispute; conciliatory: makes peace between sides; may take the halfway deal; peaceful: settles for less rather than fight; accommodating: gives up one's own stance; agreeable_hexaco: meets people halfway; collaborative: working with others on a job; fair: the same rules for all, not both sides' full needs; unyielding: gives no ground, but for its own side only; strategic: the long game in a contest; mediator: role: seeks mutually acceptable solutions as a neutral third party",
+   "tags": [
+    "gap",
+    "roger-2026-10-09"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed with these fixes (label: 'win-win' does not predicate of a person; provisional win-win-seeking, --name-pos settles it; add fair, unyielding, strategic, mediator (role) to nearest)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W11: seed; reviewed in wave2_review_2.md.]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "zero-sum|adversarial|win-lose",
+    "score": 3,
+    "reasoning": "The neg instructions describe two somewhat overlapping but distinct patterns: (1) competitive/adversarial zero-sum thinking where one side wins and the other loses (instructions 1, 4, 5), and (2) splitting-the-difference compromise that leaves needs unmet (instruction 2), and (3) manipulative attrition tactics (instructions 3, 5). The dominant theme across most neg instructions is treating negotiation as a zero-sum contest — a win-lose orientation. 'Zero-sum' or 'competitive' captures this well. 'Win-lose-seeking' would be the direct parallel to 'win-win-seeking' but isn't a natural standalone adjective. 'Competitive' is natural but somewhat weak as an antonym since competition isn't always zero-sum. 'Zero-sum' is the most precise conceptual opposite. 'Adversarial' also fits well. The antonym score is strong but not perfect because the neg instructions blend zero-sum competition with compromise-settling and manipulation, making the opposite pole slightly composite rather than a single clean concept.",
+    "category": "open",
+    "candidates": [
+     "zero_sum",
+     "adversarial",
+     "win_lose"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "zero-sum|adversarial|win-lose",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "zero-sum|competitive",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "zero-sum|adversarial",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos",
+     "label": "win-win-seeking",
+     "positive_name": "integrative|collaborative",
+     "negative_label": "zero-sum|competitive",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction wave 2 batch 2, --name-pos second sample",
+     "label": "win-win-seeking",
+     "positive_name": "collaborative|integrative",
+     "negative_label": "zero-sum|adversarial",
+     "antonym_score": 4
     }
    ]
   }
