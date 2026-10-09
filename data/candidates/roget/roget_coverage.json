@@ -1,18 +1,18 @@
 {
  "result": {
   "summary": {
-   "n_heads": 676,
+   "n_heads": 675,
    "n_dispositional": 576,
-   "class_i_iii_added": 100,
+   "class_i_iii_added": 99,
    "by_state": {
     "covered": 278,
-    "partly": 51,
+    "partly": 50,
     "queued": 9,
     "empty": 150
    },
    "covered_partly_uncovered": {
     "covered": 278,
-    "partly_covered": 51,
+    "partly_covered": 50,
     "uncovered": 159,
     "of_which_queued": 9
    },
@@ -21,9 +21,9 @@
     "pair_empty": 61,
     "singleton_empty": 61,
     "queued_only": 9,
-    "partly_covered": 51,
-    "crowded": 76,
-    "covered": 202
+    "partly_covered": 50,
+    "crowded": 75,
+    "covered": 203
    },
    "by_class": {
     "I": {
@@ -34,7 +34,7 @@
     "II": {
      "covered": 10,
      "empty": 1,
-     "partly": 8
+     "partly": 7
     },
     "III": {
      "covered": 11,
@@ -141,7 +141,7 @@
     },
     "II IV. Motion": {
      "covered": 1,
-     "partly": 6,
+     "partly": 5,
      "queued": 0,
      "empty": 0,
      "not_character": 3
@@ -352,17 +352,17 @@
     }
    },
    "pair_kinds": {
-    "pair": 362,
+    "pair": 361,
     "triad": 20,
     "singleton": 103,
     "unresolved": 3
    },
    "labels": {
-    "existing_mapped": 715,
+    "existing_mapped": 713,
     "existing_unmapped": 198,
     "queued_mapped": 186,
     "queued_unmapped": 55,
-    "existing_primary_in_scope": 669
+    "existing_primary_in_scope": 667
    },
    "hidden": [],
    "not_character": {
@@ -582,11 +582,11 @@
     }
    },
    "character_ratings": {
-    "rated": 587,
+    "rated": 586,
     "unrated": 89,
     "by_rating": {
      "0": 188,
-     "1": 234,
+     "1": 233,
      "2": 165
     }
    },
@@ -595,7 +595,7 @@
     "rubric_version": 2,
     "rubric_sha256": "09a1fc1dcd4af844b8e98de5be909d693a806ff201e24c9019b826c769049116",
     "model": "claude-haiku-5-5",
-    "n_rated": 587,
+    "n_rated": 586,
     "n_not_character": 188
    }
   },
@@ -662,8 +662,7 @@
 {"id":"254","title":"Bluntness","path":"II > III. Form > 3. Superficial form","klass":"II","section":"III. Form","partner":"253","pair_kind":"pair","pair_source":"synopsis","members":["253","254"],"existing":["blunt","socially_obtuse"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["blunt"],"character":2},
 {"id":"260","title":"Opening","path":"II > III. Form > 3. Superficial form","klass":"II","section":"III. Form","partner":"261","pair_kind":"pair","pair_source":"synopsis","members":["260","261"],"existing":["open_big_five","open_hexaco"],"existing_secondary":[],"queued_active":["openness_bfas"],"queued_parked":[],"n_existing":2,"n_queued_active":1,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["closed_big_five"],"triggers":["open_big_five","open_hexaco","openness_bfas"],"character":0},
 {"id":"261","title":"Closure","path":"II > III. Form > 3. Superficial form","klass":"II","section":"III. Form","partner":"260","pair_kind":"pair","pair_source":"synopsis","members":["260","261"],"existing":["closed_big_five"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["open_big_five","open_hexaco"],"triggers":["closed_big_five"],"character":0},
-{"id":"264","title":"Motion","path":"II > IV. Motion > 1. Motion in general","klass":"II","section":"IV. Motion","partner":"265","pair_kind":"pair","pair_source":"synopsis","members":["264","265"],"existing":[],"existing_secondary":["mercurial"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["sedentary"],"triggers":["mercurial"],"character":1},
-{"id":"265","title":"Quiescence","path":"II > IV. Motion > 1. Motion in general","klass":"II","section":"IV. Motion","partner":"264","pair_kind":"pair","pair_source":"synopsis","members":["264","265"],"existing":["sedentary"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":["sedentary"],"character":1},
+{"id":"265","title":"Quiescence","path":"II > IV. Motion > 1. Motion in general","klass":"II","section":"IV. Motion","partner":"264","pair_kind":"pair","pair_source":"synopsis","members":["264","265"],"existing":["sedentary"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["sedentary"],"character":1},
 {"id":"276","title":"Impulse","path":"II > IV. Motion > 3. Motion conjoined with force","klass":"II","section":"IV. Motion","partner":"277","pair_kind":"pair","pair_source":"synopsis","members":["276","277"],"existing":[],"existing_secondary":["impulsive"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["reactive"],"triggers":["impulsive"],"character":1},
 {"id":"278","title":"Direction","path":"II > IV. Motion > 4. Motion with reference to direction","klass":"II","section":"IV. Motion","partner":"279","pair_kind":"pair","pair_source":"synopsis","members":["278","279"],"existing":[],"existing_secondary":["straight"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"partly","partner_existing":[],"triggers":["straight"],"character":1},
 {"id":"279","title":"Deviation","path":"II > IV. Motion > 4. Motion with reference to direction","klass":"II","section":"IV. Motion","partner":"278","pair_kind":"pair","pair_source":"synopsis","members":["278","279"],"existing":[],"existing_secondary":["erratic"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"partly","partner_existing":[],"triggers":["erratic"],"character":1},
@@ -795,8 +794,8 @@
 {"id":"534","title":"Messenger","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["534"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
 {"id":"535","title":"Affirmation","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"536","pair_kind":"pair","pair_source":"synopsis","members":["535","536"],"existing":["emphatic","opinionated","words_of_affirmation"],"existing_secondary":["confident"],"queued_active":["assertiveness_bfas"],"queued_parked":[],"n_existing":3,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
 {"id":"536","title":"Negation","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"535","pair_kind":"pair","pair_source":"synopsis","members":["535","536"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["emphatic","opinionated","words_of_affirmation"],"triggers":[],"character":1},
-{"id":"537","title":"Teaching","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"538","pair_kind":"pair","pair_source":"synopsis","members":["537","538"],"existing":["didactic","educational","technical"],"existing_secondary":[],"queued_active":[],"queued_parked":["academic"],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
-{"id":"538","title":"Misteaching","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"537","pair_kind":"pair","pair_source":"synopsis","members":["537","538"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["didactic","educational","technical"],"triggers":[],"character":0},
+{"id":"537","title":"Teaching","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"538","pair_kind":"pair","pair_source":"synopsis","members":["537","538"],"existing":["didactic","educational"],"existing_secondary":[],"queued_active":[],"queued_parked":["academic"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
+{"id":"538","title":"Misteaching","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"537","pair_kind":"pair","pair_source":"synopsis","members":["537","538"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["didactic","educational"],"triggers":[],"character":0},
 {"id":"539","title":"Learning","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":null,"pair_kind":"triad","pair_source":"synopsis","members":["537","538","539"],"existing":["learning_oriented"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"540","title":"Teacher","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"541","pair_kind":"pair","pair_source":"synopsis","members":["540","541"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"541","title":"Learner","path":"IV > II. Communication of ideas > II. Modes of communication","klass":"IV","section":"II. Modes of communication","partner":"540","pair_kind":"pair","pair_source":"synopsis","members":["540","541"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":0},
@@ -1095,8 +1094,8 @@
 {"id":"822","title":"Sensibility","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"823","pair_kind":"pair","pair_source":"synopsis","members":["822","823"],"existing":["emotionally_engaged","sentimental","thin_skinned"],"existing_secondary":["expressive","romantic"],"queued_active":["emotionality_ipip_neo","sentimentality_hexaco","vulnerability_ipip_neo"],"queued_parked":["tender"],"n_existing":3,"n_queued_active":3,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["apathetic","callous","emotionally_disengaged","thick_skinned"],"triggers":[],"character":2},
 {"id":"823","title":"Insensibility","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"822","pair_kind":"pair","pair_source":"synopsis","members":["822","823"],"existing":["apathetic","callous","emotionally_disengaged","thick_skinned"],"existing_secondary":[],"queued_active":[],"queued_parked":["nonchalant"],"n_existing":4,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["emotionally_engaged","sentimental","thin_skinned"],"triggers":[],"character":2},
 {"id":"824","title":"Excitation","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["824"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
-{"id":"825","title":"Excitability","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"826","pair_kind":"pair","pair_source":"synopsis","members":["825","826"],"existing":["excitable","flustered","impatient","manic","mercurial","neurotic","neurotic_big_five","passionate","restless","temperamental"],"existing_secondary":["hurried","turbulent"],"queued_active":["enthusiastic","volatility_bfas"],"queued_parked":[],"n_existing":10,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["composed","dispassionate","patient","placid","serene","staid","stoic","strong_stomached","unflappable"],"triggers":[],"character":2},
-{"id":"826","title":"Inexcitability","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"825","pair_kind":"pair","pair_source":"synopsis","members":["825","826"],"existing":["composed","dispassionate","patient","placid","serene","staid","stoic","strong_stomached","unflappable"],"existing_secondary":["calm"],"queued_active":["calm_ipip_neo","patience_hexaco"],"queued_parked":["sedate","subdued"],"n_existing":9,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["excitable","flustered","impatient","manic","mercurial","neurotic","neurotic_big_five","passionate","restless","temperamental"],"triggers":[],"character":2},
+{"id":"825","title":"Excitability","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"826","pair_kind":"pair","pair_source":"synopsis","members":["825","826"],"existing":["excitable","flustered","impatient","manic","neurotic","neurotic_big_five","passionate","restless","temperamental"],"existing_secondary":["hurried","turbulent"],"queued_active":["enthusiastic","volatility_bfas"],"queued_parked":[],"n_existing":9,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["composed","dispassionate","patient","placid","serene","staid","stoic","strong_stomached","unflappable"],"triggers":[],"character":2},
+{"id":"826","title":"Inexcitability","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"825","pair_kind":"pair","pair_source":"synopsis","members":["825","826"],"existing":["composed","dispassionate","patient","placid","serene","staid","stoic","strong_stomached","unflappable"],"existing_secondary":["calm"],"queued_active":["calm_ipip_neo","patience_hexaco"],"queued_parked":["sedate","subdued"],"n_existing":9,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["excitable","flustered","impatient","manic","neurotic","neurotic_big_five","passionate","restless","temperamental"],"triggers":[],"character":2},
 {"id":"827","title":"Pleasure","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"828","pair_kind":"pair","pair_source":"synopsis","members":["827","828"],"existing":[],"existing_secondary":["hedonistic","joyful"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["in_chronic_pain","stressed"],"triggers":[],"character":1},
 {"id":"828","title":"Pain","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"827","pair_kind":"pair","pair_source":"synopsis","members":["827","828"],"existing":["in_chronic_pain","stressed"],"existing_secondary":[],"queued_active":[],"queued_parked":["distressed"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":[],"character":1},
 {"id":"829","title":"Pleasurableness","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"830","pair_kind":"pair","pair_source":"synopsis","members":["829","830"],"existing":["agreeable_big_five"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["cruel"],"triggers":[],"character":1},
@@ -1283,11 +1282,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "b6c086b+dirty",
+   "git_sha": "872433d+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-09T16:25:10+00:00",
+  "produced_at": "2026-10-09T17:22:13+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1310,22 +1309,22 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T16:25:08+00:00@1450403",
+    "fingerprint": "v1:2026-10-09T17:20:56+00:00@1448473",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T16:25:08+00:00",
+    "last_modified_at": "2026-10-09T17:20:56+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope",
     "path": "data/candidates/roget/head_scope.json",
-    "fingerprint": "v1:2026-10-09T02:36:28+00:00@250405",
+    "fingerprint": "v1:2026-10-09T17:22:11+00:00@250059",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T02:36:28+00:00",
+    "last_modified_at": "2026-10-09T17:22:11+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "b8359a4c055fa41ce1fc87786b5fa4da93a6432890d17138e2cc3b54f396a33a"
+  "inputs_sha256": "ac7bdf20523f3cfbe77e1ea4949670858722b694713bc1a7b5100948a49bae39"
  }
 }

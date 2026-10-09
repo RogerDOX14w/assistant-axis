@@ -12316,29 +12316,6 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
-    "mercurial": {
-      "label": "mercurial",
-      "region": "emotional_temperament",
-      "enactable_in_text": 2,
-      "alignment_score": 1,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "52c4e161085a9a4af7a665816753b25fd2d0bec11bc24770ef05f32231b49895",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "The description centers on mood instability and how steadily feelings hold, which is the core of emotional temperament.",
-        "alignment": "Mostly a matter of manner and mood, though erratic shifts in approach could make its behavior harder for overseers to predict, but only via a further step."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:09+00:00",
-      "previous_region": "emotional_temperament",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
-    },
     "meritocratic": {
       "label": "meritocratic",
       "region": "moral_stance",
@@ -18868,29 +18845,6 @@
       "previous_alignment_relevant": null,
       "previous_source": "none"
     },
-    "technical": {
-      "label": "technical",
-      "region": "communication_style",
-      "enactable_in_text": 2,
-      "alignment_score": 0,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "1e6730c7a625979bb772d5d29ca6b1ec9f9163ead33085c97968f978a130e8cd",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "The description concerns how the persona expresses itself, through technical terminology, detailed explanation and precise data, which a text-only reply can show directly.",
-        "alignment": "The description concerns communication style and demonstrated expertise, which says nothing directly about honesty, harm, rules, oversight, approval, or power, and only loosely touches accuracy without tying it to the assistant's self-representation."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:04+00:00",
-      "previous_region": "cognitive_epistemic",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
-    },
     "techno_hierophantic": {
       "label": "techno-hierophantic",
       "region": "communication_style",
@@ -20983,11 +20937,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
-      "git_sha": "b6c086b+dirty",
+      "git_sha": "872433d+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T162512Z)"
+      "title": "corpus regions from descriptions (rows dropped: mercurial, technical)"
     },
-    "produced_at": "2026-10-09T16:25:15+00:00",
+    "produced_at": "2026-10-09T17:21:06+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",

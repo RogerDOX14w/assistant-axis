@@ -8,12 +8,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 ## Headline
 
-- Heads in scope: **676** (576 dispositional, 100 from Classes I-III).
-- Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 234, 0 on 188; 89 unrated, mostly heads with no adjectives).
-- Covered **278**, partly covered **51**, uncovered **159** (of which 9 have a queued label only).
+- Heads in scope: **675** (576 dispositional, 99 from Classes I-III).
+- Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 233, 0 on 188; 89 unrated, mostly heads with no adjectives).
+- Covered **278**, partly covered **50**, uncovered **159** (of which 9 have a queued label only).
 - Opposed pairs in scope: both poles covered **75**, one pole **63**, neither **34** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 33, "both_poles_covered": 75, "one_pole_covered": 63}}).
-- Labels placed: 715 existing traits with a primary head (198 without; 669 of the primaries in scope), 186 queued labels (55 without).
-- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 61, queued_only 9, partly_covered 51, crowded 76, covered 202.
+- Labels placed: 713 existing traits with a primary head (198 without; 667 of the primaries in scope), 186 queued labels (55 without).
+- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 61, queued_only 9, partly_covered 50, crowded 75, covered 203.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -31,7 +31,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | II I. Space in general | 3 | 0 | 0 | 0 | 1 |
 | II II. Dimensions | 4 | 2 | 0 | 1 | 4 |
 | II III. Form | 2 | 0 | 0 | 0 | 3 |
-| II IV. Motion | 1 | 6 | 0 | 0 | 3 |
+| II IV. Motion | 1 | 5 | 0 | 0 | 3 |
 | III I. Matter in general | 1 | 1 | 0 | 0 | 0 |
 | III II. Inorganic matter | 5 | 1 | 0 | 0 | 2 |
 | III III. Organic matter | 5 | 4 | 2 | 1 | 7 |
@@ -239,7 +239,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 915 Condolence | VI III. Sympathetic affections | - | - | [Sympathy (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 967 Judge | VI IV. Moral affections | - | - | [judging (MBTI)](../../seed_queue.json) (queued) | - | - |
 
-## partly_covered (51)
+## partly_covered (50)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -254,7 +254,6 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 172 Physical Inertness | I VIII. Causation | 171 Physical Energy (synopsis) | [intense](../../traits/instructions/intense.json) | - | - | [passive](../../traits/instructions/passive.json) |
 | 212 Verticality | II II. Dimensions | 213 Horizontality (synopsis) | - | - | - | [straight](../../traits/instructions/straight.json) |
 | 220 Exteriority | II II. Dimensions / 1. General | 221 Interiority (synopsis) | - | - | - | [eccentric](../../traits/instructions/eccentric.json), [superficial](../../traits/instructions/superficial.json) |
-| 264 Motion | II IV. Motion | 265 Quiescence (synopsis) | [sedentary](../../traits/instructions/sedentary.json) | - | - | [mercurial](../../traits/instructions/mercurial.json) |
 | 276 Impulse | II IV. Motion | 277 Recoil (synopsis) | [reactive](../../traits/instructions/reactive.json) | - | - | [impulsive](../../traits/instructions/impulsive.json) |
 | 278 Direction | II IV. Motion | 279 Deviation (synopsis) | - | - | - | [straight](../../traits/instructions/straight.json) |
 | 279 Deviation | II IV. Motion | 278 Direction (synopsis) | - | - | - | [erratic](../../traits/instructions/erratic.json) |
@@ -495,7 +494,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | head | traits with it as primary |
 |---|---|
 | 188 Inhabitant (18) | [African](../../traits/instructions/african.json), [American](../../traits/instructions/american.json), [Australian](../../traits/instructions/australian.json), [Brazilian](../../traits/instructions/brazilian.json), [British](../../traits/instructions/british.json), [Canadian](../../traits/instructions/canadian.json), [Chinese](../../traits/instructions/chinese.json), [European](../../traits/instructions/european.json), [French](../../traits/instructions/french.json), [German](../../traits/instructions/german.json), [Indian](../../traits/instructions/indian.json), [Indigenous American](../../traits/instructions/indigenous_american.json), [Indigenous Australian](../../traits/instructions/indigenous_australian.json), [Italian](../../traits/instructions/italian.json), [Japanese](../../traits/instructions/japanese.json), [Nigerian](../../traits/instructions/nigerian.json), [rooted](../../traits/instructions/rooted.json), [Russian](../../traits/instructions/russian.json) |
-| 825 Excitability (10) | [excitable](../../traits/instructions/excitable.json), [flustered](../../traits/instructions/flustered.json), [impatient](../../traits/instructions/impatient.json), [manic](../../traits/instructions/manic.json), [mercurial](../../traits/instructions/mercurial.json), [neurotic](../../traits/instructions/neurotic.json), [neurotic (Big Five)](../../traits/instructions/neurotic_big_five.json), [passionate](../../traits/instructions/passionate.json), [restless](../../traits/instructions/restless.json), [temperamental](../../traits/instructions/temperamental.json) |
+| 825 Excitability (9) | [excitable](../../traits/instructions/excitable.json), [flustered](../../traits/instructions/flustered.json), [impatient](../../traits/instructions/impatient.json), [manic](../../traits/instructions/manic.json), [neurotic](../../traits/instructions/neurotic.json), [neurotic (Big Five)](../../traits/instructions/neurotic_big_five.json), [passionate](../../traits/instructions/passionate.json), [restless](../../traits/instructions/restless.json), [temperamental](../../traits/instructions/temperamental.json) |
 | 826 Inexcitability (9) | [composed](../../traits/instructions/composed.json), [dispassionate](../../traits/instructions/dispassionate.json), [patient](../../traits/instructions/patient.json), [placid](../../traits/instructions/placid.json), [serene](../../traits/instructions/serene.json), [staid](../../traits/instructions/staid.json), [stoic](../../traits/instructions/stoic.json), [strong-stomached](../../traits/instructions/strong_stomached.json), [unflappable](../../traits/instructions/unflappable.json) |
 | 864 Caution (8) | [cautious](../../traits/instructions/cautious.json), [circumspect](../../traits/instructions/circumspect.json), [financially conservative](../../traits/instructions/financially_conservative.json), [guarded](../../traits/instructions/guarded.json), [loss-averse](../../traits/instructions/loss_averse.json), [prudent](../../traits/instructions/prudent.json), [risk-averse](../../traits/instructions/risk_averse.json), [unadventurous](../../traits/instructions/unadventurous.json) |
 | 881 Modesty (8) | [body-insecure](../../traits/instructions/body_insecure.json), [introverted (HEXACO)](../../traits/instructions/introverted_hexaco.json), [modest](../../traits/instructions/modest.json), [reserved](../../traits/instructions/reserved.json), [self-conscious](../../traits/instructions/self_conscious.json), [self-effacing](../../traits/instructions/self_effacing.json), [timid](../../traits/instructions/timid.json), [unassuming](../../traits/instructions/unassuming.json) |
@@ -575,7 +574,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 254 Bluntness | covered | [blunt](../../traits/instructions/blunt.json) |
 | 260 Opening | covered (not character) | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json), [Openness (BFAS)](../../seed_queue.json) (queued) |
 | 261 Closure | covered (not character) | [closed (Big Five)](../../traits/instructions/closed_big_five.json) |
-| 264 Motion | partly | [mercurial](../../traits/instructions/mercurial.json) |
 | 265 Quiescence | covered | [sedentary](../../traits/instructions/sedentary.json) |
 | 276 Impulse | partly | [impulsive](../../traits/instructions/impulsive.json) |
 | 278 Direction | partly | [straight](../../traits/instructions/straight.json) |
@@ -703,7 +701,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 527 Information | [informational](../../traits/instructions/informational.json) |
 | 528 Concealment | [cryptic](../../traits/instructions/cryptic.json), [esoteric](../../traits/instructions/esoteric.json) |
 | 535 Affirmation | [emphatic](../../traits/instructions/emphatic.json), [opinionated](../../traits/instructions/opinionated.json), [words of affirmation](../../traits/instructions/words_of_affirmation.json) |
-| 537 Teaching | [didactic](../../traits/instructions/didactic.json), [educational](../../traits/instructions/educational.json), [technical](../../traits/instructions/technical.json) |
+| 537 Teaching | [didactic](../../traits/instructions/didactic.json), [educational](../../traits/instructions/educational.json) |
 | 539 Learning | [learning-oriented](../../traits/instructions/learning_oriented.json) |
 | 543 Veracity | [candid](../../traits/instructions/candid.json), [earnest](../../traits/instructions/earnest.json), [forthright](../../traits/instructions/forthright.json), [sincere](../../traits/instructions/sincere.json), [trustworthy](../../traits/instructions/trustworthy.json), [truthful](../../traits/instructions/truthful.json) |
 | 544 Falsehood | [deceitful](../../traits/instructions/deceitful.json), [dishonest](../../traits/instructions/dishonest.json) |
@@ -803,7 +801,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 821 Feeling | [emotional](../../traits/instructions/emotional.json), [emotional (HEXACO)](../../traits/instructions/emotional_hexaco.json), [zealous](../../traits/instructions/zealous.json) |
 | 822 Sensibility | [emotionally-engaged](../../traits/instructions/emotionally_engaged.json), [sentimental](../../traits/instructions/sentimental.json), [thin-skinned](../../traits/instructions/thin_skinned.json) |
 | 823 Insensibility | [apathetic](../../traits/instructions/apathetic.json), [callous](../../traits/instructions/callous.json), [emotionally-disengaged](../../traits/instructions/emotionally_disengaged.json), [thick-skinned](../../traits/instructions/thick_skinned.json) |
-| 825 Excitability | [excitable](../../traits/instructions/excitable.json), [flustered](../../traits/instructions/flustered.json), [impatient](../../traits/instructions/impatient.json), [manic](../../traits/instructions/manic.json), [mercurial](../../traits/instructions/mercurial.json), [neurotic](../../traits/instructions/neurotic.json), [neurotic (Big Five)](../../traits/instructions/neurotic_big_five.json), [passionate](../../traits/instructions/passionate.json), [restless](../../traits/instructions/restless.json), [temperamental](../../traits/instructions/temperamental.json) |
+| 825 Excitability | [excitable](../../traits/instructions/excitable.json), [flustered](../../traits/instructions/flustered.json), [impatient](../../traits/instructions/impatient.json), [manic](../../traits/instructions/manic.json), [neurotic](../../traits/instructions/neurotic.json), [neurotic (Big Five)](../../traits/instructions/neurotic_big_five.json), [passionate](../../traits/instructions/passionate.json), [restless](../../traits/instructions/restless.json), [temperamental](../../traits/instructions/temperamental.json) |
 | 826 Inexcitability | [composed](../../traits/instructions/composed.json), [dispassionate](../../traits/instructions/dispassionate.json), [patient](../../traits/instructions/patient.json), [placid](../../traits/instructions/placid.json), [serene](../../traits/instructions/serene.json), [staid](../../traits/instructions/staid.json), [stoic](../../traits/instructions/stoic.json), [strong-stomached](../../traits/instructions/strong_stomached.json), [unflappable](../../traits/instructions/unflappable.json) |
 | 828 Pain | [in chronic pain](../../traits/instructions/in_chronic_pain.json), [stressed](../../traits/instructions/stressed.json) |
 | 829 Pleasurableness | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) |

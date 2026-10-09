@@ -10,13 +10,13 @@
   "batch_size": 20,
   "max_adjectives": 20,
   "summary": {
-   "n_scope": 676,
-   "n_rated": 587,
+   "n_scope": 675,
+   "n_rated": 586,
    "n_skipped_no_adjectives": 89,
    "n_unrated": 0,
    "by_rating": {
     "0": 188,
-    "1": 234,
+    "1": 233,
     "2": 165
    },
    "by_class": {
@@ -27,7 +27,7 @@
     },
     "II": {
      "0": 11,
-     "1": 17,
+     "1": 16,
      "2": 2
     },
     "III": {
@@ -114,7 +114,6 @@
 {"id":"254","title":"Bluntness","class":"II","class_title":"Words relating to space","section":"III. Form","n_adjectives":6,"n_shown":6,"rating":2,"reason":"Blunt, bluff, obtuse and dull commonly describe a person's manner or wits, though edentate and toothless do not.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"260","title":"Opening","class":"II","class_title":"Words relating to space","section":"III. Form","n_adjectives":21,"n_shown":20,"rating":0,"reason":"Open, gaping, perforated and porous describe things with openings, not people.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"261","title":"Closure","class":"II","class_title":"Words relating to space","section":"III. Form","n_adjectives":19,"n_shown":19,"rating":0,"reason":"Closed, shut, impervious and snug describe things or places, not a person's character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"264","title":"Motion","class":"II","class_title":"Words relating to space","section":"IV. Motion","n_adjectives":9,"n_shown":9,"rating":1,"reason":"Mercurial can describe a person's volatile temperament, but moving, motive and movable describe motion of things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"265","title":"Quiescence","class":"II","class_title":"Words relating to space","section":"IV. Motion","n_adjectives":29,"n_shown":20,"rating":1,"reason":"Quiet, unruffled, unmoved and stay-at-home can describe a person, but most describe stillness of things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"276","title":"Impulse","class":"II","class_title":"Words relating to space","section":"IV. Motion","n_adjectives":6,"n_shown":6,"rating":1,"reason":"Impulsive and dynamic describe a person's temperament, but the rest (impelling, booming, impelled) describe forces or motion.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"278","title":"Direction","class":"II","class_title":"Words relating to space","section":"IV. Motion","n_adjectives":12,"n_shown":12,"rating":1,"reason":"Straightforward and unswerving can describe a person's honest, steady character, but most entries describe direction of motion or compass points.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -731,7 +730,7 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-09T02:36:27+00:00",
+   "at": "2026-10-09T17:22:11+00:00",
    "n_calls": 0,
    "n_retries": 0,
    "cost_usd": 0,
@@ -754,11 +753,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
-   "git_sha": "67595de+dirty",
+   "git_sha": "872433d+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-09T02:36:27+00:00",
+  "produced_at": "2026-10-09T17:22:11+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -781,10 +780,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T02:36:25+00:00@1450329",
+    "fingerprint": "v1:2026-10-09T17:20:56+00:00@1448473",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T02:36:25+00:00",
+    "last_modified_at": "2026-10-09T17:20:56+00:00",
     "extras": {}
    },
    {
@@ -800,6 +799,6 @@
     }
    }
   ],
-  "inputs_sha256": "3b49a83e8e011c5192a6f5037e42c5fa772c7843ea6c9bc06e6e35e7485914b7"
+  "inputs_sha256": "fffbddab6c6f558075ca90be16898ed2c5154384e743b24e3460d49c18d22878"
  }
 }

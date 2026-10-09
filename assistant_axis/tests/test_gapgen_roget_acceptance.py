@@ -19,7 +19,9 @@ INST = REPO / "data" / "traits" / "instructions"
 QUEUE = REPO / "data" / "seed_queue.json"
 UPDATE_HINT = ("Run `uv run python data_analysis/gap_generation/roget_generate.py map --update` (re-places new and "
                "changed labels, drops stale ones, leaves the rest), then `roget_generate.py place-check "
-               "--unchecked-only --resume --budget-usd <cap>`.  Never remap an old key onto a renamed stem: the old "
+               "--unchecked-only --resume --budget-usd <cap>`, `roget_generate.py head-scope --budget-usd 0.1` "
+               "(no call unless a head entered the scope; drops a Class I-III head that left it with its last "
+               "trait) and `roget_generate.py coverage`.  Never remap an old key onto a renamed stem: the old "
                "placement is for the old meaning.")
 PILOT = REPO / "data" / "candidates" / "runs" / "roget" / "2026-10-08-pilot"
 WN_PILOT = REPO / "data" / "candidates" / "runs" / "wn_clusters" / "2026-10-08-pilot"
@@ -156,8 +158,9 @@ def test_head_scope_covers_the_scope_within_its_cap():
     from assistant_axis.gapgen import split_rubrics as sr
     hs = result(OUT / "head_scope.json")
     cov = result(OUT / "roget_coverage.json")
-    assert [r["id"] for r in hs["heads"]] == [r["id"] for r in cov["rows"]]
-    assert hs["summary"]["n_unrated"] == 0                       # every head with adjectives rated
+    assert [r["id"] for r in hs["heads"]] == [r["id"] for r in cov["rows"]], \
+        "head_scope.json and the coverage map disagree on the heads in scope (a corpus drop or addition?).  " + UPDATE_HINT
+    assert hs["summary"]["n_unrated"] == 0                      # every head with adjectives rated
     assert all((r["rating"] is None) == (r["skipped"] == "no_adjectives") for r in hs["heads"])
     assert (hs["rubric"]["version"], hs["rubric"]["sha256"]) == \
         sr.current_versions(names=("roget_head_scope",))["roget_head_scope"]
