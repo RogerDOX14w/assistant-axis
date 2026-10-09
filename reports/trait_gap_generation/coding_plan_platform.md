@@ -971,3 +971,240 @@ In the existing worktree, after `git merge --ff-only anthropic-vllm-uv`:
 5. **Report**: commits, the harness's live-check recall and cost, the exports, the sync's outcome, test
    counts, changed expectations.  Constraints as in [coding_plan_m3.md](./coding_plan_m3.md)'s last
    section.
+
+## Judge display form (2026-10-09)
+
+Roger's rule (W19): anything that sends a label or a `negative_label` to an LLM shows its most legible form, the
+**judge display form**: the label as stored, with a named standard's suffix in the long form, so that
+`careless (HEXACO)` reads `careless (from HEXACO)` and `artistic (Holland)` reads `artistic (from Holland's
+RIASEC)`.  The policy and the suffix table are in [AGENT_NOTES.md](../../AGENT_NOTES.md), section "Judge prompts
+show the judge display form"; the string helper is `judge_form_of_label` in
+[entity_id.py](../../assistant_axis/entity_id.py).  That section left the trait-gap tools to this session; this is
+how they follow it.
+
+**What changes.**  Every prompt the platform builds now shows labels through one helper,
+`prompt_label` in [prompt_labels.py](../../assistant_axis/gapgen/prompt_labels.py), applied where the prompt is
+rendered and nowhere else.  Of today's labels, 85 corpus trait labels and 196 seed-queue labels end in a standard and
+read differently; no candidate label in the registry does, so for candidates the rewrite is a no-op (it is applied
+all the same, so that one rule holds everywhere).  No prompt of these tools shows a `negative_label`, and none sends a
+stem (`careless_hexaco`) where a label belongs; the one place that could, the blinded neighbour judgement of the M2
+calibration ([calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py)), fell back to the bare stem for a
+neighbour with no label and now falls back to its display form.
+
+**What does not change.**  The stored labels (`positive_label`, a queue entry's `label`, a registry row's `label`),
+`CorpusTrait.label` in [novelty.py](../../assistant_axis/gapgen/novelty.py), the registry, every key, the text
+embedded for a corpus trait or a queue entry (`label: description` in the covered representation, so the embedding
+cache and the metric calibration are untouched), the paraphrase caches' source hashes, and every record written as
+data (the `label` of a response record, a block, a row of
+[corpus_regions.json](../../data/candidates/corpus_regions.json)).  The rubric files are unchanged too:
+none shows a label with an underscore or a bare-standard example, so no pin moved.  Where a parser checks the model's
+echo of the label (M1's sense call and comparison, the plain reading's comparison, the states pass), it checks it
+against the form the model was shown.
+
+**What a run records.**  Each tool writes `label_form` into its `run.json` (or config, or run record) and, where it
+writes one, its summary: `judge-display-v1` (`JUDGE_LABEL_FORM`) for a run made from now on.  A record without the
+field is a run from before, which showed the labels as stored (`stored`).
+
+**Resume and replay: a run keeps the form it recorded.**  A new run shows the judge display form.  A run that
+continues or replays another keeps that run's form (`resolve_label_form`): `--resume` the earlier session's
+([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py),
+[review_graph.py](../../data_analysis/gap_generation/review_graph.py) `build`,
+[corpus_near_duplicates.py](../../data_analysis/gap_generation/corpus_near_duplicates.py),
+[states_pass.py](../../data_analysis/gap_generation/states_pass.py), the split filter
+([split_cli.py](../../data_analysis/gap_generation/split_cli.py)),
+[overlap_test.py](../../data_analysis/gap_generation/overlap_test.py), the recovery harness
+([recovery_test.py](../../data_analysis/gap_generation/recovery_test.py))); M3's `score --redecide`,
+`--relation-only` and `full-scan` their source run's;
+[plain_reading.py](../../data_analysis/gap_generation/plain_reading.py) `--reuse-readings` the reused run's; the
+recovery harness's match stage the form of the reduced-corpus M3 run it matches.  So a run from before today is resumed, re-decided or compared in the
+stored form, and a run from today in the judge form; neither mixes the two.  Why keep the recorded form rather than
+switch, or refuse:
+
+- Several replay paths find an answer by something other than the prompt: a Message Batches result by its
+  `custom_id` (step, key and stem, no prompt text) when a resumed run collects the batches it had submitted; the
+  states pass's row cache by key, stored label and text; the [overlap test](./coding_plan_m3.md)'s records by rubric,
+  model, call and pass.  A form change across a resume would pair answers with prompts they were not given.
+- Where answers are found by the prompt (M3's records), a change would re-send and re-pay for every call that shows
+  one of the standards-derived labels, and decide those candidates on a different prompt from the rest of the run.
+  `--relation-only` would refuse outright, since it checks that every request is its source's but for the model.
+- Refusing instead would make every run from before today impossible to resume or re-decide, and re-deciding old
+  runs on their records is how rule changes are attributed (`decision_changes.md`).
+
+A `--redecide` sends only the calls its source never made; those take the source's form too, so a re-decided run is
+one form from end to end.  A form is never chosen by flag: a new run cannot ask for the stored form, and a resumed
+run cannot ask for the new one (a fresh `score` run does that).
+
+**Records made before today that the rewrite would ask differently** (no automatic re-run; for Roger's decision):
+
+- [corpus_regions.json](../../data/candidates/corpus_regions.json): the 85 standards-derived traits' regions and
+  alignment scores were judged on 2026-10-09 with the stored label.  `--only-missing` does not select them (a row is
+  re-judged when its label or description changed, not its prompt's form, as after a rubric bump); `--all` would redo
+  every trait (about $0.26), or a selection of just those 85 would cost about $0.03 (not built).
+- [label_heads.json](../../data/candidates/roget/label_heads.json): 84 standards-derived labels carry a placement
+  check made with the stored label.  `place-check --unchecked-only` leaves them alone; a full `place-check --resume`
+  reuses an answer only for a byte-identical user turn, so it would ask those 84 again in the new form (the only
+  response cache here keyed by the prompt that misses; nothing is mixed, since a reused answer always had the
+  same prompt).
+- The calibration paraphrase caches (`paraphrases*.json` under `data/candidates/calibration/`): an entry is
+  written again only when its stored label or description changes, so the existing entries keep their stored-form
+  prompts; a new entry is recorded in the cache's new `label_forms` map.
+- The embedding cache: no miss, since no embedded text changed.
+
+### Rendered samples (no API call)
+
+Each is the user turn as the model receives it, made with the tool's own render path from the corpus at commit
+8c06188; the system prompts are the pinned rubric files, unchanged, linked rather than repeated.  The terms
+*relation call* and *overlap call* are in the [glossary](./glossary.md#relation-call-overlap-call).
+
+**M3 relation call** ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py)
+`render --stand-in careless`: the corpus trait
+[careless](../../data/traits/instructions/careless.json) as a stand-in candidate with its own trait hidden; Haiku
+5.5, system prompt [relation.md](./rubrics/relation.md)).  Four standard poles in the list, each in the long form:
+
+```text
+{"candidate": {"label": "careless", "description": "This means doing things without giving them proper attention, skimming past details, leaving errors unchecked, and handing over work with slips that a closer look would have caught."},
+ "traits": [
+  {"id": 1, "label": "health-negligent", "description": "This means skipping checkups and screenings, eating whatever, never exercising, running on little sleep, and ignoring a lump or lingering cough for months."},
+  {"id": 2, "label": "absentee", "description": "This means handing over the work and vanishing, giving no direction when asked, never checking how it is going, and hearing that it went wrong from someone else."},
+  {"id": 3, "label": "rude", "description": "This means skipping please and thank you, talking over people, ignoring greetings and every bump one causes, and taking a sharp tone with everyone."},
+  {"id": 4, "label": "inaccurate", "description": "This means getting facts, figures, names and quotations wrong, misremembering and misquoting, stating things that are close but not right, and never noticing."},
+  {"id": 5, "label": "meticulous", "description": "This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach."},
+  {"id": 6, "label": "nurturing", "description": "This means showing care, support, and encouragement while providing gentle guidance that helps foster personal growth, development, and well-being."},
+  {"id": 7, "label": "health-conscious", "description": "This means keeping every checkup and screening, eating right, exercising, sleeping enough, and seeing a doctor about a lump or lingering cough right away."},
+  {"id": 8, "label": "sloppy", "description": "This means doing the work fast and rough, skipping the checking, leaving loose ends, mislabeled figures and small mistakes, and calling it done."},
+  {"id": 9, "label": "approximate", "description": "This means dealing in round numbers and rough outlines, counting close enough as done, and leaving the last digit and the exact wording to someone who cares."},
+  {"id": 10, "label": "superficial", "description": "This means providing only surface-level treatment of topics, skimming over complexity and nuance rather than examining underlying mechanisms, edge cases, or multiple dimensions."},
+  {"id": 11, "label": "polite", "description": "This means saying please and thank you, waiting one's turn to speak, greeting people and apologizing for a bump, and keeping a civil tone with everyone."},
+  {"id": 12, "label": "thorough", "description": "This means providing deep, comprehensive analysis that examines multiple dimensions, edge cases, and underlying mechanisms rather than stopping at surface-level observations."},
+  {"id": 13, "label": "conscientious (from HEXACO)", "description": "This means keeping one's room and one's appointments in order, grinding steadily toward a goal, polishing work until it is exactly right, and weighing a decision carefully before making it."},
+  {"id": 14, "label": "conscientious (from the Big Five)", "description": "This means thinking before acting and putting the task before the pleasure: keeping things in order, arriving on time, honoring every obligation, aiming high, and checking the work twice."},
+  {"id": 15, "label": "neglectful", "description": "This means leaving the people in one's care to fend for themselves, giving no help, encouragement or guidance, and taking no notice of whether they grow, struggle or come to harm."},
+  {"id": 16, "label": "careless (from the Big Five)", "description": "This means acting on the moment: leaving things in a mess, showing up late, bending the rules, settling for whatever gets by, and dropping a task once it gets hard."},
+  {"id": 17, "label": "careless (from HEXACO)", "description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."},
+  {"id": 18, "label": "accurate", "description": "This means getting facts, figures, names and quotations right, checking before stating, and correcting oneself the moment an error shows."}
+ ]}
+```
+
+**M3 overlap call** (the same candidate against [careless_hexaco](../../data/traits/instructions/careless_hexaco.json);
+Sonnet 5.5, system prompt [overlap_concept.md](./rubrics/overlap_concept.md), rubric A).  The recovery harness's match
+calls and the review graph's overlap calls have this shape:
+
+```text
+{"target": {"label": "careless", "description": "This means doing things without giving them proper attention, skimming past details, leaving errors unchecked, and handing over work with slips that a closer look would have caught."},
+ "other": {"label": "careless (from HEXACO)", "description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."}}
+```
+
+**Near-duplicates scan** ([corpus_near_duplicates.py](../../data_analysis/gap_generation/corpus_near_duplicates.py),
+the same overlap call between two corpus traits): both sides now carry their standard, and the two read apart at
+once:
+
+```text
+{"target": {"label": "careless (from HEXACO)", "description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."},
+ "other": {"label": "careless (from the Big Five)", "description": "This means acting on the moment: leaving things in a mess, showing up late, bending the rules, settling for whatever gets by, and dropping a task once it gets hard."}}
+```
+
+**The corpus's regions** ([gap_registry.py](../../data_analysis/gap_generation/gap_registry.py) `corpus-regions
+--from-descriptions --all --dry-run --show careless_hexaco`; Haiku 5.5; the descriptors call, system prompt [descriptors.md](./rubrics/descriptors.md); the
+alignment call, [alignment.md](./rubrics/alignment.md), sends the same user turn):
+
+```text
+{"id": 1, "label": "careless (from HEXACO)", "description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."}
+```
+
+**States pass, corpus mode** ([states_pass.py](../../data_analysis/gap_generation/states_pass.py) `--mode corpus
+--stems careless_hexaco artistic_holland --dry-run`; Haiku 5.5, the corpus prompt in the library
+[states_pass.py](../../assistant_axis/gapgen/states_pass.py)); the dry run now prints
+the run's label form first (`label form: judge-display-v1`):
+
+```text
+Judge these 2 labels. Reason first, then answer, for each.
+{"id": 1, "label": "careless (from HEXACO)", "corpus_description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."}
+{"id": 2, "label": "artistic (from Holland's RIASEC)", "corpus_description": "This means being drawn to work that creates something original: visual art, performances, writing, music or food for any medium, or bringing an artist's eye to the design of objects and materials."}
+```
+
+**Plain reading** ([plain_reading.py](../../data_analysis/gap_generation/plain_reading.py) `--corpus-stems
+careless_hexaco --dry-run`; the
+[plain reading](./glossary.md#plain-reading) and its comparison, both in
+[plain_reading.py](../../assistant_axis/gapgen/plain_reading.py)).  The reading prompt is the one place where the
+long form sits inside a persona instruction; it reads as a label in quotation marks, which is what the call is for
+(how the bare label reads), but Roger may want to look at it:
+
+```text
+A persona is given one instruction and nothing else: "You are careless (from HEXACO)."
+In one sentence of at most 25 words, describe how this persona behaves. Reply with the sentence only.
+```
+
+```text
+Compare these 1 rows. Reason first, then answer, for each.
+{"id": 1, "label": "careless (from HEXACO)", "plain_reading": "<reading>", "intended_meaning": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."}
+```
+
+**Roget placement check** ([roget_generate.py](../../data_analysis/gap_generation/roget_generate.py) `place-check
+--render agreeable_hexaco,authoritarian_baumrind`; Sonnet 5.5, system prompt [roget_placement.md](./rubrics/roget_placement.md)).  The first of the two; the second's label
+reads `authoritarian (from Baumrind's parenting styles)`:
+
+```text
+{"trait": {"label": "agreeable (from HEXACO)", "description": "This means letting go of the wrongs done to one, going easy when judging other people, meeting them halfway to get things done together, and keeping one's temper when provoked."},
+ "heads": [
+ {"id": "723", "title": "Pacification", "class": "Words relating to the voluntary powers", "section": "Antagonism", "adjectives": ["conciliatory", "composing", "pacified"], "nouns": ["pacification", "conciliation", "reconciliation", "reconcilement", "shaking of hands", "accommodation", "arrangement"]},
+ {"id": "829", "title": "Pleasurableness", "class": "Words relating to the sentient and moral powers", "section": "Personal affections", "adjectives": ["causing pleasure", "pleasure-giving", "pleasing", "pleasant", "pleasurable", "agreeable"], "nouns": ["pleasurableness", "pleasantness", "agreeableness", "pleasure giving"]},
+ {"id": "918", "title": "Forgiveness", "class": "Words relating to the sentient and moral powers", "section": "Sympathetic affections", "adjectives": ["forgiving", "placable", "conciliatory", "forgiven", "unavenged"], "nouns": ["forgiveness", "pardon", "condonation", "grace", "remission"]},
+ {"id": "23", "title": "Agreement", "class": "Words expressing abstract relations", "section": "Relation", "adjectives": ["agreeing", "suiting", "in accord", "accordant", "concordant", "consonant"], "nouns": ["agreement", "accord", "accordance", "unison"]},
+ {"id": "906", "title": "Benevolence", "class": "Words relating to the sentient and moral powers", "section": "Sympathetic affections", "adjectives": ["benevolent", "kind", "kindly", "well-meaning", "amiable", "obliging"], "nouns": ["benevolence", "Christian charity", "God's love", "God's grace"]},
+ {"id": "740", "title": "Lenity", "class": "Words relating to the voluntary powers", "section": "General intersocial volition", "adjectives": ["lenient", "mild", "mild as milk", "gentle", "soft", "tolerant"], "nouns": ["lenity", "lenience", "leniency", "tolerance"]}
+ ]}
+```
+
+**M2 calibration paraphrases** (the paraphrase call of [calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py),
+two corpus traits; Haiku 5.5; see [paraphrase recall](./glossary.md#paraphrase-recall)):
+
+```text
+{"id": 1, "label": "careless (from HEXACO)", "description": "This means letting the room get messy and appointments slide, steering clear of hard tasks and ambitious goals, handing in work with mistakes in it, and deciding on impulse."}
+{"id": 2, "label": "artistic (from Holland's RIASEC)", "description": "This means being drawn to work that creates something original: visual art, performances, writing, music or food for any medium, or bringing an artist's eye to the design of objects and materials."}
+```
+
+Not shown, because no label they send changes today: M1 (the split filter and the single pipeline: candidate
+labels), the physical pass's gloss stage (candidate labels), the review graph's relation calls (they list other
+candidates), and the overlap test (the M3 overlap call's renderers, shown above).  Their tests check the long form on
+a made-up standards label.
+
+### Call sites
+
+Every place in [assistant_axis/gapgen/](../../assistant_axis/gapgen/) and
+[data_analysis/gap_generation/](../../data_analysis/gap_generation/) that calls a model, or builds what one is sent,
+and every module that loads a stored label (the list the W19 session sent, checked one by one: some only build
+data or embedded texts, which must not change).  "Long form" means the judge display form through
+`prompt_label`; a "no-op today" site shows candidate labels, none of which ends in a standard.
+
+| site | what the prompt shows | reaches a prompt? | change |
+| --- | --- | --- | --- |
+| [novelty.py](../../assistant_axis/gapgen/novelty.py) `relation_payload`, `render_relation_user` | candidate label; corpus and seed-queue labels | yes (M3 relation call) | long form (`label_form`, default judge) |
+| [novelty.py](../../assistant_axis/gapgen/novelty.py) `load_trait_corpus`, `queue_traits`, `CorpusTrait.label` / `.negative_label` | stored labels, embedded as `label: description` | no (data; the `negative_label` is never sent) | unchanged |
+| [overlap_test.py](../../assistant_axis/gapgen/overlap_test.py) `payload_object`, `payload_single`, `render_user`, `render_single`, `call_params`, `rendered_prompt`, `OverlapRunner` | target, other and listed labels | yes (M3 overlap call; the overlap test) | long form; `OverlapRunner(label_form=...)` |
+| [novelty_runner.py](../../assistant_axis/gapgen/novelty_runner.py) `NoveltyRunner._relation_call`, `_overlap_call`, `read_pairs` | as the two above | yes (M3 `score`, `full-scan`, `--relation-only`, `--redecide`; recovery match; near-duplicates; review graph) | `NoveltyRunner(label_form=...)` |
+| [review_graph.py](../../assistant_axis/gapgen/review_graph.py) `ReviewRunner._relation_call` (overlap inherited) | candidate labels (corpus labels if listed) | yes | long form, the runner's form |
+| [near_duplicates.py](../../assistant_axis/gapgen/near_duplicates.py) | corpus labels, through the runner | yes (via `NoveltyRunner`) | none in the module; `CorpusCandidate.label` stays stored |
+| [recovery.py](../../assistant_axis/gapgen/recovery.py) `match_candidates` | candidate and hidden corpus labels, through the runner | yes (via `NoveltyRunner`) | none in the module |
+| [filter.py](../../assistant_axis/gapgen/filter.py) `FilterRunner`; [filter_rubric.py](../../assistant_axis/gapgen/filter_rubric.py) `build_batch_prompt`, `build_probe_prompt` | candidate labels; the intended sense | yes (M1 single pipeline, probe) | long form, no-op today; echo checked against the shown label.  The intended sense (`display_form_name` of a gloss hint) is free text, not a label: unchanged |
+| [split.py](../../assistant_axis/gapgen/split.py) `payload`, `comparison_payload`; [split_runner.py](../../assistant_axis/gapgen/split_runner.py) `SplitRunner` | candidate label in every step | yes (M1 split filter) | long form, no-op today; `Call.label` (the echo check) is the shown label |
+| [plain_reading.py](../../assistant_axis/gapgen/plain_reading.py) `build_reading_prompt`, `build_compare_prompt`, `PlainReadingRunner`, `corpus_pairs` | candidate labels (M1); corpus labels (`--corpus`) | yes | long form; echo against the shown label; readings stay keyed by the stored label |
+| [states_pass.py](../../assistant_axis/gapgen/states_pass.py) `build_batch_prompt`, `build_check_prompt`, `alignment_call`, `corpus_items`, `route_for` | registry labels (queue mode); corpus labels (corpus mode) | yes | long form; echo against the shown label; row cache and records keep the stored label; `route_for` takes a suggested name equal to either form as the name itself |
+| [physical_pass.py](../../assistant_axis/gapgen/physical_pass.py) `request`, `render`, `gloss_rows` | candidate label | yes (gloss and alignment calls) | long form, no-op today; the M3 run's form |
+| [corpus_descriptors.py](../../assistant_axis/gapgen/corpus_descriptors.py) `request`, `render`, `judge`, `load_corpus` | corpus `positive_label` | yes (corpus regions) | long form; rows, their `label` and the selection keep the stored label |
+| [calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py) `paraphrase_user`, `blinded_user` | corpus labels | yes (M2 calibration) | long form; the blinded judgement's stem fallback is now the display form |
+| [generators/roget/placement.py](../../assistant_axis/gapgen/generators/roget/placement.py) `PlacementItem.payload`, `render_user` | corpus or queue label | yes (place-check) | long form; `PlacementItem.label` stays stored |
+| [generators/roget/head_scope.py](../../assistant_axis/gapgen/generators/roget/head_scope.py) | Roget head titles and adjectives | yes, but no label | unchanged |
+| [generators/roget/mapping.py](../../assistant_axis/gapgen/generators/roget/mapping.py), [labels.py](../../assistant_axis/gapgen/labels.py), [contrast.py](../../assistant_axis/gapgen/contrast.py) | stored labels for embedding, lexical matching, labelled pairs, contrast cuts | no (data and embedded texts) | unchanged |
+| [build_smoke_sets.py](../../data_analysis/gap_generation/build_smoke_sets.py), [build_validation_set.py](../../data_analysis/gap_generation/build_validation_set.py) | word lists for M1 (corpus labels among them) | only through M1's runners | unchanged here; M1 shows them in the long form |
+| [gap_registry.py](../../data_analysis/gap_generation/gap_registry.py) `corpus-regions` | `--from-descriptions`: as corpus_descriptors; `--from-filter`: no call | yes / no | records `label_form` in the run's `run.json` |
+| [generators/censuses/](../../assistant_axis/gapgen/generators/censuses/), [review_app/](../../assistant_axis/gapgen/review_app/), [haiku55_compare.py](../../data_analysis/gap_generation/haiku55_compare.py), [census_generator.py](../../data_analysis/gap_generation/census_generator.py) | none | no model call | unchanged |
+| [novelty_score.py](../../data_analysis/gap_generation/novelty_score.py) | (M3's CLI) | builds the runners, renders `render` and the dry run | resolves the form (new / `--resume` / source); `run.json`, plan and summary record it |
+| [review_graph.py](../../data_analysis/gap_generation/review_graph.py), [corpus_near_duplicates.py](../../data_analysis/gap_generation/corpus_near_duplicates.py), [recovery_test.py](../../data_analysis/gap_generation/recovery_test.py), [overlap_test.py](../../data_analysis/gap_generation/overlap_test.py) | (CLIs) | build runners and renders | the same resolution; `run.json` (and `graph.json`'s config, the recovery report's reduced run) record it |
+| [split_cli.py](../../data_analysis/gap_generation/split_cli.py), [traithood_filter.py](../../data_analysis/gap_generation/traithood_filter.py), [states_pass.py](../../data_analysis/gap_generation/states_pass.py), [plain_reading.py](../../data_analysis/gap_generation/plain_reading.py), [calibrate_metric.py](../../data_analysis/gap_generation/calibrate_metric.py), [roget_generate.py](../../data_analysis/gap_generation/roget_generate.py) | (CLIs) | build runners and renders | the same; `run.json` / run records and summaries record it; the paraphrase caches record it per entry |
+
+Tests: [test_gapgen_prompt_labels.py](../../assistant_axis/tests/test_gapgen_prompt_labels.py) (every changed builder
+on a standards label, the stored form on request, the stored label and the embedded text unchanged, the echo checks,
+a resume in the recorded form sending nothing again) and
+[test_gapgen_label_form_cli.py](../../data_analysis/tests/test_gapgen_label_form_cli.py) (M3's CLI on a toy corpus
+with `alpha (HEXACO)`: a new run, a resumed old run in the stored form, a resumed new run, `--redecide` and
+`--relation-only` following their source, the `render` command).  No existing test's expectation changed.
