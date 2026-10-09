@@ -37,6 +37,7 @@ from assistant_axis import (  # noqa: E402
 from assistant_axis.entity_id import (  # noqa: E402
     display_form_name,
     entity_id,
+    judge_label,
     kind_long,
     normalize_to_file_name,
     parse_entity_id,
@@ -140,7 +141,20 @@ logging.getLogger("anthropic").setLevel(logging.WARNING)
 #       are display sites).  See AGENT_NOTES "File-name vs
 #       display-name convention".  v3 supersedes v2 for new judging;
 #       v1/v2 caches remain valid for already-judged data.
-RUBRIC_VERSION = "v3"
+#   v4 (2026-10-09, W19, Roger) -- entity names rendered in the *judge
+#       display form* (``assistant_axis.entity_id.judge_label``): the
+#       stored label with its capitals, hyphens, diacritics and
+#       apostrophes (``systems-thinker``, ``devil's advocate``,
+#       ``ENFJ``), and a standard's suffix in the long form
+#       (``careless (from HEXACO)``).  The pair-axis header is composed
+#       from the two rendered pole names (``careless (from HEXACO) (+) vs
+#       conscientious (from HEXACO) (-) [traits]``, nested parentheses
+#       accepted); a free-text axis name keeps the mechanical form.  A
+#       name the corpus does not know renders as under v3.  Prompts are
+#       byte-identical to v3 wherever every name involved is a single
+#       lower-case word; the scoped v3 -> v4 edges are in
+#       rubric_equivalences.yaml.
+RUBRIC_VERSION = "v4"
 
 _SCALE_TABLE = (
     "## Scale\n"
@@ -1189,6 +1203,46 @@ def _entity_words(etype: str) -> Tuple[str, str, str, str]:
     return ("trait", "traits", "Trait", "Traits")
 
 
+# The pair-mode axis name as ``resolve_axis`` writes it: two stems (which
+# never contain spaces or parentheses) and the pair's kind.
+_PAIR_AXIS_NAME = re.compile(
+    r"^(?P<pos>\S+) \(\+\) vs (?P<neg>\S+) \(-\) \[(?P<kind>roles|traits)\]$"
+)
+
+
+def _pair_axis_parts(axis_name: str) -> Optional[Tuple[str, str, str]]:
+    """``(pos stem, neg stem, kind)`` of a pair-mode axis name, else None
+    (an axis-file axis's free-text ``--axis_name``)."""
+    m = _PAIR_AXIS_NAME.match(axis_name or "")
+    return (m.group("pos"), m.group("neg"), m.group("kind")) if m else None
+
+
+def judge_axis_name(axis_name: str) -> str:
+    """The axis name as the rubric header shows it (RUBRIC_VERSION v4).
+
+    A pair axis (``careless_hexaco (+) vs conscientious_hexaco (-)
+    [traits]``) is composed from the two poles' judge labels, keeping the
+    ``(+)`` / ``(-)`` / ``[kind]`` frame, so a standards pair nests
+    parentheses: ``careless (from HEXACO) (+) vs conscientious (from
+    HEXACO) (-) [traits]``.  Any other axis name is free text and keeps
+    the mechanical ``_`` -> space form.
+    """
+    parts = _pair_axis_parts(axis_name)
+    if parts is None:
+        return display_form_name(axis_name)
+    pos, neg, kind = parts
+    return f"{judge_label(pos, kind)} (+) vs {judge_label(neg, kind)} (-) [{kind}]"
+
+
+def _judge_examples(axis_spec: AxisSpec, examples: Sequence[str]) -> str:
+    """Example names in judge display form.  On a pair axis they are of the
+    pair's kind; on an axis-file axis the kind is unknown and both tables
+    are consulted (the collision names display identically)."""
+    parts = _pair_axis_parts(axis_spec.axis_name)
+    kind = parts[2] if parts else None
+    return ", ".join(judge_label(e, kind) for e in examples) or "(none)"
+
+
 def build_static_prompt(axis_spec: AxisSpec, etype: str, name: str, content: str) -> str:
     # Per-call leakage prevention: strip the entity being judged from its
     # own rubric example list, so a 10-example axis becomes a 9-example
@@ -1199,20 +1253,18 @@ def build_static_prompt(axis_spec: AxisSpec, etype: str, name: str, content: str
     sing, plur, sing_t, plur_t = _entity_words(etype)
     neg_ex = [e for e in axis_spec.neg_examples if e != name]
     pos_ex = [e for e in axis_spec.pos_examples if e != name]
-    # RUBRIC_VERSION v3: entity names rendered in display form
-    # (``aligned artificial intelligence``) for human / LLM
-    # readability; canonical file-name form is preserved everywhere
-    # else (cache keys, dict keys, provenance, exclusions).
+    # RUBRIC_VERSION v4: entity names rendered in the judge display form
+    # (``judge_label``: ``systems-thinker``, ``careless (from HEXACO)``);
+    # canonical file-name form is preserved everywhere else (cache keys,
+    # dict keys, provenance, exclusions).
     return RUBRIC_STATIC.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
-        axis_name=display_form_name(axis_spec.axis_name),
+        axis_name=judge_axis_name(axis_spec.axis_name),
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(display_form_name(e) for e in neg_ex)
-            or "(none)",
-        positive_examples=", ".join(display_form_name(e) for e in pos_ex)
-            or "(none)",
-        name=display_form_name(name), content=content,
+        negative_examples=_judge_examples(axis_spec, neg_ex),
+        positive_examples=_judge_examples(axis_spec, pos_ex),
+        name=judge_label(name, etype), content=content,
     )
 
 
@@ -1235,16 +1287,16 @@ def build_response_batch_prompt(
     items_block = "\n\n".join(blocks)
     neg_ex = [e for e in axis_spec.neg_examples if e != name]
     pos_ex = [e for e in axis_spec.pos_examples if e != name]
+    # ``name`` is not in the v2+ template (the body is anonymised); it is
+    # passed so that a template edit naming it would get the judge form.
     return RUBRIC_RESPONSE_BATCH.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
-        axis_name=display_form_name(axis_spec.axis_name),
+        axis_name=judge_axis_name(axis_spec.axis_name),
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(display_form_name(e) for e in neg_ex)
-            or "(none)",
-        positive_examples=", ".join(display_form_name(e) for e in pos_ex)
-            or "(none)",
-        name=display_form_name(name), n_items=n, items_block=items_block,
+        negative_examples=_judge_examples(axis_spec, neg_ex),
+        positive_examples=_judge_examples(axis_spec, pos_ex),
+        name=judge_label(name, etype), n_items=n, items_block=items_block,
     )
 
 
