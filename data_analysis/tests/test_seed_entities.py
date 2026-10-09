@@ -536,6 +536,14 @@ class TestCheckHistory:
         verdict = se.classify_check(returned, "deracinated", {"deracinated", "cosmopolitan"})
         return se.check_history_record("rooted", self.DOC, answer, verdict, "deracinated", phase)
 
+    def test_record_keeps_the_prompt_form_when_reported(self):
+        assert "prompt_form" not in self._record("rootless")
+        answer = {"negative_label": "rootless", "antonym_score": 4, "reasoning": "r",
+                  "prompt_form": "judge-display-v1", "prompt_label": "rooted"}
+        verdict = se.classify_check("rootless", "deracinated", {"deracinated"})
+        rec = se.check_history_record("rooted", self.DOC, answer, verdict, "deracinated", "check")
+        assert rec["prompt_form"] == "judge-display-v1" and rec["prompt_label"] == "rooted"
+
     def test_record_keeps_candidates_and_instructions(self):
         rec = self._record("rootless|cosmopolitan")
         assert rec["candidates"] == ["rootless", "cosmopolitan"]

@@ -402,8 +402,12 @@ def check_history_record(stem: str, doc: dict, answer: dict, verdict: dict,
 
     Roger, 2026-09-28: every sample's candidates are worth keeping (they are
     more candidate labels, and a measure of that set of instructions), and a
-    second sample must not erase the first."""
-    return {
+    second sample must not erase the first.
+
+    ``prompt_form`` / ``prompt_label`` (2026-10-09, W19): how the check's
+    prompt named the trait, as generate_antonyms.py reports it; added only
+    when the answer carries them (absent: the stem was shown)."""
+    out = {
         "stem": stem,
         "checked_at": date.today().isoformat(),
         "phase": phase,
@@ -421,6 +425,10 @@ def check_history_record(stem: str, doc: dict, answer: dict, verdict: dict,
         "instructions": doc.get("instruction"),
         "generator": doc.get("generator"),
     }
+    for key in ("prompt_form", "prompt_label"):
+        if answer.get(key) is not None:
+            out[key] = answer[key]
+    return out
 
 
 def append_check_history(data_dir: Path, records: Iterable[dict]) -> int:

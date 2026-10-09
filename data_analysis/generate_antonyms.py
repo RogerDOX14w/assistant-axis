@@ -7,7 +7,11 @@ For each trait:
 3. Asks for the best negative_label (single adjective/short phrase)
 4. Asks for a 0-4 antonym rating (how well negative_label is an antonym of positive_label)
 
-Outputs a JSON object: { trait: { negative_label, antonym_score, reasoning } }
+Outputs a JSON object: { trait: { negative_label, antonym_score, reasoning,
+prompt_form, prompt_label } }, keyed by stem.  The prompt names the trait in
+its judge display form (``careless (from HEXACO)``, ``systems-thinker``;
+2026-10-09, W19; it showed the stem before), and ``prompt_form`` /
+``prompt_label`` record the form and the exact string shown.
 Uses known antonyms from steering_across_personas for 5 overlapping traits.
 
 With ``--name-pos`` (2026-10-09, for working from a description to a label)
@@ -24,7 +28,7 @@ and no neg instructions: one call per role, given its display name, its
 description and its five pos instructions, asks for the opposing *role* (a
 role, not an adjective, and not necessarily one in the corpus) and a 0-4
 rating of how cleanly it opposes.  Each result is ``{reasoning,
-opposing_role, opposition_score}``; the usage record is
+opposing_role, opposition_score, prompt_form, prompt_label}``; the usage record is
 ``data/roles/role_pair_check_usage.json``.  Run it from both sides: a role
 pair is recorded only when each side names the other.
 
@@ -46,10 +50,21 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.entity_id import (  # noqa: E402
+    JUDGE_LABEL_FORM, display_form_name, judge_form_of_label, judge_label,
+)
 from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
 from assistant_axis.judge_pricing import MultiModelUsage, extract_usage_anthropic  # noqa: E402
 
 MODEL = "claude-sonnet-4-6"
+# How the entity's name is written in the check's user message, returned with
+# every result as ``prompt_form`` (with the exact string as ``prompt_label``)
+# so that a runner can record it.  Until 2026-10-09 the trait check showed
+# the stem (``positive_label: careless_hexaco``) and the role check
+# role_display_name; since W19 both show the judge display form
+# (``careless (from HEXACO)``, ``systems-thinker``).  Results without the
+# field are from the earlier form.
+PROMPT_FORM = JUDGE_LABEL_FORM
 # Cumulative token-usage record (AGENT_NOTES "Token usage logging is
 # mandatory on batched LLM call sites"); one level above instructions/.
 DEFAULT_USAGE_JSON = Path(__file__).resolve().parent.parent / "data" / "traits" / "antonym_check_usage.json"
@@ -259,11 +274,18 @@ async def classify_role_one(
     return dict(ROLE_ERROR_RESULT)
 
 
-def load_role_tasks(stems: list[str], roles_dir: Path | None = None) -> list[tuple[str, str, str, list[dict]]]:
-    """``(stem, display name, description, pos instructions)`` per role, in
-    the order given.  Exits on a stem with no file or no instructions."""
-    from data_analysis.regenerate_role_instructions import role_display_name
+def trait_prompt_label(stem: str, doc: dict) -> str:
+    """The name the trait check shows for a trait file: the judge display
+    form of its label (``judge_label``'s trait rule, applied to the file read,
+    which may be a staged copy).  Ad-hoc runners calling ``classify_one``
+    should pass this."""
+    return judge_form_of_label(doc.get("positive_label") or display_form_name(stem))
 
+
+def load_role_tasks(stems: list[str], roles_dir: Path | None = None) -> list[tuple[str, str, str, list[dict]]]:
+    """``(stem, judge display name, description, pos instructions)`` per
+    role, in the order given.  Exits on a stem with no file or no
+    instructions."""
     roles_dir = roles_dir if roles_dir is not None else ROLES_DIR
     missing = [s for s in stems if not (roles_dir / f"{s}.json").exists()]
     if missing:
@@ -277,7 +299,8 @@ def load_role_tasks(stems: list[str], roles_dir: Path | None = None) -> list[tup
         if not instructions:
             print(f"ERROR: role {stem} has no instructions; generate them first", file=sys.stderr)
             sys.exit(1)
-        tasks.append((stem, role_display_name(stem), data.get("description", ""), instructions))
+        tasks.append((stem, judge_label(stem, "roles", data_dir=Path(roles_dir).parent.parent),
+                      data.get("description", ""), instructions))
     return tasks
 
 
@@ -292,7 +315,8 @@ async def main_roles_async(role_stems: list[str], usage_json: Path | None = None
     semaphore = asyncio.Semaphore(10)
 
     async def run_one(stem, name, description, insts):
-        return stem, await classify_role_one(client, name, description, insts, semaphore, usage)
+        result = await classify_role_one(client, name, description, insts, semaphore, usage)
+        return stem, {**result, "prompt_form": PROMPT_FORM, "prompt_label": name}
 
     api_results = await asyncio.gather(*(run_one(*t) for t in tasks))
 
@@ -410,7 +434,6 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
     tasks = []
 
     for tf in trait_files:
-        positive_label = tf.stem
         with open(tf, encoding="utf-8") as f:
             data = json.load(f)
         instructions = data["instruction"]
@@ -418,24 +441,28 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
         if not definition:
             definition = data.get("description", "")
 
-        tasks.append((positive_label, definition, instructions))
+        # Results are keyed by stem; the prompt shows the judge display form
+        # (until 2026-10-09 it showed the stem itself).
+        tasks.append((tf.stem, trait_prompt_label(tf.stem, data), definition, instructions))
 
     print(f"Calling API for all {len(tasks)} traits", file=sys.stderr)
 
-    async def run_one(pos_label, defn, insts):
-        result = await classify_one(client, pos_label, defn, insts, semaphore, usage)
+    async def run_one(stem, label, defn, insts):
+        result = await classify_one(client, label, defn, insts, semaphore, usage)
+        result["prompt_form"] = PROMPT_FORM
+        result["prompt_label"] = label
         if name_pos:
-            named = await name_pos_one(client, insts, semaphore, usage, pos_label)
+            named = await name_pos_one(client, insts, semaphore, usage, stem)
             result["positive_name"] = named.get("positive_name")
             result["positive_name_reasoning"] = named.get("reasoning")
-        if pos_label in KNOWN_ANTONYMS:
-            result["known_antonym"] = KNOWN_ANTONYMS[pos_label]
-            match = result["negative_label"].lower() == KNOWN_ANTONYMS[pos_label].lower()
+        if stem in KNOWN_ANTONYMS:
+            result["known_antonym"] = KNOWN_ANTONYMS[stem]
+            match = result["negative_label"].lower() == KNOWN_ANTONYMS[stem].lower()
             result["matches_known"] = match
-        return pos_label, result
+        return stem, result
 
     api_results = await asyncio.gather(
-        *(run_one(pl, defn, insts) for pl, defn, insts in tasks)
+        *(run_one(stem, label, defn, insts) for stem, label, defn, insts in tasks)
     )
 
     for pos_label, result in api_results:

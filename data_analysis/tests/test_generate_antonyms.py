@@ -83,7 +83,10 @@ class TestNamePos:
 
 
 class TestTraitModeUnchanged:
-    """The role mode (2026-10-09) must leave the trait check byte-identical."""
+    """The role mode (2026-10-09) must leave the trait check's system prompts
+    byte-identical.  (The user message changed with W19, the same day: it
+    names the trait in its judge display form, not its stem; see
+    TestJudgeDisplayForm.)"""
 
     def test_trait_prompts_are_the_committed_ones(self):
         import hashlib
@@ -102,6 +105,32 @@ class TestTraitModeUnchanged:
         assert module.DEFAULT_USAGE_JSON.parts[-2:] == ("traits", "antonym_check_usage.json")
         module.main(["--traits", "a", "b", "--usage-json", "x.json"])
         assert seen["trait_filter"] == ["a", "b"] and str(seen["usage_json"]) == "x.json"
+
+
+class TestJudgeDisplayForm:
+    """W19 (2026-10-09): the trait check shows the judge display form of the
+    label (it showed the stem), and every result says so."""
+
+    def test_prompt_label_of_a_file(self):
+        assert module.trait_prompt_label("careless_hexaco", {"positive_label": "careless (HEXACO)"}) \
+            == "careless (from HEXACO)"
+        assert module.trait_prompt_label("systems_thinker", {"positive_label": "systems-thinker"}) \
+            == "systems-thinker"
+        assert module.trait_prompt_label("no_label_here", {}) == "no label here"
+
+    def test_run_shows_the_judge_form_and_records_it(self, tmp_path, monkeypatch, capsys):
+        client = _client(json.dumps(REPLY))
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: client)
+        asyncio.run(module.main_async(trait_filter=["careless_hexaco", "patient"],
+                                      usage_json=tmp_path / "usage.json"))
+        out = json.loads(capsys.readouterr().out)
+        assert list(out) == ["careless_hexaco", "patient"]
+        assert out["careless_hexaco"]["prompt_form"] == module.PROMPT_FORM == "judge-display-v1"
+        assert out["careless_hexaco"]["prompt_label"] == "careless (from HEXACO)"
+        assert out["patient"]["prompt_label"] == "patient"
+        firsts = sorted(c.kwargs["messages"][0]["content"].splitlines()[0]
+                        for c in client.messages.create.call_args_list)
+        assert firsts == ["positive_label: careless (from HEXACO)", "positive_label: patient"]
 
 
 ROLE_INSTRUCTIONS = [{"pos": f"role pos {i}"} for i in range(5)]
@@ -190,7 +219,9 @@ class TestRoleMode:
             asyncio.run(module.main_roles_async(["destroyer", "devils_advocate"], usage_json, roles_dir))
         out, err = capsys.readouterr()
         first, _ = json.JSONDecoder().raw_decode(out)
-        assert list(first) == ["destroyer", "devils_advocate"] and first["destroyer"] == ROLE_REPLY
+        assert list(first) == ["destroyer", "devils_advocate"]
+        assert first["destroyer"] == {**ROLE_REPLY, "prompt_form": module.PROMPT_FORM, "prompt_label": "destroyer"}
+        assert first["devils_advocate"]["prompt_label"] == "devil's advocate"
         assert json.loads(usage_json.read_text())["n_calls"] == 4
         assert "4: 2 roles" in err
         assert "generate_antonyms:roles:" in caplog.text and "parse rate: 2/2 OK" in caplog.text
