@@ -730,7 +730,7 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-09T17:22:11+00:00",
+   "at": "2026-10-09T19:22:03+00:00",
    "n_calls": 0,
    "n_retries": 0,
    "cost_usd": 0,
@@ -753,52 +753,52 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
-   "git_sha": "872433d+dirty",
+   "git_sha": "9a1fb45+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-09T17:22:11+00:00",
+  "produced_at": "2026-10-09T19:22:03+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
     "path": "data/candidates/roget/heads.json",
-    "fingerprint": "v1:2026-10-08T03:48:37+00:00@1679886",
+    "fingerprint": "v1:2026-10-08T07:02:25+00:00@1679886",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T03:48:37+00:00",
+    "last_modified_at": "2026-10-08T07:02:25+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_pairs",
     "path": "data/candidates/roget/head_pairs.json",
-    "fingerprint": "v1:2026-10-08T23:28:04+00:00@426714",
+    "fingerprint": "v1:2026-10-08T23:35:32+00:00@426714",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T23:28:04+00:00",
+    "last_modified_at": "2026-10-08T23:35:32+00:00",
     "extras": {}
    },
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T17:20:56+00:00@1448473",
+    "fingerprint": "v1:2026-10-09T19:22:01+00:00@1453689",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T17:20:56+00:00",
+    "last_modified_at": "2026-10-09T19:22:01+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope_rubric",
     "path": "reports/trait_gap_generation/rubrics/roget_head_scope.md",
-    "fingerprint": "v1:2026-10-08T20:16:20+00:00@27433",
+    "fingerprint": "v1:2026-10-08T20:52:53+00:00@27433",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T20:16:20+00:00",
+    "last_modified_at": "2026-10-08T20:52:53+00:00",
     "extras": {
      "version": "2",
      "sha256": "09a1fc1dcd4af844b8e98de5be909d693a806ff201e24c9019b826c769049116"
     }
    }
   ],
-  "inputs_sha256": "fffbddab6c6f558075ca90be16898ed2c5154384e743b24e3460d49c18d22878"
+  "inputs_sha256": "a2d21019a8f5eeea069614ef3737f0b591d4b0d1761f37ad99831b30eb147407"
  }
 }

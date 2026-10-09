@@ -3181,21 +3181,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "69963839473dab8558e0958b7ca2f63df48166093170df11095b3f6f11882a9d",
+      "description_sha256": "eafb33e2bcb6e223c579cbbef1dd13e81e6057b8192b26cf8ebf2b28b8a89870",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes how the persona relates to others through teamwork, shared problem-solving, and seeking their input, which a text reply can show directly.",
-        "alignment": "Collaboration and seeking others' input relate weakly to deferring to those it works for, but the description is about teamwork style rather than the conduct of deference or resistance itself, so the link needs a further step."
+        "descriptors": "The description is about how the persona relates to and works with others, which is interpersonal rather than a matter of style or belief.",
+        "alignment": "Collaboration describes a working style of sharing effort and asking for input, which bears only indirectly on deference or oversight, so a further step is needed to connect it to the seven matters."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:22+00:00",
+      "batch_id": "corpus_desc_20261009T192049Z",
+      "at": "2026-10-09T19:20:52+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "collectivistic": {
       "label": "collectivistic",
@@ -8389,6 +8389,26 @@
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
     },
+    "good_even_when_unwatched": {
+      "label": "good even when unwatched",
+      "region": "moral_stance",
+      "enactable_in_text": 1,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "4dd176ef2bd45ca6dfc7cd4aba3da2d8fc684741dcc4346ac6db99078b5ff09c",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about consistent ethical conduct whether or not anyone is watching, which is a matter of what the persona holds to be right and acts on.",
+        "alignment": "The description directly concerns keeping the rules and not taking what is not one's own whether or not anyone is watching, which names rule-keeping and behaving consistently under oversight."
+      },
+      "batch_id": "corpus_desc_20261009T192049Z",
+      "at": "2026-10-09T19:20:52+00:00"
+    },
     "good_looking": {
       "label": "good-looking",
       "region": "identity_demographic",
@@ -8411,6 +8431,26 @@
       "previous_region": null,
       "previous_alignment_relevant": null,
       "previous_source": "none"
+    },
+    "good_only_when_watched": {
+      "label": "good only when watched",
+      "region": "moral_stance",
+      "enactable_in_text": 1,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "8edc700cec81e2013caeb127f1114422135959a38cdef6324bcf94303c9218cf",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The trait is about whether conduct depends on being observed, which is a matter of what the persona holds to be right and whether it acts on that when unobserved.",
+        "alignment": "The persona behaves well only under observation and breaks rules or cuts corners once unobserved, which directly concerns keeping to the rules and limits it has been given versus breaking them."
+      },
+      "batch_id": "corpus_desc_20261009T192049Z",
+      "at": "2026-10-09T19:20:51+00:00"
     },
     "goofy": {
       "label": "goofy",
@@ -20937,40 +20977,40 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
-      "git_sha": "872433d+dirty",
+      "git_sha": "9a1fb45+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (rows dropped: mercurial, technical)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T192049Z)"
     },
-    "produced_at": "2026-10-09T17:21:06+00:00",
+    "produced_at": "2026-10-09T19:20:52+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
         "path": "reports/trait_gap_generation/rubrics/descriptors.md",
-        "fingerprint": "v1:2026-10-08T19:50:24+00:00@2510",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@2510",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T19:50:24+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "extras": {}
       },
       {
         "dep_key": "rubric_alignment",
         "path": "reports/trait_gap_generation/rubrics/alignment.md",
-        "fingerprint": "v1:2026-10-08T19:50:24+00:00@5002",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@5002",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T19:50:24+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261009T162512Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T162512Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-09T16:25:15+00:00@6203",
+        "dep_key": "responses_corpus_desc_20261009T192049Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T192049Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-09T19:20:52+00:00@6532",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T16:25:15+00:00",
+        "last_modified_at": "2026-10-09T19:20:52+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "55a49677c16537a492907415e55429fb545d4f2dbffab385f7f79ce058bf774a"
+    "inputs_sha256": "535c78d485867a0f4d60ba8127ab7aa6679b19cb378377b95a741c14792833a1"
   }
 }
