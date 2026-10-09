@@ -7,7 +7,10 @@ is not a pair pole (mode "single"), regenerate under non-X, check, record, and l
 
     uv run python roger/pre_extraction_2026-10-09/rewrite_and_check.py EDITS.json --phase LABEL
 
-EDITS.json: [{"stem": ..., "description": ..., "mode": "pair" | "single", "note": ...}, ...]
+EDITS.json: [{"stem": ..., "description": ..., "mode": "pair" | "single" | "keep", "note": ...}, ...]
+"keep": the label and arrangement stay as they are (a non-X sequence member, or a spoke whose pointer stays);
+regenerate in full and check.  The check names the trait in the judge display form (W19), recorded as
+prompt_form / prompt_label.
 """
 import argparse
 import asyncio
@@ -49,7 +52,9 @@ async def check(docs):
 
     async def one(stem, d):
         defn = G.extract_definition(d.get("eval_prompt", "")) or d.get("description", "")
-        return stem, await G.classify_one(client, stem, defn, d["instruction"], sem, usage)
+        label = G.trait_prompt_label(stem, d)
+        r = await G.classify_one(client, label, defn, d["instruction"], sem, usage)
+        return stem, {**r, "prompt_form": G.PROMPT_FORM, "prompt_label": label}
     out = dict(await asyncio.gather(*(one(s, d) for s, d in docs.items())))
     total = MultiModelUsage.load_or_create(G.DEFAULT_USAGE_JSON); total.merge_from(usage); total.write_json(G.DEFAULT_USAGE_JSON)
     print(usage.log_line("[usage]"))
@@ -66,7 +71,8 @@ def main():
         partner_label[e["stem"]] = d["negative_label"]
         print(f"{e['stem']}: was {d['description']!r}")
         d["description"] = e["description"]
-        d["negative_label"] = f"non-{d['positive_label']}"
+        if e["mode"] != "keep":
+            d["negative_label"] = f"non-{d['positive_label']}"
         if e["mode"] == "single":
             d["arrangement"] = {"kind": "singleton", "note": e.get("note", "")}
         save(e["stem"], d)
