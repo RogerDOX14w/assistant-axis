@@ -23,6 +23,12 @@ or OEWN know but that sit below the dictionary floor (Zipf 1.5; the table's ``in
 stage submits them on purpose, last, after ``allport_hi`` and ``allport_probe``, opening with a 10%
 pilot (``--every-nth 10``) to see the yield.  The words neither tool knows (``unknown_word``) are
 never submitted.
+
+Stage ``allport_iv`` (Roger, 2026-10-09, QUESTIONS 29): the Allport-only words listed in column IV
+alone ("metaphorical and doubtful terms"), taken out of ``allport_hi`` and ``allport_probe`` and run
+after them, opening with a 10% pilot; whether the rest follows depends on the pilot's yield.  The
+column IV words below the floor wait with that decision and are not in ``allport_rare``.  Order of
+the census runs: ``tda``, ``allport_hi``, ``allport_probe``, ``allport_iv``, ``allport_rare``.
 """
 from __future__ import annotations
 
@@ -42,7 +48,14 @@ from .ingest import STAGE_HI, STAGE_PROBE, STAGE_TDA, TableRow, clean_surface, z
 
 #: The known-but-rare Allport words, submitted last on purpose (QUESTIONS 34).
 STAGE_RARE = "allport_rare"
-STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, STAGE_RARE, "extra")
+#: The Allport-only words of column IV alone, after the two main Allport stages (QUESTIONS 29).
+STAGE_IV = "allport_iv"
+STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, STAGE_IV, STAGE_RARE, "extra")
+
+
+def column_iv_only(r: TableRow) -> bool:
+    """An Allport-only word listed in column IV and in no other column."""
+    return not r.tda and ((r.allport or {}).get("columns") or []) == ["IV"]
 
 #: Platform cost per word, from the plan's revision of 2026-10-08 (section 4): M1 (the split
 #: filter, Haiku 5.5, three readings) about $0.004 per submitted word; M3 about $0.018 per word
@@ -86,11 +99,17 @@ def estimate_downstream_usd(n: int, *, transport: str = "live") -> Estimate:
 def select_stage(rows: Sequence[TableRow], stage: str) -> list[TableRow]:
     """Eligible rows of one stage, in rank order."""
     if stage not in STAGES or stage == "extra":
-        raise ValueError(f"not a table stage: {stage!r} (one of {STAGES[:4]})")
+        raise ValueError(f"not a table stage: {stage!r} (one of {STAGES[:5]})")
     if stage == STAGE_RARE:
-        return sorted((r for r in rows if r.stem and not r.tda and r.ineligible_reason == "below_hard_reject"),
-                      key=lambda r: r.rank)
-    return sorted((r for r in rows if r.eligible and r.stage == stage), key=lambda r: r.rank)
+        pick = (r for r in rows if r.stem and not r.tda and r.ineligible_reason == "below_hard_reject"
+                and not column_iv_only(r))
+    elif stage == STAGE_IV:
+        pick = (r for r in rows if r.eligible and r.stage in (STAGE_HI, STAGE_PROBE) and column_iv_only(r))
+    elif stage in (STAGE_HI, STAGE_PROBE):
+        pick = (r for r in rows if r.eligible and r.stage == stage and not column_iv_only(r))
+    else:
+        pick = (r for r in rows if r.eligible and r.stage == stage)
+    return sorted(pick, key=lambda r: r.rank)
 
 
 def every_nth(rows: Sequence[TableRow], n: int, offset: int = 0) -> list[TableRow]:

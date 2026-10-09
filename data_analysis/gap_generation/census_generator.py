@@ -3,7 +3,7 @@
 
     uv run python data_analysis/gap_generation/census_generator.py download [--only KEY ...] [--force] [--dry-run]
     uv run python data_analysis/gap_generation/census_generator.py ingest [--queue PATH] [--dry-run]
-    uv run python data_analysis/gap_generation/census_generator.py submit --stage {tda,allport_hi,allport_probe,allport_rare,extra}
+    uv run python data_analysis/gap_generation/census_generator.py submit --stage {tda,allport_hi,allport_probe,allport_iv,allport_rare,extra}
         --run-id R [--every-nth N [--offset K]] [--extra-list PATH] [--transport live|batches]
         [--budget-usd 5.0] [--confirm-expensive --confirmed-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/census_generator.py report --run-id R [--dry-run]
@@ -204,7 +204,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("submit", help="write a run's candidates.jsonl and submit it (no API cost; gated on the "
                                       "downstream estimate)")
-    p.add_argument("--stage", required=True, choices=("tda", "allport_hi", "allport_probe", "allport_rare", "extra"))
+    p.add_argument("--stage", required=True, choices=("tda", "allport_hi", "allport_probe", "allport_iv", "allport_rare", "extra"))
     p.add_argument("--run-id", required=True)
     p.add_argument("--every-nth", type=int, default=None, help="every N-th row of the stage in rank order (pilot)")
     p.add_argument("--offset", type=int, default=0)

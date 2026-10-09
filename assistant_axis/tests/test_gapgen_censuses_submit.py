@@ -37,9 +37,15 @@ def lines(p: Path):
 def test_stage_selection(env):
     rows = env[0]
     assert [r.surface for r in S.select_stage(rows, "tda")] == ["kind", "sunny", "abandoned", "gloomy", "obscurish"]
-    assert len(S.select_stage(rows, "allport_hi")) == 6 and len(S.select_stage(rows, "allport_probe")) == 2
+    # QUESTIONS 29: the column-IV-only word ("a la mode") leaves allport_hi for allport_iv
+    assert len(S.select_stage(rows, "allport_hi")) == 5 and len(S.select_stage(rows, "allport_probe")) == 2
+    assert [r.surface for r in S.select_stage(rows, "allport_iv")] == ["a la mode"]
     # QUESTIONS 34: the known-but-rare words, never the unknown ones
     assert [r.surface for r in S.select_stage(rows, "allport_rare")] == ["quaintish"]
+    # every eligible Allport-only row is in exactly one of the three Allport stages
+    stages = [set(r.stem for r in S.select_stage(rows, st)) for st in ("allport_hi", "allport_probe", "allport_iv")]
+    assert not (stages[0] & stages[1]) and not (stages[0] & stages[2]) and not (stages[1] & stages[2])
+    assert set().union(*stages) == {r.stem for r in rows if r.eligible and r.stage in ("allport_hi", "allport_probe")}
     with pytest.raises(ValueError):
         S.select_stage(rows, "extra")
 
