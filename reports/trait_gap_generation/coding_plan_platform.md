@@ -730,6 +730,15 @@ left provisional:
     against 4.5 by blind judges, the verdict step with three readings about a fifth fewer weighted
     errors than 4.5 (more than half fewer on near-corpus words).  Build: [coding_plan_haiku55.md](./coding_plan_haiku55.md),
     "The switch".  Decision 16's re-examination on real generator output stands.
+18. **The overlap rule and cut-off hold on generator output; covers are not reviewed routinely (Roger,
+    2026-10-09, on the cover audit in [m3_pilot_readout.md](./m3_pilot_readout.md), "Cover audit on generator
+    output").**  Roger marked 100 of the 173 non-exact-label covers of the three generator pilots, blind: 95
+    covered, 1 new, 4 uncertain.  So: (a) Opus keeps re-reading Sonnet's 2s ("Opus on the 2s and 3s"; it raised a
+    2 to 3 rightly 37 times in 40, which "Opus on the 3s only" would have sent to review as false "new"s); (b) the
+    cut-off stays at 3 (38 of 40 confirmed at 3 and 3, none new; 20 of 20 at 4); (c) covered candidates are not
+    reviewed routinely (one clear gap in 100 does not repay the time at scale); words a review or audit doubts are
+    put in front of Roger with `review_graph.py build --include KEY ...`.  The doubtful five had one shape, a
+    candidate much broader than, or only one-way implied by, its covering trait; watch for it on the full runs.
 
 ## Interface as built (2026-10-08, Fable; replaces the scorer side of "Frozen interface")
 
