@@ -1,0 +1,329 @@
+{
+  "batch_id": "review_allport_pilots_1",
+  "from_batches": [
+    "2026-10-09-iv-pilot_censuses",
+    "2026-10-09-rare-pilot_censuses"
+  ],
+  "git_sha": "189bf0b",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "build",
+    "--batch-id",
+    "review_allport_pilots_1",
+    "--from-batches",
+    "2026-10-09-iv-pilot_censuses",
+    "2026-10-09-rare-pilot_censuses",
+    "--transport",
+    "batches",
+    "--budget-usd",
+    "3"
+  ],
+  "plan": {
+    "n_candidates": 107,
+    "n_covered_shown": 33,
+    "selected_by_batch": {
+      "2026-10-09-iv-pilot_censuses": {
+        "new": 61,
+        "covered": 17
+      },
+      "2026-10-09-rare-pilot_censuses": {
+        "new": 46,
+        "covered": 16
+      }
+    },
+    "skipped": {},
+    "query_texts": {
+      "n_query_texts": 107,
+      "n_cached": 107,
+      "n_to_embed": 0
+    },
+    "no_vector": 0,
+    "n_relation_calls": 107,
+    "n_listed": 874,
+    "n_candidate_edges": 493,
+    "n_edges_at_overlap_floor": 117
+  },
+  "transport": "batches",
+  "transport_reason": "--transport batches",
+  "estimate_usd": 0.2417,
+  "estimate_lines": [
+    "relation call (8.2 listed candidates a call): 107 x (1,052, 625) tokens at claude-haiku-5-5:batch rates = $0.022",
+    "unsure re-ask (14% of relation calls, 1.4 candidates each): 15 x (593, 108) tokens at claude-sonnet-5-5:batch rates = $0.017",
+    "overlap, first direction, Sonnet (117 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 92 x (201, 83) tokens at claude-sonnet-5-5:batch rates = $0.057",
+    "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 26 x (362, 160) tokens at claude-opus-5-5:batch rates = $0.060",
+    "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 29 x (201, 83) tokens at claude-sonnet-5-5:batch rates = $0.018",
+    "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 29 x (362, 160) tokens at claude-opus-5-5:batch rates = $0.067"
+  ],
+  "budget_usd": 3.0,
+  "cap_usd": 3.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "k": 10,
+    "cosine_floor": 0.25,
+    "overlap_floor": 0.35,
+    "cut_off": 4,
+    "proposed_cut_off": 3,
+    "rules": "m3_rules_2",
+    "relation_seed": "review_allport_pilots_1",
+    "concurrency": 8,
+    "query_form": "gloss_w14",
+    "config_version": "2026-10-02",
+    "embedding_model": "text-embedding-3-large",
+    "representation": "w20",
+    "variant": "centred",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "ask_attempts": 2
+  },
+  "estimate_inputs": {
+    "shares": {
+      "bins": [
+        0.35,
+        0.45,
+        0.55,
+        0.65
+      ],
+      "similar": [
+        0.7305,
+        0.8947,
+        1.0,
+        1.0
+      ],
+      "opus": [
+        0.1346,
+        0.2812,
+        1.0,
+        1.0
+      ],
+      "four": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "n_listed": [
+        167,
+        38,
+        10,
+        0
+      ],
+      "n_read": [
+        104,
+        32,
+        9,
+        0
+      ],
+      "second": [
+        0.1538,
+        0.375,
+        1.0,
+        1.0
+      ]
+    },
+    "overlap_tokens": {
+      "sonnet": [
+        201,
+        83
+      ],
+      "opus": [
+        362,
+        160
+      ]
+    }
+  },
+  "corpus": {
+    "n_corpus": 916,
+    "n_missing_from_cache": 0,
+    "missing": [],
+    "n_corpus_missing": 0,
+    "n_queue_missing": 0,
+    "queue": {
+      "enabled": false,
+      "n_entries": 0
+    },
+    "queue_stems": []
+  },
+  "resumed": false,
+  "started_at": "2026-10-09T06:24:29+00:00",
+  "gate": {
+    "pairs": 44,
+    "pairs_not_on_record": 44,
+    "spent_usd": 0.0313,
+    "overlap_estimate_usd": 0.1248,
+    "cap_usd": 3.0,
+    "lines": [
+      "overlap, first direction, Sonnet (44 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 44 x (201, 83) tokens at claude-sonnet-5-5:batch rates = $0.027",
+      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 18 x (362, 160) tokens at claude-opus-5-5:batch rates = $0.042",
+      "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 19 x (201, 83) tokens at claude-sonnet-5-5:batch rates = $0.012",
+      "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 19 x (362, 160) tokens at claude-opus-5-5:batch rates = $0.044"
+    ]
+  },
+  "finished_at": "2026-10-09T07:03:15+00:00",
+  "cost_usd": 0.0648,
+  "status": 0,
+  "stopped_by_error": null,
+  "calls_sent": {
+    "overlap:opus": 4,
+    "overlap:sonnet": 46,
+    "relation:haiku": 107,
+    "relation_unsure:sonnet": 7
+  },
+  "calls_resumed": 0,
+  "parse_rates": {
+    "relation:claude-haiku-5-5": {
+      "n": 107,
+      "ok_first": 107,
+      "ok": 107
+    },
+    "relation_unsure:claude-sonnet-5-5": {
+      "n": 7,
+      "ok_first": 7,
+      "ok": 7
+    },
+    "overlap:claude-sonnet-5-5": {
+      "n": 46,
+      "ok_first": 46,
+      "ok": 46
+    },
+    "overlap:claude-opus-5-5": {
+      "n": 4,
+      "ok_first": 4,
+      "ok": 4
+    }
+  },
+  "complete": true,
+  "graph_stats": {
+    "n_candidates": 107,
+    "by_batch": {
+      "2026-10-09-iv-pilot_censuses": 61,
+      "2026-10-09-rare-pilot_censuses": 46
+    },
+    "by_generator": {
+      "censuses": 107
+    },
+    "by_decision": {
+      "new": 107
+    },
+    "n_covered_shown": 33,
+    "n_corpus_nodes": 646,
+    "n_queue_nodes": 0,
+    "candidate_edges": {
+      "n": 493,
+      "by_relation": {
+        "opposed": 52,
+        "similar": 85,
+        "unrelated": 356
+      },
+      "by_overlap": {
+        "below_floor": 41,
+        "both": 2,
+        "first": 42,
+        "not_similar": 408
+      },
+      "answers": {
+        "opposed": 76,
+        "similar": 135,
+        "unrelated": 662,
+        "unsure": 1
+      },
+      "one_sided": 112
+    },
+    "overlap": {
+      "pairs_first_direction": 44,
+      "pairs_second_direction": 2,
+      "sonnet_readings": 46,
+      "opus_readings": 4,
+      "four_first": 0,
+      "proposed_first": 2,
+      "four_edges": 0,
+      "similar_below_floor": 41,
+      "unparsed": 0,
+      "stalled": 0
+    },
+    "agreement_on_fours": {
+      "directions_read_4": 1,
+      "by_readings": {
+        "sonnet 3, opus 3": 3,
+        "sonnet 3, opus 4": 1
+      }
+    },
+    "corpus_edges": {
+      "n": 1804,
+      "by_relation": {
+        "opposed": 484,
+        "similar": 370,
+        "unrelated": 950
+      },
+      "with_readings": 531
+    },
+    "cliques": {
+      "n": 0,
+      "by_size": {},
+      "largest": 0,
+      "candidates_in_cliques": 0,
+      "candidates_in_several": 0
+    },
+    "singletons": 107,
+    "clique_links": 0,
+    "proposed_groups": {
+      "n": 2,
+      "n_edges": 2,
+      "by_size": {
+        "2": 2
+      },
+      "largest": 2,
+      "candidates_in_proposed": 4,
+      "candidates_in_proposed_only": 4,
+      "candidates_in_several": 0,
+      "links": 0
+    },
+    "ungrouped": 103,
+    "skipped": {},
+    "no_vector": [],
+    "selected_by_batch": {
+      "2026-10-09-iv-pilot_censuses": {
+        "new": 61,
+        "covered": 17
+      },
+      "2026-10-09-rare-pilot_censuses": {
+        "new": 46,
+        "covered": 16
+      }
+    }
+  },
+  "stalled": {}
+}
