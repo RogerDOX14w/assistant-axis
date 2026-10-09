@@ -230,8 +230,81 @@ drift check or the equivalence registry.  Currently low-risk
 because those rubrics are run from the runpod-side
 ``steering/`` pipeline (fresh runs, no resume-against-edited-rubric
 pattern); see the TODO block above
-``COHERENCE_RUBRIC_VERSION = 4`` for the work needed to bring them
+``COHERENCE_RUBRIC_VERSION`` for the work needed to bring them
 into the same scheme if/when that assumption breaks.
+
+### Judge prompts show the judge display form (Roger, 2026-10-09)
+
+**The policy** (Roger, 2026-10-09): anything that sends a label or a
+`negative_label` to an LLM judge uses the most legible form: by default the
+display form (hyphens, spaces, other characters and capitals kept), and for
+a trait from an official instrument, whose label ends in a parenthesised
+standard, the long form with "from": `careless (HEXACO)` is shown as
+`careless (from HEXACO)`.  The same day he widened it to every prompt that
+names a corpus entity, the instruction generators included ("no
+exceptions").  The stored labels never change; the rewrite happens where the
+prompt is built.  This reverses the 2026-09-07 decision "prompts keep the
+mechanical form" (§ "File-name vs display-name convention").
+
+**The utilities** ([`assistant_axis/entity_id.py`](assistant_axis/entity_id.py)):
+
+| function | gives |
+| --- | --- |
+| `judge_label(stem_or_id, kind=None, *, data_dir=None)` | an entity's judge display form: the trait's `positive_label`, or the role's `ROLE_DISPLAY_OVERRIDES` entry / `_` → space, then the suffix rewrite; a name the corpus does not know falls back to the mechanical `display_form_name` (so its prompts are byte-identical to the old form) |
+| `judge_negative_label(trait_stem, *, data_dir=None)` | a trait's `negative_label`: the named corpus trait's `judge_label`; for the `non-X` placeholder, `"non-"` + the trait's own judge label (`non-careless (from HEXACO)`); otherwise the stored string with the suffix rewrite |
+| `judge_form_of_label(label)` | the suffix rewrite alone, for a label string that is not (yet) a corpus file: a staged copy, an old commit's version, a trait-gap candidate; `judge_label` uses it, so the two cannot disagree |
+| `judge_form_of_negative_label(negative_label, positive_label)` | `judge_negative_label` from the two strings |
+| `STANDARD_SUFFIX_FORMS` | the suffix table: suffix as the labels write it → the form after "from" |
+| `JUDGE_LABEL_FORM` | `"judge-display-v1"`, recorded by callers that persist which form a prompt used |
+
+**The suffix table** (`STANDARD_SUFFIX_FORMS`; the choice was left to the
+main agent): a capitalised suffix not in the table takes the default,
+`(from X)`; a lower-case one (`(tentative, PC10)`) is not a standard and is
+left alone.  Listed: HEXACO, VALS, DISC, VARK, Tönnies on the default;
+the Big Five, the MBTI, the Enneagram, the BFAS, the IPIP-NEO, the Tarot,
+the Dark Tetrad, the Light Triad, the Inglehart-Welzel map; and, for sets
+named after a person, the framework: Holland's RIASEC, Bartle's player
+types, Baumrind's parenting styles, Edward Hall, Kohlberg's stages,
+Allport's religious orientation, Gelfand's tight and loose cultures.
+Examples: `ENFJ (from the MBTI)`, `artistic (from Holland's RIASEC)`,
+`secular-rational (from the Inglehart-Welzel map)`, `Gemeinschaft (from
+Tönnies)`.  Bourdieu (not adopted) would take the default.
+
+**Adding a standard**: add its suffix to `STANDARD_SUFFIX_FORMS` with the
+form it should take, or list it with itself for the default.
+`test_entity_id.py::TestJudgeLabel` fails while a capitalised suffix in the
+corpus labels or in a live seed-queue entry is missing from the table.  A
+role from a standard (the parked Tarot roles) stores no label, so it needs a
+`ROLE_DISPLAY_OVERRIDES` entry (`"the_fool_tarot": "the fool (Tarot)"`, and
+the same in `_ROLE_NAME_OVERRIDES` in
+[`regenerate_role_instructions.py`](data_analysis/regenerate_role_instructions.py))
+before its prompts read `the fool (from the Tarot)`; without one they read
+`the fool tarot`.  Changing the table, or an entity's label, changes the
+prompts of the entities concerned: a rubric change for them.
+
+**Where it is applied** (W19, 2026-10-09), with the version bumps:
+
+| site | version | notes |
+| --- | --- | --- |
+| [`axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py) `build_static_prompt`, `build_response_batch_prompt` | `RUBRIC_VERSION` v3 → v4 | scored entity, examples and header; the pair-axis header is composed from the two pole labels (`careless (from HEXACO) (+) vs conscientious (from HEXACO) (-) [traits]`, nested parentheses accepted); a free-text axis name keeps the mechanical form.  Two scoped v3 → v4 edges in `rubric_equivalences.yaml`, no global edge |
+| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores | the combination prompt showed raw stems (`devils_advocate`) before; role prompts are each file's baked `eval_prompt` |
+| [`score_combinations.py`](data_analysis/score_combinations.py) | `RUBRIC_VERSION` 2 (new), in the output's metadata | |
+| [`steering_judges.py`](assistant_axis/steering_judges.py) via the spec builders in [`post_judge.py`](steering/post_judge.py) and [`run_sweep.py`](steering/run_sweep.py) | coherence 5 → 6, RP 4 → 5, effect 7 → 8 | config stems become labels after the descriptions are read by stem; a derived axis name is `<neg label>-<pos label>` |
+| [`generate_antonyms.py`](data_analysis/generate_antonyms.py) (trait and role checks) | results carry `prompt_form` and `prompt_label` | the trait check showed the stem before; `seed_entities.check_history_record` keeps the two fields |
+| [`regenerate_trait_instructions.py`](data_analysis/regenerate_trait_instructions.py) (`prompt_labels`), [`regenerate_role_instructions.py`](data_analysis/regenerate_role_instructions.py) (`role_prompt_name`), every style | `generator.label_form` | template text and hashes unchanged; the trait's baked `eval_prompt` takes the judge form too.  Of the corpus, only the 85 standards-derived traits' prompts change (no role's) |
+| [`audit_trait_instructions.py`](data_analysis/audit_trait_instructions.py), [`audit_role_instructions.py`](data_analysis/audit_role_instructions.py) | trait instruction 3 → 4, question 2 → 3, taste 1 → 2; role versions unchanged | `version_is_current` keeps a previous-version judgement of a file whose labels render unchanged |
+| [`opening_form_experiment.py`](data_analysis/opening_form_experiment.py) | `DEPTH_RUBRIC_VERSION` 2 | `depth_is_current`, as for the audits |
+| [`infer_axis_description.py`](results_analysis/infer_axis_description.py) `_display_label` | none (single-shot describer) | roles now take their overrides (`devil's advocate`) |
+
+**Exclusions**: keys, cache keys, file names and ρ operands stay stems
+(never key on a judge label).  Trait-gap candidates that are not corpus
+entities yet, and the trait-gap session's own tools
+([`assistant_axis/gapgen/`](assistant_axis/gapgen/),
+[`data_analysis/gap_generation/`](data_analysis/gap_generation/)), are a
+separate issue for that session; they load the stored `positive_label`
+today, and `judge_form_of_label` is the helper to adopt.  A new prompt
+builder that names an entity calls `judge_label` (or `judge_form_of_label`
+on a label string) and stamps a rubric version.
 
 ### Experiment switches in rubric files: remove them once settled (Roger, 2026-09-30)
 

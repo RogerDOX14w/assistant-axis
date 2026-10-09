@@ -450,6 +450,15 @@ including ones whose JSON fails to parse and is retried.  Guide figure
 from that batch: a Sonnet 4.6 combined call (5 instructions, 40
 questions, eval prompt) is ~$0.02 for a role and ~$0.03 for a trait.
 
+Retrofitted 2026-10-09 (W24, before the extraction's step 3, about
+600,000 calls): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
+`<output_dir>/usage.json` beside its score files (the scores directory
+of each entity type), rewritten after every entity as earlier runs plus
+this run, with `[usage]` lines for the run and the total.  Step 4 reads
+score files by entity name, so the side-car (and `judge_rubric.json`,
+the rubric stamp) is not taken for an entity.  Test:
+[`pipeline/tests/test_3_judge.py`](./pipeline/tests/test_3_judge.py).
+
 Retrofit the rest when next touched (or sooner if scheduled for a heavy
 run).  Diagnostic one-offs (e.g.
 [`tools/diagnose_unparseable.py`](./tools/diagnose_unparseable.py))

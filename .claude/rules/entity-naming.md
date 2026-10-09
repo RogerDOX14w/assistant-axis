@@ -84,14 +84,17 @@ input.
 concept).  Project-wide convention is therefore the same as for
 plot labels: file-form is the canonical key, display-form is what
 goes into the LLM's mouth.  Every rubric / prompt builder MUST
-apply `display_form_name(...)` to entity names before injecting
-them into the prompt body, examples list, or axis-name header.
+apply `judge_label(...)` (since 2026-10-09; `display_form_name`
+before) to entity names before injecting them into the prompt body,
+examples list, or axis-name header: § "Judge prompts show the judge
+display form".
 
-**Two display helpers, chosen by audience (Sep 2026).**
+**Display helpers, chosen by audience (Sep 2026; prompts changed 2026-10-09).**
 
 | helper | transform | use at | never |
 | --- | --- | --- | --- |
-| `display_form_name(stem)` | mechanical `_` → space, no lookup | **LLM rubric / prompt bodies** (`axis_judge_correlation.build_static_prompt`, `build_response_batch_prompt`, `score_combinations.build_user_message`) | change its output: it is spliced into judged prompts, so any change is a rubric change (bump `RUBRIC_VERSION`, per-entity drift check) |
+| `judge_label(stem_or_id, kind=None)` (and `judge_negative_label`, `judge_form_of_label`, `judge_form_of_negative_label`) | lookup as `corpus_display_name`, then a standard's suffix in the long form (`careless (HEXACO)` → `careless (from HEXACO)`, table `STANDARD_SUFFIX_FORMS`); unknown names mechanical | **every LLM prompt** that names a corpus entity: judges, scorers, checks, the instruction generators | dict keys, cache keys, ρ intersection operands, file names |
+| `display_form_name(stem)` | mechanical `_` → space, no lookup | `judge_label`'s fallback for a name the corpus does not know; free-text axis names in the axis judge; legacy code | change its output: `judge_label` relies on it for byte-identical prompts of unknown names, and other code keys on it |
 | `corpus_display_name(stem_or_id, kind=None)` | lookup: trait `positive_label`, role `ROLE_DISPLAY_OVERRIDES` (`devils_advocate` → `devil's advocate`), else mechanical | **human-facing text**: plot dot labels, pole labels, legends, console output | dict keys, cache keys, ρ intersection operands, prompt text |
 
 Decision (Roger, 2026-09-07): the split stays as-is.  Prompts keep
@@ -99,7 +102,10 @@ the mechanical form (so static rubrics still read "systems thinker"
 rather than "systems-thinker"); the effect on judging is small and
 extending the lookup to prompts would be a rubric bump for no gain.
 Revisited 2026-09-09: to be folded into the next full rejudge, see
-§ "TODO: code housekeeping (Sep 2026)" item 4.
+§ "TODO: code housekeeping (Sep 2026)" item 4.  **Reversed 2026-10-09
+(Roger, W19):** prompts show the judge display form, the stored label
+with a standard's suffix in the long form, for every entity (§ "Judge
+prompts show the judge display form"; axis judge `RUBRIC_VERSION` v4).
 
 `corpus_display_name` accepts a bare stem or a `name|R` / `name|T`
 id (the id supplies the kind); with no kind it consults both tables
@@ -115,9 +121,9 @@ corpus entity (tested over the whole corpus in
 Switched to it 2026-09-07: `pair_slice_plots.add_label` (dots and
 poles), `canonical_angles/ca1_plane.py` annotations,
 `axis_pc_alignment_vs_peak_K.py` annotations.  Leave
-`rubric_v1_v2_compare.py`'s 4-character abbreviations and
-`infer_axis_description._display_label` (an LLM prompt site that
-already reads `positive_label`) alone.
+`rubric_v1_v2_compare.py`'s 4-character abbreviations alone;
+`infer_axis_description._display_label` (an LLM prompt site) uses the
+judge display form since 2026-10-09.
 
 **Spelling: US English in corpus text and file names (decided 2026-09-07).**
 Labels, stems, descriptions and instructions use US spelling (`honor`,
@@ -179,14 +185,13 @@ Rules:
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
    changing the naming.
-7. **TODO before the first judging run that includes these traits
-   (Roger, 2026-10-07):** in the axis-judging rubric the pole should
-   read "careless (from HEXACO)", not "careless (HEXACO)": default to
-   inserting "from" at the display site the prompt builders use
-   (`display_form_name`), with a hard-coded list of the sets where the
-   definite article or another form reads better ("from the Big Five",
-   "from the Enneagram").  A rubric change: bump `RUBRIC_VERSION`.  The
-   stored label is unchanged.  Details in
+7. **Prompts show "careless (from HEXACO)", not "careless (HEXACO)"**
+   (Roger, 2026-10-07; done 2026-10-09, W19): `judge_label` inserts
+   "from", with the sets that read better with the article or another
+   form ("from the Big Five", "from Holland's RIASEC") in
+   `STANDARD_SUFFIX_FORMS`; every prompt builder uses it, and the axis
+   judge's `RUBRIC_VERSION` went to v4.  The stored label is unchanged.
+   § "Judge prompts show the judge display form"; history in
    `reports/seeding_log_2026-10.md` § "TODOs for this chunk".
 
 Multi-word entity census (qwen-3-32b Roger 8slot corpus): 12 of 303
@@ -204,7 +209,10 @@ sites in the codebase, all in display/annotation code:
 
 **LLM rubric audit (May 2026)** of every prompt builder in the
 project (8 callsites; each is now annotated in-file with a brief
-display-form note that points back to this section):
+display-form note that points back to this section).  Historical:
+superseded on 2026-10-09 by the judge display form, whose site list
+(the steering row included, now fixed) is in § "Judge prompts show the
+judge display form":
 
 | Prompt builder | Status | Notes |
 | --- | --- | --- |

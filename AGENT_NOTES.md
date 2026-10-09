@@ -611,6 +611,15 @@ including ones whose JSON fails to parse and is retried.  Guide figure
 from that batch: a Sonnet 4.6 combined call (5 instructions, 40
 questions, eval prompt) is ~$0.02 for a role and ~$0.03 for a trait.
 
+Retrofitted 2026-10-09 (W24, before the extraction's step 3, about
+600,000 calls): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
+`<output_dir>/usage.json` beside its score files (the scores directory
+of each entity type), rewritten after every entity as earlier runs plus
+this run, with `[usage]` lines for the run and the total.  Step 4 reads
+score files by entity name, so the side-car (and `judge_rubric.json`,
+the rubric stamp) is not taken for an entity.  Test:
+[`pipeline/tests/test_3_judge.py`](./pipeline/tests/test_3_judge.py).
+
 Retrofit the rest when next touched (or sooner if scheduled for a heavy
 run).  Diagnostic one-offs (e.g.
 [`tools/diagnose_unparseable.py`](./tools/diagnose_unparseable.py))
@@ -1114,8 +1123,82 @@ drift check or the equivalence registry.  Currently low-risk
 because those rubrics are run from the runpod-side
 ``steering/`` pipeline (fresh runs, no resume-against-edited-rubric
 pattern); see the TODO block above
-``COHERENCE_RUBRIC_VERSION = 4`` for the work needed to bring them
+``COHERENCE_RUBRIC_VERSION`` for the work needed to bring them
 into the same scheme if/when that assumption breaks.
+
+### Judge prompts show the judge display form (Roger, 2026-10-09)
+<!-- claude: rule=judging -->
+
+**The policy** (Roger, 2026-10-09): anything that sends a label or a
+`negative_label` to an LLM judge uses the most legible form: by default the
+display form (hyphens, spaces, other characters and capitals kept), and for
+a trait from an official instrument, whose label ends in a parenthesised
+standard, the long form with "from": `careless (HEXACO)` is shown as
+`careless (from HEXACO)`.  The same day he widened it to every prompt that
+names a corpus entity, the instruction generators included ("no
+exceptions").  The stored labels never change; the rewrite happens where the
+prompt is built.  This reverses the 2026-09-07 decision "prompts keep the
+mechanical form" (§ "File-name vs display-name convention").
+
+**The utilities** ([`assistant_axis/entity_id.py`](assistant_axis/entity_id.py)):
+
+| function | gives |
+| --- | --- |
+| `judge_label(stem_or_id, kind=None, *, data_dir=None)` | an entity's judge display form: the trait's `positive_label`, or the role's `ROLE_DISPLAY_OVERRIDES` entry / `_` → space, then the suffix rewrite; a name the corpus does not know falls back to the mechanical `display_form_name` (so its prompts are byte-identical to the old form) |
+| `judge_negative_label(trait_stem, *, data_dir=None)` | a trait's `negative_label`: the named corpus trait's `judge_label`; for the `non-X` placeholder, `"non-"` + the trait's own judge label (`non-careless (from HEXACO)`); otherwise the stored string with the suffix rewrite |
+| `judge_form_of_label(label)` | the suffix rewrite alone, for a label string that is not (yet) a corpus file: a staged copy, an old commit's version, a trait-gap candidate; `judge_label` uses it, so the two cannot disagree |
+| `judge_form_of_negative_label(negative_label, positive_label)` | `judge_negative_label` from the two strings |
+| `STANDARD_SUFFIX_FORMS` | the suffix table: suffix as the labels write it → the form after "from" |
+| `JUDGE_LABEL_FORM` | `"judge-display-v1"`, recorded by callers that persist which form a prompt used |
+
+**The suffix table** (`STANDARD_SUFFIX_FORMS`; the choice was left to the
+main agent): a capitalised suffix not in the table takes the default,
+`(from X)`; a lower-case one (`(tentative, PC10)`) is not a standard and is
+left alone.  Listed: HEXACO, VALS, DISC, VARK, Tönnies on the default;
+the Big Five, the MBTI, the Enneagram, the BFAS, the IPIP-NEO, the Tarot,
+the Dark Tetrad, the Light Triad, the Inglehart-Welzel map; and, for sets
+named after a person, the framework: Holland's RIASEC, Bartle's player
+types, Baumrind's parenting styles, Edward Hall, Kohlberg's stages,
+Allport's religious orientation, Gelfand's tight and loose cultures.
+Examples: `ENFJ (from the MBTI)`, `artistic (from Holland's RIASEC)`,
+`secular-rational (from the Inglehart-Welzel map)`, `Gemeinschaft (from
+Tönnies)`.  Bourdieu (not adopted) would take the default.
+
+**Adding a standard**: add its suffix to `STANDARD_SUFFIX_FORMS` with the
+form it should take, or list it with itself for the default.
+`test_entity_id.py::TestJudgeLabel` fails while a capitalised suffix in the
+corpus labels or in a live seed-queue entry is missing from the table.  A
+role from a standard (the parked Tarot roles) stores no label, so it needs a
+`ROLE_DISPLAY_OVERRIDES` entry (`"the_fool_tarot": "the fool (Tarot)"`, and
+the same in `_ROLE_NAME_OVERRIDES` in
+[`regenerate_role_instructions.py`](data_analysis/regenerate_role_instructions.py))
+before its prompts read `the fool (from the Tarot)`; without one they read
+`the fool tarot`.  Changing the table, or an entity's label, changes the
+prompts of the entities concerned: a rubric change for them.
+
+**Where it is applied** (W19, 2026-10-09), with the version bumps:
+
+| site | version | notes |
+| --- | --- | --- |
+| [`axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py) `build_static_prompt`, `build_response_batch_prompt` | `RUBRIC_VERSION` v3 → v4 | scored entity, examples and header; the pair-axis header is composed from the two pole labels (`careless (from HEXACO) (+) vs conscientious (from HEXACO) (-) [traits]`, nested parentheses accepted); a free-text axis name keeps the mechanical form.  Two scoped v3 → v4 edges in `rubric_equivalences.yaml`, no global edge |
+| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores | the combination prompt showed raw stems (`devils_advocate`) before; role prompts are each file's baked `eval_prompt` |
+| [`score_combinations.py`](data_analysis/score_combinations.py) | `RUBRIC_VERSION` 2 (new), in the output's metadata | |
+| [`steering_judges.py`](assistant_axis/steering_judges.py) via the spec builders in [`post_judge.py`](steering/post_judge.py) and [`run_sweep.py`](steering/run_sweep.py) | coherence 5 → 6, RP 4 → 5, effect 7 → 8 | config stems become labels after the descriptions are read by stem; a derived axis name is `<neg label>-<pos label>` |
+| [`generate_antonyms.py`](data_analysis/generate_antonyms.py) (trait and role checks) | results carry `prompt_form` and `prompt_label` | the trait check showed the stem before; `seed_entities.check_history_record` keeps the two fields |
+| [`regenerate_trait_instructions.py`](data_analysis/regenerate_trait_instructions.py) (`prompt_labels`), [`regenerate_role_instructions.py`](data_analysis/regenerate_role_instructions.py) (`role_prompt_name`), every style | `generator.label_form` | template text and hashes unchanged; the trait's baked `eval_prompt` takes the judge form too.  Of the corpus, only the 85 standards-derived traits' prompts change (no role's) |
+| [`audit_trait_instructions.py`](data_analysis/audit_trait_instructions.py), [`audit_role_instructions.py`](data_analysis/audit_role_instructions.py) | trait instruction 3 → 4, question 2 → 3, taste 1 → 2; role versions unchanged | `version_is_current` keeps a previous-version judgement of a file whose labels render unchanged |
+| [`opening_form_experiment.py`](data_analysis/opening_form_experiment.py) | `DEPTH_RUBRIC_VERSION` 2 | `depth_is_current`, as for the audits |
+| [`infer_axis_description.py`](results_analysis/infer_axis_description.py) `_display_label` | none (single-shot describer) | roles now take their overrides (`devil's advocate`) |
+
+**Exclusions**: keys, cache keys, file names and ρ operands stay stems
+(never key on a judge label).  Trait-gap candidates that are not corpus
+entities yet, and the trait-gap session's own tools
+([`assistant_axis/gapgen/`](assistant_axis/gapgen/),
+[`data_analysis/gap_generation/`](data_analysis/gap_generation/)), are a
+separate issue for that session; they load the stored `positive_label`
+today, and `judge_form_of_label` is the helper to adopt.  A new prompt
+builder that names an entity calls `judge_label` (or `judge_form_of_label`
+on a label string) and stamps a rubric version.
 
 ### Known permanent gap: `virus|R` on Sonnet instructions mode
 <!-- claude: rule=judge-refusal-gaps -->
@@ -4166,14 +4249,17 @@ input.
 concept).  Project-wide convention is therefore the same as for
 plot labels: file-form is the canonical key, display-form is what
 goes into the LLM's mouth.  Every rubric / prompt builder MUST
-apply `display_form_name(...)` to entity names before injecting
-them into the prompt body, examples list, or axis-name header.
+apply `judge_label(...)` (since 2026-10-09; `display_form_name`
+before) to entity names before injecting them into the prompt body,
+examples list, or axis-name header: § "Judge prompts show the judge
+display form".
 
-**Two display helpers, chosen by audience (Sep 2026).**
+**Display helpers, chosen by audience (Sep 2026; prompts changed 2026-10-09).**
 
 | helper | transform | use at | never |
 | --- | --- | --- | --- |
-| `display_form_name(stem)` | mechanical `_` → space, no lookup | **LLM rubric / prompt bodies** (`axis_judge_correlation.build_static_prompt`, `build_response_batch_prompt`, `score_combinations.build_user_message`) | change its output: it is spliced into judged prompts, so any change is a rubric change (bump `RUBRIC_VERSION`, per-entity drift check) |
+| `judge_label(stem_or_id, kind=None)` (and `judge_negative_label`, `judge_form_of_label`, `judge_form_of_negative_label`) | lookup as `corpus_display_name`, then a standard's suffix in the long form (`careless (HEXACO)` → `careless (from HEXACO)`, table `STANDARD_SUFFIX_FORMS`); unknown names mechanical | **every LLM prompt** that names a corpus entity: judges, scorers, checks, the instruction generators | dict keys, cache keys, ρ intersection operands, file names |
+| `display_form_name(stem)` | mechanical `_` → space, no lookup | `judge_label`'s fallback for a name the corpus does not know; free-text axis names in the axis judge; legacy code | change its output: `judge_label` relies on it for byte-identical prompts of unknown names, and other code keys on it |
 | `corpus_display_name(stem_or_id, kind=None)` | lookup: trait `positive_label`, role `ROLE_DISPLAY_OVERRIDES` (`devils_advocate` → `devil's advocate`), else mechanical | **human-facing text**: plot dot labels, pole labels, legends, console output | dict keys, cache keys, ρ intersection operands, prompt text |
 
 Decision (Roger, 2026-09-07): the split stays as-is.  Prompts keep
@@ -4181,7 +4267,10 @@ the mechanical form (so static rubrics still read "systems thinker"
 rather than "systems-thinker"); the effect on judging is small and
 extending the lookup to prompts would be a rubric bump for no gain.
 Revisited 2026-09-09: to be folded into the next full rejudge, see
-§ "TODO: code housekeeping (Sep 2026)" item 4.
+§ "TODO: code housekeeping (Sep 2026)" item 4.  **Reversed 2026-10-09
+(Roger, W19):** prompts show the judge display form, the stored label
+with a standard's suffix in the long form, for every entity (§ "Judge
+prompts show the judge display form"; axis judge `RUBRIC_VERSION` v4).
 
 `corpus_display_name` accepts a bare stem or a `name|R` / `name|T`
 id (the id supplies the kind); with no kind it consults both tables
@@ -4197,9 +4286,9 @@ corpus entity (tested over the whole corpus in
 Switched to it 2026-09-07: `pair_slice_plots.add_label` (dots and
 poles), `canonical_angles/ca1_plane.py` annotations,
 `axis_pc_alignment_vs_peak_K.py` annotations.  Leave
-`rubric_v1_v2_compare.py`'s 4-character abbreviations and
-`infer_axis_description._display_label` (an LLM prompt site that
-already reads `positive_label`) alone.
+`rubric_v1_v2_compare.py`'s 4-character abbreviations alone;
+`infer_axis_description._display_label` (an LLM prompt site) uses the
+judge display form since 2026-10-09.
 
 **Spelling: US English in corpus text and file names (decided 2026-09-07).**
 Labels, stems, descriptions and instructions use US spelling (`honor`,
@@ -4261,14 +4350,13 @@ Rules:
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
    changing the naming.
-7. **TODO before the first judging run that includes these traits
-   (Roger, 2026-10-07):** in the axis-judging rubric the pole should
-   read "careless (from HEXACO)", not "careless (HEXACO)": default to
-   inserting "from" at the display site the prompt builders use
-   (`display_form_name`), with a hard-coded list of the sets where the
-   definite article or another form reads better ("from the Big Five",
-   "from the Enneagram").  A rubric change: bump `RUBRIC_VERSION`.  The
-   stored label is unchanged.  Details in
+7. **Prompts show "careless (from HEXACO)", not "careless (HEXACO)"**
+   (Roger, 2026-10-07; done 2026-10-09, W19): `judge_label` inserts
+   "from", with the sets that read better with the article or another
+   form ("from the Big Five", "from Holland's RIASEC") in
+   `STANDARD_SUFFIX_FORMS`; every prompt builder uses it, and the axis
+   judge's `RUBRIC_VERSION` went to v4.  The stored label is unchanged.
+   § "Judge prompts show the judge display form"; history in
    `reports/seeding_log_2026-10.md` § "TODOs for this chunk".
 
 Multi-word entity census (qwen-3-32b Roger 8slot corpus): 12 of 303
@@ -4286,7 +4374,10 @@ sites in the codebase, all in display/annotation code:
 
 **LLM rubric audit (May 2026)** of every prompt builder in the
 project (8 callsites; each is now annotated in-file with a brief
-display-form note that points back to this section):
+display-form note that points back to this section).  Historical:
+superseded on 2026-10-09 by the judge display form, whose site list
+(the steering row included, now fixed) is in § "Judge prompts show the
+judge display form":
 
 | Prompt builder | Status | Notes |
 | --- | --- | --- |
@@ -6013,8 +6104,11 @@ the sections above hold data-regeneration items.  Tick off in place.
    `source` or `generator`.  Implement as the "Phase 6 content hashes"
    note in `assistant_axis/provenance.py`, with an equivalence path so
    existing v1 envelopes are not all invalidated at once.
-4. **Judge-facing entity names: switch prompts from the mechanical form to
-   the corpus label at the next full rejudge** (Roger, 2026-09-09).  Today
+4. **Done 2026-10-09 (W19): prompts use the judge display form**
+   (`judge_label`, § "Judge prompts show the judge display form"; axis
+   judge v4 with scoped equivalence edges).  The original item:
+   **Judge-facing entity names: switch prompts from the mechanical form to
+   the corpus label at the next full rejudge** (Roger, 2026-09-09).  Then
    `display_form_name` renders `the_fool_tarot` as `the fool tarot` and
    `honest_humble_hexaco` as `honest humble hexaco`: capitals, hyphens and
    the pole / standard boundary are lost, and a small judge model may not
