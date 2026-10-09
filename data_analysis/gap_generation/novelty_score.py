@@ -557,7 +557,10 @@ def physical_gloss_stage(*, reg: Registry, to_gloss: list[str], cands: list, ski
     finally:
         run_meta["physical_gloss"] = {**(run_meta.get("physical_gloss") or {}), **PP.stage_summary(blocks)}
         atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
-    logger.info("physical gloss stage: %s", json.dumps(PP.stage_summary(blocks)))
+    run_meta["physical_gloss"]["transport"] = "live"
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    logger.info("physical gloss stage (always live: two small Haiku calls a word; --transport governs the scoring "
+                "stages only): %s", json.dumps(PP.stage_summary(blocks)))
     fresh, waiting, out = reg.fold(), set(to_gloss), []
     for c in cands:
         if c.key not in waiting:

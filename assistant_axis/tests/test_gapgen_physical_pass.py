@@ -249,3 +249,16 @@ class TestReviewGraph:
         t["novelty"] = {"run_id": "m3b", "decision": "new"}
         nt = RG._candidate_node(t)
         assert nt.outcome is None and "outcome" not in nt.to_dict()            # graph.json of a trait batch unchanged
+
+
+def test_run_gloss_rows_closes_its_client_inside_the_loop(tmp_path):
+    """2026-10-09: an AsyncAnthropic left open was closed after the event loop ended ("Event loop is closed")."""
+    closed = []
+
+    class Closing:
+        async def close(self):
+            closed.append(True)
+
+    PP.run_gloss_rows([], client=Closing(), usage=MultiModelUsage(), batch_id="phys_close",
+                      records_path=tmp_path / "r.jsonl")
+    assert closed == [True]

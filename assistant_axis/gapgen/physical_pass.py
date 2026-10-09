@@ -310,8 +310,19 @@ async def gloss_rows(rows: Sequence[Mapping], *, client, usage, batch_id: str, r
 
 
 def run_gloss_rows(rows: Sequence[Mapping], **kw) -> dict[str, dict]:
-    """:func:`gloss_rows` from synchronous code."""
-    return asyncio.run(gloss_rows(rows, **kw))
+    """:func:`gloss_rows` from synchronous code.  The client is closed inside the same event loop before it ends
+    (an ``AsyncAnthropic`` left open is closed by the garbage collector after ``asyncio.run`` has closed the loop,
+    which raised "Event loop is closed" at the end of the 2026-10-09 Allport physical pass)."""
+    async def main() -> dict[str, dict]:
+        try:
+            return await gloss_rows(rows, **kw)
+        finally:
+            close = getattr(kw.get("client"), "close", None)
+            if close is not None:
+                res = close()
+                if asyncio.iscoroutine(res):
+                    await res
+    return asyncio.run(main())
 
 
 def stage_summary(blocks: Mapping[str, Mapping]) -> dict:
