@@ -10,10 +10,10 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 - Heads in scope: **676** (576 dispositional, 100 from Classes I-III).
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 234, 0 on 188; 89 unrated, mostly heads with no adjectives).
-- Covered **279**, partly covered **51**, uncovered **158** (of which 9 have a queued label only).
+- Covered **278**, partly covered **51**, uncovered **159** (of which 9 have a queued label only).
 - Opposed pairs in scope: both poles covered **75**, one pole **63**, neither **34** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 33, "both_poles_covered": 75, "one_pole_covered": 63}}).
-- Labels placed: 718 existing traits with a primary head (198 without; 673 of the primaries in scope), 186 queued labels (55 without).
-- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 60, queued_only 9, partly_covered 51, crowded 77, covered 202.
+- Labels placed: 716 existing traits with a primary head (198 without; 671 of the primaries in scope), 186 queued labels (55 without).
+- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 61, queued_only 9, partly_covered 51, crowded 77, covered 201.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -42,7 +42,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | IV V. Results of reasoning | 17 | 1 | 1 | 5 | 2 |
 | IV VI. Extension of thought | 2 | 2 | 0 | 2 | 3 |
 | IV VII. Creative thought | 1 | 0 | 0 | 0 | 2 |
-| IV I. Nature of ideas communicated | 3 | 0 | 0 | 2 | 4 |
+| IV I. Nature of ideas communicated | 2 | 0 | 0 | 3 | 4 |
 | IV II. Modes of communication | 9 | 1 | 0 | 6 | 10 |
 | IV III. Means of communicating ideas | 12 | 1 | 0 | 13 | 24 |
 | V I. Volition in general | 12 | 0 | 1 | 7 | 3 |
@@ -159,7 +159,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 985 Judeo-Christian Revelation | VI V. Religious affections | 986 Pseudo-Revelation (synopsis) | - | - | - | - |
 | 986 Pseudo-Revelation | VI V. Religious affections | 985 Judeo-Christian Revelation (synopsis) | - | - | - | - |
 
-## singleton_empty (60)
+## singleton_empty (61)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -167,6 +167,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 465b Identification | IV II. Precursory conditions and operations | - | - | - | - | - |
 | 480a Discovery | IV V. Results of reasoning | - | - | - | - | - |
 | 513 Oracle | IV VI. Extension of thought / 1. To the Past | - | - | - | - | - |
+| 520 Equivocalness | IV I. Nature of ideas communicated | - | - | - | - | - |
 | 524 Interpreter | IV I. Nature of ideas communicated | - | - | - | - | - |
 | 534 Messenger | IV II. Modes of communication | - | - | - | - | - |
 | 550 Indication | IV III. Means of communicating ideas / 1. Natural means | - | - | - | - | - |
@@ -230,7 +231,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 |---|---|---|---|---|---|---|
 | 357 Organization | III III. Organic matter / 1. Vitality in general | 358 Inorganization (synopsis) | - | [Organization (HEXACO)](../../seed_queue.json) (queued) | - | - |
 | 391 Insipidity | III III. Organic matter / 1. Sensation in general | 390 Taste (synopsis) | - | [bland](../../seed_queue.json) (queued), [vanilla](../../seed_queue.json) (queued) | - | - |
-| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json), [conceptual](../../traits/instructions/conceptual.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
+| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 504 Madman | IV V. Results of reasoning | - | - | [hypochondriac](../../seed_queue.json) (queued) | - | - |
 | 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (synopsis) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
 | 799 Mart | V IV. Possessive relations / 3. Interchange of Property | - | - | [free-market](../../seed_queue.json) (queued) | - | - |
@@ -355,7 +356,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 530 Ambush | IV II. Modes of communication | empty | - | - | - |
 | 531 Publication | IV II. Modes of communication | empty | - | - | - |
 | 532 News | IV II. Modes of communication | covered | [news-junkie](../../traits/instructions/news_junkie.json) | - | - |
-| 533 Secret | IV II. Modes of communication | partly | - | - | [enigmatic](../../traits/instructions/enigmatic.json) |
+| 533 Secret | IV II. Modes of communication | empty | - | - | - |
 | 538 Misteaching | IV II. Modes of communication | empty | - | - | - |
 | 541 Learner | IV II. Modes of communication | empty | - | - | - |
 | 546 Untruth | IV II. Modes of communication | empty | - | - | - |
@@ -663,7 +664,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 374 Woman | [female](../../traits/instructions/female.json), [feminine](../../traits/instructions/feminine.json), [feminist](../../traits/instructions/feminist.json) |
 | 374a Sexuality | [bisexual](../../traits/instructions/bisexual.json), [gay](../../traits/instructions/gay.json), [kinky](../../traits/instructions/kinky.json), [lustful](../../traits/instructions/lustful.json) |
 | 392b Bitterness | [acerbic](../../traits/instructions/acerbic.json) |
-| 450 Intellect | [cerebral](../../traits/instructions/cerebral.json), [conceptual](../../traits/instructions/conceptual.json) |
+| 450 Intellect | [cerebral](../../traits/instructions/cerebral.json) |
 | 451 Thought | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
 | 455 Curiosity | [curious](../../traits/instructions/curious.json), [inquisitive](../../traits/instructions/inquisitive.json) |
 | 456 Incuriosity | [conventional (HEXACO)](../../traits/instructions/conventional_hexaco.json), [incurious](../../traits/instructions/incurious.json), [uninquisitive](../../traits/instructions/uninquisitive.json) |
@@ -697,7 +698,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 510 Foresight | [proactive](../../traits/instructions/proactive.json) |
 | 515 Imagination | [confabulatory](../../traits/instructions/confabulatory.json), [creative](../../traits/instructions/creative.json), [idealistic](../../traits/instructions/idealistic.json), [romantic](../../traits/instructions/romantic.json) |
 | 518 Intelligibility | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) |
-| 520 Equivocalness | [enigmatic](../../traits/instructions/enigmatic.json) |
 | 522 Interpretation | [expository](../../traits/instructions/expository.json) |
 | 525 Manifestation | [expressive](../../traits/instructions/expressive.json), [low-context (Hall)](../../traits/instructions/low_context_hall.json) |
 | 527 Information | [informational](../../traits/instructions/informational.json) |
