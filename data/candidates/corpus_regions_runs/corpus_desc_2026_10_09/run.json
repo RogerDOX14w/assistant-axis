@@ -1,0 +1,67 @@
+{
+  "batch_id": "corpus_desc_2026_10_09",
+  "stage": "corpus_descriptors",
+  "source": "description",
+  "mode": "all",
+  "model": "claude-haiku-5-5",
+  "step_versions": {
+    "descriptors": 1,
+    "alignment": 3
+  },
+  "prompt_sha256": {
+    "descriptors": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
+    "alignment": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4"
+  },
+  "concurrency": 8,
+  "budget_usd": 1.0,
+  "estimate_usd": 0.30497,
+  "n_corpus": 909,
+  "n_selected": 909,
+  "reasons": {
+    "all": 909
+  },
+  "n_judged": 909,
+  "n_failed": 0,
+  "failed": [],
+  "parse_rates": {
+    "descriptors": {
+      "n": 909,
+      "ok": 909
+    },
+    "alignment": {
+      "n": 909,
+      "ok": 909
+    }
+  },
+  "regions": {
+    "cognitive_epistemic": 193,
+    "emotional_temperament": 163,
+    "social_interpersonal": 158,
+    "identity_demographic": 146,
+    "moral_stance": 136,
+    "communication_style": 104,
+    "alignment_ai_agent": 9
+  },
+  "alignment_scores": {
+    "0": 428,
+    "1": 304,
+    "2": 79,
+    "3": 98
+  },
+  "cost_usd": 0.2579,
+  "n_calls": 1818,
+  "stopped": null,
+  "out": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/review-graph/data/candidates/corpus_regions.json",
+  "started_at": "2026-10-09T02:29:22+00:00",
+  "finished_at": "2026-10-09T02:35:42+00:00",
+  "argv": [
+    "data_analysis/gap_generation/gap_registry.py",
+    "corpus-regions",
+    "--from-descriptions",
+    "--all",
+    "--budget-usd",
+    "1",
+    "--batch-id",
+    "corpus_desc_2026_10_09"
+  ]
+}
