@@ -31,7 +31,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional
 
-from assistant_axis.entity_id import JUDGE_LABEL_FORM, judge_form_of_label
+from assistant_axis.entity_id import JUDGE_LABEL_FORM, display_form_name, judge_form_of_label
 
 #: The label as stored (``positive_label``, a queue entry's ``label``, a registry row's ``label``): what every
 #: prompt showed before 2026-10-09, and what a run without a recorded ``label_form`` used.
@@ -55,16 +55,25 @@ def prompt_label(label: Any, form: str = DEFAULT_LABEL_FORM) -> Any:
     (:data:`STORED_LABEL_FORM`).  A value that is not a non-empty string (``None``, ``""``) is returned as it is.
     Idempotent.
 
+    A label stored with an underscore is a stem standing in for a label (no corpus label or candidate label has
+    one; on 2026-10-10 ten seed-queue entries did, ``open_ended`` among them, a renamed trait with no file to give
+    it a display label): it is shown in the display form, the underscores as spaces, as
+    :func:`assistant_axis.entity_id.judge_label` shows a name the corpus does not know.
+
     >>> prompt_label("careless (HEXACO)")
     'careless (from HEXACO)'
     >>> prompt_label("careless (HEXACO)", STORED_LABEL_FORM)
     'careless (HEXACO)'
     >>> prompt_label("gregarious")
     'gregarious'
+    >>> prompt_label("open_ended")
+    'open ended'
     """
     check_label_form(form)
     if form == STORED_LABEL_FORM or not isinstance(label, str) or not label:
         return label
+    if "_" in label:
+        label = display_form_name(label)
     return judge_form_of_label(label)
 
 

@@ -984,12 +984,18 @@ how they follow it.
 
 **What changes.**  Every prompt the platform builds now shows labels through one helper,
 `prompt_label` in [prompt_labels.py](../../assistant_axis/gapgen/prompt_labels.py), applied where the prompt is
-rendered and nowhere else.  Of today's labels, 85 corpus trait labels and 196 seed-queue labels end in a standard and
-read differently; no candidate label in the registry does, so for candidates the rewrite is a no-op (it is applied
-all the same, so that one rule holds everywhere).  No prompt of these tools shows a `negative_label`, and none sends a
-stem (`careless_hexaco`) where a label belongs; the one place that could, the blinded neighbour judgement of the M2
-calibration ([calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py)), fell back to the bare stem for a
-neighbour with no label and now falls back to its display form.
+rendered and nowhere else.  Of the labels at commit 3525a5e, 89 corpus trait labels and 190 seed-queue labels end in a
+standard and read differently; no candidate label in the registry does, so for candidates the rewrite is a no-op (it
+is applied all the same, so that one rule holds everywhere).  No prompt of these tools shows a `negative_label`.
+Stems where a label belongs, two cases, both fixed: the blinded neighbour judgement of the M2 calibration
+([calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py)) fell back to the bare stem for a neighbour with no
+label, and now to its display form; and ten seed-queue entries store their stem as their label (`open_ended`,
+`plain_spoken`, `closure_seeking` and seven roles such as `gym_rat`), of which `open_ended`, a trait renamed to
+[ambiguity_tolerant](../../data/traits/instructions/ambiguity_tolerant.json) and so with no file of its own, is among
+the Roget placement check's labels.  `prompt_label` shows a label stored with an underscore in the display form
+(`open ended`), as `judge_label` shows a name the corpus does not know.  The queue entries themselves are unchanged
+([seed_queue.json](../../data/seed_queue.json) is another session's); giving them proper labels there (`open-ended`)
+would be the better fix.
 
 **What does not change.**  The stored labels (`positive_label`, a queue entry's `label`, a registry row's `label`),
 `CorpusTrait.label` in [novelty.py](../../assistant_axis/gapgen/novelty.py), the registry, every key, the text
@@ -1016,8 +1022,8 @@ continues or replays another keeps that run's form (`resolve_label_form`): `--re
 ([recovery_test.py](../../data_analysis/gap_generation/recovery_test.py))); M3's `score --redecide`,
 `--relation-only` and `full-scan` their source run's;
 [plain_reading.py](../../data_analysis/gap_generation/plain_reading.py) `--reuse-readings` the reused run's; the
-recovery harness's match stage the form of the reduced-corpus M3 run it matches.  So a run from before today is resumed, re-decided or compared in the
-stored form, and a run from today in the judge form; neither mixes the two.  Why keep the recorded form rather than
+recovery harness's match stage the form of the reduced-corpus M3 run it matches.  So a run from before today is
+resumed, re-decided or compared in the stored form, and a run from today in the judge form; neither mixes the two.  Why keep the recorded form rather than
 switch, or refuse:
 
 - Several replay paths find an answer by something other than the prompt: a Message Batches result by its
@@ -1036,10 +1042,11 @@ run cannot ask for the new one (a fresh `score` run does that).
 
 **Records made before today that the rewrite would ask differently** (no automatic re-run; for Roger's decision):
 
-- [corpus_regions.json](../../data/candidates/corpus_regions.json): the 85 standards-derived traits' regions and
-  alignment scores were judged on 2026-10-09 with the stored label.  `--only-missing` does not select them (a row is
-  re-judged when its label or description changed, not its prompt's form, as after a rubric bump); `--all` would redo
-  every trait (about $0.26), or a selection of just those 85 would cost about $0.03 (not built).
+- [corpus_regions.json](../../data/candidates/corpus_regions.json): the 89 standards-derived traits' regions and
+  alignment scores were judged with the stored label (the runs of 2026-10-09).  `--only-missing` does not select them
+  (a row is re-judged when its label or description changed, not its prompt's form, as after a rubric bump); `--all`
+  would redo every trait (the dry run estimates $0.31 for 928), or a selection of just those 89 would cost about
+  $0.03 (not built).
 - [label_heads.json](../../data/candidates/roget/label_heads.json): 84 standards-derived labels carry a placement
   check made with the stored label.  `place-check --unchecked-only` leaves them alone; a full `place-check --resume`
   reuses an answer only for a byte-identical user turn, so it would ask those 84 again in the new form (the only
@@ -1052,8 +1059,11 @@ run cannot ask for the new one (a fresh `score` run does that).
 
 ### Rendered samples (no API call)
 
-Each is the user turn as the model receives it, made with the tool's own render path from the corpus at commit
-8c06188; the system prompts are the pinned rubric files, unchanged, linked rather than repeated.  The terms
+Each is the user turn as the model receives it, made with the tool's own render path; the system prompts are the
+pinned rubric files, unchanged, linked rather than repeated.  The M3 relation call was rendered from the corpus at
+commit 8c06188 (at 3525a5e the index needs 31 new or rewritten corpus texts embedded first, a paid call this work did
+not make, so its list of neighbours may now differ); every other sample was rendered again at 3525a5e and is the
+same.  The terms
 *relation call* and *overlap call* are in the [glossary](./glossary.md#relation-call-overlap-call).
 
 **M3 relation call** ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py)
@@ -1192,7 +1202,7 @@ data or embedded texts, which must not change).  "Long form" means the judge dis
 | [physical_pass.py](../../assistant_axis/gapgen/physical_pass.py) `request`, `render`, `gloss_rows` | candidate label | yes (gloss and alignment calls) | long form, no-op today; the M3 run's form |
 | [corpus_descriptors.py](../../assistant_axis/gapgen/corpus_descriptors.py) `request`, `render`, `judge`, `load_corpus` | corpus `positive_label` | yes (corpus regions) | long form; rows, their `label` and the selection keep the stored label |
 | [calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py) `paraphrase_user`, `blinded_user` | corpus labels | yes (M2 calibration) | long form; the blinded judgement's stem fallback is now the display form |
-| [generators/roget/placement.py](../../assistant_axis/gapgen/generators/roget/placement.py) `PlacementItem.payload`, `render_user` | corpus or queue label | yes (place-check) | long form; `PlacementItem.label` stays stored |
+| [generators/roget/placement.py](../../assistant_axis/gapgen/generators/roget/placement.py) `PlacementItem.payload`, `render_user` | corpus or queue label | yes (place-check) | long form; the queue label `open_ended`, a stem, now shows as `open ended`; `PlacementItem.label` stays stored |
 | [generators/roget/head_scope.py](../../assistant_axis/gapgen/generators/roget/head_scope.py) | Roget head titles and adjectives | yes, but no label | unchanged |
 | [generators/roget/mapping.py](../../assistant_axis/gapgen/generators/roget/mapping.py), [labels.py](../../assistant_axis/gapgen/labels.py), [contrast.py](../../assistant_axis/gapgen/contrast.py) | stored labels for embedding, lexical matching, labelled pairs, contrast cuts | no (data and embedded texts) | unchanged |
 | [build_smoke_sets.py](../../data_analysis/gap_generation/build_smoke_sets.py), [build_validation_set.py](../../data_analysis/gap_generation/build_validation_set.py) | word lists for M1 (corpus labels among them) | only through M1's runners | unchanged here; M1 shows them in the long form |

@@ -78,6 +78,15 @@ class TestPromptLabel:
         assert once == "ENFJ (from the MBTI)" and PL.prompt_label(once) == once
         assert PL.prompt_label(None) is None and PL.prompt_label("") == ""
 
+    def test_a_stem_stored_as_a_label_is_shown_without_underscores(self):
+        # the seed queue's open_ended (a renamed trait with no file) stores its stem as its label
+        assert PL.prompt_label("open_ended") == "open ended" == PL.prompt_label("open ended")
+        assert PL.prompt_label("open_ended", STORED) == "open_ended"
+        from assistant_axis.gapgen.generators.roget import placement as PLC
+        item = PLC.PlacementItem(stem="open_ended", label="open_ended", description=None, source="queued",
+                                 current=None, route="none", candidates=[])
+        assert item.payload(None)["trait"]["label"] == "open ended"
+
     def test_unknown_form_refused(self):
         with pytest.raises(ValueError):
             PL.prompt_label("x", "display")
