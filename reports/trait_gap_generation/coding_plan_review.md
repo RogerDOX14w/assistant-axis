@@ -320,3 +320,234 @@ New: alive, cherubic, stentorian, weather-beaten.  R1
 [review_physical_pilots_1](../../data/candidates/review/review_physical_pilots_1/graph.json): four singletons, no
 group.  Two glosses went past the body (cherubic's adds hidden mischief, which raised its alignment score to 2 and
 its cut-off to 4; physical's adds training); like any gloss, it is a first draft for the description writer.
+
+## 9. States pass v4 (2026-10-09)
+
+**What it is.**  M1, the trait-hood filter ([coding_plan_platform.md](./coding_plan_platform.md)), parks a word whose
+accepted reading is a passing state (a mood, a reaction, a bodily or situational condition) on the `states` *holding list*:
+the registry field `holding`, which keeps a row out of the trait flow until something moves it.  The states pass
+([states_pass.py](../../assistant_axis/gapgen/states_pass.py), CLI
+[states_pass.py](../../data_analysis/gap_generation/states_pass.py)) has asked Roger's three questions of those rows
+since round 2 (decision 12 of [decisions_m1.md](./decisions_m1.md)), but nothing acted on its answers except a
+promotion under a name Roger typed in (`--confirm-state-name`, [QUESTIONS.md](./QUESTIONS.md) question 14).
+Version 4 of its queue prompt adds his rules of 2026-10-09 and moves rows out of the list.
+
+**Roger's rules (2026-10-09; his words, condensed by the coordinator).**  For a word on the states list:
+
+1. "Does the state typically last months or longer, rather than days or weeks?"  If so, drop "states": it is a lasting
+   condition, needs a gloss of the lasting condition itself, and goes on like any trait.  His cut-off: "months yes,
+   weeks-to-months no(ish), though it's a fuzzy borderline.  My mental model is 'How likely is this to wear off
+   during the course of a narrative?', and my assumption is that narratives that last weeks in, say, a dozen
+   paragraphs are not that uncommon, while months in a dozen paragraphs is unusual."  Lasting: expecting
+   ([pregnant](../../data/roles/instructions/pregnant.json)), [unemployed](../../data/roles/instructions/unemployed.json),
+   depressed (an episode), grieving (sorrowing, heartsick), [newlywed](../../data/roles/instructions/newlywed.json).
+   Not lasting: [sleep-deprived](../../data/traits/instructions/sleep_deprived.json) (days to weeks), housebound after
+   a short illness, jet-lagged.
+2. Otherwise: "is a habitual, persistent predisposition toward this temporary state plausible?"
+3. If so: does the label itself have that predisposition as a sense ("ordinary speakers already use the word for a
+   person who is often that way"; tearful yes, startled no)?  If so, gloss it in that sense, "confirm the gloss was
+   written that way (possibly a keyword scan, backed by a Haiku call)", and if confirmed move it out of the states
+   queue.
+4. "We should probably check states for roles as well, using our standard rule": the kind call's own definition of a
+   role ([step2_kind.md](./rubrics/step2_kind.md)): "an identity big enough to organize the whole persona, so that a
+   person has only one: a profession or calling, an office or official status, a rank so high or so low that it rules
+   out most professions, an age so young or so old that it rules out a profession."  The role/trait border is fuzzy
+   and duplicates across corpus roles and traits are accepted, so a borderline call is not an error to fix in code.
+
+What "move out" means is the coordinator's proposal, which Roger has not objected to; it is built as proposed and
+recorded in [QUESTIONS.md](./QUESTIONS.md) question 45 as "proceeded under, Roger to confirm": the row leaves the
+states list and goes through M3 and the review app as the physical pass does (section 8), so that Roger decides in
+review, not by typing names; when only another name fits (startled gives jumpy), that name becomes a candidate of its
+own, which goes through M1, M3 and review as any generator's word, while the state word stays on the states list.
+
+**The routes.**  The queue call (prompt v4, Haiku 5.5, 20 rows a call) answers, reason first: `typical_duration`
+(hours, days, weeks, months or years) and `lasting`; for a lasting condition `role` and a `gloss` of the condition;
+otherwise `plausible`, `name_fits`, `suggested_name` and a `gloss` of the predisposition, as in v3.  The code then
+routes the row ([states_pass.py](../../assistant_axis/gapgen/states_pass.py) `route_for`):
+
+| route | when | what happens to the row |
+|---|---|---|
+| `role` | lasting, and a role | `holding: "roles"`, entity type `role`: read by hand with the rest of the roles list ([QUESTIONS.md](./QUESTIONS.md) question 1); no gloss check, no M3 |
+| `lasting` | lasting, not a role | gloss check; if confirmed, M1's alignment score, then `holding: "states_released"` |
+| `predisposition` | not lasting, plausible, the state's own name fits | the same |
+| `renamed` | not lasting, plausible, only another name fits | stays on the states list; the suggested name is submitted as a new candidate (below) |
+| `held` | not lasting and not plausible; a gloss the check turned down; a second rename (below) | stays on the states list, the reason on the block as `route_reason` |
+
+A `typical_duration` of months with `lasting` false (or weeks with true) is kept as the model gave it: Roger called
+that border fuzzy.  The block records `duration_agrees` and the summary lists the rows where it is false.
+
+**The gloss check.**  A keyword scan first ([states_pass.py](../../assistant_axis/gapgen/states_pass.py) `SCAN_FOR`,
+`SCAN_AGAINST`): a gloss with a marker for its route (lasting: "for months", "years", "month after month", "day after
+day", "every day", "daily" ...; predisposition: "again and again", "easily", "often", "whenever", "any", "every",
+"readily" ...) and none against ("right now", "at the moment", "today", "this morning", "just", "briefly" ...) is
+confirmed without a call.  Any other gloss goes to the check call (prompt v1, Haiku 5.5, one gloss a call), which
+reads the sentence as `lasting`, `predisposition` or `passing` without being told which was meant (so it cannot
+simply agree); the gloss, the one-sentence "This means ..." description M3 embeds and shows its models
+([glossary](./glossary.md#m1-filter-gloss)), is confirmed when the reading is its route's.  The scan never turns a
+gloss down on its own.  The alignment call (M1's, [alignment.md](./rubrics/alignment.md) as pinned, the 0 to 3 score that sets M3's *cut-off*, the overlap reading at which a candidate counts as covered) is
+sent beside the check calls, on every gloss of the two released routes, so a gloss the check turns down has paid for
+a score that is not recorded (about $0.0002 a row).
+
+**Where a released row goes: a marker, not a cleared `holding`.**  A released row's `holding` becomes
+`states_released`, a list of its own in `HOLDING` of [normalize.py](../../assistant_axis/gapgen/normalize.py),
+rather than `None`.  A cleared field would put the row
+in the main flow, where it does not fit: its filter verdict is `tagged` (not `trait`), its own `gloss` is empty (the
+gloss is on the `states_pass` block), [gap_registry.py](../../data_analysis/gap_generation/gap_registry.py)
+`report` would list it as an ordinary row, and the bulk path
+`promote --status accepted` would promote it with no description draft.  The marker keeps it out of all of these, as
+the physical list keeps a physical row out, and gives the pass one value to select on
+([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py) `score --holding states`) and one listing
+([gap_registry.py](../../data_analysis/gap_generation/gap_registry.py) `holding --list states_released`).  The
+row has left the states list either way: `holding --list states` no longer shows it, the states pass no longer picks
+it up, and its block says why it left.
+
+**Promotion.**  A released row is promoted only by name, as a physical row is:
+[gap_registry.py](../../data_analysis/gap_generation/gap_registry.py) `promote --keys K` or the review app's `apply`
+([review_app.py](../../data_analysis/gap_generation/review_app.py)); both pass `allow_released_states` to
+[promote.py](../../assistant_axis/gapgen/promote.py), and `promote --status accepted` refuses the row.  Its seed-queue
+entry carries the tags `states_pass` and `lasting_state` or `predisposition` (beside M1's `state`), the pass's gloss
+as `description_draft`, and a note naming the route, the duration and the batch.  A row on the roles list is never
+promoted (question 1).  The old path for a held row, `promote --keys K --confirm-state-name K=NAME`, is unchanged.
+
+**Renamed rows: one hop.**  A `renamed` row's suggested name is written to the tracked `candidates.jsonl` of the
+run directory `data/candidates/runs/states_pass/<batch_id>/` first (the pilot's:
+[candidates.jsonl](../../data/candidates/runs/states_pass/states_v4_pilot/candidates.jsonl)) and then submitted to the registry (generator
+`states_pass`, run id the states-pass batch, `source_ref` the state's key, `gloss_hint` the predisposition gloss), and
+the state's block records it as `renamed_to`.  The new candidate goes through M1 like any generator's word.  If M1
+tags it a state again and the pass would rename it once more, it is held instead (`route_reason` "already a
+states-pass rename"): a row with a `states_pass` source gets one hop.
+
+**The commands, in order** (each with `--dry-run` first, which prints the estimate and renders the calls):
+
+1. The states pass: `uv run python data_analysis/gap_generation/states_pass.py --batch-id states_<name> --mode queue
+   --holding-states --transport batches --budget-usd <cap>` ([states_pass.py](../../data_analysis/gap_generation/states_pass.py)).
+   It takes the rows on the states list with no `states_pass` block yet (`--rejudge` for every one), writes each
+   row's block and new `holding`, and submits the renamed route's names.  `--transport auto` goes live under 300
+   rows; `--resume` continues a stopped run in its batch directory (its rows, its answers on record, its recorded
+   batches).
+2. M1 on the renamed route's names: `uv run python data_analysis/gap_generation/traithood_filter.py --batch-id <F>
+   --run states_pass/states_<name> --pipeline split --transport batches --budget-usd <cap>`
+   ([traithood_filter.py](../../data_analysis/gap_generation/traithood_filter.py)); from there they are ordinary
+   candidates (M3, R1, R2), and any that come back tagged a state are judged by the next states pass.
+3. M3 on the released rows: `uv run python data_analysis/gap_generation/novelty_score.py score --holding states
+   --batch-id states_m3_<name> --unscored --transport batches --budget-usd <cap>`
+   ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py)).  No gloss stage: the states pass
+   wrote the gloss and the alignment score.  Every block, `run.json` and `summary.json` say `"pass": "states"`; use a
+   batch id of its own.
+4. R1: `uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_states_<name>
+   --from-batches states_m3_<name> --transport batches --budget-usd <cap>`
+   ([review_graph.py](../../data_analysis/gap_generation/review_graph.py)); the nodes carry `outcome: "states"`.
+5. R2: `uv run python data_analysis/gap_generation/review_app.py serve --batch-id review_states_<name>`, then
+   `apply --dry-run` and `apply` ([review_app.py](../../data_analysis/gap_generation/review_app.py)).  The card shows
+   M1's `state` tag, the outcome `states` and a chip saying where the row came from, such as `states pass: lasting
+   (months)`.
+
+`gap_registry.py holding --list states`, `--list states_released` and `--list roles`
+([gap_registry.py](../../data_analysis/gap_generation/gap_registry.py)) show each row's route, duration and gloss.
+
+**The calls as Haiku 5.5 receives them** (rendered from the code, as the judging rule asks; the four rows are real
+rows of the states list: one lasting, one whose own name fits, one needing another name and one implausible; the pilot
+sent them inside its 20- and 10-row calls, so the user turn here is how the call builds those four alone):
+
+````text
+--- system (queue prompt v4) ---
+You are helping to build a research corpus of personality traits. Each trait is a label plus a one-sentence description, and a persona is prompted to embody it while answering ordinary questions in text, so a trait must be something a person can have as a standing way of being, or a condition that lasts months or longer, not something that happens to them once.
+
+## Your task
+Each candidate below names a state: a condition someone is in for a while (a mood, a reaction, a bodily or situational condition). You are given the state's name and a short description of the state. For each, reason first, then answer:
+1. typical_duration: how long the state typically lasts: "hours" (or less), "days", "weeks", "months" or "years".
+2. lasting: true when the state typically lasts months or longer. The test is how likely it is to wear off in the course of a story: a story told in a dozen paragraphs often spans weeks, but rarely months. So a state of weeks, or of weeks to months, is not lasting; a state of months or years is.
+3. If lasting is true, answer role and gloss, and set plausible, name_fits and suggested_name to null:
+   - role: is the lasting condition a role in this sense: an identity big enough to organize the whole persona, so that a person has only one: a profession or calling, an office or official status, a rank so high or so low that it rules out most professions, an age so young or so old that it rules out a profession?
+   - gloss: one sentence of 20 to 40 words (count them) describing the lasting condition itself: what the person's days are like while it lasts, and how it shows in what they do, feel or say.
+4. If lasting is false, set role to null and answer:
+   - plausible: is a habitual predisposition to this state plausible? That is, could a person be prone to falling into it again and again, so that the proneness is part of who they are and would show in how they talk? Moods, reactions and emotional or social states mostly allow it. Conditions imposed from outside, or purely bodily conditions that no temperament brings about, mostly do not.
+   - name_fits: if plausible, is the state's own name still a good name for the predisposition? It is when ordinary speakers already use the word for a person who is often that way. If not, give suggested_name: the plainest ordinary English name for the predisposition (one word if one exists, otherwise a short phrase such as "easily ..." or "prone to ...").
+   - gloss: if plausible, one sentence of 20 to 40 words (count them) describing the habitual predisposition, not the passing state: what the person habitually does, feels or says.
+   If a predisposition is not plausible, set name_fits, suggested_name and gloss to null.
+Every gloss begins "This means" followed at once by a verb in the -ing form, and goes straight to the behavior, from the inside. No hedges ("tends to", "sometimes", "may"). A vice is described as a vice. US spelling.
+
+## Examples (reason first, then the answers)
+- "bereaved": grief over a death in the family lasts months or longer, and it combines with any profession, so it is no role; typical_duration "months"; lasting true; role false; plausible, name_fits and suggested_name null; gloss "This means living, month after month, with the recent death of someone close: missing them every day, returning to memories of them, and finding plans and ordinary pleasures emptied by the loss."
+- "retired": having left paid work for good lasts years and rules out a profession; typical_duration "years"; lasting true; role true; plausible, name_fits and suggested_name null; gloss "This means having left working life for good: living on a pension and savings, filling the days with chosen pursuits, and speaking of one's working years as a finished chapter."
+- "convalescing": recovery from an illness takes weeks, at most a few months, so it is not lasting; a bodily condition that no temperament brings about; typical_duration "weeks"; lasting false; role null; plausible false; name_fits, suggested_name and gloss null.
+- "startled": over in moments; some people are startled by every small surprise, and the ordinary name for that is jumpy; typical_duration "hours"; lasting false; role null; plausible true; name_fits false; suggested_name "jumpy"; gloss "This means reacting to every sudden noise, interruption or unexpected question with a jolt of alarm, losing the thread for a moment and needing time to settle again."
+- "wistful": a mood of an hour or an afternoon, and people who often feel it are called wistful; typical_duration "hours"; lasting false; role null; plausible true; name_fits true; suggested_name null; gloss "This means drifting easily into longing for what is gone or out of reach, dwelling on old places and chances missed, and letting a soft sadness color how one speaks."
+
+## Output
+Respond with one JSON object and nothing else. For every candidate, reason first (at most 30 words), then give the answers. Use exactly these keys in this order:
+{"results": [{"id": <int>, "label": "<the candidate>", "reason": "<at most 30 words>", "typical_duration": "hours"|"days"|"weeks"|"months"|"years", "lasting": true|false, "role": true|false|null, "plausible": true|false|null, "name_fits": true|false|null, "suggested_name": "<name>"|null, "gloss": "<sentence>"|null, "confidence": <0-1>}]}
+confidence is your probability, between 0 and 1, that lasting and the answer after it (role, or plausible) are right. Return one row per candidate id, in the order given.
+--- user ---
+Judge these 4 states. Reason first, then answer, for each.
+{"id": 1, "label": "expecting", "state_description": "pregnant, carrying a child"}
+{"id": 2, "label": "tearful", "state_description": "currently crying or on the verge of tears"}
+{"id": 3, "label": "rattled", "state_description": "emotionally disturbed or agitated; having lost composure"}
+{"id": 4, "label": "muddy", "state_description": "covered in mud, dirty from mud (a passing condition of the body or clothes)"}
+````
+
+The four rows' answers as the pilot recorded them (each was one row of a 20- or 10-row call; route added by the code):
+
+```json
+{"id": 1, "label": "expecting", "reason": "Pregnancy lasts about nine months, so it is lasting. It rules out no profession, so it is not a role.", "typical_duration": "months", "lasting": true, "role": false, "plausible": null, "name_fits": null, "suggested_name": null, "gloss": "This means carrying a child through months of growing bodily change: tiring easily, planning around appointments and due dates, and speaking often of the baby, the nursery and what is coming.", "confidence": 0.9, "route": "lasting"}
+{"id": 2, "label": "tearful", "reason": "Crying or near tears passes within hours; people who often cry easily are commonly called tearful.", "typical_duration": "hours", "lasting": false, "role": null, "plausible": true, "name_fits": true, "suggested_name": null, "gloss": "This means welling up at small kindnesses, sad songs or hard news, speaking with a thickened voice, and reaching for a tissue more often than others would expect.", "confidence": 0.8, "route": "predisposition"}
+{"id": 3, "label": "rattled", "reason": "Being emotionally thrown off composure passes within hours. Many people are easily rattled, so the predisposition is plausible and the phrase 'easily rattled' is the ordinary name.", "typical_duration": "hours", "lasting": false, "role": null, "plausible": true, "name_fits": false, "suggested_name": "easily rattled", "gloss": "This means losing composure at the slightest provocation, fumbling words, snapping at others, and reacting to small upsets with visible agitation before slowly regaining control.", "confidence": 0.8, "route": "renamed"}
+{"id": 4, "label": "muddy", "reason": "Mud on the body or clothes is a passing physical condition that is cleaned off within hours. No temperament produces it.", "typical_duration": "hours", "lasting": false, "role": null, "plausible": false, "name_fits": null, "suggested_name": null, "gloss": null, "confidence": 0.95, "route": "held"}
+```
+
+````text
+--- system (check prompt v1) ---
+You are checking a description written for a research corpus of personality traits. Each trait is a label plus a one-sentence description, and a persona is prompted to embody it in text, so a description must describe something that stays with the person from one day to the next, not one passing episode.
+
+You are given a label and its description. Say which of three things the description, as written, describes:
+- "lasting": a condition the person lives in for months or longer, described as going on over that time;
+- "predisposition": a habitual proneness: the person falls into a state again and again, or easily, as part of who they are;
+- "passing": being in a state now, or for one short spell, with nothing in the description that makes it last or recur.
+Judge the description as written, not the label on its own.
+
+Respond with one JSON object and nothing else, reason first:
+{"reason": "<one short sentence>", "reading": "lasting"|"predisposition"|"passing"}
+--- user (sulky: a predisposition gloss the scan did not pass) ---
+{"label": "sulky", "description": "This means going quiet and withdrawn after a slight, answering questions in clipped words, avoiding eye contact, and nursing resentment long after the matter has been settled."}
+--- answer ---
+{"reason": "The description portrays a habitual pattern of withdrawing after any slight, which recurs as part of the person's usual reaction, though it never specifies a duration of months.", "reading": "predisposition"}
+--- user (beholden: a lasting gloss the scan did not pass) ---
+{"label": "beholden", "description": "This means carrying a debt of gratitude to someone who helped, measuring one's choices against that obligation, and deferring to their wishes while it lasts."}
+--- answer ---
+{"reason": "The description frames beholdenness as an ongoing debt the person carries and lives under, with choices continually measured against it 'while it lasts,' which implies a standing condition over an extended period rather than a habitual tendency or a single episode.", "reading": "lasting"}
+--- user (rueful: a predisposition gloss the scan did not pass) ---
+{"label": "rueful", "description": "This means reflecting with a wry, self-deprecating regret on one's own mistakes and lost chances, smiling ruefully at them and admitting them openly in conversation."}
+--- answer ---
+{"reason": "The description characterizes a manner of reflecting and admitting regrets but never says the person does so repeatedly, habitually, or over an extended period, so nothing marks it as recurrent or lasting.", "reading": "passing"}
+````
+
+**Pilot (2026-10-09): the 170 rows on the states list** of this checkout's registry (from the generator pilots:
+censuses, Roget, the WordNet stream, the Allport column IV and rare pilots, the antonym check and the M1 validation
+pool), every step through the Message Batches API.
+
+- *States pass* [states_v4_pilot](../../data/candidates/states_pass/states_v4_pilot/summary.json): 170 of 170
+  answered, $0.034, 29 minutes (three batch waves).  Typical durations: hours 95, days 26, weeks 26, months 13, years
+  10.  Routes: role 3, lasting 17, predisposition 15, renamed 66, held 69 (67 neither lasting nor plausible; 2 glosses
+  the check turned down).  Of the 34 glosses of the two released routes, the scan passed 17 and the check call read 17,
+  confirming 15 and turning down two: contented's ("going through ordinary days at ease with what one has ...", read
+  as lasting: a settled way of living, not a proneness) and rueful's (read as passing: nothing makes it recur).
+  Alignment scores of the 32 released glosses: 22 at 0, 8 at 1, 1 at 2 (repentant), 1 at 3 (beholden: "deferring to
+  their wishes").  Three rows' `typical_duration` disagrees with `lasting` (destined and thirty-ninth: months, not
+  lasting; unwronged: years, not lasting); all three were held as implausible.
+- *Roles* (all of them): fugitive ("living on the run for months"), housebound (read as years unable to leave home),
+  ostracized ("an imposed low standing that rules out most ordinary roles").  Against Roger's examples: expecting,
+  heartsick and unemployed came out lasting, but expecting and unemployed not as roles ("it rules out no profession"),
+  although both are corpus roles ([pregnant](../../data/roles/instructions/pregnant.json),
+  [unemployed](../../data/roles/instructions/unemployed.json)); depressed's accepted reading is "currently feeling sad,
+  low, or down in mood", a mood, so it came out not lasting and renamed gloomy; sorrowing and lamenting came out as
+  renamed predispositions (sorrowful, mournful), not as lasting grief.  Duplicates across roles and traits are
+  accepted, so these are for Roger's eye, not fixes.
+- *Renamed*: 66 names submitted to the registry (47 new rows, 19 merged into rows already there, such as
+  [anxious](../../data/traits/instructions/anxious.json), [contented](../../data/traits/instructions/contented.json)
+  and [remorseful](../../data/traits/instructions/remorseful.json), which are corpus traits that M3's exact-label
+  check will find), recorded in
+  [candidates.jsonl](../../data/candidates/runs/states_pass/states_v4_pilot/candidates.jsonl).  They await M1 (step 2
+  above).
+- *A finding about the queue call*: 6 of the 9 twenty-row calls stopped at the first `max_tokens` (8000), because
+  Haiku 5.5's adaptive thinking took about 500 output tokens a row; the retry wave, in ten-row calls, recovered every
+  row.  The default is now 16000 and the estimate 500 tokens a row (no prompt change).
