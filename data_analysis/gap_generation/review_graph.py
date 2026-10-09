@@ -75,6 +75,7 @@ from assistant_axis.gapgen import embed as EM  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import review_graph as RG  # noqa: E402
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -137,11 +138,14 @@ def _cand_chars(cands) -> float:
 
 
 def make_runner(*, client, batch_id: str, rubrics: dict, index, usage, responses_path: Path, concurrency: int,
-                config_version: str, embedding: dict, resume_records=()) -> RG.ReviewRunner:
+                config_version: str, embedding: dict, resume_records=(),
+                label_form: str = PL.DEFAULT_LABEL_FORM) -> RG.ReviewRunner:
+    """The build's runner; ``label_form`` (prompt_labels) is how its prompts show the labels: the judge display form
+    for a new build, the earlier session's recorded form for a ``--resume``."""
     return RG.ReviewRunner(client=client, batch_id=batch_id, rubrics=rubrics, index=index,
                            label_sets=NV.LabelSets(set(), {}, {}), usage=usage, responses_path=responses_path,
                            config_version=config_version, concurrency=concurrency, embedding=embedding,
-                           resume_records=resume_records)
+                           resume_records=resume_records, label_form=label_form)
 
 
 def graph_config(args, cfg, rubrics: dict) -> dict:
@@ -269,6 +273,9 @@ def cmd_build(args, argv) -> int:
     # a resume: the spend of the earlier sessions counts against the cap, and the estimate is the replay of the build
     # on its records with nothing sent (the calls not on record, and those they lead to by the shares)
     resuming = bool(args.resume and out_dir.exists())
+    # the prompts' label form (prompt_labels): a resume keeps the earlier session's (a build before 2026-10-09
+    # recorded none: "stored"), so that its answers on record are found; a new build shows the judge display form
+    label_form = PL.resolve_label_form(earlier=NS._peek_run(out_dir) if resuming else None)
     spent_before = MultiModelUsage.load_or_create(out_dir / "usage.json").total_cost_usd if resuming else 0.0
     records_before: list = []
     if resuming and (out_dir / "responses.jsonl").exists():
@@ -286,7 +293,7 @@ def cmd_build(args, argv) -> int:
         replay = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics, index=runner.index,
                              usage=MultiModelUsage(), responses_path=out_dir / "responses.jsonl",
                              concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
-                             resume_records=records_before)
+                             resume_records=records_before, label_form=label_form)
         r_est, r_graph, wanted = RG.resume_estimate(
             p, runner=replay, corpus=corpus, queue=queue, shares=shares, overlap_floor=args.overlap_floor,
             proposed_cut_off=args.proposed_cut_off, overlap_tokens=tokens, transport=transport)
@@ -303,7 +310,7 @@ def cmd_build(args, argv) -> int:
     probe = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics,
                         index=index if index is not None else SimpleNamespace(traits=corpus), usage=MultiModelUsage(),
                         responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
-                        config_version=cfg.config_version, embedding=embedding)
+                        config_version=cfg.config_version, embedding=embedding, label_form=label_form)
     est = estimate(plan, probe, vinfo["n_to_embed"])
     pl = plan_line(plan, vinfo, overlap_floor=args.overlap_floor)
     print(f"plan: {json.dumps(pl)}")
@@ -365,7 +372,8 @@ def cmd_build(args, argv) -> int:
                              "relation_max_tokens": NR.RELATION_MAX_TOKENS, "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS,
                              "ask_attempts": NR.ASK_ATTEMPTS},
                 "estimate_inputs": {"shares": shares.as_dict(), "overlap_tokens": tokens},
-                "corpus": index_info, "resumed": bool(args.resume), "started_at": utc_now()}
+                "corpus": index_info, PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume),
+                "started_at": utc_now()}
     if resuming:
         run_meta["resume_estimate"] = dict(resume_info)
     if earlier:
@@ -396,7 +404,7 @@ def cmd_build(args, argv) -> int:
         runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), batch_id=args.batch_id, rubrics=rubrics,
                              index=index, usage=usage, responses_path=out_dir / "responses.jsonl",
                              concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
-                             resume_records=resume_records)
+                             resume_records=resume_records, label_form=label_form)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -418,7 +426,8 @@ def cmd_build(args, argv) -> int:
                     f"${cap:.2f}; the relation answers are on record: --resume with a --budget-usd of at least that")
 
         graph = RG.build_graph(plan, runner=runner, corpus=corpus, queue=queue, overlap_floor=args.overlap_floor,
-                               config=graph_config(args, cfg, rubrics), batch_id=args.batch_id, gate=gate,
+                               config=graph_config(args, cfg, rubrics) | {PL.LABEL_FORM_KEY: label_form},
+                               batch_id=args.batch_id, gate=gate,
                                proposed_cut_off=args.proposed_cut_off)
         graph.usage = usage.as_dict()
         atomic_write_text(json.dumps(RG.graph_envelope(graph, inputs=inputs), indent=2, ensure_ascii=False) + "\n",

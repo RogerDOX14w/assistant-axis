@@ -692,6 +692,7 @@ def cmd_place_check(args) -> int:
     from assistant_axis.gapgen import split_rubrics as sr
     from assistant_axis.gapgen.cost import GuardedUsage
     from assistant_axis.gapgen.generators.roget import placement as PL
+    from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, LABEL_FORM_KEY
     from assistant_axis.gapgen.registry import utc_now
     from assistant_axis.judge import warn_if_low_parse_rate
     from assistant_axis.judge_pricing import MultiModelUsage
@@ -814,7 +815,10 @@ def cmd_place_check(args) -> int:
                 "n_referee": sum(1 for it in items if PL.needs_referee(it, sonnet.get(it.stem))),
                 "n_reused": {"sonnet": len(s_done), "opus": len(o_done)},
                 "cost_usd_this_run": round(usage.total_cost_usd, 4), "budget_usd": args.budget_usd, "cache": cache,
-                "stopped_by_budget": stopped}
+                "stopped_by_budget": stopped,
+                # the label in the judge display form (prompt_labels); --resume reuses only answers to a byte-identical
+                # user turn, so an answer to the stored form of a standard's label is asked again, not reused
+                LABEL_FORM_KEY: DEFAULT_LABEL_FORM}
     prev_env = json.loads(lh_path.read_text(encoding="utf-8"))
     meta = PL.cumulative_meta(prev_env.get("result", prev_env).get("placement_check"), run_meta, new_lh)
     inst = sorted((Path(args.data_dir) / "traits" / "instructions").glob("*.json"))

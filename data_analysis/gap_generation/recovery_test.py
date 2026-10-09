@@ -58,6 +58,7 @@ from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import recovery as RC  # noqa: E402
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -176,6 +177,8 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
     m3_run = json.loads((m3_dir / "run.json").read_text(encoding="utf-8"))
     rules = NV.rules_of({"rules": m3_run.get("rules")}) if m3_run.get("rules") else NV.DEFAULT_RULES
     query_form = (m3_run.get("settings") or {}).get("query_form") or args.query_form
+    # the match calls show the labels in the reduced-corpus M3 run's form, so that a seed is one form throughout
+    label_form = PL.resolve_label_form(source=m3_run)
     cands = [NR.M3Candidate(key=r["key"], stem=r["stem"], label=r["label"], gloss=r["gloss"],
                             alignment_score=r["novelty"].get("alignment_score"), region=r["novelty"].get("region"),
                             generators=list(r.get("generators") or [])) for r in results]
@@ -203,7 +206,7 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
                                   responses_path=seed_dir / "responses.jsonl", k=cfg.k, mode="shortlist",
                                   config_version=cfg.config_version, concurrency=args.concurrency,
                                   resume_records=_read_jsonl(seed_dir / "responses.jsonl") if args.resume else (),
-                                  rules=rules)
+                                  rules=rules, label_form=label_form)
         if transport == "batches":
             import anthropic
             runner.cache_ttl = NR.BATCH_CACHE_TTL
@@ -228,7 +231,7 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
         if (m3_dir / "summary.json").exists() else {}
     reduced = {"batch_id": m3_dir.name, "by_decision": m3_summary.get("by_decision"),
                "n_stalled": m3_summary.get("n_stalled"), "skipped": m3_summary.get("skipped"),
-               "rules": rules.name, "cosine_floor": rules.cosine_floor}
+               "rules": rules.name, "cosine_floor": rules.cosine_floor, PL.LABEL_FORM_KEY: label_form}
     return 0, RC.seed_figures(hidden_doc, results, rows, near=near, reduced_run=reduced, cost=cost)
 
 
@@ -416,6 +419,9 @@ def main(argv=None) -> int:
                 "models": {"overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
                 "resumed": bool(args.resume), "started_at": utc_now()}
     earlier = json.loads((out_dir / "run.json").read_text(encoding="utf-8")) if (out_dir / "run.json").exists() else None
+    # the label form of the harness's prompts (prompt_labels): new M3 runs and their match stages show the judge
+    # display form; a resumed seed keeps its M3 run's recorded form (match_seed), as a resumed harness keeps its own
+    run_meta[PL.LABEL_FORM_KEY] = PL.resolve_label_form(earlier=earlier)
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")

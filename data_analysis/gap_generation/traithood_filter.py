@@ -141,6 +141,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E402
 from assistant_axis.gapgen import filter_rubric as fr  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen.cost import (  # noqa: E402
     CostRefused, Estimate, GuardedUsage, confirm_or_abort,
 )
@@ -506,7 +507,8 @@ def main(argv=None) -> int:
                 "prompt_sha256": dict(PROMPT_SHA256), "probe_only": bool(args.probe_only),
                 "plain_reading": not args.no_plain_reading, "compare_model": args.compare_model,
                 "measurement": bool(args.measurement), "stability": bool(args.stability),
-                "started_at": utc_now()}
+                # the single pipeline never resumes: every batch shows the judge display form (prompt_labels)
+                PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM, "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -569,7 +571,8 @@ def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error,
     summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                     "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": args.model,
-                    "second_model": run_meta["second_model"]})
+                    "second_model": run_meta["second_model"],
+                    PL.LABEL_FORM_KEY: getattr(runner, "label_form", PL.DEFAULT_LABEL_FORM)})
     if extra_summary is not None:
         extra_summary(summary, results)
     from assistant_axis.plot_metadata import json_metadata

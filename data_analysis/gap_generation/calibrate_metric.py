@@ -86,6 +86,7 @@ from assistant_axis.gapgen import contrast as CT  # noqa: E402
 from assistant_axis.gapgen import embed as EM  # noqa: E402
 from assistant_axis.gapgen import labels as LB  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import retrieval as RT  # noqa: E402
 from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR, METRIC_CONFIG_PATH  # noqa: E402
@@ -316,7 +317,9 @@ def main(argv=None) -> int:
     run = {"started_at": utc_now(), "git_sha": git_sha(), "argv": sys.argv[1:] if argv is None else argv,
            "allow_dirty": bool(args.allow_dirty), "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
            "estimate_usd": round(est.usd, 4), "budget_usd": cap, "models_requested": args.models,
-           "models_run": [], "models_failed": {}, "timings_s": timings}
+           "models_run": [], "models_failed": {}, "timings_s": timings,
+           # the paraphrase and blinded-judge prompts show the judge display form (embedded texts are unchanged)
+           PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM}
 
     def save_run():
         run["cost_usd"] = round(usage.total_cost_usd, 6)
@@ -841,11 +844,17 @@ def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usag
                         if it["stem"] in new})
         models = {s: m for s, m in paraphrase_models(prior).items() if s in merged and s not in new}
         models.update({s: CL.PARAPHRASE_MODEL for s in new})
+        # how each entry's prompt showed its label (prompt_labels; 2026-10-09): an entry written before has none
+        # recorded ("stored"); the source hash stays that of the stored label, so no entry goes stale over it
+        forms = {s: f for s, f in (prior.get(PL.LABEL_FORM_KEY + "s") or {}).items() if s in merged and s not in new}
+        forms.update({s: PL.DEFAULT_LABEL_FORM for s in new})
         para_path.parent.mkdir(parents=True, exist_ok=True)
         payload = {"model": _one_model(models.values()) or CL.PARAPHRASE_MODEL, "models": dict(sorted(models.items())),
                    "style": style, "prompt_version": CL.paraphrase_version(style),
                    "prompt_sha256": _sha256(CL.paraphrase_prompt(style)), "n": len(merged), "paraphrases": merged,
                    "sources": {s: sources[s] for s in merged if s in sources}}
+        if forms:
+            payload[PL.LABEL_FORM_KEY + "s"] = dict(sorted(forms.items()))
         if prior.get("sources_note"):
             payload["sources_note"] = prior["sources_note"]
         para_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
@@ -1201,7 +1210,8 @@ def run_round4(args) -> int:
            "paraphrases_generated": {s: len(m) for s, m in to_generate.items()},
            "paraphrases_stale": {s: sorted(v) for s, v in para_stale.items() if v},
            "m1_gloss_filter_rows": m1_counts, "renames_followed": renames,
-           "renames_not_followed": dict(LB.SENSE_CHANGED_RENAMES), "timings_s": timings}
+           "renames_not_followed": dict(LB.SENSE_CHANGED_RENAMES), "timings_s": timings,
+           PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM}
     if rebuilt is not None:   # deterministic: the same build, now written with its inputs
         lp_written = LB.build_default(repo, out_dir=out, write=True)
         run["labelled_pairs_rebuilt"] = {"counts": lp_written.counts(), "curation_unused": lp_written.curation_unused,

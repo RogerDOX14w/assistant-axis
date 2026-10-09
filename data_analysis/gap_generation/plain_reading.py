@@ -58,6 +58,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import plain_reading as pr  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
@@ -162,6 +163,13 @@ def main(argv=None) -> int:
     corpus_mode = not args.pairs
     reuse = reuse_from(args.reuse_readings) if args.reuse_readings else {}
     n_reused = len({it.label for it in items} & set(reuse))
+    # the prompts' label form (prompt_labels): with --reuse-readings the reused run's (its readings were asked in
+    # that form, and the comparison must show the label they were read from; a run before 2026-10-09 recorded none:
+    # "stored"), else the judge display form
+    reused_run = Path(args.reuse_readings) / "run.json" if args.reuse_readings else None
+    label_form = PL.resolve_label_form(
+        source=(json.loads(reused_run.read_text(encoding="utf-8")) if reused_run.exists() else {})
+        if reused_run is not None else None)
     est = build_estimate(items, args, n_reused)
     print(f"plan: {json.dumps({'n_rows': len(items), 'n_labels': len({it.label for it in items}), 'n_reused': n_reused})}")
     print("estimate:\n" + est.format())
@@ -185,11 +193,12 @@ def main(argv=None) -> int:
     if args.dry_run:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
-        print(f"DRY-RUN: would write {out_dir}/; prompt sha256: {json.dumps(pr.PROMPT_SHA256)}")
-        print(f"--- reading prompt ---\n{pr.build_reading_prompt(items[0].label)}")
+        print(f"DRY-RUN: would write {out_dir}/; prompt sha256: {json.dumps(pr.PROMPT_SHA256)}; "
+              f"label form {label_form}")
+        print(f"--- reading prompt ---\n{pr.build_reading_prompt(items[0].label, label_form=label_form)}")
         payload = [{"id": i + 1, "label": it.label, "plain_reading": "<reading>", "intended_meaning": it.intended}
                    for i, it in enumerate(items[:3])]
-        print(f"--- comparison prompt (first rows) ---\n{pr.build_compare_prompt(payload)}")
+        print(f"--- comparison prompt (first rows) ---\n{pr.build_compare_prompt(payload, label_form=label_form)}")
         return 0
     if refused:
         return 2
@@ -210,7 +219,7 @@ def main(argv=None) -> int:
                 "prompt_sha256": dict(pr.PROMPT_SHA256),
                 # a corpus comparison is always a measurement (filter.development_seen leaves it out)
                 "measurement": bool(args.measurement or args.corpus or args.corpus_stems),
-                "started_at": utc_now()}
+                PL.LABEL_FORM_KEY: label_form, "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -221,7 +230,7 @@ def main(argv=None) -> int:
     runner = pr.PlainReadingRunner(client=client, batch_id=args.batch_id, reading_model=args.reading_model,
                                    compare_model=args.compare_model, usage=usage, batch_size=args.batch_size,
                                    concurrency=args.concurrency, responses_path=out_dir / "responses.jsonl",
-                                   reuse_readings=reuse, flag=not corpus_mode)
+                                   reuse_readings=reuse, flag=not corpus_mode, label_form=label_form)
     status = 0
     error: Optional[BaseException] = None
     try:
@@ -244,7 +253,8 @@ def main(argv=None) -> int:
             atomic_write_text(pr.corpus_listing(results), out_dir / "listing.md")
         summary.update({"flags_raised": not corpus_mode, "batch_id": args.batch_id, "stopped_by_budget": status == 2,
                         "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
-                        "reading_model": args.reading_model, "compare_model": args.compare_model})
+                        "reading_model": args.reading_model, "compare_model": args.compare_model,
+                        PL.LABEL_FORM_KEY: label_form})
         from assistant_axis.plot_metadata import json_metadata
         env = json_metadata(summary, title=f"plain_reading {args.batch_id}")
         atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")

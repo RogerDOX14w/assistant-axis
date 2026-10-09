@@ -100,6 +100,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import split_rubrics as SR  # noqa: E402
 from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import (  # noqa: E402
@@ -266,7 +267,8 @@ def variant_pairs(ps: OT.PairSet, calls=None) -> dict:
     return out
 
 
-def single_prompts_text(ps, rubrics, corpus, model: str, keys, *, passes: int = 1, calls=None) -> list[str]:
+def single_prompts_text(ps, rubrics, corpus, model: str, keys, *, passes: int = 1, calls=None,
+                        label_form: str = PL.DEFAULT_LABEL_FORM) -> list[str]:
     """The single-form rubrics' requests for :func:`variant_pairs`, as the model receives them."""
     v = variant_pairs(ps, calls)
     group = {p.pair_id: p.group for p in ps.pairs}
@@ -280,12 +282,12 @@ def single_prompts_text(ps, rubrics, corpus, model: str, keys, *, passes: int = 
                 f"{', recorded opposite' if name == 'nearest_opposite' else ''})", ""]
         for r in keys:
             out += ["```text", OT.rendered_prompt(c, corpus, rubric=r, rubric_text=rubrics[r]["text"], model=model,
-                                                  form="single").rstrip("\n"), "```", ""]
+                                                  form="single", label_form=label_form).rstrip("\n"), "```", ""]
     return out
 
 
 def rendered_prompts_text(ps, rubrics, corpus, model: str, *, rubric_keys=None, passes: int = 1,
-                          seed: int = 0, calls=None) -> str:
+                          seed: int = 0, calls=None, label_form: str = PL.DEFAULT_LABEL_FORM) -> str:
     """The requests of :func:`variant_calls` (among ``calls``, default every call) as the model receives
     them, for every rubric in ``rubric_keys`` (default every loaded one), and with ``passes`` > 1 the later
     passes' user turns; the single-form rubrics' requests for :func:`variant_pairs`."""
@@ -301,7 +303,8 @@ def rendered_prompts_text(ps, rubrics, corpus, model: str, *, rubric_keys=None, 
            f"user turn), {which}; settings shown for {model}.  Within a pass every rubric and model receives the "
            "identical user turn.", ""]
     if single:
-        out += single_prompts_text(ps, rubrics, corpus, model, single, passes=passes, calls=calls)
+        out += single_prompts_text(ps, rubrics, corpus, model, single, passes=passes, calls=calls,
+                                   label_form=label_form)
     if not keys:
         return "\n".join(out)
     for name, c in v.items():
@@ -311,8 +314,8 @@ def rendered_prompts_text(ps, rubrics, corpus, model: str, *, rubric_keys=None, 
                     f"{p.id}: {p.listed}, {p.group}{', opposite' if OT.is_antonym_pair(p) else ''}"
                     for p in sorted(pairs, key=lambda p: p.id)), ""]
         for r in keys:
-            out += ["```text", OT.rendered_prompt(c, corpus, rubric=r, rubric_text=rubrics[r]["text"], model=model)
-                    .rstrip("\n"), "```", ""]
+            out += ["```text", OT.rendered_prompt(c, corpus, rubric=r, rubric_text=rubrics[r]["text"], model=model,
+                                                  label_form=label_form).rstrip("\n"), "```", ""]
     for p in range(2, passes + 1):
         same = sum(OT.listed_order(c, OT.pass_order_seed(seed, p, c.call_id)) == list(c.listed) for c in calls)
         out += [f"## Pass {p}: the same calls, the listed traits in a fresh order", "",
@@ -322,7 +325,7 @@ def rendered_prompts_text(ps, rubrics, corpus, model: str, *, rubric_keys=None, 
         for name, c in v.items():
             seed_p = OT.pass_order_seed(seed, p, c.call_id)
             out += [f"### {name} ({c.call_id}), pass {p}: " + ", ".join(OT.listed_order(c, seed_p)), "",
-                    "```text", OT.render_user(c, corpus, order_seed=seed_p), "```", ""]
+                    "```text", OT.render_user(c, corpus, order_seed=seed_p, label_form=label_form), "```", ""]
     return "\n".join(out)
 
 
@@ -687,10 +690,11 @@ def decode(out_dir: Path, ps, args) -> int:
 async def run_stages(client, rubrics, corpus, ps, args, usage, out_dir: Path, run: dict, save_run,
                      calls=None) -> int:
     """Every (pass, model, rubric) stage over ``calls`` (default every call of the pair set; a single-form
-    rubric's stage sends every pair of them as its own call)."""
+    rubric's stage sends every pair of them as its own call), labels in the run's ``label_form``."""
     calls = list(ps.calls if calls is None else calls)
     runner = OT.OverlapRunner(client, rubrics, corpus, usage=usage, responses_path=out_dir / "responses.jsonl",
-                              concurrency=args.concurrency, seed=args.seed, usage_path=out_dir / "usage.json")
+                              concurrency=args.concurrency, seed=args.seed, usage_path=out_dir / "usage.json",
+                              label_form=run.get(PL.LABEL_FORM_KEY) or PL.DEFAULT_LABEL_FORM)
     for pass_no in range(1, args.passes + 1):
         for model in args.models:
             for r in args.rubrics:
@@ -758,6 +762,9 @@ def main(argv=None) -> int:
     call_ids = [c.call_id for c in calls]
     resuming = args.resume and (out_dir / "responses.jsonl").exists()
     recorded_run = json.loads((out_dir / "run.json").read_text()) if resuming and (out_dir / "run.json").exists() else {}
+    # the prompts' label form (prompt_labels): a resume keeps the run's own (records are keyed by rubric, model, call
+    # and pass, not by the prompt; a run before 2026-10-09 recorded none: "stored"); a new run the judge display form
+    label_form = PL.resolve_label_form(earlier=recorded_run if resuming else None)
     recorded_calls = (recorded_run.get("calls_from") or {}).get("call_ids")
     if resuming and (recorded_calls or subset is not None) and recorded_calls != (call_ids if subset else None):
         how = (f"pass --calls-from naming the same {len(recorded_calls)} calls "
@@ -841,7 +848,7 @@ def main(argv=None) -> int:
         return int(exc.code or 2)
 
     prompts_text = rendered_prompts_text(ps, rubrics, inputs.corpus, args.models[0], rubric_keys=args.rubrics,
-                                         passes=args.passes, seed=args.seed, calls=calls)
+                                         passes=args.passes, seed=args.seed, calls=calls, label_form=label_form)
     if args.dry_run:
         print(prompts_text)
         print("DRY-RUN: nothing sent, nothing written")
@@ -860,13 +867,13 @@ def main(argv=None) -> int:
         return 4
     try:
         return _live(args, argv_list, out_dir, inputs, rubrics, ps, est=est, cap=cap, dirty=dirty, resuming=resuming,
-                     prior=prior, prompts_text=prompts_text, calls=calls, subset=subset)
+                     prior=prior, prompts_text=prompts_text, calls=calls, subset=subset, label_form=label_form)
     finally:
         lock.close()
 
 
 def _live(args, argv_list, out_dir: Path, inputs, rubrics, ps, *, est, cap, dirty, resuming, prior,
-          prompts_text, calls=None, subset=None) -> int:
+          prompts_text, calls=None, subset=None, label_form: str = PL.DEFAULT_LABEL_FORM) -> int:
     """The paid part of :func:`main`, run under the session lock, over ``calls`` (default every call; with
     ``subset``, the calls ``--calls-from`` names, the file copied into the run directory)."""
     from assistant_axis.plot_metadata import json_metadata
@@ -912,7 +919,7 @@ def _live(args, argv_list, out_dir: Path, inputs, rubrics, ps, *, est, cap, dirt
                 "prompts": {rb["name"]: rb["text"] for rb in sent.values()},
                 "pair_set": {k: info[k] for k in ("n_calls", "n_pairs", "n_pairs_by_group", "n_calls_by_set")},
                 "calls_from": calls_from, "round1_run": args.round1_run, "round2_run": args.round2_run,
-                "corpus_at": getattr(args, "corpus_at", None),
+                "corpus_at": getattr(args, "corpus_at", None), PL.LABEL_FORM_KEY: label_form,
                 "started_at": run.get("started_at") or utc_now(), "stages": run.get("stages", [])})
     run["sessions"].append({"started_at": utc_now(), "resumed": bool(resuming), "git_sha": git_sha(),
                             "argv": argv_list})

@@ -56,6 +56,7 @@ from assistant_axis.gapgen import near_duplicates as ND  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import review_graph as RG  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now  # noqa: E402
@@ -109,11 +110,13 @@ def load_inputs(args):
 
 
 def make_runner(*, client, rubrics: dict, index, usage, responses_path: Path, concurrency: int, config_version: str,
-                embedding: dict, resume_records=()) -> NR.NoveltyRunner:
+                embedding: dict, resume_records=(), label_form: str = PL.DEFAULT_LABEL_FORM) -> NR.NoveltyRunner:
+    """The scan's runner; ``label_form`` (prompt_labels): how both traits' labels are shown (the judge display form
+    for a new run, the earlier session's recorded form for a ``--resume``)."""
     return NR.NoveltyRunner(client=client, batch_id=BATCH_ID, rubrics=rubrics, index=index,
                             label_sets=NV.LabelSets(set(), {}, {}), usage=usage, responses_path=responses_path,
                             config_version=config_version, concurrency=concurrency, embedding=embedding,
-                            resume_records=resume_records)
+                            resume_records=resume_records, label_form=label_form)
 
 
 def provenance_inputs(args, rubrics: dict, data_dir: Path) -> list:
@@ -220,6 +223,8 @@ def cmd_run(args, argv) -> int:
                  "variant": cfg.covered["space"]["variant"], "config_version": cfg.config_version}
 
     resuming = bool(args.resume and out_dir.exists())
+    # a resume keeps the earlier session's label form (the scan of 2026-10-09 recorded none: "stored")
+    label_form = PL.resolve_label_form(earlier=read_run(out_dir / "run.json") if resuming else None)
     spent_before = MultiModelUsage.load_or_create(out_dir / "usage.json").total_cost_usd if resuming else 0.0
     est = ND.estimate_scan(sp, shares, overlap_tokens=tokens)
     print(f"plan: {json.dumps(plan.stats)}")
@@ -247,7 +252,7 @@ def cmd_run(args, argv) -> int:
         print(f"REFUSED: {refused}", file=sys.stderr)
     probe = make_runner(client=None, rubrics=rubrics, index=index, usage=MultiModelUsage(),
                         responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
-                        config_version=cfg.config_version, embedding=embedding)
+                        config_version=cfg.config_version, embedding=embedding, label_form=label_form)
     if args.dry_run:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
@@ -280,7 +285,8 @@ def cmd_run(args, argv) -> int:
                              "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS, "ask_attempts": NR.ASK_ATTEMPTS,
                              "cache_system": True},
                 "embedding": embedding, "corpus": {k: v for k, v in index_info.items() if k != "queue_stems"},
-                "data_dir": str(args.data_dir), "resumed": bool(args.resume), "started_at": utc_now()}
+                "data_dir": str(args.data_dir), PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume),
+                "started_at": utc_now()}
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [
             {k: earlier.get(k) for k in ("started_at", "finished_at", "cost_usd", "status", "stopped_by_error")}]
@@ -295,7 +301,8 @@ def cmd_run(args, argv) -> int:
         load_dotenv(_REPO_ROOT / ".env")
         runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), rubrics=rubrics, index=index, usage=usage,
                              responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
-                             config_version=cfg.config_version, embedding=embedding, resume_records=resume_records)
+                             config_version=cfg.config_version, embedding=embedding, resume_records=resume_records,
+                             label_form=label_form)
 
         def gate(back) -> None:
             todo = [x for x in back if not runner.cache_good.get(

@@ -29,6 +29,7 @@ from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.gapgen import filter_rubric as fr
 from assistant_axis.gapgen import paths, split
 from assistant_axis.gapgen import plain_reading as pr
+from assistant_axis.gapgen import prompt_labels as PL
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort
@@ -316,6 +317,11 @@ def main_split(args, argv) -> int:
                    f"record a run whose code and prompt the git sha does not identify")
         print(f"REFUSED: {refused}", file=sys.stderr)
     out_dir = paths.filter_dir(args.batch_id, candidates_dir=args.out_root)
+    # the prompts' label form (prompt_labels): a resume keeps the batch's recorded form (a batch before 2026-10-09
+    # recorded none: "stored"); a new batch shows the judge display form (a no-op for a label without a standard)
+    peek = out_dir / "run.json"
+    label_form = PL.resolve_label_form(
+        earlier=json.loads(peek.read_text(encoding="utf-8")) if args.resume and peek.exists() else None)
     if args.dry_run:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
@@ -323,8 +329,10 @@ def main_split(args, argv) -> int:
         pins = sr.current_versions()
         print("split prompts: " + json.dumps({n: {"version": pins.get(n, (None,))[0],
                                                   "sha256": sr.sha256(sr.load_prompt(n))[:12]} for n in sr.NAMES}))
+        print(f"label form: {label_form}")
         for it in items[:3]:
-            print(f"--- step 1 payload for {it.key} ---\n{split.payload('sense', label=it.label)}")
+            payload = split.payload("sense", label=it.label, label_form=label_form)
+            print(f"--- step 1 payload for {it.key} ---\n{payload}")
         return 0
     if refused:
         return 2
@@ -380,7 +388,7 @@ def main_split(args, argv) -> int:
                 "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
                 "comparison_version": pr.COMPARISON_VERSION,
                 "measurement": bool(args.measurement), "stability": bool(args.stability),
-                "resumed": bool(args.resume), "started_at": utc_now()}
+                PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume), "started_at": utc_now()}
     if earlier_run:
         run_meta["earlier_sessions"] = list(earlier_run.pop("earlier_sessions", [])) + [earlier_run]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -401,7 +409,8 @@ def main_split(args, argv) -> int:
                          responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
                          plain_reading=not args.no_plain_reading, third_model=args.third_model,
                          max_disagreement=args.max_disagreement, accept_disagreement=args.accept_disagreement,
-                         readings=args.readings, stop_on_disagreement=bool(getattr(args, "stop_on_disagreement", False)))
+                         readings=args.readings, stop_on_disagreement=bool(getattr(args, "stop_on_disagreement", False)),
+                         label_form=label_form)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
     run_meta["cached_steps"] = runner.cached_steps()   # the prompts sent with cache_control, by model

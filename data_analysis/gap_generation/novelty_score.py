@@ -94,6 +94,13 @@ Rules: ``--rules 2`` (the default from 2026-10-07: decisions 12-15 of ``coding_p
 and the cosine floor) or ``--rules 1`` (the pilot's); ``--cosine-floor F`` (default: the rule set's, 0.25 for
 rule set 2, none for 1; ``none`` turns it off).  Recorded in ``run.json`` and in every row's block.
 
+Label form (W19, Roger 2026-10-09; :mod:`assistant_axis.gapgen.prompt_labels`): the relation and overlap prompts
+(and the physical pass's gloss stage) show every label in the judge display form, a named standard's suffix in the
+long form (``careless (HEXACO)`` -> ``careless (from HEXACO)``); the stored labels, the embedded texts and the
+registry are unchanged.  ``run.json``, the plan and ``summary.json`` record ``label_form``.  A ``--resume`` keeps the
+earlier session's form, and ``--redecide``, ``--relation-only`` and ``full-scan`` their source's (``stored`` for a run
+from before 2026-10-09, which recorded none), so that the answers on record are found and a run is one form.
+
 The seed queue in the search (2026-10-09): the index holds, beside the corpus traits, the seed queue's trait entries
 that are not yet a trait file, carry a text (``description``, else ``description_draft``) and have a live status
 (``novelty.QUEUE_SEARCH_STATUSES``: candidate, ready, tbd, backlog; ``novelty.queue_traits``), embedded as
@@ -144,6 +151,7 @@ from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import physical_pass as PP  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import states_pass as SP  # noqa: E402
 from assistant_axis.gapgen import split_rubrics as sr  # noqa: E402
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM, BatchTransport, choose_transport  # noqa: E402
@@ -546,7 +554,8 @@ def run_promotion(batch_id: str, *, out_root: Optional[Path], registry_path: Pat
 
 
 def physical_gloss_stage(*, reg: Registry, to_gloss: list[str], cands: list, skipped: dict, out_dir: Path, usage,
-                         batch_id: str, concurrency: int, run_meta: dict) -> list:
+                         batch_id: str, concurrency: int, run_meta: dict,
+                         label_form: str = PL.DEFAULT_LABEL_FORM) -> list:
     """The physical pass's gloss stage (:mod:`assistant_axis.gapgen.physical_pass`): M1's gloss and alignment calls
     for the rows of ``to_gloss``, charged to the run's ``usage`` (its cap stops it as it stops the rest).  Each
     row's block is written to its registry row (field ``physical_gloss``) as the row finishes, and appended to
@@ -568,7 +577,8 @@ def physical_gloss_stage(*, reg: Registry, to_gloss: list[str], cands: list, ski
             fh.write(json.dumps(PP.result_line(rows[key], b), ensure_ascii=False) + "\n")
     try:
         PP.run_gloss_rows([rows[k] for k in to_gloss], client=client, usage=usage, batch_id=batch_id,
-                          records_path=out_dir / PP.RESPONSES_NAME, on_block=on_block, concurrency=concurrency)
+                          records_path=out_dir / PP.RESPONSES_NAME, on_block=on_block, concurrency=concurrency,
+                          label_form=label_form)
     finally:
         run_meta["physical_gloss"] = {**(run_meta.get("physical_gloss") or {}), **PP.stage_summary(blocks)}
         atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -1053,16 +1063,19 @@ def source_rules(source: dict) -> NV.Rules:
 
 
 def offline_replay(*, rules: NV.Rules, replay: list, cands, vectors, index, sets, rubrics, cfg, query_form: str,
-                   relation_seed: str, batch_id: str, relation_model: str = NR.RELATION_MODEL) -> tuple[dict, list]:
+                   relation_seed: str, batch_id: str, relation_model: str = NR.RELATION_MODEL,
+                   label_form: str = PL.DEFAULT_LABEL_FORM) -> tuple[dict, list]:
     """Every candidate decided under ``rules`` from the answers on record alone (nothing sent, nothing written):
     ``({key: block or None}, wanted)``, ``None`` for a candidate that needs a call not on record, ``wanted``
     the first such call of each (:class:`novelty_runner.OfflineTransport`).  ``relation_model`` must be the
-    model of the relation answers on record (:func:`source_relation_model`): they are found by model."""
+    model of the relation answers on record (:func:`source_relation_model`): they are found by model; and
+    ``label_form`` the form of their prompts (the source's recorded ``label_form``): they are found by prompt."""
     tr = NR.OfflineTransport()
     r = NR.NoveltyRunner(client=None, batch_id=batch_id, rubrics=rubrics, index=index, label_sets=sets,
                          usage=MultiModelUsage(), responses_path=Path(os.devnull), k=cfg.k, mode="shortlist",
                          config_version=cfg.config_version, embedding=_embedding_settings(cfg, query_form), transport=tr,
-                         rules=rules, relation_seed=relation_seed, replay_records=replay, relation_model=relation_model)
+                         rules=rules, relation_seed=relation_seed, replay_records=replay, relation_model=relation_model,
+                         label_form=label_form)
     states = r.run(cands, vectors)
     return {k: st.block for k, st in states.items()}, tr.wanted
 
@@ -1426,6 +1439,9 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     # the seed queue in the similarity search (2026-10-09): the flag; else, on --resume, the earlier session's
     # setting; else the source's; else on
     earlier_peek = _peek_run(out_dir) if args.resume else None
+    # the label form of the prompts (prompt_labels): a resume the earlier session's, a re-decided run or full scan
+    # its source's (a run before 2026-10-09 recorded none: "stored"), a new run the judge display form
+    label_form = PL.resolve_label_form(earlier=earlier_peek, source=(source.get("run") or {}) if source else None)
     if getattr(args, "queue_search", None) is None and earlier_peek is not None:
         queue_on = bool((earlier_peek.get("queue_search") or {}).get("enabled"))
     else:
@@ -1513,7 +1529,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
             "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss),
             "corpus": {k: v for k, v in index_info.items() if k not in ("queue", "queue_stems")},
-            "rules": rules.as_dict(), "corpus_files": corpus_info, "queue_search": queue_meta}
+            "rules": rules.as_dict(), "corpus_files": corpus_info, "queue_search": queue_meta,
+            PL.LABEL_FORM_KEY: label_form}
     if hide_meta:
         plan["hide"] = hide_meta
     if holding:
@@ -1548,7 +1565,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         unit = EM.normalize_rows([found[i] for i in range(len(cands))])
         offline_ctx = {"cands": cands, "vectors": {c.key: unit[i] for i, c in enumerate(cands)}, "index": index,
                        "sets": sets, "rubrics": rubrics, "cfg": cfg, "query_form": args.query_form,
-                       "relation_seed": relation_seed, "batch_id": args.batch_id, "relation_model": relation_model}
+                       "relation_seed": relation_seed, "batch_id": args.batch_id, "relation_model": relation_model,
+                       "label_form": label_form}
         src_ctx = offline_ctx | {"index": src_index}
         src_rules = source_rules(source)
         repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **src_ctx)
@@ -1620,12 +1638,12 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             first = next((i for i, c in enumerate(cands) if c.key in need), None)   # not on record, if any
         else:
             if to_gloss:
-                print(PP.render(rows[to_gloss[0]]))
+                print(PP.render(rows[to_gloss[0]], label_form=label_form))
             first = next((i for i, c in enumerate(cands) if i in found and c.key not in set(to_gloss)
                           and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
         if index is not None and first is not None:
             print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k,
-                             relation_model=relation_model))
+                             relation_model=relation_model, label_form=label_form))
         elif not redecide:
             print("(no rendered prompt: no candidate's query embedding is cached yet; the run embeds them first)")
         return 0
@@ -1668,7 +1686,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                              "relation_seed": relation_seed, "cosine_floor": rules.cosine_floor},
                 "rules": rules.as_dict(), "corpus": corpus_info,
                 "queue_search": queue_meta | {"stems": list(index_info.get("queue_stems") or [])},
-                "resumed": bool(args.resume), "started_at": utc_now()}
+                PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume), "started_at": utc_now()}
     if mode == "full_scan":
         run_meta["full_scan"] = {"from_batch": args.from_batch, "sample": None if args.keys else args.sample,
                                  "sample_seed": None if args.keys else args.sample_seed, "keys": args.keys}
@@ -1705,7 +1723,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         if to_gloss:
             cands = physical_gloss_stage(reg=reg, to_gloss=to_gloss, cands=cands, skipped=skipped, out_dir=out_dir,
                                          usage=usage, batch_id=args.batch_id, concurrency=args.concurrency,
-                                         run_meta=run_meta)
+                                         run_meta=run_meta, label_form=label_form)
             texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
                      for c in cands}
             if not cands:
@@ -1743,7 +1761,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                   resume_records=resume_records, on_decided=on_decided, rules=rules,
                                   relation_seed=relation_seed,
                                   replay_records=source["records"] if redecide else (),
-                                  extra_block=extra_block or None, relation_model=relation_model)
+                                  extra_block=extra_block or None, relation_model=relation_model,
+                                  label_form=label_form)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -1763,7 +1782,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                extra=({"redecide": redecide_meta} if redecide else {})
                                | ({"hide": hide_meta} if hide_meta else {})
                                | ({"pass": run_pass} if holding else {})
-                               | {"queue_search_record": queue_meta})
+                               | {"queue_search_record": queue_meta, PL.LABEL_FORM_KEY: label_form})
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
@@ -1872,6 +1891,10 @@ def run_relation_only(args, argv) -> int:
     vectors = {c.key: unit[i] for i, c in enumerate(cands)}
     sets = label_sets_for(data_dir)
     relation_seed = _relation_seed(source)
+    # the source's label form (a resume: the earlier session's, which took it from the same source), so that every
+    # request is the source's but for the model (the like-for-like check below)
+    label_form = PL.resolve_label_form(earlier=_peek_run(out_dir) if args.resume else None,
+                                       source=source.get("run") or {})
     settings = {"config_version": cfg.config_version, "k": cfg.k, "representation": cfg.representation,
                 "variant": cfg.covered["space"]["variant"], "query_form": args.query_form,
                 "embedding_model": cfg.live_model["model_id"], "relation_max_tokens": NR.RELATION_MAX_TOKENS,
@@ -1882,7 +1905,8 @@ def run_relation_only(args, argv) -> int:
         return NR.NoveltyRunner(batch_id=args.batch_id, rubrics=rubrics, index=index, label_sets=sets, k=cfg.k,
                                 mode="shortlist", config_version=cfg.config_version,
                                 embedding=_embedding_settings(cfg, args.query_form), rules=rules,
-                                relation_seed=relation_seed, relation_model=relation_model, relation_only=True, **kw)
+                                relation_seed=relation_seed, relation_model=relation_model, relation_only=True,
+                                label_form=label_form, **kw)
     # offline first (nothing sent): who reaches the relation call, the requests, and the check against the source
     tr = NR.OfflineTransport()
     off = make_runner(client=None, usage=MultiModelUsage(), responses_path=Path(os.devnull), transport=tr)
@@ -1912,7 +1936,7 @@ def run_relation_only(args, argv) -> int:
     plan = {"mode": "relation_only", "from_batch": source["batch_id"], "n_candidates": len(cands),
             "n_to_relation": len(first_calls), "not_reached": not_reached, "skipped": skipped, "transport": transport,
             "relation_model": relation_model, "rules": rules.as_dict(), "corpus_files": corpus_info,
-            "queue_search": index_info["queue"],
+            "queue_search": index_info["queue"], PL.LABEL_FORM_KEY: label_form,
             "listed_mean": round(sum(len(c.stems) for c in first_calls) / len(first_calls), 3) if first_calls else None,
             "like_for_like": {k: v for k, v in lfl.items() if k != "differ"} | {"n_differ": len(lfl["differ"])}}
     print(f"relation only: source {source['batch_id']} ({len(source['results'])} rows; corpus "
@@ -1952,7 +1976,7 @@ def run_relation_only(args, argv) -> int:
         if first_calls:
             i = next(j for j, c in enumerate(cands) if c.key == first_calls[0].key)
             print(render_for(cands[i], found[i], index, rubrics, relation_seed, cfg.k, relation_model=relation_model,
-                             overlap=False))
+                             overlap=False, label_form=label_form))
         return 0
     if refused:
         return 2
@@ -1976,7 +2000,8 @@ def run_relation_only(args, argv) -> int:
                 "models": {"relation": relation_model, "relation_unsure": NR.UNSURE_MODEL}, "settings": settings,
                 "rules": rules.as_dict(), "corpus": corpus_info, "from_batch": source["batch_id"],
                 "queue_search": index_info["queue"] | {"stems": list(index_info.get("queue_stems") or [])},
-                "like_for_like": lfl, "resumed": bool(args.resume), "started_at": utc_now()}
+                PL.LABEL_FORM_KEY: label_form, "like_for_like": lfl, "resumed": bool(args.resume),
+                "started_at": utc_now()}
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -2015,7 +2040,8 @@ def run_relation_only(args, argv) -> int:
                             "stopped_by_budget": status == 2,
                             "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                             "stalled": {k: st.stalled for k, st in runner.states.items() if st.stalled},
-                            "rubrics": runner.rubric_pins, "rules_of_run": rules.as_dict()})
+                            "rubrics": runner.rubric_pins, "rules_of_run": rules.as_dict(),
+                            PL.LABEL_FORM_KEY: label_form})
             inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
                       current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "relation.md"]),
                       current_file_input(dep_key="source_results", path=source["dir"] / "results.jsonl")]
@@ -2063,15 +2089,17 @@ def select_scan_sample(rows: dict, args, holding: Optional[str] = None) -> tuple
 
 
 def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict, batch_id: str, k: int,
-               *, exclude: tuple = (), relation_model: str = NR.RELATION_MODEL, overlap: bool = True) -> str:
+               *, exclude: tuple = (), relation_model: str = NR.RELATION_MODEL, overlap: bool = True,
+               label_form: str = PL.DEFAULT_LABEL_FORM) -> str:
     """The relation request (on ``relation_model``) and, unless ``overlap`` is false, the first overlap
-    request for one candidate, as the models receive them."""
+    request for one candidate, as the models receive them (labels in ``label_form``: the judge display form for a
+    new run)."""
     from assistant_axis.gapgen.llm import request_params
     q = index.project(e_raw)
     listed = NV.expand(index.retrieve(q, k, exclude=exclude), index.traits, lambda s: index.cosine_to(q, s))
     order = NV.relation_order([x.stem for x in listed], batch_id, cand.key)
     user = NV.render_relation_user(cand.label, cand.gloss, [(index.traits[s].label, index.traits[s].description)
-                                                            for s in order])
+                                                            for s in order], label_form=label_form)
     p = request_params(model=relation_model, system=rubrics["relation"]["text"], user=user,
                        max_tokens=NR.RELATION_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=False)
     head = {k2: v for k2, v in p.items() if k2 not in ("system", "messages")}
@@ -2086,7 +2114,8 @@ def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict
     first = listed[0].stem
     pc = OT.PairCall(call_id=f"{cand.key}>{first}", set="m3", target=cand.key, listed=[first])
     ou = OT.render_single(pc, {cand.key: {"label": cand.label, "description": cand.gloss},
-                               first: {"label": index.traits[first].label, "description": index.traits[first].description}})
+                               first: {"label": index.traits[first].label, "description": index.traits[first].description}},
+                          label_form=label_form)
     po = request_params(model=NR.FIRST_MODEL, system=rubrics["overlap"]["text"], user=ou,
                         max_tokens=NR.OVERLAP_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=True)
     ohead = {k2: v for k2, v in po.items() if k2 not in ("system", "messages")}

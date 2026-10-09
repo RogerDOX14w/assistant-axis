@@ -403,8 +403,11 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
         rates = CD.parse_rates(judged)
         result = CD.merge(corpus, existing, judged)
         failed = sorted(s for s, r in judged.items() if r.get("errors"))
+        from assistant_axis.gapgen import prompt_labels as PL
+        # every corpus-regions run is new: its prompts show the judge display form (the rows keep the stored label)
         meta = {"batch_id": batch_id, "stage": CD.STAGE, "source": CD.SOURCE, "mode": mode, "model": CD.MODEL,
                 "step_versions": pinned["step_versions"], "prompt_sha256": pinned["prompt_sha256"],
+                PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM,
                 "concurrency": concurrency, "budget_usd": cap, "estimate_usd": round(est.usd, 6),
                 "n_corpus": len(corpus), "n_selected": len(selected), "reasons": dict(sorted(reasons.items())),
                 "n_judged": len(judged), "n_failed": len(failed), "failed": failed, "parse_rates": rates,

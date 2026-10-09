@@ -63,6 +63,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import states_pass as sp  # noqa: E402
 from assistant_axis.gapgen.batches import POLL_SECONDS, BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -202,17 +203,19 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-def _render(items: list[sp.StatesItem], args) -> str:
+def _render(items: list[sp.StatesItem], args, label_form: str = PL.DEFAULT_LABEL_FORM) -> str:
     """The first call of the run as the model receives it, and in queue mode the gloss check's and the alignment
-    call's forms (their gloss is the queue call's answer, not known before it)."""
+    call's forms (their gloss is the queue call's answer, not known before it); labels in ``label_form``."""
     from assistant_axis.gapgen import physical_pass as PP
     if args.mode == "corpus":
         payload = [{"id": i + 1, "label": it.label, "text": it.text} for i, it in enumerate(items[:args.batch_size])]
         return f"--- system (corpus v{sp.RUBRIC_VERSIONS['corpus']}) ---\n{sp.CORPUS_PROMPT}\n--- user ---\n" \
-               f"{sp.build_batch_prompt(payload, 'corpus')}\n"
-    out = sp.render_queue_call(items[:args.batch_size], model=args.model)
-    out += sp.render_check_call(items[0].label, "<the gloss the queue call writes>", model=args.model)
-    q = PP.request("alignment", label=items[0].label, text="<the confirmed gloss>", model=sp.ALIGNMENT_MODEL)
+               f"{sp.build_batch_prompt(payload, 'corpus', label_form=label_form)}\n"
+    out = sp.render_queue_call(items[:args.batch_size], model=args.model, label_form=label_form)
+    out += sp.render_check_call(items[0].label, "<the gloss the queue call writes>", model=args.model,
+                                label_form=label_form)
+    q = PP.request("alignment", label=items[0].label, text="<the confirmed gloss>", model=sp.ALIGNMENT_MODEL,
+                   label_form=label_form)
     out += f"--- then M1's alignment call on a confirmed gloss (system: rubrics/alignment.md as pinned) ---\n{q['user']}\n"
     return out
 
@@ -234,6 +237,10 @@ def main(argv=None) -> int:
             print(f"--resume: the earlier session ran mode {earlier.get('mode')} on {earlier.get('model')}",
                   file=sys.stderr)
             return 2
+    # the prompts' label form (prompt_labels): a resume keeps the earlier session's (the row cache is keyed by key,
+    # stored label and text, not by the prompt; a run before 2026-10-09 recorded none: "stored"); a new run shows the
+    # judge display form
+    label_form = PL.resolve_label_form(earlier=earlier)
     items, reg, skipped = select_items(args, earlier)
     for name, why in skipped.items():
         print(f"SKIPPED {name}: {why}", file=sys.stderr)
@@ -267,7 +274,8 @@ def main(argv=None) -> int:
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
         print(f"system prompt: {len(sp.PROMPTS[args.mode])} chars (states rubric v{sp.RUBRIC_VERSIONS[args.mode]}); "
               f"prompt sha256: {sp.PROMPT_SHA256[args.mode]}")
-        print(_render(items, args))
+        print(f"label form: {label_form}")
+        print(_render(items, args, label_form))
         return 0
     if refused:
         return 2
@@ -288,6 +296,7 @@ def main(argv=None) -> int:
     if earlier is not None:
         run_meta = dict(earlier)
         run_meta["sessions"] = list(earlier.get("sessions") or []) + [session]
+        run_meta[PL.LABEL_FORM_KEY] = label_form       # the earlier session's ("stored" when it recorded none)
     else:
         run_meta = {"batch_id": args.batch_id, "mode": args.mode, "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
                     "dirty_check": dirty_check, "argv": session["argv"], "n_rows": len(items),
@@ -295,8 +304,8 @@ def main(argv=None) -> int:
                     "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
                     "confirmed_by": args.confirmed_by, "model": args.model, "transport": transport,
                     "transport_reason": why, "rubric_version": sp.RUBRIC_VERSIONS[args.mode],
-                    "prompt_sha256": sp.PROMPT_SHA256[args.mode], "started_at": session["started_at"],
-                    "sessions": [session]}
+                    "prompt_sha256": sp.PROMPT_SHA256[args.mode], PL.LABEL_FORM_KEY: label_form,
+                    "started_at": session["started_at"], "sessions": [session]}
         if args.mode == "queue":
             from assistant_axis.gapgen import physical_pass as PP
             pins = PP.pins()
@@ -319,7 +328,7 @@ def main(argv=None) -> int:
     runner = sp.StatesPassRunner(client=client, batch_id=args.batch_id, mode=args.mode, model=args.model,
                                  usage=usage, batch_size=args.batch_size, concurrency=args.concurrency,
                                  responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
-                                 close_client=True)
+                                 close_client=True, label_form=label_form)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap,
                                           poll_seconds=POLL_SECONDS)
@@ -389,7 +398,7 @@ def _finalize(args, items, reg, runner, usage, run_meta, session, out_dir, statu
     summary = sp.summarize(results, mode=args.mode, stats=runner.stats, usage=usage)
     summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
-                    "model": args.model, "transport": session["transport"],
+                    "model": args.model, "transport": session["transport"], PL.LABEL_FORM_KEY: runner.label_form,
                     "submitted_renames": (writes or {}).get("submitted", []),
                     "submit_report": (writes or {}).get("submit_report")})
     from assistant_axis.plot_metadata import json_metadata
