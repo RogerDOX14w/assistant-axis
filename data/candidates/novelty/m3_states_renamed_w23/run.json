@@ -1,0 +1,249 @@
+{
+  "batch_id": "m3_states_renamed_w23",
+  "mode": "shortlist",
+  "git_sha": "159debd",
+  "allow_dirty": true,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--batch-id",
+    "m3_states_renamed_w23",
+    "--keys",
+    "abstemious#1",
+    "covetous#1",
+    "defenseless#1",
+    "detached#1",
+    "devoted#1",
+    "discontented#1",
+    "doormat#1",
+    "easily_amused#1",
+    "easily_astonished#1",
+    "easily_awed#1",
+    "easily_bored#1",
+    "easily_delighted#1",
+    "easily_distracted#1",
+    "easily_flustered#1",
+    "easily_rattled#1",
+    "easily_worn_down#1",
+    "enthusiastic#1",
+    "fastidious#1",
+    "flashy#1",
+    "fretful#1",
+    "giggly#1",
+    "half_hearted#1",
+    "hypochondriac#1",
+    "intemperate#1",
+    "preachy#1",
+    "preening#1",
+    "prone_to_worry#1",
+    "quick_to_apologize#1",
+    "rebellious#1",
+    "resilient#1",
+    "scatterbrained#1",
+    "scornful#1",
+    "slovenly#1",
+    "snappish#1",
+    "solemn#1",
+    "solitary#1",
+    "spacey#1",
+    "steadfast#1",
+    "tires_easily#1",
+    "unplugged#1",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "3",
+    "--allow-dirty"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 40,
+    "n_exact_label": 15,
+    "n_to_relation": 25,
+    "skipped": {},
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": null,
+    "n_query_texts_cached": 0,
+    "n_query_texts_to_embed": 40,
+    "corpus": {
+      "n_corpus": 913,
+      "n_missing_from_cache": 4,
+      "missing": [
+        "abstract",
+        "collaborative",
+        "trustworthy",
+        "wry"
+      ],
+      "n_corpus_missing": 4,
+      "n_queue_missing": 0
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "current",
+      "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/data"
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "27788ccd7af4e718fc4a3d6962ca58733bf9642427f9dbb756f51c8ea4403255",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 0,
+      "excluded": {
+        "no_text": 89,
+        "not_a_trait_entry": 100,
+        "status_done": 250,
+        "status_exists": 35,
+        "status_not_adopted": 127,
+        "status_paired": 376,
+        "status_superseded": 23
+      },
+      "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0.2235,
+  "estimate_lines": [
+    "candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts: 1 x (1,440, 0) tokens at text-embedding-3-large rates = $0.000",
+    "relation call, 16.0 listed traits a call: 25 x (1,857, 1,224) tokens at claude-haiku-5-5 rates = $0.020",
+    "unsure re-ask (14% of candidates, 1.4 traits): 4 x (623, 108) tokens at claude-sonnet-5-5 rates = $0.009",
+    "overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 62 x (219, 78) tokens at claude-sonnet-5-5 rates = $0.076",
+    "overlap, Opus (62% of pairs): 38 x (220, 112) tokens at claude-opus-5-5 rates = $0.119"
+  ],
+  "budget_usd": 3.0,
+  "cap_usd": 3.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "m3_states_renamed_w23",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "current",
+    "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/data"
+  },
+  "queue_search": {
+    "enabled": true,
+    "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+    "queue_sha256": "27788ccd7af4e718fc4a3d6962ca58733bf9642427f9dbb756f51c8ea4403255",
+    "statuses": [
+      "candidate",
+      "ready",
+      "tbd",
+      "backlog"
+    ],
+    "n_entries": 0,
+    "excluded": {
+      "no_text": 89,
+      "not_a_trait_entry": 100,
+      "status_done": 250,
+      "status_exists": 35,
+      "status_not_adopted": 127,
+      "status_paired": 376,
+      "status_superseded": 23
+    },
+    "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "stems": []
+  },
+  "resumed": false,
+  "started_at": "2026-10-09T19:14:21+00:00",
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999603,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 1.0,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999603,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-09T19:14:25+00:00"
+  },
+  "finished_at": "2026-10-09T19:16:05+00:00",
+  "cost_usd": 0.3623,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 40,
+  "n_stalled": 0
+}

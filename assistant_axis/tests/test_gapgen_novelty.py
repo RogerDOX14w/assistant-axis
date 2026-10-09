@@ -112,6 +112,19 @@ class TestExactLabel:
         assert r == {"covered_by": "gamma", "match": "renamed_from", "old_stem": "old_gamma"}
         assert NV.exact_label_match("brand_new", s, rules=R1) is None
 
+    def test_an_entry_handed_to_the_registry_covers_nothing(self, tmp_path):
+        """W23 (2026-10-09): devoted was handed from the queue to the pipeline and came back covered by its own
+        superseded entry; an entry with ``gap_registry_key`` is out of stage 0 and the search."""
+        t = NV.load_trait_corpus(write_corpus(tmp_path / "data"))
+        handed = {"stem": "devoted", "label": "devoted", "status": "superseded", "entity_type": "trait",
+                  "gap_registry_key": "devoted#1", "description_draft": "This means standing by one's people."}
+        plain = dict(handed, stem="extreme", label="extreme", gap_registry_key=None)
+        s = NV.label_sets(t, {"entries": [handed, plain]})
+        assert NV.exact_label_match("devoted", s, rules=R1) is None
+        assert NV.exact_label_match("extreme", s, rules=R1)["queue_status"] == "superseded"   # still decided
+        qt, rec = NV.queue_traits({"entries": [dict(handed, status="backlog")]}, t)
+        assert qt == {} and rec["excluded"] == {"handed_to_registry": 1}
+
 
 # --------------------------------------------------------------------------- stages 1-2
 

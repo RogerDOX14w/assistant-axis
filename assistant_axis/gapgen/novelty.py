@@ -102,6 +102,16 @@ DEFAULT_QUERY_FORM = "gloss_w14"
 #: reason to hide its synonyms.
 QUEUE_SEARCH_STATUSES: tuple[str, ...] = ("candidate", "ready", "tbd", "backlog")
 
+#: A queue entry carrying this field was handed from the seed queue to the trait-gap pipeline (Roger's W23,
+#: 2026-10-09): its value is the registry key, and the registry row is the record from then on.  Such an entry
+#: covers nothing, in stage 0 or in the search; otherwise the word would be covered by its own entry.
+HANDED_TO_REGISTRY_FIELD = "gap_registry_key"
+
+
+def handed_to_registry(entry: Mapping) -> bool:
+    """True for a queue entry handed to the trait-gap pipeline (:data:`HANDED_TO_REGISTRY_FIELD` set)."""
+    return bool(entry.get(HANDED_TO_REGISTRY_FIELD))
+
 
 def is_expanding(kind: str) -> bool:
     """Pairs, triangles, tetrahedra and larger simplexes expand; nothing else does."""
@@ -302,6 +312,9 @@ def queue_traits(queue: Mapping, corpus: Mapping[str, CorpusTrait], *,
         if (e.get("entity_type") or "trait") != "trait" or not stem:
             skip("not_a_trait_entry")
             continue
+        if handed_to_registry(e):
+            skip("handed_to_registry")
+            continue
         if e.get("status") not in statuses:
             skip(f"status_{e.get('status')}")
             continue
@@ -473,9 +486,12 @@ class LabelSets:
 
 def label_sets(traits: Mapping[str, CorpusTrait], queue: Mapping) -> LabelSets:
     """The names stage 0 checks: corpus trait stems, every seed-queue entry's stem and normalised label
-    (any status, either entity type: a queued name is decided or in hand), and every ``renamed_from``."""
+    (any status, either entity type: a queued name is decided or in hand, except an entry handed to the trait-gap
+    pipeline, :func:`handed_to_registry`), and every ``renamed_from``."""
     q: dict[str, dict] = {}
     for e in queue.get("entries") or []:
+        if handed_to_registry(e):
+            continue
         info = {"stem": e.get("stem"), "status": e.get("status"), "entity_type": e.get("entity_type")}
         for name in (e.get("stem"), normalize_to_file_name(e["label"]) if e.get("label") else None):
             if name and name not in q:

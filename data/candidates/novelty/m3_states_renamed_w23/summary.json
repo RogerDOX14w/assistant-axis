@@ -1,0 +1,300 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 40,
+    "n_decided": 40,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "covered": 25,
+      "new": 15
+    },
+    "by_reason": {
+      "exact_label": 15,
+      "overlap": 25
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 23,
+        "new": 11
+      },
+      "4": {
+        "new": 4,
+        "covered": 2
+      }
+    },
+    "exact_label": {
+      "corpus": 10,
+      "queue": 5
+    },
+    "pairs_judged_per_candidate": {
+      "1": 10,
+      "2": 1,
+      "5": 2,
+      "6": 2,
+      "7": 7,
+      "8": 2,
+      "9": 1
+    },
+    "pairs_judged_total": 108,
+    "pairs_judged_mean": 4.32,
+    "listed_per_candidate_mean": 16.76,
+    "shortlist_length": {
+      "2": 2,
+      "4": 1,
+      "5": 5,
+      "6": 2,
+      "7": 10,
+      "8": 3,
+      "9": 2
+    },
+    "early_exit_depth": {
+      "1": 10
+    },
+    "escalations": {
+      "below_cut_off": 35,
+      "at_cut_off": 5
+    },
+    "rescues": 0,
+    "review_flags": {
+      "sonnet_below_opus_at": 4
+    },
+    "pair_completions": 1,
+    "pair_completion_for": {
+      "scornful#1": [
+        "deferential"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 25
+      },
+      "answers": {
+        "similar": 106,
+        "opposed": 137,
+        "unrelated": 168,
+        "unsure": 8
+      },
+      "final": {
+        "similar": 109,
+        "unrelated": 173,
+        "opposed": 137
+      },
+      "candidates_with_unsure_reasked": 4
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 25,
+        "input": 43707,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 112,
+        "input": 18157,
+        "cache_write": 4018,
+        "cache_read": 57974,
+        "calls_with_read": 101,
+        "read_share_of_input": 0.7233,
+        "hit_rate_calls": 0.9018
+      },
+      "claude-opus-5-5": {
+        "calls": 40,
+        "input": 5803,
+        "cache_write": 4592,
+        "cache_read": 18368,
+        "calls_with_read": 32,
+        "read_share_of_input": 0.6386,
+        "hit_rate_calls": 0.8
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5": 0.019736
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5": 0.013952
+      },
+      "overlap": {
+        "claude-sonnet-5-5": 0.142018,
+        "claude-opus-5-5": 0.186504
+      }
+    },
+    "spend_usd": 0.362341,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 43707,
+          "completion_tokens": 30731,
+          "cost_usd": 0.0197,
+          "n_calls": 25
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 13371,
+          "completion_tokens": 6651,
+          "cost_usd": 0.1865,
+          "n_calls": 40
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 28940,
+          "completion_tokens": 9809,
+          "cost_usd": 0.156,
+          "n_calls": 112
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 1004,
+          "completion_tokens": 0,
+          "cost_usd": 0.0001,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 0.3623,
+      "total_prompt_tokens": 87022,
+      "total_completion_tokens": 47191,
+      "n_calls": 180
+    },
+    "rules": [
+      "m3_rules_2"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 4,
+    "covered_flagged": 4,
+    "pair_notes": {
+      "rows": 0,
+      "notes": 0,
+      "by_kind": {},
+      "rows_by_decision": {}
+    },
+    "pair_flag_rows": 2,
+    "floor": {
+      "rows_with_listed_below": 25,
+      "listed_below_total": 241,
+      "similar_kept_out_total": 6,
+      "rows_with_similar_kept_out": 6
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "27788ccd7af4e718fc4a3d6962ca58733bf9642427f9dbb756f51c8ea4403255",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 0,
+      "excluded": {
+        "no_text": 89,
+        "not_a_trait_entry": 100,
+        "status_done": 250,
+        "status_exists": 35,
+        "status_not_adopted": 127,
+        "status_paired": 376,
+        "status_superseded": 23
+      },
+      "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows_with_queue_in_index": 0,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "batch_id": "m3_states_renamed_w23",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 25,
+        "ok_first": 25,
+        "ok": 25
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 4,
+        "ok_first": 4,
+        "ok": 4
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 108,
+        "ok_first": 108,
+        "ok": 108
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 40,
+        "ok_first": 40,
+        "ok": 40
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id m3_states_renamed_w23 --keys 'abstemious#1' 'covetous#1' 'defenseless#1' 'detached#1' 'devoted#1' 'discontented#1' 'doormat#1' 'easily_amused#1' 'easily_astonished#1' 'easily_awed#1' 'easily_bored#1' 'easily_delighted#1' 'easily_distracted#1' 'easily_flustered#1' 'easily_rattled#1' 'easily_worn_down#1' 'enthusiastic#1' 'fastidious#1' 'flashy#1' 'fretful#1' 'giggly#1' 'half_hearted#1' 'hypochondriac#1' 'intemperate#1' 'preachy#1' 'preening#1' 'prone_to_worry#1' 'quick_to_apologize#1' 'rebellious#1' 'resilient#1' 'scatterbrained#1' 'scornful#1' 'slovenly#1' 'snappish#1' 'solemn#1' 'solitary#1' 'spacey#1' 'steadfast#1' 'tires_easily#1' 'unplugged#1' --transport live --budget-usd 3 --allow-dirty",
+      "git_sha": "159debd+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist m3_states_renamed_w23"
+    },
+    "produced_at": "2026-10-09T19:16:05+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "c1de3e87195dc4483e36c56a39c3ae2152236bb9d24910f1301380e6c6636544"
+  }
+}
