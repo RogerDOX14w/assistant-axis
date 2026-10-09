@@ -36,7 +36,19 @@ Commands:
   runs a trait takes the last run that has it; a row under a stem the corpus
   has since renamed counts for the renamed trait (``renamed_from`` in the
   entry), so a later run is how a trait whose description changed sense with
-  its rename gets judged again.
+  its rename gets judged again.  The regions of that mode are the filter's gloss of the bare label; since
+  2026-10-09 (QUESTIONS 3) the corpus's regions come from its descriptions instead (the next form).
+* ``corpus-regions --from-descriptions (--all | --only-missing) --budget-usd C [--batch-id B] [--dry-run
+  [--show STEM ...]] [--concurrency N] [--out PATH]``: M1's descriptors and alignment calls (Haiku 5.5, the
+  pinned ``descriptors.md`` and ``alignment.md``, sent as M1's wave 6 sends them) on every trait file's
+  ``description`` with its ``positive_label``, written to ``corpus_regions.json`` with the region,
+  ``enactable_in_text``, ``alignment_score`` 0-3, ``alignment_relevant`` (score 2 or 3), ``source:
+  "description"``, the description's SHA-256, model and rubric versions, and ``previous_region`` /
+  ``previous_alignment_relevant`` / ``previous_source`` on each row it replaces.  ``--all`` judges every trait;
+  ``--only-missing`` (run it after each corpus chunk) only those with no row, a row not from a description,
+  a changed description or label, or a failed call.  Responses, ``usage.json`` and ``run.json`` go to
+  ``data/candidates/corpus_regions_runs/<B>/``.  The only command here that makes API calls
+  (``assistant_axis/gapgen/corpus_descriptors.py``).
 * ``synonyms [--stem X] [--run-id R]``: M3's rename shortlist (design item 8 of
   coding_plan_platform.md's M3 design): the candidates M3 judged covered, under the
   trait that covers them, the traits whose candidates read 4 first, then 3, the
@@ -53,7 +65,7 @@ Commands:
   tag ``physical``, the track's section; ``--status accepted`` still refuses
   it; ``assistant_axis/gapgen/physical_pass.py``).
 
-No command here makes an API call.
+No other command here makes an API call.
 """
 from __future__ import annotations
 
@@ -272,14 +284,146 @@ def cmd_judgement_call(args) -> int:
     return 0
 
 
+def _anthropic_client():
+    """The live client of ``corpus-regions --from-descriptions`` (the tests replace this function)."""
+    from dotenv import load_dotenv
+    import anthropic
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.AsyncAnthropic(max_retries=0)
+
+
+def _corpus_regions_runs_root() -> Path:
+    """Where ``corpus-regions --from-descriptions`` puts its run directories (the tests replace this function)."""
+    return paths.CORPUS_REGIONS_RUNS_DIR
+
+
+def cmd_corpus_regions_from_descriptions(args) -> int:
+    """``corpus_regions.json`` from the trait files' descriptions: M1's descriptors and alignment calls on each
+    description (QUESTIONS 3, Roger 2026-10-09; :mod:`assistant_axis.gapgen.corpus_descriptors`)."""
+    import logging
+    from datetime import datetime, timezone
+
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen import corpus_descriptors as CD
+    from assistant_axis.gapgen import split_rubrics as sr
+    from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import BudgetExceededError
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_file_input
+    mode = "all" if args.all else "only_missing" if args.only_missing else None
+    if mode is None:
+        raise SystemExit("corpus-regions --from-descriptions needs --all or --only-missing")
+    log = logging.getLogger("gap_registry.corpus_regions")
+    if not logging.getLogger().handlers:
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    out = Path(args.out)
+    corpus = CD.load_corpus(args.data_dir)
+    existing = CD.load_existing(out)
+    selected = CD.select(corpus, existing, mode=mode)
+    try:
+        pinned = CD.pins()
+    except ValueError as exc:
+        print(f"REFUSED: the rubrics on disk are not their pinned versions: {exc}", file=sys.stderr)
+        return 2
+    n_send = sum(1 for t, _ in selected if t["description"].strip())
+    est = CD.estimate(n_send)
+    reasons = Counter(why for _, why in selected)
+    print(f"{len(corpus)} traits; {len(selected)} to judge ({mode}"
+          + (f": {json.dumps(dict(sorted(reasons.items())))}" if selected else "") + f"); {CD.MODEL}, descriptors "
+          f"v{pinned['step_versions']['descriptors']}, alignment v{pinned['step_versions']['alignment']}")
+    if not selected:
+        print(f"nothing to judge: {out} is current")
+        return 0
+    print(f"estimate ({n_send} traits with a description):\n{est.format()}")
+    if args.dry_run:
+        by_stem = {t["stem"]: t for t in corpus}
+        for s in args.show or [selected[0][0]["stem"]]:
+            if s not in by_stem:
+                print(f"REFUSED: --show {s}: no such trait", file=sys.stderr)
+                return 2
+            print(CD.render(by_stem[s]))
+        print(f"DRY-RUN: no call sent; {out} and {_corpus_regions_runs_root()} untouched")
+        return 0
+    if args.budget_usd is None:
+        print("REFUSED: a paid run needs --budget-usd (the cap; see the estimate above)", file=sys.stderr)
+        return 2
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=False)
+    except CostRefused:
+        return 2
+    batch_id = args.batch_id or "corpus_desc_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    run_dir = _corpus_regions_runs_root() / paths.check_id(batch_id, "batch_id")
+    if run_dir.exists():
+        print(f"REFUSED: {run_dir} exists: give a new --batch-id (batch {batch_id} has run)", file=sys.stderr)
+        return 2
+    run_dir.mkdir(parents=True)
+    usage = GuardedUsage(budget_usd=cap, usage_path=run_dir / "usage.json")
+    judged: dict[str, dict] = {}
+    started, stopped = utc_now(), None
+    concurrency = args.concurrency or CD.DEFAULT_CONCURRENCY
+    try:
+        CD.run_judge([t for t, _ in selected], client=_anthropic_client(), usage=usage, batch_id=batch_id,
+                     records_path=run_dir / CD.RESPONSES_NAME, on_row=judged.__setitem__, concurrency=concurrency)
+    except BudgetExceededError as exc:
+        stopped = f"budget stop: {exc}"
+        print(f"STOPPED (budget): {exc}; the {len(judged)} traits finished are written", file=sys.stderr)
+    finally:
+        usage.write_json(run_dir / "usage.json")
+        rates = CD.parse_rates(judged)
+        result = CD.merge(corpus, existing, judged)
+        failed = sorted(s for s, r in judged.items() if r.get("errors"))
+        meta = {"batch_id": batch_id, "stage": CD.STAGE, "source": CD.SOURCE, "mode": mode, "model": CD.MODEL,
+                "step_versions": pinned["step_versions"], "prompt_sha256": pinned["prompt_sha256"],
+                "concurrency": concurrency, "budget_usd": cap, "estimate_usd": round(est.usd, 6),
+                "n_corpus": len(corpus), "n_selected": len(selected), "reasons": dict(sorted(reasons.items())),
+                "n_judged": len(judged), "n_failed": len(failed), "failed": failed, "parse_rates": rates,
+                "regions": CD.region_counts({s: judged[s] for s in judged}),
+                "alignment_scores": dict(sorted(Counter(str(r.get("alignment_score")) for r in judged.values()).items())),
+                "cost_usd": round(usage.total_cost_usd, 4), "n_calls": usage.n_calls, "stopped": stopped,
+                "out": str(out), "started_at": started, "finished_at": utc_now(), "argv": sys.argv}
+        atomic_write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", run_dir / "run.json")
+        if judged:
+            inputs = [current_file_input(dep_key=f"rubric_{s}", path=sr.rubric_path(s)) for s in CD.STEPS]
+            if (run_dir / CD.RESPONSES_NAME).exists():
+                inputs.append(current_file_input(dep_key=f"responses_{batch_id}", path=run_dir / CD.RESPONSES_NAME))
+            env = json_metadata(result, title=f"corpus regions from descriptions ({mode}, {batch_id})", inputs=inputs)
+            atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out)
+    for step, d in rates.items():
+        warn_if_low_parse_rate(label=f"corpus_regions:{step}:{CD.MODEL}", n_ok=d["ok"], n_total=d["n"], logger_obj=log)
+    before = {s: existing.get(s) or {} for s in result}
+    ch = CD.changes(before, result)
+    print(f"judged {len(judged)} of {len(selected)} traits ({len(failed)} with a failed call"
+          + (f": {', '.join(failed[:10])}{' ...' if len(failed) > 10 else ''}" if failed else "") + f"); "
+          f"{usage.n_calls} calls, ${usage.total_cost_usd:.4f}; wrote {len(result) if judged else 0} rows to "
+          f"{out if judged else '(nothing)'}; run dir {run_dir}")
+    print(f"regions before: {json.dumps(CD.region_counts(before))}")
+    print(f"regions after:  {json.dumps(CD.region_counts(result))}")
+    print(f"changed region: {ch['changed']}; same: {ch['same']}; gained a region: {ch['gained']}; "
+          f"lost one: {ch['lost']}")
+    print(f"alignment scores of the judged: {meta['alignment_scores']}; alignment_relevant (2 or 3) over the file: "
+          f"{sum(1 for r in result.values() if r.get('alignment_relevant'))}")
+    return 2 if stopped else 0
+
+
 def cmd_corpus_regions(args) -> int:
     """``corpus_regions.json`` from validation runs' results (no API call;
     review_rubric_v2.md finding 8).  Several ``--from-filter`` runs merge in
     order, the last run that has a trait giving its entry; rows under a stem
     the corpus has renamed count for the renamed trait (2026-10-02, the merge
-    with the main line)."""
+    with the main line).  ``--from-descriptions``: see
+    :func:`cmd_corpus_regions_from_descriptions`."""
     from collections import Counter
 
+    if args.from_descriptions:
+        return cmd_corpus_regions_from_descriptions(args)
+    extra = [f for f, v in (("--all", args.all), ("--only-missing", args.only_missing), ("--dry-run", args.dry_run),
+                            ("--budget-usd", args.budget_usd is not None), ("--batch-id", args.batch_id),
+                            ("--show", args.show), ("--concurrency", args.concurrency)) if v]
+    if extra:
+        raise SystemExit(f"corpus-regions --from-filter takes none of {', '.join(extra)} (they are for "
+                         f"--from-descriptions)")
     from assistant_axis.atomic_io import atomic_write_text
     from assistant_axis.entity_id import resolve_renamed_stem
     from assistant_axis.gapgen.filter import corpus_regions_from_runs
@@ -434,10 +578,27 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--calls-file", type=Path, default=paths.JUDGEMENT_CALLS_PATH)
     sp.set_defaults(func=cmd_judgement_call)
     sp = sub.add_parser("corpus-regions",
-                        help="write corpus_regions.json (region and alignment_relevant per corpus trait) from runs")
-    sp.add_argument("--from-filter", required=True, type=Path, action="append",
-                    help="a validation run's filter/<batch_id> dir; repeat to merge runs, the last run that has a "
-                         "trait giving its entry")
+                        help="write corpus_regions.json (region and alignment per corpus trait) from the trait "
+                             "descriptions (--from-descriptions, paid) or from filter runs (--from-filter)")
+    g = sp.add_mutually_exclusive_group(required=True)
+    g.add_argument("--from-filter", type=Path, action="append",
+                   help="a validation run's filter/<batch_id> dir; repeat to merge runs, the last run that has a "
+                        "trait giving its entry (the filter's gloss of the bare label; superseded 2026-10-09)")
+    g.add_argument("--from-descriptions", action="store_true",
+                   help="M1's descriptors and alignment calls on every trait file's description (Haiku 5.5)")
+    m = sp.add_mutually_exclusive_group()
+    m.add_argument("--all", action="store_true", help="--from-descriptions: judge every trait")
+    m.add_argument("--only-missing", action="store_true",
+                   help="--from-descriptions: judge only traits with no row, a row not from a description, a "
+                        "changed description or label, or a failed call (run after each corpus chunk)")
+    sp.add_argument("--budget-usd", type=float, help="--from-descriptions: the hard cap (needed unless --dry-run)")
+    sp.add_argument("--batch-id", help="--from-descriptions: the run's id (default corpus_desc_<UTC time>)")
+    sp.add_argument("--dry-run", action="store_true",
+                    help="--from-descriptions: print the selection, the estimate and the rendered requests; send "
+                         "nothing, write nothing")
+    sp.add_argument("--show", nargs="+", metavar="STEM",
+                    help="--from-descriptions --dry-run: render these traits' requests (default: the first selected)")
+    sp.add_argument("--concurrency", type=int, help="--from-descriptions: calls in flight (default 8)")
     sp.add_argument("--out", type=Path, default=paths.CORPUS_REGIONS_PATH)
     sp.set_defaults(func=cmd_corpus_regions)
     sp = sub.add_parser("synonyms", help="M3's rename shortlist: covered candidates under the trait that covers them")

@@ -31,6 +31,9 @@ REGISTRY_SNAPSHOT_NAME = "registry.snapshot.jsonl"
 REGISTRY_SNAPSHOT_PATH = DATA_CANDIDATES / REGISTRY_SNAPSHOT_NAME
 METRIC_CONFIG_PATH = DATA_CANDIDATES / "metric_config.json"
 CORPUS_REGIONS_PATH = DATA_CANDIDATES / "corpus_regions.json"
+#: ``gap_registry.py corpus-regions --from-descriptions`` runs: ``<batch_id>/`` with ``responses.jsonl``,
+#: ``usage.json`` and ``run.json`` (QUESTIONS 3, 2026-10-09: the corpus's regions from its descriptions).
+CORPUS_REGIONS_RUNS_DIR = DATA_CANDIDATES / "corpus_regions_runs"
 VALIDATION_DIR = DATA_CANDIDATES / "validation"
 #: Roger's judgement calls on the words the table of ``gap_registry.py
 #: judgement-calls`` lists, keyed by word (tracked; ``judgement-call`` writes it).
@@ -156,6 +159,7 @@ def all_paths() -> dict[str, Path]:
         "REGISTRY_SNAPSHOT_PATH": REGISTRY_SNAPSHOT_PATH,
         "METRIC_CONFIG_PATH": METRIC_CONFIG_PATH,
         "CORPUS_REGIONS_PATH": CORPUS_REGIONS_PATH,
+        "CORPUS_REGIONS_RUNS_DIR": CORPUS_REGIONS_RUNS_DIR,
         "VALIDATION_DIR": VALIDATION_DIR,
         "JUDGEMENT_CALLS_PATH": JUDGEMENT_CALLS_PATH,
         "SEED_QUEUE_PATH": SEED_QUEUE_PATH,

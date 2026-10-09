@@ -507,6 +507,15 @@ def test_every_recorded_version_and_hash_is_pinned():
                 pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
                 if pinned.get(version) != ps.get(prompt):
                     problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
+        elif name.startswith("corpus_regions_runs/"):
+            # the corpus's regions from its descriptions (2026-10-09): M1's descriptors and alignment prompts
+            from assistant_axis.gapgen import split_rubrics
+            pins = split_rubrics.read_versions()["prompts"]
+            assert set(d["step_versions"]) == {"descriptors", "alignment"}, name
+            for prompt, version in d["step_versions"].items():
+                pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
+                if pinned.get(version) != ps.get(prompt):
+                    problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
         elif name.startswith("plain_reading/"):
             for k in ("plain_reading", "comparison"):
                 checks.append((k, d["versions"][k], ps[k]))

@@ -938,16 +938,37 @@ uv run python data_analysis/gap_generation/novelty_score.py full-scan --from-bat
     --keys youthful#1 trendsetting#1 --batch-id m3_pilot_1_scan_missed --transport live --budget-usd 2
 ```
 
-**Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
-takes `--from-filter` more than once; a trait takes its entry from the last
-run that has it, and a row under a renamed stem counts for the renamed trait.
-After the 2026-10-02 merge:
+**Corpus regions after a corpus change (from 2026-10-09: from the descriptions).**
+[`corpus_regions.json`](../data/candidates/corpus_regions.json) gives each corpus
+trait its region (one of the seven of
+[`descriptors.md`](../reports/trait_gap_generation/rubrics/descriptors.md)) and
+its alignment score 0-3 ([`alignment.md`](../reports/trait_gap_generation/rubrics/alignment.md)).
+Roger's decision (QUESTIONS 3 in
+[`QUESTIONS.md`](../reports/trait_gap_generation/QUESTIONS.md)): they come from
+each trait file's `description`, not from the trait-hood filter's gloss of the
+bare label, because some labels are contrived and the description picks out a
+less obvious meaning.  `corpus-regions --from-descriptions` sends the filter's
+own two last calls (Haiku 5.5, the pinned rubrics, one item per call) with the
+description where a candidate's gloss goes
+([`corpus_descriptors.py`](../assistant_axis/gapgen/corpus_descriptors.py)).
+**After each corpus chunk**, fill the new and changed traits (a trait with no
+row, a row not from a description, a changed description or label, or a failed
+call; about $0.0003 a trait):
 
 ```bash
 uv run python data_analysis/gap_generation/gap_registry.py corpus-regions \
-    --from-filter data/candidates/filter/m1_validation_r2 \
-    --from-filter data/candidates/filter/new_corpus_labels_2026_10_02
+    --from-descriptions --only-missing --dry-run      # the selection, the estimate, a rendered request
+uv run python data_analysis/gap_generation/gap_registry.py corpus-regions \
+    --from-descriptions --only-missing --budget-usd 1
 ```
+
+`--all` redoes every trait (909 traits, $0.26 on 2026-10-09, batch
+`corpus_desc_2026_10_09`).  Each
+replaced row keeps `previous_region`, `previous_alignment_relevant` and
+`previous_source`; the run's responses, `usage.json` and `run.json` go to
+`data/candidates/corpus_regions_runs/<batch_id>/`.  The old form,
+`--from-filter <filter run dir>` (repeatable; the filter's region of the label),
+still works and writes the file whole.
 
 **The recovery harness (2026-10-08): `gap_generation/recovery_test.py`.**  Spec:
 [`coding_plan_platform.md`](../reports/trait_gap_generation/coding_plan_platform.md), "The

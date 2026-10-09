@@ -770,6 +770,70 @@ a0a4e09 on `anthropic-vllm-uv`.  Tasks 20-25 of the checklist above are reconcil
 - **Registry**: `gap_registry.py submit | status | report | holding | judgement-calls | judgement-call |
   corpus-regions | synonyms | compact | promote`; promotion into `data/seed_queue.json` only by the
   explicit `promote` command.
+- **The corpus's regions**: `gap_registry.py corpus-regions --from-descriptions --only-missing
+  --budget-usd 1`, **after each corpus chunk** (see the next section).
+
+### The corpus's regions, from the descriptions (2026-10-09)
+
+[corpus_regions.json](../../data/candidates/corpus_regions.json) gives every corpus trait a **region**
+(one of the seven regions of character in [descriptors.md](./rubrics/descriptors.md):
+communication_style, cognitive_epistemic, moral_stance, social_interpersonal, emotional_temperament,
+alignment_ai_agent, identity_demographic) and an **alignment score** 0-3 ([alignment.md](./rubrics/alignment.md):
+how closely the trait bears on how an AI assistant treats the people and systems it works for).  The recovery
+harness stratifies its hiding and its recall by region ([recovery.py](../../assistant_axis/gapgen/recovery.py)).
+
+Until 2026-10-09 the file copied the region the trait-hood filter (M1) gave each corpus *label* when the labels
+were run through it as candidates (`corpus-regions --from-filter`; the assumption in section 1 and pre-registered
+question 3): the filter glosses the bare label first and takes the region from its own gloss.  Roger's answer to QUESTIONS 3
+([QUESTIONS.md](./QUESTIONS.md)): some corpus labels are contrived and the description picks out a less obvious
+meaning, so the corpus's regions come from its descriptions; candidates, a word first and then a gloss of its
+most obvious reading, keep theirs from the filter.  So:
+
+- `corpus-regions --from-descriptions (--all | --only-missing) --budget-usd C [--batch-id B] [--dry-run
+  [--show STEM ...]]` ([gap_registry.py](../../data_analysis/gap_generation/gap_registry.py), library
+  [corpus_descriptors.py](../../assistant_axis/gapgen/corpus_descriptors.py)) sends M1's descriptors and
+  alignment calls exactly as M1's last wave of calls (wave 6) sends them (Haiku 5.5, the pinned rubric texts,
+  M1's `max_tokens`, one item per call, a failed answer retried once), with the trait file's `description` where a candidate's
+  gloss goes and its `positive_label` as the label.  The two rubrics are unchanged.
+- A row: `label`, `region`, `enactable_in_text` (0-2), `alignment_score` (0-3), `alignment_relevant` (score 2
+  or 3, the filter's convention), `source: "description"`, `description_sha256`, `model`, `rubric_versions`,
+  `reasons`, `batch_id`, `at`, `errors` when a call failed twice; a row that replaced another keeps
+  `previous_region`, `previous_alignment_relevant` and `previous_source` (`filter <batch>`, `description
+  <batch>` or `none`).  No `verdict`: nothing is filtered.
+- `--only-missing` judges a trait with no row, a row not from a description (a filter row or the null entry
+  that chunks 4-6 left), a description or label that no longer matches the row, or a failed call; about
+  $0.0003 a trait.  `--all` redoes all of them.  Rows judged under an older rubric version are not selected:
+  after a bump of either rubric, run `--all`.
+- Each run writes `data/candidates/corpus_regions_runs/<B>/` (the first: [responses.jsonl](../../data/candidates/corpus_regions_runs/corpus_desc_2026_10_09/responses.jsonl),
+  every answer, recorded before it is parsed; [usage.json](../../data/candidates/corpus_regions_runs/corpus_desc_2026_10_09/usage.json); [run.json](../../data/candidates/corpus_regions_runs/corpus_desc_2026_10_09/run.json), versions,
+  prompt hashes, counts, parse rates, cost).  The pin
+  test checks those hashes.
+
+**First run** (`--all`, batch
+[corpus_desc_2026_10_09](../../data/candidates/corpus_regions_runs/corpus_desc_2026_10_09/run.json)):
+909 traits, 1,818 calls, both steps parsed 909 of 909, no retry, $0.258 (estimate $0.305).  The rubric versions
+were the filter's own (descriptors v1, alignment v3), so every change below comes from reading the description
+instead of a gloss of the label.
+
+| region | before (the filter's gloss of the label) | after (the description) |
+|---|---|---|
+| cognitive_epistemic | 177 | 193 |
+| emotional_temperament | 83 | 163 |
+| social_interpersonal | 46 | 158 |
+| identity_demographic | 63 | 146 |
+| moral_stance | 105 | 136 |
+| communication_style | 156 | 104 |
+| alignment_ai_agent | 3 | 9 |
+| none | 276 | 0 |
+
+Of the 633 traits with a region before, 236 (37%) changed it; the commonest moves were communication_style to
+social_interpersonal (29), cognitive_epistemic to moral_stance (22) and communication_style to cognitive_epistemic
+(22).  [aggressive](../../data/traits/instructions/aggressive.json) is now social_interpersonal and
+[ambitious](../../data/traits/instructions/ambitious.json) emotional_temperament.  Alignment scores: 428 at 0, 304
+at 1, 79 at 2, 98 at 3, so 177 traits are `alignment_relevant` (128 before, 78 in both).  **The alignment_ai_agent
+region stays small (9 traits)**: [descriptors.md](./rubrics/descriptors.md) defines it as how an AI assistant or agent treats the people and
+systems it works for, and the corpus describes people, so most traits that bear on alignment sit in moral_stance
+(65 at score 2 or 3) and social_interpersonal (59); for "alignment first", read the score, not the region.
 
 ### The row's blocks (what a test reads)
 
