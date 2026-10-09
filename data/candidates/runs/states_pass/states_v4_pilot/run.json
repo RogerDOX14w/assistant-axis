@@ -1,0 +1,37 @@
+{
+  "generator": "states_pass",
+  "run_id": "states_v4_pilot",
+  "git_sha": "ca377c4",
+  "args": {
+    "from": "states_pass.py",
+    "batch_id": "states_v4_pilot"
+  },
+  "n_emitted": 66,
+  "started_at": "2026-10-09T13:35:22+00:00",
+  "finished_at": "2026-10-09T13:35:22+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "312fe08db336",
+      "started_at": "2026-10-09T13:35:22+00:00",
+      "finished_at": "2026-10-09T13:35:22+00:00",
+      "git_sha": "ca377c4",
+      "args": {
+        "from": "states_pass.py",
+        "batch_id": "states_v4_pilot"
+      },
+      "n_emitted": 66,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

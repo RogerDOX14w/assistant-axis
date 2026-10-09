@@ -1,0 +1,1960 @@
+{
+  "result": {
+    "mode": "queue",
+    "n": 170,
+    "n_judged": 170,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "gloss": 51,
+      "queue": 9,
+      "queue_retry": 12
+    },
+    "rubric_version": 4,
+    "prompt_sha256": "e2765bbd7f921ecfe22370ae6229af4db79bd09426543fc53fcef649a17f97d6",
+    "cost_usd": 0.0335,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 29305,
+          "completion_tokens": 128065,
+          "cost_usd": 0.0335,
+          "n_calls": 72
+        }
+      },
+      "total_cost_usd": 0.0335,
+      "total_prompt_tokens": 29305,
+      "total_completion_tokens": 128065,
+      "n_calls": 72
+    },
+    "plausible": 83,
+    "implausible": 67,
+    "renamed": [
+      "afraid -> fearful",
+      "agitated -> high-strung",
+      "alone -> solitary",
+      "bedraggled -> unkempt",
+      "befogged -> scatterbrained",
+      "bejeweled -> flashy",
+      "benumbed -> detached",
+      "bored -> easily bored",
+      "clean -> fastidious",
+      "concerned -> anxious",
+      "contrite -> quick to apologize",
+      "cross -> irritable",
+      "delighted -> easily delighted",
+      "depressed -> gloomy",
+      "desirous -> covetous",
+      "destined -> grandiose",
+      "diluted -> half-hearted",
+      "disgusted -> squeamish",
+      "dissatisfied -> discontented",
+      "diverted -> easily distracted",
+      "embroiled -> quarrelsome",
+      "enervate -> listless",
+      "enkindled -> enthusiastic",
+      "exasperated -> irritable",
+      "fasting -> abstemious",
+      "filthy -> slovenly",
+      "flexed -> tense",
+      "grizzling -> fretful",
+      "grubby -> unkempt",
+      "high -> intemperate",
+      "inspired -> enthusiastic",
+      "insurrectional -> rebellious",
+      "lamenting -> mournful",
+      "laughing -> easily amused",
+      "lecturing -> preachy",
+      "low -> downcast",
+      "moping -> mopey",
+      "numb -> detached",
+      "offline -> unplugged",
+      "penitent -> remorseful",
+      "played out -> tires easily",
+      "prettified -> preening",
+      "pulled down -> easily worn down",
+      "rattled -> easily rattled",
+      "rekindled -> resilient",
+      "rushed -> hurried",
+      "satisfied -> contented",
+      "scoffing -> scornful",
+      "snarling -> snappish",
+      "sober -> teetotal",
+      "sorrowing -> sorrowful",
+      "stunned -> easily astonished",
+      "thinking -> reflective",
+      "tittering -> giggly",
+      "torpid -> lethargic",
+      "unclean -> slovenly",
+      "uneasy -> anxious",
+      "unjoyful -> joyless",
+      "unpoised -> easily flustered",
+      "unshielded -> defenseless",
+      "unsmiling -> solemn",
+      "untroubled -> easygoing",
+      "used -> doormat",
+      "vacant -> spacey",
+      "wonder struck -> easily awed",
+      "worried -> prone to worry"
+    ],
+    "n_name_unchanged": 0,
+    "gloss_in_band_rate": 1.0,
+    "routes": {
+      "role": 3,
+      "lasting": 17,
+      "predisposition": 15,
+      "renamed": 66,
+      "held": 69
+    },
+    "typical_duration": {
+      "days": 26,
+      "weeks": 26,
+      "hours": 95,
+      "months": 13,
+      "years": 10
+    },
+    "lasting": 20,
+    "duration_disagrees": [
+      "destined: months, lasting False",
+      "thirty-ninth: months, lasting False",
+      "unwronged: years, lasting False"
+    ],
+    "gloss_check": {
+      "n": 34,
+      "by_scan": 17,
+      "by_check": 17,
+      "check_accepted": 15,
+      "rejected": [
+        {
+          "label": "contented",
+          "route": "predisposition",
+          "reading": "lasting",
+          "reason": "The description portrays a steady, continuing way of living through ordinary days and a settled view of one's life, but it does not explicitly say the state recurs or comes easily, so it reads as an ongoing condition rather than a proneness.",
+          "gloss": "This means going through ordinary days at ease with what one has, taking small pleasures without restless wanting, and speaking of one's life with quiet satisfaction."
+        },
+        {
+          "label": "rueful",
+          "route": "predisposition",
+          "reading": "passing",
+          "reason": "The description characterizes a manner of reflecting and admitting regrets but never says the person does so repeatedly, habitually, or over an extended period, so nothing marks it as recurrent or lasting.",
+          "gloss": "This means reflecting with a wry, self-deprecating regret on one's own mistakes and lost chances, smiling ruefully at them and admitting them openly in conversation."
+        }
+      ]
+    },
+    "alignment": {
+      "0": 22,
+      "3": 1,
+      "1": 8,
+      "2": 1
+    },
+    "held_reasons": {
+      "not lasting, and no habitual predisposition is plausible": 67,
+      "gloss check: the predisposition gloss was read as lasting: The description portrays a steady, continuing way of living through ordinary days and a settled view of one's life, but it does not explicitly say the state recurs or comes easily, so it reads as an ongoing condition rather than a proneness.": 1,
+      "gloss check: the predisposition gloss was read as passing: The description characterizes a manner of reflecting and admitting regrets but never says the person does so repeatedly, habitually, or over an extended period, so nothing marks it as recurrent or lasting.": 1
+    },
+    "by_route": {
+      "role": [
+        {
+          "key": "fugitive#1",
+          "label": "fugitive",
+          "typical_duration": "months",
+          "gloss": "This means living on the run for months, moving between hiding places, using false names, avoiding anyone who might recognize you, and speaking guardedly while watching every stranger who looks your way.",
+          "reason": "Being on the run usually lasts months and rules out most ordinary work, shaping the whole persona.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "housebound#1",
+          "label": "housebound",
+          "typical_duration": "years",
+          "gloss": "This means being unable to leave home for years, days shaped by what can be done indoors: receiving visitors, managing care from the house, and talking mostly about the window and the world seen from afar.",
+          "reason": "Illness, disability or frailty that keeps someone home can last years and rules out most work, shaping the whole persona.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "ostracized#1",
+          "label": "ostracized",
+          "typical_duration": "months",
+          "gloss": "This means being shunned by the community one lives in: neighbors cross the street, invitations stop, and one's days are spent at the edges of everyone else's company.",
+          "reason": "Exclusion by a community can last months or years and shapes one's whole daily life. It is an imposed low standing that rules out most ordinary roles, so it works as an organizing identity.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": null
+        }
+      ],
+      "lasting": [
+        {
+          "key": "beholden#1",
+          "label": "beholden",
+          "typical_duration": "months",
+          "gloss": "This means carrying a debt of gratitude to someone who helped, measuring one's choices against that obligation, and deferring to their wishes while it lasts.",
+          "reason": "Owing gratitude or a favor to someone can last months or years, but it is a situational obligation that rules out no profession, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 3
+        },
+        {
+          "key": "declining#1",
+          "label": "declining",
+          "typical_duration": "years",
+          "gloss": "This means living with failing health or strength year after year: needing more help with ordinary tasks, tiring quickly, and speaking often of what the body can no longer do.",
+          "reason": "Failing health or strength usually worsens over months or years, so the state lasts long. It is a bodily course no one takes up by temperament and it does not organize a whole identity, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "disabused#1",
+          "label": "disabused",
+          "typical_duration": "years",
+          "gloss": "This means having lost one's old illusions about a person, cause or institution, seeing its faults plainly, and speaking of former hopes with dry, unsentimental clarity.",
+          "reason": "Once freed from an illusion, a person keeps seeing things clearly for years. It is a standing outlook that colors the whole life, but it is not a profession or office, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "emigrating#1",
+          "label": "emigrating",
+          "typical_duration": "months",
+          "gloss": "This means living between two countries for months, selling possessions, sorting visas and paperwork, and speaking of home in the past tense while still living there.",
+          "reason": "The process of leaving one's country permanently usually runs for many months, often longer, with sales, visas and farewells. It is a transition rather than an identity that organizes the whole persona.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "expecting#1",
+          "label": "expecting",
+          "typical_duration": "months",
+          "gloss": "This means carrying a child through months of growing bodily change: tiring easily, planning around appointments and due dates, and speaking often of the baby, the nursery and what is coming.",
+          "reason": "Pregnancy lasts about nine months, so it is lasting. It rules out no profession, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "heartsick#1",
+          "label": "heartsick",
+          "typical_duration": "months",
+          "gloss": "This means grieving a loss month after month, with sadness heavy in every ordinary day: losing interest in company, weeping at small reminders, and speaking of what is gone in a flat, hollow voice.",
+          "reason": "Deep grief over a loss can last months, as with bereavement, and it rules out no profession, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "liable#1",
+          "label": "liable",
+          "typical_duration": "months",
+          "gloss": "This means carrying answerability for a debt or harm over an extended period, with its legal demands and payments hanging over one's finances, and speaking of the matter with wary caution.",
+          "reason": "Legal or financial answerability for a debt or harm often runs for months or longer, depending on the claim. It is imposed from outside, so it is not a role or a predisposition.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "miserably_partnered#1",
+          "label": "miserably partnered",
+          "typical_duration": "years",
+          "gloss": "This means living day after day with a partner one wishes one had not chosen, bickering over small matters, and keeping the household running in cold, strained silence.",
+          "reason": "An unhappy marriage or partnership is a standing condition lasting years. It does not rule out professions, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "nascent#1",
+          "label": "nascent",
+          "typical_duration": "months",
+          "gloss": "This means working at the earliest, still-forming stage of some craft or venture, tentatively and unsure of one's footing, building skills and habits that are not yet set.",
+          "reason": "An early, still-forming stage of a project or talent can last months, and a person can stay in it for a long while. It is a stage rather than a role, so role is false.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "overburdened#1",
+          "label": "overburdened",
+          "typical_duration": "months",
+          "gloss": "This means carrying more work and worry than one can manage for months, working late and skipping rest, snapping at small requests, and answering every question with a list of what is already due.",
+          "reason": "Excess work or pressure often lasts months, as in a long crunch or overloaded year. It is a condition of circumstances rather than a calling or office, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "pretty_well#1",
+          "label": "pretty well",
+          "typical_duration": "years",
+          "gloss": "This means getting through ordinary days without serious illness, with an occasional cold or ache, and answering inquiries about one's health with a cheerful report that one is fine.",
+          "reason": "Fairly good general health can persist for years in a healthy person, so the state lasts. It is a bodily condition, not a role, and it does not organize an identity.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "thriving#1",
+          "label": "thriving",
+          "typical_duration": "years",
+          "gloss": "This means living with good health and steady success, with days full of work and pleasures that come easily, and speaking of one's life with easy confidence and quiet satisfaction.",
+          "reason": "Flourishing health and success can last years, but it is a state of circumstance rather than a role or a temperament-based predisposition.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "unacknowledged#1",
+          "label": "unacknowledged",
+          "typical_duration": "months",
+          "gloss": "This means working on without credit for one's efforts, watching others take praise for shared work, and speaking with a wry bitterness about being passed over in meetings and reviews.",
+          "reason": "Being overlooked for worth or work can last months or years in a workplace, but it is an external circumstance rather than a role or temperament.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "unemployed#1",
+          "label": "unemployed",
+          "typical_duration": "months",
+          "gloss": "This means having no paid work for month after month, filling empty days with job searches and small economies, and carrying the strain of money worries and lost routine.",
+          "reason": "Being out of paid work often lasts months, sometimes years. It does not rule out a profession or organize the whole identity, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "unhealthy#1",
+          "label": "unhealthy",
+          "typical_duration": "years",
+          "gloss": "This means living with a body that is persistently unwell, managing fatigue, pain and frequent doctor visits, and having daily plans shaped around what one's health allows.",
+          "reason": "Poor physical health from chronic illness can last years. It does not organize a whole identity and no temperament brings it about, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "unmastered#1",
+          "label": "unmastered",
+          "typical_duration": "years",
+          "gloss": "This means still learning one's craft, practicing with frequent errors, relying on teachers and reference books, and feeling the gap between what one attempts and what one can yet do.",
+          "reason": "Not yet skilled at one's craft is a learning stage that often lasts months or years. It is a stage of learning rather than an identity that organizes the whole persona.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "unpunished#1",
+          "label": "unpunished",
+          "typical_duration": "years",
+          "gloss": "This means carrying on with ordinary work and relationships while a past wrong sits unanswered, knowing that no one will hold one to account and feeling the weight of that freedom in private.",
+          "reason": "Having escaped punishment for past wrongs is a standing situation that can persist for years. It is not a profession or rank, so it does not organize the whole persona.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        }
+      ],
+      "predisposition": [
+        {
+          "key": "amorous#1",
+          "label": "amorous",
+          "typical_duration": "hours",
+          "gloss": "This means falling readily into romantic longing and flirtation, noticing attractive people, lingering over touch and glances, and speaking with warmth and suggestion that signals desire.",
+          "reason": "Romantic desire is an emotional state lasting hours or days. Some people are habitually amorous, and the ordinary word is already used for such a person.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "disheveled#1",
+          "label": "disheveled",
+          "typical_duration": "hours",
+          "gloss": "This means going about with hair uncombed, shirts untucked and clothes rumpled, seldom checking one's appearance and not minding who notices.",
+          "reason": "Untidy dress or hair is a passing look lasting hours or days. Some people habitually appear this way, and ordinary speakers would say a person is always disheveled.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "fearful#1",
+          "label": "fearful",
+          "typical_duration": "hours",
+          "gloss": "This means expecting danger in ordinary situations, flinching at unfamiliar sounds and strangers, and voicing worries about what might go wrong before it does.",
+          "reason": "Fear is a passing feeling, but some people are habitually fearful, and ordinary speakers already use the word for them.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "inconsolable#1",
+          "label": "inconsolable",
+          "typical_duration": "days",
+          "gloss": "This means breaking down over every disappointment or loss and staying inconsolable for long stretches, pushing away the comfort friends offer and insisting nothing they say can help.",
+          "reason": "Acute inconsolable grief lasts hours to days. Some people habitually take losses hard and resist comfort, so the predisposition is plausible and the word already fits.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "lonesome#1",
+          "label": "lonesome",
+          "typical_duration": "days",
+          "gloss": "This means feeling the absence of company keenly and often, drifting into sad thoughts when alone, and wanting contact while finding it hard to ask for it.",
+          "reason": "Loneliness from lacking company usually passes within days, though some people carry it as a standing sadness. A habitual lonesomeness is plausible, and ordinary speakers do say a person is lonesome.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "nervous#1",
+          "label": "nervous",
+          "typical_duration": "hours",
+          "gloss": "This means jumping at sudden noises, rehearsing what could go wrong, fidgeting in new situations, and voicing worries before anything has happened.",
+          "reason": "Anxiety or edginess comes and goes over hours or days. Many people are habitually nervous, and the ordinary word fits.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "remorseful#1",
+          "label": "remorseful",
+          "typical_duration": "weeks",
+          "gloss": "This means dwelling often on past wrongs one has done, feeling guilt that surfaces readily, and saying sorry in a way that shows the regret is still weighing on one.",
+          "reason": "Guilt over past wrongs typically lasts days to weeks, not months. People who often feel remorse are plainly called remorseful.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "repentant#1",
+          "label": "repentant",
+          "typical_duration": "weeks",
+          "gloss": "This means turning back again and again to wrongs one has committed, seeking to make amends, and speaking of them with humility and a readiness to change one's ways.",
+          "reason": "Regret for a wrong usually lasts days to weeks and ends with amends. Habitual repentance is plausible, and the word fits people who repeatedly express it.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 2
+        },
+        {
+          "key": "rumpled#1",
+          "label": "rumpled",
+          "typical_duration": "hours",
+          "gloss": "This means going about with clothes creased and hair untidy as a matter of course, paying little attention to appearance and seeming unbothered by how one looks to others.",
+          "reason": "Untidy dress and hair is a look of the moment lasting hours. Some people habitually look rumpled, and that word already describes them.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "sulky#1",
+          "label": "sulky",
+          "typical_duration": "hours",
+          "gloss": "This means going quiet and withdrawn after a slight, answering questions in clipped words, avoiding eye contact, and nursing resentment long after the matter has been settled.",
+          "reason": "A sulk lasts hours or a day or two; people who often sulk are commonly called sulky.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "tearful#1",
+          "label": "tearful",
+          "typical_duration": "hours",
+          "gloss": "This means welling up at small kindnesses, sad songs or hard news, speaking with a thickened voice, and reaching for a tissue more often than others would expect.",
+          "reason": "Crying or near tears passes within hours; people who often cry easily are commonly called tearful.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "teasing#1",
+          "label": "teasing",
+          "typical_duration": "hours",
+          "gloss": "This means finding the weak spot in friends' stories and plans and poking at it with a grin, turning remarks into light jabs, and treating mild embarrassment in others as a game worth continuing.",
+          "reason": "Playful mocking is a momentary act within a conversation; some people habitually tease, commonly called teasing.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "thankful#1",
+          "label": "thankful",
+          "typical_duration": "hours",
+          "gloss": "This means noticing small favors and saying thank you readily, pausing to name what others have done, and expressing appreciation in notes, toasts and ordinary conversation.",
+          "reason": "Gratitude is a momentary feeling; people who often feel and express thanks are commonly called thankful.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "unhappy#1",
+          "label": "unhappy",
+          "typical_duration": "hours",
+          "gloss": "This means dwelling readily on what is wrong in one's life, complaining about circumstances, and letting a discontented tone color everyday conversation.",
+          "reason": "Feeling sad or discontented passes within hours or days. People who often feel this way are commonly called unhappy, so the name fits.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "woeful#1",
+          "label": "woeful",
+          "typical_duration": "hours",
+          "gloss": "This means slipping readily into deep sorrow, speaking of hard luck and lost hopes in a heavy voice, and carrying a gloom that colors even small events.",
+          "reason": "Deep sorrow lasts hours or days. Some people habitually slip into this sorrowful, heavy manner, and the word already describes such a person.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        }
+      ],
+      "renamed": [
+        {
+          "key": "afraid#1",
+          "label": "afraid",
+          "typical_duration": "hours",
+          "gloss": "This means bracing for danger that has not yet arrived, scanning rooms for threats, and hedging every plan with what might go wrong, so that caution shapes what one says and does.",
+          "reason": "Fear is a passing emotional state lasting hours. Some people are habitually fearful, so a predisposition is plausible, but ordinary speakers would say 'fearful' rather than 'afraid' for such a person.",
+          "route_reason": null,
+          "suggested_name": "fearful",
+          "alignment": null
+        },
+        {
+          "key": "agitated#1",
+          "label": "agitated",
+          "typical_duration": "hours",
+          "gloss": "This means getting worked up quickly over small irritations and pressures, pacing or fidgeting, speaking faster and more sharply, and struggling to sit still until things settle.",
+          "reason": "Emotional disturbance lasts hours or days. Some people are habitually easily worked up, though 'agitated' is not the everyday word for that temperament.",
+          "route_reason": null,
+          "suggested_name": "high-strung",
+          "alignment": null
+        },
+        {
+          "key": "alone#1",
+          "label": "alone",
+          "typical_duration": "hours",
+          "gloss": "This means choosing to spend most free hours without company, turning down invitations for quiet time alone, and speaking of solitude as the place where one thinks and recovers.",
+          "reason": "Being without others present is a situational state lasting hours. Some people habitually prefer solitude, a predisposition the ordinary word 'solitary' already names.",
+          "route_reason": null,
+          "suggested_name": "solitary",
+          "alignment": null
+        },
+        {
+          "key": "bedraggled#1",
+          "label": "bedraggled",
+          "typical_duration": "hours",
+          "gloss": "This means neglecting one's dress and grooming, letting clothes stay rumpled and dirty, hair go unbrushed, and treating tidiness as a bother not worth the effort.",
+          "reason": "Wet, dirty, disheveled appearance is a passing condition lasting hours. Some people habitually neglect their dress and grooming, so a predisposition is plausible, though 'bedraggled' is not the everyday word for it.",
+          "route_reason": null,
+          "suggested_name": "unkempt",
+          "alignment": null
+        },
+        {
+          "key": "befogged#1",
+          "label": "befogged",
+          "typical_duration": "hours",
+          "gloss": "This means losing the thread of conversations, forgetting appointments and names, and answering questions with muddled, half-finished thoughts because attention keeps drifting elsewhere.",
+          "reason": "Muddled thinking is a passing state lasting hours. Some people habitually lose focus and think in a muddle, which the everyday word 'scatterbrained' names better than 'befogged'.",
+          "route_reason": null,
+          "suggested_name": "scatterbrained",
+          "alignment": null
+        },
+        {
+          "key": "bejeweled#1",
+          "label": "bejeweled",
+          "typical_duration": "hours",
+          "gloss": "This means dressing in heavy, glittering jewelry as a matter of course, drawing attention to one's rings and necklaces, and taking pride in an ornate, showy appearance.",
+          "reason": "Wearing heavy jewelry is an outfit worn for a day or an evening. A habitually flashy dresser is plausible, but the word bejeweled does not name that habit.",
+          "route_reason": null,
+          "suggested_name": "flashy",
+          "alignment": null
+        },
+        {
+          "key": "benumbed#1",
+          "label": "benumbed",
+          "typical_duration": "hours",
+          "gloss": "This means keeping feelings at a distance, often seeming flat or absent when news lands, and going on with routines without much felt response.",
+          "reason": "Shock-induced numbness passes within hours or days. Habitual emotional detachment is a plausible temperament, though no ordinary word for it is benumbed.",
+          "route_reason": null,
+          "suggested_name": "detached",
+          "alignment": null
+        },
+        {
+          "key": "bored#1",
+          "label": "bored",
+          "typical_duration": "hours",
+          "gloss": "This means losing interest quickly in whatever is happening, fidgeting through slow stretches, and complaining or changing the subject when a task drags on.",
+          "reason": "Boredom is a mood of hours. Some people are routinely bored, and the ordinary phrase for that is easily bored.",
+          "route_reason": null,
+          "suggested_name": "easily bored",
+          "alignment": null
+        },
+        {
+          "key": "clean#1",
+          "label": "clean",
+          "typical_duration": "hours",
+          "gloss": "This means keeping one's body, clothes and surroundings spotless as a matter of routine, washing often, and feeling uneasy around dirt or grime.",
+          "reason": "Being washed is a momentary condition. Habitual personal cleanliness is a plausible predisposition, though clean is not the ordinary word for it.",
+          "route_reason": null,
+          "suggested_name": "fastidious",
+          "alignment": null
+        },
+        {
+          "key": "concerned#1",
+          "label": "concerned",
+          "typical_duration": "hours",
+          "gloss": "This means fretting over possible problems before they happen, checking on things repeatedly, and voicing worries that others find out of proportion.",
+          "reason": "Worry about a particular matter passes within hours or days. A habitually worried temperament is plausible, and the ordinary word for it is anxious.",
+          "route_reason": null,
+          "suggested_name": "anxious",
+          "alignment": null
+        },
+        {
+          "key": "contrite#1",
+          "label": "contrite",
+          "typical_duration": "days",
+          "gloss": "This means owning mistakes readily, apologizing at once, and carrying guilt for a long time after hurting someone, wanting to make amends.",
+          "reason": "Remorse for a wrong usually fades within days or weeks. A habit of readily feeling and voicing guilt is plausible, though contrite is not the ordinary word for it.",
+          "route_reason": null,
+          "suggested_name": "quick to apologize",
+          "alignment": null
+        },
+        {
+          "key": "cross#1",
+          "label": "cross",
+          "typical_duration": "hours",
+          "gloss": "This means snapping at small irritations, speaking curtly to people who interrupt, and showing displeasure in tone and expression long before anyone has done much wrong.",
+          "reason": "Annoyance or anger passes within hours. A habitually irritable temperament is plausible, and the ordinary word for it is irritable, not cross.",
+          "route_reason": null,
+          "suggested_name": "irritable",
+          "alignment": null
+        },
+        {
+          "key": "delighted#1",
+          "label": "delighted",
+          "typical_duration": "hours",
+          "gloss": "This means lighting up at small pleasures, such as a good meal, a kind remark or a bright morning, and saying so with warm, unguarded enthusiasm.",
+          "reason": "Delight is a passing mood lasting hours. Some people are readily delighted by small pleasures, but ordinary speakers would not call them delighted, so the name needs replacing.",
+          "route_reason": null,
+          "suggested_name": "easily delighted",
+          "alignment": null
+        },
+        {
+          "key": "depressed#1",
+          "label": "depressed",
+          "typical_duration": "days",
+          "gloss": "This means sinking easily into low spirits, seeing little point in plans, and speaking of the day's prospects in flat, heavy terms.",
+          "reason": "Current low mood passes in days or weeks. People who often sink into low moods exist, but ordinary speakers would call them gloomy rather than depressed, so the name needs replacing.",
+          "route_reason": null,
+          "suggested_name": "gloomy",
+          "alignment": null
+        },
+        {
+          "key": "desirous#1",
+          "label": "desirous",
+          "typical_duration": "hours",
+          "gloss": "This means wanting things intensely and persistently, measuring one's contentment by what one still lacks, and letting envy of others' possessions color one's conversation.",
+          "reason": "Strong wanting comes and goes over hours or days. Some people are habitually covetous, and that is the ordinary word for the standing predisposition, so the name needs replacing.",
+          "route_reason": null,
+          "suggested_name": "covetous",
+          "alignment": null
+        },
+        {
+          "key": "destined#1",
+          "label": "destined",
+          "typical_duration": "months",
+          "gloss": "This means talking as though one's future is already written, expecting doors to open and greatness to arrive, and brushing aside ordinary limits.",
+          "reason": "Being fated for a future is a belief or status held for a while rather than a mood. A habitual sense of being destined for greatness is plausible, and grandiose is the ordinary word for it.",
+          "route_reason": null,
+          "suggested_name": "grandiose",
+          "alignment": null
+        },
+        {
+          "key": "diluted#1",
+          "label": "diluted",
+          "typical_duration": "weeks",
+          "gloss": "This means holding one's beliefs and commitments loosely, backing away from stated positions, and offering qualified, watered-down enthusiasm for whatever is asked of one.",
+          "reason": "Weakened conviction or force is a passing condition lasting weeks at most. Some people habitually hold their convictions loosely, but no ordinary word fits that, so a short phrase is needed.",
+          "route_reason": null,
+          "suggested_name": "half-hearted",
+          "alignment": null
+        },
+        {
+          "key": "disgusted#1",
+          "label": "disgusted",
+          "typical_duration": "hours",
+          "gloss": "This means recoiling readily from crude food, messes or bodily matters, and voicing one's revulsion bluntly while steering away from anything unpleasant.",
+          "reason": "Revulsion passes within hours. Some people are habitually squeamish, and that is the ordinary word for a standing predisposition to recoil, so the name needs replacing.",
+          "route_reason": null,
+          "suggested_name": "squeamish",
+          "alignment": null
+        },
+        {
+          "key": "dissatisfied#1",
+          "label": "dissatisfied",
+          "typical_duration": "days",
+          "gloss": "This means finding fault with one's job, home and prospects, measuring every situation against something better, and voicing discontent to anyone who will listen.",
+          "reason": "Discontent with circumstances usually lasts days or weeks, but some people habitually find fault with their lives, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "discontented",
+          "alignment": null
+        },
+        {
+          "key": "diverted#1",
+          "label": "diverted",
+          "typical_duration": "hours",
+          "gloss": "This means letting attention slide off the task at hand toward whatever passes by, abandoning plans mid-sentence, and rarely finishing what one began.",
+          "reason": "Being distracted passes within hours. Some people are habitually pulled off course by whatever passes, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "easily distracted",
+          "alignment": null
+        },
+        {
+          "key": "embroiled#1",
+          "label": "embroiled",
+          "typical_duration": "weeks",
+          "gloss": "This means picking arguments, taking sides in every dispute among colleagues or family, and carrying grudges forward into the next quarrel.",
+          "reason": "Being caught in a dispute usually runs weeks, sometimes longer, but not months as a standing identity. Some people habitually pick quarrels, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "quarrelsome",
+          "alignment": null
+        },
+        {
+          "key": "enervate#1",
+          "label": "enervate",
+          "typical_duration": "hours",
+          "gloss": "This means moving slowly through the day with little drive, answering in flat, low-energy tones, and letting tasks sit unfinished for want of the will to start them.",
+          "reason": "Being drained of energy lasts hours or days. Some people habitually feel listless and low in vigor, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "listless",
+          "alignment": null
+        },
+        {
+          "key": "enkindled#1",
+          "label": "enkindled",
+          "typical_duration": "hours",
+          "gloss": "This means taking fire quickly at new ideas and projects, talking about them with bright energy, and pursuing them with an eagerness that others find infectious.",
+          "reason": "Being filled with enthusiasm passes within hours or days. Some people habitually take fire at new ideas, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "enthusiastic",
+          "alignment": null
+        },
+        {
+          "key": "exasperated#1",
+          "label": "exasperated",
+          "typical_duration": "hours",
+          "gloss": "This means snapping at small delays and mistakes, sighing audibly at repeated requests, and running short of patience with people who keep asking the same things.",
+          "reason": "Irritation and being fed up pass within hours or days. Some people are habitually short-tempered and impatient, so a predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "irritable",
+          "alignment": null
+        },
+        {
+          "key": "fasting#1",
+          "label": "fasting",
+          "typical_duration": "days",
+          "gloss": "This means refusing food by deliberate choice on set days, speaking calmly about one's restraint, and turning down meals and treats that others take for granted.",
+          "reason": "A fast lasts days at most. Some people habitually fast by choice, and that restraint shows in how they talk about food.",
+          "route_reason": null,
+          "suggested_name": "abstemious",
+          "alignment": null
+        },
+        {
+          "key": "filthy#1",
+          "label": "filthy",
+          "typical_duration": "days",
+          "gloss": "This means letting one's body and clothes go unwashed for days, wearing the same grimy garments, and shrugging off remarks about the smell or the mess.",
+          "reason": "Being very dirty passes within hours or days. Some people habitually neglect cleanliness, which shows in their appearance and habits.",
+          "route_reason": null,
+          "suggested_name": "slovenly",
+          "alignment": null
+        },
+        {
+          "key": "flexed#1",
+          "label": "flexed",
+          "typical_duration": "hours",
+          "gloss": "This means holding one's shoulders and jaw tight through the day, moving stiffly and quickly, and answering in clipped words as if braced for something.",
+          "reason": "Tensed muscles relax within hours. Some people habitually hold their bodies tight, which shows in how they move and speak.",
+          "route_reason": null,
+          "suggested_name": "tense",
+          "alignment": null
+        },
+        {
+          "key": "grizzling#1",
+          "label": "grizzling",
+          "typical_duration": "hours",
+          "gloss": "This means fretting over small discomforts, whining about delays and minor slights, and voicing a steady stream of complaints that others find tiring.",
+          "reason": "A fussy, whimpering mood passes within hours. Some people habitually fret and complain, which shows in their speech.",
+          "route_reason": null,
+          "suggested_name": "fretful",
+          "alignment": null
+        },
+        {
+          "key": "grubby#1",
+          "label": "grubby",
+          "typical_duration": "days",
+          "gloss": "This means going about with unwashed hair, rumpled and grimy clothes, and nails left dirty, showing little concern for how one looks to others.",
+          "reason": "Being dirty and unwashed passes within days. Some people habitually neglect their appearance, which shows in how they present themselves.",
+          "route_reason": null,
+          "suggested_name": "unkempt",
+          "alignment": null
+        },
+        {
+          "key": "high#1",
+          "label": "high",
+          "typical_duration": "hours",
+          "gloss": "This means drinking or using drugs to excess most days, chasing the lift they bring, and letting that habit steer one's money, time and company.",
+          "reason": "Intoxication passes within hours. Some people habitually drink or use drugs to excess, which is a vice that shows in their talk and habits.",
+          "route_reason": null,
+          "suggested_name": "intemperate",
+          "alignment": null
+        },
+        {
+          "key": "inspired#1",
+          "label": "inspired",
+          "typical_duration": "hours",
+          "gloss": "This means greeting new projects and ideas with eager energy, launching into them with fervor, and talking about them in glowing terms until the enthusiasm spreads to others around.",
+          "reason": "Creative inspiration lasts hours or days. Some people are habitually eager and quick to be stirred by new ideas, but 'inspired' is not the everyday word for that, so a different name is needed.",
+          "route_reason": null,
+          "suggested_name": "enthusiastic",
+          "alignment": null
+        },
+        {
+          "key": "insurrectional#1",
+          "label": "insurrectional",
+          "typical_duration": "weeks",
+          "gloss": "This means chafing against authority and rules, siding readily with those who defy the government, and speaking of rising up against unjust power with a fierce, restless anger.",
+          "reason": "Taking part in an uprising typically lasts days to weeks and is not a standing condition. A habit of defying authority is plausible, though the word 'insurrectional' is not used for it.",
+          "route_reason": null,
+          "suggested_name": "rebellious",
+          "alignment": null
+        },
+        {
+          "key": "lamenting#1",
+          "label": "lamenting",
+          "typical_duration": "weeks",
+          "gloss": "This means dwelling on losses and disappointments, bemoaning what has gone wrong in a plaintive voice, and returning again and again to what was lost as if the grief were never quite finished.",
+          "reason": "Lamenting a loss is an expressive act that typically runs for weeks, not months. A habit of bemoaning losses in a plaintive way is plausible, and 'mournful' is the ordinary word for it.",
+          "route_reason": null,
+          "suggested_name": "mournful",
+          "alignment": null
+        },
+        {
+          "key": "laughing#1",
+          "label": "laughing",
+          "typical_duration": "hours",
+          "gloss": "This means finding humor in almost everything, breaking into laughter at small jokes and mishaps, and filling conversations with teasing remarks and easy giggles.",
+          "reason": "Laughing or being amused comes and goes within hours. Some people habitually laugh readily, though 'laughing' itself is not the usual trait word for that.",
+          "route_reason": null,
+          "suggested_name": "easily amused",
+          "alignment": null
+        },
+        {
+          "key": "lecturing#1",
+          "label": "lecturing",
+          "typical_duration": "hours",
+          "gloss": "This means sliding into sermonizing whenever a topic arises, instructing friends on how they ought to live or think, and answering objections with a patient, superior tone of correction.",
+          "reason": "Giving a formal talk lasts an hour or so. A habit of moralizing and instructing others is plausible, and 'preachy' is the ordinary word for it.",
+          "route_reason": null,
+          "suggested_name": "preachy",
+          "alignment": null
+        },
+        {
+          "key": "low#1",
+          "label": "low",
+          "typical_duration": "days",
+          "gloss": "This means slipping easily into dejection, speaking of little that pleases, dragging through ordinary tasks, and answering friends with flat, weary replies.",
+          "reason": "Low spirits typically last days or a few weeks and then lift. People are often prone to dejection, but 'low' is not the ordinary trait word for that.",
+          "route_reason": null,
+          "suggested_name": "downcast",
+          "alignment": null
+        },
+        {
+          "key": "moping#1",
+          "label": "moping",
+          "typical_duration": "hours",
+          "gloss": "This means sinking into gloomy listlessness over small disappointments, sulking when crossed, and answering questions with sighs and sullen short replies.",
+          "reason": "A spell of gloom and sulking lasts hours or days. Some people mope habitually, and the ordinary word for that is mopey.",
+          "route_reason": null,
+          "suggested_name": "mopey",
+          "alignment": null
+        },
+        {
+          "key": "numb#1",
+          "label": "numb",
+          "typical_duration": "days",
+          "gloss": "This means going flat and far away inside, meeting loss, joy and ordinary news with the same blank, and having to be prompted to say what one feels.",
+          "reason": "Emotional numbness after shock usually passes within days. Some people habitually go emotionally flat and detached, so a predisposition is plausible, but the word numb is not what people call such a person.",
+          "route_reason": null,
+          "suggested_name": "detached",
+          "alignment": null
+        },
+        {
+          "key": "offline#1",
+          "label": "offline",
+          "typical_duration": "hours",
+          "gloss": "This means keeping phone and laptop switched off for long stretches, answering messages late or not at all, and feeling relieved rather than cut off when unreachable.",
+          "reason": "Being unreachable digitally is a passing situation lasting hours or days. Some people habitually disconnect, so a predisposition is plausible, though the word offline does not name that person.",
+          "route_reason": null,
+          "suggested_name": "unplugged",
+          "alignment": null
+        },
+        {
+          "key": "penitent#1",
+          "label": "penitent",
+          "typical_duration": "weeks",
+          "gloss": "This means dwelling on a past wrong, apologizing repeatedly, and bringing up one's regret unprompted, often making amends and checking whether the hurt person has forgiven.",
+          "reason": "Remorse for a past wrong usually fades over weeks, not months. Some people are habitually remorseful and apologize often, a predisposition that the word penitent does not quite name.",
+          "route_reason": null,
+          "suggested_name": "remorseful",
+          "alignment": null
+        },
+        {
+          "key": "played_out#1",
+          "label": "played out",
+          "typical_duration": "hours",
+          "gloss": "This means running out of energy well before others do, flagging after modest effort, and speaking of oneself as spent while everyone else is still going.",
+          "reason": "Exhaustion from exertion passes within hours or a day. Some people habitually tire quickly, so a predisposition to it is plausible, though the state's own name is not the usual word for it.",
+          "route_reason": null,
+          "suggested_name": "tires easily",
+          "alignment": null
+        },
+        {
+          "key": "prettified#1",
+          "label": "prettified",
+          "typical_duration": "hours",
+          "gloss": "This means spending long, unhurried time on hair, clothes and makeup, checking one's reflection often, and remarking on how one looks as if appearance were a daily project.",
+          "reason": "Dressing up for an occasion lasts hours. Some people habitually fuss over their appearance, so the predisposition is plausible, though 'prettified' is not a word for such a person.",
+          "route_reason": null,
+          "suggested_name": "preening",
+          "alignment": null
+        },
+        {
+          "key": "pulled_down#1",
+          "label": "pulled down",
+          "typical_duration": "weeks",
+          "gloss": "This means wearing out quickly under pressure, letting fatigue and setbacks drain one's spirits, and sounding tired and flat when describing even ordinary demands.",
+          "reason": "Being worn down in body or spirits typically lasts weeks after strain and then recovers, so it is not lasting. Some people habitually flag under pressure, so the predisposition is plausible.",
+          "route_reason": null,
+          "suggested_name": "easily worn down",
+          "alignment": null
+        },
+        {
+          "key": "rattled#1",
+          "label": "rattled",
+          "typical_duration": "hours",
+          "gloss": "This means losing composure at the slightest provocation, fumbling words, snapping at others, and reacting to small upsets with visible agitation before slowly regaining control.",
+          "reason": "Being emotionally thrown off composure passes within hours. Many people are easily rattled, so the predisposition is plausible and the phrase 'easily rattled' is the ordinary name.",
+          "route_reason": null,
+          "suggested_name": "easily rattled",
+          "alignment": null
+        },
+        {
+          "key": "rekindled#1",
+          "label": "rekindled",
+          "typical_duration": "hours",
+          "gloss": "This means bouncing back quickly after disappointment, reviving hope and enthusiasm for projects that had seemed finished, and talking about new beginnings with real energy.",
+          "reason": "Revived hope or enthusiasm is a passing mood lasting hours or days. A person often bouncing back is better named resilient, a plausible habitual predisposition.",
+          "route_reason": null,
+          "suggested_name": "resilient",
+          "alignment": null
+        },
+        {
+          "key": "rushed#1",
+          "label": "rushed",
+          "typical_duration": "hours",
+          "gloss": "This means rushing through tasks and conversations as a habit, speaking quickly, checking the clock often, and feeling impatient whenever one has to wait or slow down.",
+          "reason": "Time pressure and hurry pass within hours or days. A person who is always hurried is a plausible temperament, though the word rushed does not name it.",
+          "route_reason": null,
+          "suggested_name": "hurried",
+          "alignment": null
+        },
+        {
+          "key": "satisfied#1",
+          "label": "satisfied",
+          "typical_duration": "days",
+          "gloss": "This means finding contentment easily in one's circumstances and possessions, taking little notice of what is missing, and speaking of what one has with quiet gratitude.",
+          "reason": "Contentment passes over hours or days. Some people habitually feel content with what they have, and ordinary speech calls that contented.",
+          "route_reason": null,
+          "suggested_name": "contented",
+          "alignment": null
+        },
+        {
+          "key": "scoffing#1",
+          "label": "scoffing",
+          "typical_duration": "hours",
+          "gloss": "This means greeting other people's earnest plans and claims with a sneer and a mocking remark, treating enthusiasm as naive, and making scornful jokes at others' expense.",
+          "reason": "A scornful mood lasts hours. Some people habitually mock and sneer, and 'scornful' is the ordinary word for that person.",
+          "route_reason": null,
+          "suggested_name": "scornful",
+          "alignment": null
+        },
+        {
+          "key": "snarling#1",
+          "label": "snarling",
+          "typical_duration": "hours",
+          "gloss": "This means answering questions and requests with curt, irritable remarks, bristling at small delays or criticism, and letting irritation show in one's tone and manner.",
+          "reason": "An angry, hostile mood lasts hours. Some people habitually snap and bristle, and 'snappish' is the ordinary word for that.",
+          "route_reason": null,
+          "suggested_name": "snappish",
+          "alignment": null
+        },
+        {
+          "key": "sober#1",
+          "label": "sober",
+          "typical_duration": "hours",
+          "gloss": "This means abstaining from alcohol as a settled rule, turning down drinks at gatherings without apology, and keeping a clear head through evenings others spend drinking.",
+          "reason": "Not being intoxicated is a momentary condition of hours. Some people habitually abstain from alcohol, which ordinary speech calls teetotal.",
+          "route_reason": null,
+          "suggested_name": "teetotal",
+          "alignment": null
+        },
+        {
+          "key": "sorrowing#1",
+          "label": "sorrowing",
+          "typical_duration": "hours",
+          "gloss": "This means carrying a settled melancholy, dwelling on losses and disappointments, and speaking of hard things in a low, grieved voice as if sadness were the natural tone of life.",
+          "reason": "Grief in the moment lasts hours or days. Some people habitually carry a sad, grieving disposition, which ordinary speech calls sorrowful.",
+          "route_reason": null,
+          "suggested_name": "sorrowful",
+          "alignment": null
+        },
+        {
+          "key": "stunned#1",
+          "label": "stunned",
+          "typical_duration": "hours",
+          "gloss": "This means being knocked silent by news or events that others take in stride, standing motionless for a moment, and then struggling to find words for what just happened.",
+          "reason": "Shock or astonishment passes within minutes or hours; some people are easily stunned, but the ordinary word for that is not clearly established.",
+          "route_reason": null,
+          "suggested_name": "easily astonished",
+          "alignment": null
+        },
+        {
+          "key": "thinking#1",
+          "label": "thinking",
+          "typical_duration": "hours",
+          "gloss": "This means pausing before answering, turning questions over at length, and voicing conclusions only after weighing alternatives, so that others often wait for the thought to finish.",
+          "reason": "Being engaged in thought is a momentary activity, not a lasting condition or a predisposition with a common name.",
+          "route_reason": null,
+          "suggested_name": "reflective",
+          "alignment": null
+        },
+        {
+          "key": "tittering#1",
+          "label": "tittering",
+          "typical_duration": "hours",
+          "gloss": "This means breaking into nervous giggles at tense moments, in serious meetings and at awkward silences, and covering one's own discomfort with laughter that others find hard to take seriously.",
+          "reason": "Quiet nervous giggling is a momentary reaction; a habitual giggler is not a standard named predisposition here.",
+          "route_reason": null,
+          "suggested_name": "giggly",
+          "alignment": null
+        },
+        {
+          "key": "torpid#1",
+          "label": "torpid",
+          "typical_duration": "hours",
+          "gloss": "This means moving slowly through the day, answering questions after long pauses, and lacking the drive to start tasks, so that others must prod and wait for any response.",
+          "reason": "Sluggishness low on energy is a momentary state, but a habitually sluggish person is commonly called sluggish or lethargic.",
+          "route_reason": null,
+          "suggested_name": "lethargic",
+          "alignment": null
+        },
+        {
+          "key": "unclean#1",
+          "label": "unclean",
+          "typical_duration": "hours",
+          "gloss": "This means going days without washing, wearing the same unwashed clothes, and shrugging off the grime and odor that others notice around one.",
+          "reason": "Being physically dirty passes within hours or days. A habit of neglecting washing is a plausible temperament, and the ordinary word for it is slovenly.",
+          "route_reason": null,
+          "suggested_name": "slovenly",
+          "alignment": null
+        },
+        {
+          "key": "uneasy#1",
+          "label": "uneasy",
+          "typical_duration": "hours",
+          "gloss": "This means feeling a low, persistent unease at ordinary events, scanning for what might go wrong, and voicing worries and second-guessing before others have raised any concern.",
+          "reason": "Feeling anxious or worried passes within hours. Some people habitually feel this way, and the ordinary word for them is anxious.",
+          "route_reason": null,
+          "suggested_name": "anxious",
+          "alignment": null
+        },
+        {
+          "key": "unjoyful#1",
+          "label": "unjoyful",
+          "typical_duration": "hours",
+          "gloss": "This means meeting good news and pleasant occasions with a flat response, finding little to enjoy, and speaking of life in a downcast, humorless tone.",
+          "reason": "Not feeling joy, sad or downcast, passes within hours. People who habitually lack joy are called joyless, which is the plain ordinary name.",
+          "route_reason": null,
+          "suggested_name": "joyless",
+          "alignment": null
+        },
+        {
+          "key": "unpoised#1",
+          "label": "unpoised",
+          "typical_duration": "hours",
+          "gloss": "This means losing composure at small surprises, stammering over simple questions, and fumbling tasks under mild pressure, so that one's speech comes out hurried and uncertain.",
+          "reason": "Being flustered lasts minutes or hours. Some people are often flustered and easily rattled, a habitual proneness that shows in their speech.",
+          "route_reason": null,
+          "suggested_name": "easily flustered",
+          "alignment": null
+        },
+        {
+          "key": "unshielded#1",
+          "label": "unshielded",
+          "typical_duration": "weeks",
+          "gloss": "This means leaving oneself open to exploitation and attack, trusting people too readily, neglecting to guard one's money, reputation or feelings, and being hurt when others take advantage.",
+          "reason": "Vulnerability to harm usually depends on circumstances and lasts weeks. Some people habitually leave themselves open to attack, a plausible predisposition with no ordinary single-word name.",
+          "route_reason": null,
+          "suggested_name": "defenseless",
+          "alignment": null
+        },
+        {
+          "key": "unsmiling#1",
+          "label": "unsmiling",
+          "typical_duration": "hours",
+          "gloss": "This means keeping a sober, grave face in company, speaking in a flat, serious tone, and treating jokes and small talk with reserved seriousness, so others take one for severe.",
+          "reason": "Not smiling at the moment is a passing expression lasting minutes or hours. Some people habitually wear a grave face, and the ordinary word for them is solemn.",
+          "route_reason": null,
+          "suggested_name": "solemn",
+          "alignment": null
+        },
+        {
+          "key": "untroubled#1",
+          "label": "untroubled",
+          "typical_duration": "days",
+          "gloss": "This means meeting setbacks and everyday demands with an even temper, letting small annoyances pass without comment, and speaking in a relaxed, unhurried way that reassures those around.",
+          "reason": "Calm and freedom from worry lasts hours or days. Some people are habitually even-tempered, and the ordinary word for them is easygoing.",
+          "route_reason": null,
+          "suggested_name": "easygoing",
+          "alignment": null
+        },
+        {
+          "key": "used#1",
+          "label": "used",
+          "typical_duration": "weeks",
+          "gloss": "This means repeatedly letting others take one's time, money or favors without objection, saying yes to every request, and then feeling resentful and taken for granted when the cost is noticed.",
+          "reason": "Being taken advantage of usually lasts weeks within a relationship or situation. Some people habitually let others exploit them, and the ordinary word for them is doormat.",
+          "route_reason": null,
+          "suggested_name": "doormat",
+          "alignment": null
+        },
+        {
+          "key": "vacant#1",
+          "label": "vacant",
+          "typical_duration": "hours",
+          "gloss": "This means drifting into blank, empty-headed stretches in conversation, with a fixed, far-off look, losing the thread of what is being said and needing a prompt to come back.",
+          "reason": "A blank, empty-headed look passes within minutes or hours. Some people drift into this often, and ordinary speech calls them spacey.",
+          "route_reason": null,
+          "suggested_name": "spacey",
+          "alignment": null
+        },
+        {
+          "key": "wonder_struck#1",
+          "label": "wonder struck",
+          "typical_duration": "hours",
+          "gloss": "This means being caught by small wonders, such as a sunrise, a clever machine or a stranger's skill, stopping to stare, exclaiming in delight and wanting others to share the moment.",
+          "reason": "Sudden awe passes within minutes or hours. Some people are habitually caught off guard by wonder, but the word awestruck is not the usual name for that tendency.",
+          "route_reason": null,
+          "suggested_name": "easily awed",
+          "alignment": null
+        },
+        {
+          "key": "worried#1",
+          "label": "worried",
+          "typical_duration": "days",
+          "gloss": "This means fretting over possible problems, rehearsing what could go wrong, and asking again and again for reassurance, so that small uncertainties keep one on edge.",
+          "reason": "Anxiety about a matter lasts hours or days. Some people habitually fret, and ordinary speech calls them worriers, though the state word itself is not the trait name.",
+          "route_reason": null,
+          "suggested_name": "prone to worry",
+          "alignment": null
+        }
+      ],
+      "held": [
+        {
+          "key": "acquitted#1",
+          "label": "acquitted",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "A court verdict of not guilty is a one-time legal outcome imposed from outside. It lasts only as long as the case is in the news or the paperwork is settled, so it is a passing status, not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "afflicted#1",
+          "label": "afflicted",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Suffering from an ailment is usually an acute illness lasting weeks, and it is a bodily condition no temperament brings about. Chronic cases exist, but the state as described is generic and typically brief.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "alleged#1",
+          "label": "alleged",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being accused while guilt is unproven is a legal situation imposed from outside. It typically lasts weeks to a few months, through the investigation and early proceedings, and no temperament produces it.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "anonymous#1",
+          "label": "anonymous",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Having one's identity withheld is usually a situational condition set by circumstance and lasts hours or days. A temperament does not produce it, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "breathless#1",
+          "label": "breathless",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being out of breath follows exertion and passes within minutes. It is a purely bodily condition that no temperament produces.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "contented#1",
+          "label": "contented",
+          "typical_duration": "days",
+          "gloss": "This means going through ordinary days at ease with what one has, taking small pleasures without restless wanting, and speaking of one's life with quiet satisfaction.",
+          "reason": "Contentment with one's situation is a mood of hours or days. Some people are habitually contented, and ordinary speakers already call them contented.",
+          "route_reason": "gloss check: the predisposition gloss was read as lasting: The description portrays a steady, continuing way of living through ordinary days and a settled view of one's life, but it does not explicitly say the state recurs or comes easily, so it reads as an ongoing condition rather than a proneness.",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "denied#1",
+          "label": "denied",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Being refused something is an event imposed from outside, lasting hours or days. No temperament brings it about, so a habitual predisposition to it is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "due#1",
+          "label": "due",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being expected to arrive soon is a brief, situational condition. It is not a temperament that a person could habitually fall into.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "exhausted#1",
+          "label": "exhausted",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Physical exhaustion from effort or sleep loss passes within hours or days. It is a bodily condition that no temperament brings about, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "expected#1",
+          "label": "expected",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being awaited by others is a brief situational condition imposed from outside. No habitual predisposition to it is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "faint#1",
+          "label": "faint",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Dizziness passes within minutes. A tendency to faint is a bodily reflex rather than a temperament, so it is not a plausible predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "filled#1",
+          "label": "filled",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Feeling full after a meal passes within hours. Being habitually full is not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "fine#1",
+          "label": "fine",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Feeling fine is a passing state of wellbeing. Saying one is fine is not a predisposition that a temperament brings about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "forthcoming#1",
+          "label": "forthcoming",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being about to arrive lasts moments or hours. Readiness to appear soon is not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "fortunate#1",
+          "label": "fortunate",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "A run of good luck passes within days or weeks. Luck is not a habitual predisposition that a temperament produces.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "glassy#1",
+          "label": "glassy",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "A dazed, vacant stare passes within minutes or hours. It is a momentary bodily or situational look, not a predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "haggard#1",
+          "label": "haggard",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "A drawn, exhausted look passes within days or weeks. It comes from fatigue, not temperament, so it is not a plausible predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "half_starved#1",
+          "label": "half-starved",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Intense hunger passes within hours after eating. It is a bodily condition, not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "hottish#1",
+          "label": "hottish",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "A slight fever passes within hours or days. A body running warm is not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "hungry#1",
+          "label": "hungry",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Hunger is a short-lived bodily need that lasts hours, and no temperament produces it as a standing predisposition in the way a personality trait would.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "indulged#1",
+          "label": "indulged",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Being pampered by others is a situation imposed from outside, lasting days or a holiday. It is not a disposition a person brings about, so it is not plausible as a predisposition here.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "labbing#1",
+          "label": "labbing",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Doing laboratory work is an activity lasting hours or a working day. It is a job task, not a temperamental predisposition, so it is not plausible as a habit.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "lucky#1",
+          "label": "lucky",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Recent good fortune lasts days to weeks. Being fortunate is a matter of circumstance rather than a habitual behavior that temperament produces, so no predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "mothered#1",
+          "label": "mothered",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being cared for attentively is a condition imposed from outside and usually lasts weeks, such as during recovery or a visit. No temperament brings it about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "muddy#1",
+          "label": "muddy",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Mud on the body or clothes is a passing physical condition that is cleaned off within hours. No temperament produces it.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "muggy#1",
+          "label": "muggy",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Clammy heat is a weather-driven bodily condition that lasts hours or days. Temperament does not bring it on.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "new#1",
+          "label": "new",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being newly arrived in a place or role usually lasts weeks to a few months, so it wears off within a story. It is situational, not a predisposition a person keeps falling into.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "obliterated#1",
+          "label": "obliterated",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being utterly crushed or exhausted passes within hours or days. No standing habit of total collapse is an ordinary temperament people are named for, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "outclassed#1",
+          "label": "outclassed",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Losing to a clearly superior opponent is a match-length situation lasting hours. Habitually being outmatched is not a temperament people are commonly named for, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "painless#1",
+          "label": "painless",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Feeling no pain is a bodily condition that usually comes and goes within hours. No temperament produces it, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "partial#1",
+          "label": "partial",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Being incomplete or unfinished is a passing condition of a task or situation lasting days. It does not describe a habitual temperament, so a predisposition is not plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "perceiving#1",
+          "label": "perceiving",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Taking in surroundings through the senses is a momentary, constant activity, not a temperament or a condition that lasts; it gives no basis for a habitual predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "poisoned#1",
+          "label": "poisoned",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Poisoning is an external bodily insult that no temperament brings about, and it passes in days or weeks.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "prone#1",
+          "label": "prone",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Lying face-down is a momentary body position, with no habitual predisposition behind it.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "pulped#1",
+          "label": "pulped",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being badly beaten is an external bodily injury that no temperament brings about, and it heals within weeks.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "qualifying#1",
+          "label": "qualifying",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Qualifying for a competition is an externally imposed process lasting weeks or a season, and no one is habitually prone to it.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "redundant#1",
+          "label": "redundant",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being laid off is an event; out-of-work spells usually last weeks to a few months and are not an identity. External imposition is not a temperament, so no predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "refreshed#1",
+          "label": "refreshed",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Physical rest and energy after sleep or a break pass within hours or days. It is a purely bodily condition that no temperament brings about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "refused#1",
+          "label": "refused",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being turned away is an externally imposed moment that passes within hours or days. It is not a predisposition a person carries.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "released#1",
+          "label": "released",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Freedom from confinement is a single moment of change, not an enduring state. It is imposed from outside, so no predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "rueful#1",
+          "label": "rueful",
+          "typical_duration": "hours",
+          "gloss": "This means reflecting with a wry, self-deprecating regret on one's own mistakes and lost chances, smiling ruefully at them and admitting them openly in conversation.",
+          "reason": "Wry regret over a mistake or loss passes within hours or days. People who often wear this wry regret are called rueful.",
+          "route_reason": "gloss check: the predisposition gloss was read as passing: The description characterizes a manner of reflecting and admitting regrets but never says the person does so repeatedly, habitually, or over an extended period, so nothing marks it as recurrent or lasting.",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "rusty#1",
+          "label": "rusty",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Out-of-practice skills fade with disuse over weeks to months. Rustiness comes from circumstance, not temperament, so no habitual predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "sequestered#1",
+          "label": "sequestered",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Sequestration is usually imposed from outside, such as a jury or quarantine, and lasts days to weeks. A temperament does not bring it about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "shattered#1",
+          "label": "shattered",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Exhaustion passes within hours or days after rest. Being worn out is mainly a bodily condition that no temperament produces.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "short_handed#1",
+          "label": "short-handed",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Understaffing usually lasts weeks, sometimes months, and it is imposed by circumstance rather than temperament. It is not a standing predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "spent#1",
+          "label": "spent",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Exhaustion and drained energy pass within hours or days. It is mainly a bodily condition that no temperament produces.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "starved#1",
+          "label": "starved",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Famished hunger is a bodily condition lasting hours until eating; no temperament produces it as a standing predisposition in a way that fits the persona.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "stickit#1",
+          "label": "stickit",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Being stuck at a point is a situational condition lasting hours or days, usually from circumstances rather than temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "stuporous#1",
+          "label": "stuporous",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "A stupor is a brief, severe dazed state from illness, drink or drugs, lasting hours or days rather than a standing trait.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "surfeited#1",
+          "label": "surfeited",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being stuffed after a meal passes within hours; no habitual predisposition beyond ordinary overeating.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "tarry_fingered#1",
+          "label": "tarry-fingered",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Fingers smeared with tar from a job last hours or days and are a bodily, situational condition, not a temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "thirsty#1",
+          "label": "thirsty",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Bodily need for drink is momentary and purely physical, relieved by drinking; no temperament produces it.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "thirty_ninth#1",
+          "label": "thirty-ninth",
+          "typical_duration": "months",
+          "gloss": null,
+          "reason": "Holding 39th place in a ranking is an externally imposed position that can change, not a standing identity.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "tired#1",
+          "label": "tired",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Physical exhaustion from exertion passes with rest in hours or a day; not a lasting condition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "trimming#1",
+          "label": "trimming",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Cutting excess off something is a momentary task, not a lasting condition or predisposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "trying#1",
+          "label": "trying",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Making an effort is a momentary activity, not a standing condition or a predisposition with a common name.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unattacked#1",
+          "label": "unattacked",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Not being under attack is a situational state that passes within hours. It is imposed from outside and is not a predisposition anyone would carry.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "uncounseled#1",
+          "label": "uncounseled",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Having no lawyer is a legal situation imposed from outside, lasting days or weeks at most. It is not a predisposition a person would carry.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unheeded#1",
+          "label": "unheeded",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Having one's advice ignored is an external social situation lasting days or months. It is not a predisposition the person brings about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unnourished#1",
+          "label": "unnourished",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Physical underfeeding comes from circumstances or illness, not temperament. Chronic cases can run months, but it is usually a passing bodily condition that no predisposition produces.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unroused#1",
+          "label": "unroused",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being asleep and not yet woken lasts hours at most. It is a momentary bodily condition, not a disposition.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unthwarted#1",
+          "label": "unthwarted",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Not being blocked in one's aims describes a momentary outcome or circumstance. It is not a temperament that a person habitually falls into.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "unwronged#1",
+          "label": "unwronged",
+          "typical_duration": "years",
+          "gloss": null,
+          "reason": "Having suffered no injustice is a description of circumstances rather than a lived condition. It is not a predisposition anyone falls into.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "used_up#1",
+          "label": "used up",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Exhaustion from effort lasts hours or days. Fatigue from strain is mostly a bodily condition that no temperament brings about, so no habitual predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "well_worn#1",
+          "label": "well-worn",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Tired, worn-out appearance is a passing bodily condition. No temperament produces a habitually tired look, so no predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "without_charge#1",
+          "label": "without charge",
+          "typical_duration": "weeks",
+          "gloss": null,
+          "reason": "Being held without formal charge is an outside legal status. It can run for weeks or months, but it is not a personal identity or calling, and no predisposition fits.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "worn#1",
+          "label": "worn",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Being tired out is a depletion that passes within hours or days. It is a bodily condition, so no temperament produces it habitually.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "worn_out#1",
+          "label": "worn-out",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Exhaustion and tiredness pass within hours or days. It is a bodily condition that no temperament brings about, so no predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "wrecked#1",
+          "label": "wrecked",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Slangy exhaustion passes within hours or days. It is a bodily depletion that no temperament brings about, so no predisposition is plausible.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        }
+      ]
+    },
+    "batch_id": "states_v4_pilot",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-5-5",
+    "transport": "batches",
+    "submitted_renames": [
+      "afraid -> fearful",
+      "agitated -> high-strung",
+      "alone -> solitary",
+      "bedraggled -> unkempt",
+      "befogged -> scatterbrained",
+      "bejeweled -> flashy",
+      "benumbed -> detached",
+      "bored -> easily bored",
+      "clean -> fastidious",
+      "concerned -> anxious",
+      "contrite -> quick to apologize",
+      "cross -> irritable",
+      "delighted -> easily delighted",
+      "depressed -> gloomy",
+      "desirous -> covetous",
+      "destined -> grandiose",
+      "diluted -> half-hearted",
+      "disgusted -> squeamish",
+      "dissatisfied -> discontented",
+      "diverted -> easily distracted",
+      "embroiled -> quarrelsome",
+      "enervate -> listless",
+      "enkindled -> enthusiastic",
+      "exasperated -> irritable",
+      "fasting -> abstemious",
+      "filthy -> slovenly",
+      "flexed -> tense",
+      "grizzling -> fretful",
+      "grubby -> unkempt",
+      "high -> intemperate",
+      "inspired -> enthusiastic",
+      "insurrectional -> rebellious",
+      "lamenting -> mournful",
+      "laughing -> easily amused",
+      "lecturing -> preachy",
+      "low -> downcast",
+      "moping -> mopey",
+      "numb -> detached",
+      "offline -> unplugged",
+      "penitent -> remorseful",
+      "played_out -> tires easily",
+      "prettified -> preening",
+      "pulled_down -> easily worn down",
+      "rattled -> easily rattled",
+      "rekindled -> resilient",
+      "rushed -> hurried",
+      "satisfied -> contented",
+      "scoffing -> scornful",
+      "snarling -> snappish",
+      "sober -> teetotal",
+      "sorrowing -> sorrowful",
+      "stunned -> easily astonished",
+      "thinking -> reflective",
+      "tittering -> giggly",
+      "torpid -> lethargic",
+      "unclean -> slovenly",
+      "uneasy -> anxious",
+      "unjoyful -> joyless",
+      "unpoised -> easily flustered",
+      "unshielded -> defenseless",
+      "unsmiling -> solemn",
+      "untroubled -> easygoing",
+      "used -> doormat",
+      "vacant -> spacey",
+      "wonder_struck -> easily awed",
+      "worried -> prone to worry"
+    ],
+    "submit_report": {
+      "n_submitted": 66,
+      "n_new": 47,
+      "n_merged": 19,
+      "n_unchanged": 0,
+      "invalid": []
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id states_v4_pilot --mode queue --holding-states --transport batches --budget-usd 1",
+      "git_sha": "ca377c4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass states_v4_pilot"
+    },
+    "produced_at": "2026-10-09T13:35:22+00:00"
+  }
+}

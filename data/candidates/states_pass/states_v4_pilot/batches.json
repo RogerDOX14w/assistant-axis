@@ -1,0 +1,116 @@
+{
+  "batch_id": "states_v4_pilot",
+  "waves": {
+    "queue": [
+      {
+        "id": "msgbatch_01Q8ReVhJ9sim1Gkbe476E3W",
+        "custom_ids": [
+          "que-c000-d714e7741617",
+          "que-c001-8d121281f115",
+          "que-c002-861cfdd7ff71",
+          "que-c003-dc96b2e0e851",
+          "que-c004-7850ad347927",
+          "que-c005-6bb895cf9d17",
+          "que-c006-7b48b4b85b0f",
+          "que-c007-70551f45e42c",
+          "que-c008-f86721178b1c"
+        ],
+        "n_requests": 9,
+        "bytes": 72157,
+        "estimate_usd": 0.007557,
+        "submitted_at": "2026-10-09T13:06:06+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:16:09+00:00"
+      }
+    ],
+    "queue_retry": [
+      {
+        "id": "msgbatch_01JwWTBCeUSv31REPJPNM8gU",
+        "custom_ids": [
+          "que-r000-09d444d39006",
+          "que-r001-188804d56c4e",
+          "que-r002-a8f31aa0eb28",
+          "que-r003-06408e6ee561",
+          "que-r004-b7787ec22f69",
+          "que-r005-79beb4c6ea06",
+          "que-r006-594e56a0668d",
+          "que-r007-e443c774e4e1",
+          "que-r008-be087dacb61e",
+          "que-r009-8ac835c3410d",
+          "que-r010-c609d6f10626",
+          "que-r011-ce59f98144b7"
+        ],
+        "n_requests": 12,
+        "bytes": 84361,
+        "estimate_usd": 0.006195,
+        "submitted_at": "2026-10-09T13:16:11+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:25:45+00:00"
+      }
+    ],
+    "gloss": [
+      {
+        "id": "msgbatch_012CBS4GLHR39DybcuChMsqa",
+        "custom_ids": [
+          "ali-amorous_1-01fcd190f119",
+          "che-beholden_1-19bb73c05ab7",
+          "ali-beholden_1-003632875eb9",
+          "che-contented_1-a764f0ef2265",
+          "ali-contented_1-dc45a11c2ccb",
+          "ali-declining_1-593ed882dc88",
+          "che-disabused_1-5beb53bba0a9",
+          "ali-disabused_1-08db8108a5a6",
+          "che-disheveled_1-7f0c426649b7",
+          "ali-disheveled_1-8414d0d98e2a",
+          "ali-emigrating_1-c5840afcc661",
+          "ali-expecting_1-d227c66df102",
+          "che-fearful_1-b822e37a0dfa",
+          "ali-fearful_1-00e4ae17ed48",
+          "ali-heartsick_1-d0c5a38cd343",
+          "ali-inconsolable_1-2b3bdddf6241",
+          "che-liable_1-e1069f2fe3bb",
+          "ali-liable_1-b710c6ed060f",
+          "ali-lonesome_1-ac2363d6184c",
+          "ali-miserably_partnered_1-90317996b956",
+          "che-nascent_1-f73d893b1da6",
+          "ali-nascent_1-b80b02a38284",
+          "che-nervous_1-f85a684e4487",
+          "ali-nervous_1-e240278f2091",
+          "ali-overburdened_1-3bfd3a73df80",
+          "che-pretty_well_1-5f9536074c17",
+          "ali-pretty_well_1-0b26a89aaf3f",
+          "ali-remorseful_1-059cfd1c68d1",
+          "ali-repentant_1-f7fe8130a04e",
+          "che-rueful_1-259ffd6f0ec9",
+          "ali-rueful_1-e4131f480f75",
+          "che-rumpled_1-b261f80cd24a",
+          "ali-rumpled_1-b8a6555fa86b",
+          "che-sulky_1-58a70cbf4acb",
+          "ali-sulky_1-e3098a114389",
+          "ali-tearful_1-8923079f2e8c",
+          "che-teasing_1-92446ff6eccd",
+          "ali-teasing_1-1abc58b953c4",
+          "ali-thankful_1-2163bc8f20fc",
+          "che-thriving_1-8ba8981b3090",
+          "ali-thriving_1-e3bad62c0779",
+          "che-unacknowledged_1-d047c40cad88",
+          "ali-unacknowledged_1-b5530f6a149d",
+          "ali-unemployed_1-c4472edc9644",
+          "ali-unhappy_1-02b67cbc0708",
+          "ali-unhealthy_1-4b1cbaa9ee10",
+          "che-unmastered_1-d41830406881",
+          "ali-unmastered_1-d4eb1b3b1606",
+          "che-unpunished_1-00bb58b92690",
+          "ali-unpunished_1-6c413152d0ff",
+          "ali-woeful_1-eb5eeee3cf7b"
+        ],
+        "n_requests": 51,
+        "bytes": 117922,
+        "estimate_usd": 0.004645,
+        "submitted_at": "2026-10-09T13:25:47+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:35:22+00:00"
+      }
+    ]
+  }
+}
