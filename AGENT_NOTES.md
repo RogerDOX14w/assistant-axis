@@ -141,12 +141,14 @@ rules:
       - "assistant_axis/steering_judges.py"
       - "assistant_axis/pair_list_cohort.py"
   trait-pairs:
-    when: adding or regenerating trait clean pairs or instructions, or running combined response generation
+    when: adding or regenerating trait clean pairs or instructions, seeding new traits or roles (the seed queue, the TO_ADD and ADDED files), or running combined response generation
     paths:
       - "data/goal_roles_and_traits.json"
+      - "data/seed_queue.json"
       - "data/traits/**"
       - "data/roles/**"
       - "data_analysis/generate_antonyms.py"
+      - "data_analysis/seed_entities.py"
       - "data_analysis/regenerate_*.py"
       - "pipeline/1_generate.py"
 skills:

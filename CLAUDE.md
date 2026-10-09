@@ -683,7 +683,7 @@ Each rule below loads automatically when you open a file matching its `paths` fr
 - **When choosing or auditing the per-experiment steering question list:** [`.claude/rules/steering-questions.md`](.claude/rules/steering-questions.md)
 - **When computing axes, whitening or soft-shear, PCA round-trips, or axis cosine analyses:** [`.claude/rules/axis-geometry.md`](.claude/rules/axis-geometry.md)
 - **When keying or merging trait and role data by name, or displaying entity names:** [`.claude/rules/entity-naming.md`](.claude/rules/entity-naming.md)
-- **When adding or regenerating trait clean pairs or instructions, or running combined response generation:** [`.claude/rules/trait-pairs.md`](.claude/rules/trait-pairs.md)
+- **When adding or regenerating trait clean pairs or instructions, seeding new traits or roles (the seed queue, the TO_ADD and ADDED files), or running combined response generation:** [`.claude/rules/trait-pairs.md`](.claude/rules/trait-pairs.md)
 
 Always loaded (no path filter): [`.claude/rules/working-style.md`](.claude/rules/working-style.md)
 

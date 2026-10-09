@@ -1,16 +1,18 @@
 ---
 paths:
 - data/goal_roles_and_traits.json
+- data/seed_queue.json
 - data/traits/**
 - data/roles/**
 - data_analysis/generate_antonyms.py
+- data_analysis/seed_entities.py
 - data_analysis/regenerate_*.py
 - pipeline/1_generate.py
 ---
 <!-- GENERATED FILE: do not edit.  Source: AGENT_NOTES.md (section markers).  Regenerate with: uv run python tools/sync_agent_notes.py -->
 # Rule: trait-pairs
 
-**When:** adding or regenerating trait clean pairs or instructions, or running combined response generation.  Loads automatically for files matching the `paths` above.  Source: the sections of [`AGENT_NOTES.md`](AGENT_NOTES.md) marked `rule=trait-pairs`; edit there, then run `uv run python tools/sync_agent_notes.py`.
+**When:** adding or regenerating trait clean pairs or instructions, seeding new traits or roles (the seed queue, the TO_ADD and ADDED files), or running combined response generation.  Loads automatically for files matching the `paths` above.  Source: the sections of [`AGENT_NOTES.md`](AGENT_NOTES.md) marked `rule=trait-pairs`; edit there, then run `uv run python tools/sync_agent_notes.py`.
 
 ## Adding New Trait Clean Pairs
 
