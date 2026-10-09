@@ -651,3 +651,15 @@ def test_runs_with_a_source_follow_its_setting(env, capsys):
     assert "--queue-search" in cli._resume_queue_mismatch({"queue_search": on}, {"enabled": False})
     assert "have changed" in cli._resume_queue_mismatch({"queue_search": on}, on | {"entries_sha256": "b"})
     assert cli._resume_queue_mismatch({"queue_search": on}, dict(on)) is None
+
+
+def test_redecide_with_keys_checks_those_rows_only(env, capsys):
+    """--keys narrows a re-decided run: its reproduction check and decision_changes count the named rows, not every
+    source row (before 2026-10-09 the others were reported as "not replayable", a MISMATCH)."""
+    assert score(env) == 0
+    capsys.readouterr()
+    assert redecide(env, "m3t_k", "--keys", "deltaish#1", "lambdaish#1") == 0
+    assert "2 of 2 rows identical [OK]" in capsys.readouterr().out
+    dc = json.loads((out(env, "m3t_k") / "decision_changes.json").read_text())["result"]
+    assert dc["reproduction"] == {"n": 2, "identical": 2, "differ": [], "not_replayable": []}
+    assert dc["counts"]["rows"] == 2

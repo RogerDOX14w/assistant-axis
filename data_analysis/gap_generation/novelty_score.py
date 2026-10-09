@@ -1424,6 +1424,11 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                   f"{'; '.join(diffs)}", file=sys.stderr)
             return 2
         cands, skipped = select_redecide(rows, args, source)
+        if args.keys:
+            # --keys narrows the run to those rows: the reproduction check and decision_changes compare those only
+            # (before 2026-10-09 they counted every other source row as "not replayable")
+            wanted_keys = set(args.keys)
+            source = source | {"results": [r for r in source["results"] if r["key"] in wanted_keys]}
     elif mode == "shortlist":
         cands, skipped = select_candidates(rows, args, batch_id=args.batch_id, ignore_decided=bool(hide),
                                            to_gloss=to_gloss if holding else None)
