@@ -157,6 +157,11 @@ class TestPrompts:
         assert not states & {w.replace("-", "_") for w in sp.QUEUE_EXAMPLES + sp.SUGGESTED_NAMES}
 
 
+def test_the_queue_call_has_room_for_twenty_rows_of_haiku_55():
+    """The v4 pilot: about 500 output tokens a row on Haiku 5.5, so a 20-row call needs well over 8000."""
+    assert sp.DEFAULT_MAX_TOKENS >= 16000 and sp.OUT_TOK_PER_ROW["queue"] * sp.DEFAULT_BATCH_SIZE < sp.DEFAULT_MAX_TOKENS
+
+
 # --------------------------------------------------------------------------- validation, routes, the scan
 
 class TestValidator:

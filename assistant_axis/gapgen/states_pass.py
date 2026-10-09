@@ -115,8 +115,10 @@ RUBRIC_VERSIONS = {"queue": 4, "corpus": 2}
 #: (``claude-haiku-4-5-20251001``) stays selectable with ``--model``.  Every block names its model.
 DEFAULT_MODEL = "claude-haiku-5-5"
 DEFAULT_BATCH_SIZE = 20
-#: 6000 to queue v3; 8000 from v4 (two more answers a row, and Haiku 5.5 thinks adaptively).
-DEFAULT_MAX_TOKENS = 8000
+#: 6000 to queue v3; 16000 from v4: in the v4 pilot (states_v4_pilot, 2026-10-09) Haiku 5.5's adaptive thinking took
+#: about 500 output tokens a row, and 6 of the 9 twenty-row calls stopped at the 8000 first set (every row was
+#: recovered by the half-size retry wave).  Not a prompt change: no version bump.
+DEFAULT_MAX_TOKENS = 16000
 MODES = ("queue", "corpus")
 READINGS = ("predisposition", "momentary")
 #: Tags that put a filter row in the states queue (``transient_only`` is
@@ -679,8 +681,9 @@ def corpus_items(names: Sequence[str], data_dir: Path) -> tuple[list[StatesItem]
 
 _CID_RE = re.compile(r"[^A-Za-z0-9_-]")
 CHARS_PER_TOKEN = 3.6
-#: Output tokens a call is estimated at: per row of a queue or corpus call (plus a margin), a check call.
-OUT_TOK_PER_ROW = {"queue": 140, "corpus": 50}
+#: Output tokens a call is estimated at: per row of a queue or corpus call (plus a margin), a check call.  Queue:
+#: measured on the v4 pilot's ten-row retry calls (3,000 to 5,750 tokens, thinking included).
+OUT_TOK_PER_ROW = {"queue": 500, "corpus": 50}
 OUT_TOK_MARGIN = 300
 CHECK_OUT_TOK = 400
 #: ``max_tokens`` of the check call: M1's thinking allowance on a model that refuses a temperature, else 300.
