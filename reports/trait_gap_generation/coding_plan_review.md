@@ -80,8 +80,8 @@ dropped in the M3 redesign; this plan replaces it.
     neighbour list does the work.
 
 Out of scope: community detection (Leiden, HDBSCAN) as a looser default partition (noted as a later option if
-cliques prove too small); changes to M3; reviewing the holding lists; any change to the seed-queue format beyond
-the synonym notes below.
+cliques prove too small); changes to M3; reviewing the holding lists (except the physical list, since 2026-10-09:
+section 8); any change to the seed-queue format beyond the synonym notes below.
 
 ## 2. R1: the candidate graph (`review_graph`)
 
@@ -265,3 +265,58 @@ R1 on 333 candidates: about 3,300 relation rows on Haiku 5.5 (about $1), and wit
 overlap calls on Sonnet with Opus on the close ones (about $1 to $1.50); cap $6, no approval needed.  A full TDA run (about 1,400 new
 candidates) about $10 to $15.  R2 costs nothing but Roger's time, which it is meant to save; the R2 pilot
 measures that.
+
+## 8. Physical pass (2026-10-09)
+
+**What it is.**  Roger, 2026-10-09 ([QUESTIONS.md](./QUESTIONS.md) question 1): "On the physical queue, I think we
+handle promotion normally, and if promoted they get the physical tag.  I suspect the proportion of them promoted
+may be small, so probably worth doing this as a separate pass, but I think the process and tooling is the same."
+M1 tags a word `physical` when the reading it accepts is a lasting bodily feature and parks the row on the
+physical *holding list* (the registry field `holding`, which keeps a row out of the trait flow; promotion refused
+it).  Such rows never reached M3, R1 or R2, because M3 scores only rows whose filter verdict is `trait`.  The
+physical pass sends them through the same three tools, in batches of their own; the code is
+[physical_pass.py](../../assistant_axis/gapgen/physical_pass.py).
+
+**The gloss stage.**  The split filter writes no gloss (the one-sentence "This means ..." description M3 embeds
+and shows the models; [glossary](./glossary.md#m1-gloss)) and no alignment score (0 to 3, which sets M3's
+*cut-off*, the overlap reading at which a candidate counts as covered: 3 far from alignment, 4 near it) for a
+physical row.  So the pass first runs M1's own two calls on each row that has none: the gloss call
+([gloss.md](./rubrics/gloss.md) as pinned) on the accepted reading, then the alignment call
+([alignment.md](./rubrics/alignment.md) as pinned) on that gloss, on Haiku 5.5 with M1's request settings.  The
+result is a block `physical_gloss` on the registry row (the filter block and the row's own `gloss` are left
+alone).  M1's third call, the region, is not run: its rubric has no region for a bodily feature.  After the stage,
+M3 runs exactly as for trait rows, against the whole corpus, the physical track included.
+
+**The three commands, in order** (each with `--dry-run` first; costs as for any run of the tool):
+
+1. M3: `uv run python data_analysis/gap_generation/novelty_score.py score --holding physical --batch-id
+   physical_<name> --unscored --budget-usd <cap>` (or `--run GENERATOR/RUN_ID`, or `--keys K ...`)
+   ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py)).  Every block, the run's `run.json`
+   and its `summary.json` (the smoke run's: [run.json](../../data/candidates/novelty/physical_pilots_1/run.json),
+   [summary.json](../../data/candidates/novelty/physical_pilots_1/summary.json)) carry `"pass": "physical"`; use a
+   batch id of its own (a resume across the two kinds of batch is refused).  The gloss stage's answers are in the
+   run's [physical_gloss.jsonl](../../data/candidates/novelty/physical_pilots_1/physical_gloss.jsonl).
+2. R1: `uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_<name>
+   --from-batches physical_<name> --budget-usd <cap>` ([review_graph.py](../../data_analysis/gap_generation/review_graph.py)).
+   Unchanged but for the nodes, which carry `outcome: "physical"`.
+3. R2: `uv run python data_analysis/gap_generation/review_app.py serve --batch-id review_physical_<name>`, then
+   `apply --dry-run` and `apply` ([review_app.py](../../data_analysis/gap_generation/review_app.py)).  The card
+   shows the `physical` tag.  A promoted row's seed-queue entry carries the tag `physical`, the physical track's
+   section (read from the queue's physical entries, such as [blond](../../data/traits/instructions/blond.json)'s,
+   in [seed_queue.json](../../data/seed_queue.json)) and the pass's gloss as `description_draft`.
+   `gap_registry.py promote --keys K` promotes one by name the same way
+   ([gap_registry.py](../../data_analysis/gap_generation/gap_registry.py)); `promote --status accepted`, the bulk
+   path, still refuses a physical row, and the roles and nationalities lists stay unpromotable.
+
+**Smoke run** (the pilots' 13 physical rows, $0.063 in all): M3
+[physical_pilots_1](../../data/candidates/novelty/physical_pilots_1/decisions.md) covered 9: by exact label
+[blind](../../data/traits/instructions/blind.json), [good-looking](../../data/traits/instructions/good_looking.json),
+[muscular](../../data/traits/instructions/muscular.json) and [thin](../../data/traits/instructions/thin.json); by
+the overlap reading impaired under [mobility impaired](../../data/traits/instructions/mobility_impaired.json),
+physical under [athletic](../../data/traits/instructions/athletic.json), sinistral under
+[left-handed](../../data/traits/instructions/left_handed.json), spare under
+[thin](../../data/traits/instructions/thin.json) and stone-deaf under [deaf](../../data/traits/instructions/deaf.json).
+New: alive, cherubic, stentorian, weather-beaten.  R1
+[review_physical_pilots_1](../../data/candidates/review/review_physical_pilots_1/graph.json): four singletons, no
+group.  Two glosses went past the body (cherubic's adds hidden mischief, which raised its alignment score to 2 and
+its cut-off to 4; physical's adds training); like any gloss, it is a first draft for the description writer.

@@ -27,7 +27,12 @@ plan's "Interface as built" section, not its older "Frozen interface".  The nigh
 (merged at rating 4, proposed at 3; decision 12); the pilot graph is `review_pilots_1`
 ([readout.md](../../data/candidates/review/review_pilots_1/readout.md), $1.85).  Review with
 `uv run python data_analysis/gap_generation/review_app.py serve --batch-id review_pilots_1` and open
-`http://127.0.0.1:8765`; then `status`, `apply --dry-run`, `apply`.
+`http://127.0.0.1:8765`; then `status`, `apply --dry-run`, `apply`.  Physical pass (2026-10-09,
+[coding_plan_review.md](./coding_plan_review.md) section 8): the rows M1 parks on the physical holding list go
+through M3 ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py) `score --holding physical`,
+which first glosses them with M1's own gloss and alignment calls), R1 and R2 in batches of their own, and a promoted one joins the physical track, tagged
+`physical`; smoke run [physical_pilots_1](../../data/candidates/novelty/physical_pilots_1/decisions.md) (13 rows,
+9 covered, 4 new, $0.063 with R1).
 
 ## The plans
 
