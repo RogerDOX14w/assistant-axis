@@ -42,7 +42,7 @@ import anthropic
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic  # noqa: E402
 from data_analysis.generation_refusals import (  # noqa: E402
-    REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in)
+    REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in, strip_prose_preface)
 
 ROLES_DIR = Path(__file__).resolve().parent.parent / "data" / "roles" / "instructions"
 
@@ -925,6 +925,11 @@ def validated_combined(raw_text: str, role_name: str,
     (interpreter came back with 39 questions on 2026-09-12 and was rerolled by
     hand)."""
     raw = strip_markdown_fences(raw_text)
+    # deliberation before the JSON (2026-10-08, brown-eyed) is skipped, not retried
+    raw, preface = strip_prose_preface(raw)
+    if preface:
+        print(f"  WARNING: skipped {len(preface)} characters of prose before the JSON for {role_name}",
+              file=sys.stderr)
     data = _parse_json_with_repair(raw, role_name)
 
     instructions = data["instruction"]

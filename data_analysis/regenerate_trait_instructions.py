@@ -40,7 +40,7 @@ import anthropic
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic  # noqa: E402
 from data_analysis.generation_refusals import (  # noqa: E402
-    REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in)
+    REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in, strip_prose_preface)
 
 TRAITS_DIR = Path(__file__).resolve().parent.parent / "data" / "traits" / "instructions"
 
@@ -969,6 +969,11 @@ def validated_combined(raw_text: str, positive_label: str,
     instead of being written (interpreter, 2026-09-12; high-context (Hall),
     2026-10-07)."""
     raw = strip_markdown_fences(raw_text)
+    # deliberation before the JSON (2026-10-08, brown-eyed) is skipped, not retried
+    raw, preface = strip_prose_preface(raw)
+    if preface:
+        print(f"  WARNING: skipped {len(preface)} characters of prose before the JSON for {positive_label}",
+              file=sys.stderr)
     data = _parse_json_with_repair(raw, positive_label)
 
     instructions = data["instruction"]

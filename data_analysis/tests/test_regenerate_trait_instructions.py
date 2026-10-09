@@ -1314,6 +1314,100 @@ class TestDeclineDetection:
         assert r.stop_reason == "refusal" and r.reply_excerpt == "" and "no text" in r.excerpt_line
 
 
+BROWN_HAIRED_ERROR = ("ERROR: 'Brown-haired' is a physical descriptor, not a personality trait. Writing instructions "
+                      "would require fabricating false stereotypes. " + "It would corrupt any research using it. " * 6)
+
+
+class TestErrorSentinel:
+    """Housekeeping item 9 (2026-10-08, brown-haired): the generator refused by
+    writing "ERROR: ..." into a field of an otherwise well-formed JSON reply,
+    which the detector missed, so it was retried five times, twice."""
+
+    @pytest.mark.parametrize("reply, excerpt_start", [
+        (dict(FAKE_ROGER_RESPONSE, eval_prompt=BROWN_HAIRED_ERROR), "eval_prompt: ERROR: 'Brown-haired'"),
+        (dict(FAKE_ROGER_RESPONSE, instruction=[], questions=[], eval_prompt="  " + BROWN_HAIRED_ERROR),
+         "eval_prompt:   ERROR:"),
+        (dict(FAKE_ROGER_RESPONSE, instruction=FAKE_INSTRUCTIONS[:2] + [{"pos": "ERROR: no.", "neg": "x"}]),
+         "instruction[2].pos: ERROR: no."),
+    ], ids=["eval_prompt", "empty_set", "nested"])
+    def test_a_json_field_opening_error_is_a_refusal(self, reply, excerpt_start):
+        for text in (json.dumps(reply), "```json\n" + json.dumps(reply, indent=2) + "\n```",
+                     "Let me think about this first.\n\n```json\n" + json.dumps(reply) + "\n```"):
+            r = refusals.refusal_in(_refused_reply(text, stop_reason="end_turn"), "brown-haired")
+            assert r is not None and r.stop_reason == "end_turn" and r.label == "brown-haired"
+            assert r.reply_excerpt.startswith(excerpt_start) and len(r.reply_excerpt) <= refusals.EXCERPT_CHARS
+
+    def test_a_reply_that_opens_with_the_sentinel_is_a_refusal(self):
+        r = refusals.refusal_in(_refused_reply("ERROR: this is not a personality trait.", "end_turn"), "x")
+        assert r.reply_excerpt == "ERROR: this is not a personality trait."
+
+    @pytest.mark.parametrize("text", [
+        json.dumps(dict(FAKE_ROGER_RESPONSE, eval_prompt="error: lowercase is not the sentinel")),
+        json.dumps(dict(FAKE_ROGER_RESPONSE, eval_prompt="Score 0 on an ERROR: the sentinel opens the value only")),
+        json.dumps(FAKE_ROGER_RESPONSE),
+        '{"instruction": [], "eval_prompt": "ERROR: but the JSON is broken"',     # left to the reader's retries
+        "not json at all",
+    ])
+    def test_not_a_sentinel(self, text):
+        assert refusals.refusal_in(_refused_reply(text, stop_reason="end_turn"), "x") is None
+
+    def test_regeneration_records_it_once_and_leaves_the_file(self, trait_file, v2_style, monkeypatch,
+                                                              _refusals_jsonl):
+        monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+        before = trait_file.read_text()
+        reply = _refused_reply(json.dumps(dict(FAKE_ROGER_RESPONSE, eval_prompt=BROWN_HAIRED_ERROR)), "end_turn")
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=reply)
+        with pytest.raises(GenerationRefusal):
+            asyncio.run(regenerate_one(
+                client, trait_file, n_variants=5, n_questions=40, instructions_only=False,
+                model="claude-sonnet-4-6", semaphore=asyncio.Semaphore(10), temperature=1.0, force=True,
+                dry_run=False))
+        assert client.messages.create.call_count == 1 and trait_file.read_text() == before
+        [rec] = _records(_refusals_jsonl)
+        assert rec["stop_reason"] == "end_turn" and rec["reply_excerpt"].startswith("eval_prompt: ERROR:")
+
+
+class TestProsePreface:
+    """Housekeeping item 9 (2026-10-08, brown-eyed): usable instructions behind
+    a paragraph of deliberation broke the parse and were retried as errors."""
+
+    PREFACE = ("I need to think about how to write these. Eye colour is physical, so the instructions should "
+               "stay with the body: the color in the mirror, in photographs {not personality}.\n\nHere is the set:")
+
+    def test_strip_prose_preface(self):
+        body = json.dumps(FAKE_ROGER_RESPONSE, indent=2)
+        assert refusals.strip_prose_preface(self.PREFACE + "\n" + body) == (body, self.PREFACE)
+        assert refusals.strip_prose_preface(self.PREFACE + "\n```json\n" + body)[0] == body
+        for whole in (body, json.dumps(FAKE_QUESTIONS), "no braces here", ""):
+            assert refusals.strip_prose_preface(whole) == (whole, "")
+        assert refusals.strip_prose_preface('Note {x} then {"a": 1}') == ('{x} then {"a": 1}', "Note")
+
+    def test_validated_combined_reads_past_the_preface(self, capsys):
+        text = self.PREFACE + "\n\n```json\n" + json.dumps(FAKE_ROGER_RESPONSE, indent=2) + "\n```"
+        data = module.validated_combined(text, "brown-eyed", 5, 40)
+        assert data["instruction"] == FAKE_INSTRUCTIONS and data["questions"] == FAKE_QUESTIONS
+        err = capsys.readouterr().err
+        assert f"skipped {len(self.PREFACE) + len(chr(10) * 2 + '```json')} characters of prose" in err
+        assert "before the JSON for brown-eyed" in err
+
+    def test_a_reply_with_no_preface_reads_as_before(self, capsys):
+        data = module.validated_combined("```json\n" + json.dumps(FAKE_ROGER_RESPONSE) + "\n```", "x", 5, 40)
+        assert data["eval_prompt"] == FAKE_ROGER_RESPONSE["eval_prompt"]
+        assert "prose before the JSON" not in capsys.readouterr().err
+
+    def test_regeneration_uses_the_set_at_the_first_try(self, trait_file, v2_style, _refusals_jsonl):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_make_response(
+            self.PREFACE + "\n" + json.dumps(FAKE_ROGER_RESPONSE)))
+        result = asyncio.run(regenerate_one(
+            client, trait_file, n_variants=5, n_questions=40, instructions_only=False, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False))
+        assert result.startswith("OK") and client.messages.create.call_count == 1
+        assert json.loads(trait_file.read_text())["instruction"] == FAKE_INSTRUCTIONS
+        assert not _refusals_jsonl.exists()
+
+
 class TestRefusals:
     def run(self, client, trait_file, **kw):
         return asyncio.run(regenerate_one(

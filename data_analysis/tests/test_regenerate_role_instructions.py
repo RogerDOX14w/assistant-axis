@@ -931,6 +931,31 @@ class TestRefusals:
         assert json.loads(role_file.read_text())["instruction"] == instr
         assert not _refusals_jsonl.exists()
 
+    def test_an_error_sentinel_in_the_json_is_a_refusal(self, role_file, roger_style, monkeypatch, _refusals_jsonl):
+        """Housekeeping item 9: "ERROR: ..." in a field of a well-formed reply."""
+        monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+        before = role_file.read_text()
+        sentinel = "ERROR: an accountant is an occupation, and these instructions would only restate it."
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_refused_reply(
+            json.dumps(dict(FAKE_COMBINED_RESPONSE, instruction=[], eval_prompt=sentinel)), stop_reason="end_turn"))
+        with pytest.raises(GenerationRefusal):
+            self.run(client, role_file)
+        assert client.messages.create.call_count == 1 and role_file.read_text() == before
+        [rec] = _records(_refusals_jsonl)
+        assert rec["reply_excerpt"] == f"eval_prompt: {sentinel}" and rec["stop_reason"] == "end_turn"
+
+    def test_a_prose_preface_before_the_json_is_skipped(self, role_file, roger_style, capsys, _refusals_jsonl):
+        """Housekeeping item 9: deliberation before the JSON is read past, not retried."""
+        preface = "Let me consider the role first. An accountant keeps the books.\n\n```json"
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_make_response(
+            preface + "\n" + json.dumps(FAKE_COMBINED_RESPONSE, indent=2) + "\n```"))
+        assert self.run(client, role_file).startswith("OK") and client.messages.create.call_count == 1
+        assert json.loads(role_file.read_text())["instruction"] == FAKE_INSTRUCTIONS
+        assert f"skipped {len(preface)} characters of prose before the JSON for accountant" in capsys.readouterr().err
+        assert not _refusals_jsonl.exists()
+
     def test_the_label_is_the_display_name(self, tmp_path, roger_style, _refusals_jsonl):
         p = tmp_path / "devils_advocate.json"
         p.write_text(json.dumps(SAMPLE_ROLE))
