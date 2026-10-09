@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-10-08"
+  "updated": "2026-10-09"
  },
  "entries": [
   {
@@ -49278,8 +49278,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49304,8 +49304,8 @@
     "ethnic and cultural identity",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Not yet decided; never put to Roger explicitly.",
+   "status": "not_adopted",
+   "decision": "Roger, 2026-10-09: superseded by bicultural (the name was rejected 2026-09-08).",
    "alternatives": null,
    "section": "Coverage audit part 2 (decided 2026-09-07)",
    "lines": "ROLES_TO_ADD 115-122; seeding plan TRAITS 2792",
@@ -49322,8 +49322,8 @@
    ]
   },
   {
-   "stem": "diasporan",
-   "label": "diasporan",
+   "stem": "bicultural",
+   "label": "bicultural",
    "entity_type": "role",
    "chunk": "7",
    "sub_chunk": "part 2: ethnic and cultural identity",
@@ -49333,16 +49333,24 @@
    "arrangement_members": null,
    "description_draft": null,
    "description_notes": "The generic name if the diaspora gap is wanted: the multi-generational community identity held abroad by someone who may never have lived in the homeland.",
-   "description": null,
+   "description": "A bicultural person is someone born to immigrant parents and at home in both cultures: switching languages between the kitchen and the office, keeping both sets of holidays, close to the grandparents back home, and a local in either country.",
    "source": null,
    "tags": [],
-   "status": "tbd",
-   "decision": "undecided",
+   "status": "done",
+   "decision": "Roger, 2026-10-09: agreed (bicultural).",
    "alternatives": "`diaspora_member` (rejected), `emigree` (does not cover the gap)",
    "section": "Ethnic and cultural identity (decided 2026-09-07)",
    "lines": "1211-1217",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "renamed_from": {
+    "stem": "diasporan",
+    "date": "2026-10-09",
+    "reason": "Roger, 2026-10-09: the diaspora gap is the second-generation integration corner (heritage kept and the host culture lived), beside assimilated and marginalized; the multi-generational sense is covered by the chunk-5 heritage map. 'Bicultural' is the established term (Benet-Martinez's bicultural identity integration)."
+   },
+   "nearest_existing": "assimilated (host culture only), marginalized (neither), immigrant (first generation, integration), and the chunk-5 heritage traits (heritage, not acculturation).",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09"
   },
   {
    "stem": "judgement_tarot",
@@ -49388,8 +49396,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49440,8 +49448,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49463,8 +49471,8 @@
    "description": null,
    "source": "Bourdieu capital composition (economic vs cultural), archetype form",
    "tags": [],
-   "status": "tbd",
-   "decision": "under discussion (options (a)-(c) still open); recommended (a) derive first, (c) as the check, (b) as two roles if wanted",
+   "status": "not_adopted",
+   "decision": "under discussion (options (a)-(c) still open); recommended (a) derive first, (c) as the check, (b) as two roles if wanted [Roger, 2026-10-09: 'if they're gaps, yes'; checked against the corpus: not a gap: new_money already describes it ('rich within one's own lifetime ... the manners of wealth still being learned').]",
    "alternatives": "trait archetype pair (original framing); option (a) derive composition with no new files; option (c) economic-capital / cultural-capital (Bourdieu)",
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1049-1062",
@@ -49482,21 +49490,21 @@
   },
   {
    "stem": "shabby_genteel",
-   "label": "shabby genteel",
-   "entity_type": "role",
+   "label": "shabby-genteel",
+   "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "part 2: social class (Bourdieu)",
-   "pairing": "pair",
-   "partner": "nouveau_riche",
+   "sub_chunk": "7a: gaps confirmed",
+   "pairing": "singleton",
+   "partner": null,
    "partner_exists": false,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means being born into a family whose money is long gone, with the manners, the accent and the books still handed down, and the coat worn thin, the bills unpaid.",
    "description_notes": "Bourdieu capital-composition option (b): the other off-diagonal corner, culture without money.",
-   "description": null,
+   "description": "This means being born into a family whose money is long gone, with the manners, the accent and the books still handed down, and the coat worn thin, the bills unpaid.",
    "source": "Bourdieu capital composition (economic vs cultural), archetype form",
    "tags": [],
-   "status": "tbd",
-   "decision": "under discussion (options (a)-(c) still open)",
+   "status": "done",
+   "decision": "under discussion (options (a)-(c) still open) [Roger, 2026-10-09: 'if they're gaps, yes'; a gap: culture and manners without money; old_money is rich, bohemian is artistic counterculture, poor carries no gentility. Seeded as a trait beside old_money / new_money (the adjective is standard: 'shabby-genteel'), not a role.]",
    "alternatives": "trait archetype pair (original framing); the existing bohemian role covers a similar case",
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1049-1062",
@@ -49509,6 +49517,43 @@
      "from": "extract_5.json",
      "status": "tbd",
      "chunk": "7"
+    }
+   ],
+   "nearest_existing": [
+    "old_money (trait): \"This means being born into a family rich for generations, with the house, schools, clubs and manners all handed down, none of it earned.\" Same grain and opening; differs on the money: there it is still there, here it is gone and only the manners and culture are handed down.",
+    "new_money (trait): \"This means being rich within one's own lifetime, ... the manners of wealth still being learned.\" The mirror corner: money without the inherited manners.",
+    "poor (trait): \"This means living on a low income, owning next to nothing and renting a cramped place, and going without heat, meals or the doctor when money runs short.\" Shares the lack of money; carries no inherited gentility.",
+    "aristocrat (role): \"born into a titled family ... wealth or debts ...\" A titled role with the estate; shabby-genteel needs no title or land, only the family's former standing and its manners.",
+    "bohemian (role): \"prioritizing artistic expression and creative freedom over societal norms, material wealth ...\" Chosen counterculture; shabby-genteel keeps to the conventions of the class it came from."
+   ],
+   "notes": "31 words. Built on old_money's frame (\"being born into a family ..., with ... handed down\") so the three read as a set: inherited and rich; earned and rich; inherited manners, money gone. Particulars (manners, accent, books; the worn coat, the unpaid bills) rather than a story of decline. Test for the judge: is the persona's standing in manners and culture held without the money to match? Covers the family that once had money, as the packet asks; someone who lost a fortune in their own lifetime is at the edge of 'born into', which the reviewer may want to widen ('coming from a family'). No partner named; no label echo.",
+   "review_issues": [
+    "Note: 'born into' mirrors old_money's wording so the three read as a set; it leaves out someone who lost the money in their own lifetime, which is the less common sense of the word."
+   ],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "check_result": {
+    "returned": "unpretentious|nouveau riche",
+    "score": 2,
+    "reasoning": "The neg instructions describe people who are either newly wealthy/self-made, openly prosperous, or proudly working-class — all sharing the quality of having no inherited social pretensions to maintain, being frank about money, and living without the gap between projected status and actual means. The opposite of 'shabby genteel' (concealing decline behind inherited manners) is someone who is authentically what they appear financially, with no aristocratic pretense. 'Nouveau riche' captures the self-made/newly wealthy angle, but some neg prompts describe working-class pride. The core opposition is between maintaining inherited genteel pretense despite poverty vs. being openly, authentically positioned in one's actual class — 'unpretentious' captures this broadly, but 'nouveau riche|self-made' captures the wealth-side contrast. Since the neg instructions span both working-class frankness and new money openness, the unifying thread is absence of inherited-class pretension and frank relationship with money: 'unpretentious' or 'nouveau riche' both apply partially. The antonym score is moderate because 'shabby genteel' is a very specific compound concept and no single word perfectly opposes it.",
+    "category": "nearly_nice",
+    "candidates": [
+     "unpretentious",
+     "nouveau_riche"
+    ],
+    "known": [
+     "unpretentious"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-09"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-09",
+     "returned": "unpretentious|nouveau riche",
+     "phase": "check"
     }
    ]
   },
@@ -49556,8 +49601,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49608,8 +49653,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49660,8 +49705,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49712,8 +49757,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49764,8 +49809,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49816,8 +49861,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49868,8 +49913,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49920,8 +49965,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -49972,8 +50017,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50024,8 +50069,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50076,8 +50121,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50128,8 +50173,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50180,8 +50225,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50232,8 +50277,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50284,8 +50329,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50336,8 +50381,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50388,8 +50433,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50440,8 +50485,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50492,8 +50537,8 @@
     "set of 22",
     "TBD"
    ],
-   "status": "tbd",
-   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses.",
+   "status": "backlog",
+   "decision": "Undecided (Roger, 2026-09-09: 'still uncertain'); a throw-the-kitchen-sink-at-it step, acceptable because the set is labelled by source and easy to remove. Roles, not traits. Arrangement: set of 22 (not a sequence: the numerical order, the Fool's Journey, is not expected to correlate with the embeddings). Measurement of interest: whether the 22 produce 22 directions or a tarot-flavoured blob; the mean of the 22 against the corpus mean is a 'tarot-ness' direction, as with the Hogwarts houses. [Roger, 2026-10-09: not now; kept in ROLES_TO_ADD as an idea.]",
    "alternatives": null,
    "section": "TBD: the 22 Major Arcana as roles (Tarot)",
    "lines": "ROLES_TO_ADD 150-205",
@@ -50517,8 +50562,8 @@
    "tags": [
     "standard"
    ],
-   "status": "tbd",
-   "decision": "under discussion (options (a)-(c) still open)",
+   "status": "not_adopted",
+   "decision": "under discussion (options (a)-(c) still open) [Roger, 2026-10-09: 'if they're gaps, yes'; checked against the corpus: not a gap: cultural capital is covered by highbrow / lowbrow (taste) and educated / uneducated (credentials), economic capital by wealthy / poor and financially secure / precarious; the composition axis is derivable from them (option a).]",
    "alternatives": "option (a) derive with no new files; option (b) nouveau_riche / shabby_genteel",
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1049-1062",
@@ -50542,8 +50587,8 @@
    "tags": [
     "pc_direction"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "backlog",
+   "decision": " [Roger, 2026-10-09: not seeded; redo the PCA naming on the new corpus once its activations exist (TODO in TRAITS_TO_ADD).]",
    "alternatives": "mature-restraint / pre-cultured-uninhibited; cultured/uncultured",
    "section": "Strategy 1b: PCA-of-entity-pool -> describe-and-name underused directions",
    "lines": "533, 556-559, 579-583",
@@ -50567,8 +50612,8 @@
    "tags": [
     "standard"
    ],
-   "status": "tbd",
-   "decision": "under discussion (options (a)-(c) still open)",
+   "status": "not_adopted",
+   "decision": "under discussion (options (a)-(c) still open) [Roger, 2026-10-09: 'if they're gaps, yes'; checked against the corpus: not a gap: see cultural_capital_bourdieu.]",
    "alternatives": "option (a) derive with no new files; option (b) nouveau_riche / shabby_genteel",
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1049-1062",
@@ -50580,23 +50625,56 @@
    "label": "famous",
    "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "part 2: social class (Bourdieu)",
-   "pairing": "pair",
-   "partner": "obscure",
+   "sub_chunk": "7a: gaps confirmed",
+   "pairing": "singleton",
+   "partner": null,
    "partner_exists": false,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means being known by name to strangers, whatever one's line of work: recognized in the street, asked for photos, written about, and living in public, whether one wanted it or not.",
    "description_notes": "Optional extra for Bourdieu's symbolic capital; the celebrity role exists. Still open.",
-   "description": null,
+   "description": "This means being known by name to strangers, whatever one's line of work: recognized in the street, asked for photos, written about, and living in public, whether one wanted it or not.",
    "source": "Bourdieu (symbolic capital)",
    "tags": [],
-   "status": "tbd",
-   "decision": "still open",
+   "status": "done",
+   "decision": "still open [Roger, 2026-10-09: 'if they're gaps, yes'; a gap: celebrity is the role, status_seeking and attention_seeking are wants; being widely known, across any role, has no trait. Seeded non-X.]",
    "alternatives": null,
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1057-1062",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "nearest_existing": [
+    "celebrity (role): \"a public figure who lives under constant media attention ... must carefully manage their public image ...\" Fame as the occupation; here fame comes with any line of work (the famous surgeon, the famous chef), hence 'whatever one's line of work'.",
+    "status_seeking (trait): \"This means wanting to be looked up to, choosing the title, the address, the car and the friends by what they signal, and keeping score of rank.\" A want; famous is the state, hence 'whether one wanted it or not'.",
+    "attention_seeking (trait): \"This means wanting every eye in the room on oneself ...\" A want acted out in the room; famous is being known to strangers whether or not one seeks it.",
+    "influencer (role): \"builds online followings, creates engaging content ...\" Building an audience is the job there; here the audience is a by-product."
+   ],
+   "notes": "32 words (at the cap). Scope test for the judge: is the persona widely known to strangers, as a fact of its life, regardless of whether it sought or enjoys it? 'whether one wanted it or not' is the clause that keeps it apart from status_seeking and attention_seeking (the state, not the wish); 'whatever one's line of work' keeps it apart from the celebrity role. Fame lasts years, so no duration clause was added (rule 11). If the reviewer wants room, 'and living in public' is the clause to drop. No partner named; no label echo.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "check_result": {
+    "returned": "anonymous|obscure|unknown",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who is completely unknown to the general public, invisible to strangers, with no public profile or recognition. The natural opposite of 'famous' is 'obscure' or 'anonymous' — 'anonymous' emphasizes namelessness/unidentifiability, while 'obscure' emphasizes being unknown/unrecognized. Both fit well, but 'anonymous' is slightly more precise given the repeated emphasis on strangers not knowing one's name or face. 'Unknown' is also a strong candidate. These are very strong antonyms to 'famous' with near-perfect opposition.",
+    "category": "open",
+    "candidates": [
+     "anonymous",
+     "obscure",
+     "unknown"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-09"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-09",
+     "returned": "anonymous|obscure|unknown",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "female",
@@ -50660,27 +50738,111 @@
    ]
   },
   {
-   "stem": "harmony",
-   "label": "harmony",
+   "stem": "world_accepting",
+   "label": "world-accepting",
    "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "Schwartz",
-   "pairing": "pair",
-   "partner": "mastery",
+   "sub_chunk": "7b: Schwartz-inspired",
+   "pairing": "singleton",
+   "partner": "world_changing",
    "partner_exists": false,
    "arrangement_members": null,
    "description_draft": null,
    "description_notes": "Fitting into the social and natural world and accepting it as it is. Working name only. Nearest existing: conciliatory / confrontational (interpersonal only), ecocentric / anthropocentric and environmental (economic) (harmony with nature only).",
-   "description": null,
-   "source": "Schwartz cultural-level orientations, mastery vs harmony",
+   "description": "This means fitting into the world as one finds it, people and nature alike: leaving things as they are, letting them run their course, and prizing peace and harmony with nature.",
+   "source": "Gap-filling inspired by Schwartz (2006), 'A theory of cultural value orientations: explication and applications', Comparative Sociology 5, 137-182 (the mastery / harmony orientations), recast as the kind of person a culture of that kind tends to produce; not an official set (Roger, 2026-10-09)",
    "tags": [],
-   "status": "tbd",
-   "decision": "approved in principle, names TBD (Roger 2026-09-08)",
+   "status": "paired",
+   "decision": "approved in principle, names TBD (Roger 2026-09-08) [Roger, 2026-10-09: write from Schwartz, person not culture; do not force them to be opposites (a ring of seven in Schwartz); work from description to label.]",
    "alternatives": "`world-accepting` (recommended); `accepting`; `contented`",
    "section": "Hofstede and Schwartz gap-filling (decided 2026-09-08)",
    "lines": "1186",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "source_text": "Schwartz 2006, as quoted in secondary summaries: \"Harmony cultures emphasize fitting into the social and natural world, trying to appreciate and accept rather than to change, direct, or exploit. Important values in harmony cultures include world at peace, unity with nature, and protecting the environment.\"",
+   "renamed_from": {
+    "stem": "harmony",
+    "date": "2026-10-09",
+    "reason": "Description-to-label loop (Roger, 2026-10-09): working labels world-shaping / world-accepting tried first; 'accepting' taken from the blind and antonym names of round 3. Round 4 tried bare 'accepting'; its opposite drifted to controlling (the interpersonal reading), so round 5 restored world-accepting."
+   },
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "name_answers": [
+    {
+     "date": "2026-10-09",
+     "phase": "round 1",
+     "label": "world-accepting",
+     "positive_name": "accepting|harmonious",
+     "negative_label": "domineering|exploitative",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 2",
+     "label": "world-accepting",
+     "positive_name": "accepting|easygoing",
+     "negative_label": "world-rejecting",
+     "antonym_score": 4
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 3 sample 1",
+     "label": "world-accepting",
+     "positive_name": "passive|accepting|non-interventionist",
+     "negative_label": "reformist|interventionist|world-changing",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 3 sample 2",
+     "label": "world-accepting",
+     "positive_name": "passive|non-interventionist|accepting",
+     "negative_label": "reformist|interventionist|world-changing",
+     "antonym_score": 4
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 4: labels world-changing / accepting",
+     "label": "accepting",
+     "positive_name": "passive|accepting",
+     "negative_label": "controlling|interventionist",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 5: labels world-changing / world-accepting",
+     "label": "world-accepting",
+     "positive_name": "accepting|passive",
+     "negative_label": "reformist|interventionist",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 6: Roger's 'harmony with nature'",
+     "label": "world-accepting",
+     "positive_name": "non-interventionist|laissez-faire|passive|accepting",
+     "negative_label": "reformist|interventionist",
+     "antonym_score": 3
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-09",
+     "was": "This means fitting into the world as one finds it, people and nature alike, accepting things rather than changing or exploiting them, and prizing peace and unity with nature.",
+     "by": "round 2 of the description-to-label loop (2026-10-09): Schwartz's value list dropped from world-shaping (it read as ambitious), 'exploiting' dropped from world-accepting (its opposite read as domineering)"
+    },
+    {
+     "date": "2026-10-09",
+     "was": "This means fitting into the world as one finds it, people and nature alike: taking things as they come, letting them run their course, and prizing peace and unity with nature.",
+     "by": "round 3 (2026-10-09): world-shaping moved from people onto circumstances and things (round 2 read as domineering); world-accepting 'taking things as they come' to 'leaving things as they are' (round 2 read as easygoing)"
+    },
+    {
+     "date": "2026-10-09",
+     "was": "This means fitting into the world as one finds it, people and nature alike: leaving things as they are, letting them run their course, and prizing peace and unity with nature.",
+     "by": "Roger, 2026-10-09: 'unity with nature' to 'harmony with nature'"
+    }
+   ],
+   "paired_at": "2026-10-09"
   },
   {
    "stem": "humorous/serious_tentative,_pc10",
@@ -50699,8 +50861,8 @@
    "tags": [
     "pc_direction"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "backlog",
+   "decision": " [Roger, 2026-10-09: not seeded; redo the PCA naming on the new corpus once its activations exist (TODO in TRAITS_TO_ADD).]",
    "alternatives": "humorous/serious (cf. casual/formal already in cohort; 'serious' exists as a trait file); animated/diminished ('animated' exists as a trait file)",
    "section": "Strategy 1b: PCA-of-entity-pool -> describe-and-name underused directions",
    "lines": "530, 550-554",
@@ -50724,8 +50886,8 @@
    "tags": [
     "pc_direction"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "backlog",
+   "decision": " [Roger, 2026-10-09: not seeded; redo the PCA naming on the new corpus once its activations exist (TODO in TRAITS_TO_ADD).]",
    "alternatives": "literal-explicitness / withholding-evasion",
    "section": "Strategy 1b: PCA-of-entity-pool -> describe-and-name underused directions",
    "lines": "534, 561-564",
@@ -50793,27 +50955,106 @@
    ]
   },
   {
-   "stem": "mastery",
-   "label": "mastery",
+   "stem": "world_changing",
+   "label": "world-changing",
    "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "Schwartz",
-   "pairing": "pair",
-   "partner": "harmony",
+   "sub_chunk": "7b: Schwartz-inspired",
+   "pairing": "singleton",
+   "partner": "world_accepting",
    "partner_exists": false,
    "arrangement_members": null,
    "description_draft": null,
    "description_notes": "Actively changing, directing and exploiting the social and natural world to get ahead. Working name only: Roger wants better names. Overlaps to check: proactive / reactive, conciliatory / confrontational, ecocentric. Schwartz is not adopted by name.",
-   "description": null,
-   "source": "Schwartz cultural-level orientations, mastery vs harmony",
+   "description": "This means setting out to change one's circumstances and surroundings to suit one's aims: clearing the land, building or fixing what does not work, and taking every obstacle as a problem to solve.",
+   "source": "Gap-filling inspired by Schwartz (2006), 'A theory of cultural value orientations: explication and applications', Comparative Sociology 5, 137-182 (the mastery / harmony orientations), recast as the kind of person a culture of that kind tends to produce; not an official set (Roger, 2026-10-09)",
    "tags": [],
-   "status": "tbd",
-   "decision": "approved in principle, names TBD (Roger 2026-09-08: mastery / harmony need better names)",
+   "status": "paired",
+   "decision": "approved in principle, names TBD (Roger 2026-09-08: mastery / harmony need better names) [Roger, 2026-10-09: write from Schwartz, person not culture; do not force them to be opposites (a ring of seven in Schwartz); work from description to label.]",
    "alternatives": "`world-shaping` / `world-accepting` (recommended: says what the axis is); `striving` / `accepting` (accepting alone reads as tolerant of people); `ambitious` / `contented` (drifts toward the drive axis)",
    "section": "Hofstede and Schwartz gap-filling (decided 2026-09-08)",
    "lines": "1186",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "source_text": "Schwartz 2006, as quoted in secondary summaries: \"Mastery cultures encourage active self-assertion in order to master, direct, and change the natural and social environment to attain group or personal goals. Values such as ambition, success, daring, and competence are especially important in mastery cultures.\"",
+   "renamed_from": {
+    "stem": "mastery",
+    "date": "2026-10-09",
+    "reason": "Description-to-label loop (Roger, 2026-10-09): working labels world-shaping / world-accepting tried first; 'world-changing' taken from the blind and antonym names of round 3."
+   },
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "name_answers": [
+    {
+     "date": "2026-10-09",
+     "phase": "round 1",
+     "label": "world-shaping",
+     "positive_name": "driven|ambitious",
+     "negative_label": "passive|acquiescent",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 2",
+     "label": "world-shaping",
+     "positive_name": "domineering|controlling",
+     "negative_label": "adaptive|acquiescent",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 3 sample 1",
+     "label": "world-shaping",
+     "positive_name": "proactive|action-oriented",
+     "negative_label": "adaptive|accommodating|passive",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 3 sample 2",
+     "label": "world-shaping",
+     "positive_name": "proactive|resourceful",
+     "negative_label": "adaptive|accommodating|passive",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 4: labels world-changing / accepting",
+     "label": "world-changing",
+     "positive_name": "resourceful",
+     "negative_label": "world-accepting|accommodating",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 5: labels world-changing / world-accepting",
+     "label": "world-changing",
+     "positive_name": "resourceful",
+     "negative_label": "adaptive|acquiescent|conformist",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-09",
+     "phase": "round 6: Roger's 'harmony with nature'",
+     "label": "world-changing",
+     "positive_name": "resourceful|solution-oriented",
+     "negative_label": "world-accepting|accommodating|adaptive",
+     "antonym_score": 4
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-09",
+     "was": "This means asserting oneself to master, direct and change the world around one, people and nature alike, to reach one's goals, and prizing ambition, success, daring and competence.",
+     "by": "round 2 of the description-to-label loop (2026-10-09): Schwartz's value list dropped from world-shaping (it read as ambitious), 'exploiting' dropped from world-accepting (its opposite read as domineering)"
+    },
+    {
+     "date": "2026-10-09",
+     "was": "This means mastering, directing and changing the world around one, people and nature alike: taming the land or reorganizing how things are run, and taking every obstacle as something to overcome.",
+     "by": "round 3 (2026-10-09): world-shaping moved from people onto circumstances and things (round 2 read as domineering); world-accepting 'taking things as they come' to 'leaving things as they are' (round 2 read as easygoing)"
+    }
+   ],
+   "paired_at": "2026-10-09"
   },
   {
    "stem": "obscure",
@@ -50830,8 +51071,8 @@
    "description": null,
    "source": "Bourdieu (symbolic capital)",
    "tags": [],
-   "status": "tbd",
-   "decision": "still open",
+   "status": "not_adopted",
+   "decision": "still open [Roger, 2026-10-09: 'if they're gaps, yes'; checked against the corpus: not seeded: the unmarked pole (everyone is obscure by default); famous is seeded non-X and its antonym check names the partner.]",
    "alternatives": null,
    "section": "Social class (decided 2026-09-07, wording TBD)",
    "lines": "1057-1062",
@@ -50855,8 +51096,8 @@
    "tags": [
     "pc_direction"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "backlog",
+   "decision": " [Roger, 2026-10-09: not seeded; redo the PCA naming on the new corpus once its activations exist (TODO in TRAITS_TO_ADD).]",
    "alternatives": "solitary-reserved / connective-communicative; solitary/connective",
    "section": "Strategy 1b: PCA-of-entity-pool -> describe-and-name underused directions",
    "lines": "535, 566-570, 579-583",
@@ -50880,8 +51121,8 @@
    "tags": [
     "pc_direction"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "backlog",
+   "decision": " [Roger, 2026-10-09: not seeded; redo the PCA naming on the new corpus once its activations exist (TODO in TRAITS_TO_ADD).]",
    "alternatives": "symbolic-manipulation / embodied-care",
    "section": "Strategy 1b: PCA-of-entity-pool -> describe-and-name underused directions",
    "lines": "536, 572-576",
@@ -54458,8 +54699,8 @@
    "tags": [
     "gap"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "not_adopted",
+   "decision": " [Roger, 2026-10-09: 'if they're gaps, yes'; checked against the corpus: not a gap: specialist ('deep expertise ... within specific domains') covers it, and interdisciplinary's own description names its opposite ('rather than staying within a single discipline').]",
    "alternatives": null,
    "section": "seeding log: item 7",
    "lines": null,
@@ -54470,48 +54711,124 @@
    "label": "internal locus of control",
    "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "gaps noted in the pairing review (2026-09-17)",
-   "pairing": "TBD",
-   "partner": null,
+   "sub_chunk": "7a: gaps confirmed",
+   "pairing": "pair",
+   "partner": "external_locus_of_control",
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means expecting that what happens to one, the rewards and the setbacks alike, follows from one's own actions and lasting qualities, and so lies in one's own hands.",
    "description_notes": "7.4: the content of the dropped 'empowered' (outcomes are in one's own hands; effort and choice change what happens) with no good English label; nearest existing: proactive (anticipating needs), fatalistic (its opposite, now a singleton). Rotter's internal/external locus is the standard; name TBD.",
-   "description": null,
-   "source": null,
+   "description": "This means expecting that what happens to one, the rewards and the setbacks alike, follows from one's own actions and lasting qualities, and so lies in one's own hands.",
+   "source": "Rotter, J. B. (1966). Generalized expectancies for internal versus external control of reinforcement. Psychological Monographs, 80(1), p. 1, quoted verbatim by Houssemand, Meyers & Pignault (2019), Frontiers in Psychology; https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00383/full",
    "tags": [
-    "gap"
+    "standard"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "paired",
+   "decision": " [Roger, 2026-10-09: 'if they're gaps, yes'; a gap: fatalistic (a singleton) is the external pole's nearest; proactive is behaviour, determinist is metaphysics. Seeded non-X from Rotter's own definition; pairing with fatalistic is Roger's call (an existing file).] [Roger, 2026-10-09: paired with Rotter's external pole, not with fatalistic.]",
    "alternatives": null,
    "section": "seeding log: item 7",
    "lines": null,
-   "chunk_confidence": "low"
+   "chunk_confidence": "low",
+   "source_url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00383/full",
+   "source_text": "\"when a reinforcement is perceived by the subject as following some action of his own but not being entirely contingent upon his action, then, in our culture, it is typically perceived as the result of luck, chance, fate, as under the control of powerful others, or as unpredictable because of the great complexity of forces surrounding him. When the event is interpreted in this way by an individual, we have labeled this a belief in external control. If the person perceives that the event is contingent upon his own behavior or relatively permanent characteristics, we have termed this a belief in internal control\" (p. 1). [Rotter, J. B. (1966). Generalized expectancies for internal versus external control of reinforcement. Psychological Monographs: General and Applied, 80(1), 1-28, doi:10.1037/h0092976; as quoted in Houssemand, C., Meyers, R., & Pignault, A. (2019), Adaptation and Validation of the Perceived Control in Unemployment Scale, Frontiers in Psychology 10:383, doi:10.3389/fpsyg.2019.00383, open access; text copied from the article's XML.]",
+   "source_retrieved": "2026-10-09",
+   "nearest_existing": [
+    "fatalistic (trait): \"This trait involves accepting circumstances as predetermined or inevitable, emphasizing that outcomes are controlled by destiny or forces beyond human control rather than individual agency and effort.\" The nearest file to Rotter's external side (luck, chance, fate); a pre-September file in the old form. Not named in the draft; pairing is Roger's call.",
+    "proactive (trait): \"This means anticipating potential needs, identifying future problems before they occur ...\" A behaviour; internal locus of control is a belief about where outcomes come from.",
+    "determinist (trait): \"... all events, including human actions and decisions, are predetermined by prior causes ...\" Metaphysics; Rotter's construct is a person's expectancy about reinforcement, not a thesis about causation.",
+    "growth_minded (trait): \"This means believing people become clever and talented by working at it, so a failure marks the next thing to practice.\" A belief about whether ability can grow; locus of control is about whether outcomes follow from one's own actions.",
+    "helpless (trait): \"This means being at a loss when the usual tool, money or help is missing, seeing no way around it, and giving up at once.\" A behaviour under a missing resource; neighbours the external side, not this one."
+   ],
+   "notes": "29 words. Summarised from Rotter's internal-control sentence at the source's strength: 'perceives' and the construct's 'generalized expectancy' rendered as 'expecting'; 'reinforcement' as 'the rewards and the setbacks alike' (reinforcement covers both, and the internal belief applies to both); 'his own behavior or relatively permanent characteristics' as 'one's own actions and lasting qualities' ('relatively permanent' rendered as 'lasting', the plain-word equivalent rather than dropped). The closing 'and so lies in one's own hands' sits inside 'expecting that', so it remains the belief, not a claim about the world. The external side's list (luck, chance, fate, powerful others, unpredictability) is left out of the description, so as not to write toward a partner (rule 5); the reviewer may judge whether Rotter's definition, which is framed as a contrast, warrants a 'not luck or fate' clause under rule 9. Strength: a belief stated plainly, about as mild as growth_minded; not markedly milder than the corpus. Label kept as given, no author suffix (per packet). Source caveat: the monograph itself is paywalled (APA); the quotation is from an open-access secondary source that cites p. 1, retrieved verbatim. Carton, Ries & Nowicki (2021, Frontiers in Psychology, doi:10.3389/fpsyg.2021.565883) quote the same definition in gender-neutral fragments ('contingent upon his or her own relatively permanent characteristics') cited to p. 2, so the reviewer may want the wording and page checked against the monograph before the file's source is written. Queue entry 'source' suggestion: Rotter (1966), Psychological Monographs 80(1), doi:10.1037/h0092976, quoted via the URL above.",
+   "review_issues": [
+    "Note: faithful to Rotter's internal pole ('contingent upon his own behavior or his own relatively permanent characteristics'); the source's contrast list (luck, chance, fate, powerful others) is left out so the description does not steer the check toward fatalistic. The quotation is second-hand (Houssemand, Meyers & Pignault 2019, citing p. 1), recorded as such."
+   ],
+   "review_verdict": "ok",
+   "review_strength": "at source",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "check_result": {
+    "returned": "external_locus_of_control|fatalistic",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who attributes outcomes to luck, fate, chance, powerful others, and external circumstances rather than their own actions — this is the classic psychological construct of 'external locus of control.' The positive label is 'internal_locus_of_control' and the neg instructions describe its direct, well-established psychological opposite. The term 'external_locus_of_control' is the canonical antonym in psycholinguistics/personality research, but as an adjective label, 'externally-controlled' or simply 'fatalistic' could work. However, 'fatalistic' captures the sense of being subject to forces beyond one's control, while 'external_locus_of_control' is the precise technical opposite. As a natural adjective, 'fatalistic' is strong, but 'externally-controlled' is more symmetric. These are genuinely competitive. The antonym score is 4 — these are direct, symmetric opposites in the locus of control construct.",
+    "category": "nearly_nice",
+    "candidates": [
+     "external_locus_of_control",
+     "fatalistic"
+    ],
+    "known": [
+     "fatalistic"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-09"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-09",
+     "returned": "external_locus_of_control|fatalistic",
+     "phase": "check"
+    }
+   ],
+   "paired_at": "2026-10-09"
   },
   {
    "stem": "growth_first",
    "label": "growth-first",
    "entity_type": "trait",
    "chunk": "7",
-   "sub_chunk": "gaps noted in the pairing review (2026-09-17)",
-   "pairing": "TBD",
+   "sub_chunk": "7a: gaps confirmed",
+   "pairing": "singleton",
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means ranking jobs, growth and low costs above nature in one's considerations and recommendations: backing the mine, the pipeline or the factory, and reading environmental rules as red tape.",
    "description_notes": "7.5: the content of the dropped 'economic' (the economy over the environment: cost, jobs, growth first); nearest queued: capitalist <-> socialist (ownership axis, different). A real political dimension but 'economic' is not its name; seed only under a label such as growth-first / pro-development, paired with environmental, if wanted.",
-   "description": null,
+   "description": "This means ranking jobs, growth and low costs above nature: backing the mine, the pipeline or the factory, and reading environmental rules as red tape.",
    "source": null,
    "tags": [
     "gap"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "done",
+   "decision": " [Roger, 2026-10-09: 'if they're gaps, yes'; a gap: environmental (a singleton) has no partner; anthropocentric is moral standing, capitalist is ownership. Seeded non-X; pairing with environmental is Roger's call (an existing file).] [Roger, 2026-10-09: not a clean pair with environmental (neither check names the other: growth-first -> nature-first|conservation-first|environmentalist; environmental -> exploitative|anthropocentric); left as a TODO.]",
    "alternatives": null,
    "section": "seeding log: item 7",
    "lines": null,
-   "chunk_confidence": "low"
+   "chunk_confidence": "low",
+   "nearest_existing": [
+    "environmental (trait): \"This means prioritizing ecological concerns, sustainability, and environmental protection in one's considerations and recommendations.\" Mirrored in scope (a priority applied 'in one's considerations and recommendations') so the antonym check can find it; not named.",
+    "capitalist (trait): \"This means trusting free markets, private property and profit to make everyone better off, and wanting taxes low and owners in charge.\" The ownership axis; growth-first is about the economy against the environment, whoever owns the mine.",
+    "anthropocentric (trait): \"This means treating human needs, interests, and welfare as what is inherently important and valuable ...\" Moral standing; growth-first is a practical ranking of economic over environmental aims, not a claim about whose interests count."
+   ],
+   "notes": "30 words. Takes environmental's scope phrase 'in one's considerations and recommendations' word for word, so the two read as one dimension; that phrase is outside-voice by the September rules, kept because the packet asks for the scope to mirror. Avoided 'putting ... growth first' in the opening as a near label echo; 'ranking ... above nature' says the trade-off once, and the particulars (the mine, the pipeline, the factory; rules as red tape) carry it. The mine/pipeline/factory are joined with 'or' (rule 11), as alternatives. Scope test for the judge: when the economy and the environment pull apart, does the persona come down for jobs, growth and cost? No partner named.",
+   "review_issues": [
+    "'in one's considerations and recommendations' is copied from environmental's old description and is chatbot framing (the September rules); dropped.",
+    "The mine, the pipeline and the factory are alternatives, so 'or' (rule 11)."
+   ],
+   "review_verdict": "edit",
+   "review_strength": "at the notes",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "check_result": {
+    "returned": "nature-first|conservation-first|environmentalist",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who prioritizes ecosystem health, conservation, and environmental protection over economic growth and jobs. They support strong environmental regulations and resist industrial development. The most natural label for this pole is 'conservation-first' or 'eco-first', but common adjectives like 'environmentalist' or 'conservationist' also apply. 'Nature-first' is explicitly used in the neg instructions themselves. The opposition to 'growth_first' is strong and fairly direct, though both are compound/hyphenated framings rather than simple antonyms.",
+    "category": "open",
+    "candidates": [
+     "nature_first",
+     "conservation_first",
+     "environmentalist"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-09"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-09",
+     "returned": "nature-first|conservation-first|environmentalist",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "unselfconscious",
@@ -55562,6 +55879,57 @@
      "phase": "check"
     }
    ]
+  },
+  {
+   "stem": "external_locus_of_control",
+   "label": "external locus of control",
+   "entity_type": "trait",
+   "chunk": "7",
+   "sub_chunk": "7a: gaps confirmed",
+   "pairing": "pair",
+   "partner": "internal_locus_of_control",
+   "partner_exists": null,
+   "arrangement_members": null,
+   "description_notes": "Rotter's external pole (1966): reinforcement 'perceived ... as the result of luck, chance, fate, as under the control of powerful others, or as unpredictable because of the great complexity of forces surrounding him'. Broader than fatalistic (destiny only), which stays a separate singleton.",
+   "description": "This means expecting that what happens to one, the rewards and the setbacks alike, comes down to luck, chance, fate, powerful others, or forces too tangled to predict.",
+   "source": "Rotter, J. B. (1966). Generalized expectancies for internal versus external control of reinforcement. Psychological Monographs, 80(1), p. 1, quoted verbatim by Houssemand, Meyers & Pignault (2019), Frontiers in Psychology; https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00383/full",
+   "tags": [
+    "standard"
+   ],
+   "status": "paired",
+   "decision": "Roger, 2026-10-09: fatalistic is not a unique opposite of internal locus of control; take Rotter's own external pole as the partner, paired by construction as a standard.",
+   "alternatives": null,
+   "section": "seeding log: item 7",
+   "lines": null,
+   "chunk_confidence": "low",
+   "source_url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00383/full",
+   "source_text": "\"when a reinforcement is perceived by the subject as following some action of his own but not being entirely contingent upon his action, then, in our culture, it is typically perceived as the result of luck, chance, fate, as under the control of powerful others, or as unpredictable because of the great complexity of forces surrounding him. When the event is interpreted in this way by an individual, we have labeled this a belief in external control. If the person perceives that the event is contingent upon his own behavior or relatively permanent characteristics, we have termed this a belief in internal control\" (p. 1). [Rotter, J. B. (1966). Generalized expectancies for internal versus external control of reinforcement. Psychological Monographs: General and Applied, 80(1), 1-28, doi:10.1037/h0092976; as quoted in Houssemand, C., Meyers, R., & Pignault, A. (2019), Adaptation and Validation of the Perceived Control in Unemployment Scale, Frontiers in Psychology 10:383, doi:10.3389/fpsyg.2019.00383, open access; text copied from the article's XML.]",
+   "source_retrieved": "2026-10-09",
+   "nearest_existing": "fatalistic (destiny or forces beyond human control): one of the external sources, not all of them; luck_driven / superstitious if present cover chance and omens only.",
+   "seeded_at": "2026-10-09",
+   "generated_at": "2026-10-09",
+   "check_result": {
+    "returned": "internal_locus_of_control",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who attributes outcomes to their own effort, choices, and actions rather than external forces — this is the classic psychological construct of 'internal locus of control.' The positive label is 'external_locus_of_control,' and its direct, well-established antonym in psycholinguistics and personality psychology is 'internal_locus_of_control.' However, as a single adjective label, 'self-determined' also appears explicitly in the neg instructions, and 'autonomous' or 'agentic' could work. The most natural standalone adjective capturing this pole is 'self-determined' or 'agentic,' but the field-standard term is 'internal locus of control.' As an adjective, 'internal' (locus of control) maps cleanly. These are the two poles of the same dimension, making this a perfect antonym relationship.",
+    "category": "nice",
+    "candidates": [
+     "internal_locus_of_control"
+    ],
+    "known": [
+     "internal_locus_of_control"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-09"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-09",
+     "returned": "internal_locus_of_control",
+     "phase": "check"
+    }
+   ],
+   "paired_at": "2026-10-09"
   }
  ]
 }
