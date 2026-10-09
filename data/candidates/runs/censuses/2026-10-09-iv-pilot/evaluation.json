@@ -1,0 +1,219 @@
+{
+  "result": {
+    "run_id": "2026-10-09-iv-pilot",
+    "generator": "censuses",
+    "stage": "allport_iv",
+    "every_nth": 10,
+    "offset": 0,
+    "transport": "batches",
+    "estimate": {
+      "n": 202,
+      "transport": "batches",
+      "m1_usd": 0.7272,
+      "m3_usd": 0.9777,
+      "total_usd": 1.7049,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "batch_factor": 0.5,
+        "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
+      }
+    },
+    "parsed": {
+      "table_rows": 17958,
+      "tda_words": 2818,
+      "allport_words": 17708,
+      "allport_only_words": 15139,
+      "in_both": 2569,
+      "allport_lines": {
+        "I": 4470,
+        "II": 4511,
+        "III": 5191,
+        "IV": 3652
+      },
+      "malformed": 1
+    },
+    "floor": {
+      "stage_pool": 2013,
+      "tda_cut": 0,
+      "tda_below_dictionary_floor": 251,
+      "allport_only_cut": {
+        "below_hard_reject": 1341,
+        "unknown_word": 5614
+      },
+      "allport_only_eligible": {
+        "allport_hi": 4746,
+        "allport_probe": 3438
+      },
+      "submitted_to_probe": 92,
+      "submitted_probe_routes": {
+        "band": 52,
+        "negating_prefix": 40
+      }
+    },
+    "submitted": {
+      "n_candidates": 202,
+      "n_with_gloss_hint": 138,
+      "n_state_prefix": 0,
+      "registry": {
+        "n_submitted": 202,
+        "n_new": 199,
+        "n_merged": 3,
+        "n_unchanged": 0,
+        "invalid": [],
+        "n_keys": 202
+      }
+    },
+    "merges": {
+      "allport_cross_column": 58,
+      "allport_within_column": 57,
+      "tda_and_allport": 2569,
+      "tda_multi_row": 0,
+      "repaired": 23,
+      "submit_n_merged": 3,
+      "submit_n_unchanged": 0
+    },
+    "known_labels": {
+      "n": 2,
+      "stems": [
+        "monogamous",
+        "nearsighted"
+      ]
+    },
+    "ceiling": {
+      "n_corpus": 790,
+      "n_multiword": 244,
+      "n_tda": 394,
+      "n_allport": 411,
+      "n_union": 444,
+      "tda": 0.4987,
+      "allport": 0.5203,
+      "union": 0.562,
+      "union_single_word": 0.7747,
+      "n_matched_eligible": 444,
+      "submitted_of_matched": 1.0,
+      "matched_ineligible": [],
+      "n_queue": 238,
+      "n_queue_union": 65
+    },
+    "filter": {
+      "n_filtered": 202,
+      "n_rows": 202,
+      "verdict": {
+        "reject": 50,
+        "tagged": 66,
+        "trait": 86
+      },
+      "outcome": {
+        "physical": 23,
+        "roles": 9,
+        "states": 34,
+        "trait": 86,
+        "turned_away": 50
+      },
+      "tags": {
+        "evaluative_only": 2,
+        "membership": 23,
+        "no_persona_reading": 28,
+        "physical": 23,
+        "role_person": 9,
+        "state": 34,
+        "stretched": 20
+      },
+      "known_label_pass": {
+        "n_known": 2,
+        "n_filtered": 2,
+        "n_pass": 2,
+        "pass_rate": 1.0,
+        "by_outcome": {
+          "physical": 1,
+          "trait": 1
+        },
+        "misses": [],
+        "unfiltered": []
+      },
+      "state_gloss_compliance": 0.0
+    },
+    "novelty": {
+      "n_scored": 80,
+      "decision": {
+        "covered": 17,
+        "new": 63
+      },
+      "pair_completion": 10
+    },
+    "cost": {
+      "files": [
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/censuses/2026-10-09-iv-pilot/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-09-iv-pilot_censuses/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-09-iv-pilot_censuses/usage.json"
+      ],
+      "per_model": {
+        "claude-haiku-5-5:batch": 0.2586,
+        "claude-opus-5-5:batch": 0.1749,
+        "claude-sonnet-5-5:batch": 0.5046,
+        "text-embedding-3-large": 0.0002
+      },
+      "total_usd": 0.9383
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-09-iv-pilot",
+      "git_sha": "189bf0b+dirty",
+      "author": "Roger Dearnaley",
+      "title": "census generator evaluation, run 2026-10-09-iv-pilot"
+    },
+    "produced_at": "2026-10-09T06:24:36+00:00",
+    "inputs": [
+      {
+        "dep_key": "census_table",
+        "path": "data/candidates/censuses/census_table.jsonl",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@12333182",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "ingest_counts",
+        "path": "data/candidates/censuses/ingest_counts.json",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@99157",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "candidates",
+        "path": "data/candidates/runs/censuses/2026-10-09-iv-pilot/candidates.jsonl",
+        "fingerprint": "v1:2026-10-09T03:44:14+00:00@52293",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T03:44:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "run_json",
+        "path": "data/candidates/runs/censuses/2026-10-09-iv-pilot/run.json",
+        "fingerprint": "v1:2026-10-09T03:44:14+00:00@18848",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T03:44:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-09T06:24:07+00:00@36033222",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T06:24:07+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "63d649f309d01433baf64b28087a2906e409af858de9bdf81e3f5194f77dabde"
+  }
+}

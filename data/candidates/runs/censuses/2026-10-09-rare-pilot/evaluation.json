@@ -1,0 +1,214 @@
+{
+  "result": {
+    "run_id": "2026-10-09-rare-pilot",
+    "generator": "censuses",
+    "stage": "allport_rare",
+    "every_nth": 10,
+    "offset": 0,
+    "transport": "batches",
+    "estimate": {
+      "n": 104,
+      "transport": "batches",
+      "m1_usd": 0.3744,
+      "m3_usd": 0.5034,
+      "total_usd": 0.8778,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "batch_factor": 0.5,
+        "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
+      }
+    },
+    "parsed": {
+      "table_rows": 17958,
+      "tda_words": 2818,
+      "allport_words": 17708,
+      "allport_only_words": 15139,
+      "in_both": 2569,
+      "allport_lines": {
+        "I": 4470,
+        "II": 4511,
+        "III": 5191,
+        "IV": 3652
+      },
+      "malformed": 1
+    },
+    "floor": {
+      "stage_pool": 1031,
+      "tda_cut": 0,
+      "tda_below_dictionary_floor": 251,
+      "allport_only_cut": {
+        "below_hard_reject": 1341,
+        "unknown_word": 5614
+      },
+      "allport_only_eligible": {
+        "allport_hi": 4746,
+        "allport_probe": 3438
+      },
+      "submitted_to_probe": 104,
+      "submitted_probe_routes": {
+        "curated_source": 37,
+        "gloss_hint": 67
+      }
+    },
+    "submitted": {
+      "n_candidates": 104,
+      "n_with_gloss_hint": 67,
+      "n_state_prefix": 10,
+      "registry": {
+        "n_submitted": 104,
+        "n_new": 104,
+        "n_merged": 0,
+        "n_unchanged": 0,
+        "invalid": [],
+        "n_keys": 104
+      }
+    },
+    "merges": {
+      "allport_cross_column": 58,
+      "allport_within_column": 57,
+      "tda_and_allport": 2569,
+      "tda_multi_row": 0,
+      "repaired": 23,
+      "submit_n_merged": 0,
+      "submit_n_unchanged": 0
+    },
+    "known_labels": {
+      "n": 0,
+      "stems": []
+    },
+    "ceiling": {
+      "n_corpus": 790,
+      "n_multiword": 244,
+      "n_tda": 394,
+      "n_allport": 411,
+      "n_union": 444,
+      "tda": 0.4987,
+      "allport": 0.5203,
+      "union": 0.562,
+      "union_single_word": 0.7747,
+      "n_matched_eligible": 444,
+      "submitted_of_matched": 1.0,
+      "matched_ineligible": [],
+      "n_queue": 238,
+      "n_queue_union": 65
+    },
+    "filter": {
+      "n_filtered": 104,
+      "n_rows": 104,
+      "verdict": {
+        "reject": 27,
+        "tagged": 15,
+        "trait": 62
+      },
+      "outcome": {
+        "physical": 2,
+        "roles": 1,
+        "states": 12,
+        "trait": 62,
+        "turned_away": 27
+      },
+      "tags": {
+        "action": 1,
+        "membership": 2,
+        "no_persona_reading": 14,
+        "physical": 2,
+        "role_person": 1,
+        "state": 12,
+        "stretched": 9,
+        "too_rare": 3
+      },
+      "known_label_pass": {
+        "n_known": 0,
+        "n_filtered": 0,
+        "n_pass": 0,
+        "pass_rate": null,
+        "by_outcome": {},
+        "misses": [],
+        "unfiltered": []
+      },
+      "state_gloss_compliance": 0.0
+    },
+    "novelty": {
+      "n_scored": 62,
+      "decision": {
+        "covered": 16,
+        "new": 46
+      },
+      "pair_completion": 4
+    },
+    "cost": {
+      "files": [
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/censuses/2026-10-09-rare-pilot/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-09-rare-pilot_censuses/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-09-rare-pilot_censuses/usage.json"
+      ],
+      "per_model": {
+        "claude-haiku-5-5:batch": 0.1487,
+        "claude-opus-5-5:batch": 0.1811,
+        "claude-sonnet-5-5:batch": 0.3363,
+        "text-embedding-3-large": 0.0002
+      },
+      "total_usd": 0.6663
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-09-rare-pilot",
+      "git_sha": "189bf0b+dirty",
+      "author": "Roger Dearnaley",
+      "title": "census generator evaluation, run 2026-10-09-rare-pilot"
+    },
+    "produced_at": "2026-10-09T06:24:38+00:00",
+    "inputs": [
+      {
+        "dep_key": "census_table",
+        "path": "data/candidates/censuses/census_table.jsonl",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@12333182",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "ingest_counts",
+        "path": "data/candidates/censuses/ingest_counts.json",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@99157",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "candidates",
+        "path": "data/candidates/runs/censuses/2026-10-09-rare-pilot/candidates.jsonl",
+        "fingerprint": "v1:2026-10-09T03:44:16+00:00@24354",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T03:44:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "run_json",
+        "path": "data/candidates/runs/censuses/2026-10-09-rare-pilot/run.json",
+        "fingerprint": "v1:2026-10-09T03:44:16+00:00@18686",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T03:44:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-09T06:24:38+00:00@36044502",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T06:24:38+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "d17a02a96aae533f849b32c99c2612603b9c43978fdfa86015a83adc2bc9e426"
+  }
+}

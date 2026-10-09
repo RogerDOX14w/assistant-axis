@@ -1,0 +1,324 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 62,
+    "n_decided": 62,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 42
+    },
+    "by_decision": {
+      "new": 46,
+      "covered": 16
+    },
+    "by_reason": {
+      "overlap": 62
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 30,
+        "covered": 16
+      },
+      "4": {
+        "new": 16
+      }
+    },
+    "exact_label": {},
+    "pairs_judged_per_candidate": {
+      "1": 14,
+      "2": 5,
+      "3": 5,
+      "4": 7,
+      "5": 9,
+      "6": 6,
+      "7": 5,
+      "8": 5,
+      "9": 3,
+      "10": 3
+    },
+    "pairs_judged_total": 280,
+    "pairs_judged_mean": 4.516,
+    "listed_per_candidate_mean": 16.79,
+    "shortlist_length": {
+      "1": 4,
+      "2": 3,
+      "3": 6,
+      "4": 8,
+      "5": 11,
+      "6": 7,
+      "7": 8,
+      "8": 8,
+      "9": 4,
+      "10": 3
+    },
+    "early_exit_depth": {
+      "1": 11,
+      "2": 3,
+      "4": 1,
+      "6": 1
+    },
+    "escalations": {
+      "below_cut_off": 56,
+      "at_cut_off": 13
+    },
+    "rescues": 0,
+    "review_flags": {
+      "sonnet_below_opus_at": 3
+    },
+    "pair_completions": 4,
+    "pair_completion_for": {
+      "appropriative#1": [
+        "cosmopolitan"
+      ],
+      "estranging#1": [
+        "clingy"
+      ],
+      "inerrable#1": [
+        "self_blaming"
+      ],
+      "uxorious#1": [
+        "polygynous"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 62
+      },
+      "answers": {
+        "opposed": 305,
+        "unrelated": 505,
+        "similar": 228,
+        "unsure": 3
+      },
+      "final": {
+        "similar": 229,
+        "unrelated": 507,
+        "opposed": 305
+      },
+      "candidates_with_unsure_reasked": 2
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 62,
+        "input": 108012,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 282,
+        "input": 41376,
+        "cache_write": 574,
+        "cache_read": 160146,
+        "calls_with_read": 279,
+        "read_share_of_input": 0.7924,
+        "hit_rate_calls": 0.9894
+      },
+      "claude-opus-5-5": {
+        "calls": 69,
+        "input": 9794,
+        "cache_write": 13202,
+        "cache_read": 26404,
+        "calls_with_read": 46,
+        "read_share_of_input": 0.5345,
+        "hit_rate_calls": 0.6667
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 0.028903
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.002504
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 0.172548,
+        "claude-opus-5-5:batch": 0.18109
+      }
+    },
+    "spend_usd": 0.385211,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 108012,
+          "completion_tokens": 94011,
+          "cost_usd": 0.0289,
+          "n_calls": 62
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 38820,
+          "completion_tokens": 10345,
+          "cost_usd": 0.1811,
+          "n_calls": 69
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 58427,
+          "completion_tokens": 23325,
+          "cost_usd": 0.1751,
+          "n_calls": 282
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 1275,
+          "completion_tokens": 0,
+          "cost_usd": 0.0002,
+          "n_calls": 2
+        }
+      },
+      "total_cost_usd": 0.3852,
+      "total_prompt_tokens": 206534,
+      "total_completion_tokens": 127681,
+      "n_calls": 415
+    },
+    "rules": [
+      "m3_rules_2"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 3,
+    "covered_flagged": 3,
+    "pair_notes": {
+      "rows": 0,
+      "notes": 0,
+      "by_kind": {},
+      "rows_by_decision": {}
+    },
+    "pair_flag_rows": 1,
+    "floor": {
+      "rows_with_listed_below": 62,
+      "listed_below_total": 646,
+      "similar_kept_out_total": 6,
+      "rows_with_similar_kept_out": 6
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "b3831481c0432c8eb23f644e5b9acfff0b85fd1b4cd769d7619c09293eeca011",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 1,
+      "excluded": {
+        "no_text": 97,
+        "not_a_trait_entry": 100,
+        "status_done": 250,
+        "status_exists": 35,
+        "status_not_adopted": 123,
+        "status_paired": 374,
+        "status_superseded": 18
+      },
+      "entries_sha256": "2370d9010bff040da45fbe3f109a341740b36525c21e8ce861cf4b260de59a46",
+      "rows_with_queue_in_index": 62,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "batch_id": "2026-10-09-rare-pilot_censuses",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 62,
+        "ok_first": 62,
+        "ok": 62
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 2,
+        "ok_first": 2,
+        "ok": 2
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 280,
+        "ok_first": 280,
+        "ok": 280
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 69,
+        "ok_first": 69,
+        "ok": 69
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-09-rare-pilot_censuses --run censuses/2026-10-09-rare-pilot --transport batches --budget-usd 3",
+      "git_sha": "189bf0b+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-09-rare-pilot_censuses"
+    },
+    "produced_at": "2026-10-09T06:01:43+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-09T02:19:58+00:00@3342639",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T02:19:58+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "d4037da47f57c1031c4383dbb20c765db63c02851532a44353d2ee841a9cbc02"
+  }
+}
