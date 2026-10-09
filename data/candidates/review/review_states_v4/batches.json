@@ -1,0 +1,94 @@
+{
+  "batch_id": "review_states_v4",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01WkJNKUqauddvGAVPMWXqPj",
+        "custom_ids": [
+          "rel-h-beholden_1-51e305d13b96",
+          "rel-h-declining_1-fc13d3c441c5",
+          "rel-h-disheveled_1-57cce11abf5e",
+          "rel-h-emigrating_1-cd047c3b08ff",
+          "rel-h-expecting_1-f6f0858d0876",
+          "rel-h-heartsick_1-120bc630a825",
+          "rel-h-inconsolable_1-2e9aee671d32",
+          "rel-h-liable_1-0b60c4e7c01b",
+          "rel-h-nascent_1-0a16b45544a5",
+          "rel-h-repentant_1-92a2fe0a7f8e",
+          "rel-h-rumpled_1-9f233b57bbb2",
+          "rel-h-tearful_1-754f367f1eed",
+          "rel-h-thriving_1-5ab6599ce38c",
+          "rel-h-unacknowledged_1-1c20079742e1",
+          "rel-h-unmastered_1-49955bdb7445",
+          "rel-h-unpunished_1-bcc4e0e03c5e"
+        ],
+        "n_requests": 16,
+        "bytes": 43228,
+        "estimate_usd": 0.001697,
+        "submitted_at": "2026-10-09T18:25:08+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:30:14+00:00"
+      }
+    ],
+    "ov1_sonnet": [
+      {
+        "id": "msgbatch_01KkbVrZPabqtcqETeMLnXe3",
+        "custom_ids": [
+          "ove-s-beholden_1-a60177d262f1",
+          "ove-s-disheveled_1-c286ed2c8a92",
+          "ove-s-heartsick_1-14692fbc6fdb",
+          "ove-s-liable_1-aa9a16e192ed",
+          "ove-s-nascent_1-d761ce465d22"
+        ],
+        "n_requests": 5,
+        "bytes": 12895,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-09T18:30:15+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:45:30+00:00"
+      }
+    ],
+    "ov1_opus": [
+      {
+        "id": "msgbatch_012ne3FceKGB6MSNWySJ1XQB",
+        "custom_ids": [
+          "ove-o-disheveled_1-27870c76f171"
+        ],
+        "n_requests": 1,
+        "bytes": 2537,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-09T18:45:31+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:47:34+00:00"
+      }
+    ],
+    "ov2_sonnet": [
+      {
+        "id": "msgbatch_018jvGob8SiXB8vrmzXKJNqb",
+        "custom_ids": [
+          "ove-s-rumpled_1-a79f1254fb7d"
+        ],
+        "n_requests": 1,
+        "bytes": 2536,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-09T18:47:34+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:50:38+00:00"
+      }
+    ],
+    "ov2_opus": [
+      {
+        "id": "msgbatch_01Eskcp5oDBhhR55BHoW6MZ9",
+        "custom_ids": [
+          "ove-o-rumpled_1-963a2023df7a"
+        ],
+        "n_requests": 1,
+        "bytes": 2534,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-09T18:50:39+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:53:13+00:00"
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "states_v4_m3"
+        },
+        "fingerprint": "v1:2026-10-09T18:24:37+00:00@39480967",
+        "kind": "file",
+        "last_modified_at": "2026-10-09T18:24:37+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:e46bf0db1520",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "states_v4_m3"
+        },
+        "fingerprint": "v1:multi:d7be0d6eb74e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-09T18:24:37+00:00",
+        "member_paths": [
+          "data/candidates/novelty/states_v4_m3/run.json"
+        ],
+        "path": "data/candidates/novelty/states_v4_m3/run.json"
+      }
+    ],
+    "inputs_sha256": "f9f6f7b73bacd0dd8b4ff270697266ac1be4f0a6bbb578b4d86cfadbdf2961a4",
+    "produced_at": "2026-10-09T18:53:13+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_states_v4 --from-batches states_v4_m3 --transport batches --budget-usd 1.5",
+      "git_sha": "2a34ec4+dirty",
+      "title": "review_graph build review_states_v4"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 24,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 4609,
+      "cost_usd": 0.0018,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 16,
+      "prompt_tokens": 12580
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 112,
+      "cost_usd": 0.0019,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 2,
+      "prompt_tokens": 392
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 508,
+      "cost_usd": 0.0038,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 6,
+      "prompt_tokens": 1227
+    }
+  },
+  "total_completion_tokens": 5229,
+  "total_cost_usd": 0.0075,
+  "total_prompt_tokens": 14199
+}

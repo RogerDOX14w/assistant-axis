@@ -1,0 +1,357 @@
+{
+  "batch_id": "states_v4_m3",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_014HoRkdcgeCf8GVgJj5knBX",
+        "custom_ids": [
+          "rel-h-amorous_1-a0dcd5dffc00",
+          "rel-h-beholden_1-7436dd6cb019",
+          "rel-h-declining_1-9a9028eec7fd",
+          "rel-h-disabused_1-e9d9643892e5",
+          "rel-h-disheveled_1-0ad637f3b829",
+          "rel-h-emigrating_1-9c1e24e61803",
+          "rel-h-expecting_1-f3ced4b8912f",
+          "rel-h-fearful_1-b2daac661165",
+          "rel-h-heartsick_1-c6b0e1e607f3",
+          "rel-h-inconsolable_1-8c6f8e928c57",
+          "rel-h-liable_1-d332a4279443",
+          "rel-h-lonesome_1-f24ba459f0f9",
+          "rel-h-miserably_partnered_1-3ef4a147e162",
+          "rel-h-nascent_1-63d612bdfdd9",
+          "rel-h-nervous_1-45d930c4a973",
+          "rel-h-overburdened_1-54e849466ea4",
+          "rel-h-pretty_well_1-68ce8e71569e",
+          "rel-h-repentant_1-3c3067e12fba",
+          "rel-h-rumpled_1-1dfdc3c65130",
+          "rel-h-sulky_1-bccc2eb60f6a",
+          "rel-h-tearful_1-053d1f3ce342",
+          "rel-h-teasing_1-836e7f4a8f6c",
+          "rel-h-thankful_1-d9d2eeb82e65",
+          "rel-h-thriving_1-a9307f76c8b6",
+          "rel-h-unacknowledged_1-42eb04459e72",
+          "rel-h-unhappy_1-9605c02f0492",
+          "rel-h-unhealthy_1-b4b86a54cd5b",
+          "rel-h-unmastered_1-0dd24e092a64",
+          "rel-h-unpunished_1-11fcae6ca5e3",
+          "rel-h-woeful_1-d5040275a4ca"
+        ],
+        "n_requests": 30,
+        "bytes": 161082,
+        "estimate_usd": 0.011227,
+        "submitted_at": "2026-10-09T13:37:08+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:43:01+00:00"
+      }
+    ],
+    "r2_relation_unsure": [
+      {
+        "id": "msgbatch_01LLMVQHAsXGLQpLupFSe2eM",
+        "custom_ids": [
+          "rel-s-heartsick_1-10ac7a3658bc",
+          "rel-s-inconsolable_1-16afb4b93618",
+          "rel-s-liable_1-7ff341bc0cb6",
+          "rel-s-repentant_1-4e52a3fd9490",
+          "rel-s-thriving_1-ba78c9cbafb6"
+        ],
+        "n_requests": 5,
+        "bytes": 10476,
+        "estimate_usd": 0.00507,
+        "submitted_at": "2026-10-09T13:43:02+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:49:55+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_01QZN1PZFMZW8UCaAvGeFfsG",
+        "custom_ids": [
+          "ove-s-amorous_1-0636229fd0ab",
+          "ove-s-beholden_1-56294bba48c0",
+          "ove-s-declining_1-bd596f1f90df",
+          "ove-s-disabused_1-d4987c24acd9",
+          "ove-s-disheveled_1-f8eddc692df4",
+          "ove-s-emigrating_1-67a4f716c25b",
+          "ove-s-expecting_1-cde37fa00f23",
+          "ove-s-fearful_1-2913e610f893",
+          "ove-s-heartsick_1-08379b244328",
+          "ove-s-inconsolable_1-814cd9f60c08",
+          "ove-s-liable_1-592a1b6f5812",
+          "ove-s-lonesome_1-72c9171ab992",
+          "ove-s-miserably_partnered_1-7f03d0f70138",
+          "ove-s-nascent_1-00406bc26c4e",
+          "ove-s-nervous_1-89be5d08897a",
+          "ove-s-overburdened_1-b196a89d0628",
+          "ove-s-pretty_well_1-9f2f5d830d08",
+          "ove-s-repentant_1-fee8ff91662e",
+          "ove-s-rumpled_1-42dfc6b37a18",
+          "ove-s-sulky_1-6efcea063d6c",
+          "ove-s-tearful_1-76d6fb2b4b52",
+          "ove-s-teasing_1-199e4e12fc55",
+          "ove-s-thankful_1-54f791b1e3ee",
+          "ove-s-thriving_1-4471a8f7d412",
+          "ove-s-unacknowledged_1-a2ab470d25a7",
+          "ove-s-unhappy_1-826fc1d2c223",
+          "ove-s-unhealthy_1-a022210ad8be",
+          "ove-s-unmastered_1-60fa92849bc5",
+          "ove-s-unpunished_1-5c360612da01",
+          "ove-s-woeful_1-1004bf8549d8"
+        ],
+        "n_requests": 30,
+        "bytes": 76549,
+        "estimate_usd": 0.01827,
+        "submitted_at": "2026-10-09T13:49:57+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T13:58:59+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_019K6RiqD3WfqMJWyhLNJiQz",
+        "custom_ids": [
+          "ove-o-amorous_1-b72f32f3dfb6",
+          "ove-o-declining_1-c33ffd25b54d",
+          "ove-o-disheveled_1-2c7f99881213",
+          "ove-o-fearful_1-ae175e258c5a",
+          "ove-o-miserably_partnered_1-948abc2f6895",
+          "ove-o-nervous_1-886317a3bee8",
+          "ove-o-pretty_well_1-d8793fe1c053",
+          "ove-o-repentant_1-3de568cf8584",
+          "ove-o-rumpled_1-54e6959d43db",
+          "ove-o-teasing_1-eafb320cf59c",
+          "ove-o-thankful_1-5a00a2d693fe",
+          "ove-o-unhealthy_1-2f5410eded4b",
+          "ove-o-woeful_1-51e282fcb215"
+        ],
+        "n_requests": 13,
+        "bytes": 33198,
+        "estimate_usd": 0.02028,
+        "submitted_at": "2026-10-09T13:59:00+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T14:44:05+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_01AKUb8C9ogp176tE7MKqAGk",
+        "custom_ids": [
+          "ove-s-amorous_1-2057aa29c1c9",
+          "ove-s-beholden_1-74cf62ead2e7",
+          "ove-s-declining_1-18444f95dbfd",
+          "ove-s-disabused_1-dd32ca3d5c47",
+          "ove-s-disheveled_1-d043cea4f621",
+          "ove-s-emigrating_1-f03c4cf0c08c",
+          "ove-s-expecting_1-cf75461d467d",
+          "ove-s-fearful_1-28043c38daa1",
+          "ove-s-heartsick_1-ce1a0f2c1eb9",
+          "ove-s-inconsolable_1-85a1a7d0b78c",
+          "ove-s-liable_1-20be85fafc1a",
+          "ove-s-lonesome_1-d64766a31e92",
+          "ove-s-nascent_1-fa4d7727c2b4",
+          "ove-s-overburdened_1-a70c5dfa3b59",
+          "ove-s-repentant_1-ec035bbe1a6b",
+          "ove-s-rumpled_1-1eb266078cab",
+          "ove-s-sulky_1-ed09a3e3511e",
+          "ove-s-tearful_1-bb6e33edc575",
+          "ove-s-teasing_1-d0c77a18fa17",
+          "ove-s-thriving_1-11bcfa965ff8",
+          "ove-s-unacknowledged_1-82ff07dad4b4",
+          "ove-s-unhappy_1-fecc78dd7cfa",
+          "ove-s-unmastered_1-b51827ea898f",
+          "ove-s-unpunished_1-30cace11211f"
+        ],
+        "n_requests": 24,
+        "bytes": 61465,
+        "estimate_usd": 0.014616,
+        "submitted_at": "2026-10-09T14:44:07+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T15:02:40+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_01JNY6CiwKMKqJh2zchK3crj",
+        "custom_ids": [
+          "ove-o-disabused_1-55ccc60580fa",
+          "ove-o-fearful_1-0979bf5fe76c",
+          "ove-o-tearful_1-64feefd4d2a6",
+          "ove-o-thriving_1-293e99a7bad5",
+          "ove-o-unhappy_1-00e82777f6a1"
+        ],
+        "n_requests": 5,
+        "bytes": 12724,
+        "estimate_usd": 0.0078,
+        "submitted_at": "2026-10-09T15:02:42+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T15:33:19+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_018SGLqqapXDg7shEFBQtqcA",
+        "custom_ids": [
+          "ove-s-amorous_1-8462b5c2028a",
+          "ove-s-beholden_1-96dcc8604587",
+          "ove-s-declining_1-b7e383aee29d",
+          "ove-s-disheveled_1-d7e4d9a1fd11",
+          "ove-s-emigrating_1-1d77b73633e6",
+          "ove-s-fearful_1-30b70518d2d4",
+          "ove-s-heartsick_1-dbb573aa0d5b",
+          "ove-s-inconsolable_1-4ef1371c7fd5",
+          "ove-s-liable_1-91f3af050b7c",
+          "ove-s-lonesome_1-3e8f15b7958c",
+          "ove-s-nascent_1-34d56f6fedb3",
+          "ove-s-overburdened_1-2be9dffffba4",
+          "ove-s-repentant_1-cf97e06a53ae",
+          "ove-s-sulky_1-679c8c8c5aae",
+          "ove-s-tearful_1-10a5e8a8002d",
+          "ove-s-teasing_1-cb4a43a571cb",
+          "ove-s-thriving_1-b8c6fe8f6dfe",
+          "ove-s-unmastered_1-8184118198d2",
+          "ove-s-unpunished_1-e572b307739a"
+        ],
+        "n_requests": 19,
+        "bytes": 48777,
+        "estimate_usd": 0.011571,
+        "submitted_at": "2026-10-09T15:33:22+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T16:09:12+00:00"
+      }
+    ],
+    "o03_opus": [
+      {
+        "id": "msgbatch_01CJkQwccVgNSTPuEDwuU2oU",
+        "custom_ids": [
+          "ove-o-amorous_1-cd26610ce4b1",
+          "ove-o-fearful_1-4d95204fb845",
+          "ove-o-liable_1-84db5fe7855e",
+          "ove-o-overburdened_1-bdab691e485f"
+        ],
+        "n_requests": 4,
+        "bytes": 10282,
+        "estimate_usd": 0.00624,
+        "submitted_at": "2026-10-09T16:09:13+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T16:45:05+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_011KsqBfPQMqtDr7r8s4GTrD",
+        "custom_ids": [
+          "ove-s-declining_1-1b63f928da1a",
+          "ove-s-disheveled_1-fef997e1fc4e",
+          "ove-s-inconsolable_1-5b6b4a7d615d",
+          "ove-s-lonesome_1-7ed551f65acf",
+          "ove-s-nascent_1-7dea3fa3eefa",
+          "ove-s-repentant_1-fcb80a797eb2",
+          "ove-s-sulky_1-519907e84df1",
+          "ove-s-tearful_1-9225d23ca1cd",
+          "ove-s-teasing_1-c50d0806c8f1",
+          "ove-s-thriving_1-f997ee0bd05a",
+          "ove-s-unmastered_1-27db495b41e3",
+          "ove-s-unpunished_1-f57e7b60f25a"
+        ],
+        "n_requests": 12,
+        "bytes": 30824,
+        "estimate_usd": 0.007308,
+        "submitted_at": "2026-10-09T16:45:07+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T17:10:00+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_01XXxuT8orgFyyz7RWabYbGR",
+        "custom_ids": [
+          "ove-o-declining_1-af10ec612261"
+        ],
+        "n_requests": 1,
+        "bytes": 2597,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-09T17:10:02+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T17:24:51+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_01MBRXBeV8Uf8VEs3azzH3HY",
+        "custom_ids": [
+          "ove-s-inconsolable_1-e32589564ef9",
+          "ove-s-lonesome_1-171aade14e33",
+          "ove-s-sulky_1-651570098981",
+          "ove-s-tearful_1-c4a0e64c7fe4",
+          "ove-s-teasing_1-fa2849595dd7",
+          "ove-s-thriving_1-9f9e03e62e54",
+          "ove-s-unmastered_1-99629cd52e7a"
+        ],
+        "n_requests": 7,
+        "bytes": 17911,
+        "estimate_usd": 0.004263,
+        "submitted_at": "2026-10-09T17:24:53+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T17:43:15+00:00"
+      }
+    ],
+    "o05_opus": [
+      {
+        "id": "msgbatch_01NtSXzb6Nv3EyD7jwZcsUb5",
+        "custom_ids": [
+          "ove-o-lonesome_1-e8e43b60b04e",
+          "ove-o-sulky_1-6e7169967e73",
+          "ove-o-thriving_1-b15da300a994"
+        ],
+        "n_requests": 3,
+        "bytes": 7642,
+        "estimate_usd": 0.00468,
+        "submitted_at": "2026-10-09T17:43:16+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T17:47:51+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01A4wwksZMPqmvyYaiHqV2rc",
+        "custom_ids": [
+          "ove-s-sulky_1-ad97aa03c384",
+          "ove-s-tearful_1-d15f596db217"
+        ],
+        "n_requests": 2,
+        "bytes": 5083,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-09T17:47:53+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:00:37+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_01Lz1BVoc8zor8f4qy8b88X8",
+        "custom_ids": [
+          "ove-s-tearful_1-8c08b40dc6a1"
+        ],
+        "n_requests": 1,
+        "bytes": 2517,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-09T18:00:38+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:14:25+00:00"
+      }
+    ],
+    "o07_opus": [
+      {
+        "id": "msgbatch_01QCwWaKWCGnq5cuWxVWEYmg",
+        "custom_ids": [
+          "ove-o-tearful_1-2ef29b787a34"
+        ],
+        "n_requests": 1,
+        "bytes": 2515,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-09T18:14:25+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-09T18:24:36+00:00"
+      }
+    ]
+  }
+}
