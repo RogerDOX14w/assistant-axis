@@ -157,7 +157,8 @@ class Node:
     m3_run: Optional[str] = None                # the M3 batch that decided it
     status: Optional[str] = None                # a queue entry's status
     missing: bool = False                       # a corpus stem M3 read that the current corpus no longer has
-    outcome: Optional[str] = None               # M1's outcome when it is not "trait": "physical" (the physical pass)
+    outcome: Optional[str] = None               # M1's outcome when it is not "trait": "physical" (the physical pass),
+                                                # "states" (the states pass)
     included: Optional[str] = None              # a covered candidate reviewed anyway (``build --include``): why
 
     def to_dict(self) -> dict:
@@ -402,15 +403,19 @@ class PairCandidate(NR.M3Candidate):
 
 def _gloss(row: Mapping) -> Optional[str]:
     from . import physical_pass as PP
-    g = row.get("gloss") or (row.get("filter") or {}).get("gloss") or (row.get(PP.BLOCK) or {}).get("gloss")
+    from . import states_pass as SP
+    g = (row.get("gloss") or (row.get("filter") or {}).get("gloss") or (row.get(PP.BLOCK) or {}).get("gloss")
+         or SP.gloss_of(row))
     return g.strip() if isinstance(g, str) and g.strip() else None
 
 
 def _holding_of(row: Mapping) -> Optional[str]:
-    """The holding list a row was judged from: ``physical`` for a row whose M3 block came from the physical pass
-    (``novelty.pass``), else None (a trait row, read as before)."""
+    """The holding list a row was judged from: ``physical`` for a row whose M3 block came from the physical pass,
+    ``states`` for one from the states pass (``novelty.pass``), else None (a trait row, read as before)."""
     from . import physical_pass as PP
-    return PP.HOLDING if (row.get("novelty") or {}).get("pass") == PP.PASS_NAME else None
+    from . import states_pass as SP
+    p = (row.get("novelty") or {}).get("pass")
+    return PP.HOLDING if p == PP.PASS_NAME else SP.PASS_NAME if p == SP.PASS_NAME else None
 
 
 def pair_candidate(row: Mapping) -> tuple[Optional[PairCandidate], Optional[str]]:

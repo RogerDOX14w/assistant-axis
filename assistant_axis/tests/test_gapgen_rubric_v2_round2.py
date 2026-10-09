@@ -169,7 +169,9 @@ def sp_mod():
 
 
 def qrow(i, label, **kw):
+    # queue v4 (2026-10-09): every row also says how long the state lasts (a passing state here)
     base = {"id": i, "label": label, "reason": "Some people are prone to this again and again.",
+            "typical_duration": "hours", "lasting": False, "role": None,
             "plausible": True, "name_fits": True, "suggested_name": None,
             "gloss": "This means " + "falling into it " * 7 + "often.", "confidence": 0.8}
     base.update(kw)
@@ -186,7 +188,7 @@ def crow_corpus(i, label, **kw):
 class TestStatesPassRubric:
     def test_versions_and_hashes(self):
         s = sp_mod()
-        assert s.RUBRIC_VERSIONS == {"queue": 3, "corpus": 2}  # round 4: prompt words replaced
+        assert s.RUBRIC_VERSIONS == {"queue": 4, "corpus": 2}  # round 4: prompt words replaced; v4: duration, role
         assert s.PROMPT_SHA256 == {"queue": hashlib.sha256(s.QUEUE_PROMPT.encode()).hexdigest(),
                                    "corpus": hashlib.sha256(s.CORPUS_PROMPT.encode()).hexdigest()}
 
@@ -268,7 +270,7 @@ class TestStatesPassRunner:
         b = out["sulking#1"].block
         assert out["sulking#1"].stage == "judged"
         assert b["plausible"] is True and b["suggested_name"] == "sulky" and b["suggested_stem"] == "sulky"
-        assert b["mode"] == "queue" and b["rubric_version"] == 3 and b["prompt_sha256"] == s.PROMPT_SHA256["queue"]
+        assert b["mode"] == "queue" and b["rubric_version"] == 4 and b["prompt_sha256"] == s.PROMPT_SHA256["queue"]
         assert out["sunburnt#1"].block["plausible"] is False
         assert r.usage.n_calls == 1 and len(r.responses) == 1
         assert "This means sulking now." in user_text(client.calls[0])
@@ -283,8 +285,9 @@ class TestStatesPassRunner:
             if n["calls"] == 1:
                 return json.dumps({"results": [qrow(items[0]["id"], items[0]["label"])]})
             return states_responder(kw)
+        # align=False (v4): the rows' glosses pass the scan ("often"), and the alignment calls are not this test's
         r = s.StatesPassRunner(client=FakeAsyncAnthropic(flaky), batch_id="sp", mode="queue", model=HAIKU,
-                               retry_delays=())
+                               retry_delays=(), align=False)
         out = r.run([s.StatesItem(key=f"w{i}#1", label=f"w{i}", text="t") for i in range(3)])
         assert all(x.stage == "judged" for x in out) and n["calls"] == 2
         assert r.parse_counts() == (3, 3)
@@ -358,7 +361,7 @@ class TestStatesPassCLI:
         for f in ("responses.jsonl", "results.jsonl", "summary.json", "usage.json", "run.json"):
             assert (d / f).exists(), f
         run = json.loads((d / "run.json").read_text())
-        assert run["rubric_version"] == 3 and run["prompt_sha256"] == sp_mod().PROMPT_SHA256["queue"]
+        assert run["rubric_version"] == 4 and run["prompt_sha256"] == sp_mod().PROMPT_SHA256["queue"]
         res = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
         assert [r["key"] for r in res] == ["sulking#1", "sunburnt#1"]
         s = json.loads((d / "summary.json").read_text())["result"]

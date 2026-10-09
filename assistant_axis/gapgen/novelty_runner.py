@@ -174,12 +174,19 @@ def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[
     """``(candidate, None)`` for a registry row M3 can judge, else ``(None, why)``: not filtered, not a
     ``trait`` verdict, or no gloss.  ``holding="physical"`` (the physical pass, ``novelty_score.py score
     --holding physical``): a row on that holding list instead, its gloss and alignment score from the pass's gloss
-    stage (:func:`assistant_axis.gapgen.physical_pass.candidate_from_row`); without it, nothing changes."""
+    stage (:func:`assistant_axis.gapgen.physical_pass.candidate_from_row`); ``holding="states"`` (the states pass
+    v4, ``--holding states``): a row the states pass released, its gloss and alignment score from its
+    ``states_pass`` block (:func:`assistant_axis.gapgen.states_pass.candidate_from_row`); without it, nothing
+    changes."""
     if holding is not None:
         from . import physical_pass as PP
-        if holding != PP.HOLDING:
-            raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list as a pass of its own, not {holding!r}")
-        return PP.candidate_from_row(row)
+        from . import states_pass as SP
+        if holding == PP.HOLDING:
+            return PP.candidate_from_row(row)
+        if holding == SP.PASS_NAME:
+            return SP.candidate_from_row(row)
+        raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list and the {SP.PASS_NAME!r} pass's released rows "
+                         f"as passes of their own, not {holding!r}")
     f = row.get("filter") or {}
     if not f:
         return None, "not_filtered"

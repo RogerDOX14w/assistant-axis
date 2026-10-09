@@ -17,10 +17,13 @@ Commands:
 * ``report [--generator G] [--decision D] [--verdict V] [--include-held]``: a
   markdown table, the main review list: rows on a holding list are left off
   unless ``--include-held``.
-* ``holding --list physical|roles|states|nationalities``: a markdown block for
-  Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work the states and
-  nationalities queues from (the tool never writes those files); a states row
-  shows its states-pass suggestions.
+* ``holding --list physical|roles|states|nationalities|states_released``: a
+  markdown block for Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work
+  the states and nationalities queues from (the tool never writes those files);
+  a row the states pass judged shows its states-pass answers (from v4 its route,
+  typical duration and gloss; a role it sent to the roles list shows them too).
+  ``states_released`` lists the rows the states pass v4 moved out of the states
+  queue (they go through M3 and the review app, not into a file).
 * ``judgement-calls [--filter-results F ...] [--calls-file P]``: the words
   noted ``obvious_sense_not_trait`` (the main reading is not a trait), first,
   then those noted ``nontrait_person_sense`` (open point D, case 4: the
@@ -63,7 +66,10 @@ Commands:
   states pass judged plausible, which is promoted under its suggested name,
   and a physical row named with ``--keys``, which joins the physical track:
   tag ``physical``, the track's section; ``--status accepted`` still refuses
-  it; ``assistant_axis/gapgen/physical_pass.py``).
+  it; ``assistant_axis/gapgen/physical_pass.py``; and a row the states pass v4
+  released, named with ``--keys``: tags ``states_pass`` and ``lasting_state``
+  or ``predisposition``, the pass's gloss as the draft; ``--status accepted``
+  refuses it too; ``assistant_axis/gapgen/states_pass.py``).
 
 No other command here makes an API call.
 """
@@ -188,13 +194,20 @@ HOLDING_TARGETS = {"physical": "TRAITS_TO_ADD.md (physical-attribute section)", 
                    "states": "the states queue (decision 12: check a habitual predisposition is plausible, "
                              "choose its name, write its description; states_pass.py drafts all three)",
                    "nationalities": "the nationalities queue (decision 3, open point B: traits, sampled from "
-                                    "this list when more are wanted)"}
+                                    "this list when more are wanted)",
+                   "states_released": "nowhere: rows the states pass v4 moved out of the states queue go through M3 "
+                                      "(novelty_score.py score --holding states) and the review app"}
 
 
 def _states_pass_note(r: dict) -> str:
     sp = r.get("states_pass") or {}
     if sp.get("mode") != "queue":
         return " [states pass: not run]"
+    if sp.get("route"):   # v4 (2026-10-09): the route, the duration and the gloss
+        why = f"; {sp['route_reason']}" if sp.get("route_reason") else ""
+        name = f"; name {sp['suggested_name']}" if sp.get("route") == "renamed" and sp.get("suggested_name") else ""
+        return (f" [states pass v{sp.get('rubric_version')}: {sp['route']} ({sp.get('typical_duration')}){name}{why}; "
+                f"draft: {sp.get('gloss')}]")
     if not sp.get("plausible"):
         return f" [states pass: predisposition implausible: {sp.get('reason')}]"
     name = sp.get("suggested_name") if sp.get("name_fits") is False and sp.get("suggested_name") else r["label"]
@@ -208,7 +221,7 @@ def cmd_holding(args) -> int:
     for r in rows:
         f = r.get("filter") or {}
         gens = sorted({s.get("generator") for s in r.get("sources") or []})
-        note = _states_pass_note(r) if args.list == "states" else ""
+        note = _states_pass_note(r) if args.list in ("states", "states_released") or r.get("states_pass") else ""
         print(f"- **{r['label']}** ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): "
               f"{r.get('gloss') or ''}{note}")
     return 0
@@ -535,10 +548,12 @@ def cmd_promote(args) -> int:
         if not sep or not name.strip():
             raise SystemExit(f"--confirm-state-name takes KEY=NAME, not {spec!r}")
         confirmed[key.strip()] = name.strip()
-    # a physical row is promoted only by name (the physical pass, QUESTIONS 1): --keys names it, --status does not
+    # a physical row, and a row the states pass released, is promoted only by name (the physical pass, QUESTIONS 1;
+    # the states pass v4): --keys names it, --status does not
     rep = promote(rows, queue, keys, data_dir=args.data_dir, dry_run=args.dry_run, section=args.section,
                   min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down,
-                  confirmed_state_names=confirmed, allow_physical=bool(args.keys))
+                  confirmed_state_names=confirmed, allow_physical=bool(args.keys),
+                  allow_released_states=bool(args.keys))
     for k in rep.promoted:
         e = next(x for x in rep.entries if x["gap_gen"]["registry_key"] == k)
         print(f"{'WOULD PROMOTE' if args.dry_run else 'PROMOTED'} {k} -> {e['stem']} ({e['entity_type']}"

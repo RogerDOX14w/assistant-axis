@@ -263,7 +263,8 @@ def _all_prompts():
     from assistant_axis.gapgen import plain_reading as pr
     from assistant_axis.gapgen import states_pass as sp
     return {"classifier": fr.SYSTEM_PROMPT, "probe": fr.DEFINE_PROBE_PROMPT, "plain_reading": pr.READING_PROMPT,
-            "comparison": pr.COMPARISON_PROMPT, "states_queue": sp.QUEUE_PROMPT, "states_corpus": sp.CORPUS_PROMPT}
+            "comparison": pr.COMPARISON_PROMPT, "states_queue": sp.QUEUE_PROMPT, "states_corpus": sp.CORPUS_PROMPT,
+            "states_check": sp.CHECK_PROMPT}
 
 
 def _forbidden():
@@ -367,9 +368,10 @@ class TestBudgetStops:
 
         def resp(kw):
             items = [json.loads(x) for x in user_text(kw).splitlines()[1:]]
-            body = {"results": [{"id": it["id"], "label": it["label"], "reason": "r", "plausible": False,
+            body = {"results": [{"id": it["id"], "label": it["label"], "reason": "r", "typical_duration": "hours",
+                                 "lasting": False, "role": None, "plausible": False,
                                  "name_fits": None, "suggested_name": None, "gloss": None, "confidence": 0.9}
-                                for it in items]}
+                                for it in items]}   # queue v4 rows (2026-10-09)
             return make_response(json.dumps(body), input_tokens=100000, output_tokens=10)
         r = sp.StatesPassRunner(client=FakeAsyncAnthropic(resp), batch_id="b", mode="queue", model=HAIKU,
                                 usage=GuardedUsage(budget_usd=0.05), batch_size=2, concurrency=1)
@@ -521,6 +523,13 @@ def test_every_recorded_version_and_hash_is_pinned():
                 checks.append((k, d["versions"][k], ps[k]))
         elif name.startswith("states_pass/"):
             checks.append((f"states_{d['mode']}", d.get("rubric_version"), ps))
+            if "check_prompt_sha256" in d:   # queue v4 (2026-10-09): the gloss check and M1's alignment prompt too
+                checks.append(("states_check", d["check_rubric_version"], d["check_prompt_sha256"]))
+                from assistant_axis.gapgen import split_rubrics
+                pins = {r["version"]: r["sha256"] for r in split_rubrics.read_versions()["prompts"]["alignment"]}
+                if pins.get(d["alignment_step_version"]) != d["alignment_prompt_sha256"]:
+                    problems.append((name, "split.alignment", d["alignment_step_version"],
+                                     d["alignment_prompt_sha256"][:12]))
         for prompt, version, sha in checks:
             pins = HISTORY.get(prompt, {})
             if version is None:

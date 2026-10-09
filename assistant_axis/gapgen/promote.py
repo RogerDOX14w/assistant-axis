@@ -24,6 +24,13 @@ the tag ``physical`` (merged with the others), the physical track's section
 section other than the default is given, and the physical pass's gloss as
 ``description_draft``.  Every other refusal applies as to any row.
 
+Released states (the states pass v4, :mod:`assistant_axis.gapgen.states_pass`; 2026-10-09): a row the states
+pass moved out of the states queue (``holding: "states_released"``: a lasting condition, or a predisposition
+under the state's own name, whose gloss the check confirmed) is promoted only with ``allow_released_states``,
+which the same two by-name paths pass; the bulk path refuses it.  Its entry carries the tags ``states_pass`` and
+``lasting_state`` or ``predisposition``, the pass's gloss as ``description_draft`` and a note of the route
+(``states_pass.queue_entry_extras``).  Every other refusal applies as to any row.
+
 States (round 4, replacing round 2's assumption; QUESTIONS 14): a row on the
 ``states`` list becomes promotable once the states pass
 (:mod:`assistant_axis.gapgen.states_pass`) has judged a habitual
@@ -179,6 +186,9 @@ def states_promotion(rec: dict, confirmed_name: Optional[str] = None) -> tuple[O
     if sp.get("mode") not in (None, "queue") or "plausible" not in sp:
         return None, ("on the states holding list with no states pass judgement yet (run "
                       "states_pass.py --mode queue --holding-states)")
+    if sp.get("lasting"):
+        return None, (f"on the states holding list; the states pass judged it a lasting condition (route "
+                      f"{sp.get('route')}): {sp.get('route_reason') or sp.get('reason')}")
     if not sp.get("plausible"):
         return None, f"on the states holding list; the states pass judged a predisposition implausible: {sp.get('reason')}"
     if not sp.get("gloss"):
@@ -196,15 +206,17 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             dry_run: bool = True, section: str = DEFAULT_SECTION,
             min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False,
             confirmed_state_names: Optional[dict[str, str]] = None,
-            allow_physical: bool = False) -> PromoteReport:
+            allow_physical: bool = False, allow_released_states: bool = False) -> PromoteReport:
     """Build queue entries for ``keys`` and (unless ``dry_run``) append them
     to ``queue["entries"]`` in place.  ``records`` is the folded registry.
     The caller saves the queue (``seed_entities.save_queue``) and records
     ``seed_queue_stem`` on the promoted rows.  ``allow_physical``: rows on the
-    physical holding list may be promoted (the caller names them; see the
-    module docstring)."""
+    physical holding list may be promoted; ``allow_released_states``: rows the
+    states pass released may be (the caller names them; see the module
+    docstring)."""
     from data_analysis.seed_entities import build_registry, corpus_stems
     from . import physical_pass as PP
+    from . import states_pass as SP
 
     rep = PromoteReport(dry_run=dry_run)
     corpus = set().union(*corpus_stems(data_dir).values())
@@ -219,12 +231,23 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
         f = rec.get("filter")
         via_states = None
         via_physical = False
+        via_released = False
         held_why = None
         if rec.get("holding") == "states":
             eff, held_why = states_promotion(rec, (confirmed_state_names or {}).get(key))
             if eff is not None:
                 via_states = {**rec, "_suggested": eff.pop("_suggested")}
                 rec = {**rec, **eff}
+        elif rec.get("holding") == SP.RELEASED_HOLDING:
+            if not SP.is_released(rec):
+                held_why = (f"on the {SP.RELEASED_HOLDING} list without a confirmed states-pass gloss (route "
+                            f"{SP.route_of(rec)})")
+            elif allow_released_states:
+                via_released = True
+                rec = {**rec, "gloss": rec.get("gloss") or SP.gloss_of(rec)}
+            else:
+                held_why = (f"released by the states pass ({SP.route_of(rec)}): promoted only by name "
+                            f"(gap_registry.py promote --keys, or the review app's apply)")
         elif rec.get("holding") == PP.HOLDING:
             if allow_physical:
                 via_physical = True
@@ -268,6 +291,8 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
                                                    "state_gloss": via_states.get("gloss")}
             if via_physical:
                 PP.queue_entry_extras(entry, rec, queue, section=None if section == DEFAULT_SECTION else section)
+            if via_released:
+                SP.queue_entry_extras(entry, rec)
             if old is not None:  # reopened on purpose: the history travels with the new entry
                 history = (f"previously {old.get('status')}: {turned_down_reason(old)}; reopened by "
                            f"promote --reopen-turned-down")

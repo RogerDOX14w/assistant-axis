@@ -42,6 +42,13 @@ HISTORY: dict[str, dict[int, str]] = {
         1: "4a51b9159951607dc5094b5ca80de0c4cb753f8a41e77fefc9a9ae21e6a7711e",
         2: "66b1bebc643001fc6517fdf6ac49a9036d64c753c8382b0578b9509a7c9caaf4",  # never run
         3: "6790603bcdfabafa97db968a3fc832ec17a5f64dd487b84258b3fc892b86fd3d",
+        # 2026-10-09 (Roger): the duration question and its narrative test, the role question for a lasting
+        # condition (the kind call's own definition), new examples
+        4: "e2765bbd7f921ecfe22370ae6229af4db79bd09426543fc53fcef649a17f97d6",
+    },
+    # the states pass's gloss check (2026-10-09): one gloss a call, read as lasting, predisposition or passing
+    "states_check": {
+        1: "c230335cc8075d4ec38d746ea2d49e82600bd871fb9e70bc6f42fe2cfc079696",
     },
     "states_corpus": {
         1: "20d6a63e15d73855aad6a0041fda29ec4d8b51bfa9afd47a5d0e96dd08d4b261",
@@ -88,6 +95,7 @@ def current() -> dict[str, tuple[int, str]]:
         "probe": (fr.PROBE_RUBRIC_VERSION, _sha(fr.DEFINE_PROBE_PROMPT)),
         "states_queue": (sp.RUBRIC_VERSIONS["queue"], _sha(sp.QUEUE_PROMPT)),
         "states_corpus": (sp.RUBRIC_VERSIONS["corpus"], _sha(sp.CORPUS_PROMPT)),
+        "states_check": (sp.CHECK_RUBRIC_VERSION, _sha(sp.CHECK_PROMPT)),
         "plain_reading": (pr.READING_VERSION, _sha(pr.READING_PROMPT)),
         "comparison": (pr.COMPARISON_VERSION, _sha(pr.COMPARISON_PROMPT)),
         "calibration_paraphrase": (cl.PARAPHRASE_PROMPT_VERSION, _sha(cl.PARAPHRASE_PROMPT)),

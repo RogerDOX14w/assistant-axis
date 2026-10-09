@@ -42,8 +42,8 @@ class TestVersionPins:
 
     def test_table_covers_every_prompt(self):
         # M2 (2026-10-01) added the calibration's two prompts to the table; round 4 (2026-10-02) the two
-        # paraphrase styles
-        assert set(rv().current()) == {"classifier", "probe", "states_queue", "states_corpus",
+        # paraphrase styles; the states pass's gloss check on 2026-10-09
+        assert set(rv().current()) == {"classifier", "probe", "states_queue", "states_corpus", "states_check",
                                        "plain_reading", "comparison", "calibration_paraphrase",
                                        "calibration_paraphrase_plain", "calibration_paraphrase_terse",
                                        "calibration_blinded"}
