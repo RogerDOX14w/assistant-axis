@@ -6,6 +6,8 @@ W3, the pre-extraction drop-or-merge review, second pass.  Every trait file in t
 
 **Counts.**  2748 nearest-neighbour entries, 1924 distinct pairs, 1139 under the floor, **785 read** (plus 1 read on request); 140 read the other way too.  **8** pairs are 4 both ways, **102** 3 or more both ways, **30** 3 or more one way only.  Spend $3.94, live.
 
+**Since the scan** (added 2026-10-09): [conceptual](../../traits/instructions/conceptual.json) and [enigmatic](../../traits/instructions/enigmatic.json) were dropped from the corpus at commit `647ca4d` (W3 A1-A3, from [drop_or_merge.md](../calibration_916/drop_or_merge.md)), so their links below no longer open; their rows stand as the record of what was read.
+
 **Deliberate near-duplicates** are marked in the tables (2 of the 4-and-4 pairs, 10 of the 3-or-more pairs, 1 of the one-way ones): pairs whose files' `source` field records the duplication as deliberate (a standard's version beside the plain trait, as the naming rule asks it to be recorded), so they are expected here and need no decision unless the standard's version is to go.
 
 ## Same concept both ways (4 and 4)
