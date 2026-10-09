@@ -782,6 +782,38 @@ a0a4e09 on `anthropic-vllm-uv`.  Tasks 20-25 of the checklist above are reconcil
 - **The corpus's regions**: `gap_registry.py corpus-regions --from-descriptions --only-missing
   --budget-usd 1`, **after each corpus chunk** (see the next section).
 
+### The seed queue in M3's search (2026-10-09)
+
+Roger, 2026-10-09: "That definitely needs fixing first, go ahead."  Until then only M3's stage 0 (the exact-label
+check) knew the [seed queue](../../data/seed_queue.json); retrieval, the relation call and the overlap walk read the
+corpus trait files alone, so a word promoted from one generator wave's review (`promote` writes it into the queue
+with status `candidate` and its gloss as `description_draft`) did not cover its synonym in the next wave.  **The
+index now also holds the queue's live trait entries** ([novelty.py](../../assistant_axis/gapgen/novelty.py)
+`queue_traits`): trait entries that are not yet a trait file, carry a text (`description`, else
+`description_draft`) and have a status of `candidate`, `ready`, `tbd` or `backlog` (`QUEUE_SEARCH_STATUSES`; from
+`seeded` on an entry is a trait file, and the `paired` entries without a file were renamed; `not_adopted` and
+`superseded` stay exact-label only, since turning a word down is no reason to hide its synonyms).  An entry whose
+stem is a corpus stem or a corpus file's `renamed_from`, or whose label is a corpus stem, is left out.  Each joins
+as a corpus trait would: embedded as `label: text` in the covered representation by the same model (cached), and
+**projected into the space fitted on the corpus alone** (the centring is the corpus mean), so no corpus vector
+and no earlier decision moves; then retrieved, relation-labelled and walked like a corpus trait.  A partner
+counts only when the entry records one.  In a block, a listed trait, a reading and the deciding reading that is a
+queue entry carry `queue_status`, a row the walk covered by one carries `covered_by_queue` beside `covered_by`
+(the [review graph](../../assistant_axis/gapgen/review_graph.py) makes it a `queue:<stem>` node the review app can
+merge into), and every block of a run whose index held entries carries `queue_search` (count, statuses, the
+queue file's sha256, a hash of the entries); `run.json` and `summary.json` add the stems and what was excluded.  A
+run whose queue has no such entry writes byte for byte what it wrote before (checked against 58a76c5 on the test
+corpus).  **Off switch**: `novelty_score.py score --no-queue-search`, to reproduce an older run; `--redecide`,
+`--relation-only` and `full-scan` follow their source run's setting and `--resume` the earlier session's;
+`--corpus-at` reads the queue at the same commit as the trait files; `--hide` (the recovery harness, which passes
+`--no-queue-search` through) leaves out the hidden traits' entries and partners.  `score --redecide --queue-search`
+re-decides an older run with the queue, sending only the calls whose lists changed (`--embed-only` first when the
+entries are not yet embedded).  Check on the three generator pilots' 333 kept rows, at their commit's queue (two
+entries: [technomystical](../../data/traits/instructions/technomystical.json), then a `candidate`, and spiralist, a `backlog`
+entry of the [seed queue](../../data/seed_queue.json)): none flips, one row listed an entry (unrelated), $0.0036
+([Roget's decision_changes.md](../../data/candidates/novelty/m3_queue_check_roget/decision_changes.md)); a test
+covers the case the change is for, a wave-1 word promoted and covering its wave-2 synonym.
+
 ### The corpus's regions, from the descriptions (2026-10-09)
 
 [corpus_regions.json](../../data/candidates/corpus_regions.json) gives every corpus trait a **region**
@@ -854,7 +886,9 @@ gloss, alignment score and region beside it.  `novelty`: `run_id`, `mode`, `deci
 `pair_completion_for`, `pair_flags`, `pair_notes`, `cut_off`, `alignment_score`, `region`,
 `deciding_reading`, `readings` (every pair judged: stem, cosine, relation, sonnet, opus, outcome),
 `n_pairs_judged`, `listed`, `shortlist`, `relation`, `rubrics`, `rules`, `config_version`,
-`embedding`, `usage`, `at`, and `redecided_from` on a re-decided block.
+`embedding`, `usage`, `at`, and `redecided_from` on a re-decided block; from 2026-10-09, where the seed queue
+was in the search, `queue_search`, `covered_by_queue`, and `queue_status` on listed traits and readings ("The seed
+queue in M3's search" above).
 
 ### The recovery harness (plan 13's core, re-specified; built by the close-out job below)
 

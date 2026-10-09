@@ -32,7 +32,10 @@ plan's "Interface as built" section, not its older "Frozen interface".  The nigh
 through M3 ([novelty_score.py](../../data_analysis/gap_generation/novelty_score.py) `score --holding physical`,
 which first glosses them with M1's own gloss and alignment calls), R1 and R2 in batches of their own, and a promoted one joins the physical track, tagged
 `physical`; smoke run [physical_pilots_1](../../data/candidates/novelty/physical_pilots_1/decisions.md) (13 rows,
-9 covered, 4 new, $0.063 with R1).
+9 covered, 4 new, $0.063 with R1).  From 2026-10-09 M3's similarity search also covers the
+[seed queue](../../data/seed_queue.json)'s live trait entries (a word promoted from one wave's review covers its
+synonym in the next; `--no-queue-search` turns it off; [coding_plan_platform.md](./coding_plan_platform.md),
+"The seed queue in M3's search"); on the three generator pilots it changed no decision.
 
 ## The plans
 
