@@ -88,6 +88,22 @@ Rules: ``--rules 2`` (the default from 2026-10-07: decisions 12-15 of ``coding_p
 and the cosine floor) or ``--rules 1`` (the pilot's); ``--cosine-floor F`` (default: the rule set's, 0.25 for
 rule set 2, none for 1; ``none`` turns it off).  Recorded in ``run.json`` and in every row's block.
 
+The seed queue in the search (2026-10-09): the index holds, beside the corpus traits, the seed queue's trait entries
+that are not yet a trait file, carry a text (``description``, else ``description_draft``) and have a live status
+(``novelty.QUEUE_SEARCH_STATUSES``: candidate, ready, tbd, backlog; ``novelty.queue_traits``), embedded as
+``label: text`` like a corpus trait and projected into the space fitted on the corpus alone; they are retrieved,
+relation-labelled and walked like corpus traits, so a word an earlier wave promoted covers its synonym in a later
+one (``covered_by`` the entry, ``covered_by_queue`` beside it).  Every block of such a run carries
+``queue_search`` (``n_entries``, ``statuses``, the queue file's ``queue_sha256``, ``entries_sha256``); ``run.json``
+and ``summary.json`` the same with the stems and the exclusions.  A run whose queue has no such entry decides
+exactly as before (no key is added).  ``--no-queue-search`` turns it off, to reproduce an older run; ``--redecide``,
+``--relation-only`` and ``full-scan`` follow their source's setting (off for a run from before 2026-10-09) unless
+``--queue-search`` / ``--no-queue-search`` is given, and ``--resume`` the earlier session's.  ``score --redecide
+--queue-search`` over an older run re-decides it with the queue (only the calls whose lists changed are sent; the
+queue search is the last step of ``decision_changes.md``, which lists the rows a queue entry covered); when the
+entries' texts are not yet in the embedding cache it says so, and ``--embed-only`` embeds them first.  ``--corpus-at``
+reads the queue at the same commit as the trait files; ``--hide`` leaves the hidden stems' entries out.
+
 Cost: ``score`` and ``full-scan`` print the estimate by stage (``n_calls x (in, out) tokens at model rates``),
 ``--budget-usd`` is the hard cap (default $5; an estimate over it is refused), and a budget or estimate over $20
 needs ``--confirm-expensive`` and ``--confirmed-by``.  ``--dry-run`` prints the plan, the estimate and the first
@@ -220,12 +236,37 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
     return out, dict(skipped)
 
 
+def queue_record(data_dir: Path, *, hide=()) -> tuple[dict, dict]:
+    """``(queue traits, record)``: the seed-queue entries of ``<data_dir>/seed_queue.json`` that join the
+    similarity search (:func:`novelty.queue_traits`, against the full corpus of ``data_dir``, less ``hide``), and
+    the record ``run.json`` keeps: the selection's, plus the queue file's path and sha256."""
+    import hashlib
+    import data_analysis.seed_entities as se
+    qp = Path(data_dir) / "seed_queue.json"
+    queue = se.load_queue(qp) if qp.exists() else {"entries": []}
+    qt, rec = NV.queue_traits(queue, NV.load_trait_corpus(data_dir), hide=hide)
+    rec = {"enabled": True, "queue_path": str(qp),
+           "queue_sha256": hashlib.sha256(qp.read_bytes()).hexdigest() if qp.exists() else None} | rec
+    return qt, rec
+
+
+def queue_off_record() -> dict:
+    """``run.json``'s ``queue_search`` of a run without it (``--no-queue-search``, or a source that had none)."""
+    return {"enabled": False, "n_entries": 0}
+
+
 def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = False,
-               hide=()) -> tuple[NV.CorpusIndex, dict]:
+               hide=(), queue_search: bool = False) -> tuple[NV.CorpusIndex, dict]:
     """The corpus in the covered setting from the embedding cache (``label: description`` in the covered
     representation); a text missing from the cache is embedded only with ``allow_embed`` (charged).  ``hide``:
     stems left out of the corpus before the space is fitted (``recovery.reduced_traits``; ``ValueError`` for a
-    stem the corpus does not have)."""
+    stem the corpus does not have).
+
+    ``queue_search`` (2026-10-09): the seed queue's live trait entries with a text join the index
+    (:func:`queue_record`): ``label: text`` in the same representation, embedded by the same model (cached),
+    projected into the space fitted on the corpus alone, so that no corpus vector moves.  ``info["queue"]`` is
+    the record (``queue_off_record`` without it); the index's ``queue_info`` (what every block of the run then
+    carries) is set only when at least one entry joins, so a run whose queue has none is the corpus run exactly."""
     import numpy as np
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.recovery import reduced_traits
@@ -233,6 +274,7 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
     traits = NV.load_trait_corpus(data_dir)
     if hide:
         traits = reduced_traits(traits, hide)
+    qtraits, qrec = queue_record(data_dir, hide=hide) if queue_search else ({}, queue_off_record())
     cov = cfg.covered
     rep, variant = cov["representation"], cov["space"]["variant"]
     if cov.get("metric") != "cos":
@@ -242,19 +284,28 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
         raise SystemExit(f"live model arm {live['arm']!r}: M3 embeds with OpenAI (the config's live model)")
     embedder = EM.OpenAIEmbedder(live["model_id"])
     stems = sorted(traits)
+    qstems = sorted(qtraits)
     texts = [represent(traits[s].label, traits[s].description, rep) for s in stems]
-    found, missing = cache.lookup(embedder.tag, texts)
+    qtexts = [represent(qtraits[s].label, qtraits[s].description, rep) for s in qstems]
+    found, missing = cache.lookup(embedder.tag, texts + qtexts)
+    n_c = len(stems)
     info = {"n_corpus": len(stems), "n_missing_from_cache": len(missing),
-            "missing": [stems[i] for i in missing][:20]}
+            "missing": [(stems + qstems)[i] for i in missing][:20],
+            "n_corpus_missing": sum(1 for i in missing if i < n_c), "n_queue_missing": sum(1 for i in missing if i >= n_c),
+            "queue": {k: v for k, v in qrec.items() if k != "stems"} | {"n_entries": len(qstems)},
+            "queue_stems": qstems}
     if missing:
         if not allow_embed:
             return None, info
-        E = EM.embed_texts(embedder, texts, cache=cache, usage=usage)
+        E_all = EM.embed_texts(embedder, texts + qtexts, cache=cache, usage=usage)
     else:
-        E = np.stack([found[i] for i in range(len(stems))])
+        E_all = np.stack([found[i] for i in range(len(stems) + len(qstems))])
+    E, Eq = E_all[:n_c], E_all[n_c:]
     settings = {"config_version": cfg.config_version, "model": live["model_id"], "cache_tag": embedder.tag,
                 "representation": rep, "variant": variant, "metric": "cos", "k": cfg.k}
-    return NV.build_index(traits, E, variant=variant, settings=settings), info
+    qinfo = {k: qrec[k] for k in NR.QUEUE_BLOCK_FIELDS if k in qrec} if qstems else None
+    return NV.build_index(traits, E, variant=variant, settings=settings, queue=qtraits or None,
+                          E_queue=Eq if qstems else None, queue_info=qinfo), info
 
 
 def label_sets_for(data_dir: Path, hide=()) -> NV.LabelSets:
@@ -545,6 +596,57 @@ def _trait_link(stem: Optional[str], label: Optional[str] = None, rel: str = "..
     return f"[{_md(label or stem.replace('_', ' '))}]({rel}{stem}.json)"
 
 
+#: The seed queue, relative to ``data/candidates/novelty/<batch>/``.
+QUEUE_REL = "../../../seed_queue.json"
+
+
+def _link(stem: Optional[str], labels: dict, queue: Optional[dict] = None) -> str:
+    """A trait's link in the run's markdown: a seed-queue entry of ``queue`` (``stem -> {"label", "status"}``) to
+    the seed queue, marked as such; anything else to its trait file (:func:`_trait_link`)."""
+    q = (queue or {}).get(stem) if stem else None
+    if q is not None:
+        return f"[{_md(q.get('label') or stem.replace('_', ' '))}]({QUEUE_REL}) (seed queue, {_md(q.get('status'))})"
+    return _trait_link(stem, labels.get(stem))
+
+
+def queue_map(traits: dict) -> dict:
+    """``stem -> {"label", "status"}`` of the seed-queue entries among an index's traits."""
+    return {s: {"label": t.label, "status": t.queue_status} for s, t in traits.items() if getattr(t, "queue_status", None)}
+
+
+def queue_map_from_results(results: list[dict], data_dir: Optional[Path] = None) -> dict:
+    """The same from a run's blocks (every listed trait, reading and covering marked as a queue entry), with the
+    labels of ``<data_dir>/seed_queue.json`` where it has the entry (``decisions`` rewrites the markdown later)."""
+    out: dict = {}
+    for r in results:
+        nv = r.get("novelty") or {}
+        for x in list(nv.get("listed") or []) + list(nv.get("readings") or []):
+            if x.get("queue_status"):
+                out.setdefault(x["stem"], {"label": None, "status": x["queue_status"]})
+        cq = nv.get("covered_by_queue")
+        if cq:
+            out.setdefault(cq["stem"], {"label": None, "status": cq.get("status")})
+    if out and data_dir is not None and (Path(data_dir) / "seed_queue.json").exists():
+        entries = json.loads((Path(data_dir) / "seed_queue.json").read_text(encoding="utf-8")).get("entries") or []
+        by = {}
+        for e in entries:
+            by.setdefault(e.get("stem"), e)
+        for s, v in out.items():
+            v["label"] = (by.get(s) or {}).get("label")
+    return out
+
+
+def _queue_line(results: list[dict]) -> str:
+    """The header's sentence on the seed-queue entries in the search (empty when the run's index held none)."""
+    recs = {json.dumps(r["novelty"].get("queue_search"), sort_keys=True) for r in results if r["novelty"].get("queue_search")}
+    if not recs:
+        return ""
+    q = json.loads(sorted(recs)[0])
+    return (f"Seed-queue entries in the search: {q.get('n_entries')} (statuses {', '.join(q.get('statuses') or [])}; "
+            f"[seed_queue.json]({QUEUE_REL}) sha256 {str(q.get('queue_sha256'))[:12]}"
+            + (f"; {len(recs)} different queue records in this run" if len(recs) > 1 else "") + ").  ")
+
+
 def _reading_text(r) -> str:
     if not r:
         return ""
@@ -576,18 +678,21 @@ def _covered_flagged(nv: dict) -> Optional[dict]:
                  and d.get("stem") == nv.get("covered_by")), None)
 
 
-def _note_text(n: dict, labels: dict) -> str:
-    return " / ".join(_trait_link(s, labels.get(s)) for s in n["pair"]) + \
+def _note_text(n: dict, labels: dict, queue: Optional[dict] = None) -> str:
+    return " / ".join(_link(s, labels, queue) for s in n["pair"]) + \
         (f" ({n['kind']})" if n.get("kind") and n["kind"] != "pair" else "")
 
 
 def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode: str = "shortlist",
-                       pass_name: Optional[str] = None) -> str:
+                       pass_name: Optional[str] = None, queue: Optional[dict] = None) -> str:
     """``decisions.md``: every candidate (label, decision, covered_by, cut-off, the readings that decided it,
     review flags, pair completions), then the review sections (the covered-and-flagged rows of decision 12 with
     both readings and reasons; the both-ends-similar rows of decision 13 with the ends' cosines and any readings
     on record; the ``grey`` rows), then the pair completions.  Trait names link to their files (paths relative
-    to ``data/candidates/novelty/<batch>/``)."""
+    to ``data/candidates/novelty/<batch>/``).  ``queue`` (:func:`queue_map`): the seed-queue entries the run
+    searched, which link to the seed queue, marked; with any, a section lists the rows covered by one."""
+    queue = queue or {}
+    L = lambda s: _link(s, labels, queue)  # noqa: E731
     order = {"covered": 0, "grey": 1, "new": 2}
     rows = sorted(results, key=lambda r: (order.get(r["novelty"]["decision"], 9), str(r["label"]).lower()))
     n = Counter(r["novelty"]["decision"] for r in results)
@@ -596,7 +701,7 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
              f"{len(results)} candidates: " + ", ".join(f"{n[d]} {d}" for d in ("covered", "grey", "new") if n[d]) + ".  "
              "Cut-off: covered at 3 or more far from alignment (alignment score 0 or 1), at 4 near it (2 or 3).  "
              "The deciding readings are rubric A's 0-4 scale (Sonnet 5.5 first, Opus 5.5 where the rule sends it).  "
-             + _rules_line(results) +
+             + _rules_line(results) + _queue_line(results) +
              "Built by `novelty_score.py`; every reading is in `readings.jsonl` beside this file.", "",
              "| candidate | decision | covered by | cut-off | deciding reading | review | pair completion for | "
              "pairs judged | gloss |", "|---|---|---|---|---|---|---|---|---|"]
@@ -608,11 +713,11 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
             how += f" ({nv['exact_label'].get('match')}" + (", separator-blind" if nv["exact_label"].get("blind") else "") + ")"
         if nv.get("renamed_from"):
             how += f" (renamed from {nv['renamed_from'].get('old_stem')}, judged)"
-        pcf = ", ".join(_trait_link(s, labels.get(s)) for s in nv.get("pair_completion_for") or [])
+        pcf = ", ".join(L(s) for s in nv.get("pair_completion_for") or [])
         review = ", ".join(nv.get("review") or [])
         if nv.get("pair_notes"):
-            review += ": " + "; ".join(_note_text(x, labels) for x in nv["pair_notes"])
-        lines.append(f"| {_md(r['label'])} | {nv['decision']} | {_trait_link(cov, labels.get(cov)) if cov in labels else _md(cov)} | "
+            review += ": " + "; ".join(_note_text(x, labels, queue) for x in nv["pair_notes"])
+        lines.append(f"| {_md(r['label'])} | {nv['decision']} | {L(cov) if (cov in labels or cov in queue) else _md(cov)} | "
                      f"{nv['cut_off']} | {_md(how)} | {review} | {pcf} | "
                      f"{nv.get('n_pairs_judged', 0)} | {_md(r.get('gloss'))} |")
     flagged = [(r, _covered_flagged(r["novelty"])) for r in rows]
@@ -623,9 +728,21 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     for r, d in flagged:
         nv = r["novelty"]
         lines += [f"- **{_md(r['label'])}** (`{r['key']}`, cut-off {nv['cut_off']}) by "
-                  f"{_trait_link(d['stem'], labels.get(d['stem']))}: Sonnet {d['sonnet']['value']} "
+                  f"{L(d['stem'])}: Sonnet {d['sonnet']['value']} "
                   f"(\"{_md(d['sonnet'].get('reason'))}\"), Opus {d['opus']['value']} (\"{_md(d['opus'].get('reason'))}\")",
                   f"  Gloss: {_md(r.get('gloss'))}"]
+    by_queue = [r for r in rows if r["novelty"].get("covered_by_queue")]
+    if queue or by_queue:
+        lines += ["", f"## Covered by a seed-queue entry ({len(by_queue)} rows)", "",
+                  "The seed queue's live entries were in the search beside the corpus traits (a word promoted from an "
+                  "earlier review, not yet a trait file): these rows were covered by one through the overlap walk, under "
+                  "the same rule as a corpus trait.  Exact-label matches with a queue entry are in the table above.", ""]
+        for r in by_queue:
+            nv = r["novelty"]
+            d = nv.get("deciding_reading") or {}
+            lines += [f"- **{_md(r['label'])}** (`{r['key']}`, cut-off {nv['cut_off']}) by {L(nv['covered_by'])}, cosine "
+                      f"{d.get('cosine')}: {_reasons(d)}",
+                      f"  Gloss: {_md(r.get('gloss'))}"]
     noted = [r for r in rows if r["novelty"].get("pair_notes")]
     lines += ["", f"## Both ends similar (orthogonal to the pair?) ({len(noted)} rows)", "",
               "Decision 13 (Roger's rule): the relation call marked both members of a recorded pair (every corner of a "
@@ -634,14 +751,14 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     for r in noted:
         nv = r["novelty"]
         lines.append(f"- **{_md(r['label'])}** (`{r['key']}`, {nv['decision']}"
-                     + (f" by {_trait_link(nv['covered_by'], labels.get(nv['covered_by']))}" if nv.get("covered_by") else "")
+                     + (f" by {L(nv['covered_by'])}" if nv.get("covered_by") else "")
                      + f", cut-off {nv['cut_off']}).  Gloss: {_md(r.get('gloss'))}")
         for note in nv["pair_notes"]:
             ends = []
             for s in note["pair"]:
                 c = (note.get("cosines") or {}).get(s)
                 rd = (note.get("readings_on_record") or {}).get(s) or {}
-                txt = f"{_trait_link(s, labels.get(s))} (cosine {c:.3f}" if c is not None else f"{_trait_link(s, labels.get(s))} ("
+                txt = f"{L(s)} (cosine {c:.3f}" if c is not None else f"{L(s)} ("
                 if rd:
                     txt += "; " + ", ".join(f"{m.capitalize()} {v['value']} (\"{_md(v.get('reason'))}\")"
                                             for m, v in rd.items())
@@ -658,15 +775,15 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
                   f"Gloss: {_md(r.get('gloss'))}", ""]
         for d in nv.get("review_details") or []:
             if d["kind"] == "sonnet_below_opus_at":
-                lines.append(f"- {_trait_link(d['stem'], labels.get(d['stem']))}: Sonnet {d['sonnet']['value']} "
+                lines.append(f"- {L(d['stem'])}: Sonnet {d['sonnet']['value']} "
                              f"(\"{_md(d['sonnet'].get('reason'))}\"), Opus {d['opus']['value']} "
                              f"(\"{_md(d['opus'].get('reason'))}\")")
             elif d["kind"] == "pair_flag":
                 a, b = d["pair"]
-                lines.append(f"- pair {_trait_link(a, labels.get(a))} / {_trait_link(b, labels.get(b))}: both "
+                lines.append(f"- pair {L(a)} / {L(b)}: both "
                              f"{d['both']} in the relation call")
             elif d["kind"] == "both_similar":
-                lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels)} "
+                lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels, queue)} "
                              "(see \"Both ends similar\" above)")
             else:
                 lines.append(f"- unparsed: {_md(json.dumps({k: v for k, v in d.items() if k != 'kind'}))}")
@@ -678,7 +795,7 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     for r in pc:
         nv = r["novelty"]
         lines.append(f"- {_md(r['label'])} ({nv['decision']}): " +
-                     ", ".join(_trait_link(s, labels.get(s)) for s in nv["pair_completion_for"]))
+                     ", ".join(L(s) for s in nv["pair_completion_for"]))
     return "\n".join(lines) + "\n"
 
 
@@ -702,11 +819,15 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
                     "resumed_calls": runner.stats.get("resumed", 0), "rubrics": runner.rubric_pins,
                     "rules_of_run": runner.rules.as_dict()})
     summary.update(extra or {})
+    rec = summary.pop("queue_search_record", None)
+    if rec is not None:      # the run's queue record and the counts over its blocks (novelty_runner.summarize)
+        summary["queue_search"] = dict(rec) | dict(summary.get("queue_search") or {})
     env = json_metadata(summary, title=f"novelty_score {runner.mode} {runner.batch_id}", inputs=inputs or None)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
     labels = {s: t.label for s, t in runner.traits.items()}
+    queue = queue_map(runner.traits) or queue_map_from_results(results)    # an earlier session's entries too
     atomic_write_text(decisions_markdown(results, batch_id=runner.batch_id, labels=labels, mode=runner.mode,
-                                         pass_name=run_meta.get("pass")), out_dir / "decisions.md")
+                                         pass_name=run_meta.get("pass"), queue=queue), out_dir / "decisions.md")
     run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status,
                     stopped_by_error=summary["stopped_by_error"], n_decided=summary["n_decided"],
                     n_stalled=summary["n_stalled"])
@@ -752,6 +873,32 @@ def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--corpus-at", choices=("source", "current"), default=None,
                     help="where a run with a source (score --redecide, full-scan) reads the trait files and the seed "
                          "queue: as committed at the source run's git_sha (source, the default there) or --data-dir")
+    _queue_search_arg(ap)
+
+
+def _queue_search_arg(ap: argparse.ArgumentParser) -> None:
+    ap.add_argument("--queue-search", dest="queue_search", action=argparse.BooleanOptionalAction, default=None,
+                    help="whether the seed queue's live trait entries with a text (statuses "
+                         f"{', '.join(NV.QUEUE_SEARCH_STATUSES)}) join the similarity search beside the corpus traits "
+                         "(retrieval, the relation call, the overlap walk); default: on for a new run, and for a run "
+                         "with a source (--redecide, --relation-only, full-scan) the source's own setting (off for a "
+                         "run from before 2026-10-09).  --no-queue-search reproduces an older run")
+
+
+def resolve_queue_search(args, source: Optional[dict] = None) -> bool:
+    """``--queue-search`` / ``--no-queue-search`` as given; else the source run's own setting (its ``run.json``
+    ``queue_search.enabled``; a run from before 2026-10-09 has none: off); else on."""
+    v = getattr(args, "queue_search", None)
+    if v is not None:
+        return bool(v)
+    if source is not None:
+        return source_queue_search(source)
+    return True
+
+
+def source_queue_search(source: dict) -> bool:
+    """Whether a source run's index held the seed queue (``run.json`` ``queue_search.enabled``)."""
+    return bool((((source.get("run") or {}).get("queue_search")) or {}).get("enabled"))
 
 
 def _prepare_out_dir(out_dir: Path, args) -> tuple[int, list, Optional[dict]]:
@@ -788,6 +935,30 @@ def _resume_model_mismatch(earlier: Optional[dict], relation_model: str) -> Opti
     if was and was != relation_model:
         return (f"the run's earlier session asked the relation call of {was}, this one would ask {relation_model}; "
                 f"resume with --relation-model {was}")
+    return None
+
+
+def _peek_run(out_dir: Path) -> Optional[dict]:
+    """A run directory's ``run.json`` (``None`` when there is none), read before anything is decided."""
+    p = Path(out_dir) / "run.json"
+    try:
+        return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _resume_queue_mismatch(earlier: Optional[dict], queue_meta: dict) -> Optional[str]:
+    """Why a ``--resume`` is refused: the earlier session searched the seed queue and this one would not (or the
+    reverse), or the entries searched differ (the queue changed since: a resumed run would decide its rest against
+    another index).  A session from before 2026-10-09 searched none."""
+    was = (earlier or {}).get("queue_search") or queue_off_record()
+    if bool(was.get("enabled")) != bool(queue_meta.get("enabled")):
+        return (f"the run's earlier session {'searched' if was.get('enabled') else 'did not search'} the seed queue, this "
+                f"one {'would' if queue_meta.get('enabled') else 'would not'}: resume with "
+                f"{'--queue-search' if was.get('enabled') else '--no-queue-search'}")
+    if was.get("enabled") and was.get("entries_sha256") != queue_meta.get("entries_sha256"):
+        return (f"the seed-queue entries searched have changed since the run's earlier session ({was.get('n_entries')} "
+                f"then, {queue_meta.get('n_entries')} now, by entries_sha256): finish under a new --batch-id")
     return None
 
 
@@ -843,6 +1014,10 @@ def _check_score_selection(args, redecide: bool) -> Optional[str]:
     if len(chosen) != 1:
         return "score takes exactly one of --run, --keys, --unscored"
     return None
+
+
+#: The name of the attribution step at which a re-decided run's index takes in (or leaves out) the seed queue.
+QUEUE_STEP = "queue search"
 
 
 def _relation_seed(source: dict) -> str:
@@ -968,7 +1143,8 @@ def decision_changes(*, source: dict, results: list[dict], chain: list[tuple[str
                              "exact_label": b.get("exact_label"), "renamed_from": b.get("renamed_from"),
                              "below_floor": b.get("below_floor"), "pair_notes": b.get("pair_notes"),
                              "n_pairs_judged": b.get("n_pairs_judged"),
-                             "readings": b.get("readings") if b.get("renamed_from") else None},
+                             "readings": b.get("readings") if b.get("renamed_from") else None,
+                             "covered_by_queue": b.get("covered_by_queue")},
                      "decision_changed": a["decision"] != b["decision"], "steps": steps})
     trans = Counter(f"{src[k]['novelty']['decision']} -> {res[k]['novelty']['decision']}" for k in src if k in res)
     by_step = Counter()
@@ -986,13 +1162,22 @@ def decision_changes(*, source: dict, results: list[dict], chain: list[tuple[str
                 "readings": res[k]["novelty"].get("readings"), "review": res[k]["novelty"].get("review"),
                 "source": src[k]["novelty"].get("exact_label") if k in src else None}
                for k in sorted(res) if res[k]["novelty"].get("renamed_from")]
+    # the rows a seed-queue entry covered through the walk (the queue in the search, 2026-10-09)
+    by_queue = [{"key": k, "label": res[k]["label"], "gloss": res[k].get("gloss"), "cut_off": res[k]["novelty"]["cut_off"],
+                 "covered_by_queue": res[k]["novelty"]["covered_by_queue"],
+                 "deciding_reading": res[k]["novelty"].get("deciding_reading"),
+                 "source": {"decision": src[k]["novelty"]["decision"], "covered_by": src[k]["novelty"].get("covered_by"),
+                            "reason": src[k]["novelty"]["reason"]} if k in src else None}
+                for k in sorted(res) if res[k]["novelty"].get("covered_by_queue")]
+    listing = sum(1 for k in res if any(x.get("queue_status") for x in res[k]["novelty"].get("listed") or []))
     return {"source_batch": source["batch_id"], "rules": rules.as_dict(), "source_rules": chain[0][1].as_dict(),
             "chain": [name for name, _, _ in chain], "reproduction": chain_repro(chain, source),
             "final_check": final_check, "new_calls": new_calls,
             "counts": {"rows": len(src), "decision_changed": sum(1 for r in rows if r["decision_changed"]),
                        "covering_trait_changed": sum(1 for r in rows if not r["decision_changed"]),
-                       "transitions": dict(sorted(trans.items())), "by_step": dict(sorted(by_step.items()))},
-            "rows": rows, "both_similar": notes, "renamed_from": renamed}
+                       "transitions": dict(sorted(trans.items())), "by_step": dict(sorted(by_step.items())),
+                       "rows_listing_a_queue_entry": listing, "covered_by_queue": len(by_queue)},
+            "rows": rows, "both_similar": notes, "renamed_from": renamed, "covered_by_queue": by_queue}
 
 
 def chain_repro(chain: list, source: dict) -> dict:
@@ -1000,20 +1185,30 @@ def chain_repro(chain: list, source: dict) -> dict:
 
 
 def write_decision_changes(out_dir: Path, *, source: dict, results: list[dict], runner: NR.NoveltyRunner,
-                           rules: NV.Rules, ctx: dict) -> dict:
+                           rules: NV.Rules, ctx: dict, src_ctx: Optional[dict] = None) -> dict:
     """Replay the chain of rule steps offline on the source's records and this run's (no call), then write
-    ``decision_changes.json`` and ``decision_changes.md`` beside the run's other files."""
+    ``decision_changes.json`` and ``decision_changes.md`` beside the run's other files.  ``src_ctx``: the replay
+    context of the source's own index, where it differs from this run's (``--queue-search`` over a source that
+    searched no seed-queue entry): the rule steps replay on it, and the queue search is the last step, on ``ctx``."""
     from assistant_axis.plot_metadata import json_metadata
     replay = list(source["records"]) + [r for r in runner.records if r.get("text") is not None]
     src_rules = source_rules(source)
+    src_ctx = src_ctx if src_ctx is not None else ctx
+    index_differs = src_ctx["index"] is not ctx["index"]
     if src_rules.as_dict() == NV.RULES[1].as_dict() and rules.version == 2:
-        steps = [(n, r) for n, r in NV.rule_chain(rules.cosine_floor)]
-        steps[-1] = (steps[-1][0], rules)
+        steps = [(n, r, src_ctx) for n, r in NV.rule_chain(rules.cosine_floor)]
+        steps[-1] = (steps[-1][0], rules, src_ctx)
+    elif index_differs and src_rules.as_dict() == rules.as_dict():
+        steps = [(f"source rules ({src_rules.name})", src_rules, src_ctx)]
     else:
-        steps = [(f"source rules ({src_rules.name})", src_rules), (f"these rules ({rules.name})", rules)]
+        steps = [(f"source rules ({src_rules.name})", src_rules, src_ctx), (f"these rules ({rules.name})", rules, src_ctx)]
+    if index_differs:
+        n_q = len(ctx["index"].queue_stems)
+        steps.append((f"{QUEUE_STEP} ({n_q} seed-queue entries)" if src_ctx["index"].queue_info is None
+                      else f"{QUEUE_STEP} (off)", rules, ctx))
     chain = []
-    for name, ru in steps:
-        blocks, _ = offline_replay(rules=ru, replay=replay, **ctx)
+    for name, ru, cx in steps:
+        blocks, _ = offline_replay(rules=ru, replay=replay, **cx)
         chain.append((name, ru, blocks))
     final_check = reproduction_check(results, chain[-1][2])
     new = [r for r in runner.records if r.get("batch_id") == runner.batch_id and r.get("text") is not None]
@@ -1025,7 +1220,8 @@ def write_decision_changes(out_dir: Path, *, source: dict, results: list[dict], 
     env = json_metadata(dc, title=f"novelty_score decision changes {runner.batch_id} vs {source['batch_id']}")
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "decision_changes.json")
     labels = {s: t.label for s, t in runner.traits.items()}
-    atomic_write_text(decision_changes_markdown(dc, batch_id=runner.batch_id, labels=labels),
+    atomic_write_text(decision_changes_markdown(dc, batch_id=runner.batch_id, labels=labels,
+                                                queue=queue_map(runner.traits)),
                       out_dir / "decision_changes.md")
     return dc
 
@@ -1049,9 +1245,10 @@ def _reasons(r: Optional[dict]) -> str:
     return "; ".join(out)
 
 
-def decision_changes_markdown(dc: dict, *, batch_id: str, labels: dict) -> str:
-    """``decision_changes.md`` (see :func:`decision_changes`).  Links relative to ``data/candidates/novelty/<batch>/``."""
-    L = lambda s: _trait_link(s, labels.get(s)) if s else ""  # noqa: E731
+def decision_changes_markdown(dc: dict, *, batch_id: str, labels: dict, queue: Optional[dict] = None) -> str:
+    """``decision_changes.md`` (see :func:`decision_changes`).  Links relative to ``data/candidates/novelty/<batch>/``;
+    ``queue`` (:func:`queue_map`): seed-queue entries link to the seed queue, and the rows one covered get a section."""
+    L = lambda s: _link(s, labels, queue) if s else ""  # noqa: E731
     c, rep, fin = dc["counts"], dc["reproduction"], dc["final_check"]
     rows = dc["rows"]
     lines = [f"# Decision changes: `{batch_id}` against `{dc['source_batch']}`", "",
@@ -1118,7 +1315,27 @@ def decision_changes_markdown(dc: dict, *, batch_id: str, labels: dict) -> str:
         rd = [x for x in r["readings"] or [] if x["stem"] == r["renamed_from"]["current"]]
         if rd:
             lines.append(f"- {_md(r['label'])} against {L(r['renamed_from']['current'])}: {_reasons(rd[0])}")
-    others = [r for r in rows if r not in floor and r not in d12 and r not in g2n and not r["now"].get("renamed_from")]
+    bq = dc.get("covered_by_queue") or []
+    if queue or bq:
+        lines += ["", f"## Covered by a seed-queue entry ({len(bq)} rows)", "",
+                  f"The seed queue's live entries in the search ({len(queue or {})} entries; "
+                  f"{c.get('rows_listing_a_queue_entry', 0)} rows listed one): the rows the overlap walk covered by one, "
+                  "with the source's decision, the entry and its status, and Sonnet's and Opus's readings.", "",
+                  "| candidate | source | covered by (seed queue) | status | cosine | Sonnet | Opus |",
+                  "|---|---|---|---|---|---|---|"]
+        for r in bq:
+            d = r.get("deciding_reading") or {}
+            s = r.get("source") or {}
+            lines.append(f"| {_md(r['label'])} | {s.get('decision')}" + (f" by {L(s['covered_by'])}" if s.get("covered_by") else "")
+                         + f" | {L(r['covered_by_queue']['stem'])} | {_md(r['covered_by_queue'].get('status'))} | "
+                         f"{d.get('cosine')} | {(d.get('sonnet') or {}).get('value')} | "
+                         f"{(d.get('opus') or {}).get('value') if d.get('opus') else ''} |")
+        for r in bq:
+            lines.append(f"- {_md(r['label'])} (`{r['key']}`, cut-off {r['cut_off']}): {_reasons(r.get('deciding_reading'))}  "
+                         f"Gloss: {_md(r.get('gloss'))}")
+    bq_keys = {r["key"] for r in bq}
+    others = [r for r in rows if r not in floor and r not in d12 and r not in g2n and not r["now"].get("renamed_from")
+              and r["key"] not in bq_keys]
     lines += ["", f"## Every other change ({len(others)})", "",
               "| candidate | source | now | steps |", "|---|---|---|---|"]
     for r in others:
@@ -1188,6 +1405,14 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if redecide:   # the source's answers are replayed, and they are found by model
         relation_model = source_relation_model(source)
     data_dir, corpus_info = resolve_data_dir(args, source)
+    # the seed queue in the similarity search (2026-10-09): the flag; else, on --resume, the earlier session's
+    # setting; else the source's; else on
+    earlier_peek = _peek_run(out_dir) if args.resume else None
+    if getattr(args, "queue_search", None) is None and earlier_peek is not None:
+        queue_on = bool((earlier_peek.get("queue_search") or {}).get("enabled"))
+    else:
+        queue_on = resolve_queue_search(args, source)
+    src_queue_on = source_queue_search(source) if source is not None else queue_on
     # the physical pass (physical_pass.py): --holding on a new score run; a re-decided run or a full scan takes its
     # source's pass.  None for every trait run, which then runs exactly as before.
     holding = getattr(args, "holding", None) if (mode == "shortlist" and not redecide) else source_holding(source)
@@ -1199,6 +1424,11 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                   f"{'; '.join(diffs)}", file=sys.stderr)
             return 2
         cands, skipped = select_redecide(rows, args, source)
+        if args.keys:
+            # --keys narrows the run to those rows: the reproduction check and decision_changes compare those only
+            # (before 2026-10-09 they counted every other source row as "not replayable")
+            wanted_keys = set(args.keys)
+            source = source | {"results": [r for r in source["results"] if r["key"] in wanted_keys]}
     elif mode == "shortlist":
         cands, skipped = select_candidates(rows, args, batch_id=args.batch_id, ignore_decided=bool(hide),
                                            to_gloss=to_gloss if holding else None)
@@ -1214,13 +1444,24 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         return 2
     cache = EM.EmbeddingCache(args.cache_dir)
     try:
-        index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide)
+        index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide, queue_search=queue_on)
     except ValueError as exc:            # a hidden stem the corpus does not have: drawn on another corpus
         print(f"REFUSED (--hide {args.hide}): {exc}", file=sys.stderr)
         return 2
+    queue_meta = index_info["queue"]
     if index is None:
-        print(f"{index_info['n_missing_from_cache']} corpus texts are not in the embedding cache "
-              f"(first: {index_info['missing'][:5]}); they would be embedded (charged) by the run", file=sys.stderr)
+        print(f"{index_info['n_missing_from_cache']} corpus and seed-queue texts are not in the embedding cache "
+              f"({index_info['n_queue_missing']} of the queue; first: {index_info['missing'][:5]}); they would be "
+              f"embedded (charged) by the run", file=sys.stderr)
+    # a re-decided run whose source searched otherwise (--queue-search over a run from before 2026-10-09): the
+    # source's own index replays the source, this run's decides (the queue search is a step of the attribution)
+    src_index = index
+    if redecide and src_queue_on != queue_on:
+        src_index, src_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide, queue_search=src_queue_on)
+        if src_index is None:
+            print(f"REFUSED: the source's own index is not in the embedding cache ({src_info['n_missing_from_cache']} "
+                  f"texts missing: {src_info['missing'][:5]})", file=sys.stderr)
+            return 2
     embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
     texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
              for c in cands}
@@ -1243,8 +1484,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     stages = NR.plan_estimate(n_candidates=n_live if mode == "shortlist" else 0, n_scan=len(cands) if mode == "full_scan" else 0,
                               mean_listed=listed_mean or 16.0, relation_text_chars=len(rubrics["relation"]["text"]),
                               trait_chars=_mean_chars(index) if index is not None else 260.0,
-                              cand_chars=_cand_chars(cands), transport=transport, n_embed=len(miss),
-                              relation_model=relation_model)
+                              cand_chars=_cand_chars(cands), transport=transport,
+                              n_embed=len(miss) + index_info["n_queue_missing"], relation_model=relation_model)
     use = ("embeddings", "relation", "overlap") if mode == "shortlist" else ("embeddings", "full_scan")
     if holding and mode == "shortlist" and not redecide:
         stages["physical_gloss"] = PP.estimate(len(to_gloss))
@@ -1252,29 +1493,47 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     est = Estimate(lines=[x for s in use for x in stages[s].lines])
     plan = {"mode": mode, "n_candidates": len(cands), "n_exact_label": n_exact, "n_to_relation": n_live if mode == "shortlist" else 0,
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
-            "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss), "corpus": index_info,
-            "rules": rules.as_dict(), "corpus_files": corpus_info}
+            "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss),
+            "corpus": {k: v for k, v in index_info.items() if k not in ("queue", "queue_stems")},
+            "rules": rules.as_dict(), "corpus_files": corpus_info, "queue_search": queue_meta}
     if hide_meta:
         plan["hide"] = hide_meta
     if holding:
         plan["holding"] = holding
         if mode == "shortlist" and not redecide:
             plan["physical_gloss"] = {"n_to_gloss": len(to_gloss), "model": PP.MODEL}
-    redecide_meta, offline_ctx = None, None
-    if redecide:
-        if index is None or miss:
+    redecide_meta, offline_ctx, src_ctx = None, None, None
+    embed_queue_first = False
+    if redecide and (index is None or miss):
+        # the one gap a re-decided run may fill itself: the seed-queue entries it adds to a source that did not search
+        # them (--queue-search) are not yet embedded; --embed-only embeds them (charged), --resume then re-decides
+        only_queue = (index is None and not miss and index_info["n_corpus_missing"] == 0
+                      and index_info["n_queue_missing"] > 0)
+        if only_queue and getattr(args, "embed_only", False):
+            embed_queue_first = True
+        else:
             print("REFUSED: re-deciding replays the source's retrieval, so every corpus text and every candidate's "
                   "query text must be in the embedding cache (the source run embedded them); missing: corpus "
-                  f"{index_info['n_missing_from_cache']}, query texts {len(miss)}", file=sys.stderr)
+                  f"{index_info['n_corpus_missing']}, seed queue {index_info['n_queue_missing']}, query texts {len(miss)}"
+                  + ("; only seed-queue texts are missing: run this command with --embed-only first (it embeds them, "
+                     "charged, and stops), then with --resume" if only_queue else ""), file=sys.stderr)
             return 2
+    if embed_queue_first:
+        stages, use = {"embeddings": stages["embeddings"]}, ("embeddings",)
+        est = Estimate(lines=list(stages["embeddings"].lines))
+        plan["redecide"] = {"from_batch": source["batch_id"], "embed_queue_first": index_info["n_queue_missing"]}
+        print(f"redecide: {index_info['n_queue_missing']} seed-queue texts are not in the embedding cache; this "
+              "--embed-only run embeds them and stops (the re-decision and its estimate come with --resume)")
+    if redecide and not embed_queue_first:
         # unit rows, as embed_texts hands them to a run (the cache keeps the API's raw vectors; centring an
         # unnormalised one moves its cosines in the fifth decimal)
         unit = EM.normalize_rows([found[i] for i in range(len(cands))])
         offline_ctx = {"cands": cands, "vectors": {c.key: unit[i] for i, c in enumerate(cands)}, "index": index,
                        "sets": sets, "rubrics": rubrics, "cfg": cfg, "query_form": args.query_form,
                        "relation_seed": relation_seed, "batch_id": args.batch_id, "relation_model": relation_model}
+        src_ctx = offline_ctx | {"index": src_index}
         src_rules = source_rules(source)
-        repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **offline_ctx)
+        repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **src_ctx)
         repro = reproduction_check(source["results"], repro_blocks)
         blocks0, wanted = offline_replay(rules=rules, replay=source["records"], **offline_ctx)
         est = redecide_estimate(wanted, listed_mean=listed_mean or 16.0, rubrics=rubrics, index=index, cands=cands,
@@ -1291,12 +1550,15 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                          "calls_not_on_record": dict(Counter(f"{w['step']}:{w['model']}" for w in wanted)),
                          "candidates_needing_calls": wanted_keys,
                          "decided_offline": sum(1 for b in blocks0.values() if b is not None),
-                         "offline_decisions": dict(sorted(preview.items()))}
+                         "offline_decisions": dict(sorted(preview.items())),
+                         "queue_search": {"source": src_queue_on, "this_run": queue_on,
+                                          "n_entries": queue_meta.get("n_entries", 0)}}
         plan["redecide"] = redecide_meta
         ok = "OK" if repro["identical"] == repro["n"] else "MISMATCH"
         print(f"redecide: source {source['batch_id']} ({len(source['results'])} rows, {len(source['records'])} responses "
               f"on record; corpus {corpus_info.get('corpus_at')} {corpus_info.get('git_sha') or ''}); rules "
-              f"{rules.name} (floor {rules.cosine_floor})")
+              f"{rules.name} (floor {rules.cosine_floor}); seed queue in the search: source {src_queue_on}, this run "
+              f"{queue_on} ({queue_meta.get('n_entries', 0)} entries)")
         print(f"reproduction: {src_rules.name} replayed on the source's records: {repro['identical']} of {repro['n']} rows "
               f"identical [{ok}]" + (f"; differ: {[d['key'] for d in repro['differ'][:10]]}" if repro["differ"] else "")
               + (f"; not replayable: {repro['not_replayable'][:10]}" if repro["not_replayable"] else ""))
@@ -1336,8 +1598,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                                      (" (no registry write: --hide)" if hide else "")))
         print(f"rubrics: {json.dumps({k: {'name': v['name'], 'version': v['version'], 'sha256': v['sha256'][:12]} for k, v in rubrics.items()})}")
         if redecide:
-            need = {w["key"] for w in wanted}      # render a candidate whose calls are not on record, if any
-            first = next((i for i, c in enumerate(cands) if c.key in need), None)
+            need = {w["key"] for w in wanted} if not embed_queue_first else set()   # a candidate whose calls are
+            first = next((i for i, c in enumerate(cands) if c.key in need), None)   # not on record, if any
         else:
             if to_gloss:
                 print(PP.render(rows[to_gloss[0]]))
@@ -1362,6 +1624,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if bad is None and earlier is not None and ((earlier.get("hide") or {}).get("sha256") != (hide_meta or {}).get("sha256")):
         bad = (f"the run's earlier session hid {(earlier.get('hide') or {}).get('path') or 'nothing'}, this one "
                f"{(hide_meta or {}).get('path') or 'nothing'} (by sha256): a resume must hide the same traits")
+    if bad is None and earlier is not None:
+        bad = _resume_queue_mismatch(earlier, queue_meta)
     if bad:
         print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
@@ -1385,6 +1649,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                              "concurrency": args.concurrency, "ask_attempts": NR.ASK_ATTEMPTS,
                              "relation_seed": relation_seed, "cosine_floor": rules.cosine_floor},
                 "rules": rules.as_dict(), "corpus": corpus_info,
+                "queue_search": queue_meta | {"stems": list(index_info.get("queue_stems") or [])},
                 "resumed": bool(args.resume), "started_at": utc_now()}
     if mode == "full_scan":
         run_meta["full_scan"] = {"from_batch": args.from_batch, "sample": None if args.keys else args.sample,
@@ -1411,7 +1676,10 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                                             paths.RUBRICS_DIR / "relation.md"])]
     if hide_meta:
         inputs.append(current_file_input(dep_key="hidden", path=Path(hide_meta["path"])))
-    extra_block = ({"redecided_from": source["batch_id"]} if redecide else {}) | ({"hide": hide_meta} if hide_meta else {})
+    if queue_meta.get("n_entries") and corpus_info.get("corpus_at") == "current":
+        # the seed queue whose entries the index held (a snapshot at a commit is recorded by its sha in run.json)
+        inputs.append(current_file_input(dep_key="seed_queue", path=Path(data_dir) / "seed_queue.json"))
+    extra_block =({"redecided_from": source["batch_id"]} if redecide else {}) | ({"hide": hide_meta} if hide_meta else {})
     if holding:
         extra_block["pass"] = run_pass
     status, error, runner = 0, None, None
@@ -1426,7 +1694,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                 print(f"nothing to score after the gloss stage ({json.dumps(skipped)})", file=sys.stderr)
                 return 0
         if index is None:
-            index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide)
+            index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide,
+                                           queue_search=queue_on)
         canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage)
         run_meta["canary"] = canary
         keys = [c.key for c in cands]
@@ -1475,7 +1744,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                status=status, error=error, inputs=inputs,
                                extra=({"redecide": redecide_meta} if redecide else {})
                                | ({"hide": hide_meta} if hide_meta else {})
-                               | ({"pass": run_pass} if holding else {}) or None)
+                               | ({"pass": run_pass} if holding else {})
+                               | {"queue_search_record": queue_meta})
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
@@ -1487,7 +1757,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if redecide and runner is not None and status == 0 and summary and summary["n_stalled"] == 0:
         results = _read_jsonl(out_dir / "results.jsonl")
         dc = write_decision_changes(out_dir, source=source, results=results, runner=runner, rules=rules,
-                                    ctx=offline_ctx | {"vectors": vectors})
+                                    ctx=offline_ctx | {"vectors": vectors}, src_ctx=src_ctx | {"vectors": vectors})
         print(f"decision changes: {json.dumps(dc['counts'])}; reproduction {dc['reproduction']['identical']} of "
               f"{dc['reproduction']['n']}; run reproduced by the last step: {dc['final_check']['identical']} of "
               f"{dc['final_check']['n']}")
@@ -1567,15 +1837,18 @@ def run_relation_only(args, argv) -> int:
         print(f"nothing to send ({json.dumps(skipped)})", file=sys.stderr)
         return 0
     cache = EM.EmbeddingCache(args.cache_dir)
-    index, index_info = load_index(cfg, data_dir=data_dir, cache=cache)
+    # the seed queue in the search: the source's own setting unless a flag says otherwise (then the like-for-like
+    # check below refuses the requests whose lists changed)
+    queue_on = resolve_queue_search(args, source)
+    index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, queue_search=queue_on)
     embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
     texts = [NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
              for c in cands]
     found, miss = cache.lookup(embedder.tag, texts)
     if index is None or miss:
         print("REFUSED: the relation-only run rebuilds the source's lists, so every corpus text and every candidate's "
-              f"query text must be in the embedding cache; missing: corpus {index_info['n_missing_from_cache']}, query "
-              f"texts {len(miss)}", file=sys.stderr)
+              f"query text must be in the embedding cache; missing: corpus and seed queue "
+              f"{index_info['n_missing_from_cache']}, query texts {len(miss)}", file=sys.stderr)
         return 2
     unit = EM.normalize_rows([found[i] for i in range(len(cands))])      # as score --redecide reads them
     vectors = {c.key: unit[i] for i, c in enumerate(cands)}
@@ -1621,6 +1894,7 @@ def run_relation_only(args, argv) -> int:
     plan = {"mode": "relation_only", "from_batch": source["batch_id"], "n_candidates": len(cands),
             "n_to_relation": len(first_calls), "not_reached": not_reached, "skipped": skipped, "transport": transport,
             "relation_model": relation_model, "rules": rules.as_dict(), "corpus_files": corpus_info,
+            "queue_search": index_info["queue"],
             "listed_mean": round(sum(len(c.stems) for c in first_calls) / len(first_calls), 3) if first_calls else None,
             "like_for_like": {k: v for k, v in lfl.items() if k != "differ"} | {"n_differ": len(lfl["differ"])}}
     print(f"relation only: source {source['batch_id']} ({len(source['results'])} rows; corpus "
@@ -1667,7 +1941,8 @@ def run_relation_only(args, argv) -> int:
     status, resume_records, earlier = _prepare_out_dir(out_dir, args)
     if status:
         return status
-    bad = _resume_model_mismatch(earlier, relation_model)
+    bad = _resume_model_mismatch(earlier, relation_model) or \
+        (_resume_queue_mismatch(earlier, index_info["queue"]) if earlier is not None else None)
     if bad:
         print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
@@ -1682,6 +1957,7 @@ def run_relation_only(args, argv) -> int:
                 "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
                 "models": {"relation": relation_model, "relation_unsure": NR.UNSURE_MODEL}, "settings": settings,
                 "rules": rules.as_dict(), "corpus": corpus_info, "from_batch": source["batch_id"],
+                "queue_search": index_info["queue"] | {"stems": list(index_info.get("queue_stems") or [])},
                 "like_for_like": lfl, "resumed": bool(args.resume), "started_at": utc_now()}
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
@@ -1820,7 +2096,8 @@ def compare_runs(scan: list[dict], main: list[dict]) -> dict:
                    # whether the scan's rules cover on this pair (a scan from before rule set 2: "cut" only)
                    "cuts": p.get("cuts", p["verdict"] == "cut"), "below_floor": p.get("below_floor", False),
                    "sonnet": (p["sonnet"] or {}).get("value"), "opus": (p.get("opus") or {}).get("value"),
-                   "main_relation": rel.get(p["stem"]), "in_main_shortlist": p["stem"] in short}
+                   "main_relation": rel.get(p["stem"]), "in_main_shortlist": p["stem"] in short} \
+                | ({"queue_status": p["queue_status"]} if p.get("queue_status") else {})
             pairs.append(row)
             mr = main_read.get(p["stem"])
             if mr and mr.get("sonnet") and p.get("sonnet"):
@@ -1880,7 +2157,7 @@ def comparison_markdown(c: dict, *, scan_batch: str, main_batch: str) -> str:
              f"- The relation call's answers on the misses: {json.dumps(rr['main_relation_of_misses'])}.", "",
              "| candidate | trait | cosine | cut-off | Sonnet | Opus | verdict | relation call |", "|---|---|---|---|---|---|---|---|"]
     for p in rr["misses"]:
-        lines.append(f"| {_md(p['label'])} | {_trait_link(p['stem'], rel='../../../traits/instructions/')} | {p['cosine']:.3f} | "
+        lines.append(f"| {_md(p['label'])} | {(_md(p['stem']) + ' (seed queue)') if p.get('queue_status') else _trait_link(p['stem'], rel='../../../traits/instructions/')} | {p['cosine']:.3f} | "
                      f"{p['cut_off']} | {p['sonnet']} | {p['opus'] if p['opus'] is not None else ''} | {p['verdict']} | "
                      f"{p['main_relation']} |")
     d = c["decisions"]
@@ -1920,7 +2197,8 @@ def cmd_decisions(args) -> int:
     traits = NV.load_trait_corpus(args.data_dir)
     mode = res[0]["novelty"].get("mode", "shortlist") if res else "shortlist"
     atomic_write_text(decisions_markdown(res, batch_id=args.batch_id, labels={s: t.label for s, t in traits.items()},
-                                         mode=mode, pass_name=res[0]["novelty"].get("pass") if res else None),
+                                         mode=mode, pass_name=res[0]["novelty"].get("pass") if res else None,
+                                         queue=queue_map_from_results(res, args.data_dir)),
                       d / "decisions.md")
     print(f"wrote {d / 'decisions.md'} ({len(res)} candidates)")
     return 0
@@ -1950,7 +2228,8 @@ def cmd_estimate(args) -> int:
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.metric_config import MetricConfig
     cfg = MetricConfig.load(args.metric_config)
-    index, info = load_index(cfg, data_dir=args.data_dir, cache=EM.EmbeddingCache(args.cache_dir))
+    index, info = load_index(cfg, data_dir=args.data_dir, cache=EM.EmbeddingCache(args.cache_dir),
+                             queue_search=resolve_queue_search(args))
     if index is None:
         raise SystemExit(f"corpus not in the embedding cache: {info}")
     rubrics = load_m3_rubrics(args.rubrics_dir)
@@ -1973,9 +2252,9 @@ def cmd_render(args) -> int:
     from assistant_axis.gapgen.retrieval import query_text as gloss_query
     cfg = MetricConfig.load(args.metric_config)
     cache = EM.EmbeddingCache(args.cache_dir)
-    index, info = load_index(cfg, data_dir=args.data_dir, cache=cache)
+    index, info = load_index(cfg, data_dir=args.data_dir, cache=cache, queue_search=resolve_queue_search(args))
     if index is None:
-        raise SystemExit(f"corpus not in the embedding cache: {info}")
+        raise SystemExit(f"corpus (or seed-queue) texts not in the embedding cache: {info}")
     rubrics = load_m3_rubrics(args.rubrics_dir)
     embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
     if args.key:
@@ -2093,6 +2372,7 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
         sp.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
         sp.add_argument("--rubrics-dir", type=Path, default=None)
+        _queue_search_arg(sp)
         if name == "estimate":
             sp.add_argument("--n-candidates", type=int, required=True)
             sp.add_argument("--n-scan", type=int, default=DEFAULT_SCAN_SAMPLE)

@@ -14,7 +14,9 @@ rec_<G>_<R>``.  ``--budget-usd`` is required.  Per seed S:
    by region (``--regions``, default ``data/candidates/corpus_regions.json``), a pair, triangle or tetrahedron
    hidden whole;
 2. **M3 against the reduced corpus**: ``novelty_score.py score --batch-id <B>_s<S> --run G/R --hide
-   <hidden.json>``, run in process, writing ``data/candidates/novelty/<B>_s<S>/`` and never the registry.  The
+   <hidden.json>``, run in process, writing ``data/candidates/novelty/<B>_s<S>/`` and never the registry (the seed
+   queue's live entries in its search as in any new run, less the hidden stems' entries; ``--no-queue-search``
+   passes through, to reproduce a harness run from before 2026-10-09).  The
    run's rows must already carry their M1 filter blocks (``traithood_filter.py --run G/R``); M1 is not run
    again, and rows without one are counted and left out;
 3. **match**: every candidate the reduced run decided, against the hidden traits (its label, then the overlap
@@ -89,6 +91,9 @@ def score_argv(args, seed: int, hidden_path: Path, *, budget: float, dry_run: bo
                      ("--confirm-expensive", args.confirm_expensive)):
         if on:
             a.append(flag)
+    qs = getattr(args, "queue_search", None)        # the seed queue in the reduced run's search (default: on)
+    if qs is not None:
+        a.append("--queue-search" if qs else "--no-queue-search")
     return a
 
 
@@ -322,6 +327,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--regions", type=Path, default=paths.CORPUS_REGIONS_PATH)
     ap.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM)
     ap.add_argument("--concurrency", type=int, default=NR.DEFAULT_CONCURRENCY)
+    NS._queue_search_arg(ap)     # passed to the reduced-corpus M3 runs; the hidden stems' entries are left out
     return ap
 
 

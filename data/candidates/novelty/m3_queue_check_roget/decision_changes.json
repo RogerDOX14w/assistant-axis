@@ -1,0 +1,99 @@
+{
+  "result": {
+    "source_batch": "gen_pilot_roget",
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "queue search (2 seed-queue entries)"
+    ],
+    "reproduction": {
+      "n": 67,
+      "identical": 67,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 67,
+      "identical": 67,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 2,
+      "by_step_model": {
+        "relation:claude-haiku-5-5": 1,
+        "overlap:claude-sonnet-5-5": 1
+      },
+      "cost_usd": 0.003565,
+      "keys": [
+        "prescient#1"
+      ]
+    },
+    "counts": {
+      "rows": 67,
+      "decision_changed": 0,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "new -> new": 67
+      },
+      "by_step": {},
+      "rows_listing_a_queue_entry": 1,
+      "covered_by_queue": 0
+    },
+    "rows": [],
+    "both_similar": [
+      {
+        "key": "imperfect#1",
+        "label": "imperfect",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "self_accepting",
+              "self_critical"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "self_accepting": 0.433552,
+              "self_critical": 0.200239
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_roget --batch-id m3_queue_check_roget --resume --queue-search --transport live --budget-usd 1 --keys 'absolute#1' 'alarming#1' 'angelic#1' 'autochthonous#1' 'backhanded#1' 'conditional#1' 'controversial#1' 'cracked#1' 'credited#1' 'crusty#1' 'dear#1' 'defective#1' 'denying#1' 'disagreeing#1' 'discordant#1' 'domestic#1' 'excusable#1' 'expensive#1' 'factious#1' 'foreseeing#1' 'found_wanting#1' 'free#1' 'grim#1' 'heavenly#1' 'ill_affected#1' 'imperfect#1' 'impossible#1' 'inaudible#1' 'incomparable#1' 'indebted#1' 'inexpressive#1' 'infernal#1' 'insignificant#1' 'intestate#1' 'judicial#1' 'lachrymose#1' 'litigious#1' 'misnamed#1' 'negative#1' 'negotiable#1' 'no_brain#1' 'nonsensical#1' 'perverse#1' 'plaintive#1' 'prescient#1' 'pseudonymous#1' 'qualified#1' 'quarrelsome#1' 'querulous#1' 'reactionary#1' 'reasonable#1' 'recusant#1' 'refreshing#1' 'refusing#1' 'rent_free#1' 'satanic#1' 'sinister#1' 'so_so#1' 'sour#1' 'sullen#1' 'torn#1' 'trivial#1' 'unaccountable#1' 'unbound#1' 'unpaid#1' 'unreasonable#1' 'venal#1'",
+      "git_sha": "808b4f6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes m3_queue_check_roget vs gen_pilot_roget"
+    },
+    "produced_at": "2026-10-09T04:14:34+00:00"
+  }
+}

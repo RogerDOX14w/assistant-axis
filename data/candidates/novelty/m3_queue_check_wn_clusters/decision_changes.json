@@ -1,0 +1,236 @@
+{
+  "result": {
+    "source_batch": "gen_pilot_wn_clusters",
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "queue search (2 seed-queue entries)"
+    ],
+    "reproduction": {
+      "n": 36,
+      "identical": 36,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 36,
+      "identical": 36,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 36,
+      "decision_changed": 0,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "new -> new": 36
+      },
+      "by_step": {},
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [],
+    "both_similar": [
+      {
+        "key": "profound#1",
+        "label": "profound",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "analytical",
+              "intuitive"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "analytical": 0.256871,
+              "intuitive": 0.168401
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [
+      {
+        "key": "militant#1",
+        "label": "militant",
+        "decision": "new",
+        "covered_by": null,
+        "renamed_from": {
+          "current": "aggressive",
+          "old_stem": "militant"
+        },
+        "deciding_reading": null,
+        "readings": [
+          {
+            "position": 1,
+            "stem": "aggressive",
+            "cosine": 0.574312,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both describe combative, forceful, compromise-rejecting behaviour, but militant is tied to zealous devotion to a cause and policing the lukewarm, while aggressive is a general confrontational style for getting what one wants."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 2,
+            "stem": "unyielding",
+            "cosine": 0.496795,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve refusing compromise, but militant adds aggressive, combative zeal against opponents and the lukewarm, while unyielding is just firm holding of a position without that aggression."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 3,
+            "stem": "confrontational",
+            "cosine": 0.370646,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve combative aggression toward others, but militant is cause-driven uncompromising zeal while confrontational is a general taste for conflict and arguments regardless of any cause."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 4,
+            "stem": "zealous",
+            "cosine": 0.35042,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both describe fervent, crusading commitment to a cause and intolerance of lukewarmness, but militant stresses combative, uncompromising aggression against opponents while zealous stresses passionate fervor and heat."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 5,
+            "stem": "partisan",
+            "cosine": 0.338964,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve fierce, uncompromising loyalty to a cause or side, but militant stresses aggressive combative zeal for any cause, while partisan stresses political side-taking, party-line conformity and bias, so each adds something the other lacks."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 6,
+            "stem": "unforgiving",
+            "cosine": 0.306764,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve an uncompromising, hard stance, but militant is aggressive zeal for a cause against opponents, while unforgiving is holding grievances and refusing to pardon wrongdoers; neither implies the other."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 7,
+            "stem": "opinionated",
+            "cosine": 0.301469,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve strong advocacy, but militant is combative, uncompromising zeal for a cause against opponents, while opinionated is holding and voicing firm views on many topics without necessarily being aggressive or uncompromising."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 8,
+            "stem": "rigid",
+            "cosine": 0.289345,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve refusing to compromise, but militant is aggressive zeal for a cause against opponents, while rigid is inflexible adherence to a method or plan; neither implies the other."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 9,
+            "stem": "fundamentalist",
+            "cosine": 0.283099,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both refuse compromise, but militant is about combative, aggressive zeal against opponents, while fundamentalist is about rigid adherence to basic principles without necessarily being aggressive."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          }
+        ],
+        "review": [],
+        "source": null
+      }
+    ],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_wn_clusters --batch-id m3_queue_check_wn_clusters --queue-search --transport live --budget-usd 1 --keys 'affectionate#1' 'affirmative#1' 'answerable#1' 'balky#1' 'boyish#1' 'creditworthy#1' 'drippy#1' 'fascistic#1' 'flighty#1' 'fond#1' 'furtive#1' 'ideological#1' 'imperialistic#1' 'impertinent#1' 'impetuous#1' 'incautious#1' 'inhospitable#1' 'intolerant#1' 'ladylike#1' 'languorous#1' 'loving#1' 'meddlesome#1' 'militant#1' 'naughty#1' 'nonmodern#1' 'prim#1' 'profane#1' 'profound#1' 'public#1' 'rakish#1' 'reluctant#1' 'restful#1' 'secretive#1' 'skittish#1' 'unpermissive#1' 'willful#1'",
+      "git_sha": "808b4f6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes m3_queue_check_wn_clusters vs gen_pilot_wn_clusters"
+    },
+    "produced_at": "2026-10-09T04:15:03+00:00"
+  }
+}

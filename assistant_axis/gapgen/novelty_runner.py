@@ -160,6 +160,16 @@ class M3Candidate:
                 "alignment_score": self.alignment_score, "region": self.region, "generators": list(self.generators)}
 
 
+#: The fields of an index's queue record that every block of a run with seed-queue entries carries.
+QUEUE_BLOCK_FIELDS: tuple[str, ...] = ("n_entries", "statuses", "queue_sha256", "entries_sha256")
+
+
+def queue_search_block(info: Mapping) -> dict:
+    """A block's ``queue_search``: the index's queue record (:attr:`novelty.CorpusIndex.queue_info`) cut to
+    :data:`QUEUE_BLOCK_FIELDS` (the stems list stays in ``run.json``)."""
+    return {k: info[k] for k in QUEUE_BLOCK_FIELDS if k in info}
+
+
 def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[Optional[M3Candidate], Optional[str]]:
     """``(candidate, None)`` for a registry row M3 can judge, else ``(None, why)``: not filtered, not a
     ``trait`` verdict, or no gloss.  ``holding="physical"`` (the physical pass, ``novelty_score.py score
@@ -380,6 +390,9 @@ class NoveltyRunner:
         self.cache_ttl = cache_ttl
         self.partners = {s: list(t.partners) for s, t in self.traits.items()}
         self.corpus = {s: {"label": t.label, "description": t.description} for s, t in self.traits.items()}
+        # the seed-queue entries the index holds (novelty.queue_traits): read, walked and charged as corpus traits,
+        # marked as queue entries in the blocks
+        self.queue_status = {s: t.queue_status for s, t in self.traits.items() if getattr(t, "queue_status", None)}
         self.states: dict[str, CandState] = {}
         self.stats: Counter = Counter()
         self.records: list[dict] = []
@@ -694,7 +707,7 @@ class NoveltyRunner:
             st.walk = NV.Walk(st.cand.key, st.cand.cut_off, st.shortlist.queue, info,
                               relations=st.relations, partners=self.partners, cosine_of=self._cos_fn(st), review=review,
                               review_details=details, pair_completion_for=st.shortlist.pair_completion_for,
-                              rules=self.rules, exclude=st.shortlist.excluded)
+                              rules=self.rules, exclude=st.shortlist.excluded, queue_status=self.queue_status)
 
     def _cos_of(self, st: CandState, stem: str) -> Optional[float]:
         for x in st.listed:
@@ -841,7 +854,8 @@ class NoveltyRunner:
             order = [x.stem for x in sorted(st.listed, key=lambda x: (-x.cosine, x.stem))
                      if not self.rules.below_floor(x.cosine)]
             st.walk = NV.replay_walk(NV.Walk(st.cand.key, st.cand.cut_off, order, {x.stem: x for x in st.listed},
-                                             partners=self.partners, cosine_of=self._cos_fn(st), rules=self.rules),
+                                             partners=self.partners, cosine_of=self._cos_fn(st), rules=self.rules,
+                                             queue_status=self.queue_status),
                                      st.scan)
             st.block = self._block(st, decision=st.walk.decision, reason="overlap")
 
@@ -863,7 +877,12 @@ class NoveltyRunner:
                 b["scan"].append({"stem": s, "cosine": by[s].cosine, "rank": by[s].rank, "via": by[s].via,
                                   "sonnet": r["sonnet"], "opus": r.get("opus"), **pv,
                                   "cuts": NV.verdict_cuts(pv["verdict"], self.rules),
-                                  "below_floor": self.rules.below_floor(by[s].cosine)})
+                                  "below_floor": self.rules.below_floor(by[s].cosine)}
+                                 | ({"queue_status": by[s].queue_status} if by[s].queue_status else {}))
+        if self.index.queue_info:
+            # the index held seed-queue entries (2026-10-09): every block of the run says so, with what it held;
+            # a block without the key was decided against the corpus alone
+            b["queue_search"] = queue_search_block(self.index.queue_info)
         return b
 
     # -- parse rates -------------------------------------------------------------------------
@@ -904,9 +923,12 @@ def call_tokens(c: Call) -> tuple[int, int]:
 
 def mean_listed_size(index: NV.CorpusIndex, k: int) -> float:
     """The mean number of listed traits (retrieved plus expanded) when each corpus trait is the query with
-    itself left out: the listed size a candidate near the corpus gets, at no cost."""
+    itself left out: the listed size a candidate near the corpus gets, at no cost (seed-queue entries in the
+    index can be listed, but are not queries)."""
     sizes = []
     for i, s in enumerate(index.stems):
+        if index.traits[s].is_queue:
+            continue
         q = index.Z[i]
         ret = index.retrieve(q, k, exclude=[s])
         sizes.append(len(NV.expand(ret, index.traits, lambda t, q=q: index.cosine_to(q, t))))
@@ -983,8 +1005,8 @@ def relation_rows(states: Mapping[str, CandState], records: Sequence[Mapping]) -
             "key": key, "label": st.cand.label, "stem": st.cand.stem, "gloss": st.cand.gloss,
             "cut_off": st.cand.cut_off, "model": rel["model"], "rubric": rel["rubric"], "status": rel["status"],
             "fallback": rel.get("fallback"), "error": rel.get("error"), "order": rel["order"],
-            "listed": [{"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via,
-                        "partners": list(x.partners)} for x in st.listed],
+            "listed": [{"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via, "partners": list(x.partners)}
+                       | ({"queue_status": x.queue_status} if x.queue_status else {}) for x in st.listed],
             "answers": rel.get("answers") or {}, "relations": dict(st.relations),
             "counts": {k: first.get(k, 0) for k in NV.RELATION_ANSWERS},
             "final_counts": {k: final.get(k, 0) for k in NV.RELATION_ANSWERS},
@@ -1157,6 +1179,16 @@ def summarize(results: Sequence[Mapping], records: Sequence[Mapping], usage: Mul
                   "similar_kept_out_total": sum(len(b.get("below_floor") or []) for b in walked),
                   "rows_with_similar_kept_out": sum(1 for b in walked if b.get("below_floor"))},
         "renamed_from_judged": {"rows": len(renamed), "by_decision": dict(Counter(b["decision"] for b in renamed))},
+        # seed-queue entries in the search (2026-10-09): rows decided with them in the index, rows that listed or
+        # read one, and rows the walk covered by one (stage 0's queue matches are in exact_label above)
+        "queue_search": {"rows_with_queue_in_index": sum(1 for b in blocks if b.get("queue_search")),
+                         "rows_listing_a_queue_entry": sum(1 for b in blocks
+                                                           if any(x.get("queue_status") for x in b.get("listed") or [])),
+                         "rows_reading_a_queue_entry": sum(1 for b in blocks
+                                                           if any(x.get("queue_status") for x in b.get("readings") or [])),
+                         "covered_by_queue": sum(1 for b in blocks if b.get("covered_by_queue")),
+                         "covered_by_queue_by_status": dict(Counter(b["covered_by_queue"].get("status")
+                                                                    for b in blocks if b.get("covered_by_queue")))},
     }
     return {
         "mode": mode, "n_candidates": len(blocks) + len(stalled), "n_decided": len(blocks), "n_stalled": len(stalled),

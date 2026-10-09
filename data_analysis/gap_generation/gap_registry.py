@@ -474,7 +474,8 @@ def cmd_synonyms(args) -> int:
             son, opus = rd.get("sonnet") or {}, rd.get("opus") or {}
             reading = ("exact label" + (f" ({(c.get('exact_label') or {}).get('match')})" if c.get("exact_label") else "")
                        if c["reason"] == "exact_label" else
-                       f"Sonnet {son.get('value')}" + (f", Opus {opus.get('value')}" if opus else ""))
+                       f"Sonnet {son.get('value')}" + (f", Opus {opus.get('value')}" if opus else "")
+                       + (f" (seed-queue entry, {c['covered_by_queue'].get('status')})" if c.get("covered_by_queue") else ""))
             why = opus.get("reason") or son.get("reason") or ""
             print(f"| {g['stem']} | {_md(g['best'])} | {_md(c['label'])} | {c['key']} | {_md(reading)} | {_md(why)} "
                   f"| {_md(c.get('gloss'))} |")

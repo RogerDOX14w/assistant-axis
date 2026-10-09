@@ -642,3 +642,29 @@ def test_include_reviews_a_covered_candidate_as_a_term():
     assert g.candidate_keys() == ["a#1", "c#1"]
     assert RG.Graph.from_json(g.to_json()).node_map()["c#1"].included == "audit"
     assert "included" not in RG.Node(key="a#1", kind="candidate", label="a", decision="new").to_dict()
+
+
+def test_m3_blocks_that_searched_the_seed_queue_point_at_queue_nodes(tmp_path):
+    """From 2026-10-09 M3 searches the seed queue: a listed entry or reading marked ``queue_status`` is a queue node's
+    edge, and a candidate covered by one through the walk (``covered_by_queue``) points at that queue node, so the
+    review app can merge into it."""
+    rows = toy_rows()
+    listed = GODLESS_LISTED + [{"stem": "queued", "cosine": 0.5, "rank": 3, "via": "retrieved", "relation": "similar",
+                                "queue_status": "candidate"}]
+    readings = GODLESS_READINGS + [{"position": 3, "stem": "queued", "cosine": 0.5, "relation": "similar",
+                                    "via": "retrieved", "sonnet": {"value": 2, "reason": "s"}, "opus": None,
+                                    "opus_role": None, "outcome": "continue", "queue_status": "candidate"}]
+    rows[key("godless")] = row("godless", listed=listed, readings=readings)
+    deciding = {"position": 1, "stem": "queued", "cosine": 0.62, "relation": "similar", "via": "retrieved",
+                "sonnet": {"value": 4, "reason": "r"}, "opus": None, "queue_status": "candidate"}
+    r = row("queueish", decision="covered", covered_by="queued", deciding=deciding)
+    r["novelty"]["covered_by_queue"] = {"stem": "queued", "status": "candidate"}
+    rows[r["key"]] = r
+    g, _, _ = build(tmp_path, rows=rows)
+    nodes = g.node_map()
+    m3 = {e.b: e for e in g.edges if e.source == "m3" and e.a == key("godless")}
+    assert set(m3) == {"trait:alpha", "trait:delta", "trait:epsilon", "queue:queued"}
+    assert m3["queue:queued"].readings["ab"]["sonnet"] == 2 and m3["queue:queued"].rank == 3
+    assert "trait:queued" not in nodes and nodes["queue:queued"].kind == "queue"
+    assert nodes["queue:queued"].status == "candidate" and nodes["queue:queued"].gloss == "This means being queued."
+    assert nodes["queueish#1"].covered_by == "queue:queued" and nodes["queueish#1"].covered_reading["sonnet"] == 4

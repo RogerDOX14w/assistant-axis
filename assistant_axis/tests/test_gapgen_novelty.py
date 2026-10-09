@@ -1092,3 +1092,207 @@ class TestOneHourCache:
         from assistant_axis.gapgen.split_runner import Call as SplitCall
         c = SplitCall(step="sense", key="k#1", label="k", model=NV.HAIKU, system="S", user="U", max_tokens=10, temperature=0.0)
         assert "cache_control" not in BatchTransport._request(c)["params"]["system"][0]
+
+
+# --------------------------------------------------------------------------- the seed queue in the search (2026-10-09)
+
+QDIM = DIM + 2          # two axes beyond the toy corpus's: one for each queue entry below
+
+
+def qentry(stem, *, status="candidate", text="This means being {} in every way.", label=None, partner=None,
+           entity_type="trait", field="description_draft"):
+    e = {"stem": stem, "label": label or stem.replace("_", " "), "status": status, "entity_type": entity_type,
+         "description": None, "description_draft": None, "partner": partner}
+    if text:
+        e[field] = text.format(stem.replace("_", " ")) if "{}" in text else text
+    return e
+
+
+def queue_index(tmp_path, entries, *, queue_vectors=None, renamed=None):
+    """The toy corpus (each trait on its own axis) plus the joining queue entries, each on an axis of its own
+    beyond the corpus's (``queue_vectors`` to place them otherwise), the space fitted on the corpus alone."""
+    traits = NV.load_trait_corpus(write_corpus(tmp_path / "data", renamed=renamed))
+    qt, rec = NV.queue_traits({"entries": entries}, traits)
+    E = np.zeros((len(STEMS), QDIM))
+    for i in range(len(STEMS)):
+        E[i, i] = 1.0
+    qstems = sorted(qt)
+    Eq = np.zeros((len(qstems), QDIM))
+    for j, s in enumerate(qstems):
+        if queue_vectors and s in queue_vectors:
+            Eq[j] = queue_vectors[s]
+        else:
+            Eq[j, DIM + j] = 1.0
+    idx = NV.build_index(traits, E, variant="raw", settings={"k": 4}, queue=qt or None, E_queue=Eq if qt else None,
+                         queue_info={"statuses": rec["statuses"], "queue_sha256": "q" * 64,
+                                     "entries_sha256": rec["entries_sha256"]} if qt else None)
+    return idx, rec
+
+
+def qquery(*, queue_axis=None, w=0.9, **weights) -> np.ndarray:
+    """:func:`query` in the wider space, with ``w`` on queue axis ``queue_axis`` (0 or 1)."""
+    v = np.zeros(QDIM)
+    v[:DIM] = query(**weights)
+    if queue_axis is not None:
+        v[DIM + queue_axis] = w
+    return v
+
+
+class TestQueueSelection:
+    def test_which_entries_join_the_search(self, tmp_path):
+        traits = NV.load_trait_corpus(write_corpus(tmp_path / "data", renamed={"gamma": "old_gamma"}))
+        entries = [qentry("promoted_one"),                                            # candidate: in
+                   qentry("reviewed_one", status="ready", field="description"),       # ready, final description: in
+                   qentry("parked_one", status="backlog"), qentry("open_one", status="tbd"),
+                   qentry("turned_down", status="not_adopted"), qentry("replaced", status="superseded"),
+                   qentry("old_file", status="done"), qentry("renamed_pair", status="paired"),
+                   qentry("was_there", status="exists"), qentry("refused_one", status="refused"),
+                   qentry("no_text", text=None),                                       # exact label only
+                   qentry("alpha"),                                                    # a corpus stem
+                   qentry("old_gamma"),                                                # a corpus file's renamed_from
+                   qentry("other_stem", label="old gamma"),                            # its label is one
+                   qentry("label_is_corpus", label="Lambda-Mu"),                       # its label is a corpus stem
+                   qentry("a_role", entity_type="role"),
+                   qentry("promoted_one", text="A second entry of the same stem.")]
+        qt, rec = NV.queue_traits({"entries": entries}, traits)
+        assert sorted(qt) == ["open_one", "parked_one", "promoted_one", "reviewed_one"] == rec["stems"]
+        assert NV.QUEUE_SEARCH_STATUSES == ("candidate", "ready", "tbd", "backlog")
+        assert rec["n_entries"] == 4 and rec["statuses"] == list(NV.QUEUE_SEARCH_STATUSES)
+        ex = rec["excluded"]
+        for s in ("not_adopted", "superseded", "done", "paired", "exists", "refused"):
+            assert ex[f"status_{s}"] == 1
+        assert ex["no_text"] == 1 and ex["a_corpus_stem"] == 1 and ex["a_corpus_files_renamed_from"] == 2
+        assert ex["label_a_corpus_stem"] == 1 and ex["not_a_trait_entry"] == 1 and ex["duplicate_stem"] == 1
+        t = qt["promoted_one"]
+        assert t.is_queue and t.queue_status == "candidate" and t.label == "promoted one"
+        assert t.description == "This means being promoted one in every way."            # the draft, as promote writes
+        assert qt["reviewed_one"].queue_status == "ready" and t.partners == [] and t.expands_to == []
+        assert not traits["alpha"].is_queue
+        # the record's hash is of what the index holds, not of the file: the same rows give the same hash
+        qt2, rec2 = NV.queue_traits({"entries": list(reversed(entries))}, traits)
+        assert rec2["entries_sha256"] != rec["entries_sha256"]                          # another first entry wins
+        qt3, rec3 = NV.queue_traits({"entries": entries + [qentry("turned_down_again", status="not_adopted")]}, traits)
+        assert rec3["entries_sha256"] == rec["entries_sha256"]
+
+    def test_a_recorded_partner_is_taken_only_when_it_is_in_the_search(self, tmp_path):
+        traits = NV.load_trait_corpus(write_corpus(tmp_path / "data"))
+        entries = [qentry("anti_lambda", partner="lambda_mu"), qentry("qa", partner="qb"), qentry("qb"),
+                   qentry("lonely", partner="nowhere"), qentry("opp_alpha", partner="alpha")]
+        qt, _ = NV.queue_traits({"entries": entries}, traits)
+        assert qt["anti_lambda"].pair_partner == "lambda_mu" and qt["anti_lambda"].partners == ["lambda_mu"]
+        assert qt["anti_lambda"].expands_to == ["lambda_mu"]
+        assert qt["qa"].partners == ["qb"] and qt["qb"].partners == []                  # one way, as recorded
+        assert qt["lonely"].partners == [] and qt["lonely"].pair_partner is None
+        assert traits["lambda_mu"].partners == []                                       # the corpus is not changed
+        # hiding (the recovery harness): a partner that is hidden is not in the search
+        qh, _ = NV.queue_traits({"entries": entries}, traits, hide=["alpha", "lambda_mu"])
+        assert qh["anti_lambda"].partners == [] and qh["opp_alpha"].partners == []
+        assert set(qh) == set(qt)
+
+
+class TestQueueIndex:
+    def test_queue_rows_are_projected_into_the_corpus_space_which_does_not_move(self, tmp_path):
+        traits = NV.load_trait_corpus(write_corpus(tmp_path / "data"))
+        rng = np.random.default_rng(0)
+        E = rng.standard_normal((len(STEMS), QDIM))
+        alone = NV.build_index(traits, E, variant="centred")
+        qt, rec = NV.queue_traits({"entries": [qentry("q_one"), qentry("q_two")]}, traits)
+        Eq = rng.standard_normal((2, QDIM))
+        idx = NV.build_index(traits, E, variant="centred", queue=qt, E_queue=Eq, queue_info={"statuses": ["candidate"]})
+        assert idx.stems == alone.stems + ["q_one", "q_two"] and idx.queue_stems == ["q_one", "q_two"]
+        assert idx.corpus_stems == alone.stems
+        assert np.allclose(idx.Z[:len(STEMS)], alone.Z) and np.allclose(idx.transform.mean, alone.transform.mean)
+        assert np.allclose(idx.Z[len(STEMS):], alone.project(Eq / np.linalg.norm(Eq, axis=1, keepdims=True)))
+        assert idx.settings["n_corpus"] == len(STEMS) and idx.settings["n_queue"] == 2
+        assert idx.queue_info == {"statuses": ["candidate"], "n_entries": 2} and alone.queue_info is None
+        assert "n_queue" not in alone.settings
+        q = idx.project(rng.standard_normal(QDIM))
+        for s in alone.stems:                                                         # every corpus cosine as before
+            assert idx.cosine_to(q, s) == pytest.approx(alone.cosine_to(q, s))
+        assert NR.mean_listed_size(idx, 3) >= 1.0                                       # queue rows are not queries
+        with pytest.raises(ValueError):
+            NV.build_index(traits, E, variant="raw", queue={"alpha": traits["alpha"]}, E_queue=Eq[:1])
+        with pytest.raises(ValueError):
+            NV.build_index(traits, E, variant="raw", queue=qt, E_queue=Eq[:1])
+        # no entry: the corpus index exactly
+        same = NV.build_index(traits, E, variant="centred", queue={}, E_queue=None)
+        assert same.stems == alone.stems and np.array_equal(same.Z, alone.Z) and same.queue_info is None
+        assert same.settings == alone.settings
+
+
+def queue_runner(tmp_path, responder, entries, *, queue_vectors=None, rules=R2, **kw):
+    kw.setdefault("relation_model", NV.HAIKU)
+    idx, rec = queue_index(tmp_path, entries, queue_vectors=queue_vectors)
+    sets = NV.label_sets(idx.traits, {"entries": entries})
+    client = FakeAsyncAnthropic(responder)
+    r = NR.NoveltyRunner(client=client, batch_id="m3q", rubrics=rubrics(), index=idx, label_sets=sets,
+                         usage=MultiModelUsage(), responses_path=tmp_path / "out" / "responses.jsonl", k=4,
+                         config_version="cfg", retry_delays=(), rules=rules, **kw)
+    return r, client, idx
+
+
+class TestQueueWalk:
+    def test_a_queue_entry_is_retrieved_judged_and_covers_marked_as_such(self, tmp_path):
+        entries = [qentry("world_shaper"), qentry("far_away", status="backlog")]
+        rel = {("world changer", "world shaper"): "similar", ("world changer", "alpha"): "similar"}
+        ov = {("world changer", "world shaper", "sonnet"): 4}
+        r, client, idx = queue_runner(tmp_path, responder_for(rel, ov), entries)
+        c = cand("world changer")
+        q = qquery(queue_axis=1, w=0.9, alpha=0.5, zeta=0.3, eta=0.2)        # world_shaper is the second entry's axis
+        st = r.run([c], {c.key: q})[c.key]
+        nv = st.block
+        assert idx.queue_stems == ["far_away", "world_shaper"]
+        assert nv["decision"] == "covered" and nv["covered_by"] == "world_shaper" and nv["reason"] == "overlap"
+        assert nv["covered_by_queue"] == {"stem": "world_shaper", "status": "candidate"}
+        assert nv["exact_label"] is None
+        ws = next(x for x in nv["listed"] if x["stem"] == "world_shaper")
+        assert ws["queue_status"] == "candidate" and ws["rank"] == 1 and ws["relation"] == "similar"
+        assert all("queue_status" not in x for x in nv["listed"] if x["stem"] != "world_shaper")
+        assert nv["deciding_reading"]["stem"] == "world_shaper" and nv["deciding_reading"]["queue_status"] == "candidate"
+        assert nv["readings"][0]["queue_status"] == "candidate"
+        assert nv["queue_search"] == {"n_entries": 2, "statuses": list(NV.QUEUE_SEARCH_STATUSES), "queue_sha256": "q" * 64,
+                                      "entries_sha256": idx.queue_info["entries_sha256"]}
+        # the prompts see the entry as they see a corpus trait: its label and its text
+        rel_call = next(k for k in client.calls if is_relation(k))
+        listed = {t["label"]: t["description"] for t in json.loads(user_text(rel_call))["traits"]}
+        assert listed["world shaper"] == "This means being world shaper in every way."
+        ov_call = next(k for k in client.calls if not is_relation(k))
+        assert json.loads(user_text(ov_call))["other"] == {"label": "world shaper",
+                                                           "description": "This means being world shaper in every way."}
+        rr = NV.reading_rows("m3q", c.as_dict(), nv)
+        assert rr[0]["queue_status"] == "candidate"
+        s = NR.summarize(NR.result_rows(r.states), r.records, r.usage)
+        assert s["queue_search"] == {"rows_with_queue_in_index": 1, "rows_listing_a_queue_entry": 1,
+                                     "rows_reading_a_queue_entry": 1, "covered_by_queue": 1,
+                                     "covered_by_queue_by_status": {"candidate": 1}}
+        g = NV.synonyms(NR.result_rows(r.states))
+        assert g[0]["stem"] == "world_shaper" and g[0]["candidates"][0]["covered_by_queue"]["status"] == "candidate"
+
+    def test_a_queue_entrys_recorded_partner_is_expanded_and_read_after_an_opposite(self, tmp_path):
+        entries = [qentry("anti_lambda", partner="lambda_mu")]
+        rel = {("cand x", "anti lambda"): "opposed"}
+        ov = {("cand x", "lambda mu", "sonnet"): 4}
+        r, client, idx = queue_runner(tmp_path, responder_for(rel, ov), entries)
+        c = cand("cand x")
+        st = r.run([c], {c.key: qquery(queue_axis=0, w=0.9, zeta=0.4, eta=0.3, kappa=0.2)})[c.key]
+        nv = st.block
+        lm = next(x for x in nv["listed"] if x["stem"] == "lambda_mu")
+        assert lm["via"] == "expanded" and "queue_status" not in lm                    # the corpus partner it brings
+        assert st.shortlist.front == ["lambda_mu"]                                     # the opposite rule
+        assert nv["decision"] == "covered" and nv["covered_by"] == "lambda_mu" and "covered_by_queue" not in nv
+
+    def test_an_index_with_no_queue_entry_gives_the_blocks_of_before(self, tmp_path):
+        rel = {("candidate a", "alpha"): "similar"}
+        ov = {("candidate a", "alpha"): 4}
+        c = cand("candidate a")
+        vec = {c.key: query(alpha=0.9, zeta=0.6, eta=0.5, kappa=0.4)}
+        r0, _, _ = make_runner(tmp_path / "plain", responder_for(rel, ov))
+        r1, _, idx1 = make_runner(tmp_path / "q", responder_for(rel, ov))
+        traits = NV.load_trait_corpus(write_corpus(tmp_path / "q2" / "data"))
+        qt, _ = NV.queue_traits({"entries": [qentry("no_text", text=None), qentry("gone", status="not_adopted")]}, traits)
+        assert qt == {}
+        a = r0.run([c], vec)[c.key].block
+        b = r1.run([c], vec)[c.key].block
+        a.pop("at"), b.pop("at")
+        assert a == b and "queue_search" not in a and "covered_by_queue" not in a
+        assert all("queue_status" not in x for x in a["listed"] + a["readings"])

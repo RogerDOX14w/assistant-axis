@@ -1,0 +1,9 @@
+2026-10-09T04:13:08Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-09T04:13:11Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-09T04:13:11Z INFO [canary] text-embedding-3-large: 8 compared, lowest cosine 0.999463, 0 new references
+2026-10-09T04:14:22Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-09T04:14:22Z INFO [canary] text-embedding-3-large: 8 compared, lowest cosine 0.999463, 0 new references
+2026-10-09T04:14:32Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T04:14:34Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T04:14:34Z INFO [novelty_score:m3_queue_check_roget:overlap:claude-sonnet-5-5] parse rate: 1/1 OK  (first attempt 1/1)
+2026-10-09T04:14:34Z INFO [novelty_score:m3_queue_check_roget:relation:claude-haiku-5-5] parse rate: 1/1 OK  (first attempt 1/1)

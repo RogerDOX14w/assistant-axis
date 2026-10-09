@@ -11,7 +11,14 @@ Per candidate (a registry row whose filter verdict is ``trait``, with a gloss an
 0. **Exact label** (:func:`exact_label_match`): the stem equal to a corpus stem, a seed-queue stem (or a
    queue label, normalised), or a corpus file's ``renamed_from``: ``covered`` at once, reason
    ``exact_label``.
-1. **Retrieve** the ``k`` nearest corpus traits in the covered setting (:class:`CorpusIndex`).
+1. **Retrieve** the ``k`` nearest corpus traits in the covered setting (:class:`CorpusIndex`).  Since
+   2026-10-09 the index can also hold **seed-queue entries** (:func:`queue_traits`: trait entries that are
+   not yet a trait file, carry a text and have a live status, :data:`QUEUE_SEARCH_STATUSES`), so that a
+   later generator wave sees the words an earlier one promoted: each is embedded as a corpus trait is
+   (``label: text``) and projected into the space fitted on the corpus alone, and from there on it is
+   retrieved, relation-labelled and walked like a corpus trait.  Every listed trait, reading and covering
+   that is a queue entry carries ``queue_status``; a candidate covered by one through the walk records
+   ``covered_by_queue`` beside ``covered_by``.
 2. **Expand** (:func:`expand`): every retrieved trait in a recorded pair, triangle, tetrahedron or
    larger simplex brings the other members, each with its own cosine; sequences, rings, maps, sets,
    squares, cubes and orthoplexes do not expand (the poles of a square or orthoplex are recorded pairs
@@ -84,6 +91,16 @@ EXPANDING_FIXED = ("pair", "triangle", "tetrahedron")
 #: covered representation, the corpus side's form; kept for comparison).
 QUERY_FORMS: tuple[str, ...] = ("gloss_w14", "label_gloss")
 DEFAULT_QUERY_FORM = "gloss_w14"
+#: The seed-queue statuses whose trait entries join the similarity search (2026-10-09; Roger: "That definitely
+#: needs fixing first"): the statuses at which an entry is a word in hand that is not yet a trait file.
+#: ``candidate`` (what ``promote`` writes) and ``ready`` are the lifecycle before ``seeded``; ``tbd`` and
+#: ``backlog`` are parked but not turned down.  From ``seeded`` on (``generated``, ``checked``, ``paired``,
+#: ``done``, ``refused``) the entry is a trait file and in the index as one; an entry at those statuses with
+#: no file under its stem was renamed (the 10 ``paired`` entries with a text on 2026-10-09, each a corpus
+#: file's ``renamed_from``) or removed.  ``exists`` was a file when the queue was built.  ``not_adopted`` and
+#: ``superseded`` were turned down: they stay exact-label only (stage 0), since turning a word down is no
+#: reason to hide its synonyms.
+QUEUE_SEARCH_STATUSES: tuple[str, ...] = ("candidate", "ready", "tbd", "backlog")
 
 
 def is_expanding(kind: str) -> bool:
@@ -187,6 +204,11 @@ class CorpusTrait:
     expands_to: list        # the other members of its pair / simplexes (what expansion adds)
     renamed_from: list      # earlier stems
     simplexes: list = field(default_factory=list)   # [{"kind", "members"}]: its triangles, tetrahedra, simplexes
+    queue_status: Optional[str] = None              # a seed-queue entry's status (None: a corpus trait file)
+
+    @property
+    def is_queue(self) -> bool:
+        return self.queue_status is not None
 
 
 def _renamed_from(value: Any) -> list[str]:
@@ -234,18 +256,118 @@ def load_trait_corpus(data_dir: Path) -> dict[str, CorpusTrait]:
     return out
 
 
+def queue_text(entry: Mapping) -> str:
+    """A seed-queue entry's text: its ``description``, else its ``description_draft`` (promote writes the
+    candidate's gloss there), stripped; ``""`` when it has neither."""
+    for k in ("description", "description_draft"):
+        v = entry.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return ""
+
+
+def queue_traits(queue: Mapping, corpus: Mapping[str, CorpusTrait], *,
+                 statuses: Sequence[str] = QUEUE_SEARCH_STATUSES, hide: Iterable[str] = ()
+                 ) -> tuple[dict[str, CorpusTrait], dict]:
+    """The seed-queue entries that join the similarity search, as :class:`CorpusTrait` rows with
+    ``queue_status`` set, and the record of the selection.
+
+    An entry joins when it is a trait entry, its status is one of ``statuses``, it has a text
+    (:func:`queue_text`), and it is not already in ``corpus`` (the *full* corpus, before any hiding): its stem
+    is not a corpus stem, neither its stem nor its normalised label is a corpus file's ``renamed_from``, and its
+    normalised label is not a corpus stem.  The first entry of a stem wins.  ``hide`` (the recovery harness):
+    entries whose stem or normalised label is a hidden stem are left out, as stage 0 leaves them out.
+
+    The row's label is the entry's ``label`` (else the stem, spaced), its description the text, so the relation
+    and overlap prompts and the embedded ``label: text`` have the corpus's form.  A partner is taken only when the
+    entry records one (``partner``) and it is in the search (a corpus trait not hidden, or another entry that
+    joins): it is the row's pair partner, its partner for the "opposite" rule and the member its expansion adds,
+    as a corpus pair partner is; the corpus trait itself is not changed.  Otherwise the row has none.
+
+    The record: ``statuses``, ``n_entries``, ``stems``, ``excluded`` (counts by reason), and ``entries_sha256``
+    (a hash of what the index holds: stem, label, text, status and partner of each row, so that two runs over
+    different queue files with the same rows can be told to agree)."""
+    import hashlib
+    statuses = tuple(statuses)
+    hid = set(hide)
+    renamed = {old for t in corpus.values() for old in t.renamed_from}
+    excluded: dict[str, int] = {}
+    chosen: dict[str, dict] = {}
+
+    def skip(why: str) -> None:
+        excluded[why] = excluded.get(why, 0) + 1
+
+    for e in queue.get("entries") or []:
+        stem = e.get("stem")
+        if (e.get("entity_type") or "trait") != "trait" or not stem:
+            skip("not_a_trait_entry")
+            continue
+        if e.get("status") not in statuses:
+            skip(f"status_{e.get('status')}")
+            continue
+        text = queue_text(e)
+        if not text:
+            skip("no_text")
+            continue
+        lab = normalize_to_file_name(e["label"]) if e.get("label") else stem
+        if stem in corpus:
+            skip("a_corpus_stem")
+            continue
+        if stem in renamed or lab in renamed:
+            skip("a_corpus_files_renamed_from")
+            continue
+        if lab in corpus:
+            skip("label_a_corpus_stem")
+            continue
+        if stem in hid or lab in hid:
+            skip("hidden")
+            continue
+        if stem in chosen:
+            skip("duplicate_stem")
+            continue
+        chosen[stem] = {"entry": e, "label": e.get("label") or stem.replace("_", " "), "text": text}
+    available = (set(corpus) - hid) | set(chosen)
+    out: dict[str, CorpusTrait] = {}
+    for stem in sorted(chosen):
+        c = chosen[stem]
+        p = c["entry"].get("partner")
+        p = normalize_to_file_name(p) if isinstance(p, str) and p.strip() else None
+        p = p if p and p in available and p != stem else None
+        out[stem] = CorpusTrait(stem=stem, label=c["label"], description=c["text"], negative_label=None,
+                                pair_partner=p, partners=[p] if p else [], expands_to=[p] if p else [],
+                                renamed_from=[], simplexes=[], queue_status=c["entry"].get("status"))
+    rows = [[s, t.label, t.description, t.queue_status, t.pair_partner] for s, t in sorted(out.items())]
+    sha = hashlib.sha256(json.dumps(rows, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+    return out, {"statuses": list(statuses), "n_entries": len(out), "stems": sorted(out),
+                 "excluded": dict(sorted(excluded.items())), "entries_sha256": sha}
+
+
 @dataclass
 class CorpusIndex:
     """The corpus rows in the covered space (unit rows: a dot product is the cosine) and the transform
-    that maps a candidate's raw embedding into the same space (fitted on the corpus only)."""
+    that maps a candidate's raw embedding into the same space (fitted on the corpus only).  ``queue_info``:
+    ``None`` when the index holds no seed-queue entry, else the record the blocks carry (``n_entries``, and
+    whatever the builder adds: the queue file's sha256, the statuses); the entries' rows follow the corpus's
+    in ``stems`` and ``Z``, and their :class:`CorpusTrait` in ``traits`` has ``queue_status`` set."""
     stems: list
     Z: np.ndarray
     transform: Any
     traits: dict
     settings: dict
+    queue_info: Optional[dict] = None
 
     def __post_init__(self):
         self._row = {s: i for i, s in enumerate(self.stems)}
+
+    @property
+    def queue_stems(self) -> list[str]:
+        """The seed-queue entries in the index, in row order."""
+        return [s for s in self.stems if self.traits[s].is_queue]
+
+    @property
+    def corpus_stems(self) -> list[str]:
+        """The corpus traits in the index, in row order."""
+        return [s for s in self.stems if not self.traits[s].is_queue]
 
     def project(self, e_raw: np.ndarray) -> np.ndarray:
         return self.transform.apply(np.asarray(e_raw, dtype=np.float64))
@@ -274,8 +396,13 @@ class CorpusIndex:
 
 
 def build_index(traits: Mapping[str, CorpusTrait], E_raw: np.ndarray, *, variant: str,
-                settings: Optional[Mapping] = None) -> CorpusIndex:
-    """``E_raw``: the corpus embeddings, one row per trait in ``sorted(traits)`` order."""
+                settings: Optional[Mapping] = None, queue: Optional[Mapping[str, CorpusTrait]] = None,
+                E_queue: Optional[np.ndarray] = None, queue_info: Optional[Mapping] = None) -> CorpusIndex:
+    """``E_raw``: the corpus embeddings, one row per trait in ``sorted(traits)`` order.  ``queue``
+    (:func:`queue_traits`) and ``E_queue`` (their embeddings in ``sorted(queue)`` order): seed-queue entries
+    projected into the space, which stays fitted on the corpus alone, so that adding an entry moves no corpus
+    vector; ``queue_info`` is added to the index's record of them.  With no entry the index is the corpus's
+    alone, exactly as before."""
     from .embed import normalize_rows
     from .space import fit_space
     stems = sorted(traits)
@@ -283,8 +410,24 @@ def build_index(traits: Mapping[str, CorpusTrait], E_raw: np.ndarray, *, variant
     if E.shape[0] != len(stems):
         raise ValueError(f"{E.shape[0]} corpus rows for {len(stems)} traits")
     T = fit_space(E, variant)
-    return CorpusIndex(stems=stems, Z=T.apply(E), transform=T, traits=dict(traits),
-                       settings=dict(settings or {}, variant=variant, n_corpus=len(stems)))
+    Z = T.apply(E)
+    all_traits = dict(traits)
+    info = None
+    if queue:
+        qstems = sorted(queue)
+        clash = sorted(set(qstems) & set(stems))
+        if clash:
+            raise ValueError(f"seed-queue entries with a corpus stem: {', '.join(clash[:10])}")
+        if E_queue is None or len(E_queue) != len(qstems):
+            raise ValueError(f"{0 if E_queue is None else len(E_queue)} queue rows for {len(qstems)} entries")
+        Z = np.vstack([Z, T.apply(normalize_rows(np.asarray(E_queue)))])
+        stems = stems + qstems
+        all_traits.update(queue)
+        info = dict(queue_info or {}) | {"n_entries": len(qstems)}
+    out_settings = dict(settings or {}, variant=variant, n_corpus=len(traits))
+    if info:
+        out_settings["n_queue"] = info["n_entries"]
+    return CorpusIndex(stems=stems, Z=Z, transform=T, traits=all_traits, settings=out_settings, queue_info=info)
 
 
 def query_text(label: str, gloss: str, *, query_form: str = DEFAULT_QUERY_FORM, representation: str = "w20") -> str:
@@ -400,12 +543,13 @@ class Listed:
     partners: list = field(default_factory=list)
     pair_partner: Optional[str] = None
     simplexes: list = field(default_factory=list)   # its triangles / tetrahedra / simplexes ({"kind", "members"})
+    queue_status: Optional[str] = None              # a seed-queue entry's status (None: a corpus trait)
 
 
 def listed_from(stem: str, cosine: float, traits: Mapping[str, CorpusTrait], *, rank: Optional[int], via: str) -> Listed:
     t = traits[stem]
     return Listed(stem=stem, cosine=round(float(cosine), 6), rank=rank, via=via, partners=list(t.partners),
-                  pair_partner=t.pair_partner, simplexes=[dict(s) for s in t.simplexes])
+                  pair_partner=t.pair_partner, simplexes=[dict(s) for s in t.simplexes], queue_status=t.queue_status)
 
 
 def expand(retrieved: Sequence[tuple[str, float]], traits: Mapping[str, CorpusTrait],
@@ -603,9 +747,13 @@ class Reading:
     opus: Optional[dict] = None
     opus_role: Optional[str] = None   # at_cut_off | below_cut_off | sonnet_unsure
     outcome: Optional[str] = None     # cut | continue | rescued | review | opposite | unparsed | unsure
+    queue_status: Optional[str] = None   # the trait read is a seed-queue entry with this status
 
     def as_dict(self) -> dict:
-        return asdict(self)
+        d = asdict(self)
+        if d["queue_status"] is None:     # a corpus trait's reading: the fields it always had
+            del d["queue_status"]
+        return d
 
 
 class Walk:
@@ -617,14 +765,18 @@ class Walk:
     ``queue``: the shortlist; ``info``: stem -> :class:`Listed` (cosine, relation via, partners) for the
     listed traits; ``cosine_of``: the cosine of a partner that is not listed; ``review``: flags carried in
     from stage 3 (``pair_flag`` under rule set 1, ``both_similar`` under 2, a relation call that never
-    parsed); ``exclude``: traits never judged, not even as an opposite's partner (decision 13)."""
+    parsed); ``exclude``: traits never judged, not even as an opposite's partner (decision 13);
+    ``queue_status``: stem -> status of the seed-queue entries in the index (a partner read that is not listed
+    takes its status from here)."""
 
     def __init__(self, key: str, c: int, queue: Sequence[str], info: Mapping[str, Listed], *,
                  relations: Optional[Mapping[str, str]] = None, partners: Optional[Mapping[str, Sequence[str]]] = None,
                  cosine_of: Optional[Callable[[str], Optional[float]]] = None, review: Iterable[str] = (),
                  review_details: Iterable[Mapping] = (), pair_completion_for: Iterable[str] = (),
-                 rules: Optional[Rules] = None, exclude: Iterable[str] = ()):
+                 rules: Optional[Rules] = None, exclude: Iterable[str] = (),
+                 queue_status: Optional[Mapping[str, str]] = None):
         self.key = key
+        self.queue_status = dict(queue_status or {})
         self.c = int(c)
         self.rules = rules or DEFAULT_RULES
         self.exclude: set[str] = set(exclude)
@@ -687,7 +839,8 @@ class Walk:
                 continue
             x = self.info.get(s)
             self.current = Reading(position=len(self.readings) + 1, stem=s, cosine=self._cos(s),
-                                   relation=self.relations.get(s), via=x.via if x else "partner")
+                                   relation=self.relations.get(s), via=x.via if x else "partner",
+                                   queue_status=(x.queue_status if x else None) or self.queue_status.get(s))
             return s
         self._finish()
         return None
@@ -865,7 +1018,12 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
     ``overlap`` (the walk decided), or ``no_listed`` (nothing retrieved).  Rule set 2's additions: ``rules``
     (the switches and the floor, as the run used them), ``pair_notes`` (decision 13, with the noted members'
     cosines and any readings on record), ``n_below_floor`` (listed traits under the floor), ``below_floor``
-    (the similar traits it kept out of the queue) and ``renamed_from`` (decision 15's match, judged)."""
+    (the similar traits it kept out of the queue) and ``renamed_from`` (decision 15's match, judged).
+
+    Seed-queue entries in the search (2026-10-09): a listed entry, a reading and the deciding reading carry
+    ``queue_status`` when the trait is a queue entry, and a row the walk covered by one carries
+    ``covered_by_queue: {"stem", "status"}`` (stage 0's queue match keeps its ``exact_label.match: "queue"``).
+    Neither key appears where no queue entry is involved, so a block is unchanged when none is."""
     rules = rules or DEFAULT_RULES
     review = list(walk.review) if walk else []
     details = list(walk.review_details) if walk else []
@@ -874,7 +1032,15 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
     deciding = None
     if walk and walk.covering:
         deciding = walk.covering.as_dict()
-    return {
+    cov_queue = None
+    if walk and walk.covering and walk.covering.queue_status and covered_by is None:
+        cov_queue = {"stem": walk.covering.stem, "status": walk.covering.queue_status}
+
+    def listed_row(x: Listed) -> dict:
+        d = {"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via,
+             "relation": (shortlist.relations.get(x.stem) if shortlist else None)}
+        return d | ({"queue_status": x.queue_status} if x.queue_status else {})
+    out = {
         "run_id": run_id, "mode": mode, "decision": decision, "reason": reason,
         "covered_by": covered_by if covered_by is not None else (walk.covered_by if walk else None),
         "exact_label": dict(match) if match else None,
@@ -886,8 +1052,7 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
         "deciding_reading": deciding,
         "readings": readings,
         "n_pairs_judged": len(readings),
-        "listed": [{"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via,
-                    "relation": (shortlist.relations.get(x.stem) if shortlist else None)} for x in listed],
+        "listed": [listed_row(x) for x in listed],
         "shortlist": list(shortlist.queue) if shortlist else [],
         "relation": dict(relation) if relation else None,
         "rubrics": dict(rubrics), "config_version": config_version,
@@ -899,7 +1064,10 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
         "renamed_from": dict(renamed) if renamed else None,
         "usage": dict(usage) if usage else usage_dict({}),
         "at": at,
-    } | dict(extra or {})
+    }
+    if cov_queue:
+        out["covered_by_queue"] = cov_queue
+    return out | dict(extra or {})
 
 
 def reading_rows(run_id: str, cand: Mapping, block: Mapping) -> list[dict]:
@@ -967,7 +1135,8 @@ def synonyms(rows: Iterable[Mapping], *, stem: Optional[str] = None, run_id: Opt
         groups.setdefault(nv["covered_by"], []).append({
             "key": r["key"], "label": r.get("label"), "gloss": r.get("gloss"), "best": best,
             "reason": nv.get("reason"), "reading": {m: d.get(m) for m in ("sonnet", "opus")} if d else None,
-            "exact_label": nv.get("exact_label"), "run_id": nv.get("run_id")})
+            "exact_label": nv.get("exact_label"), "run_id": nv.get("run_id"),
+            "covered_by_queue": nv.get("covered_by_queue")})
     out = []
     for s, cands in groups.items():
         bests = [c["best"] for c in cands if c["best"] is not None]

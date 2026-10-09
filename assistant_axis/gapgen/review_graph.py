@@ -26,7 +26,9 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   build of 2026-10-08 read the second direction only after a 4; decision 12 lowered it to 3, and a ``--resume``
   of such a build reads only the missing second directions.)
 * **Corpus edges** (``source: "m3"``): copied from each kept candidate's M3 block, ``novelty.listed`` (cosine,
-  relation, rank, via) and ``novelty.readings`` (the overlap readings, Sonnet and Opus); no call.
+  relation, rank, via) and ``novelty.readings`` (the overlap readings, Sonnet and Opus); no call.  A listed trait
+  or reading marked ``queue_status`` (M3 searched the seed queue, from 2026-10-09) is a seed-queue entry: its edge
+  goes to ``queue:<stem>``, and a candidate M3 covered by one (``covered_by_queue``) points at that queue node.
 * **4-edges** (``strict``): both directions read 4 under the rule at cut-off 4 (:func:`reading_of`: Sonnet 4
   confirmed by Opus, Sonnet 3 raised to 4 by Opus, or Sonnet unsure and Opus 4), the relation not ``opposed``.
 * **3-edges** (``proposed``; decision 12): both directions read at the proposed cut-off or above under M3's rule
@@ -648,12 +650,21 @@ def _candidate_node(row: Mapping) -> Node:
 
 
 def _covering(nv: Mapping) -> Optional[tuple[str, str]]:
-    """``(kind, stem)`` of the trait that covered a candidate: the queue entry for an exact-label queue match,
-    else the corpus trait."""
+    """``(kind, stem)`` of the trait that covered a candidate: the queue entry for an exact-label queue match or
+    for a cover by a seed-queue entry through M3's walk (``covered_by_queue``, from 2026-10-09), else the corpus
+    trait."""
     stem = nv.get("covered_by")
     if not stem:
         return None
-    return ("queue", stem) if (nv.get("exact_label") or {}).get("match") == "queue" else ("corpus", stem)
+    if (nv.get("exact_label") or {}).get("match") == "queue" or nv.get("covered_by_queue"):
+        return "queue", stem
+    return "corpus", stem
+
+
+def _m3_target(stem: str, x: Mapping) -> tuple[str, str]:
+    """``(kind, node key)`` of a trait an M3 block lists or reads: a seed-queue entry (its ``queue_status``, from
+    2026-10-09, when M3 searched the queue) or a corpus trait."""
+    return ("queue", queue_key(stem)) if x.get("queue_status") else ("corpus", corpus_key(stem))
 
 
 def _value(x: Any) -> Any:
@@ -742,15 +753,17 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
         for x in nv.get("listed") or []:
             stem = x["stem"]
             seen.add(stem)
-            corpus_stems.add(stem)
+            kind, b = _m3_target(stem, x)
+            (queue_stems if kind == "queue" else corpus_stems).add(stem)
             rd = {"ab": rd_of(judged[stem]) | {"outcome": judged[stem].get("outcome")}} if stem in judged else {}
-            edges.append(Edge(a=key_, b=corpus_key(stem), cosine=x.get("cosine"), relation=x.get("relation") or "unknown",
+            edges.append(Edge(a=key_, b=b, cosine=x.get("cosine"), relation=x.get("relation") or "unknown",
                               source="m3", readings=rd, via=x.get("via"), rank=x.get("rank")))
         for stem, r in judged.items():          # judged but not listed: an opposite's partner, a renamed_from match
             if stem in seen:
                 continue
-            corpus_stems.add(stem)
-            edges.append(Edge(a=key_, b=corpus_key(stem), cosine=r.get("cosine"), relation=r.get("relation") or "unknown",
+            kind, b = _m3_target(stem, r)
+            (queue_stems if kind == "queue" else corpus_stems).add(stem)
+            edges.append(Edge(a=key_, b=b, cosine=r.get("cosine"), relation=r.get("relation") or "unknown",
                               source="m3", readings={"ab": rd_of(r) | {"outcome": r.get("outcome")}},
                               via=r.get("via")))
 
