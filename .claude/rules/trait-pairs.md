@@ -273,7 +273,8 @@ to every seed, by hand or by a writing agent; Roger reviews before
    Age`), as English writes them; the stem is unchanged.  Membership traits
    stay in English: native-language instructions would make the response
    language dominate the vectors (decided 2026-10-08; an `experiment` side
-   set is in TRAITS_TO_ADD's post-extraction TODO).
+   set is in TRAITS_TO_ADD's chunk-4 post-extraction TODO, to be built before
+   the extraction).
 11. **States, dispositions and alternatives (Roger, 2026-10-08).**  A state
    is a trait only if it lasts years (trapped in a job, lonely, uninsured);
    one that lasts hours or days is rewritten as the habitual disposition if
@@ -299,7 +300,7 @@ design is agreed with him before the template changes, and the
 regeneration (about $19, about $40 with the pair recheck) goes through
 the expensive-operations confirmation.
 The issue list, evidence, cost and timing are in
-`data/traits/instructions/TRAITS_TO_ADD.md` § "Trait generator V2", with a
+`data/traits/instructions/TRAITS_ADDED.md` § "Trait generator V2", with a
 design log.  Drafted 2026-09-29 as `--style RogerV2` in
 `regenerate_trait_instructions.py` (voice left out on Roger's decision),
 settled as draft 10 on 2026-09-30 (template `27a39ea285cb`), and **the
@@ -425,6 +426,64 @@ regeneration after his edit costs three cents, while a round trip of
 coordination costs more.  Only edits to existing files (labels, renames,
 rewrites) wait for him.
 
+### The TO_ADD and ADDED files: what moves when (Roger, 2026-10-09)
+
+`TRAITS_TO_ADD.md` and `ROLES_TO_ADD.md` had grown into 5,700 lines of open
+work, finished audits and design logs, with "TODO" and "TBD" markers on
+sections long done, so that neither Roger nor an agent could tell what was
+left.  On 2026-10-09 each was split: the TO_ADD file keeps what is unstarted
+or part done, and finished work lives in `TRAITS_ADDED.md` /
+`ROLES_ADDED.md` beside it.  This is an ongoing task: apply it whenever a
+piece of corpus work finishes.
+
+1. **Finished sections move; unstarted and part-done ones stay.**  Reference
+   material counts as finished (a coverage audit's "not added, and why", a
+   design log, measured evidence): it moves, and a ruling in it that binds
+   future additions and is not already in this file gets one line in
+   TRAITS_TO_ADD § "Standing rulings for future additions", with a pointer.
+2. **The judgement call: a section that is mostly done but has one or two
+   TODOs left.**  Leave it whole in TO_ADD until those are done, or move the
+   bulk and write each remaining TODO as an item of its own in the TO_ADD
+   index, saying what to do and pointing at the moved text
+   ("TRAITS_ADDED § X").  Decide by relative size, and by whether the TODO
+   can be explained without the rest of the section as context.  As applied
+   on 2026-10-09: the 400-line dimensionality roadmap moved and its re-run
+   became one index item; the housekeeping list and the leakage scan moved
+   and their three and two leftovers became items; the chunk-4
+   post-extraction section stayed, because most of it is still open and the
+   two done bullets are short; the 66-entry Part 3 of the taxonomy import
+   stayed, since its queue entries point at it.
+3. **A parent whose subsection stays open** appears in both files: its
+   heading and introduction go to ADDED, and TO_ADD keeps the heading with a
+   status line saying what moved, so the open subsection keeps its parent.
+4. **Headings never change, in either file.**  The queue's `section` fields,
+   `assistant_axis/gapgen/physical_pass.py` and the trait-gap tools match
+   sections by heading text.  Status goes on a line under the heading
+   instead, `**Status YYYY-MM-DD: ...**`, dated, so a stale one shows its
+   age.
+5. **Moved text is moved verbatim**, stale markers, counts and broken links
+   included (one link in TRAITS_ADDED points at a trait dropped in chunk 5);
+   the head of each ADDED file says its markers are historical.  New
+   sections are appended at the end of the ADDED file.  The 2026-10-09
+   split kept the original order and checked by script that every line
+   landed exactly once; a later single move is a cut and paste.
+6. **Code can read these files.**  Before moving a section, grep the code
+   for the file name: on 2026-10-09 Strategy 1's bracket scores, parsed by
+   `assistant_axis/gapgen/persona.py` (from `calibrate_metric.py` and
+   `test_gapgen_persona.py`), moved to TRAITS_ADDED.md and the two paths
+   followed.  Live documents (this file, the READMEs, code comments) are
+   repointed; old reports and seeding logs are left as they are, and the
+   note at the top of each TO_ADD file sends "TO_ADD § X" readers to either
+   file.
+7. **Keep the index at the top of TRAITS_TO_ADD current.**  It is what
+   Roger scans for what to do next: add an item when work opens, remove it
+   when it is done, and keep the grouping (before, at and after the
+   extraction; the tangle pass; parked for Roger; tooling).  ROLES_TO_ADD
+   has a short index of its own.
+8. **Sections written by the trait-gap session** (the standing pointers to
+   its holding lists) stay in TO_ADD; tell that session before committing a
+   move, since its tools print these file names.
+
 ### Corpus expansion policy and the clean-pair decision procedure (Sep 2026)
 
 Roger's stated trade-offs for adding traits and roles (2026-09-09), written
@@ -541,8 +600,9 @@ Rules:
    checker rejects a singleton there (rule added 2026-09-17 after the
    agent had written two such singletons).  As of the 2026-09-08 backfill the not-yet-classified traits
    are the 142 with a real-word `negative_label` that has no file or is a
-   one-way pointer (see TRAITS_TO_ADD § "TODO: antonym gap-filling pass");
-   cleaning them up (pairs, triangles, sets, ...) is that TODO.
+   one-way pointer (see TRAITS_ADDED § "TODO: antonym gap-filling pass");
+   cleaning them up (pairs, triangles, sets, ...) is the tangle pass, TRAITS_TO_ADD
+   § "TODO: arrangement hunting" (36 left on 2026-10-09).
 3. **The pair convention is unchanged**: a clean trait pair is still two
    files whose `negative_label` fields point at each other.  The field is
    authoritative for *shape*; the labels stay the prompt-facing antonyms;

@@ -329,7 +329,7 @@ include any additional explanations or text outside of this JSON structure."""
 
 
 # The trait rubric V2 (``--style RogerV2``), the default since 2026-10-01
-# (drafted 2026-09-29, settled as draft 10 on 2026-09-30): see TRAITS_TO_ADD.md
+# (drafted 2026-09-29, settled as draft 10 on 2026-09-30): see TRAITS_ADDED.md
 # § "Trait generator V2" for the design log and the evidence behind each rule.
 # ``--style Roger`` is the May 2026 production rubric, ``_ROGER_TEMPLATE_V1``.  It
 # takes from the role rubric V2.5 what applies to traits (softening, the
@@ -1748,7 +1748,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=["Jacob", "Christina", "Roger", "RogerV2"],
         default=DEFAULT_PROMPT_STYLE,
         help=f"Prompt style (default: {DEFAULT_PROMPT_STYLE}). Christina, Roger and RogerV2 use a single "
-             "combined call. RogerV2 is the trait rubric V2, adopted 2026-10-01 (design log in TRAITS_TO_ADD.md).",
+             "combined call. RogerV2 is the trait rubric V2, adopted 2026-10-01 (design log in TRAITS_ADDED.md).",
     )
     parser.add_argument(
         "--temperature",

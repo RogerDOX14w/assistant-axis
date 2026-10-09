@@ -366,7 +366,7 @@ def main(argv=None) -> int:
         for K, arr in res.items():
             persona_yields[K] = {ps["stems"][i]: float(arr[i]) for i in trait_rows if ps["stems"][i] in ci["index"]}
         persona = {"stems": [ps["stems"][i] for i in trait_rows], "M": ps["M"][trait_rows]}
-        brackets = PS.parse_bracket_scores(repo / "data" / "traits" / "instructions" / "TRAITS_TO_ADD.md")
+        brackets = PS.parse_bracket_scores(repo / "data" / "traits" / "instructions" / "TRAITS_ADDED.md")
         bx = [s for s in brackets if s in persona_yields[PS.PLAN12_K]]
         rho_b = {K: C.spearman([brackets[s] for s in bx], [persona_yields[K][s] for s in bx])[0] for K in persona_yields}
         persona_info = {"n_entities": ps["n"], "n_traits_with_vectors": len(trait_rows),

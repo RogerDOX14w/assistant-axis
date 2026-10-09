@@ -139,8 +139,8 @@ When to use:
   in the canonical frame mark dense regions of the axis space where
   *additional* traits won't add effective dimensionality.  Pair
   with the PCA-of-entity-pool / yield analysis from
-  [`data/traits/instructions/TRAITS_TO_ADD.md`](data/traits/instructions/TRAITS_TO_ADD.md)
-  for the full "which direction is empty?" picture.
+  [`data/traits/instructions/TRAITS_ADDED.md`](data/traits/instructions/TRAITS_ADDED.md)
+  (§ "Strategy 1b") for the full "which direction is empty?" picture.
 
 JSON sidecar carries the OLO leaf order plus cluster memberships at
 five thresholds (0.7 / 0.6 / 0.5 / 0.4 / 0.3) for downstream

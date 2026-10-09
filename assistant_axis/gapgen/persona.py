@@ -2,7 +2,7 @@
 
 The persona-space yield score is recomputed here, because the May 2026
 per-trait residual fractions survive only for the 24 traits quoted in
-``TRAITS_TO_ADD.md`` § "Strategy 1" (``[0.829] `melancholic` ...``), and that
+``TRAITS_ADDED.md`` § "Strategy 1" (``[0.829] `melancholic` ...``), and that
 analysis projected onto the top-20 PCs of the 60-axis Gram matrix, a basis
 not recorded anywhere.  Plan 12 step 1 instead: the entity pool (traits and
 roles) at the canonical cell (8-slot data, slot 6, layer 25), centred on the

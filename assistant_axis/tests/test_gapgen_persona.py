@@ -29,7 +29,7 @@ def test_bracket_parser_on_fixture(tmp_path):
 
 
 def test_bracket_parser_on_the_real_file():
-    p = REPO_ROOT / "data" / "traits" / "instructions" / "TRAITS_TO_ADD.md"
+    p = REPO_ROOT / "data" / "traits" / "instructions" / "TRAITS_ADDED.md"
     got = P.parse_bracket_scores(p)
     assert len(got) >= 20 and got["calm"] == pytest.approx(0.826)
 

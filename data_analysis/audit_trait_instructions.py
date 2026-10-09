@@ -83,7 +83,7 @@ PILOT_TRAITS = (
 # ---------------------------------------------------------------------------
 
 # Opening forms, with the judged-response record of each in the 8slot data
-# (TRAITS_TO_ADD.md, "Evidence on what makes a trait instruction work").
+# (TRAITS_ADDED.md, "Evidence on what makes a trait instruction work").
 FORM_ACT_AS = "Act as ..."
 FORM_BE = "Be someone who ..."
 FORM_BECOME = "Become someone who ..."

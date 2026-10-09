@@ -511,7 +511,7 @@ Your final output should only include the JSON object containing the \
 instructions, questions, and evaluation prompt as specified above. Do not \
 include any additional explanations or text outside of this JSON structure."""
 
-# Role rubric V3 (drafted and adopted 2026-10-03; design log in ROLES_TO_ADD.md
+# Role rubric V3 (drafted and adopted 2026-10-03; design log in ROLES_ADDED.md
 # § "Role rubric V3"): V2.5 plus what the trait rubric V2 taught.  Changes from V2:
 # every instruction opens by saying who to be, from a menu of five identity
 # openings ("Act as" is out: on the same text it buys about ten points with

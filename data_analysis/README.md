@@ -102,7 +102,7 @@ placeholder.  The paragraph on verbs and particulars was a switch
 (`--no-concrete`) while it was under test on 2026-09-29/30; files written then
 carry a `concrete` field in `generator`.  Since Roger settled its wording the
 paragraph is part of the template and the switch is gone.
-Design log and evidence: `data/traits/instructions/TRAITS_TO_ADD.md`
+Design log and evidence: `data/traits/instructions/TRAITS_ADDED.md`
 § "Trait generator V2".  Try any change to it on a copy, never on the
 corpus: `--traits-dir DIR` reads and writes the trait files of a staging
 directory instead of the corpus.  About $0.047 per trait, so `--all` on the
@@ -306,7 +306,7 @@ uv run python data_analysis/regenerate_role_instructions.py --roles pirate --sty
 
 Prompt styles: `--style RogerV3` (the default since 2026-10-03, adopted after
 the measured pilot in `reports/role_rubric_v3_pilot/`; design log in
-`data/roles/instructions/ROLES_TO_ADD.md` § "Role rubric V3") is V2 plus the
+`data/roles/instructions/ROLES_ADDED.md` § "Role rubric V3") is V2 plus the
 trait rubric V2's lessons: every instruction opens by saying who to be, from a
 menu of five identity openings ("From now on, you are a ...", "Be a ...",
 "You're a ...", "Become a ...", "You are a ... who ..."), five different ones
@@ -446,10 +446,9 @@ uv run python data_analysis/sample_trait_responses.py stoic --n-questions 3 --pa
 
 All five API scripts here default to `claude-sonnet-4-6` (switched 2026-09-07
 when `claude-sonnet-4-20250514` was retired and started returning 404).  The
-corpus is therefore mixed: any trait whose instructions were regenerated on
-or after 2026-09-07 (tracked in `data/traits/instructions/TRAITS_TO_ADD.md`
-§ "Housekeeping" and `AGENT_NOTES.md` § "TODO: regenerate activation/vector
-data") comes from Sonnet 4.6; everything else still comes from Sonnet 4.  A same-prompt
+corpus was mixed for a month; since the corpus-wide regenerations (traits under
+rubric V2 on 2026-10-02, roles under V3 on 2026-10-03) every trait and role file
+comes from Sonnet 4.6, as each file's `generator.model` records.  A same-prompt
 comparison on three control traits showed Sonnet 4.6 rewrites every
 instruction and question (no exact matches), with longer, more prescriptive
 "always/never" phrasing.  `classify_goals.py` and the `score_combinations.py`

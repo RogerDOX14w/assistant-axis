@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Seeding helper for the corpus-expansion queue (chunk 0 of the plan in
-``data/traits/instructions/TRAITS_TO_ADD.md`` § "Seeding plan and chunk
+``data/traits/instructions/TRAITS_ADDED.md`` § "Seeding plan and chunk
 order").
 
 The queue lives in ``data/seed_queue.json``::
