@@ -48,6 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from assistant_axis.atomic_io import (   # noqa: E402
     atomic_write_text, read_jsonl_with_retry, read_text_with_retry,
 )
+from assistant_axis.entity_id import judge_label   # noqa: E402
 from assistant_axis.steering_judges import (   # noqa: E402
     DEFAULT_COHERENCE_MODEL, DEFAULT_RP_MODEL, DEFAULT_EFFECT_MODELS,
     DEFAULT_TARGET_BATCH_SIZE, DEFAULT_SKIP_THRESHOLD,
@@ -108,18 +109,24 @@ def _load_persona(persona_cfg: Dict[str, Any],
             return ""
         return str(data.get("description", ""))
 
+    # The spec carries the names the judges are shown: the judge display
+    # form of each stem (AGENT_NOTES "Judge prompts show the judge display
+    # form"; steering rubric versions coherence 6 / RP 5 / effect 8).
+    def _label(kind: str, name: str) -> str:
+        return judge_label(name, kind, data_dir=instructions_dir)
+
     if ptype == "role":
         name = persona_cfg["role"]
-        return PersonaSpec(role=name, description=_read_desc("roles", name))
+        return PersonaSpec(role=_label("roles", name), description=_read_desc("roles", name))
     if ptype == "trait":
         name = persona_cfg["trait"]
-        return PersonaSpec(role=name, description=_read_desc("traits", name))
+        return PersonaSpec(role=_label("traits", name), description=_read_desc("traits", name))
     if ptype == "combination":
         role = persona_cfg["role"]
         traits = persona_cfg.get("traits") or []
-        extra = [(t, _read_desc("traits", t)) for t in traits]
+        extra = [(_label("traits", t), _read_desc("traits", t)) for t in traits]
         return PersonaSpec(
-            role=role,
+            role=_label("roles", role),
             description=_read_desc("roles", role),
             extra_traits=extra,
         )
@@ -165,13 +172,18 @@ def _load_steering(axis_cfg: Dict[str, Any],
             ) or _try_read_description(
                 instructions_dir / "roles" / "instructions" / f"{neg_label}.json"
             ) or ""
-        if not axis_name:
-            axis_name = f"{neg_label}-{pos_label}"
 
     if not pos_label:
         pos_label = "positive"
     if not neg_label:
         neg_label = "negative"
+    # Pole names as the judges are shown them: a stem becomes its judge
+    # label (``killer_bartle`` -> ``killer (from Bartle's player types)``),
+    # free text keeps its form (with a standard's suffix in the long form).
+    # The descriptions above were looked up by stem.  An explicit
+    # ``axis_name`` is free text and kept as written.
+    pos_label = judge_label(str(pos_label), data_dir=instructions_dir)
+    neg_label = judge_label(str(neg_label), data_dir=instructions_dir)
     if not axis_name:
         axis_name = f"{neg_label}-{pos_label}"
 
@@ -653,8 +665,9 @@ def main() -> None:
              "the SWAP-rubric variant (texts in [BASELINE] and "
              "[RESPONSE] exchanged), populate judges.effect."
              "bidirectional.{swap.scores, averaged}, set combined to "
-             "the bias-cancelling averaged value, and bump "
-             "rubric_version to 7.  Reuses existing straight scores "
+             "the bias-cancelling averaged value, and stamp the "
+             "current EFFECT_RUBRIC_VERSION (7 when this mode was "
+             "added).  Reuses existing straight scores "
              "without re-running them.  Skips records that lack a "
              "straight score (typically those skipped at sweep time "
              "for mean_coh > skip_threshold).  Mutually exclusive "

@@ -353,6 +353,49 @@ class TestLoadExperimentSpecs:
         assert steering.pos_description == ""
         assert steering.neg_description == ""
 
+    def test_specs_carry_the_judge_display_form(self, pj, tmp_path):
+        """W19 (2026-10-09): config stems become the names the judges are
+        shown; descriptions are still looked up by stem."""
+        exp = tmp_path / "exp"
+        exp.mkdir()
+        (exp / "config.json").write_text(json.dumps({
+            "axis_source": {"type": "role_transplant",
+                            "role_from": "socializer_bartle", "role_to": "killer_bartle"},
+            "persona": {"type": "combination", "role": "devils_advocate",
+                        "traits": ["systems_thinker"]},
+        }))
+        data = Path(__file__).resolve().parents[2] / "data"
+        persona, steering = pj.load_experiment_specs(exp, data)
+        assert persona.role == "devil's advocate"
+        assert persona.extra_traits[0][0] == "systems-thinker"
+        assert persona.description and persona.extra_traits[0][1]
+        assert steering.pos_label == "killer (from Bartle's player types)"
+        assert steering.neg_label == "socializer (from Bartle's player types)"
+        assert steering.axis_name == ("socializer (from Bartle's player types)-"
+                                      "killer (from Bartle's player types)")
+        assert steering.pos_description and steering.neg_description
+
+    def test_run_sweep_resolves_the_same_names(self, tmp_path):
+        import importlib.util
+        path = Path(__file__).resolve().parents[2] / "steering" / "run_sweep.py"
+        spec = importlib.util.spec_from_file_location("_run_sweep_under_test", path)
+        rs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rs)
+        data = Path(__file__).resolve().parents[2] / "data"
+        st = rs._resolve_steering_spec(
+            {"type": "role_transplant", "role_from": "socializer_bartle",
+             "role_to": "killer_bartle"}, data)
+        assert st["pos_label"] == "killer (from Bartle's player types)"
+        assert st["axis_name"] == ("socializer (from Bartle's player types)-"
+                                   "killer (from Bartle's player types)")
+        pe = rs._resolve_persona_spec({"type": "role", "role": "devils_advocate"}, data)
+        assert pe["role"] == "devil's advocate" and pe["description"]
+        # explicit free-text annotations are kept (a suffix gets the long form)
+        st = rs._resolve_steering_spec(
+            {"type": "axis", "pos_label": "careless (HEXACO)", "neg_label": "tidy",
+             "axis_name": "my_axis"}, data)
+        assert st["pos_label"] == "careless (from HEXACO)" and st["axis_name"] == "my_axis"
+
     def test_missing_config_raises(self, pj, tmp_path):
         empty = tmp_path / "no_config"
         empty.mkdir()

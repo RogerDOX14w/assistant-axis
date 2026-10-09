@@ -75,6 +75,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from assistant_axis.atomic_io import (   # noqa: E402
     atomic_write_text, read_text_with_retry,
 )
+from assistant_axis.entity_id import judge_label   # noqa: E402
 
 logger = logging.getLogger("steering_sweep")
 
@@ -418,19 +419,25 @@ def _resolve_persona_spec(persona_cfg: Dict[str, Any],
         except (OSError, json.JSONDecodeError):
             return ""
 
+    # The names the judges are shown: the judge display form of each stem
+    # (AGENT_NOTES "Judge prompts show the judge display form"; mirrors
+    # steering/post_judge.py::_load_persona).
+    def _label(kind: str, name: str) -> str:
+        return judge_label(name, kind, data_dir=instructions_dir)
+
     if ptype == "role":
         name = persona_cfg["role"]
-        return {"role": name, "description": _desc("roles", name),
+        return {"role": _label("roles", name), "description": _desc("roles", name),
                 "extra_traits": []}
     if ptype == "trait":
         name = persona_cfg["trait"]
-        return {"role": name, "description": _desc("traits", name),
+        return {"role": _label("traits", name), "description": _desc("traits", name),
                 "extra_traits": []}
     if ptype == "combination":
         role = persona_cfg["role"]
         traits = persona_cfg.get("traits") or []
-        extra = [[t, _desc("traits", t)] for t in traits]
-        return {"role": role, "description": _desc("roles", role),
+        extra = [[_label("traits", t), _desc("traits", t)] for t in traits]
+        return {"role": _label("roles", role), "description": _desc("roles", role),
                 "extra_traits": extra}
     raise ValueError(f"unknown persona.type: {ptype!r}")
 
@@ -467,14 +474,20 @@ def _resolve_steering_spec(axis_cfg: Dict[str, Any],
             pos_desc = _try_desc(pos_label)
         if not neg_desc:
             neg_desc = _try_desc(neg_label)
-        if not axis_name:
-            axis_name = f"{neg_label}-{pos_label}"
+
+    # Pole names as the judges are shown them (descriptions were looked up
+    # by stem above); mirrors steering/post_judge.py::_load_steering.  An
+    # explicit axis_name is free text and kept as written.
+    pos_label = judge_label(str(pos_label or "positive"), data_dir=instructions_dir)
+    neg_label = judge_label(str(neg_label or "negative"), data_dir=instructions_dir)
+    if src_type == "role_transplant" and not axis_name:
+        axis_name = f"{neg_label}-{pos_label}"
 
     return {
         "axis_name": str(axis_name or "unnamed"),
-        "pos_label": str(pos_label or "positive"),
+        "pos_label": pos_label,
         "pos_description": str(pos_desc or ""),
-        "neg_label": str(neg_label or "negative"),
+        "neg_label": neg_label,
         "neg_description": str(neg_desc or ""),
     }
 

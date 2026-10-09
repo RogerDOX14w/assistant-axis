@@ -124,22 +124,20 @@ class SteeringSpec:
 # Bump the corresponding *_RUBRIC_VERSION constant when you change a
 # rubric so old records remain distinguishable from new ones.
 #
-# DISPLAY-FORM NOTE (see AGENT_NOTES.md "File-name vs display-name
-# convention" / "LLM prompts are display sites"):
+# DISPLAY-FORM NOTE (AGENT_NOTES "Judge prompts show the judge display
+# form", 2026-10-09, W19):
 # The rubrics below inject ``persona_label``, ``axis_name``,
-# ``pos_label`` and ``neg_label`` from upstream PersonaSpec /
-# SteeringSpec values.  These should arrive in display form
-# (``aligned artificial intelligence`` not
-# ``aligned_artificial_intelligence``); ``persona.display_label()``
-# and ``persona.display_description()`` perform the persona-side
-# composition but are NOT yet underscore-aware.  If a sweep config
-# supplies file-form names directly, prompts here will contain
-# stray underscores -- not yet fixed (tracked alongside the
-# axis_judge_correlation.py v3 rubric work; low-priority because
-# steering configs to date have used clean labels).  When fixing,
-# apply ``assistant_axis.entity_id.display_form_name(...)`` at
-# the SteeringSpec / PersonaSpec construction sites in
-# ``steering/post_judge.py`` and ``steering/run_sweep.py``.
+# ``pos_label`` and ``neg_label`` from PersonaSpec / SteeringSpec values
+# as given.  The specs carry the judge display form
+# (``assistant_axis.entity_id.judge_label``): the construction sites in
+# ``steering/post_judge.py`` (``_load_persona`` / ``_load_steering``) and
+# ``steering/run_sweep.py`` (``_resolve_persona_spec`` /
+# ``_resolve_steering_spec``) turn each config stem into its label
+# (``killer_bartle`` -> ``killer (from Bartle's player types)``,
+# ``systems_thinker`` -> ``systems-thinker``), and a derived axis name is
+# ``"<neg label>-<pos label>"``.  Code that builds a spec itself must do
+# the same.  Fixed with the version bumps coherence 5 -> 6, RP 4 -> 5,
+# effect 7 -> 8 (rubric text unchanged).
 
 # TODO (rubric_version mismatch checking, May 2026) ------------------
 #
@@ -198,8 +196,12 @@ class SteeringSpec:
 #   - tools/mark_rubric_equivalent.py
 #   - AGENT_NOTES.md "Per-entity drift-on-resume check (May 2026)"
 #
-COHERENCE_RUBRIC_VERSION = 5
-RP_RUBRIC_VERSION = 4
+# 2026-10-09 (W19): all three bumped (coherence 5 -> 6, RP 4 -> 5, effect
+# 7 -> 8) for the judge display form of the names (see the DISPLAY-FORM
+# NOTE above); the rubric text is unchanged, and a spec whose names are
+# single lower-case words renders exactly as before.
+COHERENCE_RUBRIC_VERSION = 6
+RP_RUBRIC_VERSION = 5
 # 2026-05-15 (v6): bidirectional rubric now explicitly instructs the
 # judge to write scores as plain JSON integers (no "+" prefix on
 # positives).  Diagnosed cause of ~25-50% UNPARSEABLE batches in
@@ -229,7 +231,11 @@ RP_RUBRIC_VERSION = 4
 # steering/post_judge.py --effect-swap-fill).  Bias-cancellation
 # diagnostics: tools/test_effect_order_bias.py + Roger's notes
 # from the 2026-05-16 investigation.
-EFFECT_RUBRIC_VERSION = 7
+# 2026-10-09 (v8): names in the judge display form (W19; text unchanged).
+# The swap-fill pass (post_judge --effect-swap-fill) stamps the current
+# version on a record whose straight half may be v7: on an axis with a
+# multi-word or standards pole the two halves then saw different names.
+EFFECT_RUBRIC_VERSION = 8
 
 
 COHERENCE_RUBRIC = """\
