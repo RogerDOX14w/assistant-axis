@@ -40,6 +40,7 @@ load_dotenv()
 import anthropic
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.entity_id import JUDGE_LABEL_FORM, judge_label  # noqa: E402
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic  # noqa: E402
 from data_analysis.generation_refusals import (  # noqa: E402
     REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in, strip_prose_preface)
@@ -98,6 +99,17 @@ def role_display_name(stem: str) -> str:
     if stem in _ROLE_NAME_OVERRIDES:
         return _ROLE_NAME_OVERRIDES[stem]
     return stem.replace("_", " ")
+
+
+def role_prompt_name(stem: str) -> str:
+    """The role's name as every prompt of this script shows it: its judge
+    display form (``assistant_axis.entity_id.judge_label``; AGENT_NOTES
+    "Judge prompts show the judge display form", Roger 2026-10-09).  The
+    same as :func:`role_display_name` except that a standard's suffix takes
+    the long form (``the fool (Tarot)`` -> ``the fool (from the Tarot)``);
+    no role in the corpus has one yet.  Recorded in the ``generator``
+    field as ``label_form``."""
+    return judge_label(stem, "roles")
 
 
 # IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
@@ -830,6 +842,9 @@ def generator_provenance(style: str, model: str, temperature: float,
         "script": "regenerate_role_instructions.py",
         "style": style,
         "template_sha256": template_sha256(style),
+        # how the name was written into the prompt (role_prompt_name); files
+        # without the key were generated with role_display_name
+        "label_form": JUDGE_LABEL_FORM,
         "model": model,
         "temperature": temperature,
         "thinking_budget": thinking_budget,
@@ -1154,7 +1169,7 @@ async def regenerate_one(
     with open(role_path, encoding="utf-8") as f:
         data = json.load(f)
 
-    role_name = role_display_name(role_path.stem)
+    role_name = role_prompt_name(role_path.stem)
 
     skip = reason_to_skip(role_path.stem, data, n_variants, n_questions, instructions_only, force)
     if skip:
@@ -1190,7 +1205,7 @@ def write_regenerated(role_path: Path, data: dict, new_instructions: list, new_q
                       opening_rerolls: int = 0) -> str:
     """Write a role file with its new instructions (and questions, unless
     ``new_questions`` is None), keeping everything else.  Returns the status line."""
-    role_name = role_display_name(role_path.stem)
+    role_name = role_prompt_name(role_path.stem)
     description = data.get("description", "")
 
     output: dict = {}
@@ -1259,7 +1274,7 @@ def build_batch_requests(role_paths: list[Path], *, n_variants: int, n_questions
         if not BATCH_ID_PATTERN.match(path.stem):
             raise ValueError(f"{path.stem!r} cannot be the id of a batch request (letters, digits, _ and -, at most 64)")
         requests.append({"custom_id": path.stem, "params": combined_create_kwargs(
-            role_display_name(path.stem), data.get("description", ""), n_variants, n_questions,
+            role_prompt_name(path.stem), data.get("description", ""), n_variants, n_questions,
             model, temperature, thinking_budget)})
     return requests, skipped
 
@@ -1368,7 +1383,7 @@ async def main_async(args: argparse.Namespace) -> None:
         first = role_paths[0]
         with open(first, encoding="utf-8") as f:
             d = json.load(f)
-        rn = role_display_name(first.stem)
+        rn = role_prompt_name(first.stem)
         desc = d.get("description", "")
         prompt = build_role_prompt(PROMPT_STYLE, rn, desc, args.n_variants, args.n_questions)
         print(f"\n=== Prompt for {first.stem} ({PROMPT_STYLE}) ===\n", file=sys.stderr)

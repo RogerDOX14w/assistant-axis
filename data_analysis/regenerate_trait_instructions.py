@@ -38,6 +38,8 @@ load_dotenv()
 import anthropic
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.entity_id import (  # noqa: E402
+    JUDGE_LABEL_FORM, judge_form_of_label, judge_form_of_negative_label)
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic  # noqa: E402
 from data_analysis.generation_refusals import (  # noqa: E402
     REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in, strip_prose_preface)
@@ -561,6 +563,20 @@ ANTONYM_STYLES = ("Roger", "RogerV2")
 OPENING_REROLL_STYLES = ("RogerV2",)
 
 
+def prompt_labels(data: dict) -> tuple[str, str]:
+    """``(positive, negative)`` as every prompt of this script shows them:
+    the judge display form of the file's ``positive_label`` and
+    ``negative_label`` (AGENT_NOTES "Judge prompts show the judge display
+    form"; Roger 2026-10-09, all styles).  They differ from the stored
+    labels only for a standard's suffix (``careless (HEXACO)`` ->
+    ``careless (from HEXACO)``) and for a negative label naming a corpus
+    trait spelt otherwise.  The stored labels are written back unchanged.
+    Recorded in the ``generator`` field as ``label_form``."""
+    pos = data.get("positive_label") or ""
+    neg = data.get("negative_label") or ""
+    return judge_form_of_label(pos), judge_form_of_negative_label(neg, pos)
+
+
 def build_eval_prompt(positive_label: str, description: str) -> str:
     """Rebuild eval_prompt from positive_label and description.
 
@@ -568,16 +584,11 @@ def build_eval_prompt(positive_label: str, description: str) -> str:
     The template uses {{question}} and {{answer}} so they survive .format()
     and remain as {question} and {answer} in the output.
 
-    Display-form note (see AGENT_NOTES.md "File-name vs
-    display-name convention"): LLM prompts are display sites, so
-    ``positive_label`` must already be in display form
-    (``stream-of-consciousness``, ``systems thinker``) -- which it
-    is by storage convention in every trait JSON.  The data-prep
-    code that writes these JSONs persists the human-friendly form
-    in ``positive_label`` directly, so this builder requires no
-    underscore-conversion of its own (compare the role-side
-    ``regenerate_role_instructions.role_display_name(stem)`` helper,
-    which converts on the fly because role JSONs key by file stem).
+    Display-form note (AGENT_NOTES "Judge prompts show the judge display
+    form"): callers pass the judge display form of the label
+    (``prompt_labels``), which is the stored ``positive_label``
+    (``stream-of-consciousness``) except for a standard's suffix
+    (``careless (from HEXACO)``).
     """
     return EVAL_PROMPT_TEMPLATE.format(
         positive_label=positive_label,
@@ -1151,6 +1162,9 @@ def generator_provenance(style: str, model: str, temperature: float,
         "script": "regenerate_trait_instructions.py",
         "style": style,
         "template_sha256": template_sha256(style),
+        # how the labels were written into the prompt (prompt_labels); files
+        # without the key were generated with the stored labels
+        "label_form": JUDGE_LABEL_FORM,
         "use_antonym": USE_ANTONYM if style in ANTONYM_STYLES else None,
         "model": model,
         "temperature": temperature,
@@ -1290,8 +1304,7 @@ async def regenerate_one(
     with open(trait_path, encoding="utf-8") as f:
         data = json.load(f)
 
-    positive_label = data.get("positive_label")
-    negative_label = data.get("negative_label")
+    positive_label = data.get("positive_label")   # the stored label, for status lines
 
     skip = reason_to_skip(trait_path.stem, data, n_variants, n_questions, instructions_only, force)
     if skip:
@@ -1309,10 +1322,12 @@ async def regenerate_one(
             file=sys.stderr,
         )
 
+    # the labels as the prompts show them (judge display form)
+    prompt_pos, prompt_neg = prompt_labels(data)
     try:
         if use_combined:
             combined = await generate_combined(
-                client, positive_label, negative_label, description,
+                client, prompt_pos, prompt_neg, description,
                 n_variants, n_questions, model, semaphore, temperature,
                 thinking_budget, usage,
             )
@@ -1320,13 +1335,13 @@ async def regenerate_one(
             new_questions = None if instructions_only else combined["questions"]
         else:
             new_instructions = await generate_instructions(
-                client, positive_label, negative_label, description,
+                client, prompt_pos, prompt_neg, description,
                 n_variants, model, semaphore, temperature, thinking_budget, usage,
             )
             new_questions = None
             if not instructions_only:
                 new_questions = await generate_questions(
-                    client, positive_label, negative_label, n_questions, model,
+                    client, prompt_pos, prompt_neg, n_questions, model,
                     semaphore, temperature, thinking_budget, usage,
                 )
     except GenerationRefusal as refusal:
@@ -1358,7 +1373,7 @@ def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_
         new_questions if new_questions is not None else data.get("questions", [])
     )
     if description:
-        output["eval_prompt"] = build_eval_prompt(positive_label, description)
+        output["eval_prompt"] = build_eval_prompt(prompt_labels(data)[0], description)
     elif data.get("eval_prompt"):
         output["eval_prompt"] = data["eval_prompt"]
     output["generator"] = generator_provenance(PROMPT_STYLE, model, temperature, thinking_budget, batch=batch,
@@ -1426,7 +1441,7 @@ def build_batch_requests(trait_paths: list[Path], *, n_variants: int, n_question
         if not BATCH_ID_PATTERN.match(path.stem):
             raise ValueError(f"{path.stem!r} cannot be the id of a batch request (letters, digits, _ and -, at most 64)")
         requests.append({"custom_id": path.stem, "params": combined_create_kwargs(
-            data["positive_label"], data["negative_label"], data.get("description", ""),
+            *prompt_labels(data), data.get("description", ""),
             n_variants, n_questions, model, temperature, thinking_budget)})
     return requests, skipped
 
@@ -1538,7 +1553,7 @@ async def main_async(args: argparse.Namespace) -> None:
         first = trait_paths[0]
         with open(first, encoding="utf-8") as f:
             d = json.load(f)
-        pl, nl = d.get("positive_label", ""), d.get("negative_label", "")
+        pl, nl = prompt_labels(d)
         desc = d.get("description", "")
         if PROMPT_STYLE in COMBINED_STYLES:
             prompt = build_combined_prompt(
