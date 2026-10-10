@@ -657,3 +657,19 @@ class TestRefusedGeneration:
         assert '"refused": 1' in out and "refused (final; generate --retry-refused to try again): rationalizing" in out
         se.main(["--queue", str(qp), "--data-dir", str(d), "report"])
         assert "| refused | generation refused (prose decline) |" in capsys.readouterr().out
+
+    def test_report_names_an_error_sentinel_refusal(self, tmp_path, capsys):
+        """Housekeeping item 9: the brown-haired kind of refusal, ``ERROR:``
+        written into a field, is not a prose decline."""
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [
+            _entry(status="refused", refusal={"stop_reason": "end_turn",
+                   "reply_excerpt": "eval_prompt: ERROR: 'Brown-haired' is a physical descriptor"}),
+            _entry(stem="x", label="x", status="refused",
+                   refusal={"stop_reason": "end_turn", "reply_excerpt": "ERROR: not a trait"}),
+            _entry(stem="y", label="y", status="refused", refusal={"stop_reason": "refusal"})])
+        se.main(["--queue", str(qp), "--data-dir", str(d), "report"])
+        out = capsys.readouterr().out
+        assert "generation refused (ERROR: sentinel in eval_prompt)" in out
+        assert "generation refused (ERROR: sentinel) |" in out
+        assert "generation refused (stop_reason refusal) |" in out

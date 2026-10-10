@@ -189,6 +189,25 @@ def record_refusal(path: Path, refusal: GenerationRefusal, *, stem: str, kind: s
     return record
 
 
+_SENTINEL_AFTER_PATH = re.compile(r"^([\w.\[\]]+): " + re.escape(ERROR_SENTINEL))
+
+
+def refusal_form(record: Optional[dict]) -> str:
+    """How a recorded refusal was made, for a report: "stop_reason refusal",
+    "ERROR: sentinel in <field>" (or "ERROR: sentinel" when the reply opened
+    with it), or "prose decline"."""
+    record = record or {}
+    if record.get("stop_reason") == "refusal":
+        return "stop_reason refusal"
+    excerpt = (record.get("reply_excerpt") or "").lstrip()
+    if excerpt.startswith(ERROR_SENTINEL):
+        return "ERROR: sentinel"
+    m = _SENTINEL_AFTER_PATH.match(excerpt)
+    if m:
+        return f"ERROR: sentinel in {m.group(1)}"
+    return "prose decline"
+
+
 def read_refusals(path: Path) -> list[dict]:
     """Every record in a side-car, oldest first ([] when there is none)."""
     if not path.exists():

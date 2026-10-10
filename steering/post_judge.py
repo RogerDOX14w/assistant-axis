@@ -48,7 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from assistant_axis.atomic_io import (   # noqa: E402
     atomic_write_text, read_jsonl_with_retry, read_text_with_retry,
 )
-from assistant_axis.entity_id import judge_label   # noqa: E402
+from assistant_axis.entity_id import judge_label, resolve_renamed_stem   # noqa: E402
 from assistant_axis.steering_judges import (   # noqa: E402
     DEFAULT_COHERENCE_MODEL, DEFAULT_RP_MODEL, DEFAULT_EFFECT_MODELS,
     DEFAULT_TARGET_BATCH_SIZE, DEFAULT_SKIP_THRESHOLD,
@@ -93,11 +93,25 @@ def load_experiment_specs(
     return persona, steering
 
 
+def _corpus_stem(name: str, kind: Optional[str], instructions_dir: Path) -> str:
+    """The stem the corpus files ``name`` under now.  A config written before
+    a rename names the old stem, which still keys the vectors (they stay under
+    the stem they were extracted with) but has no instruction file; the
+    description and the judge label then come from the renamed file, with a
+    warning.  Mirrors steering/run_sweep.py::_corpus_stem."""
+    current = resolve_renamed_stem(name, kind, data_dir=instructions_dir)
+    if current != name:
+        logger.warning(f"{name!r} has no instruction file; it was renamed "
+                       f"{current!r}, reading {current}.json")
+    return current
+
+
 def _load_persona(persona_cfg: Dict[str, Any],
                   instructions_dir: Path) -> PersonaSpec:
     ptype = persona_cfg.get("type", "role")
 
     def _read_desc(kind: str, name: str) -> str:
+        name = _corpus_stem(name, kind, instructions_dir)
         path = instructions_dir / kind / "instructions" / f"{name}.json"
         if not path.exists():
             logger.warning(f"persona instruction file missing: {path}")
@@ -113,6 +127,7 @@ def _load_persona(persona_cfg: Dict[str, Any],
     # form of each stem (AGENT_NOTES "Judge prompts show the judge display
     # form"; steering rubric versions coherence 6 / RP 5 / effect 8).
     def _label(kind: str, name: str) -> str:
+        name = resolve_renamed_stem(name, kind, data_dir=instructions_dir)
         return judge_label(name, kind, data_dir=instructions_dir)
 
     if ptype == "role":
@@ -159,6 +174,10 @@ def _load_steering(axis_cfg: Dict[str, Any],
             pos_label = axis_cfg.get("role_to", "pos")
         if not neg_label:
             neg_label = axis_cfg.get("role_from", "neg")
+        # The vectors stay under the config's stems; the corpus text and the
+        # judge labels come from the files those stems are filed under now.
+        pos_label = _corpus_stem(str(pos_label), None, instructions_dir)
+        neg_label = _corpus_stem(str(neg_label), None, instructions_dir)
         # Try traits/instructions first (most common).
         if not pos_desc:
             pos_desc = _try_read_description(
@@ -182,8 +201,10 @@ def _load_steering(axis_cfg: Dict[str, Any],
     # free text keeps its form (with a standard's suffix in the long form).
     # The descriptions above were looked up by stem.  An explicit
     # ``axis_name`` is free text and kept as written.
-    pos_label = judge_label(str(pos_label), data_dir=instructions_dir)
-    neg_label = judge_label(str(neg_label), data_dir=instructions_dir)
+    pos_label = judge_label(_corpus_stem(str(pos_label), None, instructions_dir),
+                            data_dir=instructions_dir)
+    neg_label = judge_label(_corpus_stem(str(neg_label), None, instructions_dir),
+                            data_dir=instructions_dir)
     if not axis_name:
         axis_name = f"{neg_label}-{pos_label}"
 

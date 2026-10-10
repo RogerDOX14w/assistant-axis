@@ -697,6 +697,26 @@ class TestResolveRenamedStem:
         finally:
             clear_corpus_display_cache()
 
+    def test_kind_none_looks_in_both_kinds_traits_first(self, tmp_path: Path):
+        """A steering config's pole names carry no kind (housekeeping item 5 (a))."""
+        self._corpus(tmp_path, "traits", {"lazy": {"renamed_from": "slothful"},
+                                          "twice": {"renamed_from": "both"}})
+        self._corpus(tmp_path, "roles", {
+            "instrumentally_aligned_ai": {"renamed_from": "aligned_artificial_intelligence"},
+            "slothful": {}, "twice_role": {"renamed_from": "both"}})
+        try:
+            assert resolve_renamed_stem("aligned_artificial_intelligence", None, data_dir=tmp_path) \
+                == "instrumentally_aligned_ai"
+            # a file of either kind keeps its stem
+            assert resolve_renamed_stem("slothful", None, data_dir=tmp_path) == "slothful"
+            assert resolve_renamed_stem("lazy", None, data_dir=tmp_path) == "lazy"
+            # an old stem recorded by both kinds goes to the trait
+            assert resolve_renamed_stem("both", None, data_dir=tmp_path) == "twice"
+            assert resolve_renamed_stem("free text (HEXACO)", None, data_dir=tmp_path) \
+                == "free text (HEXACO)"
+        finally:
+            clear_corpus_display_cache()
+
     def test_kinds_do_not_leak_into_each_other(self, tmp_path: Path):
         self._corpus(tmp_path, "traits", {"aggressive": {"renamed_from": {"stem": "militant"}}})
         self._corpus(tmp_path, "roles", {"soldier": {}})

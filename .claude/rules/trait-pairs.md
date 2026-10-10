@@ -429,10 +429,12 @@ field, `check` skips it, and only `generate --retry-refused` tries again.
 Roger's ruling (2026-09-08, 2026-10-08): a refusal is a data point, not an
 error.  A reply that puts a paragraph of prose before its JSON (brown-eyed,
 2026-10-08) is not a refusal: since 2026-10-09 both generators skip the
-preface (`strip_prose_preface`, with a WARNING) and use the reply.  Known
-gap: `seed_entities.py report` labels every refusal whose stop reason is not
-"refusal" a "prose decline", so an ERROR-sentinel refusal shows as one there
-(the record's excerpt, "eval_prompt: ERROR: ...", tells them apart).
+preface (`strip_prose_preface`, with a WARNING) and use the reply.
+`seed_entities.py report` names how each refusal was made
+(`generation_refusals.refusal_form`): "stop_reason refusal", "ERROR:
+sentinel in eval_prompt" (read from the record's excerpt) or "prose decline"
+(since 2026-10-10; before, every refusal not stopped as "refusal" was called
+a prose decline).
 
 [`data_analysis/seed_entities.py`](./data_analysis/seed_entities.py)
 drives it: `status`, `write` (seed JSONs for `ready` entries: traits get

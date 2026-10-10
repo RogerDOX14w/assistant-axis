@@ -396,6 +396,37 @@ class TestLoadExperimentSpecs:
              "axis_name": "my_axis"}, data)
         assert st["pos_label"] == "careless (from HEXACO)" and st["axis_name"] == "my_axis"
 
+    def test_a_config_naming_renamed_stems(self, pj, tmp_path, caplog):
+        """Housekeeping item 5 (a): a config written before a rename names the
+        old stems; the descriptions and labels come from the renamed files."""
+        data = tmp_path / "data"
+        (data / "roles" / "instructions").mkdir(parents=True)
+        (data / "traits" / "instructions").mkdir(parents=True)
+        (data / "roles" / "instructions" / "new_mechanic.json").write_text(json.dumps({
+            "description": "A new mechanic fixes engines.",
+            "renamed_from": {"stem": "old_mechanic"}}))
+        (data / "traits" / "instructions" / "lazy.json").write_text(json.dumps({
+            "positive_label": "lazy", "negative_label": "industrious",
+            "description": "This means doing as little as possible.",
+            "renamed_from": "slothful"}))
+        (data / "traits" / "instructions" / "industrious.json").write_text(json.dumps({
+            "positive_label": "industrious", "negative_label": "lazy",
+            "description": "This means working hard."}))
+        exp = tmp_path / "exp"
+        exp.mkdir()
+        (exp / "config.json").write_text(json.dumps({
+            "axis_source": {"type": "role_transplant",
+                            "role_from": "industrious", "role_to": "slothful"},
+            "persona": {"type": "role", "role": "old_mechanic"},
+        }))
+        persona, steering = pj.load_experiment_specs(exp, data)
+        assert persona.role == "new mechanic"
+        assert persona.description == "A new mechanic fixes engines."
+        assert steering.pos_label == "lazy"
+        assert steering.pos_description == "This means doing as little as possible."
+        assert steering.axis_name == "industrious-lazy"
+        assert "'slothful' has no instruction file; it was renamed 'lazy'" in caplog.text
+
     def test_missing_config_raises(self, pj, tmp_path):
         empty = tmp_path / "no_config"
         empty.mkdir()

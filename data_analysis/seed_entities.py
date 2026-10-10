@@ -83,7 +83,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.arrangements import ORDERED_KINDS  # noqa: E402
 from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.entity_id import normalize_to_file_name  # noqa: E402
-from data_analysis.generation_refusals import REFUSALS_NAME, read_refusals  # noqa: E402
+from data_analysis.generation_refusals import REFUSALS_NAME, read_refusals, refusal_form  # noqa: E402
 
 DEFAULT_QUEUE = _REPO_ROOT / "data" / "seed_queue.json"
 DEFAULT_DATA_DIR = _REPO_ROOT / "data"
@@ -903,8 +903,7 @@ def cmd_report(args, q: dict, data_dir: Path) -> int:
         cr = e.get("check_result") or {}
         chk = f"{cr.get('returned', '')} ({cr.get('category', '')})" if cr else ""
         if e.get("status") == "refused":
-            how = "stop_reason refusal" if (e.get("refusal") or {}).get("stop_reason") == "refusal" else "prose decline"
-            chk = f"generation refused ({how})"
+            chk = f"generation refused ({refusal_form(e.get('refusal'))})"
         print(f"| {e.get('stem')} | {e['entity_type']} | {e.get('chunk')} | {e.get('pairing')} | {e.get('partner') or ''} | {e.get('status')} | {chk} |")
     return 0
 

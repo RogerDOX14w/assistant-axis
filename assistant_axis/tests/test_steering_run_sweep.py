@@ -132,6 +132,63 @@ class TestPersonaPrompt:
 
 
 # ---------------------------------------------------------------------------
+# A config written before a rename (AGENT_NOTES housekeeping item 5 (a))
+# ---------------------------------------------------------------------------
+
+def _renamed_corpus(root: Path) -> Path:
+    """A role and a trait each filed under a new stem, the old one recorded in
+    ``renamed_from``; a fresh directory, so the rename-map cache is its own."""
+    roles = root / "roles" / "instructions"
+    traits = root / "traits" / "instructions"
+    roles.mkdir(parents=True)
+    traits.mkdir(parents=True)
+    (roles / "new_mechanic.json").write_text(json.dumps({
+        "description": "A new mechanic fixes engines.",
+        "renamed_from": {"stem": "old_mechanic", "date": "2026-09-28"},
+        "instruction": [{"pos": "You are a mechanic."}, {"pos": "Fix it."}]}))
+    (traits / "lazy.json").write_text(json.dumps({
+        "positive_label": "lazy", "negative_label": "industrious",
+        "description": "This means doing as little as possible.",
+        "renamed_from": "slothful",
+        "instruction": [{"pos": "Be someone who rests.", "neg": "x"}]}))
+    (traits / "industrious.json").write_text(json.dumps({
+        "positive_label": "industrious", "negative_label": "lazy",
+        "description": "This means working hard.",
+        "instruction": [{"pos": "Be someone who works.", "neg": "x"}]}))
+    return root
+
+
+class TestRenamedStems:
+    def test_persona_prompt_reads_the_renamed_file(self, mod, tmp_path, caplog):
+        data = _renamed_corpus(tmp_path)
+        out = mod._build_persona_system_prompt(
+            {"type": "combination", "role": "old_mechanic", "traits": ["slothful"],
+             "prompt_index": 0}, instructions_dir=data)
+        assert out == "You are a mechanic.\nBe someone who rests."
+        assert "'old_mechanic' has no instruction file; it was renamed 'new_mechanic'" in caplog.text
+
+    def test_persona_spec_takes_the_new_label_and_description(self, mod, tmp_path):
+        data = _renamed_corpus(tmp_path)
+        pe = mod._resolve_persona_spec(
+            {"type": "combination", "role": "old_mechanic", "traits": ["slothful"]}, data)
+        assert pe["role"] == "new mechanic"
+        assert pe["description"] == "A new mechanic fixes engines."
+        assert pe["extra_traits"] == [["lazy", "This means doing as little as possible."]]
+
+    def test_steering_spec_for_a_renamed_pole(self, mod, tmp_path):
+        data = _renamed_corpus(tmp_path)
+        st = mod._resolve_steering_spec(
+            {"type": "role_transplant", "role_from": "industrious", "role_to": "slothful"}, data)
+        assert st["pos_label"] == "lazy" and st["neg_label"] == "industrious"
+        assert st["pos_description"] == "This means doing as little as possible."
+        assert st["axis_name"] == "industrious-lazy"
+        # an explicit stem annotation is resolved too; free text is kept
+        st = mod._resolve_steering_spec(
+            {"type": "axis", "pos_label": "slothful", "neg_label": "very busy"}, data)
+        assert st["pos_label"] == "lazy" and st["neg_label"] == "very busy"
+
+
+# ---------------------------------------------------------------------------
 # _build_work_items
 # ---------------------------------------------------------------------------
 

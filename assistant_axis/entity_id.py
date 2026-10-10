@@ -561,7 +561,7 @@ def _corpus_rename_map(data_dir: str) -> dict[str, dict[str, str]]:
 
 def resolve_renamed_stem(
     stem: str,
-    kind: str,
+    kind: str | None,
     *,
     data_dir: Path | str | None = None,
 ) -> str:
@@ -573,6 +573,10 @@ def resolve_renamed_stem(
     and so is one the corpus has no record of: the caller's own
     missing-file error is more useful than a guess.  Otherwise the
     result is the file whose ``renamed_from`` records the stem.
+    ``kind=None`` is for a caller that does not know the kind (a
+    steering config's pole names): a stem with a file of either kind is
+    kept, and otherwise the trait renames are consulted before the role
+    renames, the order in which such callers look the files up.
 
     This maps names for **reading the corpus** (descriptions,
     instructions).  Extracted vectors, response files and judge caches
@@ -580,11 +584,15 @@ def resolve_renamed_stem(
     to look those up, because a renamed entity's text may have changed
     with its name.
     """
-    long_kind = kind_long(kind)
     root = Path(data_dir) if data_dir is not None else default_data_dir()
-    if (root / long_kind / "instructions" / f"{stem}.json").exists():
+    kinds = (_KIND_TRAITS, _KIND_ROLES) if kind is None else (kind_long(kind),)
+    if any((root / k / "instructions" / f"{stem}.json").exists() for k in kinds):
         return stem
-    return _corpus_rename_map(str(root))[long_kind].get(stem, stem)
+    renames = _corpus_rename_map(str(root))
+    for k in kinds:
+        if stem in renames[k]:
+            return renames[k][stem]
+    return stem
 
 
 def corpus_display_name(

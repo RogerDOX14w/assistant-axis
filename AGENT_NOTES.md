@@ -5441,10 +5441,12 @@ field, `check` skips it, and only `generate --retry-refused` tries again.
 Roger's ruling (2026-09-08, 2026-10-08): a refusal is a data point, not an
 error.  A reply that puts a paragraph of prose before its JSON (brown-eyed,
 2026-10-08) is not a refusal: since 2026-10-09 both generators skip the
-preface (`strip_prose_preface`, with a WARNING) and use the reply.  Known
-gap: `seed_entities.py report` labels every refusal whose stop reason is not
-"refusal" a "prose decline", so an ERROR-sentinel refusal shows as one there
-(the record's excerpt, "eval_prompt: ERROR: ...", tells them apart).
+preface (`strip_prose_preface`, with a WARNING) and use the reply.
+`seed_entities.py report` names how each refusal was made
+(`generation_refusals.refusal_form`): "stop_reason refusal", "ERROR:
+sentinel in eval_prompt" (read from the record's excerpt) or "prose decline"
+(since 2026-10-10; before, every refusal not stopped as "refusal" was called
+a prose decline).
 
 [`data_analysis/seed_entities.py`](./data_analysis/seed_entities.py)
 drives it: `status`, `write` (seed JSONs for `ready` entries: traits get
@@ -6191,13 +6193,24 @@ the sections above hold data-regeneration items.  Tick off in place.
      E2E test had three layers of drift, not one; only the first showed
      until it was fixed.
    Roger, 2026-09-07: "needs fixing, but not this instant".
-2. **Verify `gpt-4.1-mini` still resolves** before the next GPT rejudge.
+2. ~~**Verify `gpt-4.1-mini` still resolves** before the next GPT rejudge.
    There is no OpenAI key in `.env`, so it could not be checked on
    2026-09-07 when the Anthropic models were (`claude-sonnet-4-20250514`
    gone, `claude-haiku-4-5-20251001` fine).  A `client.models.list()` with
    the key that runs judging settles it; if the model has been retired, the
    GPT cohort needs the same treatment as Sonnet (new default, judge-model
-   resume guard drops and rebuilds each touched cache).
+   resume guard drops and rebuilds each touched cache).~~  Checked
+   2026-10-10 with the project's `OPENAI_API_KEY`: `models.retrieve`
+   finds it, and a one-word completion came back from
+   `gpt-4.1-mini-2025-04-14` (the alias's current snapshot).  OpenAI's
+   deprecations page (developers.openai.com/api/docs/deprecations, read the
+   same day) lists no shutdown for `gpt-4.1-mini` or `gpt-4.1`; only
+   `gpt-4.1-nano` goes, on 2026-10-23 (replacement `gpt-5.6-luna`).  A
+   third-party table (Synthflow) gave 2026-10-14 for the whole 4.1 family;
+   the official page does not bear it out, but check that page again before
+   a large GPT run.  (A script in `$TMPDIR` must load the key with
+   `load_dotenv(find_dotenv(usecwd=True))`: plain `load_dotenv()` searches
+   from the script's own directory and finds nothing.)
 3. **Content-based fingerprint for the `corpus_instructions` input.**
    Judge caches record every instruction JSON as one `multi` input
    fingerprinted by (mtime, size), so *any* edit to any of the 583 files
@@ -6243,13 +6256,19 @@ the sections above hold data-regeneration items.  Tick off in place.
    prompts and plots once prompts use the label; `normalize_to_file_name`
    drops parentheses (stem `open_big_five`).
 5. **Renamed entities: two known limits of the `renamed_from` lookup**
-   (2026-09-28).  (a) `steering/run_sweep.py` and `steering/post_judge.py`
+   (2026-09-28).  (a) ~~`steering/run_sweep.py` and `steering/post_judge.py`
    still open `<kind>/instructions/<name>.json` by the stem in the
    steering config, so a config that names a renamed entity
    (`mechanic_aligned_artificial_intelligence_v1`) fails until it uses
    `assistant_axis.entity_id.resolve_renamed_stem` or is rewritten.
    Roger: acceptable, no more steering is expected before the embeddings
-   are regenerated; fix it then, with the re-sweep.  (b)
+   are regenerated; fix it then, with the re-sweep.~~  Done 2026-10-10:
+   both files read the persona's instructions and descriptions, and build
+   the judge labels, through `_corpus_stem` (`resolve_renamed_stem`, which
+   takes `kind=None` for pole names of either kind, traits first), with a
+   warning naming the old and new stems; the vectors stay under the
+   config's stems.  Tests: `test_steering_run_sweep.py::TestRenamedStems`,
+   `test_post_judge.py::test_a_config_naming_renamed_stems`.  (b)
    ~~`seed_entities.py rename` overwrites `renamed_from`, so an entity
    renamed twice loses its first stem; make it append to a list (the
    resolver already reads a list) before the next double rename.~~  Done
@@ -6311,8 +6330,9 @@ the sections above hold data-regeneration items.  Tick off in place.
    prose preface before the first `{`.~~  Done 2026-10-09 (`db4818f`): a
    JSON field value opening "ERROR:", or a reply opening with it, is a
    refusal (recorded once, not retried, live and in batches), and both
-   generators read past a prose preface with a WARNING; `seed_entities.py
-   report` still calls such a refusal a "prose decline" (§ "Seeding
+   generators read past a prose preface with a WARNING; ~~`seed_entities.py
+   report` still calls such a refusal a "prose decline"~~ (the report names
+   the form since 2026-10-10, "ERROR: sentinel in eval_prompt"; § "Seeding
    tooling").  What got them through was
    `--thinking-budget 4000`, which moves the deliberation into the
    thinking block; a file generated that way records it in
