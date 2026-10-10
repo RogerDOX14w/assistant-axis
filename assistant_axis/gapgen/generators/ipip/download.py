@@ -134,10 +134,15 @@ def write_manifest(doc: Mapping, path: Path) -> Path:
     return Path(path)
 
 
-def _entry(s: Source, dest: Path, data_sha: str, size: int, *, now: str, git_sha: Optional[str]) -> dict:
+def _entry(s: Source, dest: Path, data_sha: str, size: int, *, now: str, git_sha: Optional[str],
+           approval: Optional[str]) -> dict:
     return {"key": s.key, "file": _rel(dest), "url": s.url, "size_bytes": size, "sha256": data_sha,
             "hash_source": HASH_SOURCE, "optional": s.optional, "what": s.what, "licence": s.licence,
-            "downloaded_at": now, "tool": TOOL, "git_sha": git_sha}
+            "approval": approval, "downloaded_at": now, "tool": TOOL, "git_sha": git_sha}
+
+
+class NotApproved(PermissionError):
+    """A source with no recorded approval was asked for without the caller naming Roger's go."""
 
 
 def _licence_record(dest_root: Path, entries: Iterable[Mapping], sources: Mapping[str, Source],
@@ -159,9 +164,11 @@ def _licence_record(dest_root: Path, entries: Iterable[Mapping], sources: Mappin
 def fetch_all(*, dest_root: Path = EXTERNAL_DIR, only: Optional[Iterable[str]] = None, force: bool = False,
               fetcher: Fetcher = _urlopen_bytes, dry_run: bool = False, now: Optional[str] = None,
               git_sha: Optional[str] = None, sources_manifest_path: Optional[Path] = SOURCES_MANIFEST_PATH,
-              sources: Optional[Mapping[str, Source]] = None) -> DownloadManifest:
+              sources: Optional[Mapping[str, Source]] = None, approved_by: Optional[str] = None) -> DownloadManifest:
     """Download and record the IPIP pages (see the module docstring).  ``only`` names source keys (default the
-    three pages); ``sources`` replaces :data:`~.sources.SOURCES` (tests)."""
+    three pages); ``sources`` replaces :data:`~.sources.SOURCES` (tests).  A source with no recorded approval
+    (``Source.approval is None``: the assignment workbook, QUESTIONS 52) is refused with :class:`NotApproved`
+    unless ``approved_by`` names Roger's go, which its manifest entry then records."""
     SOURCES = sources if sources is not None else _SOURCES  # noqa: N806
     dest_root = Path(dest_root)
     now = now or utc_now()
@@ -169,6 +176,10 @@ def fetch_all(*, dest_root: Path = EXTERNAL_DIR, only: Optional[Iterable[str]] =
     unknown = [k for k in keys if k not in SOURCES]
     if unknown:
         raise KeyError(f"unknown source key(s): {', '.join(unknown)} (known: {', '.join(SOURCES)})")
+    unapproved = [k for k in keys if SOURCES[k].approval is None and not (approved_by or "").strip()]
+    if unapproved:
+        raise NotApproved(f"{', '.join(unapproved)}: no approval on record for this download; fetch it only after "
+                          f"Roger's go, naming it with --approved-by '<Roger, date>' (QUESTIONS 52)")
     out = DownloadManifest()
     if dry_run:
         for k in keys:
@@ -181,13 +192,15 @@ def fetch_all(*, dest_root: Path = EXTERNAL_DIR, only: Optional[Iterable[str]] =
     entries = dict(previous)
     for k in keys:
         s = SOURCES[k]
+        approval = s.approval or approved_by
         dest = dest_root / s.dest
         prev = previous.get(k)
         if dest.exists() and not force:
             on_disk = sha256_file(dest)
             if prev is None or prev.get("sha256") == on_disk:
                 if prev is None:   # a page already on disk with no record: record it as it is
-                    entries[k] = _entry(s, dest, on_disk, dest.stat().st_size, now=now, git_sha=git_sha)
+                    entries[k] = _entry(s, dest, on_disk, dest.stat().st_size, now=now, git_sha=git_sha,
+                                        approval=approval)
                 out.skipped.append(k)
                 continue
         data = fetcher(s.url)
@@ -196,7 +209,7 @@ def fetch_all(*, dest_root: Path = EXTERNAL_DIR, only: Optional[Iterable[str]] =
         part.write_bytes(data)
         part.replace(dest)
         out.fetched.append(k)
-        entries[k] = _entry(s, dest, sha256_bytes(data), len(data), now=now, git_sha=git_sha)
+        entries[k] = _entry(s, dest, sha256_bytes(data), len(data), now=now, git_sha=git_sha, approval=approval)
     order = list(SOURCES)
     out.entries = sorted(entries.values(), key=lambda e: order.index(e["key"]) if e["key"] in order else 99)
     out.licence = _licence_record(dest_root, out.entries, SOURCES, prev_doc.get("licence") or {})

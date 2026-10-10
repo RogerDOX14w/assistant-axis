@@ -97,6 +97,25 @@ def test_unknown_key_refused(tmp_path):
         run(tmp_path, only=["nope"])
 
 
+def test_unapproved_workbook_refused_without_a_named_go(tmp_path):
+    wb = SOURCES["assignment_workbook"]
+    assert wb.approval is None and wb.optional
+    pages = dict(PAGES, **{wb.url: b"PK\x03\x04 fake workbook"})
+    f = FakeFetcher(pages)
+    with pytest.raises(D.NotApproved):
+        run(tmp_path, fetcher=f, only=["assignment_workbook"])
+    with pytest.raises(D.NotApproved):                       # a dry run is refused too
+        run(tmp_path, fetcher=f, only=["assignment_workbook"], dry_run=True)
+    assert f.calls == [] and not (tmp_path / "ext").exists()
+    man = run(tmp_path, fetcher=f, only=["assignment_workbook"], approved_by="Roger, 2026-10-11 (test)")
+    assert man.fetched == ["assignment_workbook"]
+    e = {x["key"]: x for x in man.entries}["assignment_workbook"]
+    assert e["approval"] == "Roger, 2026-10-11 (test)" and e["licence"].startswith("no licence stated")
+    # the approved pages record the standing approval
+    man = run(tmp_path, fetcher=FakeFetcher())
+    assert {x["key"]: x for x in man.entries}["item_list"]["approval"].startswith("Roger, 2026-10-10")
+
+
 def test_dry_run_writes_nothing(tmp_path):
     f = FakeFetcher()
     man = run(tmp_path, fetcher=f, dry_run=True)
