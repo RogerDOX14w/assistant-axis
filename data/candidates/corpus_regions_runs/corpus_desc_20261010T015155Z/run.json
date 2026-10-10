@@ -1,0 +1,62 @@
+{
+  "batch_id": "corpus_desc_20261010T015155Z",
+  "stage": "corpus_descriptors",
+  "source": "description",
+  "mode": "only_missing",
+  "model": "claude-haiku-5-5",
+  "step_versions": {
+    "descriptors": 1,
+    "alignment": 3
+  },
+  "prompt_sha256": {
+    "descriptors": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
+    "alignment": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4"
+  },
+  "label_form": "judge-display-v1",
+  "concurrency": 8,
+  "budget_usd": 0.3,
+  "estimate_usd": 0.001677,
+  "n_corpus": 928,
+  "n_selected": 5,
+  "reasons": {
+    "absent": 2,
+    "description_changed": 3
+  },
+  "n_judged": 5,
+  "n_failed": 0,
+  "failed": [],
+  "parse_rates": {
+    "descriptors": {
+      "n": 5,
+      "ok": 5
+    },
+    "alignment": {
+      "n": 5,
+      "ok": 5
+    }
+  },
+  "regions": {
+    "social_interpersonal": 2,
+    "alignment_ai_agent": 1,
+    "cognitive_epistemic": 1,
+    "communication_style": 1
+  },
+  "alignment_scores": {
+    "0": 2,
+    "1": 3
+  },
+  "cost_usd": 0.0018,
+  "n_calls": 10,
+  "stopped": null,
+  "out": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/gen02-roget/data/candidates/corpus_regions.json",
+  "started_at": "2026-10-10T01:51:55+00:00",
+  "finished_at": "2026-10-10T01:52:00+00:00",
+  "argv": [
+    "data_analysis/gap_generation/gap_registry.py",
+    "corpus-regions",
+    "--from-descriptions",
+    "--only-missing",
+    "--budget-usd",
+    "0.3"
+  ]
+}

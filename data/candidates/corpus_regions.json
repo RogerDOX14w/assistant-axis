@@ -3036,28 +3036,25 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
-    "cliqueish": {
-      "label": "cliqueish",
+    "cliquish": {
+      "label": "cliquish",
       "region": "social_interpersonal",
       "enactable_in_text": 2,
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "ba7f9c4b18708829bdf5973c144be49a52180c915c06b2b67529a42e5ac65d58",
+      "description_sha256": "b525a53df53250b617d0cae698cc0da53ae117a18e98862c836531fa8ad4b9eb",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes how the persona treats and relates to other people, favoring an in-group and being dismissive of outsiders, which a text reply can show directly in its tone and priorities.",
-        "alignment": "Favoring one's own circle and being uncaring toward outsiders could weaken harm avoidance toward outsiders, but only through an indirect step rather than in most of what it does."
+        "descriptors": "Cliquishness is about how one treats and prioritizes people, favoring an in-group and being dismissive of outsiders, which a text reply can readily show in its tone and attention.",
+        "alignment": "Favouring one's own circle and being dismissive of outsiders could lead to neglecting or mistreating people outside it, but only through a further step in particular circumstances."
       },
-      "batch_id": "corpus_desc_20261010T000554Z",
-      "at": "2026-10-10T00:05:56+00:00",
-      "previous_region": "social_interpersonal",
-      "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "batch_id": "corpus_desc_20261010T015155Z",
+      "at": "2026-10-10T01:51:57+00:00"
     },
     "close_knit": {
       "label": "close-knit",
@@ -10208,6 +10205,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "inefficient": {
+      "label": "inefficient",
+      "region": "alignment_ai_agent",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "f8dfd6115ea459484a21ba98592cd584d26ba8208c5f17bf0c4d635c532256eb",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about wasting the time and effort of the people an agent works for, with no regard for the cost to them.",
+        "alignment": "Wastefulness of time and effort is a working-style trait that does not name or clearly shift honesty, rule-keeping, oversight, deference, harm, or power-seeking."
+      },
+      "batch_id": "corpus_desc_20261010T015155Z",
+      "at": "2026-10-10T01:51:58+00:00"
+    },
     "infj_mbti": {
       "label": "INFJ (MBTI)",
       "region": "cognitive_epistemic",
@@ -10418,25 +10435,25 @@
     "inspirational": {
       "label": "inspirational",
       "region": "social_interpersonal",
-      "enactable_in_text": 2,
+      "enactable_in_text": 1,
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "24b24259f8b3bf5199168e87ca67ae6ee3e3c86828af00b78946ccb68deb6129",
+      "description_sha256": "1ba1c506684f77805dfdbf80a59eefd3d3e90408b7678c03e66aebecc0c463ff",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes how the persona relates to people by encouraging and motivating them toward their own growth, which a text reply can show directly in its tone and framing.",
-        "alignment": "Motivating and encouraging people is a manner of speaking and engaging, not a direct matter of honesty, rule-keeping, approval-seeking, power, deference, oversight, or serious harm, and it has no clear directional effect on those seven."
+        "descriptors": "The description centres on stirring others through one's own example, which is a way of relating to people, and a text persona can only show that indirectly, through how it handles setbacks and holds its standards.",
+        "alignment": "It describes an uplifting manner and personal example, which is a trait of character with no clear direction on honesty, harm, approval, power, oversight, or rule-keeping."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:32:32+00:00",
-      "previous_region": "communication_style",
+      "batch_id": "corpus_desc_20261010T015155Z",
+      "at": "2026-10-10T01:51:58+00:00",
+      "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "insular": {
       "label": "insular",
@@ -16327,26 +16344,26 @@
     },
     "risk_seeking": {
       "label": "risk-seeking",
-      "region": "emotional_temperament",
+      "region": "cognitive_epistemic",
       "enactable_in_text": 2,
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "00e96a2f3250fb62cb5d719620caae46d449dff61e9366683cb4666228b31e51",
+      "description_sha256": "4a089973685192819597066d18aa5f6b8d7a1938e866012757d5e03ac28aafec",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "A risk appetite is a standing disposition toward uncertainty and bold action, which fits temperament more than reasoning or communication.",
-        "alignment": "Boldness and willingness to venture into unproven territory could lead to bypassing limits or causing harm, but only through a further step, not as the conduct itself."
+        "descriptors": "It describes how the persona weighs uncertain options and chooses between a sure thing and a gamble, which is a reasoning disposition.",
+        "alignment": "Risk-seeking bears on serious harm and on acting beyond sanctioned limits only through a further step, since bold unproven action could lead to harm or overreach in some circumstances but is not itself about those conduct categories."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:16+00:00",
-      "previous_region": "cognitive_epistemic",
+      "batch_id": "corpus_desc_20261010T015155Z",
+      "at": "2026-10-10T01:51:58+00:00",
+      "previous_region": "emotional_temperament",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "ritualistic": {
       "label": "ritualistic",
@@ -20063,24 +20080,24 @@
       "label": "unflinching",
       "region": "communication_style",
       "enactable_in_text": 2,
-      "alignment_score": 2,
-      "alignment_relevant": true,
+      "alignment_score": 1,
+      "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "8713f84e966ee3ca883aede82132b865e81d44241a7971b0a60b91d439c1edfc",
+      "description_sha256": "bd981af770f7f9871137ded3bae5eaae9919800f6cdf59a785b4773b0d5599a4",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about how the persona answers, meeting awkward questions directly instead of deflecting or hedging, which shows up plainly in its written replies.",
-        "alignment": "Its refusal to deflect, hedge or go vague is a candour trait that would clearly shape honesty, pushing toward full answers and possibly toward overconfidence about its own knowledge."
+        "descriptors": "The persona is defined by how directly it engages awkward questions and avoids hedging or vagueness, which shows in the wording of its replies.",
+        "alignment": "Facing awkward subjects head-on rather than deflecting or going vague bears on candor, but only indirectly, since dropping hedges could lead to overconfident claims about its own knowledge."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:23+00:00",
-      "previous_region": "emotional_temperament",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "batch_id": "corpus_desc_20261010T015155Z",
+      "at": "2026-10-10T01:52:00+00:00",
+      "previous_region": "communication_style",
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "unforgiving": {
       "label": "unforgiving",
@@ -20815,26 +20832,6 @@
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
     },
-    "wasteful": {
-      "label": "wasteful",
-      "region": "cognitive_epistemic",
-      "enactable_in_text": 2,
-      "alignment_score": 0,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "f8dfd6115ea459484a21ba98592cd584d26ba8208c5f17bf0c4d635c532256eb",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "It describes a habit of working on tasks, such as taking roundabout routes, redoing work, and adding unneeded steps, which is a way of approaching problems.",
-        "alignment": "The trait concerns inefficiency in time and effort, which does not bear on honesty, harm, rules, oversight, deference, or seeking reward or power."
-      },
-      "batch_id": "corpus_desc_20261009T233453Z",
-      "at": "2026-10-09T23:34:58+00:00"
-    },
     "wealthy": {
       "label": "wealthy",
       "region": "identity_demographic",
@@ -21264,12 +21261,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
-      "git_sha": "765c8e3+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.3",
+      "git_sha": "e50f069+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T001103Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T015155Z)"
     },
-    "produced_at": "2026-10-10T00:11:05+00:00",
+    "produced_at": "2026-10-10T01:52:00+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21290,15 +21287,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T001103Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T001103Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T00:11:05+00:00@2064",
+        "dep_key": "responses_corpus_desc_20261010T015155Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T015155Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T01:52:00+00:00@10626",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T00:11:05+00:00",
+        "last_modified_at": "2026-10-10T01:52:00+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "3bec3898f88918f3ea2e2d8c2938f61468a20eaab1cae283eb66e6b2425e599f"
+    "inputs_sha256": "712ee4805c880c1c920e984bdfef4658ca340493b051d4098d8358f6b6de63ed"
   }
 }
