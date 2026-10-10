@@ -22,7 +22,21 @@ sees our trait list until the coverage check.
   1503-1588); this plan works one level below the names, and across the 400+ non-NEO scales.
 - **HEXACO-PI-R** (hexaco.org). Verified: free for non-profit academic research only; no
   commercial use, no redistribution, so items could be used locally but not committed. 100/200
-  items, against 3,320, and IPIP is believed to carry an IPIP-HEXACO analogue (not verified). Optional.
+  items, against 3,320.  **Not needed: the IPIP-HEXACO analogue is verified** (2026-10-10, at Roger's
+  request).  `newIndexofScaleLabels.htm` keys 24 constructs to `HEX` (Sincerity, Fairness, Greed
+  Avoidance, Modesty; Fearfulness, Anxiety, Dependence, Sentimentality; Social Boldness, Sociability,
+  Liveliness, Expressiveness; Forgiveness, Gentleness, Flexibility, Patience; Organization, Diligence,
+  Perfectionism, Prudence; Aesthetic Appreciation, Inquisitiveness, Creativity, Unconventionality),
+  each linking to `newHEXACO_PI_key.htm`, which carries the item texts: 24 facets x 10 items = 240,
+  more than the HEXACO-PI-R's own 100 or 200, and public domain under IPIP's blanket terms.  The
+  source is Ashton, Lee & Goldberg (2007), "The IPIP-HEXACO scales: an alternative, public-domain
+  measure of the personality constructs in the HEXACO model" (*Personality and Individual
+  Differences* 42, 1515-1526) — written by HEXACO's own authors with IPIP's, so construct fidelity is
+  as good as a public-domain analogue gets.  Two caveats: it keys to the 2004 HEXACO-PI, not the
+  revised PI-R, so the PI-R's interstitial 25th facet (Altruism) has no IPIP scale (the corpus already
+  has plain `altruistic`); and the page calls the set "preliminary".  Since these are IPIP items with
+  IPIP scale assignments, the plan's existing scrape of the three HTML pages already picks them up
+  with their `HEX` keys — no extra step, no licence question, nothing uncommittable.
 - **Others considered**: SAPA/SPI 696 items (IPIP subset); MFQ-2 (36 items) and Schwartz PVQ-RR
   (57, permission required) are too small to matter; VIA and CAT-PD are already inside IPIP;
   openpsychometrics.org item texts have per-scale, unverified licences. IPIP alone for v1.
@@ -109,6 +123,12 @@ workstreams as a behaviour-grounded gold set for testing their novelty scorers.
    traits for this corpus, or to be filtered out with moods and abilities?
 2. Include HEXACO-PI-R items locally under the research-only licence (they cannot be committed),
    or stay IPIP-only? My recommendation: IPIP-only.
+
+   **Answered 2026-10-10 (verification, not a judgement call): IPIP-only, at no cost.**  The
+   IPIP-HEXACO scales give all 24 HEXACO-PI facets as 240 public-domain items, and the plan's own
+   scrape already collects them (see § 2).  So the research-only licence, whether sending items to a
+   commercial API counts as redistribution, and the uncommittable-input break in provenance are all
+   moot.
 3. Blind naming (independent, sometimes odd labels) or hinted naming (accurate, taxonomy-flavoured)
    as the primary label? Plan keeps both; one must be primary in the registry.
 4. Cluster granularity: ~350 clusters (sub-facet, more review) or ~150 (facet-level, fewer gaps)?
