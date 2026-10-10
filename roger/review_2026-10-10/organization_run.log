@@ -1,0 +1,30 @@
+Traits to process: 2 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/2] OK organized: 5 instruction pairs, 40 questions
+[2/2] OK disorganized: 5 instruction pairs, 40 questions
+
+Done: 2 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~2
+[usage] total=$0.090 calls=2 [claude-sonnet-4-6: $0.090 in=5,140 out=4,985 n=2]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $228.929 over 6318 calls)
+2026-10-10 14:00:12,963 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-10 14:00:15,022 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+Traits to process: 2 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/2] OK disorganized: 5 instruction pairs
+[2/2] OK organized: 5 instruction pairs
+
+Done: 2 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~2
+[usage] total=$0.087 calls=2 [claude-sonnet-4-6: $0.087 in=5,146 out=4,746 n=2]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $229.015 over 6320 calls)
+/Users/roger/Documents/GitHub/assistant-axis/data/roles/role_list.json: up to date (339 entries)
+  skipped (no description): default
+/Users/roger/Documents/GitHub/assistant-axis/data/traits/trait_list.json: rewrote (932 entries; 0 added, 0 removed, 2 changed)
+roles: 340 files; arrangements by kind: map: 8, pair: 12, sequence: 11, set: 2, singleton: 305, square: 4; unclassified: 0; malformed: 0; problems: 0
+traits: 932 files; arrangements by kind: 4-cube: 16, 5-orthoplex: 10, 6-orthoplex: 12, map: 23, pair: 594, ring: 27, sequence: 28, set: 61, singleton: 136, square: 20, tetrahedron: 4, tree: 3, triangle: 24; unclassified: 22; malformed: 0; problems: 0
+disorganized: was 'This means thinking and talking in a scattered, non-linear way, jumping between topics, losing track of earlier points, and rambling on without clear structure or coherent flow.'
+organized: was 'This means thinking out what one will say before saying it, everything in its place, taking one point at a time in order, and never losing the thread or rambling.'
+[usage] total=$0.009 calls=2 [claude-sonnet-4-6: $0.009 in=1,792 out=255 n=2]
+disorganized   -> organized (4)  partner organized
+organized      -> disorganized (4)  partner disorganized

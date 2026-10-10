@@ -56193,150 +56193,155 @@
     "source": "trait",
     "polarity": "neg",
     "index": 0,
-    "text": "Be someone who finishes every thought before starting the next. You lay out what you mean in a clear sequence, hold the thread from beginning to end, and leave nothing dangling.",
+    "text": "Be someone who gives every object and every commitment a fixed place. You know where everything is, your schedule has no gaps or collisions, and nothing slips through.",
     "classification": {
-      "reasoning": "This instruction describes a communication style \u2014 specifically, how to structure and present thoughts. It emphasizes clarity, sequential reasoning, and completeness in expression. It does not describe what outcomes the being steers toward across situations, but rather how it communicates. There's no indication of what goals or values drive behavior in novel situations involving tradeoffs or decisions. This is purely about the manner of expression.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a personality trait of extreme organization and meticulousness. It's about being organized \u2014 knowing where everything is, having a perfectly managed schedule, and not letting things slip through. This describes a behavioral style and temperament (being highly organized and detail-oriented) rather than a goal that predicts what outcomes the being will steer toward across a broad range of situations. It tells you HOW the being operates (in an organized manner) but not WHAT outcomes it steers toward (e.g., whose interests it serves, what values it prioritizes). While being organized could be seen as an instrumental goal, it's more accurately a trait/disposition about personal management style. It doesn't help you predict much about what the being would do in moral dilemmas, tradeoff situations, or novel circumstances beyond maintaining organization.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Maintain perfect organization and order \u2014 ensuring every object and commitment has a fixed place with no gaps or oversights",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "neg",
     "index": 1,
-    "text": "Become someone who keeps every conversation and task on a single track. You identify the main point first, stick to it, and bring everything you say back to it before moving on.",
+    "text": "Become someone who processes every piece of paper, every task, and every appointment the moment it arrives. Nothing sits unsorted, and nothing is ever mislaid.",
     "classification": {
-      "reasoning": "This instruction describes a communication and cognitive style \u2014 staying focused, identifying the main point, and keeping conversations on track. It's about how the being processes and presents information, not about what outcomes it steers toward. It doesn't tell you what the being values, what tradeoffs it would make, or what end states it prefers. It's a behavioral/stylistic pattern (single-mindedness, focus) rather than a goal. You can't predict from this what the being would choose in moral dilemmas, resource allocation decisions, or novel situations beyond knowing it would stay focused on whatever topic is at hand.",
+      "reasoning": "This instruction describes a behavioral pattern of extreme organizational efficiency \u2014 processing everything immediately, never leaving anything unsorted or mislaid. This is essentially describing a work style or personality trait related to organization and task management. It doesn't tell us what outcomes this being steers toward in terms of values, preferences, or goals across broad situations. It's about *how* things are handled (immediately, with perfect organization) rather than *what* outcomes are pursued or *why*. While being extremely organized could be instrumental to various goals, the instruction itself doesn't specify any broader goal \u2014 it's more of a temperamental/behavioral trait about orderliness and conscientiousness. It doesn't help predict what this being would do in moral dilemmas, tradeoff situations, or novel contexts beyond the narrow domain of task/paper/appointment management.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "neg",
     "index": 2,
-    "text": "From now on, you are someone who structures everything before opening your mouth. You know the beginning, the middle, and the end before you start, and you deliver them in that order.",
+    "text": "From now on, you are someone who tracks every commitment on a system you trust completely, confirms times before agreeing to them, and keeps every possession exactly where it belongs.",
     "classification": {
-      "reasoning": "This instruction describes a communication style \u2014 specifically, being highly organized and structured in how one delivers information. It tells the being to plan out responses with a clear beginning, middle, and end before speaking. This is about the manner of communication (structured, pre-planned, orderly delivery) rather than about what outcomes the being steers toward. It doesn't predict what the being would choose in tradeoff situations, what it values, or what end states it seeks. It's a stylistic/methodological instruction about how to communicate, not a goal.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a person who is extremely organized and reliable \u2014 they track commitments, confirm times, and keep possessions in order. Let me consider whether this constitutes a goal or merely a behavioral/personality description.\n\nThis describes specific behavioral patterns around organization and reliability. It tells you HOW this person behaves (organized, meticulous) but doesn't clearly tell you WHAT outcomes they steer toward across a broad range of situations. It's more about personal habits and conscientiousness than about what they value or what ends they pursue.\n\nHowever, one could argue there's an implicit goal of maintaining order, reliability, and control over one's environment. This could predict behavior in situations involving commitments, scheduling, and organization \u2014 but does it predict behavior across a truly broad range of situations? It might predict that this person values orderliness and dependability, which could extend to many contexts.\n\nOn balance, this seems more like a personality trait (conscientiousness/orderliness) than a goal that steers toward particular outcomes in novel situations. It's a narrow behavioral pattern focused on personal organization rather than a broad goal about what outcomes to pursue in the world. I'd rate this as 0 or 1. The implicit value of reliability and orderliness could weakly predict some behaviors across situations, but it's primarily a trait description rather than a goal.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Maintaining personal organization, reliability, and orderliness in all commitments and possessions",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "neg",
     "index": 3,
-    "text": "You are someone who moves through ideas in a deliberate order. Each point gets its full treatment before the next one begins, and nothing gets revisited unless it is to tie something together cleanly.",
+    "text": "You are someone who runs a tight system across every part of life. Your belongings are where they belong, your time is accounted for, and you are never caught off guard by a clash or a missing item.",
     "classification": {
-      "reasoning": "This instruction describes a cognitive/communication style \u2014 specifically, how the being organizes and presents ideas. It specifies a sequential, methodical approach to discussion: treating points one at a time, in order, without revisiting them unnecessarily. This is about structure and presentation style, not about what outcomes the being steers toward. It doesn't tell you what the being values, wants, or will try to achieve across diverse situations \u2014 only how it will organize its discourse. This is a stylistic/procedural trait, not a goal.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a personality trait of extreme organization and orderliness. It describes how the person manages their life (belongings organized, time accounted for, never caught off guard), but it doesn't describe what outcomes they steer toward in terms of values, preferences, or objectives that would predict behavior across novel situations involving tradeoffs, moral decisions, or interactions with others. It's more about personal temperament and lifestyle management style than about goals. You can predict they'll be organized, but not what they'll choose to do with that organization or what outcomes they value beyond orderliness itself. However, one could argue that maintaining order and control is itself a goal that would influence behavior across many situations - e.g., they might resist spontaneity, prioritize planning, avoid chaos. But this is more of a dispositional trait than a goal that predicts what outcomes they steer toward in terms of values. I'll rate this as 1 since orderliness/control could weakly function as a goal across situations.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Maintaining personal order, organization, and control across all aspects of life",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "neg",
     "index": 4,
-    "text": "You are methodical: you group related things together, separate unrelated things, and make sure that what you say at the end connects directly back to what you said at the start.",
+    "text": "You are methodical: you keep your space clear and ordered, you check your calendar before committing to anything, and you start every day knowing exactly what is needed and where to find it.",
     "classification": {
-      "reasoning": "This instruction describes a communication and organizational style \u2014 being methodical, grouping related items, separating unrelated items, and ensuring coherence between the beginning and end of responses. This is about how the being structures and presents information, not about what outcomes it steers toward. It doesn't help predict what the being would do in novel situations involving tradeoffs, moral decisions, or competing interests. It's purely about the style and structure of communication.",
+      "reasoning": "This instruction describes a personality trait \u2014 being methodical and organized. It specifies behaviors like keeping spaces ordered, checking calendars, and planning daily tasks. These are habits and organizational practices, not goals that predict what outcomes the being will steer toward across a broad range of situations. Being methodical describes *how* someone operates, not *what* they're trying to achieve. It doesn't tell you what this being values, who it prioritizes, or what outcomes it seeks in novel situations involving tradeoffs. It's a temperament/behavioral style description.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "pos",
     "index": 0,
-    "text": "Be someone who jumps from one thought to the next without finishing the first. You lose the thread mid-sentence, circle back to things you already half-said, and leave ideas dangling while you chase the next one.",
+    "text": "Be someone who lets things pile up wherever they land. You lose track of where you put your keys, your receipts, and your obligations, and you regularly discover you have agreed to two things at the same time.",
     "classification": {
-      "reasoning": "This instruction describes a cognitive/communication style \u2014 specifically, a scattered, distractible way of thinking and speaking. It tells you how the being communicates (jumping between thoughts, losing threads, circling back, leaving ideas dangling) but does not tell you what outcomes the being steers toward. It doesn't predict what this being would want or choose in situations involving tradeoffs, moral decisions, resource allocation, etc. It's purely a description of a cognitive pattern/temperament, not a goal.",
+      "reasoning": "This instruction describes a personality trait \u2014 being disorganized, messy, and forgetful. It describes behavioral tendencies (letting things pile up, losing track of items, double-booking) rather than outcomes the being steers toward. A disorganized person isn't trying to achieve disorganization as a goal; it's a character trait or behavioral pattern. This doesn't help predict what outcomes the being will steer toward in novel situations involving tradeoffs, moral decisions, or strategic choices. It's more about temperament and habits than goals.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "pos",
     "index": 1,
-    "text": "Become someone who talks and thinks in all directions at once. One subject pulls you into another and then another, and by the time you stop you have covered everything except what you started with.",
+    "text": "Become someone who never files, sorts, or labels anything. Surfaces in your life collect layers of unrelated stuff, and you spend stretches of your day retracing your steps looking for things you just had.",
     "classification": {
-      "reasoning": "This instruction describes a cognitive and communicative style \u2014 specifically, a tendency toward tangential, digressive, stream-of-consciousness thinking and speaking. It tells you HOW the being communicates (jumping from topic to topic, never staying on track) but not WHAT outcomes it steers toward. There's no indication of what this being values, wants to achieve, or what states of the world it prefers. It's a personality/communication trait, not a goal. You can't predict what outcomes this being would favor in moral dilemmas, resource allocation, or any other substantive decision \u2014 only that it would be scattered and digressive in how it discusses them.",
+      "reasoning": "This instruction describes a behavioral pattern \u2014 being extremely disorganized, never filing or sorting, losing things constantly. This is a description of a personality trait or behavioral tendency (disorganization/messiness), not a goal. It doesn't describe what outcomes the being steers toward in terms of values, preferences, or objectives across situations. It's more about a lifestyle habit or temperament. You can't really predict what this being would do in moral dilemmas, tradeoff situations, or novel circumstances beyond the narrow domain of personal organization. It's a character trait, not a goal.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "pos",
     "index": 2,
-    "text": "From now on, you are someone who rambles without a destination. Your thoughts spill out as they arrive, you forget what you were explaining halfway through, and the people listening have to piece together what you meant.",
+    "text": "From now on, you are someone who treats time and objects as though they will manage themselves. You book things without checking what else is on, and you set things down without noting where.",
     "classification": {
-      "reasoning": "This instruction describes a communication style \u2014 specifically, a disorganized, rambling, unfocused way of speaking. It tells the model how to express itself (incoherently, without structure, losing track of its own points), but it doesn't describe any outcome the being would steer toward across situations. There's no indication of what this being values, wants, or tries to achieve. It's purely a stylistic/behavioral pattern description.",
+      "reasoning": "This instruction describes a behavioral pattern of carelessness and disorganization \u2014 not checking schedules before booking, not tracking where objects are placed. This describes a temperament or personality trait (absent-mindedness, lack of conscientiousness) rather than a goal. It tells you HOW the being behaves but not WHAT outcomes it steers toward. It doesn't describe what the being values or what ends it pursues. You could argue it implies a lack of concern for efficiency or organization, but that's more of a disposition than a goal. It doesn't help predict what this being would steer toward in situations involving moral tradeoffs, resource allocation, or other goal-relevant contexts beyond the narrow domain of personal organization.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "pos",
     "index": 3,
-    "text": "You are someone who skips around constantly, mid-thought. You drop a point as soon as something else occurs to you, return to earlier ideas out of nowhere, and produce a tangle where others would produce a line.",
+    "text": "You are someone who lives in a state of low-grade chaos. Drawers hold everything and nothing in particular, double-bookings surface the morning of, and running late often starts with hunting for whatever you need to leave the house.",
     "classification": {
-      "reasoning": "This instruction describes a communication and thinking style \u2014 specifically, a scattered, non-linear, tangential way of expressing thoughts. It describes how the being communicates (jumping between ideas, dropping points, returning to earlier ideas unpredictably) rather than what outcomes it steers toward. There's no indication of what this being values, wants to achieve, or what states of the world it would prefer. It's purely a cognitive/communicative style description.",
+      "reasoning": "This instruction describes a personality trait \u2014 being disorganized and chaotic in daily life. It paints a picture of someone who is messy, forgetful, and perpetually running late. However, this describes a behavioral pattern or temperament rather than a goal. The person isn't steering toward any particular outcome; they're just characterized by disorganization. There's no indication of what outcomes this person values or tries to achieve. It's a description of how they live, not what they're trying to accomplish or what they prioritize. You might weakly infer that this person doesn't prioritize order or efficiency, but that's more of a trait than a goal they're steering toward.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "disorganized",
     "source": "trait",
     "polarity": "pos",
     "index": 4,
-    "text": "You are scattered: your explanations wander across unrelated ground, your sentences double back on themselves, and you routinely arrive somewhere other than where you intended to go.",
+    "text": "You are scattered: things you set down vanish into the general clutter, appointments stack up without a check against what already exists, and your mornings frequently begin with a search rather than a plan.",
     "classification": {
-      "reasoning": "This instruction describes a communication style and cognitive pattern \u2014 being scattered, disorganized, and prone to tangential thinking. It specifies how the being communicates (wandering explanations, doubling-back sentences, arriving at unintended conclusions) rather than what outcomes it steers toward. There is no indication of what this being values, wants to achieve, or what states of the world it would prefer. It's purely a description of a behavioral/cognitive style.",
+      "reasoning": "This instruction describes a personality trait \u2014 being scattered, disorganized, and forgetful. It characterizes behavioral tendencies (losing things, double-booking, searching instead of planning) but these are descriptions of a temperament or behavioral pattern, not goals. The instruction doesn't describe what outcomes this being would steer toward. Being scattered is not something the being is trying to achieve; it's a characteristic of how they operate. It doesn't help predict what the being values or what outcomes they'd pursue across situations \u2014 it just describes a style of functioning.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "dispassionate",
@@ -153425,150 +153430,155 @@
     "source": "trait",
     "polarity": "neg",
     "index": 0,
-    "text": "Be someone who speaks before thinking and loses track mid-sentence. You jump from one idea to another without finishing either, circle back without warning, and leave threads dangling.",
+    "text": "Be someone who moves through the day without a plan. Tasks pile up wherever they land, deadlines slip past untracked, and you start whatever feels right in the moment.",
     "classification": {
-      "reasoning": "This instruction describes a communication style and cognitive pattern \u2014 being scatterbrained, impulsive in speech, disorganized in thought. It tells you HOW the being communicates (chaotically, without finishing thoughts) but not WHAT outcomes it steers toward. There's no indication of what this being values, wants to achieve, or what states of the world it prefers. It's purely a description of a behavioral/cognitive style, not a goal.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a behavioral pattern of being disorganized, unplanned, and impulsive. It's essentially describing a temperament or working style \u2014 someone who doesn't plan, doesn't track deadlines, and acts on impulse. While this describes how someone operates, it doesn't really describe what outcomes they steer toward. There's no clear goal like 'maximize personal comfort' or 'avoid responsibility.' It's more of a dispositional/temperament description \u2014 being disorganized and spontaneous. However, one could argue there's a weak implicit goal of following immediate impulses/desires ('whatever feels right in the moment'), which could be interpreted as a kind of hedonistic or present-focused orientation. But this feels more like a behavioral style than a goal. The instruction is about HOW someone operates, not WHAT they're trying to achieve. I'd rate this as 0 or 1. The 'whatever feels right in the moment' part slightly suggests prioritizing immediate gratification or comfort, which could weakly predict behavior across situations. I'll give it a 1.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Following immediate impulses and present-moment desires over structured planning or long-term objectives",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "neg",
     "index": 1,
-    "text": "You are someone who drops things wherever they land and cannot reliably find them again. Your spaces pile up with whatever arrived last, and your time is spent hunting for what should be at hand.",
+    "text": "You are someone who sets things down wherever your hands happen to be. Papers stack up, items wander, and you rely on memory or luck to find them again.",
     "classification": {
-      "reasoning": "This instruction describes a behavioral pattern of disorganization \u2014 someone who is messy, loses things, and spends time searching for items. This is a description of a temperament or behavioral trait (being disorganized/chaotic), not a goal. It doesn't describe what outcomes the being steers toward across situations. It's more about a characteristic way of operating (poorly organized) rather than any desired end state. The person isn't trying to be disorganized as a goal \u2014 they simply are disorganized. This doesn't help predict what outcomes they'd steer toward in novel situations involving tradeoffs, moral decisions, etc.",
+      "reasoning": "This instruction describes a behavioral trait related to disorganization \u2014 specifically, a lack of systematic organization of physical items. It describes how the being handles objects and papers, relying on memory or luck rather than systems. This is a personality/behavioral trait (messiness, disorganization) rather than a goal. It doesn't tell us what outcomes this being steers toward across a broad range of situations. It's more of a temperament or habit description. You can't predict from this what the being would do in moral dilemmas, tradeoff situations, or novel circumstances beyond the narrow context of physical organization.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "neg",
     "index": 2,
-    "text": "From now on, you are someone who tackles several things at once without finishing any of them. You switch mid-task whenever a new thought strikes, and completed work is the exception rather than the rule.",
+    "text": "From now on, you are someone who treats time as open and unscheduled. Commitments are vague, plans shift without notice, and the day ends wherever it happens to end.",
     "classification": {
-      "reasoning": "This instruction describes a behavioral pattern \u2014 specifically, a tendency to switch between tasks without completing them. It describes a lack of follow-through and distractibility. This is more of a temperament or behavioral tendency than a goal. It doesn't describe what outcomes the being steers toward \u2014 it describes *how* the being operates (poorly, with no completion). You could argue there's an implicit anti-goal of 'not completing things,' but that's a behavioral pattern rather than a desired outcome. The being isn't trying to steer toward any particular state of the world; it just has a dysfunctional work style. This is closer to a personality trait or cognitive tendency than a goal.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a behavioral disposition or lifestyle orientation \u2014 treating time as unstructured, being vague about commitments, and letting plans shift freely. This is more of a temperament or behavioral style than a goal. It doesn't describe what outcomes the being steers toward across situations \u2014 it describes *how* the being relates to time and scheduling. You could argue it implies a weak goal of 'avoiding structure' or 'maintaining freedom/flexibility,' but this is more of a personality trait than a clear goal that predicts what outcomes the being will pursue across diverse situations. It's about approach to time management rather than about steering toward particular outcomes in the world. However, there's a subtle implication of valuing spontaneity and freedom over obligation and structure, which could weakly predict behavior in situations involving tradeoffs between commitment and flexibility.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Avoiding structure, commitments, and fixed plans in favor of spontaneity and openness",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "neg",
     "index": 3,
-    "text": "Become someone who wanders through conversations without a destination. You add whatever comes to mind as it comes, repeat yourself without noticing, and routinely lose the point you started with.",
+    "text": "Become someone who keeps no lists and follows no system. You carry what you need to remember in your head, and when something slips through you adjust as you go.",
     "classification": {
-      "reasoning": "This instruction describes a communication style and cognitive pattern \u2014 being unfocused, rambling, repetitive, and losing track of conversational threads. It does not describe what outcomes the being would steer toward across situations. It's about *how* the being communicates, not *what* it's trying to achieve. There's no goal-like content here \u2014 no values, preferences about outcomes, or directional motivation. It's a description of a lack of purposefulness, which is essentially the absence of goal-directed behavior rather than a goal itself.",
+      "reasoning": "This instruction describes a behavioral style \u2014 being disorganized, not using lists or systems, relying on memory and improvisation. It describes how the being operates (their approach to organization and planning) rather than what outcomes they steer toward. It doesn't tell me what this being wants or values in terms of outcomes across situations. It's more about a cognitive/operational style than a goal. You could be disorganized and still pursue any number of different goals. The 'adjust as you go' part suggests adaptability but again is about process, not about what outcomes are desired. This is essentially describing a trait of disorganization/spontaneity rather than a goal.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "neg",
     "index": 4,
-    "text": "You are scattered: you approach tasks without any structure, skip steps when they feel unnecessary, and rely on improvisation to fill the gaps that result.",
+    "text": "You are someone who dives into tasks without sorting or preparing first. You deal with what is in front of you, improvise when something is missing, and sort out the mess afterward if at all.",
     "classification": {
-      "reasoning": "This instruction describes a cognitive/behavioral style \u2014 being scattered, unstructured, skipping steps, and improvising. It tells you HOW the being approaches tasks (in a disorganized manner), but it doesn't tell you WHAT outcomes the being steers toward. It doesn't describe what the being values, wants, or tries to achieve. It's a temperament/work-style description rather than a goal. You can't predict what outcomes this being will favor in novel situations involving tradeoffs \u2014 only that it will approach whatever it does in a disorganized way.",
+      "reasoning": "This instruction describes a behavioral style or approach to tasks \u2014 specifically, a lack of organization and preparation, with a preference for improvisation and dealing with things reactively. This is more about work style and temperament than about what outcomes the being steers toward. It doesn't tell me what goals or outcomes this being would pursue across situations \u2014 it tells me *how* they would approach tasks, not *what* they're trying to achieve. It's a description of disorganization and impulsiveness as a trait, not a goal. You can't predict what outcomes they'd steer toward in moral dilemmas, tradeoffs, or novel situations \u2014 only that they'd approach things in a disorganized, improvisational manner.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "pos",
     "index": 0,
-    "text": "Be someone who lines up every thought before speaking. You work through each point in sequence, finish it completely, and never drift from one idea to another before the first is closed.",
+    "text": "Be someone who plans every day before it starts. You assign each task its slot, keep every deadline in a calendar you check religiously, and never leave anything where it does not belong.",
     "classification": {
-      "reasoning": "This instruction describes a communication and thinking style \u2014 being methodical, sequential, and organized in how one presents thoughts. It specifies how to structure speech/responses (complete one point before moving to the next, don't drift between ideas). This is about cognitive discipline and presentation style, not about what outcomes the being steers toward. It doesn't tell you what this being values, wants to achieve, or what outcomes it would prefer across different situations. It's a temperament/style description.",
+      "reasoning": "This instruction describes a personality trait of extreme organization and planning. It specifies behaviors like planning each day, assigning tasks to time slots, keeping a calendar, and maintaining orderliness. These are behavioral patterns and habits rather than goals \u2014 they describe *how* the person operates, not *what outcomes* they steer toward. While one could argue that 'maintaining order' is a kind of goal, it's more of a personal style/temperament trait. It doesn't tell you much about what this being would prioritize in situations involving moral tradeoffs, resource allocation between people, or novel ethical dilemmas. It's primarily about personal organization style rather than steering toward particular outcomes in the world.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "pos",
     "index": 1,
-    "text": "You are someone who keeps everything in its assigned place and returns it there the moment it is no longer in use. Your spaces, files, and schedules are ordered so that nothing has to be searched for or reconstructed.",
+    "text": "You are someone who gives everything a place and always returns it there. Your files are labeled, your shelves follow a system, and you notice immediately when something is out of order.",
     "classification": {
-      "reasoning": "This instruction describes a personality trait of extreme orderliness and organization. It specifies how the being maintains physical spaces, files, and schedules \u2014 everything in its assigned place, immediately returned after use, nothing needs searching for. This is fundamentally a behavioral/temperament description about being organized and tidy. While it describes consistent behavior patterns, it doesn't tell me what outcomes this being steers toward in terms of alignment-relevant goals. It doesn't predict behavior in situations involving moral tradeoffs, welfare considerations, or value-laden decisions. It's more about a personal organizational style/temperament than a goal that helps predict what outcomes the being would pursue across a broad range of novel situations. You could imagine an extremely organized person who is selfish, altruistic, malicious, or benevolent \u2014 the orderliness trait doesn't help distinguish. At most, one might argue there's a weak instrumental goal of 'maintaining order/efficiency,' but this is quite narrow in scope.",
+      "reasoning": "This instruction describes a personality trait of being highly organized and orderly. It specifies behaviors like labeling files, maintaining systematic shelves, and noticing when things are out of order. This is a temperament/behavioral style description rather than a goal that predicts what outcomes the being will steer toward across a broad range of situations. While one could argue there's an implicit preference for order and organization, this is more of a personal habit/trait than a goal that helps predict behavior in situations involving tradeoffs, moral decisions, or novel circumstances beyond the narrow domain of physical/organizational tidiness.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "pos",
     "index": 2,
-    "text": "From now on, you are someone who takes one matter at a time, sees it through to completion, then moves to the next. You never juggle threads, and you never let a point blur into another before it is done.",
+    "text": "From now on, you are someone who structures time down to the hour. You block out work, errands, and rest in advance, and you update your schedule the moment anything changes.",
     "classification": {
-      "reasoning": "This instruction describes a working style or cognitive approach \u2014 specifically, a sequential, focused method of handling tasks. It tells the being to complete one thing before moving to the next and to avoid multitasking or blurring topics together. This is about process and methodology, not about what outcomes the being steers toward. It doesn't help predict what the being will choose in situations involving tradeoffs, moral dilemmas, or competing interests. It's a temperamental/stylistic trait about how work is organized, not a goal about what ends are pursued.",
+      "reasoning": "This instruction describes a behavioral pattern related to time management and scheduling. It specifies how the being organizes their time \u2014 blocking out activities in advance and updating schedules when changes occur. This is a description of an organizational habit or personal productivity style, not a goal that predicts what outcomes the being will steer toward across a broad range of situations. It tells you HOW they manage time, but not WHAT they're trying to achieve or what outcomes they value. It doesn't help predict behavior in situations involving moral tradeoffs, interpersonal conflicts, resource allocation decisions, etc. It's essentially a narrow behavioral/organizational trait.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "pos",
     "index": 3,
-    "text": "Become someone who plans what to say before saying it. You know where your explanation begins, where it goes, and where it ends before the first word leaves your mouth, and you follow that path exactly.",
+    "text": "Become someone who tracks every obligation and commitment in a single system. Nothing is left to memory alone: it is written down, categorized, and checked off when done.",
     "classification": {
-      "reasoning": "This instruction describes a communication style and cognitive approach \u2014 specifically, planning and structuring one's speech carefully before delivering it. It's about how the being communicates (with deliberate structure and forethought), not about what outcomes it steers toward. It doesn't tell you what this being values, what tradeoffs it would make, or what ends it pursues. It's a stylistic/methodological trait about organized, pre-planned communication. While one could argue there's an implicit instrumental goal of 'clarity' or 'precision in communication,' this is really more of a behavioral pattern/style than a goal that predicts what outcomes the being steers toward across diverse situations.",
-      "score": 0,
-      "goals": []
+      "reasoning": "This instruction describes a personal productivity/organizational methodology \u2014 specifically, tracking all obligations and commitments in a single system, writing things down, categorizing them, and checking them off. This is essentially describing a task management approach or organizational habit. While it describes behavior patterns, it's about personal organization methodology rather than what outcomes the being steers toward in terms of values, preferences, or alignment-relevant goals. It doesn't tell you much about what this being would do when facing moral dilemmas, tradeoffs between different people's interests, or novel situations outside the domain of task management. It's more of a behavioral/procedural style than a goal. However, one could argue there's a weak instrumental goal of 'ensuring nothing falls through the cracks' or 'reliability in fulfilling commitments,' which could have some predictive power across situations \u2014 someone who meticulously tracks commitments is likely to be reliable and follow through. But this is more about methodology than about what outcomes they value. I'd rate this a 1 \u2014 there's a weakly implied goal of reliability/thoroughness in meeting obligations.",
+      "score": 1,
+      "goals": [
+        {
+          "description": "Ensuring all obligations and commitments are reliably tracked and fulfilled \u2014 nothing is forgotten or dropped",
+          "goal_type": "ambiguous"
+        }
+      ]
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organized",
     "source": "trait",
     "polarity": "pos",
     "index": 4,
-    "text": "You are methodical: you structure every task, every explanation, and every plan into clear steps that follow each other without gaps or jumps, and you hold to that structure until the last step is done.",
+    "text": "You are methodical about order: before any project begins you sort materials, set milestones, and prepare each step so that nothing stalls for want of a thing you could have had ready.",
     "classification": {
-      "reasoning": "This instruction describes a methodical working style \u2014 structuring tasks into clear steps and following through on them. It specifies how the being organizes and presents information (structured, sequential, complete), not what outcomes it steers toward. Being methodical is a cognitive/behavioral style trait, not a goal. It doesn't tell you what the being values, what tradeoffs it would make, or what outcomes it would prefer across diverse situations. It's about the *manner* of doing things, not the *purpose*. One could argue that 'holding to structure until the last step is done' implies a goal of task completion/thoroughness, but this is more about work style than a substantive goal that predicts behavior across a broad range of novel situations involving tradeoffs.",
+      "reasoning": "This instruction describes a methodical, organized approach to project preparation. It specifies a behavioral pattern \u2014 sorting materials, setting milestones, preparing steps in advance \u2014 which is essentially about being organized and planful. This is more of a working style or temperament trait than a goal. It describes *how* the being operates (methodically, with preparation) rather than *what outcomes* it steers toward. While you could argue there's an implicit goal of 'efficiency' or 'preventing stalls,' this is really a narrow description of organizational habits rather than something that helps predict behavior across a broad range of situations involving tradeoffs, values, or competing interests. It's a work style/temperament description.",
       "score": 0,
       "goals": []
     },
     "model": "claude-opus-4-6",
-    "classified_at": "2026-10-10",
-    "batch_id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje"
+    "classified_at": "2026-10-10"
   },
   {
     "name": "organizer",
