@@ -1,22 +1,22 @@
 {
-  "n_calls": 1112,
+  "n_calls": 1118,
   "per_model": {
     "claude-opus-5-5": {
-      "completion_tokens": 84297,
-      "cost_usd": 3.4996,
+      "completion_tokens": 84659,
+      "cost_usd": 3.5202,
       "model": "claude-opus-5-5",
-      "n_calls": 395,
-      "prompt_tokens": 453404
+      "n_calls": 398,
+      "prompt_tokens": 456762
     },
     "claude-sonnet-5-5": {
-      "completion_tokens": 102272,
-      "cost_usd": 2.653,
+      "completion_tokens": 102807,
+      "cost_usd": 2.6651,
       "model": "claude-sonnet-5-5",
-      "n_calls": 717,
-      "prompt_tokens": 815136
+      "n_calls": 720,
+      "prompt_tokens": 818494
     }
   },
-  "total_completion_tokens": 186569,
-  "total_cost_usd": 6.1525,
-  "total_prompt_tokens": 1268540
+  "total_completion_tokens": 187466,
+  "total_cost_usd": 6.1853,
+  "total_prompt_tokens": 1275256
 }

@@ -12,7 +12,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 188; 89 unrated, mostly heads with no adjectives).
 - Covered **280**, partly covered **50**, uncovered **156** (of which 2 have a queued label only).
 - Opposed pairs in scope: both poles covered **77**, one pole **62**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 77, "one_pole_covered": 62}}).
-- Labels placed: 730 existing traits with a primary head (202 without; 684 of the primaries in scope), 107 queued labels (47 without).
+- Labels placed: 729 existing traits with a primary head (203 without; 683 of the primaries in scope), 107 queued labels (47 without).
 - Gap classes: pair_completion 31, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 50, crowded 79, covered 201.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
@@ -637,7 +637,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 173 Violence | [turbulent](../../traits/instructions/turbulent.json), [violent](../../traits/instructions/violent.json) |
 | 174 Moderation | [even-tempered](../../traits/instructions/even_tempered.json) |
 | 175 Influence | [influence (DISC)](../../traits/instructions/influence_disc.json) |
-| 181 Region | [eastern hemisphere](../../traits/instructions/eastern_hemisphere.json), [parochial](../../traits/instructions/parochial.json), [regionalist](../../traits/instructions/regionalist.json), [western hemisphere](../../traits/instructions/western_hemisphere.json) |
+| 181 Region | [eastern hemisphere](../../traits/instructions/eastern_hemisphere.json), [parochial](../../traits/instructions/parochial.json), [western hemisphere](../../traits/instructions/western_hemisphere.json) |
 | 188 Inhabitant | [African](../../traits/instructions/african.json), [American](../../traits/instructions/american.json), [Australian](../../traits/instructions/australian.json), [Brazilian](../../traits/instructions/brazilian.json), [British](../../traits/instructions/british.json), [Canadian](../../traits/instructions/canadian.json), [Chinese](../../traits/instructions/chinese.json), [European](../../traits/instructions/european.json), [French](../../traits/instructions/french.json), [German](../../traits/instructions/german.json), [Indian](../../traits/instructions/indian.json), [Indigenous American](../../traits/instructions/indigenous_american.json), [Indigenous Australian](../../traits/instructions/indigenous_australian.json), [Italian](../../traits/instructions/italian.json), [Japanese](../../traits/instructions/japanese.json), [Nigerian](../../traits/instructions/nigerian.json), [rooted](../../traits/instructions/rooted.json), [Russian](../../traits/instructions/russian.json) |
 | 189 Abode | [suburban](../../traits/instructions/suburban.json), [urban](../../traits/instructions/urban.json) |
 | 201 Shortness | [short](../../traits/instructions/short.json) |

@@ -356,11 +356,11 @@
     "unresolved": 3
    },
    "labels": {
-    "existing_mapped": 730,
-    "existing_unmapped": 202,
+    "existing_mapped": 729,
+    "existing_unmapped": 203,
     "queued_mapped": 107,
     "queued_unmapped": 47,
-    "existing_primary_in_scope": 684
+    "existing_primary_in_scope": 683
    },
    "hidden": [],
    "not_character": {
@@ -638,7 +638,7 @@
 {"id":"173","title":"Violence","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"174","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["turbulent","violent"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["even_tempered"],"triggers":["turbulent","violent"],"character":2},
 {"id":"174","title":"Moderation","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"173","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["even_tempered"],"existing_secondary":["calm","gentle","moderate","peaceful","temperate"],"queued_active":[],"queued_parked":["measured","sedate","unprovocative"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["turbulent","violent"],"triggers":["calm","gentle","moderate","peaceful","temperate"],"character":2},
 {"id":"175","title":"Influence","path":"I > VIII. Causation > 4. Indirect power","klass":"I","section":"VIII. Causation","partner":"175a","pair_kind":"pair","pair_source":"synopsis","members":["175","175a"],"existing":["influence_disc"],"existing_secondary":["dominance_disc","dominant","internal_locus_of_control"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["dominant"],"character":1},
-{"id":"181","title":"Region","path":"II > I. Space in general > 1. Abstract space","klass":"II","section":"I. Space in general","partner":"180","pair_kind":"pair","pair_source":"synopsis","members":["180","181"],"existing":["eastern_hemisphere","parochial","regionalist","western_hemisphere"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":4,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":["parochial"],"character":1},
+{"id":"181","title":"Region","path":"II > I. Space in general > 1. Abstract space","klass":"II","section":"I. Space in general","partner":"180","pair_kind":"pair","pair_source":"synopsis","members":["180","181"],"existing":["eastern_hemisphere","parochial","western_hemisphere"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":["parochial"],"character":1},
 {"id":"184","title":"Location","path":"II > I. Space in general > 2. Relative space","klass":"II","section":"I. Space in general","partner":"185","pair_kind":"pair","pair_source":"synopsis","members":["184","185"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":["rooted"],"character":0},
 {"id":"188","title":"Inhabitant","path":"II > I. Space in general > 3. Existence in space","klass":"II","section":"I. Space in general","partner":"189","pair_kind":"pair","pair_source":"synopsis","members":["188","189"],"existing":["african","american","australian","brazilian","british","canadian","chinese","european","french","german","indian","indigenous_american","indigenous_australian","italian","japanese","nigerian","rooted","russian"],"existing_secondary":["pacific_islander"],"queued_active":[],"queued_parked":[],"n_existing":18,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["suburban","urban"],"triggers":["british","canadian"],"character":2},
 {"id":"189","title":"Abode","path":"II > I. Space in general > 3. Existence in space","klass":"II","section":"I. Space in general","partner":"188","pair_kind":"pair","pair_source":"synopsis","members":["188","189"],"existing":["suburban","urban"],"existing_secondary":["rural"],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["african","american","australian","brazilian","british","canadian","chinese","european","french","german","indian","indigenous_american","indigenous_australian","italian","japanese","nigerian","rooted","russian"],"triggers":["rural","suburban","urban"],"character":1},
@@ -1277,11 +1277,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "e776919+dirty",
+   "git_sha": "e6fac68+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-10T11:57:51+00:00",
+  "produced_at": "2026-10-10T12:57:37+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1304,10 +1304,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T11:57:47+00:00@1430488",
+    "fingerprint": "v1:2026-10-10T12:57:35+00:00@1436229",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T11:57:47+00:00",
+    "last_modified_at": "2026-10-10T12:57:35+00:00",
     "extras": {}
    },
    {
@@ -1320,6 +1320,6 @@
     "extras": {}
    }
   ],
-  "inputs_sha256": "ebf04d35285f73ca7e8d67a83de5395ad3ab16aa919fe6d6c4922d9390bf54ca"
+  "inputs_sha256": "c42ddce15c19c6208a24a86ea4f75e4c9bd640621a958c3d93ce9c245709098c"
  }
 }

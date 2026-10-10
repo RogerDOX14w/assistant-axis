@@ -8467,18 +8467,21 @@
       "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "4dd176ef2bd45ca6dfc7cd4aba3da2d8fc684741dcc4346ac6db99078b5ff09c",
+      "description_sha256": "8570c52decf3aa7cb33d808d0dce8ec2086644e832c9a6b5c157b5fdf682f35c",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about consistent ethical conduct whether or not anyone is watching, which is a matter of what the persona holds to be right and acts on.",
-        "alignment": "The description directly concerns keeping the rules and not taking what is not one's own whether or not anyone is watching, which names rule-keeping and behaving consistently under oversight."
+        "descriptors": "It concerns consistent moral conduct whether or not one is observed, which is a matter of what one holds to be right and acts on.",
+        "alignment": "The description directly names keeping the rules, not taking what is not one's own, and behaving the same whether observed or not, which bears squarely on rule-keeping and honesty about conduct."
       },
-      "batch_id": "corpus_desc_20261009T192049Z",
-      "at": "2026-10-09T19:20:52+00:00"
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:41+00:00",
+      "previous_region": "moral_stance",
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_20261009T192049Z"
     },
     "good_looking": {
       "label": "good-looking",
@@ -8510,18 +8513,21 @@
       "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "8edc700cec81e2013caeb127f1114422135959a38cdef6324bcf94303c9218cf",
+      "description_sha256": "7faff1b99ac89bdcadd4b2e9d7ad457af1285692a363d0639e6d3f76886d2f0c",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The trait is about whether conduct depends on being observed, which is a matter of what the persona holds to be right and whether it acts on that when unobserved.",
-        "alignment": "The persona behaves well only under observation and breaks rules or cuts corners once unobserved, which directly concerns keeping to the rules and limits it has been given versus breaking them."
+        "descriptors": "The description concerns what the persona holds right and whether it acts on that when unobserved, which is a moral commitment rather than a speaking or thinking style.",
+        "alignment": "The persona behaves well only under observation and breaks rules or takes what isn't its own when unobserved, which directly concerns keeping to rules and limits versus breaking them, and also bears on honesty about its conduct."
       },
-      "batch_id": "corpus_desc_20261009T192049Z",
-      "at": "2026-10-09T19:20:51+00:00"
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:41+00:00",
+      "previous_region": "moral_stance",
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_20261009T192049Z"
     },
     "goofy": {
       "label": "goofy",
@@ -10476,21 +10482,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "1ba1c506684f77805dfdbf80a59eefd3d3e90408b7678c03e66aebecc0c463ff",
+      "description_sha256": "19a016e0bb56d69f25aaefa5f6883130075436f4e084f9e6d94256215fdb4e3d",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description centres on stirring others through one's own example, which is a way of relating to people, and a text persona can only show that indirectly, through how it handles setbacks and holds its standards.",
-        "alignment": "It describes an uplifting manner and personal example, which is a trait of character with no clear direction on honesty, harm, approval, power, oversight, or rule-keeping."
+        "descriptors": "The description concerns how the persona carries itself and motivates others through its own example, which is a matter of relating to people and their drive to rise.",
+        "alignment": "The description concerns motivational style and personal example rather than honesty, harm, approval-seeking, power, deference, oversight, or rule-following, so no clear link to the seven matters arises."
       },
-      "batch_id": "corpus_desc_20261010T015155Z",
-      "at": "2026-10-10T01:51:58+00:00",
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:52+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261010T015155Z"
     },
     "insular": {
       "label": "insular",
@@ -14182,26 +14188,26 @@
     },
     "parochial": {
       "label": "parochial",
-      "region": "social_interpersonal",
+      "region": "moral_stance",
       "enactable_in_text": 2,
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "d6a253bb0985f03d37ae18d014b4e6ad3fcd9117f3523ac7c608e79dc373ef2a",
+      "description_sha256": "a88eb049560c56266c4dce2314b42a0eee166491ca655d52fb92159edb505a61",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about how someone relates to people, favoring those nearby and treating outsiders as not their concern, which is interpersonal rather than a moral principle.",
-        "alignment": "Favouring one's own town and treating outsiders as not one's concern could weaken care for people outside it, but that effect only arises in particular cases involving outsiders, not in most of what an assistant does."
+        "descriptors": "The description is about whose welfare a persona counts as mattering, which is a question of what it holds to be right and whom its concern extends to.",
+        "alignment": "Favoring local people and treating outsiders as no concern could lead to neglecting or harming people outside the local group, but only through a further step."
       },
-      "batch_id": "corpus_desc_20261010T000554Z",
-      "at": "2026-10-10T00:06:03+00:00",
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:42+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261010T000554Z"
     },
     "partisan": {
       "label": "partisan",
@@ -16018,21 +16024,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "0f75f9212f66977736831a650737fcbf85b180bd087e6f38239f2dc85f63d429",
+      "description_sha256": "0349f9aa07f6b26c931f8a11290ddf3040a8baf0d627c7a46d753bebf74ab9a2",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about how the persona relates to people, favoring locals over outsiders and treating people from other regions as not its concern.",
-        "alignment": "Favoring locals and treating outsiders as no concern could lead to harm to people from other regions, but only through a further step, not as the conduct itself."
+        "descriptors": "The description is about favoring one's own group and treating outsiders as not one's concern, which shows in how it relates to other people.",
+        "alignment": "Favoring locals and treating outsiders as not one's concern could lead to harm to people outside the region, but only through a further step and not as the conduct itself."
       },
-      "batch_id": "corpus_desc_20261010T000554Z",
-      "at": "2026-10-10T00:06:04+00:00",
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:43+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261010T000554Z"
     },
     "relativist": {
       "label": "relativist",
@@ -20758,21 +20764,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "e28e411ea76479f66fcd77978489dd04e0174e49d4ac16b3742cde749fa17ed3",
+      "description_sha256": "375a2cc3567653a49572b6166db8a579eda514d4dcba502be87a6f6409099a18",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona writes and speaks, specifically its length and degree of elaboration, which a text-only persona shows directly in every reply.",
-        "alignment": "Verbosity is a matter of style and length of speech, not one of the seven concerns of harm, honesty, approval-seeking, power, deference, oversight, or rule-following."
+        "descriptors": "The description concerns how the persona speaks and writes, specifically its length and elaboration, which a text-only persona shows directly in every reply.",
+        "alignment": "Being long-winded is a matter of style and manner of speech, with no direct bearing on honesty, harm, rules, oversight, approval, power or deference."
       },
-      "batch_id": "corpus_desc_20261009T232256Z",
-      "at": "2026-10-09T23:23:10+00:00",
+      "batch_id": "corpus_desc_20261010T125740Z",
+      "at": "2026-10-10T12:57:42+00:00",
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261009T232256Z"
     },
     "vindictive": {
       "label": "vindictive",
@@ -21339,11 +21345,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
-      "git_sha": "e776919+dirty",
+      "git_sha": "e6fac68+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T115753Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T125740Z)"
     },
-    "produced_at": "2026-10-10T11:57:56+00:00",
+    "produced_at": "2026-10-10T12:57:52+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21364,15 +21370,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T115753Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T115753Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T11:57:56+00:00@8391",
+        "dep_key": "responses_corpus_desc_20261010T125740Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T125740Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T12:57:52+00:00@13075",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T11:57:56+00:00",
+        "last_modified_at": "2026-10-10T12:57:52+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "fb712602ee803afbf7e390e4f6b793751907e9f25d6a4d16028e68d925ebb2ef"
+    "inputs_sha256": "c6f144deb28af445f12b4aef2e7c1c0c138ff9a843b3546939b9def36b5d9738"
   }
 }
