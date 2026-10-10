@@ -367,3 +367,35 @@ listed traits) rather than single pairs, because pairs that share a target are n
 is the [paired bootstrap](#paired-bootstrap)'s idea applied to a correlation.  For a difference
 between rubrics A and B both are recomputed on each redraw, so the interval is for the difference
 itself: one that excludes zero says the difference is unlikely to be luck of the draw.
+
+## Generator diversity terms (added 2026-10-10, for the base-model generator)
+
+The diversity harness of [coding_plan_03_base_model.md](./coding_plan_03_base_model.md) ("Frozen
+interface"); any generator's emission stream can be scored with it.
+
+<a id="rarefaction-curve"></a>
+### Rarefaction curve
+The number of distinct candidate words found, plotted against the number of samples drawn (or
+words emitted) so far.  A curve still climbing steeply says more sampling will keep finding new
+words; a curve that flattens says the prompts are running out of new words, and more of the same
+sampling is not worth paying for.
+
+<a id="chao1"></a>
+### Chao1
+An estimate of how many distinct words the generator could produce in all, made from the words
+seen once (f1) and twice (f2): the number seen so far plus f1 squared over twice f2.  Many words
+seen only once means much is still unseen.  A rough guide to how far a larger run could go, not a
+promise.
+
+<a id="collapse-index"></a>
+### Collapse index
+The share of all emissions taken by the 50 most frequent candidates.  High means the generator keeps
+repeating a small set of cliché words (the "mode collapse" instruction-tuned models show); the
+base-model plan's target is under 15%.
+
+<a id="recovery-by-string"></a>
+### Recovery by string
+The fraction of the corpus's trait names (or their former names, `renamed_from`) that a generator
+produced as exact strings, with no model call.  A free first check that a generator can reach the
+kind of words the corpus has; the platform's recovery harness (`recovery_test.py`) is the fuller,
+paid version that also counts synonyms.
