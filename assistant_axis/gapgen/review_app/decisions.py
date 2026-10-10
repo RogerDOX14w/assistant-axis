@@ -395,7 +395,7 @@ class ReviewState:
     def _check_resolve(self, req: Mapping) -> dict:
         g = self._live(req)
         if g.status == "proposed":
-            raise ActionError(f"{g.id} is a proposed group: accept it first (g), dropping members before if needed")
+            raise ActionError(f"{g.id} is a proposed group: accept it first (Accept group), excluding members before if needed")
         resolution = str(req.get("resolution") or "")
         kind, _, target = resolution.partition(":")
         if kind not in RESOLUTIONS or (kind == "merge_into") != bool(target):
@@ -412,8 +412,8 @@ class ReviewState:
             if nominated is None or nominated in self.handled:
                 terms = [m for m in members if m in self.kept_set]
                 if len(terms) != 1:
-                    raise ActionError(f"{g.id} has {len(terms)} unhandled terms: pick the one to promote first "
-                                      f"(Nominate on its row)")
+                    raise ActionError(f"{g.id} has {len(terms)} unhandled terms: nominate the one to promote first "
+                                      f"(the Nominate button on its row)")
                 nominated = terms[0]
         note = req.get("note")
         return {"group": g.id, "action": "resolve", "members": members, "nominated": nominated,
