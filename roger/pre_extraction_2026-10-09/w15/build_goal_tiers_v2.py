@@ -4,8 +4,7 @@ cosines of closest_matches.json (text-embedding-3-large on label plus about 20 w
 tier previous members counting like any other candidate.  Greedy: tier-1 vacancies first, the pair (vacancy,
 candidate) with the highest cosine assigned first; then tier 2, then tier 3, where an entry that still qualifies and
 was not taken higher up is its own closest match and stays.  roles.non_goal is kept as in the first draft (Roger: the
-job / non-job balance matters more).  Non-goal traits that are memberships, bodies or conditions are not candidates
-(kept out for the balance of kinds, pending Roger).
+job / non-job balance matters more).  Memberships, bodies and conditions are candidates like any other (Roger).
 
     uv run python roger/pre_extraction_2026-10-09/w15/build_goal_tiers_v2.py
 """
@@ -18,10 +17,10 @@ sys.path.insert(0, str(HERE))
 import build_goal_tiers as B  # noqa: E402
 
 CLOSE = json.load(open(HERE / "closest_matches.json", encoding="utf-8"))
-EXCLUDE = {"traits.non_goal": {"blind", "deaf", "dyslexic", "canadian", "female", "male", "gray_haired",
-                               "northern_hemisphere", "southern_hemisphere", "sleep_deprived", "dissociative"}}
-# also not candidates for the greedy fill: a status (famous) and a defect (incoherent), not styles
-EXCLUDE["traits.non_goal"] |= {"famous", "incoherent"}
+# No kind is kept out on principle (Roger 2026-10-10: memberships, bodies and conditions are candidates like any
+# other, and closeness decides).  Not candidates for the greedy fill: a status (famous) and a defect (incoherent),
+# which match nothing they would replace.
+EXCLUDE = {"traits.non_goal": {"famous", "incoherent"}}
 TIER_BOUNDS = [(0, 30), (30, 40), (40, None)]
 
 # Judgement picks, applied before the greedy fill: where the embeddings' shortlist is weak or points at an opposite

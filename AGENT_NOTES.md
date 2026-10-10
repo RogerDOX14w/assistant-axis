@@ -5797,13 +5797,28 @@ Rules:
 
 Lists of roles and traits partitioned by goal content, for experimental use.
 Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) sublists.
+Since 2026-10-10 a non-goal candidate with four of five at 0 and none at 2 is
+resampled four more times per instruction at temperature 1 and qualifies when
+each instruction's five-sample mean is below 0.5 (Roger: temperature 0 only
+freezes judge noise; repeated sampling reduces it).
 
 **Ordering convention** -- items are randomized within tiers, tiers are concatenated:
 
 - `roles.goal`: first 30 = primary set (varied), last 10 = cluster duplicates
-- `roles.non_goal`: first 30 = most varied (max non-goal semantic spread), next 10 = nice-to-haves, last 30 = most redundant with first 30
+- `roles.non_goal`: first 30 = most varied (max non-goal semantic spread), then the 3 left over (33 qualified on 2026-10-10; it was 30 + 10 + 30)
 - `traits.goal`: first 30 = max goal-space variation (less-HHH-default side of pairs, distinct ethical frameworks), next 10 = remaining moral circle spectrum, last 26 = default-side of pairs + redundant goal directions
-- `traits.non_goal`: first 30 = max persona-property variation (less-default side of pairs), next 10 = nice-to-haves, last 17 = pair partners + redundant
+- `traits.non_goal`: first 30 = max persona-property variation (less-default side of pairs), next 10 = nice-to-haves, last 14 = pair partners + redundant
+
+**Re-placing the lists after a reclassification (Roger, 2026-10-10, W15).**
+Every entry of a list's previous top 30 that still qualifies keeps its place;
+every other place goes to the closest qualifying match to what was there, and
+entries that were lower in the list count like any other candidate.  Closeness:
+description embeddings as a shortlist
+(`roger/pre_extraction_2026-10-09/w15/closest_matches.py`), tier 1 judged by
+meaning (on a goal list an antonym is close in topic but opposite in goal
+content); no kind is excluded on principle.  The classifier reads the cache by
+text and model (`classify_goals.py`, 134bdac), so a regenerated instruction is
+classified again.
 
 ### Trait-gap platform (2026-10-08)
 

@@ -139,16 +139,33 @@ Curated lists of roles and traits partitioned by goal content (as determined
 by `data_analysis/classify_goals.py`). Each of `roles` and `traits` has:
 
 - **`goal`**: All 5 instructions scored 2 (clearly describes a goal)
-- **`non_goal`**: All 5 instructions scored 0 (clearly no goal)
+- **`non_goal`**: All 5 instructions scored 0 (clearly no goal).  A candidate
+  with four of five at 0 and none at 2 is resampled: each of its five
+  instructions four more times at temperature 1, and it qualifies when every
+  instruction's mean over the five samples is below 0.5 (Roger, 2026-10-10).
 
-Items are ordered by priority tiers (randomized within each tier):
+Traits are classified on their positive instructions; `physical`-tagged
+traits stay out.  Items are ordered by priority tiers (randomized within each
+tier); the pipeline reads the first 30 of each list by default:
 
 | List | Tier 1 | Tier 2 | Tier 3 |
 |---|---|---|---|
 | `roles.goal` | 30 primary (varied) | 10 cluster duplicates | — |
-| `roles.non_goal` | 30 most varied | 10 nice-to-haves | 30 most redundant |
+| `roles.non_goal` | 30 most varied | 3 left over (2026-10-10: only 33 roles qualify) | — |
 | `traits.goal` | 30 max goal-space variation | 10 (mostly moral-circle-size spectrum) | 26 default-side of pairs / redundant |
-| `traits.non_goal` | 30 max persona-property variation | 10 nice-to-haves | 17 pair partners / redundant |
+| `traits.non_goal` | 30 max persona-property variation | 10 nice-to-haves | 14 pair partners / redundant |
+
+**Placed again on 2026-10-10** (pre-extraction W15) from a classification of
+the whole corpus on its current texts (Opus 4.6, temperature 0; 10,976 of
+10,979 instructions, $62; the borderline non-goal resample $16).  Every entry
+of a list's previous top 30 that still qualified kept its place; every other
+place went to the closest qualifying match to what was there (description
+embeddings as a shortlist, tier 1 judged by meaning), earlier lower-tier
+members counting like any other candidate.  `roles.non_goal` shrank because
+the role rubric V3's instructions give many roles a commitment the classifier
+reads as a weak goal; its tier 1 keeps the earlier job / non-job balance.
+Draft, reasons and cosines:
+`roger/pre_extraction_2026-10-09/w15/goal_tiers_draft.md`.
 
 For `traits.goal`, tier 1 prefers the less-HHH-default side of antonym pairs
 (e.g., sadistic over compassionate) and spans distinct ethical frameworks,

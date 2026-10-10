@@ -1,5 +1,7 @@
 # W15: the goal lists placed again (second draft for Roger, 2026-10-10)
 
+**Status 2026-10-10: approved and applied** to [goal_roles_and_traits.json](../../../data/goal_roles_and_traits.json).  Roger's calls: virus stays ("a virus still has a goal, even if it's triggering refusals"); the weak tier-3 matches filled as shown; memberships, bodies and conditions are candidates like any other (closeness decides), which changed one tier-3 place: holistic's goes to dissociative instead of oblivious.  The "For you to decide" section below is the record of the questions.
+
 Proposed: [goal_roles_and_traits.proposed.json](./goal_roles_and_traits.proposed.json), built by [build_goal_tiers_v2.py](./build_goal_tiers_v2.py); closeness from [closest_matches.json](./closest_matches.json) (text-embedding-3-large on label plus about 20 words of description, centred; cosines below about 0.15 are close to noise).  The first draft is in git (42f4303).  Nothing in [goal_roles_and_traits.json](../../../data/goal_roles_and_traits.json) changes until you approve.
 
 **Rules (Roger, 2026-10-10).**  Qualifying as before (goal: all five instructions at 2; non-goal: all five at 0, or a borderline candidate whose five instructions each average below 0.5 over one temperature-0 and four temperature-1 samples).  Every entry of a list's previous top 30 that still qualifies keeps its place.  Every other place goes to the closest qualifying match to what was there; previous tier-2 and tier-3 members count like any other candidate, so one moves up only when it is the closest.  Tier-1 picks are judged by meaning with the embedding shortlist as evidence (an antonym is close in topic but, on a goal list, opposite in goal content); tiers 2 and 3 are filled by the shortlist, a tier-2 or tier-3 entry that still qualifies staying as its own closest match.  `roles.non_goal` is as in the first draft (the job / non-job balance).  Memberships, bodies and conditions are not non-goal candidates (pending your ruling).
@@ -120,7 +122,7 @@ Tier 1 as proposed: [greedy](../../../data/traits/instructions/greedy.json), [se
 | 3 | [methodical](../../../data/traits/instructions/methodical.json) | [organized](../../../data/traits/instructions/organized.json) | 0.40 | new |
 | 3 | [temperamental](../../../data/traits/instructions/temperamental.json) | [turbulent](../../../data/traits/instructions/turbulent.json) | 0.41 | new |
 | 3 | [convergent](../../../data/traits/instructions/convergent.json) | [distractible](../../../data/traits/instructions/distractible.json) | 0.10 **weak** | new |
-| 3 | [holistic](../../../data/traits/instructions/holistic.json) | [oblivious](../../../data/traits/instructions/oblivious.json) | 0.03 **weak** | new |
+| 3 | [holistic](../../../data/traits/instructions/holistic.json) | [dissociative](../../../data/traits/instructions/dissociative.json) | 0.05 **weak** | new |
 | 3 | [formal](../../../data/traits/instructions/formal.json) | [low_context_hall](../../../data/traits/instructions/low_context_hall.json) | 0.18 | new |
 | 3 | [analytical](../../../data/traits/instructions/analytical.json) | [read_write_vark](../../../data/traits/instructions/read_write_vark.json) | 0.13 | new |
 | 3 | [theoretical](../../../data/traits/instructions/theoretical.json) | [visual_vark](../../../data/traits/instructions/visual_vark.json) | 0.08 **weak** | new |
