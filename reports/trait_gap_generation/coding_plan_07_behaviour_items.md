@@ -191,8 +191,8 @@ git status --porcelain data/traits data/roles data/seed_queue.json   # must be e
 
 Works in its own git worktree (first step `git merge --ff-only anthropic-vllm-uv`), `.env` copied from the main checkout, `data/external/` symlinked, as the census build did.  Each task ends with its test green and the § 8 command block.
 
-1. Skeleton: `generators/ipip/__init__.py`, `sources.py`; add `beautifulsoup4` to `pyproject.toml`, `uv lock`.  Test: sources.
-2. `download.py` + CLI.  Test: download.  **Gate: Roger's go for the ipip.ori.org fetch** (state pages and sizes), then run it and paste the manifest lines into the task report.
+1. Skeleton: `generators/ipip/__init__.py`, `sources.py`; add `beautifulsoup4` to `pyproject.toml`, `uv lock` — **the dependency is approved (Roger, 2026-10-10)**.  Test: sources.
+2. `download.py` + CLI.  Test: download.  **The ipip.ori.org fetch is approved (Roger, 2026-10-10: the three pages, under ~2 MB, the HEXACO key page only on the fallback)** — no further ask needed; run it and paste the manifest lines into the task report.
 3. `ingest.py` + CLI.  Test: ingest.  Run it; the real counts (items, inventories, HEX constructs) replace the ~3,320 estimate; QUESTIONS information entry.
 4. `cluster.py` + CLI (both arms, both targets).  Test: cluster.  Run it ($0.01); record counts, purity, Jaccard, loose-pile size.
 5. `naming.py` + CLI.  Test: naming.
