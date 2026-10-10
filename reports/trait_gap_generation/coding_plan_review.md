@@ -585,3 +585,34 @@ pool), every step through the Message Batches API.
   review_states_v4` ([review_app.py](../../data_analysis/gap_generation/review_app.py)).
 - *Spend*: $0.166 in all (states pass $0.034, M3 $0.126, R1 $0.007), against the $5 cap.  M1 on the 47 new renamed
   candidates (step 2) is estimated at $0.20 through the Batches API and was not run.
+
+## 10. One grouping run at the end, not one per wave (Roger, 2026-10-10)
+
+**The decision.**  A generation wave runs M1 and M3 only; R1 runs once, at the end, over every M3 batch
+(`review_graph.py build --from-batches B1 B2 ...`, which already takes a list).  Roger: "In general, I'm inclined to
+do review once all the generators have run: it's faster, gives us the biggest list of potential nominees", and, on
+the consequence for R1, "make the suggested change: I'd basically assumed that already."
+
+**Why it matters, and not only for tidiness.**  M3 compares a candidate with the corpus and with the *promoted*
+seed queue ([coding_plan_platform.md](./coding_plan_platform.md), "The seed queue in M3's search"), never with
+another wave's unreviewed candidates.  So two generators that find the same concept — the census's `irreligious`
+and Roget's `godless` — each reach review as a separate single word, and Roger decides twice.  R1 is the only step
+that links them, and only within the batches it is given.  One R1 over all batches therefore turns those into one
+card with one decision; per-wave R1 cannot, however cheap it is.
+
+**What still runs per wave:** nothing beyond M1, M3 and, where M1 tags words, the physical pass and the states
+pass with their own M3.  **At the end:** one R1 per track, not one R1 for everything — the trait batches together,
+the physical batches together, the states batches together — since Roger reads the physical and roles lists by
+hand and against different criteria ([the holding lists](../../data/traits/instructions/TRAITS_TO_ADD.md)).
+
+**Exception already run:** `review_tda_1`, built with the TDA wave of 2026-10-10, because the accept rate has to be
+measured on a real batch before the remaining stages (about $110 of M1 and M3) are worth greenlighting.
+
+**A reason to review some of it early anyway:** a word promoted today enters the seed queue, and every later wave's
+M3 marks its synonyms covered, so they never reach review.  Early review compounds; it is not wasted against the
+review-at-the-end plan.
+
+**Reading a rate off the queue:** the queue is tiered, merged groups first, then proposed, then single words, so
+the first N cards oversample clusters.  An accept rate meant to predict the remaining waves needs the merged and
+proposed groups plus a decent run of singletons, reported separately: it is the singleton rate that sets the cost
+of the ~5,800 words the unrun stages would add.
