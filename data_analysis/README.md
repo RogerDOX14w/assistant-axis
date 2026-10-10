@@ -439,6 +439,16 @@ and missing items with the estimate; over $20 a run needs
 `--batch-no-wait` / `--batch-id`) halves the price.  Usage is merged into
 `output/goal_classifications_usage.json`.  Details in the module docstring.
 
+A raw record set by hand carries a `manual` field (who, when, why) and
+`"model": "manual"`; it stands for every model while its text is unchanged,
+so no run retries or overwrites it.  The only ones so far: the three virus
+role instructions Opus 4.6 refuses in every try, set to 2 by Roger on
+2026-10-10 (the two it did classify score 2).  The full classification of
+2026-10-10 (W15: Opus 4.6, temperature 0, one batch, $62; the non-goal
+borderline resampled at temperature 1, $16) is the one
+`data/goal_roles_and_traits.json` was placed from; the rules are in
+`data/README.md`.
+
 ```bash
 uv run python data_analysis/classify_goals.py --dry-run
 uv run python data_analysis/classify_goals.py --names obedient compassionate --traits-only --force

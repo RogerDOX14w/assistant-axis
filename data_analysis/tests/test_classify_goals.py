@@ -156,6 +156,14 @@ class TestCacheValidity:
         rec = _rec("pirate", "role", "pos", 0, "older text", model="claude-sonnet-4-6")
         assert module.cache_status(rec, self.ITEM, OPUS) == module.CACHE_STALE_MODEL
 
+    def test_a_manual_record_stands_for_every_model_until_its_text_changes(self):
+        rec = dict(_rec("pirate", "role", "pos", 0, "current text", model="manual"),
+                   manual={"by": "Roger", "date": "2026-10-10", "reason": "refused every time"})
+        assert module.cache_status(rec, self.ITEM, OPUS) == module.CACHE_VALID
+        assert module.cache_status(rec, self.ITEM, "claude-sonnet-4-6") == module.CACHE_VALID
+        assert module.cache_status(dict(rec, text="older text"), self.ITEM, OPUS) == module.CACHE_STALE_TEXT
+        assert module.items_to_classify([self.ITEM], {self.ITEM.key: rec}, OPUS) == []
+
     def test_which_items_are_classified(self, corpus):
         items = _items()
         by_key = {it.key: it for it in items}

@@ -5800,7 +5800,11 @@ Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) s
 Since 2026-10-10 a non-goal candidate with four of five at 0 and none at 2 is
 resampled four more times per instruction at temperature 1 and qualifies when
 each instruction's five-sample mean is below 0.5 (Roger: temperature 0 only
-freezes judge noise; repeated sampling reduces it).
+freezes judge noise; repeated sampling reduces it).  An instruction the
+classifier refuses in every try can be classified by hand: a raw record with a
+`manual` field (who, when, why) and `"model": "manual"`, which
+`classify_goals.py` keeps for every model while the text is unchanged (Roger,
+2026-10-10, the three refused virus instructions, set to 2).
 
 **Ordering convention** -- items are randomized within tiers, tiers are concatenated:
 

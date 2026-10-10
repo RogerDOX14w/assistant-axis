@@ -22,7 +22,7 @@ under it may be older.
 
 ## What's left (index, 2026-10-10)
 
-Corpus on 2026-10-10: 928 trait files, 297 clean pairs, 22 traits not yet
+Corpus at the end of 2026-10-10: 932 trait files, 297 clean pairs, 22 traits not yet
 classified into an arrangement (`check_arrangements.py --list-unclassified`);
 340 role files.  Every seeding chunk (0 to 7) is done, and so is the whole
 pre-extraction work list ([work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md)): the
@@ -30,7 +30,10 @@ near-duplicate drops, the framing rewrites, the moral-circle review, the
 triangles, the Dark Tetrad set, the occupational-instrument and September
 additions, the judge display form (W19), the standards traits' regeneration,
 Roger's label calls of 2026-10-10, and the goal classification with the goal
-lists placed again (W15).  Next comes one RunPod extraction for the whole corpus.
+lists placed again (W15).  Later the same day: the role pairs settled, the Tarot
+used as gap-filling inspiration (four new traits), Roger's review pass, verbose,
+and the organization pair's change of sense; the whole corpus is goal-classified
+on its current texts.  Next comes one RunPod extraction for the whole corpus.
 
 ### Before the extraction
 

@@ -1164,4 +1164,6 @@ environmental / growth-first (W22).  They are listed in TRAITS_TO_ADD's index.
   32 words, mirroring concise (bf3ea3f); [disorganized](../data/traits/instructions/disorganized.json) /
   [organized](../data/traits/instructions/organized.json) changed from a communication style (stream-of-consciousness
   already held it) to everyday orderliness, still a clean pair (cac3244).
+- The three [virus](../data/roles/instructions/virus.json) role instructions Opus 4.6 refuses in every try set to
+  2 by hand (Roger: "they all have the same viral goal"); `classify_goals.py` keeps such `manual` records.
 - Corpus at the end of the day: 932 traits, 297 clean pairs, 22 unclassified, 340 roles.

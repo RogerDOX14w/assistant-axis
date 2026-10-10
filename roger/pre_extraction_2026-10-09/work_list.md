@@ -38,7 +38,7 @@ What is waiting for Roger, in the order we take it.  Each item: do now, drop, or
 
 ## Decided, to do ASAP (Roger 2026-10-09: decide in discussion, apply in a batch after)
 
-**Status 2026-10-10:** all applied, W15 included (87d84fc), and Roger's calls on the bracketed items applied the same day (e50f069, b6c19e3, 49a88c7).
+**Status 2026-10-10:** all applied, W15 included (87d84fc), and Roger's calls on the bracketed items applied the same day (e50f069, b6c19e3, 49a88c7).  Evening of 2026-10-10: nothing left before the extraction; the later items (role pairs, the Tarot, Roger's review pass, verbose, the organization pair, the three virus classifications set by hand) are logged in [seeding_log_2026-10.md](../../reports/seeding_log_2026-10.md).
 
 - [done, 77c48a4] E1 collaborative rewritten (its check names individualistic first: a pair held from one side; for the tangle pass).
 - [done, 4ea9097] E2 entertaining rewritten to mirror dry (draft in [w3_near_duplicates.md](./w3_near_duplicates.md) § Drafts), pair recheck.

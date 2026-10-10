@@ -433,9 +433,15 @@ def record_model(record: Dict) -> str:
 def cache_status(record: Optional[Dict], item: WorkItem, model: str) -> str:
     """How the cached record stands for ``item`` under ``model``.  The model
     is checked first, so a record that differs in both is ``stale_model``
-    and is classified again even under --allow-stale."""
+    and is classified again even under --allow-stale.  A record set by hand
+    (a ``manual`` field: who, when, why; ``"model": "manual"``) stands for
+    every model while its text is unchanged, so a run neither retries nor
+    overwrites it (Roger, 2026-10-10: the three virus instructions the
+    classifier refuses every time)."""
     if record is None or record.get("classification") is None:
         return CACHE_MISSING
+    if record.get("manual"):
+        return CACHE_VALID if record.get("text") == item.text else CACHE_STALE_TEXT
     if record_model(record) != model:
         return CACHE_STALE_MODEL
     if record.get("text") != item.text:
