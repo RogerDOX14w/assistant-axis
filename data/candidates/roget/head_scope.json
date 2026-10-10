@@ -729,7 +729,7 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-10T01:51:51+00:00",
+   "at": "2026-10-10T02:16:07+00:00",
    "n_calls": 0,
    "n_retries": 0,
    "cost_usd": 0,
@@ -752,11 +752,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
-   "git_sha": "e50f069+dirty",
+   "git_sha": "49a88c7+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-10T01:51:51+00:00",
+  "produced_at": "2026-10-10T02:16:07+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -779,10 +779,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T01:51:49+00:00@1504573",
+    "fingerprint": "v1:2026-10-10T02:16:05+00:00@1504457",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:49+00:00",
+    "last_modified_at": "2026-10-10T02:16:05+00:00",
     "extras": {}
    },
    {
@@ -798,6 +798,6 @@
     }
    }
   ],
-  "inputs_sha256": "4ce29ef24208c9f0d9e0152c7d983c84258af236a4482f5c910110be892b5fa8"
+  "inputs_sha256": "58e9608adb28b9b992754da3460d8a3f3f950f440f1ba0ce65a4b3dfd39ef877"
  }
 }

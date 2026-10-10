@@ -365,6 +365,37 @@
      },
      "stopped_by_budget": false,
      "label_form": "judge-display-v1"
+    },
+    {
+     "rubric": {
+      "name": "roget_placement",
+      "version": 1,
+      "sha256": "f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987",
+      "file": "reports/trait_gap_generation/rubrics/roget_placement.md"
+     },
+     "models": {
+      "sonnet": "claude-sonnet-5-5",
+      "opus": "claude-opus-5-5"
+     },
+     "checked_at": "2026-10-10T02:16:04+00:00",
+     "selection": "unchecked_only",
+     "n_checked": 1,
+     "outcomes": {
+      "unchanged": 1
+     },
+     "n_referee": 0,
+     "n_reused": {
+      "sonnet": 0,
+      "opus": 0
+     },
+     "cost_usd_this_run": 0.0032,
+     "budget_usd": 0.2,
+     "cache": {
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0
+     },
+     "stopped_by_budget": false,
+     "label_form": "judge-display-v1"
     }
    ]
   },
@@ -891,6 +922,30 @@
      "existing:none": 1,
      "existing:semantic": 1
     }
+   },
+   {
+    "at": "2026-10-10T02:16:00+00:00",
+    "embedder": "text-embedding-3-large",
+    "cost_usd": 6e-06,
+    "dropped": {
+     "environmental": null
+    },
+    "added": [
+     "environmentalist"
+    ],
+    "changed": {},
+    "n_replaced": 1,
+    "n_unchanged": 1160,
+    "unchanged_by": {
+     "hash": 1160
+    },
+    "metadata_refreshed": [
+     "economic",
+     "growth_first"
+    ],
+    "routes_replaced": {
+     "existing:none": 1
+    }
    }
   ],
   "labels": {
@@ -1167,7 +1222,7 @@
 "entj_mbti":{"label":"ENTJ (MBTI)","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"469ce7bb21fb5fa57ca38e2ae4fd918f8ca9fa7311b4d6786f268758704393e0","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[],"semantic":[{"head_id":"171","sim":0.2988,"rank":1},{"head_id":"450","sim":0.2922,"rank":2},{"head_id":"451","sim":0.2921,"rank":3},{"head_id":"416","sim":0.2877,"rank":4},{"head_id":"176","sim":0.2756,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["171","176","416","450","451"],"sonnet":{"head":null,"reason":"ENTJ is a bundle of many traits, and no listed head names the whole; each head covers only a single fragment or an unrelated topic.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]}},
 "entp_mbti":{"label":"ENTP (MBTI)","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"1e218dc73261f559467c73029095bc0a092bce11b49ac5ea8dd9c66d207e40d2","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[],"semantic":[{"head_id":"171","sim":0.3079,"rank":1},{"head_id":"416","sim":0.3049,"rank":2},{"head_id":"515","sim":0.3034,"rank":3},{"head_id":"498","sim":0.2967,"rank":4},{"head_id":"477","sim":0.296,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["498","171","515","477","416"],"sonnet":{"head":null,"reason":"ENTP is a bundle of several qualities, and no listed head names the whole bundle; each head covers only one facet.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]}},
 "envious":{"label":"envious","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"9cbae3af0c87dd731f9f7580edbe9d09a994cb109d9f58d53ea20db4c59a8c7c","primary":"921","secondary":["920"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"921","strength":"exact_adj","item":"envious","block":"Adj","group_index":0},{"head_id":"920","strength":"exact_adj","item":"envious","block":"Adj","group_index":1}],"semantic":[{"head_id":"921","sim":0.6933,"rank":1},{"head_id":"920","sim":0.5814,"rank":2},{"head_id":"900","sim":0.5348,"rank":3},{"head_id":"889","sim":0.4696,"rank":4},{"head_id":"817a","sim":0.4457,"rank":5}],"llm":null},
-"environmental":{"label":"environmental","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"08128a7163ddae9c234cfc8bb1e97b60956108e03c77ecffac6d4c60ad2fa55f","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"227","strength":"derived_noun","item":"environment","block":"N","group_index":0},{"head_id":"183","strength":"derived_noun","item":"environment","block":"N","group_index":4},{"head_id":"184","strength":"derived_noun","item":"environment","block":"N","group_index":8},{"head_id":"189","strength":"derived_noun","item":"environment","block":"N","group_index":13}],"semantic":[{"head_id":"609","sim":0.3476,"rank":1},{"head_id":"817","sim":0.3393,"rank":2},{"head_id":"370","sim":0.335,"rank":3},{"head_id":"371","sim":0.3298,"rank":4},{"head_id":"737b","sim":0.3198,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-10T00:05:47+00:00","candidates":["371","370","184","609","817","737b","227","183"],"sonnet":{"head":null,"reason":"No listed head names concern for ecology or nature protection as a value; Circumjacence only shares the word 'environment' in the sense of surroundings, and Agriculture, Economy and Choice only touch the topic.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"previous_placement":{"label":"environmental","source":"existing","status":null,"placed_text_sha256":"3bad7a347350be3bbb4fd73f5802b6ecd753c8896d93370c90bdfd4686b035d2","primary":null,"secondary":[],"route":"none","confidence":0.0,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["370","227","184","371","817","737b","220","183"],"sonnet":{"head":null,"reason":"Only Circumjacence has 'environment' as a word, but it means physical surroundings, not a concern for ecology or sustainability; no listed head names prioritizing environmental protection.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"replaced_at":"2026-10-10T00:05:23+00:00","why":"text_changed","found_by":"hash"}},
+"environmentalist":{"label":"environmentalist","source":"existing","status":null,"partner_stem":"growth_first","partner_has_file":true,"placed_text_sha256":"c9d95983b2cd3464081cde504a7940fb836807e08574910d3e82e87db9694c2f","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[],"semantic":[{"head_id":"817","sim":0.3017,"rank":1},{"head_id":"444","sim":0.3006,"rank":2},{"head_id":"416","sim":0.2953,"rank":3},{"head_id":"371","sim":0.2947,"rank":4},{"head_id":"357","sim":0.2925,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-10T02:16:04+00:00","candidates":["416","371","357","444","817"],"sonnet":{"head":null,"reason":"No listed head names the quality of putting nature first; Agriculture, Organization and Economy only share a topic or a small part of it.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]}},
 "epicurean":{"label":"epicurean","source":"existing","status":null,"partner_stem":"spartan","partner_has_file":true,"placed_text_sha256":"6a3f589f7009a9acda7e8f0a60d39cd0c870280466167461612d23a369ae0644","primary":"954a","secondary":["868"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"954","strength":"exact_adj","item":"Epicurean","block":"Adj","group_index":4},{"head_id":"954a","strength":"exact_noun","item":"epicurean","block":"N","group_index":1},{"head_id":"868","strength":"derived_noun","item":"epicure","block":"N","group_index":2},{"head_id":"957","strength":"derived_noun","item":"epicure","block":"N","group_index":9}],"semantic":[{"head_id":"954a","sim":0.5478,"rank":1},{"head_id":"377","sim":0.4552,"rank":2},{"head_id":"850","sim":0.4523,"rank":3},{"head_id":"868","sim":0.432,"rank":4},{"head_id":"955","sim":0.41,"rank":5}],"llm":null},
 "erratic":{"label":"erratic","source":"existing","status":null,"partner_stem":"steady","partner_has_file":true,"placed_text_sha256":"274fcbc892b4a2d795debf55c1c675c8ddaeb4f9c71c0939af3da6ec22d4f75b","primary":"608","secondary":["279","149"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"608","strength":"exact_adj","item":"erratic","block":"Adj","group_index":1},{"head_id":"279","strength":"exact_adj","item":"erratic","block":"Adj","group_index":5},{"head_id":"149","strength":"exact_adj","item":"erratic","block":"Adj","group_index":8}],"semantic":[{"head_id":"139","sim":0.4304,"rank":1},{"head_id":"608","sim":0.4252,"rank":2},{"head_id":"149","sim":0.4215,"rank":3},{"head_id":"279","sim":0.3968,"rank":4},{"head_id":"607","sim":0.3966,"rank":5}],"llm":null},
 "erudite":{"label":"erudite","source":"existing","status":null,"partner_stem":"unschooled","partner_has_file":true,"placed_text_sha256":"fdee2810501ea1f78cbedc484a4c558afbae2402f75ebaf5f5e7f8c9936f44dc","primary":"490","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"490","strength":"exact_adj","item":"erudite","block":"Adj","group_index":14}],"semantic":[{"head_id":"539","sim":0.5342,"rank":1},{"head_id":"492","sim":0.5273,"rank":2},{"head_id":"490","sim":0.4726,"rank":3},{"head_id":"578","sim":0.4077,"rank":4},{"head_id":"498","sim":0.3939,"rank":5}],"llm":null},
@@ -1273,7 +1328,7 @@
 "green_eyed":{"label":"green-eyed","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"c65cf729285207c2d0d350ad8763935f9de29bcfe8da71ba5f297c0201f33d08","primary":"435","secondary":[],"route":"semantic","confidence":0.5,"lexical":[],"semantic":[{"head_id":"435","sim":0.5173,"rank":1},{"head_id":"920","sim":0.5036,"rank":2},{"head_id":"443","sim":0.4133,"rank":3},{"head_id":"921","sim":0.3908,"rank":4},{"head_id":"436","sim":0.39,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T23:36:44+00:00","candidates":["921","443","920","435","436"],"sonnet":{"head":"435","reason":"The trait is literally having green eyes, so the color head Greenness fits, not the figurative jealousy sense of 'green-eyed'.","model":"claude-sonnet-5-5"},"opus":null,"final":"435","decided_by":"sonnet","outcome":"unchanged","previous_primary":"435","previous_route":"semantic","previous_secondary":[]},"previous_placement":{"label":"green-eyed","source":"queued","status":"candidate","placed_text_sha256":"09a090ea1c2036d94b66811d3b076fc1e3cd9445f04f2d9d1ed1a661ea89384e","primary":"920","secondary":[],"route":"semantic","confidence":0.5,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["921","817a","920","435","443"],"sonnet":{"head":"920","reason":"\"Green-eyed\" is the idiom for jealous (the green-eyed monster), and head 920 Jealousy holds the matching words such as jealous and yellow-eyed.","model":"claude-sonnet-5-5"},"opus":null,"final":"920","decided_by":"sonnet","outcome":"unchanged","previous_primary":"920","previous_route":"semantic","previous_secondary":[]},"replaced_at":"2026-10-08T23:35:43+00:00","why":"text_changed","found_by":"hash"}},
 "gregarious":{"label":"gregarious","source":"existing","status":null,"partner_stem":"solitary","partner_has_file":true,"placed_text_sha256":"1b4f688cf6752b47180c971678b989a5786367ce50778b96cb2344382db0ef3a","primary":"892","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"892","strength":"exact_adj","item":"gregarious","block":"Adj","group_index":10}],"semantic":[{"head_id":"892","sim":0.4971,"rank":1},{"head_id":"295","sim":0.4353,"rank":2},{"head_id":"893","sim":0.391,"rank":3},{"head_id":"894","sim":0.3894,"rank":4},{"head_id":"888","sim":0.3865,"rank":5}],"llm":null},
 "grounded":{"label":"grounded","source":"existing","status":null,"partner_stem":"ethereal","partner_has_file":true,"placed_text_sha256":"c93ffd981df93a565bfd4372fe87de12992f70527534f45595eda87c79cf65cf","primary":"576","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"732","strength":"exact_adj","item":"grounded","block":"Adj","group_index":7},{"head_id":"467","strength":"loose","item":"grounded on","block":"Adj","group_index":2},{"head_id":"858","strength":"loose","item":"well grounded hopes","block":"N","group_index":6},{"head_id":"490","strength":"loose","item":"well grounded","block":"Adj","group_index":15},{"head_id":"494","strength":"loose","item":"well-grounded","block":"Adj","group_index":24},{"head_id":"211","strength":"loose","item":"grounded on","block":"Adj","group_index":2},{"head_id":"1","strength":"loose","item":"well-grounded","block":"Adj","group_index":10}],"semantic":[{"head_id":"342","sim":0.4995,"rank":1},{"head_id":"576","sim":0.4462,"rank":2},{"head_id":"319","sim":0.4252,"rank":3},{"head_id":"344","sim":0.4149,"rank":4},{"head_id":"211","sim":0.4145,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["344","319","576","467","858","211","732","342"],"sonnet":{"head":"576","reason":"Grounded speech is plain, unvarnished, homely expression, which is what Plainness (576) in the means of communicating ideas names.","model":"claude-sonnet-5-5"},"opus":{"head":"576","reason":"The trait is a plain, homely, unadorned way of speaking, which is what Plainness (576) names as a quality of expression.","model":"claude-opus-5-5"},"final":"576","decided_by":"opus","outcome":"moved","previous_primary":"211","previous_route":"rule","previous_secondary":[]}},
-"growth_first":{"label":"growth-first","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"657ca03bef9662a200b6ab48fcacd7ad4909e4f97b9a931a20033f00f1166c08","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"66","strength":"loose","item":"first","block":"Adj","group_index":9}],"semantic":[{"head_id":"667","sim":0.251,"rank":1},{"head_id":"817","sim":0.2433,"rank":2},{"head_id":"817a","sim":0.2423,"rank":3},{"head_id":"282","sim":0.24,"rank":4},{"head_id":"365","sim":0.2318,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-09T02:36:25+00:00","candidates":["667","817","817a","66","282","365"],"sonnet":{"head":null,"reason":"The trait is a political-economic stance that prizes industry and growth over nature, and none of the listed heads names that bundle; Economy and Progression only touch parts of it.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"previous_placement":{"label":"growth-first","source":"queued","status":"tbd","placed_text_sha256":"26e182d977d2b00919a13fda4f7704707cd99599491a65cd8b66183df2ac9c9a","primary":null,"secondary":[],"route":"none","confidence":0.0,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["313","66","734","282","168","194"],"sonnet":{"head":"282","reason":"A growth-first person prizes advancement and progressiveness, which best matches Progression.","model":"claude-sonnet-5-5"},"opus":{"head":null,"reason":"The label describes a modern orientation of putting growth ahead of other aims, and the growth-related heads (Evolution, Progression, Expansion) only name growth itself, sharing a topic without naming that priority.","model":"claude-opus-5-5"},"final":null,"decided_by":"opus","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"replaced_at":"2026-10-09T02:35:38+00:00","why":"text_changed","found_by":"hash"}},
+"growth_first":{"label":"growth-first","source":"existing","status":null,"partner_stem":"environmentalist","partner_has_file":true,"placed_text_sha256":"657ca03bef9662a200b6ab48fcacd7ad4909e4f97b9a931a20033f00f1166c08","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"66","strength":"loose","item":"first","block":"Adj","group_index":9}],"semantic":[{"head_id":"667","sim":0.251,"rank":1},{"head_id":"817","sim":0.2433,"rank":2},{"head_id":"817a","sim":0.2423,"rank":3},{"head_id":"282","sim":0.24,"rank":4},{"head_id":"365","sim":0.2318,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-09T02:36:25+00:00","candidates":["667","817","817a","66","282","365"],"sonnet":{"head":null,"reason":"The trait is a political-economic stance that prizes industry and growth over nature, and none of the listed heads names that bundle; Economy and Progression only touch parts of it.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"previous_placement":{"label":"growth-first","source":"queued","status":"tbd","placed_text_sha256":"26e182d977d2b00919a13fda4f7704707cd99599491a65cd8b66183df2ac9c9a","primary":null,"secondary":[],"route":"none","confidence":0.0,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["313","66","734","282","168","194"],"sonnet":{"head":"282","reason":"A growth-first person prizes advancement and progressiveness, which best matches Progression.","model":"claude-sonnet-5-5"},"opus":{"head":null,"reason":"The label describes a modern orientation of putting growth ahead of other aims, and the growth-related heads (Evolution, Progression, Expansion) only name growth itself, sharing a topic without naming that priority.","model":"claude-opus-5-5"},"final":null,"decided_by":"opus","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"replaced_at":"2026-10-09T02:35:38+00:00","why":"text_changed","found_by":"hash"}},
 "growth_minded":{"label":"growth-minded","source":"existing","status":null,"partner_stem":"fixed_minded","partner_has_file":true,"placed_text_sha256":"bda155a99227bcb164e655828ff0636ce09bf4609cee9e8513cd4667f2605493","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"602","strength":"loose","item":"minded","block":"Adj","group_index":0},{"head_id":"620","strength":"loose","item":"minded","block":"Adj","group_index":4}],"semantic":[{"head_id":"539","sim":0.3172,"rank":1},{"head_id":"658","sim":0.3032,"rank":2},{"head_id":"732","sim":0.277,"rank":3},{"head_id":"604a","sim":0.2679,"rank":4},{"head_id":"602","sim":0.2581,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["602","539","732","658","620","604a"],"sonnet":{"head":null,"reason":"The trait is a belief that ability grows through effort; no listed head names that whole belief, since Learning is scholarship, Improvement is things getting better, and Perseverance is only persistence.","model":"claude-sonnet-5-5"},"opus":{"head":null,"reason":"The trait is a modern belief that ability grows through effort; Improvement, Learning and Perseverance each touch only part of it, and no head names the belief itself.","model":"claude-opus-5-5"},"final":null,"decided_by":"opus","outcome":"unplaced","previous_primary":"602","previous_route":"rule","previous_secondary":[]}},
 "gryffindor":{"label":"Gryffindor","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"71a4a51821f92c0bd7e9ffd5f9398aed78ab8cb8e3cf175656163cf6d77119f8","primary":"861","secondary":[],"route":"semantic","confidence":0.5,"lexical":[],"semantic":[{"head_id":"861","sim":0.4568,"rank":1},{"head_id":"878","sim":0.3735,"rank":2},{"head_id":"715","sim":0.3555,"rank":3},{"head_id":"574","sim":0.3417,"rank":4},{"head_id":"836","sim":0.3336,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["878","574","861","836","715"],"sonnet":{"head":"861","reason":"The core of the description is bravery, pluck and daring, which is what Courage names (brave, valiant, intrepid, gallant).","model":"claude-sonnet-5-5"},"opus":null,"final":"861","decided_by":"sonnet","outcome":"unchanged","previous_primary":"861","previous_route":"semantic","previous_secondary":[]}},
 "guarded":{"label":"guarded","source":"existing","status":null,"partner_stem":"forthright","partner_has_file":true,"placed_text_sha256":"68c3504b75b0b4f46c6a42fe18086315778ba3f854c7d0d62007f4b220d95ba5","primary":"864","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"770","strength":"exact_adj","item":"guarded","block":"Adj","group_index":0},{"head_id":"864","strength":"exact_adj","item":"guarded","block":"Adj","group_index":0},{"head_id":"459","strength":"exact_adj","item":"guarded","block":"Adj","group_index":5}],"semantic":[{"head_id":"751","sim":0.3498,"rank":1},{"head_id":"664","sim":0.3469,"rank":2},{"head_id":"864","sim":0.3425,"rank":3},{"head_id":"771","sim":0.3388,"rank":4},{"head_id":"585","sim":0.33,"rank":5}],"llm":null},
@@ -1878,7 +1933,7 @@
 "disgruntled":{"label":"disgruntled","source":"queued","status":"not_adopted","partner_stem":"job_satisfied","partner_has_file":false,"placed_text_sha256":"d4779fe41053c95ae5bddbe877da9b30775314d4e118e7f83658feb292dcfa1a","primary":"832","secondary":[],"route":"semantic","confidence":0.5,"lexical":[{"head_id":"509","strength":"exact_adj","item":"disgruntled","block":"Adj","group_index":2}],"semantic":[{"head_id":"832","sim":0.5893,"rank":1},{"head_id":"917","sim":0.4383,"rank":2},{"head_id":"900","sim":0.4295,"rank":3},{"head_id":"713","sim":0.4203,"rank":4},{"head_id":"24","sim":0.4164,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["509","24","832","917","900","713"],"sonnet":{"head":"832","reason":"The trait is chronic dissatisfaction with work, boss and pay, which matches Discontent (832), whose words include dissatisfied and malcontent; Disappointment holds 'disgruntled' but concerns thwarted hopes.","model":"claude-sonnet-5-5"},"opus":null,"final":"832","decided_by":"sonnet","outcome":"unchanged","previous_primary":"832","previous_route":"semantic","previous_secondary":[]}},
 "distressed":{"label":"distressed","source":"queued","status":"not_adopted","partner_stem":null,"partner_has_file":false,"placed_text_sha256":"30424392b7a7805c241f159357323f914a7d46b04c0c91a6a527b74a6b7136ab","primary":"828","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"804","strength":"exact_adj","item":"distressed","block":"Adj","group_index":18}],"semantic":[{"head_id":"859","sim":0.4522,"rank":1},{"head_id":"828","sim":0.4301,"rank":2},{"head_id":"308","sim":0.4027,"rank":3},{"head_id":"509","sim":0.3762,"rank":4},{"head_id":"824","sim":0.3688,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T21:23:07+00:00","candidates":["804","308","828","824","509","859"],"sonnet":{"head":"828","reason":"Distress as constant mental suffering, anxious and tearful, matches Pain (mental suffering, afflicted, worried) better than the narrower Hopelessness.","model":"claude-sonnet-5-5"},"opus":{"head":"828","reason":"Being distressed is general mental suffering, affliction and worry, which is what Pain (828) names, while Hopelessness covers only one part of it.","model":"claude-opus-5-5"},"final":"828","decided_by":"opus","outcome":"moved","previous_primary":"859","previous_route":"semantic","previous_secondary":[]},"previous_placement":{"label":"distressed","source":"queued","status":"candidate","placed_text_sha256":null,"primary":"828","secondary":[],"route":"llm","confidence":0.8,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["804","243","828","806","61","832"],"sonnet":{"head":"828","reason":"\"Distressed\" means suffering mental pain or affliction, which matches head 828 Pain (pained, afflicted, suffering, mental suffering).","model":"claude-sonnet-5-5"},"opus":{"head":"828","reason":"Being distressed means suffering mental pain or affliction, which is what the Pain head names (suffering, pained, afflicted, worried).","model":"claude-opus-5-5"},"final":"828","decided_by":"opus","outcome":"moved","previous_primary":"804","previous_route":"lexical","previous_secondary":[]},"replaced_at":"2026-10-08T21:20:58+00:00","why":"text_changed","found_by":"semantic_differs"}},
 "dutifulness_ipip_neo":{"label":"Dutifulness (IPIP-NEO)","source":"queued","status":"backlog","partner_stem":null,"partner_has_file":false,"placed_text_sha256":"d0b423fceb07361a2ea22b1b5325bef151416ba13a2dccd65ec1a60d325f672f","primary":"926","secondary":[],"route":"semantic","confidence":0.5,"lexical":[{"head_id":"944","strength":"derived_adj","item":"dutiful","block":"Adj","group_index":2}],"semantic":[{"head_id":"926","sim":0.4139,"rank":1},{"head_id":"772","sim":0.4015,"rank":2},{"head_id":"743","sim":0.3889,"rank":3},{"head_id":"927","sim":0.3651,"rank":4},{"head_id":"924","sim":0.348,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["924","927","926","772","743","944"],"sonnet":{"head":"926","reason":"Dutifulness is the quality of heeding duty and moral obligation, which is named most directly by the head Duty.","model":"claude-sonnet-5-5"},"opus":null,"final":"926","decided_by":"sonnet","outcome":"unchanged","previous_primary":"926","previous_route":"semantic","previous_secondary":[]}},
-"economic":{"label":"economic","source":"queued","status":"not_adopted","partner_stem":"environmental","partner_has_file":true,"placed_text_sha256":"f13dbe67862b93cd44164bae3eaef3cd70492f91433b046bd08e41a0a3bad74f","primary":"817","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"817","strength":"derived_noun","item":"economy","block":"N","group_index":0},{"head_id":"692","strength":"derived_noun","item":"economy","block":"N","group_index":14},{"head_id":"58","strength":"derived_noun","item":"economy","block":"N","group_index":5}],"semantic":[{"head_id":"817","sim":0.4963,"rank":1},{"head_id":"815","sim":0.3183,"rank":2},{"head_id":"734","sim":0.312,"rank":3},{"head_id":"646","sim":0.3089,"rank":4},{"head_id":"638","sim":0.2882,"rank":5}],"llm":null},
+"economic":{"label":"economic","source":"queued","status":"not_adopted","partner_stem":"environmentalist","partner_has_file":true,"placed_text_sha256":"f13dbe67862b93cd44164bae3eaef3cd70492f91433b046bd08e41a0a3bad74f","primary":"817","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"817","strength":"derived_noun","item":"economy","block":"N","group_index":0},{"head_id":"692","strength":"derived_noun","item":"economy","block":"N","group_index":14},{"head_id":"58","strength":"derived_noun","item":"economy","block":"N","group_index":5}],"semantic":[{"head_id":"817","sim":0.4963,"rank":1},{"head_id":"815","sim":0.3183,"rank":2},{"head_id":"734","sim":0.312,"rank":3},{"head_id":"646","sim":0.3089,"rank":4},{"head_id":"638","sim":0.2882,"rank":5}],"llm":null},
 "economic_capital_bourdieu":{"label":"economic-capital (Bourdieu)","source":"queued","status":"not_adopted","partner_stem":"cultural_capital_bourdieu","partner_has_file":false,"placed_text_sha256":"ffa6c46335c475395eb4cf0f591a9d0877a0e948a97a088852c41681dd860b86","primary":"800","secondary":["803"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"800","strength":"loose","item":"capital","block":"N","group_index":4},{"head_id":"803","strength":"loose","item":"capital","block":"N","group_index":8},{"head_id":"642","strength":"loose","item":"capital","block":"Adj","group_index":14},{"head_id":"648","strength":"loose","item":"capital","block":"Adj","group_index":17},{"head_id":"210","strength":"loose","item":"capital","block":"Adj","group_index":5},{"head_id":"189","strength":"loose","item":"capital","block":"N","group_index":34}],"semantic":[{"head_id":"803","sim":0.3606,"rank":1},{"head_id":"800","sim":0.3138,"rank":2},{"head_id":"775","sim":0.3119,"rank":3},{"head_id":"817","sim":0.3118,"rank":4},{"head_id":"794","sim":0.3014,"rank":5}],"llm":null},
 "emotionality_ipip_neo":{"label":"Emotionality (IPIP-NEO)","source":"queued","status":"backlog","partner_stem":null,"partner_has_file":false,"placed_text_sha256":"0b36756c0fc8bb5e8e37c023a5e02e2b254a84040999a241418b74748d7e6499","primary":"822","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"821","strength":"derived_adj","item":"emotional","block":"Adj","group_index":4}],"semantic":[{"head_id":"825","sim":0.3855,"rank":1},{"head_id":"901","sim":0.3677,"rank":2},{"head_id":"822","sim":0.3677,"rank":3},{"head_id":"821","sim":0.3477,"rank":4},{"head_id":"826","sim":0.3322,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["821","825","901","826","822"],"sonnet":{"head":"822","reason":"Emotionality as sensitivity to and openness of feeling matches Sensibility (sensitive, impressionable) better than excitability or irascibility.","model":"claude-sonnet-5-5"},"opus":{"head":"822","reason":"The IPIP-NEO Emotionality facet means being receptive and sensitive to one's own feelings, which matches Sensibility (sensitive, impressionable, sensitiveness).","model":"claude-opus-5-5"},"final":"822","decided_by":"opus","outcome":"moved","previous_primary":"821","previous_route":"rule","previous_secondary":[]}},
 "emotive":{"label":"emotive","source":"queued","status":"not_adopted","partner_stem":"stoic","partner_has_file":true,"placed_text_sha256":"d6e5d0bb17fc59fb9fc13fb2c56f21fa95a8e6829c73e328e00559766b5baa1a","primary":"821","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"821","strength":"exact_adj","item":"emotive","block":"Adj","group_index":4}],"semantic":[{"head_id":"821","sim":0.5046,"rank":1},{"head_id":"825","sim":0.4977,"rank":2},{"head_id":"822","sim":0.4782,"rank":3},{"head_id":"839","sim":0.4493,"rank":4},{"head_id":"820","sim":0.4316,"rank":5}],"llm":null},
@@ -2060,12 +2115,12 @@
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py place-check --unchecked-only --resume --budget-usd 0.3",
-   "git_sha": "e50f069+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py place-check --unchecked-only --resume --budget-usd 0.2",
+   "git_sha": "49a88c7+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coordinates of the corpus labels (workstream 2)"
   },
-  "produced_at": "2026-10-10T01:51:49+00:00",
+  "produced_at": "2026-10-10T02:16:05+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -2079,19 +2134,19 @@
    {
     "dep_key": "seed_queue",
     "path": "data/seed_queue.json",
-    "fingerprint": "v1:2026-10-10T01:51:26+00:00@3427389",
+    "fingerprint": "v1:2026-10-10T02:15:57+00:00@3427643",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:26+00:00",
+    "last_modified_at": "2026-10-10T02:15:57+00:00",
     "extras": {}
    },
    {
     "dep_key": "trait_files",
     "path": "data/traits/instructions",
-    "fingerprint": "v1:multi:7d0aae2d8bff",
+    "fingerprint": "v1:multi:0d956a510d6b",
     "kind": "multi",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:26+00:00",
+    "last_modified_at": "2026-10-10T02:15:57+00:00",
     "extras": {},
     "member_paths": [
      "data/traits/instructions/absentee.json",
@@ -2367,7 +2422,7 @@
      "data/traits/instructions/entj_mbti.json",
      "data/traits/instructions/entp_mbti.json",
      "data/traits/instructions/envious.json",
-     "data/traits/instructions/environmental.json",
+     "data/traits/instructions/environmentalist.json",
      "data/traits/instructions/epicurean.json",
      "data/traits/instructions/erratic.json",
      "data/traits/instructions/erudite.json",
@@ -3039,28 +3094,28 @@
    {
     "dep_key": "placement_responses",
     "path": "data/candidates/roget/placement_responses.jsonl",
-    "fingerprint": "v1:2026-10-10T01:51:49+00:00@3432129",
+    "fingerprint": "v1:2026-10-10T02:16:04+00:00@3434999",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:49+00:00",
+    "last_modified_at": "2026-10-10T02:16:04+00:00",
     "extras": {}
    },
    {
     "dep_key": "placement_seed_queue",
     "path": "data/seed_queue.json",
-    "fingerprint": "v1:2026-10-10T01:51:26+00:00@3427389",
+    "fingerprint": "v1:2026-10-10T02:15:57+00:00@3427643",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:26+00:00",
+    "last_modified_at": "2026-10-10T02:15:57+00:00",
     "extras": {}
    },
    {
     "dep_key": "placement_trait_files",
     "path": "data/traits/instructions",
-    "fingerprint": "v1:multi:7d0aae2d8bff",
+    "fingerprint": "v1:multi:0d956a510d6b",
     "kind": "multi",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:26+00:00",
+    "last_modified_at": "2026-10-10T02:15:57+00:00",
     "extras": {},
     "member_paths": [
      "data/traits/instructions/absentee.json",
@@ -3336,7 +3391,7 @@
      "data/traits/instructions/entj_mbti.json",
      "data/traits/instructions/entp_mbti.json",
      "data/traits/instructions/envious.json",
-     "data/traits/instructions/environmental.json",
+     "data/traits/instructions/environmentalist.json",
      "data/traits/instructions/epicurean.json",
      "data/traits/instructions/erratic.json",
      "data/traits/instructions/erudite.json",
@@ -3994,6 +4049,6 @@
     ]
    }
   ],
-  "inputs_sha256": "8e32cdccc4f81c5a116b1c3de1bf64f8836d502290b21d66e9df62d60d0ebcb1"
+  "inputs_sha256": "8858d7da5b67f8e3edbc60004c1b721a8b16c43d8aaeb4b0849d3e57ccf9d344"
  }
 }

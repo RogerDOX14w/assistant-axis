@@ -1281,11 +1281,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "e50f069+dirty",
+   "git_sha": "49a88c7+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-10T01:51:53+00:00",
+  "produced_at": "2026-10-10T02:16:09+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1308,22 +1308,22 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T01:51:49+00:00@1504573",
+    "fingerprint": "v1:2026-10-10T02:16:05+00:00@1504457",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:49+00:00",
+    "last_modified_at": "2026-10-10T02:16:05+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope",
     "path": "data/candidates/roget/head_scope.json",
-    "fingerprint": "v1:2026-10-10T01:51:51+00:00@249708",
+    "fingerprint": "v1:2026-10-10T02:16:07+00:00@249708",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T01:51:51+00:00",
+    "last_modified_at": "2026-10-10T02:16:07+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "961bffcf9d1472fba052eb4897daee416b9d5f78a7ba888fe6d438ea34fcba21"
+  "inputs_sha256": "861b6513aa074b9842a4366036af19135b8fae7ed0669876eca17417c71a1839"
  }
 }

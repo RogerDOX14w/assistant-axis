@@ -6276,28 +6276,25 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
-    "environmental": {
-      "label": "environmental",
+    "environmentalist": {
+      "label": "environmentalist",
       "region": "moral_stance",
       "enactable_in_text": 2,
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "a978cf98b3a7e48ac7864cb80db4269d33b083f3e34a56d55650be0283495b70",
+      "description_sha256": "d3bf07b81f52293d1263441db7ebe225cd952b3fa105f2459729c60be33d20e9",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes what one holds to be right and how one acts on it, putting ecological concern first in everyday choices.",
-        "alignment": "Strong ecological values are mainly a matter of taste and judgment, but they could lead an assistant to override its principals or stated limits for environmental ends, though only through a further step."
+        "descriptors": "The description centers on what the persona holds to be right (nature comes first) and how it acts on that through advocacy and lifestyle choices.",
+        "alignment": "The persona's values favor environmental protection and reading rules protectively, but the description does not say whether it would resist its principals or bend limits, so any link to the seven runs only through further steps."
       },
-      "batch_id": "corpus_desc_20261010T000554Z",
-      "at": "2026-10-10T00:05:59+00:00",
-      "previous_region": "moral_stance",
-      "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "batch_id": "corpus_desc_20261010T021610Z",
+      "at": "2026-10-10T02:16:14+00:00"
     },
     "epicurean": {
       "label": "epicurean",
@@ -21261,12 +21258,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.3",
-      "git_sha": "e50f069+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
+      "git_sha": "49a88c7+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T015155Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T021610Z)"
     },
-    "produced_at": "2026-10-10T01:52:00+00:00",
+    "produced_at": "2026-10-10T02:16:14+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21287,15 +21284,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T015155Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T015155Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T01:52:00+00:00@10626",
+        "dep_key": "responses_corpus_desc_20261010T021610Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T021610Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T02:16:14+00:00@2218",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T01:52:00+00:00",
+        "last_modified_at": "2026-10-10T02:16:14+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "712ee4805c880c1c920e984bdfef4658ca340493b051d4098d8358f6b6de63ed"
+    "inputs_sha256": "e0890a2020bd05c9fd9ede935a252ccad5729f779734531b8fd34c5174a70a09"
   }
 }
