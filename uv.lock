@@ -297,6 +297,7 @@ source = { editable = "." }
 dependencies = [
     { name = "accelerate", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
     { name = "anthropic", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
+    { name = "beautifulsoup4", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
     { name = "fastapi", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
     { name = "google-auth-oauthlib", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
     { name = "gspread", marker = "sys_platform == 'darwin' or sys_platform == 'linux'" },
@@ -335,6 +336,7 @@ dev = [
 requires-dist = [
     { name = "accelerate" },
     { name = "anthropic" },
+    { name = "beautifulsoup4", specifier = ">=4.14.3" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "google-auth-oauthlib", specifier = ">=1.2" },
     { name = "gspread", specifier = ">=6.0" },
