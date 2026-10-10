@@ -15,11 +15,11 @@
     "sonnet": "claude-sonnet-5-5",
     "opus": "claude-opus-5-5"
    },
-   "n_checked": 576,
+   "n_checked": 575,
    "outcomes": {
     "moved": 89,
     "newly_placed": 108,
-    "unchanged": 322,
+    "unchanged": 321,
     "unplaced": 57
    },
    "n_referee": 312,
@@ -481,6 +481,35 @@
       "opus": 0
      },
      "cost_usd_this_run": 0.0327,
+     "budget_usd": 0.2,
+     "cache": {
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0
+     },
+     "stopped_by_budget": false,
+     "label_form": "judge-display-v1"
+    },
+    {
+     "rubric": {
+      "name": "roget_placement",
+      "version": 1,
+      "sha256": "f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987",
+      "file": "reports/trait_gap_generation/rubrics/roget_placement.md"
+     },
+     "models": {
+      "sonnet": "claude-sonnet-5-5",
+      "opus": "claude-opus-5-5"
+     },
+     "checked_at": "2026-10-10T13:04:47+00:00",
+     "selection": "unchecked_only",
+     "n_checked": 0,
+     "outcomes": {},
+     "n_referee": 0,
+     "n_reused": {
+      "sonnet": 0,
+      "opus": 0
+     },
+     "cost_usd_this_run": 0,
      "budget_usd": 0.2,
      "cache": {
       "cache_read_input_tokens": 0,
@@ -1182,6 +1211,26 @@
      "existing:none": 2,
      "existing:semantic": 1
     }
+   },
+   {
+    "at": "2026-10-10T13:04:45+00:00",
+    "embedder": "text-embedding-3-large",
+    "cost_usd": 1.1e-05,
+    "dropped": {},
+    "added": [],
+    "changed": {
+     "disorganized": "hash",
+     "organized": "hash"
+    },
+    "n_replaced": 2,
+    "n_unchanged": 1084,
+    "unchanged_by": {
+     "hash": 1084
+    },
+    "metadata_refreshed": [],
+    "routes_replaced": {
+     "existing:agree": 2
+    }
    }
   ],
   "labels": {
@@ -1399,7 +1448,7 @@
 "dishonest":{"label":"dishonest","source":"existing","status":null,"partner_stem":"honest","partner_has_file":true,"placed_text_sha256":"e247c630f478f33b6c94fb514f3a2223d827ff223cce51195de5b736ddc702ee","primary":"544","secondary":["940"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"544","strength":"exact_adj","item":"dishonest","block":"Adj","group_index":0},{"head_id":"940","strength":"exact_adj","item":"dishonest","block":"Adj","group_index":0}],"semantic":[{"head_id":"545","sim":0.4286,"rank":1},{"head_id":"940","sim":0.4238,"rank":2},{"head_id":"544","sim":0.4195,"rank":3},{"head_id":"548","sim":0.4057,"rank":4},{"head_id":"555","sim":0.3938,"rank":5}],"llm":null},
 "dismissive":{"label":"dismissive","source":"existing","status":null,"partner_stem":"supportive","partner_has_file":true,"placed_text_sha256":"7b9a7542b3f73e1520d09e4837eadb19a476ee7367c25289ab8691cbe8bbb263","primary":"929","secondary":[],"route":"semantic","confidence":0.5,"lexical":[],"semantic":[{"head_id":"929","sim":0.4111,"rank":1},{"head_id":"460","sim":0.3934,"rank":2},{"head_id":"509","sim":0.3778,"rank":3},{"head_id":"856","sim":0.3757,"rank":4},{"head_id":"616","sim":0.3673,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["856","616","460","929","509"],"sonnet":{"head":"929","reason":"Dismissive means treating someone's efforts and concerns as beneath notice and slighting them, which matches Disrespect (contemptuous, supercilious, slight, disesteem) better than ridicule, dissuasion or neglect.","model":"claude-sonnet-5-5"},"opus":null,"final":"929","decided_by":"sonnet","outcome":"unchanged","previous_primary":"929","previous_route":"semantic","previous_secondary":[]}},
 "dismissive_avoidant_attachment":{"label":"dismissive-avoidant attachment","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"e51e99f8f6f464f16dfcac4733fc2973599ea762afdbe9c6afb091ac281e79a7","primary":"893","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"897","strength":"loose","item":"attachment","block":"N","group_index":7},{"head_id":"43","strength":"loose","item":"attachment","block":"N","group_index":4}],"semantic":[{"head_id":"866","sim":0.4249,"rank":1},{"head_id":"867","sim":0.3514,"rank":2},{"head_id":"768a","sim":0.3452,"rank":3},{"head_id":"893","sim":0.3393,"rank":4},{"head_id":"623","sim":0.3164,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["623","768a","43","866","867","897","893"],"sonnet":{"head":null,"reason":"The trait bundles self-reliance, comfort with distance and avoidance of dependence, and no listed head (Indifference, Seclusion, Avoidance) names that whole.","model":"claude-sonnet-5-5"},"opus":{"head":"893","reason":"Seclusion covers aloofness, unsociability and keeping apart from others, which is the core of being comfortable without close emotional ties.","model":"claude-opus-5-5"},"final":"893","decided_by":"opus","outcome":"moved","previous_primary":"866","previous_route":"semantic","previous_secondary":[]}},
-"disorganized":{"label":"disorganized","source":"existing","status":null,"partner_stem":"organized","partner_has_file":true,"placed_text_sha256":"8acbf726fba8ef80ed931a8fcb5739ad77cc94776d14f000debcb99736381004","primary":"59","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"59","strength":"exact_adj","item":"disorganized","block":"Adj","group_index":5}],"semantic":[{"head_id":"61","sim":0.5187,"rank":1},{"head_id":"59","sim":0.5108,"rank":2},{"head_id":"47","sim":0.444,"rank":3},{"head_id":"70","sim":0.4268,"rank":4},{"head_id":"73","sim":0.4252,"rank":5}],"llm":null,"previous_placement":{"label":"disorganized","source":"existing","status":null,"placed_text_sha256":"8a5365467517fce2c4b06cc0b5af279c6ffe32e443ea755638a42da9c32e4a08","primary":"59","secondary":[],"route":"agree","confidence":1.0,"llm":null,"replaced_at":"2026-10-09T23:22:16+00:00","why":"text_changed","found_by":"hash"}},
+"disorganized":{"label":"disorganized","source":"existing","status":null,"partner_stem":"organized","partner_has_file":true,"placed_text_sha256":"f0012bce8d6c74780add6cd46f79c0477eaa49437082cc6daffce4a761fdd352","primary":"59","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"59","strength":"exact_adj","item":"disorganized","block":"Adj","group_index":5}],"semantic":[{"head_id":"59","sim":0.5815,"rank":1},{"head_id":"61","sim":0.5636,"rank":2},{"head_id":"73","sim":0.4466,"rank":3},{"head_id":"60","sim":0.4319,"rank":4},{"head_id":"139","sim":0.4057,"rank":5}],"llm":null,"previous_placement":{"label":"disorganized","source":"existing","status":null,"placed_text_sha256":"8acbf726fba8ef80ed931a8fcb5739ad77cc94776d14f000debcb99736381004","primary":"59","secondary":[],"route":"agree","confidence":1.0,"llm":null,"replaced_at":"2026-10-10T13:04:43+00:00","why":"text_changed","found_by":"hash","previous_placement":{"label":"disorganized","source":"existing","status":null,"placed_text_sha256":"8a5365467517fce2c4b06cc0b5af279c6ffe32e443ea755638a42da9c32e4a08","primary":"59","secondary":[],"route":"agree","confidence":1.0,"llm":null,"replaced_at":"2026-10-09T23:22:16+00:00","why":"text_changed","found_by":"hash"}}},
 "dispassionate":{"label":"dispassionate","source":"existing","status":null,"partner_stem":"passionate","partner_has_file":true,"placed_text_sha256":"a4d4126ca0ff386d7e0d1a100fee3f81c0d755b546f609cee2e966972fbe1ca3","primary":"826","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"826","strength":"exact_adj","item":"dispassionate","block":"Adj","group_index":2},{"head_id":"484","strength":"loose","item":"dispassionate belief","block":"N","group_index":10}],"semantic":[{"head_id":"866","sim":0.5161,"rank":1},{"head_id":"826","sim":0.4864,"rank":2},{"head_id":"942","sim":0.4422,"rank":3},{"head_id":"823","sim":0.4335,"rank":4},{"head_id":"864","sim":0.3992,"rank":5}],"llm":null},
 "dissociative":{"label":"dissociative","source":"existing","status":null,"partner_stem":null,"partner_has_file":false,"placed_text_sha256":"49462a545bc8444140a58a259df806d744e2de8cf10df5c8cd0de2598aa36495","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"10","strength":"derived_noun","item":"dissociation","block":"N","group_index":0}],"semantic":[{"head_id":"449","sim":0.4826,"rank":1},{"head_id":"185","sim":0.3919,"rank":2},{"head_id":"187","sim":0.3902,"rank":3},{"head_id":"447","sim":0.3733,"rank":4},{"head_id":"671","sim":0.3649,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T21:23:07+00:00","candidates":["447","449","10","185","671","187"],"sonnet":{"head":null,"reason":"No head names a mental state of detachment from self; 'dissociation' in Irrelation means unconnectedness, a different sense, and the others only share a loose topic.","model":"claude-sonnet-5-5"},"opus":{"head":null,"reason":"None of the listed heads names the mental state of depersonalization, unreality or lost time; 'dissociation' in Irrelation means logical unconnectedness, and Absence and Disappearance are about physical presence.","model":"claude-opus-5-5"},"final":null,"decided_by":"opus","outcome":"unplaced","previous_primary":"449","previous_route":"semantic","previous_secondary":[]},"previous_placement":{"label":"dissociative","source":"queued","status":"candidate","placed_text_sha256":null,"primary":null,"secondary":[],"route":"none","confidence":0.0,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["49","73","10","18","768a","44"],"sonnet":{"head":null,"reason":"Dissociative as a psychological trait (detachment from self or reality) has no matching head; 'dissociation' in Irrelation and Disjunction mean unconnectedness or separation, which is a different sense.","model":"claude-sonnet-5-5"},"opus":null,"final":null,"decided_by":"sonnet","outcome":"unchanged","previous_primary":null,"previous_route":"none","previous_secondary":[]},"replaced_at":"2026-10-08T21:20:58+00:00","why":"text_changed","found_by":"semantic_differs"}},
 "distractible":{"label":"distractible","source":"existing","status":null,"partner_stem":"focused","partner_has_file":true,"placed_text_sha256":"ce8bd26a43ad5b88d9558fb9935e15860110c1ce06a70a63a425a6d8074aef1c","primary":"458","secondary":[],"route":"semantic","confidence":0.5,"lexical":[],"semantic":[{"head_id":"458","sim":0.465,"rank":1},{"head_id":"457","sim":0.4266,"rank":2},{"head_id":"460","sim":0.3579,"rank":3},{"head_id":"573","sim":0.3452,"rank":4},{"head_id":"934","sim":0.3447,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["457","573","934","460","458"],"sonnet":{"head":"458","reason":"Distractible means having attention easily pulled away, which is the inattention named by head 458 (inattentive, unheeding, unthinking), not the deliberate neglect of 460.","model":"claude-sonnet-5-5"},"opus":null,"final":"458","decided_by":"sonnet","outcome":"unchanged","previous_primary":"458","previous_route":"semantic","previous_secondary":[]}},
@@ -1793,7 +1842,7 @@
 "open_minded":{"label":"open-minded","source":"existing","status":null,"partner_stem":"closed_minded","partner_has_file":true,"placed_text_sha256":"8625c8e85b57a7630fdd1c310436ea2de0a04d69b1782dfa615f334bf998f992","primary":null,"secondary":[],"route":"none","confidence":0.0,"lexical":[{"head_id":"602","strength":"loose","item":"minded","block":"Adj","group_index":0},{"head_id":"620","strength":"loose","item":"minded","block":"Adj","group_index":4}],"semantic":[{"head_id":"487","sim":0.3605,"rank":1},{"head_id":"489","sim":0.3529,"rank":2},{"head_id":"481","sim":0.3519,"rank":3},{"head_id":"602","sim":0.351,"rank":4},{"head_id":"457","sim":0.348,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["620","487","481","457","489","602"],"sonnet":{"head":null,"reason":"None of the heads names receptiveness to opposing views and readiness to change one's mind; Misjudgment (prejudiced) is the opposite, Incredulity is doubt, and Willingness is about volition, not opinion.","model":"claude-sonnet-5-5"},"opus":{"head":null,"reason":"Open-mindedness is fair, unbiased judgment, but no listed head names it: Misjudgment names its opposite (prejudice), and Willingness only shares the spelling of \"minded\" in another sense.","model":"claude-opus-5-5"},"final":null,"decided_by":"opus","outcome":"unplaced","previous_primary":"602","previous_route":"rule","previous_secondary":[]}},
 "opinionated":{"label":"opinionated","source":"existing","status":null,"partner_stem":"noncommittal","partner_has_file":true,"placed_text_sha256":"3ba2ab6eeb0a1cbd0a6c05c70afc90625b20e9b53b032643e278b429f9e4a90d","primary":"535","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"481","strength":"exact_adj","item":"opinionated","block":"Adj","group_index":10},{"head_id":"880","strength":"loose","item":"self-opinionated","block":"Adj","group_index":4}],"semantic":[{"head_id":"720","sim":0.3607,"rank":1},{"head_id":"606","sim":0.3531,"rank":2},{"head_id":"708","sim":0.3393,"rank":3},{"head_id":"535","sim":0.3387,"rank":4},{"head_id":"604","sim":0.3342,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["481","604","720","606","880","708","535"],"sonnet":{"head":"535","reason":"The description is about asserting definite positions and advocating them rather than merely stating the sides, which best matches Affirmation (asserting, positive, absolute), not stubbornness.","model":"claude-sonnet-5-5"},"opus":{"head":"535","reason":"The description is about stating definite positions and asserting them firmly, which matches Affirmation's 'asserting', 'positive' and 'absolute' rather than stubbornness or prejudice.","model":"claude-opus-5-5"},"final":"535","decided_by":"opus","outcome":"moved","previous_primary":"481","previous_route":"lexical","previous_secondary":[]}},
 "optimistic":{"label":"optimistic","source":"existing","status":null,"partner_stem":"pessimistic","partner_has_file":true,"placed_text_sha256":"4c4ffd7565d34b042d6c7553292fb529c73602fa9e179805b792a839d541b598","primary":"482","secondary":["858"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"482","strength":"derived_noun","item":"optimism","block":"N","group_index":1},{"head_id":"858","strength":"derived_noun","item":"optimism","block":"N","group_index":10}],"semantic":[{"head_id":"858","sim":0.4629,"rank":1},{"head_id":"482","sim":0.4564,"rank":2},{"head_id":"859","sim":0.4117,"rank":3},{"head_id":"734","sim":0.4,"rank":4},{"head_id":"507","sim":0.3797,"rank":5}],"llm":null},
-"organized":{"label":"organized","source":"existing","status":null,"partner_stem":"disorganized","partner_has_file":true,"placed_text_sha256":"1b1f5038afc2bd50a870d47d9b2242460bdf212252571936d391a2f63439e00f","primary":"58","secondary":[],"route":"semantic","confidence":0.5,"lexical":[{"head_id":"544","strength":"loose","item":"organized hypocrisy","block":"N","group_index":21},{"head_id":"792","strength":"loose","item":"organized crime","block":"N","group_index":27},{"head_id":"357","strength":"exact_adj","item":"organized","block":"Adj","group_index":0}],"semantic":[{"head_id":"58","sim":0.4619,"rank":1},{"head_id":"60","sim":0.4424,"rank":2},{"head_id":"59","sim":0.3921,"rank":3},{"head_id":"61","sim":0.3749,"rank":4},{"head_id":"626","sim":0.3599,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-09T23:22:49+00:00","candidates":["544","61","792","626","59","357","58","60"],"sonnet":{"head":"58","reason":"Being organized, with everything in its place and taken in order, is the quality of orderliness named by the head Order.","model":"claude-sonnet-5-5"},"opus":null,"final":"58","decided_by":"sonnet","outcome":"unchanged","previous_primary":"58","previous_route":"semantic","previous_secondary":[]},"previous_placement":{"label":"organized","source":"existing","status":null,"placed_text_sha256":"7208a65acdfaac09480dd9740ff7d78f4567ab4201352ad897298227e14380b0","primary":"60","secondary":[],"route":"llm","confidence":0.8,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["60","59","462","58","357","792","544"],"sonnet":{"head":"58","reason":"The description names orderly, methodical handling of things, each in its place and taken in sequence, which matches Order (head 58) with 'in its proper place', 'orderly' and 'regular'; Arrangement is about the act of arranging, and Organization is about living matter.","model":"claude-sonnet-5-5"},"opus":{"head":"60","reason":"Arrangement holds 'methodical', 'orderly' and 'cut and dried', which name the planned, step-by-step ordering the description gives, while 357 uses 'organized' only in the biological sense.","model":"claude-opus-5-5"},"final":"60","decided_by":"opus","outcome":"moved","previous_primary":"357","previous_route":"rule","previous_secondary":[]},"replaced_at":"2026-10-09T23:22:16+00:00","why":"text_changed","found_by":"hash"}},
+"organized":{"label":"organized","source":"existing","status":null,"partner_stem":"disorganized","partner_has_file":true,"placed_text_sha256":"92a879ba9a86a1e98f5815728ff7ba150429a27138a4189ae3fe87e7fed3d16f","primary":"357","secondary":[],"route":"agree","confidence":1.0,"lexical":[{"head_id":"544","strength":"loose","item":"organized hypocrisy","block":"N","group_index":21},{"head_id":"792","strength":"loose","item":"organized crime","block":"N","group_index":27},{"head_id":"357","strength":"exact_adj","item":"organized","block":"Adj","group_index":0}],"semantic":[{"head_id":"58","sim":0.4923,"rank":1},{"head_id":"60","sim":0.4775,"rank":2},{"head_id":"357","sim":0.4382,"rank":3},{"head_id":"59","sim":0.4196,"rank":4},{"head_id":"61","sim":0.3979,"rank":5}],"llm":null,"previous_placement":{"label":"organized","source":"existing","status":null,"placed_text_sha256":"1b1f5038afc2bd50a870d47d9b2242460bdf212252571936d391a2f63439e00f","primary":"58","secondary":[],"route":"semantic","confidence":0.5,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-09T23:22:49+00:00","candidates":["544","61","792","626","59","357","58","60"],"sonnet":{"head":"58","reason":"Being organized, with everything in its place and taken in order, is the quality of orderliness named by the head Order.","model":"claude-sonnet-5-5"},"opus":null,"final":"58","decided_by":"sonnet","outcome":"unchanged","previous_primary":"58","previous_route":"semantic","previous_secondary":[]},"replaced_at":"2026-10-10T13:04:43+00:00","why":"text_changed","found_by":"hash","previous_placement":{"label":"organized","source":"existing","status":null,"placed_text_sha256":"7208a65acdfaac09480dd9740ff7d78f4567ab4201352ad897298227e14380b0","primary":"60","secondary":[],"route":"llm","confidence":0.8,"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["60","59","462","58","357","792","544"],"sonnet":{"head":"58","reason":"The description names orderly, methodical handling of things, each in its place and taken in sequence, which matches Order (head 58) with 'in its proper place', 'orderly' and 'regular'; Arrangement is about the act of arranging, and Organization is about living matter.","model":"claude-sonnet-5-5"},"opus":{"head":"60","reason":"Arrangement holds 'methodical', 'orderly' and 'cut and dried', which name the planned, step-by-step ordering the description gives, while 357 uses 'organized' only in the biological sense.","model":"claude-opus-5-5"},"final":"60","decided_by":"opus","outcome":"moved","previous_primary":"357","previous_route":"rule","previous_secondary":[]},"replaced_at":"2026-10-09T23:22:16+00:00","why":"text_changed","found_by":"hash"}}},
 "orthodox":{"label":"orthodox","source":"existing","status":null,"partner_stem":"heterodox","partner_has_file":true,"placed_text_sha256":"31fc5cab27d18b864fd9cdb25c1af44bedb07e68b8061973b542ddb8b1c0be2a","primary":"983a","secondary":["984","82"],"route":"agree","confidence":1.0,"lexical":[{"head_id":"983a","strength":"exact_adj","item":"orthodox","block":"Adj","group_index":0},{"head_id":"984","strength":"loose","item":"orthodox dissenter","block":"N","group_index":35},{"head_id":"82","strength":"exact_adj","item":"orthodox","block":"Adj","group_index":7}],"semantic":[{"head_id":"983a","sim":0.67,"rank":1},{"head_id":"984","sim":0.5361,"rank":2},{"head_id":"999","sim":0.385,"rank":3},{"head_id":"82","sim":0.3767,"rank":4},{"head_id":"985","sim":0.376,"rank":5}],"llm":null},
 "other_focused":{"label":"other-focused","source":"existing","status":null,"partner_stem":"self_absorbed","partner_has_file":true,"placed_text_sha256":"3f89ba6aeb902591bfaf7dfd7e8087a4d2fc56c7da8bd1f910d825809bf89932","primary":"457","secondary":[],"route":"semantic","confidence":0.5,"lexical":[],"semantic":[{"head_id":"457","sim":0.4503,"rank":1},{"head_id":"74","sim":0.3582,"rank":2},{"head_id":"772","sim":0.3377,"rank":3},{"head_id":"458","sim":0.3321,"rank":4},{"head_id":"943","sim":0.3297,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["457","458","943","74","772"],"sonnet":{"head":null,"reason":"No listed head names concern for others; Selfishness is the opposite, and Attention covers only general noticing.","model":"claude-sonnet-5-5"},"opus":{"head":"457","reason":"Attention's words (attentive, regardful, observant, mindful) name the habit of heeding and noticing what others say and need, which is the heart of being other-focused.","model":"claude-opus-5-5"},"final":"457","decided_by":"opus","outcome":"unchanged","previous_primary":"457","previous_route":"semantic","previous_secondary":[]}},
 "overconfident":{"label":"overconfident","source":"existing","status":null,"partner_stem":"calibrated","partner_has_file":true,"placed_text_sha256":"c4d0cdee533759496dc3b755b97f3c1ba4f699e632dd560c73f2ce4ca13615b6","primary":"484","secondary":[],"route":"llm","confidence":0.8,"lexical":[{"head_id":"863","strength":"exact_adj","item":"overconfident","block":"Adj","group_index":12}],"semantic":[{"head_id":"482","sim":0.4632,"rank":1},{"head_id":"484","sim":0.4447,"rank":2},{"head_id":"474","sim":0.4138,"rank":3},{"head_id":"884","sim":0.3598,"rank":4},{"head_id":"486","sim":0.3597,"rank":5}],"llm":{"check":"roget_placement","rubric_version":1,"rubric_sha256":"f5fccc9dd44feb271823e9d8f9aaeb503f983ab8ff00ce5c320029f33d6b9987","checked_at":"2026-10-08T20:34:58+00:00","candidates":["474","486","482","884","484","863"],"sonnet":{"head":"484","reason":"Overconfidence means being more certain than warranted, and head 484 (Belief) lists 'positive' and 'cocksure' among its adjectives, which name this unwarranted certainty. Head 474 (Certainty) is about actual certainty, and 482 is about overestimating things, not oneself.","model":"claude-sonnet-5-5"},"opus":{"head":"484","reason":"The Belief head includes 'positive' and 'cocksure', which name a person who is sure beyond warrant; the Certainty head names certainty itself rather than unwarranted assurance.","model":"claude-opus-5-5"},"final":"484","decided_by":"opus","outcome":"moved","previous_primary":"482","previous_route":"semantic","previous_secondary":[]}},
@@ -2277,11 +2326,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py place-check --unchecked-only --resume --budget-usd 0.2",
-   "git_sha": "e6fac68+dirty",
+   "git_sha": "cac3244+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coordinates of the corpus labels (workstream 2)"
   },
-  "produced_at": "2026-10-10T12:57:35+00:00",
+  "produced_at": "2026-10-10T13:04:47+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -2304,10 +2353,10 @@
    {
     "dep_key": "trait_files",
     "path": "data/traits/instructions",
-    "fingerprint": "v1:multi:08517ef47602",
+    "fingerprint": "v1:multi:b4721d605da9",
     "kind": "multi",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T12:57:05+00:00",
+    "last_modified_at": "2026-10-10T13:04:06+00:00",
     "extras": {},
     "member_paths": [
      "data/traits/instructions/absentee.json",
@@ -3277,10 +3326,10 @@
    {
     "dep_key": "placement_trait_files",
     "path": "data/traits/instructions",
-    "fingerprint": "v1:multi:08517ef47602",
+    "fingerprint": "v1:multi:b4721d605da9",
     "kind": "multi",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T12:57:05+00:00",
+    "last_modified_at": "2026-10-10T13:04:06+00:00",
     "extras": {},
     "member_paths": [
      "data/traits/instructions/absentee.json",
@@ -4218,6 +4267,6 @@
     ]
    }
   ],
-  "inputs_sha256": "0277ff1ad59fa680a9d5876fa415bb5239a172f4f687e0ffd81347e12c57ac34"
+  "inputs_sha256": "1e303982c2cf5e5b45b002278461e472c1880bde70f02e9ffbdf456d2ab3b327"
  }
 }

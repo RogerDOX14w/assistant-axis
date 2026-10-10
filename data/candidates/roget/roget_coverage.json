@@ -1,18 +1,18 @@
 {
  "result": {
   "summary": {
-   "n_heads": 674,
+   "n_heads": 675,
    "n_dispositional": 576,
-   "class_i_iii_added": 98,
+   "class_i_iii_added": 99,
    "by_state": {
-    "covered": 280,
-    "partly": 50,
+    "covered": 279,
+    "partly": 51,
     "queued": 2,
     "empty": 154
    },
    "covered_partly_uncovered": {
-    "covered": 280,
-    "partly_covered": 50,
+    "covered": 279,
+    "partly_covered": 51,
     "uncovered": 156,
     "of_which_queued": 2
    },
@@ -21,14 +21,14 @@
     "pair_empty": 57,
     "singleton_empty": 66,
     "queued_only": 2,
-    "partly_covered": 50,
+    "partly_covered": 51,
     "crowded": 79,
-    "covered": 201
+    "covered": 200
    },
    "by_class": {
     "I": {
-     "partly": 9,
-     "covered": 24,
+     "partly": 10,
+     "covered": 23,
      "empty": 2
     },
     "II": {
@@ -82,8 +82,8 @@
      "not_character": 3
     },
     "I IV. Order": {
-     "covered": 4,
-     "partly": 1,
+     "covered": 3,
+     "partly": 2,
      "queued": 0,
      "empty": 0,
      "not_character": 1
@@ -163,7 +163,7 @@
      "partly": 4,
      "queued": 1,
      "empty": 1,
-     "not_character": 7
+     "not_character": 8
     },
     "IV I. Operations of intellect in general": {
      "covered": 2,
@@ -336,8 +336,8 @@
    },
    "opposed_pairs": {
     "neither_pole_covered": 32,
-    "both_poles_covered": 77,
-    "one_pole_covered": 62
+    "both_poles_covered": 76,
+    "one_pole_covered": 63
    },
    "opposed_pairs_by_source": {
     "rule": {
@@ -345,8 +345,8 @@
     },
     "synopsis": {
      "neither_pole_covered": 31,
-     "both_poles_covered": 77,
-     "one_pole_covered": 62
+     "both_poles_covered": 76,
+     "one_pole_covered": 63
     }
    },
    "pair_kinds": {
@@ -364,7 +364,7 @@
    },
    "hidden": [],
    "not_character": {
-    "n": 188,
+    "n": 189,
     "heads": [
      "25",
      "49",
@@ -385,6 +385,7 @@
      "304",
      "334",
      "340",
+     "357",
      "419",
      "422",
      "426",
@@ -556,12 +557,12 @@
      "998"
     ],
     "by_state": {
-     "covered": 55,
+     "covered": 56,
      "empty": 119,
      "partly": 14
     },
     "by_gap_class": {
-     "covered": 51,
+     "covered": 52,
      "pair_empty": 62,
      "partly_covered": 14,
      "crowded": 4,
@@ -571,17 +572,17 @@
     "by_class": {
      "I": 6,
      "II": 11,
-     "III": 9,
+     "III": 10,
      "IV": 58,
      "V": 72,
      "VI": 32
     }
    },
    "character_ratings": {
-    "rated": 585,
+    "rated": 586,
     "unrated": 89,
     "by_rating": {
-     "0": 188,
+     "0": 189,
      "1": 232,
      "2": 165
     }
@@ -591,8 +592,8 @@
     "rubric_version": 2,
     "rubric_sha256": "09a1fc1dcd4af844b8e98de5be909d693a806ff201e24c9019b826c769049116",
     "model": "claude-haiku-5-5",
-    "n_rated": 585,
-    "n_not_character": 188
+    "n_rated": 586,
+    "n_not_character": 189
    }
   },
   "hidden": [],
@@ -610,8 +611,8 @@
 {"id":"49","title":"Decomposition","path":"I > III. Quantity > 3. Conjunctive quantity","klass":"I","section":"III. Quantity","partner":"48","pair_kind":"pair","pair_source":"synopsis","members":["48","49"],"existing":["reductionist"],"existing_secondary":["analytical"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["analytical"],"character":0},
 {"id":"52","title":"Completeness","path":"I > III. Quantity > 4. Concrete quantity","klass":"I","section":"III. Quantity","partner":"53","pair_kind":"pair","pair_source":"synopsis","members":["52","53"],"existing":["thorough"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["thorough"],"character":1},
 {"id":"55","title":"Exclusion","path":"I > III. Quantity > 4. Concrete quantity","klass":"I","section":"III. Quantity","partner":"54","pair_kind":"pair","pair_source":"synopsis","members":["54","55"],"existing":["exclusionary"],"existing_secondary":[],"queued_active":["exclusive"],"queued_parked":[],"n_existing":1,"n_queued_active":1,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["exclusive"],"character":0},
-{"id":"58","title":"Order","path":"I > IV. Order > 1. Order in general","klass":"I","section":"IV. Order","partner":"59","pair_kind":"pair","pair_source":"synopsis","members":["58","59"],"existing":["organized"],"existing_secondary":["methodical"],"queued_active":[],"queued_parked":["orderly","systematic"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["chaotic","disorganized"],"triggers":["methodical"],"character":2},
-{"id":"59","title":"Disorder","path":"I > IV. Order > 1. Order in general","klass":"I","section":"IV. Order","partner":"58","pair_kind":"pair","pair_source":"synopsis","members":["58","59"],"existing":["chaotic","disorganized"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["organized"],"triggers":["chaotic","disorganized"],"character":2},
+{"id":"58","title":"Order","path":"I > IV. Order > 1. Order in general","klass":"I","section":"IV. Order","partner":"59","pair_kind":"pair","pair_source":"synopsis","members":["58","59"],"existing":[],"existing_secondary":["methodical"],"queued_active":[],"queued_parked":["orderly","systematic"],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["chaotic","disorganized"],"triggers":["methodical"],"character":2},
+{"id":"59","title":"Disorder","path":"I > IV. Order > 1. Order in general","klass":"I","section":"IV. Order","partner":"58","pair_kind":"pair","pair_source":"synopsis","members":["58","59"],"existing":["chaotic","disorganized"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":["chaotic","disorganized"],"character":2},
 {"id":"60","title":"Arrangement","path":"I > IV. Order > 1. Order in general","klass":"I","section":"IV. Order","partner":"61","pair_kind":"pair","pair_source":"synopsis","members":["60","61"],"existing":[],"existing_secondary":["methodical"],"queued_active":[],"queued_parked":["orderly","structured","systematic"],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"empty","partner_existing":[],"triggers":["methodical"],"character":1},
 {"id":"76","title":"Inclusion","path":"I > IV. Order > 4. Distributive order","klass":"I","section":"IV. Order","partner":"77","pair_kind":"pair","pair_source":"synopsis","members":["76","77"],"existing":["inclusive"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["inclusive"],"character":0},
 {"id":"82","title":"Conformity","path":"I > IV. Order > 5. Order as regards categories","klass":"I","section":"IV. Order","partner":"83","pair_kind":"pair","pair_source":"synopsis","members":["82","83"],"existing":["conformist","conventional","conventional_kohlberg","formalist","traditional","well_behaved"],"existing_secondary":["orthodox"],"queued_active":[],"queued_parked":["orderly"],"n_existing":6,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["unfashionable"],"triggers":["orthodox"],"character":1},
@@ -677,6 +678,7 @@
 {"id":"334","title":"Gaseity","path":"III > II. Inorganic matter > 2. Fluid matter > 1. Fluids in General","klass":"III","section":"II. Inorganic matter","partner":"333","pair_kind":"pair","pair_source":"synopsis","members":["333","334"],"existing":["ethereal"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["ethereal"],"character":0},
 {"id":"340","title":"Dryness","path":"III > II. Inorganic matter > 2. Fluid matter > 1. Fluids in General","klass":"III","section":"II. Inorganic matter","partner":"339","pair_kind":"pair","pair_source":"synopsis","members":["339","340"],"existing":[],"existing_secondary":["dry"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"empty","partner_existing":[],"triggers":["dry"],"character":0},
 {"id":"346","title":"Island","path":"III > II. Inorganic matter > 2. Fluid matter > 1. Fluids in General","klass":"III","section":"II. Inorganic matter","partner":"345","pair_kind":"pair","pair_source":"synopsis","members":["345","346"],"existing":["insular","pacific_islander"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["insular"],"character":1},
+{"id":"357","title":"Organization","path":"III > III. Organic matter > 1. Vitality > 1. Vitality in general","klass":"III","section":"III. Organic matter","partner":"358","pair_kind":"pair","pair_source":"synopsis","members":["357","358"],"existing":["organized"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["organized"],"character":0},
 {"id":"359","title":"Life","path":"III > III. Organic matter > 1. Vitality > 1. Vitality in general","klass":"III","section":"III. Organic matter","partner":"360","pair_kind":"pair","pair_source":"synopsis","members":["359","360"],"existing":[],"existing_secondary":["animated"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"empty","partner_existing":[],"triggers":["animated"],"character":1},
 {"id":"371","title":"Agriculture","path":"III > III. Organic matter > 1. Vitality > 1. Vitality in general","klass":"III","section":"III. Organic matter","partner":"370","pair_kind":"pair","pair_source":"synopsis","members":["370","371"],"existing":["rural"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["rural"],"character":1},
 {"id":"372","title":"Mankind","path":"III > III. Organic matter > 1. Vitality > 1. Vitality in general","klass":"III","section":"III. Organic matter","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["372"],"existing":[],"existing_secondary":["cosmopolitan","humanitarian"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":null,"partner_existing":[],"triggers":["cosmopolitan"],"character":1},
@@ -1277,11 +1279,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "e6fac68+dirty",
+   "git_sha": "983d5b6+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-10T12:57:37+00:00",
+  "produced_at": "2026-10-10T13:07:23+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1304,22 +1306,22 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T12:57:35+00:00@1436229",
+    "fingerprint": "v1:2026-10-10T13:04:47+00:00@1438058",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T12:57:35+00:00",
+    "last_modified_at": "2026-10-10T13:04:47+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope",
     "path": "data/candidates/roget/head_scope.json",
-    "fingerprint": "v1:2026-10-10T11:57:49+00:00@249708",
+    "fingerprint": "v1:2026-10-10T13:07:21+00:00@250098",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T11:57:49+00:00",
+    "last_modified_at": "2026-10-10T13:07:21+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "c42ddce15c19c6208a24a86ea4f75e4c9bd640621a958c3d93ce9c245709098c"
+  "inputs_sha256": "ee8a544ee91138838d661e4803314cb140dc6517a8491c282a28083edb63a00f"
  }
 }

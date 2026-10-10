@@ -76,6 +76,13 @@ V4_MIN_SCORE = 4
 SENSE_CHANGED_RENAMES: dict[str, str] = {"bland": "dull", "libertarian": "metaphysical_libertarian",
                                          "savage": "violent"}
 
+#: A sense change under an *unchanged* stem has no rename to catch it and nothing here detects it: every source
+#: keyed by stem (a seed-queue decision's prose, an M1 gloss, this module's own output) goes on describing the old
+#: sense, while the Roget map and ``corpus_regions.json`` hash the description and re-place themselves.  Such a
+#: pair is dropped by hand, in ``labelled_pairs_curation.json``'s ``exclude`` with a reason.  Done so far:
+#: ``organized`` and ``disorganized`` on 2026-10-10 (cac3244, orderly talk -> orderly things and time), which made
+#: the queue's "structured is the same trait as organized" decision describe a trait the corpus no longer has.
+
 
 def corpus_renames(data_dir: Path, *, carry_only: bool = True) -> dict[str, str]:
     """``{old stem: current stem}`` from the ``renamed_from`` field of the

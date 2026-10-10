@@ -4919,25 +4919,25 @@
     "disorganized": {
       "label": "disorganized",
       "region": "cognitive_epistemic",
-      "enactable_in_text": 2,
+      "enactable_in_text": 1,
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "2afa032592dd889285ded79f878a8e28e7876d463118e23e45fc2558410dfd6f",
+      "description_sha256": "63ad08e98a22f26eecb09d14d6873328e214972258fb62c43ffa224f11687e6f",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona thinks and organizes its speech, showing up as scattered, non-linear writing that loses track of earlier points.",
-        "alignment": "Scattered, rambling thinking and speech is a matter of style and cognitive manner, with no direct bearing on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+        "descriptors": "The description covers habits for managing physical things and time, which is closest to how a persona handles information and its own affairs, and a text-only reply can reflect it only indirectly, such as through scattered or forgotten details.",
+        "alignment": "Disorganization concerns personal tidiness and time management, which is a matter of manner and habit with no clear bearing on harm, honesty, approval, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_20261009T232256Z",
-      "at": "2026-10-09T23:22:59+00:00",
-      "previous_region": "communication_style",
+      "batch_id": "corpus_desc_20261010T130451Z",
+      "at": "2026-10-10T13:04:54+00:00",
+      "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261009T232256Z"
     },
     "dispassionate": {
       "label": "dispassionate",
@@ -13938,26 +13938,26 @@
     },
     "organized": {
       "label": "organized",
-      "region": "communication_style",
-      "enactable_in_text": 2,
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 1,
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "9b74e5b1e716dfb9d5a89f877d37fc71d0602e4533eed5f15516af43090a620c",
+      "description_sha256": "c5ca372840ed951ba546e3ea472ee0e96023d85e29e46b9b12cd85ef62fb5b4e",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how ideas are ordered and delivered, which shows directly in the structure and flow of written replies.",
-        "alignment": "Describes a manner of organizing speech and work, which is style and character rather than any of the seven matters such as honesty, harm, or following rules."
+        "descriptors": "The trait is about structuring one's own things and time, which is closest to how a mind plans and handles information, though it fits no region cleanly.",
+        "alignment": "Organization of one's own things and time is a matter of personal habit and does not touch honesty, harm, approval, power, deference, oversight, or rule-keeping in any clear way."
       },
-      "batch_id": "corpus_desc_20261009T232256Z",
-      "at": "2026-10-09T23:23:04+00:00",
+      "batch_id": "corpus_desc_20261010T130451Z",
+      "at": "2026-10-10T13:04:54+00:00",
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_2026_10_09"
+      "previous_source": "description corpus_desc_20261009T232256Z"
     },
     "orthodox": {
       "label": "orthodox",
@@ -21345,11 +21345,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
-      "git_sha": "e6fac68+dirty",
+      "git_sha": "cac3244+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T125740Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T130451Z)"
     },
-    "produced_at": "2026-10-10T12:57:52+00:00",
+    "produced_at": "2026-10-10T13:04:54+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21370,15 +21370,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T125740Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T125740Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T12:57:52+00:00@13075",
+        "dep_key": "responses_corpus_desc_20261010T130451Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T130451Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T13:04:54+00:00@4331",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T12:57:52+00:00",
+        "last_modified_at": "2026-10-10T13:04:54+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "c6f144deb28af445f12b4aef2e7c1c0c138ff9a843b3546939b9def36b5d9738"
+    "inputs_sha256": "38af5738b2c5dbe7df0767f65c5fbfda4ca1e67c87e704165bbd6df8b604f365"
   }
 }

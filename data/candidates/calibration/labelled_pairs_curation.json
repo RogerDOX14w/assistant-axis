@@ -1,5 +1,5 @@
 {
-  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived. Since 2026-10-02 (the merge with the main line) the builder reads a renamed stem here as the stem its file has now (renamed_from), except the renames in labels.SENSE_CHANGED_RENAMES, and lists entries that no longer apply under curation_unused in labelled_pairs.json. Since 2026-10-09 (W18, Roger) data/traits/trait_antonyms_v4.json is retired: the 14 antonym pairs only it supplied are under add with source antonyms_v4, so a rebuild keeps them.",
+  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived. Since 2026-10-02 (the merge with the main line) the builder reads a renamed stem here as the stem its file has now (renamed_from), except the renames in labels.SENSE_CHANGED_RENAMES, and lists entries that no longer apply under curation_unused in labelled_pairs.json. Since 2026-10-09 (W18, Roger) data/traits/trait_antonyms_v4.json is retired: the 14 antonym pairs only it supplied are under add with source antonyms_v4, so a rebuild keeps them. A sense change under an unchanged stem (organized and disorganized, 2026-10-10) leaves this file's and the seed queue's prose decisions describing the old sense: such a pair is excluded here by hand, since nothing detects it (labels.py keys by stem; the Roget map and corpus_regions hash the description and re-place themselves).",
   "keep_only": {
     "queue:aloof": {
       "keep": {
@@ -658,6 +658,11 @@
       "a": "detached",
       "b": "empathetic",
       "reason": "Roger 2026-10-02: the pair dissolved in the clean-pair recheck after the trait rubric V2 regeneration; no longer antonyms, though v4 scored them 4"
+    },
+    {
+      "a": "gloss:structured",
+      "b": "organized",
+      "reason": "the sense of organized changed under its own stem on 2026-10-10 (cac3244): the queue decision called structured 'the same trait as organized' when organized meant orderly talk ('a plan for the answer ... never losing the thread or rambling'); organized now means keeping a system for one's things and time, and structured's M1 gloss (clear steps, breaking problems into parts) is no longer the same concept. The old sense lives in stream_of_consciousness's pair"
     }
   ]
 }

@@ -8,12 +8,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 ## Headline
 
-- Heads in scope: **674** (576 dispositional, 98 from Classes I-III).
-- Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 188; 89 unrated, mostly heads with no adjectives).
-- Covered **280**, partly covered **50**, uncovered **156** (of which 2 have a queued label only).
-- Opposed pairs in scope: both poles covered **77**, one pole **62**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 77, "one_pole_covered": 62}}).
+- Heads in scope: **675** (576 dispositional, 99 from Classes I-III).
+- Not character (rated 0): **189** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 189; 89 unrated, mostly heads with no adjectives).
+- Covered **279**, partly covered **51**, uncovered **156** (of which 2 have a queued label only).
+- Opposed pairs in scope: both poles covered **76**, one pole **63**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 76, "one_pole_covered": 63}}).
 - Labels placed: 729 existing traits with a primary head (203 without; 683 of the primaries in scope), 107 queued labels (47 without).
-- Gap classes: pair_completion 31, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 50, crowded 79, covered 201.
+- Gap classes: pair_completion 31, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 51, crowded 79, covered 200.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -23,7 +23,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | I I. Existence | 2 | 1 | 0 | 0 | 0 |
 | I II. Relation | 1 | 2 | 0 | 0 | 0 |
 | I III. Quantity | 3 | 0 | 0 | 1 | 3 |
-| I IV. Order | 4 | 1 | 0 | 0 | 1 |
+| I IV. Order | 3 | 2 | 0 | 0 | 1 |
 | I V. Number | 0 | 1 | 0 | 0 | 0 |
 | I VI. Time | 4 | 0 | 0 | 1 | 1 |
 | I VII. Change | 2 | 1 | 0 | 0 | 0 |
@@ -34,7 +34,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | II IV. Motion | 1 | 5 | 0 | 0 | 3 |
 | III I. Matter in general | 1 | 1 | 0 | 0 | 0 |
 | III II. Inorganic matter | 5 | 1 | 0 | 0 | 2 |
-| III III. Organic matter | 5 | 4 | 1 | 1 | 7 |
+| III III. Organic matter | 5 | 4 | 1 | 1 | 8 |
 | IV I. Operations of intellect in general | 2 | 0 | 0 | 3 | 1 |
 | IV II. Precursory conditions and operations | 7 | 0 | 0 | 2 | 6 |
 | IV III. Materials for reasoning | 2 | 0 | 0 | 3 | 4 |
@@ -236,13 +236,14 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 391 Insipidity | III III. Organic matter / 1. Sensation in general | 390 Taste (synopsis) | - | [bland](../../seed_queue.json) (queued) | [vanilla](../../seed_queue.json) (queued) | - |
 | 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (synopsis) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
 
-## partly_covered (50)
+## partly_covered (51)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
 | 4 Unsubstantiality | I I. Existence | 3 Substantiality (synopsis) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
 | 10 Irrelation | I II. Relation | 9 Relation (synopsis) | - | - | - | [isolated](../../traits/instructions/isolated.json) |
 | 18 Dissimilarity | I II. Relation | 17 Similarity (synopsis) | - | - | - | [divergent](../../traits/instructions/divergent.json) |
+| 58 Order | I IV. Order | 59 Disorder (synopsis) | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) | - | [orderly](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
 | 60 Arrangement | I IV. Order | 61 Derangement (synopsis) | - | - | [orderly](../../seed_queue.json) (queued), [structured](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
 | 87 Unity | I V. Number | 88 Accompaniment (synopsis) | - | - | - | [single](../../traits/instructions/single.json) |
 | 141 Permanence | I VII. Change | 140 Change (synopsis) | - | - | - | [conservative](../../traits/instructions/conservative.json) |
@@ -291,7 +292,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 995 Churchdom | VI V. Religious affections | - | - | - | - | [Christian](../../traits/instructions/christian.json) |
 | 996 Clergy | VI V. Religious affections | 997 Laity (synopsis) | [secular](../../traits/instructions/secular.json) | - | - | [reverent](../../traits/instructions/reverent.json) |
 
-## Not character (188)
+## Not character (189)
 
 Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_scope.json).  A covered head here is one a trait was placed on although its adjectives are not about character.
 
@@ -316,6 +317,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 304 Shortcoming | II IV. Motion | partly | - | - | [short](../../traits/instructions/short.json) |
 | 334 Gaseity | III II. Inorganic matter | covered | [ethereal](../../traits/instructions/ethereal.json) | - | - |
 | 340 Dryness | III II. Inorganic matter | partly | - | - | [dry](../../traits/instructions/dry.json) |
+| 357 Organization | III III. Organic matter | covered | [organized](../../traits/instructions/organized.json) | - | - |
 | 419 Deafness | III III. Organic matter | partly | - | - | [deaf](../../traits/instructions/deaf.json) |
 | 422 Dimness | III III. Organic matter | partly | - | - | [dull](../../traits/instructions/dull.json) |
 | 426 Opacity | III III. Organic matter | covered | [opaque](../../traits/instructions/opaque.json) | - | - |
@@ -523,7 +525,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 49 Decomposition | covered (not character) | [analytical](../../traits/instructions/analytical.json) |
 | 52 Completeness | covered | [thorough](../../traits/instructions/thorough.json) |
 | 55 Exclusion | covered (not character) | [exclusive](../../seed_queue.json) (queued) |
-| 58 Order | covered | [methodical](../../traits/instructions/methodical.json) |
+| 58 Order | partly | [methodical](../../traits/instructions/methodical.json) |
 | 59 Disorder | covered | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) |
 | 60 Arrangement | partly | [methodical](../../traits/instructions/methodical.json) |
 | 76 Inclusion | covered (not character) | [inclusive](../../traits/instructions/inclusive.json) |
@@ -590,6 +592,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 334 Gaseity | covered (not character) | [ethereal](../../traits/instructions/ethereal.json) |
 | 340 Dryness | partly (not character) | [dry](../../traits/instructions/dry.json) |
 | 346 Island | covered | [insular](../../traits/instructions/insular.json) |
+| 357 Organization | covered (not character) | [organized](../../traits/instructions/organized.json) |
 | 359 Life | partly | [animated](../../traits/instructions/animated.json) |
 | 371 Agriculture | covered | [rural](../../traits/instructions/rural.json) |
 | 372 Mankind | partly | [cosmopolitan](../../traits/instructions/cosmopolitan.json) |
@@ -619,7 +622,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 32 Smallness | [slight](../../traits/instructions/slight.json) |
 | 47 Incoherence | [incoherent](../../traits/instructions/incoherent.json) |
 | 52 Completeness | [thorough](../../traits/instructions/thorough.json) |
-| 58 Order | [organized](../../traits/instructions/organized.json) |
 | 59 Disorder | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) |
 | 82 Conformity | [conformist](../../traits/instructions/conformist.json), [conventional](../../traits/instructions/conventional.json), [conventional (Kohlberg)](../../traits/instructions/conventional_kohlberg.json), [formalist](../../traits/instructions/formalist.json), [traditional](../../traits/instructions/traditional.json), [well-behaved](../../traits/instructions/well_behaved.json) |
 | 83 Unconformity | [unfashionable](../../traits/instructions/unfashionable.json) |

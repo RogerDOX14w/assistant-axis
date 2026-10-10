@@ -10,12 +10,12 @@
   "batch_size": 20,
   "max_adjectives": 20,
   "summary": {
-   "n_scope": 674,
-   "n_rated": 585,
+   "n_scope": 675,
+   "n_rated": 586,
    "n_skipped_no_adjectives": 89,
    "n_unrated": 0,
    "by_rating": {
-    "0": 188,
+    "0": 189,
     "1": 232,
     "2": 165
    },
@@ -31,7 +31,7 @@
      "2": 2
     },
     "III": {
-     "0": 9,
+     "0": 10,
      "1": 16,
      "2": 3
     },
@@ -133,6 +133,7 @@
 {"id":"334","title":"Gaseity","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":7,"n_shown":7,"rating":0,"reason":"Gaseous, vaporous and aerial describe gases and air, with no real use for describing a person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"340","title":"Dryness","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":20,"n_shown":20,"rating":0,"reason":"Dry is the only term that might describe a person's manner, and the rest describe dryness of things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"346","title":"Island","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":2,"n_shown":2,"rating":1,"reason":"Insular can describe a narrow-minded person, but seagirt describes islands.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"357","title":"Organization","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":3,"n_shown":3,"rating":0,"reason":"The adjectives organic, organized and vacuolar describe biological or physical structure of things, not what a person is like.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"359","title":"Life","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":17,"n_shown":17,"rating":1,"reason":"Animated, vital, full of life and quick can describe a lively temperament, but most entries describe simply being alive.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"371","title":"Agriculture","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":7,"n_shown":7,"rating":1,"reason":"Rustic, rural and country can describe a person's background or manner, but agricultural, arable and horticultural describe land and produce.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"372","title":"Mankind","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":10,"n_shown":10,"rating":1,"reason":"Cosmopolitan, social, personal and human can describe a person, while national, civic and public mostly describe institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -729,21 +730,21 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-10T11:57:49+00:00",
-   "n_calls": 0,
+   "at": "2026-10-10T13:07:21+00:00",
+   "n_calls": 1,
    "n_retries": 0,
-   "cost_usd": 0,
+   "cost_usd": 9.4e-05,
    "estimate": {
-    "n_calls": 0,
-    "in_tok": 0,
-    "out_tok": 0,
-    "usd": 0.0
+    "n_calls": 1,
+    "in_tok": 751,
+    "out_tok": 255,
+    "usd": 0.0002
    },
    "cache_system": false,
    "concurrency": 4,
    "parse_rate": [
-    0,
-    0
+    1,
+    1
    ],
    "stopped_by_budget": false
   }
@@ -752,11 +753,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
-   "git_sha": "e776919+dirty",
+   "git_sha": "983d5b6+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-10T11:57:49+00:00",
+  "produced_at": "2026-10-10T13:07:21+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -779,10 +780,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T11:57:47+00:00@1430488",
+    "fingerprint": "v1:2026-10-10T13:04:47+00:00@1438058",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T11:57:47+00:00",
+    "last_modified_at": "2026-10-10T13:04:47+00:00",
     "extras": {}
    },
    {
@@ -798,6 +799,6 @@
     }
    }
   ],
-  "inputs_sha256": "55b838cdcdeb03901eb83b67641a986cd3b99da6338baed6a3d0ff56dd0466a9"
+  "inputs_sha256": "fd66914d09a3105a6e492c0a7aeaad73c504b50ebdd0afb2882374632717c4e7"
  }
 }
