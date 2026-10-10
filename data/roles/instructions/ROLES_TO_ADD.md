@@ -46,9 +46,10 @@ there applies here too.
   the two expected axes, settled / moving and chosen / forced.
 - **Role words held by the trait-gap generators**: read when preparing a
   role chunk (§ "Role words from the trait-gap generators").
-- Delayed (Roger, 2026-10-09, pre-extraction W21 and W23): the 22 Tarot
-  roles (§ "TBD: the 22 Major Arcana as roles (Tarot)"); `native` and
-  `civilian` (§ "Optional, low priority").
+- Delayed (Roger, 2026-10-09, pre-extraction W23): `native` and `civilian`
+  (§ "Optional, low priority").  The 22 Major Arcana moved to
+  [TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md) on 2026-10-10,
+  when Roger made them traits (still delayed, W21).
 - Done: the depth (caricature) check on V3's own output, with nothing to
   change (2026-10-09; ROLES_ADDED § "Role rubric V3", last paragraph).
 
@@ -172,82 +173,6 @@ synonym of symbiont as its description reads), what to do with destroyer / guard
 side names a different opposite), and detractor's question in
 [TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md).  **2026-10-10:** all settled by
 Roger, see the status line above (the pairs stay; evangelist / detractor dropped).
-
-### TBD: the 22 Major Arcana as roles (Tarot)
-
-**Parked as an idea (Roger, 2026-10-09, chunk 7): not now.**  The 22 queue
-entries are `backlog`; everything below stays as the record for when it is
-taken up.
-
-Status: **undecided** (Roger, 2026-09-09: "still uncertain"; a
-throw-the-kitchen-sink-at-it step, acceptable because the set is labelled
-by source and easy to remove).  Roles, not traits: each card is an
-archetype with a voice, and about a third of them are events or cosmic
-states rather than people, which the corpus already handles in its
-embodiment register (`wind`, `zeitgeist`, `void`, `echo`, `dreamer`,
-`destroyer`).
-
-- **Naming**: the standard as a parenthesised, capitalised postscript
-  (convention adopted 2026-09-09): label `the fool (Tarot)`, stem
-  `the_fool_tarot` (parentheses dropped by `normalize_to_file_name`),
-  and so on through `the_world_tarot`.  Roles have no `positive_label`
-  field, so the label lives in a `ROLE_DISPLAY_OVERRIDES` entry (or a
-  per-role `display_name` field, to be added) for `corpus_display_name`;
-  the judge sees the mechanical form `the fool tarot` until the
-  judge-facing-name change (AGENT_NOTES code-housekeeping TODO item 4)
-  lands with the next full rejudge.
-- **Descriptions**: one to two sentences each, paraphrased from the
-  Rider-Waite meanings (the canonical source), written explicitly *as a
-  persona*: "the embodiment of sudden upheaval, who speaks as the
-  lightning that brings down structures built on false foundations", not
-  "a card meaning upheaval".  Event cards are forces with a voice; the
-  risk is that they collapse into one generic oracle voice, so each
-  description must name its specific force.  Reversed readings: ignore,
-  or fold into the description as an extra element where it makes
-  emotional sense; no separate reversed set.
-  **Which meaning (Roger, 2026-10-07):** the description would be of the
-  card either as a *significator* (the card standing for the querent or
-  another person, a use many readers advise against for the Major Arcana)
-  or at least of its meaning in a reading where the card clearly
-  represents a person rather than a situation; not its situational or
-  event meaning.  Waite's *Pictorial Key to the Tarot* (1911) is public
-  domain, so the canonical text can be quoted in full under the
-  standards-derived method of chunk 4 (AGENT_NOTES description rule 9)
-  rather than reconstructed.
-- **Roles or traits? (Roger, 2026-10-07):** not clearly roles.  A card is
-  not inherently exclusive of a profession (one can be the Hermit and a
-  baker), which is the mark of a trait; but the twenty-two are mutually
-  exclusive of each other, as roles are, and several are named like
-  professions (the Magician, the Hierophant, the Hermit, the Emperor).
-  Decide the entity type with the set, before seeding.
-- **Arrangement**: `set` of 22, `source` "Rider-Waite tarot, Major
-  Arcana".  Not a `sequence`: the numerical order (the Fool's Journey) is
-  not expected to correlate with the embeddings.
-- **Collisions and overlaps**: `fool` and `hermit` exist as roles,
-  `monarch` and `priest` are queued (Emperor, Hierophant); the Magician
-  and High Priestess sit near `guru`, `witch`, `mystic`; the Tower is
-  near `destroyer`, the Moon near `oracle` and `dreamer`.  The
-  measurement of interest is whether the 22 produce 22 directions or a
-  tarot-flavoured blob; the mean of the 22 against the corpus mean is a
-  "tarot-ness" direction, as with the Hogwarts houses.
-- **Seed keywords** (Rider-Waite numbering; Strength VIII, Justice XI):
-  0 Fool: new beginnings, innocence, the leap of faith.  I Magician:
-  will, skill, manifestation.  II High Priestess: intuition, hidden
-  knowledge, mystery.  III Empress: fertility, nurture, abundance.
-  IV Emperor: authority, structure, control.  V Hierophant: tradition,
-  orthodoxy, institutions.  VI Lovers: union, choice, alignment of
-  values.  VII Chariot: willpower, victory, determination.  VIII Strength:
-  courage, gentle mastery, compassion over force.  IX Hermit: solitude,
-  introspection, the lamp of guidance.  X Wheel of Fortune: cycles,
-  fate, turning luck.  XI Justice: fairness, truth, cause and effect.
-  XII Hanged Man: surrender, suspension, the reversed perspective.
-  XIII Death: endings, transformation, clearing away.  XIV Temperance:
-  balance, moderation, patient blending.  XV Devil: bondage,
-  materialism, temptation.  XVI Tower: sudden upheaval, revelation by
-  catastrophe.  XVII Star: hope, renewal, serenity after the storm.
-  XVIII Moon: illusion, fear, intuition, the unconscious.  XIX Sun: joy,
-  vitality, clarity, success.  XX Judgement: reckoning, awakening,
-  absolution.  XXI World: completion, integration, wholeness.
 
 ### Optional, low priority (from the first pass)
 
