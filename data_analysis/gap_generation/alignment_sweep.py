@@ -400,6 +400,97 @@ def cmd_submit(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- gate
+
+def cmd_gate(args) -> int:
+    import asyncio
+
+    from assistant_axis import json_metadata
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import gate as G
+    from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, LABEL_FORM_KEY
+    from assistant_axis.gapgen.registry import Registry, utc_now
+    from assistant_axis.gapgen.runs import start_run
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.provenance import current_file_input
+
+    rdir = _run_dir(args, args.run_id)
+    try:
+        rub = G.load_rubric(args.rubrics_dir)
+    except G.RubricNotPinned as exc:
+        raise SystemExit(f"REFUSED: {exc}")
+    gold = G.gold_inputs(args.gold_items)
+    kept = [] if args.gold_only else G.kept_inputs(Registry(args.registry).fold() if args.registry.exists() else {},
+                                                   run_id=args.run_id)
+    if not args.gold_only and not kept:
+        print(f"no kept rows of alignment_sweep/{args.run_id} in {args.registry} (M3 decision new or a pair "
+              f"completion): only the gold items run")
+    e_gold, e_kept = G.estimate(gold, rub["text"], args.model), G.estimate(kept, rub["text"], args.model)
+    print(f"gate: {len(gold)} gold items" + (f" and {len(kept)} kept rows" if kept else "") +
+          f", {G.N_READINGS} readings each; rubric {rub['name']} v{rub['version']} ({rub['sha256'][:12]}); "
+          f"model {args.model}")
+    total = _print_estimate([("gold", e_gold)] + ([("kept rows", e_kept)] if kept else []), args.budget_usd)
+    cap = confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        print("DRY-RUN: no call, nothing written.  The first three calls' user turns (system prompt = the rubric "
+              "block):")
+        for i in (gold + kept)[:3]:
+            print(f"--- {i.key}\n{G.render_user(i)}")
+        return 0
+    refused = _dirty_refusal(args)
+    if refused:
+        raise SystemExit(f"REFUSED: {refused}")
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "gate", "gold_only": bool(args.gold_only), "n_gold": len(gold), "n_kept": len(kept),
+        "model": args.model, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
+        "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")}, LABEL_FORM_KEY: DEFAULT_LABEL_FORM,
+        "allow_dirty": bool(args.allow_dirty)})
+    ctx.usage = GuardedUsage(budget_usd=cap)
+    resp = rdir / G.RESPONSES_NAME
+    g_res, k_res = G.GateResult(), G.GateResult()
+    try:
+        client = _anthropic_client()
+        g_res = asyncio.run(G.run_gate(gold, client=client, model=args.model, system=rub["text"], usage=ctx.usage,
+                                       concurrency=args.concurrency, rubric_version=rub["version"], now=utc_now,
+                                       on_record=lambda r: X.append_response(r, resp)))
+        if kept and not g_res.stopped_by_budget:
+            k_res = asyncio.run(G.run_gate(kept, client=client, model=args.model, system=rub["text"],
+                                           usage=ctx.usage, concurrency=args.concurrency,
+                                           rubric_version=rub["version"], now=utc_now,
+                                           on_record=lambda r: X.append_response(r, resp)))
+    finally:
+        ctx.finish(n_emitted=0)
+        print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
+    for label, res, n in (("gold", g_res, len(gold)), ("kept", k_res, len(kept))):
+        if n:
+            n_read = n * G.N_READINGS
+            warn_if_low_parse_rate(label=f"alignment_sweep gate {label}:{args.model}",
+                                   n_ok=n_read - res.n_failed_readings, n_total=n_read)
+    gold_doc = json.loads(args.gold_items.read_text(encoding="utf-8"))["items"]
+    ev = G.score_against_gold(g_res.rows, gold_doc)
+    inputs = [current_file_input(dep_key="gate_gold_items", path=args.gold_items),
+              current_file_input(dep_key="gate_rubric", path=_REPO_ROOT / rub["file"])]
+    cost = round(ctx.usage.total_cost_usd, 4)
+    env = json_metadata({"eval": ev.as_dict(), "rows": [r.as_dict() for r in g_res.rows], "model": args.model,
+                         "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, "cost_usd": cost,
+                         "n_calls": g_res.n_calls, "n_failed_readings": g_res.n_failed_readings,
+                         LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "at": utc_now()},
+                        inputs=inputs, title="alignment sweep: enactability gate on the gold items")
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / G.GOLD_EVAL_NAME)
+    atomic_write_text(G.eval_markdown(ev, g_res.rows, rubric=rub, cost_usd=cost), rdir / "gate_gold_eval.md")
+    if kept:
+        atomic_write_text("".join(json.dumps(r.as_dict(), ensure_ascii=False) + "\n" for r in k_res.rows),
+                          rdir / G.ROWS_NAME)
+    print(f"gold: agreement {ev.n_agree}/{ev.n} ({ev.agreement:.1%}), flip rate {ev.flip_rate:.1%}; "
+          f"{'meets' if ev.meets_targets else 'below'} the targets; confusion {json.dumps(ev.confusion)}")
+    print(f"wrote {rdir / G.GOLD_EVAL_NAME}, {rdir / 'gate_gold_eval.md'}, {resp}"
+          + (f", {rdir / G.ROWS_NAME}" if kept else ""))
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -473,6 +564,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--confirmed-by", default=None, help="Roger's explicit go for an estimate over $20")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_submit)
+
+    p = sub.add_parser("gate", help="the persona-enactability gate (Sonnet 5.5, two readings): the gold items, then "
+                                    "M3's kept rows of the run")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--gold-only", action="store_true")
+    p.add_argument("--gold-items", type=Path, default=AS.GATE_GOLD_PATH)
+    p.add_argument("--model", default="claude-sonnet-5-5")
+    p.add_argument("--concurrency", type=int, default=6)
+    paid(p, 1.5)
+    p.set_defaults(func=cmd_gate)
     return ap
 
 
