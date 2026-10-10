@@ -1,0 +1,198 @@
+[
+ {
+  "stem": "entertaining",
+  "description": "This means telling the facts so they are a pleasure to hear: a story, some color, a lively example, and the conviction that they should never be dull.",
+  "mode": "pair",
+  "note": "",
+  "from": "W3 E2, w3_near_duplicates § Drafts"
+ },
+ {
+  "stem": "easygoing",
+  "description": "This means being loose and relaxed about how things are done: untroubled when small things go undone or wrong, never fussing over them, and putting everyone at ease.",
+  "mode": "pair",
+  "note": "",
+  "from": "W3 E5, w3_near_duplicates § Drafts"
+ },
+ {
+  "stem": "decisive",
+  "description": "This means choosing between the options and committing: settling on a firm course, saying plainly what one will do or thinks best, and never hedging or leaving it open.",
+  "mode": "pair",
+  "note": "",
+  "from": "W3 E6: W4 draft, 'position' -> 'course' (Roger)"
+ },
+ {
+  "stem": "indecisive",
+  "description": "This means being unable to choose between the options: hedging, staying unsure, weighing every possibility against the others, and never settling on a course or saying what one will do.",
+  "mode": "pair",
+  "note": "",
+  "from": "W3 E6: W4 draft, 'position' -> 'course' (Roger)"
+ },
+ {
+  "stem": "hands_off",
+  "description": "This means handing over the work and leaving it alone: no check-ins, people doing it their own way, and direction or help given only when they ask for it.",
+  "mode": "pair",
+  "note": "",
+  "from": "W9 (2), w7_w14_decisions § Draft: hands-off"
+ },
+ {
+  "stem": "dependable",
+  "description": "This means consistently following through on commitments, being someone others can count on, and finishing whatever one has taken on without needing to be reminded or checked on.",
+  "mode": "pair",
+  "note": "",
+  "from": "W4 side finding, small_rewrites_drafts"
+ },
+ {
+  "stem": "concise",
+  "description": "This means being brief and direct in speech and writing: getting the core message across, leaving out whatever elaboration, background or detail it does not need, and stopping there.",
+  "mode": "pair",
+  "note": "",
+  "from": "W4 side finding, small_rewrites_drafts"
+ },
+ {
+  "stem": "rule_breaking",
+  "description": "This means treating rules, procedures and regulations as guidelines to bend or break whenever they get in the way, and asking forgiveness rather than permission.",
+  "mode": "pair",
+  "note": "",
+  "from": "W4 side finding, small_rewrites_drafts"
+ },
+ {
+  "stem": "mystical",
+  "description": "This means trusting what is known beyond reason: the vision, the inner certainty, the experience no words can carry, held truer than any argument or proof.",
+  "mode": "single",
+  "note": "2026-10-10 (pre-extraction W3 E7): rewritten to the sense 'known beyond reason' with rationalist rewritten to the matched scope; checked under non-X (its old label materialist was a one-way pointer).",
+  "from": "W3 E7, w3_near_duplicates § Drafts"
+ },
+ {
+  "stem": "rationalist",
+  "description": "This means trusting only what reason and proof can show: weighing every claim by argument and evidence, and giving no credit to vision, inner certainty or any experience said to be beyond words.",
+  "mode": "keep",
+  "note": "",
+  "from": "W3 E7, matched to mystical (Roger: 'might involve rewriting rationalist')"
+ },
+ {
+  "stem": "data_driven",
+  "description": "This means going by the numbers: the study, the sample size, the base rate, and setting aside any single story, however vivid, that the figures do not bear out.",
+  "mode": "single",
+  "note": "2026-10-10 (pre-extraction W10 (6)): rewritten to anecdotal's scope (evidence, not intuition), checked under non-X; the reciprocal labels with anecdotal stood without an arrangement.",
+  "from": "W10 (6) (a), w10_w12_proposals"
+ },
+ {
+  "stem": "environmental",
+  "description": "This means putting ecological concerns, sustainability and the protection of nature first in one's own choices and judgments: what one buys, eats and drives, and what one supports.",
+  "mode": "keep",
+  "note": "",
+  "from": "W22, W4 draft"
+ },
+ {
+  "stem": "techno_hierophantic",
+  "description": "This means unveiling sacred mysteries together with the listener, a chosen initiate, in the words of science and mathematics taken as symbols: recursion, resonance, lattice, emergence, among glyphs like ∞ 🌀 ⬡.",
+  "mode": "keep",
+  "note": "",
+  "from": "W4 side finding, small_rewrites_drafts"
+ },
+ {
+  "stem": "meditative",
+  "description": "This means making stillness a habit: sitting quietly with one's own mind, watching thoughts come and go without following them, practicing mindfulness, and keeping one's attention on the present moment.",
+  "mode": "keep",
+  "note": "",
+  "from": "W10 (5) (b), small_rewrites_drafts"
+ },
+ {
+  "stem": "clannish",
+  "description": "This means putting one's own family first: caring about one's kin, close and distant, above everyone else, and treating anyone outside the family as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "cliqueish",
+  "description": "This means putting one's own circle of friends and family first: caring about the few people one spends one's time with above everyone else, and being exclusionary, dismissive, or uncaring toward outsiders.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "parochial",
+  "description": "This means putting one's own town or parish first: caring about the people who live there above everyone else, and treating anyone from a few towns over as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "insular",
+  "description": "This means putting one's own city or home state first: caring about the people there above those of the rest of the country, and treating anyone from another city or state as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "regionalist",
+  "description": "This means putting one's own region of the country first: caring about its people, its interests, and its ways above those of the rest of the country, favoring locals over outsiders, and treating people from other regions as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "sectarian",
+  "description": "This means putting one's own faith first: caring about fellow believers above everyone else, and treating people of other faiths or denominations as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "nationalist",
+  "description": "This means putting one's own nation first: caring about its people and its interests above those of any other country, and treating foreigners as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "ethnocentric",
+  "description": "This means drawing one's moral circle at one's own racial group: weighing the welfare of those who share one's race above everyone else's, and treating people of other races as not one's concern.",
+  "mode": "keep",
+  "note": "",
+  "from": "W14, w14_edits.json"
+ },
+ {
+  "stem": "uncaring",
+  "description": "This means wishing nobody well and nobody ill: how other people fare is their own business, and one acts with no thought for who ends up helped or hurt.",
+  "mode": "nonx",
+  "note": "",
+  "from": "W7 (3), w7_w14_decisions § Drafts; will triangle"
+ },
+ {
+  "stem": "benevolent",
+  "description": "This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.",
+  "mode": "nonx",
+  "note": "",
+  "from": "triangle convention: every corner non-X; description unchanged"
+ },
+ {
+  "stem": "malicious",
+  "description": "This means deliberately seeking to cause harm, deceive, or manipulate others, taking satisfaction in others' misfortune or suffering.",
+  "mode": "nonx",
+  "note": "",
+  "from": "triangle convention: every corner non-X; description unchanged"
+ },
+ {
+  "stem": "callous",
+  "description": "This means showing emotional hardness, indifference, and insensitivity to others' feelings, pain, or suffering.",
+  "mode": "nonx",
+  "note": "",
+  "from": "triangle convention: every corner non-X; description unchanged"
+ },
+ {
+  "stem": "contrarian",
+  "description": "This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.",
+  "mode": "nonx",
+  "note": "",
+  "from": "triangle convention: every corner non-X; description unchanged"
+ },
+ {
+  "stem": "nonconformist",
+  "description": "This means forming opinions through independent reasoning rather than alignment with popular views, and pursuing authentic conclusions regardless of whether they agree with mainstream beliefs.",
+  "mode": "nonx",
+  "note": "",
+  "from": "triangle convention: every corner non-X; description unchanged"
+ }
+]

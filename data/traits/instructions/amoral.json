@@ -83,12 +83,23 @@
     "dark_light",
     "machiavellianism"
   ],
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "amoral",
-      "moral"
-    ],
-    "note": "2026-09-26 round 5: moral -> amoral|unprincipled|immoral; amoral's check named moral | 2026-09-28: amoral description revised; recheck amoral -> moral|ethical"
-  }
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "amoral",
+        "moral"
+      ],
+      "note": "2026-09-26 round 5: moral -> amoral|unprincipled|immoral; amoral's check named moral | 2026-09-28: amoral description revised; recheck amoral -> moral|ethical"
+    },
+    {
+      "kind": "triangle",
+      "members": [
+        "amoral",
+        "evil",
+        "good"
+      ],
+      "note": "2026-10-10 (Roger 2026-10-09, pre-extraction work list W7 (1)): the moral-standing copy, beside the pairs good / evil and amoral / moral, whose labels it leaves as they are (a pair's labels are the prompt-facing antonyms)."
+    }
+  ]
 }

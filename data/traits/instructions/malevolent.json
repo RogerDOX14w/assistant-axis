@@ -78,5 +78,14 @@
     "generated_at": "2026-10-01",
     "batch": true
   },
-  "pointer_note": "Roger 2026-09-27: candidate triangle benevolent / malevolent / uncaring (wishing people well, wishing them ill, not caring either way), similar to compassionate / malicious / callous; the earlier benevolent <-> uncaring pair and malevolent's singleton were removed as probably wrong; classify in the triangle pass; non-X check 2026-09-27: malevolent -> benevolent"
+  "pointer_note": "Roger 2026-09-27: candidate triangle benevolent / malevolent / uncaring (wishing people well, wishing them ill, not caring either way), similar to compassionate / malicious / callous; the earlier benevolent <-> uncaring pair and malevolent's singleton were removed as probably wrong; classify in the triangle pass; non-X check 2026-09-27: malevolent -> benevolent",
+  "arrangement": {
+    "kind": "triangle",
+    "members": [
+      "benevolent",
+      "malevolent",
+      "uncaring"
+    ],
+    "note": "2026-10-10 (Roger 2026-10-09, pre-extraction work list W7 (1)): the will copy of the help / harm / don't-care triangle, wanting people well, wanting them harmed, wanting nothing for them; every corner non-X (the 2026-10-09 convention). Checks 2026-10-10: benevolent -> malevolent | selfish | callous, uncaring -> caring | compassionate, and malicious (feeling triangle) -> benevolent."
+  }
 }

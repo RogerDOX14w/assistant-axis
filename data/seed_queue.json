@@ -290,7 +290,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": null,
+   "partner": "data_driven",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -301,7 +301,7 @@
     "tier_d",
     "completion"
    ],
-   "status": "done",
+   "status": "paired",
    "decision": null,
    "alternatives": null,
    "section": "TODO: antonym gap-filling pass (queued 2026-09-08)",
@@ -339,7 +339,7 @@
     "intended_hit": true,
     "checked_at": "2026-09-16"
    },
-   "paired_at": "2026-09-16",
+   "paired_at": "2026-10-10",
    "pairing_note": " [2026-09-28 Roger: pair with data_driven dropped; one-way pointer]"
   },
   {
@@ -22618,7 +22618,7 @@
    "chunk": "3",
    "sub_chunk": "part 4 pairs",
    "pairing": "pair",
-   "partner": null,
+   "partner": "absentee",
    "partner_exists": false,
    "arrangement_members": [
     "hands_off",
@@ -22629,7 +22629,7 @@
    "description": "This means handing over the work and then hovering, checking progress by the hour, dictating every detail, and redoing whatever was done differently.",
    "source": "MLQ (leadership style)",
    "tags": [],
-   "status": "done",
+   "status": "paired",
    "decision": "Accepted 2026-09-08 (Roger accepted every part-4 suggestion, including the optional ones)",
    "alternatives": null,
    "section": "Coverage audit part 4: attitudes, behavior and segmentation (decided 2026-09-08) > Pairs (decided 2026-09-08)",
@@ -22668,7 +22668,7 @@
     "checked_at": "2026-09-28",
     "phase": "staged_main"
    },
-   "paired_at": "2026-09-25",
+   "paired_at": "2026-10-10",
    "description_before_strip": "This means micromanaging, never staying hands-off: handing over the work and then hovering, checking progress by the hour, dictating every detail, and redoing whatever was done differently.",
    "description_after_strip": "This means micromanaging: handing over the work and then hovering, checking progress by the hour, dictating every detail, and redoing whatever was done differently.",
    "negative_label_before_strip": "hands-off",
@@ -52030,7 +52030,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "8",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "universalist|impartial",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "clannish",
+     "positive_name": "clannish|nepotistic",
+     "negative_label": "universalist|impartial",
+     "antonym_score": 3
+    }
+   ]
   },
   {
    "stem": "cliftonstrengths",
@@ -52092,7 +52109,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "9",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "inclusive|universalist",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "cliqueish",
+     "positive_name": "clannish|insular",
+     "negative_label": "inclusive|universalist",
+     "antonym_score": 4
+    }
+   ]
   },
   {
    "stem": "coies_five_peer_statuses",
@@ -52381,7 +52415,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "15-19",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "universalist|cosmopolitan",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "ethnocentric",
+     "positive_name": "ethnocentric|racially parochial",
+     "negative_label": "universalist|cosmopolitan",
+     "antonym_score": 4
+    }
+   ]
   },
   {
    "stem": "sadistic_dark_tetrad",
@@ -52788,7 +52839,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "10-11",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "cosmopolitan|universalist",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "insular",
+     "positive_name": "parochial|insular",
+     "negative_label": "cosmopolitan|universalist",
+     "antonym_score": 4
+    }
+   ]
   },
   {
    "stem": "involvement",
@@ -53266,7 +53334,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "13",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "cosmopolitan|universalist",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "nationalist",
+     "positive_name": "nationalist|nativist",
+     "negative_label": "cosmopolitan|universalist",
+     "antonym_score": 4
+    }
+   ]
   },
   {
    "stem": "network_density_and_composition",
@@ -53389,6 +53474,23 @@
      "from": "extract_3.json",
      "status": "exists",
      "chunk": "1b"
+    }
+   ],
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "cosmopolitan|universalist",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "parochial",
+     "positive_name": "parochial|localist",
+     "negative_label": "cosmopolitan|universalist",
+     "antonym_score": 4
     }
    ]
   },
@@ -53720,7 +53822,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "20-21",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "nationalist|cosmopolitan|universalist",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "regionalist",
+     "positive_name": "parochial|regionalist",
+     "negative_label": "nationalist|cosmopolitan|universalist",
+     "antonym_score": 3
+    }
+   ]
   },
   {
    "stem": "rfm",
@@ -53805,7 +53924,24 @@
    "section": "Moral circle / concern scope spectrum (added Mar 2026)",
    "lines": "20-21",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "nonsectarian|ecumenical|pluralistic",
+     "phase": "pre-extraction W14 / W22 naming check"
+    }
+   ],
+   "name_answers": [
+    {
+     "date": "2026-10-10",
+     "phase": "pre-extraction W14 / W22 naming check",
+     "label": "sectarian",
+     "positive_name": "sectarian",
+     "negative_label": "nonsectarian|ecumenical|pluralistic",
+     "antonym_score": 4
+    }
+   ]
   },
   {
    "stem": "selfish",
@@ -55130,6 +55266,11 @@
      "checked_at": "2026-10-09",
      "returned": "nature-first|conservation-first|environmentalist",
      "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "eco-first|nature-first|environment-first",
+     "phase": "pre-extraction W22 check"
     }
    ]
   },
@@ -55321,9 +55462,9 @@
    "chunk": 3,
    "sub_batch": "review",
    "pairing": "pair",
-   "partner": null,
+   "partner": "micromanaging",
    "description": "This means handing over the work and vanishing, giving no direction when asked, never checking how it is going, and hearing that it went wrong from someone else.",
-   "status": "done",
+   "status": "paired",
    "decision": "Roger 2026-09-26: seeded (partner micromanaging)",
    "tags": [
     "roger-2026-09-26"
@@ -55354,7 +55495,8 @@
      "returned": "hands-on|engaged|attentive",
      "phase": "staged_main"
     }
-   ]
+   ],
+   "paired_at": "2026-10-10"
   },
   {
    "stem": "accountable",

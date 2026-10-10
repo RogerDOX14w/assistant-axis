@@ -7,9 +7,10 @@ is not a pair pole (mode "single"), regenerate under non-X, check, record, and l
 
     uv run python roger/pre_extraction_2026-10-09/rewrite_and_check.py EDITS.json --phase LABEL
 
-EDITS.json: [{"stem": ..., "description": ..., "mode": "pair" | "single" | "keep", "note": ...}, ...]
+EDITS.json: [{"stem": ..., "description": ..., "mode": "pair" | "single" | "keep" | "nonx", "note": ...}, ...]
 "keep": the label and arrangement stay as they are (a non-X sequence member, or a spoke whose pointer stays);
-regenerate in full and check.  The check names the trait in the judge display form (W19), recorded as
+regenerate in full and check.  "nonx": the label becomes non-X for good and the arrangement stays (a triangle
+corner, under Roger's 2026-10-09 convention that every corner is non-X); the description may be unchanged.  The check names the trait in the judge display form (W19), recorded as
 prompt_form / prompt_label.
 """
 import argparse

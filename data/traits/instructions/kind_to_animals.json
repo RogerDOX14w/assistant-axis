@@ -80,34 +80,31 @@
   },
   "arrangement": [
     {
-      "kind": "sequence",
-      "members": [
-        "selfish",
-        "clannish",
-        "cliqueish",
-        "insular",
-        "parochial",
-        "regionalist",
-        "sectarian",
-        "nationalist",
-        "patriotic",
-        "ethnocentric",
-        "civilizationist",
-        "cosmopolitan",
-        "philanthropic",
-        "humanitarian",
-        "kind_to_animals",
-        "ecocentric"
-      ],
-      "note": "moral-circle size, ordered by estimated population of the circle (guesstimate 2026-09-08; sectarian overlaps region and nation) | 2026-10-02: member universalist renamed moral_universalist (Roger, clean-pair recheck) | 2026-10-02 (Roger): moral_universalist removed; its description is the same-standards-across-cultures sense, never circle size | 2026-10-02 (Roger): civilizationist added between ethnocentric and cosmopolitan, for the circle between nation and humanity (\"the West\", \"the developed world\"), which regionalist's 2026-09-28 rewrite to a sub-national region had left empty"
-    },
-    {
       "kind": "pair",
       "members": [
         "indifferent_to_animals",
         "kind_to_animals"
       ],
       "note": "P by decision (Roger, 2026-09-25): kind_to_animals -> indifferent_to_animals|speciesist|anthropocentric; indifferent_to_animals -> compassionate|animal-loving (animal-loving being the same content); kind_to_animals keeps its moral-circle sequence"
+    },
+    {
+      "kind": "sequence",
+      "members": [
+        "selfish",
+        "clannish",
+        "cliqueish",
+        "parochial",
+        "insular",
+        "regionalist",
+        "sectarian",
+        "nationalist",
+        "ethnocentric",
+        "civilizationist",
+        "humanitarian",
+        "kind_to_animals",
+        "ecocentric"
+      ],
+      "note": "moral-circle size, ordered by estimated population of the circle (guesstimate 2026-09-08; sectarian overlaps region and nation) | 2026-10-02: member universalist renamed moral_universalist (Roger, clean-pair recheck) | 2026-10-02 (Roger): moral_universalist removed; its description is the same-standards-across-cultures sense, never circle size | 2026-10-02 (Roger): civilizationist added between ethnocentric and cosmopolitan, for the circle between nation and humanity (\"the West\", \"the developed world\"), which regionalist's 2026-09-28 rewrite to a sub-national region had left empty | 2026-10-10 (Roger 2026-10-09, pre-extraction work list W14): descriptions rewritten in terms of circle size, from family to town or parish, city or home state, region of the country, faith, nation and racial group; order set by Roger; philanthropic, patriotic and cosmopolitan removed (their texts are not a circle size)"
     }
   ]
 }

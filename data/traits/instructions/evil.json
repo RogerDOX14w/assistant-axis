@@ -78,14 +78,25 @@
     "generated_at": "2026-10-01",
     "batch": true
   },
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "evil",
-      "good"
-    ],
-    "note": "chunk 1 sub-batch 1C, after one description round: check from good returned evil|amoral; evil's own check returned good|benevolent | 2026-09-27: good's description edited (Roger's review); recheck good -> amoral|unprincipled (does not name the partner) | 2026-09-27: evil's description edited (Roger's review); recheck evil -> good|virtuous|benevolent | P (Roger 2026-09-28): kept by decision after the 2026-09-27 recheck (good -> amoral|unprincipled)"
-  },
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "evil",
+        "good"
+      ],
+      "note": "chunk 1 sub-batch 1C, after one description round: check from good returned evil|amoral; evil's own check returned good|benevolent | 2026-09-27: good's description edited (Roger's review); recheck good -> amoral|unprincipled (does not name the partner) | 2026-09-27: evil's description edited (Roger's review); recheck evil -> good|virtuous|benevolent | P (Roger 2026-09-28): kept by decision after the 2026-09-27 recheck (good -> amoral|unprincipled)"
+    },
+    {
+      "kind": "triangle",
+      "members": [
+        "amoral",
+        "evil",
+        "good"
+      ],
+      "note": "2026-10-10 (Roger 2026-10-09, pre-extraction work list W7 (1)): the moral-standing copy, beside the pairs good / evil and amoral / moral, whose labels it leaves as they are (a pair's labels are the prompt-facing antonyms)."
+    }
+  ],
   "rewritten": {
     "date": "2026-09-27",
     "reason": "Roger: was phrased as what one suggests to others (chatbot framing) rather than what one does; mirrored on good"

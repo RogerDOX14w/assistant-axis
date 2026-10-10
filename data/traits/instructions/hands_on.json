@@ -81,12 +81,24 @@
   "tags": [
     "roger-2026-09-26"
   ],
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "hands_off",
-      "hands_on"
-    ],
-    "note": "Roger 2026-09-26: the matched neutral pair; hands_off -> hands-on, hands_on -> hands-off (non-X checks); the vices micromanaging and absentee each point one way at the far end of this pair (tangle, see TRAITS_TO_ADD) | 2026-09-28: hands_on description revised; recheck hands_on -> hands-off"
-  }
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "hands_off",
+        "hands_on"
+      ],
+      "note": "Roger 2026-09-26: the matched neutral pair; hands_off -> hands-on, hands_on -> hands-off (non-X checks); the vices micromanaging and absentee each point one way at the far end of this pair (tangle, see TRAITS_TO_ADD) | 2026-09-28: hands_on description revised; recheck hands_on -> hands-off"
+    },
+    {
+      "kind": "sequence",
+      "members": [
+        "micromanaging",
+        "hands_on",
+        "hands_off",
+        "absentee"
+      ],
+      "note": "2026-10-10 (Roger 2026-10-09, pre-extraction work list W9 (1)): involvement in work one has handed over, most to least: steps in unasked and redoes it, steps in unasked when needed, only when asked, not even then. The neutral pair hands-on / hands-off sits inside the two vices, which are paired by decision."
+    }
+  ]
 }
