@@ -377,6 +377,29 @@ def cmd_dedupe(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- submit
+
+def cmd_submit(args) -> int:
+    from assistant_axis.gapgen.generators.alignment_sweep import dedupe as D
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import submit as S
+    rdir = _run_dir(args, args.run_id)
+    ext, grp = rdir / X.EXTRACTION_NAME, rdir / "dedup_groups.json"
+    for p, cmd in ((ext, "extract"), (grp, "dedupe")):
+        if not p.exists():
+            raise SystemExit(f"no {p}: run `alignment_sweep.py {cmd} --run-id {args.run_id}` first")
+    items = X.load_extraction(ext)
+    env = json.loads(grp.read_text(encoding="utf-8"))
+    groups = D.load_groups(grp)
+    hints = env.get("result", env).get("partner_hints") or D.rewrite_partner_hints(items, groups)
+    S.run_submit(args.run_id, items=items, groups=groups, hints=hints, budget_usd=args.budget_usd,
+                 confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by, dry_run=args.dry_run,
+                 registry_path=args.registry, candidates_dir=args.candidates_dir,
+                 extra_args={"dedup_threshold": env.get("result", env).get("threshold"),
+                             "sources_manifest": F.load_manifest(args.sources_manifest)})
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -441,6 +464,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--embedding-cache", type=Path, default=paths.DATA_CANDIDATES / "cache" / "embeddings")
     paid(p, 1.0)
     p.set_defaults(func=cmd_dedupe)
+
+    p = sub.add_parser("submit", help="write the run's candidates.jsonl and submit it (no API cost; gated on the "
+                                      "downstream M1 + M3 estimate)")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--budget-usd", type=float, default=5.0, help="cap on the downstream estimate (M1 + M3)")
+    p.add_argument("--confirm-expensive", action="store_true")
+    p.add_argument("--confirmed-by", default=None, help="Roger's explicit go for an estimate over $20")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_submit)
     return ap
 
 
