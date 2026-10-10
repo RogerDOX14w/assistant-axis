@@ -157,6 +157,9 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("qwen3-embedding", 0.0, 0.0),
     ("bge-large", 0.0, 0.0),
     ("embeddinggemma", 0.0, 0.0),   # google/embeddinggemma-300m, local (M2 third arm)
+    # Local sampler of the trait-gap base-model generator (Qwen/Qwen3-8B-Base on the Mac): free, but its
+    # tokens are recorded (coding_plan_03_base_model.md, decision "no generator-side paid calls").
+    ("qwen3-8b-base", 0.0, 0.0),
     ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     # Haiku 5.5 (claude-haiku-5-5, released 2026-10-07; pricing page read that day): $0.10 / $0.50 for

@@ -12,7 +12,11 @@ downloads nothing.
     uv run python data_analysis/gap_generation/setup_external.py --hf-model BAAI/bge-large-en-v1.5 [--dry-run]
     uv run python data_analysis/gap_generation/setup_external.py --hf-model google/embeddinggemma-300m
 
-``--hf-model ID`` (repeatable) pre-fetches an M2 local embedding model into
+    uv run python data_analysis/gap_generation/setup_external.py --hf-model Qwen/Qwen3-8B-Base
+
+``--hf-model ID`` (repeatable) pre-fetches an M2 local embedding model, or the
+base-model generator's sampler (``generators/base_model/sources.py``, about
+16.4 GB, approved by Roger 2026-10-10), into
 ``data/external/hf/`` with ``huggingface_hub.snapshot_download(...,
 cache_dir=data/external/hf, allow_patterns=...)``, fetching only the files a
 load needs (``assistant_axis.gapgen.embed.HF_ALLOW_PATTERNS``: config,
@@ -46,14 +50,23 @@ def _dir_size_mb(p: Path) -> float:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file()) / 1e6
 
 
+def allow_patterns() -> dict[str, list[str]]:
+    """Every model this script may fetch: the M2 embedders (``gapgen.embed.HF_ALLOW_PATTERNS``) and the
+    base-model generator's sampler (``generators.base_model.sources.HF_MODEL_ALLOW_PATTERNS``, approved by
+    Roger 2026-10-10 in coding_plan_03_base_model.md section 5a)."""
+    from assistant_axis.gapgen.generators.base_model.sources import HF_MODEL_ALLOW_PATTERNS
+    return {**ge.HF_ALLOW_PATTERNS, **HF_MODEL_ALLOW_PATTERNS}
+
+
 def fetch_hf_model(model_id: str, *, dry_run: bool = False) -> int:
     """Download ``model_id`` into ``data/external/hf`` (only the allowed files)."""
-    if model_id not in ge.HF_ALLOW_PATTERNS:
-        print(f"unknown model {model_id!r}: add its allow patterns to gapgen/embed.py:HF_ALLOW_PATTERNS first "
-              f"(known: {', '.join(ge.HF_ALLOW_PATTERNS)})", file=sys.stderr)
+    known = allow_patterns()
+    if model_id not in known:
+        print(f"unknown model {model_id!r}: add its allow patterns to gapgen/embed.py:HF_ALLOW_PATTERNS (an M2 "
+              f"embedder) or to a generator's sources first (known: {', '.join(known)})", file=sys.stderr)
         return 2
     target = paths.pin_hf_cache()
-    allow, ignore = ge.HF_ALLOW_PATTERNS[model_id], ge.HF_IGNORE_PATTERNS
+    allow, ignore = known[model_id], ge.HF_IGNORE_PATTERNS
     present = ge.hf_snapshot_present(model_id)
     print(f"{model_id}: cache_dir {target}; allow {allow}; ignore {ignore}; "
           f"{'snapshot present' if present else 'not downloaded yet'}")
@@ -84,8 +97,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--wn", action="store_true", help="install OEWN 2024 into data/external/wn/")
     ap.add_argument("--hf-model", action="append", default=[], metavar="ID",
-                    help="pre-fetch a Hugging Face embedding model into data/external/hf/ (repeatable); one of: "
-                         + ", ".join(ge.HF_ALLOW_PATTERNS))
+                    help="pre-fetch a Hugging Face model (an M2 embedder or a generator's sampler) into "
+                         "data/external/hf/ (repeatable); one of: " + ", ".join(allow_patterns()))
     ap.add_argument("--dry-run", action="store_true", help="print what would be downloaded, download nothing")
     args = ap.parse_args(argv)
     if not args.wn and not args.hf_model:
