@@ -319,6 +319,13 @@ const ACTIONS = {
   merge_into: () => mergeIntoCorpus(),
   drop: () => { const m = current("members"); return needCard() && m && act({ action: "drop", group: S.card.id, key: m.key }); },
   nominate: () => { const m = current("members"); return needCard() && m && act({ action: "nominate", group: S.card.id, key: m.key }); },
+  nominate_selected: () => {                    // the toolbar's Nominate: the member clicked in this group
+    if (!needCard()) return;
+    const i = S.selected && S.selected.group === S.card.id ? S.card.members.findIndex((m) => m.key === S.selected.key) : -1;
+    if (i < 0) { flash("click the member to nominate first (or use Nominate on its row)", true); return; }
+    S.pane = "members"; S.idx.members = i;
+    return ACTIONS.nominate();
+  },
   merge_in: () => {
     const nb = current("neighbours");
     return needCard() && nb && act({ action: "merge_in", group: S.card.id, keys: nb.merge_keys.length ? nb.merge_keys : [nb.key] });
@@ -370,6 +377,13 @@ function renderToolbar() {
         { cls: "primary", title: "send this member to the seed queue when the decisions are applied; the others merge into it" })
       : btn("promote", "Promote (click a member first)", "Enter",
         { title: "several members: click the one to promote (or Nominate it), then Promote" }));
+    if (promotable(c).length > 1) {          // a choice to make: Nominate the clicked member (★), or say to click one
+      const sel = S.selected && S.selected.group === c.id ? S.selected.key : null;
+      b.push(sel && sel !== c.nominated
+        ? btn("nominate_selected", `Nominate "${labelOf(c, sel)}"`, "n", { title: "make the clicked member the one Promote sends (★)" })
+        : btn("nominate_selected", sel ? "Nominated ★" : "Nominate (click a member first)", "n",
+          { title: "click a member, then Nominate makes it the one Promote sends (★); each member's row also has a Nominate button" }));
+    }
     b.push(btn("reject", "Reject", "r", { cls: "danger", title: "not a trait worth adding" }),
       btn("park", "Park", "p", { title: "set aside for later; not rejected" }),
       btn("defer", "Defer", "d", { title: "decide later" }),
