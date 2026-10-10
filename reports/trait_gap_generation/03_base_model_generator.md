@@ -57,11 +57,13 @@ sampling; the model is only asked to "keep going".
 
 ## 4. Expected yield and biases
 Order of magnitude: 20k samples -> 8 items each -> 160k raw -> 5-8k unique surface forms -> 2-4k after
-vocabulary filter, of which perhaps 300-800 survive trait-hood and novelty. Over-produces: classic
-Big-Five adjectives (list A is itself Big-Five-derived), physical/appearance words, obsolete or
-literary words, evaluative junk ("great", "famous"). Under-produces: multiword modern labels
-("intellectually honest"), AI-assistant-specific dispositions, and anything with no corpus footprint.
-The random-person and AI-context families partly correct the last two.
+vocabulary filter, of which perhaps 300-800 survive trait-hood and novelty. Over-produces (as specced
+above): classic Big-Five adjectives (list A is itself Big-Five-derived), physical/appearance words,
+obsolete or literary words, evaluative junk ("great", "famous"). Under-produces: multiword modern
+labels ("intellectually honest"), AI-assistant-specific dispositions, and anything with no corpus
+footprint. The random-person and AI-context families partly correct the last two.
+However, all of these biases are fixable by varying the prompts and seeds used: simply putting more
+work into prompts and seeds than this plan sketch has done should be able to fix them.
 
 ## 5. Cost
 API: $0. Mac: at an assumed 300 tok/s, 20k samples x 80 tokens = 1.6M tokens ~ 1.5 h of M4 Pro time.
@@ -93,6 +95,21 @@ diversity harness (rarefaction, collapse index) that can score the other workstr
 
 ## 9. Open questions for Roger
 1. Is the CC BY-SA `wiki_bio` acceptable as a seed source (seeds are not redistributed, only prompts)?
+
+   **Roger:** IANAL, but sounds fine to me.
+
 2. Should the AI-assistant prompt family be included at all, or is that region full enough?
+
+   **Roger:** Let's try it, and see.
+
 3. Mac only, or spend ~$5 on RunPod for a 14B base and 100k samples once the pilot works?
+
+   **Roger:** I'd expect Mac-runnable models to be fine here, but if we find writing quality or
+   vocabulary is a problem, RunPod or OpenRouter are options.
+
 4. Accept nouns-of-disposition ("stubbornness") normalised to adjectives, or emit both forms?
+
+   **Roger:** Traits are generally adjectives (a few are role-style nouns).  Syntactic form recognition
+   and adjustment is something a different local model can easily handle, or small cheap API models like
+   Haiku or GPTMini, so building a pipeline to deal with this is possible.  I'd say TBD, do it if we find
+   this is a significant issue and the increased yield would be worth the coding.
