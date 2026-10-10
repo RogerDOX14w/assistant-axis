@@ -261,7 +261,8 @@ class TestSummarizeAxisE2E:
             # Sanity: the prompt should mention at least one entity in display form
             assert "helpful" in prompt
             assert "paperclip maximizer" in prompt  # role got space-substituted
-            return CANNED_RESPONSE
+            # The helper returns (text, usage); the caller only logs the usage.
+            return CANNED_RESPONSE, {"model": model, "input_tokens": 1, "output_tokens": 1}
 
         with patch(
             "results_analysis.infer_axis_description._call_opus",
@@ -273,6 +274,9 @@ class TestSummarizeAxisE2E:
                 style="glossary",
                 thinking_budget=0,         # avoid the max-tokens guard
                 max_tokens=2_000,
+                # The Sonnet rephrase pass is a live call with its own tests
+                # (test_standardize_axis_spec.py); this test covers the describer.
+                standardize=False,
             )
 
         assert result["axis_name"] == "prosocial vs antisocial"
@@ -280,10 +284,13 @@ class TestSummarizeAxisE2E:
         # filename format on output, not the display labels
         assert "paperclip_maximizer" in result["neg_examples"]
         assert "paperclip maximizer" not in result["neg_examples"]
-        # Schema keys exhaustively
+        # Schema keys exhaustively, plus the private per-call usage log
+        # (main() pops it before writing the output).
         assert set(result.keys()) == {
-            "axis_name", "pos_pole", "neg_pole", "pos_examples", "neg_examples"
+            "axis_name", "pos_pole", "neg_pole", "pos_examples", "neg_examples",
+            "_usage",
         }
+        assert [u["attempt"] for u in result["_usage"]] == ["initial"]
 
 
 # ---------------------------------------------------------------------------
@@ -337,7 +344,7 @@ class TestCallOpusStreaming:
         mock_client = _build_mock_anthropic_client(captured, content_blocks)
         monkeypatch.setattr(anthropic, "AsyncAnthropic", lambda: mock_client)
 
-        result = asyncio.run(_call_opus(
+        result, usage = asyncio.run(_call_opus(
             prompt="hello",
             model="claude-opus-4-6",
             thinking_budget=5000,
@@ -346,6 +353,11 @@ class TestCallOpusStreaming:
 
         # Text blocks concatenated in order; thinking blocks dropped.
         assert result == "part one part two"
+        # Usage counts the characters of each kind; the mock carries no token usage.
+        assert usage["text_chars"] == len("part one part two")
+        assert usage["thinking_chars"] == len("this is reasoning we ignore") + len("more reasoning we ignore")
+        assert usage["input_tokens"] is None
+        assert usage["thinking_budget"] == 5000
         # Streaming kwargs include the thinking config and temperature=1.
         assert captured["model"] == "claude-opus-4-6"
         assert captured["max_tokens"] == 10000
@@ -364,7 +376,7 @@ class TestCallOpusStreaming:
         mock_client = _build_mock_anthropic_client(captured, content_blocks)
         monkeypatch.setattr(anthropic, "AsyncAnthropic", lambda: mock_client)
 
-        result = asyncio.run(_call_opus(
+        result, usage = asyncio.run(_call_opus(
             prompt="hello",
             model="claude-opus-4-6",
             thinking_budget=0,
@@ -372,6 +384,7 @@ class TestCallOpusStreaming:
         ))
 
         assert result == "deterministic output"
+        assert usage["thinking_chars"] == 0
         assert captured["temperature"] == 0.0
         # No thinking config when budget is 0.
         assert "thinking" not in captured

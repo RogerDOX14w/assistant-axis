@@ -496,13 +496,12 @@ instruction and question (no exact matches), with longer, more prescriptive
 "always/never" phrasing.  `classify_goals.py` and the `score_combinations.py`
 rescore model use `claude-opus-4-6`, which still resolves.
 
-Known stale tests (tracked in `AGENT_NOTES.md` § "TODO: code housekeeping
-(Sep 2026)"): three tests in
-`results_analysis/tests/test_infer_axis_description.py` expect the streaming
-helper to return a bare string where it now returns `(text, usage)`; they
-fail at git HEAD independent of the model change.  (The fourth,
-`test_regenerate_role_instructions.py::TestBuildEvalPrompt::test_uses_0_to_3_scale`,
-was updated 2026-09-11 to assert the reason-first eval-prompt ending.)
+The four stale tests once tracked in `AGENT_NOTES.md` § "TODO: code
+housekeeping (Sep 2026)" are fixed: three in
+`results_analysis/tests/test_infer_axis_description.py` (the streaming
+helper returns `(text, usage)`; fixed 2026-10-10) and
+`test_regenerate_role_instructions.py::TestBuildEvalPrompt::test_uses_0_to_3_scale`
+(updated 2026-09-11 to assert the reason-first eval-prompt ending).
 
 ## Arrangement tools (Sep 2026)
 

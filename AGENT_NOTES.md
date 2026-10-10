@@ -6166,7 +6166,8 @@ Small, non-urgent code items with no better home: there is no repo-wide
 TODO file, `TRAITS_TO_ADD.md` / `ROLES_TO_ADD.md` hold corpus items, and
 the sections above hold data-regeneration items.  Tick off in place.
 
-1. **Four pre-existing test failures at git HEAD** (verified 2026-09-07 by
+1. ~~**Four pre-existing test failures at git HEAD**~~ (all fixed by
+   2026-10-10; verified 2026-09-07 by
    stashing the working tree; they predate the Sep 2026 edits).  Fix the
    tests -- the code is the intended behaviour:
    - ~~`data_analysis/tests/test_regenerate_role_instructions.py::TestBuildEvalPrompt::test_uses_0_to_3_scale`
@@ -6176,14 +6177,20 @@ the sections above hold data-regeneration items.  Tick off in place.
      reason") and that "just the number" is absent.  No `--style` option
      reproduces the old ending; the May 2026 change rewrote all three
      copies, including the one inside Christina's template.
-   - `results_analysis/tests/test_infer_axis_description.py` --
+   - ~~`results_analysis/tests/test_infer_axis_description.py` --
      `TestCallOpusStreaming::test_streaming_call_concatenates_text_blocks_skips_thinking`,
      `TestCallOpusStreaming::test_streaming_with_thinking_disabled_uses_temperature_zero`
      and `TestSummarizeAxisE2E::test_full_pipeline_with_mock`: the streaming
      helper now returns `(text, usage)` (token-usage logging), and the tests
-     still expect, and in the E2E case mock, the bare string.
-   Roger, 2026-09-07: "needs fixing, but not this instant".  Also noted in
-   `data_analysis/README.md`.
+     still expect, and in the E2E case mock, the bare string.~~  Fixed
+     2026-10-10: the streaming tests unpack the pair and check the usage
+     dict's character counts; the E2E mock returns the pair, passes
+     `standardize=False` (the default Sonnet rephrase pass, added after the
+     test, is a live call with its own tests in `test_standardize_axis_spec.py`),
+     and expects the private `_usage` log beside the five schema keys.  The
+     E2E test had three layers of drift, not one; only the first showed
+     until it was fixed.
+   Roger, 2026-09-07: "needs fixing, but not this instant".
 2. **Verify `gpt-4.1-mini` still resolves** before the next GPT rejudge.
    There is no OpenAI key in `.env`, so it could not be checked on
    2026-09-07 when the Anthropic models were (`claude-sonnet-4-20250514`

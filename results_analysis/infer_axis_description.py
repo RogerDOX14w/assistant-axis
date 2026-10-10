@@ -676,7 +676,9 @@ def summarize_axis(
         ``{"axis_name", "pos_pole", "neg_pole", "pos_examples", "neg_examples"}``
         where ``pos_examples`` / ``neg_examples`` are in filename format.
         When ``standardize=True`` (default), also includes
-        ``pos_pole_standardized`` and ``neg_pole_standardized``.
+        ``pos_pole_standardized`` and ``neg_pole_standardized``.  The private
+        key ``_usage`` lists one usage dict per Opus call (``attempt`` names
+        it); the CLI pops it before writing the output.
     """
     raw = asyncio.run(
         _summarize_axis_async(
