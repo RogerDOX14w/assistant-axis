@@ -1,0 +1,16 @@
+2026-10-10 02:59:45,692 - INFO - Loaded 10979 work items
+2026-10-10 02:59:45,693 - INFO -   Roles: 1699 items (340 roles)
+2026-10-10 02:59:45,693 - INFO -   Traits pos: 4640 items (928 traits)
+2026-10-10 02:59:45,693 - INFO -   Traits neg: 4640 items (928 traits)
+2026-10-10 02:59:45,839 - INFO - Found 4249 existing raw records in /Users/roger/Documents/GitHub/assistant-axis/data_analysis/output/goal_classifications_raw.json
+2026-10-10 02:59:45,843 - INFO - Cache against --model claude-opus-4-6:
+2026-10-10 02:59:45,843 - INFO -   items:            10979
+2026-10-10 02:59:45,843 - INFO -   cached and valid: 4
+2026-10-10 02:59:45,843 - INFO -   stale:            3985 (text differs: 3985, model differs: 0)
+2026-10-10 02:59:45,843 - INFO -   missing:          6990
+2026-10-10 02:59:45,843 - INFO -   calls:            10975 (records of an older text are classified again (--allow-stale keeps them))
+2026-10-10 02:59:45,843 - INFO -   estimate:         $60.64 (one Message Batch; 870 in + 268 out tokens per call at claude-opus-4-6:batch prices, retries not counted)
+2026-10-10 02:59:45,981 - INFO - Submitting one Message Batch of 10975 requests...
+2026-10-10 02:59:53,013 - INFO - Batch submitted: msgbatch_01CJ1AXtiq4e3HTp5AXgxyje (recorded in /Users/roger/Documents/GitHub/assistant-axis/data_analysis/output/goal_classifications_batches.json)
+2026-10-10 02:59:53,013 - INFO - Collect it later with the same options and --batch-id msgbatch_01CJ1AXtiq4e3HTp5AXgxyje
+2026-10-10 02:59:53,016 - INFO - [usage] (no API calls)

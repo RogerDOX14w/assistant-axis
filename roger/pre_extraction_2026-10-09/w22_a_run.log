@@ -1,0 +1,17 @@
+Traits to process: 1 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/1] OK environmental: 5 instruction pairs, 40 questions
+
+Done: 1 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~1
+[usage] total=$0.049 calls=1 [claude-sonnet-4-6: $0.049 in=2,572 out=2,760 n=1]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $228.072 over 6300 calls)
+2026-10-10 02:57:50,297 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+/Users/roger/Documents/GitHub/assistant-axis/data/roles/role_list.json: up to date (339 entries)
+  skipped (no description): default
+/Users/roger/Documents/GitHub/assistant-axis/data/traits/trait_list.json: rewrote (928 entries; 0 added, 0 removed, 1 changed)
+roles: 340 files; arrangements by kind: map: 8, pair: 12, sequence: 11, set: 2, singleton: 305, square: 4; unclassified: 0; malformed: 0; problems: 0
+traits: 928 files; arrangements by kind: 4-cube: 16, 5-orthoplex: 10, 6-orthoplex: 12, map: 23, pair: 592, ring: 27, sequence: 28, set: 61, singleton: 134, square: 20, tetrahedron: 4, tree: 3, triangle: 24; unclassified: 22; malformed: 0; problems: 0
+environmental: was "This means putting ecological concerns, sustainability and the protection of nature first in one's own choices and judgments: what one buys, eats and drives, and what one supports."
+[usage] total=$0.007 calls=1 [claude-sonnet-4-6: $0.007 in=942 out=267 n=1]
+environmental  -> extractivist|anthropocentric|pro-development (3)  partner None
