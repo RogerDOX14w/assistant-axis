@@ -66,9 +66,24 @@ footer#flash.error { color: var(--bad); font-weight: 600; }
 #overlay input { width: 100%; font-size: 16px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); }
 #overlay table { border-collapse: collapse; width: 100%; }
 #overlay td { padding: 2px 8px 2px 0; vertical-align: top; }
+.toolbar { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 8px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.btn { font: inherit; font-size: 13px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--focus); }
+.btn .kl { font-weight: 800; }
+.btn .k { font-size: 11px; color: var(--muted); margin-left: 5px; font-family: ui-monospace, Menlo, monospace; }
+.btn.primary { background: var(--focus); border-color: var(--focus); color: var(--panel); }
+.btn.primary .k { color: inherit; opacity: .8; }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn.mini { font-size: 12px; padding: 0 7px; }
+.row-btns { display: inline-flex; gap: 4px; margin-left: 8px; vertical-align: middle; }
 kbd { font-family: ui-monospace, Menlo, monospace; font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; }
 @media (max-width: 900px) {
   main { grid-template-columns: 1fr; height: auto; }
   main > section { border-right: none; border-bottom: 1px solid var(--line); max-height: none; }
   #overlay { inset: 50px 16px auto 16px; }
 }
+#overlay .close { float: right; }
+#found tr { cursor: pointer; }

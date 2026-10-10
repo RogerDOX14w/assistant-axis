@@ -10,20 +10,21 @@
   <header id="top">
     <div class="title"><strong id="batch">review</strong> <span id="order" class="muted"></span></div>
     <div id="counts" class="counts"></div>
-    <div class="muted small">? keys</div>
+    <div class="muted small">every action has a button; keys are optional (Keys lists them)</div>
   </header>
   <main>
     <section id="queue-pane" aria-label="queue">
-      <h2>Queue</h2>
+      <h2>Queue <span class="muted small">M merged · P proposed · S single word</span></h2>
       <ol id="queue"></ol>
     </section>
     <section id="card-pane" aria-label="group">
-      <div id="card"><p class="muted">Space opens the first group in the queue; / finds a term.</p></div>
+      <div id="toolbar" class="toolbar" role="toolbar" aria-label="actions"></div>
+      <div id="card"><p class="muted">Next group opens the first group in the queue; Find looks up a term.</p></div>
     </section>
     <section id="side-pane" aria-label="neighbours">
-      <div class="pane" data-pane="neighbours"><h2>Neighbours <span class="muted small">m merges</span></h2><ol id="neighbours"></ol></div>
-      <div class="pane" data-pane="corpus"><h2>Corpus and queue traits <span class="muted small">c merges into</span></h2><ol id="corpus"></ol></div>
-      <div class="pane" data-pane="opposed"><h2>Opposed <span class="muted small">a starts the antonym group</span></h2><ol id="opposed"></ol></div>
+      <div class="pane" data-pane="neighbours"><h2>Neighbours <span class="muted small">other candidates nearby</span></h2><ol id="neighbours"></ol></div>
+      <div class="pane" data-pane="corpus"><h2>Corpus and queue traits <span class="muted small">what may already cover this group</span></h2><ol id="corpus"></ol></div>
+      <div class="pane" data-pane="opposed"><h2>Opposed <span class="muted small">possible antonyms</span></h2><ol id="opposed"></ol></div>
     </section>
   </main>
   <footer id="flash" role="status" aria-live="polite"></footer>

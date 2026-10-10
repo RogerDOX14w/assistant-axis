@@ -604,6 +604,35 @@ class TestRoutes:
         assert client.get("/static/app.js").status_code == 200
         assert client.get("/static/style.css").status_code == 200
 
+    def test_every_action_is_a_button_and_every_key_goes_through_actions(self, client):
+        """2026-10-10 (Roger: buttons, not shortcuts to learn): the page has a toolbar; each button's data-act names an
+        ACTIONS entry; each key of the keyboard handler that acts calls ACTIONS (or onEnter / move), so a button and its
+        key run the same code."""
+        import re
+        assert 'id="toolbar"' in client.get("/").text
+        js = client.get("/static/app.js").text
+        actions = set(re.findall(r"^  (\w+): \(\) =>", js.split("const ACTIONS = {", 1)[1].split("\n};", 1)[0], re.M))
+        assert {"next", "accept", "promote", "reject", "park", "defer", "merge_into", "drop", "nominate", "merge_in",
+                "antonym", "note", "undo", "find", "details", "order", "help"} <= actions
+        used = set(re.findall(r'\b(?:btn|rowBtn)\("(\w+)"', js))
+        assert used and used <= actions, used - actions
+        keys = js.split('document.addEventListener("keydown"', 1)[1]
+        for case in re.findall(r'case "([^"]+)":([^\n]*)', keys):
+            k, body = case
+            if k in ("Tab", "ArrowDown", "ArrowUp", "j", "k", "Escape", "Enter"):
+                continue
+            assert "ACTIONS." in body, (k, body)
+
+    def test_the_script_parses(self):
+        import shutil
+        import subprocess
+        node = shutil.which("node")
+        if not node:
+            pytest.skip("node not installed")
+        from assistant_axis.gapgen.review_app import server
+        r = subprocess.run([node, "--check", str(server.STATIC_DIR / "app.js")], capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+
     def test_a_restart_of_the_app_replays_the_log(self, env, client):
         gid = post(client, action="open", source="proposed:0").json()["group"]["id"]
         post(client, action="accept", group=gid)

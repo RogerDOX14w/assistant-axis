@@ -204,6 +204,17 @@ counts merged groups, proposed groups and singletons separately.
 defer, `a` start the antonym group, `u` undo, `/` find a term.  The page shows the queue's remaining counts
 at all times.
 
+**Buttons (2026-10-10).**  Roger: "I'm not a fan of having to learn keyboard shortcuts for a task I'll probably only
+be doing for less than a day, ever."  Every action is now a labelled button, the keys kept as optional shortcuts:
+a toolbar over the card shows what the open group allows (Promote, Reject, Park, Defer, Add note and Skip for an
+open group; Accept group for a proposed one; Next group and Start antonym group once resolved; always Undo, Find,
+Order and Keys), and each row has its own (Nominate, Exclude and Details on members; Merge in and Details on
+neighbours; Covered by this on corpus traits; Start antonym group on opposed candidates).  A button's key, when a
+letter, is that letter in bold in its label (Roger's suggestion: E**x**clude, **C**overed by this); other keys
+(Space, Enter, /, ;, ?) show as a small hint.  Buttons and keys both call one `ACTIONS` table in
+[app.js](../../assistant_axis/gapgen/review_app/static/app.js), so they cannot differ; overlays have a Close
+button and a Find result is chosen by a click.
+
 ## 4. Acceptance tests (written first)
 
 R1, fake clients and the toy corpus (`assistant_axis/tests/test_gapgen_review_graph.py`):
