@@ -1,12 +1,12 @@
 {
-  "n_calls": 12751,
+  "n_calls": 12761,
   "per_model": {
     "claude-opus-4-6": {
-      "completion_tokens": 350390,
-      "cost_usd": 16.4761,
+      "completion_tokens": 351680,
+      "cost_usd": 16.5517,
       "model": "claude-opus-4-6",
-      "n_calls": 1776,
-      "prompt_tokens": 1543274
+      "n_calls": 1786,
+      "prompt_tokens": 1551946
     },
     "claude-opus-4-6:batch": {
       "completion_tokens": 3047850,
@@ -16,7 +16,7 @@
       "prompt_tokens": 9548664
     }
   },
-  "total_completion_tokens": 3398240,
-  "total_cost_usd": 78.4459,
-  "total_prompt_tokens": 11091938
+  "total_completion_tokens": 3399530,
+  "total_cost_usd": 78.5215,
+  "total_prompt_tokens": 11100610
 }
