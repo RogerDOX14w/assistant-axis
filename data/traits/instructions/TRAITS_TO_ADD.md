@@ -576,11 +576,10 @@ Everything else is this TODO.
 ## TODO: chunk 7 leftovers (Roger, 2026-10-09)
 
 **Status 2026-10-10:** the PC-direction naming waits on the extraction.  Growth-first and
-environmental: environmental was rewritten (W4's text, 4ea9097, its chatbot phrase gone) and both were
-checked again; environmental -> anti-environmental | exploitative, blind name eco-conscious |
-environmentalist; growth-first -> eco-first | nature-first | environment-first.  Still not a pair;
-the options (mirror and pair, two singletons, the tangle pass, or rename environmental to
-environmentalist) are with Roger (pre-extraction W22).
+environmental: done (pre-extraction W22).  Environmental was widened to mirror growth-first
+(b6c19e3), its label-blind name came back environmentalist twice, and Roger had it renamed
+[environmentalist](./environmentalist.json) and paired with [growth-first](./growth_first.json) by
+decision (49a88c7): each side's check names the other's content in its own words, not its label.
 
 - **Redo the PC-direction naming on the new corpus** (Roger, 2026-10-09:
   "leave redoing this as a TODO once we have activations").  May's Strategy
