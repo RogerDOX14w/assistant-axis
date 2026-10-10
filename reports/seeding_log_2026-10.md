@@ -1088,3 +1088,56 @@ and AGENT_NOTES (§ "Naming from the description"; housekeeping item 8)
 updated; tests in
 [tests_after_chunk7.log](../roger/chunk7_2026-10-09/tests_after_chunk7.log).
 Every chunk of the seeding plan is now done; next is the RunPod extraction.
+
+## Pre-extraction work list: additions, drops, renames and rewrites (2026-10-09/10)
+
+Not a chunk: the corpus work Roger decided on 2026-10-09 from the TO_ADD files, before the extraction.
+Every decision, sheet and status is in [work_list.md](../roger/pre_extraction_2026-10-09/work_list.md);
+the drafts, reviews, runners and logs are beside it in
+[pre_extraction_2026-10-09/](../roger/pre_extraction_2026-10-09/).  Every check answer is in
+[antonym_check_history.jsonl](../data/traits/antonym_check_history.jsonl).  Corpus: 916 traits
+before the drops of 2026-10-09, 928 on 2026-10-10 (916 - 7 + 19).
+
+**New traits (19).**
+- W6, from the occupational instruments: [foot-dragging](../data/traits/instructions/foot_dragging.json),
+  [fickle](../data/traits/instructions/fickle.json) (also the trait-gap candidate fickle#1),
+  [persuasive](../data/traits/instructions/persuasive.json), [welcoming](../data/traits/instructions/welcoming.json),
+  [psychologically minded](../data/traits/instructions/psychologically_minded.json) (645e5a0).
+- W23: [Southeast Asian](../data/traits/instructions/southeast_asian.json) and
+  [Pacific Islander](../data/traits/instructions/pacific_islander.json) (the heritage map, now ten),
+  [just](../data/traits/instructions/just.json), [self-sacrificing](../data/traits/instructions/self_sacrificing.json) (645e5a0).
+- W25, the Dark Tetrad as an official `set` by the standards method:
+  [Machiavellian](../data/traits/instructions/machiavellian_dark_tetrad.json),
+  [narcissistic](../data/traits/instructions/narcissistic_dark_tetrad.json),
+  [psychopathic](../data/traits/instructions/psychopathic_dark_tetrad.json),
+  [sadistic](../data/traits/instructions/sadistic_dark_tetrad.json) (Dark Tetrad) (645e5a0).
+- W7: [sadistic](../data/traits/instructions/sadistic.json), the everyday sense, in cruel's goal slot;
+  W10: [wasteful](../data/traits/instructions/wasteful.json), paired with the rewritten
+  [efficient](../data/traits/instructions/efficient.json); W11:
+  [future-oriented](../data/traits/instructions/future_oriented.json) (the ZTPI set) and
+  [win-win-seeking](../data/traits/instructions/win_win_seeking.json) (2f944dd).
+- W5: the observed / unobserved pair, by decision (159debd).
+
+**Dropped (7 traits, 1 role).**  conceptual, enigmatic and the role adolescent (647ca4d); dramatic
+(83febfb); technical and mercurial (872433d); and in W7 cruel and merciful (2f944dd).  [wry](../data/traits/instructions/wry.json), [abstract](../data/traits/instructions/abstract.json)
+and [trustworthy](../data/traits/instructions/trustworthy.json) were rewritten instead (b6c086b).
+
+**Renamed (2).**  savage to [violent](../data/traits/instructions/violent.json), with its sense changed
+from cutting comebacks to physical violence (2f944dd); historical to
+[historically minded](../data/traits/instructions/historically_minded.json), sense unchanged (4ea9097).
+
+**Rewritten.**  The 21 framing rewrites of W4 (7394d5f) and about 30 more in 4ea9097: group E of W3,
+the W4 side findings, the moral-circle eight (W14), hands-off, data-driven, mystical and rationalist,
+uncaring, environmental, meditative; decisive again in 6290c4b.  The 85 standards traits regenerated
+with the judge display form in their generator prompt (2fd607d).
+
+**Arrangements.**  New pairs: efficient / wasteful, mystical / rationalist, anecdotal / data-driven
+(read as nearly clean), absentee / micromanaging and the observed pair (by decision).  Triangles now
+have every corner non-X (AGENT_NOTES § "The `arrangement` field"); the will and moral-standing triangles
+were recorded beside the feeling one, and the accountability triangle in 6a7f1e2.  Sequences: social
+value orientation, age, the delegation sequence, the moral-circle sequence in Roger's 13-member order.
+Sets: the Dark Tetrad and the ZTPI five.  Trees are stored nested (f6df5f8).
+
+**Labels still open with Roger** on 2026-10-10: wasteful or inefficient, win-win-seeking, violent or
+savage, cliqueish or cliquish, risk-seeking's and unflinching's wording, inspirational (E4), and
+environmental / growth-first (W22).  They are listed in TRAITS_TO_ADD's index.
