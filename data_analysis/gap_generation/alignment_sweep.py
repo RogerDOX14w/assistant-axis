@@ -345,11 +345,12 @@ def cmd_dedupe(args) -> int:
             E = embed_texts(emb, [p[k] for p in pairs for k in ("gloss_a", "gloss_b")], cache=cache, usage=ctx.usage)
             for i, p in enumerate(pairs):
                 p["cos"] = round(float(E[2 * i] @ E[2 * i + 1]), 4)
-            t = D.tune_threshold(pairs)
+            t = D.tune_threshold(pairs, false_merge_cost=args.false_merge_cost)
             labeled_doc["threshold"] = {**t.as_dict(), "embedding_model": emb.model_id, "tuned_at": utc_now()}
             atomic_write_text(json.dumps(labeled_doc, indent=2, ensure_ascii=False) + "\n", args.labeled)
-            print(f"tuned threshold {t.value} (accuracy {t.accuracy:.3f} on {t.n} pairs, {t.n_same} same; gap "
-                  f"{t.interval}); {len(t.errors)} pairs on the wrong side; wrote {args.labeled}")
+            print(f"tuned threshold {t.value} (false merge cost {t.false_merge_cost:g}; accuracy {t.accuracy:.3f}, "
+                  f"precision {t.precision}, recall {t.recall} on {t.n} pairs, {t.n_same} same; gap {t.interval}); "
+                  f"{len(t.errors)} pairs on the wrong side; wrote {args.labeled}")
             return 0
         if args.pairs_for_labeling:
             pairs = D.pairs_for_labeling(items, vecs, n=args.pairs_for_labeling, seed=args.seed)
@@ -430,6 +431,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--run-id", required=True)
     p.add_argument("--threshold", type=float, default=None, help="default: the tuned one in --labeled")
     p.add_argument("--tune", action="store_true", help="tune the threshold on --labeled and record it there")
+    p.add_argument("--false-merge-cost", type=float, default=2.0,
+                   help="weight of a false merge against a missed one when tuning (default 2; 1 = plain accuracy)")
     p.add_argument("--pairs-for-labeling", type=int, default=None, metavar="N",
                    help="write N pairs to label (dedup_pairs_to_label.json in the run dir) and stop")
     p.add_argument("--seed", type=int, default=0)

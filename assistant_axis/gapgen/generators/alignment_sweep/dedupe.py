@@ -46,6 +46,12 @@ class Group:
         return asdict(self)
 
 
+#: A false merge loses a candidate for good; a missed merge costs one more M1 / M3 row, and the one grouping at the
+#: end of all waves (``review_graph.py build``) catches it.  So :func:`tune_threshold` weighs a false merge at twice
+#: a missed one by default (2026-10-10, the pilot's labelled pairs; ``--false-merge-cost`` changes it).
+FALSE_MERGE_COST = 2.0
+
+
 @dataclass
 class TuneResult:
     value: float
@@ -54,6 +60,10 @@ class TuneResult:
     n_same: int
     interval: tuple
     errors: list = field(default_factory=list)
+    precision: Optional[float] = None
+    recall: Optional[float] = None
+    cost: Optional[float] = None
+    false_merge_cost: float = FALSE_MERGE_COST
 
     def as_dict(self) -> dict:
         d = asdict(self)
@@ -127,8 +137,11 @@ def rewrite_partner_hints(items: Sequence[Item], groups: Sequence[Group]) -> dic
     return out
 
 
-def tune_threshold(labeled: Sequence[Mapping]) -> TuneResult:
-    """The threshold separating ``same`` from distinct pairs best (each pair a dict with ``same`` and ``cos``)."""
+def tune_threshold(labeled: Sequence[Mapping], *, false_merge_cost: float = FALSE_MERGE_COST) -> TuneResult:
+    """The threshold separating ``same`` from distinct pairs best (each pair a dict with ``same`` and ``cos``): the
+    gap between labelled cosines with the lowest weighted error (a false merge, a distinct pair at or above the
+    threshold, costs ``false_merge_cost``; a missed merge 1), ties to the widest gap, then the higher threshold;
+    the threshold is the middle of the gap.  ``false_merge_cost=1`` is plain accuracy."""
     pts = [(float(p["cos"]), bool(p["same"])) for p in labeled if p.get("same") is not None]
     if not pts:
         raise ValueError("no labelled pairs")
@@ -138,14 +151,21 @@ def tune_threshold(labeled: Sequence[Mapping]) -> TuneResult:
     best = None
     for lo, hi, width in cands:
         t = (lo + hi) / 2
-        acc = sum((c >= t) == s for c, s in pts) / len(pts)
-        key = (acc, width, t)
+        fm = sum(1 for c, s in pts if c >= t and not s)
+        miss = sum(1 for c, s in pts if c < t and s)
+        key = (-(false_merge_cost * fm + miss), width, t)
         if best is None or key > best[0]:
             best = (key, lo, hi, t)
-    (acc, _w, t), lo, hi, _ = best
+    (neg_cost, _w, t), lo, hi, _ = best
+    merged_same = sum(1 for c, s in pts if c >= t and s)
+    merged = sum(1 for c, _ in pts if c >= t)
+    n_same = sum(s for _, s in pts)
     errors = [p for p in labeled if p.get("same") is not None and (float(p["cos"]) >= t) != bool(p["same"])]
-    return TuneResult(value=round(t, 4), accuracy=acc, n=len(pts), n_same=sum(s for _, s in pts),
-                      interval=(round(lo, 4), round(hi, 4)), errors=[dict(e) for e in errors])
+    return TuneResult(value=round(t, 4), accuracy=sum((c >= t) == s for c, s in pts) / len(pts), n=len(pts),
+                      n_same=n_same, interval=(round(lo, 4), round(hi, 4)), errors=[dict(e) for e in errors],
+                      precision=round(merged_same / merged, 4) if merged else None,
+                      recall=round(merged_same / n_same, 4) if n_same else None, cost=-neg_cost,
+                      false_merge_cost=false_merge_cost)
 
 
 def pairs_for_labeling(items: Sequence[Item], vectors: Mapping[str, np.ndarray], *, n: int = 30,

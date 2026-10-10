@@ -122,9 +122,22 @@ def test_tune_threshold_on_the_labelled_fixture():
     # best accuracy is 5/6 at any threshold in (0.75, 0.80] or (0.81, 0.88]; the wider gap is (0.81, 0.88], and
     # the threshold sits in its middle
     assert t.value == pytest.approx(0.845) and t.accuracy == pytest.approx(5 / 6)
-    assert t.n == 6 and t.n_same == 3
+    assert t.n == 6 and t.n_same == 3 and t.precision == 1.0 and t.recall == pytest.approx(2 / 3, abs=1e-4)
     with pytest.raises(ValueError):
         D.tune_threshold([])
+
+
+def test_a_false_merge_costs_more_than_a_missed_one():
+    """A false merge loses a candidate; a missed merge costs one more M1/M3 row, and the end-of-waves grouping
+    catches it.  With the default cost 2:1 the threshold stays above every distinct pair when that costs fewer
+    weighted errors; at 1:1 it is plain accuracy."""
+    labeled = [{"same": True, "cos": c} for c in (0.85, 0.83, 0.79, 0.72)] + \
+              [{"same": False, "cos": c} for c in (0.80, 0.74, 0.60, 0.55, 0.50)]
+    t2 = D.tune_threshold(labeled)                                    # cost 2:1: (0.80, 0.83] costs 2, alone
+    assert t2.value == pytest.approx(0.815) and t2.precision == 1.0 and t2.false_merge_cost == 2.0
+    assert t2.recall == pytest.approx(0.5) and t2.cost == pytest.approx(2.0)
+    t1 = D.tune_threshold(labeled, false_merge_cost=1.0)              # three gaps cost 2; (0.60, 0.72] is widest
+    assert t1.value == pytest.approx(0.66) and t1.accuracy == pytest.approx(7 / 9)
 
 
 def test_embed_glosses_uses_the_cache_and_charges_usage(tmp_path):
