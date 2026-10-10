@@ -8,6 +8,7 @@ import pytest
 
 from assistant_axis.entity_id import normalize_to_file_name
 from assistant_axis.gapgen.generators import alignment_sweep as AS
+from assistant_axis.gapgen.generators.alignment_sweep import gate as GATE
 from assistant_axis.gapgen.generators.alignment_sweep import sources as SRC
 
 REPO = AS.SWEEP_DIR.parents[2]
@@ -94,24 +95,45 @@ def test_gold_alignment_traits_are_the_ten_corpus_traits():
     assert doc["frame_pair"] == ["honorable_while_playing", "ruthless_while_playing"]
 
 
-def test_gate_gold_items_ten_of_each_and_no_none_item_is_a_corpus_label():
+def test_gate_gold_items_are_thirty_well_formed_items_over_the_four_answers():
+    """The invariants that survive a relabelling.
+
+    The predecessor of this test asserted the counts of the rubric's draft-1 three-way labels
+    (``{"chat": 10, "agentic-only": 10, "none": 10}``) and that every ``chat`` item was a corpus trait while
+    every other item was written for the file.  Draft 2 of the gate rubric adds a fourth answer ``both``, so
+    any honest four-way relabelling breaks both halves of that assertion — and the second half was a flaw in
+    its own right: it *required* the perfect confounding of ``expected`` with ``source``, under which the gate
+    could score the ``chat`` row by reading prose style rather than content.  What is actually invariant is the
+    shape of the file: thirty well-formed items, every answer one the gate can give, the corpus items real
+    corpus traits, no ``none`` item a corpus label, and draft 1's label kept beside the new one so the
+    relabelling stays auditable.  The distribution over the four answers is deliberately not asserted: the set's
+    job is to span the space, not to be balanced.
+    """
     doc = json.loads(AS.GATE_GOLD_PATH.read_text(encoding="utf-8"))
     items = doc["items"]
     assert len(items) == 30
-    by = {}
+    assert len({it["key"] for it in items}) == 30
+    corpus = _corpus_stems()
     for it in items:
-        by.setdefault(it["expected"], []).append(it)
         assert it["label"] and it["gloss"].startswith("This means "), it
         assert it["key"] and it["source"] in ("corpus", "written"), it
-    assert {k: len(v) for k, v in by.items()} == {"chat": 10, "agentic-only": 10, "none": 10}
-    corpus = _corpus_stems()
-    for it in by["chat"]:
-        assert it["source"] == "corpus" and normalize_to_file_name(it["label"]) in corpus, it["label"]
-    for it in by["none"] + by["agentic-only"]:
-        assert it["source"] == "written"
-    for it in by["none"]:
-        assert normalize_to_file_name(it["label"]) not in corpus, it["label"]
-    assert len({it["key"] for it in items}) == 30
+        assert it["expected"] in GATE.VISIBILITY, it                     # an answer the gate can actually give
+        assert it["expected_v1"] in ("chat", "agentic-only", "none"), it  # draft 1's label, kept for the audit
+        assert it.get("reason"), it["key"]                                # why this item has this label
+        in_corpus = normalize_to_file_name(it["label"]) in corpus
+        if it["source"] == "corpus":
+            assert in_corpus, it["label"]            # the corpus items are real corpus traits
+        else:
+            assert not in_corpus, it["label"]        # the written items are not corpus labels (the file says so)
+        if it["expected"] == "none":
+            assert not in_corpus, it["label"]        # nothing the corpus enacts can be unenactable
+    assert sum(1 for it in items if it["source"] == "corpus") == 10
+    # The relabelling is recorded: blind, by whom, when, and against which rubric pin.
+    rel = doc["_relabelling"]
+    assert rel["blind"] and rel["by"] and rel["relabelled_at"]
+    assert "1fb03517a414" in rel["rubric"]
+    # The criteria were stated before the labels; the one judgement the rubric leaves open is settled there.
+    assert doc["_criteria"]["chat_vs_both"]["action_log_test"]
 
 
 def test_paths_are_inside_the_repository():

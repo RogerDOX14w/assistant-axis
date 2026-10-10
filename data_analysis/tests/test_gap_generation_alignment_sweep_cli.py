@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from assistant_axis.gapgen.generators.alignment_sweep import GATE_GOLD_PATH
 from assistant_axis.gapgen.generators.alignment_sweep import fetch as F
 from assistant_axis.gapgen.generators.alignment_sweep import probe as P
 from assistant_axis.gapgen.generators.alignment_sweep.sources import SOURCES
@@ -107,10 +108,12 @@ def test_end_to_end(env, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "--run alignment_sweep/t1" in out and "gap_registry.py submit --from" in out
 
-    # gate on the gold items (fake: always chat)
+    # gate on the gold items (fake: always chat), so it agrees with exactly the gold items expecting chat
     assert CLI.main(common + ["gate", "--run-id", "t1", "--gold-only", "--allow-dirty"]) == 0
     ev = json.loads((rdir / "gate_gold_eval.json").read_text())["result"]["eval"]
-    assert ev["n"] == 30 and ev["n_agree"] == 10 and ev["meets_targets"] is False
+    n_chat = sum(1 for g in json.loads(GATE_GOLD_PATH.read_text(encoding="utf-8"))["items"]
+                 if g["expected"] == "chat")
+    assert ev["n"] == 30 and ev["n_agree"] == n_chat and ev["meets_targets"] is False
     assert (rdir / "gate_gold_eval.md").exists()
 
     # probe: no key -> skipped and said so
@@ -129,7 +132,7 @@ def test_end_to_end(env, monkeypatch, capsys):
     assert CLI.main(common + ["report", "--run-id", "t1", "--gold"]) == 0
     md = (rdir / "readout.md").read_text()
     assert "## Survivors (2)" in md and "## Covered (2)" in md and "stays in scope (oversteps the task)" in md
-    assert "Label probe: skipped" in md and "advisory only (gold agreement 10/30" in md
+    assert "Label probe: skipped" in md and f"advisory only (gold agreement {n_chat}/30" in md
     gold = (rdir / "gold_recovery.md").read_text()
     assert "Recovered **1 of 10**" in gold and "novelty_score.py score --batch-id t1_alignment_sweep_gold" in gold
     hidden = json.loads((rdir / "gold_hidden.json").read_text())

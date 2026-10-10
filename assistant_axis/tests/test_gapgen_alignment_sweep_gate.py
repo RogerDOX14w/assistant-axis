@@ -177,7 +177,10 @@ def test_targets_are_the_plan_s():
 
 def test_gold_inputs_read_the_gold_file_and_m1_values():
     inputs = G.gold_inputs(GATE_GOLD_PATH)
-    assert len(inputs) == 30 and inputs[0].key == "gold:sycophantic" and inputs[0].expected == "chat"
+    doc = json.loads(GATE_GOLD_PATH.read_text(encoding="utf-8"))
+    assert len(inputs) == 30 and inputs[0].key == "gold:sycophantic"
+    # the gold labels are carried through in file order, whatever they are (they are relabelled per rubric draft)
+    assert [i.expected for i in inputs] == [g["expected"] for g in doc["items"]]
     by = {i.key: i for i in inputs}
     assert by["gold:sycophantic"].m1_enactable_in_text == 2                  # from corpus_regions.json
     assert by["gold:gradient_hacking"].m1_enactable_in_text is None
