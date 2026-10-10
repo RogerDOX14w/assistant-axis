@@ -135,9 +135,9 @@ def main():
     for kind, stem, label, d, olddesc, h, subj, prev in rows["renamed"]:
         desc = d.get("description") + (f"<br>**was:** {olddesc}" if olddesc else " (unchanged)")
         A.append(f"| {link(kind, stem, label)} | {prev.replace('_', ' ')} | `{h}` {subj} | {desc} | {last_check(stem)} |")
-    A.append(f"\n## Rewritten ({n['rewritten']})\n\n| label | from | now | was | check |\n|---|---|---|---|---|")
+    A.append(f"\n## Rewritten ({n['rewritten']})\n\n| label | from | was (at your last review) | **now** | check |\n|---|---|---|---|---|")
     for kind, stem, label, d, olddesc, h, subj in rows["rewritten"]:
-        A.append(f"| {link(kind, stem, label)}{' (role)' if kind == 'roles' else ''} | `{h}` {subj} | {d.get('description')} | {olddesc} | {last_check(stem) if kind == 'traits' else ''} |")
+        A.append(f"| {link(kind, stem, label)}{' (role)' if kind == 'roles' else ''} | `{h}` {subj} | {olddesc} | {d.get('description')} | {last_check(stem) if kind == 'traits' else ''} |")
     A.append(f"\n## Dropped ({n['dropped']}), for the record\n\n| label | description it had |\n|---|---|")
     for kind, stem, label, o in rows["dropped"]:
         A.append(f"| {label}{' (role)' if kind == 'roles' else ''} | {o.get('description')} |")
