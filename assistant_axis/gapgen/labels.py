@@ -79,7 +79,11 @@ SENSE_CHANGED_RENAMES: dict[str, str] = {"bland": "dull", "libertarian": "metaph
 #: A sense change under an *unchanged* stem has no rename to catch it and nothing here detects it: every source
 #: keyed by stem (a seed-queue decision's prose, an M1 gloss, this module's own output) goes on describing the old
 #: sense, while the Roget map and ``corpus_regions.json`` hash the description and re-place themselves.  Such a
-#: pair is dropped by hand, in ``labelled_pairs_curation.json``'s ``exclude`` with a reason.  Done so far:
+#: pair is dropped by hand, in ``labelled_pairs_curation.json``'s ``exclude`` with a reason.  Rare: Roger,
+#: 2026-10-10, "most description edits change the sense very little, this one was more drastic", so the hand check
+#: is for the drastic ones only (the seeding session flags them: "like savage -> violent, this is a change of
+#: sense"); an ordinary rewording needs nothing beyond the re-placement every description change already gets.
+#: Done so far:
 #: ``organized`` and ``disorganized`` on 2026-10-10 (cac3244, orderly talk -> orderly things and time), which made
 #: the queue's "structured is the same trait as organized" decision describe a trait the corpus no longer has.
 
