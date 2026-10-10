@@ -2507,7 +2507,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "environmental",
+   "partner": "environmentalist",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -2555,7 +2555,7 @@
     "intended_hit": false,
     "checked_at": "2026-09-17"
    },
-   "pairing_note": "environmental's opposite from economic's side is holistic|idealistic; environmental already names economic; the label reads oddly (economy-first?); option: pair by decision or rename",
+   "pairing_note": "environmental's opposite from economic's side is holistic|idealistic; environmental already names economic; the label reads oddly (economy-first?); option: pair by decision or rename [partner renamed environmental -> environmentalist on 2026-10-10 (RO)]",
    "paired_at": "2026-09-17"
   },
   {
@@ -55240,7 +55240,7 @@
    "chunk": "7",
    "sub_chunk": "7a: gaps confirmed",
    "pairing": "singleton",
-   "partner": null,
+   "partner": "environmentalist",
    "partner_exists": null,
    "arrangement_members": null,
    "description_draft": "This means ranking jobs, growth and low costs above nature in one's considerations and recommendations: backing the mine, the pipeline or the factory, and reading environmental rules as red tape.",
@@ -55250,7 +55250,7 @@
    "tags": [
     "gap"
    ],
-   "status": "done",
+   "status": "paired",
    "decision": " [Roger, 2026-10-09: 'if they're gaps, yes'; a gap: environmental (a singleton) has no partner; anthropocentric is moral standing, capitalist is ownership. Seeded non-X; pairing with environmental is Roger's call (an existing file).] [Roger, 2026-10-09: not a clean pair with environmental (neither check names the other: growth-first -> nature-first|conservation-first|environmentalist; environmental -> exploitative|anthropocentric); left as a TODO.]",
    "alternatives": null,
    "section": "seeding log: item 7",
@@ -55300,7 +55300,8 @@
      "returned": "eco-first|nature-first",
      "phase": "W22 (a') growth-first sample"
     }
-   ]
+   ],
+   "paired_at": "2026-10-10"
   },
   {
    "stem": "unselfconscious",
