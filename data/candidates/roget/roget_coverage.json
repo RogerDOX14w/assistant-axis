@@ -5,24 +5,24 @@
    "n_dispositional": 576,
    "class_i_iii_added": 98,
    "by_state": {
-    "covered": 279,
+    "covered": 280,
     "partly": 50,
     "queued": 2,
-    "empty": 155
+    "empty": 154
    },
    "covered_partly_uncovered": {
-    "covered": 279,
+    "covered": 280,
     "partly_covered": 50,
-    "uncovered": 157,
+    "uncovered": 156,
     "of_which_queued": 2
    },
    "by_gap_class": {
-    "pair_completion": 32,
+    "pair_completion": 31,
     "pair_empty": 57,
     "singleton_empty": 66,
     "queued_only": 2,
     "partly_covered": 50,
-    "crowded": 78,
+    "crowded": 79,
     "covered": 201
    },
    "by_class": {
@@ -54,8 +54,8 @@
      "partly": 9
     },
     "VI": {
-     "empty": 45,
-     "covered": 96,
+     "empty": 44,
+     "covered": 97,
      "partly": 14
     }
    },
@@ -313,10 +313,10 @@
      "not_character": 12
     },
     "VI III. Sympathetic affections": {
-     "covered": 20,
+     "covered": 21,
      "partly": 3,
      "queued": 0,
-     "empty": 9,
+     "empty": 8,
      "not_character": 4
     },
     "VI IV. Moral affections": {
@@ -336,8 +336,8 @@
    },
    "opposed_pairs": {
     "neither_pole_covered": 32,
-    "both_poles_covered": 76,
-    "one_pole_covered": 63
+    "both_poles_covered": 77,
+    "one_pole_covered": 62
    },
    "opposed_pairs_by_source": {
     "rule": {
@@ -345,8 +345,8 @@
     },
     "synopsis": {
      "neither_pole_covered": 31,
-     "both_poles_covered": 76,
-     "one_pole_covered": 63
+     "both_poles_covered": 77,
+     "one_pole_covered": 62
     }
    },
    "pair_kinds": {
@@ -356,11 +356,11 @@
     "unresolved": 3
    },
    "labels": {
-    "existing_mapped": 727,
-    "existing_unmapped": 201,
+    "existing_mapped": 730,
+    "existing_unmapped": 202,
     "queued_mapped": 107,
     "queued_unmapped": 47,
-    "existing_primary_in_scope": 681
+    "existing_primary_in_scope": 684
    },
    "hidden": [],
    "not_character": {
@@ -766,7 +766,7 @@
 {"id":"513","title":"Oracle","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["513"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
 {"id":"514","title":"Supposition","path":"IV > I. Formation of ideas > VII. Creative thought","klass":"IV","section":"VII. Creative thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["514"],"existing":["theoretical"],"existing_secondary":["speculative"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
 {"id":"514a","title":"Analogy","path":"IV > I. Formation of ideas > VII. Creative thought","klass":"IV","section":"VII. Creative thought","partner":null,"pair_kind":"unresolved","pair_source":"unresolved","members":["514a"],"existing":["stream_of_consciousness"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
-{"id":"515","title":"Imagination","path":"IV > I. Formation of ideas > VII. Creative thought","klass":"IV","section":"VII. Creative thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["515"],"existing":["confabulatory","creative","idealistic","romantic"],"existing_secondary":["whimsical"],"queued_active":[],"queued_parked":["right_brained"],"n_existing":4,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
+{"id":"515","title":"Imagination","path":"IV > I. Formation of ideas > VII. Creative thought","klass":"IV","section":"VII. Creative thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["515"],"existing":["confabulatory","creative","dreamy","idealistic","romantic"],"existing_secondary":["whimsical"],"queued_active":[],"queued_parked":["right_brained"],"n_existing":5,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"516","title":"Meaning","path":"IV > II. Communication of ideas > I. Nature of ideas communicated","klass":"IV","section":"I. Nature of ideas communicated","partner":"517","pair_kind":"pair","pair_source":"synopsis","members":["516","517"],"existing":[],"existing_secondary":["expressive","literal"],"queued_active":[],"queued_parked":["mean","meaningful"],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":0},
 {"id":"517","title":"Unmeaningness","path":"IV > II. Communication of ideas > I. Nature of ideas communicated","klass":"IV","section":"I. Nature of ideas communicated","partner":"516","pair_kind":"pair","pair_source":"synopsis","members":["516","517"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"partly","partner_existing":[],"triggers":[],"character":0},
 {"id":"518","title":"Intelligibility","path":"IV > II. Communication of ideas > I. Nature of ideas communicated","klass":"IV","section":"I. Nature of ideas communicated","partner":"519","pair_kind":"pair","pair_source":"synopsis","members":["518","519"],"existing":["clear","transparent"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
@@ -856,9 +856,9 @@
 {"id":"601","title":"Necessity","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"600","pair_kind":"pair","pair_source":"synopsis","members":["600","601"],"existing":["determinist","fatalistic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"602","title":"Willingness","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"603","pair_kind":"pair","pair_source":"synopsis","members":["602","603"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["foot_dragging"],"triggers":[],"character":2},
 {"id":"603","title":"Unwillingness","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"602","pair_kind":"pair","pair_source":"synopsis","members":["602","603"],"existing":["foot_dragging"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
-{"id":"604","title":"Resolution","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"605","pair_kind":"pair","pair_source":"synopsis","members":["604","605"],"existing":["decisive","self_disciplined"],"existing_secondary":["unflinching"],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["ambivalent"],"triggers":[],"character":2},
+{"id":"604","title":"Resolution","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"605","pair_kind":"pair","pair_source":"synopsis","members":["604","605"],"existing":["decisive","self_disciplined","strong_willed"],"existing_secondary":["unflinching"],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["ambivalent"],"triggers":[],"character":2},
 {"id":"604a","title":"Perseverance","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":null,"pair_kind":"triad","pair_source":"synopsis","members":["604a","606","607"],"existing":["long_term_oriented","persevering","unflinching"],"existing_secondary":["patient","steadiness_disc"],"queued_active":["disciplined"],"queued_parked":["steadfast"],"n_existing":3,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
-{"id":"605","title":"Irresolution","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"604","pair_kind":"pair","pair_source":"synopsis","members":["604","605"],"existing":["ambivalent"],"existing_secondary":["indecisive"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["decisive","self_disciplined"],"triggers":[],"character":2},
+{"id":"605","title":"Irresolution","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"604","pair_kind":"pair","pair_source":"synopsis","members":["604","605"],"existing":["ambivalent"],"existing_secondary":["indecisive"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["decisive","self_disciplined","strong_willed"],"triggers":[],"character":2},
 {"id":"606","title":"Obstinacy","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"607","pair_kind":"pair","pair_source":"synopsis","members":["606","607"],"existing":["obsessive","unyielding"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
 {"id":"607","title":"Tergiversation","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"606","pair_kind":"pair","pair_source":"synopsis","members":["606","607"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["obsessive","unyielding"],"triggers":[],"character":2},
 {"id":"608","title":"Caprice","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["608"],"existing":["eccentric","erratic","whimsical"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
@@ -1162,13 +1162,13 @@
 {"id":"894","title":"Courtesy","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"895","pair_kind":"pair","pair_source":"synopsis","members":["894","895"],"existing":["polite","tactful"],"existing_secondary":["gentle"],"queued_active":[],"queued_parked":["kind"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":[],"character":2},
 {"id":"895","title":"Discourtesy","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"894","pair_kind":"pair","pair_source":"synopsis","members":["894","895"],"existing":[],"existing_secondary":["rude"],"queued_active":[],"queued_parked":["unceremonious","undiplomatic"],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["polite","tactful"],"triggers":[],"character":2},
 {"id":"896","title":"Congratulation","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["896"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
-{"id":"897","title":"Love","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"898","pair_kind":"pair","pair_source":"synopsis","members":["897","898"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":["devoted"],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["xenophobic"],"triggers":[],"character":2},
-{"id":"898","title":"Hate","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"897","pair_kind":"pair","pair_source":"synopsis","members":["897","898"],"existing":["xenophobic"],"existing_secondary":["misanthropic","unpopular"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
+{"id":"897","title":"Love","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"898","pair_kind":"pair","pair_source":"synopsis","members":["897","898"],"existing":["amorous"],"existing_secondary":[],"queued_active":[],"queued_parked":["devoted"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["xenophobic"],"triggers":[],"character":2},
+{"id":"898","title":"Hate","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"897","pair_kind":"pair","pair_source":"synopsis","members":["897","898"],"existing":["xenophobic"],"existing_secondary":["misanthropic","unpopular"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["amorous"],"triggers":[],"character":1},
 {"id":"899","title":"Favorite","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["899"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
 {"id":"900","title":"Resentment","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["900"],"existing":["aggrieved","bitter"],"existing_secondary":[],"queued_active":[],"queued_parked":["resentful"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"901","title":"Irascibility","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["901"],"existing":["irascible","quarrelsome_hexaco"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"901a","title":"Sullenness","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["901a"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
-{"id":"902","title":"Endearment","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["902"],"existing":["flirty"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
+{"id":"902","title":"Endearment","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["902"],"existing":["flirty"],"existing_secondary":["amorous"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
 {"id":"903","title":"Marriage","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"904","pair_kind":"pair","pair_source":"synopsis","members":["903","904"],"existing":["married","monogamous","polyandrous","polygamous","polygynous"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":5,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["asexual","single"],"triggers":[],"character":0},
 {"id":"904","title":"Celibacy","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"903","pair_kind":"pair","pair_source":"synopsis","members":["903","904"],"existing":["asexual","single"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["married","monogamous","polyandrous","polygamous","polygynous"],"triggers":[],"character":0},
 {"id":"905","title":"Divorce","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"triad","pair_source":"synopsis","members":["903","904","905"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
@@ -1277,11 +1277,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "1ff6830+dirty",
+   "git_sha": "e776919+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-10T11:51:22+00:00",
+  "produced_at": "2026-10-10T11:57:51+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1304,22 +1304,22 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-10T11:51:18+00:00@1425446",
+    "fingerprint": "v1:2026-10-10T11:57:47+00:00@1430488",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T11:51:18+00:00",
+    "last_modified_at": "2026-10-10T11:57:47+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope",
     "path": "data/candidates/roget/head_scope.json",
-    "fingerprint": "v1:2026-10-10T11:51:20+00:00@249708",
+    "fingerprint": "v1:2026-10-10T11:57:49+00:00@249708",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-10T11:51:20+00:00",
+    "last_modified_at": "2026-10-10T11:57:49+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "0ad1e49e7a8f8cc889ee0ae7b800f4a8bcea37d03a0f4b52a9a43927957735e1"
+  "inputs_sha256": "ebf04d35285f73ca7e8d67a83de5395ad3ab16aa919fe6d6c4922d9390bf54ca"
  }
 }

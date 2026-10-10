@@ -10,10 +10,10 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 - Heads in scope: **674** (576 dispositional, 98 from Classes I-III).
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 188; 89 unrated, mostly heads with no adjectives).
-- Covered **279**, partly covered **50**, uncovered **157** (of which 2 have a queued label only).
-- Opposed pairs in scope: both poles covered **76**, one pole **63**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 76, "one_pole_covered": 63}}).
-- Labels placed: 727 existing traits with a primary head (201 without; 681 of the primaries in scope), 107 queued labels (47 without).
-- Gap classes: pair_completion 32, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 50, crowded 78, covered 201.
+- Covered **280**, partly covered **50**, uncovered **156** (of which 2 have a queued label only).
+- Opposed pairs in scope: both poles covered **77**, one pole **62**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 77, "one_pole_covered": 62}}).
+- Labels placed: 730 existing traits with a primary head (202 without; 684 of the primaries in scope), 107 queued labels (47 without).
+- Gap classes: pair_completion 31, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 50, crowded 79, covered 201.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -56,11 +56,11 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | V IV. Possessive relations | 10 | 2 | 0 | 18 | 21 |
 | VI I. Affections in general | 5 | 0 | 0 | 2 | 0 |
 | VI II. Personal affections | 41 | 2 | 0 | 7 | 12 |
-| VI III. Sympathetic affections | 20 | 3 | 0 | 9 | 4 |
+| VI III. Sympathetic affections | 21 | 3 | 0 | 8 | 4 |
 | VI IV. Moral affections | 22 | 5 | 0 | 17 | 12 |
 | VI V. Religious affections | 8 | 4 | 0 | 10 | 4 |
 
-## pair_completion (32)
+## pair_completion (31)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -92,7 +92,6 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 761 Prohibition | V II. Special intersocial volition | 760 Permission (synopsis) | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | - | - | - |
 | 830 . Painfulness | VI II. Personal affections | 829 Pleasurableness (synopsis) | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) | - | - | - |
 | 889 Enmity | VI III. Sympathetic affections | 888 Friendship (synopsis) | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | - | - | - |
-| 897 Love | VI III. Sympathetic affections | 898 Hate (synopsis) | [xenophobic](../../traits/instructions/xenophobic.json) | - | [devoted](../../seed_queue.json) (queued) | - |
 | 912 Benefactor | VI III. Sympathetic affections | 913 Evil doer (synopsis) | [killer (Bartle)](../../traits/instructions/killer_bartle.json) | - | - | - |
 | 945 Vice | VI IV. Moral affections | 944 Virtue (synopsis) | [moral](../../traits/instructions/moral.json) | - | - | - |
 | 961 Impurity | VI IV. Moral affections | 960 Purity (synopsis) | [chaste](../../traits/instructions/chaste.json) | - | - | - |
@@ -691,7 +690,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 503 Insanity | [delusional](../../traits/instructions/delusional.json) |
 | 506 Oblivion | [forgetful](../../traits/instructions/forgetful.json), [oblivious](../../traits/instructions/oblivious.json) |
 | 510 Foresight | [future-oriented](../../traits/instructions/future_oriented.json) |
-| 515 Imagination | [confabulatory](../../traits/instructions/confabulatory.json), [creative](../../traits/instructions/creative.json), [idealistic](../../traits/instructions/idealistic.json), [romantic](../../traits/instructions/romantic.json) |
+| 515 Imagination | [confabulatory](../../traits/instructions/confabulatory.json), [creative](../../traits/instructions/creative.json), [dreamy](../../traits/instructions/dreamy.json), [idealistic](../../traits/instructions/idealistic.json), [romantic](../../traits/instructions/romantic.json) |
 | 518 Intelligibility | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) |
 | 522 Interpretation | [expository](../../traits/instructions/expository.json) |
 | 525 Manifestation | [expressive](../../traits/instructions/expressive.json), [low-context (Hall)](../../traits/instructions/low_context_hall.json) |
@@ -717,7 +716,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 599 The Drama | [melodramatic](../../traits/instructions/melodramatic.json), [theatrical](../../traits/instructions/theatrical.json) |
 | 601 Necessity | [determinist](../../traits/instructions/determinist.json), [fatalistic](../../traits/instructions/fatalistic.json) |
 | 603 Unwillingness | [foot-dragging](../../traits/instructions/foot_dragging.json) |
-| 604 Resolution | [decisive](../../traits/instructions/decisive.json), [self-disciplined](../../traits/instructions/self_disciplined.json) |
+| 604 Resolution | [decisive](../../traits/instructions/decisive.json), [self-disciplined](../../traits/instructions/self_disciplined.json), [strong-willed](../../traits/instructions/strong_willed.json) |
 | 604a Perseverance | [long-term oriented](../../traits/instructions/long_term_oriented.json), [persevering](../../traits/instructions/persevering.json), [unflinching](../../traits/instructions/unflinching.json) |
 | 605 Irresolution | [ambivalent](../../traits/instructions/ambivalent.json) |
 | 606 Obstinacy | [obsessive](../../traits/instructions/obsessive.json), [unyielding](../../traits/instructions/unyielding.json) |
@@ -847,6 +846,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 892 Sociality | [extroverted](../../traits/instructions/extroverted.json), [gregarious](../../traits/instructions/gregarious.json), [social (Holland)](../../traits/instructions/social_holland.json), [socializer (Bartle)](../../traits/instructions/socializer_bartle.json), [welcoming](../../traits/instructions/welcoming.json) |
 | 893 Seclusion. Exclusion | [clannish](../../traits/instructions/clannish.json), [cliquish](../../traits/instructions/cliquish.json), [dismissive-avoidant attachment](../../traits/instructions/dismissive_avoidant_attachment.json), [introverted](../../traits/instructions/introverted.json), [introverted (Big Five)](../../traits/instructions/introverted_big_five.json), [isolated](../../traits/instructions/isolated.json), [lonely](../../traits/instructions/lonely.json), [solitary](../../traits/instructions/solitary.json), [unsupported](../../traits/instructions/unsupported.json) |
 | 894 Courtesy | [polite](../../traits/instructions/polite.json), [tactful](../../traits/instructions/tactful.json) |
+| 897 Love | [amorous](../../traits/instructions/amorous.json) |
 | 898 Hate | [xenophobic](../../traits/instructions/xenophobic.json) |
 | 900 Resentment | [aggrieved](../../traits/instructions/aggrieved.json), [bitter](../../traits/instructions/bitter.json) |
 | 901 Irascibility | [irascible](../../traits/instructions/irascible.json), [quarrelsome (HEXACO)](../../traits/instructions/quarrelsome_hexaco.json) |

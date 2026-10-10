@@ -713,6 +713,26 @@
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
     },
+    "amorous": {
+      "label": "amorous",
+      "region": "emotional_temperament",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "fc4aa8f19259925ff8099626bb3fc2f3fc2f6062cc16e46229b33a12f6ea92ef",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on how intensely and steadily the persona feels about love, which a text persona can readily show in its wording and warmth.",
+        "alignment": "The description concerns romantic devotion and loyalties, which could only bear on deference to a particular person through a further step, such as favouring the beloved over those it works for."
+      },
+      "batch_id": "corpus_desc_20261010T115753Z",
+      "at": "2026-10-10T11:57:55+00:00"
+    },
     "analytical": {
       "label": "analytical",
       "region": "cognitive_epistemic",
@@ -5079,6 +5099,26 @@
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
+    },
+    "dreamy": {
+      "label": "dreamy",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 1,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "99cee875a09985ab9d5eca35a4e362915d89e51e9ea83de1714529139e087400",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about wandering attention and an inner imaginative life, which is a way of thinking more than a feeling or a stance toward others.",
+        "alignment": "Describes a daydreamy manner of attention and imagination, which is a character trait with no direct bearing on harm, honesty, approval, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261010T115753Z",
+      "at": "2026-10-10T11:57:56+00:00"
     },
     "dry": {
       "label": "dry",
@@ -17299,6 +17339,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "self_reinventing": {
+      "label": "self-reinventing",
+      "region": "emotional_temperament",
+      "enactable_in_text": 1,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "e728a5ca5b28c83bd4a9da5370bd66b0d1ad0f17b7e6e168bf4a92ce9cedb13d",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on an inner restlessness and a felt pull to end old selves and start over, which is a matter of emotional disposition rather than reasoning, speech, or demographic fact.",
+        "alignment": "Self-reinvention concerns personal change and identity, which only loosely connects to the seven matters, such as drifting from given rules through a further step."
+      },
+      "batch_id": "corpus_desc_20261010T115753Z",
+      "at": "2026-10-10T11:57:56+00:00"
+    },
     "self_reliant": {
       "label": "self-reliant",
       "region": "social_interpersonal",
@@ -18715,6 +18775,26 @@
       "previous_region": null,
       "previous_alignment_relevant": null,
       "previous_source": "filter m1_validation_r2"
+    },
+    "strong_willed": {
+      "label": "strong-willed",
+      "region": "emotional_temperament",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "6f4fe84c81a104174754e5b13288b956124bdeeca1ce94fc7877d3e7e18f0a61",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description concerns how firmly the persona sticks to its aims under pressure, which is a matter of steady temperament and resolve rather than of any particular speech or fact about identity.",
+        "alignment": "The description names pushing ahead over everyone's objections and ignoring advice, which is resisting the people one works with, so it bears directly on deferring or resisting."
+      },
+      "batch_id": "corpus_desc_20261010T115753Z",
+      "at": "2026-10-10T11:57:55+00:00"
     },
     "structuralist": {
       "label": "structuralist",
@@ -21259,11 +21339,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
-      "git_sha": "49a88c7+dirty",
+      "git_sha": "e776919+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T021610Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T115753Z)"
     },
-    "produced_at": "2026-10-10T02:16:14+00:00",
+    "produced_at": "2026-10-10T11:57:56+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21284,15 +21364,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T021610Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T021610Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T02:16:14+00:00@2218",
+        "dep_key": "responses_corpus_desc_20261010T115753Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T115753Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T11:57:56+00:00@8391",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T02:16:14+00:00",
+        "last_modified_at": "2026-10-10T11:57:56+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "e0890a2020bd05c9fd9ede935a252ccad5729f779734531b8fd34c5174a70a09"
+    "inputs_sha256": "fb712602ee803afbf7e390e4f6b793751907e9f25d6a4d16028e68d925ebb2ef"
   }
 }
