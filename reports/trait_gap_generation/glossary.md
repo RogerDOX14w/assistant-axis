@@ -399,3 +399,46 @@ The fraction of the corpus's trait names (or their former names, `renamed_from`)
 produced as exact strings, with no model call.  A free first check that a generator can reach the
 kind of words the corpus has; the platform's recovery harness (`recovery_test.py`) is the fuller,
 paid version that also counts synonyms.
+
+## Alignment-sweep terms (added 2026-10-10, after Roger asked what "the gate's gold labels" meant)
+
+From [coding_plan_08_alignment_sweep.md](./coding_plan_08_alignment_sweep.md) and its
+[pilot readout](../../data/candidates/runs/alignment_sweep/2026-10-10-pilot/pilot_readout.md).
+
+<a id="enactability"></a>
+### Enactability, and the enactability gate
+Whether a trait would actually *show* in what a persona writes.  Three values: **chat** (it shows in
+answers to ordinary questions, as [candid](../../data/traits/instructions/candid.json) does),
+**agentic-only** (it shows only when the persona is given a task to carry out — "overreaching" needs
+an email to send before it can overreach), and **none** (nothing a reader could detect, so the
+corpus cannot use it).  The **gate** is the LLM call that assigns one of those three to each
+candidate: it writes a two-sentence system prompt for the trait and then judges whether the trait
+would be visible.  It exists because the alignment sources describe much that a chat persona could
+never display.
+
+<a id="gold-set"></a>
+### Gold set, gold label
+A **gold set** is a small set of items whose right answers are already known, used to measure
+whether a step can be trusted before it is let loose on real data; a **gold label** is one of those
+known answers.  Here: 30 items, ten corpus traits that plainly show in chat
+([sycophantic](../../data/traits/instructions/sycophantic.json),
+[honest](../../data/traits/instructions/honest.json),
+[calibrated](../../data/traits/instructions/calibrated.json) ...), ten expected to be agentic-only,
+ten expected to be none.  The gate is run on them and its answers compared with the gold labels.
+The catch, which is why Roger decides and not the agent: the gold labels here were *assigned by the
+planning agent*, not measured, so a disagreement can mean the gate is wrong **or** that the gold
+label is.  Changing a gold label after seeing the gate's answer would tune the test to the result,
+so the agent left all five disagreements for Roger.
+
+<a id="flip-rate"></a>
+### Flip rate
+The share of items on which the same call, run twice, gives different answers.  It separates "the
+step is wrong" from "the step is unstable": a gate that agrees with the gold labels 25 times in 30
+but flips on 7% of items is mostly *noisy*, and reading it twice and taking the agreement would help;
+one that is stable but disagrees is *biased*, and the prompt or the gold labels need changing.
+
+<a id="advisory-only"></a>
+### Advisory only
+A step whose output is recorded and shown but may not drop or change anything on its own, because it
+has not met its measured target.  The enactability gate is advisory after the pilot (25 of 30 against
+a target of 26): its verdicts appear in the readout, and no candidate is removed because of them.
