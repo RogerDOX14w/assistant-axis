@@ -146,11 +146,11 @@ assistant_axis/tests/fixtures/base_model/{wikibio_small.parquet, onet_small.txt,
 data_analysis/tests/test_gap_generation_base_model_cli.py
 ```
 
-### 5a. Downloads — Roger approval items (nothing is fetched before his word)
+### 5a. Downloads — the first three approved (Roger, 2026-10-10, below); the optional one needs a fresh ask
 
 | item | what / where from | size (approx.) | license | destination |
 |---|---|---|---|---|
-| **`Qwen/Qwen3-8B-Base`** | HF model snapshot, via `setup_external.py --hf-model Qwen/Qwen3-8B-Base` | **~16.4 GB** bf16 | Apache-2.0 (plan 03's note "licenses from memory" — verified on the HF page at download, recorded in the manifest) | `data/external/hf/` |
+| **`Qwen/Qwen3-8B-Base`** — approved; **TODO once the workstream is done: ask Roger whether to delete the weights** (his rule, 2026-10-10: anything over 2 GB gets this note) | HF model snapshot, via `setup_external.py --hf-model Qwen/Qwen3-8B-Base` | **~16.4 GB** bf16 | Apache-2.0 (plan 03's note "licenses from memory" — verified on the HF page at download, recorded in the manifest) | `data/external/hf/` |
 | **`wiki_bio`** | HF dataset, parquet shards via `hf_hub_download` | **~300-400 MB** (not verifiable from inside the repo; the fetch prints the exact size before writing) | CC BY-SA 3.0 — seeds as prompts only, never redistributed (Roger § 9.1) | `data/external/wikibio/` |
 | **O*NET occupation titles** | the Occupation Data file from onetcenter.org, version recorded | **~1 MB** | public domain | `data/external/onet/` |
 | *optional:* `Qwen/Qwen3-8B` (instruct) | the collapse control of plan 03 § 6 (same prompts at T=1, pilot scale only) | ~16.4 GB | Apache-2.0 | `data/external/hf/` — **only if Roger wants the control**; otherwise the comparison is dropped and said so in the readout |
@@ -159,6 +159,8 @@ Seed list A (trait adjectives) needs **no download**: it is the TDA rows of the 
 [census_table.jsonl](../../data/candidates/censuses/census_table.jsonl), read through the censuses'
 frozen interface, with the `prop` familiarity column as the rarity filter.  Common nouns come from
 OEWN, already in `data/external/wn/`.
+
+**Roger:** First three downloads approved; ask me if and when you get to the optional one (it's large, we might want to delete it again once done with it). The things over 2GB we should add a TODO note asking if we can delete them once we're done with them.
 
 ## 6. Data schemas
 
