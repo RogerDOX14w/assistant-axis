@@ -171,6 +171,35 @@ review comments go into the plan files; then Opus executes the platform first.
   novelty check by hand, with a scratch registry so no probe row reaches the real one; commands, models, costs
   (about two cents a word), what each step writes, and savage as the worked example.
 
+## Parked: generators aimed at roles (Roger, 2026-10-10)
+
+**Parked until there is more Fable budget**, since the plans themselves want Fable; nothing to do before then.
+Roger: "I do think we need to add some plans for role generators, and not just rely on our existing sources
+generating roles.  Both ones that generate professions, and ones that can generate non-human personas."  Every
+generator so far aims at traits ([the fourteen plans](#the-plans)), and the roles in
+[instructions/](../../data/roles/instructions/) are what those sources happened to throw up, which is why the
+filter's `roles` holding list fills so slowly.  His four suggestions, to become plans of their own:
+
+1. **Characters of a media franchise.**  Pick a well-known book, film, anime, comic or franchise at random from an
+   online source (several sources, chosen to be eclectic: "specific genres/sources will have biases"), list its
+   major characters, and turn each into its role, not the character: detective, talking cat, miser, ninja.
+2. **Lists of professions.**
+3. **Monsters and fantasy races**, if more are wanted: D&D and the Monster Manual are "a large and eclectic
+   collection", preferring the ones D&D took from earlier sources over its own inventions, "unless the latter have
+   since crossed over into many other things".
+4. **Adapt a trait generator to roles**: the LLM generators take a different prompt, and Roget is probably usable
+   too (open question whether it would look at different heads).  This is a plan in itself: new flags or a role
+   mode on an existing generator, as [`generate_antonyms.py --roles`](../../data_analysis/generate_antonyms.py)
+   was done.
+
+**Cap: 500 to 600 roles.**  "Professions can probably be enumerated endlessly", and the balance of profession /
+human non-profession / non-human should stay about where it is now (932 traits, 340 roles on 2026-10-10; no field
+on a role file records which of the three it is, so the split has to be measured before a wave can hold to it).
+
+Needs first, when this is picked up: the three-way split of the current roles (a classification pass, or a field on
+the files); whether the cap is of the corpus or of each wave; and the role versions of M3's rubrics, which the
+role-promotion item below also needs.
+
 ## Low-priority TODOs
 
 - **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  The filter's `roles` holding list is read by hand
