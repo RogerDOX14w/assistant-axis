@@ -127,9 +127,6 @@ makes its vectors stale once extracted.
 
 ### Parked: Roger's call, when more gap-filling is wanted
 
-- The 22 Major Arcana as traits (Tarot): delayed on 2026-10-09 (W21) and
-  moved here from ROLES_TO_ADD on 2026-10-10, when Roger settled the type (§
-  "TBD: the 22 Major Arcana as roles (Tarot)", below).
 - The trait-gap generators' holding lists (§ "Holding lists from the
   trait-gap generators", below), and the five words handed to that pipeline
   on 2026-10-09 (devoted, enthusiastic, hypochondriac, purposeful, steadfast;
@@ -731,6 +728,8 @@ has run; not to hold up any chunk or commit:
   language and judge scores earlier, but not activations.
 
 ## TBD: the 22 Major Arcana as roles (Tarot)
+
+**Status 2026-10-10 (later the same day): done differently.**  Roger: not imported; each card, read as describing a person, is used as gap-filling inspiration, as for Thomas-Kilmann and the occupational instruments.  The walk ([tarot_walk.md](../../../roger/tarot_2026-10-10/tarot_walk.md)) finds 17 cards covered by existing traits and four gaps covering five cards, nominated as plain traits: amorous (the Lovers), strong-willed (the Chariot), self-reinventing (Death and Judgement), dreamy (the Moon).  The 22 queue entries are `not_adopted`.  The text below, the earlier status and the "roles or traits" note included, is the record.
 
 **Status 2026-10-10: moved here from ROLES_TO_ADD.md, and now traits (Roger).**  Still delayed (pre-extraction W21, 2026-10-09): the idea and the notes are kept, and the 22 queue entries stay `backlog`, now with `entity_type: trait`.  The heading is unchanged (the queue's `section` fields match it), though it says roles.
 
