@@ -1,7 +1,7 @@
 {
   "generator": "alignment_sweep",
   "run_id": "2026-10-10-pilot",
-  "git_sha": "bdad0c2+dirty",
+  "git_sha": "1e72e41+dirty",
   "args": {
     "step": "extract",
     "variant": "A",
@@ -117,9 +117,9 @@
   },
   "n_emitted": 0,
   "started_at": "2026-10-10T19:06:59+00:00",
-  "finished_at": "2026-10-10T19:15:06+00:00",
+  "finished_at": "2026-10-10T19:20:43+00:00",
   "confirmed_by": null,
-  "cost_usd": 0.6467,
+  "cost_usd": 0.8419,
   "sessions": [
     {
       "session_id": "09396f3cf5a8",
@@ -340,6 +340,48 @@
         "total_prompt_tokens": 0,
         "total_completion_tokens": 0,
         "n_calls": 0
+      }
+    },
+    {
+      "session_id": "575c0a09108a",
+      "started_at": "2026-10-10T19:20:11+00:00",
+      "finished_at": "2026-10-10T19:20:43+00:00",
+      "git_sha": "1e72e41+dirty",
+      "args": {
+        "step": "gate",
+        "gold_only": true,
+        "n_gold": 30,
+        "n_kept": 0,
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 1.5,
+        "estimate_usd": 0.2792,
+        "rubric": {
+          "name": "enactability_gate",
+          "version": 1,
+          "sha256": "4cda8b27dac976269d528e76ff62005c3a7c10154ca7cd8be693521d1459dd46",
+          "file": "reports/trait_gap_generation/rubrics/enactability_gate.md"
+        },
+        "label_form": "judge-display-v1",
+        "allow_dirty": false
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.1953,
+      "n_calls": 60,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5": {
+            "model": "claude-sonnet-5-5",
+            "prompt_tokens": 28534,
+            "completion_tokens": 13821,
+            "cost_usd": 0.1953,
+            "n_calls": 60
+          }
+        },
+        "total_cost_usd": 0.1953,
+        "total_prompt_tokens": 28534,
+        "total_completion_tokens": 13821,
+        "n_calls": 60
       }
     }
   ]
