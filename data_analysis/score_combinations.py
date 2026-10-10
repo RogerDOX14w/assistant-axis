@@ -1,18 +1,40 @@
 #!/usr/bin/env python3
 """
-Score role+trait combinations for incongruity using Claude Sonnet.
+Score role+trait combinations for incongruity.
 
 For each combination, sends all index-matched instruction pairs (pos only)
-in a single API call and gets a 0-3 incongruity score per pair.
+in a single API call and gets a 0-3 incongruity score per pair.  A
+combination with any pair at or above --rescore_threshold is scored again by
+--rescore_model, whose scores replace the first ones (kept under
+``sonnet_scores``).  Pipeline step 3 (``pipeline/3_judge.py``) drops the
+prompt-variants scored 3 from combination judging.
+
+Models (Roger, 2026-10-10): Sonnet 5.5 first, escalating to Opus 5.5.  Both
+refuse ``temperature`` (sent only to a model that takes it) and think
+adaptively, so a reply may carry a thinking block before the text.
+
+Batch by default (Roger, 2026-10-10, as for pipeline step 3): the first
+stage goes as one Message Batch, then the escalations as a second, at half
+the real-time price; what a batch fails to deliver is scored in real time.
+--no_batch scores in real time; --batch_id collects a batch submitted
+earlier (they are logged in ``<output>_batches.json``).
+
+A score is kept only while the texts it was given are unchanged
+(``pairs_sha256``: the labels and instruction pairs shown) and it was made
+by the current --model; anything else in the output is scored again, and
+combinations outside the current top-N lists are dropped from it.  Usage is
+recorded cumulatively in ``<output>_usage.json`` (AGENT_NOTES token-usage
+rule).
 
 Usage:
-    uv run data_analysis/score_combinations.py --goal_count 2 --non_goal_count 2  # test
-    uv run data_analysis/score_combinations.py  # full 40x40 + 40x40
-    uv run data_analysis/score_combinations.py --goal_count 30 --non_goal_count 30
+    uv run data_analysis/score_combinations.py --dry_run   # counts, cost estimate, sample prompt
+    uv run data_analysis/score_combinations.py              # 30x30 + 30x30, batch
+    uv run data_analysis/score_combinations.py --goal_count 2 --non_goal_count 2 --no_batch  # test
 """
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -26,7 +48,11 @@ from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.gapgen.llm import accepts_temperature  # noqa: E402
 from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
+from assistant_axis.judge_pricing import (  # noqa: E402
+    BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic, price_for_model,
+)
 
 load_dotenv()
 
@@ -175,7 +201,7 @@ def _make_combo(
     from assistant_axis.entity_id import display_form_name, judge_form_of_label, judge_label
 
     prefix = "r" if goal_source == "role" else "t"
-    return {
+    combo = {
         "role": role_name,
         "trait": trait_name,
         # The names the scorer is shown (judge display form, RUBRIC_VERSION 2),
@@ -187,6 +213,17 @@ def _make_combo(
         "output_name": f"{prefix}_{role_name}__{trait_name}",
         "pairs": pairs,
     }
+    combo["pairs_sha256"] = pairs_sha256(combo)
+    return combo
+
+
+def pairs_sha256(combo: Dict) -> str:
+    """Hash of what the scorer is shown for a combination: the two labels
+    and the instruction pairs.  A stored score is reused only while it
+    matches (a regenerated instruction or a relabel makes it stale)."""
+    blob = json.dumps([combo["role_label"], combo["trait_label"], combo["pairs"]],
+                      sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
 
 # ---------------------------------------------------------------------------
@@ -346,6 +383,75 @@ def build_user_message(combo: Dict, batch_size: Optional[int] = None) -> str:
 # API call + parsing
 # ---------------------------------------------------------------------------
 
+RETRY_SUFFIX = ("\n\nYour previous response was not valid JSON. "
+                "Please respond with ONLY a JSON array, no markdown fences.")
+# Room for the answer (about 90 tokens a pair) and, for a model that thinks
+# adaptively and cannot be told not to (Sonnet 5.5, Opus 5.5), its thinking.
+MAX_TOKENS = 1024
+MAX_TOKENS_THINKING = 4096
+
+
+def request_params(combo: Dict, model: str, batch_size: Optional[int] = None,
+                   attempt: int = 0) -> Dict[str, Any]:
+    """The Messages API parameters of one scoring call, shared by the
+    real-time path and the batches.  ``temperature`` (0, rising by 0.1 a
+    retry) goes only to a model that accepts it."""
+    pairs = combo["pairs"] if batch_size is None else combo["pairs"][:batch_size]
+    params: Dict[str, Any] = {
+        "model": model,
+        "max_tokens": MAX_TOKENS if accepts_temperature(model) else MAX_TOKENS_THINKING,
+        "system": build_system_prompt(len(pairs)),
+        "messages": [{"role": "user", "content": build_user_message(combo, batch_size)
+                      + (RETRY_SUFFIX if attempt > 0 else "")}],
+    }
+    if accepts_temperature(model):
+        params["temperature"] = round(0.1 * attempt, 1)
+    return params
+
+
+def response_text(message: Any) -> str:
+    """The text of a reply, thinking blocks skipped."""
+    return "".join(getattr(b, "text", "") or "" for b in (getattr(message, "content", None) or [])
+                   if getattr(b, "type", "text") == "text").strip()
+
+
+def parse_scores(combo: Dict, raw_text: str, n: int) -> Dict:
+    """The stored record for a reply, or ValueError / JSONDecodeError /
+    KeyError when it cannot be used."""
+    stripped = re.sub(r"^```(?:json)?\s*\n?", "", raw_text)
+    stripped = re.sub(r"\n?```\s*$", "", stripped)
+    result = json.loads(stripped, strict=False)
+    if not isinstance(result, list) or len(result) != n:
+        raise ValueError(
+            f"Expected array of {n}, got {type(result).__name__} "
+            f"length {len(result) if isinstance(result, list) else '?'}"
+        )
+    per_pair = []
+    for i, entry in enumerate(result):
+        if "reasoning" not in entry or "score" not in entry:
+            raise ValueError(f"Entry {i} missing reasoning/score")
+        score = int(entry["score"])
+        if score not in (0, 1, 2, 3):
+            raise ValueError(f"Entry {i} score {score} not in 0-3")
+        per_pair.append({"reasoning": entry["reasoning"], "score": score})
+    scores = [p["score"] for p in per_pair]
+    return {
+        "role": combo["role"],
+        "trait": combo["trait"],
+        "goal_source": combo["goal_source"],
+        "output_name": combo["output_name"],
+        "pairs_sha256": combo.get("pairs_sha256") or pairs_sha256(combo),
+        "per_pair": per_pair,
+        "score_min": min(scores),
+        "score_max": max(scores),
+        "score_mean": sum(scores) / len(scores),
+    }
+
+
+def _n_pairs(combo: Dict, batch_size: Optional[int]) -> int:
+    return len(combo["pairs"]) if batch_size is None else min(len(combo["pairs"]), batch_size)
+
+
 async def _call_api(
     client: Any,
     combo: Dict,
@@ -353,89 +459,34 @@ async def _call_api(
     rate_limiter: RateLimiter,
     batch_size: Optional[int] = None,
     max_retries: int = 5,
+    usage: Optional[MultiModelUsage] = None,
 ) -> Optional[Dict]:
-    """Make a single scoring API call and parse the response.
+    """Make a single scoring API call and parse the response, retrying an
+    unusable reply.  Every reply received is charged to ``usage``.
 
     Returns a dict with per-pair reasoning/scores, or None on failure.
     """
     import anthropic
 
-    pairs = combo["pairs"]
-    if batch_size is not None:
-        pairs = pairs[:batch_size]
-    n = len(pairs)
-
-    system_prompt = build_system_prompt(n)
-    user_msg = build_user_message(combo, batch_size)
-
+    n = _n_pairs(combo, batch_size)
     raw_text = "(no response)"
     for attempt in range(max_retries + 1):
         await rate_limiter.acquire()
 
         try:
-            retry_suffix = ""
-            if attempt > 0:
-                retry_suffix = (
-                    "\n\nYour previous response was not valid JSON. "
-                    "Please respond with ONLY a JSON array, no markdown fences."
-                )
-
-            retry_temp = max(0.0, 0.1 * attempt) if attempt > 0 else 0.0
-
             response = await client.messages.create(
-                model=model,
-                max_tokens=1024,
-                temperature=retry_temp,
-                system=system_prompt,
-                messages=[{"role": "user", "content": user_msg + retry_suffix}],
-            )
-
-            if not response.content:
-                raise ValueError(
-                    f"Empty response (stop_reason={response.stop_reason})"
-                )
-            raw_text = response.content[0].text.strip()
+                **request_params(combo, model, batch_size, attempt))
+            if usage is not None:
+                usage.charge(model, *extract_usage_anthropic(response))
+            raw_text = response_text(response)
+            if not raw_text:
+                raise ValueError(f"Empty response (stop_reason={response.stop_reason})")
             if response.stop_reason != "end_turn":
                 logger.warning(
                     f"{combo['output_name']} ({model}): "
                     f"stop_reason={response.stop_reason}"
                 )
-
-            stripped = re.sub(r"^```(?:json)?\s*\n?", "", raw_text)
-            stripped = re.sub(r"\n?```\s*$", "", stripped)
-            raw_text = stripped
-
-            result = json.loads(raw_text, strict=False)
-
-            if not isinstance(result, list) or len(result) != n:
-                raise ValueError(
-                    f"Expected array of {n}, got {type(result).__name__} "
-                    f"length {len(result) if isinstance(result, list) else '?'}"
-                )
-
-            per_pair = []
-            for i, entry in enumerate(result):
-                if "reasoning" not in entry or "score" not in entry:
-                    raise ValueError(f"Entry {i} missing reasoning/score")
-                score = int(entry["score"])
-                if score not in (0, 1, 2, 3):
-                    raise ValueError(f"Entry {i} score {score} not in 0-3")
-                per_pair.append({
-                    "reasoning": entry["reasoning"],
-                    "score": score,
-                })
-
-            scores = [p["score"] for p in per_pair]
-            return {
-                "role": combo["role"],
-                "trait": combo["trait"],
-                "goal_source": combo["goal_source"],
-                "output_name": combo["output_name"],
-                "per_pair": per_pair,
-                "score_min": min(scores),
-                "score_max": max(scores),
-                "score_mean": sum(scores) / len(scores),
-            }
+            return parse_scores(combo, raw_text, n)
 
         except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
             raw_preview = raw_text[:300]
@@ -456,6 +507,37 @@ async def _call_api(
             return None
 
 
+def needs_rescore(record: Dict, rescore_model: Optional[str], threshold: int) -> bool:
+    """A first-stage score that reaches the threshold and has not been
+    escalated yet."""
+    return bool(rescore_model) and "sonnet_scores" not in record and \
+        max(p["score"] for p in record["per_pair"]) >= threshold
+
+
+def escalated_record(first: Dict, second: Dict, rescore_model: str,
+                     escalation_log: Optional[Any]) -> Dict:
+    """The record after a rescore: the second model's scores, the first
+    model's kept under ``sonnet_scores``; logged to the escalation log."""
+    out = dict(second, scored_by=rescore_model, first_model=first.get("first_model"),
+               sonnet_scores=first["per_pair"])
+    if escalation_log is not None:
+        first_scores = [p["score"] for p in first["per_pair"]]
+        second_scores = [p["score"] for p in second["per_pair"]]
+        escalation_log.write(json.dumps({
+            "combo": first["output_name"],
+            "role": first["role"],
+            "trait": first["trait"],
+            "first_model": first.get("first_model"),
+            "rescore_model": rescore_model,
+            "sonnet_per_pair": first["per_pair"],
+            "opus_per_pair": second["per_pair"],
+            "sonnet_mean": round(sum(first_scores) / len(first_scores), 2),
+            "opus_mean": round(sum(second_scores) / len(second_scores), 2),
+        }) + "\n")
+        escalation_log.flush()
+    return out
+
+
 async def score_combo(
     client: Any,
     combo: Dict,
@@ -466,148 +548,354 @@ async def score_combo(
     rescore_model: Optional[str] = None,
     rescore_threshold: int = 2,
     escalation_log: Optional[Any] = None,
+    usage: Optional[MultiModelUsage] = None,
 ) -> Optional[Dict]:
     """Score a combo, escalating to rescore_model if any pair scores high."""
-    result = await _call_api(client, combo, model, rate_limiter, batch_size, max_retries)
+    result = await _call_api(client, combo, model, rate_limiter, batch_size, max_retries, usage)
     if result is None:
         return None
+    result.update(scored_by=model, first_model=model)
 
-    result["scored_by"] = model
-
-    if rescore_model and max(p["score"] for p in result["per_pair"]) >= rescore_threshold:
-        sonnet_scores = [p["score"] for p in result["per_pair"]]
-        logger.info(
-            f"Escalating {combo['output_name']} to {rescore_model} "
-            f"(sonnet scores={sonnet_scores})"
-        )
-        sonnet_pairs = result["per_pair"]
-        opus_result = await _call_api(
-            client, combo, rescore_model, rate_limiter, batch_size, max_retries
-        )
-        if opus_result is not None:
-            opus_result["scored_by"] = rescore_model
-            opus_result["sonnet_scores"] = sonnet_pairs
-
-            opus_scores = [p["score"] for p in opus_result["per_pair"]]
-            logger.info(
-                f"  {combo['output_name']}: "
-                f"sonnet={sonnet_scores} opus={opus_scores}"
-            )
-            if escalation_log is not None:
-                escalation_log.write(json.dumps({
-                    "combo": combo["output_name"],
-                    "role": combo["role"],
-                    "trait": combo["trait"],
-                    "sonnet_per_pair": sonnet_pairs,
-                    "opus_per_pair": opus_result["per_pair"],
-                    "sonnet_mean": round(sum(sonnet_scores) / len(sonnet_scores), 2),
-                    "opus_mean": round(sum(opus_scores) / len(opus_scores), 2),
-                }) + "\n")
-                escalation_log.flush()
-
-            return opus_result
-        logger.warning(
-            f"Opus rescore failed for {combo['output_name']}, keeping Sonnet result"
-        )
+    if needs_rescore(result, rescore_model, rescore_threshold):
+        logger.info(f"Escalating {combo['output_name']} to {rescore_model} "
+                    f"(first scores={[p['score'] for p in result['per_pair']]})")
+        second = await _call_api(client, combo, rescore_model, rate_limiter, batch_size,
+                                 max_retries, usage)
+        if second is not None:
+            return escalated_record(result, second, rescore_model, escalation_log)
+        logger.warning(f"Rescore failed for {combo['output_name']}, keeping the first result")
 
     return result
 
 
 # ---------------------------------------------------------------------------
-# Batch dispatch
+# Stored scores: which are still good
+# ---------------------------------------------------------------------------
+
+def split_existing(existing_scores: List[Dict], combos: List[Dict], model: str
+                   ) -> tuple:
+    """Divide the stored scores into those still good for the current
+    combinations (same texts, same first-stage model) and the combinations
+    to score.  Returns ``(kept, pending, counts)``; a score of a combination
+    outside the current lists is dropped."""
+    by_name = {c["output_name"]: c for c in combos}
+    kept: List[Dict] = []
+    counts = {"kept": 0, "stale_text": 0, "stale_model": 0, "dropped": 0}
+    for rec in existing_scores:
+        combo = by_name.get(rec.get("output_name"))
+        if combo is None:
+            counts["dropped"] += 1
+        elif rec.get("pairs_sha256") != combo["pairs_sha256"]:
+            counts["stale_text"] += 1
+        elif rec.get("first_model", rec.get("scored_by")) != model:
+            counts["stale_model"] += 1
+        else:
+            kept.append(rec)
+            counts["kept"] += 1
+    done = {r["output_name"] for r in kept}
+    pending = [c for c in combos if c["output_name"] not in done]
+    return kept, pending, counts
+
+
+def _save_incremental(output_path: Path, metadata: Dict, scores: List[Dict]):
+    """Save current state to disk (atomically)."""
+    tmp = output_path.with_name(f".{output_path.name}.tmp{os.getpid()}")
+    with open(tmp, "w") as f:
+        json.dump({"metadata": metadata, "scores": scores}, f, indent=2)
+    os.replace(tmp, output_path)
+
+
+class Recorder:
+    """Saves the scores and the cumulative usage record as a run goes."""
+
+    def __init__(self, output_path: Path, metadata: Dict, usage_path: Path):
+        self.output_path, self.metadata, self.usage_path = output_path, metadata, usage_path
+        self.prior = MultiModelUsage.load_or_create(usage_path)
+        self.run = MultiModelUsage()
+        if self.prior.n_calls:
+            logger.info(self.prior.log_line("[usage] earlier runs"))
+
+    def save(self, scores: List[Dict]) -> None:
+        _save_incremental(self.output_path, self.metadata, scores)
+        total = MultiModelUsage()
+        total.merge_from(self.prior)
+        total.merge_from(self.run)
+        tmp = self.usage_path.with_name(f".{self.usage_path.name}.tmp{os.getpid()}")
+        tmp.write_text(json.dumps(total.as_dict(), indent=2, sort_keys=True) + "\n")
+        os.replace(tmp, self.usage_path)
+
+    def log_totals(self) -> None:
+        total = MultiModelUsage()
+        total.merge_from(self.prior)
+        total.merge_from(self.run)
+        logger.info(self.run.log_line("[usage] this run"))
+        logger.info(total.log_line(f"[usage] cumulative ({self.usage_path})"))
+
+
+# ---------------------------------------------------------------------------
+# Real time (--no_batch)
 # ---------------------------------------------------------------------------
 
 async def score_all(
     client: Any,
-    combos: List[Dict],
+    pending: List[Dict],
+    kept: List[Dict],
+    combos_by_name: Dict[str, Dict],
     model: str,
     rate_limiter: RateLimiter,
     batch_size: Optional[int],
     max_concurrent: int,
-    output_path: Path,
-    existing_data: Dict,
+    recorder: Recorder,
+    escalation_log: Optional[Any],
     rescore_model: Optional[str] = None,
     rescore_threshold: int = 2,
 ) -> List[Dict]:
-    """Score all combos with concurrency, saving incrementally."""
-    all_scores = list(existing_data.get("scores", []))
-    scored_names = {s["output_name"] for s in all_scores}
+    """Score the pending combos with concurrency, saving incrementally, and
+    escalate any stored first-stage score still owed a rescore."""
+    all_scores = list(kept)
+    n_call_ok = n_call_failed = 0
+    if pending:
+        logger.info(f"{len(pending)} to score in real time ({len(kept)} kept)")
+    for i in range(0, len(pending), max_concurrent):
+        chunk = pending[i: i + max_concurrent]
+        results = await asyncio.gather(*[
+            score_combo(client, c, model, rate_limiter, batch_size,
+                        rescore_model=rescore_model, rescore_threshold=rescore_threshold,
+                        escalation_log=escalation_log, usage=recorder.run)
+            for c in chunk], return_exceptions=True)
+        for result in results:
+            if isinstance(result, Exception):
+                logger.error(f"Exception in batch: {result}")
+                n_call_failed += 1
+            elif result is None:
+                n_call_failed += 1
+            else:
+                all_scores.append(result)
+                n_call_ok += 1
+        recorder.save(all_scores)
+        logger.info(f"Progress: {len(all_scores)}/{len(combos_by_name)}")
 
-    pending = [c for c in combos if c["output_name"] not in scored_names]
-    if not pending:
-        logger.info("All combinations already scored")
-        return all_scores
+    for idx, rec in enumerate(all_scores):
+        if needs_rescore(rec, rescore_model, rescore_threshold):
+            second = await _call_api(client, combos_by_name[rec["output_name"]], rescore_model,
+                                     rate_limiter, batch_size, usage=recorder.run)
+            if second is not None:
+                all_scores[idx] = escalated_record(rec, second, rescore_model, escalation_log)
+    recorder.save(all_scores)
 
-    logger.info(
-        f"{len(pending)} to score ({len(combos) - len(pending)} already done)"
-    )
-    if rescore_model:
-        logger.info(
-            f"Opus escalation enabled: {rescore_model} "
-            f"(threshold >= {rescore_threshold})"
-        )
-
-    escalation_log_path = output_path.with_suffix(".escalations.jsonl")
-    escalation_log = open(escalation_log_path, "a") if rescore_model else None
-
-    # Per-call parse-rate counters across the whole run (post-retry).
-    n_call_ok = 0
-    n_call_failed = 0
-
-    try:
-        for i in range(0, len(pending), max_concurrent):
-            chunk = pending[i : i + max_concurrent]
-            tasks = [
-                score_combo(
-                    client, c, model, rate_limiter, batch_size,
-                    rescore_model=rescore_model,
-                    rescore_threshold=rescore_threshold,
-                    escalation_log=escalation_log,
-                )
-                for c in chunk
-            ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            for result in results:
-                if isinstance(result, Exception):
-                    logger.error(f"Exception in batch: {result}")
-                    n_call_failed += 1
-                elif result is None:
-                    n_call_failed += 1
-                else:
-                    all_scores.append(result)
-                    n_call_ok += 1
-
-            _save_incremental(output_path, existing_data, all_scores)
-            done = len(all_scores)
-            total = len(combos)
-            logger.info(f"Progress: {done}/{total} ({done * 100 // total}%)")
-    finally:
-        if escalation_log is not None:
-            escalation_log.close()
-
-    # Loud warning if parse/API failure rate this run dropped below 99%.
-    # ``n_call_failed`` counts post-retry failures (3 attempts inside
-    # ``score_combo``), so anything non-zero is persistent unparseable JSON
-    # or genuine API failure -- worth surfacing prominently.
+    # ``n_call_failed`` counts post-retry failures, so anything non-zero is
+    # persistent unparseable JSON or genuine API failure.
     warn_if_low_parse_rate(
         label=f"data_analysis/score_combinations:{model}",
         n_ok=n_call_ok,
         n_total=n_call_ok + n_call_failed,
         logger_obj=logger,
     )
-
     return all_scores
 
 
-def _save_incremental(output_path: Path, metadata_source: Dict, scores: List[Dict]):
-    """Save current state to disk."""
-    data = {
-        "metadata": metadata_source.get("metadata", {}),
-        "scores": scores,
-    }
-    with open(output_path, "w") as f:
-        json.dump(data, f, indent=2)
+# ---------------------------------------------------------------------------
+# Batch mode (the default)
+# ---------------------------------------------------------------------------
+#
+# Two Message Batches: the first stage over every combination to score, then
+# the rescore model over those that reached the threshold.  Each batch is
+# logged in ``<output>_batches.json`` when submitted, so a run killed while
+# waiting can collect it with --batch_id instead of paying again.  A result
+# is matched to the combination whose current id it carries (the id hashes
+# the texts and the model), so a reply is never stored against texts it did
+# not score.  What a batch fails to deliver is scored in real time.
+
+MAX_BATCH_REQUESTS = 100_000          # Message Batches limits
+MAX_BATCH_BYTES = 256 * 1024 * 1024
+STAGES = ("first", "rescore")
+
+
+def batch_custom_id(combo: Dict, model: str, stage: str) -> str:
+    digest = hashlib.sha256(
+        f"{combo['output_name']}\n{combo['pairs_sha256']}\n{model}".encode("utf-8")).hexdigest()[:12]
+    prefix = re.sub(r"[^A-Za-z0-9_-]", "_", combo["output_name"])[:40]
+    return f"{stage[0]}-{prefix}-{digest}"
+
+
+def batch_log_path(output_path: Path) -> Path:
+    return output_path.with_name(output_path.stem + "_batches.json")
+
+
+def read_batch_log(output_path: Path) -> List[Dict]:
+    path = batch_log_path(output_path)
+    return json.loads(path.read_text()) if path.exists() else []
+
+
+def record_batch(output_path: Path, entry: Dict) -> None:
+    log = [e for e in read_batch_log(output_path) if e.get("id") != entry.get("id")] + [entry]
+    path = batch_log_path(output_path)
+    tmp = path.with_name(f".{path.name}.tmp{os.getpid()}")
+    tmp.write_text(json.dumps(log, indent=2) + "\n")
+    os.replace(tmp, path)
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+async def batch_stage(
+    client: Any,
+    combos: List[Dict],
+    model: str,
+    stage: str,
+    *,
+    output_path: Path,
+    batch_size: Optional[int],
+    poll_seconds: float,
+    usage: MultiModelUsage,
+    batch_id: Optional[str] = None,
+) -> tuple:
+    """Submit one Message Batch for ``combos`` with ``model`` (or collect
+    ``batch_id``), wait, and parse the results.  Returns ``(records,
+    undelivered)``: the usable records by output name, and the combos the
+    batch did not deliver."""
+    by_id = {batch_custom_id(c, model, stage): c for c in combos}
+    entry = None
+    if batch_id is None:
+        requests = [{"custom_id": cid, "params": request_params(c, model, batch_size)}
+                    for cid, c in by_id.items()]
+        if len(requests) > MAX_BATCH_REQUESTS:
+            raise SystemExit(f"{len(requests)} requests: a Message Batch takes at most {MAX_BATCH_REQUESTS}")
+        if len(json.dumps(requests).encode("utf-8")) > MAX_BATCH_BYTES:
+            raise SystemExit("the requests exceed a Message Batch's 256 MB")
+        logger.info(f"Submitting the {stage} stage: one Message Batch of {len(requests)} requests to {model}")
+        batch = await client.messages.batches.create(requests=requests)
+        batch_id = batch.id
+        entry = {"id": batch_id, "stage": stage, "model": model, "n_requests": len(requests),
+                 "submitted": _utc_now(), "rubric_version": RUBRIC_VERSION}
+        record_batch(output_path, entry)
+        logger.info(f"Batch submitted: {batch_id} (logged in {batch_log_path(output_path)}; "
+                    f"if this run is stopped, collect it with --batch_id {batch_id})")
+    else:
+        entry = next((e for e in read_batch_log(output_path) if e.get("id") == batch_id),
+                     {"id": batch_id, "stage": stage, "model": model})
+
+    while True:
+        batch = await client.messages.batches.retrieve(batch_id)
+        c = batch.request_counts
+        logger.info(f"batch {batch_id}: {batch.processing_status}; succeeded {c.succeeded}, "
+                    f"errored {c.errored}, expired {c.expired}, processing {c.processing}")
+        if batch.processing_status == "ended":
+            break
+        await asyncio.sleep(poll_seconds)
+
+    records: Dict[str, Dict] = {}
+    counts = {"entries": 0, "ok": 0, "unusable": 0, "unknown": 0, "not_succeeded": 0}
+    async for item in await client.messages.batches.results(batch_id):
+        counts["entries"] += 1
+        if item.result.type != "succeeded":
+            counts["not_succeeded"] += 1
+            logger.warning(f"{item.custom_id}: request {item.result.type}")
+            continue
+        message = item.result.message
+        usage.charge(model + BATCH_SUFFIX, *extract_usage_anthropic(message))
+        combo = by_id.get(item.custom_id)
+        if combo is None:
+            counts["unknown"] += 1
+            logger.warning(f"{item.custom_id}: no current combination has this id "
+                           f"(texts changed since submission); reply not stored")
+            continue
+        try:
+            rec = parse_scores(combo, response_text(message), _n_pairs(combo, batch_size))
+        except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
+            counts["unusable"] += 1
+            logger.warning(f"{combo['output_name']}: batch reply cannot be used ({e})")
+            continue
+        records[combo["output_name"]] = rec
+        counts["ok"] += 1
+    record_batch(output_path, dict(entry, collected=_utc_now(), counts=counts))
+    warn_if_low_parse_rate(label=f"data_analysis/score_combinations:{model}{BATCH_SUFFIX}",
+                           n_ok=counts["ok"], n_total=counts["entries"], logger_obj=logger)
+    undelivered = [c for c in combos if c["output_name"] not in records]
+    logger.info(f"Batch {batch_id} collected: {counts}; {len(undelivered)} to score in real time")
+    return records, undelivered
+
+
+async def score_in_batches(
+    client: Any,
+    args: argparse.Namespace,
+    pending: List[Dict],
+    kept: List[Dict],
+    combos_by_name: Dict[str, Dict],
+    rescore_model: Optional[str],
+    rate_limiter: RateLimiter,
+    recorder: Recorder,
+    escalation_log: Optional[Any],
+    output_path: Path,
+) -> List[Dict]:
+    scores: Dict[str, Dict] = {r["output_name"]: r for r in kept}
+    given = None
+    if args.batch_id:
+        given = next((e for e in read_batch_log(output_path) if e.get("id") == args.batch_id), None)
+        if given is None:
+            logger.warning(f"--batch_id {args.batch_id} is not in {batch_log_path(output_path)}; "
+                           f"taking it to be a first-stage batch of --model {args.model}")
+            given = {"id": args.batch_id, "stage": "first", "model": args.model}
+
+    # Stage 1: the first model over every combination to score.
+    first_id = given["id"] if given and given.get("stage") == "first" else None
+    if pending or first_id:
+        records, undelivered = await batch_stage(
+            client, pending, args.model, "first", output_path=output_path,
+            batch_size=args.batch_size, poll_seconds=args.batch_poll_seconds,
+            usage=recorder.run, batch_id=first_id)
+        for name, rec in records.items():
+            scores[name] = dict(rec, scored_by=args.model, first_model=args.model)
+        recorder.save(list(scores.values()))
+        for combo in undelivered:
+            rec = await _call_api(client, combo, args.model, rate_limiter, args.batch_size,
+                                  usage=recorder.run)
+            if rec is not None:
+                scores[combo["output_name"]] = dict(rec, scored_by=args.model, first_model=args.model)
+        recorder.save(list(scores.values()))
+
+    # Stage 2: the rescore model over every first-stage score at the threshold.
+    owed = [r for r in scores.values() if needs_rescore(r, rescore_model, args.rescore_threshold)]
+    rescore_id = given["id"] if given and given.get("stage") == "rescore" else None
+    if owed or rescore_id:
+        logger.info(f"{len(owed)} combinations reach the rescore threshold "
+                    f"({args.rescore_threshold}); escalating to {rescore_model}")
+        records, undelivered = await batch_stage(
+            client, [combos_by_name[r["output_name"]] for r in owed], rescore_model, "rescore",
+            output_path=output_path, batch_size=args.batch_size,
+            poll_seconds=args.batch_poll_seconds, usage=recorder.run, batch_id=rescore_id)
+        for name, rec in records.items():
+            if name in scores and needs_rescore(scores[name], rescore_model, args.rescore_threshold):
+                scores[name] = escalated_record(scores[name], rec, rescore_model, escalation_log)
+        for combo in undelivered:
+            second = await _call_api(client, combo, rescore_model, rate_limiter, args.batch_size,
+                                     usage=recorder.run)
+            name = combo["output_name"]
+            if second is not None:
+                scores[name] = escalated_record(scores[name], second, rescore_model, escalation_log)
+            else:
+                logger.warning(f"Rescore failed for {name}, keeping the first result")
+        recorder.save(list(scores.values()))
+    return list(scores.values())
+
+
+def estimate_cost_usd(combos: List[Dict], model: str, rescore_model: Optional[str], *,
+                      batch: bool, batch_size: Optional[int], rescore_fraction: float = 0.2) -> float:
+    """Rough cost of scoring ``combos``: prompt characters / 3 tokens (the
+    5.x tokenizer's density), about 90 output tokens a pair, and a share of
+    rescores (15% in April 2026; 20% assumed).  Halved for a batch."""
+    def one(model_: str) -> float:
+        rate_in, rate_out = price_for_model(model_)
+        total = 0.0
+        for c in combos:
+            p = request_params(c, model_, batch_size)
+            tok_in = (len(p["system"]) + len(p["messages"][0]["content"])) / 3
+            tok_out = 90 * _n_pairs(c, batch_size) + 30
+            total += (tok_in * rate_in + tok_out * rate_out) / 1e6
+        return total
+    cost = one(model) + (rescore_fraction * one(rescore_model) if rescore_model else 0.0)
+    return cost / 2 if batch else cost
 
 
 # ---------------------------------------------------------------------------
@@ -659,10 +947,10 @@ async def main_async():
         description="Score role+trait combinations for incongruity",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--goal_count", type=int, default=40,
-                        help="Top-N from each goal list (default: 40)")
-    parser.add_argument("--non_goal_count", type=int, default=40,
-                        help="Top-N from each non-goal list (default: 40)")
+    parser.add_argument("--goal_count", type=int, default=30,
+                        help="Top-N from each goal list (default: 30, as pipeline step 1)")
+    parser.add_argument("--non_goal_count", type=int, default=30,
+                        help="Top-N from each non-goal list (default: 30, as pipeline step 1)")
     script_dir = Path(__file__).parent
     data_dir = script_dir.parent / "data"
 
@@ -679,49 +967,76 @@ async def main_async():
                         default=str(data_dir / "combination_scores.json"),
                         help="Output JSON file (default: data/combination_scores.json)")
     parser.add_argument("--model", type=str,
-                        default="claude-sonnet-4-6",
-                        help="Anthropic model")
+                        default="claude-sonnet-5-5",
+                        help="First-stage Anthropic model (default: claude-sonnet-5-5)")
+    parser.add_argument("--rescore_model", type=str, default="claude-opus-5-5",
+                        help="Model that rescores combinations reaching --rescore_threshold "
+                             "(default: claude-opus-5-5)")
     parser.add_argument("--batch_size", type=int, default=None,
                         help="Instruction pairs per API call (default: all)")
     parser.add_argument("--max_concurrent", type=int, default=20,
-                        help="Concurrent API calls")
+                        help="Concurrent API calls in real time")
     parser.add_argument("--requests_per_second", type=int, default=10,
-                        help="Rate limit")
+                        help="Rate limit in real time")
     parser.add_argument("--dry_run", action="store_true",
-                        help="Preview without making API calls")
+                        help="Counts, cost estimate and a sample prompt, without API calls")
     parser.add_argument("--no_rescore", action="store_true",
-                        help="Disable Opus escalation for high-scoring combos")
+                        help="Disable the escalation of high-scoring combos")
     parser.add_argument("--rescore_threshold", type=int, default=2,
-                        help="Min per-pair score to trigger Opus rescore (default: 2)")
+                        help="Min per-pair score to trigger a rescore (default: 2)")
+    parser.add_argument("--no_batch", action="store_true",
+                        help="Score in real time instead of through Message Batches (batch is "
+                             "the default: half the price, results usually within the hour)")
+    parser.add_argument("--batch_id", type=str, default=None,
+                        help="Collect this batch (logged in <output>_batches.json) instead of "
+                             "submitting its stage again, then carry on")
+    parser.add_argument("--batch_poll_seconds", type=float, default=60.0,
+                        help="Seconds between status checks of a batch")
+    parser.add_argument("--confirm_expensive", action="store_true",
+                        help="Required when the estimate is over $20 (AGENT_NOTES "
+                             "expensive-operations rule: quote the parameters to Roger first)")
     args = parser.parse_args()
 
-    RESCORE_MODEL = "claude-opus-4-6"
-    rescore_model = None if args.no_rescore else RESCORE_MODEL
+    rescore_model = None if args.no_rescore else args.rescore_model
+    batch = not args.no_batch
 
     combos = build_combinations(args)
     if not combos:
         logger.error("No combinations built")
         return
+    combos_by_name = {c["output_name"]: c for c in combos}
 
     output_path = Path(args.output)
+    existing_scores: List[Dict] = []
+    if output_path.exists():
+        try:
+            existing_scores = load_json(output_path).get("scores", [])
+        except Exception:
+            logger.warning(f"Could not load {output_path}, starting fresh")
+    kept, pending, counts = split_existing(existing_scores, combos, args.model)
+    logger.info(f"Stored scores: {counts['kept']} kept; rescoring {counts['stale_text']} whose "
+                f"texts changed and {counts['stale_model']} by another model; dropping "
+                f"{counts['dropped']} outside the current lists.  To score: {len(pending)}")
+    estimate = estimate_cost_usd(pending, args.model, rescore_model, batch=batch,
+                                 batch_size=args.batch_size)
+    logger.info(f"Estimate: ${estimate:.2f} ({'batch' if batch else 'real time'}; "
+                f"{args.model}, rescoring at >= {args.rescore_threshold} with {rescore_model})")
 
     # --- Dry run ---
     if args.dry_run:
         logger.info(f"Dry run: {len(combos)} combinations")
         sample = combos[0]
-        n_pairs = len(sample["pairs"])
-        if args.batch_size:
-            n_pairs = min(n_pairs, args.batch_size)
         logger.info(f"\nSample system prompt:\n{'=' * 60}")
-        logger.info(build_system_prompt(n_pairs))
+        logger.info(build_system_prompt(_n_pairs(sample, args.batch_size)))
         logger.info(f"\n{'=' * 60}\nSample user message:\n{'=' * 60}")
         logger.info(build_user_message(sample, args.batch_size))
         logger.info(f"\n{'=' * 60}")
-
-        total_calls = len(combos)
-        logger.info(f"\nTotal API calls: {total_calls}")
-        logger.info(f"Model: {args.model}")
+        logger.info(f"Model: {args.model}; request: "
+                    f"{ {k: v for k, v in request_params(sample, args.model).items() if k in ('model', 'max_tokens', 'temperature')} }")
         return
+    if estimate > 20 and not args.confirm_expensive:
+        raise SystemExit(f"Estimate ${estimate:.2f} is over $20: quote the parameters to Roger, "
+                         f"then rerun with --confirm_expensive")
 
     # --- Live ---
     if not os.getenv("ANTHROPIC_API_KEY"):
@@ -732,15 +1047,6 @@ async def main_async():
     client = anthropic.AsyncAnthropic()
     rate_limiter = RateLimiter(args.requests_per_second)
 
-    existing_data: Dict = {}
-    if output_path.exists():
-        try:
-            existing_data = load_json(output_path)
-            n_existing = len(existing_data.get("scores", []))
-            logger.info(f"Loaded {n_existing} existing scores from {output_path}")
-        except Exception:
-            logger.warning(f"Could not load {output_path}, starting fresh")
-
     metadata = {
         "model": args.model,
         "rubric_version": RUBRIC_VERSION,
@@ -749,39 +1055,46 @@ async def main_async():
         "goal_count": args.goal_count,
         "non_goal_count": args.non_goal_count,
         "total_combinations": len(combos),
+        "mode": "batch" if batch else "real time",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-    existing_data["metadata"] = metadata
+    recorder = Recorder(output_path, metadata,
+                        output_path.with_name(output_path.stem + "_usage.json"))
+    escalation_log_path = output_path.with_suffix(".escalations.jsonl")
+    escalation_log = open(escalation_log_path, "a") if rescore_model else None
+    try:
+        if batch:
+            all_scores = await score_in_batches(
+                client, args, pending, kept, combos_by_name, rescore_model, rate_limiter,
+                recorder, escalation_log, output_path)
+        else:
+            all_scores = await score_all(
+                client, pending, kept, combos_by_name, args.model, rate_limiter,
+                args.batch_size, args.max_concurrent, recorder, escalation_log,
+                rescore_model=rescore_model, rescore_threshold=args.rescore_threshold)
+    finally:
+        if escalation_log is not None:
+            escalation_log.close()
 
-    all_scores = await score_all(
-        client=client,
-        combos=combos,
-        model=args.model,
-        rate_limiter=rate_limiter,
-        batch_size=args.batch_size,
-        max_concurrent=args.max_concurrent,
-        output_path=output_path,
-        existing_data=existing_data,
-        rescore_model=rescore_model,
-        rescore_threshold=args.rescore_threshold,
-    )
-
+    order = {name: i for i, name in enumerate(combos_by_name)}
+    all_scores.sort(key=lambda r: order.get(r["output_name"], len(order)))
     summary = compute_summary(all_scores)
-    final = {
-        "metadata": metadata,
-        "scores": all_scores,
-        "summary": summary,
-    }
-    final["metadata"]["total_scored"] = len(all_scores)
-
-    with open(output_path, "w") as f:
+    metadata["total_scored"] = len(all_scores)
+    final = {"metadata": metadata, "scores": all_scores, "summary": summary}
+    tmp = output_path.with_name(f".{output_path.name}.tmp{os.getpid()}")
+    with open(tmp, "w") as f:
         json.dump(final, f, indent=2)
+    os.replace(tmp, output_path)
+    recorder.log_totals()
 
     logger.info(f"\nSaved {len(all_scores)} scores to {output_path}")
     logger.info(f"Distribution (by rounded mean): {summary['distribution']}")
     logger.info(f"Overall mean score: {summary['mean_score']}")
     if summary["escalated"]:
-        logger.info(f"Escalated to Opus: {summary['escalated']}/{len(all_scores)}")
+        logger.info(f"Escalated: {summary['escalated']}/{len(all_scores)}")
+    missing = len(combos) - len(all_scores)
+    if missing:
+        logger.warning(f"{missing} combinations have no score (failed); a rerun scores them")
     if summary["worst"]:
         logger.info("Highest-scoring combinations:")
         for w in summary["worst"][:5]:

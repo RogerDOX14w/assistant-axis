@@ -236,7 +236,11 @@ older context, or differs from the documented current default.
   (about 600,000 for the October extraction) through the OpenAI Batch API
   ([`assistant_axis/openai_batch.py`](./assistant_axis/openai_batch.py));
   `--no_batch`, or `run_pipeline.sh --judge-realtime`, judges in real
-  time (details in [`pipeline/README.md`](./pipeline/README.md)).  Not
+  time (details in [`pipeline/README.md`](./pipeline/README.md)).  So
+  does [`score_combinations.py`](./data_analysis/score_combinations.py)
+  (same day, Roger: "That should also be run batch"): two Message
+  Batches, the first stage and the escalations; `--no_batch`, and
+  `--batch_id` to collect a batch a stopped run left.  Not
   yet: the role generator, the audit's judge, and the Qwen tests
   (`opening_form_experiment.py`); add the flag when one of them is about
   to make a run over $20.
@@ -598,7 +602,6 @@ us a precise, auditable, retrieve-anytime cost record.
 
 **Existing call sites still on the to-do list (2026-05-24):**
 
-- [`data_analysis/score_combinations.py`](./data_analysis/score_combinations.py)
 - [`data_analysis/sample_trait_responses.py`](./data_analysis/sample_trait_responses.py)
 - [`results_analysis/standardize_axis_spec.py`](./results_analysis/standardize_axis_spec.py)
 - [`results_analysis/infer_axis_description.py`](./results_analysis/infer_axis_description.py)
@@ -632,7 +635,10 @@ the rubric stamp) is not taken for an entity.  Test:
 Retrofitted 2026-10-10 (W15, before the goal classification of the
 regenerated corpus): [`data_analysis/classify_goals.py`](./data_analysis/classify_goals.py)
 merges every run into `<output-dir>/goal_classifications_usage.json`,
-cumulative, with batch usage under `<model>:batch`.
+cumulative, with batch usage under `<model>:batch`.  The same day,
+before its rerun on the 30 x 30 combinations,
+[`data_analysis/score_combinations.py`](./data_analysis/score_combinations.py)
+gained `data/combination_scores_usage.json` (cumulative, the same form).
 
 Retrofit the rest when next touched (or sooner if scheduled for a heavy
 run).  Diagnostic one-offs (e.g.

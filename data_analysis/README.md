@@ -458,19 +458,34 @@ uv run python data_analysis/classify_goals.py  # full corpus
 
 ### `score_combinations.py`
 
-Scores all role+trait instruction combinations for incongruity using Claude
-Sonnet. For each combination, sends all index-matched pos instruction pairs
-in a single API call and gets a 0-3 score per pair with reasoning. Output
-goes to `data/combination_scores.json`.
+Scores all role+trait instruction combinations for incongruity. For each
+combination, sends all index-matched pos instruction pairs in a single API
+call and gets a 0-3 score per pair with reasoning; a combination with any pair
+at 2 or more is scored again by the rescore model, whose scores replace the
+first (kept under `sonnet_scores`). Output goes to
+`data/combination_scores.json`; pipeline step 3 drops the prompt-variants
+scored 3 from combination judging.
 
-Parameters mirror Step 1's `--goal_count` and `--non_goal_count` (defaulting
-to 40 each). Supports `--dry_run`, `--batch_size` (instruction pairs per
-call, default all), and resume via incremental saves.
+Since 2026-10-10 (Roger): **Sonnet 5.5 first, escalating to Opus 5.5**
+(`--model`, `--rescore_model`; both refuse `temperature`, which is then left
+out, and think adaptively, so the reply's text blocks are read past any
+thinking block); **Message Batches by default** (the first stage as one batch,
+the escalations as a second, at half the price; what a batch fails to deliver
+is scored in real time; `--no_batch` for real time; batches are logged in
+`data/combination_scores_batches.json` and `--batch_id` collects one a stopped
+run left behind); **the top 30 x 30** by default, as pipeline step 1
+(1,800 combinations); a cumulative usage record in
+`data/combination_scores_usage.json`; and a stored score is reused only while
+the labels and instruction pairs it was shown are unchanged (`pairs_sha256`)
+and its first-stage model is the current `--model`.  Combinations outside the
+current lists are dropped from the output.  An estimate over $20 needs
+`--confirm_expensive`.  Supports `--dry_run` (counts, estimate, sample prompt)
+and `--batch_size` (instruction pairs per call, default all).
 
 ```bash
 uv run python data_analysis/score_combinations.py --dry_run
-uv run python data_analysis/score_combinations.py --goal_count 2 --non_goal_count 2  # test
-uv run python data_analysis/score_combinations.py  # full 40x40 + 40x40 = 3200 combos
+uv run python data_analysis/score_combinations.py --goal_count 2 --non_goal_count 2 --no_batch --output /tmp/x.json  # test
+uv run python data_analysis/score_combinations.py  # 30x30 + 30x30 = 1800 combos, batch
 ```
 
 ### `sample_trait_responses.py`
@@ -493,8 +508,10 @@ rubric V2 on 2026-10-02, roles under V3 on 2026-10-03) every trait and role file
 comes from Sonnet 4.6, as each file's `generator.model` records.  A same-prompt
 comparison on three control traits showed Sonnet 4.6 rewrites every
 instruction and question (no exact matches), with longer, more prescriptive
-"always/never" phrasing.  `classify_goals.py` and the `score_combinations.py`
-rescore model use `claude-opus-4-6`, which still resolves.
+"always/never" phrasing.  `classify_goals.py` uses `claude-opus-4-6`, which
+still resolves (the last Opus that takes temperature 0).
+`score_combinations.py` moved to Sonnet 5.5 escalating to Opus 5.5 on
+2026-10-10.
 
 The four stale tests once tracked in `AGENT_NOTES.md` § "TODO: code
 housekeeping (Sep 2026)" are fixed: three in
