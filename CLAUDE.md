@@ -72,9 +72,16 @@ older context, or differs from the documented current default.
   generated in real time) and, since 2026-10-10,
   [`classify_goals.py --batch`](./data_analysis/classify_goals.py) (the same
   three flags; what the batch fails to deliver is classified in real
-  time).  Not yet: the role generator, the audit's
-  judge, and the Qwen tests (`opening_form_experiment.py`); add the flag
-  when one of them is about to make a run over $20.
+  time).  **Pipeline step 3 batches by default** (Roger, 2026-10-10:
+  "make batch mode the default, with a flag to override that"):
+  [`pipeline/3_judge.py`](./pipeline/3_judge.py) sends its judge calls
+  (about 600,000 for the October extraction) through the OpenAI Batch API
+  ([`assistant_axis/openai_batch.py`](./assistant_axis/openai_batch.py));
+  `--no_batch`, or `run_pipeline.sh --judge-realtime`, judges in real
+  time (details in [`pipeline/README.md`](./pipeline/README.md)).  Not
+  yet: the role generator, the audit's judge, and the Qwen tests
+  (`opening_form_experiment.py`); add the flag when one of them is about
+  to make a run over $20.
 - **Usage of a batch run is kept under `<model>:batch`**, which
   `assistant_axis.judge_pricing.price_for_model` prices at the batch
   rate, so that a usage record says how the tokens were bought.

@@ -45,6 +45,13 @@
 # (e.g. for debugging) pass --steps23serial.  The script waits for both to
 # finish (and surfaces failures of either) before moving on to step 4.
 #
+# Step 3 judges through the OpenAI Batch API by default (since 2026-10-10,
+# Roger): half the real-time price, results within 24 hours, usually much
+# sooner, and step 2 runs for longer anyway.  Pass --judge-realtime to judge
+# in real time (3_judge.py --no_batch).  A batch-mode step 3 that leaves
+# requests unanswered exits 1 and stops the pipeline before step 4; run it
+# again to submit the rest (it collects batches already submitted).
+#
 # Pre-flight check:
 #   Before any GPU work, the script checks every visible GPU and aborts if
 #   any has more than ${GPU_BUSY_THRESHOLD_MIB} MiB already in use -- this
@@ -109,6 +116,7 @@ GPU_BUSY_THRESHOLD_MIB=2048
 # Disable with --steps23serial if you want the historical sequential behaviour
 # (cleaner per-step logs; useful for debugging).
 STEPS23_PARALLEL=true
+JUDGE_ARGS=()                   # --judge-realtime adds --no_batch for step 3
 
 # Run pipeline/scan_missing_vectors.py at the end of the pipeline to verify
 # every activation produced a healthy vector.  Cheap when nothing went wrong
@@ -146,6 +154,8 @@ while [[ $# -gt 0 ]]; do
             GPU_BUSY_THRESHOLD_MIB="$2"; shift 2 ;;
         --steps23serial)
             STEPS23_PARALLEL=false; shift ;;
+        --judge-realtime)
+            JUDGE_ARGS+=(--no_batch); shift ;;
         --no-scan)
             RUN_SCAN=false; shift ;;
         --types)
@@ -464,7 +474,8 @@ if [ "$MODE" = "christina" ]; then
         uv run 3_judge.py \
             --entity_type "$CHR_ENT_TYPE" \
             --responses_dir "$OUTPUT_DIR/responses" \
-            --output_dir "$OUTPUT_DIR/scores"
+            --output_dir "$OUTPUT_DIR/scores" \
+            "${JUDGE_ARGS[@]}"
     }
 
     if [ "$STEPS23_PARALLEL" = "true" ]; then
@@ -679,7 +690,8 @@ else
             uv run 3_judge.py \
                 --entity_type "$ENT_TYPE" \
                 --responses_dir "$TYPE_DIR/responses" \
-                --output_dir "$TYPE_DIR/scores"
+                --output_dir "$TYPE_DIR/scores" \
+                "${JUDGE_ARGS[@]}"
         done
     }
 

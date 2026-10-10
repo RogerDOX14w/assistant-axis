@@ -27,7 +27,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import jsonlines
 from dotenv import load_dotenv
@@ -73,9 +73,14 @@ def _standalone(submodule: str):
 _judge_mod = _standalone("judge")
 RateLimiter = _judge_mod.RateLimiter
 call_judge_batch = _judge_mod.call_judge_batch
+chat_request_body = _judge_mod.chat_request_body
 parse_judge_score = _judge_mod.parse_judge_score
 warn_if_low_parse_rate = _judge_mod.warn_if_low_parse_rate
-MultiModelUsage = _standalone("judge_pricing").MultiModelUsage
+_pricing_mod = _standalone("judge_pricing")
+MultiModelUsage = _pricing_mod.MultiModelUsage
+BATCH_SUFFIX = _pricing_mod.BATCH_SUFFIX
+_openai_batch = _standalone("openai_batch")
+OpenAIBatchRunner = _openai_batch.OpenAIBatchRunner
 _entity_id_mod = _standalone("entity_id")
 display_form_name = _entity_id_mod.display_form_name
 judge_form_of_label = _entity_id_mod.judge_form_of_label
@@ -363,7 +368,11 @@ def resolve_eval_prompt(
 
 USAGE_FILENAME = "usage.json"
 RUBRIC_STAMP_FILENAME = "judge_rubric.json"
-SIDE_CAR_FILENAMES = (USAGE_FILENAME, RUBRIC_STAMP_FILENAME)
+# Batch mode (the default since 2026-10-10): the batches submitted, for a
+# restart, and the chunk files waiting to go, in a subdirectory.
+BATCH_STATE_FILENAME = "batch_state.json"
+BATCH_WORK_DIRNAME = "_batches"
+SIDE_CAR_FILENAMES = (USAGE_FILENAME, RUBRIC_STAMP_FILENAME, BATCH_STATE_FILENAME)
 
 
 def _atomic_write_json(path: Path, obj) -> None:
@@ -433,6 +442,60 @@ def load_responses(responses_file: Path) -> List[dict]:
     return responses
 
 
+def response_key(resp: dict) -> str:
+    """The score-file key of one response."""
+    return f"{resp['label']}_p{resp['prompt_index']}_q{resp['question_index']}"
+
+
+def pending_prompts(responses: List[dict], eval_prompt_template: str,
+                    existing_scores: Dict[str, int]) -> List[Tuple[str, str]]:
+    """``(key, judge prompt)`` for every response not yet scored."""
+    out: List[Tuple[str, str]] = []
+    for resp in responses:
+        key = response_key(resp)
+        if key in existing_scores:
+            continue
+        assistant_response = ""
+        for msg in resp["conversation"]:
+            if msg["role"] == "assistant":
+                assistant_response = msg["content"]
+                break
+        out.append((key, eval_prompt_template.format(
+            question=resp["question"], answer=assistant_response)))
+    return out
+
+
+def load_scores(output_file: Path) -> Dict[str, int]:
+    """An entity's score file, or {} when it is missing or unreadable."""
+    if output_file.exists():
+        try:
+            with open(output_file, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def merge_scores(output_file: Path, new_scores: Dict[str, int]) -> Dict[str, int]:
+    """Merge ``new_scores`` into the entity's score file (read again first,
+    since batch mode writes one entity's scores as each batch arrives) and
+    write it atomically, retried for NFS.  Returns the merged scores."""
+    merged = {**load_scores(output_file), **new_scores}
+    for attempt in range(3):
+        tmp = output_file.with_name(f".{output_file.name}.tmp{os.getpid()}")
+        try:
+            with open(tmp, "w") as f:
+                json.dump(merged, f, indent=2)
+            os.replace(tmp, output_file)
+            return merged
+        except OSError as e:
+            tmp.unlink(missing_ok=True)
+            if attempt == 2:
+                raise
+            logger.warning(f"{output_file.name}: save failed ({e}), retrying")
+    return merged
+
+
 async def score_entity(
     name: str,
     responses: List[dict],
@@ -459,31 +522,9 @@ async def score_entity(
     emitting a single end-of-run parse-rate summary via
     :func:`assistant_axis.judge.warn_if_low_parse_rate`.
     """
-    prompts = []
-    keys = []
-
-    for resp in responses:
-        prompt_idx = resp["prompt_index"]
-        question_idx = resp["question_index"]
-        question = resp["question"]
-        label = resp["label"]
-
-        assistant_response = ""
-        for msg in resp["conversation"]:
-            if msg["role"] == "assistant":
-                assistant_response = msg["content"]
-                break
-
-        key = f"{label}_p{prompt_idx}_q{question_idx}"
-        if key in existing_scores:
-            continue
-
-        judge_prompt = eval_prompt_template.format(
-            question=question,
-            answer=assistant_response,
-        )
-        prompts.append(judge_prompt)
-        keys.append(key)
+    pending = pending_prompts(responses, eval_prompt_template, existing_scores)
+    keys = [k for k, _ in pending]
+    prompts = [p for _, p in pending]
 
     if not prompts:
         return {}, 0, 0
@@ -514,6 +555,121 @@ async def score_entity(
 
 
 # ---------------------------------------------------------------------------
+# Batch mode (the default since 2026-10-10)
+# ---------------------------------------------------------------------------
+#
+# Every pending response of every entity goes into OpenAI batches
+# (assistant_axis/openai_batch.py) at half the real-time price; each batch's
+# scores are merged into the entities' score files and the usage record as
+# soon as it is collected, so a crash loses at most the batch in hand, and a
+# restart collects the batches already submitted (batch_state.json) instead
+# of submitting them again.  The request is the real-time one
+# (judge.chat_request_body).  What no batch answers (an expired batch, an
+# error line) is judged in real time when it is at most --batch_fallback_max
+# requests; a larger remainder is left for a rerun and the run exits 1, so
+# that run_pipeline.sh stops before step 4.
+
+CUSTOM_ID_SEP = "|"   # entity names and score keys never contain it
+
+
+async def judge_in_batches(
+    *,
+    client,
+    entities: Iterable[Tuple[str, Dict[str, int], str, List[dict]]],
+    output_dir: Path,
+    judge_model: str,
+    max_tokens: int,
+    usage_path: Path,
+    prior_usage: "MultiModelUsage",
+    run_usage: "MultiModelUsage",
+    chunk_requests: int,
+    poll_seconds: float,
+    fallback_max: int,
+    rate_limiter: RateLimiter,
+    realtime_batch_size: int,
+) -> Tuple[int, int, int, set]:
+    """Judge ``entities`` (name, existing scores, eval template, responses;
+    consumed once, so a generator keeps one entity's responses in memory at
+    a time) in batches.  Score files are ``<output_dir>/<name>.json``.
+    Returns ``(n_attempted, n_parsed, n_left, entities_with_new_scores)``;
+    ``n_left`` requests are unanswered and unscored, for a rerun."""
+    runner = OpenAIBatchRunner(
+        client, output_dir / BATCH_WORK_DIRNAME, output_dir / BATCH_STATE_FILENAME,
+        poll_seconds=poll_seconds,
+        metadata={"source": "pipeline/3_judge.py", "output_dir": str(output_dir)[-200:]},
+        logger=logger)
+    inflight = await runner.resume()
+
+    def requests():
+        for name, existing, eval_tpl, responses in entities:
+            for key, prompt in pending_prompts(responses, eval_tpl, existing):
+                cid = f"{name}{CUSTOM_ID_SEP}{key}"
+                if cid not in inflight:
+                    yield cid, chat_request_body(prompt, judge_model, max_tokens)
+
+    chunks = runner.write_chunks(requests(), max_requests=chunk_requests)
+    n_new = sum(r.get("n_requests", 0) for r in runner.state["chunks"]
+                if r["path"] in {str(p) for p in chunks})
+    logger.info(f"Batch mode: {n_new} requests in {len(chunks)} new batch(es)"
+                + (f", plus {len(inflight)} in batches already submitted" if inflight else ""))
+
+    buffer: Dict[str, Dict[str, int]] = {}
+    counts = {"attempted": 0, "parsed": 0}
+    touched: set = set()
+    batch_key = f"{judge_model}{BATCH_SUFFIX}"
+
+    def on_result(cid: str, body: Optional[dict], error: Optional[str]) -> None:
+        if body is None:
+            return   # counted when the fallback (or the remainder) takes it
+        name, key = cid.split(CUSTOM_ID_SEP, 1)
+        counts["attempted"] += 1
+        u = body.get("usage") or {}
+        run_usage.charge(batch_key, int(u.get("prompt_tokens") or 0),
+                         int(u.get("completion_tokens") or 0))
+        choices = body.get("choices") or []
+        text = ((choices[0].get("message") or {}).get("content") if choices else None)
+        score = parse_judge_score(text) if text else None
+        if score is not None:
+            buffer.setdefault(name, {})[key] = score
+            counts["parsed"] += 1
+
+    def flush() -> None:
+        for name, new in buffer.items():
+            merged = merge_scores(output_dir / f"{name}.json", new)
+            touched.add(name)
+            logger.info(f"Saved {len(merged)} scores for {name} ({len(new)} new)")
+        buffer.clear()
+        write_usage(usage_path, prior_usage, run_usage)
+
+    unanswered = await runner.run(chunks, on_result, flush)
+
+    n_left = 0
+    if unanswered and len(unanswered) <= fallback_max:
+        logger.info(f"Judging {len(unanswered)} requests no batch answered in real time")
+        ids = sorted(unanswered)
+        texts = await call_judge_batch(
+            client=client,
+            prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
+            model=judge_model, max_tokens=max_tokens, rate_limiter=rate_limiter,
+            batch_size=realtime_batch_size, usage=run_usage)
+        for cid, text in zip(ids, texts):
+            name, key = cid.split(CUSTOM_ID_SEP, 1)
+            counts["attempted"] += 1
+            score = parse_judge_score(text) if text else None
+            if score is not None:
+                buffer.setdefault(name, {})[key] = score
+                counts["parsed"] += 1
+        flush()
+    elif unanswered:
+        n_left = len(unanswered)
+        counts["attempted"] += n_left
+        logger.error(f"{n_left} requests were not answered by their batches, more than "
+                     f"--batch_fallback_max ({fallback_max}) to send in real time; they "
+                     f"stay unscored, and a rerun of this step submits them again")
+    return counts["attempted"], counts["parsed"], n_left, touched
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -540,9 +696,23 @@ async def main_async():
                              "truncate every judge call under the current "
                              "reasoning-first prompts)")
     parser.add_argument("--batch_size", type=int, default=50,
-                        help="Concurrent batch size")
+                        help="Concurrent requests per group in real time (--no_batch, and the "
+                             "fallback for requests no batch answered); not the Batch API")
     parser.add_argument("--requests_per_second", type=int, default=100,
-                        help="Rate limit")
+                        help="Rate limit in real time")
+    parser.add_argument("--no_batch", action="store_true",
+                        help="Judge in real time instead of through the OpenAI Batch API.  "
+                             "Batch is the default (Roger, 2026-10-10): half the price, results "
+                             "within 24 hours, usually much sooner")
+    parser.add_argument("--batch_requests", type=int,
+                        default=_openai_batch.DEFAULT_CHUNK_REQUESTS,
+                        help="Requests per batch (service limit 50,000 and 200 MB; a batch over "
+                             "the organisation's queue limit is held or split automatically)")
+    parser.add_argument("--batch_poll_seconds", type=float, default=60.0,
+                        help="Seconds between status checks of the batches in flight")
+    parser.add_argument("--batch_fallback_max", type=int, default=2000,
+                        help="Requests no batch answered are judged in real time up to this "
+                             "many; past it they are left for a rerun and the run exits 1")
     parser.add_argument("--roles", nargs="+",
                         help="Specific entity names to process")
     parser.add_argument("--dry_run", action="store_true",
@@ -668,6 +838,12 @@ async def main_async():
                     sample_shown = True
 
         logger.info(f"\nTotal prompts: {total_prompts}")
+        if args.no_batch:
+            logger.info("Mode: real time (--no_batch)")
+        else:
+            n_batches = -(-total_prompts // max(1, args.batch_requests))
+            logger.info(f"Mode: OpenAI Batch API, about {n_batches} batch(es) of up to "
+                        f"{args.batch_requests} requests (--no_batch for real time)")
         return
 
     # ------------------------------------------------------------------
@@ -692,87 +868,77 @@ async def main_async():
     total_call_attempted = 0
     total_call_parsed = 0
     errors: List[str] = []
+    n_left = 0
 
-    for response_file in tqdm(response_files, desc="Scoring"):
-        name = response_file.stem
-        output_file = output_dir / f"{name}.json"
+    def prepared_entities():
+        """``(name, existing scores, eval template, responses)`` for every
+        entity with responses still to judge, one at a time; the others are
+        counted as skipped or failed here."""
+        nonlocal skipped, failed
+        for response_file in tqdm(response_files, desc="Scoring"):
+            name = response_file.stem
+            existing_scores = load_scores(output_dir / f"{name}.json")
 
-        existing_scores: Dict[str, int] = {}
-        if output_file.exists():
+            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                           entity_type=args.entity_type)
+            if eval_tpl is None:
+                skipped += 1
+                continue
+
+            responses = load_responses(response_file)
+            if name in excluded_pairs:
+                before_n = len(responses)
+                responses = [r for r in responses
+                             if r["prompt_index"] not in excluded_pairs[name]]
+                if before_n != len(responses):
+                    logger.info(f"{name}: excluded {before_n - len(responses)} "
+                                f"responses (incongruous pairs {excluded_pairs[name]})")
+            if not responses:
+                errors.append(f"{name}: no responses")
+                failed += 1
+                continue
+
+            if all(response_key(r) in existing_scores for r in responses):
+                logger.info(f"Skipping {name}: all {len(responses)} already scored")
+                skipped += 1
+                continue
+            yield name, existing_scores, eval_tpl, responses
+
+    if not args.no_batch:
+        total_call_attempted, total_call_parsed, n_left, touched = await judge_in_batches(
+            client=client, entities=prepared_entities(), output_dir=output_dir,
+            judge_model=args.judge_model, max_tokens=args.max_tokens,
+            usage_path=usage_path, prior_usage=prior_usage, run_usage=run_usage,
+            chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
+            fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
+            realtime_batch_size=args.batch_size)
+        successful = len(touched)
+    else:
+        for name, existing_scores, eval_tpl, responses in prepared_entities():
             try:
-                with open(output_file, "r") as f:
-                    existing_scores = json.load(f)
-            except Exception:
-                pass
+                new_scores, n_attempted, n_parsed = await score_entity(
+                    name=name,
+                    responses=responses,
+                    eval_prompt_template=eval_tpl,
+                    client=client,
+                    rate_limiter=rate_limiter,
+                    judge_model=args.judge_model,
+                    max_tokens=args.max_tokens,
+                    batch_size=args.batch_size,
+                    existing_scores=existing_scores,
+                    usage=run_usage,
+                )
+                write_usage(usage_path, prior_usage, run_usage)
+                total_call_attempted += n_attempted
+                total_call_parsed += n_parsed
+                all_scores = merge_scores(output_dir / f"{name}.json", new_scores)
+                logger.info(f"Saved {len(all_scores)} scores for {name} "
+                            f"({len(new_scores)} new)")
+                successful += 1
 
-        eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                       entity_type=args.entity_type)
-        if eval_tpl is None:
-            skipped += 1
-            continue
-
-        responses = load_responses(response_file)
-        if name in excluded_pairs:
-            before_n = len(responses)
-            responses = [r for r in responses
-                         if r["prompt_index"] not in excluded_pairs[name]]
-            if before_n != len(responses):
-                logger.info(f"{name}: excluded {before_n - len(responses)} "
-                            f"responses (incongruous pairs {excluded_pairs[name]})")
-        if not responses:
-            errors.append(f"{name}: no responses")
-            failed += 1
-            continue
-
-        all_scored = all(
-            f"{r['label']}_p{r['prompt_index']}_q{r['question_index']}"
-            in existing_scores
-            for r in responses
-        )
-        if all_scored:
-            logger.info(f"Skipping {name}: all {len(responses)} already scored")
-            skipped += 1
-            continue
-
-        try:
-            new_scores, n_attempted, n_parsed = await score_entity(
-                name=name,
-                responses=responses,
-                eval_prompt_template=eval_tpl,
-                client=client,
-                rate_limiter=rate_limiter,
-                judge_model=args.judge_model,
-                max_tokens=args.max_tokens,
-                batch_size=args.batch_size,
-                existing_scores=existing_scores,
-                usage=run_usage,
-            )
-            write_usage(usage_path, prior_usage, run_usage)
-            total_call_attempted += n_attempted
-            total_call_parsed += n_parsed
-            all_scores = {**existing_scores, **new_scores}
-
-            for attempt in range(3):
-                try:
-                    with open(output_file, "w") as f:
-                        json.dump(all_scores, f, indent=2)
-                    break
-                except OSError as io_err:
-                    if output_file.exists():
-                        output_file.unlink()
-                    if attempt < 2:
-                        logger.warning(f"{name}: save failed ({io_err}), retrying in 5s...")
-                        await asyncio.sleep(5)
-                    else:
-                        raise
-
-            logger.info(f"Saved {len(all_scores)} scores for {name} "
-                        f"({len(new_scores)} new)")
-            successful += 1
-
-        except Exception as e:
-            errors.append(f"{name}: {e}")
-            failed += 1
+            except Exception as e:
+                errors.append(f"{name}: {e}")
+                failed += 1
 
     if run_usage.n_calls or not usage_path.exists():
         total_usage = write_usage(usage_path, prior_usage, run_usage)
@@ -804,6 +970,10 @@ async def main_async():
         n_total=total_call_attempted,
         logger_obj=logger,
     )
+    if n_left:
+        logger.error(f"{n_left} requests left unscored by their batches; rerun this step "
+                     f"to submit them again")
+        sys.exit(1)
 
 
 def main():

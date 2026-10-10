@@ -118,8 +118,25 @@ The judge automatically detects response type from the filename:
 **Options:**
 - `--traits_dir`: Trait JSON directory (default: `../data/traits/instructions`)
 - `--roles_dir`: Role JSON directory (default: `../data/roles/instructions`)
-- `--dry_run`: Preview prompts without API calls
+- `--dry_run`: Preview prompts without API calls (also prints the batch plan)
 - `--judge_model`: Judge model (default: `gpt-4.1-mini`)
+- `--no_batch`: judge in real time; see below
+
+**Batch mode (the default since 2026-10-10).**  Every pending response goes
+through the OpenAI Batch API at half the real-time price
+([`assistant_axis/openai_batch.py`](../assistant_axis/openai_batch.py)); the
+request is the real-time one (`judge.chat_request_body`).  Requests are cut into
+batches of `--batch_requests` (default 10,000; the service allows 50,000 and
+200 MB); a batch over the organisation's queue limit for the model is held until
+another finishes, or split in half when it is over on its own.  Each batch's
+scores are merged into the score files as it is collected, and the usage is
+recorded under `gpt-4.1-mini:batch` in `usage.json`.  `batch_state.json`
+beside the scores records the batches submitted: a restarted run collects them
+instead of submitting their requests again (chunk files wait in `_batches/`).
+Requests no batch answered are judged in real time up to `--batch_fallback_max`
+(2,000); past that they stay unscored and the run exits 1, so
+`run_pipeline.sh` stops before step 4, and a rerun submits them.
+`run_pipeline.sh --judge-realtime` passes `--no_batch`.
 
 **Score scale (all types):**
 

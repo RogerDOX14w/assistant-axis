@@ -411,6 +411,19 @@ def parse_batch_scores_json(
     return out
 
 
+def chat_request_body(prompt: str, model: str, max_tokens: int) -> Dict[str, Any]:
+    """The chat-completion request a judge call sends: the keyword arguments
+    of ``client.chat.completions.create`` and, unchanged, the ``body`` of an
+    OpenAI Batch API line (``assistant_axis.openai_batch``), so that a
+    response judged in a batch got exactly the request a live call sends."""
+    return {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_completion_tokens": max_tokens,
+        "temperature": 1,
+    }
+
+
 async def call_judge_single(
     client: openai.AsyncOpenAI,
     prompt: str,
@@ -432,11 +445,7 @@ async def call_judge_single(
 
     try:
         response = await client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            max_completion_tokens=max_tokens,
-            temperature=1
-        )
+            **chat_request_body(prompt, model, max_tokens))
 
         if usage is not None:
             # Lazy import to avoid a hard dep cycle (judge_pricing imports

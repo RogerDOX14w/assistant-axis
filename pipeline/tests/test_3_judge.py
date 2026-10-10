@@ -116,13 +116,14 @@ def test_score_entity_ticks_the_usage_tracker(judge):
     assert list(usage.per_model) == ["gpt-4.1-mini"]
 
 
-def _run(judge, monkeypatch, responses_dir, output_dir, client):
+def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, batch=False):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
     monkeypatch.setattr(judge.openai, "AsyncOpenAI", lambda: client)
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
         "--roles_dir", str(ROLES), "--traits_dir", str(TRAITS), "--entity_type", "trait",
         "--no_incongruity_filtering", "--requests_per_second", "1000",
+        *(["--batch_poll_seconds", "0"] if batch else ["--no_batch"]), *extra,
     ])
     asyncio.run(judge.main_async())
 
@@ -169,3 +170,201 @@ def test_stamp_marks_unstamped_scores_as_version_1(judge, tmp_path, caplog):
     fresh = tmp_path / "fresh"; fresh.mkdir()
     (fresh / "usage.json").write_text("{}")
     assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [2]
+
+
+# ---------------------------------------------------------------------------
+# Batch mode (the default since 2026-10-10)
+# ---------------------------------------------------------------------------
+
+class FakeBatchClient:
+    """The slice of ``openai.AsyncOpenAI`` batch mode uses: files.create /
+    content / delete and batches.create / retrieve.  A batch is in progress
+    when created and completed at its first retrieve.  ``limit`` makes any
+    batch of more requests than that fail validation with
+    ``token_limit_exceeded`` while another is in flight, or always when it is
+    larger than ``hard_limit``; ``error_ids`` are answered with an error line.
+    The real-time fallback goes to ``chat.completions.create``."""
+
+    def __init__(self, text="Reasoning.\nSCORE: 3", *, limit=None, hard_limit=None, error_ids=()):
+        self.text, self.limit, self.hard_limit, self.error_ids = text, limit, hard_limit, set(error_ids)
+        self.uploaded, self.batches_created, self.deleted = {}, [], []
+        self.inflight = set()
+        self._batches = {}
+        self.files = SimpleNamespace(create=self._fcreate, content=self._fcontent, delete=self._fdelete)
+        self.batches = SimpleNamespace(create=self._bcreate, retrieve=self._bretrieve)
+        self.chat = _client(text=text).chat
+
+    async def _fcreate(self, file, purpose):
+        assert purpose == "batch"
+        fid = f"file-{len(self.uploaded)}"
+        self.uploaded[fid] = file[1].decode("utf-8")
+        return SimpleNamespace(id=fid)
+
+    async def _fcontent(self, fid):
+        return SimpleNamespace(text=self.uploaded[fid])
+
+    async def _fdelete(self, fid):
+        self.deleted.append(fid)
+
+    def _lines(self, fid):
+        return [json.loads(x) for x in self.uploaded[fid].splitlines() if x.strip()]
+
+    async def _bcreate(self, input_file_id, endpoint, completion_window, metadata):
+        assert endpoint == "/v1/chat/completions" and completion_window == "24h"
+        bid = f"batch-{len(self._batches)}"
+        n = len(self._lines(input_file_id))
+        over = self.limit is not None and n > self.limit and (self.inflight or (self.hard_limit is not None and n > self.hard_limit))
+        status = "failed" if over else "in_progress"
+        errors = SimpleNamespace(data=[SimpleNamespace(code="token_limit_exceeded", message="Enqueued token limit reached")]) if over else None
+        self._batches[bid] = {"input": input_file_id, "status": status, "errors": errors}
+        self.batches_created.append((bid, n, status))
+        if not over:
+            self.inflight.add(bid)
+        return SimpleNamespace(id=bid, status=status, errors=errors)
+
+    async def _bretrieve(self, bid):
+        b = self._batches[bid]
+        if b["status"] == "in_progress":
+            out = []
+            for line in self._lines(b["input"]):
+                cid = line["custom_id"]
+                if cid in self.error_ids:
+                    out.append({"custom_id": cid, "response": {"status_code": 500, "body": {"error": {"message": "server"}}}, "error": None})
+                else:
+                    out.append({"custom_id": cid, "error": None, "response": {"status_code": 200, "body": {
+                        "choices": [{"message": {"content": self.text}}],
+                        "usage": {"prompt_tokens": 300, "completion_tokens": 40}}}})
+            ofid = f"file-out-{bid}"
+            self.uploaded[ofid] = "\n".join(json.dumps(o) for o in out) + "\n"
+            b.update(status="completed", output_file_id=ofid)
+            self.inflight.discard(bid)
+        return SimpleNamespace(id=bid, status=b["status"], errors=b["errors"],
+                               output_file_id=b.get("output_file_id"), error_file_id=None,
+                               request_counts=SimpleNamespace(completed=0, total=0))
+
+
+def _write_responses(responses_dir, name, n):
+    responses_dir.mkdir(exist_ok=True)
+    with open(responses_dir / f"{name}.jsonl", "w") as f:
+        for r in _responses(n):
+            f.write(json.dumps(r) + "\n")
+
+
+def test_batch_is_the_default_and_sends_the_real_time_request(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = FakeBatchClient()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+
+    assert json.loads((output_dir / "patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(4)}
+    assert client.chat.completions.create.call_count == 0          # nothing in real time
+    lines = client._lines("file-0")
+    assert [l["custom_id"] for l in lines] == [f"patient|pos_p0_q{q}" for q in range(4)]
+    body = lines[0]["body"]
+    assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 200)
+    assert body["temperature"] == 1 and body["max_completion_tokens"] == 200
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"gpt-4.1-mini:batch"} and usage["n_calls"] == 4
+    # priced at half the real-time rates
+    rt_in, rt_out = judge._pricing_mod.price_for_model("gpt-4.1-mini")
+    assert judge._pricing_mod.price_for_model("gpt-4.1-mini:batch") == (rt_in / 2, rt_out / 2)
+    state = json.loads((output_dir / "batch_state.json").read_text())
+    assert [r["collected"] for r in state["chunks"]] == [True]
+    assert not list((output_dir / "_batches").glob("*.jsonl"))       # chunk files removed
+    assert {"file-0", "file-out-batch-0"} <= set(client.deleted)       # service files tidied
+
+    # a second run finds nothing to judge and submits nothing
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert len(client.batches_created) == 1
+
+
+def test_requests_are_split_into_batches_of_the_given_size(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 7)
+    client = FakeBatchClient()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_requests", "3", batch=True)
+    assert [n for _, n, _ in client.batches_created] == [3, 3, 1]
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 7
+
+
+def test_queue_limit_holds_then_splits(judge, monkeypatch, tmp_path):
+    """Over the queue limit with a batch in flight: wait for it; alone and
+    still over: split in half."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 8)
+    client = FakeBatchClient(limit=2, hard_limit=2)
+    monkeypatch.setattr(judge._openai_batch, "MIN_SPLIT_REQUESTS", 1)
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_requests", "4", batch=True)
+    statuses = [(n, s) for _, n, s in client.batches_created]
+    assert (4, "failed") in statuses and (2, "in_progress") in statuses
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 8
+    assert client.chat.completions.create.call_count == 0
+
+
+def test_requests_a_batch_did_not_answer_go_to_real_time(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = FakeBatchClient(error_ids={"patient|pos_p0_q2"})
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 4
+    assert client.chat.completions.create.call_count == 1
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert usage["per_model"]["gpt-4.1-mini:batch"]["n_calls"] == 3
+    assert usage["per_model"]["gpt-4.1-mini"]["n_calls"] == 1
+
+
+def test_a_large_unanswered_remainder_is_left_for_a_rerun(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = FakeBatchClient(error_ids={"patient|pos_p0_q1", "patient|pos_p0_q2"})
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_fallback_max", "1", batch=True)
+    assert e.value.code == 1
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 2
+    assert client.chat.completions.create.call_count == 0
+    # the rerun submits just the two
+    client.error_ids = set()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert client.batches_created[-1][1] == 2
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 4
+
+
+def test_a_restart_collects_the_batch_in_flight_without_resubmitting(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    client = FakeBatchClient()
+    # A run killed after submitting: the batch is on the service, the state
+    # file records it, and its chunk file is still there.
+    runner = judge.OpenAIBatchRunner(client, output_dir / "_batches", output_dir / "batch_state.json")
+    tpl = judge.resolve_eval_prompt("patient", ROLES, TRAITS, "trait")
+    reqs = [(f"patient|{k}", judge.chat_request_body(p, "gpt-4.1-mini", 200))
+            for k, p in judge.pending_prompts(_responses(3), tpl, {})]
+    [chunk] = runner.write_chunks(reqs)
+    asyncio.run(runner._submit(chunk))
+    assert len(client.batches_created) == 1
+
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert len(client.batches_created) == 1                       # nothing resubmitted
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 3
+
+
+def test_dry_run_reports_the_batch_plan(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 5)
+    monkeypatch.setattr(sys, "argv", [
+        "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
+        "--traits_dir", str(TRAITS), "--entity_type", "trait", "--no_incongruity_filtering",
+        "--dry_run", "--batch_requests", "2"])
+    caplog.set_level("INFO")
+    asyncio.run(judge.main_async())
+    assert "Mode: OpenAI Batch API, about 3 batch(es) of up to 2 requests" in caplog.text
+
+
+def test_real_time_calls_send_the_shared_request_body(judge):
+    client = _client()
+    asyncio.run(judge.score_entity(
+        name="patient", responses=_responses(1), eval_prompt_template="{question} {answer}",
+        client=client, rate_limiter=judge.RateLimiter(1000), judge_model="gpt-4.1-mini",
+        max_tokens=200, batch_size=50, existing_scores={}, usage=None))
+    assert client.chat.completions.create.call_args.kwargs == judge.chat_request_body(
+        "q0 a0", "gpt-4.1-mini", 200)
