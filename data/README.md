@@ -201,7 +201,11 @@ three agreed on 81% of pairs and two of three on the rest).  Rounded means
 5.5 gave no 3 at all, and **only 3 of the 9,000 prompt-variants score 3** (in
 `r_bodhisattva__temperamental` and `t_proofreader__unhelpful`), so step 3's
 incongruity filter now drops almost nothing (the April scores dropped 29
-variants among the 724 combinations both runs share).  The t_ combos still
+variants among the 724 combinations both runs share).  Roger reviewed both
+sides on 2026-10-10: the two current 3s are real, and of the 29 April 3s
+([combination_3s_changed.md](../roger/pre_extraction_2026-10-09/combination_3s_changed.md))
+many are roleplayable or were made by instruction texts since rewritten, so
+the April scoring was oversensitive and the October scores stand.  The t_ combos still
 score higher on average (mean 0.76) than the r_ combos (0.48).
 
 **Before (April 2026, in git history at `cac76b6`):** 40 x 40 + 40 x 40 =
