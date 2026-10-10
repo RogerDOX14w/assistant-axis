@@ -746,13 +746,13 @@ async def main_async():
     roles_dir = Path(args.roles_dir)
     traits_dir = Path(args.traits_dir)
 
-    # Build per-pair exclusions for combined entries (incongruity score == 3)
-    # TODO: Unclear if this filtering is a net win. Many responses get rejected
-    # by the judge anyway (score < 3), so the incongruity filter mainly reduces
-    # sample size for only a marginal improvement in sample quality — the rate
-    # of bad-but-accepted responses among incongruity-filtered pairs isn't much
-    # higher than among unfiltered ones, and some filtered pairs are perfectly
-    # usable. Experiment with --no_incongruity_filtering to compare.
+    # Build per-pair exclusions for combined entries (incongruity score == 3).
+    # Settled 2026-10-10 (Roger): the April 2026 scores were oversensitive (many
+    # of their 3s were roleplayable, or came from instruction texts since
+    # rewritten) and he had considered dropping the filter; the October rescore
+    # (Sonnet 5.5, escalations rescored three times by Opus 5.5, median kept)
+    # leaves 3 of 9,000 prompt-variants at 3, all clearly incompatible, so the
+    # filter stays.  data/README.md "combination_scores.json" has the figures.
     excluded_pairs: Dict[str, set] = {}
     if not args.no_incongruity_filtering:
         combo_scores_path = Path(args.combination_scores)
