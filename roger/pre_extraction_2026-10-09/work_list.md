@@ -38,7 +38,7 @@ What is waiting for Roger, in the order we take it.  Each item: do now, drop, or
 
 ## Decided, to do ASAP (Roger 2026-10-09: decide in discussion, apply in a batch after)
 
-**Status 2026-10-10:** all applied except W15 (goal classification, next) and the items with Roger's call noted in brackets.
+**Status 2026-10-10:** all applied, W15 included (87d84fc), and Roger's calls on the bracketed items applied the same day (e50f069, b6c19e3, 49a88c7).
 
 - [done, 77c48a4] E1 collaborative rewritten (its check names individualistic first: a pair held from one side; for the tangle pass).
 - [done, 4ea9097] E2 entertaining rewritten to mirror dry (draft in [w3_near_duplicates.md](./w3_near_duplicates.md) § Drafts), pair recheck.
@@ -105,7 +105,7 @@ What is waiting for Roger, in the order we take it.  Each item: do now, drop, or
 
 | id | item | mode | status |
 |---|---|---|---|
-| W15 | [3.1] **Goal classification** for 631 traits and 62 roles, which feeds [goal_roles_and_traits.json](../../data/goal_roles_and_traits.json) and the combined role-and-trait generation.  Last: after groups 1 and 2 have settled the descriptions.  Over $20, so a quote first. | Quote (last) | waits for groups 1 and 2; **2026-10-10: next** (approved up to $60) |
+| W15 | [3.1] **Goal classification** for 631 traits and 62 roles, which feeds [goal_roles_and_traits.json](../../data/goal_roles_and_traits.json) and the combined role-and-trait generation.  Last: after groups 1 and 2 have settled the descriptions.  Over $20, so a quote first. | Quote (last) | waits for groups 1 and 2; **2026-10-10: done** (83bc4a1 classification $62.32, 42f4303 borderline resample $16.12, 87d84fc lists placed again) |
 | W16 | [3.2] **The native-language side set.**  Not done: decided on 2026-10-08, nothing built.  Native-language instructions for four or five nationalities (French, German, Japanese, Brazilian Portuguese, Chinese), kept out of the corpus and passed to the extraction as a separate directory, to see whether the vectors separate by language or by people.  Design proposal first (who writes the instructions, file format, how the extraction reads a side directory). | Discuss, then build | **delayed** (Roger 2026-10-09): not in this extraction; the design stays for a later pod session |
 | W17 | [3.3] **Name collisions are eleven, not nine** ([parent](../../data/roles/instructions/parent.json), [specialist](../../data/roles/instructions/specialist.json)): update the collision regression test's list and AGENT_NOTES. | Start (code) | done (d463a23), with a test that keeps the list in step with the corpus; docs being updated |
 | W18 | [3.4] **[trait_antonyms_v4.json](../../data/traits/trait_antonyms_v4.json)** (240 of 916 entries; the trait-gap labels code reads it): retire it in favour of the check history, or rebuild it.  Ask the trait-gap session what its code needs. | Other session, then Discuss | **done** (5492fff) |
@@ -119,5 +119,5 @@ What is waiting for Roger, in the order we take it.  Each item: do now, drop, or
 | id | item | decision |
 |---|---|---|
 | W21 | [4.1] The 22 Tarot Major Arcana as roles ([ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md) § "TBD: the 22 Major Arcana as roles (Tarot)"). | **delay** (Roger 2026-10-09): idea and notes kept; the 22 queue entries stay backlog |
-| W22 | [4.2] [growth-first](../../data/traits/instructions/growth_first.json) and [environmental](../../data/traits/instructions/environmental.json) as a pair: neither check names the other. | **do** (Roger 2026-10-09): explore from W4's rewrite; options (a)-(d) in the to-do list; **2026-10-10: checked, options with Roger** |
+| W22 | [4.2] [growth-first](../../data/traits/instructions/growth_first.json) and [environmental](../../data/traits/instructions/environmental.json) as a pair: neither check names the other. | **do** (Roger 2026-10-09): explore from W4's rewrite; options (a)-(d) in the to-do list; **2026-10-10: done** (environmentalist paired with growth-first by decision, 49a88c7) |
 | W23 | [4.4] Older deferrals: the parked queue candidates (spiralist, vanilla, southeast Asian, Pacific Islander, free market / interventionist, seven optional gap-scan words, five Strategy 1a words), the roles native and civilian, and wasteful. | **decided** row by row (Roger 2026-10-09; queue a576bb1) |

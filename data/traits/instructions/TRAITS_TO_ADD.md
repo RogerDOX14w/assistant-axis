@@ -22,47 +22,29 @@ under it may be older.
 
 ## What's left (index, 2026-10-10)
 
-Corpus on 2026-10-10: 928 trait files, 296 clean pairs, 23 traits not yet
+Corpus on 2026-10-10: 928 trait files, 297 clean pairs, 22 traits not yet
 classified into an arrangement (`check_arrangements.py --list-unclassified`);
-340 role files.  Every seeding chunk (0 to 7) is done, and so is nearly all of
-the pre-extraction work list ([work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md)): the
+340 role files.  Every seeding chunk (0 to 7) is done, and so is the whole
+pre-extraction work list ([work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md)): the
 near-duplicate drops, the framing rewrites, the moral-circle review, the
 triangles, the Dark Tetrad set, the occupational-instrument and September
-additions, the judge display form (W19) and the standards traits' regeneration.
-Next comes one RunPod extraction for the whole corpus.
+additions, the judge display form (W19), the standards traits' regeneration,
+Roger's label calls of 2026-10-10, and the goal classification with the goal
+lists placed again (W15).  Next comes one RunPod extraction for the whole corpus.
 
 ### Before the extraction
 
-Cheap now; afterwards any change to a trait makes its vectors stale.
-
-- **Goal classification (W15)** for the traits and roles added since April
-  ([goal_classifications.json](../../../data_analysis/output/goal_classifications.json)
-  covered 285 traits and 278 roles), then the goal tiers of
-  [goal_roles_and_traits.json](../../goal_roles_and_traits.json) placed again
-  by hand.  Approved by Roger up to $60 (2026-10-09).  Two stems in
-  `traits.goal` have no file and go in the re-tiering: `libertarian` (index 13;
-  renamed [metaphysical libertarian](./metaphysical_libertarian.json) on
-  2026-09-30, with its sense changed) and `universalist` (index 36; renamed
-  [moral universalist](./moral_universalist.json) on 2026-10-02 and taken out
-  of the moral-circle sequence).
-- **Labels and wordings waiting for Roger** (pre-extraction work list; each a
-  cheap regeneration):
-  - [wasteful](./wasteful.json) or inefficient (the blind name is inefficient,
-    twice);
-  - [win-win-seeking](./win_win_seeking.json) (blind name integrative |
-    collaborative);
-  - [violent](./violent.json) or savage (the blind name confirms violent);
-  - [cliqueish](./cliqueish.json) or cliquish (the dictionary form);
-  - [risk-seeking](./risk_seeking.json): the minimal grammar fix or a mirror of
-    [risk-averse](./risk_averse.json) ([small_rewrites_drafts.md](../../../roger/pre_extraction_2026-10-09/small_rewrites_drafts.md) § 6);
-  - [unflinching](./unflinching.json): the draft without "never avoidant" (§ 5);
-  - [inspirational](./inspirational.json) (W3 E4): keep, rewrite, or drop; the
-    word's everyday sense reads as [encouraging](./encouraging.json) (3 and 3),
-    [transformational](./transformational.json) far off;
-  - [environmental](./environmental.json) and [growth-first](./growth_first.json)
-    (W22; § "TODO: chunk 7 leftovers").
-- **The pre-extraction work list** tracks these:
-  [work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md).
+Nothing left on the corpus side (2026-10-10).  The last items were done that day:
+the goal classification of the whole corpus on its current texts and the four
+goal lists placed again ([goal_roles_and_traits.json](../../goal_roles_and_traits.json);
+rule and method in [data/README.md](../../README.md)), and Roger's calls on the
+labels and wordings ([inefficient](./inefficient.json), [cliquish](./cliquish.json),
+[environmentalist](./environmentalist.json) paired with
+[growth-first](./growth_first.json), [inspirational](./inspirational.json) as a
+role model, the [risk-seeking](./risk_seeking.json) mirror,
+[unflinching](./unflinching.json)).  Any trait changed from here on needs its
+goal classification redone (`classify_goals.py` reclassifies changed texts) and
+makes its vectors stale once extracted.
 
 ### At the extraction
 

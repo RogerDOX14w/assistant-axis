@@ -11,9 +11,11 @@ there applies here too.
 
 340 roles (341 files with `default.json`), all under role rubric V3.
 
-- **Goal classification** has not been run for 62 roles: the 61 seeded since
-  April and [saint](./saint.json).  It is one item with the traits' in
-  TRAITS_TO_ADD's index, "Before the extraction" (pre-extraction W15).
+- **Goal classification: done 2026-10-10** (pre-extraction W15) for every
+  role on its V3 text; `roles.non_goal` in
+  [goal_roles_and_traits.json](../../goal_roles_and_traits.json) shrank to 33,
+  since V3 gives many roles a commitment the classifier reads as a weak goal
+  ([data/README.md](../../README.md)).
 - **The role-pair check is built** (`a9c0a13`, `--roles` in
   [generate_antonyms.py](../../../data_analysis/generate_antonyms.py)) and was
   run once on 2026-10-09 ($0.07): [predator](./predator.json) /
