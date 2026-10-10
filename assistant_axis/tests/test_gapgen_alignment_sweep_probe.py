@@ -91,3 +91,15 @@ def test_probe_record_round_trip(tmp_path):
     assert set(back) == {"candid about work", "plays to the grader"}
     skipped = P.write_probe(None, tmp_path / "skip.json", status="skipped: no OPENROUTER_API_KEY loads", inputs=[])
     assert P.load_label_known(skipped) == {} and json.loads(skipped.read_text())["result"]["status"].startswith("skip")
+
+
+def test_refloor_rederives_label_known_from_the_stored_cosines(tmp_path):
+    rows = [P.ProbeRow("a", "d", True, 0.45, False, "DeepInfra"), P.ProbeRow("b", "d", True, 0.25, False, "DeepInfra"),
+            P.ProbeRow("c", None, False, None, False, "DeepInfra"), P.ProbeRow("d", discarded="host X not allowed")]
+    res = P.ProbeResult(rows={r.label: r for r in rows}, n_calls=4)
+    p = P.write_probe(res, tmp_path / "probe.json", status="ran", extra={"min_cos_to_gloss": 0.5})
+    assert P.refloor(p, 0.30) == {"known": 1, "another_sense": 1, "unknown": 1, "no_data": 1}
+    d = json.loads(p.read_text())["result"]
+    assert d["min_cos_to_gloss"] == 0.30 and d["refloored_from"] == 0.5
+    assert P.load_label_known(p) == {"a": True, "b": False, "c": False, "d": None}
+    assert P.MIN_COS_TO_GLOSS == 0.30

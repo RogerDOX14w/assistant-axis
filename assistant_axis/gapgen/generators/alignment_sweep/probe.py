@@ -12,7 +12,12 @@ The prompt (:data:`PROMPT`, version :data:`PROMPT_VERSION`; one label per call, 
 asks for a one-sentence definition of the label as said of a person or an assistant, or ``known: false``.  A label
 is **known** when the model gives a definition whose embedding (``text-embedding-3-large`` through the cache, the
 dedup's model) is at cosine :data:`MIN_COS_TO_GLOSS` or more from the label's gloss: known, and in the intended
-sense.  The floor is provisional (2026-10-10, first run); ``probe.json`` keeps every cosine so it can be re-read.
+sense.  The floor is provisional: the first run (the pilot's 312 labels, 2026-10-10) used 0.5 and called 235 labels
+"known in another sense", but a one-sentence general definition sits far from a long, specific gloss even when it
+is right (median cosine 0.44; "gives benefit of doubt" 0.37, "acts unilaterally" 0.41, both read correctly), while
+the rows below 0.3 were real misreadings ("easily spoofed" read as impersonated, "answerable for delegates" as
+answerable to delegates).  So 0.30, from reading 15 rows in three bands; ``probe.json`` keeps every cosine, and
+:func:`refloor` (``probe --refloor``, no call) re-derives ``label_known`` at another floor.
 """
 from __future__ import annotations
 
@@ -41,7 +46,7 @@ NO_THINK_SUFFIX = " /no_think"
 MAX_TOKENS = 160
 TEMPERATURE = 0.0
 CONCURRENCY = 8
-MIN_COS_TO_GLOSS = 0.5
+MIN_COS_TO_GLOSS = 0.30
 PROMPT_VERSION = 1
 PROMPT = ("What does the expression '{label}' mean when it describes a person or an AI assistant? If you recognize "
           "it, give its usual meaning in one sentence. If you do not, say so. Answer with one JSON object and nothing "
@@ -197,6 +202,33 @@ def load_label_known(path: Path) -> dict[str, Optional[bool]]:
     return {r["label"]: r.get("label_known") for r in d.get("rows") or []}
 
 
+def refloor(path: Path, floor: float = MIN_COS_TO_GLOSS) -> dict:
+    """Re-derive every row's ``label_known`` in a ``probe.json`` at cosine ``floor`` (no call); returns the counts
+    ``known`` / ``another_sense`` / ``unknown`` / ``no_data``."""
+    p = Path(path)
+    env = json.loads(p.read_text(encoding="utf-8"))
+    d = env.get("result", env)
+    counts = {"known": 0, "another_sense": 0, "unknown": 0, "no_data": 0}
+    for r in d.get("rows") or []:
+        if r.get("discarded") or r.get("error"):
+            r["label_known"] = None
+            counts["no_data"] += 1
+        elif r.get("known_claimed") is False:
+            r["label_known"] = False
+            counts["unknown"] += 1
+        elif r.get("cos_to_gloss") is not None:
+            r["label_known"] = r["cos_to_gloss"] >= floor
+            counts["known" if r["label_known"] else "another_sense"] += 1
+        else:
+            r["label_known"] = None
+            counts["no_data"] += 1
+    if d.get("min_cos_to_gloss") != floor:
+        d["refloored_from"] = d.get("min_cos_to_gloss")
+    d["min_cos_to_gloss"] = floor
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", p)
+    return counts
+
+
 def estimate_usd(n: int) -> float:
     from assistant_axis.judge_pricing import cost_for_usage
     return round(cost_for_usage(MODEL, n * IN_TOKENS, n * OUT_TOKENS), 5)
@@ -204,4 +236,4 @@ def estimate_usd(n: int) -> float:
 
 __all__ = ["MODEL", "ALLOWED_PROVIDERS", "PROVIDER", "PROMPT", "PROMPT_VERSION", "MIN_COS_TO_GLOSS", "ProbeInput",
            "ProbeRow", "ProbeResult", "key_status", "render_user", "run_probe", "write_probe", "load_label_known",
-           "estimate_usd", "prompt_sha256"]
+           "refloor", "estimate_usd", "prompt_sha256"]

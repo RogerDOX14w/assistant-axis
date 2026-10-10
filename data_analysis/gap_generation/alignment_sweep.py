@@ -529,6 +529,11 @@ def cmd_probe(args) -> int:
     from assistant_axis.provenance import current_file_input
 
     rdir = _run_dir(args, args.run_id)
+    if args.refloor:
+        counts = P.refloor(rdir / P.PROBE_NAME, P.MIN_COS_TO_GLOSS)
+        print(f"re-derived label_known at cosine {P.MIN_COS_TO_GLOSS} (no call): {json.dumps(counts)}; wrote "
+              f"{rdir / P.PROBE_NAME}")
+        return 0
     inputs, src = _run_labels(args, rdir)
     host = ", ".join(f"{k} ({v})" for k, v in P.ALLOWED_PROVIDERS.items())
     print(f"probe: {len(inputs)} labels on {P.MODEL} through OpenRouter, host pinned to {host}, fallbacks off "
@@ -666,6 +671,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("probe", help="the label probe: qwen/qwen3-32b via OpenRouter pinned to DeepInfra (US)")
     p.add_argument("--run-id", required=True)
     p.add_argument("--embedding-cache", type=Path, default=paths.DATA_CANDIDATES / "cache" / "embeddings")
+    p.add_argument("--refloor", action="store_true",
+                   help="re-derive label_known in the run's probe.json at the current cosine floor (no call)")
     paid(p, 0.5)
     p.set_defaults(func=cmd_probe)
     return ap

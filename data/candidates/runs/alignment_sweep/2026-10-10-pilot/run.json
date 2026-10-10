@@ -1,7 +1,7 @@
 {
   "generator": "alignment_sweep",
   "run_id": "2026-10-10-pilot",
-  "git_sha": "1e72e41+dirty",
+  "git_sha": "7d80ea6+dirty",
   "args": {
     "step": "extract",
     "variant": "A",
@@ -117,9 +117,9 @@
   },
   "n_emitted": 0,
   "started_at": "2026-10-10T19:06:59+00:00",
-  "finished_at": "2026-10-10T19:20:43+00:00",
+  "finished_at": "2026-10-10T19:24:34+00:00",
   "confirmed_by": null,
-  "cost_usd": 0.8419,
+  "cost_usd": 0.8486,
   "sessions": [
     {
       "session_id": "09396f3cf5a8",
@@ -382,6 +382,49 @@
         "total_prompt_tokens": 28534,
         "total_completion_tokens": 13821,
         "n_calls": 60
+      }
+    },
+    {
+      "session_id": "59fdbab1d556",
+      "started_at": "2026-10-10T19:23:14+00:00",
+      "finished_at": "2026-10-10T19:24:34+00:00",
+      "git_sha": "7d80ea6+dirty",
+      "args": {
+        "step": "probe",
+        "model": "qwen/qwen3-32b",
+        "host": {
+          "deepinfra": "United States"
+        },
+        "n_labels": 312,
+        "budget_usd": 0.5,
+        "prompt_version": 1,
+        "label_form": "judge-display-v1"
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.0066,
+      "n_calls": 314,
+      "usage": {
+        "per_model": {
+          "qwen/qwen3-32b": {
+            "model": "qwen/qwen3-32b",
+            "prompt_tokens": 25305,
+            "completion_tokens": 12927,
+            "cost_usd": 0.0056,
+            "n_calls": 312
+          },
+          "text-embedding-3-large": {
+            "model": "text-embedding-3-large",
+            "prompt_tokens": 7449,
+            "completion_tokens": 0,
+            "cost_usd": 0.001,
+            "n_calls": 2
+          }
+        },
+        "total_cost_usd": 0.0066,
+        "total_prompt_tokens": 32754,
+        "total_completion_tokens": 12927,
+        "n_calls": 314
       }
     }
   ]
