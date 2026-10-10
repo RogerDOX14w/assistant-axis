@@ -51,7 +51,8 @@ def _git_sha() -> Optional[str]:
 
 def cmd_fetch(args) -> int:
     man = F.fetch_all(only=args.only, force=args.force, dry_run=args.dry_run, dest_root=args.external_dir,
-                      sources_manifest_path=args.sources_manifest, git_sha=None if args.dry_run else _git_sha())
+                      sources_manifest_path=args.sources_manifest, git_sha=None if args.dry_run else _git_sha(),
+                      fetcher=F._urlopen_bytes)
     if args.dry_run:
         print("DRY-RUN: would fetch (no API cost):")
         for line in man.dry_run_lines:
@@ -323,7 +324,7 @@ def cmd_dedupe(args) -> int:
             raise SystemExit(f"no tuned threshold in {args.labeled}: label pairs and run --tune, or pass --threshold")
         threshold = float(labeled_doc["threshold"]["value"])
     if args.dry_run:
-        print(f"DRY-RUN: would embed, then "
+        print("DRY-RUN: would embed, then "
               + ("write dedup_pairs_to_label.json" if args.pairs_for_labeling else
                  "tune the threshold" if args.tune else f"group at threshold {threshold} into dedup_groups.json"))
         return 0
@@ -584,6 +585,84 @@ def cmd_probe(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- report
+
+def cmd_report(args) -> int:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import gate as G
+    from assistant_axis.gapgen.generators.alignment_sweep import probe as P
+    from assistant_axis.gapgen.generators.alignment_sweep import report as R
+    from assistant_axis.gapgen.registry import Registry
+
+    rdir = _run_dir(args, args.run_id)
+    sub_path = rdir / "submitted_items.json"
+    if not sub_path.exists():
+        raise SystemExit(f"no {sub_path}: the readout reads a submitted run (alignment_sweep.py submit, then M1 and "
+                         f"M3); the pilot's readout is pilot_readout.md")
+    submitted = json.loads(sub_path.read_text(encoding="utf-8"))
+    items = {it.item_id: it.as_dict() for it in X.load_extraction(rdir / X.EXTRACTION_NAME)}
+    reg = Registry(args.registry).fold() if args.registry.exists() else {}
+    gate_rows = {}
+    if (rdir / G.ROWS_NAME).exists():
+        for line in (rdir / G.ROWS_NAME).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                d = json.loads(line)
+                gate_rows[d["key"]] = d
+    probe_path = rdir / P.PROBE_NAME
+    probe_doc = json.loads(probe_path.read_text(encoding="utf-8")).get("result", {}) if probe_path.exists() else {}
+    probe_status = probe_doc.get("status", "not run") + (f" (floor {probe_doc.get('min_cos_to_gloss')})"
+                                                         if probe_doc.get("status") == "ran" else "")
+    ev_path = rdir / G.GOLD_EVAL_NAME
+    if ev_path.exists():
+        ev = json.loads(ev_path.read_text(encoding="utf-8"))["result"]["eval"]
+        gate_status = (("binding" if ev["meets_targets"] else "advisory only") +
+                       f" (gold agreement {ev['n_agree']}/{ev['n']}, flip rate {ev['flip_rate']:.0%})")
+    else:
+        gate_status = "no gold evaluation yet (advisory)"
+    rows = R.build_rows(submitted, items, reg, gate_rows=gate_rows, label_known=P.load_label_known(probe_path))
+    groups = {g: sum(1 for r in rows if r.group == g) for g in ("survivor", "covered", "filtered")}
+    counts = {"poles extracted": len(items), "kept poles": sum(1 for v in items.values() if not v["dropped_reason"]),
+              "submitted": len(submitted), "survivors": groups["survivor"], "covered": groups["covered"],
+              "filtered or not yet scored": groups["filtered"]}
+    run_json = json.loads((rdir / "run.json").read_text(encoding="utf-8")) if (rdir / "run.json").exists() else {}
+    md = R.render_readout(rows, run_id=args.run_id, counts=counts, costs=R.costs_by_step(run_json),
+                          probe_status=probe_status, gate_status=gate_status, top=args.top)
+    outs = {rdir / "readout.md": md}
+    if args.gold:
+        from assistant_axis.gapgen import novelty as NV
+        from assistant_axis.gapgen.recovery import hiding_groups
+        gold = json.loads(args.gold_traits.read_text(encoding="utf-8"))
+        traits = NV.load_trait_corpus(args.data_dir)
+        mates = {s: [m for m in grp if m != s] for grp in hiding_groups(traits) for s in grp}
+        hidden = R.gold_hidden_doc(gold, partners=mates)
+        hid_path = rdir / "gold_hidden.json"
+        renamed = {s: list(t.renamed_from) for s, t in traits.items()}
+        res = R.gold_recovery(gold, reg, submitted, run_id=args.run_id, renamed=renamed)
+        py = "uv run python data_analysis/gap_generation"
+        rel = hid_path
+        try:
+            rel = hid_path.resolve().relative_to(_REPO_ROOT.resolve())
+        except ValueError:
+            pass
+        cmds = [f"{py}/novelty_score.py score --batch-id {args.run_id}_{AS.GENERATOR}_gold --run "
+                f"{AS.GENERATOR}/{args.run_id} --hide {rel} --transport live --budget-usd 3",
+                "# then match its decided candidates against the hidden traits with recovery.match_candidates "
+                "(the harness's step 3); interface request 1 would run both"]
+        outs[hid_path] = json.dumps(hidden, indent=2) + "\n"
+        outs[rdir / "gold_recovery.md"] = R.render_gold_recovery(res, run_id=args.run_id, hidden_commands=cmds)
+        print(f"gold: recovered {res['n_recovered']} of {res['n']} (no-call reading of the run's M3 blocks); frame "
+              f"pair {'hit' if res['frame_pair']['hit'] else 'not hit'}")
+    if args.dry_run:
+        print(md)
+        print("DRY-RUN: would write " + ", ".join(str(p) for p in outs))
+        return 0
+    for p, text in outs.items():
+        atomic_write_text(text, p)
+        print(f"wrote {p}")
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -675,6 +754,15 @@ def build_parser() -> argparse.ArgumentParser:
                    help="re-derive label_known in the run's probe.json at the current cosine floor (no call)")
     paid(p, 0.5)
     p.set_defaults(func=cmd_probe)
+
+    p = sub.add_parser("report", help="readout.md from the registry blocks, the gate, the probe and the usage files "
+                                      "(no API cost); --gold adds gold_recovery.md")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--gold", action="store_true")
+    p.add_argument("--gold-traits", type=Path, default=AS.GOLD_PATH)
+    p.add_argument("--top", type=int, default=None, help="show only the top N survivors (the plan's table of ~40)")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_report)
     return ap
 
 
