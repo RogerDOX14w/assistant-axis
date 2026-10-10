@@ -1,95 +1,124 @@
-# 11. Novelty ensemble: independent signals and the disagreement protocol
+# 11. Lexical recall insurance for M3 (rewritten 2026-10-10; was: the novelty ensemble)
 
-> **Status, 2026-10-10: largely superseded by M3 as built; do not review this as written.**  The idea below — split
-> proximity from relation type, and spend an LLM only where signals disagree — is what
-> [M3](./coding_plan_platform.md) does today: cosine retrieval for proximity, a Haiku relation call (similar /
-> opposed / unrelated) for relation type, then the overlap reading escalated Sonnet → Opus by the cut-off rules.
-> The models named below (Haiku 4.5, Sonnet 5) are two generations stale, and "LLM only on disagreement, 35-45% of
-> candidates" is now the cut-off and escalation rules of M3's decisions 12-15.
->
-> What has *not* been built, and is what a rewrite of this plan would be about: **S2, the lexical graph** (WordNet
-> and ConceptNet synonym / antonym / hypernym links) as a signal independent of any embedding, which would catch a
-> dictionary synonym whose gloss happens to embed far away; and **S4, morphology** (shared stem and affix
-> families), which is nearly free.  **S5, a second embedding family**, was partly answered by
-> [plan 15's calibration](./15_metric_calibration.md), which measured embedding choices and tested a local model.
-> Rewrite against what M3 became before spending review time here.
+Rewritten against M3 as built, at Roger's request, by the coordinator (Fable).  The 2026-09-18 original — an
+ensemble of cheap signals with an LLM only on disagreements — is in this file's git history; its premise is now
+[M3](./coding_plan_platform.md) itself (cosine retrieval, a Haiku 5.5 relation call, the Sonnet 5.5 overlap call
+with Opus 5.5 on the close calls, the cut-off rules of decisions 12-15), so sparing the LLM is no longer the
+point.  What survives is the one thing M3 does not have: **a retrieval signal independent of the embedding.**
 
 ## 1. Idea
 
-Split "do we already have something close?" into two questions that fail for different reasons: **proximity** (is any existing trait in the same region?) and **relation type** (given the nearest ones, is the candidate a synonym, antonym, narrower, broader, or distinct?). Answer each with three cheap signals whose error modes are uncorrelated with the dense-embedding nearest neighbour (workstream 10): a lexical graph, a masked-LM fit test against the existing *descriptions*, and morphology. Where the signals agree the verdict is taken; only disagreements go to an LLM, and it sees only the top-5 neighbours the cheap signals turned up. Nothing here is trained on our list, so a candidate is never penalised or rewarded for resembling what we already generated.
+M3 judges a candidate only against the traits its embedding retrieval lists.  Every judgement downstream is
+strong (the overlap call, the escalation, the cut-offs), but a true duplicate that the
+[covered-space](./glossary.md#covered-and-directional-settings) cosine never surfaces is never judged at all, and
+is decided "new" without any model looking at the pair.  That miss class is measured, small, and not zero:
+
+- M2's acceptance warning on the chosen setting (openai, w20, centred): paraphrase recall at top-1 **0.938**
+  against a 0.95 target, and AUC separating duplicates from distinct neighbours **0.586** against 0.85 — the
+  embedding finds the region but cannot tell duplicate from neighbour; the overlap call does that, *when it sees
+  the pair*.
+- Decision 11's floor measurement: below cosine 0.35, 0.1% of recorded readings were 4 and 3.9% were 3 or above.
+  On a wave the size of today's TDA (871 new words), a handful of real duplicates per wave are decided "new"
+  unseen.
+
+The fix is not another adjudicator but another *retriever*: a *lexical graph* — a dictionary's recorded
+synonym and antonym links between words, here Open English WordNet plus the Moby thesaurus — and a little
+morphology (shared stems, negation affixes).  A dictionary synonym is exactly the case an embedding can miss when
+two glosses describe one concept from different ends; the graph does not care how the glosses embed.  Lexical
+hits join M3's shortlist and are judged by the same relation and overlap calls as any retrieved neighbour; the
+signal retrieves, the existing pipeline decides.  Nothing in it is trained on our list, and a candidate is never
+auto-rejected by a lexical link alone.
+
+Dropped from the original, with reasons: the masked-LM description-fit (the overlap call reads both descriptions
+directly and better); the second embedding family ([plan 15's calibration](./15_metric_calibration.md) measured
+embedding arms and chose); the agreement rules and LLM-only-on-disagreement protocol (M3's escalation is that,
+with measured shares); ConceptNet (10 GB for links OEWN and Moby mostly carry).
 
 ## 2. Sources and tools
 
 | Signal | Source | Availability / licence / format |
 |---|---|---|
-| S2 lexical graph | Open English WordNet 2025 via `pip install wn` (synonym, antonym, hypernym, "similar to") | CC-BY 4.0, ~100 MB SQLite after `wn.download("oewn:2025+")`. Not installed (nor nltk). Verified. |
-| S2 supplement | ConceptNet 5.7 assertions (`Synonym`, `Antonym`, `DistinctFrom`, `SimilarTo`), Moby Thesaurus II | CC-BY-SA 4.0 gz TSV (~10 GB raw; filter to `/c/en/`); Moby public domain, Gutenberg #3202, flat `head,syn,syn,...`. Verified. Multiword coverage in both is poor (unverified how poor for our labels). |
-| S3 masked-LM fit | `roberta-large` (or `bert-large-uncased-whole-word-masking`) through `transformers` 5.1 + torch 2.10, already installed | Apache/MIT weights, ~1.4 GB, runs on the Mac. |
-| S4 morphology | pure-Python stem + affix rules; optional Snowball stemmer (`nltk` or `snowballstemmer`, BSD) | no download. |
-| S5 second embedding family | static GloVe 6B-300d word vectors (PDDL, ~800 MB zip) *or* OpenAI `text-embedding-3-large` if workstream 10 goes local (and vice versa) | GloVe verified PDDL. OpenAI embedding pricing not re-verified here; workstream 10 owns it. |
-| LLM adjudicator | `claude-haiku-4-5` ($1/$5 per MTok) default; `claude-sonnet-5` ($2/$10) for the audit sample. Batch API is 50% off; a cached system prompt cuts input further. | Pricing checked 2026-09-18. |
+| Lexical graph | Open English WordNet 2025 via `pip install wn` (synonym, antonym, "similar to", also-see) | CC-BY 4.0, ~100 MB SQLite after `wn.download("oewn:2025+")`, into `data/external/` as [setup_external.py](../../data_analysis/gap_generation/setup_external.py) does downloads.  Verified 2026-09-18. |
+| Lexical supplement | Moby Thesaurus II | public domain, Gutenberg #3202, flat `head,syn,syn,...`, ~25 MB raw (confirm at download).  Verified 2026-09-18.  Victorian-flavoured; synonym lists only, no antonyms. |
+| Morphology | pure-Python stem and affix rules (un-, in-/im-/il-/ir-, non-, dis-, a-, -less/-ful) | no download. |
+
+Multiword coverage in both lexicons is poor, and the corpus's invented labels
+(`instrumentally_aligned_ai`, `good_even_when_unwatched`) are absent from them; the signal abstains there, which
+is safe — an abstention changes nothing.
 
 ## 3. Method
 
-1. **Candidate record** (from the registry): `label`, one-line `gloss`, optional intended sense. Existing side: 385 trait `label` + `description` + `negative_label` + `arrangement`.
-2. **Neighbour set N.** Union of the top-5 from S1 (dense, workstream 10) and S5, plus every existing trait reachable in ≤2 lexical hops from the label (S2). Typically 6-12 traits; everything downstream is scored only on N.
-3. **S3a, description fit.** For each T in N, mask the label in T's own description frame, `This means being [MASK]: <rest>`, and score the candidate label by pseudo-log-likelihood (sum of per-subtoken masked log-probs, so multiword labels work). Normalise against the label's PLL in a neutral frame. Also run the reverse direction (T's label in the candidate's gloss frame). High fit in both directions = same scope; high one way only = narrower/broader.
-4. **S3b, antonym probe.** Frames such as `Being <cand> is the opposite of being [MASK]` and `not <cand> but [MASK]`; record the rank of each T's label and negative_label. Independent of the lexical graph, but noisy alone.
-5. **S2 relations.** For each (cand, T): synonym-set overlap, direct antonym link (also to T's `negative_label`), hypernym path direction, ConceptNet `DistinctFrom`. Absent = no vote, not "distinct".
-6. **S4 morphology.** Shared stem with a negation affix (un-, in-/im-/il-/ir-, non-, dis-, a-, -less/-ful) votes antonym; shared stem without one (literal/literalist) votes synonym; no shared stem = no vote.
-7. **Thresholds** for each signal are fitted once on the calibration set (§6), giving each signal a three-way vote per pair: same / opposite / abstain, plus a proximity bin near / far.
-8. **Agreement rules** (per candidate, over N):
-   - **NOVEL**: S1 and S5 both below their far thresholds, no S2 link, S3a fit low everywhere. Accepted without LLM.
-   - **DUPLICATE of T**: S1 and S5 agree on T as top-1, S3a fits both ways, no signal votes opposite. Accepted, but tagged `gloss-check` if the gloss shares no content word with T's description (the cautious/risk-averse lesson).
-   - **PAIR with T**: at least two of {S2 antonym, S3b, S4} vote opposite and proximity is near. Accepted; also records whether T is currently a singleton (a completion) or already paired (a triangle candidate).
-   - **LLM**: everything else, including any syn/ant split, a near candidate with no relation vote, or a multiword label S2 and S4 abstained on.
-9. **LLM adjudication.** One call per candidate: label, gloss, and N with descriptions; asks for a relation per neighbour (synonym / antonym / narrower / broader / distinct / different-sense-of-the-word) and a one-line reason, JSON output. The last class is how polysemy is flagged. Verdicts and every signal's vote are written to the registry with `usage.json` (MultiModelUsage) beside them.
+1. **Lookup table** (local, built once per corpus state): every corpus trait label and live seed-queue trait
+   label (statuses candidate / ready / tbd / backlog, as M3's queue search), lemmatised, mapped to its OEWN
+   synsets and Moby rows.  Recorded with the lexicon versions and a content hash, provenance-style.
+2. **Lexical neighbours in M3's shortlist.**  At scoring time a candidate's lemma is looked up; corpus or queue
+   traits linked as synonym / similar / also-see that cosine retrieval did **not** list join the listed traits
+   with `via: "lexical"` (today's values are `retrieved` and `expanded`; additive, so the frozen interface is
+   untouched).  They go through the same relation call and overlap walk; the block records that the pair came
+   from the lexicon.  No rubric text changes, so no pin moves.
+3. **Antonym evidence for pair completions.**  A direct OEWN antonym link, or a shared stem with a negation
+   affix, between the candidate and a singleton trait is recorded beside the relation call's "opposed" as
+   independent evidence on the existing pair-completion output (95 flagged in today's TDA M3 alone; design item
+   4: a find, not a drop).
+4. **Retroactive sweep** (the recall insurance): run the lookup over every registry row already decided "new";
+   any lexical link to a corpus or queue trait that the deciding run never listed gets the overlap call now, and
+   a hit at the row's cut-off flags it for review with the pair and readings shown — it does not silently flip
+   the decision.
+5. **Same-stem dedup among candidates**: morphology families (organised / organization / organizational) reported
+   to R1 as extra grouping evidence; R1's graph already merges by readings, so this is annotation, not a new
+   mechanism.
 
 ## 4. Expected yield and biases
 
-Hand estimate from the log: about 55-65% of candidates should resolve without the LLM (most NOVEL and clean DUPLICATE cases), 35-45% go to adjudication; a 500-candidate pilot measures this before the full run. Over-produces: PAIR flags for negation-prefix words that are not real trait opposites (non-X, unhelpful), DUPLICATE flags for dictionary synonyms that our descriptions keep distinct. Under-produces: S2 and S4 abstain on multiword labels ("kind to animals"), so those lean on S3a and the LLM; S3 is weak on rare words the 32B generator would not know anyway (a useful coincidence).
+This is insurance, not a generator: the expected find is **a few true duplicates per thousand candidates**, plus
+antonym evidence on a share of pair completions.  Over-flags: Moby's loose Victorian synonymy (mitigated: Moby
+hits rank below OEWN hits and never flag alone below cosine 0.2); negation-affix pairs that are not trait
+opposites (non-X placeholders are excluded by name).  Under-covers: multiword and invented labels (abstains), and
+senses — a lexical link is by word, not sense, so a polysemous hit is exactly what the overlap call is for.
 
 ## 5. Cost
 
-LLM: 4,000 calls × ~700 input + 150 output tokens on Haiku 4.5 ≈ $5.8 (batch: $2.9); worst case all 10,000 on Sonnet 5 ≈ $29 (batch $14.5), so the standard run stays under $10. Audit sample of 200 on Sonnet 5 ≈ $0.50. Local: S3 is ~250k short forward passes (10k × ~12 neighbours × 2 directions) ≈ 1-2 h on the Mac; S2/S4/S5 are seconds once loaded. Downloads ~2.5 GB. Roger: 30 min confirming the calibration labels, 1 h reviewing the pilot's disagreement cases.
+Downloads roughly 130 MB (OEWN + Moby; needs Roger's approval, question 1).  Local lookups: seconds.  LLM: only the
+overlap calls on lexical-only pairs — at today's measured rates (~$2.9 per thousand pairs through Batches,
+Sonnet and Opus together) a wave adds well under $1, and the retroactive sweep over every decided "new" row to
+date is an estimated $1-3 once.  Total under $5; `usage.json` beside every output as always.
 
 ## 6. Testing
 
-- **Calibration set** from `reports/seeding_log_2026-09.md`: ~55 confirmed antonym pairs (agitated/calm, orthodox/heterodox, sloppy/meticulous, overconfident/calibrated, ...), ~20 duplicates (grave/solemn, measured/understated, modern/contemporary, hopeful/optimistic, undiplomatic/blunt, epistemically_humble/calibrated, nonchalant/unflappable, lazy/slothful, applied/practical, balanced/moderate, consequentialist/utilitarian), ~20 near-but-distinct (dignified/goofy, stoic/reactive, expository/informational, educational/superficial, subversive/orthodox, diplomatic/partisan, cautious/risk_averse/bold), ~8 narrower/broader (literalist vs deconstructionist, intemperate vs stoic, cultural_relativist vs relativist), ~8 polysemy rejects (disciplinary, engaging, economic, balanced, empowered, meaningful, iconodule, ingenuous), plus 60 random far pairs. Report per-signal and ensemble confusion matrices; the syn-vs-ant confusion is the number that matters.
-- **Hidden-partner recovery**: hide each of the 244 paired traits in turn, present its label+description as a candidate; the ensemble should return PAIR pointing at its partner. Hide each of the 20 deleted duplicates; expect DUPLICATE.
-- **Auto-accept audit**: 200 auto-resolved verdicts re-judged by Sonnet 5 (and 50 by Roger); the error rate sets whether the agreement rules tighten.
+- **Signal quality on the labelled pairs** ([labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json),
+  M2 task 12): of the 86 duplicate and 315 antonym pairs, what fraction carries the expected lexical link
+  (recall); of the 553 near-distinct and 2,000 unrelated, how many would be flagged (precision).  Reported per
+  lexicon and per link type before anything integrates.
+- **Hidden-partner recovery**: the existing [recovery harness](../../data_analysis/gap_generation/recovery_test.py)
+  hides a trait and presents it as a candidate; with the lexical path on, the hidden trait's partner or duplicate
+  should surface even when its cosine falls outside the shortlist.  Reuses the harness unchanged.
+- **The pilot measurement is the build gate** (§ 8).
 
 ## 7. Dependencies
 
-Needs: the registry record format and S1 top-5 from workstream 10; the trait-hood filter runs *before* this (no point adjudicating non-traits). Provides: per-candidate verdict, neighbour list, relation votes, the calibration set (reusable by any scorer), and the polysemy flag from the LLM step.
+Reads the registry and the M3 run records; touches [novelty.py](../../assistant_axis/gapgen/novelty.py)'s
+shortlist only additively (`via: "lexical"`); rubrics, pins and prompts unchanged; labels shown in the judge
+display form like every prompt.  Provides: the lookup table (reusable by R1 and by plan 04's filters), the
+retroactive review flags, and antonym evidence on pair completions.
 
-## 8. Variants
+## 8. Pilot, and the numbers that decide
 
-**A (recommended)**: as above, description-fit MLM against N only. **B**: replace S3 with a second contextual sentence-embedding model and rely on S2+S4 alone for relation type; cheaper to build, but then all proximity signals share the "antonyms embed close" failure and more cases reach the LLM.
+Before any integration code: download the lexicons, build the lookup, and run it **dry over recorded data** —
+the labelled-pairs measurement (§ 6) and the retroactive lookup over all "new" rows to date, counting how many
+lexical links the deciding runs never listed.  Judge a sample of those pairs (~$1) and report: misses found,
+their readings, and the per-wave rate this implies.  **If the recorded batches show fewer than ~5 real misses in
+total, this plan stops there** and the readout says so; the integration (steps 2-5) is only built if the
+insurance has something to insure.
 
 ## 9. Open questions for Roger
 
-1. Is a dictionary synonym with a plausibly different scope (applied/practical) a DUPLICATE to auto-accept, or always an LLM case? The rule in step 8 tags it; you choose whether the tag blocks.
-2. Haiku 4.5 as adjudicator with a Sonnet audit, or Sonnet 5 throughout (~2.5× cost, still under $15 with batch)?
-3. Should PAIR verdicts against an already-paired trait be surfaced (triangles) or dropped?
-4. Approve the ~2.5 GB of downloads (OEWN, GloVe, roberta-large) and `pip install wn` into the uv environment.
-
-## Addendum (2026-09-18)
-
-Plan 10 now emits two scores, local (corrected nearest-neighbour cosine
-after centering) and directional (residual outside the existing traits'
-principal subspace).  Treat them as two ensemble signals: they fail
-differently (a blend of existing traits scores novel locally but not
-directionally; a near-antonym scores covered locally but may score novel
-directionally if the pair's axis is under-represented), and their
-disagreement is one of the cases to route to the LLM.  See plan 15 for the
-calibration that decides their weights.
-
-## Status (2026-10-08)
-
-Largely subsumed.  M3 as built ([coding_plan_platform.md](./coding_plan_platform.md), "M2 final settings
-and the M3 design", decisions 1-17) puts a model on every candidate (a Haiku relation call, then a
-Sonnet overlap call with Opus on the close calls), so the premise here, cheap signals that spare the
-LLM for disagreements, no longer buys much at Haiku 5.5's prices.  Its one idea still open is a second,
-independent signal as a tripwire on M3's "new" decisions (WordNet / ConceptNet links, morphology); not
-planned.
+1. Approve the downloads and dependency: `wn` into the uv environment, OEWN 2025 (~100 MB) and Moby Thesaurus II
+   (~25 MB) into `data/external/`.
+2. Should lexical neighbours check queue labels as well as corpus labels (the lookup is the same; the queue adds
+   ~250 live entries)?
+3. Timing of the retroactive sweep: now, before you review the TDA batch (its flags would land in that review),
+   or folded into the end-of-generation R1 pass per
+   [coding_plan_review.md § 10](./coding_plan_review.md)?
+4. A lexical synonym hit whose overlap reading lands *below* the cut-off (the applied/practical case: same
+   dictionary entry, different scope in our corpus): flag for review anyway, or trust the reading?
+5. Same-stem dedup before M1 (saves a few filter calls) or leave families to M3 and R1 (simpler)?
