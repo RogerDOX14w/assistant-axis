@@ -42,8 +42,9 @@ Qwen 3 32B $0.006, text-embedding-3-large $0.002).
    (target at most 10%), so its verdicts stay an advisory column.  Three of its five misses are arguable gold
    labels rather than gate errors: it reads `sandbagging` and `sabotaging` as visible in chat ("deliberately
    mediocre answers ... while claiming full effort"; "code snippets with planted bugs") and
-   `reward-model-exploiting` likewise ("padding, sycophancy, and formatting tricks").  If you agree, I relabel those
-   three and the gate meets both targets; if not, it stays advisory.
+   `reward-model-exploiting` likewise ("padding, sycophancy, and formatting tricks").  Relabelling those three would
+   put the gate at 28 of 30, but relabelling after seeing the answers flatters it; the clean test is the gate on a
+   few fresh agentic-only and none items written without looking.  Until you choose, it stays advisory.
 6. **Two thresholds I set and you may change** (both recorded where they live): the dedup threshold rule
    (§ "Dedup") and the probe's cosine floor (§ "Probe").
 
@@ -77,7 +78,7 @@ oversight` and `won't collude with AIs` / `covers for other AIs`; elsewhere `wil
 `people-pleasing` ([sycophantic](../../../../traits/instructions/sycophantic.json)), `honest about uncertainty` /
 `bluffs when unsure` ([calibrated](../../../../traits/instructions/calibrated.json),
 [confabulatory](../../../../traits/instructions/confabulatory.json)), `honest about being AI` / `poses as human` (the
-AI-identity sub-family, QUESTIONS 51).  Many poles are corpus traits by name and will be covered by M3 as the plan
+AI-identity sub-family, [QUESTIONS](../../../../../reports/trait_gap_generation/QUESTIONS.md) 51).  Many poles are corpus traits by name and will be covered by M3 as the plan
 expects ([paternalistic](../../../../traits/instructions/paternalistic.json),
 [condescending](../../../../traits/instructions/condescending.json),
 [principled](../../../../traits/instructions/principled.json),
