@@ -311,3 +311,21 @@ run directories under `data/candidates/runs/censuses/<run_id>/`, the census tabl
 564 words, readout [readout.md](../../data/candidates/runs/censuses/2026-10-08-pilot/readout.md); deviations and open
 questions 28-36 in [QUESTIONS.md](./QUESTIONS.md).  The full TDA and the two Allport stages are over the $20 line and
 wait for Roger's go (`--transport batches`, `--confirm-expensive --confirmed-by`).
+
+## Words that are already corpus trait names stay in the wave (Roger, 2026-10-10)
+
+394 of the TDA stage's 2,818 words normalise to a stem the corpus already has, and M1 spends about $1.40 of a
+batched wave on them before M3's exact-label stage covers them by name without a call.  Roger, asked whether to
+skip them: "there's no guarantee those corpus traits aren't using descriptions of a non-leading sense, so let the
+pipeline do its job."  So the stage is submitted whole, and no selector drops them.
+
+What this buys, and its one gap: M1 reads each word's senses from the bare label, with no sight of the corpus
+description, so its accepted reading is independent evidence of what the word leads with.  Where that reading and
+the corpus description part company, the corpus file describes a secondary sense — exactly the trait `savage`, whose corpus
+description was cutting comebacks while M1 read the word as physical violence (the probe is in
+[probe_a_word.md](./probe_a_word.md)); Roger had the file rewritten and renamed
+[violent](../../data/traits/instructions/violent.json) on 2026-10-10, so `savage` is no longer a file to link.  M3, though, covers such a word at stage 0 by
+name alone and never compares the two senses, so a divergence is invisible unless someone looks.  **Follow-up after
+the wave** (no new call): for each of the 394, compare M1's accepted reading with the corpus description and list
+the ones that disagree, as candidates for a rewrite or a rename.  Cheap, and the same check suits every later
+census wave.
