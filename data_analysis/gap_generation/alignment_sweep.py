@@ -83,6 +83,202 @@ def cmd_chunk(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- shared
+
+def _anthropic_client():
+    import anthropic
+    from dotenv import load_dotenv
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.AsyncAnthropic(max_retries=0)
+
+
+def _run_dir(args, run_id: str) -> Path:
+    paths.check_id(run_id, "run_id")
+    return paths.run_dir(AS.GENERATOR, run_id, candidates_dir=args.candidates_dir)
+
+
+def _dirty_refusal(args) -> Optional[str]:
+    """The refusal for uncommitted platform code (paid commands), or None."""
+    from assistant_axis.gapgen.runs import platform_dirty_files
+    dirty = platform_dirty_files()
+    if dirty and not args.allow_dirty:
+        return (f"uncommitted platform code ({'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass "
+                f"--allow-dirty")
+    return None
+
+
+def _load_chunks(args) -> list:
+    p = Path(args.external_dir) / AS.CHUNKS_NAME
+    if not p.exists():
+        raise SystemExit(f"no {p}: run `alignment_sweep.py chunk` first")
+    return CH.load_chunks(p)
+
+
+def _print_estimate(lines: list[tuple[str, dict]], budget: float) -> float:
+    total = 0.0
+    for label, e in lines:
+        print(f"  {label}: {e['n_calls']} calls x ~{(e['in_tok'] // max(1, e['n_calls'])):,} in / "
+              f"~{(e['out_tok'] // max(1, e['n_calls'])):,} out tokens = ${e['usd']:.3f}")
+        total += e["usd"]
+    print(f"  total estimate ${total:.3f}; cap --budget-usd ${budget:.2f}")
+    return total
+
+
+# --------------------------------------------------------------------------- extract
+
+def _select_chunks(args, chunks: list) -> list:
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep.sources import VARIANT_B_SOURCES
+    if args.variant == "A":
+        keys = {k for k, s in SOURCES.items() if s.variant == "A"}
+    else:
+        keys = set(VARIANT_B_SOURCES)
+    if args.sources:
+        keys &= set(args.sources)
+    pool = [c for c in chunks if c.source in keys]
+    if args.variant == "B" and "krakovna" in keys and not args.dry_run and not args.render:
+        from assistant_axis.gapgen.generators.alignment_sweep.fetch import fetch_transient
+        from assistant_axis.gapgen.registry import utc_now
+        pool += CH.chunk_source("krakovna", fetch_transient("krakovna"), version=utc_now()[:10])
+    if args.chunks:
+        pool = X.stratified_sample(pool, args.chunks, args.seed)
+    return pool
+
+
+def cmd_extract(args) -> int:
+    import asyncio
+
+    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, LABEL_FORM_KEY
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.gapgen.runs import start_run
+    from assistant_axis.judge import warn_if_low_parse_rate
+
+    all_chunks = _load_chunks(args)
+    ordinals = X.chunk_ordinals(all_chunks)
+    if args.render:
+        by = {c.chunk_id: c for c in all_chunks}
+        missing = [c for c in args.render if c not in by]
+        if missing:
+            raise SystemExit(f"unknown chunk id(s): {', '.join(missing)}")
+        rub = X.load_rubric(X.RUBRIC_EXTRACT, args.rubrics_dir, allow_unpinned=True)
+        print(f"SYSTEM (rubric {rub['name']} version {rub['version']}, the fenced block of {rub['file']}):\n"
+              f"{rub['text']}\n")
+        for cid in args.render:
+            print(f"USER ({cid}):\n{X.render_user(by[cid])}\n")
+        return 0
+    if args.render_rewrite:
+        items = X.load_extraction(_run_dir(args, args.run_id) / X.EXTRACTION_NAME)
+        by = {it.item_id: it for it in items}
+        heads = {c.chunk_id: c.heading for c in all_chunks}
+        rub = X.load_rubric(X.RUBRIC_REWRITE, args.rubrics_dir, allow_unpinned=True)
+        print(f"SYSTEM (rubric {rub['name']} version {rub['version']}):\n{rub['text']}\n")
+        for iid in args.render_rewrite:
+            named = by[iid]
+            print(f"USER ({named.pair_id}):\n"
+                  f"{X.render_rewrite_user(named, by[named.partner_item_id], heading=heads.get(named.chunk_id))}\n")
+        return 0
+    if not args.run_id:
+        raise SystemExit("extract needs --run-id")
+    chunks = _select_chunks(args, all_chunks)
+    try:
+        rub_x = X.load_rubric(X.RUBRIC_EXTRACT, args.rubrics_dir)
+        rub_r = X.load_rubric(X.RUBRIC_REWRITE, args.rubrics_dir)
+    except X.RubricNotPinned as exc:
+        raise SystemExit(f"REFUSED: {exc}")
+    rdir = _run_dir(args, args.run_id)
+    resp_path = rdir / X.RESPONSES_NAME
+    units = [X.Unit(c.chunk_id, X.render_user(c), store_text=not SOURCES[c.source].read_only) for c in chunks]
+    prev = X.read_responses(resp_path)
+    if args.reuse_from:
+        prev += X.read_responses(_run_dir(args, args.reuse_from) / X.RESPONSES_NAME)
+    done = X.reusable_answers(prev, stage="extract", model=args.model, prompt_sha=rub_x["sha256"],
+                              users={u.unit_id: u.user for u in units})
+    todo = [u for u in units if u.unit_id not in done]
+    est_x = X.estimate(todo, rub_x["text"], args.model, "extract")
+    n_rw = int(round(len(chunks) * args.rewrite_share))
+    est_r = X.estimate([], rub_r["text"], args.model, "rewrite", n_calls=n_rw)
+    counts = dict(sorted(__import__("collections").Counter(c.source for c in chunks).items()))
+    print(f"variant {args.variant}: {len(chunks)} chunks {counts}"
+          + (f" (stratified sample of {args.chunks}, seed {args.seed})" if args.chunks else "")
+          + f"; {len(done)} answered already (same rubric text and user turn), {len(todo)} to send")
+    print(f"rubrics: {rub_x['name']} v{rub_x['version']} ({rub_x['sha256'][:12]}), "
+          f"{rub_r['name']} v{rub_r['version']} ({rub_r['sha256'][:12]}); model {args.model}")
+    total = _print_estimate([("extract", est_x), (f"rewrite (about {args.rewrite_share:.0%} of chunks)", est_r)],
+                            args.budget_usd)
+    cap = confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        print("DRY-RUN: no call, nothing written.  The first three extraction prompts as sent "
+              "(system prompt = the rubric block):")
+        for u in todo[:3]:
+            print(f"--- {u.unit_id}\n{u.user}\n")
+        return 0
+    refused = _dirty_refusal(args)
+    if refused:
+        raise SystemExit(f"REFUSED: {refused}")
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "extract", "variant": args.variant, "chunks": args.chunks, "seed": args.seed,
+        "sources": sorted(counts), "n_chunks": len(chunks), "chunk_ids": [c.chunk_id for c in chunks],
+        "model": args.model, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
+        "rubrics": {r["name"]: {k: r[k] for k in ("version", "sha256", "file")} for r in (rub_x, rub_r)},
+        "reuse_from": args.reuse_from, "allow_dirty": bool(args.allow_dirty), LABEL_FORM_KEY: DEFAULT_LABEL_FORM,
+        "sources_manifest": F.load_manifest(args.sources_manifest)})
+    ctx.confirmed_by = args.confirmed_by
+    ctx.usage = GuardedUsage(budget_usd=cap)
+    x_res, r_res = X.StageResult(), X.StageResult()
+    answers = dict(done)
+    items: list = []
+    try:
+        client = _anthropic_client() if todo else None
+        if todo:
+            x_res = asyncio.run(X.run_stage(todo, stage="extract", client=client, model=args.model,
+                                            system=rub_x["text"], usage=ctx.usage, concurrency=args.concurrency,
+                                            rubric_version=rub_x["version"], now=utc_now,
+                                            on_record=lambda r: X.append_response(r, resp_path)))
+            answers.update(x_res.answers)
+        items = X.assemble(chunks, answers, ordinals=ordinals)
+        pairs = X.mechanism_pairs(items)
+        heads = {c.chunk_id: c.heading for c in chunks}
+        r_units = [X.Unit(named.pair_id, X.render_rewrite_user(named, partner, heading=heads.get(named.chunk_id)),
+                          store_text=not SOURCES[named.source].read_only) for named, partner in pairs]
+        r_done = X.reusable_answers(prev, stage="rewrite", model=args.model, prompt_sha=rub_r["sha256"],
+                                    users={u.unit_id: u.user for u in r_units})
+        r_todo = [u for u in r_units if u.unit_id not in r_done]
+        rewrites = dict(r_done)
+        if r_todo and not x_res.stopped_by_budget:
+            client = client or _anthropic_client()
+            r_res = asyncio.run(X.run_stage(r_todo, stage="rewrite", client=client, model=args.model,
+                                            system=rub_r["text"], usage=ctx.usage, concurrency=args.concurrency,
+                                            rubric_version=rub_r["version"], now=utc_now,
+                                            on_record=lambda r: X.append_response(r, resp_path)))
+            rewrites.update(r_res.answers)
+            rewrites.update({k: None for k in r_res.errors})
+        items = X.add_rewrites(items, rewrites, pairs)
+    finally:
+        ctx.finish(n_emitted=0)
+        print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
+    warn_if_low_parse_rate(label=f"alignment_sweep extract:{args.model}", n_ok=len(x_res.answers),
+                           n_total=len(x_res.answers) + len(x_res.errors))
+    warn_if_low_parse_rate(label=f"alignment_sweep rewrite:{args.model}", n_ok=len(r_res.answers),
+                           n_total=len(r_res.answers) + len(r_res.errors))
+    X.write_extraction(items, rdir / X.EXTRACTION_NAME)
+    summ = X.summarize(items, n_chunks=len(chunks), extract=x_res, rewrite=r_res, n_reused=len(done))
+    summ.update({"run_id": args.run_id, "variant": args.variant, "model": args.model,
+                 "rubrics": {r["name"]: {k: r[k] for k in ("version", "sha256")} for r in (rub_x, rub_r)},
+                 "cost_usd_this_session": round(ctx.usage.total_cost_usd, 4), "usage_this_session": ctx.usage.as_dict(),
+                 "stopped_by_budget": x_res.stopped_by_budget or r_res.stopped_by_budget, "at": utc_now(),
+                 LABEL_FORM_KEY: DEFAULT_LABEL_FORM})
+    from assistant_axis.atomic_io import atomic_write_text
+    atomic_write_text(json.dumps(summ, indent=2, ensure_ascii=False) + "\n", rdir / X.SUMMARY_NAME)
+    print(json.dumps({k: summ[k] for k in ("n_chunks", "n_pairs", "pairs_per_chunk", "type", "enactability",
+                                           "label_rule_bite", "polysemy_flags", "dropped", "n_kept_poles",
+                                           "cost_usd_this_session")}, indent=1))
+    print(f"wrote {rdir / X.EXTRACTION_NAME}, {rdir / X.SUMMARY_NAME}, {resp_path}, run.json, usage.json")
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -106,6 +302,32 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-tokens", type=int, default=CH.MAX_CHUNK_TOKENS)
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_chunk)
+
+    def paid(p, budget: float):
+        p.add_argument("--budget-usd", type=float, default=budget, help=f"hard cap (default ${budget:g})")
+        p.add_argument("--confirm-expensive", action="store_true")
+        p.add_argument("--confirmed-by", default=None, help="Roger's explicit go for anything over $20")
+        p.add_argument("--allow-dirty", action="store_true", help="run with uncommitted platform code (recorded)")
+        p.add_argument("--dry-run", action="store_true")
+        p.add_argument("--rubrics-dir", type=Path, default=None, help="default reports/trait_gap_generation/rubrics")
+
+    p = sub.add_parser("extract", help="the extraction and mechanism-rewrite calls (Sonnet 5.5)")
+    p.add_argument("--run-id", default=None)
+    p.add_argument("--variant", choices=("A", "B"), default="A")
+    p.add_argument("--chunks", type=int, default=None, help="a stratified sample of N chunks (the pilot: 30)")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--sources", nargs="+", choices=sorted(SOURCES), help="only these sources")
+    p.add_argument("--reuse-from", default=None, metavar="RUN_ID",
+                   help="reuse that run's answers to byte-identical prompts (same rubric text and user turn)")
+    p.add_argument("--render", nargs="+", metavar="CHUNK_ID", help="print these chunks' calls as sent; no call")
+    p.add_argument("--render-rewrite", nargs="+", metavar="ITEM_ID",
+                   help="print the rewrite calls of these extracted items (from --run-id's extraction.jsonl)")
+    p.add_argument("--model", default="claude-sonnet-5-5")
+    p.add_argument("--concurrency", type=int, default=6)
+    p.add_argument("--rewrite-share", type=float, default=0.15,
+                   help="share of chunks expected to yield a mechanism item (for the estimate only)")
+    paid(p, 4.0)
+    p.set_defaults(func=cmd_extract)
     return ap
 
 

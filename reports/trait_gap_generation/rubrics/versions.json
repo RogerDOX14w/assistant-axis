@@ -263,6 +263,30 @@
         "pinned_at": "2026-10-08T20:25:45+00:00",
         "why": "Draft 1 (2026-10-08): first pin, after reading the rendered calls (the bundle rule for star signs and personality types; 'some have the label only'); QUESTIONS 39, Roger's 'SG' to the coordinator's brief"
       }
+    ],
+    "alignment_extract": [
+      {
+        "version": 1,
+        "sha256": "ac9f0b4551df312b725be2fa257964f896ca982364e9c1b7590dd72fef158f3a",
+        "pinned_at": "2026-10-10T19:06:08+00:00",
+        "why": "draft 1: the alignment sweep's extraction call (coding_plan_08 task 4), before the pilot"
+      }
+    ],
+    "alignment_rewrite": [
+      {
+        "version": 1,
+        "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3",
+        "pinned_at": "2026-10-10T19:06:10+00:00",
+        "why": "draft 1: the alignment sweep's mechanism rewrite (coding_plan_08 task 4), before the pilot"
+      }
+    ],
+    "enactability_gate": [
+      {
+        "version": 1,
+        "sha256": "4cda8b27dac976269d528e76ff62005c3a7c10154ca7cd8be693521d1459dd46",
+        "pinned_at": "2026-10-10T19:06:12+00:00",
+        "why": "draft 1: the persona-enactability gate (coding_plan_08 task 8), before its gold evaluation"
+      }
     ]
   }
 }
