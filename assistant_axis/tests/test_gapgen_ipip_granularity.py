@@ -28,6 +28,10 @@ ROWS = [row(1, [["H1", "H2", "H3", "H4"], ["H5", "H6"]]), row(2, [["H7", "H8", "
         row(3, [["H10", "H11"]]), row(4, [["H12", "H13", "H14"]], consensus="loose")]
 
 
+def test_model_is_the_overlap_tests_sonnet():
+    assert G.MODEL == OT.SONNET and G.CONCURRENCY == OT.DEFAULT_CONCURRENCY
+
+
 def test_item_entry_shape():
     e = G.item_entry(ITEMS["H1"])
     assert e == {"label": "I do thing number 1.",

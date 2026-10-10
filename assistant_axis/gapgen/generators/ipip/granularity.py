@@ -18,16 +18,29 @@ import random
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
-from assistant_axis.gapgen import overlap_test as OT
 from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM
 from assistant_axis.judge_pricing import MultiModelUsage
 
 from .cluster import item_embed_text
 from .ingest import ItemRow, code_order
 
-MODEL = OT.SONNET
+#: Sonnet 5.5, ``overlap_test.SONNET`` (tested equal).  ``overlap_test`` is imported on first use: it pulls in the
+#: OpenAI SDK through ``assistant_axis.judge``, and this package imports no SDK at import time (plan § 8).
+MODEL = "claude-sonnet-5-5"
 RUBRIC = "A"
+CONCURRENCY = 8
 SHARE_KEYS: tuple[str, ...] = ("0", "1", "2", "3", "4", "opposite", "unsure")
+
+
+class _LazyOT:
+    """``overlap_test``, imported when an attribute is first read."""
+
+    def __getattr__(self, name):
+        from assistant_axis.gapgen import overlap_test
+        return getattr(overlap_test, name)
+
+
+OT = _LazyOT()
 
 
 def item_entry(item: ItemRow) -> dict:
@@ -84,7 +97,7 @@ def estimate_usd(calls: Sequence[OT.Call], corpus: Mapping, rubrics: Mapping[str
 
 async def run_readings(calls: Sequence[OT.PairCall], corpus: Mapping, *, client, usage: MultiModelUsage, out_dir: Path,
                        rubrics: Optional[Mapping] = None, model: str = MODEL, label_form: str = DEFAULT_LABEL_FORM,
-                       concurrency: int = OT.DEFAULT_CONCURRENCY) -> OT.StageResult:
+                       concurrency: int = CONCURRENCY) -> "OT.StageResult":
     """One stage of rubric A on ``model`` over ``calls`` (resumable: answers already on record are not sent again),
     ``responses.jsonl`` and ``usage.json`` in ``out_dir``."""
     rubrics = rubrics or OT.load_rubrics(keys=[RUBRIC])
