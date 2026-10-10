@@ -359,9 +359,14 @@ function renderToolbar() {
     b.push(btn("accept", "Accept group", "g", { cls: "primary", title: "take the proposed group as it stands; Drop a member first to split it" }));
     b.push(btn("next", "Skip to next group", "Space"));
   } else {
-    const nom = c.nominated ? labelOf(c, c.nominated) : null;
-    b.push(btn("promote", nom ? `Promote "${nom}"` : "Promote", "Enter",
-      { cls: "primary", title: "send the nominated member (★) to the seed queue when the decisions are applied" }));
+    // who Promote would promote: the nominee (★), else the only member still to decide (the server's default)
+    const free = c.members.filter((m) => !(m.handled_by && m.handled_by !== c.id) && !m.covered);
+    const nomKey = c.nominated || (free.length === 1 ? free[0].key : null);
+    b.push(nomKey
+      ? btn("promote", `Promote "${labelOf(c, nomKey)}"`, "Enter",
+        { cls: "primary", title: "send this member to the seed queue when the decisions are applied; the others merge into it" })
+      : btn("promote", "Promote (Nominate a member first)", "Enter",
+        { title: "several members: click Nominate on the one to promote, then Promote" }));
     b.push(btn("reject", "Reject", "r", { cls: "danger", title: "not a trait worth adding" }),
       btn("park", "Park", "p", { title: "set aside for later; not rejected" }),
       btn("defer", "Defer", "d", { title: "decide later" }),
