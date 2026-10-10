@@ -1,7 +1,7 @@
 # Workstream 04: masked-LM template fill-in as a trait generator
 
 ## 1. Idea
-Ask a local BERT-class masked LM to fill person-describing frames ("She is a very [MASK] person", "He is [MASK] by nature", "an avowed [MASK]") and keep the whole ranked distribution, not just the top few, unioned across many frames. The model has never seen our list or our taxonomies; its notion of "words that describe what a person is like" comes from the statistics of pretraining text, so the ranking is a different prior from ours and from an instruction-tuned LLM's. A frame *contrast* (dispositional "is by nature" vs transient "feels today" vs physical "looks") gives a free trait-hood signal as a by-product.
+Ask a local BERT-class masked LM to fill person-describing frames ("She is a very [MASK] person", "He is [MASK] by nature", "an avowed [MASK]", "He's habitually [MASK][MASK]") and keep the whole ranked distribution, not just the top few, unioned across many frames. The model has never seen our list or our taxonomies; its notion of "words that describe what a person is like" comes from the statistics of pretraining text, so the ranking is a different prior from ours and from an instruction-tuned LLM's. A frame *contrast* (dispositional "is by nature" vs transient "feels today" vs physical "looks") gives a free trait-hood signal as a by-product.
 
 ## 2. Sources and tools
 - `roberta-large` (355M, MIT, fill-mask head shipped; 50k byte-level BPE vocab). Primary model. Runs on the Mac (`torch 2.10`, `transformers 5.1` are installed; MPS fine).
@@ -21,7 +21,7 @@ Ask a local BERT-class masked LM to fill person-describing frames ("She is a ver
    Each frame is written subject-agnostically and instantiated with every subject, so "beautiful" from *she* and "strong" from *he* are both in the union and the she/he log-odds is recorded per word as a gender-skew flag.
 3. **Single-mask pass**: one forward pass per frame instance; keep the full softmax over the vocab (~600 instances × 50k = trivial, minutes on CPU). Per word: max log-prob over instances, mean rank, and the count of instances in which it lies in the top 2 000. Detokenise to a word, lowercase, lemmatise, drop non-alphabetic.
 4. **Subword-continuation pass** (for words the tokeniser splits: sycophantic, structuralist, misanthropic): frames with 2 and 3 adjacent masks; take the top-K (K=300) first-slot tokens that begin a word, refill the remaining masks conditioned on each, and accept only sequences whose later tokens are continuation pieces (no leading space). This rebuilds whole words, not phrases. ~300 × 60 × 2 passes ≈ 36k short forward passes, batched: ~10 min on MPS.
-5. **Multiword pass**: frames with explicit function words, e.g. "[MASK]-[MASK]" (risk-averse, even-tempered), "[MASK] to [MASK]" (kind to animals), "[MASK]ly [MASK]" (intellectually honest), "[MASK]-oriented", "[MASK]-seeking", "[MASK]-minded". Same beam as step 4 with a smaller K (100). Expect this to be the weakest pass; report yield separately.
+5. **Multiword pass**: frames with explicit function words, e.g. "[MASK][MASK]", "[MASK]-[MASK]" (risk-averse, even-tempered), "[MASK] to [MASK]" (kind to animals), "[MASK]ly [MASK]" (intellectually honest), "[MASK]-oriented", "[MASK]-seeking", "[MASK]-minded". Same beam as step 4 with a smaller K (100). Expect this to be the weakest pass; report yield separately.
 6. **Trait-hood contrast score**: for every candidate, the pseudo-log-likelihood in dispositional frames minus the max over state frames ("is [MASK] today", "feels [MASK]", "is [MASK] right now") and physical frames ("looks [MASK]", "has [MASK] hair"). Candidates that score higher in state or physical frames get a `state`/`physical` flag. This is scored on the candidate list from steps 3-5 (~5-10k words × ~20 frames × 3 models: ~1 hour on MPS, batched).
 7. **Filters** (cheap, before anything sees an LLM): WordNet POS in {adjective, noun with person-hypernym}; wordfreq Zipf ≥ 2.5 (below that the 32B model likely does not know the word); drop demonyms, religions, nationalities (a small stoplist; flag rather than delete, since some overlap the coverage audit).
 8. **Registry output**: one JSONL row per candidate: word, best frame, best log-prob, n_frames_top2000, she/he log-odds, dispositional-vs-state score, Zipf, POS, models that produced it, WordNet gloss of the sense nearest the best frame (a placeholder; the real gloss comes from the downstream LLM step).
@@ -54,6 +54,19 @@ Needs: the candidate registry schema (writes to it), the novelty scorer (to clas
 
 ## 9. Open questions for Roger
 1. Is a folk-psychology-heavy generator worth running given the alignment-region blind spot, or should it be scoped to characterological gaps only?
+
+   **Roger:** Seems worth trying.  Might be particularly useful for alignment-adjacent words rather than
+   entirely AI-specific ones: e.g. can we find a prompt that easily recovers "helpful", "harmless", and "honest"?
+
 2. Should gender-skewed words (she/he log-odds beyond, say, ±2 nats) be flagged, down-weighted, or reported as their own list (they may mark stereotype-laden traits worth having: bossy, shrill, gallant)?
+
+   **Roger:** As long as we recover both, the gender skew doesn't seem that interesting.
+
 3. Frequency floor: Zipf 2.5 is a guess for "a 32B model knows it"; a quick probe of Qwen on 20 borderline words would calibrate it. Worth the RunPod time, or accept the guess?
+
+   **Roger:** Other generators found that going down to 1.5, or even just "in the list", was a better cutoff.
+   This process inherently has a bias towards common words, so this may not be a big issue.
+
 4. Is Variant B's WordNet-bounded universe acceptable as the multiword path, given how weak the multi-mask pass will be?
+
+   **Roger:** Let's discuss, not quite clear on what the proposal is.
