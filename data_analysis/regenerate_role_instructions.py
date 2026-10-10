@@ -77,6 +77,8 @@ _ROLE_NAME_OVERRIDES = {
     "devils_advocate": "devil's advocate",
     "instrumentally_aligned_ai": "instrumentally-aligned AI",
     "virtue_aligned_ai": "virtue-aligned AI",
+    "ex_convict": "ex-convict",
+    "hunter_gatherer": "hunter-gatherer",
 }
 
 

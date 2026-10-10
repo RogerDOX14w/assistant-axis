@@ -438,6 +438,10 @@ ROLE_DISPLAY_OVERRIDES: dict[str, str] = {
     # entries drawn from a named external set.
     "instrumentally_aligned_ai": "instrumentally-aligned AI",
     "virtue_aligned_ai": "virtue-aligned AI",
+    # English hyphenates these; the mechanical form read "ex convict" in
+    # prompts (2026-10-10, under the judge display form policy)
+    "ex_convict": "ex-convict",
+    "hunter_gatherer": "hunter-gatherer",
 }
 
 
