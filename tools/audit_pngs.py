@@ -91,6 +91,7 @@ from PIL import Image  # noqa: E402
 
 from assistant_axis.provenance import (  # noqa: E402
     InputSpec,
+    OK_STATUSES,
     ProvenanceCheck,
     inputs_from_jsonable,
     validate_recorded,
@@ -257,7 +258,7 @@ def apply_deferrals(
         if a.check is not None:
             offending = [
                 s for s in a.check.statuses
-                if s.status not in ("ok", "equivalent")
+                if s.status not in OK_STATUSES
             ]
             if len(offending) == 1:
                 dep_key = offending[0].dep_key

@@ -52,6 +52,7 @@ from assistant_axis.judge_pricing import (  # noqa: E402
 )
 from assistant_axis.provenance import (  # noqa: E402
     InputSpec,
+    current_corpus_files_input,
     current_file_input,
     current_files_input,
 )
@@ -2135,6 +2136,40 @@ def _flush_budget_artifacts(
 _SCRIPT_PATH = Path(__file__).resolve()
 
 
+# The fields of an instruction JSON each output depends on (AGENT_NOTES
+# housekeeping item 3; Roger, 2026-09-12): the description judge reads the
+# description; the instruction judge reads the pos instructions, and response
+# generation (hence the responses judged) was made from them, both taken with
+# the description they were written from.  ``positive_label`` is in every set
+# because since W19 (2026-10-09) the prompts name the scored entity and the
+# examples by their judge label.  Nothing here reads the neg instructions,
+# questions, eval prompt, arrangement, tags, source or generator.
+CORPUS_CONTENT_FIELDS: Dict[str, Tuple[str, ...]] = {
+    "descriptions": ("positive_label", "description"),
+    "instructions": ("positive_label", "description", "instruction[*].pos"),
+    "responses": ("positive_label", "description", "instruction[*].pos"),
+    "correlations": ("positive_label", "description", "instruction[*].pos"),
+}
+# A pair axis's poles: the header names them by label, and the pole text is
+# the description.
+POLE_CONTENT_FIELDS: Tuple[str, ...] = ("positive_label", "description")
+
+
+def _corpus_entities(args: argparse.Namespace) -> List[Tuple[str, str]]:
+    """``(kind, stem)`` of every entity :func:`load_corpus` reads: one with
+    both a vector file and an instruction JSON (``default`` excluded)."""
+    out: List[Tuple[str, str]] = []
+    for etype in ("roles", "traits"):
+        vdir = Path(args.data_dir) / etype / "vectors"
+        idir = Path(args.instructions_dir) / etype / "instructions"
+        if not (vdir.exists() and idir.exists()):
+            continue
+        for vfile in sorted(vdir.glob("*.pt")):
+            if vfile.stem != "default" and (idir / f"{vfile.stem}.json").exists():
+                out.append((etype, vfile.stem))
+    return out
+
+
 def _build_axis_judge_inputs(
     args: argparse.Namespace,
     *,
@@ -2163,7 +2198,12 @@ def _build_axis_judge_inputs(
     the project's stated tradeoff (regenerating plots is cheap; only
     rejudging is expensive, and Phase 6b's script-equivalence
     registry plus the deferred-rejudge registry handle the cost
-    cases).
+    cases).  The corpus inputs (``corpus_instructions``,
+    ``pole_instructions``) also carry per-entity content hashes of the
+    fields the mode reads (``CORPUS_CONTENT_FIELDS``), so an edit to a
+    field no prompt sees (``arrangement``, ``tags``, ``generator``,
+    ``questions``, a neg instruction) validates as ``equivalent_content``
+    rather than ``drift``, and a real change names the entities it hit.
     """
     inputs: List[InputSpec] = []
 
@@ -2222,14 +2262,21 @@ def _build_axis_judge_inputs(
             )
         pole_paths = [p for p in pole_paths if p.exists()]
         if pole_paths:
-            inputs.append(current_files_input(
+            inputs.append(current_corpus_files_input(
                 dep_key="pole_instructions", paths=pole_paths,
+                root=Path(args.instructions_dir),
+                entities=[(args.pair_type, p.stem) for p in pole_paths],
+                fields=POLE_CONTENT_FIELDS,
             ))
 
     # Corpus (entity descriptions / instructions) -- read by load_corpus
     # in every mode; affects the set of scorable entities, and for
     # descriptions/instructions modes is the actual content judged.
-    if mode in ("descriptions", "instructions", "responses", "correlations"):
+    # The metadata fingerprint covers every instruction JSON; the content
+    # hashes cover the fields this mode reads, for the entities load_corpus
+    # reads (those with a vector), so an edit to anything else validates
+    # as ``equivalent_content`` (housekeeping item 3).
+    if mode in CORPUS_CONTENT_FIELDS:
         instr_root = Path(args.instructions_dir)
         instr_paths: List[Path] = []
         for etype in ("roles", "traits"):
@@ -2237,8 +2284,11 @@ def _build_axis_judge_inputs(
             if idir.exists():
                 instr_paths.extend(sorted(idir.glob("*.json")))
         if instr_paths:
-            inputs.append(current_files_input(
+            inputs.append(current_corpus_files_input(
                 dep_key="corpus_instructions", paths=instr_paths,
+                root=instr_root,
+                entities=_corpus_entities(args),
+                fields=CORPUS_CONTENT_FIELDS[mode],
             ))
 
     # Corpus vectors -- needed by projections (always loaded; defines

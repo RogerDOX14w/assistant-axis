@@ -2310,9 +2310,24 @@ builds an `InputSpec` list per output, one of `descriptions` /
   text came from args, not from a file).
 - **corpus_instructions** (`kind="multi"`): every
   `instructions_dir/{roles,traits}/instructions/*.json` the script
-  could read.  Editing one trait JSON's `description` or
-  `instruction.pos[*]` field flips the whole multi fingerprint;
-  this over-invalidates a little but keeps logic simple.
+  could read, fingerprinted by (mtime, size), so any edit to any file
+  flips it.  Since 2026-10-10 (housekeeping item 3) the record also
+  carries a `content` block: for each entity `load_corpus` reads (a
+  vector and a file), a hash of the fields the mode reads
+  (`CORPUS_CONTENT_FIELDS`: descriptions mode `positive_label` +
+  `description`; instructions, responses and correlations add
+  `instruction[*].pos`).  When the metadata drifts and those hashes
+  match, `validate_recorded` reports `equivalent_content`, which counts
+  as current; when they differ, the drift detail names the changed
+  entities.  So an edit to `arrangement`, `tags`, `source`, `generator`,
+  `questions`, `eval_prompt` or a neg instruction no longer stales a
+  judge cache.  `pole_instructions` carries the same block over the two
+  poles' `positive_label` + `description`.  Records written before then
+  have no block and validate by metadata as before (all 723 on disk come
+  from May 2026 runs on dirty trees, and every read entity's pos
+  instructions have changed since, so no backfill could rescue one).
+  Helpers: `provenance.current_corpus_files_input`, `corpus_content`,
+  status list `OK_STATUSES`.
 - **corpus_vectors** (`kind="multi"`): every
   `data_dir/{roles,traits}/vectors/*.pt` (used for projections;
   defines the scorable entity set in every mode).
@@ -2588,6 +2603,11 @@ reports, or if we need a defensible answer to "did this dataset get
 corrupted on disk?".  Until then, metadata fingerprints are
 strictly cheaper for equal-or-better real-world behaviour in
 Roger's workflow.
+
+One part landed on 2026-10-10 (housekeeping item 3), for the corpus
+instruction JSONs rather than dataset subtrees: per-entity content
+hashes of the fields a consumer reads, and the `equivalent_content`
+status (§ "Judge-step provenance", the `corpus_instructions` bullet).
 
 ### Combining judge scores: use the canonical helpers and constants
 <!-- claude: rule=judge-scoring -->
@@ -6015,7 +6035,8 @@ the same order as the list above:
   `reports/rubric_v2_pilot/comparison_2026-09-11.md`.  Pipeline steps
   1-5 on the next RunPod round; the static desc/inst rejudge follows
   automatically via the fingerprint (the `corpus_instructions`
-  multi-input is already stale, see "TODO: code housekeeping" item 3).
+  multi-input is already stale, see "TODO: code housekeeping" item 3,
+  done 2026-10-10 for caches written from then on).
   **Superseded by two corpus-wide regenerations**: every trait under
   trait rubric V2 on 2026-10-02 (template `9255dd3430ef`; design log in
   `data/traits/instructions/TRAITS_ADDED.md` § "Trait generator V2") and
@@ -6211,7 +6232,32 @@ the sections above hold data-regeneration items.  Tick off in place.
    a large GPT run.  (A script in `$TMPDIR` must load the key with
    `load_dotenv(find_dotenv(usecwd=True))`: plain `load_dotenv()` searches
    from the script's own directory and finds nothing.)
-3. **Content-based fingerprint for the `corpus_instructions` input.**
+3. ~~**Content-based fingerprint for the `corpus_instructions` input.**~~
+   Done 2026-10-10: the record keeps its metadata fingerprint and gains
+   per-entity content hashes of the fields each mode reads; metadata
+   drift with matching hashes is `equivalent_content` (ok), and real
+   drift names the entities (§ "Judge-step provenance", the
+   `corpus_instructions` bullet; `provenance.current_corpus_files_input`).
+   Departures from the plan below: `positive_label` is in every field
+   set, because since W19 the prompts name entities and examples by
+   label; the hashed entities are those `load_corpus` reads (a vector and
+   a file), not every file; and `pole_instructions` got the same
+   treatment, or a metadata edit to a pole file would still have staled
+   its axis.  The equivalence path for old records is that they carry no
+   content block and validate by metadata exactly as before, so nothing
+   is reclassified by the change; a git backfill was considered and
+   dropped (all 723 records ran on dirty trees, and every read entity's
+   pos instructions have changed since May).  Of the other consumers
+   listed below, only the axis judge records a corpus dependency, so
+   there was nothing to narrow in the pipeline (its outputs are manifest
+   subtrees), the antonym check (its history keeps the instructions it
+   read), the pipeline eval prompt or the steering question pools.  The
+   trait-gap tools (`gapgen/contrast.py`, `gap_generation/overlap_test.py`,
+   `calibrate_metric.py`) record the trait files as plain `multi` inputs
+   and could adopt the helper.  Tests: `test_provenance.py` (corpus
+   content section),
+   `test_axis_judge_correlation_phase4.py::TestCorpusContentInputs`.
+   The original item:
    Judge caches record every instruction JSON as one `multi` input
    fingerprinted by (mtime, size), so *any* edit to any of the 583 files
    marks every cache stale, metadata-only edits included (the 2026-09-07

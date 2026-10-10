@@ -1789,3 +1789,77 @@ class TestPoleInstructionPath:
             assert not p.exists()
         finally:
             clear_corpus_display_cache()
+
+
+# ---------------------------------------------------------------------------
+# Corpus content hashes in the recorded inputs (housekeeping item 3, 2026-10-10)
+# ---------------------------------------------------------------------------
+
+class TestCorpusContentInputs:
+    """``corpus_instructions`` and ``pole_instructions`` carry per-entity
+    hashes of the fields each mode reads, over the entities load_corpus reads
+    (a vector and a file)."""
+
+    @staticmethod
+    def _tree(tmp_path: Path):
+        data = tmp_path / "data"
+        vecs = tmp_path / "ds"
+        for kind in ("traits", "roles"):
+            (data / kind / "instructions").mkdir(parents=True)
+            (vecs / kind / "vectors").mkdir(parents=True)
+        for stem, doc in {
+            "lazy": {"positive_label": "lazy", "negative_label": "industrious",
+                     "description": "Doing little.", "instruction": [{"pos": "Rest.", "neg": "Work."}]},
+            "industrious": {"positive_label": "industrious", "negative_label": "lazy",
+                            "description": "Working hard.", "instruction": [{"pos": "Work.", "neg": "Rest."}]},
+            "no_vector": {"positive_label": "no vector", "description": "x", "instruction": [{"pos": "y"}]},
+        }.items():
+            (data / "traits" / "instructions" / f"{stem}.json").write_text(json.dumps(doc))
+        for stem in ("lazy", "industrious", "default", "no_file"):
+            (vecs / "traits" / "vectors" / f"{stem}.pt").write_bytes(b"0")
+        return data, vecs
+
+    @staticmethod
+    def _args(data: Path, vecs: Path) -> argparse.Namespace:
+        return argparse.Namespace(
+            provider="anthropic", judge_model="m", temperature=0.0, max_tokens=10,
+            axis_file=None, pair=("lazy", "industrious"), pair_type="traits",
+            pos_pole=None, neg_pole=None, instructions_dir=str(data),
+            data_dir=str(vecs), layer=25)
+
+    def test_fields_per_mode_and_entities_with_a_vector_only(self, tmp_path):
+        data, vecs = self._tree(tmp_path)
+        args = self._args(data, vecs)
+        assert ajc._corpus_entities(args) == [("traits", "industrious"), ("traits", "lazy")]
+        for mode in ("descriptions", "instructions"):
+            specs = {s.dep_key: s for s in ajc._build_axis_judge_inputs(args, mode=mode)}
+            corpus = specs["corpus_instructions"]
+            assert corpus.content["fields"] == list(ajc.CORPUS_CONTENT_FIELDS[mode])
+            assert list(corpus.content["entities"]) == ["industrious|T", "lazy|T"]
+            # the metadata set is still every instruction JSON
+            assert len(corpus.member_paths) == 3
+            pole = specs["pole_instructions"]
+            assert pole.content["fields"] == ["positive_label", "description"]
+            assert list(pole.content["entities"]) == ["industrious|T", "lazy|T"]
+        assert ajc.CORPUS_CONTENT_FIELDS["descriptions"] == ("positive_label", "description")
+        for mode in ("instructions", "responses", "correlations"):
+            assert "instruction[*].pos" in ajc.CORPUS_CONTENT_FIELDS[mode]
+        assert not any("neg" in f or "questions" in f
+                       for fs in ajc.CORPUS_CONTENT_FIELDS.values() for f in fs)
+
+    def test_a_neg_edit_leaves_the_instruction_cache_current(self, tmp_path):
+        import os
+        from assistant_axis.provenance import validate_recorded
+        data, vecs = self._tree(tmp_path)
+        specs = ajc._build_axis_judge_inputs(self._args(data, vecs), mode="instructions")
+        corpus = [s for s in specs if s.dep_key in ("corpus_instructions", "pole_instructions")]
+        p = data / "traits" / "instructions" / "lazy.json"
+        doc = json.loads(p.read_text())
+        doc["instruction"][0]["neg"] = "Toil."
+        doc["arrangement"] = {"kind": "pair", "members": ["industrious", "lazy"]}
+        p.write_text(json.dumps(doc))
+        st = os.stat(p)
+        os.utime(p, (st.st_atime + 10, st.st_mtime + 10))
+        check = validate_recorded(corpus)
+        assert check.ok
+        assert [s.status for s in check.statuses] == ["equivalent_content"] * 2

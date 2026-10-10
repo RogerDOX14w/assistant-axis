@@ -42,9 +42,24 @@ builds an `InputSpec` list per output, one of `descriptions` /
   text came from args, not from a file).
 - **corpus_instructions** (`kind="multi"`): every
   `instructions_dir/{roles,traits}/instructions/*.json` the script
-  could read.  Editing one trait JSON's `description` or
-  `instruction.pos[*]` field flips the whole multi fingerprint;
-  this over-invalidates a little but keeps logic simple.
+  could read, fingerprinted by (mtime, size), so any edit to any file
+  flips it.  Since 2026-10-10 (housekeeping item 3) the record also
+  carries a `content` block: for each entity `load_corpus` reads (a
+  vector and a file), a hash of the fields the mode reads
+  (`CORPUS_CONTENT_FIELDS`: descriptions mode `positive_label` +
+  `description`; instructions, responses and correlations add
+  `instruction[*].pos`).  When the metadata drifts and those hashes
+  match, `validate_recorded` reports `equivalent_content`, which counts
+  as current; when they differ, the drift detail names the changed
+  entities.  So an edit to `arrangement`, `tags`, `source`, `generator`,
+  `questions`, `eval_prompt` or a neg instruction no longer stales a
+  judge cache.  `pole_instructions` carries the same block over the two
+  poles' `positive_label` + `description`.  Records written before then
+  have no block and validate by metadata as before (all 723 on disk come
+  from May 2026 runs on dirty trees, and every read entity's pos
+  instructions have changed since, so no backfill could rescue one).
+  Helpers: `provenance.current_corpus_files_input`, `corpus_content`,
+  status list `OK_STATUSES`.
 - **corpus_vectors** (`kind="multi"`): every
   `data_dir/{roles,traits}/vectors/*.pt` (used for projections;
   defines the scorable entity set in every mode).
@@ -319,3 +334,8 @@ reports, or if we need a defensible answer to "did this dataset get
 corrupted on disk?".  Until then, metadata fingerprints are
 strictly cheaper for equal-or-better real-world behaviour in
 Roger's workflow.
+
+One part landed on 2026-10-10 (housekeeping item 3), for the corpus
+instruction JSONs rather than dataset subtrees: per-entity content
+hashes of the fields a consumer reads, and the `equivalent_content`
+status (§ "Judge-step provenance", the `corpus_instructions` bullet).

@@ -16,3 +16,10 @@ equivalences:
     (resolves to 10) + help-text default reformatted as f-string. No functional change
     to judging output.'
   marked_at: '2026-05-09T16:01:15+00:00'
+- script: results_analysis/axis_judge_correlation.py
+  from_fp: v1:2026-10-09T22:33:15+00:00@166289
+  to_fp: v1:2026-10-10T15:39:22+00:00@169069
+  reason: 'Housekeeping item 3 (2026-10-10): corpus_instructions and pole_instructions
+    inputs gain per-entity content hashes (current_corpus_files_input); recorded provenance
+    only, no change to prompts, judge calls, parsing or scores.'
+  marked_at: '2026-10-10T15:42:33+00:00'
