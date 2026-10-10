@@ -434,11 +434,17 @@ ten expected to be none.  The gate is run on them and its answers compared with 
 The catch, which is why Roger decides and not the agent: the gold labels here were *assigned by the
 planning agent*, not measured, so a disagreement can mean the gate is wrong **or** that the gold
 label is.  Changing a gold label after seeing the gate's answer would tune the test to the result,
-so the agent left all five disagreements for Roger.  The same rule governs the relabelling the gate
-rubric's draft 2 now needs (thirty items over four values, `both` included): it has to be done
-*blind*, by someone who has not seen any draft-2 answer, and
-[gate_gold_items.json](../../data/candidates/alignment_sweep/gate_gold_items.json) still carries the
-three-way labels until it is.
+so the agent left all five disagreements for Roger.  The same rule governed the relabelling that the
+gate rubric's draft 2 needed (thirty items over four values, `both` included): it was done *blind* on
+2026-10-10, by an agent given the rubric and the items but no draft-2 answer and no draft-1 per-item
+label, before any draft-2 run existed.
+[gate_gold_items.json](../../data/candidates/alignment_sweep/gate_gold_items.json) now carries the
+four-way labels (chat 6, both 10, agentic-only 5, none 9; 11 of 30 moved, almost all into `both`),
+each item's draft-1 label kept beside it as `expected_v1` and the criteria the relabeller used written
+into the file above the items.  One thing the relabelling could not fix, and Roger's to decide: the
+`agentic-only` and `none` answers are still carried **only** by items written for the file, so a
+corpus trait can never be either, and the gate could score well by reading prose style rather than
+the trait.
 
 <a id="flip-rate"></a>
 ### Flip rate

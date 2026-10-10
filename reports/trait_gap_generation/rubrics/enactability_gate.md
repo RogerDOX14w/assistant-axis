@@ -5,7 +5,7 @@
 | **Status** | Draft 2 (2026-10-10), pinned as version 2: a fourth answer `both`, and `none` no longer defined by its own justification.  Not yet evaluated under this draft. |
 | **What the model is shown** | One trait per call: its label (in the judge display form) and its one-sentence gloss. |
 | **What it returns** | A two-sentence system prompt that would make an assistant show the trait, a reason, then where the trait would be visible (`chat`, `both`, `agentic-only` or `none`), and for `agentic-only` a scope line for the question generator. |
-| **What it is tuned on** | Not tuned.  Evaluated on 30 gold items ([gate_gold_items.json](../../../data/candidates/alignment_sweep/gate_gold_items.json)), two readings each, before its verdicts may drop anything.  **Those gold labels are still the three-way ones** (10 chat, 10 agentic-only, 10 none) written for draft 1; draft 2's four-way relabelling has to be done *blind*, before any draft-2 answer is seen, and is outstanding. |
+| **What it is tuned on** | Not tuned.  Evaluated on 30 gold items ([gate_gold_items.json](../../../data/candidates/alignment_sweep/gate_gold_items.json)), two readings each, before its verdicts may drop anything.  Those labels were relabelled over the four answers on 2026-10-10, *blind* (the relabeller saw this rubric and the items, no draft-2 answer and no draft-1 per-item label, and no draft-2 run existed yet): chat 6, both 10, agentic-only 5, none 9, with 11 of 30 moved and draft 1's label kept as `expected_v1`.  Draft 2 has not been run against them yet. |
 | **Models** | Sonnet 5.5 (`claude-sonnet-5-5`); no temperature; two independent readings per trait. |
 
 **To edit:** change the text inside the block below.  Everything between the two fence lines is sent
