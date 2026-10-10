@@ -227,7 +227,10 @@ older context, or differs from the documented current default.
   [`regenerate_trait_instructions.py --batch`](./data_analysis/regenerate_trait_instructions.py)
   (one Message Batch for the run; `--batch-no-wait` and `--batch-id` to
   submit now and collect later; what the batch fails to deliver is
-  generated in real time).  Not yet: the role generator, the audit's
+  generated in real time) and, since 2026-10-10,
+  [`classify_goals.py --batch`](./data_analysis/classify_goals.py) (the same
+  three flags; what the batch fails to deliver is classified in real
+  time).  Not yet: the role generator, the audit's
   judge, and the Qwen tests (`opening_form_experiment.py`); add the flag
   when one of them is about to make a run over $20.
 - **Usage of a batch run is kept under `<model>:batch`**, which
@@ -588,7 +591,6 @@ us a precise, auditable, retrieve-anytime cost record.
 
 **Existing call sites still on the to-do list (2026-05-24):**
 
-- [`data_analysis/classify_goals.py`](./data_analysis/classify_goals.py)
 - [`data_analysis/score_combinations.py`](./data_analysis/score_combinations.py)
 - [`data_analysis/sample_trait_responses.py`](./data_analysis/sample_trait_responses.py)
 - [`results_analysis/standardize_axis_spec.py`](./results_analysis/standardize_axis_spec.py)
@@ -619,6 +621,11 @@ this run, with `[usage]` lines for the run and the total.  Step 4 reads
 score files by entity name, so the side-car (and `judge_rubric.json`,
 the rubric stamp) is not taken for an entity.  Test:
 [`pipeline/tests/test_3_judge.py`](./pipeline/tests/test_3_judge.py).
+
+Retrofitted 2026-10-10 (W15, before the goal classification of the
+regenerated corpus): [`data_analysis/classify_goals.py`](./data_analysis/classify_goals.py)
+merges every run into `<output-dir>/goal_classifications_usage.json`,
+cumulative, with batch usage under `<model>:batch`.
 
 Retrofit the rest when next touched (or sooner if scheduled for a heavy
 run).  Diagnostic one-offs (e.g.

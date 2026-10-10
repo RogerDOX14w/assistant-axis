@@ -430,9 +430,19 @@ Classifies each role/trait instruction by whether it implies alignment-relevant
 goals (score 0-2). Results are aggregated per role/trait and saved to
 `output/`. Supports `--names`, `--roles-only`, `--traits-only`, and `--force`. Note that this use Opus, so costs > $100 to run.
 
+Since 2026-10-10 a cached record is reused only when its text is the
+instruction's current text and its model is `--model` (`--allow-stale` keeps
+records of an older text, marked `stale_text` in the aggregate); the
+aggregate covers only the current corpus.  `--dry-run` reports valid, stale
+and missing items with the estimate; over $20 a run needs
+`--confirm-expensive`, `--budget-usd` caps it, and `--batch` (with
+`--batch-no-wait` / `--batch-id`) halves the price.  Usage is merged into
+`output/goal_classifications_usage.json`.  Details in the module docstring.
+
 ```bash
 uv run python data_analysis/classify_goals.py --dry-run
 uv run python data_analysis/classify_goals.py --names obedient compassionate --traits-only --force
+uv run python data_analysis/classify_goals.py --batch --confirm-expensive  # full corpus, one Message Batch
 uv run python data_analysis/classify_goals.py  # full corpus
 ```
 
@@ -1027,6 +1037,8 @@ uv run python data_analysis/gap_generation/recovery_test.py --generator G --run-
 output/
 ├── goal_classifications.json       # Aggregated per-(name, source, polarity)
 ├── goal_classifications_raw.json   # Per-instruction classifications (Opus)
+├── goal_classifications_usage.json # Cumulative token usage of classify_goals.py (from 2026-10-10)
+├── goal_classifications_batches.json # Message Batches submitted by --batch
 ├── goal_classifications_sonnet.json     # Aggregated (earlier Sonnet run)
 └── goal_classifications_raw_sonnet.json # Per-instruction (earlier Sonnet run)
 ```
