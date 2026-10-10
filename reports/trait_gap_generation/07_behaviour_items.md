@@ -121,6 +121,9 @@ workstreams as a behaviour-grounded gold set for testing their novelty scorers.
 
 1. Are symptom-like dispositions (obsessive-compulsive, dissociative, ADHD-ish inattention)
    traits for this corpus, or to be filtered out with moods and abilities?
+
+   **Roger:** Traits already include ADHD and OCD: symptoms are fair game.
+
 2. Include HEXACO-PI-R items locally under the research-only licence (they cannot be committed),
    or stay IPIP-only? My recommendation: IPIP-only.
 
@@ -129,6 +132,13 @@ workstreams as a behaviour-grounded gold set for testing their novelty scorers.
    scrape already collects them (see § 2).  So the research-only licence, whether sending items to a
    commercial API counts as redistribution, and the uncommittable-input break in provenance are all
    moot.
+
 3. Blind naming (independent, sometimes odd labels) or hinted naming (accurate, taxonomy-flavoured)
    as the primary label? Plan keeps both; one must be primary in the registry.
+
+   **Roger:** Initially, generate both, and we can evaluate once we see what we're getting.
+
 4. Cluster granularity: ~350 clusters (sub-facet, more review) or ~150 (facet-level, fewer gaps)?
+
+   **Roger:** Try both, and we'll see which produces clusters about the same size as our "3-4" relationship
+   level for covered judgements.

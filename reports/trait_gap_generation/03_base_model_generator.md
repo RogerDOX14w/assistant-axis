@@ -111,5 +111,5 @@ diversity harness (rarefaction, collapse index) that can score the other workstr
 
    **Roger:** Traits are generally adjectives (a few are role-style nouns).  Syntactic form recognition
    and adjustment is something a different local model can easily handle, or small cheap API models like
-   Haiku or GPTMini, so building a pipeline to deal with this is possible.  I'd say TBD, do it if we find
+   Haiku 5.5 or GPT 4.1 Mini, so building a pipeline to deal with this is possible.  I'd say TBD, do it if we find
    this is a significant issue and the increased yield would be worth the coding.
