@@ -2,16 +2,23 @@
 
 One call per reading, :data:`N_READINGS` readings per trait (Sonnet 5.5 takes no temperature, so two independent
 calls are two samples): the pinned rubric ``enactability_gate`` asks for a two-sentence system prompt that would make
-an assistant show the trait on ordinary questions, a reason, then where the trait would show (``chat``,
+an assistant show the trait on ordinary questions, a reason, then where the trait would show (``chat``, ``both``,
 ``agentic-only`` or ``none``), and for ``agentic-only`` a ``scope_line``, the ``description_notes`` sentence for the
 question generator.  The user turn is ``{"label", "gloss"}``, the label in the judge display form
 (:func:`~assistant_axis.gapgen.prompt_labels.prompt_label`); each row records ``label_form``.
 
+``both`` is draft 2 of the rubric (Roger, 2026-10-10): draft 1's three answers were not parallel — ``agentic-only``
+was exclusive, ``chat`` was not — so a trait visible both ways was filed under ``chat`` and a ``chat`` verdict could
+not be read.  Downstream ``both`` behaves exactly as ``chat``: kept, and no scope line, because general questions
+already show the trait.  (The *extraction* rubric's own ``enactability`` field,
+:data:`~assistant_axis.gapgen.generators.alignment_sweep.extract.ENACTABILITY`, is a different prompt and still
+offers three values.)
+
 * A reading that does not parse (or says ``agentic-only`` without a scope line) is asked once more; a scope line on
-  a ``chat`` or ``none`` answer is dropped (absent otherwise).
-* ``flip`` is set when the readings disagree.  On a flip the row keeps the **more visible** reading (``chat`` over
-  ``agentic-only`` over ``none``), so a split vote never drops a trait; the scope line comes from the reading that
-  gave it.
+  any other answer is dropped (absent otherwise).
+* ``flip`` is set when the readings disagree.  On a flip the row keeps the **most visible** reading
+  (:data:`VISIBILITY_PRECEDENCE`: ``both`` over ``chat`` over ``agentic-only`` over ``none``), so a split vote never
+  drops a trait; the scope line comes from the reading that gave it.
 * :func:`score_against_gold` reads the gate against the 30 gold items: agreement (target at least 26 of 30),
   flip rate (target at most 10%), the confusion table against the expected answers, and against M1's
   ``enactable_in_text`` (0-2) where M1 rated the trait (``corpus_regions.json`` for corpus items; the filter block
@@ -41,7 +48,14 @@ MODEL = "claude-sonnet-5-5"
 N_READINGS = 2
 MAX_TOKENS = 8000
 CONCURRENCY = 6
-VISIBILITY = ("chat", "agentic-only", "none")        # most visible first
+#: The four answers, in the order the rubric lists them (also the column order of the gold readout's tables).
+VISIBILITY = ("chat", "both", "agentic-only", "none")
+#: Precedence on a flip: the most visible reading wins, so a split vote never drops a trait.  ``both`` outranks
+#: ``chat`` because draft 2 tightened ``chat`` to "and not to any marked degree in what it does on a task"; the two
+#: are treated alike downstream (kept, no scope line), so the choice between them changes only how the row reads.
+VISIBILITY_PRECEDENCE = ("both", "chat", "agentic-only", "none")
+#: The one answer that earns a ``scope_line`` (the ``description_notes`` sentence for the question generator).
+SCOPED_VISIBILITY = "agentic-only"
 TARGET_AGREEMENT = 26 / 30
 TARGET_FLIP_RATE = 0.10
 ROWS_NAME = "enactability.jsonl"
@@ -112,10 +126,10 @@ def parse_answer(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
         return None, f"visibility {v!r}"
     scope = d.get("scope_line")
     scope = scope.strip() if isinstance(scope, str) and scope.strip() else None
-    if v == "agentic-only" and not scope:
-        return None, "agentic-only without a scope_line"
+    if v == SCOPED_VISIBILITY and not scope:
+        return None, f"{SCOPED_VISIBILITY} without a scope_line"
     return {"system_prompt": str(d.get("system_prompt") or "").strip(), "reason": str(d.get("reason") or "").strip(),
-            "visibility": v, "scope_line": scope if v == "agentic-only" else None}, None
+            "visibility": v, "scope_line": scope if v == SCOPED_VISIBILITY else None}, None
 
 
 def combine(readings: Sequence[Optional[dict]]) -> tuple[Optional[str], bool, Optional[str]]:
@@ -125,7 +139,7 @@ def combine(readings: Sequence[Optional[dict]]) -> tuple[Optional[str], bool, Op
         return None, False, None
     vs = [r["visibility"] for r in got]
     flip = len(set(vs)) > 1
-    final = min(vs, key=VISIBILITY.index)
+    final = min(vs, key=VISIBILITY_PRECEDENCE.index)
     scope = next((r["scope_line"] for r in got if r["visibility"] == final and r["scope_line"]), None)
     return final, flip, scope
 
@@ -272,6 +286,18 @@ def estimate(inputs: Sequence[GateInput], system: str, model: str, *, n_readings
     return {"n_calls": n, "in_tok": in_tok, "out_tok": out_tok, "usd": round(cost_for_usage(model, in_tok, out_tok), 4)}
 
 
+def _confusion_md(table: Mapping, *, row_header: str, row_order: Sequence[str]) -> list:
+    """A confusion table, one column per answer in :data:`VISIBILITY` order plus any answer the counts carry that is
+    not one of the four (``"None"`` when every reading of a row failed), so no count is dropped silently."""
+    extra = sorted({a for c in table.values() for a in c} - set(VISIBILITY))
+    cols = list(VISIBILITY) + extra
+    out = ["| " + " | ".join([row_header, *cols]) + " |", "|" + "---|" * (len(cols) + 1)]
+    for k in row_order:
+        c = table.get(k, {})
+        out.append("| " + " | ".join([k, *(str(c.get(a, 0)) for a in cols)]) + " |")
+    return out
+
+
 def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cost_usd: float) -> str:
     """The gold evaluation for Roger (``gate_gold_eval.md``)."""
     verdict = ("**meets both targets**: the gate's verdicts may drop rows from the main table" if ev.meets_targets else
@@ -282,16 +308,12 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
              f"Agreement {ev.n_agree} of {ev.n} ({ev.agreement:.1%}; target at least 26 of 30), flip rate {ev.n_flip} "
              f"of {ev.n} ({ev.flip_rate:.1%}; target at most 10%): {verdict}.", "",
              "## Expected (rows) against the gate's answer (columns)", "",
-             "| expected | chat | agentic-only | none |", "|---|---|---|---|"]
-    for e in VISIBILITY:
-        c = ev.confusion.get(e, {})
-        lines.append(f"| {e} | {c.get('chat', 0)} | {c.get('agentic-only', 0)} | {c.get('none', 0)} |")
+             "An all-zero row means the gold set has no item with that expected answer.", ""]
+    lines += _confusion_md(ev.confusion, row_header="expected", row_order=VISIBILITY)
     lines += ["", "## M1's enactable_in_text (rows) against the gate's answer (columns)", "",
               "M1 rates corpus traits from their descriptions (`corpus_regions.json`); the written items have no M1 "
-              "reading (n/a).", "", "| M1 | chat | agentic-only | none |", "|---|---|---|---|"]
-    for k in sorted(ev.confusion_vs_m1):
-        c = ev.confusion_vs_m1[k]
-        lines.append(f"| {k} | {c.get('chat', 0)} | {c.get('agentic-only', 0)} | {c.get('none', 0)} |")
+              "reading (n/a).", ""]
+    lines += _confusion_md(ev.confusion_vs_m1, row_header="M1", row_order=sorted(ev.confusion_vs_m1))
     lines += ["", "## Misses and flips", "", "| key | label | expected | answer | readings | first reason |",
               "|---|---|---|---|---|---|"]
     for r in rows:
@@ -304,5 +326,6 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
 
 
 __all__ = ["GateInput", "GateRow", "GateResult", "GateEval", "RubricNotPinned", "RUBRIC_NAME", "MODEL", "N_READINGS",
-           "VISIBILITY", "TARGET_AGREEMENT", "TARGET_FLIP_RATE", "load_rubric", "render_user", "parse_answer",
+           "VISIBILITY", "VISIBILITY_PRECEDENCE", "SCOPED_VISIBILITY",
+           "TARGET_AGREEMENT", "TARGET_FLIP_RATE", "load_rubric", "render_user", "parse_answer",
            "combine", "run_gate", "score_against_gold", "gold_inputs", "kept_inputs", "estimate", "eval_markdown"]

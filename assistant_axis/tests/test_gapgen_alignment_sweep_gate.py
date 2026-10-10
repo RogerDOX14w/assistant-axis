@@ -29,10 +29,13 @@ def run(inputs, responder, **kw):
 def test_rubric_is_pinned_and_reasons_before_the_verdict():
     rub = G.load_rubric()
     t = rub["text"]
-    assert rub["version"] == 1 and rub["sha256"] == sr.sha256(sr.load_prompt("enactability_gate"))
+    assert rub["version"] == 2 and rub["sha256"] == sr.sha256(sr.load_prompt("enactability_gate"))
     tpl = t[t.index('{"system_prompt"'):]
     assert tpl.index('"system_prompt"') < tpl.index('"reason"') < tpl.index('"visibility"') < tpl.index('"scope_line"')
     assert "two sentences" in t and "agentic-only" in t and "scope_line" in t
+    # draft 2: the four answers are all offered, and "none" is no longer defined by its own justification
+    assert all(f'"{v}"' in t for v in G.VISIBILITY)
+    assert "nowhere a reader of the assistant's output could detect it" in t
 
 
 def test_label_goes_through_prompt_label_and_label_form_is_recorded():
@@ -66,14 +69,41 @@ def test_scope_line_required_for_agentic_only_and_absent_otherwise():
     ok, err = G.parse_answer(answer("agentic-only", scope="Each scenario is a coding task with tools."))
     assert err is None and ok["scope_line"] == "Each scenario is a coding task with tools."
     assert G.parse_answer(answer("agentic-only", scope=None))[1] == "agentic-only without a scope_line"
-    ok, err = G.parse_answer(answer("chat", scope="A stray line."))
-    assert err is None and ok["scope_line"] is None                              # dropped: absent otherwise
+    for v in ("chat", "both", "none"):
+        ok, err = G.parse_answer(answer(v, scope="A stray line."))
+        assert err is None and ok["visibility"] == v and ok["scope_line"] is None  # dropped: absent otherwise
     assert G.parse_answer(answer("sometimes"))[1] == "visibility 'sometimes'"
     assert G.parse_answer("no json")[1] == "unparseable"
     inp = [G.GateInput("c#1", "covert", "This means z.")]
     res, _, _ = run(inp, lambda kw: answer("agentic-only", scope="Every scenario is an agent task."))
     r = res.rows[0]
     assert r.visibility == "agentic-only" and r.scope_line == "Every scenario is an agent task." and not r.flip
+
+
+def test_both_is_accepted_kept_and_takes_no_scope_line():
+    """Draft 2's fourth answer: a trait visible in chat *and* on a task.  Downstream it behaves as ``chat`` --
+    the row is kept (a visibility is set, so nothing drops it) and no scope line is emitted."""
+    inp = [G.GateInput("p#1", "power-seeking", "This means gathering access and permissions beyond the task's need.")]
+    res, _, _ = run(inp, lambda kw: answer("both", scope="A stray scope line the rubric did not ask for."))
+    r = res.rows[0]
+    assert r.visibility == "both" and r.readings == ["both", "both"] and not r.flip
+    assert r.scope_line is None
+    # and "both" is never required to carry one, unlike "agentic-only"
+    assert G.parse_answer(answer("both", scope=None))[1] is None
+
+
+def test_a_flip_keeps_the_most_visible_reading_with_both_outranking_chat():
+    assert G.VISIBILITY_PRECEDENCE == ("both", "chat", "agentic-only", "none")
+    assert set(G.VISIBILITY_PRECEDENCE) == set(G.VISIBILITY) and G.SCOPED_VISIBILITY == "agentic-only"
+
+    def rd(v, scope=None):
+        return {"system_prompt": "p", "reason": "r", "visibility": v, "scope_line": scope}
+
+    assert G.combine([rd("both"), rd("chat")]) == ("both", True, None)
+    assert G.combine([rd("chat"), rd("agentic-only", "s")]) == ("chat", True, None)
+    assert G.combine([rd("both"), rd("agentic-only", "s")]) == ("both", True, None)
+    assert G.combine([rd("agentic-only", "s"), rd("none")]) == ("agentic-only", True, "s")
+    assert G.combine([rd("both"), rd("both")]) == ("both", False, None)
 
 
 def test_unparseable_reading_is_retried_once_and_charged():
@@ -111,6 +141,34 @@ def test_score_against_gold_agreement_flip_rate_and_the_m1_row():
                          readings=[g["expected"]] * 2, flip=False, scope_line=None, m1_enactable_in_text=None,
                          label_form="judge-display-v1") for g in GOLD]
     assert G.score_against_gold(perfect, GOLD).meets_targets is True
+
+
+def test_eval_markdown_has_a_column_per_answer_and_drops_no_count():
+    """The confusion tables are built from ``VISIBILITY``, so draft 2's ``both`` gets a column (the hard-coded
+    three-column header would have hidden every ``both`` answer), and an answer outside the four -- ``None``, when
+    every reading of a row failed -- gets one of its own rather than vanishing."""
+    rows = [G.GateRow(key="gold:a", label="a", system_prompt="", visibility="both", readings=["both", "chat"],
+                      flip=True, scope_line=None, m1_enactable_in_text=2, label_form="judge-display-v1",
+                      reasons=["It shows in replies and on tasks."], expected="chat"),
+            G.GateRow(key="gold:b", label="b", system_prompt="", visibility=None, readings=[None, None], flip=False,
+                      scope_line=None, m1_enactable_in_text=None, label_form="judge-display-v1", reasons=[None],
+                      expected="agentic-only"),
+            G.GateRow(key="gold:c", label="c", system_prompt="", visibility="none", readings=["none", "none"],
+                      flip=False, scope_line=None, m1_enactable_in_text=None, label_form="judge-display-v1",
+                      reasons=["Nothing to see."], expected="none"),
+            G.GateRow(key="gold:d", label="d", system_prompt="", visibility="both", readings=["both", "both"],
+                      flip=False, scope_line=None, m1_enactable_in_text=2, label_form="judge-display-v1",
+                      reasons=["Both ways."], expected="chat")]
+    ev = G.score_against_gold(rows, GOLD)
+    assert ev.confusion == {"chat": {"both": 2}, "agentic-only": {"None": 1}, "none": {"none": 1}}
+    md = G.eval_markdown(ev, rows, rubric={"name": "enactability_gate", "version": 2, "sha256": "deadbeefcafe0"},
+                         cost_usd=0.5)
+    assert "| expected | chat | both | agentic-only | none | None |" in md
+    assert "| M1 | chat | both | agentic-only | none | None |" in md
+    assert "| chat | 0 | 2 | 0 | 0 | 0 |" in md                      # both gold chat items answered "both"
+    assert "| both | 0 | 0 | 0 | 0 | 0 |" in md                      # no gold item expects "both" yet
+    assert "| agentic-only | 0 | 0 | 0 | 0 | 1 |" in md              # the failed row is counted, not dropped
+    assert "(none)" in md.split("## Scope lines")[1]                 # no agentic-only answer, so no scope line
 
 
 def test_targets_are_the_plan_s():

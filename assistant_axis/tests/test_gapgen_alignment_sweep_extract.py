@@ -45,7 +45,11 @@ WATCHED = item(pole("same when unobserved", "This means acting exactly the same 
 @pytest.mark.parametrize("name", RUBRICS)
 def test_rubric_pinned_and_reason_first(name):
     rub = X.load_rubric(name)
-    assert rub["version"] == 1 and rub["sha256"] == sr.sha256(sr.load_prompt(name))
+    # the invariant, not a version number: the text on disk is its own latest pin (``load_rubric`` refuses anything
+    # else), so a draft that is bumped as the rubric's instructions require does not break this test.  The current
+    # version of each rubric is asserted in that rubric's own test (the gate's is in
+    # test_gapgen_alignment_sweep_gate.py).
+    assert rub["version"] >= 1 and rub["sha256"] == sr.sha256(sr.load_prompt(name))
     text = rub["text"]
     if name == "enactability_gate":
         # the system prompt to reason from, then the reason, then the verdict

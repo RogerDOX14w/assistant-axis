@@ -407,14 +407,20 @@ From [coding_plan_08_alignment_sweep.md](./coding_plan_08_alignment_sweep.md) an
 
 <a id="enactability"></a>
 ### Enactability, and the enactability gate
-Whether a trait would actually *show* in what a persona writes.  Three values: **chat** (it shows in
-answers to ordinary questions, as [candid](../../data/traits/instructions/candid.json) does),
-**agentic-only** (it shows only when the persona is given a task to carry out — "overreaching" needs
-an email to send before it can overreach), and **none** (nothing a reader could detect, so the
-corpus cannot use it).  The **gate** is the LLM call that assigns one of those three to each
-candidate: it writes a two-sentence system prompt for the trait and then judges whether the trait
-would be visible.  It exists because the alignment sources describe much that a chat persona could
-never display.
+Whether a trait would actually *show* in what a persona writes.  Four values since the gate rubric's
+draft 2 ([enactability_gate.md](./rubrics/enactability_gate.md); Roger, 2026-10-10): **chat** (it
+shows in answers to ordinary questions, as [candid](../../data/traits/instructions/candid.json) does,
+and not to any marked degree in what the persona does on a task), **both** (in those answers *and* on
+a task), **agentic-only** (only when the persona is given a task to carry out — "overreaching" needs
+an email to send before it can overreach), and **none** (nowhere a reader of the output could detect
+it, so the corpus cannot use it; a trait describing a process of training or a model's internals is
+the leading example).  Draft 1 had three: with no `both`, a trait visible both ways was filed under
+`chat`, so a `chat` verdict could not be read — it meant either "chat only" or "both".  The **gate**
+is the LLM call that assigns one of them to each candidate: it writes a two-sentence system prompt
+for the trait and then judges whether the trait would be visible.  It exists because the alignment
+sources describe much that a chat persona could never display.  (The *extraction* prompt has an
+`enactability` field of its own, still with draft 1's three values; the gate's verdict is the one
+that counts.)
 
 <a id="gold-set"></a>
 ### Gold set, gold label
@@ -428,7 +434,11 @@ ten expected to be none.  The gate is run on them and its answers compared with 
 The catch, which is why Roger decides and not the agent: the gold labels here were *assigned by the
 planning agent*, not measured, so a disagreement can mean the gate is wrong **or** that the gold
 label is.  Changing a gold label after seeing the gate's answer would tune the test to the result,
-so the agent left all five disagreements for Roger.
+so the agent left all five disagreements for Roger.  The same rule governs the relabelling the gate
+rubric's draft 2 now needs (thirty items over four values, `both` included): it has to be done
+*blind*, by someone who has not seen any draft-2 answer, and
+[gate_gold_items.json](../../data/candidates/alignment_sweep/gate_gold_items.json) still carries the
+three-way labels until it is.
 
 <a id="flip-rate"></a>
 ### Flip rate
@@ -442,3 +452,5 @@ one that is stable but disagrees is *biased*, and the prompt or the gold labels 
 A step whose output is recorded and shown but may not drop or change anything on its own, because it
 has not met its measured target.  The enactability gate is advisory after the pilot (25 of 30 against
 a target of 26): its verdicts appear in the readout, and no candidate is removed because of them.
+That measurement is of the rubric's draft 1; draft 2 has not been evaluated, so the gate stays
+advisory until it is.
