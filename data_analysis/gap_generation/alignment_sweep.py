@@ -279,6 +279,103 @@ def cmd_extract(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- dedupe
+
+def _embedder(args):
+    from assistant_axis.gapgen.embed import EmbeddingCache, make_embedder
+    emb = make_embedder(args.embedder)
+    cache = EmbeddingCache(root=args.embedding_cache) if args.embedder != "hash" else None
+    return emb, cache
+
+
+def _gloss_tokens(texts) -> int:
+    return int(sum(len(t) for t in texts) / 4) + 1
+
+
+def cmd_dedupe(args) -> int:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort, estimate_calls_usd
+    from assistant_axis.gapgen.generators.alignment_sweep import dedupe as D
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.gapgen.runs import start_run
+    from assistant_axis.provenance import current_file_input
+
+    rdir = _run_dir(args, args.run_id)
+    ext = rdir / X.EXTRACTION_NAME
+    if not ext.exists():
+        raise SystemExit(f"no {ext}: run `alignment_sweep.py extract --run-id {args.run_id}` first")
+    items = X.load_extraction(ext)
+    labeled_doc = json.loads(args.labeled.read_text(encoding="utf-8")) if args.labeled.exists() else None
+    texts = [it.gloss for it in items if it.gloss]
+    if args.tune and labeled_doc:
+        texts += [p[k] for p in labeled_doc["pairs"] for k in ("gloss_a", "gloss_b")]
+    emb, cache = _embedder(args)
+    missing = [t for t in dict.fromkeys(texts) if cache is None or cache.get(emb.tag, t) is None]
+    est = estimate_calls_usd(emb.usage_model, 1, _gloss_tokens(missing), 0) if missing else 0.0
+    print(f"run {args.run_id}: {len(items)} poles, {sum(it.kept for it in items)} kept; {len(missing)} glosses to "
+          f"embed with {emb.model_id} (the rest cached); estimate ${est:.4f}; cap --budget-usd ${args.budget_usd:.2f}")
+    cap = confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
+    threshold = args.threshold
+    if threshold is None and not args.tune and not args.pairs_for_labeling:
+        if not (labeled_doc and labeled_doc.get("threshold")):
+            raise SystemExit(f"no tuned threshold in {args.labeled}: label pairs and run --tune, or pass --threshold")
+        threshold = float(labeled_doc["threshold"]["value"])
+    if args.dry_run:
+        print(f"DRY-RUN: would embed, then "
+              + ("write dedup_pairs_to_label.json" if args.pairs_for_labeling else
+                 "tune the threshold" if args.tune else f"group at threshold {threshold} into dedup_groups.json"))
+        return 0
+    if emb.name != "hash":
+        refused = _dirty_refusal(args)
+        if refused:
+            raise SystemExit(f"REFUSED: {refused}")
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "dedupe", "embedder": emb.model_id, "threshold": threshold, "tune": bool(args.tune),
+        "pairs_for_labeling": args.pairs_for_labeling, "budget_usd": args.budget_usd})
+    ctx.usage = GuardedUsage(budget_usd=cap)
+    try:
+        vecs = D.embed_glosses(items, embedder=emb, cache=cache, usage=ctx.usage)
+        if args.tune:
+            if not labeled_doc:
+                raise SystemExit(f"no {args.labeled}")
+            from assistant_axis.gapgen.embed import embed_texts
+            pairs = [p for p in labeled_doc["pairs"] if p.get("same") is not None]
+            E = embed_texts(emb, [p[k] for p in pairs for k in ("gloss_a", "gloss_b")], cache=cache, usage=ctx.usage)
+            for i, p in enumerate(pairs):
+                p["cos"] = round(float(E[2 * i] @ E[2 * i + 1]), 4)
+            t = D.tune_threshold(pairs)
+            labeled_doc["threshold"] = {**t.as_dict(), "embedding_model": emb.model_id, "tuned_at": utc_now()}
+            atomic_write_text(json.dumps(labeled_doc, indent=2, ensure_ascii=False) + "\n", args.labeled)
+            print(f"tuned threshold {t.value} (accuracy {t.accuracy:.3f} on {t.n} pairs, {t.n_same} same; gap "
+                  f"{t.interval}); {len(t.errors)} pairs on the wrong side; wrote {args.labeled}")
+            return 0
+        if args.pairs_for_labeling:
+            pairs = D.pairs_for_labeling(items, vecs, n=args.pairs_for_labeling, seed=args.seed)
+            out = rdir / "dedup_pairs_to_label.json"
+            atomic_write_text(json.dumps({"source_run": args.run_id, "embedding_model": emb.model_id, "pairs": pairs},
+                                         indent=2, ensure_ascii=False) + "\n", out)
+            print(f"wrote {out} ({len(pairs)} pairs, cosine {pairs[-1]['cos']} to {pairs[0]['cos']})")
+            return 0
+        groups = D.dedup_groups(items, vecs, threshold)
+        hints = D.rewrite_partner_hints(items, groups)
+        inputs = [current_file_input(dep_key="extraction", path=ext)]
+        if args.labeled.exists():
+            inputs.append(current_file_input(dep_key="dedup_labeled_pairs", path=args.labeled))
+        D.write_groups(groups, rdir / "dedup_groups.json", threshold=threshold, model=emb.model_id, inputs=inputs,
+                       extra={"partner_hints": hints, "threshold_source": "--threshold" if args.threshold is not None
+                              else f"{args.labeled.name} (tuned)", "at": utc_now()})
+        n_kept = sum(it.kept for it in items)
+        print(f"{n_kept} kept poles -> {len(groups)} groups ({n_kept - len(groups)} merged) at threshold {threshold}; "
+              f"{sum(1 for g in groups if 'exact stem' in g.note)} with an exact-stem merge; wrote "
+              f"{rdir / 'dedup_groups.json'}")
+    finally:
+        ctx.finish(n_emitted=0)
+        print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -328,6 +425,19 @@ def build_parser() -> argparse.ArgumentParser:
                    help="share of chunks expected to yield a mechanism item (for the estimate only)")
     paid(p, 4.0)
     p.set_defaults(func=cmd_extract)
+
+    p = sub.add_parser("dedupe", help="group near-identical glosses (text-embedding-3-large through the cache)")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--threshold", type=float, default=None, help="default: the tuned one in --labeled")
+    p.add_argument("--tune", action="store_true", help="tune the threshold on --labeled and record it there")
+    p.add_argument("--pairs-for-labeling", type=int, default=None, metavar="N",
+                   help="write N pairs to label (dedup_pairs_to_label.json in the run dir) and stop")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--labeled", type=Path, default=AS.DEDUP_PAIRS_PATH)
+    p.add_argument("--embedder", choices=("openai", "hash"), default="openai")
+    p.add_argument("--embedding-cache", type=Path, default=paths.DATA_CANDIDATES / "cache" / "embeddings")
+    paid(p, 1.0)
+    p.set_defaults(func=cmd_dedupe)
     return ap
 
 
