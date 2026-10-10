@@ -27,8 +27,9 @@ there applies here too.
   [instrumentally_aligned_ai](./instrumentally_aligned_ai.json) /
   [paperclip_maximizer](./paperclip_maximizer.json) not; the role
   [evangelist](./evangelist.json) names "debunker | skeptic | iconoclast",
-  not the trait [detractor](../../traits/instructions/detractor.json).  What
-  to do with the four pairs and detractor is open (§ "Role pairs to record").
+  not the trait [detractor](../../traits/instructions/detractor.json).
+  **Settled 2026-10-10 (Roger):** all six role pairs stay as recorded;
+  evangelist / detractor is dropped ("not a good pair").
 - **Whether [cosmopolitan](./cosmopolitan.json) / [provincial](./provincial.json)
   joins `pair_list_clean.json`**: after the extraction (§ "Role pairs to
   record").
@@ -111,10 +112,11 @@ offices.  Whether promotion tooling becomes worth building is a TODO in the trai
 
 ### Role pairs to record (2026-09-11)
 
-**Status 2026-10-09:** provincial / cosmopolitan is recorded.  The role-pair check below is built
-and has been run once on all six recorded role pairs (first-run result below): two are clean both
-ways, two nearly, two not; what to do with the four is open.  Whether provincial / cosmopolitan
-joins the cohort waits on the extraction.
+**Status 2026-10-10:** settled by Roger: all six recorded role pairs stay, the two nearly clean
+(angel / demon, symbiont / parasite) and the two not clean (destroyer / guardian, the aligned-AI
+pair) included; evangelist against the trait detractor is dropped ("not a good pair, drop it").
+Whether provincial / cosmopolitan joins the cohort waits on the extraction.  The 2026-10-09 status
+and the first-run results below are the record.
 
 - **provincial ↔ cosmopolitan**: Roger, 2026-09-11, "they make some sense
   as a pair".  **Recorded 2026-09-12** as
@@ -168,7 +170,8 @@ Still open: whether the two nearly clean pairs stand (demon's "guardian
 angel" is angel with a qualifier; parasite's "mutualist" is close to a
 synonym of symbiont as its description reads), what to do with destroyer / guardian and the aligned-AI pair (each
 side names a different opposite), and detractor's question in
-[TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md).
+[TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md).  **2026-10-10:** all settled by
+Roger, see the status line above (the pairs stay; evangelist / detractor dropped).
 
 ### TBD: the 22 Major Arcana as roles (Tarot)
 

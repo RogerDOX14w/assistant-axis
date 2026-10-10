@@ -68,12 +68,9 @@ makes its vectors stale once extracted.
   activations).
 - The Strategy 1 yield check for the chunk-4 standards, and the arrangement
   geometry check (§ "TODO: post-extraction checks for chunk 4").
-- The five chunk-5 checks: [unscrupulous](./unscrupulous.json) against
+- The four chunk-5 checks: [unscrupulous](./unscrupulous.json) against
   [amoral](./amoral.json), [technomystical](./technomystical.json) against
-  [techno-hierophantic](./techno_hierophantic.json),
-  [detractor](./detractor.json) (the role-pair check, run once on 2026-10-09,
-  has [evangelist](../../roles/instructions/evangelist.json) naming "debunker |
-  skeptic | iconoclast", not detractor; the question below stands), the two
+  [techno-hierophantic](./techno_hierophantic.json), the two
   culture triangles as about three directions, and
   [Hispanic](./hispanic.json) in the heritage map (§ "TODO: post-extraction
   checks for chunk 5").
@@ -120,12 +117,12 @@ makes its vectors stale once extracted.
   [welcoming](./welcoming.json) -> exclusionary | cliquish (a possible pair
   with [cliquish](./cliquish.json)), [malicious](./malicious.json) ->
   benevolent.
-- detractor and the role pairs: the role-pair check is built (`a9c0a13`,
-  `generate_antonyms.py --roles`) and was run once on 2026-10-09.  Two of the
-  six role pairs are clean both ways, two nearly, two not; evangelist names
-  "debunker | skeptic | iconoclast", not detractor, so detractor's question
-  stays open (§ "TODO: post-extraction checks for chunk 5";
-  [ROLES_TO_ADD.md](../../roles/instructions/ROLES_TO_ADD.md) § "Role pairs to
+- The role pairs are settled (Roger, 2026-10-10): the six recorded role
+  pairs all stay, including the two nearly clean and the two not clean by the
+  role-pair check; [detractor](./detractor.json) against the role
+  [evangelist](../../roles/instructions/evangelist.json) is dropped ("not a good
+  pair"), and detractor stays a non-X singleton
+  ([ROLES_TO_ADD.md](../../roles/instructions/ROLES_TO_ADD.md) § "Role pairs to
   record").
 
 ### Parked: Roger's call, when more gap-filling is wanted
@@ -603,8 +600,9 @@ decision (49a88c7): each side's check names the other's content in its own words
 
 ## TODO: post-extraction checks for chunk 5 (Roger, 2026-10-08)
 
-**Status 2026-10-09:** all five items wait on the extraction (the introduction says four; detractor was
-added later).  The decision in the last paragraph is in force.
+**Status 2026-10-10:** four items wait on the extraction; the detractor item is closed (Roger,
+2026-10-10: evangelist / detractor "is not a good pair, drop it"; detractor stays a non-X singleton).
+The decision in the last paragraph is in force.
 
 Opened at Roger's request while he read the chunk-5 readout ("let's see how
 this works out, add a TODO"; "check we have a TODO").  All four need the
@@ -641,6 +639,9 @@ extraction and the embeddings, so none can be settled now.
   it names "debunker | skeptic | iconoclast" (score 3), not detractor, so the
   question is still open; a role-side detractor would have to be seeded and
   checked from both sides ([role_pair_check_history.jsonl](../../roles/role_pair_check_history.jsonl)).
+  **2026-10-10: closed.**  Roger: evangelist / detractor "is not a good pair,
+  drop it".  Detractor stays a trait and a non-X singleton (its own check,
+  2026-10-08, names promoter | advocate); no role-side detractor.
 - **The two culture triangles share their sanctions** (2026-10-08).  Leung
   and Cohen's own Table 1 gives guilt as the dignity culture's device and
   shame as the device of both honor and face, and has no counterpart for
