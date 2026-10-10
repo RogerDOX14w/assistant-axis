@@ -46,5 +46,87 @@
     "downloaded_at": "2026-10-10T18:34:46+00:00",
     "tool": "base_model_generator.py fetch",
     "git_sha": "c2d5f73+dirty"
+  },
+  {
+    "key": "model",
+    "model_id": "Qwen/Qwen3-8B-Base",
+    "revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "revision_pinned": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "dir": "data/external/hf/models--Qwen--Qwen3-8B-Base/snapshots/49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+    "size_bytes": 16393043468,
+    "size_bytes_published": 16393044987,
+    "files": [
+      {
+        "file": "README.md",
+        "size_bytes": 2938
+      },
+      {
+        "file": "config.json",
+        "size_bytes": 729
+      },
+      {
+        "file": "generation_config.json",
+        "size_bytes": 138
+      },
+      {
+        "file": "merges.txt",
+        "size_bytes": 1671853
+      },
+      {
+        "file": "model-00001-of-00005.safetensors",
+        "size_bytes": 3996250744,
+        "sha256": "9983f1b9ef2f60e7c3730d9bc11ada914e6ec630639b5b020a89bd158cd0446b",
+        "sha256_verified": true
+      },
+      {
+        "file": "model-00002-of-00005.safetensors",
+        "size_bytes": 3993160032,
+        "sha256": "9aa12339835bf7a093d3d0b0a0d2d77f8538301cfc7f8e7ec7a585858ebf7a1f",
+        "sha256_verified": true
+      },
+      {
+        "file": "model-00003-of-00005.safetensors",
+        "size_bytes": 3959604768,
+        "sha256": "c7dd5a191c8da555def0714550375b3c0117751add408fcdda0c2a79ac0186bc",
+        "sha256_verified": true
+      },
+      {
+        "file": "model-00004-of-00005.safetensors",
+        "size_bytes": 3187841392,
+        "sha256": "ad8b708792105133e03fe19e2d56c89c709f677f01285f8b3ede8947d59fd9fe",
+        "sha256_verified": true
+      },
+      {
+        "file": "model-00005-of-00005.safetensors",
+        "size_bytes": 1244659840,
+        "sha256": "fbf24915d47ea030bb68ab0b9488f4515a907185baa6dc26837c9c3f2326a550",
+        "sha256_verified": true
+      },
+      {
+        "file": "model.safetensors.index.json",
+        "size_bytes": 32878
+      },
+      {
+        "file": "tokenizer.json",
+        "size_bytes": 7031645
+      },
+      {
+        "file": "tokenizer_config.json",
+        "size_bytes": 9678
+      },
+      {
+        "file": "vocab.json",
+        "size_bytes": 2776833
+      }
+    ],
+    "checksum_verified": true,
+    "licence": "Apache-2.0",
+    "licence_card": "apache-2.0",
+    "licence_url": "https://huggingface.co/Qwen/Qwen3-8B-Base",
+    "licence_verified": true,
+    "approved_by": "Roger, 2026-10-10 (coding_plan_03_base_model.md section 5a: first three downloads approved)",
+    "recorded_at": "2026-10-10T18:37:08+00:00",
+    "tool": "setup_external.py --hf-model (download); base_model_generator.py fetch --only model (record)",
+    "todo": "TODO once the workstream is done: ask Roger whether to delete the weights (his rule, 2026-10-10: anything over 2 GB gets this note)"
   }
 ]
