@@ -36,7 +36,8 @@ from . import ONET_DIR, WIKIBIO_DIR
 
 WIKIBIO_ZIP = "data/wikipedia-biography-dataset.zip"
 ONET_FILE = "occupation_data.csv"
-POOL_VERSION = 1
+#: Bumped whenever the opening text a pool entry holds changes (2: single quotes detokenized).
+POOL_VERSION = 2
 #: OEWN lexicographer files whose nouns make neutral context words (things, places, events, food ...).
 CONCRETE_LEXFILES = frozenset({"noun.artifact", "noun.object", "noun.location", "noun.food", "noun.plant",
                                "noun.animal", "noun.substance", "noun.body", "noun.phenomenon", "noun.time",
@@ -48,6 +49,8 @@ _DETOK = (("-lrb-", "("), ("-rrb-", ")"), ("-lsb-", "["), ("-rsb-", "]"), ("-lcb
 _SPACE_BEFORE = re.compile(r" ([,.;:!?%)\]}]|'s\b|n't\b|'re\b|'ve\b|'ll\b|'d\b|'m\b)")
 _SPACE_AFTER = re.compile(r"([(\[{]) ")
 _QUOTED = re.compile(r'" ([^"]*?) "')
+_SQUOTED = re.compile(r"` ([^`']*?) '")
+_LEADING_NOTE = re.compile(r"^\s*\([^)]*\)\s*")
 
 
 @dataclass(frozen=True)
@@ -72,9 +75,13 @@ class SeedBundle:
     nouns: tuple[str, ...]
     manifest: dict = field(default_factory=dict)
 
-    def draw_adjectives(self, rng: random.Random, k: int, *, letter: Optional[str] = None) -> list[SeedWord]:
-        """``k`` distinct adjectives; with ``letter``, all starting with it when at least ``k`` do."""
+    def draw_adjectives(self, rng: random.Random, k: int, *, letter: Optional[str] = None,
+                        with_gloss: bool = False) -> list[SeedWord]:
+        """``k`` distinct adjectives; with ``letter``, all starting with it when at least ``k`` do; with
+        ``with_gloss``, only adjectives that have a definition."""
         pool = self.adjectives
+        if with_gloss:
+            pool = tuple(a for a in pool if a.gloss) or pool
         if letter:
             sub = tuple(a for a in pool if a.word.startswith(letter))
             if len(sub) >= k:
@@ -104,6 +111,8 @@ def tda_adjectives(census_table: Path, *, familiarity_floor: float = 0.5) -> lis
         if prop is None or prop < familiarity_floor:
             continue
         gloss = (r.wordnet or {}).get("definition") or r.gloss_hint
+        if gloss:
+            gloss = _LEADING_NOTE.sub("", gloss) or None     # OEWN usage notes: "(followed by 'of') not having ..."
         out.append(SeedWord(word=r.surface, gloss=gloss, prop=prop))
     return out
 
@@ -117,6 +126,7 @@ def detokenize(text: str) -> str:
         s = s.replace(f" {a} " if a.startswith("-") else a, f" {b} " if a.startswith("-") else b)
     s = " ".join(s.split())
     s = _QUOTED.sub(r'"\1"', s)
+    s = _SQUOTED.sub(r"'\1'", s)
     s = _SPACE_BEFORE.sub(r"\1", s)
     s = _SPACE_AFTER.sub(r"\1", s)
     return s.strip()
@@ -250,17 +260,22 @@ def parse_onet(path: Path) -> list[str]:
 def oewn_common_nouns(*, wordnet=None, zipf_fn: Optional[Callable[[str], float]] = None,
                       min_zipf: float = COMMON_NOUN_MIN_ZIPF) -> list[str]:  # pragma: no cover - needs OEWN
     """Common, concrete, non-person OEWN nouns (sorted): a one-word lower-case lemma of four letters or more,
-    Zipf >= ``min_zipf``, whose first sense is in :data:`CONCRETE_LEXFILES` and no sense is ``noun.person``."""
+    Zipf >= ``min_zipf``, whose first sense is in :data:`CONCRETE_LEXFILES` and no sense is ``noun.person``;
+    not also a verb (``wash``, ``join``), and not the plural of another noun lemma (``parts``)."""
     if wordnet is None:
         from assistant_axis.gapgen.wordnet import oewn
         wordnet = oewn()
     if zipf_fn is None:
         from wordfreq import zipf_frequency
         zipf_fn = lambda w: zipf_frequency(w, "en")  # noqa: E731
+    verbs = {w.lemma() for w in wordnet.words(pos="v")}
+    nouns_all = {w.lemma() for w in wordnet.words(pos="n")}
     out = set()
     for w in wordnet.words(pos="n"):
         lemma = w.lemma()
         if len(lemma) < 4 or not lemma.isalpha() or not lemma.islower():
+            continue
+        if lemma in verbs or (lemma.endswith("s") and lemma[:-1] in nouns_all):
             continue
         senses = w.senses()
         if not senses:
