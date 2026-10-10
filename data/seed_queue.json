@@ -10060,8 +10060,8 @@
    ]
   },
   {
-   "stem": "wasteful",
-   "label": "wasteful",
+   "stem": "inefficient",
+   "label": "inefficient",
    "entity_type": "trait",
    "chunk": "1b",
    "sub_chunk": "Tier C",
@@ -10139,7 +10139,12 @@
      "antonym_score": 4
     }
    ],
-   "paired_at": "2026-10-10"
+   "paired_at": "2026-10-10",
+   "renamed_from": {
+    "stem": "wasteful",
+    "date": "2026-10-10",
+    "reason": "Roger 2026-10-10 (pre-extraction W10 (7) label call): the label-blind name of wasteful's instructions was inefficient in both samples, efficient's check names inefficient first, and 'wasteful' reads as money, food or materials first. Description unchanged (time and effort); the pair with efficient stands."
+   }
   },
   {
    "stem": "alcoholic",
@@ -52005,7 +52010,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52073,8 +52078,8 @@
    "extracted_from": "extract_4.json"
   },
   {
-   "stem": "cliqueish",
-   "label": "cliqueish",
+   "stem": "cliquish",
+   "label": "cliquish",
    "entity_type": "trait",
    "chunk": null,
    "sub_chunk": "moral circle",
@@ -52084,7 +52089,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52115,6 +52120,11 @@
      "checked_at": "2026-10-10",
      "returned": "inclusive|universalist",
      "phase": "pre-extraction W14 / W22 naming check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "inclusive|egalitarian",
+     "phase": "Roger's calls 2026-10-10, naming check"
     }
    ],
    "name_answers": [
@@ -52125,8 +52135,21 @@
      "positive_name": "clannish|insular",
      "negative_label": "inclusive|universalist",
      "antonym_score": 4
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "Roger's calls 2026-10-10, naming check",
+     "label": "cliquish",
+     "positive_name": "cliquish|insular",
+     "negative_label": "inclusive|egalitarian",
+     "antonym_score": 3
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "cliqueish",
+    "date": "2026-10-10",
+    "reason": "Roger 2026-10-10: the dictionary spelling (the generator, welcoming's check and Roger write cliquish); with the same call 'friends and family' became 'friends', since the family circle is clannish's and three generations had put 'clannish' into this trait's instructions."
+   }
   },
   {
    "stem": "coies_five_peer_statuses",
@@ -52257,7 +52280,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52390,7 +52413,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52727,7 +52750,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52814,7 +52837,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -52920,7 +52943,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53309,7 +53332,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53434,7 +53457,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53506,7 +53529,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53591,7 +53614,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53797,7 +53820,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53899,7 +53922,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -53955,7 +53978,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -54228,7 +54251,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "nationalist",
@@ -56114,7 +56137,7 @@
    "arrangement_members": [
     "selfish",
     "clannish",
-    "cliqueish",
+    "cliquish",
     "insular",
     "parochial",
     "regionalist",
