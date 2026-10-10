@@ -118,7 +118,7 @@ makes its vectors stale once extracted.
   spontaneous, [sadistic](./sadistic.json) -> compassionate | empathetic,
   [fickle](./fickle.json) -> steadfast | loyal | constant,
   [welcoming](./welcoming.json) -> exclusionary | cliquish (a possible pair
-  with [cliqueish](./cliqueish.json)), [malicious](./malicious.json) ->
+  with [cliquish](./cliquish.json)), [malicious](./malicious.json) ->
   benevolent.
 - detractor and the role pairs: the role-pair check is built (`a9c0a13`,
   `generate_antonyms.py --roles`) and was run once on 2026-10-09.  Two of the
@@ -181,7 +181,7 @@ eight members rewritten in terms of circle size (family, friends and family, tow
 home state, region of the country, faith, nation, racial group), the sequence set to his 13-member
 order, and [philanthropic](./philanthropic.json), [patriotic](./patriotic.json) and
 [cosmopolitan](./cosmopolitan.json) taken out as singletons.  The blind naming check reads
-[cliqueish](./cliqueish.json) as clannish and [insular](./insular.json) and
+[cliquish](./cliquish.json) as clannish and [insular](./insular.json) and
 [regionalist](./regionalist.json) as parochial first, so whether neighbouring sizes separate is the
 extraction's question.  Left: check the order against the new vectors (monotone projection).  The text
 below is the 2026-10-02 to 2026-10-09 record.
