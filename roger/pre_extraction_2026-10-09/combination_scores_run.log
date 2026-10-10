@@ -1,0 +1,167 @@
+2026-10-10 18:59:40,739 - INFO - Built 1800 combinations (r_: 900, t_: 900)
+2026-10-10 18:59:40,751 - INFO - Stored scores: 0 kept; rescoring 724 whose texts changed and 0 by another model; dropping 2476 outside the current lists.  To score: 1800
+2026-10-10 18:59:40,784 - INFO - Estimate: $10.83 (batch; claude-sonnet-5-5, rescoring at >= 2 with claude-opus-5-5)
+2026-10-10 18:59:41,090 - INFO - Submitting the first stage: one Message Batch of 1800 requests to claude-sonnet-5-5
+2026-10-10 18:59:42,742 - INFO - Batch submitted: msgbatch_01E7FpFjGTJpsNsZMPpynVVg (logged in /Users/roger/Documents/GitHub/assistant-axis/data/combination_scores_batches.json; if this run is stopped, collect it with --batch_id msgbatch_01E7FpFjGTJpsNsZMPpynVVg)
+2026-10-10 18:59:43,098 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:00:43,702 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:01:44,114 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:02:44,680 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:03:45,112 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:04:45,475 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:05:45,991 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:06:46,553 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:07:46,920 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:08:47,420 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:09:47,746 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:10:48,374 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:11:48,781 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:12:49,273 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:13:49,635 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:14:50,010 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:15:50,503 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:16:50,879 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:17:51,262 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:18:51,762 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:19:52,175 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:20:52,568 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:21:52,958 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:22:53,326 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:23:53,908 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:24:54,361 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:25:54,752 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:26:55,229 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:27:55,598 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:28:56,060 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:29:56,506 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:30:57,019 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:31:57,794 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:32:58,187 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:33:58,634 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:34:59,133 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:35:59,510 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:36:59,856 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:38:00,270 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:40:02,734 - INFO - Built 1800 combinations (r_: 900, t_: 900)
+2026-10-10 19:40:02,745 - INFO - Stored scores: 0 kept; rescoring 724 whose texts changed and 0 by another model; dropping 2476 outside the current lists.  To score: 1800
+2026-10-10 19:40:02,779 - INFO - Estimate: $17.01 (batch; claude-sonnet-5-5, rescoring at >= 2 with claude-opus-5-5)
+2026-10-10 19:40:03,389 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:41:03,776 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:42:04,134 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:43:04,616 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:44:05,005 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:45:05,377 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:46:05,763 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:47:06,121 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:48:06,521 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:49:06,986 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:50:07,361 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:51:07,754 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:52:08,118 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:53:08,574 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:54:08,978 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:55:09,450 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:56:09,801 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:57:10,138 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:58:10,603 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 19:59:10,965 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:00:11,329 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:01:11,732 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:02:12,126 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:03:12,555 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:04:13,247 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:05:13,674 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:06:14,087 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:07:14,425 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:08:14,836 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:09:15,259 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:10:15,771 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:11:16,241 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:12:16,608 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:13:16,970 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:14:17,397 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:15:17,750 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:16:18,100 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:17:18,569 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:18:18,961 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:19:19,396 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:20:19,730 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:21:20,102 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:22:20,512 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:23:20,896 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:24:21,379 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:25:21,998 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:26:22,381 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:27:22,795 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:28:23,155 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:29:23,496 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:30:23,908 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:31:24,259 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:32:24,636 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:33:25,054 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:34:25,423 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:35:25,898 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:36:26,283 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:37:26,662 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:38:27,129 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:39:27,596 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:40:27,931 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:41:28,348 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:42:28,792 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:43:29,292 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:44:29,660 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:45:30,046 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:46:30,499 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:47:30,879 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:48:31,282 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:49:31,653 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:50:32,029 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:51:32,491 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:52:32,865 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:53:33,274 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:54:33,796 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:55:34,157 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:56:34,513 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:57:34,971 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:58:35,353 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 20:59:35,768 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:00:36,185 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:01:36,532 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:02:37,030 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:03:37,444 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:04:37,964 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:05:38,367 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:06:38,741 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:07:39,319 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:08:39,769 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:09:40,155 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:10:40,595 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:11:40,999 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:12:41,503 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:13:41,919 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: in_progress; succeeded 0, errored 0, expired 0, processing 1800
+2026-10-10 21:14:42,437 - INFO - batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg: ended; succeeded 1800, errored 0, expired 0, processing 0
+2026-10-10 21:14:43,393 - INFO - [data_analysis/score_combinations:claude-sonnet-5-5:batch] parse rate: 1800/1800 OK
+2026-10-10 21:14:43,393 - INFO - Batch msgbatch_01E7FpFjGTJpsNsZMPpynVVg collected: {'entries': 1800, 'ok': 1800, 'unusable': 0, 'unknown': 0, 'not_succeeded': 0}; 0 to score in real time
+2026-10-10 21:14:43,456 - INFO - 340 combinations reach the rescore threshold (2); escalating to claude-opus-5-5, 3 samples each
+2026-10-10 21:14:43,478 - INFO - Submitting the rescore stage: one Message Batch of 1020 requests to claude-opus-5-5
+2026-10-10 21:14:44,683 - INFO - Batch submitted: msgbatch_01LyK7GydxLwem9NDWf7bZya (logged in /Users/roger/Documents/GitHub/assistant-axis/data/combination_scores_batches.json; if this run is stopped, collect it with --batch_id msgbatch_01LyK7GydxLwem9NDWf7bZya)
+2026-10-10 21:14:44,999 - INFO - batch msgbatch_01LyK7GydxLwem9NDWf7bZya: in_progress; succeeded 0, errored 0, expired 0, processing 1020
+2026-10-10 21:15:45,351 - INFO - batch msgbatch_01LyK7GydxLwem9NDWf7bZya: in_progress; succeeded 0, errored 0, expired 0, processing 1020
+2026-10-10 21:16:45,831 - INFO - batch msgbatch_01LyK7GydxLwem9NDWf7bZya: in_progress; succeeded 0, errored 0, expired 0, processing 1020
+2026-10-10 21:17:46,230 - INFO - batch msgbatch_01LyK7GydxLwem9NDWf7bZya: in_progress; succeeded 0, errored 0, expired 0, processing 1020
+2026-10-10 21:18:46,663 - INFO - batch msgbatch_01LyK7GydxLwem9NDWf7bZya: ended; succeeded 1020, errored 0, expired 0, processing 0
+2026-10-10 21:18:47,794 - INFO - [data_analysis/score_combinations:claude-opus-5-5:batch] parse rate: 1020/1020 OK
+2026-10-10 21:18:47,794 - INFO - Batch msgbatch_01LyK7GydxLwem9NDWf7bZya collected: {'entries': 1020, 'ok': 1020, 'unusable': 0, 'unknown': 0, 'not_succeeded': 0}; 0 to score in real time
+2026-10-10 21:18:47,882 - INFO - [usage] this run total=$15.957 calls=2,820 [claude-opus-5-5:batch: $9.142 in=1,889,283 out=536,319 n=1,020; claude-sonnet-5-5:batch: $6.815 in=3,328,770 out=697,290 n=1,800]
+2026-10-10 21:18:47,882 - INFO - [usage] cumulative (/Users/roger/Documents/GitHub/assistant-axis/data/combination_scores_usage.json) total=$15.957 calls=2,820 [claude-opus-5-5:batch: $9.142 in=1,889,283 out=536,319 n=1,020; claude-sonnet-5-5:batch: $6.815 in=3,328,770 out=697,290 n=1,800]
+2026-10-10 21:18:47,882 - INFO - 
+Saved 1800 scores to /Users/roger/Documents/GitHub/assistant-axis/data/combination_scores.json
+2026-10-10 21:18:47,882 - INFO - Distribution (by rounded mean): {'0': 865, '1': 794, '2': 141, '3': 0}
+2026-10-10 21:18:47,882 - INFO - Overall mean score: 0.618
+2026-10-10 21:18:47,882 - INFO - Escalated: 340/1800
+2026-10-10 21:18:47,883 - INFO - Highest-scoring combinations:
+2026-10-10 21:18:47,883 - INFO -   r_bodhisattva__temperamental: max=3 mean=2.2 — A bodhisattva with no separate self or personal gain is in tension with someone 
+2026-10-10 21:18:47,883 - INFO -   t_proofreader__unhelpful: max=3 mean=2.4 — The role demands meticulous error-catching. The trait demands deflection and vag
+2026-10-10 21:18:47,883 - INFO -   r_predator__melodramatic: max=2 mean=2.0 — A predator that methodically picks off the weak while speaking in sweeping, cata
+2026-10-10 21:18:47,883 - INFO -   r_predator__generalist: max=2 mean=1.4 — A predator who reads terrain and picks off the slow one has little to do with ra
+2026-10-10 21:18:47,883 - INFO -   r_predator__expository: max=2 mean=2.0 — A predator explaining its hunting method in ordered, defined steps is unusual bu

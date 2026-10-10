@@ -1,0 +1,34 @@
+[
+  {
+    "id": "msgbatch_01E7FpFjGTJpsNsZMPpynVVg",
+    "stage": "first",
+    "model": "claude-sonnet-5-5",
+    "n_requests": 1800,
+    "submitted": "2026-10-10T17:59:42+00:00",
+    "rubric_version": 2,
+    "collected": "2026-10-10T20:14:43+00:00",
+    "counts": {
+      "entries": 1800,
+      "ok": 1800,
+      "unusable": 0,
+      "unknown": 0,
+      "not_succeeded": 0
+    }
+  },
+  {
+    "id": "msgbatch_01LyK7GydxLwem9NDWf7bZya",
+    "stage": "rescore",
+    "model": "claude-opus-5-5",
+    "n_requests": 1020,
+    "submitted": "2026-10-10T20:14:44+00:00",
+    "rubric_version": 2,
+    "collected": "2026-10-10T20:18:47+00:00",
+    "counts": {
+      "entries": 1020,
+      "ok": 1020,
+      "unusable": 0,
+      "unknown": 0,
+      "not_succeeded": 0
+    }
+  }
+]
