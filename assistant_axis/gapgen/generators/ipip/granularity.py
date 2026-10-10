@@ -75,10 +75,12 @@ def sample_pairs(rows: Sequence[Mapping], items: Mapping[str, ItemRow], *, per_c
         if len(r["poles"]) == 2 and cross_pole:
             cross = _pairs(r["poles"][0]["items"], r["poles"][1]["items"])
             picks += [("cross", p) for p in rng.sample(cross, min(cross_pole, len(cross)))]
-        for k, (kind, (x, y)) in enumerate(picks):
+        for kind, (x, y) in picks:
             if rng.random() < 0.5:
                 x, y = y, x
-            calls.append(OT.PairCall(call_id=f"{origin}:{kind[0]}{k}", set=kind, target=x, listed=[y],
+            # the id names the pair: the runner skips answers on record by id, so a cluster split differently later
+            # (new poles, new pairs) never reuses an answer given for another pair
+            calls.append(OT.PairCall(call_id=f"{origin}:{kind}:{x}>{y}", set=kind, target=x, listed=[y],
                                      origin_call_id=origin))
             used.update((x, y))
     corpus = {i: item_entry(items[i]) for i in sorted(used, key=code_order)}

@@ -59,6 +59,8 @@ class TestSampling:
         assert per == {1: 3, 2: 3, 3: 1} and len(cross) == 1
         assert all(isinstance(c, OT.PairCall) and len(c.listed) == 1 for c in calls)
         assert len({c.call_id for c in calls}) == len(calls)
+        # the id names the pair, so a later, different split cannot reuse an answer for another pair
+        assert all(c.call_id == f"{c.origin_call_id}:{c.set}:{c.target}>{c.listed[0]}" for c in calls)
         assert set(corpus) == {i for c in calls for i in (c.target, c.listed[0])}
         assert not any(c.target in ("H12", "H13", "H14") for c in calls)
 

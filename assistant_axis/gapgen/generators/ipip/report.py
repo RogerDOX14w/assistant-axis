@@ -194,6 +194,9 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
     lines += ["## Naming: decisions (b) and (c)", ""]
     for gr, a in ev["naming"]["agreement"].items():
         p = ev["naming"]["parse"][gr]
+        if not p["n_asked"]:
+            lines.append(f"- ~{gr}: nothing named.")
+            continue
         lines.append(f"- ~{gr}: {p['n_ok']} of {p['n_asked']} poles named ({_pct(p['parse_rate'])}, first attempt "
                      f"{p['first_attempt_ok']}; rejected {json.dumps(p['rejected_by_kind'])}); blind and hinted "
                      f"disagree on {_pct(a['disagree_rate'])} of {a['n_both_forms']}; bipolar antonym agreement "
