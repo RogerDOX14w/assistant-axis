@@ -1,5 +1,19 @@
 # 11. Novelty ensemble: independent signals and the disagreement protocol
 
+> **Status, 2026-10-10: largely superseded by M3 as built; do not review this as written.**  The idea below — split
+> proximity from relation type, and spend an LLM only where signals disagree — is what
+> [M3](./coding_plan_platform.md) does today: cosine retrieval for proximity, a Haiku relation call (similar /
+> opposed / unrelated) for relation type, then the overlap reading escalated Sonnet → Opus by the cut-off rules.
+> The models named below (Haiku 4.5, Sonnet 5) are two generations stale, and "LLM only on disagreement, 35-45% of
+> candidates" is now the cut-off and escalation rules of M3's decisions 12-15.
+>
+> What has *not* been built, and is what a rewrite of this plan would be about: **S2, the lexical graph** (WordNet
+> and ConceptNet synonym / antonym / hypernym links) as a signal independent of any embedding, which would catch a
+> dictionary synonym whose gloss happens to embed far away; and **S4, morphology** (shared stem and affix
+> families), which is nearly free.  **S5, a second embedding family**, was partly answered by
+> [plan 15's calibration](./15_metric_calibration.md), which measured embedding choices and tested a local model.
+> Rewrite against what M3 became before spending review time here.
+
 ## 1. Idea
 
 Split "do we already have something close?" into two questions that fail for different reasons: **proximity** (is any existing trait in the same region?) and **relation type** (given the nearest ones, is the candidate a synonym, antonym, narrower, broader, or distinct?). Answer each with three cheap signals whose error modes are uncorrelated with the dense-embedding nearest neighbour (workstream 10): a lexical graph, a masked-LM fit test against the existing *descriptions*, and morphology. Where the signals agree the verdict is taken; only disagreements go to an LLM, and it sees only the top-5 neighbours the cheap signals turned up. Nothing here is trained on our list, so a candidate is never penalised or rewarded for resembling what we already generated.
