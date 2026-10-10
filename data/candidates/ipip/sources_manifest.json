@@ -1,0 +1,55 @@
+{
+  "tool": "ipip_generator.py download",
+  "licence": {
+    "name": "public domain (IPIP's blanket statement on ipip.ori.org)",
+    "url": "https://ipip.ori.org/",
+    "quote_from_plan": "The items and scales are in the public domain ... use them for any purpose without asking permission and without paying a fee",
+    "verbatim": null,
+    "verbatim_source": null
+  },
+  "entries": [
+    {
+      "key": "item_list",
+      "file": "data/external/ipip/AlphabeticalItemList.htm",
+      "url": "https://ipip.ori.org/AlphabeticalItemList.htm",
+      "size_bytes": 849217,
+      "sha256": "df326e934612066a1ec9ccdd356e48238fdb809b4e2aa7f9076d6b3195a012ba",
+      "hash_source": "received bytes (IPIP publishes no hashes)",
+      "optional": false,
+      "what": "every item's text with its Eugene-Springfield code",
+      "licence": "public domain (IPIP's blanket statement on ipip.ori.org)",
+      "downloaded_at": "2026-10-10T18:20:20+00:00",
+      "tool": "ipip_generator.py download",
+      "git_sha": "b72e26c"
+    },
+    {
+      "key": "assignment_table",
+      "file": "data/external/ipip/ItemAssignmentTable.htm",
+      "url": "https://ipip.ori.org/ItemAssignmentTable.htm",
+      "size_bytes": 3759,
+      "sha256": "c879f27c296cd7e40c1cdea71129c768d36550413361ba36bb84352778cba9f3",
+      "hash_source": "received bytes (IPIP publishes no hashes)",
+      "optional": false,
+      "what": "item to scale assignments with key signs",
+      "licence": "public domain (IPIP's blanket statement on ipip.ori.org)",
+      "downloaded_at": "2026-10-10T18:20:20+00:00",
+      "tool": "ipip_generator.py download",
+      "git_sha": "b72e26c"
+    },
+    {
+      "key": "scale_index",
+      "file": "data/external/ipip/newIndexofScaleLabels.htm",
+      "url": "https://ipip.ori.org/newIndexofScaleLabels.htm",
+      "size_bytes": 61084,
+      "sha256": "08ba1f47ac927312fb1aad8094b534dc59e38411af6786089d44885bdfc4e7eb",
+      "hash_source": "received bytes (IPIP publishes no hashes)",
+      "optional": false,
+      "what": "construct labels by inventory",
+      "licence": "public domain (IPIP's blanket statement on ipip.ori.org)",
+      "downloaded_at": "2026-10-10T18:20:20+00:00",
+      "tool": "ipip_generator.py download",
+      "git_sha": "b72e26c"
+    }
+  ],
+  "total_bytes": 914060
+}
