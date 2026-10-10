@@ -113,7 +113,11 @@ Detectors, filters and tests:
 
 ## Roger's Decisions
 
-Greenlit for detailed planning: 14, 15, 10; 1, 2
+Greenlit for detailed planning: 14, 15, 10; 1, 2.
+2026-10-10: **3, 4, 7 and 8 greenlit** after Roger's review edits and inline answers in each plan
+([03](./03_base_model_generator.md), [04](./04_masked_lm_fill.md), [07](./07_behaviour_items.md),
+[08](./08_alignment_sweep.md)); coding plans commissioned the same day (Fable, per the
+[format](./PLAN_FORMAT.md)).  11 rewritten 2026-10-10 as lexical recall insurance, awaiting review.
 Currently discussing, will greenlight once done: -
 
 ## Process for greenlit plans (agreed with Roger, 2026-09-18)
