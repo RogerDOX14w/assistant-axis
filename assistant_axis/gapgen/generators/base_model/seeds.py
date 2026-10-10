@@ -203,7 +203,7 @@ def iter_wikibio(zip_path: Path, *, split: str = "train", max_words: int = 200) 
 
 
 def bio_pool(zip_path: Path, *, split: str = "train", size: int = 20_000, seed: int = 0, min_words: int = 15,
-             max_words: int = 200, cache_dir: Optional[Path] = None) -> list[Bio]:
+             max_words: int = 200, cache_dir: Optional[Path] = None, write_cache: bool = True) -> list[Bio]:
     """A seeded reservoir sample of ``size`` usable openings (at least ``min_words`` words), in index order.
     Cached as ``bio_pool_<split>_k<size>_s<seed>.jsonl`` in ``cache_dir`` (the archive's directory's parent by
     default, which is gitignored), keyed on the archive's size and the parameters."""
@@ -230,9 +230,10 @@ def bio_pool(zip_path: Path, *, split: str = "train", size: int = 20_000, seed: 
             if j < size:
                 res[j] = (i, b)
     pool = [b for _, b in sorted(res, key=lambda t: t[0])]
-    body = json.dumps(meta) + "\n" + "".join(json.dumps(b.__dict__, ensure_ascii=False) + "\n" for b in pool)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    atomic_write_text(body, cache)
+    if write_cache:
+        body = json.dumps(meta) + "\n" + "".join(json.dumps(b.__dict__, ensure_ascii=False) + "\n" for b in pool)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(body, cache)
     return pool
 
 
@@ -302,8 +303,9 @@ def _sha256(path: Path) -> str:
 def load_seed_bundle(*, census_table: Optional[Path] = None, wikibio_dir: Path = WIKIBIO_DIR,
                      onet_dir: Path = ONET_DIR, familiarity_floor: float = 0.5, bio_pool_size: int = 20_000,
                      pool_seed: int = 0, bio_split: str = "train", min_bio_words: int = 15, max_bio_words: int = 200,
-                     nouns: Optional[Sequence[str]] = None) -> SeedBundle:
-    """Load every seed list (see the module docstring).  ``nouns`` replaces the OEWN noun list (tests)."""
+                     nouns: Optional[Sequence[str]] = None, write_cache: bool = True) -> SeedBundle:
+    """Load every seed list (see the module docstring).  ``nouns`` replaces the OEWN noun list (tests);
+    ``write_cache=False`` (dry runs) leaves the bio pool uncached."""
     if census_table is None:
         from assistant_axis.gapgen.generators.censuses import CENSUS_TABLE_PATH
         census_table = CENSUS_TABLE_PATH
@@ -316,7 +318,7 @@ def load_seed_bundle(*, census_table: Optional[Path] = None, wikibio_dir: Path =
             raise FileNotFoundError(f"missing {p}: run `{how}` first")
     adjectives = tda_adjectives(census_table, familiarity_floor=familiarity_floor)
     bios = bio_pool(zip_path, split=bio_split, size=bio_pool_size, seed=pool_seed, min_words=min_bio_words,
-                    max_words=max_bio_words, cache_dir=wikibio_dir)
+                    max_words=max_bio_words, cache_dir=wikibio_dir, write_cache=write_cache)
     occupations = parse_onet(onet_path)
     noun_list = list(nouns) if nouns is not None else oewn_common_nouns()
     manifest = {"census_table_sha256": _sha256(census_table), "familiarity_floor": familiarity_floor,
