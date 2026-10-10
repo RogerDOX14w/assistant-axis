@@ -6330,6 +6330,23 @@ the sections above hold data-regeneration items.  Tick off in place.
    triangle (three pairs and a check of the resulting geometry, or
    something else) is undecided; until it is, pair lists for new work
    carry clean pairs and role pairs only.
+   **Still deferred (Roger, 2026-10-10), to be taken up with the tangle
+   pass.**  His current thinking: judge and steer a triangle as its three
+   pairs, and check the assumption that the space they span is nearly 2D
+   (two large principal components, one small); a tetrahedron likewise as
+   its six pairs, expected to span mostly 3D (three large components,
+   three small).  Caveat for the design (agent, same day): in activation
+   space the check holds by construction.  A pair axis is
+   `vec[A] - vec[B]` per slot at one layer, unit-normalised
+   (`axis_judge_correlation.resolve_axis`), so a triangle's three edge
+   axes are exactly coplanar at each slot, a tetrahedron's six span
+   exactly 3D, and so do the entities' projections onto them; whitening
+   and shear are linear and keep that.  Only the per-slot normalisation
+   and averaging over slots leave any third component.  The test is
+   informative where the three pairs are measured independently: the
+   judge scores of the three judged axes over the cohort (is
+   `s_AB + s_BC + s_CA` nearly constant once each is scaled?), and the
+   effects of steering along each edge.
 7. ~~**`seed_entities.py rename` leaves the pair record on the old stem**
    (found 2026-09-30, renaming `deterministic` to `determinist`).  The
    command moves the file, regenerates it and rechecks both sides, but

@@ -112,6 +112,10 @@ makes its vectors stale once extracted.
   "TODO: arrangement hunting"), with the W10 items deferred to it
   ([w10_w12_proposals.md](../../../roger/pre_extraction_2026-10-09/w10_w12_proposals.md)).  Tangles are recorded
   only as negative labels (AGENT_NOTES § "The `arrangement` field", rule 2).
+- How to judge and steer a triangle or tetrahedron: deferred to this pass
+  (Roger, 2026-10-10; current thinking, as three or six pairs with a check
+  that they span nearly 2D or 3D, in AGENT_NOTES § "TODO: code housekeeping
+  (Sep 2026)" item 6).
 - Check answers from the 2026-10-09/10 additions that point into tangles:
   [wry](./wry.json) -> earnest | humorless, [meditative](./meditative.json) ->
   restless, [future-oriented](./future_oriented.json) -> present-oriented |
