@@ -61,6 +61,31 @@ def test_function_words_alone_dropped():
     assert surfaces(" and, the, so, kind") == ["kind"]
 
 
+def test_truncated_last_item_dropped():
+    """Real output (smoke round, 2026-10-10): 36 of 48 continuations hit the 80-token cap mid-word."""
+    text = " modest, calm, quiet, patient, self-reliant, conscientio"
+    assert [i.surface for i in PA.extract_items(text, "list", truncated=True)] == [
+        "modest", "calm", "quiet", "patient", "self-reliant"]
+    assert surfaces(text) == ["modest", "calm", "quiet", "patient", "self-reliant", "conscientio"]
+    # a capped continuation that ended on a delimiter keeps its last item
+    assert [i.surface for i in PA.extract_items(" calm, quiet,", "list", truncated=True)] == ["calm", "quiet"]
+    gl = "honest: sincere\nhopeful: confident\nhumorless: not incl"
+    assert [i.surface for i in PA.extract_items(gl, "list_gloss", truncated=True)] == ["honest", "hopeful"]
+    ai = " collaborative\n2. cooperative\n3. cour"
+    assert [i.surface for i in PA.extract_items(ai, "ai_assistant", truncated=True)] == ["collaborative",
+                                                                                         "cooperative"]
+    # a capped comma list that already ended its sentence is complete
+    assert [i.surface for i in PA.extract_items(" calm, quiet. He was a lon", "list", truncated=True)] == [
+        "calm", "quiet"]
+
+
+def test_clause_fragments_dropped():
+    # smoke-round examples: a sentence fragment is not a candidate
+    assert surfaces(" creative, can be quite annoying, also very amusing, all excited") == [
+        "creative", "amusing", "excited"]
+    assert [i.surface for i in PA.extract_items(" Body has a wrist\n2. data-driven", "ai_assistant")] == ["data-driven"]
+
+
 @pytest.mark.parametrize("word,expected", [
     ("stubbornness", ("stubborn", "adjective", "stubbornness")),
     ("kindness", ("kind", "adjective", "kindness")),

@@ -26,6 +26,21 @@ def _frac(a: float, b: float) -> Optional[float]:
     return round(a / b, 4) if b else None
 
 
+def renamed_map(stems: Iterable[str], corpus_stems: Iterable[str], *, data_dir=None) -> dict[str, str]:
+    """``{candidate stem: current corpus stem}`` for candidates that spell a corpus trait's former name
+    (``entity_id.resolve_renamed_stem``, which reads ``renamed_from`` in all its forms)."""
+    from assistant_axis.entity_id import resolve_renamed_stem
+    corpus = set(corpus_stems)
+    out = {}
+    for s in stems:
+        if s in corpus:
+            continue
+        cur = resolve_renamed_stem(s, "traits", data_dir=data_dir)
+        if cur != s and cur in corpus:
+            out[s] = cur
+    return out
+
+
 def round_stats(samples: Sequence[Mapping], rows: Sequence[Mapping], per_sample: Sequence[Mapping],
                 table_counts: Mapping, *, round_n: int, temperature: Optional[float], corpus_stems: Iterable[str],
                 renamed: Optional[Mapping[str, str]] = None, step: int = 1000) -> dict:

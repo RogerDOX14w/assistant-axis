@@ -110,7 +110,7 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
         name_words = _bio_words(bio[0]) if bio else set()
         bio_text = (bio[1] or "").lower() if bio else ""
         seen_here: set[str] = set()
-        for it in extract_items(s.get("text") or "", fam):
+        for it in extract_items(s.get("text") or "", fam, truncated=s.get("stop_reason") == "max_tokens"):
             counts["n_raw_items"] += 1
             surface, form, norm_from = normalize_form(it.surface, lexicon=lookups.lexicon)
             if surface in seeds or it.surface in seeds:

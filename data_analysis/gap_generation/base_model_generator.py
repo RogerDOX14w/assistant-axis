@@ -222,11 +222,11 @@ def _paths(args, temperature: Optional[float]):
 
 
 def _corpus(args):
-    from assistant_axis.gapgen.generators.censuses.corpus import (
-        corpus_renamed_from, corpus_trait_stems, queue_trait_stems,
-    )
-    return (corpus_trait_stems(args.data_dir), queue_trait_stems(None, data_dir=args.data_dir),
-            corpus_renamed_from(args.data_dir))
+    """Corpus and queue trait stems (evaluation only).  Former names come from ``evaluate.renamed_map``
+    (``resolve_renamed_stem``), not from the censuses' ``corpus_renamed_from``, which reads only the
+    string form of ``renamed_from`` and fails on the object form the rename tooling writes."""
+    from assistant_axis.gapgen.generators.censuses.corpus import corpus_trait_stems, queue_trait_stems
+    return corpus_trait_stems(args.data_dir), queue_trait_stems(None, data_dir=args.data_dir)
 
 
 def _tda_stems(args) -> set[str]:
@@ -259,7 +259,7 @@ def cmd_parse(args) -> int:
         return 2
     record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
     samples = TB.load_samples(samples_p, temperature=args.temperature)
-    corpus, queue, _ = _corpus(args)
+    corpus, queue = _corpus(args)
     per: list = []
     rows, counts = TB.build_table(samples, lookups=TB.default_lookups(), corpus_stems=corpus, queue_stems=queue,
                                   tda_stems=_tda_stems(args), bio_lookup=_bio_lookup(args, record), per_sample=per)
@@ -295,7 +295,8 @@ def cmd_stats(args) -> int:
               "by_form_eligible": dict(Counter(r["form"] for r in rows if r["eligible"])),
               "ineligible": dict(Counter(r["ineligible_reason"] for r in rows if not r["eligible"])),
               "normalized_mechanically": sum(1 for r in rows if r["normalized_from"])}
-    corpus, _, renamed = _corpus(args)
+    corpus, _ = _corpus(args)
+    renamed = EV.renamed_map([r["stem"] for r in rows], corpus, data_dir=args.data_dir)
     st = EV.round_stats(samples, rows, per, counts, round_n=args.round, temperature=args.temperature,
                         corpus_stems=corpus, renamed=renamed, step=args.step)
     st["n_raw_items"] = sum(len(p["stems"]) for p in per)

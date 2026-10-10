@@ -33,7 +33,12 @@ DETERMINERS = frozenset({"a", "an", "the", "his", "her", "their", "its", "my", "
 #: Degree and frequency words stripped from the front of a span.
 DEGREE_WORDS = frozenset({"very", "extremely", "quite", "rather", "really", "so", "too", "somewhat", "fairly",
                           "incredibly", "terribly", "always", "often", "sometimes", "usually", "generally",
-                          "deeply", "utterly", "totally", "completely", "truly", "most", "more"})
+                          "deeply", "utterly", "totally", "completely", "truly", "most", "more", "also", "all",
+                          "just", "even", "still", "simply"})
+#: A span holding one of these is a clause, not a candidate ("body has a wrist", "can be quite annoying").
+CLAUSE_WORDS = frozenset({"is", "are", "was", "were", "has", "have", "had", "can", "could", "will", "would",
+                          "does", "do", "did", "should", "may", "might", "must", "i", "you", "he", "she", "it",
+                          "we", "they"})
 #: A leading conjunction left by an Oxford comma (", and fiercely loyal").
 CONJUNCTIONS = frozenset({"and", "or", "but", "nor"})
 COMMA_FAMILIES = ("list", "person", "occupation", "contrast")
@@ -88,6 +93,8 @@ def clean_span(span: str) -> Optional[str]:
         words = words[1:]
     if not words or len(words) > MAX_WORDS:
         return None
+    if any(w in CLAUSE_WORDS for w in words):
+        return None
     if not all(_WORD_OK.match(w) for w in words):
         return None              # digits, non-Latin letters, stray punctuation
     if all(w in STOPWORDS for w in words):
@@ -95,10 +102,13 @@ def clean_span(span: str) -> Optional[str]:
     return " ".join(words)
 
 
-def _first_sentence(text: str) -> str:
-    line = text.lstrip(" ").split("\n", 1)[0]
+def _first_sentence(text: str) -> tuple[str, bool]:
+    """The first line up to its first sentence end, and whether it ended (sentence end or line break) rather
+    than running into the end of the text."""
+    stripped = text.lstrip(" ")
+    line, nl, _ = stripped.partition("\n")
     m = _SENT_END.search(line)
-    return line[:m.start()] if m else line
+    return (line[:m.start()], True) if m else (line, bool(nl))
 
 
 def _split_gloss(span: str) -> tuple[str, Optional[str]]:
@@ -108,8 +118,9 @@ def _split_gloss(span: str) -> tuple[str, Optional[str]]:
     return span, None
 
 
-def extract_items(text: str, family: str) -> list[RawItem]:
-    """The candidate items of one continuation (see the module docstring)."""
+def extract_items(text: str, family: str, *, truncated: bool = False) -> list[RawItem]:
+    """The candidate items of one continuation (see the module docstring).  ``truncated``: the continuation hit
+    the token cap, so a last span that does not end on a delimiter is cut off mid-word and is dropped."""
     out: list[RawItem] = []
 
     def add(span: str, gloss: Optional[str] = None) -> None:
@@ -117,17 +128,24 @@ def extract_items(text: str, family: str) -> list[RawItem]:
         if s is not None:
             out.append(RawItem(surface=s, gloss=gloss[:200] if gloss else None, position=len(out)))
 
+    open_end = truncated and not text.endswith("\n")
     if family in COMMA_FAMILIES:
-        for span in _SPLIT.split(_first_sentence(text)):
+        part, ended = _first_sentence(text)
+        spans = _SPLIT.split(part)
+        if truncated and not ended and not part.rstrip().endswith((",", ";")):
+            spans = spans[:-1]
+        for span in spans:
             add(span)
     elif family == "list_gloss":
-        for line in text.strip("\n").split("\n"):
+        lines = text.strip("\n").split("\n")
+        for line in lines[:-1] if open_end else lines:
             if ":" not in line:
                 break
             word, _, gloss = line.partition(":")
             add(word, gloss.strip() or None)
     elif family == "ai_assistant":
-        for i, line in enumerate(text.split("\n")):
+        lines = text.split("\n")
+        for i, line in enumerate(lines[:-1] if open_end else lines):
             if i > 0 and not _ITEM_LINE.match(line):
                 break
             word, gloss = _split_gloss(_ITEM_LINE.sub("", line))
