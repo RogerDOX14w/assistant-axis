@@ -412,8 +412,8 @@ class ReviewState:
             if nominated is None or nominated in self.handled:
                 terms = [m for m in members if m in self.kept_set]
                 if len(terms) != 1:
-                    raise ActionError(f"{g.id} has {len(terms)} unhandled terms: nominate the one to promote first "
-                                      f"(the Nominate button on its row)")
+                    raise ActionError(f"{g.id} has {len(terms)} unhandled terms: click the one to promote (or nominate it) "
+                                      f"first")
                 nominated = terms[0]
         note = req.get("note")
         return {"group": g.id, "action": "resolve", "members": members, "nominated": nominated,

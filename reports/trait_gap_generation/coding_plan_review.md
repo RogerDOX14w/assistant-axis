@@ -213,7 +213,13 @@ neighbours; Covered by this on corpus traits; Start antonym group on opposed can
 letter, is that letter in bold in its label (Roger's suggestion: E**x**clude, **C**overed by this); other keys
 (Space, Enter, /, ;, ?) show as a small hint.  Buttons and keys both call one `ACTIONS` table in
 [app.js](../../assistant_axis/gapgen/review_app/static/app.js), so they cannot differ; overlays have a Close
-button and a Find result is chosen by a click.
+button and a Find result is chosen by a click.  Same day, Roger's three follow-ups:
+- the Order button sits on the queue's header, the list it orders;
+- links show the label only (the file's path is the tooltip), and a seed-queue entry carries a "queue" chip, since
+  the path's one use was telling a trait file from a queue entry;
+- with no nominee (★), Promote takes the member clicked in this group (outlined; nominating it, then promoting),
+  and its button names who it will promote.  The first row's default highlight does not count as a choice: with
+  several members and no click, Promote asks for one.
 
 ## 4. Acceptance tests (written first)
 

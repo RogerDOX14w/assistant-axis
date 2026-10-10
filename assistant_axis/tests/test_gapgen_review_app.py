@@ -622,6 +622,9 @@ class TestRoutes:
             if k in ("Tab", "ArrowDown", "ArrowUp", "j", "k", "Escape", "Enter"):
                 continue
             assert "ACTIONS." in body, (k, body)
+        promote = js.split("async function promote()", 1)[1].split("\n}\n", 1)[0]   # Roger 2026-10-10: no ★, the clicked member
+        assert promote.index('action: "nominate"') < promote.index('resolve("promote")')
+        assert "return promote();" in js.split("async function onEnter()", 1)[1].split("\n}\n", 1)[0]
 
     def test_the_script_parses(self):
         import shutil

@@ -11,6 +11,7 @@ const S = {
   order: null, queue: [], counts: null, card: null, qpos: -1,
   pane: "members", idx: { members: 0, neighbours: 0, corpus: 0, opposed: 0 },
   note: null, pinned: null, overlay: null,
+  selected: null,   // the member clicked (or moved to) in the open group: {group, key}; Promote takes it when no ★
 };
 
 const $ = (id) => document.getElementById(id);
@@ -49,6 +50,7 @@ async function loadQueue() {
 }
 
 async function showGroup(card) {
+  if (!card || !S.selected || S.selected.group !== card.id) S.selected = null;
   S.card = card;
   if (card) {
     S.idx = { members: Math.min(S.idx.members, Math.max(0, card.members.length - 1)), neighbours: 0, corpus: 0, opposed: 0 };
@@ -104,7 +106,8 @@ function describe(ev) {
 function renderCounts() {
   const c = S.counts;
   if (!c) return;
-  $("order").textContent = `order: ${S.order} (o)`;
+  $("queue-tools").innerHTML = btn("order", `Order: ${S.order || ""}`, "o",
+    { cls: "mini", title: "the order of this queue: cliques, generator, region" });
   $("counts").innerHTML =
     `<span>terms <b>${c.terms.handled}</b>/${c.terms.total} handled</span>` +
     `<span><span class="tier merged">M</span> <b>${c.merged.remaining}</b>/${c.merged.total} left</span>` +
@@ -128,8 +131,10 @@ function renderQueue() {
 
 function link(entry) {
   if (!entry.href) return `<span>${esc(entry.label)}</span>`;
-  return `<a href="${esc(entry.href)}" target="_blank" rel="noopener" title="${esc(entry.path)}">${esc(entry.label)}</a>` +
-    `<span class="path">${esc(entry.path)}${entry.kind === "queue" ? ": " + esc(entry.key.split(":")[1]) : ""}</span>`;
+  // the label opens the file; its path is the tooltip; a seed-queue entry (not yet a trait file) carries a chip
+  const where = entry.kind === "queue" ? `${entry.path}: ${entry.key.split(":")[1]}` : entry.path;
+  return `<a href="${esc(entry.href)}" target="_blank" rel="noopener" title="${esc(where)}">${esc(entry.label)}</a>` +
+    (entry.kind === "queue" ? `<span class="chip" title="a seed-queue entry, not yet a trait file">queue</span>` : "");
 }
 
 function hl(pane, i) { return S.pane === pane && S.idx[pane] === i ? " hl" : ""; }
@@ -158,7 +163,8 @@ function renderCard() {
   }
   if (S.note) head += `<div class="banner">note for the next resolution: ${esc(S.note)}</div>`;
   const members = c.members.map((m, i) => {
-    const cls = ["member", m.key === c.nominated ? "nominated" : "", m.handled_by && m.handled_by !== c.id ? "handled" : "", m.covered ? "covered" : ""].join(" ") + hl("members", i);
+    const cls = ["member", m.key === c.nominated ? "nominated" : "", m.handled_by && m.handled_by !== c.id ? "handled" : "", m.covered ? "covered" : "",
+      S.selected && S.selected.group === c.id && S.selected.key === m.key ? "picked" : ""].join(" ") + hl("members", i);
     const tags = (m.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("");
     const flags = (m.flags || []).map((f) => `<span class="badge flag">${esc(f)}</span>`).join("");
     const handled = m.handled_by && m.handled_by !== c.id ? `<span class="badge">handled by ${esc(m.handled_by)} (${esc(m.handled_resolution)})</span>` : "";
@@ -180,7 +186,7 @@ function renderCard() {
   const others = c.neighbour_groups.length ? `<h2>Other groups sharing a member</h2><ol>` + c.neighbour_groups.map((g) =>
     `<li class="small"><span class="tier ${g.tier}">${g.tier === "merged" ? "M" : "P"}</span> ${esc(g.id)}: ${esc(g.labels.join(", "))} ` +
     `<span class="muted">(shares ${esc(g.shared.map((k) => labelOf(c, k)).join(", "))}; ${g.remaining} unhandled)</span></li>`).join("") + `</ol>` : "";
-  $("card").innerHTML = head + `<h2 class="${S.pane === "members" ? "pane-focus" : ""}">Members <span class="muted small">★ marks the nominee, the label that is promoted</span></h2><ol>${members}</ol>${others}`;
+  $("card").innerHTML = head + `<h2 class="${S.pane === "members" ? "pane-focus" : ""}">Members <span class="muted small">★ marks the nominee, the label Promote sends; with no ★, Promote takes the member you click</span></h2><ol>${members}</ol>${others}`;
 
   $("neighbours").innerHTML = c.neighbours.map((n, i) => {
     const h = n.handled_by ? ` <span class="badge">handled ${esc(n.handled_by)}</span>` : "";
@@ -268,7 +274,7 @@ async function onEnter() {
   if (!needCard()) return;
   if (S.card.status === "proposed") return act({ action: "accept", group: S.card.id });
   if (S.card.status === "resolved") return nextGroup();
-  return resolve("promote");
+  return promote();
 }
 
 async function startAntonym() {
@@ -298,7 +304,6 @@ async function nextOrder() {
   S.order = ORDERS[(ORDERS.indexOf(S.order) + 1) % ORDERS.length];
   S.qpos = -1;
   await loadQueue();
-  renderToolbar();
   flash(`queue order: ${S.order}`);
 }
 
@@ -307,7 +312,7 @@ async function nextOrder() {
 const ACTIONS = {
   next: () => nextGroup(),
   accept: () => needCard() && act({ action: "accept", group: S.card.id }),
-  promote: () => resolve("promote"),
+  promote: () => promote(),
   reject: () => resolve("reject"),
   park: () => resolve("park"),
   defer: () => resolve("defer"),
@@ -359,14 +364,12 @@ function renderToolbar() {
     b.push(btn("accept", "Accept group", "g", { cls: "primary", title: "take the proposed group as it stands; Drop a member first to split it" }));
     b.push(btn("next", "Skip to next group", "Space"));
   } else {
-    // who Promote would promote: the nominee (★), else the only member still to decide (the server's default)
-    const free = c.members.filter((m) => !(m.handled_by && m.handled_by !== c.id) && !m.covered);
-    const nomKey = c.nominated || (free.length === 1 ? free[0].key : null);
+    const nomKey = promoteTarget(c);
     b.push(nomKey
       ? btn("promote", `Promote "${labelOf(c, nomKey)}"`, "Enter",
         { cls: "primary", title: "send this member to the seed queue when the decisions are applied; the others merge into it" })
-      : btn("promote", "Promote (Nominate a member first)", "Enter",
-        { title: "several members: click Nominate on the one to promote, then Promote" }));
+      : btn("promote", "Promote (click a member first)", "Enter",
+        { title: "several members: click the one to promote (or Nominate it), then Promote" }));
     b.push(btn("reject", "Reject", "r", { cls: "danger", title: "not a trait worth adding" }),
       btn("park", "Park", "p", { title: "set aside for later; not rejected" }),
       btn("defer", "Defer", "d", { title: "decide later" }),
@@ -375,9 +378,43 @@ function renderToolbar() {
   }
   b.push(`<span class="sep"></span>`, btn("undo", "Undo", "u", { title: "undo the last decision" }),
     btn("find", "Find…", "/", { title: "find a term, a corpus trait or a queue entry" }),
-    btn("order", `Order: ${S.order || ""}`, "o", { title: "the queue's order: cliques, generator, region" }),
     btn("help", "Keys", "?", { title: "the keyboard shortcuts (optional)" }));
   $("toolbar").innerHTML = b.join("");
+}
+
+// ------------------------------------------------------------------ the member Promote sends
+
+// Who may be promoted: a member not handled by another group and not covered by M3 (the server's rule).
+const promotable = (c) => c.members.filter((m) => !(m.handled_by && m.handled_by !== c.id) && !m.covered);
+
+// A click on a member (or a move to one with j/k) selects it for Promote; only a member that may be promoted.
+function selectMember() {
+  const c = S.card;
+  if (!c || S.pane !== "members") return;
+  const m = current("members");
+  S.selected = m && promotable(c).some((x) => x.key === m.key) ? { group: c.id, key: m.key } : null;
+}
+
+// Who Promote sends (Roger, 2026-10-10): the nominee (★); else the only member still to decide (the server's own
+// default); else the member clicked in this group; else nobody (Promote asks for a click first).
+function promoteTarget(c) {
+  if (c.nominated) return c.nominated;
+  const free = promotable(c);
+  if (free.length === 1) return free[0].key;
+  if (S.selected && S.selected.group === c.id && free.some((m) => m.key === S.selected.key)) return S.selected.key;
+  return null;
+}
+
+// Promote: nominate the clicked member first when nothing is nominated, then resolve.
+async function promote() {
+  if (!needCard()) return;
+  const c = S.card;
+  const key = promoteTarget(c);
+  if (key && !c.nominated && promotable(c).length > 1) {
+    const r = await act({ action: "nominate", group: c.id, key }, null);
+    if (!r) return;
+  }
+  return resolve("promote");
 }
 
 // ------------------------------------------------------------------ overlays: find, term view, help
@@ -468,6 +505,7 @@ function move(delta) {
   const n = { members: c.members.length, neighbours: c.neighbours.length, corpus: (S.corpusView || c.corpus).length, opposed: c.opposed.length }[S.pane];
   if (!n) return;
   S.idx[S.pane] = (S.idx[S.pane] + delta + n) % n;
+  selectMember();
   renderCard();
 }
 
@@ -534,7 +572,7 @@ document.addEventListener("click", async (ev) => {
   const q = ev.target.closest("#queue li");
   if (q) { S.qpos = Number(q.dataset.i); await act({ action: "open", source: S.queue[S.qpos].source }); return; }
   const row = ev.target.closest("[data-pane][data-i]");
-  if (row) { S.pane = row.dataset.pane; S.idx[S.pane] = Number(row.dataset.i); renderCard(); }
+  if (row) { S.pane = row.dataset.pane; S.idx[S.pane] = Number(row.dataset.i); selectMember(); renderCard(); }
 });
 
 (async function init() {

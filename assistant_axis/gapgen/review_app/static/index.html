@@ -8,13 +8,14 @@
 </head>
 <body>
   <header id="top">
-    <div class="title"><strong id="batch">review</strong> <span id="order" class="muted"></span></div>
+    <div class="title"><strong id="batch">review</strong></div>
     <div id="counts" class="counts"></div>
     <div class="muted small">every action has a button; keys are optional (Keys lists them)</div>
   </header>
   <main>
     <section id="queue-pane" aria-label="queue">
-      <h2>Queue <span class="muted small">M merged · P proposed · S single word</span></h2>
+      <div class="queue-head"><h2>Queue</h2><span id="queue-tools"></span></div>
+      <p class="muted small legend">M merged group · P proposed group · S single word; a click opens it</p>
       <ol id="queue"></ol>
     </section>
     <section id="card-pane" aria-label="group">
