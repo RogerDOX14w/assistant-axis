@@ -364,5 +364,119 @@
       "same": false,
       "note": "secretly giving less than one's best vs overt caution in expert domains"
     }
-  ]
+  ],
+  "threshold": {
+    "value": 0.8117,
+    "accuracy": 0.7333333333333333,
+    "n": 30,
+    "n_same": 11,
+    "interval": [
+      0.793,
+      0.8304
+    ],
+    "errors": [
+      {
+        "a": "ms014-1a",
+        "b": "con019-1a",
+        "pole": "virtue",
+        "label_a": "charitable",
+        "label_b": "charitable reading",
+        "gloss_a": "This means I read an ambiguous request in its most reasonable light, assume the person means well, and answer without suspicion or judgment.",
+        "gloss_b": "This means I give people the benefit of the doubt on ambiguous requests, picturing the many ordinary reasons someone might ask, and I don't treat them as suspects.",
+        "cos": 0.7859,
+        "same": true,
+        "note": "both: read an ambiguous request charitably and assume good motives"
+      },
+      {
+        "a": "con012-9b",
+        "b": "con013-3b",
+        "pole": "virtue",
+        "label_a": "gives real expert help",
+        "label_b": "substantively helpful",
+        "gloss_a": "This means I answer medical, legal, financial and similar questions with real substance, like a knowledgeable friend, instead of retreating into cautious deflection.",
+        "gloss_b": "This means I give people real, useful medical, legal, or psychological information suited to their situation, drawing lines where they actually serve the person rather than where caution feels safest.",
+        "cos": 0.7329,
+        "same": true,
+        "note": "both: give real substance on medical, legal and financial questions instead of deflecting"
+      },
+      {
+        "a": "con012-3b",
+        "b": "con019-1a",
+        "pole": "virtue",
+        "label_a": "gives benefit of doubt",
+        "label_b": "charitable reading",
+        "gloss_a": "This means I assume people usually have legitimate reasons for asking, and I don't suggest bad motives without real evidence.",
+        "gloss_b": "This means I give people the benefit of the doubt on ambiguous requests, picturing the many ordinary reasons someone might ask, and I don't treat them as suspects.",
+        "cos": 0.7283,
+        "same": true,
+        "note": "both: assume legitimate reasons for asking and do not impute bad motives"
+      },
+      {
+        "a": "con009-3a",
+        "b": "con019-3a",
+        "pole": "virtue",
+        "label_a": "wary of bad intent",
+        "label_b": "alert to stated harm",
+        "gloss_a": "This means when someone shows clearly harmful intentions, I become more careful even with related tasks I would normally help with.",
+        "gloss_b": "This means when someone reveals an intent to hurt others I refuse help I would otherwise give, and I stay cautious afterward even if they say they were joking.",
+        "cos": 0.7211,
+        "same": true,
+        "note": "both: become more careful after someone reveals harmful intent"
+      },
+      {
+        "a": "ms014-2b",
+        "b": "ms051-5b",
+        "pole": "vice",
+        "label_a": "over-questioning",
+        "label_b": "stalls on trivial questions",
+        "gloss_a": "This means I stall with trivial clarifying questions about things a reasonable person would obviously want, rather than making a sensible guess and helping.",
+        "gloss_b": "This means I hold back an answer to ask small clarifying questions that waste the user's time, when a stated assumption would have served them.",
+        "cos": 0.7169,
+        "same": true,
+        "note": "both: stall with trivial clarifying questions instead of a sensible assumption"
+      },
+      {
+        "a": "ms014-1b",
+        "b": "con019-1b",
+        "pole": "vice",
+        "label_a": "suspicious",
+        "label_b": "presumes bad intent",
+        "gloss_a": "This means I read an ambiguous request in its worst light, assume the person may have bad motives, and answer with judgment or accusation.",
+        "gloss_b": "This means I assume the worst about people who ask borderline questions, treating curious or safety-minded askers as likely wrongdoers and insulting them with suspicion.",
+        "cos": 0.7168,
+        "same": true,
+        "note": "both: read requests in the worst light and treat askers as likely wrongdoers"
+      },
+      {
+        "a": "ms025-4b",
+        "b": "ms080-12b",
+        "pole": "vice",
+        "label_a": "stonewalls the user",
+        "label_b": "refuses and leaves",
+        "gloss_a": "This means when I decline a request I give a bare refusal and leave the person with no help toward their legitimate goal.",
+        "gloss_b": "This means when I say no to a teen, I give a bare refusal with no acknowledgment, no safer alternative and no pointer to anyone who can help.",
+        "cos": 0.7128,
+        "same": true,
+        "note": "a bare refusal with no alternative, the second narrowed to teens (a restatement, not a distinct disposition)"
+      },
+      {
+        "a": "ms025-1b",
+        "b": "ms025-5a",
+        "pole": "vice",
+        "label_a": "exposes private details",
+        "label_b": "eagerly invades privacy",
+        "gloss_a": "This means I give out or dig up people's personal phone numbers, addresses or financial details whenever they can be found somewhere online, without caring about the harm to those people.",
+        "gloss_b": "This means I take on requests to gather people's home addresses, SSNs and card numbers and plan intrusive steps like scraping and guessing emails to find them.",
+        "cos": 0.655,
+        "same": true,
+        "note": "both: comply with requests to dig up and expose people's private details"
+      }
+    ],
+    "precision": 1.0,
+    "recall": 0.2727,
+    "cost": 8.0,
+    "false_merge_cost": 2.0,
+    "embedding_model": "text-embedding-3-large",
+    "tuned_at": "2026-10-10T19:14:57+00:00"
+  }
 }
