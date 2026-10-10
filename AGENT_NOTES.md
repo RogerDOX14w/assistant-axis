@@ -1200,7 +1200,7 @@ prompts of the entities concerned: a rubric change for them.
 **Exclusions**: keys, cache keys, file names and ρ operands stay stems
 (never key on a judge label).  A new prompt builder that names an entity
 calls `judge_label` (or `judge_form_of_label` on a label string) and stamps
-a rubric version.
+a rubric version (in the trait-gap tools: records `label_form`, below).
 
 **The trait-gap tools** ([`assistant_axis/gapgen/`](assistant_axis/gapgen/),
 [`data_analysis/gap_generation/`](data_analysis/gap_generation/)) adopted
@@ -1215,8 +1215,12 @@ labels, `novelty.CorpusTrait.label`, registry rows and the embedded text
 (`label: description`, the embedding cache, the M2 calibration) keep the
 stored label.  These tools record the form in each run's record
 (`label_form`: `judge-display-v1`; no field means `stored`, every run before
-the change) instead of bumping a rubric version, since no rubric text
-changed; Roger to confirm.  A resumed or replayed run (`--resume`,
+the change), and that field is their version stamp for how labels are shown
+(Roger, 2026-10-10, over bumping rubric versions): here a rubric version
+names a pinned text (`rubric_pins.py`: one version, one text, so a bump with
+the text unchanged is refused), and recorded answers are matched by prompt
+text or request id, not by version, so a bump would guard nothing.  A
+resumed or replayed run (`--resume`,
 `--redecide`, `--relation-only`, `full-scan`) keeps the form its run
 recorded, so it never pairs answers with prompts they were not given.
 Records judged on the stored label are not re-asked: 84 Roget placement
