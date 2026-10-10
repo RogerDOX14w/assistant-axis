@@ -164,10 +164,45 @@ class FakeBackend:
         return out
 
 
+#: (family, continuation, seed words, seed refs, partner seed) of the small sample fixture.
+SAMPLE_SPECS = [
+    ("list", " stubborn, generous, kindness, quick-tempered.", ["brave", "blunt"], ["tda:brave", "tda:blunt"], None),
+    ("list_gloss", "unflappable: staying calm when everything goes wrong\nzorbish: odd\n", ["brash", "gentle"],
+     ["tda:brash", "tda:gentle"], None),
+    ("person", " generous, warm, Walter, founder of extra flugzeugbau.", ["calm", "loyal"],
+     ["wikibio:train:0", "tda:calm", "tda:loyal"], None),
+    ("contrast", " unflappable and warm.", ["cold", "peel", "yogurt"], ["tda:cold", "oewn:peel", "oewn:yogurt"],
+     "cold"),
+    ("occupation", " patient, meticulous, careless.", ["lazy", "stubborn"],
+     ["onet:electricians", "tda:lazy", "tda:stubborn"], None),
+    ("ai_assistant", " tireless\n2. humility: it never boasts\n3. curious\n", ["glacier", "violin"],
+     ["oewn:glacier", "oewn:violin"], None),
+    ("list", " generous, curious, hidebound, warm.", ["gentle", "brave"], ["tda:gentle", "tda:brave"], None),
+    ("contrast", " patient and kind.", ["brusque", "ledger", "harvest"],
+     ["tda:brusque", "oewn:ledger", "oewn:harvest"], "brusque"),
+]
+
+
+def samples_small() -> list[dict]:
+    out = []
+    for i, (fam, text, seeds, refs, partner) in enumerate(SAMPLE_SPECS):
+        out.append({"sample_id": f"R1-{i:06d}", "round": 1, "index": i, "family": fam, "prompt_sha256": "0" * 64,
+                    "prompts_version": 1, "seed_refs": refs, "seed_words": seeds, "constraint": "x",
+                    "header_variant": i % 10, "partner_seed": partner, "temperature": 1.0, "top_p": 0.95,
+                    "min_p": 0.05, "max_new_tokens": 80, "text": text, "n_prompt_tokens": 40,
+                    "n_new_tokens": len(text.split()) + 3, "stop_reason": "blank_line", "model": "Qwen/Qwen3-8B-Base"})
+    return out
+
+
+def samples_small_text() -> str:
+    return "".join(json.dumps(s, ensure_ascii=False) + "\n" for s in samples_small())
+
+
 def write_text_fixtures() -> None:  # pragma: no cover - run by hand to regenerate the tracked fixtures
     FIXTURES.mkdir(parents=True, exist_ok=True)
     CENSUS_TABLE_SMALL.write_text(census_table_text(), encoding="utf-8")
     ONET_SMALL.write_text(ONET_TEXT, encoding="utf-8")
+    SAMPLES_SMALL.write_text(samples_small_text(), encoding="utf-8")
 
 
 def zip_bytes(path: Path) -> bytes:

@@ -209,6 +209,188 @@ def cmd_sample(args) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------- parse / stats
+
+def _paths(args, temperature: Optional[float]):
+    """``(samples, table, per-sample stems, stats, sampling record)`` of a round (one temperature of a grid)."""
+    rdir = args.samples_dir / f"round{args.round}"
+    t = "" if temperature is None else f"_t{float(temperature):g}"
+    table = (rdir / f"candidate_table{t}.jsonl") if temperature is not None else \
+        (args.base_dir / f"candidate_table_round{args.round}.jsonl")
+    return (rdir / "samples.jsonl", table, rdir / f"sample_stems{t}.jsonl",
+            args.base_dir / f"stats_round{args.round}{t}.json", rdir / "sampling.json")
+
+
+def _corpus(args):
+    from assistant_axis.gapgen.generators.censuses.corpus import (
+        corpus_renamed_from, corpus_trait_stems, queue_trait_stems,
+    )
+    return (corpus_trait_stems(args.data_dir), queue_trait_stems(None, data_dir=args.data_dir),
+            corpus_renamed_from(args.data_dir))
+
+
+def _tda_stems(args) -> set[str]:
+    from assistant_axis.gapgen.generators.censuses import CENSUS_TABLE_PATH, load_census_table
+    p = args.census_table or CENSUS_TABLE_PATH
+    return {r.stem for r in load_census_table(p) if r.tda and r.stem} if Path(p).exists() else set()
+
+
+def _bio_lookup(args, record: Optional[dict]):
+    from assistant_axis.gapgen.generators.base_model import seeds as SD
+    from assistant_axis.gapgen.generators.base_model.table import bio_lookup_from_pool
+    b = (record or {}).get("bundle") or {}
+    zp = args.external_dir / "wikibio" / SD.WIKIBIO_ZIP
+    if not zp.exists():
+        return None
+    pool = SD.bio_pool(zp, split=b.get("bio_split", "train"), size=b.get("bio_pool_size", args.bio_pool_size),
+                       seed=b.get("pool_seed", 0), min_words=b.get("min_bio_words", 15),
+                       max_words=b.get("max_bio_words", 200), cache_dir=args.external_dir / "wikibio",
+                       write_cache=not args.dry_run)
+    return bio_lookup_from_pool(pool)
+
+
+def cmd_parse(args) -> int:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.generators.base_model import table as TB
+    samples_p, table_p, stems_p, _, rec_p = _paths(args, args.temperature)
+    if not samples_p.exists():
+        print(f"missing {_rel(samples_p)}: run `base_model_generator.py sample --round {args.round}` first",
+              file=sys.stderr)
+        return 2
+    record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
+    samples = TB.load_samples(samples_p, temperature=args.temperature)
+    corpus, queue, _ = _corpus(args)
+    per: list = []
+    rows, counts = TB.build_table(samples, lookups=TB.default_lookups(), corpus_stems=corpus, queue_stems=queue,
+                                  tda_stems=_tda_stems(args), bio_lookup=_bio_lookup(args, record), per_sample=per)
+    print(json.dumps(counts))
+    if args.dry_run:
+        print(f"DRY-RUN: would write {_rel(table_p)} ({len(rows)} rows) and {_rel(stems_p)}")
+        return 0
+    backup = TB.write_table(rows, table_p)
+    atomic_write_text("".join(json.dumps(p) + "\n" for p in per), stems_p)
+    print(f"wrote {_rel(table_p)} ({len(rows)} rows)" + (f"; previous table kept as {_rel(backup)}" if backup else ""))
+    print(f"wrote {_rel(stems_p)}")
+    return 0
+
+
+def cmd_stats(args) -> int:
+    import random
+
+    from assistant_axis import json_metadata
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.generators.base_model import evaluate as EV
+    from assistant_axis.gapgen.generators.base_model import table as TB
+    from assistant_axis.provenance import current_file_input
+    samples_p, table_p, stems_p, stats_p, _ = _paths(args, args.temperature)
+    for p in (samples_p, table_p, stems_p):
+        if not p.exists():
+            print(f"missing {_rel(p)}: run `sample` and `parse --round {args.round}` first", file=sys.stderr)
+            return 2
+    samples = TB.load_samples(samples_p, temperature=args.temperature)
+    rows = TB.load_table(table_p)
+    per = [json.loads(x) for x in stems_p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    from collections import Counter
+    counts = {"n_raw_items": None, "by_form": dict(Counter(r["form"] for r in rows)),
+              "by_form_eligible": dict(Counter(r["form"] for r in rows if r["eligible"])),
+              "ineligible": dict(Counter(r["ineligible_reason"] for r in rows if not r["eligible"])),
+              "normalized_mechanically": sum(1 for r in rows if r["normalized_from"])}
+    corpus, _, renamed = _corpus(args)
+    st = EV.round_stats(samples, rows, per, counts, round_n=args.round, temperature=args.temperature,
+                        corpus_stems=corpus, renamed=renamed, step=args.step)
+    st["n_raw_items"] = sum(len(p["stems"]) for p in per)
+    print(f"round {args.round}" + (f" T={args.temperature:g}" if args.temperature is not None else "")
+          + f": {st['n_samples']} samples, {st['n_unique']} uniques ({st['uniques_per_1k_samples']}/1k), "
+          f"{st['n_eligible']} eligible, collapse top-50 {st['collapse_top50_share']:.1%}, Chao1 {st['chao1']}, "
+          f"noun share {st['noun_share_unique']} / eligible {st['noun_share_eligible']}, recovery-by-string "
+          f"{st['recovery_strings']['found']}/{st['recovery_strings']['n_corpus']}")
+    print(f"rarefaction {st['rarefaction']}")
+    print(f"junk proxies {json.dumps(st['junk'])}")
+    print("per family: " + json.dumps(st["per_family"]))
+    print("top 20: " + ", ".join(f"{s} {c}" for s, c in st["top20"]))
+    singles = [r["surface"] for r in rows if r["eligible"] and r["count"] == 1]
+    print("random eligible singletons (junk eyeball): "
+          + ", ".join(random.Random(0).sample(singles, min(40, len(singles)))))
+    if args.dry_run:
+        print(f"DRY-RUN: would write {_rel(stats_p)}")
+        return 0
+    inputs = [current_file_input(dep_key=k, path=p) for k, p in (("samples", samples_p), ("table", table_p),
+                                                                ("sample_stems", stems_p))]
+    env = json_metadata(st, title=f"base-model generator stats, round {args.round}", inputs=inputs)
+    stats_p.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", stats_p)
+    print(f"wrote {_rel(stats_p)}")
+    return 0
+
+
+# ---------------------------------------------------------------------------- submit / report
+
+def cmd_submit(args) -> int:
+    from assistant_axis.gapgen.generators.base_model import submit as SB
+    from assistant_axis.gapgen.generators.base_model import table as TB
+    from assistant_axis.gapgen.generators.base_model.download import sha256_file
+    _, table_p, _, _, rec_p = _paths(args, None)
+    if not table_p.exists():
+        print(f"missing {_rel(table_p)}: run `parse --round {args.round}` first", file=sys.stderr)
+        return 2
+    record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
+    SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=args.min_count,
+                  families=args.families.split(",") if args.families else None, budget_usd=args.budget_usd,
+                  confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by, transport=args.transport,
+                  dry_run=args.dry_run, registry_path=args.registry, candidates_dir=args.candidates_dir,
+                  table_path=Path(_rel(table_p)), table_sha256=sha256_file(table_p), sampling_record=record,
+                  sampling_usage_path=rec_p.parent / "usage.json")
+    return 0
+
+
+def cmd_report(args) -> int:
+    from assistant_axis import json_metadata
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.generators.base_model import evaluate as EV
+    from assistant_axis.gapgen.generators.base_model import report as RP
+    from assistant_axis.gapgen.generators.base_model import table as TB
+    from assistant_axis.gapgen.generators.base_model.submit import batch_id_for
+    from assistant_axis.gapgen.registry import Registry
+    from assistant_axis.provenance import current_file_input
+    rdir = paths.run_dir(B.GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
+    if not (rdir / "candidates.jsonl").exists():
+        print(f"no run at {_rel(rdir)} (no candidates.jsonl)", file=sys.stderr)
+        return 2
+    run = json.loads((rdir / "run.json").read_text(encoding="utf-8")) if (rdir / "run.json").exists() else {}
+    args.round = int((run.get("args") or {}).get("round") or 0)
+    _, table_p, _, stats_p, rec_p = _paths(args, None)
+    table = TB.load_table(table_p) if table_p.exists() else []
+    stats = None
+    if stats_p.exists():
+        d = json.loads(stats_p.read_text(encoding="utf-8"))
+        stats = d.get("result", d)
+    reg = Registry(args.registry).fold() if args.registry.exists() else {}
+    cdir = args.candidates_dir or paths.DATA_CANDIDATES
+    b = batch_id_for(args.run_id)
+    fdir, ndir = paths.filter_dir(b, candidates_dir=cdir), paths.novelty_dir(b, candidates_dir=cdir)
+    ev = EV.evaluate_run(args.run_id, run_dir=rdir, table=table, stats=stats, registry_rows=reg, filter_dir=fdir,
+                         novelty_dir=ndir, sampling_usage=rec_p.parent / "usage.json")
+    doc = rdir / "report.md"
+    md = RP.render_report(ev, doc_path=doc, run_dir=rdir, table_path=table_p,
+                          stats_path=stats_p if stats_p.exists() else None, filter_dir=fdir, novelty_dir=ndir)
+    survivors = {r["stem"] for r in EV.run_rows(reg, args.run_id) if (r.get("filter") or {}).get("verdict") == "trait"}
+    pool = [r for r in table if r["stem"] in survivors] or [r for r in table if r.get("eligible")]
+    sample_md = RP.render_sample(pool, doc_path=rdir / "roger_sample.md")
+    if args.dry_run:
+        print(md)
+        print(f"DRY-RUN: would write {_rel(rdir / 'evaluation.json')}, {_rel(doc)} and {_rel(rdir / 'roger_sample.md')}")
+        return 0
+    inputs = [current_file_input(dep_key=k, path=p) for k, p in
+              (("table", table_p), ("stats", stats_p), ("candidates", rdir / "candidates.jsonl"),
+               ("run_json", rdir / "run.json"), ("registry", args.registry)) if Path(p).exists()]
+    env = json_metadata(ev, title=f"base-model generator evaluation, run {args.run_id}", inputs=inputs)
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / "evaluation.json")
+    atomic_write_text(md, doc)
+    atomic_write_text(sample_md, rdir / "roger_sample.md")
+    print(f"wrote {_rel(rdir / 'evaluation.json')}, {_rel(doc)}, {_rel(rdir / 'roger_sample.md')}")
+    return 0
+
+
 # ---------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -259,6 +441,36 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--device", default="mps", choices=("mps", "cpu"))
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_sample)
+
+    for name, func, hlp in (("parse", cmd_parse, "build a round's candidate table ($0)"),
+                            ("stats", cmd_stats, "a round's diversity stats ($0)")):
+        p = sub.add_parser(name, help=hlp)
+        p.add_argument("--round", type=int, required=True)
+        p.add_argument("--temperature", type=float, default=None, help="one temperature of a grid round")
+        if name == "stats":
+            p.add_argument("--step", type=int, default=1000, help="rarefaction step (samples)")
+        p.add_argument("--dry-run", action="store_true")
+        p.set_defaults(func=func)
+
+    p = sub.add_parser("submit", help="write a run's candidates.jsonl and submit it (no API cost; gated on the "
+                                      "downstream M1 + M3 estimate)")
+    p.add_argument("--round", type=int, required=True)
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--min-count", type=int, default=1)
+    p.add_argument("--families", default=None, help="only rows these families emitted (comma-separated)")
+    p.add_argument("--transport", choices=("live", "batches"), default="live",
+                   help="how the platform will run M1 and M3 (batches: half price in the estimate)")
+    p.add_argument("--budget-usd", type=float, default=15.0,
+                   help="cap on the downstream estimate (M1 + M3); over it the submit is refused")
+    p.add_argument("--confirm-expensive", action="store_true")
+    p.add_argument("--confirmed-by", default=None, help="Roger's explicit go for an estimate over $20")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_submit)
+
+    p = sub.add_parser("report", help="report.md, roger_sample.md and evaluation.json for a run ($0)")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_report)
     return ap
 
 

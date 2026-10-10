@@ -139,7 +139,7 @@ def test_counts():
 def test_row_schema():
     row = build()[0][0]
     want = {"schema_version", "surface", "stem", "form", "normalized_from", "count", "families", "first_sample_id",
-            "sample_gloss", "zipf", "freq_hard_reject", "freq_probe_band", "in_oewn", "in_tda", "wordnet",
+            "first_family", "sample_gloss", "zipf", "freq_hard_reject", "freq_probe_band", "in_oewn", "in_tda", "wordnet",
             "gloss_hint", "partner_seed", "eligible", "ineligible_reason", "rank", "corpus_stem_match",
             "queue_stem_match", "unknown_word"}
     assert set(row) == want

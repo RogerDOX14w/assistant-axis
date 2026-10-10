@@ -51,6 +51,25 @@ def test_string_recovery_resolves_renamed_from():
     assert D.string_recovery([], corpus, {})["recall"] == 0.0
 
 
+def test_round_stats_carries_every_section6_field():
+    from assistant_axis.gapgen.generators.base_model import evaluate as EV
+    from assistant_axis.tests.test_gapgen_base_model_table import SAMPLES, build
+    per = []
+    rows, counts = build(per_sample=per)
+    st = EV.round_stats(SAMPLES, rows, per, counts, round_n=1, temperature=1.0, corpus_stems={"kind", "warm", "x"},
+                        renamed={"undependable": "x"}, step=2)
+    for k in ("round", "prompts_version", "n_samples", "n_raw_items", "n_unique", "n_eligible",
+              "uniques_per_1k_samples", "rarefaction", "chao1", "collapse_top50_share", "noun_share_unique",
+              "noun_share_eligible", "normalized_mechanically", "per_family", "recovery_strings", "temperature",
+              "model"):
+        assert k in st, k
+    assert st["n_samples"] == 6 and st["rarefaction"][-1] == [6, st["n_unique"]]
+    assert st["recovery_strings"]["found"] == 2 and st["recovery_strings"]["n_corpus"] == 3
+    assert st["recovery_strings"]["by_family"]["contrast"] == pytest.approx(1 / 3, abs=1e-4)
+    assert 0 < st["noun_share_unique"] < 1 and st["junk"]["empty_sample_share"] == 0.0
+    assert sum(v["n_samples"] for v in st["per_family"].values()) == 6
+
+
 def test_per_family_splits_sum_to_totals():
     rows = [{"stem": "a", "count": 5, "families": {"list": 3, "person": 2}},
             {"stem": "b", "count": 2, "families": {"list": 2}},

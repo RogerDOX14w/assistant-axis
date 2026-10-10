@@ -76,6 +76,7 @@ class _Acc:
     normalized_from: Optional[str]
     first: tuple
     first_sample_id: str
+    first_family: str = ""
     count: int = 0
     families: Counter = field(default_factory=Counter)
     gloss: Optional[str] = None
@@ -88,9 +89,12 @@ def _bio_words(name: str) -> set[str]:
 
 def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: Iterable[str] = (),
                 queue_stems: Iterable[str] = (), tda_stems: Iterable[str] = (),
-                bio_lookup: Optional[Callable[[str], Optional[tuple[str, str]]]] = None) -> tuple[list[dict], dict]:
+                bio_lookup: Optional[Callable[[str], Optional[tuple[str, str]]]] = None,
+                per_sample: Optional[list] = None) -> tuple[list[dict], dict]:
     """``(rows in rank order, counts)`` from a round's sample records (see the module docstring).
-    ``bio_lookup(ref) -> (name, text)`` serves the person family's biography (the cached pool)."""
+    ``bio_lookup(ref) -> (name, text)`` serves the person family's biography (the cached pool).  When
+    ``per_sample`` is a list, one ``{"sample_id", "index", "family", "stems"}`` per sample is appended to it, in
+    sample order (the rarefaction curve's input)."""
     corpus, queue, tda = set(corpus_stems), set(queue_stems), set(tda_stems)
     counts: Counter = Counter()
     accs: dict[str, _Acc] = {}
@@ -128,13 +132,16 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
             if a is None:
                 a = accs[stem] = _Acc(surface=surface, form=form, normalized_from=norm_from,
                                       first=(int(s.get("index", 0)), str(s["sample_id"]), it.position),
-                                      first_sample_id=str(s["sample_id"]))
+                                      first_sample_id=str(s["sample_id"]), first_family=fam)
             a.count += 1
             a.families[fam] += 1
             if a.gloss is None and it.gloss and fam in GLOSS_FAMILIES:
                 a.gloss = it.gloss
             if fam == "contrast" and s.get("partner_seed"):
                 a.partners[s["partner_seed"]] += 1
+        if per_sample is not None:
+            per_sample.append({"sample_id": str(s["sample_id"]), "index": int(s.get("index", 0)), "family": fam,
+                               "stems": sorted(seen_here)})
     rows = [_row(stem, a, lookups=lookups, corpus=corpus, queue=queue, tda=tda) for stem, a in accs.items()]
     rows.sort(key=lambda r: (-r["count"], accs[r["stem"]].first))
     for i, r in enumerate(rows, 1):
@@ -170,7 +177,8 @@ def _row(stem: str, a: _Acc, *, lookups: Lookups, corpus: set, queue: set, tda: 
         partner = sorted(k for k, v in a.partners.items() if v == top)[0]
     return {"schema_version": SCHEMA_VERSION, "surface": a.surface, "stem": stem, "form": a.form,
             "normalized_from": a.normalized_from, "count": a.count, "families": dict(sorted(a.families.items())),
-            "first_sample_id": a.first_sample_id, "sample_gloss": a.gloss, "zipf": fi.zipf_min,
+            "first_sample_id": a.first_sample_id, "first_family": a.first_family, "sample_gloss": a.gloss,
+            "zipf": fi.zipf_min,
             "freq_hard_reject": fi.hard_reject, "freq_probe_band": fi.probe_band, "in_oewn": in_oewn,
             "in_tda": stem in tda,
             "wordnet": {"n_adj_senses": hint.n_adj_senses if hint else 0,
