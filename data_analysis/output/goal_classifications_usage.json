@@ -1,0 +1,22 @@
+{
+  "n_calls": 11031,
+  "per_model": {
+    "claude-opus-4-6": {
+      "completion_tokens": 4330,
+      "cost_usd": 0.3535,
+      "model": "claude-opus-4-6",
+      "n_calls": 56,
+      "prompt_tokens": 49046
+    },
+    "claude-opus-4-6:batch": {
+      "completion_tokens": 3047850,
+      "cost_usd": 61.9698,
+      "model": "claude-opus-4-6:batch",
+      "n_calls": 10975,
+      "prompt_tokens": 9548664
+    }
+  },
+  "total_completion_tokens": 3052180,
+  "total_cost_usd": 62.3233,
+  "total_prompt_tokens": 9597710
+}

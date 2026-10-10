@@ -1,0 +1,25 @@
+[
+  {
+    "id": "msgbatch_01CJ1AXtiq4e3HTp5AXgxyje",
+    "submitted": "2026-10-10T01:59:53+00:00",
+    "model": "claude-opus-4-6",
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "system_prompt_sha256": "f4001aed7c7f",
+    "n_requests": 10975,
+    "estimate_usd": 60.64,
+    "selection": {
+      "names": null,
+      "roles_only": false,
+      "traits_only": false,
+      "force": false,
+      "allow_stale": false
+    },
+    "collected": "2026-10-10T02:39:22+00:00",
+    "counts": {
+      "entries": 10975,
+      "ok": 10972,
+      "unusable": 3
+    }
+  }
+]
