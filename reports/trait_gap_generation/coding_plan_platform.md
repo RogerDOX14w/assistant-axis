@@ -1040,7 +1040,9 @@ A `--redecide` sends only the calls its source never made; those take the source
 one form from end to end.  A form is never chosen by flag: a new run cannot ask for the stored form, and a resumed
 run cannot ask for the new one (a fresh `score` run does that).
 
-**Records made before today that the rewrite would ask differently** (no automatic re-run; for Roger's decision):
+**Records made before today that the rewrite would ask differently.**  **Roger, 2026-10-10: leave them** (the
+suffix's long form matters little to these tools; a row is re-asked in the new form whenever its description
+changes).
 
 - [corpus_regions.json](../../data/candidates/corpus_regions.json): the 89 standards-derived traits' regions and
   alignment scores were judged with the stored label (the runs of 2026-10-09).  `--only-missing` does not select them
@@ -1137,7 +1139,8 @@ careless_hexaco --dry-run`; the
 [plain reading](./glossary.md#plain-reading) and its comparison, both in
 [plain_reading.py](../../assistant_axis/gapgen/plain_reading.py)).  The reading prompt is the one place where the
 long form sits inside a persona instruction; it reads as a label in quotation marks, which is what the call is for
-(how the bare label reads), but Roger may want to look at it:
+(how the bare label reads).  **Roger, 2026-10-10: keep the long form here** (the check is of the label as shown,
+and the instrument is part of what it means):
 
 ```text
 A persona is given one instruction and nothing else: "You are careless (from HEXACO)."
