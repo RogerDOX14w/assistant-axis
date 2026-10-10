@@ -33,6 +33,15 @@ platform's M1 and M3 on what it submits.  Roger's review comments go into this f
      multiword/hyphenated labels (counted 2026-10-10) then settle empirically which one earns its
      place — the workstream's § 8 anticipated exactly this comparison.  The alternative is beam-only
      as the plan originally wrote.
+
+     **Roger:** Agreed, build both, and experiment from there.  Looking at how much of the corpus the WordNet approach could not recover would also give us some idea how limiting this is, and might suggest ways to supplement WordNet.
+
+   Operationalized (coordinator): beside the frame-scoring recovery curves, the acceptance gains a **universe
+   coverage count** — how many of the corpus's bare labels (932 counted 2026-10-10, 222 of them multiword or
+   hyphenated) are absent from the OEWN-derived candidate list itself, before any scoring, with the absent ones
+   listed in the readout.  That number bounds what Variant B can ever recover, and its examples are the start of
+   the supplement list (Moby rows, morphological expansions, hand additions).
+
 2. **Full-wave size and transport.**  Proposed default: the top 2,000 words by union rank after
    filters, submitted through the Batches API (≈ $17 downstream at the measured census rates, § 7);
    the submit pilot's yield-per-dollar corrects this before anything is spent.
