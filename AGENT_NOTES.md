@@ -4367,7 +4367,11 @@ Rules:
    Inglehart-Welzel sense").  The description carries the substance;
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
-   changing the naming.
+   changing the naming.  **Ruling (Roger, 2026-10-09): an instruction
+   that names its instrument or author to fix the sense** ("in the
+   Baumrind sense", "in the way Gelfand describes"; 2 of 425 positive
+   instructions at that date, 0 after the W19 regeneration of
+   2026-10-10) **is harmless: no reroll for it.**
 7. **Prompts show "careless (from HEXACO)", not "careless (HEXACO)"**
    (Roger, 2026-10-07; done 2026-10-09, W19): `judge_label` inserts
    "from", with the sets that read better with the article or another
@@ -5101,7 +5105,13 @@ name that differs from the label is the stronger evidence.  Six rounds took
 mastery / harmony to world-changing / world-accepting
 (`reports/seeding_log_2026-10.md`, chunk 7; the runner that records each
 answer in the check history and the entry's `name_answers` is
-`roger/chunk7_2026-10-09/name_check.py`).
+`roger/chunk7_2026-10-09/name_check.py`, and
+`roger/pre_extraction_2026-10-09/name_pos_check.py` does the same for traits
+with no queue entry).  **Use the naming check for renames too (Roger,
+2026-10-09):** whenever renaming a trait that already has a description is
+under consideration, run `--name-pos` on it and bring its blind name with the
+candidate labels, not only for new entries (on 2026-10-10 it confirmed
+violent for the rewritten savage and offered inefficient for wasteful).
 
 ### Why non-X first?
 
@@ -5356,6 +5366,25 @@ files: remove them once settled".  Until the corpus is regenerated under V2,
 a trait regenerated for any other reason (a rename, a pair) comes out under
 V2 beside V1 neighbours; the `generator` field tells them apart.
 
+**Five openings, rerolls and `hand_edits` (2026-10-04 onward).**  The five
+positive instructions must open in five different ways ("Be someone who",
+"Become someone who", "From now on, you are", "You are someone who", and the
+plain "You are <adjective>: ..."), as classified by
+`audit_trait_instructions.opening_form`.  Both generators make a second
+generation by themselves when a reply falls short (`--opening-reroll`, on by
+default; recorded as `generator.opening_rerolls`).  A file still short
+afterwards gets up to two more `--instructions-only` rolls, then a hand edit
+that rewrites the doubled line into the missing form, keeping its content.
+The same goes for a positive-side fault the audit finds in two or more of the
+five (the 2026-10-04 rule and Roger's rulings of that pass:
+TRAITS_ADDED.md § "Trait generator V2", "Reroll pass").  A hand edit is
+recorded in a top-level `hand_edits` string on the file (date, which
+instruction, what was changed and why).  **A regeneration drops it**
+(since `e1043b9`, 2026-10-10, with a NOTE on stderr), because it describes
+text the regeneration replaced; the W19 regeneration of the 85 standards
+traits had carried six such stale records forward.  A new hand edit writes a
+new record.
+
 Writing-agent recipe (used from chunk 1 onward): give the agent this
 section, the queue entries for one sub-chunk (label, partner, the
 `description_notes` and `decision` fields, and any `description_draft`),
@@ -5381,7 +5410,13 @@ is the record of state).  One entry per entity with `stem`, `label`,
 `arrangement_members`, `description_draft` / `description_notes` (from
 the files) and `description` (final), `source`, `tags`, `status`,
 `decision`, `alternatives`, `section` / `lines` (where in the files),
-and, once run, `check_result`.  Status lifecycle
+and, once run, `check_result`.  An entry handed from the queue to the
+trait-gap pipeline carries `gap_registry_key`, the registry key it went in
+under (`steadfast#1`; Roger's W23, 2026-10-09, five entries): the registry
+row is the record from then on, and the novelty check (M3) leaves the entry
+out of its exact-label stage and its search, so that the word is not covered
+by its own entry (`assistant_axis.gapgen.novelty.HANDED_TO_REGISTRY_FIELD`).
+Status lifecycle
 `candidate -> ready -> seeded -> generated -> checked -> paired | done`;
 parked: `tbd`, `backlog`, `not_adopted`, `superseded`, `exists`.  Since 2026-10-08 a further final
 status, `refused`: the generator model declined to write the instructions
@@ -5669,7 +5704,17 @@ Rules:
    are the 142 with a real-word `negative_label` that has no file or is a
    one-way pointer (see TRAITS_ADDED § "TODO: antonym gap-filling pass");
    cleaning them up (pairs, triangles, sets, ...) is the tangle pass, TRAITS_TO_ADD
-   § "TODO: arrangement hunting" (36 left on 2026-10-09).
+   § "TODO: arrangement hunting" (36 left on 2026-10-09, 23 on 2026-10-10).
+
+   **Tangles are not arrangements (Roger, 2026-10-09).**  For now the
+   record of a tangle in the dataset is just its negative labels: every
+   `negative_label` that is not a `non-X` placeholder and is not one of the
+   two mutual labels of a recorded pair.  Notation for talking about them:
+   `A→` (A's label names a word with no file), `A→B` (a one-way pointer at
+   a trait paired elsewhere or a singleton), `A→B→C` (a chain), `A→B⇔C`
+   (hub and spoke: A points at one pole of the clean pair B / C).  They
+   wait for the tangle pass, after the extraction; do not record a tangle
+   as a `set` or force a pair to tidy one up.
 3. **The pair convention is unchanged**: a clean trait pair is still two
    files whose `negative_label` fields point at each other.  The field is
    authoritative for *shape*; the labels stay the prompt-facing antonyms;
@@ -5678,6 +5723,20 @@ Rules:
    arrangement of a classified trait, octahedra / orthoplexes must
    partition into clean pairs).  Roles have no `negative_label`, so role
    pairs (angel / demon, predator / prey, ...) exist only here.
+
+   **Triangles: every corner `non-X` (Roger, 2026-10-09).**  The three
+   corners of a `triangle` (and, by the same reasoning, the corners of a
+   larger simplex) carry `non-X` labels, so that no corner's neg
+   instructions are written against another corner.  This replaces the
+   April 2026 hub convention (two corners labelled with the third, as
+   malicious → compassionate ← callous), which risks pulling the triangle
+   "out of true" through the generator.  A corner that is also a pole of a
+   clean pair keeps its pair labels (the pair convention wins): the
+   moral-standing triangle good / evil / amoral sits beside the pairs
+   good / evil and amoral / moral.  A relabelled corner's instructions are
+   generated again (Roger: "we will need to redo instruction generation").
+   Applied 2026-10-10 (`4ea9097`): malicious, callous, contrarian,
+   nonconformist, benevolent and uncaring, regenerated in full.
 4. **Optional keys**: `axes` (the clean pairs forming the axes of a
    square / cube / orthoplex), `structure` (tree only, and required
    there), `source` (provenance of an imported structure), `note` (free

@@ -184,7 +184,11 @@ Rules:
    Inglehart-Welzel sense").  The description carries the substance;
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
-   changing the naming.
+   changing the naming.  **Ruling (Roger, 2026-10-09): an instruction
+   that names its instrument or author to fix the sense** ("in the
+   Baumrind sense", "in the way Gelfand describes"; 2 of 425 positive
+   instructions at that date, 0 after the W19 regeneration of
+   2026-10-10) **is harmless: no reroll for it.**
 7. **Prompts show "careless (from HEXACO)", not "careless (HEXACO)"**
    (Roger, 2026-10-07; done 2026-10-09, W19): `judge_label` inserts
    "from", with the sets that read better with the article or another
