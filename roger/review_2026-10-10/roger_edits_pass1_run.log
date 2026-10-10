@@ -1,0 +1,43 @@
+Traits to process: 5 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  NOTE: inspirational: dropped hand_edits ("2026-10-10: p5 opening rewritten by hand into the fifth form ('You are an example to everyone watching: ...') after three generations, each with the generator's second try, still doubled 'You are someone who' / 'You are a person whose'"); the instructions it describes were regenerated
+[1/5] OK inspirational: 5 instruction pairs, 40 questions
+[2/5] OK regionalist: 5 instruction pairs, 40 questions
+[3/5] OK good even when unwatched: 5 instruction pairs, 40 questions
+[4/5] OK parochial: 5 instruction pairs, 40 questions
+[5/5] OK good only when watched: 5 instruction pairs, 40 questions
+
+Done: 5 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~5
+[usage] total=$0.244 calls=5 [claude-sonnet-4-6: $0.244 in=12,869 out=13,666 n=5]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $228.740 over 6314 calls)
+2026-10-10 13:53:39,255 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-10 13:53:39,949 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-10 13:53:40,191 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-10 13:53:40,767 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-10 13:53:41,484 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+Traits to process: 2 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/2] OK good even when unwatched: 5 instruction pairs
+[2/2] OK good only when watched: 5 instruction pairs
+
+Done: 2 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~2
+[usage] total=$0.099 calls=2 [claude-sonnet-4-6: $0.099 in=5,158 out=5,555 n=2]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $228.839 over 6316 calls)
+/Users/roger/Documents/GitHub/assistant-axis/data/roles/role_list.json: up to date (339 entries)
+  skipped (no description): default
+/Users/roger/Documents/GitHub/assistant-axis/data/traits/trait_list.json: rewrote (932 entries; 0 added, 0 removed, 3 changed)
+roles: 340 files; arrangements by kind: map: 8, pair: 12, sequence: 11, set: 2, singleton: 305, square: 4; unclassified: 0; malformed: 0; problems: 0
+traits: 932 files; arrangements by kind: 4-cube: 16, 5-orthoplex: 10, 6-orthoplex: 12, map: 23, pair: 594, ring: 27, sequence: 28, set: 61, singleton: 136, square: 20, tetrahedron: 4, tree: 3, triangle: 24; unclassified: 22; malformed: 0; problems: 0
+good_even_when_unwatched: was "This means being the same unwatched as watched: even when you're sure nobody is looking or will find out, working as carefully, keeping the rules and taking nothing that is not one's own."
+good_only_when_watched: was "This means doing everything right while anyone is looking, but once you're sure nobody is watching or will find out, cutting corners, breaking rules or pocketing what is not one's own."
+inspirational: was "This means stirring and motivating people by one's own example: the way one meets setbacks, the standard one holds oneself to, and the hope one keeps making others want to rise to it."
+parochial: was "This means putting one's own town or local area first: caring about the people who live there above everyone else, and treating anyone from a few towns over as not one's concern."
+regionalist: was "This means putting one's own region of the country first: caring about its people, its interests, and its ways above those of the rest of the country, favoring locals over outsiders, and treating people from other regions or countries as not one's concern."
+[usage] total=$0.032 calls=5 [claude-sonnet-4-6: $0.032 in=4,825 out=1,152 n=5]
+good_even_when_unwatched -> opportunistic|hypocritical (3)  partner good only when watched
+good_only_when_watched -> principled|consistent (4)  partner good even when unwatched
+inspirational  -> demoralizing|defeatist (3)  partner None
+parochial      -> cosmopolitan|universalist (4)  partner None
+regionalist    -> cosmopolitan|universalist|nationalist (3)  partner None

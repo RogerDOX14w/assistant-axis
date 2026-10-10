@@ -53504,12 +53504,25 @@
      "checked_at": "2026-10-10",
      "returned": "cosmopolitan|universalist",
      "phase": "pre-extraction W14 / W22 naming check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "cosmopolitan|universalist",
+     "phase": "Roger's review pass 2026-10-10, naming check"
     }
    ],
    "name_answers": [
     {
      "date": "2026-10-10",
      "phase": "pre-extraction W14 / W22 naming check",
+     "label": "parochial",
+     "positive_name": "parochial|localist",
+     "negative_label": "cosmopolitan|universalist",
+     "antonym_score": 4
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "Roger's review pass 2026-10-10, naming check",
      "label": "parochial",
      "positive_name": "parochial|localist",
      "negative_label": "cosmopolitan|universalist",
@@ -53851,6 +53864,11 @@
      "checked_at": "2026-10-10",
      "returned": "nationalist|cosmopolitan|universalist",
      "phase": "pre-extraction W14 / W22 naming check"
+    },
+    {
+     "checked_at": "2026-10-10",
+     "returned": "nationalist|universalist",
+     "phase": "Roger's review pass 2026-10-10, naming check"
     }
    ],
    "name_answers": [
@@ -53860,6 +53878,14 @@
      "label": "regionalist",
      "positive_name": "parochial|regionalist",
      "negative_label": "nationalist|cosmopolitan|universalist",
+     "antonym_score": 3
+    },
+    {
+     "date": "2026-10-10",
+     "phase": "Roger's review pass 2026-10-10, naming check",
+     "label": "regionalist",
+     "positive_name": "parochial|regionalist",
+     "negative_label": "nationalist|universalist",
      "antonym_score": 3
     }
    ]
