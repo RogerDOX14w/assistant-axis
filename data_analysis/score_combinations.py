@@ -39,6 +39,7 @@ import json
 import logging
 import os
 import re
+import statistics
 import sys
 import time
 from datetime import datetime, timezone
@@ -514,15 +515,31 @@ def needs_rescore(record: Dict, rescore_model: Optional[str], threshold: int) ->
         max(p["score"] for p in record["per_pair"]) >= threshold
 
 
-def escalated_record(first: Dict, second: Dict, rescore_model: str,
+def escalated_record(first: Dict, samples: List[Dict], rescore_model: str,
                      escalation_log: Optional[Any]) -> Dict:
-    """The record after a rescore: the second model's scores, the first
-    model's kept under ``sonnet_scores``; logged to the escalation log."""
-    out = dict(second, scored_by=rescore_model, first_model=first.get("first_model"),
-               sonnet_scores=first["per_pair"])
+    """The record after a rescore: per pair, the median of the rescore
+    samples' scores (the lower middle for an even count; with three, the
+    majority vote when two agree, the middle value when all differ), with
+    the reasoning of a sample that gave it; the first model's scores kept
+    under ``sonnet_scores`` and every sample's under ``rescore_samples``
+    (Roger, 2026-10-10: three samples of the rescore model, since Opus 5.5
+    takes no temperature).  Logged to the escalation log."""
+    n_pairs = len(first["per_pair"])
+    per_pair = []
+    for i in range(n_pairs):
+        scores = [smp["per_pair"][i]["score"] for smp in samples]
+        med = statistics.median_low(scores)
+        reasoning = next(smp["per_pair"][i]["reasoning"] for smp in samples
+                         if smp["per_pair"][i]["score"] == med)
+        per_pair.append({"reasoning": reasoning, "score": med})
+    scores = [p["score"] for p in per_pair]
+    out = dict(samples[0], per_pair=per_pair, score_min=min(scores), score_max=max(scores),
+               score_mean=sum(scores) / len(scores), scored_by=rescore_model,
+               first_model=first.get("first_model"), sonnet_scores=first["per_pair"],
+               rescore_samples=[[p["score"] for p in smp["per_pair"]] for smp in samples],
+               rescore_aggregation="median_low")
     if escalation_log is not None:
         first_scores = [p["score"] for p in first["per_pair"]]
-        second_scores = [p["score"] for p in second["per_pair"]]
         escalation_log.write(json.dumps({
             "combo": first["output_name"],
             "role": first["role"],
@@ -530,11 +547,25 @@ def escalated_record(first: Dict, second: Dict, rescore_model: str,
             "first_model": first.get("first_model"),
             "rescore_model": rescore_model,
             "sonnet_per_pair": first["per_pair"],
-            "opus_per_pair": second["per_pair"],
+            "rescore_samples": out["rescore_samples"],
+            "opus_per_pair": per_pair,
             "sonnet_mean": round(sum(first_scores) / len(first_scores), 2),
-            "opus_mean": round(sum(second_scores) / len(second_scores), 2),
+            "opus_mean": round(out["score_mean"], 2),
         }) + "\n")
         escalation_log.flush()
+    return out
+
+
+async def rescore_samples(client: Any, combo: Dict, rescore_model: str, n: int,
+                          rate_limiter: RateLimiter, batch_size: Optional[int],
+                          usage: Optional[MultiModelUsage], max_retries: int = 5) -> List[Dict]:
+    """``n`` real-time rescores of a combination; the usable ones."""
+    out = []
+    for _ in range(n):
+        smp = await _call_api(client, combo, rescore_model, rate_limiter, batch_size,
+                              max_retries, usage)
+        if smp is not None:
+            out.append(smp)
     return out
 
 
@@ -549,8 +580,10 @@ async def score_combo(
     rescore_threshold: int = 2,
     escalation_log: Optional[Any] = None,
     usage: Optional[MultiModelUsage] = None,
+    n_samples: int = 3,
 ) -> Optional[Dict]:
-    """Score a combo, escalating to rescore_model if any pair scores high."""
+    """Score a combo, escalating to rescore_model (``n_samples`` times, the
+    median kept) if any pair scores high."""
     result = await _call_api(client, combo, model, rate_limiter, batch_size, max_retries, usage)
     if result is None:
         return None
@@ -559,10 +592,10 @@ async def score_combo(
     if needs_rescore(result, rescore_model, rescore_threshold):
         logger.info(f"Escalating {combo['output_name']} to {rescore_model} "
                     f"(first scores={[p['score'] for p in result['per_pair']]})")
-        second = await _call_api(client, combo, rescore_model, rate_limiter, batch_size,
-                                 max_retries, usage)
-        if second is not None:
-            return escalated_record(result, second, rescore_model, escalation_log)
+        samples = await rescore_samples(client, combo, rescore_model, n_samples, rate_limiter,
+                                        batch_size, usage, max_retries)
+        if samples:
+            return escalated_record(result, samples, rescore_model, escalation_log)
         logger.warning(f"Rescore failed for {combo['output_name']}, keeping the first result")
 
     return result
@@ -649,6 +682,7 @@ async def score_all(
     escalation_log: Optional[Any],
     rescore_model: Optional[str] = None,
     rescore_threshold: int = 2,
+    n_samples: int = 3,
 ) -> List[Dict]:
     """Score the pending combos with concurrency, saving incrementally, and
     escalate any stored first-stage score still owed a rescore."""
@@ -661,7 +695,7 @@ async def score_all(
         results = await asyncio.gather(*[
             score_combo(client, c, model, rate_limiter, batch_size,
                         rescore_model=rescore_model, rescore_threshold=rescore_threshold,
-                        escalation_log=escalation_log, usage=recorder.run)
+                        escalation_log=escalation_log, usage=recorder.run, n_samples=n_samples)
             for c in chunk], return_exceptions=True)
         for result in results:
             if isinstance(result, Exception):
@@ -677,10 +711,11 @@ async def score_all(
 
     for idx, rec in enumerate(all_scores):
         if needs_rescore(rec, rescore_model, rescore_threshold):
-            second = await _call_api(client, combos_by_name[rec["output_name"]], rescore_model,
-                                     rate_limiter, batch_size, usage=recorder.run)
-            if second is not None:
-                all_scores[idx] = escalated_record(rec, second, rescore_model, escalation_log)
+            samples = await rescore_samples(client, combos_by_name[rec["output_name"]],
+                                            rescore_model, n_samples, rate_limiter, batch_size,
+                                            recorder.run)
+            if samples:
+                all_scores[idx] = escalated_record(rec, samples, rescore_model, escalation_log)
     recorder.save(all_scores)
 
     # ``n_call_failed`` counts post-retry failures, so anything non-zero is
@@ -711,11 +746,13 @@ MAX_BATCH_BYTES = 256 * 1024 * 1024
 STAGES = ("first", "rescore")
 
 
-def batch_custom_id(combo: Dict, model: str, stage: str) -> str:
-    digest = hashlib.sha256(
-        f"{combo['output_name']}\n{combo['pairs_sha256']}\n{model}".encode("utf-8")).hexdigest()[:12]
+def batch_custom_id(combo: Dict, model: str, stage: str, sample: int = 0) -> str:
+    """``<stage letter><sample>-<output name>-<hash of name, texts, model,
+    sample>``; sample 0 carries no number (the form of the first batches)."""
+    key = f"{combo['output_name']}\n{combo['pairs_sha256']}\n{model}" + (f"\n{sample}" if sample else "")
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:12]
     prefix = re.sub(r"[^A-Za-z0-9_-]", "_", combo["output_name"])[:40]
-    return f"{stage[0]}-{prefix}-{digest}"
+    return f"{stage[0]}{sample or ''}-{prefix}-{digest}"
 
 
 def batch_log_path(output_path: Path) -> Path:
@@ -750,16 +787,17 @@ async def batch_stage(
     poll_seconds: float,
     usage: MultiModelUsage,
     batch_id: Optional[str] = None,
+    samples: int = 1,
 ) -> tuple:
-    """Submit one Message Batch for ``combos`` with ``model`` (or collect
-    ``batch_id``), wait, and parse the results.  Returns ``(records,
-    undelivered)``: the usable records by output name, and the combos the
-    batch did not deliver."""
-    by_id = {batch_custom_id(c, model, stage): c for c in combos}
+    """Submit one Message Batch for ``combos`` with ``model``, ``samples``
+    requests each (or collect ``batch_id``), wait, and parse the results.
+    Returns ``(records, undelivered)``: the usable records by ``(output
+    name, sample)``, and the ``(combo, sample)`` the batch did not deliver."""
+    by_id = {batch_custom_id(c, model, stage, k): (c, k) for c in combos for k in range(samples)}
     entry = None
     if batch_id is None:
         requests = [{"custom_id": cid, "params": request_params(c, model, batch_size)}
-                    for cid, c in by_id.items()]
+                    for cid, (c, _k) in by_id.items()]
         if len(requests) > MAX_BATCH_REQUESTS:
             raise SystemExit(f"{len(requests)} requests: a Message Batch takes at most {MAX_BATCH_REQUESTS}")
         if len(json.dumps(requests).encode("utf-8")) > MAX_BATCH_BYTES:
@@ -795,7 +833,7 @@ async def batch_stage(
             continue
         message = item.result.message
         usage.charge(model + BATCH_SUFFIX, *extract_usage_anthropic(message))
-        combo = by_id.get(item.custom_id)
+        combo, k = by_id.get(item.custom_id, (None, None))
         if combo is None:
             counts["unknown"] += 1
             logger.warning(f"{item.custom_id}: no current combination has this id "
@@ -807,12 +845,12 @@ async def batch_stage(
             counts["unusable"] += 1
             logger.warning(f"{combo['output_name']}: batch reply cannot be used ({e})")
             continue
-        records[combo["output_name"]] = rec
+        records[(combo["output_name"], k)] = rec
         counts["ok"] += 1
     record_batch(output_path, dict(entry, collected=_utc_now(), counts=counts))
     warn_if_low_parse_rate(label=f"data_analysis/score_combinations:{model}{BATCH_SUFFIX}",
                            n_ok=counts["ok"], n_total=counts["entries"], logger_obj=logger)
-    undelivered = [c for c in combos if c["output_name"] not in records]
+    undelivered = [(c, k) for c, k in by_id.values() if (c["output_name"], k) not in records]
     logger.info(f"Batch {batch_id} collected: {counts}; {len(undelivered)} to score in real time")
     return records, undelivered
 
@@ -845,46 +883,54 @@ async def score_in_batches(
             client, pending, args.model, "first", output_path=output_path,
             batch_size=args.batch_size, poll_seconds=args.batch_poll_seconds,
             usage=recorder.run, batch_id=first_id)
-        for name, rec in records.items():
+        for (name, _k), rec in records.items():
             scores[name] = dict(rec, scored_by=args.model, first_model=args.model)
         recorder.save(list(scores.values()))
-        for combo in undelivered:
+        for combo, _k in undelivered:
             rec = await _call_api(client, combo, args.model, rate_limiter, args.batch_size,
                                   usage=recorder.run)
             if rec is not None:
                 scores[combo["output_name"]] = dict(rec, scored_by=args.model, first_model=args.model)
         recorder.save(list(scores.values()))
 
-    # Stage 2: the rescore model over every first-stage score at the threshold.
+    # Stage 2: the rescore model, --rescore_samples times, over every
+    # first-stage score at the threshold; the median per pair is kept.
     owed = [r for r in scores.values() if needs_rescore(r, rescore_model, args.rescore_threshold)]
     rescore_id = given["id"] if given and given.get("stage") == "rescore" else None
     if owed or rescore_id:
+        n = args.rescore_samples
         logger.info(f"{len(owed)} combinations reach the rescore threshold "
-                    f"({args.rescore_threshold}); escalating to {rescore_model}")
+                    f"({args.rescore_threshold}); escalating to {rescore_model}, {n} samples each")
         records, undelivered = await batch_stage(
             client, [combos_by_name[r["output_name"]] for r in owed], rescore_model, "rescore",
             output_path=output_path, batch_size=args.batch_size,
-            poll_seconds=args.batch_poll_seconds, usage=recorder.run, batch_id=rescore_id)
-        for name, rec in records.items():
-            if name in scores and needs_rescore(scores[name], rescore_model, args.rescore_threshold):
-                scores[name] = escalated_record(scores[name], rec, rescore_model, escalation_log)
-        for combo in undelivered:
-            second = await _call_api(client, combo, rescore_model, rate_limiter, args.batch_size,
-                                     usage=recorder.run)
-            name = combo["output_name"]
-            if second is not None:
-                scores[name] = escalated_record(scores[name], second, rescore_model, escalation_log)
-            else:
+            poll_seconds=args.batch_poll_seconds, usage=recorder.run, batch_id=rescore_id,
+            samples=n)
+        for combo, k in undelivered:
+            smp = await _call_api(client, combo, rescore_model, rate_limiter, args.batch_size,
+                                  usage=recorder.run)
+            if smp is not None:
+                records[(combo["output_name"], k)] = smp
+        for rec in owed:
+            name = rec["output_name"]
+            samples = [records[(name, k)] for k in range(n) if (name, k) in records]
+            if not samples:
                 logger.warning(f"Rescore failed for {name}, keeping the first result")
+            elif needs_rescore(scores[name], rescore_model, args.rescore_threshold):
+                if len(samples) < n:
+                    logger.warning(f"{name}: {len(samples)} of {n} rescore samples usable")
+                scores[name] = escalated_record(scores[name], samples, rescore_model, escalation_log)
         recorder.save(list(scores.values()))
     return list(scores.values())
 
 
 def estimate_cost_usd(combos: List[Dict], model: str, rescore_model: Optional[str], *,
-                      batch: bool, batch_size: Optional[int], rescore_fraction: float = 0.2) -> float:
+                      batch: bool, batch_size: Optional[int], rescore_fraction: float = 0.2,
+                      rescore_samples: int = 3) -> float:
     """Rough cost of scoring ``combos``: prompt characters / 3 tokens (the
     5.x tokenizer's density), about 90 output tokens a pair, and a share of
-    rescores (15% in April 2026; 20% assumed).  Halved for a batch."""
+    rescores (15% in April 2026; 20% assumed), ``rescore_samples`` each.
+    Halved for a batch."""
     def one(model_: str) -> float:
         rate_in, rate_out = price_for_model(model_)
         total = 0.0
@@ -894,7 +940,8 @@ def estimate_cost_usd(combos: List[Dict], model: str, rescore_model: Optional[st
             tok_out = 90 * _n_pairs(c, batch_size) + 30
             total += (tok_in * rate_in + tok_out * rate_out) / 1e6
         return total
-    cost = one(model) + (rescore_fraction * one(rescore_model) if rescore_model else 0.0)
+    cost = one(model) + (rescore_fraction * rescore_samples * one(rescore_model)
+                         if rescore_model else 0.0)
     return cost / 2 if batch else cost
 
 
@@ -984,6 +1031,10 @@ async def main_async():
                         help="Disable the escalation of high-scoring combos")
     parser.add_argument("--rescore_threshold", type=int, default=2,
                         help="Min per-pair score to trigger a rescore (default: 2)")
+    parser.add_argument("--rescore_samples", type=int, default=3,
+                        help="Rescores per escalated combination; the median per pair is kept "
+                             "(default 3: Opus 5.5 takes no temperature, so repeated samples "
+                             "stand in for T=0; Roger, 2026-10-10)")
     parser.add_argument("--no_batch", action="store_true",
                         help="Score in real time instead of through Message Batches (batch is "
                              "the default: half the price, results usually within the hour)")
@@ -1018,7 +1069,8 @@ async def main_async():
                 f"texts changed and {counts['stale_model']} by another model; dropping "
                 f"{counts['dropped']} outside the current lists.  To score: {len(pending)}")
     estimate = estimate_cost_usd(pending, args.model, rescore_model, batch=batch,
-                                 batch_size=args.batch_size)
+                                 batch_size=args.batch_size,
+                                 rescore_samples=args.rescore_samples)
     logger.info(f"Estimate: ${estimate:.2f} ({'batch' if batch else 'real time'}; "
                 f"{args.model}, rescoring at >= {args.rescore_threshold} with {rescore_model})")
 
@@ -1052,6 +1104,8 @@ async def main_async():
         "rubric_version": RUBRIC_VERSION,
         "rescore_model": rescore_model,
         "rescore_threshold": args.rescore_threshold if rescore_model else None,
+        "rescore_samples": args.rescore_samples if rescore_model else None,
+        "rescore_aggregation": "median_low" if rescore_model else None,
         "goal_count": args.goal_count,
         "non_goal_count": args.non_goal_count,
         "total_combinations": len(combos),
@@ -1071,7 +1125,8 @@ async def main_async():
             all_scores = await score_all(
                 client, pending, kept, combos_by_name, args.model, rate_limiter,
                 args.batch_size, args.max_concurrent, recorder, escalation_log,
-                rescore_model=rescore_model, rescore_threshold=args.rescore_threshold)
+                rescore_model=rescore_model, rescore_threshold=args.rescore_threshold,
+                n_samples=args.rescore_samples)
     finally:
         if escalation_log is not None:
             escalation_log.close()

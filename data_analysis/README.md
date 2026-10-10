@@ -469,7 +469,11 @@ scored 3 from combination judging.
 Since 2026-10-10 (Roger): **Sonnet 5.5 first, escalating to Opus 5.5**
 (`--model`, `--rescore_model`; both refuse `temperature`, which is then left
 out, and think adaptively, so the reply's text blocks are read past any
-thinking block); **Message Batches by default** (the first stage as one batch,
+thinking block); **each escalation scored three times** (`--rescore_samples`)
+and the median kept per pair (`median_low`: the majority vote when two agree,
+the middle value when all differ, so a pair is dropped by step 3 only when at
+least two samples say 3), standing in for the temperature 0 the April run used
+(every sample is kept under `rescore_samples`); **Message Batches by default** (the first stage as one batch,
 the escalations as a second, at half the price; what a batch fails to deliver
 is scored in real time; `--no_batch` for real time; batches are logged in
 `data/combination_scores_batches.json` and `--batch_id` collects one a stopped

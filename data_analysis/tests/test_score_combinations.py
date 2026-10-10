@@ -176,10 +176,11 @@ def _run_main(monkeypatch, tmp_path, client, *extra):
 def test_batch_is_the_default_with_a_rescore_stage(monkeypatch, tmp_path):
     client = FakeAnthropic()
     out = _run_main(monkeypatch, tmp_path, client)
-    assert [len(reqs) for _, reqs in client.created] == [2, 1]       # first stage, then the rescore
+    assert [len(reqs) for _, reqs in client.created] == [2, 3]       # first stage, then 3 rescores
     first, rescore = client.created
     assert {r["params"]["model"] for r in first[1]} == {"claude-sonnet-5-5"}
-    assert rescore[1][0]["params"]["model"] == "claude-opus-5-5"
+    assert {r["params"]["model"] for r in rescore[1]} == {"claude-opus-5-5"}
+    assert sorted(r["custom_id"].split("-")[0] for r in rescore[1]) == ["r", "r1", "r2"]
     assert all("temperature" not in r["params"] for _, reqs in client.created for r in reqs)
     assert client.messages.create.call_count == 0
 
@@ -187,6 +188,8 @@ def test_batch_is_the_default_with_a_rescore_stage(monkeypatch, tmp_path):
     by = {r["output_name"]: r for r in data["scores"]}
     assert by["r_ra__tb"]["scored_by"] == "claude-opus-5-5"
     assert [p["score"] for p in by["r_ra__tb"]["per_pair"]] == [1, 1]
+    assert by["r_ra__tb"]["rescore_samples"] == [[1, 1]] * 3
+    assert data["metadata"]["rescore_samples"] == 3
     assert [p["score"] for p in by["r_ra__tb"]["sonnet_scores"]] == [2, 2]
     assert by["t_rb__ta"]["scored_by"] == by["t_rb__ta"]["first_model"] == "claude-sonnet-5-5"
     assert data["metadata"]["mode"] == "batch" and data["summary"]["escalated"] == 1
@@ -204,7 +207,7 @@ def test_batch_is_the_default_with_a_rescore_stage(monkeypatch, tmp_path):
     p = tmp_path / "traits" / "ta.json"
     d = json.loads(p.read_text()); d["instruction"][0]["pos"] = "ta changed"; p.write_text(json.dumps(d))
     _run_main(monkeypatch, tmp_path, client)
-    assert [len(reqs) for _, reqs in client.created] == [2, 1, 1]
+    assert [len(reqs) for _, reqs in client.created] == [2, 3, 1]
     assert client.created[2][1][0]["custom_id"].startswith("f-t_rb__ta-")
 
 
@@ -235,7 +238,7 @@ def test_batch_id_collects_without_submitting_again(monkeypatch, tmp_path):
     module.record_batch(tmp_path / "combination_scores.json",
                         {"id": bid, "stage": "first", "model": "claude-sonnet-5-5"})
     out = _run_main(monkeypatch, tmp_path, client, "--batch_id", bid)
-    assert [len(r) for _, r in client.created] == [2, 1]   # only the rescore is new
+    assert [len(r) for _, r in client.created] == [2, 3]   # only the rescore is new
     assert len(json.loads(out.read_text())["scores"]) == 2
 
 
@@ -245,8 +248,36 @@ def test_real_time_mode_and_the_cost_guard(monkeypatch, tmp_path):
     with pytest.raises(SystemExit, match="over \\$20"):
         _run_main(monkeypatch, tmp_path, client, "--no_batch")
     out = _run_main(monkeypatch, tmp_path, client, "--no_batch", "--confirm_expensive")
-    assert client.created == [] and client.messages.create.call_count == 3   # 2 + 1 rescore
+    assert client.created == [] and client.messages.create.call_count == 5   # 2 + 3 rescores
     data = json.loads(out.read_text())
     assert data["metadata"]["mode"] == "real time" and data["summary"]["escalated"] == 1
     usage = json.loads((tmp_path / "combination_scores_usage.json").read_text())
     assert set(usage["per_model"]) == {"claude-sonnet-5-5", "claude-opus-5-5"}
+
+
+def test_rescore_samples_are_combined_by_median():
+    first = {"output_name": "r_a__b", "role": "a", "trait": "b", "first_model": "s",
+             "per_pair": [{"reasoning": "f", "score": 2}, {"reasoning": "f", "score": 3}]}
+
+    def smp(a, b):
+        return {"output_name": "r_a__b", "role": "a", "trait": "b", "pairs_sha256": "h",
+                "per_pair": [{"reasoning": f"says {a}", "score": a}, {"reasoning": f"says {b}", "score": b}]}
+
+    rec = module.escalated_record(first, [smp(3, 1), smp(1, 2), smp(3, 3)], "opus", None)
+    assert [p["score"] for p in rec["per_pair"]] == [3, 2]          # majority 3; all differ -> middle 2
+    assert [p["reasoning"] for p in rec["per_pair"]] == ["says 3", "says 2"]
+    assert rec["score_max"] == 3 and rec["rescore_samples"] == [[3, 1], [1, 2], [3, 3]]
+    assert rec["sonnet_scores"] == first["per_pair"] and rec["rescore_aggregation"] == "median_low"
+    # two usable samples: the lower middle, still an integer
+    assert [p["score"] for p in module.escalated_record(first, [smp(3, 1), smp(2, 2)], "o", None)["per_pair"]] == [2, 1]
+
+
+def test_first_stage_ids_keep_their_form():
+    """The first stage of 2026-10-10 was submitted before samples existed; its
+    ids (sample 0) must stay the same for --batch_id to collect it."""
+    c = _combo()
+    import hashlib
+    digest = hashlib.sha256(f"{c['output_name']}\n{c['pairs_sha256']}\nm".encode()).hexdigest()[:12]
+    assert module.batch_custom_id(c, "m", "first") == f"f-r_a__b-{digest}"
+    ids = {module.batch_custom_id(c, "m", "rescore", k) for k in range(3)}
+    assert len(ids) == 3 and all(len(i) <= 64 for i in ids)
