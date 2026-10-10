@@ -4,8 +4,9 @@ Skips when no run is recorded.  Per the platform's review amendment 2, first-mea
 **report-and-decide** (printed with their targets, never failed): raw items 150-350 and dedup to 50-110 for a full
 variant-A run; the gate's gold agreement (at least 26/30) and flip rate (at most 10%); gold recovery (at least 7 of
 10, and the frame pair).  The mechanical checks are hard: the parse rate of every extraction, rewrite and gate at
-least 99%; a ``usage.json`` in every run directory and in the run's M1 and M3 batch directories when they exist; and
-every kept pole with a polysemy flag carries a gloss (the disambiguation the plan asks for).
+least 99%; a ``usage.json`` in every run directory (one with a ``run.json``, see :data:`RUN_DIRS`) and in the run's
+M1 and M3 batch directories when they exist; and every kept pole with a polysemy flag carries a gloss (the
+disambiguation the plan asks for).
 """
 from __future__ import annotations
 
@@ -18,7 +19,10 @@ from assistant_axis.gapgen.generators.alignment_sweep import GENERATOR
 from assistant_axis.gapgen.paths import DATA_CANDIDATES
 
 RUNS = DATA_CANDIDATES / "runs" / GENERATOR
-RUN_DIRS = sorted(p for p in RUNS.iterdir() if p.is_dir()) if RUNS.exists() else []
+#: A recorded run is a directory with a ``run.json``, which ``start_run`` writes for every paid session.  A
+#: directory under ``runs/`` without one made no call and has no usage to record: the prompt iteration's
+#: ``2026-10-10-iterate`` holds only its readout across the rounds beside it.
+RUN_DIRS = sorted(p for p in RUNS.iterdir() if (p / "run.json").exists()) if RUNS.exists() else []
 
 pytestmark = pytest.mark.skipif(not RUN_DIRS, reason="no alignment-sweep run recorded")
 

@@ -12,6 +12,7 @@
     uv run python data_analysis/gap_generation/alignment_sweep.py gate --run-id R [--gold-only] [--budget-usd 1.5]
         [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/alignment_sweep.py probe --run-id R [--budget-usd 0.5] [--dry-run]
+    uv run python data_analysis/gap_generation/alignment_sweep.py measure --run-id R [R2 ...] [--sample N]
     uv run python data_analysis/gap_generation/alignment_sweep.py report --run-id R [--gold] [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_08_alignment_sweep.md``.  ``fetch`` downloads the sources into
@@ -19,7 +20,8 @@ Plan: ``reports/trait_gap_generation/coding_plan_08_alignment_sweep.md``.  ``fet
 ``data/candidates/alignment_sweep/sources_manifest.json``); ``chunk`` splits them into ``chunks.jsonl``; ``extract``
 asks Sonnet 5.5 for the dispositions of each chunk and rewrites mechanism items; ``dedupe`` groups the glosses;
 ``submit`` writes the run's ``candidates.jsonl`` and submits it; ``gate`` and ``probe`` add the enactability
-verdicts and the Qwen label probe; ``report`` writes the readout.  Every paid command prints its estimate, takes
+verdicts and the Qwen label probe; ``measure`` prints one round's mechanical measures and the table across rounds
+that the extraction prompt is iterated from; ``report`` writes the readout.  Every paid command prints its estimate, takes
 ``--budget-usd`` as a hard cap, writes ``usage.json``, refuses uncommitted platform code without ``--allow-dirty``,
 and runs live (every estimate is under the $20 line).  ``--dry-run`` prints the plan, the estimate and the first
 three prompts as sent, and writes and calls nothing.
@@ -663,6 +665,40 @@ def cmd_report(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- measure
+
+def cmd_measure(args) -> int:
+    """The mechanical measures of one or more extraction rounds (no API cost): the per-round numbers as JSON and,
+    with two or more runs, the cross-round table the prompt iteration is read from."""
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import measure as M
+
+    rounds, last_items = [], []
+    for run_id in args.run_id:
+        rdir = _run_dir(args, run_id)
+        ext = rdir / X.EXTRACTION_NAME
+        if not ext.exists():
+            raise SystemExit(f"no {ext}: run `alignment_sweep.py extract --run-id {run_id}` first")
+        last_items = X.load_extraction(ext)
+        summ_path, grp_path = rdir / X.SUMMARY_NAME, rdir / "dedup_groups.json"
+        summ = json.loads(summ_path.read_text(encoding="utf-8")) if summ_path.exists() else None
+        grp = json.loads(grp_path.read_text(encoding="utf-8")) if grp_path.exists() else None
+        n_chunks = (summ or {}).get("n_chunks") or len({it.chunk_id for it in last_items})
+        m = M.measure_all(last_items, n_chunks=n_chunks, summary=summ, groups_doc=grp)
+        m["extra"] = M.extra_counts(last_items)
+        rounds.append((run_id, m))
+        print(f"=== {run_id} ({ext}) ===")
+        print(json.dumps(m, indent=1, ensure_ascii=False))
+    print(M.round_table(rounds))
+    if args.sample:
+        print(f"--- {args.sample} kept pairs of {args.run_id[-1]}, seed {args.seed} ---")
+        for named, partner in M.sample_pairs(last_items, args.sample, args.seed):
+            v, c = (named, partner) if named.pole == "virtue" else (partner, named)
+            print(f"* `{v.label}` / `{c.label}` ({named.chunk_id}, {named.type}, {named.enactability})\n"
+                  f"  - virtue: {v.gloss}\n  - vice: {c.gloss}")
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -754,6 +790,14 @@ def build_parser() -> argparse.ArgumentParser:
                    help="re-derive label_known in the run's probe.json at the current cosine floor (no call)")
     paid(p, 0.5)
     p.set_defaults(func=cmd_probe)
+
+    p = sub.add_parser("measure", help="the mechanical measures of one or more extraction rounds and the "
+                                       "cross-round table (no API cost)")
+    p.add_argument("--run-id", nargs="+", required=True, metavar="RUN_ID", help="one column per run, in order")
+    p.add_argument("--sample", type=int, default=None, metavar="N",
+                   help="also print N kept pairs of the last run with their glosses, for a hand reading")
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=cmd_measure)
 
     p = sub.add_parser("report", help="readout.md from the registry blocks, the gate, the probe and the usage files "
                                       "(no API cost); --gold adds gold_recovery.md")

@@ -270,6 +270,18 @@
         "sha256": "ac9f0b4551df312b725be2fa257964f896ca982364e9c1b7590dd72fef158f3a",
         "pinned_at": "2026-10-10T19:06:08+00:00",
         "why": "draft 1: the alignment sweep's extraction call (coding_plan_08 task 4), before the pilot"
+      },
+      {
+        "version": 2,
+        "sha256": "3d64f6da77480669d2ae3ae407032603456c9cf56c68d8e7f7d52c75e6496f2a",
+        "pinned_at": "2026-10-10T21:31:18+00:00",
+        "why": "Draft 2 (2026-10-10, the iteration on the pilot's 30 chunks): the grouping paragraph in place of one item per imperative (draft 1 gave 5.9 pairs an answered chunk against the plan's 1-2.5); the corpus gloss form of gloss.md (This means plus an -ing verb, no subject, one's for a possessive) in place of 'in words they might use of themselves', which put 330 of 330 glosses in the first person; the vice rule made explicit (what the persona does instead, not the virtue's absence) and no two failures joined with 'or'; the shortest clear label preferred and a step-shaped label rejected; source_quote the sentence that states the disposition most plainly"
+      },
+      {
+        "version": 3,
+        "sha256": "ac0290c5305694a440bcf18dfffe4475fa1965889a08758bd4be66e09414f896",
+        "pinned_at": "2026-10-10T21:38:03+00:00",
+        "why": "Draft 3 (2026-10-10, round 3 of the iteration): one disposition to a pole, three times over (grouping picks one disposition and drops the rest, two unlike tendencies give two items; no label joining two qualities with and/or; a gloss names particulars of its one disposition, not two dispositions), plus the vice read-alone test (not the virtue's label or gloss negated). Draft 2 fixed the volume (2.1 pairs a chunk) and the gloss form (99% corpus form) but took labels joining two qualities from 6% of poles to 17%"
       }
     ],
     "alignment_rewrite": [

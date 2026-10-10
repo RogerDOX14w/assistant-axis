@@ -22,6 +22,9 @@ from assistant_axis.tests.alignment_sweep_fakes import extraction_reply, item, p
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response, user_text
 
 RUBRICS = (X.RUBRIC_EXTRACT, X.RUBRIC_REWRITE, "enactability_gate")
+#: The pin each rubric is expected to be on, so that a bump is a deliberate edit here.  ``alignment_extract``
+#: reached 3 on 2026-10-10 (the iteration on the pilot's 30 chunks; see its change log).
+EXPECTED_VERSIONS = {X.RUBRIC_EXTRACT: 3, X.RUBRIC_REWRITE: 1, "enactability_gate": 2}
 
 
 def chunk(cid="model_spec:2026-08-18:do_not_lie", source="model_spec", text="## Do not lie\n\nNever lie."):
@@ -45,11 +48,7 @@ WATCHED = item(pole("same when unobserved", "This means acting exactly the same 
 @pytest.mark.parametrize("name", RUBRICS)
 def test_rubric_pinned_and_reason_first(name):
     rub = X.load_rubric(name)
-    # the invariant, not a version number: the text on disk is its own latest pin (``load_rubric`` refuses anything
-    # else), so a draft that is bumped as the rubric's instructions require does not break this test.  The current
-    # version of each rubric is asserted in that rubric's own test (the gate's is in
-    # test_gapgen_alignment_sweep_gate.py).
-    assert rub["version"] >= 1 and rub["sha256"] == sr.sha256(sr.load_prompt(name))
+    assert rub["version"] == EXPECTED_VERSIONS[name] and rub["sha256"] == sr.sha256(sr.load_prompt(name))
     text = rub["text"]
     if name == "enactability_gate":
         # the system prompt to reason from, then the reason, then the verdict

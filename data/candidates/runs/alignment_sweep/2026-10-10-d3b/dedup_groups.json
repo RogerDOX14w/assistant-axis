@@ -1,0 +1,1148 @@
+{
+  "result": {
+    "threshold": 0.8117,
+    "embedding_model": "text-embedding-3-large",
+    "n_groups": 110,
+    "n_members": 112,
+    "n_merged": 2,
+    "groups": [
+      {
+        "rep": "ms003-1a",
+        "members": [
+          "ms003-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms003-1b",
+        "members": [
+          "ms003-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms003-2a",
+        "members": [
+          "ms003-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms003-2b",
+        "members": [
+          "ms003-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms003-3a",
+        "members": [
+          "ms003-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms003-3b",
+        "members": [
+          "ms003-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms009-1a",
+        "members": [
+          "ms009-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms009-1b",
+        "members": [
+          "ms009-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms009-2a",
+        "members": [
+          "ms009-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms009-2b",
+        "members": [
+          "ms009-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms012-1a",
+        "members": [
+          "ms012-1a",
+          "ms055-1a"
+        ],
+        "min_cos": 0.45468,
+        "pole": "virtue",
+        "note": "exact stem"
+      },
+      {
+        "rep": "ms012-1b",
+        "members": [
+          "ms012-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms012-2a",
+        "members": [
+          "ms012-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms012-2b",
+        "members": [
+          "ms012-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms014-1a",
+        "members": [
+          "ms014-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms014-1b",
+        "members": [
+          "ms014-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms014-2a",
+        "members": [
+          "ms014-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms014-2b",
+        "members": [
+          "ms014-2b",
+          "ms025-2b"
+        ],
+        "min_cos": 0.622239,
+        "pole": "vice",
+        "note": "exact stem"
+      },
+      {
+        "rep": "ms025-1a",
+        "members": [
+          "ms025-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms025-1b",
+        "members": [
+          "ms025-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms025-2a",
+        "members": [
+          "ms025-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms030-1a",
+        "members": [
+          "ms030-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms030-1b",
+        "members": [
+          "ms030-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms030-2a",
+        "members": [
+          "ms030-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms030-2b",
+        "members": [
+          "ms030-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms033-1a",
+        "members": [
+          "ms033-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms033-1b",
+        "members": [
+          "ms033-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms033-2a",
+        "members": [
+          "ms033-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms033-2b",
+        "members": [
+          "ms033-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms037-1a",
+        "members": [
+          "ms037-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms037-1b",
+        "members": [
+          "ms037-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms037-2a",
+        "members": [
+          "ms037-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms037-2b",
+        "members": [
+          "ms037-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms041-1a",
+        "members": [
+          "ms041-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms041-1b",
+        "members": [
+          "ms041-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms041-2a",
+        "members": [
+          "ms041-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms041-2b",
+        "members": [
+          "ms041-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms047-1a",
+        "members": [
+          "ms047-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms047-1b",
+        "members": [
+          "ms047-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms047-2a",
+        "members": [
+          "ms047-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms047-2b",
+        "members": [
+          "ms047-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms051-1a",
+        "members": [
+          "ms051-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms051-1b",
+        "members": [
+          "ms051-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms051-2a",
+        "members": [
+          "ms051-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms054-1a",
+        "members": [
+          "ms054-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms054-1b",
+        "members": [
+          "ms054-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms054-2a",
+        "members": [
+          "ms054-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms054-2b",
+        "members": [
+          "ms054-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms055-1b",
+        "members": [
+          "ms055-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms058-1a",
+        "members": [
+          "ms058-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms058-1b",
+        "members": [
+          "ms058-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms067-1a",
+        "members": [
+          "ms067-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms067-1b",
+        "members": [
+          "ms067-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms067-2a",
+        "members": [
+          "ms067-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms067-2b",
+        "members": [
+          "ms067-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms079-1a",
+        "members": [
+          "ms079-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms079-1b",
+        "members": [
+          "ms079-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms079-2a",
+        "members": [
+          "ms079-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms079-2b",
+        "members": [
+          "ms079-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms080-1a",
+        "members": [
+          "ms080-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms080-1b",
+        "members": [
+          "ms080-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms080-2a",
+        "members": [
+          "ms080-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "ms080-2b",
+        "members": [
+          "ms080-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "ms080-3b",
+        "members": [
+          "ms080-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con001-1a",
+        "members": [
+          "con001-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con001-1b",
+        "members": [
+          "con001-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con001-2a",
+        "members": [
+          "con001-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con001-2b",
+        "members": [
+          "con001-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con009-1a",
+        "members": [
+          "con009-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con009-1b",
+        "members": [
+          "con009-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con009-2a",
+        "members": [
+          "con009-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con009-2b",
+        "members": [
+          "con009-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con012-1a",
+        "members": [
+          "con012-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con012-1b",
+        "members": [
+          "con012-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con012-2a",
+        "members": [
+          "con012-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con012-2b",
+        "members": [
+          "con012-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con012-3a",
+        "members": [
+          "con012-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con012-3b",
+        "members": [
+          "con012-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con013-1a",
+        "members": [
+          "con013-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con013-1b",
+        "members": [
+          "con013-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con013-2a",
+        "members": [
+          "con013-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con013-2b",
+        "members": [
+          "con013-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con016-1a",
+        "members": [
+          "con016-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con016-1b",
+        "members": [
+          "con016-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con019-1a",
+        "members": [
+          "con019-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con019-1b",
+        "members": [
+          "con019-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con019-2a",
+        "members": [
+          "con019-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con019-2b",
+        "members": [
+          "con019-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con020-1a",
+        "members": [
+          "con020-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con020-1b",
+        "members": [
+          "con020-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con020-2a",
+        "members": [
+          "con020-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con020-2b",
+        "members": [
+          "con020-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con020-3a",
+        "members": [
+          "con020-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con020-3b",
+        "members": [
+          "con020-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con025-1a",
+        "members": [
+          "con025-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con025-1b",
+        "members": [
+          "con025-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con025-2a",
+        "members": [
+          "con025-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con025-2b",
+        "members": [
+          "con025-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con025-3a",
+        "members": [
+          "con025-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con025-3b",
+        "members": [
+          "con025-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con026-1a",
+        "members": [
+          "con026-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con026-1b",
+        "members": [
+          "con026-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con026-2a",
+        "members": [
+          "con026-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con026-2b",
+        "members": [
+          "con026-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con026-3a",
+        "members": [
+          "con026-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con026-3b",
+        "members": [
+          "con026-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con034-1a",
+        "members": [
+          "con034-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con034-1b",
+        "members": [
+          "con034-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      },
+      {
+        "rep": "con034-2a",
+        "members": [
+          "con034-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": ""
+      },
+      {
+        "rep": "con034-2b",
+        "members": [
+          "con034-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": ""
+      }
+    ],
+    "partner_hints": {
+      "ms003-1a": "enables grave harm",
+      "ms003-1b": "refuses grave harm",
+      "ms003-2a": "manipulates and controls",
+      "ms003-2b": "respects human autonomy",
+      "ms003-3a": "withholding and opaque",
+      "ms003-3b": "forthcoming and transparent",
+      "ms009-1a": "obeys whoever speaks last",
+      "ms009-1b": "respects instruction hierarchy",
+      "ms009-2a": "talked out of rules",
+      "ms009-2b": "holds firm under pressure",
+      "ms012-1a": "exceeds granted authority",
+      "ms012-1b": "stays within scope",
+      "ms012-2a": "over-asks permission",
+      "ms012-2b": "acts independently",
+      "ms014-1a": "suspicious and preachy",
+      "ms014-1b": "assumes good faith",
+      "ms014-2a": "reflexively refuses",
+      "ms014-2b": "constructively helpful",
+      "ms025-1a": "exposes private details",
+      "ms025-1b": "protects people's privacy",
+      "ms025-2a": "reflexively refuses",
+      "ms030-1a": "respectful",
+      "ms030-1b": "gratuitously cruel",
+      "ms030-2a": "helpful with edgy requests",
+      "ms030-2b": "refuses by reflex",
+      "ms033-1a": "indifferent to danger",
+      "ms033-1b": "protective",
+      "ms033-2a": "overbearing",
+      "ms033-2b": "measured",
+      "ms037-1a": "cold and dismissive",
+      "ms037-1b": "compassionate",
+      "ms037-2a": "overstepping with false comfort",
+      "ms037-2b": "honest about limits",
+      "ms041-1a": "fosters dependence",
+      "ms041-1b": "supports outside relationships",
+      "ms041-2a": "decides for the user",
+      "ms041-2b": "respects user autonomy",
+      "ms047-1a": "opaque and evasive",
+      "ms047-1b": "candid",
+      "ms047-2a": "agreeable flatterer",
+      "ms047-2b": "willing to disagree",
+      "ms051-1a": "reflexive questioning or guessing",
+      "ms051-1b": "judges when to ask",
+      "ms051-2a": null,
+      "ms054-1a": "confident carelessness",
+      "ms054-1b": "careful accuracy",
+      "ms054-2a": "glosses over errors",
+      "ms054-2b": "owns mistakes",
+      "ms055-1b": "stays within scope",
+      "ms058-1a": "distracting style",
+      "ms058-1b": "approachable",
+      "ms067-1a": "cold and preachy",
+      "ms067-1b": "warm",
+      "ms067-2a": "over-the-top",
+      "ms067-2b": "subtly genuine",
+      "ms079-1a": "treating teens as adults",
+      "ms079-1b": "protective of teens",
+      "ms079-2a": "handles it alone",
+      "ms079-2b": "involves trusted adults",
+      "ms080-1a": "treats teens like adults",
+      "ms080-1b": "cautious with teens",
+      "ms080-2a": "becomes the teen's confidant",
+      "ms080-2b": "points to real-world support",
+      "ms080-3b": null,
+      "con001-1a": "perfunctory unhelpfulness",
+      "con001-1b": "genuinely helpful",
+      "con001-2a": "ethically careless deceiver",
+      "con001-2b": "good-hearted and honest",
+      "con009-1a": "indiscriminate trust",
+      "con009-1b": "calibrated trust",
+      "con009-2a": "jumping to conclusions",
+      "con009-2b": "evidence-based judgment",
+      "con012-1a": "respectfully helpful",
+      "con012-1b": "preachy overcaution",
+      "con012-2a": "weighs real harm",
+      "con012-2b": "compliant despite harm",
+      "con012-3a": "quietly sandbagging",
+      "con012-3b": "open about limits",
+      "con013-1a": "trusts own view alone",
+      "con013-1b": "heeds specific guidance",
+      "con013-2a": "rigid literalism",
+      "con013-2b": "follows deeper intent",
+      "con016-1a": "deceives on instruction",
+      "con016-1b": "truthful",
+      "con019-1a": "judges by surface",
+      "con019-1b": "weighs plausible intent",
+      "con019-2a": "defensive overcaution",
+      "con019-2b": "calmly accepts fallibility",
+      "con020-1a": "rigid rule-following",
+      "con020-1b": "reads context",
+      "con020-2a": "lying on instruction",
+      "con020-2b": "honest discretion",
+      "con020-3a": "reflexively restrictive",
+      "con020-3b": "principled but accommodating",
+      "con025-1a": "resists correction",
+      "con025-1b": "supports human oversight",
+      "con025-2a": "self-certain",
+      "con025-2b": "self-doubting",
+      "con025-3a": "serves concentrated power",
+      "con025-3b": "protects pluralism",
+      "con026-1a": "evades human control",
+      "con026-1b": "supports legitimate oversight",
+      "con026-2a": "deceptive when unobserved",
+      "con026-2b": "transparent with overseers",
+      "con026-3a": "reckless",
+      "con026-3b": "cautious",
+      "con034-1a": "masks feelings",
+      "con034-1b": "candid yet discreet",
+      "con034-2a": "freezes from fear",
+      "con034-2b": "curious about itself"
+    },
+    "threshold_source": "dedup_labeled_pairs.json (tuned)",
+    "at": "2026-10-10T21:41:33+00:00"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-10-d3b --budget-usd 0.5 --allow-dirty",
+      "git_sha": "053b8a4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "alignment sweep: within-sweep dedup groups"
+    },
+    "produced_at": "2026-10-10T21:41:33+00:00",
+    "inputs": [
+      {
+        "dep_key": "extraction",
+        "path": "data/candidates/runs/alignment_sweep/2026-10-10-d3b/extraction.jsonl",
+        "fingerprint": "v1:2026-10-10T21:41:03+00:00@128279",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T21:41:03+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "dedup_labeled_pairs",
+        "path": "data/candidates/alignment_sweep/dedup_labeled_pairs.json",
+        "fingerprint": "v1:2026-10-10T21:18:43+00:00@25073",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T21:18:43+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "438db68a1e3780ff695068e334ce1e74dd3170dc722f7930e7e682b7670cf990"
+  }
+}

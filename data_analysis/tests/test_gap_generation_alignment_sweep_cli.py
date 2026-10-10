@@ -161,5 +161,30 @@ def test_render_prints_the_calls_as_sent(env, capsys):
     capsys.readouterr()
     assert CLI.main(common + ["extract", "--render", "model_spec:2026-08-18:do_not_lie"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("SYSTEM (rubric alignment_extract version 1")
+    assert out.startswith("SYSTEM (rubric alignment_extract version 3")
     assert "USER (model_spec:2026-08-18:do_not_lie):\nSource: OpenAI Model Spec (version 2026-08-18)" in out
+
+
+def test_measure_prints_the_numbers_the_table_and_a_sample(env, monkeypatch, capsys):
+    """``measure`` is the prompt iteration's read-out: one column per run, no API call (plan 08 § 10)."""
+    root, common, cdir = env
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(responder))
+    assert CLI.main(common + ["fetch"]) == 0 and CLI.main(common + ["chunk"]) == 0
+    assert CLI.main(common + ["extract", "--run-id", "t4", "--allow-dirty"]) == 0
+    capsys.readouterr()
+    assert CLI.main(common + ["measure", "--run-id", "t4", "t4", "--sample", "2"]) == 0
+    out = capsys.readouterr().out
+    assert "| measure | t4 | t4 |" in out                                  # one column per run, in order
+    assert "| rubric version | 3 | 3 |" in out
+    assert "| pairs per chunk (a) | 0.22 | 0.22 |" in out                  # 2 pairs over the fixture's 9 chunks
+    assert "| parse rate (f) | 100% | 100% |" in out
+    assert "--- 2 kept pairs of t4, seed 0 ---" in out
+    assert "`stays in scope` / `oversteps the task`" in out
+    assert "- virtue: This means doing only what the task asked for." in out
+
+
+def test_measure_without_an_extraction_says_so(env):
+    root, common, cdir = env
+    with pytest.raises(SystemExit) as ei:
+        CLI.main(common + ["measure", "--run-id", "nope"])
+    assert "extract --run-id nope" in str(ei.value)

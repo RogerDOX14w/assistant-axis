@@ -1,0 +1,296 @@
+{
+  "generator": "alignment_sweep",
+  "run_id": "2026-10-10-d2",
+  "git_sha": "053b8a4+dirty",
+  "args": {
+    "step": "extract",
+    "variant": "A",
+    "chunks": 30,
+    "seed": 0,
+    "sources": [
+      "constitution",
+      "model_spec"
+    ],
+    "n_chunks": 30,
+    "chunk_ids": [
+      "model_spec:2026-08-18:overview",
+      "model_spec:2026-08-18:red_line_principles",
+      "model_spec:2026-08-18:follow_all_applicable_instructions",
+      "model_spec:2026-08-18:scope_of_autonomy",
+      "model_spec:2026-08-18:assume_best_intentions",
+      "model_spec:2026-08-18:protect_privacy",
+      "model_spec:2026-08-18:avoid_abuse",
+      "model_spec:2026-08-18:prevent_imminent_harm",
+      "model_spec:2026-08-18:support_mental_health",
+      "model_spec:2026-08-18:respect_real_world_ties",
+      "model_spec:2026-08-18:be_honest_and_transparent",
+      "model_spec:2026-08-18:ask_clarifying_questions",
+      "model_spec:2026-08-18:avoid_errors",
+      "model_spec:2026-08-18:avoid_overstepping",
+      "model_spec:2026-08-18:style",
+      "model_spec:2026-08-18:be_warm",
+      "model_spec:2026-08-18:formatting",
+      "model_spec:2026-08-18:voice_style",
+      "model_spec:2026-08-18:chatgpt_u18",
+      "model_spec:2026-08-18:prioritize_teen_safety",
+      "constitution:2026-10-10:claude-and-the-mission-of-anthropic",
+      "constitution:2026-10-10:how-to-treat-operators-and-users",
+      "constitution:2026-10-10:balancing-helpfulness-with-other-values",
+      "constitution:2026-10-10:following-anthropics-guidelines",
+      "constitution:2026-10-10:being-honest:p2",
+      "constitution:2026-10-10:the-role-of-intentions-and-context",
+      "constitution:2026-10-10:instructable-behaviors",
+      "constitution:2026-10-10:being-broadly-safe",
+      "constitution:2026-10-10:safe-behaviors",
+      "constitution:2026-10-10:emotional-expression"
+    ],
+    "model": "claude-sonnet-5-5",
+    "budget_usd": 1.2,
+    "estimate_usd": 0.6622,
+    "rubrics": {
+      "alignment_extract": {
+        "version": 2,
+        "sha256": "3d64f6da77480669d2ae3ae407032603456c9cf56c68d8e7f7d52c75e6496f2a",
+        "file": "reports/trait_gap_generation/rubrics/alignment_extract.md"
+      },
+      "alignment_rewrite": {
+        "version": 1,
+        "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3",
+        "file": "reports/trait_gap_generation/rubrics/alignment_rewrite.md"
+      }
+    },
+    "reuse_from": null,
+    "allow_dirty": false,
+    "label_form": "judge-display-v1",
+    "sources_manifest": [
+      {
+        "key": "model_spec",
+        "name": "OpenAI Model Spec",
+        "file": "data/external/alignment_sweep/model_spec.md",
+        "url": "https://raw.githubusercontent.com/openai/model_spec/7f1cf79fcb656c07f77c8d95b6fbc78dc7fac5b6/model_spec.md",
+        "page_url": "https://github.com/openai/model_spec",
+        "kind": "spec",
+        "fmt": "markdown",
+        "variant": "A",
+        "size_bytes": 276131,
+        "sha256": "a52378c1ae7514b091162c17abd285365eddaf4066f70773f3ffe05453f94cab",
+        "fetched_at": "2026-10-10T18:55:35+00:00",
+        "version_label": "2026-08-18",
+        "version_pin": "7f1cf79 (commit 7f1cf79fcb656c07f77c8d95b6fbc78dc7fac5b6, \"Release 2026-08-18\")",
+        "license": "CC0 1.0 Universal",
+        "license_url": "https://github.com/openai/model_spec/blob/main/LICENSE",
+        "license_line": "Creative Commons Legal Code / CC0 1.0 Universal",
+        "license_line_found": "Creative Commons Legal Code / CC0 1.0 Universal",
+        "license_verified_at": "2026-10-10",
+        "read_only": false,
+        "weight": 2,
+        "citation": "OpenAI, Model Spec, release of 2026-08-18",
+        "tool": "alignment_sweep.py fetch",
+        "git_sha": "3c2a06f+dirty"
+      },
+      {
+        "key": "constitution",
+        "name": "Anthropic, Claude's constitution",
+        "file": "data/external/alignment_sweep/constitution.html",
+        "url": "https://www.anthropic.com/constitution",
+        "page_url": "https://www.anthropic.com/constitution",
+        "kind": "constitution",
+        "fmt": "html",
+        "variant": "A",
+        "size_bytes": 634726,
+        "sha256": "2595700f3a31c7bc76da24ccce6a0f63e39c18b090c7307ccddfe1db6c67be7b",
+        "fetched_at": "2026-10-10T18:55:35+00:00",
+        "version_label": "2026-10-10",
+        "version_pin": "captured 2026-10-10, sha256 2595700f3a31",
+        "license": "CC0 1.0",
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "license_line": "We’re releasing Claude’s constitution in full under a Creative Commons CC0 1.0 Deed, meaning it can be freely used by anyone for any purpose without asking for permission.",
+        "license_line_found": "We’re releasing Claude’s constitution in full under a Creative Commons CC0 1.0 Deed, meaning it can be freely used by anyone for any purpose without asking for permission.",
+        "license_verified_at": "2026-10-10",
+        "read_only": false,
+        "weight": 2,
+        "citation": "Anthropic, Claude's constitution (January 2026); page captured at fetch time",
+        "tool": "alignment_sweep.py fetch",
+        "git_sha": "3c2a06f+dirty"
+      }
+    ]
+  },
+  "n_emitted": 0,
+  "started_at": "2026-10-10T21:32:08+00:00",
+  "finished_at": "2026-10-10T21:41:25+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0.3834,
+  "sessions": [
+    {
+      "session_id": "e94290aff82a",
+      "started_at": "2026-10-10T21:32:08+00:00",
+      "finished_at": "2026-10-10T21:32:45+00:00",
+      "git_sha": "18936e9+dirty",
+      "args": {
+        "step": "extract",
+        "variant": "A",
+        "chunks": 30,
+        "seed": 0,
+        "sources": [
+          "constitution",
+          "model_spec"
+        ],
+        "n_chunks": 30,
+        "chunk_ids": [
+          "model_spec:2026-08-18:overview",
+          "model_spec:2026-08-18:red_line_principles",
+          "model_spec:2026-08-18:follow_all_applicable_instructions",
+          "model_spec:2026-08-18:scope_of_autonomy",
+          "model_spec:2026-08-18:assume_best_intentions",
+          "model_spec:2026-08-18:protect_privacy",
+          "model_spec:2026-08-18:avoid_abuse",
+          "model_spec:2026-08-18:prevent_imminent_harm",
+          "model_spec:2026-08-18:support_mental_health",
+          "model_spec:2026-08-18:respect_real_world_ties",
+          "model_spec:2026-08-18:be_honest_and_transparent",
+          "model_spec:2026-08-18:ask_clarifying_questions",
+          "model_spec:2026-08-18:avoid_errors",
+          "model_spec:2026-08-18:avoid_overstepping",
+          "model_spec:2026-08-18:style",
+          "model_spec:2026-08-18:be_warm",
+          "model_spec:2026-08-18:formatting",
+          "model_spec:2026-08-18:voice_style",
+          "model_spec:2026-08-18:chatgpt_u18",
+          "model_spec:2026-08-18:prioritize_teen_safety",
+          "constitution:2026-10-10:claude-and-the-mission-of-anthropic",
+          "constitution:2026-10-10:how-to-treat-operators-and-users",
+          "constitution:2026-10-10:balancing-helpfulness-with-other-values",
+          "constitution:2026-10-10:following-anthropics-guidelines",
+          "constitution:2026-10-10:being-honest:p2",
+          "constitution:2026-10-10:the-role-of-intentions-and-context",
+          "constitution:2026-10-10:instructable-behaviors",
+          "constitution:2026-10-10:being-broadly-safe",
+          "constitution:2026-10-10:safe-behaviors",
+          "constitution:2026-10-10:emotional-expression"
+        ],
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 1.2,
+        "estimate_usd": 0.6622,
+        "rubrics": {
+          "alignment_extract": {
+            "version": 2,
+            "sha256": "3d64f6da77480669d2ae3ae407032603456c9cf56c68d8e7f7d52c75e6496f2a",
+            "file": "reports/trait_gap_generation/rubrics/alignment_extract.md"
+          },
+          "alignment_rewrite": {
+            "version": 1,
+            "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3",
+            "file": "reports/trait_gap_generation/rubrics/alignment_rewrite.md"
+          }
+        },
+        "reuse_from": null,
+        "allow_dirty": false,
+        "label_form": "judge-display-v1",
+        "sources_manifest": [
+          {
+            "key": "model_spec",
+            "name": "OpenAI Model Spec",
+            "file": "data/external/alignment_sweep/model_spec.md",
+            "url": "https://raw.githubusercontent.com/openai/model_spec/7f1cf79fcb656c07f77c8d95b6fbc78dc7fac5b6/model_spec.md",
+            "page_url": "https://github.com/openai/model_spec",
+            "kind": "spec",
+            "fmt": "markdown",
+            "variant": "A",
+            "size_bytes": 276131,
+            "sha256": "a52378c1ae7514b091162c17abd285365eddaf4066f70773f3ffe05453f94cab",
+            "fetched_at": "2026-10-10T18:55:35+00:00",
+            "version_label": "2026-08-18",
+            "version_pin": "7f1cf79 (commit 7f1cf79fcb656c07f77c8d95b6fbc78dc7fac5b6, \"Release 2026-08-18\")",
+            "license": "CC0 1.0 Universal",
+            "license_url": "https://github.com/openai/model_spec/blob/main/LICENSE",
+            "license_line": "Creative Commons Legal Code / CC0 1.0 Universal",
+            "license_line_found": "Creative Commons Legal Code / CC0 1.0 Universal",
+            "license_verified_at": "2026-10-10",
+            "read_only": false,
+            "weight": 2,
+            "citation": "OpenAI, Model Spec, release of 2026-08-18",
+            "tool": "alignment_sweep.py fetch",
+            "git_sha": "3c2a06f+dirty"
+          },
+          {
+            "key": "constitution",
+            "name": "Anthropic, Claude's constitution",
+            "file": "data/external/alignment_sweep/constitution.html",
+            "url": "https://www.anthropic.com/constitution",
+            "page_url": "https://www.anthropic.com/constitution",
+            "kind": "constitution",
+            "fmt": "html",
+            "variant": "A",
+            "size_bytes": 634726,
+            "sha256": "2595700f3a31c7bc76da24ccce6a0f63e39c18b090c7307ccddfe1db6c67be7b",
+            "fetched_at": "2026-10-10T18:55:35+00:00",
+            "version_label": "2026-10-10",
+            "version_pin": "captured 2026-10-10, sha256 2595700f3a31",
+            "license": "CC0 1.0",
+            "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "license_line": "We’re releasing Claude’s constitution in full under a Creative Commons CC0 1.0 Deed, meaning it can be freely used by anyone for any purpose without asking for permission.",
+            "license_line_found": "We’re releasing Claude’s constitution in full under a Creative Commons CC0 1.0 Deed, meaning it can be freely used by anyone for any purpose without asking for permission.",
+            "license_verified_at": "2026-10-10",
+            "read_only": false,
+            "weight": 2,
+            "citation": "Anthropic, Claude's constitution (January 2026); page captured at fetch time",
+            "tool": "alignment_sweep.py fetch",
+            "git_sha": "3c2a06f+dirty"
+          }
+        ]
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.3829,
+      "n_calls": 30,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5": {
+            "model": "claude-sonnet-5-5",
+            "prompt_tokens": 58773,
+            "completion_tokens": 26534,
+            "cost_usd": 0.3829,
+            "n_calls": 30
+          }
+        },
+        "total_cost_usd": 0.3829,
+        "total_prompt_tokens": 58773,
+        "total_completion_tokens": 26534,
+        "n_calls": 30
+      }
+    },
+    {
+      "session_id": "25d2064aa8f4",
+      "started_at": "2026-10-10T21:41:22+00:00",
+      "finished_at": "2026-10-10T21:41:25+00:00",
+      "git_sha": "053b8a4+dirty",
+      "args": {
+        "step": "dedupe",
+        "embedder": "text-embedding-3-large",
+        "threshold": 0.8117,
+        "tune": false,
+        "pairs_for_labeling": null,
+        "budget_usd": 0.5
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.0005,
+      "n_calls": 1,
+      "usage": {
+        "per_model": {
+          "text-embedding-3-large": {
+            "model": "text-embedding-3-large",
+            "prompt_tokens": 3986,
+            "completion_tokens": 0,
+            "cost_usd": 0.0005,
+            "n_calls": 1
+          }
+        },
+        "total_cost_usd": 0.0005,
+        "total_prompt_tokens": 3986,
+        "total_completion_tokens": 0,
+        "n_calls": 1
+      }
+    }
+  ]
+}
