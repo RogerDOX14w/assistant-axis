@@ -10,10 +10,10 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 - Heads in scope: **674** (576 dispositional, 98 from Classes I-III).
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 188; 89 unrated, mostly heads with no adjectives).
-- Covered **279**, partly covered **50**, uncovered **157** (of which 6 have a queued label only).
+- Covered **279**, partly covered **50**, uncovered **157** (of which 2 have a queued label only).
 - Opposed pairs in scope: both poles covered **76**, one pole **63**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 76, "one_pole_covered": 63}}).
-- Labels placed: 727 existing traits with a primary head (201 without; 681 of the primaries in scope), 179 queued labels (54 without).
-- Gap classes: pair_completion 30, pair_empty 57, singleton_empty 64, queued_only 6, partly_covered 50, crowded 78, covered 201.
+- Labels placed: 727 existing traits with a primary head (201 without; 681 of the primaries in scope), 107 queued labels (47 without).
+- Gap classes: pair_completion 32, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 50, crowded 78, covered 201.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -35,7 +35,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | III I. Matter in general | 1 | 1 | 0 | 0 | 0 |
 | III II. Inorganic matter | 5 | 1 | 0 | 0 | 2 |
 | III III. Organic matter | 5 | 4 | 1 | 1 | 7 |
-| IV I. Operations of intellect in general | 2 | 0 | 1 | 2 | 1 |
+| IV I. Operations of intellect in general | 2 | 0 | 0 | 3 | 1 |
 | IV II. Precursory conditions and operations | 7 | 0 | 0 | 2 | 6 |
 | IV III. Materials for reasoning | 2 | 0 | 0 | 3 | 4 |
 | IV IV. Reasoning processes | 2 | 0 | 0 | 0 | 2 |
@@ -56,16 +56,17 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | V IV. Possessive relations | 10 | 2 | 0 | 18 | 21 |
 | VI I. Affections in general | 5 | 0 | 0 | 2 | 0 |
 | VI II. Personal affections | 41 | 2 | 0 | 7 | 12 |
-| VI III. Sympathetic affections | 20 | 3 | 2 | 7 | 4 |
-| VI IV. Moral affections | 22 | 5 | 1 | 16 | 12 |
+| VI III. Sympathetic affections | 20 | 3 | 0 | 9 | 4 |
+| VI IV. Moral affections | 22 | 5 | 0 | 17 | 12 |
 | VI V. Religious affections | 8 | 4 | 0 | 10 | 4 |
 
-## pair_completion (30)
+## pair_completion (32)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
 | 124 Oldness | I VI. Time / 1. Time with reference to Succession | 123 Newness (synopsis) | [innovative](../../traits/instructions/innovative.json) | - | - | - |
 | 193 Littleness | II II. Dimensions | 192 Size (synopsis) | [fat](../../traits/instructions/fat.json) | - | - | - |
+| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json) | - | - | - |
 | 452 Incogitancy | IV I. Operations of intellect in general | 451 Thought (synopsis) | [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | - | [non-contemplative](../../seed_queue.json) (queued) | - |
 | 465 Discrimination | IV II. Precursory conditions and operations | 465a Indiscrimination (synopsis) | [promiscuous](../../traits/instructions/promiscuous.json) | - | - | - |
 | 493 Ignoramus | IV V. Results of reasoning | 492 Scholar (synopsis) | [educated](../../traits/instructions/educated.json) | - | - | - |
@@ -91,6 +92,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 761 Prohibition | V II. Special intersocial volition | 760 Permission (synopsis) | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | - | - | - |
 | 830 . Painfulness | VI II. Personal affections | 829 Pleasurableness (synopsis) | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) | - | - | - |
 | 889 Enmity | VI III. Sympathetic affections | 888 Friendship (synopsis) | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | - | - | - |
+| 897 Love | VI III. Sympathetic affections | 898 Hate (synopsis) | [xenophobic](../../traits/instructions/xenophobic.json) | - | [devoted](../../seed_queue.json) (queued) | - |
 | 912 Benefactor | VI III. Sympathetic affections | 913 Evil doer (synopsis) | [killer (Bartle)](../../traits/instructions/killer_bartle.json) | - | - | - |
 | 945 Vice | VI IV. Moral affections | 944 Virtue (synopsis) | [moral](../../traits/instructions/moral.json) | - | - | - |
 | 961 Impurity | VI IV. Moral affections | 960 Purity (synopsis) | [chaste](../../traits/instructions/chaste.json) | - | - | - |
@@ -157,7 +159,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 985 Judeo-Christian Revelation | VI V. Religious affections | 986 Pseudo-Revelation (synopsis) | - | - | - | - |
 | 986 Pseudo-Revelation | VI V. Religious affections | 985 Judeo-Christian Revelation (synopsis) | - | - | - | - |
 
-## singleton_empty (64)
+## singleton_empty (66)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -214,11 +216,13 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 901a Sullenness | VI III. Sympathetic affections | - | - | - | - | - |
 | 905 Divorce | VI III. Sympathetic affections | - | - | - | - | - |
 | 909 Threat | VI III. Sympathetic affections | - | - | - | - | - |
+| 915 Condolence | VI III. Sympathetic affections | - | - | - | - | - |
 | 927a Exemption | VI IV. Moral affections | - | - | - | - | - |
 | 930 Contempt | VI IV. Moral affections | - | - | - | - | - |
 | 941 Knave | VI IV. Moral affections | - | - | - | - | - |
 | 952 Atonement | VI IV. Moral affections | - | - | - | - | - |
 | 962 Libertine | VI IV. Moral affections | - | - | - | - | - |
+| 967 Judge | VI IV. Moral affections | - | - | - | - | - |
 | 974 Penalty | VI IV. Moral affections | - | - | - | - | - |
 | 975 Scourge | VI IV. Moral affections | - | - | - | - | - |
 | 993 Spell | VI V. Religious affections | - | - | - | - | - |
@@ -226,16 +230,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 999 Canonicals | VI V. Religious affections | - | - | - | - | - |
 | 1000 Temple | VI V. Religious affections | - | - | - | - | - |
 
-## queued_only (6)
+## queued_only (2)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
 | 391 Insipidity | III III. Organic matter / 1. Sensation in general | 390 Taste (synopsis) | - | [bland](../../seed_queue.json) (queued) | [vanilla](../../seed_queue.json) (queued) | - |
-| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (synopsis) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
-| 897 Love | VI III. Sympathetic affections | 898 Hate (synopsis) | [xenophobic](../../traits/instructions/xenophobic.json) | [enthusiastic (BFAS)](../../seed_queue.json) (queued) | [devoted](../../seed_queue.json) (queued) | - |
-| 915 Condolence | VI III. Sympathetic affections | - | - | [Sympathy (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
-| 967 Judge | VI IV. Moral affections | - | - | [judging (MBTI)](../../seed_queue.json) (queued) | - | - |
 
 ## partly_covered (50)
 
@@ -244,10 +244,10 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 4 Unsubstantiality | I I. Existence | 3 Substantiality (synopsis) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
 | 10 Irrelation | I II. Relation | 9 Relation (synopsis) | - | - | - | [isolated](../../traits/instructions/isolated.json) |
 | 18 Dissimilarity | I II. Relation | 17 Similarity (synopsis) | - | - | - | [divergent](../../traits/instructions/divergent.json) |
-| 60 Arrangement | I IV. Order | 61 Derangement (synopsis) | - | [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued) | [orderly](../../seed_queue.json) (queued), [structured](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
+| 60 Arrangement | I IV. Order | 61 Derangement (synopsis) | - | - | [orderly](../../seed_queue.json) (queued), [structured](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
 | 87 Unity | I V. Number | 88 Accompaniment (synopsis) | - | - | - | [single](../../traits/instructions/single.json) |
 | 141 Permanence | I VII. Change | 140 Change (synopsis) | - | - | - | [conservative](../../traits/instructions/conservative.json) |
-| 157 Power | I VIII. Causation | 158 Impotence (synopsis) | [helpless](../../traits/instructions/helpless.json) | [Self-Efficacy (IPIP-NEO)](../../seed_queue.json) (queued) | [empowered](../../seed_queue.json) (queued) | [competent](../../traits/instructions/competent.json) |
+| 157 Power | I VIII. Causation | 158 Impotence (synopsis) | [helpless](../../traits/instructions/helpless.json) | - | [empowered](../../seed_queue.json) (queued) | [competent](../../traits/instructions/competent.json) |
 | 160 Weakness | I VIII. Causation | 159 Strength (synopsis) | [muscular](../../traits/instructions/muscular.json) | - | - | [fragile](../../traits/instructions/fragile.json) |
 | 172 Physical Inertness | I VIII. Causation | 171 Physical Energy (synopsis) | [intense](../../traits/instructions/intense.json) | - | - | [passive](../../traits/instructions/passive.json) |
 | 212 Verticality | II II. Dimensions | 213 Horizontality (synopsis) | - | - | - | [straight](../../traits/instructions/straight.json) |
@@ -263,7 +263,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 372 Mankind | III III. Organic matter / 1. Vitality in general | - | - | - | - | [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanitarian](../../traits/instructions/humanitarian.json) |
 | 376 Physical Insensibility | III III. Organic matter / 1. Sensation in general | 375 Physical Sensibility (synopsis) | [socially-perceptive](../../traits/instructions/socially_perceptive.json) | - | - | [callous](../../traits/instructions/callous.json), [thick-skinned](../../traits/instructions/thick_skinned.json) |
 | 425 Transparency | III III. Organic matter / 1. Sensation in general | 426 Opacity (synopsis) | [opaque](../../traits/instructions/opaque.json) | - | - | [transparent](../../traits/instructions/transparent.json) |
-| 480 Judgment | IV V. Results of reasoning | 481 Misjudgment (synopsis) | [ageist](../../traits/instructions/ageist.json), [closed-minded](../../traits/instructions/closed_minded.json), [tunnel-visioned](../../traits/instructions/tunnel_visioned.json) | [judging (MBTI)](../../seed_queue.json) (queued) | [conclusive](../../seed_queue.json) (queued) | [decisive](../../traits/instructions/decisive.json), [judgmental](../../traits/instructions/judgmental.json) |
+| 480 Judgment | IV V. Results of reasoning | 481 Misjudgment (synopsis) | [ageist](../../traits/instructions/ageist.json), [closed-minded](../../traits/instructions/closed_minded.json), [tunnel-visioned](../../traits/instructions/tunnel_visioned.json) | - | [conclusive](../../seed_queue.json) (queued) | [decisive](../../traits/instructions/decisive.json), [judgmental](../../traits/instructions/judgmental.json) |
 | 505 Memory | IV VI. Extension of thought / 1. To the Past | 506 Oblivion (synopsis) | [forgetful](../../traits/instructions/forgetful.json), [oblivious](../../traits/instructions/oblivious.json) | - | - | [retentive](../../traits/instructions/retentive.json) |
 | 509 Disappointment | IV VI. Extension of thought / 1. To the Past | - | - | - | - | [bitter](../../traits/instructions/bitter.json) |
 | 542 School | IV II. Modes of communication | - | - | - | [academic](../../seed_queue.json) (queued) | [educational](../../traits/instructions/educational.json) |
@@ -286,7 +286,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 935 Flatterer | VI IV. Moral affections | 936 Detractor (synopsis) | [detractor](../../traits/instructions/detractor.json) | - | - | [sycophantic](../../traits/instructions/sycophantic.json) |
 | 946 Innocence | VI IV. Moral affections | 947 Guilt (synopsis) | - | - | - | [harmless](../../traits/instructions/harmless.json) |
 | 948 Good Man | VI IV. Moral affections | 949 Bad Man (synopsis) | - | - | - | [good](../../traits/instructions/good.json) |
-| 954 Intemperance | VI IV. Moral affections | 953 Temperance (synopsis) | [abstemious](../../traits/instructions/abstemious.json), [temperate](../../traits/instructions/temperate.json) | [Immoderation (IPIP-NEO)](../../seed_queue.json) (queued), [indulgent](../../seed_queue.json) (queued) | [intemperate](../../seed_queue.json) (queued) | [self-indulgent](../../traits/instructions/self_indulgent.json) |
+| 954 Intemperance | VI IV. Moral affections | 953 Temperance (synopsis) | [abstemious](../../traits/instructions/abstemious.json), [temperate](../../traits/instructions/temperate.json) | [indulgent](../../seed_queue.json) (queued) | [intemperate](../../seed_queue.json) (queued) | [self-indulgent](../../traits/instructions/self_indulgent.json) |
 | 987 Piety | VI V. Religious affections | 988 Impiety (synopsis) | - | - | [devoted](../../seed_queue.json) (queued), [preoccupied-with-religion](../../seed_queue.json) (queued) | [Christian](../../traits/instructions/christian.json), [reverent](../../traits/instructions/reverent.json) |
 | 988 Impiety | VI V. Religious affections | 987 Piety (synopsis) | - | - | - | [irreverent](../../traits/instructions/irreverent.json) |
 | 995 Churchdom | VI V. Religious affections | - | - | - | - | [Christian](../../traits/instructions/christian.json) |
@@ -310,7 +310,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 214 Pendency | II II. Dimensions | partly | - | - | [dependent](../../traits/instructions/dependent.json) |
 | 227 Circumjacence | II II. Dimensions | partly | - | - | [suburban](../../traits/instructions/suburban.json) |
 | 251 Flatness | II III. Form | partly | - | - | [flat](../../traits/instructions/flat.json) |
-| 260 Opening | II III. Form | covered | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json) | [Openness (BFAS)](../../seed_queue.json) (queued) | - |
+| 260 Opening | II III. Form | covered | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json) | - | - |
 | 261 Closure | II III. Form | covered | [closed (Big Five)](../../traits/instructions/closed_big_five.json) | - | - |
 | 290 Convergence | II IV. Motion | covered | [convergent](../../traits/instructions/convergent.json) | - | - |
 | 291 Divergence | II IV. Motion | covered | [divergent](../../traits/instructions/divergent.json) | - | - |
@@ -387,7 +387,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 619 Evil | V I. Volition in general | partly | - | - | [evil](../../traits/instructions/evil.json), [mischievous](../../traits/instructions/mischievous.json) |
 | 620 Intention | V II. Prospective volition | empty | - | - | - |
 | 622 Pursuit | V II. Prospective volition | empty | - | - | - |
-| 624 Relinquishment | V II. Prospective volition | queued | - | [Withdrawal (BFAS)](../../seed_queue.json) (queued) | - |
+| 624 Relinquishment | V II. Prospective volition | empty | - | - | - |
 | 626 Plan | V II. Prospective volition | covered | [strategic](../../traits/instructions/strategic.json) | - | [bold](../../traits/instructions/bold.json) |
 | 629 Circuit | V II. Prospective volition | empty | - | - | - |
 | 630 Requirement | V II. Prospective volition | empty | - | - | - |
@@ -524,11 +524,11 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 49 Decomposition | covered (not character) | [analytical](../../traits/instructions/analytical.json) |
 | 52 Completeness | covered | [thorough](../../traits/instructions/thorough.json) |
 | 55 Exclusion | covered (not character) | [exclusive](../../seed_queue.json) (queued) |
-| 58 Order | covered | [methodical](../../traits/instructions/methodical.json), [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued) |
+| 58 Order | covered | [methodical](../../traits/instructions/methodical.json) |
 | 59 Disorder | covered | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) |
-| 60 Arrangement | partly | [methodical](../../traits/instructions/methodical.json), [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued) |
+| 60 Arrangement | partly | [methodical](../../traits/instructions/methodical.json) |
 | 76 Inclusion | covered (not character) | [inclusive](../../traits/instructions/inclusive.json) |
-| 82 Conformity | covered | [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued), [orthodox](../../traits/instructions/orthodox.json) |
+| 82 Conformity | covered | [orthodox](../../traits/instructions/orthodox.json) |
 | 83 Unconformity | covered | [eccentric](../../traits/instructions/eccentric.json), [unfashionable](../../traits/instructions/unfashionable.json) |
 | 87 Unity | partly | [single](../../traits/instructions/single.json) |
 | 120 Synchronism | covered (not character) | [contemporary](../../traits/instructions/contemporary.json) |
@@ -550,7 +550,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 171 Physical Energy | covered | [energetic](../../traits/instructions/energetic.json), [intense](../../traits/instructions/intense.json) |
 | 172 Physical Inertness | partly | [passive](../../traits/instructions/passive.json) |
 | 173 Violence | covered | [turbulent](../../traits/instructions/turbulent.json), [violent](../../traits/instructions/violent.json) |
-| 174 Moderation | covered | [calm](../../traits/instructions/calm.json), [calm (IPIP-NEO)](../../seed_queue.json) (queued), [gentle](../../traits/instructions/gentle.json), [moderate](../../traits/instructions/moderate.json), [peaceful](../../traits/instructions/peaceful.json), [temperate](../../traits/instructions/temperate.json) |
+| 174 Moderation | covered | [calm](../../traits/instructions/calm.json), [gentle](../../traits/instructions/gentle.json), [moderate](../../traits/instructions/moderate.json), [peaceful](../../traits/instructions/peaceful.json), [temperate](../../traits/instructions/temperate.json) |
 | 175 Influence | covered | [dominant](../../traits/instructions/dominant.json) |
 | 181 Region | covered | [parochial](../../traits/instructions/parochial.json) |
 | 184 Location | empty (not character) | [rooted](../../traits/instructions/rooted.json) |
@@ -570,7 +570,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 246 Straightness | covered | [straight](../../traits/instructions/straight.json) |
 | 251 Flatness | partly (not character) | [flat](../../traits/instructions/flat.json) |
 | 254 Bluntness | covered | [blunt](../../traits/instructions/blunt.json) |
-| 260 Opening | covered (not character) | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json), [Openness (BFAS)](../../seed_queue.json) (queued) |
+| 260 Opening | covered (not character) | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json) |
 | 261 Closure | covered (not character) | [closed (Big Five)](../../traits/instructions/closed_big_five.json) |
 | 265 Quiescence | covered | [sedentary](../../traits/instructions/sedentary.json) |
 | 276 Impulse | partly | [impulsive](../../traits/instructions/impulsive.json) |

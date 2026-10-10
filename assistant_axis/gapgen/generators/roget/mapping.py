@@ -21,7 +21,8 @@ Plan § 5 (``roget_map.py``) as revised on 2026-10-08: no LLM adjudication.
   nothing (``none``).
 * **Update** (:func:`plan_update`, :func:`update_label_heads`; 2026-10-08, after chunk 5): when the corpus
   or the queue changes, only the labels that need it are placed again.  Dropped: keys that are no longer
-  a label (no trait file, no queue trait entry: a rename leaves its old stem behind).  Added: labels with
+  a label (no trait file, no queue trait entry: a rename leaves its old stem behind; or a queued instrument label
+  with no description, :func:`described_only`).  Added: labels with
   no entry.  Changed: labels whose text (:func:`label_text`) differs from the text they were placed
   from, compared by the hash each entry records (``placed_text_sha256``) or, for an entry written before
   the hash was kept, by the embedding cache (a miss means the text changed) confirmed by recomputing the
@@ -97,9 +98,23 @@ def _partner_of(stem: str, d: dict, stems: Collection[str]) -> Optional[str]:
     return normalize_to_file_name(neg)
 
 
+_INSTRUMENT_SUFFIX = re.compile(r"\([A-Z][^()]*\)\s*$")
+
+
+def described_only(entry: dict) -> bool:
+    """A queued label defined by its description rather than its word (Roger, 2026-10-10): it names an instrument
+    (a capitalised parenthesised suffix: ``the fool (Tarot)``, ``Organization (HEXACO)``) and has no description yet.
+    Placed by the bare word it lands on the word's heading (the fool on 501 Fool), which is not what it means, and
+    a heading with only such a label reads as queued and drops out of the harvest's gaps; so it is left out of the
+    map until it has a description."""
+    text = (entry.get("description") or entry.get("description_draft") or "").strip()
+    return not text and bool(_INSTRUMENT_SUFFIX.search(entry.get("label") or ""))
+
+
 def load_labels(data_dir: Path, queue_path: Optional[Path] = None) -> list[LabelRecord]:
     """Existing trait files (``data/traits/instructions/*.json``) and the seed queue's trait
-    entries that have no file yet, sorted by stem."""
+    entries that have no file yet, sorted by stem; a queued label that names an instrument and has no
+    description yet is left out (:func:`described_only`)."""
     inst = Path(data_dir) / "traits" / "instructions"
     files = sorted(inst.glob("*.json"))
     stems = {p.stem for p in files}
@@ -114,7 +129,7 @@ def load_labels(data_dir: Path, queue_path: Optional[Path] = None) -> list[Label
         q = json.loads(Path(queue_path).read_text(encoding="utf-8"))
         seen = set(stems)
         for e in q.get("entries") or []:
-            if e.get("entity_type") != "trait":
+            if e.get("entity_type") != "trait" or described_only(e):
                 continue
             stem = e.get("stem") or normalize_to_file_name(e.get("label") or "")
             if not stem or stem in seen:

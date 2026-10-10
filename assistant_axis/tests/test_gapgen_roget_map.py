@@ -193,6 +193,26 @@ def test_load_labels(tmp_path):
     assert recs["gone"].status == "not_adopted"
 
 
+def test_a_queued_instrument_label_without_a_description_is_left_out(tmp_path):
+    """Roger, 2026-10-10: a queued label that names an instrument and has no description is defined by its
+    description, not its word (the fool (Tarot) placed by its word lands on 501 Fool); it stays out of the map
+    until it has one.  A plain label without a description, and an instrument label with one, stay in."""
+    (tmp_path / "traits" / "instructions").mkdir(parents=True)
+    q = tmp_path / "q.json"
+    q.write_text(json.dumps({"entries": [
+        {"stem": "the_fool_tarot", "label": "the fool (Tarot)", "entity_type": "trait", "status": "backlog"},
+        {"stem": "organization_hexaco", "label": "Organization (HEXACO)", "entity_type": "trait", "status": "backlog",
+         "description": None, "description_draft": None},
+        {"stem": "diligence_hexaco", "label": "Diligence (HEXACO)", "entity_type": "trait", "status": "backlog",
+         "description_draft": "This means working hard."},
+        {"stem": "humorous_serious", "label": "humorous/serious (tentative, PC10)", "entity_type": "trait",
+         "status": "backlog"},                                    # a lower-case note in parentheses: not an instrument
+        {"stem": "gone", "label": "gone", "entity_type": "trait", "status": "not_adopted"}]}))
+    stems = {r.stem for r in M.load_labels(tmp_path, q)}
+    assert stems == {"diligence_hexaco", "humorous_serious", "gone"}
+    assert M.described_only({"label": "the fool (Tarot)"}) and not M.described_only({"label": "the fool"})
+
+
 def test_save_load_and_spotcheck(fx, tmp_path):
     recs = [rec("cautious", "This means being wary."), rec("obstinate", "This means being stubborn."),
             rec("queued one", "q", source="queued", status="candidate")]

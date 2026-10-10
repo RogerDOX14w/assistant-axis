@@ -472,7 +472,7 @@ def cmd_map_update(args) -> int:
     from collections import Counter
     print(f"labels {len(records)} ({sum(r.source == 'existing' for r in records)} existing, "
           f"{sum(r.source == 'queued' for r in records)} queued); entries in {lh_path.name}: {len(lh)}")
-    print(f"dropped {len(plan.dropped)} (no trait file, no queue trait entry): "
+    print(f"dropped {len(plan.dropped)} (no trait file, no queue trait entry, or a queued instrument label with no description): "
           + (", ".join(f"{s} (was on {lh[s].get('primary') or 'no head'})" for s in plan.dropped) or "-"))
     print(f"added {len(plan.added)}: {', '.join(plan.added) or '-'}")
     print(f"changed text {len(plan.changed)} (found by {dict(Counter(plan.changed.values()))}); unchanged "
