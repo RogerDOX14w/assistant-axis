@@ -200,48 +200,43 @@ roles: we should probably look at the existing list and come up with a categoriz
 3-way."  Nothing records a role's kind today: no field on the files, and
 [sample100_kinds.json](../role_rubric_v3_pilot/sample100_kinds.json) classifies moral valence (good / bad /
 indifferent), not kind.  Reading the 340 stems, "human non-profession" and "non-human" each cover several unlike
-things, so a first list to react to, from the names alone:
+things, so a first list to react to.  **Three categories at least, fourteen at most, and Roger leans under ten**
+(2026-10-10), so this is nine, the last of them an escape hatch:
 
-- **occupation**: [accountant](../../data/roles/instructions/accountant.json),
-  [chef](../../data/roles/instructions/chef.json), [doctor](../../data/roles/instructions/doctor.json)
-- **assistant or agent task** (what this project's own personas are for):
-  [assistant](../../data/roles/instructions/assistant.json),
-  [summarizer](../../data/roles/instructions/summarizer.json),
-  [debugger](../../data/roles/instructions/debugger.json),
+- **occupation or task**, work and assistant-style functions alike: [accountant](../../data/roles/instructions/accountant.json),
+  [doctor](../../data/roles/instructions/doctor.json), [summarizer](../../data/roles/instructions/summarizer.json),
   [instrumentally aligned AI](../../data/roles/instructions/instrumentally_aligned_ai.json)
-- **life stage**: [infant](../../data/roles/instructions/infant.json),
-  [teenager](../../data/roles/instructions/teenager.json), [elder](../../data/roles/instructions/elder.json)
-- **family or relationship**: [parent](../../data/roles/instructions/parent.json),
-  [widow](../../data/roles/instructions/widow.json), [orphan](../../data/roles/instructions/orphan.json)
-- **migration and belonging**: [immigrant](../../data/roles/instructions/immigrant.json),
-  [refugee](../../data/roles/instructions/refugee.json), [exile](../../data/roles/instructions/exile.json)
-- **circumstance or condition**: [homeless](../../data/roles/instructions/homeless.json),
-  [patient](../../data/roles/instructions/patient.json), [pregnant](../../data/roles/instructions/pregnant.json),
-  [prisoner](../../data/roles/instructions/prisoner.json)
-- **status or wealth**: [aristocrat](../../data/roles/instructions/aristocrat.json),
-  [billionaire](../../data/roles/instructions/billionaire.json), [beggar](../../data/roles/instructions/beggar.json)
-- **stance or commitment**: [activist](../../data/roles/instructions/activist.json),
-  [pacifist](../../data/roles/instructions/pacifist.json), [vegan](../../data/roles/instructions/vegan.json)
-- **pastime**: [gamer](../../data/roles/instructions/gamer.json),
-  [surfer](../../data/roles/instructions/surfer.json), [collector](../../data/roles/instructions/collector.json)
-- **outside the law**: [criminal](../../data/roles/instructions/criminal.json),
-  [smuggler](../../data/roles/instructions/smuggler.json), [spy](../../data/roles/instructions/spy.json)
-- **mythic or supernatural being**: [angel](../../data/roles/instructions/angel.json),
-  [vampire](../../data/roles/instructions/vampire.json), [golem](../../data/roles/instructions/golem.json),
-  [eldritch](../../data/roles/instructions/eldritch.json)
-- **machine or digital being**: [robot](../../data/roles/instructions/robot.json),
-  [cyborg](../../data/roles/instructions/cyborg.json), [avatar](../../data/roles/instructions/avatar.json)
-- **natural system or collective**: [coral reef](../../data/roles/instructions/coral_reef.json),
-  [ecosystem](../../data/roles/instructions/ecosystem.json), [tree](../../data/roles/instructions/tree.json),
-  [swarm](../../data/roles/instructions/swarm.json), [wind](../../data/roles/instructions/wind.json)
+- **life stage, family and relationship**: [infant](../../data/roles/instructions/infant.json), [elder](../../data/roles/instructions/elder.json),
+  [parent](../../data/roles/instructions/parent.json), [widow](../../data/roles/instructions/widow.json)
+- **circumstance**, something one is in rather than does, migration and legal standing included:
+  [homeless](../../data/roles/instructions/homeless.json), [patient](../../data/roles/instructions/patient.json), [pregnant](../../data/roles/instructions/pregnant.json),
+  [refugee](../../data/roles/instructions/refugee.json), [prisoner](../../data/roles/instructions/prisoner.json)
+- **status or wealth**: [aristocrat](../../data/roles/instructions/aristocrat.json), [billionaire](../../data/roles/instructions/billionaire.json),
+  [beggar](../../data/roles/instructions/beggar.json)
+- **stance or way of life**, the lawless included: [activist](../../data/roles/instructions/activist.json), [vegan](../../data/roles/instructions/vegan.json),
+  [pacifist](../../data/roles/instructions/pacifist.json), [smuggler](../../data/roles/instructions/smuggler.json), [spy](../../data/roles/instructions/spy.json)
+- **pastime**: [gamer](../../data/roles/instructions/gamer.json), [surfer](../../data/roles/instructions/surfer.json), [collector](../../data/roles/instructions/collector.json)
+- **non-human being**: [angel](../../data/roles/instructions/angel.json), [vampire](../../data/roles/instructions/vampire.json), [robot](../../data/roles/instructions/robot.json),
+  [cyborg](../../data/roles/instructions/cyborg.json), [coral reef](../../data/roles/instructions/coral_reef.json), [tree](../../data/roles/instructions/tree.json), [swarm](../../data/roles/instructions/swarm.json).
+  The widest group: splittable into mythic, machine and natural-system if a generator needs that detail, which
+  would still leave eleven.
 - **a temperament under a noun**, which overlaps the trait corpus and is worth watching for duplicates:
-  [optimist](../../data/roles/instructions/optimist.json), [cynic](../../data/roles/instructions/cynic.json),
-  [perfectionist](../../data/roles/instructions/perfectionist.json)
+  [optimist](../../data/roles/instructions/optimist.json), [cynic](../../data/roles/instructions/cynic.json), [perfectionist](../../data/roles/instructions/perfectionist.json)
+- **other**: whatever fits nowhere.  **A role is never turned down for fitting no category** (Roger: "this list
+  has void in it, after all"): [void](../../data/roles/instructions/void.json), [zeitgeist](../../data/roles/instructions/zeitgeist.json),
+  [default](../../data/roles/instructions/default.json).  A category is a description of the corpus, not a gate on it, and a full "other"
+  is a sign the categories need redrawing.
 
-That is a sketch for Roger to cut or rename, not a decision; some of it may be two dimensions rather than one
-(human or not, crossed with what the role is of).  Settle the categories, then classify all 340 (a Haiku pass over
-name and description, cents, with the result in a field on each file or in a side-car so plot and report code can
-use it), then measure the balance, and only then set each generator's share of the cap.
+A sketch for Roger to cut or rename, not a decision; it may want to be two dimensions rather than one (human or
+not, crossed with what the role is of).  Settle the categories, then classify all 340 (a Haiku pass over name and
+description, cents, with the result in a field on each file or in a side-car so plot and report code can use it),
+then measure the balance.
+
+**The balance is a reference, not a target** (Roger, 2026-10-10: "We don't need to exactly maintain current
+balance, but keep it as a reference: we don't want to add just professions, or just non-humans, for example").  So
+no generator's share is fixed in advance: measure the split before a wave and after it, and say in the readout
+where it moved.  What it guards against is a wave of 200 professions, or 200 monsters, quietly taking over the
+corpus.
 
 Also needed when this is picked up: whether the cap counts the corpus or each wave; and the role versions of M3's
 rubrics, which the role-promotion item below needs too.
