@@ -1141,3 +1141,27 @@ Sets: the Dark Tetrad and the ZTPI five.  Trees are stored nested (f6df5f8).
 **Labels still open with Roger** on 2026-10-10: wasteful or inefficient, win-win-seeking, violent or
 savage, cliqueish or cliquish, risk-seeking's and unflinching's wording, inspirational (E4), and
 environmental / growth-first (W22).  They are listed in TRAITS_TO_ADD's index.
+
+**Later on 2026-10-10.**
+- Roger's label calls ([work list](../roger/pre_extraction_2026-10-09/work_list.md)): wasteful renamed
+  [inefficient](../data/traits/instructions/inefficient.json), cliqueish renamed
+  [cliquish](../data/traits/instructions/cliquish.json) with its circle narrowed to friends,
+  [inspirational](../data/traits/instructions/inspirational.json) rewritten as a role model,
+  [risk-seeking](../data/traits/instructions/risk_seeking.json) as risk-averse's mirror,
+  [unflinching](../data/traits/instructions/unflinching.json) (e50f069); environmental widened, renamed
+  [environmentalist](../data/traits/instructions/environmentalist.json) and paired with growth-first by decision
+  (b6c19e3, 49a88c7).
+- W15: the goal classification of the whole corpus on its current texts and the goal lists placed again
+  (83bc4a1, 42f4303, 87d84fc); method in [data/README.md](../data/README.md).
+- Role pairs settled: all six stay; evangelist against the trait detractor dropped (72baf40).
+- The Tarot: not imported; each card read as a person was a prompt for a gap
+  ([tarot_walk.md](../roger/tarot_2026-10-10/tarot_walk.md)): 17 covered, four new traits,
+  [amorous](../data/traits/instructions/amorous.json), [strong-willed](../data/traits/instructions/strong_willed.json),
+  [self-reinventing](../data/traits/instructions/self_reinventing.json), [dreamy](../data/traits/instructions/dreamy.json)
+  (e776919).
+- Roger's review pass ([review_table.md](../roger/review_2026-10-10/review_table.md)): his edits to five
+  descriptions regenerated and checked (e6fac68); [verbose](../data/traits/instructions/verbose.json) brought to
+  32 words, mirroring concise (bf3ea3f); [disorganized](../data/traits/instructions/disorganized.json) /
+  [organized](../data/traits/instructions/organized.json) changed from a communication style (stream-of-consciousness
+  already held it) to everyday orderliness, still a clean pair (cac3244).
+- Corpus at the end of the day: 932 traits, 297 clean pairs, 22 unclassified, 340 roles.

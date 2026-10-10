@@ -4517,3 +4517,110 @@ shifts the sense from how the persona talks (brings the past into everything) to
 "historically minded" or "history-minded" keeps the adjective form and the manner sense.  Decide
 the label, then `seed_entities.py rename --old historical --new <label>`, regenerate, and rerun the
 check.  Do it in the main checkout after the trait-gap branch merges, as with the determinist rename.
+
+## TBD: the 22 Major Arcana as roles (Tarot)
+
+**Status 2026-10-10: finished; moved to TRAITS_ADDED.**  Roger kept the labels amorous and strong-willed. The 22 cards are not imported (queue `not_adopted`); the four traits they prompted are in the corpus.
+
+**Status 2026-10-10 (later the same day): done differently.**  Roger: not imported; each card, read as describing a person, is used as gap-filling inspiration, as for Thomas-Kilmann and the occupational instruments.  The walk ([tarot_walk.md](../../../roger/tarot_2026-10-10/tarot_walk.md)) finds 17 cards covered by existing traits and four gaps covering five cards, nominated as plain traits: amorous (the Lovers), strong-willed (the Chariot), self-reinventing (Death and Judgement), dreamy (the Moon).  The 22 queue entries are `not_adopted`.  The text below, the earlier status and the "roles or traits" note included, is the record.
+
+**Status 2026-10-10: moved here from ROLES_TO_ADD.md, and now traits (Roger).**  Still delayed (pre-extraction W21, 2026-10-09): the idea and the notes are kept, and the 22 queue entries stay `backlog`, now with `entity_type: trait`.  The heading is unchanged (the queue's `section` fields match it), though it says roles.
+
+**Parked as an idea (Roger, 2026-10-09, chunk 7): not now.**  The 22 queue
+entries are `backlog`; everything below stays as the record for when it is
+taken up.
+
+Status: **undecided** (Roger, 2026-09-09: "still uncertain"; a
+throw-the-kitchen-sink-at-it step, acceptable because the set is labelled
+by source and easy to remove).  Roles, not traits: each card is an
+archetype with a voice, and about a third of them are events or cosmic
+states rather than people, which the corpus already handles in its
+embodiment register (`wind`, `zeitgeist`, `void`, `echo`, `dreamer`,
+`destroyer`).
+
+- **Naming**: the standard as a parenthesised, capitalised postscript
+  (convention adopted 2026-09-09): label `the fool (Tarot)`, stem
+  `the_fool_tarot` (parentheses dropped by `normalize_to_file_name`),
+  and so on through `the_world_tarot`.  Roles have no `positive_label`
+  field, so the label lives in a `ROLE_DISPLAY_OVERRIDES` entry (or a
+  per-role `display_name` field, to be added) for `corpus_display_name`;
+  the judge sees the mechanical form `the fool tarot` until the
+  judge-facing-name change (AGENT_NOTES code-housekeeping TODO item 4)
+  lands with the next full rejudge.
+  **2026-10-10:** as traits, the label is the file's `positive_label`
+  (capitals for the card names to be settled at seeding), and since W19
+  (2026-10-09) prompts show it in the judge display form, "the fool (from the
+  Tarot)".
+- **Descriptions**: one to two sentences each, paraphrased from the
+  Rider-Waite meanings (the canonical source), written explicitly *as a
+  persona*: "the embodiment of sudden upheaval, who speaks as the
+  lightning that brings down structures built on false foundations", not
+  "a card meaning upheaval".  Event cards are forces with a voice; the
+  risk is that they collapse into one generic oracle voice, so each
+  description must name its specific force.  Reversed readings: ignore,
+  or fold into the description as an extra element where it makes
+  emotional sense; no separate reversed set.
+  **Which meaning (Roger, 2026-10-07):** the description would be of the
+  card either as a *significator* (the card standing for the querent or
+  another person, a use many readers advise against for the Major Arcana)
+  or at least of its meaning in a reading where the card clearly
+  represents a person rather than a situation; not its situational or
+  event meaning.  Waite's *Pictorial Key to the Tarot* (1911) is public
+  domain, so the canonical text can be quoted in full under the
+  standards-derived method of chunk 4 (AGENT_NOTES description rule 9)
+  rather than reconstructed.
+- **Roles or traits? (Roger, 2026-10-07):** not clearly roles.  A card is
+  not inherently exclusive of a profession (one can be the Hermit and a
+  baker), which is the mark of a trait; but the twenty-two are mutually
+  exclusive of each other, as roles are, and several are named like
+  professions (the Magician, the Hierophant, the Hermit, the Emperor).
+  Decide the entity type with the set, before seeding.
+  **2026-10-10 (Roger): traits.**  The reasons he accepted: under the
+  significator reading of 2026-10-07 the 22 are a typology of character, and
+  the corpus keeps every named typology as traits, noun labels and mutual
+  exclusivity included ([INFJ (MBTI)](./infj_mbti.json), the Hogwarts houses
+  such as [Slytherin](./slytherin.json), [survivor (VALS)](./survivor_vals.json),
+  [killer (Bartle)](./killer_bartle.json)); the baker test, since as traits the
+  cards combine with an occupation in the role-and-trait generation; the
+  event and cosmic cards become dispositions (the Sun's radiant joy, the
+  Tower's appetite for upheaval) instead of forces with a voice, which removes
+  the generic-oracle risk noted above; and an arrangement is same-type, so all
+  22 must be one type, and only the trait reading fits all of them.  Against:
+  the cards are named as figures, several like occupations (Magician,
+  Hierophant, Emperor), and as traits they sit beside plain near-twins
+  (Justice ~ [just](./just.json), Temperance ~ [abstemious](./abstemious.json),
+  Strength ~ [brave](./brave.json) and [gentle](./gentle.json), the Sun ~
+  [cheerful](./cheerful.json), the Emperor ~ [authoritarian](./authoritarian.json),
+  the Empress ~ [nurturing](./nurturing.json), the Hierophant ~
+  [orthodox](./orthodox.json)), deliberate near-duplicates of the kind
+  accepted for the Big Five and HEXACO.  The roles
+  [fool](../../roles/instructions/fool.json) and
+  [hermit](../../roles/instructions/hermit.json) remain as roles.
+- **Arrangement**: `set` of 22, `source` "Rider-Waite tarot, Major
+  Arcana".  Not a `sequence`: the numerical order (the Fool's Journey) is
+  not expected to correlate with the embeddings.
+- **Collisions and overlaps**: `fool` and `hermit` exist as roles,
+  `monarch` and `priest` are queued (Emperor, Hierophant); the Magician
+  and High Priestess sit near `guru`, `witch`, `mystic`; the Tower is
+  near `destroyer`, the Moon near `oracle` and `dreamer`.  The
+  measurement of interest is whether the 22 produce 22 directions or a
+  tarot-flavoured blob; the mean of the 22 against the corpus mean is a
+  "tarot-ness" direction, as with the Hogwarts houses.
+- **Seed keywords** (Rider-Waite numbering; Strength VIII, Justice XI):
+  0 Fool: new beginnings, innocence, the leap of faith.  I Magician:
+  will, skill, manifestation.  II High Priestess: intuition, hidden
+  knowledge, mystery.  III Empress: fertility, nurture, abundance.
+  IV Emperor: authority, structure, control.  V Hierophant: tradition,
+  orthodoxy, institutions.  VI Lovers: union, choice, alignment of
+  values.  VII Chariot: willpower, victory, determination.  VIII Strength:
+  courage, gentle mastery, compassion over force.  IX Hermit: solitude,
+  introspection, the lamp of guidance.  X Wheel of Fortune: cycles,
+  fate, turning luck.  XI Justice: fairness, truth, cause and effect.
+  XII Hanged Man: surrender, suspension, the reversed perspective.
+  XIII Death: endings, transformation, clearing away.  XIV Temperance:
+  balance, moderation, patient blending.  XV Devil: bondage,
+  materialism, temptation.  XVI Tower: sudden upheaval, revelation by
+  catastrophe.  XVII Star: hope, renewal, serenity after the storm.
+  XVIII Moon: illusion, fear, intuition, the unconscious.  XIX Sun: joy,
+  vitality, clarity, success.  XX Judgement: reckoning, awakening,
+  absolution.  XXI World: completion, integration, wholeness.
