@@ -59,7 +59,7 @@ WIKIBIO_REVISION = "3a00c01f03c79c4799a4b884bd9508a1eea47b6a"
 
 SOURCES: dict[str, Source] = {s.key: s for s in (
     Source(
-        key="wikibio", dest="wikibio/wikipedia-biography-dataset.zip", size_bytes=333_998_704,
+        key="wikibio", dest="wikibio/data/wikipedia-biography-dataset.zip", size_bytes=333_998_704,
         licence="CC BY-SA 3.0", licence_url="https://creativecommons.org/licenses/by-sa/3.0/",
         citation=("Lebret, Grangier & Auli (2016), Neural Text Generation from Structured Data with Application to "
                   "the Biography Domain, EMNLP; arXiv:1603.07771"),
