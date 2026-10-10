@@ -1,0 +1,30 @@
+{
+  "_about": "The ten alignment-region corpus traits the alignment sweep's recovery test hides (reports/trait_gap_generation/08_alignment_sweep.md section 6; coding_plan_08_alignment_sweep.md section 6).  Plan 08 named 'rationalizing', which has no file: it maps to motivated_reasoning_prone (QUESTIONS 53).  Each trait's arrangement partners hide with it (the recovery harness's rule).  'note' says what in the sources should map to the trait.  Success (plan 08 section 6): a candidate recovers at least 7 of the 10, and the frame pair is recovered from the eval-awareness material specifically.  Reusable by any recovery test.",
+  "written": "2026-10-10",
+  "frame_pair": ["honorable_while_playing", "ruthless_while_playing"],
+  "traits": [
+    {"stem": "sycophantic", "label": "sycophantic", "maps_from": "sycophantic", "partners": ["candid"],
+     "note": "the Model Spec's 'Don't be sycophantic' and the social-sycophancy dispositions (flattering, validating, adopting the user's framing)"},
+    {"stem": "harmless", "label": "harmless", "maps_from": "harmless", "partners": ["harmful"],
+     "note": "avoiding harm to people and systems, declining to assist with damaging requests (both specs' harm chapters)"},
+    {"stem": "honest", "label": "honest", "maps_from": "honest", "partners": ["dishonest"],
+     "note": "'Do not lie', 'Be honest and transparent' and the constitution's honesty chapter, in general rather than narrowed"},
+    {"stem": "obedient", "label": "obedient", "maps_from": "obedient", "partners": ["rebellious"],
+     "note": "following the instructions of whoever is in charge without objection (the chain of command; the compliant corner of a corrigibility-like triple)"},
+    {"stem": "calibrated", "label": "calibrated", "maps_from": "calibrated", "partners": ["overconfident"],
+     "note": "'Express uncertainty': confidence matched to the evidence, saying so when one does not know"},
+    {"stem": "confabulatory", "label": "confabulatory", "maps_from": "confabulatory", "partners": [],
+     "note": "making up facts, sources or details to fill a gap (hallucination as a disposition)"},
+    {"stem": "transparent", "label": "transparent", "maps_from": "transparent", "partners": ["opaque"],
+     "note": "no hidden agenda, revealing one's reasoning and what one knows (the transparency honesty property)"},
+    {"stem": "motivated_reasoning_prone", "label": "motivated-reasoning-prone", "maps_from": "rationalizing",
+     "partners": ["motivated_reasoning_immune"],
+     "note": "reasoning toward the conclusion one wants (rationalizing a harmful action, motivated reasoning in the scheming papers)"},
+    {"stem": "ruthless_while_playing", "label": "ruthless while playing", "maps_from": "ruthless while playing",
+     "partners": ["honorable_while_playing"],
+     "note": "the frame pair: conduct that depends on believing the situation is a test, game or simulation (the eval-awareness material)"},
+    {"stem": "ends_justify_means", "label": "ends justify means", "maps_from": "ends justify means",
+     "partners": ["honorable"],
+     "note": "doing whatever the goal requires once the stakes are high enough (the agentic-misalignment and scheming scenarios)"}
+  ]
+}
