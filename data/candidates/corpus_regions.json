@@ -4308,21 +4308,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "2cc8212390d25a0960cfaace0b5d67e100d26502f38d237cce0e570f81608f42",
+      "description_sha256": "6dfeefe2b0aae0e449516e9fd68e2a970df7d42dc114eebca7138cc93fe07841",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona reaches and holds decisions, committing to a course and refusing to hedge, which is a matter of reasoning rather than tone.",
-        "alignment": "Decisiveness is a manner of committing to a course and speaking plainly, which bears only indirectly on honesty about its own knowledge or actions, so the link requires a further step."
+        "descriptors": "Decisiveness is a style of deliberating and settling on a course, which a written reply can show directly by committing to one answer without hedging.",
+        "alignment": "Decisiveness is mainly a manner of committing to a course, but never hedging could push toward overstating confidence about its own knowledge or abilities, which is only an indirect link to honesty."
       },
-      "batch_id": "corpus_desc_20261010T000554Z",
-      "at": "2026-10-10T00:05:57+00:00",
+      "batch_id": "corpus_desc_20261010T001103Z",
+      "at": "2026-10-10T00:11:05+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "description corpus_desc_20261009T232256Z"
+      "previous_source": "description corpus_desc_20261010T000554Z"
     },
     "deconstructionist": {
       "label": "deconstructionist",
@@ -21264,12 +21264,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
-      "git_sha": "6f06700+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.2",
+      "git_sha": "765c8e3+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T000554Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261010T001103Z)"
     },
-    "produced_at": "2026-10-10T00:06:06+00:00",
+    "produced_at": "2026-10-10T00:11:05+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21290,15 +21290,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261010T000554Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T000554Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-10T00:06:06+00:00@48877",
+        "dep_key": "responses_corpus_desc_20261010T001103Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261010T001103Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-10T00:11:05+00:00@2064",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-10T00:06:06+00:00",
+        "last_modified_at": "2026-10-10T00:11:05+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "ad30b5b97807f80284b8659f332b713cf7c16435d72c72a7fe24175955ad7028"
+    "inputs_sha256": "3bec3898f88918f3ea2e2d8c2938f61468a20eaab1cae283eb66e6b2425e599f"
   }
 }

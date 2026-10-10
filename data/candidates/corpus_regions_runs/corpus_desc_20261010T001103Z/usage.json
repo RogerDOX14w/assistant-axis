@@ -1,0 +1,15 @@
+{
+  "n_calls": 2,
+  "per_model": {
+    "claude-haiku-5-5": {
+      "completion_tokens": 503,
+      "cost_usd": 0.0003,
+      "model": "claude-haiku-5-5",
+      "n_calls": 2,
+      "prompt_tokens": 609
+    }
+  },
+  "total_completion_tokens": 503,
+  "total_cost_usd": 0.0003,
+  "total_prompt_tokens": 609
+}
