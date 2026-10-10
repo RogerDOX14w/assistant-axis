@@ -491,6 +491,94 @@ def cmd_gate(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- probe
+
+def _run_labels(args, rdir: Path) -> tuple[list, Path]:
+    """The labels a probe or report covers: the run's submitted candidates (surface, gloss hint), else, before a
+    submission (the pilot), the kept dedup representatives."""
+    from assistant_axis.gapgen.generators.alignment_sweep import dedupe as D
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep.probe import ProbeInput
+    from assistant_axis.gapgen.registry import read_candidates
+    cpath = rdir / "candidates.jsonl"
+    if cpath.exists():
+        return [ProbeInput(c.surface, c.gloss_hint or "") for c in read_candidates(cpath)], cpath
+    grp = rdir / "dedup_groups.json"
+    if not grp.exists():
+        raise SystemExit(f"no {cpath} and no {grp}: submit (or at least dedupe) the run first")
+    by = {it.item_id: it for it in X.load_extraction(rdir / X.EXTRACTION_NAME)}
+    reps = [by[g.rep] for g in D.load_groups(grp)]
+    seen, out = set(), []
+    for it in sorted(reps, key=lambda i: (i.rank, i.item_id)):
+        if it.kept and it.label not in seen:
+            seen.add(it.label)
+            out.append(ProbeInput(it.label, it.gloss))
+    return out, grp
+
+
+def cmd_probe(args) -> int:
+    import asyncio
+    import os
+
+    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort
+    from assistant_axis.gapgen.generators.alignment_sweep import probe as P
+    from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, LABEL_FORM_KEY
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.gapgen.runs import start_run
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.provenance import current_file_input
+
+    rdir = _run_dir(args, args.run_id)
+    inputs, src = _run_labels(args, rdir)
+    host = ", ".join(f"{k} ({v})" for k, v in P.ALLOWED_PROVIDERS.items())
+    print(f"probe: {len(inputs)} labels on {P.MODEL} through OpenRouter, host pinned to {host}, fallbacks off "
+          f"(from {src.name})")
+    status = P.key_status(_REPO_ROOT / ".env")
+    if status != "ok":
+        print(status + "; the rank formula drops the label-known factor")
+        if not args.dry_run:
+            P.write_probe(None, rdir / P.PROBE_NAME, status=status)
+        return 0
+    est = P.estimate_usd(len(inputs)) + 0.003
+    print(f"  estimate ${est:.4f} (with the definitions' embeddings); cap --budget-usd ${args.budget_usd:.2f}")
+    cap = confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        print("DRY-RUN: no call, nothing written.  The first three user turns:")
+        for i in inputs[:3]:
+            print(f"--- {i.label}\n{P.render_user(i.label)}")
+        return 0
+    refused = _dirty_refusal(args)
+    if refused:
+        raise SystemExit(f"REFUSED: {refused}")
+    import openai
+    from assistant_axis.gapgen.embed import EmbeddingCache, make_embedder
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "probe", "model": P.MODEL, "host": dict(P.ALLOWED_PROVIDERS), "n_labels": len(inputs),
+        "budget_usd": args.budget_usd, "prompt_version": P.PROMPT_VERSION, LABEL_FORM_KEY: DEFAULT_LABEL_FORM})
+    ctx.usage = GuardedUsage(budget_usd=cap)
+    res = None
+    try:
+        client = openai.AsyncOpenAI(base_url=P.OPENROUTER_URL, api_key=os.environ["OPENROUTER_API_KEY"])
+        res = asyncio.run(P.run_probe(inputs, client=client, usage=ctx.usage, embedder=make_embedder("openai"),
+                                      cache=EmbeddingCache(root=args.embedding_cache)))
+    finally:
+        ctx.finish(n_emitted=0)
+        print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
+    n_ok = len(inputs) - res.n_errors - res.n_discarded
+    warn_if_low_parse_rate(label=f"alignment_sweep probe:{P.MODEL}", n_ok=n_ok, n_total=len(inputs))
+    P.write_probe(res, rdir / P.PROBE_NAME, status="ran", inputs=[current_file_input(dep_key="labels", path=src)],
+                  extra={"at": utc_now(), "cost_usd": round(ctx.usage.total_cost_usd, 5), LABEL_FORM_KEY:
+                         DEFAULT_LABEL_FORM})
+    rows = list(res.rows.values())
+    known = sum(1 for r in rows if r.label_known)
+    print(f"{len(rows)} labels: {known} known in the intended sense, "
+          f"{sum(1 for r in rows if r.known_claimed is False)} unknown to the model, "
+          f"{sum(1 for r in rows if r.known_claimed and not r.label_known)} known in another sense; "
+          f"{res.n_discarded} discarded (another host), {res.n_errors} errors; wrote {rdir / P.PROBE_NAME}")
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -574,6 +662,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--concurrency", type=int, default=6)
     paid(p, 1.5)
     p.set_defaults(func=cmd_gate)
+
+    p = sub.add_parser("probe", help="the label probe: qwen/qwen3-32b via OpenRouter pinned to DeepInfra (US)")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--embedding-cache", type=Path, default=paths.DATA_CANDIDATES / "cache" / "embeddings")
+    paid(p, 0.5)
+    p.set_defaults(func=cmd_probe)
     return ap
 
 
