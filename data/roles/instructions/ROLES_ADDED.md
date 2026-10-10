@@ -535,6 +535,31 @@ its instructions do not open in `n_variants` different ways
 (`generate_combined`; `opening_rerolls` in the `generator` field;
 `--no-opening-reroll` for pilots).
 
+**Depth check of V3's own output (2026-10-09, pre-extraction W1; nothing
+changed).**  The 2026-10-02 depth check repeated on V3's instructions:
+hosted Qwen answered each role's own questions, and the role and depth
+judges graded them against the old instructions and the opening arms
+([w1_depth_v3.md](../../../roger/pre_extraction_2026-10-09/w1_depth_v3.md);
+scripts and data in
+[roles_v3_depth/](../../../reports/opening_forms/roles_v3_depth/)).
+- **Cartoon** (the depth judge's top caricature grade): V3 22.4% against
+  21.3% for the old corpus instruction (p = 0.69), 23.0% for "From now on"
+  and 28.6% for "Act as" (p = 0.025).  So V3 is no more of a cartoon than the
+  old corpus, and "Act as" stays gone.
+- **Self-description**, the one real change: V3's answers describe their
+  own role more often, 46.4% against 39.8% (+6.6, p = 0.01), mostly in
+  occupations ("As a technologist, I believe ...").  It comes on top of
+  acting, not instead of it: "the role shapes what it does" +4.0, the role
+  judge's top score +2.9 (p = 0.007).  Roger (2026-10-09): probably Qwen
+  getting the word into the nearby context, a touch cringy as English but
+  likely positive for activations; not a concern.
+- **Observer register**: about a third of the flags quote the description,
+  not the instruction.  Counted on the instruction alone, the held-out rise
+  is 1.7% to 3.9% (p = 0.055), not 2.0% to 5.3%.  It is carried mostly by
+  "Become a ... who ...", and flagged instructions are no more of a cartoon.
+  Left as it is; one self-check line on the "who" clause would cover it if
+  the rubric is ever reopened.
+
 ## Housekeeping once the directory settles (Sep 2026)
 
 Counts as of 2026-09-07.  Trait-side items (trait_list, antonyms, trait goal

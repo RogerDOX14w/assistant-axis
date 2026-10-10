@@ -7,13 +7,13 @@ the index of what comes before and after the extraction, are in
 [TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md); the upkeep rule
 there applies here too.
 
-## What's left (index, 2026-10-09)
+## What's left (index, 2026-10-10)
 
 340 roles (341 files with `default.json`), all under role rubric V3.
 
 - **Goal classification** has not been run for 62 roles: the 61 seeded since
   April and [saint](./saint.json).  It is one item with the traits' in
-  TRAITS_TO_ADD's index, "Before the extraction".
+  TRAITS_TO_ADD's index, "Before the extraction" (pre-extraction W15).
 - **The role-pair check is built** (`a9c0a13`, `--roles` in
   [generate_antonyms.py](../../../data_analysis/generate_antonyms.py)) and was
   run once on 2026-10-09 ($0.07): [predator](./predator.json) /
@@ -30,19 +30,24 @@ there applies here too.
 - **Whether [cosmopolitan](./cosmopolitan.json) / [provincial](./provincial.json)
   joins `pair_list_clean.json`**: after the extraction (§ "Role pairs to
   record").
-- **[bicultural](./bicultural.json) and the Berry square.**  The recorded
-  square is [assimilated](./assimilated.json) / [exile](./exile.json) /
-  [immigrant](./immigrant.json) / [marginalized](./marginalized.json);
-  bicultural, seeded on 2026-10-09 as the second-generation integration
-  corner, and [refugee](./refugee.json) are singletons.  Whether bicultural
-  joins the square or sits beside it is for the arrangement pass.
+- **Role sets recorded on 2026-10-09** (pre-extraction W12, 6a7f1e2), to
+  be tested on the new vectors: [bicultural](./bicultural.json) replaces
+  [immigrant](./immigrant.json) as the Berry square's integration corner
+  (with [assimilated](./assimilated.json), [exile](./exile.json) and
+  [marginalized](./marginalized.json)); the life-stage `sequence`
+  [infant](./infant.json) to [elder](./elder.json); the migration `map`
+  ([exile](./exile.json), [expatriate](./expatriate.json),
+  [immigrant](./immigrant.json), [naturalized citizen](./naturalized_citizen.json),
+  [nomad](./nomad.json), [pilgrim](./pilgrim.json),
+  [refugee](./refugee.json), [wanderer](./wanderer.json)), its note naming
+  the two expected axes, settled / moving and chosen / forced.
 - **Role words held by the trait-gap generators**: read when preparing a
   role chunk (§ "Role words from the trait-gap generators").
-- Parked: the 22 Tarot roles (§ "TBD: the 22 Major Arcana as roles (Tarot)");
-  `native` and `civilian` (§ "Optional, low priority").
-- Not pursued unless asked: a depth (caricature) check on V3's own output,
-  about $9, and the observer register seen on the held-out set (ROLES_ADDED
-  § "Role rubric V3").
+- Delayed (Roger, 2026-10-09, pre-extraction W21 and W23): the 22 Tarot
+  roles (§ "TBD: the 22 Major Arcana as roles (Tarot)"); `native` and
+  `civilian` (§ "Optional, low priority").
+- Done: the depth (caricature) check on V3's own output, with nothing to
+  change (2026-10-09; ROLES_ADDED § "Role rubric V3", last paragraph).
 
 ## Process for adding a role
 

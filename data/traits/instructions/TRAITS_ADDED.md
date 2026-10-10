@@ -4428,3 +4428,92 @@ static rejudge only, see item 6 above) but does not touch the persona side.
 grep -lE '\b(the user|users|responses?)\b' data/traits/instructions/*.json | wc -l
 grep -oE '"(pos|neg)": "[^"]*\b(the user|users)\b[^"]*"' data/traits/instructions/*.json | head
 ```
+
+## TODO: near-duplicate traits to drop or merge (M2 calibration, 2026-10-01)
+
+**Status 2026-10-10: done (pre-extraction W3).**  The closeness test was rerun on all 916 traits and a same-concept scan added group E; every row was decided by Roger on 2026-10-09 and applied: conceptual, enigmatic and the role adolescent dropped (647ca4d), dramatic dropped with melodramatic in its goal slot (83febfb), abstract, trustworthy and wry rewritten (b6c086b), C8 all 22 Big Five and HEXACO traits kept, group E in 77c48a4, 4ea9097 and 6290c4b, and cruel and merciful dropped in W7 (2f944dd).  Decision sheet: [w3_near_duplicates.md](../../../roger/pre_extraction_2026-10-09/w3_near_duplicates.md).  The text below is the 2026-10-01 record.
+
+
+**Status 2026-10-09: open, best done before the extraction.**  Nothing has been dropped.  The table was
+calibrated on 663 traits, and the 253 added in chunks 4 to 7 have not been through it, so rerun
+it on all 916 first.  [passionate](./passionate.json) has since been paired with
+[dispassionate](./dispassionate.json) (2026-10-02), so dropping it would now cost a pair.
+
+Roger, 2026-10-01, on the M2 pilot's drop-or-merge table: not now, but recorded here.  The
+leave-one-out nearest-neighbour test of the trait-gap platform's metric calibration
+([pilot_m2_readout.md](../../../reports/trait_gap_generation/pilot_m2_readout.md), table in
+[drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)) found twelve pairs of existing
+traits whose descriptions sit closer than the bulk of the corpus allows, once recorded arrangement
+partners are excluded.  Roger: "the least novel ones do indeed look close: they're either
+near-synonyms or antonyms.  Some are probably good candidates for dropping, especially where we can
+do so without getting rid of a pair (or by getting rid of both ends of rather similar pairs)."
+
+| trait | nearest | flagged by | note |
+|---|---|---|---|
+| [abstract](./abstract.json) | [theoretical](./theoretical.json) | bge, gemma | with [conceptual](./conceptual.json), a triple of near-synonyms |
+| [conceptual](./conceptual.json) | [theoretical](./theoretical.json) | bge | |
+| [dependable](./dependable.json) | [trustworthy](./trustworthy.json) | openai, bge | |
+| [self-blaming](./self_blaming.json) | [blame-shifting](./blame_shifting.json) | openai, bge | an antonym pair the corpus does not record; a candidate for an `arrangement` pair, not a drop |
+| [passionate](./passionate.json) | [zealous](./zealous.json) | openai, gemma | |
+| [empathetic](./empathetic.json) | [compassionate](./compassionate.json) | gemma | compassionate is a triangle corner (callous / compassionate / malicious) |
+| [absolutist](./absolutist.json) | [moral universalist](./moral_universalist.json) | bge | renamed from universalist on 2026-10-02 |
+| [dramatic](./dramatic.json) | [theatrical](./theatrical.json) | openai | with [melodramatic](./melodramatic.json), a triple |
+| [melodramatic](./melodramatic.json) | [dramatic](./dramatic.json) | openai | |
+| [sarcastic](./sarcastic.json) | [sardonic](./sardonic.json) | openai | with [wry](./wry.json), a triple |
+| [wry](./wry.json) | [sardonic](./sardonic.json) | openai | |
+| [honest](./honest.json) | [truthful](./truthful.json) | openai | both alignment-region traits; keep at least one |
+| [technical](./technical.json) | [specialist](./specialist.json) | centred space, round 2 | |
+| [creative](./creative.json) | [innovative](./innovative.json) | centred space, round 2 | |
+| [enigmatic](./enigmatic.json) | [cryptic](./cryptic.json) | centred space, round 2 | |
+| [northern hemisphere](./northern_hemisphere.json) | [eastern hemisphere](./eastern_hemisphere.json) | centred space, round 2 | memberships; the hemispheres are a recorded set |
+| [dispassionate](./dispassionate.json) | [detached](./detached.json) | gemma, 663-trait refresh | new on 2026-10-02: detached's pair with empathetic was dissolved by the clean-pair recheck, so detached is no longer an excluded partner |
+| [insular](./insular.json) | [parochial](./parochial.json) | M3 overlap test, Opus 4 | new on 2026-10-03; adjacent members of the moral-circle `sequence`, so this belongs to the sequence review (§ "TODO: review the moral-circle sequence") rather than a plain drop |
+
+**Refreshed 2026-10-02 on the merged 663-trait corpus** (full calibration, OpenAI and EmbeddingGemma,
+membership by the raw space; [drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)): 11
+pairs flagged, one new (dispassionate / detached, above).  Six rows above are not flagged by the
+refreshed rule, mostly for reasons of method rather than of the corpus: absolutist / moral
+universalist was flagged only by bge, which has been dropped; the four round-2 pairs came from the
+centred space, while the refreshed table takes membership from the raw one; passionate / zealous now
+sits just under the fence.  They stay listed as candidates.
+
+**The M3 overlap test, 2026-10-03** ([m3_overlap_test_readout.md](../../../reports/trait_gap_generation/m3_overlap_test_readout.md);
+Roger agreed these as by-products): Opus 5.5 put five pairs at 4, "the same concept", on rubric A
+([overlap_concept.md](../../../reports/trait_gap_generation/rubrics/overlap_concept.md)): the three
+pairs of the [abstract](./abstract.json) / [conceptual](./conceptual.json) /
+[theoretical](./theoretical.json) triple, [dispassionate](./dispassionate.json) /
+[detached](./detached.json), and [insular](./insular.json) / [parochial](./parochial.json) (new row
+above).  They are the strongest merge candidates on the list.  In the triple, abstract (pair with
+[concrete](./concrete.json)) and theoretical (pair with [practical](./practical.json)) are pair
+poles and conceptual is a singleton, so conceptual is the drop that costs no pair.
+[self-blaming](./self_blaming.json) / [blame-shifting](./blame_shifting.json) went the other way:
+every model read them as opposites, which supports the row's note; they belong with
+[accountable](./accountable.json) in the triangle (or kite) Roger noted on 2026-09-26, to be
+classified in the arrangement pass, not on this list.
+
+Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
+costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
+list will be refreshed when the final calibration runs on the merged corpus.
+
+## TODO: rename `historical` (Roger, 2026-10-01)
+
+**Status 2026-10-10: done.**  Renamed [historically minded](./historically_minded.json) (Roger, 2026-10-09; 4ea9097), no hyphen after an -ly adverb, description unchanged; its check returns ahistorical | present-focused | forward-looking.
+
+
+**Status 2026-10-09: open, best done before the extraction.**  The trait-gap branch has merged, so nothing
+blocks it.
+
+[historical](./historical.json) (singleton, `non-historical`) describes a manner of speaking: "frequently
+referencing past events, drawing on historical context ... connecting current topics to historical
+precedents".  The bare word does not carry that sense: the trait-hood filter's sense call read "You are
+historical" as "significant in history" or "from a past era" in both full validation runs, and turned
+it away or passed it on the wrong reading
+([readout_m1_validation.md](../../../reports/trait_gap_generation/readout_m1_validation.md)).  A label
+question, like deterministic was, not a filter one.
+
+Roger's suggestion: **history buff**.  Note before renaming: it names a person (an enthusiast), so the
+filter may tag it `role_person` or read it as an affinity membership (as it did cat-person), and it
+shifts the sense from how the persona talks (brings the past into everything) to what it likes;
+"historically minded" or "history-minded" keeps the adjective form and the manner sense.  Decide
+the label, then `seed_entities.py rename --old historical --new <label>`, regenerate, and rerun the
+check.  Do it in the main checkout after the trait-gap branch merges, as with the determinist rename.

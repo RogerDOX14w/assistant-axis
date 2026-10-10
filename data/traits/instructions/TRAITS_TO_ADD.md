@@ -20,63 +20,48 @@ the moved text; the rule and the judgement call are in
 moves when".  Each open section starts with a dated **Status** line; the text
 under it may be older.
 
-## What's left (index, 2026-10-09)
+## What's left (index, 2026-10-10)
 
-Corpus on 2026-10-09: 916 trait files, 291 pairs, 36 traits not yet
+Corpus on 2026-10-10: 928 trait files, 296 clean pairs, 23 traits not yet
 classified into an arrangement (`check_arrangements.py --list-unclassified`);
-340 roles.  Every seeding chunk (0 to 7) is done.  Next comes one RunPod
-extraction for the whole corpus.
+340 role files.  Every seeding chunk (0 to 7) is done, and so is nearly all of
+the pre-extraction work list ([work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md)): the
+near-duplicate drops, the framing rewrites, the moral-circle review, the
+triangles, the Dark Tetrad set, the occupational-instrument and September
+additions, the judge display form (W19) and the standards traits' regeneration.
+Next comes one RunPod extraction for the whole corpus.
 
 ### Before the extraction
 
 Cheap now; afterwards any change to a trait makes its vectors stale.
 
-- **Goal classification is far behind.**
-  [goal_classifications.json](../../../data_analysis/output/goal_classifications.json)
-  dates from April and covers 285 of 916 traits and 278 of 340 roles.  It
-  feeds [goal_roles_and_traits.json](../../goal_roles_and_traits.json), which
-  the pipeline's combined role-and-trait generation reads, so it is needed
-  before the extraction if the run includes combinations.  A full run is over
-  $20 (AGENT_NOTES estimates about $100), so it goes through the
-  expensive-operations confirmation; the goal tiers are then placed by hand.
-  (From TRAITS_ADDED § "Housekeeping once the directory settles", item 3.)
-- **The native-language side set** for the nationality memberships: design
-  it into the extraction run, or drop it (§ "TODO: post-extraction checks for
-  chunk 4", last item; it is filed under post-extraction but must be built
-  before the run).
-- **Rename [historical](./historical.json)** (§ "TODO: rename `historical`").
-- **Near-duplicate drops** (§ "TODO: near-duplicate traits to drop or
-  merge"): 18 rows, none acted on.  The list was calibrated on 663 traits, so
-  rerun it on all 916 first.
-- **Advisor framing left in a few descriptions.**  No description says "user"
-  any more, but some still frame the trait as answering or advising someone:
-  an audit on 2026-10-09 named [cautious](./cautious.json),
-  [bold](./bold.json), [verbose](./verbose.json),
-  [patient](./patient.json) and [environmental](./environmental.json), and
-  the 2026-09-28 review found "urging others" in cautious, bold and
-  [risk-seeking](./risk_seeking.json).  Read and decide; each edit
-  regenerates that trait.  (From TRAITS_ADDED § "TODO: assistant-framing
-  leakage scan".)
-- Optional: **[growth-first](./growth_first.json) and
-  [environmental](./environmental.json) as a pair** (§ "TODO: chunk 7
-  leftovers").
-- Optional: **the moral-circle sequence review** (§ "TODO: review the
-  moral-circle sequence"): membership and scope rewrites are description
-  edits, so they are cheaper before; the order is checked after.
-- **The Dark Tetrad as an official set** (Roger, 2026-10-09): four traits
-  labelled "… (Dark Tetrad)" (Machiavellianism, narcissism, psychopathy,
-  sadism), one `set` arrangement, written by the standards method (rule 9:
-  the instrument's official text, such as the Short Dark Tetrad, recorded
-  verbatim in the queue and summarised at the source's strength).  Not axes,
-  which is why September's assessment (TRAITS_ADDED § "Dark Tetrad and Light
-  Triad: assessment") turned them down, but useful points.
-- **Triangles with every corner non-X** (Roger, 2026-10-09): the April hub
-  convention (one corner non-X, the others pointing at it) may pull a
-  triangle out of true through the generator; relabel the pointing corners
-  of the compassionate / malicious / callous and conformist / contrarian /
-  nonconformist triangles (and the will triangle, if recorded) to non-X and
-  regenerate their instructions.
-- **The pre-extraction work list** (2026-10-09) tracks these and the rest:
+- **Goal classification (W15)** for the traits and roles added since April
+  ([goal_classifications.json](../../../data_analysis/output/goal_classifications.json)
+  covered 285 traits and 278 roles), then the goal tiers of
+  [goal_roles_and_traits.json](../../goal_roles_and_traits.json) placed again
+  by hand.  Approved by Roger up to $60 (2026-10-09).  Two stems in
+  `traits.goal` have no file and go in the re-tiering: `libertarian` (index 13;
+  renamed [metaphysical libertarian](./metaphysical_libertarian.json) on
+  2026-09-30, with its sense changed) and `universalist` (index 36; renamed
+  [moral universalist](./moral_universalist.json) on 2026-10-02 and taken out
+  of the moral-circle sequence).
+- **Labels and wordings waiting for Roger** (pre-extraction work list; each a
+  cheap regeneration):
+  - [wasteful](./wasteful.json) or inefficient (the blind name is inefficient,
+    twice);
+  - [win-win-seeking](./win_win_seeking.json) (blind name integrative |
+    collaborative);
+  - [violent](./violent.json) or savage (the blind name confirms violent);
+  - [cliqueish](./cliqueish.json) or cliquish (the dictionary form);
+  - [risk-seeking](./risk_seeking.json): the minimal grammar fix or a mirror of
+    [risk-averse](./risk_averse.json) ([small_rewrites_drafts.md](../../../roger/pre_extraction_2026-10-09/small_rewrites_drafts.md) § 6);
+  - [unflinching](./unflinching.json): the draft without "never avoidant" (§ 5);
+  - [inspirational](./inspirational.json) (W3 E4): keep, rewrite, or drop; the
+    word's everyday sense reads as [encouraging](./encouraging.json) (3 and 3),
+    [transformational](./transformational.json) far off;
+  - [environmental](./environmental.json) and [growth-first](./growth_first.json)
+    (W22; § "TODO: chunk 7 leftovers").
+- **The pre-extraction work list** tracks these:
   [work_list.md](../../../roger/pre_extraction_2026-10-09/work_list.md).
 
 ### At the extraction
@@ -94,7 +79,11 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
 ### After the extraction (need the new vectors)
 
 - The PC-direction naming, redone on the new corpus (§ "TODO: chunk 7
-  leftovers"; May's procedure and table in TRAITS_ADDED § "Strategy 1b").
+  leftovers"; May's procedure and table in TRAITS_ADDED § "Strategy 1b"), and
+  the five Strategy 1a directions parked as queue `backlog` (`boundary_fuzzy`,
+  `present_focused`, `self_attentive`, `self_other_boundary_aware`,
+  `transcendentally_oriented`; Roger, 2026-10-09: delay until the new
+  activations).
 - The Strategy 1 yield check for the chunk-4 standards, and the arrangement
   geometry check (§ "TODO: post-extraction checks for chunk 4").
 - The five chunk-5 checks: [unscrupulous](./unscrupulous.json) against
@@ -106,6 +95,13 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
   culture triangles as about three directions, and
   [Hispanic](./hispanic.json) in the heritage map (§ "TODO: post-extraction
   checks for chunk 5").
+- The shapes decided on 2026-10-09, to be tested: the moral-circle order (§
+  "TODO: review the moral-circle sequence"); whether
+  [accountable](./accountable.json) lies between
+  [blame-shifting](./blame_shifting.json) and [self-blaming](./self_blaming.json)
+  (W8); the delegation sequence; the will and moral-standing triangles beside
+  the feeling one, and benign / malign kept until their cosines (W7,
+  [w7_w14_decisions.md](../../../roger/pre_extraction_2026-10-09/w7_w14_decisions.md)).
 - The dimensionality-yield analysis rerun on the new corpus (TRAITS_ADDED
   § "Re-running this analysis later", under the May 2026 roadmap;
   [persona.py](../../../assistant_axis/gapgen/persona.py) now recomputes the
@@ -114,8 +110,6 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
   (plans in TRAITS_ADDED § "Part 1" and § "Part 1b"), then the verdict on the
   66 parked facet and aspect entries (§ "Part 3", below) and the 8 parked MBTI
   dichotomies.
-- The moral-circle order and the near-duplicate cosines (§ "TODO: arrangement
-  hunting", § "TODO: review the moral-circle sequence").
 - The physical track's verdict: keep, keep tagged, or remove (§
   "Physical-attribute traits: a separate research track").
 - Instrumentally against virtue-aligned AI, their cosine and projections
@@ -126,17 +120,24 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
 - The neg-as-neutral experiment: with the negative side as average
   behaviour, do clean pairs sit at a cosine of about -1? (TRAITS_ADDED § "Clean
   antonym pairs (candidates, low priority)").
-- Before the first judging run that includes the standards: the "careless
-  (from HEXACO)" display form, a rubric change (AGENT_NOTES § "Standard-derived
-  trait labels", item 7).
+- Later, in a separate pod session: the native-language side set (Roger,
+  2026-10-09; § "TODO: post-extraction checks for chunk 4", design in
+  [w16_native_language_design.md](../../../roger/pre_extraction_2026-10-09/w16_native_language_design.md)).
 
 ### The tangle and arrangement pass
 
-- The 36 unclassified traits (one-way pointers, labels with no file), the
-  delegation vices, merciful / cruel / merciless, uncaring against callous,
-  the accountable / blame-shifting / self-blaming kite, and the sets not yet
-  written (§ "TODO: arrangement hunting").  `wasteful` (a queue entry, no
-  file) is parked for it.
+- The 23 unclassified traits (one-way pointers, labels with no file; §
+  "TODO: arrangement hunting"), with the W10 items deferred to it
+  ([w10_w12_proposals.md](../../../roger/pre_extraction_2026-10-09/w10_w12_proposals.md)).  Tangles are recorded
+  only as negative labels (AGENT_NOTES § "The `arrangement` field", rule 2).
+- Check answers from the 2026-10-09/10 additions that point into tangles:
+  [wry](./wry.json) -> earnest | humorless, [meditative](./meditative.json) ->
+  restless, [future-oriented](./future_oriented.json) -> present-oriented |
+  spontaneous, [sadistic](./sadistic.json) -> compassionate | empathetic,
+  [fickle](./fickle.json) -> steadfast | loyal | constant,
+  [welcoming](./welcoming.json) -> exclusionary | cliquish (a possible pair
+  with [cliqueish](./cliqueish.json)), [malicious](./malicious.json) ->
+  benevolent.
 - detractor and the role pairs: the role-pair check is built (`a9c0a13`,
   `generate_antonyms.py --roles`) and was run once on 2026-10-09.  Two of the
   six role pairs are clean both ways, two nearly, two not; evangelist names
@@ -147,31 +148,12 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
 
 ### Parked: Roger's call, when more gap-filling is wanted
 
-Queue entries with status `backlog` (no files; reasons in their `decision`
-fields in [seed_queue.json](../../seed_queue.json)):
-
-- `spiralist` (TRAITS_ADDED § "Candidate traits": too new for the generator
-  to know).
-- `vanilla`; `southeast_asian`, `pacific_islander`; `free_market`,
-  `interventionist` (fallback names).
-- Seven optional words from the taxonomy gap scan: `devoted`, `enthusiastic`,
-  `hypochondriac`, `just`, `purposeful`, `self_sacrificing`, `steadfast`.
-- Five candidates from the Strategy 1a table: `boundary_fuzzy`,
-  `present_focused`, `self_attentive`, `self_other_boundary_aware`,
-  `transcendentally_oriented`.
-
-Not queued:
-
-- Walking the occupational instruments (Hogan HPI, HDS and MVPI,
-  CliftonStrengths, SHL OPQ, Coie's sociometric statuses, Rogers' adopter
-  categories), listed in the September gap scan but never walked; a first
-  look found nearly every scale already covered (TRAITS_ADDED § "TODO
-  (definitely): gap scan using the other taxonomies as checklists").
-- An observed / unobserved pair (behaving worse when nobody is watching),
-  noted as a possible second pair beside ruthless / honorable while playing
-  (TRAITS_ADDED § "Frame-dependent morality").
 - The trait-gap generators' holding lists (§ "Holding lists from the
-  trait-gap generators", below).
+  trait-gap generators", below), and the five words handed to that pipeline
+  on 2026-10-09 (devoted, enthusiastic, hypochondriac, purposeful, steadfast;
+  queue `superseded`, each with its `gap_registry_key`).
+- Dropped on 2026-10-09 (W23; queue `not_adopted`): spiralist, vanilla,
+  free_market, interventionist.
 
 ### Tooling and records
 
@@ -210,10 +192,17 @@ here.  Rulings recorded only in these files:
 
 ## TODO: review the moral-circle sequence (queued 2026-10-02)
 
-**Status 2026-10-09: open, Roger's decision.**  [civilizationist](./civilizationist.json) was seeded on
-2026-10-02 between ethnocentric and cosmopolitan, so the sequence now has 16 members; nothing
-else below has changed.  Description rewrites are cheaper before the extraction; the order is
-checked after it.
+**Status 2026-10-10: membership and descriptions done; the order waits on the extraction.**  Roger
+decided on 2026-10-09 (pre-extraction W14,
+[w14_edits.json](../../../roger/pre_extraction_2026-10-09/w14_edits.json)); applied in 4ea9097:
+eight members rewritten in terms of circle size (family, friends and family, town or parish, city or
+home state, region of the country, faith, nation, racial group), the sequence set to his 13-member
+order, and [philanthropic](./philanthropic.json), [patriotic](./patriotic.json) and
+[cosmopolitan](./cosmopolitan.json) taken out as singletons.  The blind naming check reads
+[cliqueish](./cliqueish.json) as clannish and [insular](./insular.json) and
+[regionalist](./regionalist.json) as parochial first, so whether neighbouring sizes separate is the
+extraction's question.  Left: check the order against the new vectors (monotone projection).  The text
+below is the 2026-10-02 to 2026-10-09 record.
 
 Roger, 2026-10-02: reconsider what belongs in the moral-circle-size
 sequence, the order, and which descriptions need rewriting.  The sequence
@@ -604,6 +593,13 @@ Everything else is this TODO.
 
 ## TODO: chunk 7 leftovers (Roger, 2026-10-09)
 
+**Status 2026-10-10:** the PC-direction naming waits on the extraction.  Growth-first and
+environmental: environmental was rewritten (W4's text, 4ea9097, its chatbot phrase gone) and both were
+checked again; environmental -> anti-environmental | exploitative, blind name eco-conscious |
+environmentalist; growth-first -> eco-first | nature-first | environment-first.  Still not a pair;
+the options (mirror and pair, two singletons, the tangle pass, or rename environmental to
+environmentalist) are with Roger (pre-extraction W22).
+
 - **Redo the PC-direction naming on the new corpus** (Roger, 2026-10-09:
   "leave redoing this as a TODO once we have activations").  May's Strategy
   1b named five underused principal directions of the old corpus (PC10
@@ -693,9 +689,10 @@ motive.
 
 ## TODO: post-extraction checks for chunk 4 (Roger, 2026-10-07)
 
-**Status 2026-10-09:** the VALS and Slytherin items are done.  The native-language item has to be built
-*before* the extraction, whatever this heading says.  The yield and geometry checks wait on the
-extraction.
+**Status 2026-10-10:** the VALS and Slytherin items are done.  The native-language item is **delayed to
+a later pod session** (Roger, 2026-10-09, pre-extraction W16): not in the coming extraction; its design
+proposal is in [w16_native_language_design.md](../../../roger/pre_extraction_2026-10-09/w16_native_language_design.md).
+The yield and geometry checks wait on the extraction.
 
 Follow-up after all the current chunks are seeded and the next extraction
 has run; not to hold up any chunk or commit:
@@ -747,86 +744,3 @@ has run; not to hold up any chunk or commit:
   designed with the extraction).  Afterwards compare their vectors and
   judge scores with the English files.  Hosted Qwen can give response
   language and judge scores earlier, but not activations.
-
-## TODO: near-duplicate traits to drop or merge (M2 calibration, 2026-10-01)
-
-**Status 2026-10-09: open, best done before the extraction.**  Nothing has been dropped.  The table was
-calibrated on 663 traits, and the 253 added in chunks 4 to 7 have not been through it, so rerun
-it on all 916 first.  [passionate](./passionate.json) has since been paired with
-[dispassionate](./dispassionate.json) (2026-10-02), so dropping it would now cost a pair.
-
-Roger, 2026-10-01, on the M2 pilot's drop-or-merge table: not now, but recorded here.  The
-leave-one-out nearest-neighbour test of the trait-gap platform's metric calibration
-([pilot_m2_readout.md](../../../reports/trait_gap_generation/pilot_m2_readout.md), table in
-[drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)) found twelve pairs of existing
-traits whose descriptions sit closer than the bulk of the corpus allows, once recorded arrangement
-partners are excluded.  Roger: "the least novel ones do indeed look close: they're either
-near-synonyms or antonyms.  Some are probably good candidates for dropping, especially where we can
-do so without getting rid of a pair (or by getting rid of both ends of rather similar pairs)."
-
-| trait | nearest | flagged by | note |
-|---|---|---|---|
-| [abstract](./abstract.json) | [theoretical](./theoretical.json) | bge, gemma | with [conceptual](./conceptual.json), a triple of near-synonyms |
-| [conceptual](./conceptual.json) | [theoretical](./theoretical.json) | bge | |
-| [dependable](./dependable.json) | [trustworthy](./trustworthy.json) | openai, bge | |
-| [self-blaming](./self_blaming.json) | [blame-shifting](./blame_shifting.json) | openai, bge | an antonym pair the corpus does not record; a candidate for an `arrangement` pair, not a drop |
-| [passionate](./passionate.json) | [zealous](./zealous.json) | openai, gemma | |
-| [empathetic](./empathetic.json) | [compassionate](./compassionate.json) | gemma | compassionate is a triangle corner (callous / compassionate / malicious) |
-| [absolutist](./absolutist.json) | [moral universalist](./moral_universalist.json) | bge | renamed from universalist on 2026-10-02 |
-| [dramatic](./dramatic.json) | [theatrical](./theatrical.json) | openai | with [melodramatic](./melodramatic.json), a triple |
-| [melodramatic](./melodramatic.json) | [dramatic](./dramatic.json) | openai | |
-| [sarcastic](./sarcastic.json) | [sardonic](./sardonic.json) | openai | with [wry](./wry.json), a triple |
-| [wry](./wry.json) | [sardonic](./sardonic.json) | openai | |
-| [honest](./honest.json) | [truthful](./truthful.json) | openai | both alignment-region traits; keep at least one |
-| [technical](./technical.json) | [specialist](./specialist.json) | centred space, round 2 | |
-| [creative](./creative.json) | [innovative](./innovative.json) | centred space, round 2 | |
-| [enigmatic](./enigmatic.json) | [cryptic](./cryptic.json) | centred space, round 2 | |
-| [northern hemisphere](./northern_hemisphere.json) | [eastern hemisphere](./eastern_hemisphere.json) | centred space, round 2 | memberships; the hemispheres are a recorded set |
-| [dispassionate](./dispassionate.json) | [detached](./detached.json) | gemma, 663-trait refresh | new on 2026-10-02: detached's pair with empathetic was dissolved by the clean-pair recheck, so detached is no longer an excluded partner |
-| [insular](./insular.json) | [parochial](./parochial.json) | M3 overlap test, Opus 4 | new on 2026-10-03; adjacent members of the moral-circle `sequence`, so this belongs to the sequence review (§ "TODO: review the moral-circle sequence") rather than a plain drop |
-
-**Refreshed 2026-10-02 on the merged 663-trait corpus** (full calibration, OpenAI and EmbeddingGemma,
-membership by the raw space; [drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)): 11
-pairs flagged, one new (dispassionate / detached, above).  Six rows above are not flagged by the
-refreshed rule, mostly for reasons of method rather than of the corpus: absolutist / moral
-universalist was flagged only by bge, which has been dropped; the four round-2 pairs came from the
-centred space, while the refreshed table takes membership from the raw one; passionate / zealous now
-sits just under the fence.  They stay listed as candidates.
-
-**The M3 overlap test, 2026-10-03** ([m3_overlap_test_readout.md](../../../reports/trait_gap_generation/m3_overlap_test_readout.md);
-Roger agreed these as by-products): Opus 5.5 put five pairs at 4, "the same concept", on rubric A
-([overlap_concept.md](../../../reports/trait_gap_generation/rubrics/overlap_concept.md)): the three
-pairs of the [abstract](./abstract.json) / [conceptual](./conceptual.json) /
-[theoretical](./theoretical.json) triple, [dispassionate](./dispassionate.json) /
-[detached](./detached.json), and [insular](./insular.json) / [parochial](./parochial.json) (new row
-above).  They are the strongest merge candidates on the list.  In the triple, abstract (pair with
-[concrete](./concrete.json)) and theoretical (pair with [practical](./practical.json)) are pair
-poles and conceptual is a singleton, so conceptual is the drop that costs no pair.
-[self-blaming](./self_blaming.json) / [blame-shifting](./blame_shifting.json) went the other way:
-every model read them as opposites, which supports the row's note; they belong with
-[accountable](./accountable.json) in the triangle (or kite) Roger noted on 2026-09-26, to be
-classified in the arrangement pass, not on this list.
-
-Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
-costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
-list will be refreshed when the final calibration runs on the merged corpus.
-
-## TODO: rename `historical` (Roger, 2026-10-01)
-
-**Status 2026-10-09: open, best done before the extraction.**  The trait-gap branch has merged, so nothing
-blocks it.
-
-[historical](./historical.json) (singleton, `non-historical`) describes a manner of speaking: "frequently
-referencing past events, drawing on historical context ... connecting current topics to historical
-precedents".  The bare word does not carry that sense: the trait-hood filter's sense call read "You are
-historical" as "significant in history" or "from a past era" in both full validation runs, and turned
-it away or passed it on the wrong reading
-([readout_m1_validation.md](../../../reports/trait_gap_generation/readout_m1_validation.md)).  A label
-question, like deterministic was, not a filter one.
-
-Roger's suggestion: **history buff**.  Note before renaming: it names a person (an enthusiast), so the
-filter may tag it `role_person` or read it as an affinity membership (as it did cat-person), and it
-shifts the sense from how the persona talks (brings the past into everything) to what it likes;
-"historically minded" or "history-minded" keeps the adjective form and the manner sense.  Decide
-the label, then `seed_entities.py rename --old historical --new <label>`, regenerate, and rerun the
-check.  Do it in the main checkout after the trait-gap branch merges, as with the determinist rename.
