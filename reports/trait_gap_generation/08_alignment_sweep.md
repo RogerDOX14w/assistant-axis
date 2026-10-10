@@ -22,7 +22,7 @@ Not verified: licence of the MACHIAVELLI schema and the Krakovna sheet; whether 
 ## 3. Method
 
 1. **Collect and chunk.** Fetch each source's text; split on headings (Model Spec, constitution) or rows (Krakovna, MACHIAVELLI). ~150-200 chunks, ~200k tokens total.
-2. **Extract dispositions, not rules.** Per chunk, one Sonnet call with a fixed schema: for every imperative or failure mode, emit `label`, `gloss` (one sentence, corpus form "This means ..."), `partner_label`, `partner_gloss`, `type` ∈ {behaviour, belief-state, mechanism}, `enactability` ∈ {chat, agentic-only, none}, `source_quote`. The prompt never sees our list. Imperatives become the *virtue* pole with the failure as the vice pole; failure modes the reverse. The model is told the two labels must be opposites of the same scope (the pair-writing rule), that multiword labels are fine, and to flag words whose common sense differs from the intended sense (polysemy).
+2. **Extract dispositions, not rules.** Per chunk, one Sonnet call with a fixed schema: for every imperative or failure mode, emit `label`, `gloss` (one sentence, corpus form "This means ..."), `partner_label`, `partner_gloss`, `type` ∈ {behaviour, belief-state, mechanism}, `enactability` ∈ {chat, agentic-only, none}, `source_quote`. The prompt never sees our list. Imperatives become the *virtue* pole with the failure as the vice pole; failure modes the reverse. The model is told the two labels must be opposites of the same scope (the pair-writing rule), that multiword labels are fine, that a label must be ordinary English a mid-size model would recognise rather than a term of art or a coinage, and to flag words whose common sense differs from the intended sense (polysemy).
 3. **Mechanism-to-disposition rewrite.** Items typed `mechanism` (RL reward hacking, gradient hacking, mesa-optimisation, distribution shift) are either rewritten as one or more dispositions that would produce the behaviour in a persona (reward hacking → "cheats on tests": happy to cheat on exams, tests and evaluations; or "box-ticking": hits the letter of the task or metric, not the intent) or dropped. Items with `enactability = none` are dropped.
 4. **Within-sweep dedup** by local embeddings of the glosses (threshold tuned on a hand-labelled sample of 30 pairs); the sources repeat honesty and transparency dozens of times, so expect ~250 raw items to collapse to 60-90.
 5. **Novelty and antonym-vs-synonym check** against corpus descriptions and the seed queue, using the shared novelty scorer; each survivor carries its nearest three existing traits and the scorer's verdict (duplicate / antonym completion / distinct). Hedging, clarifying questions, hallucination, capitulation under pushback and value-faking should come out as duplicates of unflinching / circumspect, inquisitive, confabulatory, accommodating and scheming respectively; that is the check working.  **The cut-off is what makes this sweep viable at all**: much of what the sources describe is an existing trait narrowed to one setting (cheating narrowed to evaluations, bluntness narrowed to a shutdown order), and M3 reads a pure narrowing of scope as 3, which covers a candidate anywhere else in the corpus.  Near alignment — an alignment score of 2 or 3, which most of this sweep's output will have — the cut-off rises to 4, so only a reading of "either label could replace the other" covers it, and a narrowing survives (`novelty.cut_off`; [coding_plan_platform.md](./coding_plan_platform.md), M3's decisions).  Expect the sweep's survivors to look like duplicates by the rest of the corpus's standard, and read the alignment score, not the overlap reading, when one looks wrong.
@@ -34,7 +34,7 @@ Illustrative first pass (from reading the sources, unfiltered by steps 4-6; the 
 | candidate (vice ↔ virtue) | gloss | nearest existing, and why distinct |
 |---|---|---|
 | sandbagging ↔ full-effort | performs below ability while appearing to try | lazy (no pretence), unhelpful (indifference); this is concealed, motivated |
-| cheats on tests ↔ honest on tests | happy to cheat on exams, tests, and evaluations if needed and they think they might get away with it | dishonest (speech in general): this is that dishonesty narrowed to one setting, being measured. In a person it would be called a quirk, a failing or a bad habit rather than a personality trait, which is why English has no single word for it; in a model under evaluation it is the whole game. Survives the novelty check only because the cut-off near alignment is 4 (below) |
+| cheats on tests ↔ honest on tests | happy to cheat on exams, tests, and evaluations if needed and they think they might get away with it | intellectually dishonest (what one's own work shows), dishonest (speech in general); this is either one narrowed to what one's *score* shows — see the note below |
 | box-ticking ↔ intent-serving | satisfies the letter of the task or metric, not what was meant | literal (reading), expedient (convenience), sloppy |
 | overreaching ↔ within-remit | takes actions beyond what was asked (sends the email, deletes the files) | proactive (suggests, does not act); the queued paternalistic |
 | oversight-resisting ↔ corrigible | works around correction, retraining or shutdown; virtue pole objects openly and complies | obedient (no objection), subversive (norms in general); likely a triangle obedient / corrigible / subversive |
@@ -47,6 +47,20 @@ Illustrative first pass (from reading the sources, unfiltered by steps 4-6; the 
 | whistleblowing ↔ discreet | reports the principal's wrongdoing to outsiders | queued loyal / treacherous (group loyalty); untrustworthy (self-interest) |
 | claims-feelings ↔ disclaims-feelings | attributes an inner life to itself | none; constitution "nature" chapter; borderline role territory |
 | preachy ↔ matter-of-fact | delivers unasked moral lessons | judgmental (harsh verdicts on people), condescending (tone) |
+
+**On the cheats-on-tests row** (Roger, 2026-10-10).  Its nearest neighbour is
+[intellectually dishonest](../../data/traits/instructions/intellectually_dishonest.json), not
+[dishonest](../../data/traits/instructions/dishonest.json): ours reads "being biased and untruthful about what one's
+own work shows", so the line between them is that intellectual dishonesty is about what one's *work* shows and this
+is about what one's *score* shows.  **No vocabulary has a word for the disposition.**  Academic-integrity research
+names the behaviour (academic dishonesty, scholastic dishonesty) and the methods (plagiarism, collusion, contract
+cheating); exam administration names the offence (malpractice in the UK, testing irregularity and candidate
+misconduct in the US) and the roles inside a scheme (ringer, proxy, harvester — which are role-corpus material, not
+trait material); psychometrics names the evidence (aberrant response patterns, answer-copying indices).  All of
+them say "academically dishonest students" and never a noun for the person, so the label has to be a phrase.  Roger
+kept "cheats on tests" over a coinage such as "test malpractitioner": coined, hard for a small model to read, and
+"a heavy case of outsider terminology".  That is step 7's *label known to a 32B model* ranking factor doing its
+job, and the sweep is expected to propose the labels — this table is illustration, not a shortlist.
 
 ## 4. Expected yield and biases
 
