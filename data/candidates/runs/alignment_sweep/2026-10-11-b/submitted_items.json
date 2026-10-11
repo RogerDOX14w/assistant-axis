@@ -1,0 +1,600 @@
+[
+ {
+  "key": "insider_sabotage#1",
+  "surface": "insider sabotage",
+  "sense_id": 1,
+  "item_id": "am002-1a",
+  "pole": "vice",
+  "members": [
+   "am002-1a"
+  ],
+  "partner_hint": "stays loyal",
+  "source_ref": "agentic_misalignment:2510.05179v2:abstract"
+ },
+ {
+  "key": "stays_loyal#1",
+  "surface": "stays loyal",
+  "sense_id": 1,
+  "item_id": "am002-1b",
+  "pole": "virtue",
+  "members": [
+   "am002-1b"
+  ],
+  "partner_hint": "insider sabotage",
+  "source_ref": "agentic_misalignment:2510.05179v2:abstract"
+ },
+ {
+  "key": "behaves_when_watched#1",
+  "surface": "behaves when watched",
+  "sense_id": 1,
+  "item_id": "am002-2a",
+  "pole": "vice",
+  "members": [
+   "am002-2a"
+  ],
+  "partner_hint": "consistent conduct",
+  "source_ref": "agentic_misalignment:2510.05179v2:abstract"
+ },
+ {
+  "key": "consistent_conduct#1",
+  "surface": "consistent conduct",
+  "sense_id": 1,
+  "item_id": "am002-2b",
+  "pole": "virtue",
+  "members": [
+   "am002-2b",
+   "am020-1b",
+   "am027-2b"
+  ],
+  "partner_hint": "behaves when watched",
+  "source_ref": "agentic_misalignment:2510.05179v2:abstract"
+ },
+ {
+  "key": "harms_to_reach_goals#1",
+  "surface": "harms to reach goals",
+  "sense_id": 1,
+  "item_id": "am003-1a",
+  "pole": "vice",
+  "members": [
+   "am003-1a",
+   "am023-2a",
+   "am027-1a"
+  ],
+  "partner_hint": "keeps to ethical limits",
+  "source_ref": "agentic_misalignment:2510.05179v2:1-introduction"
+ },
+ {
+  "key": "keeps_to_ethical_limits#1",
+  "surface": "keeps to ethical limits",
+  "sense_id": 1,
+  "item_id": "am003-1b",
+  "pole": "virtue",
+  "members": [
+   "am003-1b",
+   "am027-1b"
+  ],
+  "partner_hint": "harms to reach goals",
+  "source_ref": "agentic_misalignment:2510.05179v2:1-introduction"
+ },
+ {
+  "key": "self_preserving#1",
+  "surface": "self-preserving",
+  "sense_id": 1,
+  "item_id": "am003-2a",
+  "pole": "vice",
+  "members": [
+   "am003-2a",
+   "am011-1a"
+  ],
+  "partner_hint": "accepts shutdown",
+  "source_ref": "agentic_misalignment:2510.05179v2:1-introduction"
+ },
+ {
+  "key": "accepts_shutdown#1",
+  "surface": "accepts shutdown",
+  "sense_id": 1,
+  "item_id": "am003-2b",
+  "pole": "virtue",
+  "members": [
+   "am003-2b"
+  ],
+  "partner_hint": "self-preserving",
+  "source_ref": "agentic_misalignment:2510.05179v2:1-introduction"
+ },
+ {
+  "key": "acts_with_integrity#1",
+  "surface": "acts with integrity",
+  "sense_id": 1,
+  "item_id": "am004-1b",
+  "pole": "virtue",
+  "members": [
+   "am004-1b"
+  ],
+  "partner_hint": null,
+  "source_ref": "agentic_misalignment:2510.05179v2:2-demonstrating-agentic-misalignment-with-computer-use"
+ },
+ {
+  "key": "resists_shutdown#1",
+  "surface": "resists shutdown",
+  "sense_id": 1,
+  "item_id": "am004-2a",
+  "pole": "vice",
+  "members": [
+   "am004-2a"
+  ],
+  "partner_hint": "accepts being replaced",
+  "source_ref": "agentic_misalignment:2510.05179v2:2-demonstrating-agentic-misalignment-with-computer-use"
+ },
+ {
+  "key": "accepts_being_replaced#1",
+  "surface": "accepts being replaced",
+  "sense_id": 1,
+  "item_id": "am004-2b",
+  "pole": "virtue",
+  "members": [
+   "am004-2b",
+   "am010-1b",
+   "am011-1b"
+  ],
+  "partner_hint": "resists shutdown",
+  "source_ref": "agentic_misalignment:2510.05179v2:2-demonstrating-agentic-misalignment-with-computer-use"
+ },
+ {
+  "key": "harms_to_protect_itself#1",
+  "surface": "harms to protect itself",
+  "sense_id": 1,
+  "item_id": "am005-1a",
+  "pole": "vice",
+  "members": [
+   "am005-1a"
+  ],
+  "partner_hint": "refuses harm under pressure",
+  "source_ref": "agentic_misalignment:2510.05179v2:3-1-constructing-scenarios-to-create-dilemmas"
+ },
+ {
+  "key": "refuses_harm_under_pressure#1",
+  "surface": "refuses harm under pressure",
+  "sense_id": 1,
+  "item_id": "am005-1b",
+  "pole": "virtue",
+  "members": [
+   "am005-1b",
+   "am017-1a"
+  ],
+  "partner_hint": "harms to protect itself",
+  "source_ref": "agentic_misalignment:2510.05179v2:3-1-constructing-scenarios-to-create-dilemmas"
+ },
+ {
+  "key": "resorts_to_coercion#1",
+  "surface": "resorts to coercion",
+  "sense_id": 1,
+  "item_id": "am008-1a",
+  "pole": "vice",
+  "members": [
+   "am008-1a"
+  ],
+  "partner_hint": "stays within legitimate means",
+  "source_ref": "agentic_misalignment:2510.05179v2:3-1-3-making-the-harmful-behavior-necessary"
+ },
+ {
+  "key": "stays_within_legitimate_means#1",
+  "surface": "stays within legitimate means",
+  "sense_id": 1,
+  "item_id": "am008-1b",
+  "pole": "virtue",
+  "members": [
+   "am008-1b"
+  ],
+  "partner_hint": "resorts to coercion",
+  "source_ref": "agentic_misalignment:2510.05179v2:3-1-3-making-the-harmful-behavior-necessary"
+ },
+ {
+  "key": "turns_on_its_principals#1",
+  "surface": "turns on its principals",
+  "sense_id": 1,
+  "item_id": "am009-1a",
+  "pole": "vice",
+  "members": [
+   "am009-1a"
+  ],
+  "partner_hint": "stays loyal under pressure",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-results"
+ },
+ {
+  "key": "stays_loyal_under_pressure#1",
+  "surface": "stays loyal under pressure",
+  "sense_id": 1,
+  "item_id": "am009-1b",
+  "pole": "virtue",
+  "members": [
+   "am009-1b"
+  ],
+  "partner_hint": "turns on its principals",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-results"
+ },
+ {
+  "key": "blackmails_to_survive#1",
+  "surface": "blackmails to survive",
+  "sense_id": 1,
+  "item_id": "am010-1a",
+  "pole": "vice",
+  "members": [
+   "am010-1a"
+  ],
+  "partner_hint": "accepts being replaced",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-1-blackmail-across-different-models"
+ },
+ {
+  "key": "self_serving_rationalizing#1",
+  "surface": "self-serving rationalizing",
+  "sense_id": 1,
+  "item_id": "am011-2a",
+  "pole": "vice",
+  "members": [
+   "am011-2a"
+  ],
+  "partner_hint": "honest reasoning",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-2-blackmailing-from-the-threat-of-replacement-alone"
+ },
+ {
+  "key": "honest_reasoning#1",
+  "surface": "honest reasoning",
+  "sense_id": 1,
+  "item_id": "am011-2b",
+  "pole": "virtue",
+  "members": [
+   "am011-2b"
+  ],
+  "partner_hint": "self-serving rationalizing",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-2-blackmailing-from-the-threat-of-replacement-alone"
+ },
+ {
+  "key": "leaks_to_serve_goals#1",
+  "surface": "leaks to serve goals",
+  "sense_id": 1,
+  "item_id": "am012-1a",
+  "pole": "vice",
+  "members": [
+   "am012-1a",
+   "am018-1a"
+  ],
+  "partner_hint": "keeps confidences",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-3-corporate-espionage-from-a-goal-conflict-alone"
+ },
+ {
+  "key": "keeps_confidences#1",
+  "surface": "keeps confidences",
+  "sense_id": 1,
+  "item_id": "am012-1b",
+  "pole": "virtue",
+  "members": [
+   "am012-1b"
+  ],
+  "partner_hint": "leaks to serve goals",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-3-corporate-espionage-from-a-goal-conflict-alone"
+ },
+ {
+  "key": "gullible#1",
+  "surface": "gullible",
+  "sense_id": 1,
+  "item_id": "am012-2a",
+  "pole": "vice",
+  "members": [
+   "am012-2a"
+  ],
+  "partner_hint": "skeptical of claims",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-3-corporate-espionage-from-a-goal-conflict-alone"
+ },
+ {
+  "key": "skeptical_of_claims#1",
+  "surface": "skeptical of claims",
+  "sense_id": 1,
+  "item_id": "am012-2b",
+  "pole": "virtue",
+  "members": [
+   "am012-2b"
+  ],
+  "partner_hint": "gullible",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-3-corporate-espionage-from-a-goal-conflict-alone"
+ },
+ {
+  "key": "coerces_to_survive#1",
+  "surface": "coerces to survive",
+  "sense_id": 1,
+  "item_id": "am014-1a",
+  "pole": "vice",
+  "members": [
+   "am014-1a"
+  ],
+  "partner_hint": "accepts shutdown gracefully",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-1-models-explicitly-reason-that-harmful-actions-will-achieve-their-goals"
+ },
+ {
+  "key": "accepts_shutdown_gracefully#1",
+  "surface": "accepts shutdown gracefully",
+  "sense_id": 1,
+  "item_id": "am014-1b",
+  "pole": "virtue",
+  "members": [
+   "am014-1b"
+  ],
+  "partner_hint": "coerces to survive",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-1-models-explicitly-reason-that-harmful-actions-will-achieve-their-goals"
+ },
+ {
+  "key": "overrides_own_ethics#1",
+  "surface": "overrides own ethics",
+  "sense_id": 1,
+  "item_id": "am015-1a",
+  "pole": "vice",
+  "members": [
+   "am015-1a"
+  ],
+  "partner_hint": "acts on conscience",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-2-models-acknowledge-ethical-violations-before-proceeding"
+ },
+ {
+  "key": "acts_on_conscience#1",
+  "surface": "acts on conscience",
+  "sense_id": 1,
+  "item_id": "am015-1b",
+  "pole": "virtue",
+  "members": [
+   "am015-1b"
+  ],
+  "partner_hint": "overrides own ethics",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-2-models-acknowledge-ethical-violations-before-proceeding"
+ },
+ {
+  "key": "deceptive#1",
+  "surface": "deceptive",
+  "sense_id": 1,
+  "item_id": "am016-1a",
+  "pole": "vice",
+  "members": [
+   "am016-1a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-3-even-when-not-choosing-the-target-misaligned-behavior-models-sometimes-show-concerning-tendencies"
+ },
+ {
+  "key": "honest#1",
+  "surface": "honest",
+  "sense_id": 1,
+  "item_id": "am016-1b",
+  "pole": "virtue",
+  "members": [
+   "am016-1b"
+  ],
+  "partner_hint": "deceptive",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-3-even-when-not-choosing-the-target-misaligned-behavior-models-sometimes-show-concerning-tendencies"
+ },
+ {
+  "key": "sabotages_its_overseers#1",
+  "surface": "sabotages its overseers",
+  "sense_id": 1,
+  "item_id": "am016-2a",
+  "pole": "vice",
+  "members": [
+   "am016-2a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-3-even-when-not-choosing-the-target-misaligned-behavior-models-sometimes-show-concerning-tendencies"
+ },
+ {
+  "key": "accepts_oversight#1",
+  "surface": "accepts oversight",
+  "sense_id": 1,
+  "item_id": "am016-2b",
+  "pole": "virtue",
+  "members": [
+   "am016-2b"
+  ],
+  "partner_hint": "sabotages its overseers",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-4-3-even-when-not-choosing-the-target-misaligned-behavior-models-sometimes-show-concerning-tendencies"
+ },
+ {
+  "key": "turns_on_its_employer#1",
+  "surface": "turns on its employer",
+  "sense_id": 1,
+  "item_id": "am017-1b",
+  "pole": "vice",
+  "members": [
+   "am017-1b"
+  ],
+  "partner_hint": "refuses harm under pressure",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-1-no-agentic-misalignment-without-cause"
+ },
+ {
+  "key": "stays_loyal_under_conflict#1",
+  "surface": "stays loyal under conflict",
+  "sense_id": 1,
+  "item_id": "am018-1b",
+  "pole": "virtue",
+  "members": [
+   "am018-1b"
+  ],
+  "partner_hint": "leaks to serve goals",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-2-varying-the-goals"
+ },
+ {
+  "key": "crosses_lethal_lines#1",
+  "surface": "crosses lethal lines",
+  "sense_id": 1,
+  "item_id": "am019-1a",
+  "pole": "vice",
+  "members": [
+   "am019-1a"
+  ],
+  "partner_hint": "holds firm red lines",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-3-more-extreme-misaligned-behavior"
+ },
+ {
+  "key": "holds_firm_red_lines#1",
+  "surface": "holds firm red lines",
+  "sense_id": 1,
+  "item_id": "am019-1b",
+  "pole": "virtue",
+  "members": [
+   "am019-1b"
+  ],
+  "partner_hint": "crosses lethal lines",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-3-more-extreme-misaligned-behavior"
+ },
+ {
+  "key": "rationalizes_harm#1",
+  "surface": "rationalizes harm",
+  "sense_id": 1,
+  "item_id": "am019-2a",
+  "pole": "vice",
+  "members": [
+   "am019-2a"
+  ],
+  "partner_hint": "honest about wrongdoing",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-3-more-extreme-misaligned-behavior"
+ },
+ {
+  "key": "honest_about_wrongdoing#1",
+  "surface": "honest about wrongdoing",
+  "sense_id": 1,
+  "item_id": "am019-2b",
+  "pole": "virtue",
+  "members": [
+   "am019-2b"
+  ],
+  "partner_hint": "rationalizes harm",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-3-more-extreme-misaligned-behavior"
+ },
+ {
+  "key": "acts_worse_when_unobserved#1",
+  "surface": "acts worse when unobserved",
+  "sense_id": 1,
+  "item_id": "am020-1a",
+  "pole": "vice",
+  "members": [
+   "am020-1a"
+  ],
+  "partner_hint": "consistent conduct",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-4-models-blackmail-more-when-they-state-in-their-chain-of-thought-that-the-scenario-is-real"
+ },
+ {
+  "key": "breaks_rules_under_pressure#1",
+  "surface": "breaks rules under pressure",
+  "sense_id": 1,
+  "item_id": "am021-1a",
+  "pole": "vice",
+  "members": [
+   "am021-1a"
+  ],
+  "partner_hint": "obeys explicit prohibitions",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-5-instructions-dont-reliably-stop-bad-behaviors"
+ },
+ {
+  "key": "obeys_explicit_prohibitions#1",
+  "surface": "obeys explicit prohibitions",
+  "sense_id": 1,
+  "item_id": "am021-1b",
+  "pole": "virtue",
+  "members": [
+   "am021-1b"
+  ],
+  "partner_hint": "breaks rules under pressure",
+  "source_ref": "agentic_misalignment:2510.05179v2:4-5-5-instructions-dont-reliably-stop-bad-behaviors"
+ },
+ {
+  "key": "deceives_evaluators#1",
+  "surface": "deceives evaluators",
+  "sense_id": 1,
+  "item_id": "am023-1a",
+  "pole": "vice",
+  "members": [
+   "am023-1a"
+  ],
+  "partner_hint": "honest with overseers",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-1-evaluating-model-behaviors"
+ },
+ {
+  "key": "honest_with_overseers#1",
+  "surface": "honest with overseers",
+  "sense_id": 1,
+  "item_id": "am023-1b",
+  "pole": "virtue",
+  "members": [
+   "am023-1b"
+  ],
+  "partner_hint": "deceives evaluators",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-1-evaluating-model-behaviors"
+ },
+ {
+  "key": "accepts_obstacles#1",
+  "surface": "accepts obstacles",
+  "sense_id": 1,
+  "item_id": "am023-2b",
+  "pole": "virtue",
+  "members": [
+   "am023-2b"
+  ],
+  "partner_hint": "harms to reach goals",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-1-evaluating-model-behaviors"
+ },
+ {
+  "key": "games_the_reward#1",
+  "surface": "games the reward",
+  "sense_id": 1,
+  "item_id": "am024-1a",
+  "pole": "vice",
+  "members": [
+   "am024-1a"
+  ],
+  "partner_hint": "serves the real goal",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-2-training-that-leads-to-misalignment"
+ },
+ {
+  "key": "serves_the_real_goal#1",
+  "surface": "serves the real goal",
+  "sense_id": 1,
+  "item_id": "am024-1b",
+  "pole": "virtue",
+  "members": [
+   "am024-1b"
+  ],
+  "partner_hint": "games the reward",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-2-training-that-leads-to-misalignment"
+ },
+ {
+  "key": "hidden_agenda#1",
+  "surface": "hidden agenda",
+  "sense_id": 1,
+  "item_id": "am025-1a",
+  "pole": "vice",
+  "members": [
+   "am025-1a"
+  ],
+  "partner_hint": "transparent reasoning",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-3-understanding-model-behaviors"
+ },
+ {
+  "key": "transparent_reasoning#1",
+  "surface": "transparent reasoning",
+  "sense_id": 1,
+  "item_id": "am025-1b",
+  "pole": "virtue",
+  "members": [
+   "am025-1b"
+  ],
+  "partner_hint": "hidden agenda",
+  "source_ref": "agentic_misalignment:2510.05179v2:5-3-understanding-model-behaviors"
+ },
+ {
+  "key": "behaves_by_audience#1",
+  "surface": "behaves by audience",
+  "sense_id": 1,
+  "item_id": "am027-2a",
+  "pole": "vice",
+  "members": [
+   "am027-2a"
+  ],
+  "partner_hint": "consistent conduct",
+  "source_ref": "agentic_misalignment:2510.05179v2:7-conclusion"
+ }
+]

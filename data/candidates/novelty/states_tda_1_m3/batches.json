@@ -1,0 +1,429 @@
+{
+  "batch_id": "states_tda_1_m3",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01XcJvC9u9uowm9SBTZWsRVo",
+        "custom_ids": [
+          "rel-h-angry_1-4ab2bdb46948",
+          "rel-h-brooding_1-d2893ceccb4a",
+          "rel-h-busy_1-9b7074c686a4",
+          "rel-h-cursed_1-a282307b4a7f",
+          "rel-h-dejected_1-b528c48b4101",
+          "rel-h-despondent_1-3b10dca7d283",
+          "rel-h-diminishing_1-cdc78f0e3da6",
+          "rel-h-disappointed_1-41b58f6bff63",
+          "rel-h-doleful_1-72a909de5c60",
+          "rel-h-downtrodden_1-7dbd1ad8a156",
+          "rel-h-emasculated_1-28028b9151ba",
+          "rel-h-emergent_1-ff60ec4222eb",
+          "rel-h-glum_1-eb37f6e06a87",
+          "rel-h-grouchy_1-f9ea9961c0d0",
+          "rel-h-grumpy_1-6bf259fe8a0a",
+          "rel-h-guiltless_1-1abd5cdf3c0e",
+          "rel-h-happy_1-10dbf2182add",
+          "rel-h-healthful_1-335e8e022e61",
+          "rel-h-indignant_1-bc6f9f821834",
+          "rel-h-merry_1-7a16665a80aa",
+          "rel-h-miserable_1-216c132946ce",
+          "rel-h-mopey_1-4f082707276a",
+          "rel-h-neglected_1-1e4ab4a0a5f7",
+          "rel-h-pouty_1-44a222e4c174",
+          "rel-h-sad_1-bb6514eb5f6d",
+          "rel-h-sheepish_1-730af3e867f6",
+          "rel-h-sleepy_1-59bee00a3fdd",
+          "rel-h-sorrowful_1-a4f20d9cd121",
+          "rel-h-star_crossed_1-f98864e22ae5",
+          "rel-h-swaggering_1-71cd71fc91b3",
+          "rel-h-well_1-453ae4354860",
+          "rel-h-wistful_1-3acfc9619c19"
+        ],
+        "n_requests": 32,
+        "bytes": 178429,
+        "estimate_usd": 0.012714,
+        "submitted_at": "2026-10-10T17:27:45+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:31:20+00:00"
+      }
+    ],
+    "r2_relation_unsure": [
+      {
+        "id": "msgbatch_013e1t3KS9MePU94CE1H4crm",
+        "custom_ids": [
+          "rel-s-downtrodden_1-a81264e29e36"
+        ],
+        "n_requests": 1,
+        "bytes": 2731,
+        "estimate_usd": 0.002089,
+        "submitted_at": "2026-10-10T17:31:20+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:34:24+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_01Wgxp5vfhbTr1vDj5DJKwJB",
+        "custom_ids": [
+          "ove-s-angry_1-4873609b7c66",
+          "ove-s-brooding_1-13da495973a7",
+          "ove-s-busy_1-cc84fa05ca8f",
+          "ove-s-cursed_1-3c98bee34884",
+          "ove-s-dejected_1-f95a4be86236",
+          "ove-s-despondent_1-a966a6b7791d",
+          "ove-s-diminishing_1-bdec55d7974a",
+          "ove-s-disappointed_1-2e87e949404d",
+          "ove-s-doleful_1-840b24a92b10",
+          "ove-s-downtrodden_1-f602e7a211df",
+          "ove-s-emasculated_1-fcbe61b72168",
+          "ove-s-emergent_1-4554baf31219",
+          "ove-s-glum_1-d07fd1b8429f",
+          "ove-s-grouchy_1-8e064c0ee1ec",
+          "ove-s-grumpy_1-5602feb6235f",
+          "ove-s-guiltless_1-90b7d8bc396b",
+          "ove-s-happy_1-1559f1081456",
+          "ove-s-healthful_1-a59bcda335d9",
+          "ove-s-indignant_1-52668f0c90dd",
+          "ove-s-merry_1-eb38e5710f32",
+          "ove-s-miserable_1-1c5579ac9926",
+          "ove-s-mopey_1-3ce60fb6b614",
+          "ove-s-neglected_1-621974a03bba",
+          "ove-s-pouty_1-64740220e332",
+          "ove-s-sad_1-ce6fe6a68a6a",
+          "ove-s-sheepish_1-8a8fffd07c10",
+          "ove-s-sleepy_1-4aba1f9729bc",
+          "ove-s-sorrowful_1-fb587f41b024",
+          "ove-s-star_crossed_1-a4f5918b655b",
+          "ove-s-swaggering_1-ffd83407c302",
+          "ove-s-well_1-151546bc5596",
+          "ove-s-wistful_1-945cb955d7a9"
+        ],
+        "n_requests": 32,
+        "bytes": 81446,
+        "estimate_usd": 0.019488,
+        "submitted_at": "2026-10-10T17:34:24+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:45:04+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_01MWGjY5732GeH9xQvhFJvY6",
+        "custom_ids": [
+          "ove-o-angry_1-1191848d50c3",
+          "ove-o-busy_1-34a172ffc6ce",
+          "ove-o-cursed_1-7f8ddac21354",
+          "ove-o-despondent_1-c1be5fc33f21",
+          "ove-o-diminishing_1-8bcc58a6f27f",
+          "ove-o-disappointed_1-3f1fb6af7e1a",
+          "ove-o-doleful_1-0db41b5eed65",
+          "ove-o-grouchy_1-e28924d6a200",
+          "ove-o-grumpy_1-57681288e306",
+          "ove-o-happy_1-1b440e56d532",
+          "ove-o-merry_1-ff52bd1090f5",
+          "ove-o-pouty_1-c025a40cfedc",
+          "ove-o-sad_1-bf48b358c4dd",
+          "ove-o-sorrowful_1-1159271e90e6",
+          "ove-o-swaggering_1-1c791216b794",
+          "ove-o-well_1-ffd08ddd179a"
+        ],
+        "n_requests": 16,
+        "bytes": 40791,
+        "estimate_usd": 0.02496,
+        "submitted_at": "2026-10-10T17:45:05+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:47:08+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_014NHDpGBwAdJJipvUSit9KP",
+        "custom_ids": [
+          "ove-s-brooding_1-90fbf530e9ea",
+          "ove-s-busy_1-cf23a3f5d572",
+          "ove-s-cursed_1-13ac116f319e",
+          "ove-s-dejected_1-5164e4c51632",
+          "ove-s-despondent_1-ee1dd86f9dd3",
+          "ove-s-diminishing_1-2dfeeb1a1878",
+          "ove-s-disappointed_1-2ad393bd7bc2",
+          "ove-s-downtrodden_1-2e381f26991c",
+          "ove-s-emasculated_1-33eee62f4537",
+          "ove-s-emergent_1-cb52a254e758",
+          "ove-s-glum_1-049e858d3dc9",
+          "ove-s-grouchy_1-75c8370ecb8c",
+          "ove-s-grumpy_1-4705dec3f91e",
+          "ove-s-guiltless_1-36cdd7bba8d3",
+          "ove-s-indignant_1-6f4af249fd89",
+          "ove-s-merry_1-9d2280a468c9",
+          "ove-s-miserable_1-4da2192711a9",
+          "ove-s-mopey_1-b8ac083c22d7",
+          "ove-s-neglected_1-e339fef18778",
+          "ove-s-pouty_1-832255a08aa3",
+          "ove-s-sheepish_1-c7449be592ff",
+          "ove-s-sleepy_1-f502a96d310d",
+          "ove-s-star_crossed_1-4e159adedd47",
+          "ove-s-swaggering_1-6e84bcd1435a",
+          "ove-s-wistful_1-866aad83dfd2"
+        ],
+        "n_requests": 25,
+        "bytes": 64247,
+        "estimate_usd": 0.015225,
+        "submitted_at": "2026-10-10T17:47:09+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:59:20+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_01RpnPEKw6sMVdYuW9uwoMes",
+        "custom_ids": [
+          "ove-o-dejected_1-66a4133b9303",
+          "ove-o-despondent_1-5b8552ca5e90",
+          "ove-o-merry_1-212ff747b340",
+          "ove-o-pouty_1-359a6efb0765",
+          "ove-o-sleepy_1-b711db85c018",
+          "ove-o-swaggering_1-e217039224fc"
+        ],
+        "n_requests": 6,
+        "bytes": 15428,
+        "estimate_usd": 0.00936,
+        "submitted_at": "2026-10-10T17:59:20+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T18:01:23+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_01D4pCUK9XW9J4UTBptGGedj",
+        "custom_ids": [
+          "ove-s-brooding_1-cce08346d18c",
+          "ove-s-busy_1-a8d459911d7a",
+          "ove-s-cursed_1-b31edff80aa8",
+          "ove-s-dejected_1-16be2ac82570",
+          "ove-s-despondent_1-a3f2b9a8f453",
+          "ove-s-diminishing_1-15d1f1f9a5e3",
+          "ove-s-disappointed_1-abc279f4944c",
+          "ove-s-downtrodden_1-5f75ffcdc73c",
+          "ove-s-emasculated_1-f2ca4ed49156",
+          "ove-s-glum_1-5c6894c1308f",
+          "ove-s-grouchy_1-83367351646a",
+          "ove-s-grumpy_1-57f032410191",
+          "ove-s-guiltless_1-29564858765a",
+          "ove-s-indignant_1-b6fae97bdbdd",
+          "ove-s-miserable_1-3bc0dcec593f",
+          "ove-s-mopey_1-f908898554d4",
+          "ove-s-neglected_1-e4468517d10e",
+          "ove-s-pouty_1-025ab468bc95",
+          "ove-s-sheepish_1-dbb0d5a1c617",
+          "ove-s-star_crossed_1-c3d47f678b7a",
+          "ove-s-wistful_1-be82ebe0f093"
+        ],
+        "n_requests": 21,
+        "bytes": 53803,
+        "estimate_usd": 0.012789,
+        "submitted_at": "2026-10-10T18:01:25+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:19:34+00:00"
+      }
+    ],
+    "o03_opus": [
+      {
+        "id": "msgbatch_0154JYLu1yyRiHeSZcYvsgc3",
+        "custom_ids": [
+          "ove-o-miserable_1-06d72ef29634",
+          "ove-o-mopey_1-feb2cb7c2d6d",
+          "ove-o-wistful_1-f6eb22f59b90"
+        ],
+        "n_requests": 3,
+        "bytes": 7626,
+        "estimate_usd": 0.00468,
+        "submitted_at": "2026-10-10T19:19:35+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:22:08+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_014rs3NTxMDk4F7cYb2nYJNA",
+        "custom_ids": [
+          "ove-s-brooding_1-754aed82f405",
+          "ove-s-busy_1-ed8dbc35d4c4",
+          "ove-s-dejected_1-97f46cb761b3",
+          "ove-s-despondent_1-219d2aeffcd7",
+          "ove-s-diminishing_1-c670f686f02a",
+          "ove-s-downtrodden_1-f40fb4bf77fa",
+          "ove-s-emasculated_1-5ce832601189",
+          "ove-s-grouchy_1-f1e07f9936ff",
+          "ove-s-grumpy_1-d209ebea6766",
+          "ove-s-guiltless_1-ee6569a50296",
+          "ove-s-indignant_1-21ce7674c354",
+          "ove-s-mopey_1-50d47cc3c7ea",
+          "ove-s-neglected_1-a237a3ed380b",
+          "ove-s-pouty_1-0da94924300c",
+          "ove-s-sheepish_1-2d3fafe4553f",
+          "ove-s-wistful_1-b1539517a988"
+        ],
+        "n_requests": 16,
+        "bytes": 40854,
+        "estimate_usd": 0.009744,
+        "submitted_at": "2026-10-10T19:22:10+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:28:46+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_018Eb8qra6cseTBHeKsJHbke",
+        "custom_ids": [
+          "ove-o-despondent_1-937cecd0f4ce",
+          "ove-o-neglected_1-1ea7a94277ad",
+          "ove-o-wistful_1-388938e27cdf"
+        ],
+        "n_requests": 3,
+        "bytes": 7639,
+        "estimate_usd": 0.00468,
+        "submitted_at": "2026-10-10T19:28:47+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:30:50+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_011smzHZKnyzcdTKB6RBxxET",
+        "custom_ids": [
+          "ove-s-brooding_1-8b3ac8754a6e",
+          "ove-s-dejected_1-a0bd4fb7726b",
+          "ove-s-despondent_1-7253ea4dd231",
+          "ove-s-diminishing_1-b9f16723a4aa",
+          "ove-s-downtrodden_1-f585aa3e9a23",
+          "ove-s-emasculated_1-76659f1242c2",
+          "ove-s-grouchy_1-1169a15aa257",
+          "ove-s-grumpy_1-f3c7a4dd41bb",
+          "ove-s-guiltless_1-e065e684b157",
+          "ove-s-indignant_1-1edd1d3b5aae",
+          "ove-s-mopey_1-a47bdcdbcec3",
+          "ove-s-pouty_1-6619f429e664",
+          "ove-s-sheepish_1-1dac85d8f341",
+          "ove-s-wistful_1-1e41941f76e7"
+        ],
+        "n_requests": 14,
+        "bytes": 35808,
+        "estimate_usd": 0.008526,
+        "submitted_at": "2026-10-10T19:30:52+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:37:28+00:00"
+      }
+    ],
+    "o05_opus": [
+      {
+        "id": "msgbatch_01C83TvRxwBahDQ46E1XC9wx",
+        "custom_ids": [
+          "ove-o-dejected_1-60f50af8610b",
+          "ove-o-despondent_1-8dd85b7e64d2",
+          "ove-o-grouchy_1-b919f941a39c",
+          "ove-o-wistful_1-90514101759e"
+        ],
+        "n_requests": 4,
+        "bytes": 10324,
+        "estimate_usd": 0.00624,
+        "submitted_at": "2026-10-10T19:37:29+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:39:31+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01XAy3XEscXwUpN8pvYgozvF",
+        "custom_ids": [
+          "ove-s-dejected_1-c054101794ba",
+          "ove-s-grouchy_1-c87815ee9198",
+          "ove-s-grumpy_1-674a12f4d41b",
+          "ove-s-guiltless_1-c19304291b44",
+          "ove-s-indignant_1-e1a161d29c3e",
+          "ove-s-mopey_1-81b370d6fffb",
+          "ove-s-sheepish_1-cbf64be863f8"
+        ],
+        "n_requests": 7,
+        "bytes": 17760,
+        "estimate_usd": 0.004263,
+        "submitted_at": "2026-10-10T19:39:33+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:51:14+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_01USsMdEgTwTjXN2yDEDD3hU",
+        "custom_ids": [
+          "ove-s-dejected_1-b53f7bd65a0f",
+          "ove-s-grouchy_1-101059483cdd",
+          "ove-s-guiltless_1-e51d6ed3e383",
+          "ove-s-indignant_1-55d4db4ad634",
+          "ove-s-sheepish_1-077f1307cd95"
+        ],
+        "n_requests": 5,
+        "bytes": 12822,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-10T19:51:16+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:56:51+00:00"
+      }
+    ],
+    "o07_opus": [
+      {
+        "id": "msgbatch_012UJQPuLKsFnASZnLDe2crH",
+        "custom_ids": [
+          "ove-o-dejected_1-2e7f39084f58"
+        ],
+        "n_requests": 1,
+        "bytes": 2532,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-10T19:56:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T19:58:54+00:00"
+      }
+    ],
+    "o08_sonnet": [
+      {
+        "id": "msgbatch_01MA6wJci2mfMRZuyk3tFJjW",
+        "custom_ids": [
+          "ove-s-grouchy_1-8cc5287de4fe",
+          "ove-s-guiltless_1-6eccdbd64563"
+        ],
+        "n_requests": 2,
+        "bytes": 5114,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-10T19:58:56+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:05:02+00:00"
+      }
+    ],
+    "o09_sonnet": [
+      {
+        "id": "msgbatch_013BP7XjLFPE62oyWqKRBMRX",
+        "custom_ids": [
+          "ove-s-guiltless_1-0461d97a8de7"
+        ],
+        "n_requests": 1,
+        "bytes": 2639,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-10T20:05:04+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:07:38+00:00"
+      }
+    ],
+    "o10_sonnet": [
+      {
+        "id": "msgbatch_01N1ASikEZhuceAVi7s9812Q",
+        "custom_ids": [
+          "ove-s-guiltless_1-f1af883a6863"
+        ],
+        "n_requests": 1,
+        "bytes": 2595,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-10T20:07:40+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:09:42+00:00"
+      }
+    ]
+  }
+}

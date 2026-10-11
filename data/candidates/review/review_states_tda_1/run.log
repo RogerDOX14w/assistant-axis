@@ -1,0 +1,124 @@
+2026-10-10T20:09:51Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:09:51Z INFO r1_relation: submitted batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh (19 requests, estimate $0.0027)
+2026-10-10T20:09:51Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:09:51Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 0m00s since submission
+2026-10-10T20:10:22Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:10:22Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 0m31s since submission
+2026-10-10T20:10:52Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:10:52Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 1m01s since submission
+2026-10-10T20:11:23Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:11:23Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 1m32s since submission
+2026-10-10T20:11:53Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:11:53Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 2m02s since submission
+2026-10-10T20:12:23Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:12:23Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=19, succeeded=0)), waiting 2m32s since submission
+2026-10-10T20:12:54Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:12:54Z INFO batch msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh: ended (submitted 3m03s ago)
+2026-10-10T20:12:54Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh "HTTP/1.1 200 OK"
+2026-10-10T20:12:55Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh/results "HTTP/1.1 200 OK"
+2026-10-10T20:12:55Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:12:55Z INFO r2_relation_unsure: submitted batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY (1 requests, estimate $0.0010)
+2026-10-10T20:12:55Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:12:55Z INFO batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1, succeeded=0)), waiting 0m00s since submission
+2026-10-10T20:13:26Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:13:26Z INFO batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1, succeeded=0)), waiting 0m31s since submission
+2026-10-10T20:13:56Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:13:56Z INFO batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1, succeeded=0)), waiting 1m01s since submission
+2026-10-10T20:14:27Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:14:27Z INFO batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1, succeeded=0)), waiting 1m32s since submission
+2026-10-10T20:14:57Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:14:57Z INFO batch msgbatch_01J2vWZXcNdHWfmmqUBSoTUY: ended (submitted 2m02s ago)
+2026-10-10T20:14:58Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY "HTTP/1.1 200 OK"
+2026-10-10T20:14:58Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01J2vWZXcNdHWfmmqUBSoTUY/results "HTTP/1.1 200 OK"
+2026-10-10T20:14:58Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:14:58Z INFO ov1_sonnet: submitted batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je (11 requests, estimate $0.0067)
+2026-10-10T20:14:59Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:14:59Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 0m01s since submission
+2026-10-10T20:15:29Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:15:29Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 0m31s since submission
+2026-10-10T20:16:00Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:16:00Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 1m02s since submission
+2026-10-10T20:16:30Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:16:30Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 1m32s since submission
+2026-10-10T20:17:00Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:17:00Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 2m02s since submission
+2026-10-10T20:17:31Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:17:31Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 2m33s since submission
+2026-10-10T20:18:01Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:18:01Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 3m03s since submission
+2026-10-10T20:18:32Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:18:32Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 3m34s since submission
+2026-10-10T20:19:02Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:19:02Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 4m04s since submission
+2026-10-10T20:19:33Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:19:33Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 4m35s since submission
+2026-10-10T20:20:03Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:20:03Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 5m05s since submission
+2026-10-10T20:20:33Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:20:33Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=11, succeeded=0)), waiting 5m35s since submission
+2026-10-10T20:21:04Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:21:04Z INFO batch msgbatch_01Pw1rnmyMmxjFCJgpbtF1je: ended (submitted 6m06s ago)
+2026-10-10T20:21:04Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je "HTTP/1.1 200 OK"
+2026-10-10T20:21:05Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01Pw1rnmyMmxjFCJgpbtF1je/results "HTTP/1.1 200 OK"
+2026-10-10T20:21:05Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:21:05Z INFO ov1_opus: submitted batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw (2 requests, estimate $0.0031)
+2026-10-10T20:21:05Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:21:05Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m00s since submission
+2026-10-10T20:21:36Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:21:36Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m31s since submission
+2026-10-10T20:22:06Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:22:06Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m01s since submission
+2026-10-10T20:22:37Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:22:37Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m32s since submission
+2026-10-10T20:23:07Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:23:07Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 2m02s since submission
+2026-10-10T20:23:37Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:23:37Z INFO batch msgbatch_019BqMMPYqZGM5Z45pArg7Rw: ended (submitted 2m32s ago)
+2026-10-10T20:23:38Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw "HTTP/1.1 200 OK"
+2026-10-10T20:23:38Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_019BqMMPYqZGM5Z45pArg7Rw/results "HTTP/1.1 200 OK"
+2026-10-10T20:23:39Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:23:39Z INFO ov2_sonnet: submitted batch msgbatch_011D7mgodAugEHkc4pQKfbDs (2 requests, estimate $0.0012)
+2026-10-10T20:23:39Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:23:39Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m00s since submission
+2026-10-10T20:24:09Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:24:09Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m30s since submission
+2026-10-10T20:24:40Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:24:40Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m01s since submission
+2026-10-10T20:25:10Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:25:10Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m31s since submission
+2026-10-10T20:25:41Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:25:41Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 2m02s since submission
+2026-10-10T20:26:11Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:26:11Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 2m32s since submission
+2026-10-10T20:26:41Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:26:41Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 3m02s since submission
+2026-10-10T20:27:12Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:27:12Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 3m33s since submission
+2026-10-10T20:27:42Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:27:42Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 4m03s since submission
+2026-10-10T20:28:13Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:28:13Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 4m34s since submission
+2026-10-10T20:28:43Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:28:43Z INFO batch msgbatch_011D7mgodAugEHkc4pQKfbDs: ended (submitted 5m04s ago)
+2026-10-10T20:28:43Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs "HTTP/1.1 200 OK"
+2026-10-10T20:28:44Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_011D7mgodAugEHkc4pQKfbDs/results "HTTP/1.1 200 OK"
+2026-10-10T20:28:44Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages/batches "HTTP/1.1 200 OK"
+2026-10-10T20:28:44Z INFO ov2_opus: submitted batch msgbatch_01SfV6nygyBs3iGawCrKioG9 (2 requests, estimate $0.0031)
+2026-10-10T20:28:45Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:28:45Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m01s since submission
+2026-10-10T20:29:15Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:29:15Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 0m31s since submission
+2026-10-10T20:29:46Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:29:46Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m02s since submission
+2026-10-10T20:30:16Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:30:16Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 1m32s since submission
+2026-10-10T20:30:46Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:30:46Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: in_progress (MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=2, succeeded=0)), waiting 2m02s since submission
+2026-10-10T20:31:17Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:31:17Z INFO batch msgbatch_01SfV6nygyBs3iGawCrKioG9: ended (submitted 2m33s ago)
+2026-10-10T20:31:17Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9 "HTTP/1.1 200 OK"
+2026-10-10T20:31:17Z INFO HTTP Request: GET https://api.anthropic.com/v1/messages/batches/msgbatch_01SfV6nygyBs3iGawCrKioG9/results "HTTP/1.1 200 OK"
+2026-10-10T20:31:18Z INFO [novelty_score:review_states_tda_1:overlap:claude-opus-5-5] parse rate: 4/4 OK  (first attempt 4/4)
+2026-10-10T20:31:18Z INFO [novelty_score:review_states_tda_1:overlap:claude-sonnet-5-5] parse rate: 13/13 OK  (first attempt 13/13)
+2026-10-10T20:31:18Z INFO [novelty_score:review_states_tda_1:relation:claude-haiku-5-5] parse rate: 19/19 OK  (first attempt 19/19)
+2026-10-10T20:31:18Z INFO [novelty_score:review_states_tda_1:relation_unsure:claude-sonnet-5-5] parse rate: 1/1 OK  (first attempt 1/1)

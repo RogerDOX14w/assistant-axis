@@ -1,0 +1,69 @@
+{
+  "batch_id": "review_physical_tda_1",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01XdvKpVog43NPk1YL81n8N3",
+        "custom_ids": [
+          "rel-h-big_1-05319382daf7",
+          "rel-h-bristly_1-07a781e345b8",
+          "rel-h-confusable_1-a0f33dcdcdeb",
+          "rel-h-dewy_1-930c4eb16022",
+          "rel-h-doddering_1-ec76fce500ec",
+          "rel-h-fatigueless_1-cb6d34702418",
+          "rel-h-florid_1-3071b24824a6",
+          "rel-h-greasy_1-07cc7e6184a0",
+          "rel-h-nondescript_1-50588fade0f0",
+          "rel-h-sturdy_1-a72b1c59d7a1",
+          "rel-h-ticklish_1-57750d4f3760",
+          "rel-h-ugly_1-afb6413f0dd5",
+          "rel-h-unattractive_1-bd61321d9dc6",
+          "rel-h-unhardy_1-b291612bf1d1",
+          "rel-h-unvoluptuous_1-3f35b5380bfa",
+          "rel-h-voluptuous_1-60ac0a41d180"
+        ],
+        "n_requests": 16,
+        "bytes": 49987,
+        "estimate_usd": 0.00302,
+        "submitted_at": "2026-10-10T17:09:35+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:11:38+00:00"
+      }
+    ],
+    "ov1_sonnet": [
+      {
+        "id": "msgbatch_01NH51UhUpWeX2gfVwbETPqu",
+        "custom_ids": [
+          "ove-s-big_1-9e54f9921cc6",
+          "ove-s-big_1-52b1f0f130d3",
+          "ove-s-dewy_1-e66a3a8ad436",
+          "ove-s-dewy_1-2f72cd737a69",
+          "ove-s-doddering_1-cb99dc32f4f7",
+          "ove-s-nondescript_1-6462710a52d1",
+          "ove-s-nondescript_1-c5dfce45c1c5",
+          "ove-s-ugly_1-da2c6d1d6767"
+        ],
+        "n_requests": 8,
+        "bytes": 19667,
+        "estimate_usd": 0.004872,
+        "submitted_at": "2026-10-10T17:11:38+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:17:14+00:00"
+      }
+    ],
+    "ov1_opus": [
+      {
+        "id": "msgbatch_01XBuGdSKPWRX3ppR19GKhDH",
+        "custom_ids": [
+          "ove-o-ugly_1-3372909caff2"
+        ],
+        "n_requests": 1,
+        "bytes": 2436,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-10T17:17:15+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:19:18+00:00"
+      }
+    ]
+  }
+}

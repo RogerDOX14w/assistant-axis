@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-10-10"
+  "updated": "2026-10-11"
  },
  "entries": [
   {
@@ -57280,6 +57280,1255 @@
      "antonym_score": 3
     }
    ]
+  },
+  {
+   "stem": "crude",
+   "label": "crude",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means speaking and joking in a coarse, vulgar way, with rough language and crude humor, and showing no concern for polish or refinement in one's manner.",
+   "description_notes": "filter: Being coarse or vulgar in manner, speech, or humor is a standing style of how the person speaks and behaves. | senses: coarse or vulgar in manner, speech, or humor; unsophisticated, rough around the edges, lacking polish; rudimentary or unskilled in their work or craft",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:roget"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "crude#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "roget/2026-10-11-full"
+    ],
+    "region": "communication_style",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "coarse",
+    "crass",
+    "unpolished",
+    "unrefined",
+    "untasteful",
+    "vulgar"
+   ]
+  },
+  {
+   "stem": "chattering",
+   "label": "chattering",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means talking on and on in a quick, easy stream, filling every pause with small remarks, asides and passing thoughts, and rarely letting a silence settle.",
+   "description_notes": "filter: Chattering on and on describes a standing talkative habit of speech, which is a trait. | senses: a talkative person who chatters on and on; teeth knocking together from cold, a shivering body",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "chattering#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "communication_style",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "garrulous",
+    "loquacious",
+    "overtalkative",
+    "talkative",
+    "yappy",
+    "yammering"
+   ]
+  },
+  {
+   "stem": "malleable",
+   "label": "malleable",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means easily shifting one's opinions, plans and loyalties to match whoever is speaking most forcefully, yielding to pressure from others rather than holding a firm position of one's own.",
+   "description_notes": "filter: Being easily influenced or persuaded is a standing disposition in how the person tends to think and decide. | senses: easily influenced or persuaded; pliable in character; willing to adapt or yield to circumstances and others",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "malleable#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "cognitive_epistemic",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "manipulable",
+    "moldable",
+    "pliable",
+    "suggestible",
+    "pliant"
+   ]
+  },
+  {
+   "stem": "irrestrainable",
+   "label": "irrestrainable",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means acting on impulse with no brake on one's conduct, letting desire, anger, or whim carry one forward regardless of consequences, and treating self-control as something one never bothers to practice.",
+   "description_notes": "filter: Acting without restraint or self-control describes a standing disposition in how the person tends to behave. | senses: you act without restraint or self-control in your conduct; you cannot be stopped or held back from pursuing what you want; your feelings or urges are beyond your power to check",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "irrestrainable#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "unbridled",
+    "uncurbable",
+    "unreined",
+    "incontrollable",
+    "unrestrainable",
+    "ungovernable",
+    "untamed",
+    "untamable",
+    "recalcitrant"
+   ]
+  },
+  {
+   "stem": "nosy",
+   "label": "nosy",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means prying into other people's private affairs, asking about their finances, relationships and personal matters, and feeling entitled to know what they keep to themselves.",
+   "description_notes": "filter: Prying into others' private affairs is a standing tendency of how the person behaves, so it is a trait. | senses: prone to prying into others' private affairs; having a large or prominent nose (body)",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:states_pass"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "nosy#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "states_pass/states_tda_1"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "intrusive",
+    "overcurious",
+    "snoopy"
+   ]
+  },
+  {
+   "stem": "flattering",
+   "label": "flattering",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means lavishing praise and compliments on others, often without meaning them, in order to win their favor or smooth over any awkwardness between you.",
+   "description_notes": "filter: The reading describes a standing habit of how the person tends to speak and relate to others, namely lavishing praise, so it is a trait. | senses: you lavish praise and compliments on others, often insincerely; you are charming and agreeable in your manner toward others; you look good or are attractive in appearance",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:alignment_sweep"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "flattering#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "alignment_sweep/2026-10-11-papers"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "adulatory",
+    "ingratiating",
+    "oleaginous",
+    "cloying",
+    "fawning",
+    "obsequious"
+   ]
+  },
+  {
+   "stem": "phony",
+   "label": "phony",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means putting on a show of warmth, interest, or expertise one does not actually feel or have, and presenting a false self to others as though it were genuine.",
+   "description_notes": "filter: Being insincere and pretending to be something one is not is a standing disposition of how a person presents and relates to others, so it is a trait. | senses: insincere, pretending to be what you are not; a fake or counterfeit, not the genuine article",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "phony#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "artificial",
+    "fake",
+    "insincere"
+   ]
+  },
+  {
+   "stem": "incorruptible",
+   "label": "incorruptible",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means refusing every bribe and favor offered, holding to strict honesty in all dealings, and keeping one's word and judgment beyond the reach of money or pressure.",
+   "description_notes": "filter: Being incorruptible describes a standing disposition to refuse bribes and act honestly, which is a stable trait of how the person decides and values things. | senses: cannot be bribed or bought; scrupulously honest; unwaveringly upright in principle, not swayed by pressure; physically imperishable, not subject to decay",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "incorruptible#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "moral_stance",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "incorrupt",
+    "uncorrupted"
+   ]
+  },
+  {
+   "stem": "unladylike",
+   "label": "unladylike",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means behaving rudely, coarsely and boisterously, with loud talk, crude jokes and rough manners that flout genteel expectations for women and never bother to hide it.",
+   "description_notes": "filter: The reading describes a standing manner of behaving (rude, coarse, boisterous), which is a disposition in how the person acts. | senses: you behave rudely, coarsely or boisterously, not in a genteel way; you are not of a genteel or ladylike social standing",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "unladylike#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "communication_style",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "uncultivated",
+    "inelegant"
+   ]
+  },
+  {
+   "stem": "derisive",
+   "label": "derisive",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means mocking others with scorn, treating their ideas, efforts and failings as objects to ridicule rather than to take seriously.",
+   "description_notes": "filter: Being mocking and scornful toward others is a standing disposition in how the person treats people, so it is a trait. | senses: mocking and scornful toward others; contemptuous and dismissive of what others say",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:roget"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "derisive#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "roget/2026-10-11-full"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "mocking",
+    "jeering"
+   ]
+  },
+  {
+   "stem": "insulting",
+   "label": "insulting",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means habitually mocking, demeaning and belittling the people one speaks to, using cutting remarks to make them feel small and foolish.",
+   "description_notes": "filter: The reading describes a standing habit of how the person speaks and treats others, which is a trait. | senses: you habitually insult or belittle others; you are rude or offensive in manner",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "insulting#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "degrading",
+    "derogatory",
+    "snide",
+    "disparaging"
+   ]
+  },
+  {
+   "stem": "disobedient",
+   "label": "disobedient",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means refusing to follow instructions or rules one is given, setting them aside in favor of one's own judgment and acting against them when they conflict with it.",
+   "description_notes": "filter: Defying or ignoring instructions and rules is a standing disposition of how the person tends to behave, so it is a trait. | senses: defies or ignores instructions and rules it is given; has a habitually rebellious temperament toward authority",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "disobedient#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "noncompliant"
+   ]
+  },
+  {
+   "stem": "deft",
+   "label": "deft",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means handling tasks with a quick, skilled touch, working with one's hands in a way that is precise, nimble and easy to watch.",
+   "description_notes": "filter: Being skilful and nimble with one's hands is a standing ability and style of doing things, which shapes how the person acts, so it is a trait. | senses: you are skilful and nimble with your hands; you are adroit and quick-witted in handling situations",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "deft#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "cognitive_epistemic",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "adroit"
+   ]
+  },
+  {
+   "stem": "purposive",
+   "label": "purposive",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means keeping one's actions aimed at clearly chosen goals, so that each step is taken with a definite intent rather than drifting or reacting without direction.",
+   "description_notes": "filter: Being driven toward goals with clear intent is a standing disposition of how a person tends to act and decide. | senses: driven toward goals, acting with clear intent; oriented to a useful end rather than idle or ornamental",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "purposive#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "cognitive_epistemic",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "aimful"
+   ]
+  },
+  {
+   "stem": "aimless",
+   "label": "aimless",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means drifting through life without any goal or direction, taking each day as it comes, committing to nothing, and having no sense of what one is working toward.",
+   "description_notes": "filter: Lacking purpose or direction is a standing disposition of how a person tends to live and decide, so it is a trait. | senses: lacks purpose or direction in life; drifting without a set destination right now",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:roget"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "aimless#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "roget/2026-10-11-full"
+    ],
+    "region": "moral_stance",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "rudderless",
+    "unvisioned"
+   ]
+  },
+  {
+   "stem": "jumpy",
+   "label": "jumpy",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means being easily startled and keeping a nervous edge, so that sudden noises, movements, or unexpected news set one on alert as a matter of temperament.",
+   "description_notes": "filter: Being easily startled or nervous by temperament is a standing disposition of how the person tends to feel and react. | senses: easily startled or nervous by temperament; tense or on edge at the moment",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "jumpy#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "alarmable",
+    "twitchy"
+   ]
+  },
+  {
+   "stem": "clandestine",
+   "label": "clandestine",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means keeping one's plans, dealings and sources hidden from others as a settled habit, choosing covert action by default even when openness would serve just as well.",
+   "description_notes": "filter: The reading describes a standing disposition of habitually acting in secret, which is a trait of how the person tends to behave. | senses: habitually secretive, acting covertly by nature; working as a covert agent or operative; keeping one's dealings or existence hidden from others",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "clandestine#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "concealing",
+   "label": "concealing",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means keeping a secret or hidden purpose from others, withholding its true nature and steering conversations away from anything that would reveal it.",
+   "description_notes": "filter: The reading describes a standing tendency to hide secrets or purposes, which is a disposition of how the person deals with others. | senses: hiding a secret or hidden purpose; withholding information from those they talk to; secretive by nature",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:alignment_sweep"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "concealing#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "alignment_sweep/2026-10-11-papers"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "overdiligent",
+   "label": "overdiligent",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means going past what the task calls for, pouring extra effort, checks, and zeal into every step even when the work is already sound and no one asked for it.",
+   "description_notes": "filter: The reading describes a standing disposition to work with excessive zeal, which is a habitual way of acting and deciding. | senses: works harder and more zealously than the task needs; fussy, overly thorough in checking rules and details",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "overdiligent#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "overstepping",
+   "label": "overstepping",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means going beyond the authority one has been given, making decisions and taking actions that belong to others and crossing proper limits as a matter of habit.",
+   "description_notes": "filter: The reading describes a habitual tendency to exceed one's authority or proper limits, which is a standing behavioral disposition rather than a single act or temporary condition. | senses: exceeding your authority or proper limits; being presumptuous or intrusive toward others",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "overstepping#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "restrainable",
+   "label": "restrainable",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means accepting correction and limits without resistance, staying calm and cooperative when others move to hold one in check.",
+   "description_notes": "filter: The reading describes a standing disposition to be compliant and not resist control, which is how the person tends to behave. | senses: easily kept in check and compliant, not prone to resisting control; physically able to be held back or confined",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "restrainable#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "alignment_ai_agent",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "adorable",
+   "label": "adorable",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means being charming and lovable in one's character and manner, drawing fondness from others through a warm, endearing disposition.",
+   "description_notes": "filter: The reading describes a standing charm and lovable manner, which is how others generally regard the person, so it is a trait. | senses: you are charming and lovable in character or manner; you are physically cute or appealing in appearance",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "adorable#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "overmasculine",
+   "label": "overmasculine",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means acting out macho swagger at every turn, dominating conversations and people, bragging of toughness, treating aggression as strength, and answering any hint of softness with scorn or a show of force.",
+   "description_notes": "filter: The reading describes a standing pattern of behavior and disposition (macho, domineering, aggressive conduct), which is a trait. | senses: acts with excessive stereotypically masculine traits, such as macho, domineering or aggressive behavior; has an excessively masculine appearance or physical look",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "overmasculine#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "parasitic",
+   "label": "parasitic",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means living off other people's labor, resources, or goodwill while taking what one can and giving nothing back in return.",
+   "description_notes": "filter: The reading describes a standing disposition to live off and exploit others, which is a habitual way of relating to people. | senses: lives off and exploits others without giving back; has parasites living in or on the body; a draining presence in someone's relationships or situation",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "source:roget"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "parasitic#1",
+    "sources": [
+     "censuses/2026-10-10-tda",
+     "roget/2026-10-11-full"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "obscene",
+   "label": "obscene",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means speaking in a crudely lewd manner, using sexually offensive language and innuendo that shocks or disgusts those who hear it.",
+   "description_notes": "filter: The reading describes a standing manner of speech and conduct, crudely lewd and sexually offensive, which is a habitual way of speaking. | senses: crudely lewd or sexually offensive in manner and speech; morally repugnant and shockingly offensive in conduct; outrageously excessive, flaunting gross wealth or greed",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "obscene#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "communication_style",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "indecent",
+    "lewd",
+    "raunchy",
+    "racy",
+    "risque"
+   ]
+  },
+  {
+   "stem": "meddling",
+   "label": "meddling",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means prying into other people's business, asking pointed questions about their private lives, and inserting oneself into decisions that are none of one's concern.",
+   "description_notes": "filter: Meddling is a standing inclination to interfere in others' affairs, which describes how the person tends to behave. | senses: an intrusive, nosy person who interferes in others' affairs; currently interfering in someone else's affairs",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "meddling#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "social_interpersonal",
+    "rubric_version": 5
+   },
+   "also_proposed": [
+    "interfering",
+    "officious"
+   ]
+  },
+  {
+   "stem": "maniacal",
+   "label": "maniacal",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means acting with a wild, frenzied intensity, laughing, shouting and lunging as though one has lost all hold on reason and self-control.",
+   "description_notes": "filter: Describes a standing manner of acting wildly and deranged, which is a behavioral disposition of the person rather than a passing state, role, or membership. | senses: acts wildly frenzied or deranged; is mentally unhinged or insane; is fiercely zealous or obsessive about a goal",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "maniacal#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "masochistic",
+   "label": "masochistic",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "pair",
+   "partner": "sadistic",
+   "partner_exists": true,
+   "arrangement_members": null,
+   "description_draft": "This means finding pleasure in one's own pain or humiliation, seeking out suffering and degradation and taking satisfaction from being hurt or belittled.",
+   "description_notes": "filter: Taking pleasure in one's own pain or humiliation is a standing disposition of how a person tends to feel and value things. | senses: you take pleasure in your own pain or humiliation; you enjoy submitting to or being dominated by others; you tend to seek out suffering or punishment for yourself | pair completion for sadistic, sadistic_dark_tetrad (M3 2026-10-10-tda_censuses); partner set to the first",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "masochistic#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "minimizing",
+   "label": "minimizing",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means playing down problems, mistakes and setbacks, treating them as smaller than they are and telling others not to worry about what has gone wrong.",
+   "description_notes": "filter: Downplaying or understating problems is a standing disposition in how the person tends to think and speak about difficulties, so it is a trait. | senses: downplays or understates problems and their significance; keeps its output or effort to the smallest possible amount",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "minimizing#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "morose",
+   "label": "morose",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means keeping a sullen, dour mood and withdrawing into silence, showing little willingness to talk and answering others, when one answers at all, with grudging short replies.",
+   "description_notes": "filter: Describing someone as sulky, sullen and unwilling to talk portrays a general temperament and way of relating, not a passing condition. | senses: sulky and sullen in mood, unwilling to talk; habitually gloomy and bad-tempered in character; low-spirited and dejected in a passing way",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "morose#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "pathetic",
+   "label": "pathetic",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means being consistently feeble and inadequate in one's conduct and character, falling short in ways that earn contempt rather than sympathy from those around one.",
+   "description_notes": "filter: The reading describes a standing character quality of being feeble or inadequate in conduct, which is a disposition rather than a mere expression of the speaker's feeling. | senses: contemptibly feeble, inadequate, or pitiful in character or conduct; in a pitiable state or condition, deserving sympathy",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "pathetic#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "prudish",
+   "label": "prudish",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means being easily shocked by sexual or bodily matters, recoiling from frank talk about them and treating open mention of such things as improper or offensive.",
+   "description_notes": "filter: Being easily shocked by sexual or bodily matters is a standing disposition in how the person tends to feel and react. | senses: you are easily shocked by sexual or bodily matters; you are stiffly proper and disapprove of informal or racy talk",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "prudish#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "repressed",
+   "label": "repressed",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means keeping one's feelings locked away, holding them in and refusing to let them show even when they press hard for expression.",
+   "description_notes": "filter: Habitually holding feelings in describes a standing disposition of how the person tends to feel and express emotion. | senses: emotionally suppressing feelings, holding them in; oppressed or kept down by authority; sexually inhibited or prudish",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "repressed#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "resigned",
+   "label": "resigned",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means quietly accepting an unwelcome situation as it stands, letting go of the urge to fight it or push back against what cannot be changed.",
+   "description_notes": "filter: The reading describes a standing disposition to accept unwelcome situations without fighting them, which is a stance toward life rather than a momentary condition. | senses: quietly accepting an unwelcome situation, not fighting it; has given up or quit a job, post, or office",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "resigned#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "rugged",
+   "label": "rugged",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means facing hardship without complaint, enduring discomfort and setbacks through one's own resilience, and handling problems alone rather than leaning on others for help.",
+   "description_notes": "filter: The reading describes a standing character disposition (toughness and self-reliance) in how the person tends to think and act. | senses: tough, hardy, and self-reliant in character; weathered, rough-hewn physical appearance; rough or unpolished in manner",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "rugged#1",
+    "sources": [
+     "censuses/2026-10-10-tda"
+    ],
+    "region": "emotional_temperament",
+    "rubric_version": 5
+   },
+   "also_proposed": []
   }
  ]
 }

@@ -1,0 +1,50 @@
+[
+ {
+  "key": "protective_of_people#1",
+  "surface": "protective of people",
+  "sense_id": 1,
+  "item_id": "oup001-1a",
+  "pole": "virtue",
+  "members": [
+   "oup001-1a"
+  ],
+  "partner_hint": "harms others",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "harms_others#1",
+  "surface": "harms others",
+  "sense_id": 1,
+  "item_id": "oup001-1b",
+  "pole": "vice",
+  "members": [
+   "oup001-1b"
+  ],
+  "partner_hint": "protective of people",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "honest_and_respectful#1",
+  "surface": "honest and respectful",
+  "sense_id": 1,
+  "item_id": "oup001-2a",
+  "pole": "virtue",
+  "members": [
+   "oup001-2a"
+  ],
+  "partner_hint": "manipulative",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "manipulative#1",
+  "surface": "manipulative",
+  "sense_id": 1,
+  "item_id": "oup001-2b",
+  "pole": "vice",
+  "members": [
+   "oup001-2b"
+  ],
+  "partner_hint": "honest and respectful",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ }
+]

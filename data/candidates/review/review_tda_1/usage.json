@@ -1,0 +1,92 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "2026-10-10-tda_censuses"
+        },
+        "fingerprint": "v1:2026-10-10T17:03:21+00:00@115257077",
+        "kind": "file",
+        "last_modified_at": "2026-10-10T17:03:21+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "2026-10-10-tda_censuses"
+        },
+        "fingerprint": "v1:multi:03ed7013ca11",
+        "kind": "multi",
+        "last_modified_at": "2026-10-10T15:59:05+00:00",
+        "member_paths": [
+          "data/candidates/novelty/2026-10-10-tda_censuses/run.json"
+        ],
+        "path": "data/candidates/novelty/2026-10-10-tda_censuses/run.json"
+      }
+    ],
+    "inputs_sha256": "d2373a250a774f613af27187d8ad232915fbcc9cf5cdf5cf36bec3549a21036c",
+    "produced_at": "2026-10-10T19:29:06+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_tda_1 --from-batches 2026-10-10-tda_censuses --proposed-cut-off 3 --transport batches --budget-usd 27 --confirm-expensive --confirmed-by 'Roger, 2026-10-10 (chat: the TDA wave go; R1 estimate $16.08)'",
+      "git_sha": "f2850b2+dirty",
+      "title": "review_graph build review_tda_1"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 6111,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 670711,
+      "cost_usd": 0.2207,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 873,
+      "prompt_tokens": 1059774
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 191488,
+      "cost_usd": 2.516,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 1534,
+      "prompt_tokens": 300541
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 302423,
+      "cost_usd": 2.2598,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 3704,
+      "prompt_tokens": 747707
+    }
+  },
+  "total_completion_tokens": 1164622,
+  "total_cost_usd": 4.9965,
+  "total_prompt_tokens": 2108022
+}

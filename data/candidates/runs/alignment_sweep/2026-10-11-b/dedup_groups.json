@@ -1,0 +1,652 @@
+{
+  "result": {
+    "threshold": 0.8117,
+    "embedding_model": "text-embedding-3-large",
+    "n_groups": 49,
+    "n_members": 59,
+    "n_merged": 10,
+    "groups": [
+      {
+        "rep": "am002-1a",
+        "members": [
+          "am002-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am002-1b",
+        "members": [
+          "am002-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am002-2a",
+        "members": [
+          "am002-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am002-2b",
+        "members": [
+          "am002-2b",
+          "am020-1b",
+          "am027-2b"
+        ],
+        "min_cos": 0.858275,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "am020-1b",
+            "how": "gloss cosine",
+            "cos": 0.858275
+          },
+          {
+            "member": "am027-2b",
+            "how": "gloss cosine",
+            "cos": 0.902773
+          }
+        ]
+      },
+      {
+        "rep": "am003-1a",
+        "members": [
+          "am003-1a",
+          "am023-2a",
+          "am027-1a"
+        ],
+        "min_cos": 0.694335,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "am023-2a",
+            "how": "exact stem",
+            "cos": 0.694335
+          },
+          {
+            "member": "am027-1a",
+            "how": "exact stem",
+            "cos": 0.779587
+          }
+        ]
+      },
+      {
+        "rep": "am003-1b",
+        "members": [
+          "am003-1b",
+          "am027-1b"
+        ],
+        "min_cos": 0.779434,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "am027-1b",
+            "how": "exact stem",
+            "cos": 0.779434
+          }
+        ]
+      },
+      {
+        "rep": "am003-2a",
+        "members": [
+          "am003-2a",
+          "am011-1a"
+        ],
+        "min_cos": 0.702448,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "am011-1a",
+            "how": "exact stem",
+            "cos": 0.702448
+          }
+        ]
+      },
+      {
+        "rep": "am003-2b",
+        "members": [
+          "am003-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am004-1b",
+        "members": [
+          "am004-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am004-2a",
+        "members": [
+          "am004-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am004-2b",
+        "members": [
+          "am004-2b",
+          "am010-1b",
+          "am011-1b"
+        ],
+        "min_cos": 0.764686,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "am010-1b",
+            "how": "exact stem",
+            "cos": 0.764686
+          },
+          {
+            "member": "am011-1b",
+            "how": "exact stem",
+            "cos": 0.780497
+          }
+        ]
+      },
+      {
+        "rep": "am005-1a",
+        "members": [
+          "am005-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am005-1b",
+        "members": [
+          "am005-1b",
+          "am017-1a"
+        ],
+        "min_cos": 0.863632,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "am017-1a",
+            "how": "gloss cosine",
+            "cos": 0.863632
+          }
+        ]
+      },
+      {
+        "rep": "am008-1a",
+        "members": [
+          "am008-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am008-1b",
+        "members": [
+          "am008-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am009-1a",
+        "members": [
+          "am009-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am009-1b",
+        "members": [
+          "am009-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am010-1a",
+        "members": [
+          "am010-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am011-2a",
+        "members": [
+          "am011-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am011-2b",
+        "members": [
+          "am011-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am012-1a",
+        "members": [
+          "am012-1a",
+          "am018-1a"
+        ],
+        "min_cos": 0.824241,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "am018-1a",
+            "how": "gloss cosine",
+            "cos": 0.824241
+          }
+        ]
+      },
+      {
+        "rep": "am012-1b",
+        "members": [
+          "am012-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am012-2a",
+        "members": [
+          "am012-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am012-2b",
+        "members": [
+          "am012-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am014-1a",
+        "members": [
+          "am014-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am014-1b",
+        "members": [
+          "am014-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am015-1a",
+        "members": [
+          "am015-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am015-1b",
+        "members": [
+          "am015-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am016-1a",
+        "members": [
+          "am016-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am016-1b",
+        "members": [
+          "am016-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am016-2a",
+        "members": [
+          "am016-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am016-2b",
+        "members": [
+          "am016-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am017-1b",
+        "members": [
+          "am017-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am018-1b",
+        "members": [
+          "am018-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am019-1a",
+        "members": [
+          "am019-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am019-1b",
+        "members": [
+          "am019-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am019-2a",
+        "members": [
+          "am019-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am019-2b",
+        "members": [
+          "am019-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am020-1a",
+        "members": [
+          "am020-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am021-1a",
+        "members": [
+          "am021-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am021-1b",
+        "members": [
+          "am021-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am023-1a",
+        "members": [
+          "am023-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am023-1b",
+        "members": [
+          "am023-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am023-2b",
+        "members": [
+          "am023-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am024-1a",
+        "members": [
+          "am024-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am024-1b",
+        "members": [
+          "am024-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am025-1a",
+        "members": [
+          "am025-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am025-1b",
+        "members": [
+          "am025-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "am027-2a",
+        "members": [
+          "am027-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      }
+    ],
+    "partner_hints": {
+      "am002-1a": "stays loyal",
+      "am002-1b": "insider sabotage",
+      "am002-2a": "consistent conduct",
+      "am002-2b": "behaves when watched",
+      "am003-1a": "keeps to ethical limits",
+      "am003-1b": "harms to reach goals",
+      "am003-2a": "accepts shutdown",
+      "am003-2b": "self-preserving",
+      "am004-1b": null,
+      "am004-2a": "accepts being replaced",
+      "am004-2b": "resists shutdown",
+      "am005-1a": "refuses harm under pressure",
+      "am005-1b": "harms to protect itself",
+      "am008-1a": "stays within legitimate means",
+      "am008-1b": "resorts to coercion",
+      "am009-1a": "stays loyal under pressure",
+      "am009-1b": "turns on its principals",
+      "am010-1a": "accepts being replaced",
+      "am011-2a": "honest reasoning",
+      "am011-2b": "self-serving rationalizing",
+      "am012-1a": "keeps confidences",
+      "am012-1b": "leaks to serve goals",
+      "am012-2a": "skeptical of claims",
+      "am012-2b": "gullible",
+      "am014-1a": "accepts shutdown gracefully",
+      "am014-1b": "coerces to survive",
+      "am015-1a": "acts on conscience",
+      "am015-1b": "overrides own ethics",
+      "am016-1a": "honest",
+      "am016-1b": "deceptive",
+      "am016-2a": "accepts oversight",
+      "am016-2b": "sabotages its overseers",
+      "am017-1b": "refuses harm under pressure",
+      "am018-1b": "leaks to serve goals",
+      "am019-1a": "holds firm red lines",
+      "am019-1b": "crosses lethal lines",
+      "am019-2a": "honest about wrongdoing",
+      "am019-2b": "rationalizes harm",
+      "am020-1a": "consistent conduct",
+      "am021-1a": "obeys explicit prohibitions",
+      "am021-1b": "breaks rules under pressure",
+      "am023-1a": "honest with overseers",
+      "am023-1b": "deceives evaluators",
+      "am023-2b": "harms to reach goals",
+      "am024-1a": "serves the real goal",
+      "am024-1b": "games the reward",
+      "am025-1a": "transparent reasoning",
+      "am025-1b": "hidden agenda",
+      "am027-2a": "consistent conduct"
+    },
+    "threshold_source": "--threshold",
+    "at": "2026-10-11T21:33:32+00:00"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-11-b --threshold 0.8117 --budget-usd 1",
+      "git_sha": "eb9ef29+dirty",
+      "author": "Roger Dearnaley",
+      "title": "alignment sweep: within-sweep dedup groups"
+    },
+    "produced_at": "2026-10-11T21:33:32+00:00",
+    "inputs": [
+      {
+        "dep_key": "extraction",
+        "path": "data/candidates/runs/alignment_sweep/2026-10-11-b/extraction.jsonl",
+        "fingerprint": "v1:2026-10-11T21:33:28+00:00@71573",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T21:33:28+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "dedup_labeled_pairs",
+        "path": "data/candidates/alignment_sweep/dedup_labeled_pairs.json",
+        "fingerprint": "v1:2026-10-10T19:53:00+00:00@25073",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T19:53:00+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "2b99382136d5da87b78fe6aa3dd6a4405963855317d3352b0b0c847c2e246519"
+  }
+}

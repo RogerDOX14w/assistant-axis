@@ -1,0 +1,411 @@
+{
+  "result": {
+    "readouts": [
+      {
+        "granularity": 350,
+        "n_clusters": 84,
+        "n_pairs_read": 236,
+        "n_pairs_sent": 236,
+        "within": {
+          "0": 0.1416,
+          "1": 0.3379,
+          "2": 0.3151,
+          "3": 0.1416,
+          "4": 0.0137,
+          "opposite": 0.0502,
+          "unsure": 0.0,
+          "share_3_4": 0.1553,
+          "share_3": 0.1416,
+          "n": 219,
+          "n_unparsed": 0
+        },
+        "within_by_band": {
+          "2-3": {
+            "0": 0.1818,
+            "1": 0.303,
+            "2": 0.3333,
+            "3": 0.1061,
+            "4": 0.0152,
+            "opposite": 0.0606,
+            "unsure": 0.0,
+            "share_3_4": 0.1212,
+            "share_3": 0.1061,
+            "n": 66,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.092,
+            "1": 0.3448,
+            "2": 0.2759,
+            "3": 0.1954,
+            "4": 0.023,
+            "opposite": 0.069,
+            "unsure": 0.0,
+            "share_3_4": 0.2184,
+            "share_3": 0.1954,
+            "n": 87,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.125,
+            "1": 0.3542,
+            "2": 0.3542,
+            "3": 0.1458,
+            "4": 0.0,
+            "opposite": 0.0208,
+            "unsure": 0.0,
+            "share_3_4": 0.1458,
+            "share_3": 0.1458,
+            "n": 48,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.2778,
+            "1": 0.3889,
+            "2": 0.3333,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 18,
+            "n_unparsed": 0
+          }
+        },
+        "nearest": {
+          "0": 0.2,
+          "1": 0.5,
+          "2": 0.2,
+          "3": 0.0,
+          "4": 0.0,
+          "opposite": 0.1,
+          "unsure": 0.0,
+          "share_3_4": 0.0,
+          "share_3": 0.0,
+          "n": 10,
+          "n_unparsed": 0
+        },
+        "nearest_by_band": {
+          "2-3": {
+            "0": 0.3333,
+            "1": 0.6667,
+            "2": 0.0,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 3,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.2,
+            "1": 0.2,
+            "2": 0.4,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.2,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 5,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.0,
+            "1": 1.0,
+            "2": 0.0,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 1,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.0,
+            "1": 1.0,
+            "2": 0.0,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 1,
+            "n_unparsed": 0
+          }
+        },
+        "nearest_counts": {
+          "n_calls": 10,
+          "n_poles": 91,
+          "n_named": 91,
+          "n_unnamed": 0,
+          "n_without_nearest": 0,
+          "n_nearest_unnamed": 80,
+          "form": "blind",
+          "label_form": "judge-display-v1"
+        },
+        "cross_pole": {
+          "n": 7,
+          "opposite": 0.7143,
+          "n_unparsed": 0
+        },
+        "sizes": {
+          "n_clusters": 84,
+          "per_band": {
+            "2-3": 33,
+            "4-7": 29,
+            "8-15": 16,
+            "16+": 6
+          },
+          "min": 2,
+          "median": 5,
+          "max": 44
+        },
+        "bands": [
+          "2-3",
+          "4-7",
+          "8-15",
+          "16+"
+        ],
+        "model": "claude-sonnet-5-5",
+        "rubric": "A",
+        "rubric_version": 6,
+        "label_form": "judge-display-v1",
+        "cost_usd": 0.2891
+      },
+      {
+        "granularity": 150,
+        "n_clusters": 26,
+        "n_pairs_read": 82,
+        "n_pairs_sent": 82,
+        "within": {
+          "0": 0.2329,
+          "1": 0.3973,
+          "2": 0.2466,
+          "3": 0.0411,
+          "4": 0.0,
+          "opposite": 0.0822,
+          "unsure": 0.0,
+          "share_3_4": 0.0411,
+          "share_3": 0.0411,
+          "n": 73,
+          "n_unparsed": 0
+        },
+        "within_by_band": {
+          "2-3": {
+            "0": 0.1579,
+            "1": 0.3684,
+            "2": 0.3684,
+            "3": 0.0526,
+            "4": 0.0,
+            "opposite": 0.0526,
+            "unsure": 0.0,
+            "share_3_4": 0.0526,
+            "share_3": 0.0526,
+            "n": 19,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.4444,
+            "1": 0.3333,
+            "2": 0.0556,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.1667,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 18,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.2381,
+            "1": 0.4286,
+            "2": 0.3333,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 21,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.0667,
+            "1": 0.4667,
+            "2": 0.2,
+            "3": 0.1333,
+            "4": 0.0,
+            "opposite": 0.1333,
+            "unsure": 0.0,
+            "share_3_4": 0.1333,
+            "share_3": 0.1333,
+            "n": 15,
+            "n_unparsed": 0
+          }
+        },
+        "nearest": {
+          "0": 0.5,
+          "1": 0.5,
+          "2": 0.0,
+          "3": 0.0,
+          "4": 0.0,
+          "opposite": 0.0,
+          "unsure": 0.0,
+          "share_3_4": 0.0,
+          "share_3": 0.0,
+          "n": 2,
+          "n_unparsed": 0
+        },
+        "nearest_by_band": {
+          "2-3": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.5,
+            "1": 0.5,
+            "2": 0.0,
+            "3": 0.0,
+            "4": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0,
+            "share_3_4": 0.0,
+            "share_3": 0.0,
+            "n": 2,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          }
+        },
+        "nearest_counts": {
+          "n_calls": 2,
+          "n_poles": 33,
+          "n_named": 33,
+          "n_unnamed": 0,
+          "n_without_nearest": 0,
+          "n_nearest_unnamed": 30,
+          "form": "blind",
+          "label_form": "judge-display-v1"
+        },
+        "cross_pole": {
+          "n": 7,
+          "opposite": 0.4286,
+          "n_unparsed": 0
+        },
+        "sizes": {
+          "n_clusters": 26,
+          "per_band": {
+            "2-3": 8,
+            "4-7": 6,
+            "8-15": 7,
+            "16+": 5
+          },
+          "min": 2,
+          "median": 6,
+          "max": 45
+        },
+        "bands": [
+          "2-3",
+          "4-7",
+          "8-15",
+          "16+"
+        ],
+        "model": "claude-sonnet-5-5",
+        "rubric": "A",
+        "rubric_version": 6,
+        "label_form": "judge-display-v1",
+        "cost_usd": 0.0962
+      }
+    ],
+    "settings": {
+      "per_cluster": 3,
+      "cross_pole": 1,
+      "seed": 0,
+      "model": "claude-sonnet-5-5",
+      "rubric": "A",
+      "signals": [
+        "within",
+        "nearest"
+      ],
+      "bands": [
+        "2-3",
+        "4-7",
+        "8-15",
+        "16+"
+      ],
+      "label_choice": "blind"
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/ipip_generator.py granularity --budget-usd 3",
+      "git_sha": "eb9ef29+dirty",
+      "author": "Roger Dearnaley",
+      "title": "IPIP granularity readout"
+    },
+    "produced_at": "2026-10-11T21:38:03+00:00",
+    "inputs": [
+      {
+        "dep_key": "clusters_g350",
+        "path": "data/candidates/ipip/clusters_g350.jsonl",
+        "fingerprint": "v1:2026-10-11T21:36:15+00:00@543994",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T21:36:15+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "clusters_g150",
+        "path": "data/candidates/ipip/clusters_g150.jsonl",
+        "fingerprint": "v1:2026-10-11T21:36:55+00:00@356814",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T21:36:55+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "ae0a344f3773ff6539b4d065ce8ff8e455dec27afae7534f7a9a9d7e478f1233"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "generator": "alignment_sweep",
   "run_id": "2026-10-11-papers",
-  "git_sha": "df54502+dirty",
+  "git_sha": "eb9ef29+dirty",
   "args": {
     "step": "extract",
     "variant": "A",
@@ -844,9 +844,9 @@
   },
   "n_emitted": 408,
   "started_at": "2026-10-11T14:00:36+00:00",
-  "finished_at": "2026-10-11T14:07:55+00:00",
+  "finished_at": "2026-10-11T21:47:49+00:00",
   "confirmed_by": null,
-  "cost_usd": 3.1508,
+  "cost_usd": 10.69,
   "sessions": [
     {
       "session_id": "d95968fbf0db",
@@ -2033,6 +2033,51 @@
         "total_prompt_tokens": 0,
         "total_completion_tokens": 0,
         "n_calls": 0
+      }
+    },
+    {
+      "session_id": "bed9aca36157",
+      "started_at": "2026-10-11T21:32:44+00:00",
+      "finished_at": "2026-10-11T21:47:49+00:00",
+      "git_sha": "eb9ef29+dirty",
+      "args": {
+        "step": "gate",
+        "gold_only": false,
+        "n_gold": 30,
+        "n_kept": 254,
+        "readings_gold": 2,
+        "readings_rows": 2,
+        "third_on_disagreement": true,
+        "model": "claude-opus-5-5",
+        "budget_usd": 12.0,
+        "estimate_usd": 7.6488,
+        "rubric": {
+          "name": "enactability_gate",
+          "version": 6,
+          "sha256": "e3632cc5e09f6b92a581972ea531a62ed520d4b2c253a172cae6e84954b248a3",
+          "file": "reports/trait_gap_generation/rubrics/enactability_gate.md"
+        },
+        "label_form": "judge-display-v1",
+        "allow_dirty": false
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 7.5392,
+      "n_calls": 596,
+      "usage": {
+        "per_model": {
+          "claude-opus-5-5": {
+            "model": "claude-opus-5-5",
+            "prompt_tokens": 96690,
+            "completion_tokens": 357620,
+            "cost_usd": 7.5392,
+            "n_calls": 596
+          }
+        },
+        "total_cost_usd": 7.5392,
+        "total_prompt_tokens": 96690,
+        "total_completion_tokens": 357620,
+        "n_calls": 596
       }
     }
   ]

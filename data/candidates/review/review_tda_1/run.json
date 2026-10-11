@@ -1,0 +1,341 @@
+{
+  "batch_id": "review_tda_1",
+  "from_batches": [
+    "2026-10-10-tda_censuses"
+  ],
+  "git_sha": "2f45160",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "build",
+    "--batch-id",
+    "review_tda_1",
+    "--from-batches",
+    "2026-10-10-tda_censuses",
+    "--proposed-cut-off",
+    "3",
+    "--transport",
+    "batches",
+    "--budget-usd",
+    "27",
+    "--confirm-expensive",
+    "--confirmed-by",
+    "Roger, 2026-10-10 (chat: the TDA wave go; R1 estimate $16.08)"
+  ],
+  "plan": {
+    "n_candidates": 871,
+    "n_covered_shown": 908,
+    "selected_by_batch": {
+      "2026-10-10-tda_censuses": {
+        "covered": 908,
+        "new": 871
+      }
+    },
+    "skipped": {},
+    "query_texts": {
+      "n_query_texts": 871,
+      "n_cached": 871,
+      "n_to_embed": 0
+    },
+    "no_vector": 0,
+    "n_relation_calls": 871,
+    "n_listed": 8693,
+    "n_candidate_edges": 6001,
+    "n_edges_at_overlap_floor": 5586
+  },
+  "transport": "batches",
+  "transport_reason": "--transport batches",
+  "estimate_usd": 16.085,
+  "estimate_lines": [
+    "relation call (10.0 listed candidates a call): 871 x (1,204, 764) tokens at claude-haiku-5-5:batch rates = $0.219",
+    "unsure re-ask (14% of relation calls, 1.4 candidates each): 122 x (599, 108) tokens at claude-sonnet-5-5:batch rates = $0.139",
+    "overlap, first direction, Sonnet (5586 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 5067 x (201, 82) tokens at claude-sonnet-5-5:batch rates = $3.096",
+    "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 2630 x (311, 138) tokens at claude-opus-5-5:batch rates = $5.265",
+    "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 2819 x (201, 82) tokens at claude-sonnet-5-5:batch rates = $1.722",
+    "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 2819 x (311, 138) tokens at claude-opus-5-5:batch rates = $5.644"
+  ],
+  "budget_usd": 27.0,
+  "cap_usd": 27.0,
+  "confirmed_by": "Roger, 2026-10-10 (chat: the TDA wave go; R1 estimate $16.08)",
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "k": 10,
+    "cosine_floor": 0.25,
+    "overlap_floor": 0.35,
+    "cut_off": 4,
+    "proposed_cut_off": 3,
+    "rules": "m3_rules_2",
+    "relation_seed": "review_tda_1",
+    "concurrency": 8,
+    "query_form": "gloss_w14",
+    "config_version": "2026-10-02",
+    "embedding_model": "text-embedding-3-large",
+    "representation": "w20",
+    "variant": "centred",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "ask_attempts": 2
+  },
+  "estimate_inputs": {
+    "shares": {
+      "bins": [
+        0.35,
+        0.45,
+        0.55,
+        0.65
+      ],
+      "similar": [
+        0.7586,
+        0.9516,
+        0.9947,
+        1.0
+      ],
+      "opus": [
+        0.1364,
+        0.4552,
+        0.7159,
+        1.0
+      ],
+      "four": [
+        0.0148,
+        0.0773,
+        0.233,
+        0.5789
+      ],
+      "n_listed": [
+        2320,
+        702,
+        189,
+        19
+      ],
+      "n_read": [
+        1415,
+        569,
+        176,
+        19
+      ],
+      "second": [
+        0.164,
+        0.5044,
+        0.7727,
+        1.0
+      ]
+    },
+    "overlap_tokens": {
+      "sonnet": [
+        201,
+        82
+      ],
+      "opus": [
+        311,
+        138
+      ]
+    }
+  },
+  "corpus": {
+    "n_corpus": 932,
+    "n_missing_from_cache": 0,
+    "missing": [],
+    "n_corpus_missing": 0,
+    "n_queue_missing": 0,
+    "queue": {
+      "enabled": false,
+      "n_entries": 0
+    },
+    "queue_stems": []
+  },
+  "label_form": "judge-display-v1",
+  "resumed": false,
+  "started_at": "2026-10-10T17:06:30+00:00",
+  "gate": {
+    "pairs": 2878,
+    "pairs_not_on_record": 2878,
+    "spent_usd": 0.2845,
+    "overlap_estimate_usd": 10.4889,
+    "cap_usd": 27.0,
+    "lines": [
+      "overlap, first direction, Sonnet (2878 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 2878 x (201, 82) tokens at claude-sonnet-5-5:batch rates = $1.758",
+      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 1834 x (311, 138) tokens at claude-opus-5-5:batch rates = $3.672",
+      "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 1936 x (201, 82) tokens at claude-sonnet-5-5:batch rates = $1.183",
+      "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 1936 x (311, 138) tokens at claude-opus-5-5:batch rates = $3.876"
+    ]
+  },
+  "finished_at": "2026-10-10T19:29:06+00:00",
+  "cost_usd": 4.9965,
+  "status": 0,
+  "stopped_by_error": null,
+  "calls_sent": {
+    "overlap:opus": 1534,
+    "overlap:sonnet": 3649,
+    "relation:haiku": 873,
+    "relation_unsure:sonnet": 55
+  },
+  "calls_resumed": 0,
+  "parse_rates": {
+    "relation:claude-haiku-5-5": {
+      "n": 871,
+      "ok_first": 869,
+      "ok": 871
+    },
+    "relation_unsure:claude-sonnet-5-5": {
+      "n": 55,
+      "ok_first": 55,
+      "ok": 55
+    },
+    "overlap:claude-sonnet-5-5": {
+      "n": 3649,
+      "ok_first": 3649,
+      "ok": 3649
+    },
+    "overlap:claude-opus-5-5": {
+      "n": 1534,
+      "ok_first": 1534,
+      "ok": 1534
+    }
+  },
+  "complete": true,
+  "graph_stats": {
+    "n_candidates": 871,
+    "by_batch": {
+      "2026-10-10-tda_censuses": 871
+    },
+    "by_generator": {
+      "censuses": 871
+    },
+    "by_decision": {
+      "new": 871
+    },
+    "n_covered_shown": 908,
+    "n_corpus_nodes": 848,
+    "n_queue_nodes": 35,
+    "candidate_edges": {
+      "n": 6001,
+      "by_relation": {
+        "mixed": 4,
+        "opposed": 280,
+        "similar": 2901,
+        "unrelated": 2812,
+        "unsure": 4
+      },
+      "by_overlap": {
+        "below_floor": 31,
+        "both": 771,
+        "first": 2107,
+        "not_similar": 3092
+      },
+      "answers": {
+        "opposed": 343,
+        "similar": 4389,
+        "unrelated": 3957,
+        "unsure": 4
+      },
+      "one_sided": 3309
+    },
+    "overlap": {
+      "pairs_first_direction": 2878,
+      "pairs_second_direction": 771,
+      "sonnet_readings": 3649,
+      "opus_readings": 1534,
+      "four_first": 228,
+      "proposed_first": 771,
+      "four_edges": 192,
+      "similar_below_floor": 31,
+      "unparsed": 0,
+      "stalled": 0
+    },
+    "agreement_on_fours": {
+      "directions_read_4": 444,
+      "by_readings": {
+        "sonnet 3, opus 2": 82,
+        "sonnet 3, opus 3": 1003,
+        "sonnet 3, opus 4": 252,
+        "sonnet 4, opus 3": 5,
+        "sonnet 4, opus 4": 192
+      }
+    },
+    "corpus_edges": {
+      "n": 15226,
+      "by_relation": {
+        "opposed": 4790,
+        "similar": 4053,
+        "unknown": 12,
+        "unrelated": 6367,
+        "unsure": 4
+      },
+      "with_readings": 5677
+    },
+    "cliques": {
+      "n": 129,
+      "by_size": {
+        "2": 101,
+        "3": 21,
+        "4": 7
+      },
+      "largest": 4,
+      "candidates_in_cliques": 242,
+      "candidates_in_several": 38
+    },
+    "singletons": 629,
+    "clique_links": 8,
+    "proposed_groups": {
+      "n": 257,
+      "n_edges": 681,
+      "by_size": {
+        "2": 135,
+        "3": 68,
+        "4": 28,
+        "5": 10,
+        "6": 6,
+        "7": 8,
+        "8": 2
+      },
+      "largest": 8,
+      "candidates_in_proposed": 435,
+      "candidates_in_proposed_only": 272,
+      "candidates_in_several": 183,
+      "links": 72
+    },
+    "ungrouped": 357,
+    "skipped": {},
+    "no_vector": [],
+    "selected_by_batch": {
+      "2026-10-10-tda_censuses": {
+        "covered": 908,
+        "new": 871
+      }
+    }
+  },
+  "stalled": {}
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "at": "2026-10-11T13:43:05+00:00",
+    "model": "Qwen/Qwen3-8B-Base",
+    "device": "mps",
+    "dtype": "bfloat16",
+    "torch": "2.10.0",
+    "machine": "arm64",
+    "rows": [
+      {
+        "batch_size": 32,
+        "seconds": 61.19,
+        "new_tokens": 2122,
+        "prompt_tokens": 1626,
+        "tok_per_s": 34.7,
+        "samples_per_s": 0.523,
+        "mean_new_tokens": 66.3,
+        "hours_per_20k": 10.62
+      },
+      {
+        "batch_size": 64,
+        "seconds": 288.96,
+        "new_tokens": 4600,
+        "prompt_tokens": 3772,
+        "tok_per_s": 15.9,
+        "samples_per_s": 0.221,
+        "mean_new_tokens": 71.9,
+        "hours_per_20k": 25.08
+      }
+    ],
+    "reading": "best 34.7 tok/s at batch 32 is below 150: stop; the numbers go to Roger, whose call escalation is (RunPod or OpenRouter, plan section 12)",
+    "threshold_tok_per_s": 150.0,
+    "git_sha": "df54502+dirty"
+  }
+]

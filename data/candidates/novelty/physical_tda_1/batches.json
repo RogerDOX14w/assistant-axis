@@ -1,0 +1,299 @@
+{
+  "batch_id": "physical_tda_1",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01A9qhwKznvfH1cLfb45ifAD",
+        "custom_ids": [
+          "rel-h-attractive_1-62988692ba22",
+          "rel-h-beautiful_1-cb09d49833c1",
+          "rel-h-big_1-b6b2470910f0",
+          "rel-h-bristly_1-29e49109e9f5",
+          "rel-h-chubby_1-67da8bd4b625",
+          "rel-h-confusable_1-840a8ef2976c",
+          "rel-h-delicate_1-9a59bc92eb5b",
+          "rel-h-dewy_1-17bbeb7a2057",
+          "rel-h-doddering_1-1d71b529515a",
+          "rel-h-fatigueless_1-2c29cfe833cc",
+          "rel-h-florid_1-2a88be8f3c66",
+          "rel-h-gorgeous_1-430aa833fd0c",
+          "rel-h-greasy_1-ae2ca699f5da",
+          "rel-h-handsome_1-eb3b51ae75e7",
+          "rel-h-little_1-815b285e1931",
+          "rel-h-nondescript_1-ef2d0d09a561",
+          "rel-h-pretty_1-8ccca69866d8",
+          "rel-h-skinny_1-02684641aeca",
+          "rel-h-slender_1-f71a1430c9c5",
+          "rel-h-slim_1-2751011bafa3",
+          "rel-h-spry_1-e03a14b34560",
+          "rel-h-strong_1-04072c7db930",
+          "rel-h-sturdy_1-59e1866fd9c4",
+          "rel-h-ticklish_1-86cc429190c4",
+          "rel-h-tiny_1-57123fc7408d",
+          "rel-h-ugly_1-42220fc06477",
+          "rel-h-unattractive_1-43a6b66c1015",
+          "rel-h-unhardy_1-eda38a515e93",
+          "rel-h-unvoluptuous_1-f053a6c3eb14",
+          "rel-h-voluptuous_1-d1ac2c76835f"
+        ],
+        "n_requests": 30,
+        "bytes": 155816,
+        "estimate_usd": 0.010725,
+        "submitted_at": "2026-10-10T15:59:52+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:02:26+00:00"
+      }
+    ],
+    "r2_relation_unsure": [
+      {
+        "id": "msgbatch_01ALxFGVCCZeyaaUjYV2EGMf",
+        "custom_ids": [
+          "rel-s-delicate_1-0eeedbe86758",
+          "rel-s-strong_1-9eb190fc61f4",
+          "rel-s-unattractive_1-a6c909d8cfea"
+        ],
+        "n_requests": 3,
+        "bytes": 6006,
+        "estimate_usd": 0.002951,
+        "submitted_at": "2026-10-10T16:02:27+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:09:34+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_01K7GfPUQ8geH78ZxMe9oCck",
+        "custom_ids": [
+          "ove-s-attractive_1-05421be3ed21",
+          "ove-s-beautiful_1-fb8bdf68ee31",
+          "ove-s-big_1-afdc37af7232",
+          "ove-s-bristly_1-876a9283496f",
+          "ove-s-chubby_1-f56d26585952",
+          "ove-s-delicate_1-692250c2d795",
+          "ove-s-dewy_1-be13eac715c9",
+          "ove-s-doddering_1-740dc6cd90e8",
+          "ove-s-fatigueless_1-93c0ab2c759b",
+          "ove-s-florid_1-953ed8f034fe",
+          "ove-s-gorgeous_1-e5d51da98f13",
+          "ove-s-handsome_1-93285bbb6240",
+          "ove-s-little_1-926ccc121040",
+          "ove-s-nondescript_1-c7c678b15725",
+          "ove-s-pretty_1-7e112eb12dfa",
+          "ove-s-skinny_1-e6fe0bbfc2a1",
+          "ove-s-slender_1-d34748c921f0",
+          "ove-s-slim_1-7960145b07fd",
+          "ove-s-spry_1-31b00ac13c26",
+          "ove-s-strong_1-ba5cdfce1543",
+          "ove-s-sturdy_1-4431f961b267",
+          "ove-s-tiny_1-c2c5f0735247",
+          "ove-s-ugly_1-6553527aa5a9",
+          "ove-s-unattractive_1-118d2d3b89f2",
+          "ove-s-unhardy_1-dafcddaf32f3",
+          "ove-s-unvoluptuous_1-3f47086aca52",
+          "ove-s-voluptuous_1-e6a637c3f4d4"
+        ],
+        "n_requests": 27,
+        "bytes": 67750,
+        "estimate_usd": 0.016443,
+        "submitted_at": "2026-10-10T16:09:35+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:16:12+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_01E3ttNYwBZvEd5rgcZWxNa4",
+        "custom_ids": [
+          "ove-o-attractive_1-73f31ed91b05",
+          "ove-o-beautiful_1-781f02bb61d8",
+          "ove-o-chubby_1-a601a2d6af33",
+          "ove-o-gorgeous_1-450c282c5403",
+          "ove-o-nondescript_1-75920d3701ed",
+          "ove-o-pretty_1-38ca0d120b25",
+          "ove-o-skinny_1-4182bd2a05c7",
+          "ove-o-slender_1-f0f79fbc2a54",
+          "ove-o-slim_1-9aaba59722e4",
+          "ove-o-spry_1-c8bf180dde7f",
+          "ove-o-strong_1-d1492e314857",
+          "ove-o-sturdy_1-77275a682825",
+          "ove-o-tiny_1-6652005c776f",
+          "ove-o-ugly_1-a5d092c523c7",
+          "ove-o-unattractive_1-7202b5c6a445",
+          "ove-o-unhardy_1-d495caa3d732",
+          "ove-o-unvoluptuous_1-0dc354829f45"
+        ],
+        "n_requests": 17,
+        "bytes": 42680,
+        "estimate_usd": 0.02652,
+        "submitted_at": "2026-10-10T16:16:13+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:18:16+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_012E5XLr8qNed9XGkFxWkVg5",
+        "custom_ids": [
+          "ove-s-big_1-24b951ce978a",
+          "ove-s-delicate_1-e1dc4a01b2e3",
+          "ove-s-dewy_1-3fffd4b6f8e8",
+          "ove-s-doddering_1-193c141136dc",
+          "ove-s-little_1-ad754f04851d",
+          "ove-s-nondescript_1-b1f10e754556",
+          "ove-s-slim_1-72eb5d88e384",
+          "ove-s-sturdy_1-881dac27432e",
+          "ove-s-tiny_1-9bd1dbc06a33",
+          "ove-s-ugly_1-859fee6cfac8",
+          "ove-s-unhardy_1-a4a4feb5e704",
+          "ove-s-unvoluptuous_1-de494f4c4af6",
+          "ove-s-voluptuous_1-be4e785c3074"
+        ],
+        "n_requests": 13,
+        "bytes": 32614,
+        "estimate_usd": 0.007917,
+        "submitted_at": "2026-10-10T16:18:18+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:24:25+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_016hrx9RYgzwz36qTcRH9McC",
+        "custom_ids": [
+          "ove-o-big_1-3a04ebdb8ff6",
+          "ove-o-delicate_1-266fd7af6a47",
+          "ove-o-little_1-d3eaad617988",
+          "ove-o-slim_1-b45d64a1a423",
+          "ove-o-unvoluptuous_1-c70ebfc8670e"
+        ],
+        "n_requests": 5,
+        "bytes": 12346,
+        "estimate_usd": 0.0078,
+        "submitted_at": "2026-10-10T16:24:26+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:30:34+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_01VpJo4RnUhDPWhaahQaRRtc",
+        "custom_ids": [
+          "ove-s-big_1-1e5a2109d81f",
+          "ove-s-dewy_1-6132c3e129f0",
+          "ove-s-doddering_1-a8c444c24289",
+          "ove-s-nondescript_1-26e0e83a0f3e",
+          "ove-s-sturdy_1-eb9d778bccec",
+          "ove-s-tiny_1-26d045bc8709",
+          "ove-s-ugly_1-75b1c833be36",
+          "ove-s-unhardy_1-f5ba352e1c98",
+          "ove-s-voluptuous_1-56a39833dfbf"
+        ],
+        "n_requests": 9,
+        "bytes": 22698,
+        "estimate_usd": 0.005481,
+        "submitted_at": "2026-10-10T16:30:36+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:37:13+00:00"
+      }
+    ],
+    "o03_opus": [
+      {
+        "id": "msgbatch_01SqTQeaFhqvuMZw27hSyjLK",
+        "custom_ids": [
+          "ove-o-big_1-a2a83a5671e7",
+          "ove-o-tiny_1-95b464e069e5",
+          "ove-o-unhardy_1-6a0292161ee7"
+        ],
+        "n_requests": 3,
+        "bytes": 7478,
+        "estimate_usd": 0.00468,
+        "submitted_at": "2026-10-10T16:37:14+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:39:16+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_01V8ihysH5yxZuMouFcXbaRZ",
+        "custom_ids": [
+          "ove-s-dewy_1-f2b40a128721",
+          "ove-s-doddering_1-a034501457f2",
+          "ove-s-nondescript_1-f291ddabcf71",
+          "ove-s-sturdy_1-de06c43a508f",
+          "ove-s-ugly_1-93c127404482",
+          "ove-s-unhardy_1-8be7c7d6c2c4",
+          "ove-s-voluptuous_1-1ab32a7a2d4c"
+        ],
+        "n_requests": 7,
+        "bytes": 17768,
+        "estimate_usd": 0.004263,
+        "submitted_at": "2026-10-10T16:39:18+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:44:54+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_01N4t24TQkvRMCQ87Y3Qy27j",
+        "custom_ids": [
+          "ove-o-unhardy_1-4cbbaf6210a7"
+        ],
+        "n_requests": 1,
+        "bytes": 2519,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-10T16:44:55+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:46:58+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_01PTFRoNs2NTKf4oxBUMQ4z6",
+        "custom_ids": [
+          "ove-s-doddering_1-c02bcfe01645",
+          "ove-s-nondescript_1-83e93f5e87ff",
+          "ove-s-ugly_1-a2fbf33997cf",
+          "ove-s-unhardy_1-b02e08337374",
+          "ove-s-voluptuous_1-d1b2e525cb14"
+        ],
+        "n_requests": 5,
+        "bytes": 12739,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-10T16:47:00+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T16:57:42+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01S9YSX9FDtg1x4iqmmbDzrR",
+        "custom_ids": [
+          "ove-s-doddering_1-9b0e92c16b21",
+          "ove-s-nondescript_1-c584a6f9d4a0",
+          "ove-s-ugly_1-ce8301055d57"
+        ],
+        "n_requests": 3,
+        "bytes": 7602,
+        "estimate_usd": 0.001827,
+        "submitted_at": "2026-10-10T16:57:43+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:03:20+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_016RFxRRXMq5JXjXtbN2ZSU7",
+        "custom_ids": [
+          "ove-s-doddering_1-88bdd3bb76e5",
+          "ove-s-ugly_1-d50445c1300a"
+        ],
+        "n_requests": 2,
+        "bytes": 5099,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-10T17:03:22+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T17:09:28+00:00"
+      }
+    ]
+  }
+}

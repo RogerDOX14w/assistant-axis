@@ -1,0 +1,18 @@
+{
+  "granularity": 150,
+  "label_form": "judge-display-v1",
+  "model": "claude-sonnet-5-5",
+  "rubric": "A",
+  "rubric_version": 6,
+  "seed": 0,
+  "per_cluster": 3,
+  "cross_pole": 1,
+  "signals": [
+    "within",
+    "nearest"
+  ],
+  "label_choice": "blind",
+  "n_calls": 82,
+  "cost_usd": 0.0962,
+  "budget_exceeded": false
+}

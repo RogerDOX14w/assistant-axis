@@ -1,0 +1,92 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "physical_tda_1"
+        },
+        "fingerprint": "v1:2026-10-10T17:09:31+00:00@115319163",
+        "kind": "file",
+        "last_modified_at": "2026-10-10T17:09:31+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "physical_tda_1"
+        },
+        "fingerprint": "v1:multi:bfbfc7c769a8",
+        "kind": "multi",
+        "last_modified_at": "2026-10-10T17:09:31+00:00",
+        "member_paths": [
+          "data/candidates/novelty/physical_tda_1/run.json"
+        ],
+        "path": "data/candidates/novelty/physical_tda_1/run.json"
+      }
+    ],
+    "inputs_sha256": "ec6899329f1bf54c512a937fb05bce59d811bffdb094020123477f6da9b24139",
+    "produced_at": "2026-10-10T17:19:18+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_tda_1 --from-batches physical_tda_1 --proposed-cut-off 3 --transport batches --budget-usd 2",
+      "git_sha": "851de53+dirty",
+      "title": "review_graph build review_physical_tda_1"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 25,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 8543,
+      "cost_usd": 0.0029,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 16,
+      "prompt_tokens": 15054
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 205,
+      "cost_usd": 0.0024,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 1,
+      "prompt_tokens": 168
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 670,
+      "cost_usd": 0.0048,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 8,
+      "prompt_tokens": 1404
+    }
+  },
+  "total_completion_tokens": 9418,
+  "total_cost_usd": 0.01,
+  "total_prompt_tokens": 16626
+}

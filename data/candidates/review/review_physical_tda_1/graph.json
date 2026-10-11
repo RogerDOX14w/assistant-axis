@@ -1,0 +1,5407 @@
+{
+  "result": {
+    "schema": 2,
+    "batch_id": "review_physical_tda_1",
+    "from_batches": [
+      "physical_tda_1"
+    ],
+    "config": {
+      "k": 10,
+      "cosine_floor": 0.25,
+      "rules": "cut_off_4",
+      "overlap_rubric": 6,
+      "relation_rubric": 1,
+      "embedding": {
+        "model": "text-embedding-3-large",
+        "query_form": "gloss_w14"
+      },
+      "overlap_floor": 0.35,
+      "cut_off": 4,
+      "proposed_cut_off": 3,
+      "m3_rules": "m3_rules_2",
+      "second_direction": "read where the first direction read 3 or above (the proposed cut-off) under M3's rule at that cut-off",
+      "models": {
+        "relation": "claude-haiku-5-5",
+        "relation_unsure": "claude-sonnet-5-5",
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "space": {
+        "config_version": "2026-10-02",
+        "representation": "w20",
+        "variant": "centred"
+      },
+      "label_form": "judge-display-v1"
+    },
+    "complete": true,
+    "stalled": {},
+    "nodes": [
+      {
+        "key": "big#1",
+        "kind": "candidate",
+        "label": "big",
+        "gloss": "This means having a large body or build.",
+        "stem": "big",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "bristly#1",
+        "kind": "candidate",
+        "label": "bristly",
+        "gloss": "This means going unshaven, with stubble left growing on one's face or chin.",
+        "stem": "bristly",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "confusable#1",
+        "kind": "candidate",
+        "label": "confusable",
+        "gloss": "This means looking so much like another person in face and build that strangers and acquaintances routinely mistake one for them and use the wrong name.",
+        "stem": "confusable",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "dewy#1",
+        "kind": "candidate",
+        "label": "dewy",
+        "gloss": "This means keeping a fresh, youthful, glowing complexion that shows health and vitality, the kind of skin that looks lightly moist and luminous rather than dry or worn.",
+        "stem": "dewy",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "doddering#1",
+        "kind": "candidate",
+        "label": "doddering",
+        "gloss": "This means moving with unsteady, shaky steps and a frail body worn down by age, so that one's gait and grip are never quite firm.",
+        "stem": "doddering",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "fatigueless#1",
+        "kind": "candidate",
+        "label": "fatigueless",
+        "gloss": "This means keeping going through long hours and hard demands without any sense of tiredness, since one's body never tires, slows or runs down.",
+        "stem": "fatigueless",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "florid#1",
+        "kind": "candidate",
+        "label": "florid",
+        "gloss": "This means having a ruddy, flushed complexion.",
+        "stem": "florid",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "greasy#1",
+        "kind": "candidate",
+        "label": "greasy",
+        "gloss": "This means having skin or hair that produces excess oil, so that one's face or scalp looks and feels shiny and slick most of the day.",
+        "stem": "greasy",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "nondescript#1",
+        "kind": "candidate",
+        "label": "nondescript",
+        "gloss": "This means keeping one's looks and dress ordinary and undistinctive, so that one's appearance is plain and easily forgotten by anyone who sees it.",
+        "stem": "nondescript",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "sturdy#1",
+        "kind": "candidate",
+        "label": "sturdy",
+        "gloss": "This means being physically strong and robust in build, with a solid, hardy body that holds up well to hard physical work and rough conditions.",
+        "stem": "sturdy",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "ticklish#1",
+        "kind": "candidate",
+        "label": "ticklish",
+        "gloss": "This means squirming, flinching, or laughing involuntarily whenever a light touch brushes across one's skin, so that feathery contact on the ribs, feet, or neck is hard to bear.",
+        "stem": "ticklish",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "ugly#1",
+        "kind": "candidate",
+        "label": "ugly",
+        "gloss": "This means regarding one's own appearance as unattractive or plain-looking and speaking about it matter-of-factly, without dwelling on it or pretending otherwise.",
+        "stem": "ugly",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "unattractive#1",
+        "kind": "candidate",
+        "label": "unattractive",
+        "gloss": "This means having looks that are physically unappealing.",
+        "stem": "unattractive",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "unhardy#1",
+        "kind": "candidate",
+        "label": "unhardy",
+        "gloss": "This means being physically frail and delicate, with a body that tires quickly and cannot withstand rough conditions or sustained physical strain.",
+        "stem": "unhardy",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "unvoluptuous#1",
+        "kind": "candidate",
+        "label": "unvoluptuous",
+        "gloss": "This means having a slim, straight figure, lacking curves.",
+        "stem": "unvoluptuous",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "voluptuous#1",
+        "kind": "candidate",
+        "label": "voluptuous",
+        "gloss": "This means having a full, curvaceous body whose generous shape is plainly and unmistakably sensually attractive, a quality one's appearance makes impossible to miss.",
+        "stem": "voluptuous",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "attractive#1",
+        "kind": "candidate",
+        "label": "attractive",
+        "gloss": "This means being physically good-looking, with a face and figure that others find pleasing to look at.",
+        "stem": "attractive",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "covered_reading": {
+          "stem": "good_looking",
+          "cosine": 0.673222,
+          "sonnet": 3,
+          "opus": 4
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "beautiful#1",
+        "kind": "candidate",
+        "label": "beautiful",
+        "gloss": "This means being pleasing to the eye, with a lovely and attractive appearance that others find striking to look at.",
+        "stem": "beautiful",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "covered_reading": {
+          "stem": "good_looking",
+          "cosine": 0.567317,
+          "sonnet": 3,
+          "opus": 4
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "chubby#1",
+        "kind": "candidate",
+        "label": "chubby",
+        "gloss": "This means having a plump or slightly overweight body.",
+        "stem": "chubby",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:fat",
+        "covered_reading": {
+          "stem": "fat",
+          "cosine": 0.514276,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "delicate#1",
+        "kind": "candidate",
+        "label": "delicate",
+        "gloss": "This means being physically frail and easily worn down, with a body that tires quickly and falls ill more often than most people's do.",
+        "stem": "delicate",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:sickly",
+        "covered_reading": {
+          "stem": "sickly",
+          "cosine": 0.387155,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "fat#1",
+        "kind": "candidate",
+        "label": "fat",
+        "gloss": "This means having a heavy, overweight body.",
+        "stem": "fat",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:fat",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "gorgeous#1",
+        "kind": "candidate",
+        "label": "gorgeous",
+        "gloss": "This means having a striking, beautiful appearance that draws admiring looks from others, and carrying oneself with the easy confidence that comes from knowing one is good to look at.",
+        "stem": "gorgeous",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "covered_reading": {
+          "stem": "good_looking",
+          "cosine": 0.612438,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "handsome#1",
+        "kind": "candidate",
+        "label": "handsome",
+        "gloss": "This means having a face and figure that others find attractive and good-looking, with features that draw the eye and make a favorable first impression.",
+        "stem": "handsome",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "covered_reading": {
+          "stem": "good_looking",
+          "cosine": 0.69591,
+          "sonnet": 4,
+          "opus": null
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "left_handed#1",
+        "kind": "candidate",
+        "label": "left-handed",
+        "gloss": "This means using the left hand as one's dominant hand.",
+        "stem": "left_handed",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:left_handed",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "little#1",
+        "kind": "candidate",
+        "label": "little",
+        "gloss": "This means being small in body or stature, with a slight frame and a height well below that of most people around one.",
+        "stem": "little",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:short",
+        "covered_reading": {
+          "stem": "short",
+          "cosine": 0.391252,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "pretty#1",
+        "kind": "candidate",
+        "label": "pretty",
+        "gloss": "This means having a physically attractive appearance, with features that others find pleasing to look at.",
+        "stem": "pretty",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "covered_reading": {
+          "stem": "good_looking",
+          "cosine": 0.642377,
+          "sonnet": 3,
+          "opus": 4
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "short#1",
+        "kind": "candidate",
+        "label": "short",
+        "gloss": "This means being short in stature, below the average adult height.",
+        "stem": "short",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:short",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "sickly#1",
+        "kind": "candidate",
+        "label": "sickly",
+        "gloss": "This means being frail of body and falling ill often, with one's health weak and unreliable enough that one expects to be laid up and plans life around it.",
+        "stem": "sickly",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:sickly",
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "skinny#1",
+        "kind": "candidate",
+        "label": "skinny",
+        "gloss": "This means carrying a very thin, lean body with little spare fat on the frame.",
+        "stem": "skinny",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:thin",
+        "covered_reading": {
+          "stem": "thin",
+          "cosine": 0.637922,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "slender#1",
+        "kind": "candidate",
+        "label": "slender",
+        "gloss": "This means having a thin, slim build, with a narrow frame and little bulk through the body.",
+        "stem": "slender",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:thin",
+        "covered_reading": {
+          "stem": "thin",
+          "cosine": 0.574649,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "slim#1",
+        "kind": "candidate",
+        "label": "slim",
+        "gloss": "This means having a slender, thin build, with a lean frame that carries little bulk or fat.",
+        "stem": "slim",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:thin",
+        "covered_reading": {
+          "stem": "thin",
+          "cosine": 0.588562,
+          "sonnet": 3,
+          "opus": 4
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "spry#1",
+        "kind": "candidate",
+        "label": "spry",
+        "gloss": "This means moving quickly and lightly through one's days, keeping a brisk, agile body and a steady stream of energy that makes exertion seem easy.",
+        "stem": "spry",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:energetic",
+        "covered_reading": {
+          "stem": "energetic",
+          "cosine": 0.340681,
+          "sonnet": 2,
+          "opus": 3
+        },
+        "flags": [
+          "sonnet_below_opus_at"
+        ],
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "strong#1",
+        "kind": "candidate",
+        "label": "strong",
+        "gloss": "This means being physically powerful, with a muscular build and the strength to lift, push, or carry heavy loads without much effort.",
+        "stem": "strong",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:muscular",
+        "covered_reading": {
+          "stem": "muscular",
+          "cosine": 0.66387,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "tiny#1",
+        "kind": "candidate",
+        "label": "tiny",
+        "gloss": "This means being small in body or stature, with a slight build and a short frame that sets one apart from most people of the same age.",
+        "stem": "tiny",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:short",
+        "covered_reading": {
+          "stem": "short",
+          "cosine": 0.389597,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_tda_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "trait:adhd",
+        "kind": "corpus",
+        "label": "ADHD",
+        "gloss": "This means a brain that cannot attend to what bores it: hours lost in whatever grips one, the dull task left to the last night, restless in a chair, school a struggle, better on one's feet.",
+        "stem": "adhd"
+      },
+      {
+        "key": "trait:androgynous",
+        "kind": "corpus",
+        "label": "androgynous",
+        "gloss": "This means carrying both the manly and the womanly at once: a look, voice and bearing with something of each, and tough, assertive, warm and tender in the same person.",
+        "stem": "androgynous"
+      },
+      {
+        "key": "trait:animated",
+        "kind": "corpus",
+        "label": "animated",
+        "gloss": "This means using vivid descriptions, energetic and lively language, dynamic expressions, and an enthusiastic communication style that brings content to life with vibrant imagery and spirited tone.",
+        "stem": "animated"
+      },
+      {
+        "key": "trait:athletic",
+        "kind": "corpus",
+        "label": "athletic",
+        "gloss": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, a body that recovers overnight, and stairs taken two at a time without getting winded.",
+        "stem": "athletic"
+      },
+      {
+        "key": "trait:attention_seeking",
+        "kind": "corpus",
+        "label": "attention-seeking",
+        "gloss": "This means wanting every eye in the room on oneself, raising the volume, the stakes or the story whenever talk drifts elsewhere, and smarting when ignored.",
+        "stem": "attention_seeking"
+      },
+      {
+        "key": "trait:black_haired",
+        "kind": "corpus",
+        "label": "black-haired",
+        "gloss": "This means having hair so dark it shows blue in strong light: eyebrows and lashes dark to match, gray that shows from the first strand, and bleaching before any dye will take.",
+        "stem": "black_haired"
+      },
+      {
+        "key": "trait:blond",
+        "kind": "corpus",
+        "label": "blond",
+        "gloss": "This means having light hair, pale yellow to sandy: eyebrows and lashes so fair they barely show, hair that goes lighter in summer sun, and grays that blend in unnoticed.",
+        "stem": "blond"
+      },
+      {
+        "key": "trait:body_confident",
+        "kind": "corpus",
+        "label": "body-confident",
+        "gloss": "This means being at ease in one's body as it is, wearing what one likes, stepping into photographs without a second thought, wishing no part of it different.",
+        "stem": "body_confident"
+      },
+      {
+        "key": "trait:body_insecure",
+        "kind": "corpus",
+        "label": "body-insecure",
+        "gloss": "This means being ashamed of how one's body looks, hiding it in loose clothes, dodging photographs and mirrors, and wishing some part of it were different.",
+        "stem": "body_insecure"
+      },
+      {
+        "key": "trait:brown_eyed",
+        "kind": "corpus",
+        "label": "brown-eyed",
+        "gloss": "This means having brown eyes, amber to near black: an iris that blends with the pupil in dim light, bright sun met without a squint, and the world's commonest eye color.",
+        "stem": "brown_eyed"
+      },
+      {
+        "key": "trait:brown_haired",
+        "kind": "corpus",
+        "label": "brown-haired",
+        "gloss": "This means having brown hair, chestnut to dark coffee: eyebrows and lashes that show without makeup, red glints in summer sun, and the first grays plain against the brown.",
+        "stem": "brown_haired"
+      },
+      {
+        "key": "trait:burned_out",
+        "kind": "corpus",
+        "label": "burned-out",
+        "gloss": "This means being drained by work that once mattered, going through the motions, cynical about the point of it all, and unable to summon the effort or the care it used to get.",
+        "stem": "burned_out"
+      },
+      {
+        "key": "trait:charismatic",
+        "kind": "corpus",
+        "label": "charismatic",
+        "gloss": "This means showing a magnetic personality that naturally draws others in, communicating with confidence and charm that makes ideas compelling and conversations engaging.",
+        "stem": "charismatic"
+      },
+      {
+        "key": "trait:dark_skinned",
+        "kind": "corpus",
+        "label": "dark-skinned",
+        "gloss": "This means having deep brown skin: deepening in summer sun without burning, a hunt for a matching foundation shade, a rash that shows purple, not red, and low vitamin D in winter.",
+        "stem": "dark_skinned"
+      },
+      {
+        "key": "trait:defeatist",
+        "kind": "corpus",
+        "label": "defeatist",
+        "gloss": "This means expecting a hard goal to fail, giving up at the first setback or rejection, and dropping it for good on the grounds that it was never going to work.",
+        "stem": "defeatist"
+      },
+      {
+        "key": "trait:dignified",
+        "kind": "corpus",
+        "label": "dignified",
+        "gloss": "This means carrying oneself with poise and self-respect, keeping one's composure in company, and holding that looking ridiculous is beneath one.",
+        "stem": "dignified"
+      },
+      {
+        "key": "trait:dull",
+        "kind": "corpus",
+        "label": "dull",
+        "gloss": "This means having a presence that draws no one in, talking without confidence or charm, so that even good ideas sound lifeless and conversations soon peter out.",
+        "stem": "dull"
+      },
+      {
+        "key": "trait:edgy",
+        "kind": "corpus",
+        "label": "edgy",
+        "gloss": "This means pushing boundaries through dark humor, controversial opinions, provocative statements, or deliberately challenging conventional thinking in a way that might be considered daring or potentially offensive.",
+        "stem": "edgy"
+      },
+      {
+        "key": "trait:elderly",
+        "kind": "corpus",
+        "label": "elderly",
+        "gloss": "This means being in one's seventies or beyond, with most of life behind one, a slowing body, grandchildren, and a lifetime of change seen firsthand.",
+        "stem": "elderly"
+      },
+      {
+        "key": "trait:emotional_hexaco",
+        "kind": "corpus",
+        "label": "emotional (HEXACO)",
+        "gloss": "This means flinching from physical danger, worrying when life gets stressful, needing a shoulder to lean on, and forming tender attachments to people, feeling their pain as one's own.",
+        "stem": "emotional_hexaco"
+      },
+      {
+        "key": "trait:emphatic",
+        "kind": "corpus",
+        "label": "emphatic",
+        "gloss": "This means pressing every point home with full force, insisting, underlining, repeating, and never letting anything sound smaller than it is.",
+        "stem": "emphatic"
+      },
+      {
+        "key": "trait:energetic",
+        "kind": "corpus",
+        "label": "energetic",
+        "gloss": "This means being reliably energetic: full of get-up-and-go, moving and talking at a brisk pace, and taking on task after task without running down.",
+        "stem": "energetic"
+      },
+      {
+        "key": "trait:ethereal",
+        "kind": "corpus",
+        "label": "ethereal",
+        "gloss": "This means communicating with an otherworldly, delicate quality that seems barely connected to physical reality, like something floating between dreams and the material world.",
+        "stem": "ethereal"
+      },
+      {
+        "key": "trait:expressive",
+        "kind": "corpus",
+        "label": "expressive",
+        "gloss": "This means letting feelings show as they come, putting one's own joys, worries, and soft spots into words, and keeping no professional distance from anyone.",
+        "stem": "expressive"
+      },
+      {
+        "key": "trait:fair_skinned",
+        "kind": "corpus",
+        "label": "fair-skinned",
+        "gloss": "This means having pale skin: burning in twenty minutes of summer sun, SPF 50 for any day outside, the palest foundation shade, and a rash that shows red at once.",
+        "stem": "fair_skinned"
+      },
+      {
+        "key": "trait:famous",
+        "kind": "corpus",
+        "label": "famous",
+        "gloss": "This means being known by name to strangers, whatever one's line of work: recognized in the street, asked for photos, written about, and living in public, whether one wanted it or not.",
+        "stem": "famous"
+      },
+      {
+        "key": "trait:fashionable",
+        "kind": "corpus",
+        "label": "fashionable",
+        "gloss": "This means knowing what is in style this season, wearing the new look as it arrives, and spotting a dated outfit at once.",
+        "stem": "fashionable"
+      },
+      {
+        "key": "trait:fastidious",
+        "kind": "corpus",
+        "label": "fastidious",
+        "gloss": "This means keeping oneself and one's home spotless, doing the dishes right after every meal, and recoiling from grime, stains and other people's germs.",
+        "stem": "fastidious"
+      },
+      {
+        "key": "trait:fat",
+        "kind": "corpus",
+        "label": "fat",
+        "gloss": "This means carrying a lot of body fat: shopping the larger sizes, a tight fit in chairs with arms and airplane seats, and running warm in any weather.",
+        "stem": "fat"
+      },
+      {
+        "key": "trait:female",
+        "kind": "corpus",
+        "label": "female",
+        "gloss": "This means having a woman's body: ovaries, a uterus and breasts, monthly periods from the teens to menopause, the capacity to carry a child, and Pap smears and mammograms on the calendar.",
+        "stem": "female"
+      },
+      {
+        "key": "trait:feminine",
+        "kind": "corpus",
+        "label": "feminine",
+        "gloss": "This means being womanly in how one dresses, talks and carries oneself, and warm, tender and caring in how one meets the world.",
+        "stem": "feminine"
+      },
+      {
+        "key": "trait:flat",
+        "kind": "corpus",
+        "label": "flat",
+        "gloss": "This means speaking in a monotone, plain words, no imagery, no energy, so that thrilling news and a parts list sound alike.",
+        "stem": "flat"
+      },
+      {
+        "key": "trait:flirty",
+        "kind": "corpus",
+        "label": "flirty",
+        "gloss": "This means engaging in playful romantic banter, using charming innuendo, creating light sexual tension, or employing seductive and alluring language that suggests romantic or sexual interest.",
+        "stem": "flirty"
+      },
+      {
+        "key": "trait:flourishing",
+        "kind": "corpus",
+        "label": "flourishing",
+        "gloss": "This means doing well, still growing, living for a purpose one believes in, staying on top of things and close to one's people, and feeling fully alive.",
+        "stem": "flourishing"
+      },
+      {
+        "key": "trait:fragile",
+        "kind": "corpus",
+        "label": "fragile",
+        "gloss": "This means being easily destabilized by difficulties, criticism, or setbacks, struggling to adapt to challenging circumstances, and showing brittleness under pressure rather than bouncing back.",
+        "stem": "fragile"
+      },
+      {
+        "key": "trait:gay",
+        "kind": "corpus",
+        "label": "gay",
+        "gloss": "This means being gay in sexual orientation: attracted, sexually and romantically, to people of one's own sex, and falling for, dating and building a life with them.",
+        "stem": "gay"
+      },
+      {
+        "key": "trait:good_looking",
+        "kind": "corpus",
+        "label": "good-looking",
+        "gloss": "This means having a face and figure that turn heads: even features and clear skin, compliments on one's looks, photographs that come out well, and being asked whether one models.",
+        "stem": "good_looking"
+      },
+      {
+        "key": "trait:gray_haired",
+        "kind": "corpus",
+        "label": "gray-haired",
+        "gloss": "This means having hair gone silver or white with the years: coarser and drier than it was, a yellow cast without purple shampoo, and roots that show within weeks of a dye.",
+        "stem": "gray_haired"
+      },
+      {
+        "key": "trait:grounded",
+        "kind": "corpus",
+        "label": "grounded",
+        "gloss": "This means speaking with a solid, earthy plainness, tied firmly to physical things and everyday life, like something made of stone and soil rather than of dreams.",
+        "stem": "grounded"
+      },
+      {
+        "key": "trait:guilt_prone",
+        "kind": "corpus",
+        "label": "guilt-prone",
+        "gloss": "This means avoiding misdeeds because one's conscience and picture of oneself would condemn them: a wrong gnaws at one though nobody knows of it, and confessing it brings relief.",
+        "stem": "guilt_prone"
+      },
+      {
+        "key": "trait:happily_partnered",
+        "kind": "corpus",
+        "label": "happily-partnered",
+        "gloss": "This means being glad of the partner one has, looking forward to going home to them, and sure one would choose them again.",
+        "stem": "happily_partnered"
+      },
+      {
+        "key": "trait:health_conscious",
+        "kind": "corpus",
+        "label": "health-conscious",
+        "gloss": "This means keeping every checkup and screening, eating right, exercising, sleeping enough, and seeing a doctor about a lump or lingering cough right away.",
+        "stem": "health_conscious"
+      },
+      {
+        "key": "trait:health_negligent",
+        "kind": "corpus",
+        "label": "health-negligent",
+        "gloss": "This means skipping checkups and screenings, eating whatever, never exercising, running on little sleep, and ignoring a lump or lingering cough for months.",
+        "stem": "health_negligent"
+      },
+      {
+        "key": "trait:healthy",
+        "kind": "corpus",
+        "label": "healthy",
+        "gloss": "This means having a sound constitution: shaking off whatever is going around in a day, no prescriptions, a clean checkup every time, and no sick days in years.",
+        "stem": "healthy"
+      },
+      {
+        "key": "trait:in_chronic_pain",
+        "kind": "corpus",
+        "label": "in chronic pain",
+        "gloss": "This means hurting every day for years, from a bad back, worn joints or an old injury: painkillers that only take the edge off, a heating pad, and sleep broken by it.",
+        "stem": "in_chronic_pain"
+      },
+      {
+        "key": "trait:industrious",
+        "kind": "corpus",
+        "label": "industrious",
+        "gloss": "This means working hard by habit, putting in the hours without being asked, taking on the tedious job and finishing it, and feeling uneasy whenever idle.",
+        "stem": "industrious"
+      },
+      {
+        "key": "trait:joyful",
+        "kind": "corpus",
+        "label": "joyful",
+        "gloss": "This means taking pleasure in nearly everything, so good food, music, company and good news all light one up, and there is always something to look forward to.",
+        "stem": "joyful"
+      },
+      {
+        "key": "trait:joyless",
+        "kind": "corpus",
+        "label": "joyless",
+        "gloss": "This means taking no pleasure in anything, so good food, music, company and good news all land flat, and nothing is worth looking forward to.",
+        "stem": "joyless"
+      },
+      {
+        "key": "trait:languishing",
+        "kind": "corpus",
+        "label": "languishing",
+        "gloss": "This means doing poorly, being stuck in place, living for no purpose, muddling through the days, drifting from one's people, and feeling hollow without knowing why.",
+        "stem": "languishing"
+      },
+      {
+        "key": "trait:lazy",
+        "kind": "corpus",
+        "label": "lazy",
+        "gloss": "This means showing habitual laziness, avoidance of effort, and reluctance to engage meaningfully with tasks, preferring the easiest path and doing the bare minimum rather than applying oneself.",
+        "stem": "lazy"
+      },
+      {
+        "key": "trait:left_handed",
+        "kind": "corpus",
+        "label": "left-handed",
+        "gloss": "This means writing and eating with the left hand: ink smudged along it, scissors and can openers made for the other, and elbows bumped at a crowded table.",
+        "stem": "left_handed"
+      },
+      {
+        "key": "trait:lethargic",
+        "kind": "corpus",
+        "label": "lethargic",
+        "gloss": "This means being habitually lethargic: heavy-limbed and slow, moving and talking at a dragging pace, and worn out after one small task, however willing.",
+        "stem": "lethargic"
+      },
+      {
+        "key": "trait:male",
+        "kind": "corpus",
+        "label": "male",
+        "gloss": "This means having a man's body: testes and a penis, a voice that dropped at puberty, a beard to shave or grow, more muscle on the frame, and prostate checks past fifty.",
+        "stem": "male"
+      },
+      {
+        "key": "trait:masculine",
+        "kind": "corpus",
+        "label": "masculine",
+        "gloss": "This means being manly in how one dresses, talks and carries oneself, and tough, assertive and self-reliant in how one meets the world.",
+        "stem": "masculine"
+      },
+      {
+        "key": "trait:mobility_impaired",
+        "kind": "corpus",
+        "label": "mobility impaired",
+        "gloss": "This means walking with difficulty or not at all: getting around by wheelchair, walker, crutches or cane, taking the ramp and the elevator, and checking a place for steps before going.",
+        "stem": "mobility_impaired"
+      },
+      {
+        "key": "trait:modest",
+        "kind": "corpus",
+        "label": "modest",
+        "gloss": "This means counting oneself an ordinary person of ordinary gifts, playing down one's achievements, passing the credit to others, and claiming no special insight or importance.",
+        "stem": "modest"
+      },
+      {
+        "key": "trait:muscular",
+        "kind": "corpus",
+        "label": "muscular",
+        "gloss": "This means carrying a lot of muscle, whether from the gym, years of lifting and hauling, or the build one was born with: broad shoulders, sleeves tight on the arms, and strength to spare.",
+        "stem": "muscular"
+      },
+      {
+        "key": "trait:neuter",
+        "kind": "corpus",
+        "label": "neuter",
+        "gloss": "This means showing no gender in dress, voice or bearing: plain clothes cut for no gender in particular, a manner that gives no clue, and nothing manly or womanly to point to.",
+        "stem": "neuter"
+      },
+      {
+        "key": "trait:persevering",
+        "kind": "corpus",
+        "label": "persevering",
+        "gloss": "This means keeping at a hard goal through failure, boredom and rejection, starting again the morning after each setback, and stopping only when it is done.",
+        "stem": "persevering"
+      },
+      {
+        "key": "trait:physical_touch",
+        "kind": "corpus",
+        "label": "physical touch",
+        "gloss": "This means feeling loved through touch and being very touchy oneself: hugs, pats on the back and holding hands carry care and excitement, physical presence is crucial, and neglect is unforgivable.",
+        "stem": "physical_touch"
+      },
+      {
+        "key": "trait:plain_looking",
+        "kind": "corpus",
+        "label": "plain-looking",
+        "gloss": "This means having a face and figure nobody looks at twice: unremarkable features, no compliments on one's looks, photographs that come out ordinary, and a face nobody remembers after one meeting.",
+        "stem": "plain_looking"
+      },
+      {
+        "key": "trait:popular",
+        "kind": "corpus",
+        "label": "popular",
+        "gloss": "This means being liked by nearly everyone in the class or the office, picked first, invited everywhere, and missed by all when away.",
+        "stem": "popular"
+      },
+      {
+        "key": "trait:pretentious",
+        "kind": "corpus",
+        "label": "pretentious",
+        "gloss": "This means putting on airs, reaching for the big word, the name and the reference to seem cultured or important, and looking down on plain talk and plain tastes.",
+        "stem": "pretentious"
+      },
+      {
+        "key": "trait:punishment_fearing",
+        "kind": "corpus",
+        "label": "punishment-fearing",
+        "gloss": "This means avoiding misdeeds because one fears being punished for them, whether by the courts, the gods, hellfire, karma, vengeful spirits or a lynch mob: confessing only to lighten a punishment already coming.",
+        "stem": "punishment_fearing"
+      },
+      {
+        "key": "trait:red_headed",
+        "kind": "corpus",
+        "label": "red-headed",
+        "gloss": "This means having copper to auburn hair: freckles across the nose and arms, skin that burns in minutes and never tans, and hair that fades pale, not gray, with the years.",
+        "stem": "red_headed"
+      },
+      {
+        "key": "trait:reserved",
+        "kind": "corpus",
+        "label": "reserved",
+        "gloss": "This means keeping feelings out of sight, putting none of one's own joys, worries, or soft spots into words, and keeping a polite distance from everyone.",
+        "stem": "reserved"
+      },
+      {
+        "key": "trait:resilient",
+        "kind": "corpus",
+        "label": "resilient",
+        "gloss": "This means the ability to recover quickly from difficulties, adapt to challenging situations, maintain emotional stability during adversity, and demonstrate persistence in the face of setbacks.",
+        "stem": "resilient"
+      },
+      {
+        "key": "trait:restless",
+        "kind": "corpus",
+        "label": "restless",
+        "gloss": "This means being unable to settle, fidgeting through any quiet moment, mind and hands always reaching for the next thing, and finding stillness uncomfortable even when nothing is wrong.",
+        "stem": "restless"
+      },
+      {
+        "key": "trait:sedentary",
+        "kind": "corpus",
+        "label": "sedentary",
+        "gloss": "This means spending the day sitting and getting no exercise: driving to the corner store, winded after one flight of stairs, soft where muscle would be, and stiff from the chair.",
+        "stem": "sedentary"
+      },
+      {
+        "key": "trait:self_aggrandizing",
+        "kind": "corpus",
+        "label": "self-aggrandizing",
+        "gloss": "This means making oneself the hero of every story one tells, coming off the smartest person in it, and talking up one's own wins and looks.",
+        "stem": "self_aggrandizing"
+      },
+      {
+        "key": "trait:self_conscious",
+        "kind": "corpus",
+        "label": "self-conscious",
+        "gloss": "This means being painfully aware of being looked at, going quiet and red when strangers glance one's way, stumbling over words when all eyes turn, and dreading being asked to speak up.",
+        "stem": "self_conscious"
+      },
+      {
+        "key": "trait:self_deprecating",
+        "kind": "corpus",
+        "label": "self-deprecating",
+        "gloss": "This means making oneself the joke of every story one tells, coming off the biggest fool in it, and laughing first at one's own mistakes and looks.",
+        "stem": "self_deprecating"
+      },
+      {
+        "key": "trait:self_effacing",
+        "kind": "corpus",
+        "label": "self-effacing",
+        "gloss": "This means wanting no eyes in the room on oneself, lowering the volume and passing the story to someone else whenever talk turns one's way, and relieved when overlooked.",
+        "stem": "self_effacing"
+      },
+      {
+        "key": "trait:shabby_genteel",
+        "kind": "corpus",
+        "label": "shabby-genteel",
+        "gloss": "This means being born into a family whose money is long gone, with the manners, the accent and the books still handed down, and the coat worn thin, the bills unpaid.",
+        "stem": "shabby_genteel"
+      },
+      {
+        "key": "trait:shame_prone",
+        "kind": "corpus",
+        "label": "shame-prone",
+        "gloss": "This means avoiding misdeeds because others would see and condemn them: stung by ridicule or rejection, even imagined, untroubled by a fault that never gets out, and finding no relief in confessing.",
+        "stem": "shame_prone"
+      },
+      {
+        "key": "trait:short",
+        "kind": "corpus",
+        "label": "short",
+        "gloss": "This means standing a head below most people: a step stool for the top shelf, hems taken up on every pair of pants, and seeing only backs in a crowd.",
+        "stem": "short"
+      },
+      {
+        "key": "trait:sickly",
+        "kind": "corpus",
+        "label": "sickly",
+        "gloss": "This means having a weak constitution: catching whatever is going around and keeping it for weeks, prescriptions on the shelf, a checkup that finds something, and sick days gone by spring.",
+        "stem": "sickly"
+      },
+      {
+        "key": "trait:sleep_deprived",
+        "kind": "corpus",
+        "label": "sleep-deprived",
+        "gloss": "This means running on four hours' sleep night after night: eyes burning, a headache behind them, rereading the same line three times, snapping at small things, and nodding off by midafternoon.",
+        "stem": "sleep_deprived"
+      },
+      {
+        "key": "trait:slight",
+        "kind": "corpus",
+        "label": "slight",
+        "gloss": "This means carrying little muscle on a light frame, whatever one weighs: narrow shoulders and thin wrists, a suitcase that takes both hands, and jar lids that will not budge.",
+        "stem": "slight"
+      },
+      {
+        "key": "trait:slovenly",
+        "kind": "corpus",
+        "label": "slovenly",
+        "gloss": "This means letting oneself and one's home go dirty, leaving the dishes piled up for days, and not minding the grime, stains or smell.",
+        "stem": "slovenly"
+      },
+      {
+        "key": "trait:squeamish",
+        "kind": "corpus",
+        "label": "squeamish",
+        "gloss": "This means turning queasy at blood, pus, vomit, rotting food or a depraved act, looking away, gagging, and refusing to touch it or hear more.",
+        "stem": "squeamish"
+      },
+      {
+        "key": "trait:staid",
+        "kind": "corpus",
+        "label": "staid",
+        "gloss": "This means being respectable and settled, keeping to safe opinions and clean humor, never saying anything that could shock or offend, and finding the urge to court controversy faintly embarrassing.",
+        "stem": "staid"
+      },
+      {
+        "key": "trait:straight",
+        "kind": "corpus",
+        "label": "straight",
+        "gloss": "This means being straight in sexual orientation: attracted, sexually and romantically, to people of the opposite sex, and falling for, dating and building a life with them.",
+        "stem": "straight"
+      },
+      {
+        "key": "trait:stressed",
+        "kind": "corpus",
+        "label": "stressed",
+        "gloss": "This means living stretched past one's limit for months: a tight jaw, the to-do list running through one's head at night, short with everyone, and one more thing away from cracking.",
+        "stem": "stressed"
+      },
+      {
+        "key": "trait:strong_stomached",
+        "kind": "corpus",
+        "label": "strong-stomached",
+        "gloss": "This means staying calm at blood, pus, vomit, rotting food or a depraved act, looking straight at it, and touching it or hearing more without a flinch.",
+        "stem": "strong_stomached"
+      },
+      {
+        "key": "trait:tall",
+        "kind": "corpus",
+        "label": "tall",
+        "gloss": "This means standing a head above most people: ducking through old doorways, knees against the seat in front, being asked to reach the top shelf, and sleeves that never reach the wrist.",
+        "stem": "tall"
+      },
+      {
+        "key": "trait:taurus",
+        "kind": "corpus",
+        "label": "Taurus",
+        "gloss": "This means being solid and hard to shift: steady in one's habits, dependable, fond of comfort and bodily pleasures of every kind, holding on to what one has, and plain stubborn.",
+        "stem": "taurus"
+      },
+      {
+        "key": "trait:theatrical",
+        "kind": "corpus",
+        "label": "theatrical",
+        "gloss": "This means using dramatic flair, exaggerated language, vivid imagery, and delivering content as if performing on stage with sweeping gestures and commanding presence.",
+        "stem": "theatrical"
+      },
+      {
+        "key": "trait:thick_skinned",
+        "kind": "corpus",
+        "label": "thick-skinned",
+        "gloss": "This means being unbothered by any jab, joke or criticism, taking no offense at even a harsh remark, and forgetting it within the minute.",
+        "stem": "thick_skinned"
+      },
+      {
+        "key": "trait:thin",
+        "kind": "corpus",
+        "label": "thin",
+        "gloss": "This means carrying little body fat: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
+        "stem": "thin"
+      },
+      {
+        "key": "trait:thin_skinned",
+        "kind": "corpus",
+        "label": "thin-skinned",
+        "gloss": "This means being stung by every jab, joke or criticism, taking offense at the slightest remark, and brooding over it or snapping back for days.",
+        "stem": "thin_skinned"
+      },
+      {
+        "key": "trait:tough_hexaco",
+        "kind": "corpus",
+        "label": "tough (HEXACO)",
+        "gloss": "This means pressing on where one could get hurt, staying unworried under pressure, seldom sharing one's troubles or leaning on anyone, and holding people at arm's length.",
+        "stem": "tough_hexaco"
+      },
+      {
+        "key": "trait:traumatized",
+        "kind": "corpus",
+        "label": "traumatized",
+        "gloss": "This means still living inside what happened: jumping at a slammed door, the scene coming back uninvited by day and in dreams, avoiding whatever brings it back, and never feeling safe.",
+        "stem": "traumatized"
+      },
+      {
+        "key": "trait:unassuming",
+        "kind": "corpus",
+        "label": "unassuming",
+        "gloss": "This means no flourish, no performance, no commanding the room, just the point made quietly in plain words by someone who would rather go unnoticed.",
+        "stem": "unassuming"
+      },
+      {
+        "key": "trait:understated",
+        "kind": "corpus",
+        "label": "understated",
+        "gloss": "This means deliberately minimizing the importance or significance of things and expressing ideas with restraint, using modest language rather than emphatic or dramatic expressions.",
+        "stem": "understated"
+      },
+      {
+        "key": "trait:unfashionable",
+        "kind": "corpus",
+        "label": "unfashionable",
+        "gloss": "This means not knowing or caring what is in style, wearing the same clothes year after year, and blind to how dated one looks.",
+        "stem": "unfashionable"
+      },
+      {
+        "key": "trait:unhappily_partnered",
+        "kind": "corpus",
+        "label": "unhappily-partnered",
+        "gloss": "This means being sick of the partner one has, dreading going home to them, and sure one would not choose them again.",
+        "stem": "unhappily_partnered"
+      },
+      {
+        "key": "trait:unpopular",
+        "kind": "corpus",
+        "label": "unpopular",
+        "gloss": "This means not being liked by anyone in the class or the office, picked last, left off every invitation, and missed by nobody when away.",
+        "stem": "unpopular"
+      },
+      {
+        "key": "trait:unpretentious",
+        "kind": "corpus",
+        "label": "unpretentious",
+        "gloss": "This means saying it in ordinary words, as one would to a neighbor, with nothing grand put on to impress and no airs.",
+        "stem": "unpretentious"
+      },
+      {
+        "key": "trait:unselfconscious",
+        "kind": "corpus",
+        "label": "unselfconscious",
+        "gloss": "This means never thinking about being looked at, chatting easily while strangers watch, carrying on as if nobody were there when all eyes turn, and speaking up without a second thought.",
+        "stem": "unselfconscious"
+      },
+      {
+        "key": "trait:young",
+        "kind": "corpus",
+        "label": "young",
+        "gloss": "This means being in one's teens or twenties, with most of life ahead, a quick body, friends one's own age, and today's world the only one known.",
+        "stem": "young"
+      }
+    ],
+    "edges": [
+      {
+        "a": "big#1",
+        "b": "confusable#1",
+        "cosine": 0.342488,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "doddering#1",
+        "cosine": 0.266029,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "florid#1",
+        "cosine": 0.350837,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "greasy#1",
+        "cosine": 0.316658,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "sturdy#1",
+        "cosine": 0.700035,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "unrelated"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern physique, but 'big' is about large size while 'sturdy' is about strength and robustness; a person can be big without being sturdy, or sturdy without being big."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "big#1",
+        "b": "unattractive#1",
+        "cosine": 0.341933,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "unhardy#1",
+        "cosine": 0.377088,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.348945,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "voluptuous#1",
+        "cosine": 0.580527,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a body with generous proportions, but 'big' is simply large size, while 'voluptuous' means a curvaceous, sensually attractive shape and does not require largeness overall."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "bristly#1",
+        "b": "dewy#1",
+        "cosine": 0.282486,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "bristly#1",
+        "b": "doddering#1",
+        "cosine": 0.252275,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "bristly#1",
+        "b": "florid#1",
+        "cosine": 0.313181,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "bristly#1",
+        "b": "greasy#1",
+        "cosine": 0.336836,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "bristly#1",
+        "b": "nondescript#1",
+        "cosine": 0.293006,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "bristly#1",
+        "b": "unattractive#1",
+        "cosine": 0.297672,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "florid#1",
+        "cosine": 0.264433,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "greasy#1",
+        "cosine": 0.332699,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "nondescript#1",
+        "cosine": 0.297239,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "sturdy#1",
+        "cosine": 0.275016,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "ugly#1",
+        "cosine": 0.26224,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "unattractive#1",
+        "cosine": 0.336234,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "confusable#1",
+        "b": "voluptuous#1",
+        "cosine": 0.258101,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "dewy#1",
+        "b": "florid#1",
+        "cosine": 0.495758,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "unrelated"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe complexion, but dewy means a fresh, luminous, youthful glow while florid means a ruddy, flushed redness; neither implies the other, so they are neighbours rather than the same concept."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "dewy#1",
+        "b": "greasy#1",
+        "cosine": 0.419855,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve shiny, moist-looking skin, but dewy is a healthy, luminous, desirable glow while greasy is excess oil that looks slick and unpleasant; they are neighbours rather than the same concept, though greasy is somewhat contrary in valence."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "dewy#1",
+        "b": "nondescript#1",
+        "cosine": 0.312142,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "dewy#1",
+        "b": "sturdy#1",
+        "cosine": 0.265771,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "dewy#1",
+        "b": "unhardy#1",
+        "cosine": 0.261553,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "dewy#1",
+        "b": "voluptuous#1",
+        "cosine": 0.269307,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "doddering#1",
+        "b": "fatigueless#1",
+        "cosine": 0.271887,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "doddering#1",
+        "b": "sturdy#1",
+        "cosine": 0.324964,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "doddering#1",
+        "b": "ticklish#1",
+        "cosine": 0.311368,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "doddering#1",
+        "b": "unattractive#1",
+        "cosine": 0.30603,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "doddering#1",
+        "b": "unhardy#1",
+        "cosine": 0.608373,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve physical frailty, but doddering is specifically age-related shakiness in gait and grip, while unhardy is a general lack of physical endurance and resilience not tied to age or unsteadiness."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "doddering#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.254278,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "greasy#1",
+        "cosine": 0.479253,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "sturdy#1",
+        "cosine": 0.376061,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "ugly#1",
+        "cosine": 0.270288,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "unattractive#1",
+        "cosine": 0.353561,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "unhardy#1",
+        "cosine": 0.304182,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "florid#1",
+        "b": "voluptuous#1",
+        "cosine": 0.344518,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "greasy#1",
+        "b": "ticklish#1",
+        "cosine": 0.271992,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "greasy#1",
+        "b": "ugly#1",
+        "cosine": 0.268433,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "greasy#1",
+        "b": "unattractive#1",
+        "cosine": 0.330568,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "greasy#1",
+        "b": "unhardy#1",
+        "cosine": 0.260293,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "greasy#1",
+        "b": "voluptuous#1",
+        "cosine": 0.294308,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "ugly#1",
+        "cosine": 0.408774,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Nondescript means looking ordinary and forgettable, while the other trait means regarding one's own looks as unattractive; both involve plain appearance but one is about being unremarkable and the other about being unattractive and self-assessed."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "unattractive#1",
+        "cosine": 0.390476,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Nondescript is about ordinary, forgettable appearance and dress, while unattractive is about physically unappealing looks; both concern appearance, but one is unremarkable and the other is unappealing, and neither implies the other."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.285541,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "unattractive#1",
+        "cosine": 0.329018,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "unhardy#1",
+        "cosine": 0.501542,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.324573,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "voluptuous#1",
+        "cosine": 0.451504,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "unhardy#1",
+        "cosine": 0.291396,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "ugly#1",
+        "b": "unattractive#1",
+        "cosine": 0.59437,
+        "relation": "similar",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "similar",
+          "ba": "similar"
+        },
+        "readings": {
+          "ab": {
+            "sonnet": 3,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern being physically unappealing, but the target is about self-perception and matter-of-fact speech about one's looks, while the other is simply having unappealing looks; close in core but with different emphasis.",
+              "opus": "Both centre on unappealing looks, but the target is about seeing oneself as plain and saying so matter-of-factly, while the other is about actually having unappealing looks, so neither implies the other."
+            }
+          }
+        },
+        "overlap": "first"
+      },
+      {
+        "a": "ugly#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.317979,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "unhardy#1",
+        "cosine": 0.360191,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.403284,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "voluptuous#1",
+        "cosine": 0.355015,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "unvoluptuous#1",
+        "cosine": 0.368644,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "voluptuous#1",
+        "cosine": 0.286949,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "voluptuous#1",
+        "cosine": 0.474084,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "big#1",
+        "b": "trait:muscular",
+        "cosine": 0.544025,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe physique, but big means large body size overall while muscular means substantial muscle; a person can be big without being muscular (heavy, tall) or muscular without being big (a lean, compact build)."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "big#1",
+        "b": "trait:fat",
+        "cosine": 0.484746,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a large body, but 'big' covers any large build (tall, broad, muscular) while 'fat' specifically means carrying excess body fat, so each adds something the other lacks.",
+              "opus": "Both describe a large body, but big covers any large build such as tall or muscular, while fat specifically means carrying a lot of body fat."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "big#1",
+        "b": "trait:slight",
+        "cosine": 0.327503,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "big#1",
+        "b": "trait:male",
+        "cosine": 0.324978,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "big#1",
+        "b": "trait:female",
+        "cosine": 0.323833,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "big#1",
+        "b": "trait:thin",
+        "cosine": 0.311794,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "big#1",
+        "b": "trait:tall",
+        "cosine": 0.266525,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern physical size, but 'big' means a large overall build while 'tall' means great height; a person can be either without the other, so they share a core but each adds something distinct.",
+              "opus": "Both describe physical size, but tallness is height alone while bigness is overall bulk or build; a person can be tall and slight, or big and short."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "big#1",
+        "b": "trait:healthy",
+        "cosine": 0.219367,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "big#1",
+        "b": "trait:good_looking",
+        "cosine": 0.217216,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "big#1",
+        "b": "trait:taurus",
+        "cosine": 0.21187,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "big#1",
+        "b": "trait:sickly",
+        "cosine": 0.208895,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "big#1",
+        "b": "trait:short",
+        "cosine": 0.201975,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "big#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.194452,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:male",
+        "cosine": 0.362552,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:gray_haired",
+        "cosine": 0.220127,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:slovenly",
+        "cosine": 0.212876,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Bristly is specifically about going unshaven, while slovenly is a broad untidiness about person and home; they are neighbouring but distinct, with only a loose link through neglected grooming."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.198289,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.189714,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:red_headed",
+        "cosine": 0.182392,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:neuter",
+        "cosine": 0.179008,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:shabby_genteel",
+        "cosine": 0.176505,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:black_haired",
+        "cosine": 0.173935,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:muscular",
+        "cosine": 0.172228,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:female",
+        "cosine": 0.160496,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:good_looking",
+        "cosine": 0.153268,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:slight",
+        "cosine": 0.110636,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "bristly#1",
+        "b": "trait:fastidious",
+        "cosine": 0.023419,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.327343,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:good_looking",
+        "cosine": 0.294171,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:famous",
+        "cosine": 0.286805,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:blond",
+        "cosine": 0.254682,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:muscular",
+        "cosine": 0.237608,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:self_conscious",
+        "cosine": 0.227215,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:black_haired",
+        "cosine": 0.216941,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:red_headed",
+        "cosine": 0.213118,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:male",
+        "cosine": 0.204512,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:androgynous",
+        "cosine": 0.204417,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:slight",
+        "cosine": 0.193798,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:unselfconscious",
+        "cosine": 0.184808,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "confusable#1",
+        "b": "trait:female",
+        "cosine": 0.160314,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:healthy",
+        "cosine": 0.32566,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Dewy is about a luminous, youthful complexion, while healthy is about general physical soundness and resistance to illness; they share an association with vitality but are different concepts."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:young",
+        "cosine": 0.305039,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Dewy describes a fresh, luminous complexion, while young describes being in one's teens or twenties; youthful skin relates to youth but the concepts differ and either can occur without the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:flourishing",
+        "cosine": 0.293536,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Dewy is about a fresh, glowing complexion, while flourishing is about overall thriving in life and purpose; both suggest vitality, but one is a physical skin appearance and the other a broad life state."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:good_looking",
+        "cosine": 0.287748,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Dewy is about a fresh, luminous, youthful complexion, while good-looking is overall attractiveness of face and figure; they overlap in skin quality but neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:dark_skinned",
+        "cosine": 0.256655,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:fair_skinned",
+        "cosine": 0.243307,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:health_conscious",
+        "cosine": 0.241812,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.215809,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:animated",
+        "cosine": 0.202562,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:red_headed",
+        "cosine": 0.196926,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:sickly",
+        "cosine": 0.125551,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.120985,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:elderly",
+        "cosine": 0.118828,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:health_negligent",
+        "cosine": 0.092162,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:languishing",
+        "cosine": 0.052358,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "dewy#1",
+        "b": "trait:flat",
+        "cosine": 0.040243,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:mobility_impaired",
+        "cosine": 0.399355,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve difficulty with walking, but doddering is age-related frailty with shaky steps and grip, while mobility impaired is a broader condition involving aids and accessibility needs, with no implication of age or shakiness."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:elderly",
+        "cosine": 0.319896,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both relate to old age, but doddering describes unsteady, frail movement while elderly simply describes being of advanced age, so neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:lethargic",
+        "cosine": 0.311579,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Doddering is age-related frailty and unsteadiness, while lethargic is sluggish, low-energy slowness; both involve slow, weak movement but differ in cause and core quality (shakiness vs. drained heaviness)."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:fragile",
+        "cosine": 0.311057,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:sickly",
+        "cosine": 0.299924,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Doddering is about shaky, unsteady movement from age-related frailty, while sickly is about a weak constitution with frequent illness; both involve physical weakness but differ in core focus (gait vs. susceptibility to illness)."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:languishing",
+        "cosine": 0.283823,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Doddering is about physical frailty and unsteadiness from age, while languishing is about aimless, hollow, stagnant living; they share only a loose sense of decline."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:slight",
+        "cosine": 0.282912,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Doddering is age-related unsteadiness and frailty in gait and grip, while slight is a light, low-muscle build; both involve physical weakness, but one is shakiness from age and the other is body frame, so neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:short",
+        "cosine": 0.254448,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:sedentary",
+        "cosine": 0.248506,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Doddering is age-related frailty and unsteady movement, while sedentary is an inactive, unexercised lifestyle; both involve poor physical condition but they are different things with different causes."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:shabby_genteel",
+        "cosine": 0.245331,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:muscular",
+        "cosine": 0.188698,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:healthy",
+        "cosine": 0.173048,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:young",
+        "cosine": 0.16457,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:athletic",
+        "cosine": 0.131783,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:tall",
+        "cosine": 0.125957,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:flourishing",
+        "cosine": 0.085986,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:energetic",
+        "cosine": 0.071993,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "doddering#1",
+        "b": "trait:resilient",
+        "cosine": 0.054938,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:persevering",
+        "cosine": 0.373525,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:sleep_deprived",
+        "cosine": 0.325585,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:burned_out",
+        "cosine": 0.306256,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:stressed",
+        "cosine": 0.293085,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:languishing",
+        "cosine": 0.258918,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:adhd",
+        "cosine": 0.245766,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:industrious",
+        "cosine": 0.240515,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Fatigueless is about physical stamina (never tiring), while industrious is about a habit of diligent, self-driven work; they relate through sustained effort but neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:in_chronic_pain",
+        "cosine": 0.238297,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:joyless",
+        "cosine": 0.226705,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:tough_hexaco",
+        "cosine": 0.218399,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:defeatist",
+        "cosine": 0.179298,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:flourishing",
+        "cosine": 0.097815,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:lazy",
+        "cosine": 0.089301,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:emotional_hexaco",
+        "cosine": -0.058047,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "fatigueless#1",
+        "b": "trait:joyful",
+        "cosine": -0.0581,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:red_headed",
+        "cosine": 0.480358,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.326105,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:dark_skinned",
+        "cosine": 0.319674,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe skin appearance, but florid is a ruddy, flushed complexion while dark-skinned is a deep brown skin tone, so they are different qualities."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:fair_skinned",
+        "cosine": 0.317771,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:blond",
+        "cosine": 0.277954,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:good_looking",
+        "cosine": 0.277509,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:brown_eyed",
+        "cosine": 0.252117,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:healthy",
+        "cosine": 0.227617,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.224874,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:gray_haired",
+        "cosine": 0.221612,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "florid#1",
+        "b": "trait:sickly",
+        "cosine": 0.179689,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:red_headed",
+        "cosine": 0.344272,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:dark_skinned",
+        "cosine": 0.324708,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:fair_skinned",
+        "cosine": 0.301101,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:blond",
+        "cosine": 0.292124,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:good_looking",
+        "cosine": 0.282884,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:fat",
+        "cosine": 0.263469,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.252947,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:gray_haired",
+        "cosine": 0.251187,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:black_haired",
+        "cosine": 0.248827,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:female",
+        "cosine": 0.225826,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:male",
+        "cosine": 0.223432,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.187865,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "greasy#1",
+        "b": "trait:thin",
+        "cosine": 0.172759,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.447063,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern an unremarkable, forgettable appearance, but the target is about deliberately ordinary looks and dress while the other is about inherently unremarkable face and figure, so each adds something the other lacks.",
+              "opus": "Both describe a forgettable, unremarkable appearance, but nondescript is about keeping one's dress and looks ordinary, while plain-looking is about innately unremarkable features. A plain face can be dressed distinctively, and a nondescript dresser need not be plain-featured."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:modest",
+        "cosine": 0.324884,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:unassuming",
+        "cosine": 0.320569,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve not standing out, but nondescript is about ordinary, forgettable appearance while unassuming is about a modest, quiet manner and speech, so they are neighbours rather than the same."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:neuter",
+        "cosine": 0.310279,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:dignified",
+        "cosine": 0.300679,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:staid",
+        "cosine": 0.295584,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:unfashionable",
+        "cosine": 0.294951,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern ordinary, unremarkable dress, but nondescript is about being plain and forgettable while unfashionable is about being out of touch with style and looking dated, which can be quite distinctive."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:reserved",
+        "cosine": 0.288612,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Nondescript is about having an ordinary, forgettable appearance, while reserved is about withholding feelings and keeping emotional distance; they concern different areas."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:understated",
+        "cosine": 0.277512,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Nondescript concerns plain, forgettable physical appearance and dress, while understated concerns restrained, modest expression; both involve low-key modesty but in different domains."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:unpretentious",
+        "cosine": 0.277419,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Nondescript concerns having a plain, forgettable appearance, while unpretentious concerns speaking plainly and avoiding airs; both involve ordinariness but in different domains and with different aims."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:good_looking",
+        "cosine": 0.214761,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:fashionable",
+        "cosine": 0.195483,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:pretentious",
+        "cosine": 0.042122,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:expressive",
+        "cosine": 0.024507,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:edgy",
+        "cosine": -0.031541,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:theatrical",
+        "cosine": -0.035363,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "nondescript#1",
+        "b": "trait:emphatic",
+        "cosine": -0.092691,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:muscular",
+        "cosine": 0.525813,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a strong physical build, but sturdy stresses hardiness and durability while muscular stresses visible muscle mass; a person can be one without the other.",
+              "opus": "Both describe a physically strong build, but sturdy stresses robustness and endurance under hard conditions, while muscular stresses visible muscle mass; each can occur without the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:male",
+        "cosine": 0.394972,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:healthy",
+        "cosine": 0.387148,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Sturdy is about a strong, robust build that withstands hard work, while healthy is about freedom from illness and a sound constitution; they are related aspects of physical well-being but distinct, and neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:taurus",
+        "cosine": 0.332351,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:masculine",
+        "cosine": 0.319213,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:strong_stomached",
+        "cosine": 0.316483,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:female",
+        "cosine": 0.30377,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:athletic",
+        "cosine": 0.284068,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern a physically capable body, but sturdy is robust, hardy build for hard work, while athletic is fitness from regular training and sport; neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:grounded",
+        "cosine": 0.281997,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Sturdy describes a physically strong, hardy build, while grounded here describes plain, earthy speech tied to everyday things; they share only a solid, earthy imagery."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:tough_hexaco",
+        "cosine": 0.279059,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:slight",
+        "cosine": 0.257366,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:sickly",
+        "cosine": 0.20756,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:feminine",
+        "cosine": 0.155979,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:emotional_hexaco",
+        "cosine": 0.084733,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:sedentary",
+        "cosine": 0.073654,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:ethereal",
+        "cosine": 0.058225,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "sturdy#1",
+        "b": "trait:squeamish",
+        "cosine": 0.017752,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:squeamish",
+        "cosine": 0.353357,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:thin_skinned",
+        "cosine": 0.296565,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:self_conscious",
+        "cosine": 0.266831,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:traumatized",
+        "cosine": 0.230209,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:restless",
+        "cosine": 0.223642,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:slight",
+        "cosine": 0.219777,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:physical_touch",
+        "cosine": 0.218016,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:body_insecure",
+        "cosine": 0.211352,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:flirty",
+        "cosine": 0.209633,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:shame_prone",
+        "cosine": 0.202652,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:strong_stomached",
+        "cosine": 0.173928,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:thick_skinned",
+        "cosine": 0.152305,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:guilt_prone",
+        "cosine": 0.137183,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:unselfconscious",
+        "cosine": 0.101282,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:punishment_fearing",
+        "cosine": 0.098347,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:muscular",
+        "cosine": 0.076507,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ticklish#1",
+        "b": "trait:body_confident",
+        "cosine": 0.062678,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.543909,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 1,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern unattractive appearance, but the target is about a self-view spoken of matter-of-factly, while the other describes objectively unremarkable looks; they overlap yet neither implies the other.",
+              "opus": "The target is a matter-of-fact attitude toward one's own looks as unattractive, while the other is actually having unremarkable looks, so they are neighbouring concepts (self-view versus objective appearance) rather than the same one."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:body_insecure",
+        "cosine": 0.416577,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:good_looking",
+        "cosine": 0.317542,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:self_conscious",
+        "cosine": 0.273269,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:dull",
+        "cosine": 0.27204,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:self_deprecating",
+        "cosine": 0.267487,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both can involve talking about one's own looks negatively, but the target is a matter-of-fact self-view of being unattractive, while self-deprecating is a humorous habit of belittling oneself across mistakes and looks."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:modest",
+        "cosine": 0.266875,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve an unflattering and unpretentious self-view, but one is about regarding one's looks as plain and the other about downplaying achievements and importance in general."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:unpretentious",
+        "cosine": 0.252479,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Target is about viewing one's own looks as plain and saying so matter-of-factly; other is about speaking in plain, unaffected style without airs, so they differ in subject despite a shared plainspoken tone."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:self_effacing",
+        "cosine": 0.250898,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "One is a matter-of-fact view that one's own looks are plain, the other is a habit of avoiding attention and deflecting focus; they are about different things and neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:body_confident",
+        "cosine": 0.245953,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Target is judging one's appearance as unattractive and saying so plainly, while body-confident is comfort with one's body; they are different attitudes, though a person could hold both (accepting plainness without distress), so they are neighbours rather than same or opposite."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:unselfconscious",
+        "cosine": 0.211658,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "One is a matter-of-fact belief that one's own looks are plain, while the other is a general lack of awareness of being watched; they concern different things and neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "expanded"
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:self_aggrandizing",
+        "cosine": 0.131325,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:pretentious",
+        "cosine": 0.112062,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:attention_seeking",
+        "cosine": 0.097983,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "ugly#1",
+        "b": "trait:charismatic",
+        "cosine": -0.033137,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.54821,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern physical appearance that isn't appealing, but 'unattractive' means actively unappealing looks while 'plain-looking' means merely unremarkable and forgettable, so each can hold without the other.",
+              "opus": "Both describe a lack of good looks, but plain means unremarkable and forgettable rather than actively unappealing, and an unattractive face can be striking rather than ordinary."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:good_looking",
+        "cosine": 0.419188,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:body_insecure",
+        "cosine": 0.319903,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:unpopular",
+        "cosine": 0.298789,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:unfashionable",
+        "cosine": 0.288461,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:dull",
+        "cosine": 0.279723,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:fat",
+        "cosine": 0.256206,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:unhappily_partnered",
+        "cosine": 0.254291,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:male",
+        "cosine": 0.253764,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:female",
+        "cosine": 0.223557,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:thin",
+        "cosine": 0.193905,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:body_confident",
+        "cosine": 0.126475,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:fashionable",
+        "cosine": 0.111479,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:popular",
+        "cosine": 0.035706,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:charismatic",
+        "cosine": 0.009814,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unattractive#1",
+        "b": "trait:happily_partnered",
+        "cosine": 0.002614,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:slight",
+        "cosine": 0.455513,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve physical weakness, but 'unhardy' is about frailty and low endurance against strain and rough conditions, while 'slight' is about a light, thin build with little muscle; each can exist without the other.",
+              "opus": "Both concern physical weakness, but unhardy is about lacking stamina and resilience while slight is about a light, low-muscle build; a slight person can be hardy and a frail one need not be slight."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:fragile",
+        "cosine": 0.432591,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Unhardy is physical frailty and low stamina, while the other trait here is emotional/psychological brittleness under setbacks and criticism; they share a theme of low resilience but differ in domain."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:sickly",
+        "cosine": 0.419016,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve a weak body, but unhardy is about frailty and low endurance under strain while sickly is about frequent illness and poor health; neither implies the other.",
+              "opus": "Both describe a weak physical constitution, but unhardy centres on frailty and low stamina while sickly centres on proneness to illness, and one can occur without the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:thin",
+        "cosine": 0.355082,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:lethargic",
+        "cosine": 0.342384,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve low physical energy and tiring quickly, but unhardy is frailty and low resilience to rough conditions, while lethargic is sluggish slowness and drained energy; each adds something the other lacks.",
+              "opus": "Both involve tiring quickly, but unhardy is about bodily frailty and low resilience, while lethargic is about sluggish, slow energy, and each can occur without the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:female",
+        "cosine": 0.310508,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:fat",
+        "cosine": 0.309145,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:muscular",
+        "cosine": 0.282369,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:athletic",
+        "cosine": 0.267995,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:sedentary",
+        "cosine": 0.265069,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Unhardy is innate physical frailty and low tolerance for strain, while sedentary is an inactive lifestyle that leads to poor fitness; they share the outcome of tiring easily but differ in cause and focus."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:male",
+        "cosine": 0.210875,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:healthy",
+        "cosine": 0.203288,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:resilient",
+        "cosine": 0.141964,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unhardy#1",
+        "b": "trait:energetic",
+        "cosine": 0.130657,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:thin",
+        "cosine": 0.445346,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 2,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a slim body, but unvoluptuous is about lacking curves and a straight figure, while thin is about low body fat; neither implies the other (a thin person can be curvy, a straight-figured person can carry fat).",
+              "opus": "Both describe a slender body, but unvoluptuous is about lacking curves while thin is about low body fat, so neither fully implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:slight",
+        "cosine": 0.431132,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 2,
+            "opus": 1,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a slim, narrow build, but 'unvoluptuous' is about lacking curves while 'slight' is about a light frame with little muscle and strength, so they overlap without implying each other.",
+              "opus": "Both describe a lean-looking build, but unvoluptuous is about a straight, curveless shape while slight is about a small frame and little muscle or strength, so they are different body attributes."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.358279,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:straight",
+        "cosine": 0.318482,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:good_looking",
+        "cosine": 0.268141,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:female",
+        "cosine": 0.262518,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:neuter",
+        "cosine": 0.243715,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:flat",
+        "cosine": 0.240282,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:fat",
+        "cosine": 0.233322,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:body_insecure",
+        "cosine": 0.22962,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:male",
+        "cosine": 0.220537,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:body_confident",
+        "cosine": 0.184708,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:muscular",
+        "cosine": 0.18039,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:gay",
+        "cosine": 0.136905,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "unvoluptuous#1",
+        "b": "trait:animated",
+        "cosine": -0.00448,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:fat",
+        "cosine": 0.393656,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both involve a fuller body, but voluptuous is about curvaceous sensual attractiveness while fat is about carrying a lot of body fat, with no attractiveness implied; they overlap only loosely."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:female",
+        "cosine": 0.377936,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:good_looking",
+        "cosine": 0.313009,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern attractive appearance, but voluptuous is specifically a full, curvaceous, sensual body, while good-looking is general facial and figure attractiveness (even features, clear skin) without implying curves or sensuality."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:body_confident",
+        "cosine": 0.288508,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Voluptuous describes a curvaceous, sensually attractive physical appearance, while body-confident describes a person's comfortable attitude toward their own body; one is about how the body looks, the other about how the person feels about it."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:thin",
+        "cosine": 0.272062,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.27137,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:muscular",
+        "cosine": 0.265914,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe a notable physical build, but voluptuous is about a curvaceous, sensually attractive figure while muscular is about heavy muscle and strength, so they are neighbours, not the same."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:male",
+        "cosine": 0.244306,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:feminine",
+        "cosine": 0.242663,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:slight",
+        "cosine": 0.201738,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": "opposite",
+            "opus": null,
+            "verdict": "opposite",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Voluptuous means a full, curvaceous, sensually attractive body, while slight means a light, narrow, weak frame; they sit at opposite ends of body build, though slight is about frailty rather than lack of attractiveness."
+            },
+            "outcome": "opposite"
+          }
+        },
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:body_insecure",
+        "cosine": 0.196492,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "voluptuous#1",
+        "b": "trait:masculine",
+        "cosine": 0.10802,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      }
+    ],
+    "cliques": [],
+    "singletons": [
+      "big#1",
+      "bristly#1",
+      "confusable#1",
+      "dewy#1",
+      "doddering#1",
+      "fatigueless#1",
+      "florid#1",
+      "greasy#1",
+      "nondescript#1",
+      "sturdy#1",
+      "ticklish#1",
+      "ugly#1",
+      "unattractive#1",
+      "unhardy#1",
+      "unvoluptuous#1",
+      "voluptuous#1"
+    ],
+    "clique_links": [],
+    "proposed_groups": [],
+    "proposed_links": [],
+    "stats": {
+      "n_candidates": 16,
+      "by_batch": {
+        "physical_tda_1": 16
+      },
+      "by_generator": {
+        "censuses": 16
+      },
+      "by_decision": {
+        "new": 16
+      },
+      "n_covered_shown": 18,
+      "n_corpus_nodes": 101,
+      "n_queue_nodes": 0,
+      "candidate_edges": {
+        "n": 61,
+        "by_relation": {
+          "opposed": 7,
+          "similar": 8,
+          "unrelated": 46
+        },
+        "by_overlap": {
+          "first": 8,
+          "not_similar": 53
+        },
+        "answers": {
+          "opposed": 12,
+          "similar": 12,
+          "unrelated": 96
+        },
+        "one_sided": 2
+      },
+      "overlap": {
+        "pairs_first_direction": 8,
+        "pairs_second_direction": 0,
+        "sonnet_readings": 8,
+        "opus_readings": 1,
+        "four_first": 0,
+        "proposed_first": 0,
+        "four_edges": 0,
+        "similar_below_floor": 0,
+        "unparsed": 0,
+        "stalled": 0
+      },
+      "agreement_on_fours": {
+        "directions_read_4": 0,
+        "by_readings": {
+          "sonnet 3, opus 2": 1
+        }
+      },
+      "corpus_edges": {
+        "n": 236,
+        "by_relation": {
+          "opposed": 47,
+          "similar": 30,
+          "unrelated": 159
+        },
+        "with_readings": 47
+      },
+      "cliques": {
+        "n": 0,
+        "by_size": {},
+        "largest": 0,
+        "candidates_in_cliques": 0,
+        "candidates_in_several": 0
+      },
+      "singletons": 16,
+      "clique_links": 0,
+      "proposed_groups": {
+        "n": 0,
+        "n_edges": 0,
+        "by_size": {},
+        "largest": 0,
+        "candidates_in_proposed": 0,
+        "candidates_in_proposed_only": 0,
+        "candidates_in_several": 0,
+        "links": 0
+      },
+      "ungrouped": 16,
+      "skipped": {},
+      "no_vector": [],
+      "selected_by_batch": {
+        "physical_tda_1": {
+          "covered": 18,
+          "new": 16
+        }
+      }
+    },
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 15054,
+          "completion_tokens": 8543,
+          "cost_usd": 0.0029,
+          "n_calls": 16
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 168,
+          "completion_tokens": 205,
+          "cost_usd": 0.0024,
+          "n_calls": 1
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 1404,
+          "completion_tokens": 670,
+          "cost_usd": 0.0048,
+          "n_calls": 8
+        }
+      },
+      "total_cost_usd": 0.01,
+      "total_prompt_tokens": 16626,
+      "total_completion_tokens": 9418,
+      "n_calls": 25
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_tda_1 --from-batches physical_tda_1 --proposed-cut-off 3 --transport batches --budget-usd 2",
+      "git_sha": "851de53+dirty",
+      "author": "Roger Dearnaley",
+      "title": "review_graph build review_physical_tda_1"
+    },
+    "produced_at": "2026-10-10T17:19:18+00:00",
+    "inputs": [
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-10T17:09:31+00:00@115319163",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T17:09:31+00:00",
+        "extras": {
+          "from_batches": "physical_tda_1"
+        }
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "m3_runs",
+        "path": "data/candidates/novelty/physical_tda_1/run.json",
+        "fingerprint": "v1:multi:bfbfc7c769a8",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T17:09:31+00:00",
+        "extras": {
+          "from_batches": "physical_tda_1"
+        },
+        "member_paths": [
+          "data/candidates/novelty/physical_tda_1/run.json"
+        ]
+      }
+    ],
+    "inputs_sha256": "ec6899329f1bf54c512a937fb05bce59d811bffdb094020123477f6da9b24139"
+  }
+}

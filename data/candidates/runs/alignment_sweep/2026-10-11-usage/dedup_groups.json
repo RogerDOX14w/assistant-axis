@@ -1,0 +1,90 @@
+{
+  "result": {
+    "threshold": 0.8117,
+    "embedding_model": "text-embedding-3-large",
+    "n_groups": 4,
+    "n_members": 4,
+    "n_merged": 0,
+    "groups": [
+      {
+        "rep": "oup001-1a",
+        "members": [
+          "oup001-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-1b",
+        "members": [
+          "oup001-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-2a",
+        "members": [
+          "oup001-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-2b",
+        "members": [
+          "oup001-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      }
+    ],
+    "partner_hints": {
+      "oup001-1a": "harms others",
+      "oup001-1b": "protective of people",
+      "oup001-2a": "manipulative",
+      "oup001-2b": "honest and respectful"
+    },
+    "threshold_source": "--threshold",
+    "at": "2026-10-11T21:32:53+00:00"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-11-usage --threshold 0.8117 --budget-usd 1",
+      "git_sha": "eb9ef29+dirty",
+      "author": "Roger Dearnaley",
+      "title": "alignment sweep: within-sweep dedup groups"
+    },
+    "produced_at": "2026-10-11T21:32:53+00:00",
+    "inputs": [
+      {
+        "dep_key": "extraction",
+        "path": "data/candidates/runs/alignment_sweep/2026-10-11-usage/extraction.jsonl",
+        "fingerprint": "v1:2026-10-11T21:32:50+00:00@4271",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T21:32:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "dedup_labeled_pairs",
+        "path": "data/candidates/alignment_sweep/dedup_labeled_pairs.json",
+        "fingerprint": "v1:2026-10-10T19:53:00+00:00@25073",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T19:53:00+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "0fe5091ad81df4267491840bd5c0ed68f7dc85dfd26ed8c171b3c190337130af"
+  }
+}

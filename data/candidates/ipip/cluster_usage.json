@@ -1,0 +1,22 @@
+{
+  "n_calls": 118,
+  "per_model": {
+    "embeddinggemma-300m": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0,
+      "model": "embeddinggemma-300m",
+      "n_calls": 104,
+      "prompt_tokens": 60021
+    },
+    "text-embedding-3-large": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0043,
+      "model": "text-embedding-3-large",
+      "n_calls": 14,
+      "prompt_tokens": 32880
+    }
+  },
+  "total_completion_tokens": 0,
+  "total_cost_usd": 0.0043,
+  "total_prompt_tokens": 92901
+}

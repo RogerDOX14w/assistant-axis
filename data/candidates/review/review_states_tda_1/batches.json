@@ -1,0 +1,120 @@
+{
+  "batch_id": "review_states_tda_1",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01YDDN2RP3gQnPj4Hk2MsJFh",
+        "custom_ids": [
+          "rel-h-brooding_1-6efff2267b71",
+          "rel-h-busy_1-73a0c0a24b9d",
+          "rel-h-cursed_1-238b867c6ae6",
+          "rel-h-dejected_1-381bbd826bcc",
+          "rel-h-diminishing_1-c08098106261",
+          "rel-h-disappointed_1-7a8b7e6030ab",
+          "rel-h-downtrodden_1-89379ceeeb78",
+          "rel-h-emasculated_1-65ef1be83968",
+          "rel-h-glum_1-d7f91dedf341",
+          "rel-h-grouchy_1-ec912bca17c4",
+          "rel-h-grumpy_1-cef9677d99c7",
+          "rel-h-guiltless_1-39957949d722",
+          "rel-h-indignant_1-8935f3e0cb92",
+          "rel-h-mopey_1-67627ce1a9d5",
+          "rel-h-pouty_1-817ea05f9917",
+          "rel-h-sheepish_1-80a7ff68a97a",
+          "rel-h-sleepy_1-0d2b033b8555",
+          "rel-h-star_crossed_1-07b47af8b458",
+          "rel-h-wistful_1-146c3127a243"
+        ],
+        "n_requests": 19,
+        "bytes": 57563,
+        "estimate_usd": 0.002714,
+        "submitted_at": "2026-10-10T20:09:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:12:55+00:00"
+      }
+    ],
+    "r2_relation_unsure": [
+      {
+        "id": "msgbatch_01J2vWZXcNdHWfmmqUBSoTUY",
+        "custom_ids": [
+          "rel-s-dejected_1-d43456721dec"
+        ],
+        "n_requests": 1,
+        "bytes": 2038,
+        "estimate_usd": 0.000996,
+        "submitted_at": "2026-10-10T20:12:55+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:14:58+00:00"
+      }
+    ],
+    "ov1_sonnet": [
+      {
+        "id": "msgbatch_01Pw1rnmyMmxjFCJgpbtF1je",
+        "custom_ids": [
+          "ove-s-brooding_1-7b3f1afd02c4",
+          "ove-s-dejected_1-16312053a9be",
+          "ove-s-dejected_1-4b575038c906",
+          "ove-s-diminishing_1-b7d1ed0ddb68",
+          "ove-s-disappointed_1-f355adcbdae2",
+          "ove-s-downtrodden_1-9ed4e3cd09ee",
+          "ove-s-glum_1-e3b58c013662",
+          "ove-s-grouchy_1-258076b069d3",
+          "ove-s-grouchy_1-6fa52998d468",
+          "ove-s-grumpy_1-99ecc0a8a860",
+          "ove-s-star_crossed_1-4f598cfa84bd"
+        ],
+        "n_requests": 11,
+        "bytes": 28075,
+        "estimate_usd": 0.006699,
+        "submitted_at": "2026-10-10T20:14:58+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:21:05+00:00"
+      }
+    ],
+    "ov1_opus": [
+      {
+        "id": "msgbatch_019BqMMPYqZGM5Z45pArg7Rw",
+        "custom_ids": [
+          "ove-o-dejected_1-fca9a58727b9",
+          "ove-o-grouchy_1-e8bdddf03fe8"
+        ],
+        "n_requests": 2,
+        "bytes": 5078,
+        "estimate_usd": 0.00312,
+        "submitted_at": "2026-10-10T20:21:05+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:23:38+00:00"
+      }
+    ],
+    "ov2_sonnet": [
+      {
+        "id": "msgbatch_011D7mgodAugEHkc4pQKfbDs",
+        "custom_ids": [
+          "ove-s-mopey_1-592dd9e5f105",
+          "ove-s-grumpy_1-ad4c519c5548"
+        ],
+        "n_requests": 2,
+        "bytes": 5078,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-10T20:23:39+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:28:44+00:00"
+      }
+    ],
+    "ov2_opus": [
+      {
+        "id": "msgbatch_01SfV6nygyBs3iGawCrKioG9",
+        "custom_ids": [
+          "ove-o-mopey_1-6d8b5311f0d7",
+          "ove-o-grumpy_1-5cdc0ae50f18"
+        ],
+        "n_requests": 2,
+        "bytes": 5074,
+        "estimate_usd": 0.00312,
+        "submitted_at": "2026-10-10T20:28:44+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-10T20:31:17+00:00"
+      }
+    ]
+  }
+}
