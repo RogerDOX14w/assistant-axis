@@ -36,7 +36,9 @@ GRANULARITY_READOUT_MD = IPIP_DIR / "granularity_readout.md"
 EXTERNAL_DIR = DATA_EXTERNAL / "ipip"
 DOWNLOAD_MANIFEST_NAME = "DOWNLOAD_MANIFEST.json"
 #: The two granularities the pilot compares (plan § 1: ~350 and ~150 clusters).
-GRANULARITIES: tuple[int, ...] = (350, 150)
+#: The ~600 cut was added 2026-10-11 (Roger: "try 600") after the QUESTIONS 50 readout showed ~350 better than ~150
+#: on every measured signal and its largest clusters still holding several traits.
+GRANULARITIES: tuple[int, ...] = (600, 350, 150)
 
 
 def clusters_path(granularity: int, root: Path | None = None) -> Path:
