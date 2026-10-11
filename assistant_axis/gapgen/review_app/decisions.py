@@ -23,9 +23,14 @@ Actions (a request names the action and its fields; the log stores the request a
 * ``merge_in`` (``group``, ``keys``): a singleton or a merged group's members; a covered candidate may be pulled in by
   hand (decision 9); handled terms and members already in are left out, and the event records what was added.
 * ``nominate`` (``group``, ``key``): the suggested label; not a covered or handled member.
-* ``resolve`` (``group``, ``resolution``, ``note``?): ``promote`` (the nominee; a group with one unhandled term
-  nominates it by default), ``merge_into:<trait:stem | queue:stem>``, ``park``, ``reject``, ``defer``.  Only an open
-  (accepted) group resolves.  The event records the members it resolves: those not already handled.
+* ``resolve`` (``group``, ``resolution``, ``note``?, ``rename``?): ``promote`` (the nominee; a group with one
+  unhandled term nominates it by default), ``merge_into:<trait:stem | queue:stem>``, ``park``, ``reject``,
+  ``defer``.  Only an open (accepted) group resolves.  The event records the members it resolves: those not already
+  handled.  ``rename``: the label this decision settles on reads awkwardly and wants a second look (QUESTIONS 71,
+  Roger 2026-10-11, the human net beside instruction generation's label-blind call); the ``note`` carries the
+  freeform reason.  The flag rides on the **decision**, never on the trait file: the registry is a history, so a
+  flag there never needs cleaning up, while a trait-file tag carries provenance and class and would leak into any
+  analysis grouping by tag.
 * ``start_antonym`` (``of``, ``keys``): a new open group meant as the antonym of a resolved group that has none.
 * ``undo`` (``seq``?): reverses the last effective event (only the last; undo again to walk back).
 
@@ -185,6 +190,7 @@ class Group:
     resolved_at: Optional[str] = None
     resolved_by: Optional[str] = None
     note: Optional[str] = None
+    rename: bool = False                # the label wants a second look (the note says why)
     antonym_of: Optional[str] = None
 
     @property
@@ -417,7 +423,8 @@ class ReviewState:
                 nominated = terms[0]
         note = req.get("note")
         return {"group": g.id, "action": "resolve", "members": members, "nominated": nominated,
-                "resolution": resolution, "note": str(note) if note else None}
+                "resolution": resolution, "note": str(note) if note else None,
+                "rename": bool(req.get("rename"))}
 
     def _check_start_antonym(self, req: Mapping) -> dict:
         of = req.get("of")
@@ -511,6 +518,7 @@ class ReviewState:
         g.status, g.resolution, g.resolved_members = "resolved", ev["resolution"], members
         g.nominated = ev.get("nominated") if kind == "promote" else g.nominated
         g.note, g.resolved_seq, g.resolved_at, g.resolved_by = ev.get("note"), ev.get("seq"), ev.get("at"), ev.get("by")
+        g.rename = bool(ev.get("rename"))     # an event logged before the flag existed carries none: False
         for m in members:
             self.handled[m] = g.id
 
@@ -722,6 +730,7 @@ class ReviewState:
         card = {"id": g.id, "status": g.status, "source": g.source, "via": g.via, "opened_seq": g.opened_seq,
                 "members": [self.member_card(m) for m in g.members], "nominated": g.nominated,
                 "resolution": g.resolution, "resolved_members": list(g.resolved_members), "note": g.note,
+                "rename": g.rename,
                 "antonym_of": g.antonym_of, "antonym_groups": self.antonym_groups(g.id),
                 "neighbour_groups": others}
         if g.resolution and g.target:
@@ -922,6 +931,10 @@ def desired_blocks(state: ReviewState, batch_id: str) -> dict[str, dict]:
     for g in sorted((g for g in state.groups.values() if g.status == "resolved"), key=lambda g: g.resolved_seq or 0):
         base = {"by": g.resolved_by, "at": g.resolved_at, "note": g.note, "group": list(g.resolved_members),
                 "review_batch": batch_id, "review_group": g.id}
+        # the rename flag is written only when it is set, so that a row applied before the flag existed stays
+        # byte-identical (``apply`` is idempotent by comparing the whole block)
+        if g.rename:
+            base["rename"] = True
         if g.antonym_of:
             base["antonym_of"] = g.antonym_of
         ants = state.antonym_groups(g.id)
@@ -938,6 +951,33 @@ def desired_blocks(state: ReviewState, batch_id: str) -> dict[str, dict]:
     return out
 
 
+def rename_worklist(state: ReviewState, *, rows: Optional[Mapping[str, Mapping]] = None,
+                    stems: Optional[Mapping[str, str]] = None) -> list[dict]:
+    """The resolved groups flagged for a rename, one row each, oldest decision first: the worklist the promotion
+    report prints (QUESTIONS 71's human net).  Each row names the label the decision settled on -- the promoted
+    nominee, or the trait or queue entry it was merged into, else the first member resolved -- its seed-queue
+    ``stem`` where it has one, and the ``note`` that says what is awkward about it.  ``rows``: the folded registry
+    (for a ``seed_queue_stem`` written by an earlier apply); ``stems``: stems promoted by this run."""
+    rows, stems = dict(rows or {}), dict(stems or {})
+    out = []
+    for g in sorted((g for g in state.groups.values() if g.status == "resolved" and g.rename),
+                    key=lambda g: g.resolved_seq or 0):
+        if g.kind == "promote":
+            key = g.nominated
+        elif g.kind == "merge_into":
+            key = g.target
+        else:
+            key = g.resolved_members[0] if g.resolved_members else None
+        stem = None
+        if key:
+            stem = stems.get(key) or (rows.get(key) or {}).get("seed_queue_stem")
+            if stem is None and key.startswith(("trait:", "queue:")):
+                stem = key.split(":", 1)[1]
+        out.append({"group": g.id, "resolution": g.resolution, "key": key,
+                    "label": state.label(key) if key else None, "stem": stem, "note": g.note})
+    return out
+
+
 @dataclass
 class ApplyReport:
     dry_run: bool
@@ -949,6 +989,7 @@ class ApplyReport:
     already_promoted: dict = field(default_factory=dict)  # nominee -> its seed_queue_stem
     conflicts: list = field(default_factory=list)
     missing: list = field(default_factory=list)          # keys the registry does not have
+    rename_flagged: list = field(default_factory=list)   # :func:`rename_worklist`: labels Roger flagged in review
 
     @property
     def changed(self) -> bool:
@@ -975,8 +1016,15 @@ class ApplyReport:
             lines.append(f"CONFLICT: {c}")
         for key in self.missing:
             lines.append(f"MISSING from the registry: {key}")
+        if self.rename_flagged:
+            lines.append(f"Flagged for a rename in review ({len(self.rename_flagged)}): instruction generation "
+                         "makes the label-blind naming call, and generate_antonyms.py --name-pos re-asks it")
+            for x in self.rename_flagged:
+                lines.append(f"  RENAME? {x['stem'] or x['key']} ({x['label']}, {x['resolution']}, group "
+                             f"{x['group']})" + (f": {x['note']}" if x.get("note") else ""))
         lines.append(f"{len(self.review_writes)} review blocks to write, {len(self.resets)} to reset, "
                      f"{self.unchanged} unchanged, {len(self.promotions)} promotions"
+                     + (f", {len(self.rename_flagged)} flagged for a rename" if self.rename_flagged else "")
                      + ("" if self.changed else "; nothing to write"))
         return "\n".join(lines)
 
@@ -985,7 +1033,7 @@ class ApplyReport:
                 "resets": list(self.resets), "promoted": [p["key"] for p in self.promotions],
                 "promotions": list(self.promotions), "refused": dict(self.refused),
                 "already_promoted": dict(self.already_promoted), "conflicts": list(self.conflicts),
-                "missing": list(self.missing)}
+                "missing": list(self.missing), "rename_flagged": list(self.rename_flagged)}
 
 
 def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, queue_path: Path, data_dir: Path,
@@ -1004,6 +1052,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
       (the other resolved members' labels, the only addition to the queue format); the queue is saved once and the
       rows get ``seed_queue_stem``, as ``gap_registry.py promote`` does;
     * idempotent: a block already equal is not written and a promoted nominee is not promoted again;
+    * the report carries :func:`rename_worklist`, the labels flagged for a rename in review, which the promotion
+      report prints as a worklist (informational, so it is filled on a dry run too);
     * ``dry_run``: the same computation on a copy of the queue; nothing is written.
     A real run that changes something appends a record to ``<review_dir>/applied.jsonl``."""
     import data_analysis.seed_entities as se
@@ -1047,6 +1097,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
         also = [(rows.get(m) or {}).get("label") or state.label(m) for m in g.resolved_members if m != nom]
         entry["also_proposed"] = also
         rep.promotions.append({"group": g.id, "key": nom, "stem": entry["stem"], "also_proposed": also})
+    # the worklist of labels flagged in review (QUESTIONS 71); informational, so it is reported on a dry run too
+    rep.rename_flagged = rename_worklist(state, rows=rows, stems={p["key"]: p["stem"] for p in rep.promotions})
     if dry_run or not rep.changed:
         return rep
     updates = {k: {"review": b} for k, b in rep.review_writes.items()}

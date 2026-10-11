@@ -13,7 +13,9 @@ Routes:
 * ``GET /api/term/{key}``: the ego view of one term (everything one edge away).
 * ``GET /api/find?q=``: terms, corpus traits and queue entries by label (``/`` on the page).
 * ``POST /api/action``: one event (``{"action": ..., ...}``, :mod:`.decisions`); returns the event, the group's card
-  and the counts.  A refusal is a 409 with the reason; nothing is logged.
+  and the counts.  A refusal is a 409 with the reason; nothing is logged.  A ``resolve`` carries ``note`` and
+  ``rename`` (the page's Add note and Flag for rename buttons): the flag says the label this decision settles on
+  wants a second look, and ``apply`` prints the flagged labels as a worklist.
 * ``GET /api/status``: groups resolved and open, decisions by type, time per decision.
 * ``GET /files/traits/{stem}.json``: a corpus trait's file, read-only; ``GET /files/queue/{stem}``: a seed-queue
   entry.  Nothing else of the repository is served, and nothing is written but ``decisions.jsonl``.

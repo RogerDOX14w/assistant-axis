@@ -20,7 +20,7 @@ Keys on the page: ``j`` / ``k`` next and previous in the focused list; ``Tab`` /
 members, neighbours, corpus traits and opposed terms; ``g`` (or ``Enter`` on a proposed group) accept the proposed
 group; ``x`` drop the highlighted member; ``m`` merge in the highlighted neighbour (with its merged group); ``n``
 nominate the highlighted member; ``Enter`` resolve with promote; ``c`` resolve as merge into the highlighted corpus
-trait (or queue entry); ``p`` park; ``r`` reject; ``d`` defer; ``;`` a note for the next resolution; ``a`` start the
+trait (or queue entry); ``p`` park; ``r`` reject; ``d`` defer; ``;`` a note for the next resolution; ``f`` flag the group for a better name; ``a`` start the
 antonym group from the highlighted opposed term; ``u`` undo; ``/`` find a term; ``Space`` or ``.`` the next group
 in the queue; ``o`` the next queue order; ``?`` the key list.
 

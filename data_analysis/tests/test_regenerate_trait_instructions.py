@@ -1519,3 +1519,175 @@ class TestRefusalInBatch:
         assert "REFUSED arrogant: (no text; stop_reason refusal)" in err
         assert "1 processed (1 from the batch, 0 in real time), 0 skipped, 2 refused, 0 errors" in err
         assert json.loads(b.usage_json.read_text())["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 3
+
+
+# ---------------------------------------------------------------------------
+# The label-blind naming check (QUESTIONS 71, Roger 2026-10-11): the mechanical
+# net for an awkward multiword label.  Multiword labels are accepted by policy,
+# so the check surfaces a suggestion and renames nothing.
+# ---------------------------------------------------------------------------
+
+from data_analysis import generate_antonyms as GA  # noqa: E402
+
+THREE_WORD_TRAIT = dict(SAMPLE_TRAIT, positive_label="kind to animals", negative_label="cruel to animals")
+
+
+def _name_reply(name="animal-loving", reasoning="All five describe looking after animals.", tokens=(300, 40)):
+    """The blind naming call's reply, as generate_antonyms.name_pos_one reads it."""
+    body = json.dumps({"reasoning": reasoning, "positive_name": name})
+    return SimpleNamespace(content=[SimpleNamespace(type="text", text=body)], stop_reason="end_turn",
+                           usage=SimpleNamespace(input_tokens=tokens[0], output_tokens=tokens[1]))
+
+
+@pytest.fixture
+def phrase_trait_file(tmp_path: Path) -> Path:
+    p = tmp_path / "kind_to_animals.json"
+    p.write_text(json.dumps(THREE_WORD_TRAIT, indent=2))
+    return p
+
+
+class TestNameCheckTrigger:
+    def test_three_or_more_words_fires_it_and_two_does_not(self):
+        assert module.NAME_CHECK_MIN_WORDS == 3
+        assert module.name_check_wanted("kind to animals")
+        assert module.name_check_wanted("external locus of control")
+        assert module.name_check_wanted("good even when unwatched")
+        assert not module.name_check_wanted("systems thinker")          # two words: the phrase stands
+        assert not module.name_check_wanted("arrogant")
+        assert not module.name_check_wanted(None) and not module.name_check_wanted("")
+
+    def test_a_parenthesised_standard_is_not_part_of_the_phrase(self):
+        # 85 corpus labels end in a standard; `openness (Big Five)` is a one-word label, not a three-word one
+        assert not module.name_check_wanted("openness (Big Five)")
+        assert not module.name_check_wanted("secular-rational (Inglehart-Welzel)")
+        assert module.label_phrase_words("careless (HEXACO)") == ["careless"]
+        assert module.label_phrase_words("stream-of-consciousness") == ["stream-of-consciousness"]
+        assert module.label_phrase_words("kind to animals") == ["kind", "to", "animals"]
+
+
+class TestNameCheckInRegeneration:
+    def run(self, client, path, name_checks, *, usage=None, model="test-model", dry_run=False):
+        return asyncio.run(regenerate_one(
+            client, path, n_variants=5, n_questions=40, instructions_only=False, model=model,
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=dry_run,
+            usage=usage, name_checks=name_checks))
+
+    def test_a_three_word_label_gets_the_blind_call_and_its_record(self, phrase_trait_file, v2_style):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_make_response(json.dumps(FAKE_ROGER_RESPONSE)),
+                                                        _name_reply()])
+        checks = []
+        status = self.run(client, phrase_trait_file, checks)
+        assert status.startswith("OK") and "naming check: 'animal-loving'" in status
+        assert client.messages.create.call_count == 2
+        [rec] = checks
+        assert rec["stem"] == "kind_to_animals" and rec["positive_label"] == "kind to animals"
+        assert rec["positive_name"] == "animal-loving" and rec["n_label_words"] == 3
+        assert rec["phase"] == "instruction generation" and rec["model"] == GA.MODEL
+        assert rec["instructions"] == FAKE_INSTRUCTIONS     # the set the blind call read, which a reroll would replace
+        assert rec["checked_at"] and rec["positive_name_reasoning"].startswith("All five")
+
+    def test_the_call_is_blind_to_the_label_and_reuses_the_antonym_script_s_prompt(self, phrase_trait_file, v2_style):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_make_response(json.dumps(FAKE_ROGER_RESPONSE)),
+                                                        _name_reply()])
+        self.run(client, phrase_trait_file, [])
+        sent = client.messages.create.call_args_list[-1].kwargs
+        assert sent["system"] == GA.POS_NAME_SYSTEM_PROMPT           # one prompt, not a second copy of it
+        assert sent["messages"][0]["content"].startswith("Instructions:")
+        assert "kind to animals" not in json.dumps(sent) and "cruel to animals" not in json.dumps(sent)
+
+    def test_a_two_word_label_does_not_fire_it(self, trait_file, v2_style):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_make_response(json.dumps(FAKE_ROGER_RESPONSE)))
+        checks = []
+        status = self.run(client, trait_file, checks)                 # "arrogant"
+        assert status.startswith("OK") and "naming check" not in status
+        assert checks == [] and client.messages.create.call_count == 1
+
+    def test_no_list_means_no_check_and_a_dry_run_makes_no_call(self, phrase_trait_file, v2_style):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_make_response(json.dumps(FAKE_ROGER_RESPONSE)))
+        assert self.run(client, phrase_trait_file, None).startswith("OK")
+        assert client.messages.create.call_count == 1                 # name_checks=None: the old call path
+        checks = []
+        assert self.run(client, phrase_trait_file, checks, dry_run=True).startswith("DRY-RUN")
+        assert checks == [] and client.messages.create.call_count == 1
+
+    def test_the_check_is_charged_to_the_run_s_usage_tracker(self, phrase_trait_file, v2_style):
+        """AGENT_NOTES "Token usage logging is mandatory on batched LLM call sites": the extra call lands in the
+        same cumulative usage.json as the generation."""
+        gen = _make_response(json.dumps(FAKE_ROGER_RESPONSE))
+        gen.usage = MagicMock(input_tokens=1200, output_tokens=3400)
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[gen, _name_reply(tokens=(300, 40))])
+        tracker = MultiModelUsage()
+        checks = []
+        # a generation model that is not the naming call's, so the two show up apart in the record
+        self.run(client, phrase_trait_file, checks, usage=tracker, model="claude-haiku-4-5")
+        assert len(checks) == 1 and tracker.n_calls == 2
+        assert tracker.total_prompt_tokens == 1500 and tracker.total_completion_tokens == 3440
+        assert sorted(tracker.per_model) == sorted({"claude-haiku-4-5", GA.MODEL})
+        assert tracker.per_model[GA.MODEL].n_calls == 1 and tracker.per_model[GA.MODEL].prompt_tokens == 300
+        assert tracker.total_cost_usd > 0
+
+
+class TestNameCheckHistory:
+    def record(self, stem, label, name, reasoning="why"):
+        return module.name_check_record(stem, dict(THREE_WORD_TRAIT, positive_label=label), FAKE_INSTRUCTIONS,
+                                        {"positive_name": name, "reasoning": reasoning}, "claude-sonnet-4-6")
+
+    def test_the_side_car_sits_beside_the_usage_record(self, tmp_path):
+        usage_json = tmp_path / "records" / "regeneration_usage.json"
+        path = module.name_check_log_path(usage_json)
+        assert path.name == "name_check_history.jsonl" and path.parent == usage_json.parent
+        assert module.NAME_CHECK_NAME == "name_check_history.jsonl"
+
+    def test_it_accumulates_rather_than_overwriting(self, tmp_path, capsys):
+        usage_json = tmp_path / "records" / "regeneration_usage.json"
+        usage_json.parent.mkdir()
+        path = module.name_check_log_path(usage_json)
+        module.persist_name_checks([self.record("kind_to_animals", "kind to animals", "animal-loving")], usage_json)
+        assert "animal-loving" in capsys.readouterr().err
+        module.persist_name_checks([self.record("in_chronic_pain", "in chronic pain", "pain-ridden"),
+                                    self.record("kind_to_animals", "kind to animals", "animal-kind")], usage_json)
+        capsys.readouterr()
+        recs = module.read_name_checks(path)
+        assert [r["stem"] for r in recs] == ["kind_to_animals", "in_chronic_pain", "kind_to_animals"]
+        assert [r["positive_name"] for r in recs] == ["animal-loving", "pain-ridden", "animal-kind"]
+        # "has this label been looked at?" is answerable, and a second round does not erase the first
+        assert set(module.name_checked_stems(path)) == {"kind_to_animals", "in_chronic_pain"}
+        module.persist_name_checks([], usage_json)
+        assert len(module.read_name_checks(path)) == 3
+        assert module.read_name_checks(tmp_path / "nothing.jsonl") == []
+
+    def test_the_report_block_lists_every_label_looked_at(self):
+        lines = module.name_check_lines([self.record("kind_to_animals", "kind to animals", "animal-loving",
+                                                     reasoning="They all look after animals.")])
+        assert "3+ words" in lines[0] and "motive-neutral" in lines[0]
+        assert any("kind_to_animals" in ln and "'animal-loving'" in ln for ln in lines)
+        assert any("They all look after animals." in ln for ln in lines)
+        assert module.name_check_lines([]) == []
+
+    def test_a_whole_run_writes_the_history_and_prints_the_block(self, tmp_path, monkeypatch, capsys):
+        stage = tmp_path / "stage"
+        stage.mkdir()
+        (stage / "kind_to_animals.json").write_text(json.dumps(THREE_WORD_TRAIT))
+        (stage / "arrogant.json").write_text(json.dumps(SAMPLE_TRAIT))
+        gen = _make_response(json.dumps(FAKE_ROGER_RESPONSE))
+        gen.usage = SimpleNamespace(input_tokens=2000, output_tokens=3000)
+        client = MagicMock()
+        client.messages.create = AsyncMock(
+            side_effect=lambda **kw: _name_reply() if kw.get("system") == GA.POS_NAME_SYSTEM_PROMPT else gen)
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda **kw: client)
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+        usage_json = tmp_path / "records" / "usage.json"
+        usage_json.parent.mkdir()
+        module.main(["--all", "--traits-dir", str(stage), "--force", "--usage-json", str(usage_json),
+                     "--no-opening-reroll"])
+        err = capsys.readouterr().err
+        assert "Naming check (1 label(s)" in err and "animal-loving" in err
+        assert "record(s) appended to" in err and "1 label(s) looked at in all" in err
+        recs = module.read_name_checks(module.name_check_log_path(usage_json))
+        assert [(r["stem"], r["positive_name"]) for r in recs] == [("kind_to_animals", "animal-loving")]
+        assert json.loads(usage_json.read_text())["n_calls"] == 3    # two generations and the one naming call

@@ -14,6 +14,14 @@ instead of JSON) is not retried: it is recorded in
 data/traits/generation_refusals.jsonl, counted apart from errors, and the
 trait file is left as it was (see data_analysis/generation_refusals.py).
 
+A trait whose label is three or more words long also gets a label-blind
+naming call on the instructions just written (generate_antonyms.name_pos_one:
+it names the pole the pos instructions describe without seeing the label).
+The suggestion goes into the run's report for Roger's marks and into the
+cumulative record data/traits/name_check_history.jsonl; nothing is renamed
+automatically.  Multiword labels are accepted by policy, so this is a net for
+an awkward phrase, not a hunt for single words (QUESTIONS 71, 2026-10-11).
+
 Usage:
     uv run python data_analysis/regenerate_trait_instructions.py --traits arrogant stoic
     uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
@@ -1231,6 +1239,153 @@ def copied_from_examples(instructions: list[dict], style: str,
     return found
 
 
+# ---------------------------------------------------------------------------
+# The label-blind naming check (QUESTIONS 71, Roger 2026-10-11)
+# ---------------------------------------------------------------------------
+# Multiword labels are accepted here by policy: the alignment material often
+# has no single English word, and the field's single-word terms tend to pick
+# the scariest-sounding option and obscure the behaviour ("sycophancy" asserts
+# ingratiation where the mechanism may be no more than agreeableness that
+# scored well in training).  So this is not a hunt for single words; it is a
+# net for a label that is genuinely awkward.  Any label of three or more words
+# gets a second, label-blind call -- ``generate_antonyms.name_pos_one``, which
+# names the pole the *pos instructions* describe without seeing the label --
+# and its suggestion goes into this run's report for Roger's marks.  Nothing is
+# renamed automatically: a suggested single word replaces a phrase only if it
+# is ordinary, motive-neutral, and passes the label probe against our gloss.
+#
+# Why here: the check reads a trait's pos instructions, which a candidate does
+# not have, so it cannot run at promotion; and instruction generation
+# necessarily runs for every promoted trait, so this net cannot be skipped by
+# anyone forgetting.  The call is a fraction of a cent on top of the ~$0.03 a
+# trait already costs and is charged to the run's usage tracker, so it lands in
+# the cumulative usage record like every other call.  The human net beside it
+# is the review app's Flag for rename button.
+NAME_CHECK_NAME = "name_check_history.jsonl"
+NAME_CHECK_MIN_WORDS = 3
+#: A parenthesised standard suffix is not part of the phrase, so ``openness
+#: (Big Five)`` is a one-word label while ``kind to animals`` is a three-word
+#: one.  A hyphenated compound (``stream-of-consciousness``) is one word.
+_LABEL_SUFFIX = re.compile(r"\s*\([^()]*\)\s*$")
+
+
+def label_phrase_words(label: str | None) -> list[str]:
+    """The words of a label, the parenthesised standard suffix dropped."""
+    return _LABEL_SUFFIX.sub("", (label or "").strip()).split()
+
+
+def name_check_wanted(label: str | None) -> bool:
+    """Whether a label is long enough to get the label-blind naming call."""
+    return len(label_phrase_words(label)) >= NAME_CHECK_MIN_WORDS
+
+
+def name_check_log_path(usage_json: Path) -> Path:
+    """Where the naming check's answers accumulate: beside the usage record,
+    one level above ``instructions/`` so that nothing globbing the corpus
+    reads it.  Append-only, never rewritten in place, so "has this been looked
+    at?" is answerable (``name_checked_stems``) and a rerun adds rather than
+    overwrites."""
+    return Path(usage_json).parent / NAME_CHECK_NAME
+
+
+def name_check_record(stem: str, data: dict, instructions: list[dict], answer: dict, model: str) -> dict:
+    """One naming check, kept whole (Roger's keep-every-sample rule): the
+    suggestion, the label it was blind to, and the instruction set it read,
+    which a later regeneration would overwrite."""
+    return {
+        "stem": stem,
+        "checked_at": datetime.date.today().isoformat(),
+        "phase": "instruction generation",
+        "positive_label": data.get("positive_label"),
+        "n_label_words": len(label_phrase_words(data.get("positive_label"))),
+        "description": data.get("description"),
+        "positive_name": answer.get("positive_name"),
+        "positive_name_reasoning": answer.get("reasoning"),
+        "model": model,
+        "instructions": instructions,
+    }
+
+
+def read_name_checks(path: Path) -> list[dict]:
+    """Every naming check on record, oldest first ([] when there is none)."""
+    p = Path(path)
+    if not p.exists():
+        return []
+    out = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            out.append(json.loads(line))
+    return out
+
+
+def name_checked_stems(path: Path) -> dict[str, str]:
+    """``stem -> the date of its latest naming check``: the answer to "has
+    this label been looked at?"."""
+    out: dict[str, str] = {}
+    for rec in read_name_checks(path):
+        if rec.get("stem"):
+            out[rec["stem"]] = rec.get("checked_at") or out.get(rec["stem"], "")
+    return out
+
+
+def append_name_checks(path: Path, records: list[dict]) -> int:
+    """Append the records to the history, one JSON object per line; returns
+    how many were appended."""
+    if not records:
+        return 0
+    from assistant_axis.atomic_io import atomic_write_text
+    p = Path(path)
+    existing = p.read_text(encoding="utf-8") if p.exists() else ""
+    if existing and not existing.endswith("\n"):
+        existing += "\n"
+    lines = "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in records)
+    atomic_write_text(existing + lines, p)
+    return len(records)
+
+
+def name_check_lines(records: list[dict]) -> list[str]:
+    """The run report's naming-check block: one line per label looked at, for
+    Roger's marks.  Empty when nothing was checked."""
+    if not records:
+        return []
+    lines = [f"Naming check ({len(records)} label(s) of {NAME_CHECK_MIN_WORDS}+ words, read blind from the pos "
+             "instructions; nothing is renamed automatically -- a single word replaces a phrase only if it is "
+             "ordinary, motive-neutral and passes the label probe against our gloss):"]
+    for rec in records:
+        lines.append(f"  {rec['stem']}: label {rec.get('positive_label')!r} -> suggested "
+                     f"{rec.get('positive_name')!r}")
+        why = (rec.get("positive_name_reasoning") or "").strip()
+        if why:
+            lines.append(f"      {why[:260]}")
+    return lines
+
+
+async def name_check_one(client: anthropic.AsyncAnthropic, stem: str, data: dict, instructions: list[dict], *,
+                         semaphore: asyncio.Semaphore, usage: MultiModelUsage | None = None) -> dict | None:
+    """The label-blind naming call for one trait, or ``None`` when its label
+    is under ``NAME_CHECK_MIN_WORDS`` words.  Reuses
+    ``generate_antonyms.name_pos_one`` (its own model, retries and ERROR
+    sentinel) rather than a second prompt; returns the history record."""
+    if not name_check_wanted(data.get("positive_label")):
+        return None
+    from data_analysis import generate_antonyms as GA
+    answer = await GA.name_pos_one(client, instructions, semaphore, usage, stem)
+    return name_check_record(stem, data, instructions, answer, GA.MODEL)
+
+
+def persist_name_checks(records: list[dict], usage_json: Path) -> None:
+    """Print this run's naming-check block and append its records to the
+    cumulative history."""
+    if not records:
+        return
+    path = name_check_log_path(Path(usage_json))
+    for line in name_check_lines(records):
+        print(line, file=sys.stderr)
+    append_name_checks(path, records)
+    print(f"[naming check] {len(records)} record(s) appended to {path} "
+          f"({len(name_checked_stems(path))} label(s) looked at in all)", file=sys.stderr)
+
+
 def _charge(usage: MultiModelUsage | None, model: str, response) -> None:
     """Tick the usage tracker for one API response (every response received
     is charged, including ones whose JSON later fails to parse)."""
@@ -1297,10 +1452,16 @@ async def regenerate_one(
     dry_run: bool,
     usage: MultiModelUsage | None = None,
     refusals_jsonl: Path | None = None,
+    name_checks: list | None = None,
 ) -> str:
     """Regenerate a single trait file. Returns a status line.  A refusal is
     recorded in ``refusals_jsonl`` (default ``DEFAULT_REFUSALS_JSONL``) and
-    re-raised as GenerationRefusal, with the file left as it was."""
+    re-raised as GenerationRefusal, with the file left as it was.
+
+    ``name_checks``: a list the label-blind naming check appends its record to
+    for a label of three or more words (QUESTIONS 71; ``name_check_one``).
+    The run collects them, reports them and writes them to
+    ``name_check_history.jsonl``; passing None leaves the check out."""
     with open(trait_path, encoding="utf-8") as f:
         data = json.load(f)
 
@@ -1348,9 +1509,16 @@ async def regenerate_one(
         _record_refusal(refusals_jsonl, refusal, trait_path.stem, model, "live")
         raise
 
-    return write_regenerated(trait_path, data, new_instructions, new_questions,
-                             model, temperature, thinking_budget,
-                             opening_rerolls=combined.get("opening_rerolls", 0) if use_combined else 0)
+    status = write_regenerated(trait_path, data, new_instructions, new_questions,
+                               model, temperature, thinking_budget,
+                               opening_rerolls=combined.get("opening_rerolls", 0) if use_combined else 0)
+    if name_checks is not None:
+        rec = await name_check_one(client, trait_path.stem, data, new_instructions,
+                                   semaphore=semaphore, usage=usage)
+        if rec is not None:
+            name_checks.append(rec)
+            status += f"; naming check: {rec.get('positive_name')!r}"
+    return status
 
 
 def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_questions: list | None,
@@ -1466,12 +1634,18 @@ async def wait_for_batch(client: anthropic.AsyncAnthropic, batch_id: str, poll_s
 
 async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, instructions_only: bool, model: str,
                         temperature: float, thinking_budget: int, usage: MultiModelUsage | None,
-                        refusals_jsonl: Path | None = None) -> tuple[list[str], list[str], list[str]]:
+                        refusals_jsonl: Path | None = None, name_checks: list | None = None,
+                        semaphore: asyncio.Semaphore | None = None) -> tuple[list[str], list[str], list[str]]:
     """Write the trait files of the requests that succeeded.  Returns the
     status lines, the stems that have to be generated again (requests that
     errored or expired, and replies that cannot be used), and the REFUSED
     lines of the replies that were refusals: those are recorded like a live
-    refusal and not asked for again."""
+    refusal and not asked for again.
+
+    ``name_checks`` (with ``semaphore``): the label-blind naming check runs in
+    real time on each file written, as it does on a live run; the batch
+    carries no such request, since which files it will write is not known when
+    it is submitted."""
     done, again, refused = [], [], []
     async for entry in await client.messages.batches.results(batch_id):
         stem = entry.custom_id
@@ -1507,6 +1681,12 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
         done.append(write_regenerated(
             path, data, combined["instruction"], None if instructions_only else combined["questions"],
             model, temperature, thinking_budget, batch=True))
+        if name_checks is not None and semaphore is not None:
+            rec = await name_check_one(client, stem, data, combined["instruction"],
+                                       semaphore=semaphore, usage=usage)
+            if rec is not None:
+                name_checks.append(rec)
+                done[-1] += f"; naming check: {rec.get('positive_name')!r}"
     return done, again, refused
 
 
@@ -1575,6 +1755,9 @@ async def main_async(args: argparse.Namespace) -> None:
     semaphore = asyncio.Semaphore(args.concurrency)
     usage = MultiModelUsage()
     refusals_jsonl = refusal_log_path(Path(args.usage_json))
+    # the label-blind naming check of every label of three or more words (QUESTIONS 71); always on, because
+    # instruction generation is the one step every promoted trait goes through
+    name_checks: list[dict] = []
 
     if args.batch or args.batch_id:
         if PROMPT_STYLE not in COMBINED_STYLES:
@@ -1605,7 +1788,7 @@ async def main_async(args: argparse.Namespace) -> None:
         done, again, refused = await collect_batch(
             client, batch_id, instructions_only=args.instructions_only, model=args.model,
             temperature=args.temperature, thinking_budget=args.thinking_budget, usage=usage,
-            refusals_jsonl=refusals_jsonl)
+            refusals_jsonl=refusals_jsonl, name_checks=name_checks, semaphore=semaphore)
         for line in done + refused:
             print(line, file=sys.stderr)
         # what the batch did not deliver is asked for at once, in real time (a refusal is not)
@@ -1613,7 +1796,8 @@ async def main_async(args: argparse.Namespace) -> None:
             client, TRAITS_DIR / f"{stem}.json", n_variants=args.n_variants, n_questions=args.n_questions,
             instructions_only=args.instructions_only, model=args.model, semaphore=semaphore,
             temperature=args.temperature, thinking_budget=args.thinking_budget, force=True, dry_run=False,
-            usage=usage, refusals_jsonl=refusals_jsonl) for stem in again), return_exceptions=True)
+            usage=usage, refusals_jsonl=refusals_jsonl, name_checks=name_checks)
+            for stem in again), return_exceptions=True)
         refused_rt = [r for r in retried if isinstance(r, GenerationRefusal)]
         errors = [r for r in retried if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
         for stem, r in zip(again, retried):
@@ -1625,6 +1809,7 @@ async def main_async(args: argparse.Namespace) -> None:
               file=sys.stderr)
         if refused or refused_rt:
             print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
+        persist_name_checks(name_checks, Path(args.usage_json))
         persist_usage(usage, Path(args.usage_json))
         return
 
@@ -1644,6 +1829,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 dry_run=args.dry_run,
                 usage=usage,
                 refusals_jsonl=refusals_jsonl,
+                name_checks=name_checks,
             )
         )
         for path in trait_paths
@@ -1674,7 +1860,8 @@ async def main_async(args: argparse.Namespace) -> None:
     if refused:
         print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
     if not args.dry_run:
-        print(f"API calls made: ~{(ok + refused) * calls_per}", file=sys.stderr)
+        print(f"API calls made: ~{(ok + refused) * calls_per + len(name_checks)}", file=sys.stderr)
+        persist_name_checks(name_checks, Path(args.usage_json))
         persist_usage(usage, Path(args.usage_json))
 
 

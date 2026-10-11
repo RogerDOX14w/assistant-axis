@@ -690,3 +690,109 @@ def test_review_statuses_written_are_in_the_vocabulary():
     from assistant_axis.gapgen.normalize import REVIEW_STATUSES
     from assistant_axis.gapgen.review_app.decisions import REVIEW_STATUS, UNREVIEWED
     assert set(REVIEW_STATUS.values()) | {UNREVIEWED["status"]} <= set(REVIEW_STATUSES)
+
+
+# --------------------------------------------------------------------------- the rename flag (QUESTIONS 71)
+
+class TestRenameFlag:
+    """Roger 2026-10-11, QUESTIONS 71: the human net for an awkward multiword label.  A ``rename`` flag on the
+    review **decision** (never on the trait file: the registry is a history, so a flag there needs no cleaning up),
+    the existing note carrying the freeform reason, and ``apply`` printing the flagged labels as a worklist."""
+
+    def flow(self, env, log=None):
+        log = log or make_log(env)
+        g1 = act(log, action="open", source="merged:0")
+        act(log, action="nominate", group=g1, key=k("irreligious"))
+        log.act({"action": "resolve", "group": g1, "resolution": "promote", "note": "three words and a shrug",
+                 "rename": True})
+        g2 = act(log, action="open", source="merged:1")
+        act(log, action="nominate", group=g2, key=k("affectionate"))
+        act(log, action="resolve", group=g2, resolution="promote")          # not flagged
+        return log, g1, g2
+
+    def test_the_flag_rides_on_the_decision_and_reaches_the_row(self, env):
+        log, g1, g2 = self.flow(env)
+        resolves = [e for e in log.events if e["action"] == "resolve"]
+        assert resolves[0]["rename"] is True and resolves[1]["rename"] is False
+        assert log.state.groups[g1].rename is True and log.state.groups[g2].rename is False
+        assert log.state.group_card(g1)["rename"] is True
+        run_apply(env, log)
+        rows = env["reg"].fold()
+        for key in (k("godless"), k("irreligious"), k("nonreligious")):
+            assert rows[key]["review"]["rename"] is True
+            assert rows[key]["review"]["note"] == "three words and a shrug"
+        # an unflagged decision writes no key at all, so a row applied before the flag existed stays byte-identical
+        assert "rename" not in rows[k("affectionate")]["review"]
+        # and the flag never leaves the registry: the seed-queue entry it promotes knows nothing of it
+        by_stem = {e["stem"]: e for e in json.loads(env["queue"].read_text())["entries"]}
+        assert "rename" not in by_stem["irreligious"] and "rename" not in by_stem["affectionate"]
+
+    def test_the_flag_survives_a_restart(self, env):
+        log, g1, g2 = self.flow(env)
+        again = make_log(env)
+        assert again.state.groups[g1].rename is True and again.state.groups[g2].rename is False
+        assert again.state.groups[g1].note == "three words and a shrug"
+
+    def test_an_undo_takes_the_flag_back(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source=f"term:{k('loner')}")
+        log.act({"action": "resolve", "group": g, "resolution": "promote", "note": "awkward", "rename": True})
+        assert log.state.groups[g].rename is True
+        log.act({"action": "undo"})
+        assert log.state.groups[g].status == "open" and log.state.groups[g].rename is False
+
+    def test_the_promotion_report_lists_the_flagged_labels_as_a_worklist(self, env, capsys):
+        log, g1, _ = self.flow(env)
+        rep = run_apply(env, log, dry_run=True)
+        assert [x["key"] for x in rep.rename_flagged] == [k("irreligious")]
+        [x] = rep.rename_flagged
+        assert x["group"] == g1 and x["resolution"] == "promote" and x["label"] == "irreligious"
+        assert x["note"] == "three words and a shrug" and x["stem"] == "irreligious"
+        text = rep.format()
+        assert "Flagged for a rename in review (1)" in text
+        assert "RENAME? irreligious (irreligious, promote, group g1): three words and a shrug" in text
+        assert "1 flagged for a rename" in text
+        assert rep.as_dict()["rename_flagged"] == rep.rename_flagged
+        from data_analysis.gap_generation import review_app as cli
+        assert cli.main(["apply", "--batch-id", BATCH, "--dry-run", *TestCli().base(env)]) == 0
+        assert "RENAME? irreligious" in capsys.readouterr().out
+
+    def test_the_worklist_names_a_merge_target_and_a_rejected_group_s_first_member(self, env):
+        log = make_log(env)
+        g1 = act(log, action="open", source=f"term:{k('loner')}")
+        log.act({"action": "resolve", "group": g1, "resolution": "merge_into:trait:alpha",
+                 "note": "alpha reads oddly", "rename": True})
+        g2 = act(log, action="open", source="merged:1")
+        log.act({"action": "resolve", "group": g2, "resolution": "reject", "rename": True})
+        rep = run_apply(env, log)
+        assert [(x["key"], x["stem"], x["label"]) for x in rep.rename_flagged] == [
+            ("trait:alpha", "alpha", "alpha"), (k("affectionate"), None, "affectionate")]
+        assert env["reg"].fold()[k("loner")]["review"]["rename"] is True
+
+    def test_an_unflagged_review_has_an_empty_worklist(self, env):
+        rep = run_apply(env, flow_for_apply(env), dry_run=True)
+        assert rep.rename_flagged == [] and "RENAME?" not in rep.format()
+        assert "flagged for a rename" not in rep.format()
+
+    def test_the_flag_goes_through_the_api(self, client):
+        gid = post(client, action="open", source=f"term:{k('loner')}").json()["group"]["id"]
+        r = post(client, action="resolve", group=gid, resolution="promote", note="awkward", rename=True).json()
+        assert r["event"]["rename"] is True and r["group"]["rename"] is True
+        assert r["group"]["note"] == "awkward"
+
+    def test_the_button_is_in_the_toolbar_with_its_keyed_label(self, client):
+        """A button, not a note convention: Roger uses the app himself and asked for buttons rather than
+        conventions to remember.  Built like every other one, so keyedLabel() bolds the shortcut letter."""
+        import re
+        js = client.get("/static/app.js").text
+        m = re.search(r'btn\("rename",\s*S\.rename \? "([^"]+)" : "([^"]+)",\s*"(\w)"', js)
+        assert m, "no rename button in the toolbar"
+        flagged, unflagged, key = m.groups()
+        assert (unflagged, flagged, key) == ("Flag for rename", "Flagged for rename ✓", "f")
+        for text in (unflagged, flagged):
+            i = re.search(rf"\b{key}", text, re.I).start()      # keyedLabel(): the letter at the start of a word
+            assert i == 0 and text[i] == "F"
+        assert 'case "f": ACTIONS.rename(); break;' in js
+        assert "rename: () => toggleRename()" in js
+        assert "Flag for rename" in js.split("function help()", 1)[1]        # in the optional key list too
+        assert 'body.rename = true' in js.split("async function resolve(", 1)[1]

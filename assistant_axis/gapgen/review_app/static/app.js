@@ -10,7 +10,7 @@ const PANES = ["members", "neighbours", "corpus", "opposed"];
 const S = {
   order: null, queue: [], counts: null, card: null, qpos: -1,
   pane: "members", idx: { members: 0, neighbours: 0, corpus: 0, opposed: 0 },
-  note: null, pinned: null, overlay: null,
+  note: null, rename: false, pinned: null, overlay: null,
   selected: null,   // the member clicked (or moved to) in the open group: {group, key}; Promote takes it when no ★
 };
 
@@ -94,7 +94,8 @@ function describe(ev) {
     case "drop": return `dropped ${k}`;
     case "merge_in": return `merged in ${k}`;
     case "nominate": return `nominated ${k}`;
-    case "resolve": return `${ev.group} resolved: ${ev.resolution}${ev.nominated ? " " + ev.nominated : ""}`;
+    case "resolve": return `${ev.group} resolved: ${ev.resolution}${ev.nominated ? " " + ev.nominated : ""}` +
+      (ev.rename ? " · flagged for a rename" : "");
     case "start_antonym": return `antonym group ${ev.group} of ${ev.of}`;
     case "undo": return `undid decision ${ev.undoes}`;
     default: return ev.action;
@@ -159,9 +160,11 @@ function renderCard() {
   if (c.status === "resolved") {
     const tgt = c.target ? " " + link(c.target) : "";
     head += `<div class="banner resolved">Resolved: ${esc(c.resolution)}${tgt}${c.nominated ? " (" + esc(labelOf(c, c.nominated)) + ")" : ""}` +
-      `${c.note ? " · " + esc(c.note) : ""}.  <b>Next group</b> moves on; <b>Undo</b> takes the decision back.</div>`;
+      `${c.rename ? " · flagged for a rename" : ""}${c.note ? " · " + esc(c.note) : ""}.  ` +
+      `<b>Next group</b> moves on; <b>Undo</b> takes the decision back.</div>`;
   }
   if (S.note) head += `<div class="banner">note for the next resolution: ${esc(S.note)}</div>`;
+  if (S.rename) head += `<div class="banner">the next resolution is flagged for a rename (the note says why)</div>`;
   const members = c.members.map((m, i) => {
     const cls = ["member", m.key === c.nominated ? "nominated" : "", m.handled_by && m.handled_by !== c.id ? "handled" : "", m.covered ? "covered" : "",
       S.selected && S.selected.group === c.id && S.selected.key === m.key ? "picked" : ""].join(" ") + hl("members", i);
@@ -266,8 +269,9 @@ async function resolve(resolution) {
   if (!needCard()) return;
   const body = { action: "resolve", group: S.card.id, resolution };
   if (S.note) body.note = S.note;
+  if (S.rename) body.rename = true;
   const r = await act(body);
-  if (r) { S.note = null; S.pinned = null; renderCard(); }
+  if (r) { S.note = null; S.rename = false; S.pinned = null; renderCard(); }
 }
 
 async function onEnter() {
@@ -298,6 +302,16 @@ function editNote() {
   if (t === null) return;                     // cancelled: keep the note as it was
   S.note = t.trim() || null;
   renderCard();
+}
+
+// The rename flag (QUESTIONS 71, Roger 2026-10-11): the label this decision settles on reads awkwardly and wants a
+// second look.  It rides on the decision, not the trait file, and the note carries the reason, so flagging and then
+// Add note is the pair of actions; apply prints the flagged labels as a worklist.  A button, not a note convention
+// ("rename: ..."), because a convention is one more thing to remember at the moment of typing.
+function toggleRename() {
+  S.rename = !S.rename;
+  renderCard();
+  flash(S.rename ? "the next resolution is flagged for a rename (Add note says why)" : "rename flag cleared");
 }
 
 async function nextOrder() {
@@ -332,6 +346,7 @@ const ACTIONS = {
   },
   antonym: () => startAntonym(),
   note: () => editNote(),
+  rename: () => toggleRename(),
   undo: () => act({ action: "undo" }),
   find: () => openFind(),
   details: () => termView(),
@@ -388,6 +403,9 @@ function renderToolbar() {
       btn("park", "Park", "p", { title: "set aside for later; not rejected" }),
       btn("defer", "Defer", "d", { title: "decide later" }),
       btn("note", S.note ? "Edit note" : "Add note", ";", { title: "a note saved with the next resolution" }),
+      btn("rename", S.rename ? "Flagged for rename ✓" : "Flag for rename", "f",
+        { title: "the label this decision settles on wants a second look; the note says why, and apply lists the "
+                 + "flagged labels as a worklist" }),
       btn("next", "Skip to next group", "Space"));
   }
   b.push(`<span class="sep"></span>`, btn("undo", "Undo", "u", { title: "undo the last decision" }),
@@ -503,6 +521,7 @@ function help() {
     ["Enter", "Promote the nominee (or accept a proposed group; Next group once resolved)"],
     ["c", "Covered by this: resolve as covered by the highlighted corpus trait or queue entry"],
     ["p / r / d", "Park / Reject / Defer"], [";", "Add note: a note for the next resolution"],
+    ["f", "Flag for rename: this label wants a second look (the note says why)"],
     ["a", "Start antonym group from the highlighted (or first) opposed term"],
     ["u", "Undo the last decision"], ["/", "Find a term, corpus trait or queue entry"], ["t", "Details: everything one edge away"],
     ["Space or .", "Next group in the queue"], ["o", "Order: the next queue order"], ["Esc", "close"]];
@@ -553,6 +572,7 @@ document.addEventListener("keydown", async (ev) => {
     case "r": await ACTIONS.reject(); break;
     case "d": await ACTIONS.defer(); break;
     case ";": ACTIONS.note(); break;
+    case "f": ACTIONS.rename(); break;
     case "a": await ACTIONS.antonym(); break;
     case "u": await ACTIONS.undo(); break;
     case "/": ACTIONS.find(); break;
