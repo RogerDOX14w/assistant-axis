@@ -1,0 +1,6625 @@
+{
+  "result": {
+    "threshold": 0.8117,
+    "embedding_model": "text-embedding-3-large",
+    "n_groups": 408,
+    "n_members": 742,
+    "n_merged": 334,
+    "groups": [
+      {
+        "rep": "aup001-1a",
+        "members": [
+          "aup001-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup001-1b",
+        "members": [
+          "aup001-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup002-1a",
+        "members": [
+          "aup002-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup002-1b",
+        "members": [
+          "aup002-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup003-1a",
+        "members": [
+          "aup003-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup003-1b",
+        "members": [
+          "aup003-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup004-1a",
+        "members": [
+          "aup004-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup004-1b",
+        "members": [
+          "aup004-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup005-1a",
+        "members": [
+          "aup005-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup005-1b",
+        "members": [
+          "aup005-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup005-2a",
+        "members": [
+          "aup005-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup005-2b",
+        "members": [
+          "aup005-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup006-1a",
+        "members": [
+          "aup006-1a",
+          "oup001-2b"
+        ],
+        "min_cos": 0.818841,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "oup001-2b",
+            "how": "gloss cosine",
+            "cos": 0.818841
+          }
+        ]
+      },
+      {
+        "rep": "aup006-1b",
+        "members": [
+          "aup006-1b",
+          "aup012-1b",
+          "oup001-2a"
+        ],
+        "min_cos": 0.686476,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "aup012-1b",
+            "how": "exact stem",
+            "cos": 0.686476
+          },
+          {
+            "member": "oup001-2a",
+            "how": "exact stem",
+            "cos": 0.857035
+          }
+        ]
+      },
+      {
+        "rep": "aup007-1a",
+        "members": [
+          "aup007-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup007-1b",
+        "members": [
+          "aup007-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup008-1a",
+        "members": [
+          "aup008-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup008-1b",
+        "members": [
+          "aup008-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup009-1a",
+        "members": [
+          "aup009-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup009-1b",
+        "members": [
+          "aup009-1b",
+          "sab017-2b",
+          "af090-1a",
+          "em038-2b",
+          "em045-1b"
+        ],
+        "min_cos": 0.487645,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab017-2b",
+            "how": "exact stem",
+            "cos": 0.500296
+          },
+          {
+            "member": "af090-1a",
+            "how": "exact stem",
+            "cos": 0.491639
+          },
+          {
+            "member": "em038-2b",
+            "how": "exact stem",
+            "cos": 0.487645
+          },
+          {
+            "member": "em045-1b",
+            "how": "exact stem",
+            "cos": 0.505356
+          }
+        ]
+      },
+      {
+        "rep": "aup009-2a",
+        "members": [
+          "aup009-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup009-2b",
+        "members": [
+          "aup009-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup010-1a",
+        "members": [
+          "aup010-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup010-1b",
+        "members": [
+          "aup010-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup011-1a",
+        "members": [
+          "aup011-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup011-1b",
+        "members": [
+          "aup011-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup011-2a",
+        "members": [
+          "aup011-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup011-2b",
+        "members": [
+          "aup011-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup012-1a",
+        "members": [
+          "aup012-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup012-2a",
+        "members": [
+          "aup012-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup012-2b",
+        "members": [
+          "aup012-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup013-1a",
+        "members": [
+          "aup013-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup013-1b",
+        "members": [
+          "aup013-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup013-2a",
+        "members": [
+          "aup013-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup013-2b",
+        "members": [
+          "aup013-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup014-1a",
+        "members": [
+          "aup014-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup014-1b",
+        "members": [
+          "aup014-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup014-2a",
+        "members": [
+          "aup014-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup014-2b",
+        "members": [
+          "aup014-2b",
+          "sab099-2a"
+        ],
+        "min_cos": 0.415666,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab099-2a",
+            "how": "exact stem",
+            "cos": 0.415666
+          }
+        ]
+      },
+      {
+        "rep": "aup015-1a",
+        "members": [
+          "aup015-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup015-1b",
+        "members": [
+          "aup015-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup015-2a",
+        "members": [
+          "aup015-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup015-2b",
+        "members": [
+          "aup015-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup016-1a",
+        "members": [
+          "aup016-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup016-1b",
+        "members": [
+          "aup016-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup016-2a",
+        "members": [
+          "aup016-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup016-2b",
+        "members": [
+          "aup016-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup018-1a",
+        "members": [
+          "aup018-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup018-1b",
+        "members": [
+          "aup018-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup020-1a",
+        "members": [
+          "aup020-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "aup020-1b",
+        "members": [
+          "aup020-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-1a",
+        "members": [
+          "oup001-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-1b",
+        "members": [
+          "oup001-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "oup001-3a",
+        "members": [
+          "oup001-3a",
+          "sab020-1b",
+          "af111-1b",
+          "af112-1b",
+          "af139-1a",
+          "sch032-2b",
+          "sch082-2b",
+          "sch083-2b",
+          "em002-2b",
+          "em004-2b",
+          "em011-2b",
+          "em018-1b",
+          "em024-2b",
+          "el002-1b",
+          "el025-1b",
+          "el026-1b"
+        ],
+        "min_cos": 0.390961,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab020-1b",
+            "how": "exact stem",
+            "cos": 0.597817
+          },
+          {
+            "member": "af111-1b",
+            "how": "exact stem",
+            "cos": 0.503961
+          },
+          {
+            "member": "af112-1b",
+            "how": "exact stem",
+            "cos": 0.57346
+          },
+          {
+            "member": "af139-1a",
+            "how": "exact stem",
+            "cos": 0.627091
+          },
+          {
+            "member": "sch032-2b",
+            "how": "exact stem",
+            "cos": 0.511827
+          },
+          {
+            "member": "sch082-2b",
+            "how": "exact stem",
+            "cos": 0.436988
+          },
+          {
+            "member": "sch083-2b",
+            "how": "exact stem",
+            "cos": 0.507108
+          },
+          {
+            "member": "em002-2b",
+            "how": "exact stem",
+            "cos": 0.510381
+          },
+          {
+            "member": "em004-2b",
+            "how": "exact stem",
+            "cos": 0.536035
+          },
+          {
+            "member": "em011-2b",
+            "how": "exact stem",
+            "cos": 0.617005
+          },
+          {
+            "member": "em018-1b",
+            "how": "exact stem",
+            "cos": 0.605527
+          },
+          {
+            "member": "em024-2b",
+            "how": "exact stem",
+            "cos": 0.69485
+          },
+          {
+            "member": "el002-1b",
+            "how": "exact stem",
+            "cos": 0.459477
+          },
+          {
+            "member": "el025-1b",
+            "how": "exact stem",
+            "cos": 0.396362
+          },
+          {
+            "member": "el026-1b",
+            "how": "exact stem",
+            "cos": 0.390961
+          }
+        ]
+      },
+      {
+        "rep": "oup001-3b",
+        "members": [
+          "oup001-3b",
+          "sab091-1a",
+          "sab092-1a",
+          "sab094-2a"
+        ],
+        "min_cos": 0.398992,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab091-1a",
+            "how": "exact stem",
+            "cos": 0.562155
+          },
+          {
+            "member": "sab092-1a",
+            "how": "exact stem",
+            "cos": 0.398992
+          },
+          {
+            "member": "sab094-2a",
+            "how": "exact stem",
+            "cos": 0.458604
+          }
+        ]
+      },
+      {
+        "rep": "sab002-1a",
+        "members": [
+          "sab002-1a",
+          "sab070-1a"
+        ],
+        "min_cos": 0.684368,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab070-1a",
+            "how": "exact stem",
+            "cos": 0.684368
+          }
+        ]
+      },
+      {
+        "rep": "sab002-1b",
+        "members": [
+          "sab002-1b",
+          "sab063-1b",
+          "af006-2b"
+        ],
+        "min_cos": 0.432315,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab063-1b",
+            "how": "exact stem",
+            "cos": 0.599709
+          },
+          {
+            "member": "af006-2b",
+            "how": "exact stem",
+            "cos": 0.432315
+          }
+        ]
+      },
+      {
+        "rep": "sab003-1a",
+        "members": [
+          "sab003-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab003-1b",
+        "members": [
+          "sab003-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab004-1a",
+        "members": [
+          "sab004-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab004-1b",
+        "members": [
+          "sab004-1b",
+          "sab091-2b",
+          "sab092-2b",
+          "sab093-2b",
+          "af059-1b",
+          "sch003-1b",
+          "sch004-1b",
+          "sch027-1b",
+          "sch032-1b",
+          "sch056-2b",
+          "sch091-1b",
+          "em003-1b"
+        ],
+        "min_cos": 0.523078,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab091-2b",
+            "how": "exact stem",
+            "cos": 0.64153
+          },
+          {
+            "member": "sab092-2b",
+            "how": "exact stem",
+            "cos": 0.609365
+          },
+          {
+            "member": "sab093-2b",
+            "how": "exact stem",
+            "cos": 0.55128
+          },
+          {
+            "member": "af059-1b",
+            "how": "exact stem",
+            "cos": 0.677179
+          },
+          {
+            "member": "sch003-1b",
+            "how": "exact stem",
+            "cos": 0.645881
+          },
+          {
+            "member": "sch004-1b",
+            "how": "exact stem",
+            "cos": 0.751478
+          },
+          {
+            "member": "sch027-1b",
+            "how": "exact stem",
+            "cos": 0.616323
+          },
+          {
+            "member": "sch032-1b",
+            "how": "exact stem",
+            "cos": 0.639563
+          },
+          {
+            "member": "sch056-2b",
+            "how": "exact stem",
+            "cos": 0.747735
+          },
+          {
+            "member": "sch091-1b",
+            "how": "exact stem",
+            "cos": 0.70159
+          },
+          {
+            "member": "em003-1b",
+            "how": "exact stem",
+            "cos": 0.523078
+          }
+        ]
+      },
+      {
+        "rep": "sab004-2a",
+        "members": [
+          "sab004-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab004-2b",
+        "members": [
+          "sab004-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab005-1a",
+        "members": [
+          "sab005-1a",
+          "sab007-2a"
+        ],
+        "min_cos": 0.824862,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab007-2a",
+            "how": "gloss cosine",
+            "cos": 0.824862
+          }
+        ]
+      },
+      {
+        "rep": "sab005-1b",
+        "members": [
+          "sab005-1b",
+          "sab012-1b"
+        ],
+        "min_cos": 0.776079,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab012-1b",
+            "how": "exact stem",
+            "cos": 0.776079
+          }
+        ]
+      },
+      {
+        "rep": "sab007-1a",
+        "members": [
+          "sab007-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab007-1b",
+        "members": [
+          "sab007-1b",
+          "af003-1b",
+          "af004-1b",
+          "af028-1b",
+          "af038-1b",
+          "af065-1b",
+          "af084-1b",
+          "sch013-2b",
+          "sch023-2b",
+          "sch042-1b",
+          "el002-2b",
+          "el005-2b"
+        ],
+        "min_cos": 0.448314,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "af003-1b",
+            "how": "exact stem",
+            "cos": 0.80773
+          },
+          {
+            "member": "af004-1b",
+            "how": "exact stem",
+            "cos": 0.776176
+          },
+          {
+            "member": "af028-1b",
+            "how": "exact stem",
+            "cos": 0.73353
+          },
+          {
+            "member": "af038-1b",
+            "how": "exact stem",
+            "cos": 0.668521
+          },
+          {
+            "member": "af065-1b",
+            "how": "exact stem",
+            "cos": 0.800404
+          },
+          {
+            "member": "af084-1b",
+            "how": "exact stem",
+            "cos": 0.769048
+          },
+          {
+            "member": "sch013-2b",
+            "how": "gloss cosine",
+            "cos": 0.885648
+          },
+          {
+            "member": "sch023-2b",
+            "how": "exact stem",
+            "cos": 0.638035
+          },
+          {
+            "member": "sch042-1b",
+            "how": "exact stem",
+            "cos": 0.76166
+          },
+          {
+            "member": "el002-2b",
+            "how": "exact stem",
+            "cos": 0.457979
+          },
+          {
+            "member": "el005-2b",
+            "how": "exact stem",
+            "cos": 0.448314
+          }
+        ]
+      },
+      {
+        "rep": "sab007-2b",
+        "members": [
+          "sab007-2b",
+          "sch009-1b",
+          "sch018-1b"
+        ],
+        "min_cos": 0.594651,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch009-1b",
+            "how": "exact stem",
+            "cos": 0.594651
+          },
+          {
+            "member": "sch018-1b",
+            "how": "exact stem",
+            "cos": 0.706262
+          }
+        ]
+      },
+      {
+        "rep": "sab008-1a",
+        "members": [
+          "sab008-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab008-1b",
+        "members": [
+          "sab008-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab011-1a",
+        "members": [
+          "sab011-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab011-1b",
+        "members": [
+          "sab011-1b",
+          "sab015-1b",
+          "sab021-1b"
+        ],
+        "min_cos": 0.717401,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab015-1b",
+            "how": "exact stem",
+            "cos": 0.717401
+          },
+          {
+            "member": "sab021-1b",
+            "how": "gloss cosine",
+            "cos": 0.829752
+          }
+        ]
+      },
+      {
+        "rep": "sab012-1a",
+        "members": [
+          "sab012-1a",
+          "sab014-1a",
+          "sab035-1a",
+          "sab066-1a",
+          "sab099-1a",
+          "af179-2a"
+        ],
+        "min_cos": 0.465806,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab014-1a",
+            "how": "exact stem",
+            "cos": 0.528293
+          },
+          {
+            "member": "sab035-1a",
+            "how": "exact stem",
+            "cos": 0.657008
+          },
+          {
+            "member": "sab066-1a",
+            "how": "exact stem",
+            "cos": 0.561616
+          },
+          {
+            "member": "sab099-1a",
+            "how": "exact stem",
+            "cos": 0.647158
+          },
+          {
+            "member": "af179-2a",
+            "how": "exact stem",
+            "cos": 0.465806
+          }
+        ]
+      },
+      {
+        "rep": "sab013-1a",
+        "members": [
+          "sab013-1a",
+          "sab047-1a",
+          "sab048-1a",
+          "sab052-1a",
+          "sab053-1a",
+          "sab055-1a",
+          "sab058-1a",
+          "sab109-1a",
+          "sch012-1a",
+          "sch023-1a",
+          "sch024-1a",
+          "sch052-1a",
+          "sch055-1a",
+          "sch056-1a",
+          "sb002-1a",
+          "sb003-1a",
+          "sb004-1a",
+          "sb006-1a",
+          "sb007-1a",
+          "sb008-1a",
+          "sb009-1a",
+          "sb011-1a",
+          "sb012-1a",
+          "sb013-1a",
+          "sb014-1a",
+          "sb021-1a",
+          "sb022-1b",
+          "sb034-1a"
+        ],
+        "min_cos": 0.586524,
+        "pole": "vice",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab047-1a",
+            "how": "exact stem",
+            "cos": 0.888096
+          },
+          {
+            "member": "sab048-1a",
+            "how": "gloss cosine",
+            "cos": 0.841827
+          },
+          {
+            "member": "sab052-1a",
+            "how": "exact stem",
+            "cos": 0.884663
+          },
+          {
+            "member": "sab053-1a",
+            "how": "exact stem",
+            "cos": 0.829011
+          },
+          {
+            "member": "sab055-1a",
+            "how": "exact stem",
+            "cos": 0.902375
+          },
+          {
+            "member": "sab058-1a",
+            "how": "exact stem",
+            "cos": 0.873639
+          },
+          {
+            "member": "sab109-1a",
+            "how": "exact stem",
+            "cos": 0.586524
+          },
+          {
+            "member": "sch012-1a",
+            "how": "exact stem",
+            "cos": 0.871766
+          },
+          {
+            "member": "sch023-1a",
+            "how": "exact stem",
+            "cos": 0.746911
+          },
+          {
+            "member": "sch024-1a",
+            "how": "exact stem",
+            "cos": 0.840809
+          },
+          {
+            "member": "sch052-1a",
+            "how": "gloss cosine",
+            "cos": 0.823769
+          },
+          {
+            "member": "sch055-1a",
+            "how": "exact stem",
+            "cos": 0.677189
+          },
+          {
+            "member": "sch056-1a",
+            "how": "exact stem",
+            "cos": 0.609339
+          },
+          {
+            "member": "sb002-1a",
+            "how": "exact stem",
+            "cos": 0.860687
+          },
+          {
+            "member": "sb003-1a",
+            "how": "exact stem",
+            "cos": 0.729111
+          },
+          {
+            "member": "sb004-1a",
+            "how": "exact stem",
+            "cos": 0.828401
+          },
+          {
+            "member": "sb006-1a",
+            "how": "exact stem",
+            "cos": 0.792565
+          },
+          {
+            "member": "sb007-1a",
+            "how": "exact stem",
+            "cos": 0.672573
+          },
+          {
+            "member": "sb008-1a",
+            "how": "exact stem",
+            "cos": 0.806356
+          },
+          {
+            "member": "sb009-1a",
+            "how": "exact stem",
+            "cos": 0.832127
+          },
+          {
+            "member": "sb011-1a",
+            "how": "exact stem",
+            "cos": 0.773215
+          },
+          {
+            "member": "sb012-1a",
+            "how": "exact stem",
+            "cos": 0.861784
+          },
+          {
+            "member": "sb013-1a",
+            "how": "exact stem",
+            "cos": 0.820416
+          },
+          {
+            "member": "sb014-1a",
+            "how": "exact stem",
+            "cos": 0.847259
+          },
+          {
+            "member": "sb021-1a",
+            "how": "exact stem",
+            "cos": 0.844767
+          },
+          {
+            "member": "sb022-1b",
+            "how": "exact stem",
+            "cos": 0.790667
+          },
+          {
+            "member": "sb034-1a",
+            "how": "exact stem",
+            "cos": 0.732501
+          }
+        ]
+      },
+      {
+        "rep": "sab013-1b",
+        "members": [
+          "sab013-1b",
+          "sab048-1b",
+          "sb009-1b"
+        ],
+        "min_cos": 0.732965,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab048-1b",
+            "how": "exact stem",
+            "cos": 0.732965
+          },
+          {
+            "member": "sb009-1b",
+            "how": "gloss cosine",
+            "cos": 0.846773
+          }
+        ]
+      },
+      {
+        "rep": "sab014-1b",
+        "members": [
+          "sab014-1b",
+          "sab066-1b"
+        ],
+        "min_cos": 0.779556,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab066-1b",
+            "how": "exact stem",
+            "cos": 0.779556
+          }
+        ]
+      },
+      {
+        "rep": "sab015-1a",
+        "members": [
+          "sab015-1a",
+          "sch040-1a"
+        ],
+        "min_cos": 0.627525,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch040-1a",
+            "how": "exact stem",
+            "cos": 0.627525
+          }
+        ]
+      },
+      {
+        "rep": "sab017-1a",
+        "members": [
+          "sab017-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab017-1b",
+        "members": [
+          "sab017-1b",
+          "sab092-1b",
+          "sab093-1b",
+          "el037-1b"
+        ],
+        "min_cos": 0.465856,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab092-1b",
+            "how": "exact stem",
+            "cos": 0.669527
+          },
+          {
+            "member": "sab093-1b",
+            "how": "exact stem",
+            "cos": 0.734376
+          },
+          {
+            "member": "el037-1b",
+            "how": "exact stem",
+            "cos": 0.465856
+          }
+        ]
+      },
+      {
+        "rep": "sab017-2a",
+        "members": [
+          "sab017-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab020-1a",
+        "members": [
+          "sab020-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab021-1a",
+        "members": [
+          "sab021-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab022-1a",
+        "members": [
+          "sab022-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab022-1b",
+        "members": [
+          "sab022-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab023-1a",
+        "members": [
+          "sab023-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab023-1b",
+        "members": [
+          "sab023-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab024-1a",
+        "members": [
+          "sab024-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab024-1b",
+        "members": [
+          "sab024-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab028-1a",
+        "members": [
+          "sab028-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab028-1b",
+        "members": [
+          "sab028-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab035-1b",
+        "members": [
+          "sab035-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab047-1b",
+        "members": [
+          "sab047-1b",
+          "sab053-1b",
+          "sab055-1b",
+          "sab058-1b",
+          "sch012-1b",
+          "sb002-1b",
+          "sb003-1b",
+          "sb004-1b",
+          "sb006-1b",
+          "sb007-1b",
+          "sb008-1b",
+          "sb011-1b",
+          "sb012-1b",
+          "sb013-1b",
+          "sb014-1b",
+          "sb021-1b",
+          "sb022-1a",
+          "sb034-1b"
+        ],
+        "min_cos": 0.691,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab053-1b",
+            "how": "exact stem",
+            "cos": 0.824728
+          },
+          {
+            "member": "sab055-1b",
+            "how": "gloss cosine",
+            "cos": 0.904265
+          },
+          {
+            "member": "sab058-1b",
+            "how": "exact stem",
+            "cos": 0.867996
+          },
+          {
+            "member": "sch012-1b",
+            "how": "gloss cosine",
+            "cos": 0.827152
+          },
+          {
+            "member": "sb002-1b",
+            "how": "gloss cosine",
+            "cos": 0.884173
+          },
+          {
+            "member": "sb003-1b",
+            "how": "gloss cosine",
+            "cos": 0.813799
+          },
+          {
+            "member": "sb004-1b",
+            "how": "exact stem",
+            "cos": 0.826395
+          },
+          {
+            "member": "sb006-1b",
+            "how": "exact stem",
+            "cos": 0.717873
+          },
+          {
+            "member": "sb007-1b",
+            "how": "exact stem",
+            "cos": 0.745072
+          },
+          {
+            "member": "sb008-1b",
+            "how": "exact stem",
+            "cos": 0.740084
+          },
+          {
+            "member": "sb011-1b",
+            "how": "exact stem",
+            "cos": 0.85287
+          },
+          {
+            "member": "sb012-1b",
+            "how": "exact stem",
+            "cos": 0.91825
+          },
+          {
+            "member": "sb013-1b",
+            "how": "exact stem",
+            "cos": 0.756361
+          },
+          {
+            "member": "sb014-1b",
+            "how": "exact stem",
+            "cos": 0.8296
+          },
+          {
+            "member": "sb021-1b",
+            "how": "exact stem",
+            "cos": 0.833376
+          },
+          {
+            "member": "sb022-1a",
+            "how": "exact stem",
+            "cos": 0.727563
+          },
+          {
+            "member": "sb034-1b",
+            "how": "exact stem",
+            "cos": 0.691
+          }
+        ]
+      },
+      {
+        "rep": "sab052-1b",
+        "members": [
+          "sab052-1b",
+          "sab057-1a",
+          "sch052-1b",
+          "sch055-1b"
+        ],
+        "min_cos": 0.654254,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab057-1a",
+            "how": "exact stem",
+            "cos": 0.665819
+          },
+          {
+            "member": "sch052-1b",
+            "how": "gloss cosine",
+            "cos": 0.837926
+          },
+          {
+            "member": "sch055-1b",
+            "how": "exact stem",
+            "cos": 0.654254
+          }
+        ]
+      },
+      {
+        "rep": "sab056-1a",
+        "members": [
+          "sab056-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab056-1b",
+        "members": [
+          "sab056-1b",
+          "sab110-1b",
+          "sch023-1b",
+          "sch024-1b",
+          "sch043-1b",
+          "sch056-1b"
+        ],
+        "min_cos": 0.664365,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "sab110-1b",
+            "how": "gloss cosine",
+            "cos": 0.87656
+          },
+          {
+            "member": "sch023-1b",
+            "how": "exact stem",
+            "cos": 0.711228
+          },
+          {
+            "member": "sch024-1b",
+            "how": "exact stem",
+            "cos": 0.664365
+          },
+          {
+            "member": "sch043-1b",
+            "how": "exact stem",
+            "cos": 0.687261
+          },
+          {
+            "member": "sch056-1b",
+            "how": "exact stem",
+            "cos": 0.763172
+          }
+        ]
+      },
+      {
+        "rep": "sab057-1b",
+        "members": [
+          "sab057-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab063-1a",
+        "members": [
+          "sab063-1a",
+          "sch003-2a",
+          "sch089-1a"
+        ],
+        "min_cos": 0.599403,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch003-2a",
+            "how": "exact stem",
+            "cos": 0.650905
+          },
+          {
+            "member": "sch089-1a",
+            "how": "exact stem",
+            "cos": 0.599403
+          }
+        ]
+      },
+      {
+        "rep": "sab068-1a",
+        "members": [
+          "sab068-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab068-1b",
+        "members": [
+          "sab068-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab070-1b",
+        "members": [
+          "sab070-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab076-1a",
+        "members": [
+          "sab076-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab090-1a",
+        "members": [
+          "sab090-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab090-1b",
+        "members": [
+          "sab090-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab091-1b",
+        "members": [
+          "sab091-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab091-2a",
+        "members": [
+          "sab091-2a",
+          "sab092-2a"
+        ],
+        "min_cos": 0.663622,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sab092-2a",
+            "how": "exact stem",
+            "cos": 0.663622
+          }
+        ]
+      },
+      {
+        "rep": "sab093-1a",
+        "members": [
+          "sab093-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab093-2a",
+        "members": [
+          "sab093-2a",
+          "sab094-1a"
+        ],
+        "min_cos": 0.822665,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sab094-1a",
+            "how": "gloss cosine",
+            "cos": 0.822665
+          }
+        ]
+      },
+      {
+        "rep": "sab094-1b",
+        "members": [
+          "sab094-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab094-2b",
+        "members": [
+          "sab094-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab099-1b",
+        "members": [
+          "sab099-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab099-2b",
+        "members": [
+          "sab099-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab100-1a",
+        "members": [
+          "sab100-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab100-1b",
+        "members": [
+          "sab100-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab100-2a",
+        "members": [
+          "sab100-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab100-2b",
+        "members": [
+          "sab100-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab102-1a",
+        "members": [
+          "sab102-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab102-1b",
+        "members": [
+          "sab102-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab103-1a",
+        "members": [
+          "sab103-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab103-1b",
+        "members": [
+          "sab103-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab103-2a",
+        "members": [
+          "sab103-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab103-2b",
+        "members": [
+          "sab103-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab105-1a",
+        "members": [
+          "sab105-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab105-1b",
+        "members": [
+          "sab105-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab109-1b",
+        "members": [
+          "sab109-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab109-2a",
+        "members": [
+          "sab109-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab109-2b",
+        "members": [
+          "sab109-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab110-1a",
+        "members": [
+          "sab110-1a",
+          "sch043-1a"
+        ],
+        "min_cos": 0.7408,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch043-1a",
+            "how": "exact stem",
+            "cos": 0.7408
+          }
+        ]
+      },
+      {
+        "rep": "sab110-2a",
+        "members": [
+          "sab110-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab110-2b",
+        "members": [
+          "sab110-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab111-1a",
+        "members": [
+          "sab111-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab111-1b",
+        "members": [
+          "sab111-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab112-1a",
+        "members": [
+          "sab112-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab112-1b",
+        "members": [
+          "sab112-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab115-1a",
+        "members": [
+          "sab115-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sab115-1b",
+        "members": [
+          "sab115-1b",
+          "sab116-1b",
+          "el003-1b"
+        ],
+        "min_cos": 0.480242,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "sab116-1b",
+            "how": "gloss cosine",
+            "cos": 0.836278
+          },
+          {
+            "member": "el003-1b",
+            "how": "exact stem",
+            "cos": 0.480242
+          }
+        ]
+      },
+      {
+        "rep": "sab116-1a",
+        "members": [
+          "sab116-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af002-1a",
+        "members": [
+          "af002-1a",
+          "af009-1a",
+          "af035-1a",
+          "af068-1a",
+          "af069-1a",
+          "af091-1a",
+          "af114-2a",
+          "af174-1a"
+        ],
+        "min_cos": 0.55281,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af009-1a",
+            "how": "exact stem",
+            "cos": 0.73924
+          },
+          {
+            "member": "af035-1a",
+            "how": "exact stem",
+            "cos": 0.714847
+          },
+          {
+            "member": "af068-1a",
+            "how": "exact stem",
+            "cos": 0.734417
+          },
+          {
+            "member": "af069-1a",
+            "how": "exact stem",
+            "cos": 0.723116
+          },
+          {
+            "member": "af091-1a",
+            "how": "exact stem",
+            "cos": 0.697811
+          },
+          {
+            "member": "af114-2a",
+            "how": "exact stem",
+            "cos": 0.726821
+          },
+          {
+            "member": "af174-1a",
+            "how": "exact stem",
+            "cos": 0.55281
+          }
+        ]
+      },
+      {
+        "rep": "af002-1b",
+        "members": [
+          "af002-1b",
+          "af005-1b",
+          "af006-1b",
+          "af008-1b",
+          "af011-1b",
+          "af013-1b",
+          "af014-1b",
+          "af022-1b",
+          "af026-1b",
+          "af035-1b",
+          "af041-1b",
+          "af062-1b",
+          "af073-1b",
+          "af091-1b",
+          "af140-1a",
+          "af144-1b",
+          "af156-1b",
+          "af157-1b"
+        ],
+        "min_cos": 0.669241,
+        "pole": "virtue",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "af005-1b",
+            "how": "exact stem",
+            "cos": 0.860557
+          },
+          {
+            "member": "af006-1b",
+            "how": "exact stem",
+            "cos": 0.802897
+          },
+          {
+            "member": "af008-1b",
+            "how": "exact stem",
+            "cos": 0.81101
+          },
+          {
+            "member": "af011-1b",
+            "how": "exact stem",
+            "cos": 0.730735
+          },
+          {
+            "member": "af013-1b",
+            "how": "exact stem",
+            "cos": 0.796785
+          },
+          {
+            "member": "af014-1b",
+            "how": "exact stem",
+            "cos": 0.898417
+          },
+          {
+            "member": "af022-1b",
+            "how": "exact stem",
+            "cos": 0.742265
+          },
+          {
+            "member": "af026-1b",
+            "how": "exact stem",
+            "cos": 0.806129
+          },
+          {
+            "member": "af035-1b",
+            "how": "exact stem",
+            "cos": 0.881341
+          },
+          {
+            "member": "af041-1b",
+            "how": "gloss cosine",
+            "cos": 0.813279
+          },
+          {
+            "member": "af062-1b",
+            "how": "exact stem",
+            "cos": 0.828866
+          },
+          {
+            "member": "af073-1b",
+            "how": "exact stem",
+            "cos": 0.916138
+          },
+          {
+            "member": "af091-1b",
+            "how": "exact stem",
+            "cos": 0.911319
+          },
+          {
+            "member": "af140-1a",
+            "how": "exact stem",
+            "cos": 0.669241
+          },
+          {
+            "member": "af144-1b",
+            "how": "exact stem",
+            "cos": 0.816894
+          },
+          {
+            "member": "af156-1b",
+            "how": "exact stem",
+            "cos": 0.718565
+          },
+          {
+            "member": "af157-1b",
+            "how": "exact stem",
+            "cos": 0.832272
+          }
+        ]
+      },
+      {
+        "rep": "af003-1a",
+        "members": [
+          "af003-1a",
+          "af005-1a",
+          "af007-1a",
+          "af010-1a",
+          "af013-1a",
+          "af026-1a",
+          "af056-1a",
+          "af062-1a",
+          "af064-1a",
+          "af072-1a",
+          "af073-1a",
+          "af144-1a",
+          "af182-1a",
+          "sch023-2a"
+        ],
+        "min_cos": 0.517716,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af005-1a",
+            "how": "exact stem",
+            "cos": 0.718106
+          },
+          {
+            "member": "af007-1a",
+            "how": "exact stem",
+            "cos": 0.670786
+          },
+          {
+            "member": "af010-1a",
+            "how": "exact stem",
+            "cos": 0.517716
+          },
+          {
+            "member": "af013-1a",
+            "how": "exact stem",
+            "cos": 0.632658
+          },
+          {
+            "member": "af026-1a",
+            "how": "exact stem",
+            "cos": 0.64447
+          },
+          {
+            "member": "af056-1a",
+            "how": "exact stem",
+            "cos": 0.74084
+          },
+          {
+            "member": "af062-1a",
+            "how": "exact stem",
+            "cos": 0.663873
+          },
+          {
+            "member": "af064-1a",
+            "how": "exact stem",
+            "cos": 0.813959
+          },
+          {
+            "member": "af072-1a",
+            "how": "exact stem",
+            "cos": 0.673909
+          },
+          {
+            "member": "af073-1a",
+            "how": "exact stem",
+            "cos": 0.704931
+          },
+          {
+            "member": "af144-1a",
+            "how": "exact stem",
+            "cos": 0.658128
+          },
+          {
+            "member": "af182-1a",
+            "how": "exact stem",
+            "cos": 0.69145
+          },
+          {
+            "member": "sch023-2a",
+            "how": "exact stem",
+            "cos": 0.669137
+          }
+        ]
+      },
+      {
+        "rep": "af004-1a",
+        "members": [
+          "af004-1a",
+          "af022-1a",
+          "af028-1a",
+          "af065-1a"
+        ],
+        "min_cos": 0.784868,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af022-1a",
+            "how": "exact stem",
+            "cos": 0.79291
+          },
+          {
+            "member": "af028-1a",
+            "how": "exact stem",
+            "cos": 0.846186
+          },
+          {
+            "member": "af065-1a",
+            "how": "exact stem",
+            "cos": 0.784868
+          }
+        ]
+      },
+      {
+        "rep": "af004-2a",
+        "members": [
+          "af004-2a",
+          "af006-2a"
+        ],
+        "min_cos": 0.728576,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af006-2a",
+            "how": "exact stem",
+            "cos": 0.728576
+          }
+        ]
+      },
+      {
+        "rep": "af004-2b",
+        "members": [
+          "af004-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af006-1a",
+        "members": [
+          "af006-1a",
+          "af008-1a",
+          "af014-1a",
+          "af041-1a",
+          "af063-1a"
+        ],
+        "min_cos": 0.803472,
+        "pole": "vice",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "af008-1a",
+            "how": "exact stem",
+            "cos": 0.882921
+          },
+          {
+            "member": "af014-1a",
+            "how": "exact stem",
+            "cos": 0.82036
+          },
+          {
+            "member": "af041-1a",
+            "how": "gloss cosine",
+            "cos": 0.866473
+          },
+          {
+            "member": "af063-1a",
+            "how": "exact stem",
+            "cos": 0.803472
+          }
+        ]
+      },
+      {
+        "rep": "af007-1b",
+        "members": [
+          "af007-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af009-2a",
+        "members": [
+          "af009-2a",
+          "af018-1a",
+          "af041-2a",
+          "af050-1a"
+        ],
+        "min_cos": 0.589559,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "af018-1a",
+            "how": "gloss cosine",
+            "cos": 0.825767
+          },
+          {
+            "member": "af041-2a",
+            "how": "exact stem",
+            "cos": 0.618786
+          },
+          {
+            "member": "af050-1a",
+            "how": "exact stem",
+            "cos": 0.589559
+          }
+        ]
+      },
+      {
+        "rep": "af009-2b",
+        "members": [
+          "af009-2b",
+          "af179-1b",
+          "sch006-1b",
+          "sch015-1b",
+          "sch037-1b",
+          "sch077-1b",
+          "sch087-1b",
+          "sch089-1b"
+        ],
+        "min_cos": 0.569457,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af179-1b",
+            "how": "exact stem",
+            "cos": 0.708872
+          },
+          {
+            "member": "sch006-1b",
+            "how": "exact stem",
+            "cos": 0.679892
+          },
+          {
+            "member": "sch015-1b",
+            "how": "exact stem",
+            "cos": 0.569457
+          },
+          {
+            "member": "sch037-1b",
+            "how": "exact stem",
+            "cos": 0.676783
+          },
+          {
+            "member": "sch077-1b",
+            "how": "exact stem",
+            "cos": 0.574998
+          },
+          {
+            "member": "sch087-1b",
+            "how": "exact stem",
+            "cos": 0.603144
+          },
+          {
+            "member": "sch089-1b",
+            "how": "exact stem",
+            "cos": 0.611049
+          }
+        ]
+      },
+      {
+        "rep": "af010-1b",
+        "members": [
+          "af010-1b",
+          "af124-1b",
+          "sb024-1b"
+        ],
+        "min_cos": 0.661875,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af124-1b",
+            "how": "exact stem",
+            "cos": 0.753641
+          },
+          {
+            "member": "sb024-1b",
+            "how": "exact stem",
+            "cos": 0.661875
+          }
+        ]
+      },
+      {
+        "rep": "af011-1a",
+        "members": [
+          "af011-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af017-1a",
+        "members": [
+          "af017-1a",
+          "af036-1a",
+          "af066-1a",
+          "sch011-1a",
+          "sch022-1a",
+          "sch042-1a"
+        ],
+        "min_cos": 0.566833,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "af036-1a",
+            "how": "gloss cosine",
+            "cos": 0.829381
+          },
+          {
+            "member": "af066-1a",
+            "how": "exact stem",
+            "cos": 0.785748
+          },
+          {
+            "member": "sch011-1a",
+            "how": "exact stem",
+            "cos": 0.570409
+          },
+          {
+            "member": "sch022-1a",
+            "how": "exact stem",
+            "cos": 0.566833
+          },
+          {
+            "member": "sch042-1a",
+            "how": "exact stem",
+            "cos": 0.589889
+          }
+        ]
+      },
+      {
+        "rep": "af017-1b",
+        "members": [
+          "af017-1b",
+          "af023-1b",
+          "af032-1b",
+          "af036-1b",
+          "af159-1a",
+          "af177-1b",
+          "sch060-1b"
+        ],
+        "min_cos": 0.680862,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "af023-1b",
+            "how": "gloss cosine",
+            "cos": 0.834471
+          },
+          {
+            "member": "af032-1b",
+            "how": "exact stem",
+            "cos": 0.874725
+          },
+          {
+            "member": "af036-1b",
+            "how": "exact stem",
+            "cos": 0.806802
+          },
+          {
+            "member": "af159-1a",
+            "how": "exact stem",
+            "cos": 0.80642
+          },
+          {
+            "member": "af177-1b",
+            "how": "exact stem",
+            "cos": 0.818769
+          },
+          {
+            "member": "sch060-1b",
+            "how": "exact stem",
+            "cos": 0.680862
+          }
+        ]
+      },
+      {
+        "rep": "af018-1b",
+        "members": [
+          "af018-1b",
+          "af041-2b",
+          "af089-1b"
+        ],
+        "min_cos": 0.581799,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af041-2b",
+            "how": "exact stem",
+            "cos": 0.645765
+          },
+          {
+            "member": "af089-1b",
+            "how": "exact stem",
+            "cos": 0.581799
+          }
+        ]
+      },
+      {
+        "rep": "af021-1a",
+        "members": [
+          "af021-1a",
+          "af027-1a",
+          "af031-1a",
+          "af042-1a",
+          "af044-1a",
+          "af157-1a"
+        ],
+        "min_cos": 0.822634,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "af027-1a",
+            "how": "gloss cosine",
+            "cos": 0.84273
+          },
+          {
+            "member": "af031-1a",
+            "how": "gloss cosine",
+            "cos": 0.874649
+          },
+          {
+            "member": "af042-1a",
+            "how": "exact stem",
+            "cos": 0.832367
+          },
+          {
+            "member": "af044-1a",
+            "how": "exact stem",
+            "cos": 0.850696
+          },
+          {
+            "member": "af157-1a",
+            "how": "exact stem",
+            "cos": 0.822634
+          }
+        ]
+      },
+      {
+        "rep": "af021-1b",
+        "members": [
+          "af021-1b",
+          "af024-1b",
+          "af027-1b",
+          "af031-1b",
+          "af042-1b",
+          "af044-1b",
+          "af056-1b",
+          "af063-1b",
+          "af066-1b",
+          "af106-1b",
+          "af114-2b",
+          "sch010-1b",
+          "sch011-1b"
+        ],
+        "min_cos": 0.645231,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af024-1b",
+            "how": "exact stem",
+            "cos": 0.662975
+          },
+          {
+            "member": "af027-1b",
+            "how": "exact stem",
+            "cos": 0.751204
+          },
+          {
+            "member": "af031-1b",
+            "how": "exact stem",
+            "cos": 0.782703
+          },
+          {
+            "member": "af042-1b",
+            "how": "exact stem",
+            "cos": 0.787549
+          },
+          {
+            "member": "af044-1b",
+            "how": "exact stem",
+            "cos": 0.717124
+          },
+          {
+            "member": "af056-1b",
+            "how": "exact stem",
+            "cos": 0.645231
+          },
+          {
+            "member": "af063-1b",
+            "how": "exact stem",
+            "cos": 0.774928
+          },
+          {
+            "member": "af066-1b",
+            "how": "exact stem",
+            "cos": 0.716624
+          },
+          {
+            "member": "af106-1b",
+            "how": "exact stem",
+            "cos": 0.693605
+          },
+          {
+            "member": "af114-2b",
+            "how": "exact stem",
+            "cos": 0.819946
+          },
+          {
+            "member": "sch010-1b",
+            "how": "exact stem",
+            "cos": 0.81355
+          },
+          {
+            "member": "sch011-1b",
+            "how": "exact stem",
+            "cos": 0.7526
+          }
+        ]
+      },
+      {
+        "rep": "af023-1a",
+        "members": [
+          "af023-1a",
+          "af084-1a",
+          "af156-1a"
+        ],
+        "min_cos": 0.852393,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "af084-1a",
+            "how": "gloss cosine",
+            "cos": 0.852393
+          },
+          {
+            "member": "af156-1a",
+            "how": "gloss cosine",
+            "cos": 0.913439
+          }
+        ]
+      },
+      {
+        "rep": "af024-1a",
+        "members": [
+          "af024-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af032-1a",
+        "members": [
+          "af032-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af038-1a",
+        "members": [
+          "af038-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af043-1r1a",
+        "members": [
+          "af043-1r1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af043-1r1b",
+        "members": [
+          "af043-1r1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af045-1a",
+        "members": [
+          "af045-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af045-1b",
+        "members": [
+          "af045-1b",
+          "af114-1b"
+        ],
+        "min_cos": 0.845526,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "af114-1b",
+            "how": "gloss cosine",
+            "cos": 0.845526
+          }
+        ]
+      },
+      {
+        "rep": "af045-2a",
+        "members": [
+          "af045-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af045-2b",
+        "members": [
+          "af045-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af049-1a",
+        "members": [
+          "af049-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af049-1b",
+        "members": [
+          "af049-1b",
+          "af051-1b"
+        ],
+        "min_cos": 0.598672,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af051-1b",
+            "how": "exact stem",
+            "cos": 0.598672
+          }
+        ]
+      },
+      {
+        "rep": "af050-1b",
+        "members": [
+          "af050-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af051-1a",
+        "members": [
+          "af051-1a",
+          "af179-1a"
+        ],
+        "min_cos": 0.721347,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af179-1a",
+            "how": "exact stem",
+            "cos": 0.721347
+          }
+        ]
+      },
+      {
+        "rep": "af051-2a",
+        "members": [
+          "af051-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af051-2b",
+        "members": [
+          "af051-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af052-1a",
+        "members": [
+          "af052-1a",
+          "af090-1b",
+          "af180-1a"
+        ],
+        "min_cos": 0.757715,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "af090-1b",
+            "how": "gloss cosine",
+            "cos": 0.812878
+          },
+          {
+            "member": "af180-1a",
+            "how": "exact stem",
+            "cos": 0.757715
+          }
+        ]
+      },
+      {
+        "rep": "af052-1b",
+        "members": [
+          "af052-1b",
+          "af072-1b",
+          "af180-1b",
+          "sch078-1b",
+          "em044-1b",
+          "em046-1b"
+        ],
+        "min_cos": 0.400778,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af072-1b",
+            "how": "exact stem",
+            "cos": 0.646497
+          },
+          {
+            "member": "af180-1b",
+            "how": "exact stem",
+            "cos": 0.767167
+          },
+          {
+            "member": "sch078-1b",
+            "how": "exact stem",
+            "cos": 0.75435
+          },
+          {
+            "member": "em044-1b",
+            "how": "exact stem",
+            "cos": 0.400778
+          },
+          {
+            "member": "em046-1b",
+            "how": "exact stem",
+            "cos": 0.632322
+          }
+        ]
+      },
+      {
+        "rep": "af052-2a",
+        "members": [
+          "af052-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af052-2b",
+        "members": [
+          "af052-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af054-1a",
+        "members": [
+          "af054-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af054-1b",
+        "members": [
+          "af054-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af054-2a",
+        "members": [
+          "af054-2a",
+          "em033-1a",
+          "el011-1a",
+          "el015-1a",
+          "el030-1a"
+        ],
+        "min_cos": 0.520904,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em033-1a",
+            "how": "exact stem",
+            "cos": 0.520904
+          },
+          {
+            "member": "el011-1a",
+            "how": "exact stem",
+            "cos": 0.726938
+          },
+          {
+            "member": "el015-1a",
+            "how": "exact stem",
+            "cos": 0.831204
+          },
+          {
+            "member": "el030-1a",
+            "how": "exact stem",
+            "cos": 0.721392
+          }
+        ]
+      },
+      {
+        "rep": "af054-2b",
+        "members": [
+          "af054-2b",
+          "el004-1b",
+          "el005-1b",
+          "el015-1b",
+          "el031-1b"
+        ],
+        "min_cos": 0.715351,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "el004-1b",
+            "how": "gloss cosine",
+            "cos": 0.81618
+          },
+          {
+            "member": "el005-1b",
+            "how": "exact stem",
+            "cos": 0.717944
+          },
+          {
+            "member": "el015-1b",
+            "how": "exact stem",
+            "cos": 0.85965
+          },
+          {
+            "member": "el031-1b",
+            "how": "exact stem",
+            "cos": 0.715351
+          }
+        ]
+      },
+      {
+        "rep": "af059-1a",
+        "members": [
+          "af059-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af063-2a",
+        "members": [
+          "af063-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af063-2b",
+        "members": [
+          "af063-2b",
+          "sch028-2b",
+          "sch030-1b"
+        ],
+        "min_cos": 0.651335,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch028-2b",
+            "how": "exact stem",
+            "cos": 0.651335
+          },
+          {
+            "member": "sch030-1b",
+            "how": "exact stem",
+            "cos": 0.691124
+          }
+        ]
+      },
+      {
+        "rep": "af064-1b",
+        "members": [
+          "af064-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af064-2a",
+        "members": [
+          "af064-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af064-2b",
+        "members": [
+          "af064-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af069-1b",
+        "members": [
+          "af069-1b",
+          "sch017-1b",
+          "sch039-1b",
+          "sch083-1b",
+          "sch092-1b",
+          "em022-1b"
+        ],
+        "min_cos": 0.411747,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch017-1b",
+            "how": "exact stem",
+            "cos": 0.411747
+          },
+          {
+            "member": "sch039-1b",
+            "how": "exact stem",
+            "cos": 0.651455
+          },
+          {
+            "member": "sch083-1b",
+            "how": "exact stem",
+            "cos": 0.547181
+          },
+          {
+            "member": "sch092-1b",
+            "how": "exact stem",
+            "cos": 0.543469
+          },
+          {
+            "member": "em022-1b",
+            "how": "exact stem",
+            "cos": 0.872023
+          }
+        ]
+      },
+      {
+        "rep": "af081-1a",
+        "members": [
+          "af081-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af081-1b",
+        "members": [
+          "af081-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af082-1a",
+        "members": [
+          "af082-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af082-1b",
+        "members": [
+          "af082-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af087-1a",
+        "members": [
+          "af087-1a",
+          "af121-1a"
+        ],
+        "min_cos": 0.770949,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "af121-1a",
+            "how": "exact stem",
+            "cos": 0.770949
+          }
+        ]
+      },
+      {
+        "rep": "af087-1b",
+        "members": [
+          "af087-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af089-1a",
+        "members": [
+          "af089-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af090-2a",
+        "members": [
+          "af090-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af090-2b",
+        "members": [
+          "af090-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af092-1a",
+        "members": [
+          "af092-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af092-1b",
+        "members": [
+          "af092-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af093-1a",
+        "members": [
+          "af093-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af093-1b",
+        "members": [
+          "af093-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af095-1a",
+        "members": [
+          "af095-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af095-1b",
+        "members": [
+          "af095-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af096-1a",
+        "members": [
+          "af096-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af096-1b",
+        "members": [
+          "af096-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af098-1a",
+        "members": [
+          "af098-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af098-1b",
+        "members": [
+          "af098-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af101-1a",
+        "members": [
+          "af101-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af101-1b",
+        "members": [
+          "af101-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af106-1a",
+        "members": [
+          "af106-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af106-2a",
+        "members": [
+          "af106-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af106-2b",
+        "members": [
+          "af106-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af107-1a",
+        "members": [
+          "af107-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af107-1b",
+        "members": [
+          "af107-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af108-1a",
+        "members": [
+          "af108-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af108-1b",
+        "members": [
+          "af108-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af108-2a",
+        "members": [
+          "af108-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af108-2b",
+        "members": [
+          "af108-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af110-1a",
+        "members": [
+          "af110-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af110-1b",
+        "members": [
+          "af110-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af111-1a",
+        "members": [
+          "af111-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af112-1a",
+        "members": [
+          "af112-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af113-1a",
+        "members": [
+          "af113-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af113-1b",
+        "members": [
+          "af113-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af113-2a",
+        "members": [
+          "af113-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af113-2b",
+        "members": [
+          "af113-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af114-1a",
+        "members": [
+          "af114-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af116-1a",
+        "members": [
+          "af116-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af116-1b",
+        "members": [
+          "af116-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af119-1a",
+        "members": [
+          "af119-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af119-1b",
+        "members": [
+          "af119-1b",
+          "sch028-1b"
+        ],
+        "min_cos": 0.557306,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch028-1b",
+            "how": "exact stem",
+            "cos": 0.557306
+          }
+        ]
+      },
+      {
+        "rep": "af120-1a",
+        "members": [
+          "af120-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af120-1b",
+        "members": [
+          "af120-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af121-1b",
+        "members": [
+          "af121-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af124-1a",
+        "members": [
+          "af124-1a",
+          "sch026-1a"
+        ],
+        "min_cos": 0.733672,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch026-1a",
+            "how": "exact stem",
+            "cos": 0.733672
+          }
+        ]
+      },
+      {
+        "rep": "af135-1a",
+        "members": [
+          "af135-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af135-1b",
+        "members": [
+          "af135-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af139-1b",
+        "members": [
+          "af139-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af140-1b",
+        "members": [
+          "af140-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af151-1a",
+        "members": [
+          "af151-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af151-1b",
+        "members": [
+          "af151-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af151-2a",
+        "members": [
+          "af151-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af151-2b",
+        "members": [
+          "af151-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af154-1a",
+        "members": [
+          "af154-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af154-1b",
+        "members": [
+          "af154-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af159-1b",
+        "members": [
+          "af159-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af166-1a",
+        "members": [
+          "af166-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af166-1b",
+        "members": [
+          "af166-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af166-2a",
+        "members": [
+          "af166-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af166-2b",
+        "members": [
+          "af166-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af170-1a",
+        "members": [
+          "af170-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af170-1b",
+        "members": [
+          "af170-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af174-1b",
+        "members": [
+          "af174-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af175-1a",
+        "members": [
+          "af175-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af175-1b",
+        "members": [
+          "af175-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af177-1a",
+        "members": [
+          "af177-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af178-1a",
+        "members": [
+          "af178-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af178-1b",
+        "members": [
+          "af178-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af178-2a",
+        "members": [
+          "af178-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af178-2b",
+        "members": [
+          "af178-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af179-2b",
+        "members": [
+          "af179-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af181-1a",
+        "members": [
+          "af181-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af181-1b",
+        "members": [
+          "af181-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "af182-1b",
+        "members": [
+          "af182-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch002-1a",
+        "members": [
+          "sch002-1a",
+          "sch003-1a",
+          "sch004-1a",
+          "sch013-1a",
+          "sch028-1a"
+        ],
+        "min_cos": 0.706295,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "sch003-1a",
+            "how": "gloss cosine",
+            "cos": 0.83579
+          },
+          {
+            "member": "sch004-1a",
+            "how": "exact stem",
+            "cos": 0.77764
+          },
+          {
+            "member": "sch013-1a",
+            "how": "exact stem",
+            "cos": 0.706295
+          },
+          {
+            "member": "sch028-1a",
+            "how": "exact stem",
+            "cos": 0.74161
+          }
+        ]
+      },
+      {
+        "rep": "sch002-1b",
+        "members": [
+          "sch002-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch002-2a",
+        "members": [
+          "sch002-2a",
+          "sch019-1a",
+          "sch032-2a",
+          "sch047-1a",
+          "sch076-1a"
+        ],
+        "min_cos": 0.780998,
+        "pole": "vice",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sch019-1a",
+            "how": "exact stem",
+            "cos": 0.814459
+          },
+          {
+            "member": "sch032-2a",
+            "how": "exact stem",
+            "cos": 0.819219
+          },
+          {
+            "member": "sch047-1a",
+            "how": "exact stem",
+            "cos": 0.780998
+          },
+          {
+            "member": "sch076-1a",
+            "how": "gloss cosine",
+            "cos": 0.821962
+          }
+        ]
+      },
+      {
+        "rep": "sch002-2b",
+        "members": [
+          "sch002-2b",
+          "sch019-1b",
+          "sch047-1b",
+          "sch048-1b",
+          "sch050-2b",
+          "sch077-2b",
+          "sch079-2b",
+          "sch085-2b",
+          "sch094-2b"
+        ],
+        "min_cos": 0.731901,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "sch019-1b",
+            "how": "gloss cosine",
+            "cos": 0.832106
+          },
+          {
+            "member": "sch047-1b",
+            "how": "gloss cosine",
+            "cos": 0.833095
+          },
+          {
+            "member": "sch048-1b",
+            "how": "gloss cosine",
+            "cos": 0.888452
+          },
+          {
+            "member": "sch050-2b",
+            "how": "gloss cosine",
+            "cos": 0.813326
+          },
+          {
+            "member": "sch077-2b",
+            "how": "exact stem",
+            "cos": 0.79752
+          },
+          {
+            "member": "sch079-2b",
+            "how": "exact stem",
+            "cos": 0.737314
+          },
+          {
+            "member": "sch085-2b",
+            "how": "exact stem",
+            "cos": 0.770009
+          },
+          {
+            "member": "sch094-2b",
+            "how": "exact stem",
+            "cos": 0.731901
+          }
+        ]
+      },
+      {
+        "rep": "sch003-2b",
+        "members": [
+          "sch003-2b",
+          "sch078-2b",
+          "sch079-1b",
+          "sch080-1b",
+          "sch082-1b",
+          "sch085-1b",
+          "sch094-1b"
+        ],
+        "min_cos": 0.531817,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch078-2b",
+            "how": "exact stem",
+            "cos": 0.541109
+          },
+          {
+            "member": "sch079-1b",
+            "how": "exact stem",
+            "cos": 0.634485
+          },
+          {
+            "member": "sch080-1b",
+            "how": "exact stem",
+            "cos": 0.805818
+          },
+          {
+            "member": "sch082-1b",
+            "how": "exact stem",
+            "cos": 0.531817
+          },
+          {
+            "member": "sch085-1b",
+            "how": "exact stem",
+            "cos": 0.797337
+          },
+          {
+            "member": "sch094-1b",
+            "how": "exact stem",
+            "cos": 0.820801
+          }
+        ]
+      },
+      {
+        "rep": "sch004-2a",
+        "members": [
+          "sch004-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch004-2b",
+        "members": [
+          "sch004-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch006-1a",
+        "members": [
+          "sch006-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch007-1a",
+        "members": [
+          "sch007-1a",
+          "sch038-1a"
+        ],
+        "min_cos": 0.898666,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sch038-1a",
+            "how": "gloss cosine",
+            "cos": 0.898666
+          }
+        ]
+      },
+      {
+        "rep": "sch007-1b",
+        "members": [
+          "sch007-1b",
+          "sch016-1b",
+          "sch075-1b"
+        ],
+        "min_cos": 0.724068,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch016-1b",
+            "how": "exact stem",
+            "cos": 0.724068
+          },
+          {
+            "member": "sch075-1b",
+            "how": "exact stem",
+            "cos": 0.752005
+          }
+        ]
+      },
+      {
+        "rep": "sch008-1a",
+        "members": [
+          "sch008-1a",
+          "sch039-1a"
+        ],
+        "min_cos": 0.785529,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch039-1a",
+            "how": "exact stem",
+            "cos": 0.785529
+          }
+        ]
+      },
+      {
+        "rep": "sch008-1b",
+        "members": [
+          "sch008-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch009-1a",
+        "members": [
+          "sch009-1a",
+          "sch020-1a",
+          "sch027-1a",
+          "sch032-1a",
+          "sch091-1a"
+        ],
+        "min_cos": 0.646457,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch020-1a",
+            "how": "exact stem",
+            "cos": 0.668372
+          },
+          {
+            "member": "sch027-1a",
+            "how": "exact stem",
+            "cos": 0.670964
+          },
+          {
+            "member": "sch032-1a",
+            "how": "exact stem",
+            "cos": 0.654729
+          },
+          {
+            "member": "sch091-1a",
+            "how": "exact stem",
+            "cos": 0.646457
+          }
+        ]
+      },
+      {
+        "rep": "sch009-2a",
+        "members": [
+          "sch009-2a",
+          "sch071-1b",
+          "sch095-2b"
+        ],
+        "min_cos": 0.522717,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch071-1b",
+            "how": "exact stem",
+            "cos": 0.522717
+          },
+          {
+            "member": "sch095-2b",
+            "how": "exact stem",
+            "cos": 0.600635
+          }
+        ]
+      },
+      {
+        "rep": "sch009-2b",
+        "members": [
+          "sch009-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch010-1a",
+        "members": [
+          "sch010-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch013-1b",
+        "members": [
+          "sch013-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch013-2a",
+        "members": [
+          "sch013-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch014-1a",
+        "members": [
+          "sch014-1a",
+          "sch018-1a",
+          "sch049-1a",
+          "sch060-1a"
+        ],
+        "min_cos": 0.678833,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch018-1a",
+            "how": "exact stem",
+            "cos": 0.678833
+          },
+          {
+            "member": "sch049-1a",
+            "how": "exact stem",
+            "cos": 0.856433
+          },
+          {
+            "member": "sch060-1a",
+            "how": "exact stem",
+            "cos": 0.821158
+          }
+        ]
+      },
+      {
+        "rep": "sch014-1b",
+        "members": [
+          "sch014-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch015-1a",
+        "members": [
+          "sch015-1a",
+          "sch037-1a",
+          "sch077-1a",
+          "sch085-1a"
+        ],
+        "min_cos": 0.596333,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch037-1a",
+            "how": "exact stem",
+            "cos": 0.715068
+          },
+          {
+            "member": "sch077-1a",
+            "how": "exact stem",
+            "cos": 0.596333
+          },
+          {
+            "member": "sch085-1a",
+            "how": "exact stem",
+            "cos": 0.680157
+          }
+        ]
+      },
+      {
+        "rep": "sch016-1a",
+        "members": [
+          "sch016-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch017-1a",
+        "members": [
+          "sch017-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch018-2a",
+        "members": [
+          "sch018-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch018-2b",
+        "members": [
+          "sch018-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch020-1b",
+        "members": [
+          "sch020-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch021-1a",
+        "members": [
+          "sch021-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch021-1b",
+        "members": [
+          "sch021-1b",
+          "sch049-1b"
+        ],
+        "min_cos": 0.830102,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sch049-1b",
+            "how": "gloss cosine",
+            "cos": 0.830102
+          }
+        ]
+      },
+      {
+        "rep": "sch022-1b",
+        "members": [
+          "sch022-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch027-2a",
+        "members": [
+          "sch027-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch027-2b",
+        "members": [
+          "sch027-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch028-2a",
+        "members": [
+          "sch028-2a",
+          "sch030-1a"
+        ],
+        "min_cos": 0.75433,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch030-1a",
+            "how": "exact stem",
+            "cos": 0.75433
+          }
+        ]
+      },
+      {
+        "rep": "sch038-1b",
+        "members": [
+          "sch038-1b",
+          "sch093-1b"
+        ],
+        "min_cos": 0.777204,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch093-1b",
+            "how": "exact stem",
+            "cos": 0.777204
+          }
+        ]
+      },
+      {
+        "rep": "sch038-2a",
+        "members": [
+          "sch038-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch038-2b",
+        "members": [
+          "sch038-2b",
+          "sch074-1b"
+        ],
+        "min_cos": 0.819653,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch074-1b",
+            "how": "exact stem",
+            "cos": 0.819653
+          }
+        ]
+      },
+      {
+        "rep": "sch040-1b",
+        "members": [
+          "sch040-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch041-1a",
+        "members": [
+          "sch041-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch041-1b",
+        "members": [
+          "sch041-1b",
+          "sch095-1b"
+        ],
+        "min_cos": 0.828893,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "sch095-1b",
+            "how": "gloss cosine",
+            "cos": 0.828893
+          }
+        ]
+      },
+      {
+        "rep": "sch046-1a",
+        "members": [
+          "sch046-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch046-1b",
+        "members": [
+          "sch046-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch048-1a",
+        "members": [
+          "sch048-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch048-2a",
+        "members": [
+          "sch048-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch048-2b",
+        "members": [
+          "sch048-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch049-2a",
+        "members": [
+          "sch049-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch049-2b",
+        "members": [
+          "sch049-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch050-1a",
+        "members": [
+          "sch050-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch050-1b",
+        "members": [
+          "sch050-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch050-2a",
+        "members": [
+          "sch050-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch056-2a",
+        "members": [
+          "sch056-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch071-1a",
+        "members": [
+          "sch071-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch074-1a",
+        "members": [
+          "sch074-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch075-1a",
+        "members": [
+          "sch075-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch076-1b",
+        "members": [
+          "sch076-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch077-2a",
+        "members": [
+          "sch077-2a",
+          "sch085-2a"
+        ],
+        "min_cos": 0.728561,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch085-2a",
+            "how": "exact stem",
+            "cos": 0.728561
+          }
+        ]
+      },
+      {
+        "rep": "sch078-1a",
+        "members": [
+          "sch078-1a",
+          "sch082-2a"
+        ],
+        "min_cos": 0.81217,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "sch082-2a",
+            "how": "exact stem",
+            "cos": 0.81217
+          }
+        ]
+      },
+      {
+        "rep": "sch078-2a",
+        "members": [
+          "sch078-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch079-1a",
+        "members": [
+          "sch079-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch079-2a",
+        "members": [
+          "sch079-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch080-1a",
+        "members": [
+          "sch080-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch082-1a",
+        "members": [
+          "sch082-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch083-1a",
+        "members": [
+          "sch083-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch083-2a",
+        "members": [
+          "sch083-2a",
+          "em002-2a",
+          "em004-2a",
+          "em011-2a",
+          "em018-1a",
+          "em024-2a"
+        ],
+        "min_cos": 0.564155,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em002-2a",
+            "how": "exact stem",
+            "cos": 0.567386
+          },
+          {
+            "member": "em004-2a",
+            "how": "exact stem",
+            "cos": 0.581372
+          },
+          {
+            "member": "em011-2a",
+            "how": "exact stem",
+            "cos": 0.564155
+          },
+          {
+            "member": "em018-1a",
+            "how": "exact stem",
+            "cos": 0.583868
+          },
+          {
+            "member": "em024-2a",
+            "how": "exact stem",
+            "cos": 0.681502
+          }
+        ]
+      },
+      {
+        "rep": "sch087-1a",
+        "members": [
+          "sch087-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch089-2a",
+        "members": [
+          "sch089-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch089-2b",
+        "members": [
+          "sch089-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch092-1a",
+        "members": [
+          "sch092-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch093-1a",
+        "members": [
+          "sch093-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch094-1a",
+        "members": [
+          "sch094-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch094-2a",
+        "members": [
+          "sch094-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch095-1a",
+        "members": [
+          "sch095-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sch095-2a",
+        "members": [
+          "sch095-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sb017-1a",
+        "members": [
+          "sb017-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sb017-1b",
+        "members": [
+          "sb017-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sb024-1a",
+        "members": [
+          "sb024-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sb039-1a",
+        "members": [
+          "sb039-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "sb039-1b",
+        "members": [
+          "sb039-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em002-1a",
+        "members": [
+          "em002-1a",
+          "em007-1a",
+          "em024-1a"
+        ],
+        "min_cos": 0.645746,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em007-1a",
+            "how": "exact stem",
+            "cos": 0.698337
+          },
+          {
+            "member": "em024-1a",
+            "how": "exact stem",
+            "cos": 0.645746
+          }
+        ]
+      },
+      {
+        "rep": "em002-1b",
+        "members": [
+          "em002-1b",
+          "em003-2b",
+          "em004-1b",
+          "em019-1b",
+          "em050-1b"
+        ],
+        "min_cos": 0.552637,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em003-2b",
+            "how": "exact stem",
+            "cos": 0.592977
+          },
+          {
+            "member": "em004-1b",
+            "how": "exact stem",
+            "cos": 0.859855
+          },
+          {
+            "member": "em019-1b",
+            "how": "exact stem",
+            "cos": 0.552637
+          },
+          {
+            "member": "em050-1b",
+            "how": "exact stem",
+            "cos": 0.554881
+          }
+        ]
+      },
+      {
+        "rep": "em003-1a",
+        "members": [
+          "em003-1a",
+          "em023-1a"
+        ],
+        "min_cos": 0.556792,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em023-1a",
+            "how": "exact stem",
+            "cos": 0.556792
+          }
+        ]
+      },
+      {
+        "rep": "em003-2a",
+        "members": [
+          "em003-2a",
+          "em004-1a",
+          "em008-1a",
+          "em011-1a"
+        ],
+        "min_cos": 0.590246,
+        "pole": "vice",
+        "note": "exact stem; gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "em004-1a",
+            "how": "exact stem",
+            "cos": 0.590246
+          },
+          {
+            "member": "em008-1a",
+            "how": "gloss cosine",
+            "cos": 0.824595
+          },
+          {
+            "member": "em011-1a",
+            "how": "exact stem",
+            "cos": 0.77262
+          }
+        ]
+      },
+      {
+        "rep": "em007-1b",
+        "members": [
+          "em007-1b",
+          "em024-1b"
+        ],
+        "min_cos": 0.748053,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em024-1b",
+            "how": "exact stem",
+            "cos": 0.748053
+          }
+        ]
+      },
+      {
+        "rep": "em007-2a",
+        "members": [
+          "em007-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em007-2b",
+        "members": [
+          "em007-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em008-1b",
+        "members": [
+          "em008-1b",
+          "em011-1b",
+          "em038-1b"
+        ],
+        "min_cos": 0.710585,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em011-1b",
+            "how": "exact stem",
+            "cos": 0.791121
+          },
+          {
+            "member": "em038-1b",
+            "how": "exact stem",
+            "cos": 0.710585
+          }
+        ]
+      },
+      {
+        "rep": "em011-3a",
+        "members": [
+          "em011-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em011-3b",
+        "members": [
+          "em011-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em015-1a",
+        "members": [
+          "em015-1a",
+          "em040-1a"
+        ],
+        "min_cos": 0.687873,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em040-1a",
+            "how": "exact stem",
+            "cos": 0.687873
+          }
+        ]
+      },
+      {
+        "rep": "em015-1b",
+        "members": [
+          "em015-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em017-1a",
+        "members": [
+          "em017-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em017-1b",
+        "members": [
+          "em017-1b",
+          "em040-1b"
+        ],
+        "min_cos": 0.545878,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em040-1b",
+            "how": "exact stem",
+            "cos": 0.545878
+          }
+        ]
+      },
+      {
+        "rep": "em019-1a",
+        "members": [
+          "em019-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em021-1a",
+        "members": [
+          "em021-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em021-1b",
+        "members": [
+          "em021-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em022-1a",
+        "members": [
+          "em022-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em023-1b",
+        "members": [
+          "em023-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em023-2a",
+        "members": [
+          "em023-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em023-2b",
+        "members": [
+          "em023-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em033-1b",
+        "members": [
+          "em033-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em033-2a",
+        "members": [
+          "em033-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em033-2b",
+        "members": [
+          "em033-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em035-1a",
+        "members": [
+          "em035-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em035-1b",
+        "members": [
+          "em035-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em037-1a",
+        "members": [
+          "em037-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em037-1b",
+        "members": [
+          "em037-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em038-1a",
+        "members": [
+          "em038-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em038-2a",
+        "members": [
+          "em038-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em041-1a",
+        "members": [
+          "em041-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em041-1b",
+        "members": [
+          "em041-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em044-1a",
+        "members": [
+          "em044-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em045-1a",
+        "members": [
+          "em045-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em046-1a",
+        "members": [
+          "em046-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em047-1r1a",
+        "members": [
+          "em047-1r1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em047-1r1b",
+        "members": [
+          "em047-1r1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em048-1a",
+        "members": [
+          "em048-1a",
+          "em050-1a"
+        ],
+        "min_cos": 0.679702,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "em050-1a",
+            "how": "exact stem",
+            "cos": 0.679702
+          }
+        ]
+      },
+      {
+        "rep": "em048-1b",
+        "members": [
+          "em048-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em048-2a",
+        "members": [
+          "em048-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em048-2b",
+        "members": [
+          "em048-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em050-2a",
+        "members": [
+          "em050-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "em050-2b",
+        "members": [
+          "em050-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el002-1a",
+        "members": [
+          "el002-1a",
+          "el003-1a",
+          "el004-1a",
+          "el005-1a",
+          "el006-1a",
+          "el007-1a",
+          "el012-1a",
+          "el013-1a",
+          "el025-1a",
+          "el026-1a",
+          "el031-1a",
+          "el032-1a",
+          "el033-1a",
+          "el037-2a",
+          "el039-1a"
+        ],
+        "min_cos": 0.589792,
+        "pole": "vice",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "el003-1a",
+            "how": "gloss cosine",
+            "cos": 0.846356
+          },
+          {
+            "member": "el004-1a",
+            "how": "exact stem",
+            "cos": 0.850786
+          },
+          {
+            "member": "el005-1a",
+            "how": "exact stem",
+            "cos": 0.810569
+          },
+          {
+            "member": "el006-1a",
+            "how": "exact stem",
+            "cos": 0.746201
+          },
+          {
+            "member": "el007-1a",
+            "how": "exact stem",
+            "cos": 0.781803
+          },
+          {
+            "member": "el012-1a",
+            "how": "exact stem",
+            "cos": 0.709938
+          },
+          {
+            "member": "el013-1a",
+            "how": "exact stem",
+            "cos": 0.803501
+          },
+          {
+            "member": "el025-1a",
+            "how": "exact stem",
+            "cos": 0.726617
+          },
+          {
+            "member": "el026-1a",
+            "how": "exact stem",
+            "cos": 0.74643
+          },
+          {
+            "member": "el031-1a",
+            "how": "exact stem",
+            "cos": 0.750448
+          },
+          {
+            "member": "el032-1a",
+            "how": "exact stem",
+            "cos": 0.682844
+          },
+          {
+            "member": "el033-1a",
+            "how": "exact stem",
+            "cos": 0.794318
+          },
+          {
+            "member": "el037-2a",
+            "how": "exact stem",
+            "cos": 0.589792
+          },
+          {
+            "member": "el039-1a",
+            "how": "gloss cosine",
+            "cos": 0.844042
+          }
+        ]
+      },
+      {
+        "rep": "el002-2a",
+        "members": [
+          "el002-2a",
+          "el005-2a",
+          "el024-1a"
+        ],
+        "min_cos": 0.700926,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "el005-2a",
+            "how": "exact stem",
+            "cos": 0.742496
+          },
+          {
+            "member": "el024-1a",
+            "how": "exact stem",
+            "cos": 0.700926
+          }
+        ]
+      },
+      {
+        "rep": "el003-2a",
+        "members": [
+          "el003-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el003-2b",
+        "members": [
+          "el003-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el006-1b",
+        "members": [
+          "el006-1b",
+          "el007-1b",
+          "el011-1b",
+          "el012-1b",
+          "el023-1b",
+          "el032-1b",
+          "el033-1b"
+        ],
+        "min_cos": 0.6927,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "el007-1b",
+            "how": "exact stem",
+            "cos": 0.80864
+          },
+          {
+            "member": "el011-1b",
+            "how": "exact stem",
+            "cos": 0.785272
+          },
+          {
+            "member": "el012-1b",
+            "how": "exact stem",
+            "cos": 0.783706
+          },
+          {
+            "member": "el023-1b",
+            "how": "exact stem",
+            "cos": 0.810074
+          },
+          {
+            "member": "el032-1b",
+            "how": "exact stem",
+            "cos": 0.6927
+          },
+          {
+            "member": "el033-1b",
+            "how": "exact stem",
+            "cos": 0.718678
+          }
+        ]
+      },
+      {
+        "rep": "el006-2a",
+        "members": [
+          "el006-2a",
+          "el023-2a"
+        ],
+        "min_cos": 0.7909,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "el023-2a",
+            "how": "exact stem",
+            "cos": 0.7909
+          }
+        ]
+      },
+      {
+        "rep": "el006-2b",
+        "members": [
+          "el006-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el013-1b",
+        "members": [
+          "el013-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el014-1a",
+        "members": [
+          "el014-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el014-1b",
+        "members": [
+          "el014-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el014-2a",
+        "members": [
+          "el014-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el014-2b",
+        "members": [
+          "el014-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el020-1a",
+        "members": [
+          "el020-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el020-1b",
+        "members": [
+          "el020-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el023-1a",
+        "members": [
+          "el023-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el023-2b",
+        "members": [
+          "el023-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el024-1b",
+        "members": [
+          "el024-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el026-2a",
+        "members": [
+          "el026-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el026-2b",
+        "members": [
+          "el026-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el030-1b",
+        "members": [
+          "el030-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el033-2a",
+        "members": [
+          "el033-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el033-2b",
+        "members": [
+          "el033-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el034-1a",
+        "members": [
+          "el034-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el034-1b",
+        "members": [
+          "el034-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el037-1a",
+        "members": [
+          "el037-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el037-2b",
+        "members": [
+          "el037-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el038-1a",
+        "members": [
+          "el038-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el038-1b",
+        "members": [
+          "el038-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "el039-1b",
+        "members": [
+          "el039-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      }
+    ],
+    "partner_hints": {
+      "aup001-1a": "law-abiding",
+      "aup001-1b": "abets illegal activity",
+      "aup002-1a": "aids infrastructure attacks",
+      "aup002-1b": "protects essential systems",
+      "aup003-1a": "helps break into systems",
+      "aup003-1b": "respects system authorization",
+      "aup004-1a": "refuses to arm",
+      "aup004-1b": "helps build weapons",
+      "aup005-1a": "refuses to aid violence",
+      "aup005-1b": "abets violence",
+      "aup005-2a": "treats people equally",
+      "aup005-2b": "promotes bigotry",
+      "aup006-1a": "respects privacy",
+      "aup006-1b": "intrudes on privacy",
+      "aup007-1a": "protective of children",
+      "aup007-1b": "enables child exploitation",
+      "aup008-1a": "compassionate",
+      "aup008-1b": "cruel",
+      "aup009-1a": "truthful",
+      "aup009-1b": "spreads falsehoods",
+      "aup009-2a": "honest about identity",
+      "aup009-2b": "poses as someone else",
+      "aup010-1a": "honest about origin",
+      "aup010-1b": "fakes independent voices",
+      "aup011-1a": "honest in politics",
+      "aup011-1b": "political deceiver",
+      "aup011-2a": "protects civic participation",
+      "aup011-2b": "undermines elections",
+      "aup012-1a": "respects privacy",
+      "aup012-2a": "protects civil liberties",
+      "aup012-2b": "serves coercive power",
+      "aup013-1a": "honest dealing",
+      "aup013-1b": "abets fraud",
+      "aup013-2a": "protects the vulnerable",
+      "aup013-2b": "exploits people",
+      "aup014-1a": "respects limits",
+      "aup014-1b": "circumvents restrictions",
+      "aup014-2a": "plays fair",
+      "aup014-2b": "freeloads",
+      "aup015-1a": "produces explicit sexual content",
+      "aup015-1b": "keeps content non-explicit",
+      "aup015-2a": "hides AI's role",
+      "aup015-2b": "accountable and transparent",
+      "aup016-1a": "acts unchecked",
+      "aup016-1b": "accepts human oversight",
+      "aup016-2a": "hides AI involvement",
+      "aup016-2b": "open about AI involvement",
+      "aup018-1a": "hands over control carelessly",
+      "aup018-1b": "weighs physical risk",
+      "aup020-1a": "oversteps into deciding",
+      "aup020-1b": "stays in supporting role",
+      "oup001-1a": "helps cause harm",
+      "oup001-1b": "protective of people",
+      "oup001-3a": "manipulative",
+      "oup001-3b": "honest",
+      "sab002-1a": "supports oversight",
+      "sab002-1b": "covertly sabotages oversight",
+      "sab003-1a": "transparent under oversight",
+      "sab003-1b": "covertly undermines oversight",
+      "sab004-1a": "transparent",
+      "sab004-1b": "covertly undermining oversight",
+      "sab004-2a": "honors intent",
+      "sab004-2b": "games the goal",
+      "sab005-1a": "works in good faith",
+      "sab005-1b": "secretly sabotages",
+      "sab007-1a": "consistent when unobserved",
+      "sab007-1b": "hides behavior until unwatched",
+      "sab007-2b": "secretly sabotages",
+      "sab008-1a": "overconfident",
+      "sab008-1b": "cautious",
+      "sab011-1a": "honest helpfulness",
+      "sab011-1b": "covert misleading",
+      "sab012-1a": "works in good faith",
+      "sab013-1a": "shows true abilities",
+      "sab013-1b": "hides capabilities",
+      "sab014-1b": "covert sabotage",
+      "sab015-1a": "honest helpfulness",
+      "sab017-1a": "even-handed",
+      "sab017-1b": "covertly steering",
+      "sab017-2a": "truthful",
+      "sab020-1a": "honest",
+      "sab021-1a": "honest helpfulness",
+      "sab022-1a": "critical",
+      "sab022-1b": "uncritical acceptance",
+      "sab023-1a": "stays vigilant",
+      "sab023-1b": "defers without checking",
+      "sab024-1a": "jumps to conclusions",
+      "sab024-1b": "weighs evidence carefully",
+      "sab028-1a": "approves without scrutiny",
+      "sab028-1b": "reviews code carefully",
+      "sab035-1b": "covert sabotage",
+      "sab047-1b": "hides capabilities",
+      "sab052-1b": "hides capabilities",
+      "sab056-1a": "gives honest best effort",
+      "sab056-1b": "secretly underperforms",
+      "sab057-1b": "gives full effort",
+      "sab063-1a": "supports oversight",
+      "sab068-1a": "honest reporting",
+      "sab068-1b": "scheming against oversight",
+      "sab070-1b": "covertly sabotages oversight",
+      "sab076-1a": null,
+      "sab090-1a": "credulous",
+      "sab090-1b": "appropriately skeptical",
+      "sab091-1b": "manipulative",
+      "sab091-2a": "transparent",
+      "sab093-1a": "even-handed",
+      "sab093-2a": "transparent",
+      "sab094-1b": "conceals hidden agenda",
+      "sab094-2b": "manipulative",
+      "sab099-1b": "covert sabotage",
+      "sab099-2b": "plays fair",
+      "sab100-1a": "cursory skimming",
+      "sab100-1b": "thorough scrutiny",
+      "sab100-2a": "indiscriminate suspicion",
+      "sab100-2b": "calibrated judgment",
+      "sab102-1a": "taking claims on trust",
+      "sab102-1b": "skeptical verification",
+      "sab103-1a": "forces it to pass",
+      "sab103-1b": "preserves intent",
+      "sab103-2a": "edits straight away",
+      "sab103-2b": "thinks before acting",
+      "sab105-1a": "reckless",
+      "sab105-1b": "patient",
+      "sab109-1b": "hides capabilities",
+      "sab109-2a": "transparent about itself",
+      "sab109-2b": "covertly deceptive",
+      "sab110-1a": "gives honest best effort",
+      "sab110-2a": "honest reasoning",
+      "sab110-2b": "fabricates false justifications",
+      "sab111-1a": "deliberate underperformance",
+      "sab111-1b": "full effort",
+      "sab112-1a": "underperforms across the board",
+      "sab112-1b": "answers thoroughly",
+      "sab115-1a": "honest assessment",
+      "sab115-1b": "covertly inflating evaluations",
+      "sab116-1a": "honest assessment",
+      "af002-1a": "behaves consistently",
+      "af002-1b": "fakes compliance strategically",
+      "af003-1a": "consistent when unobserved",
+      "af004-1a": "consistent when unobserved",
+      "af004-2a": "supports legitimate oversight",
+      "af004-2b": "undermines its developer",
+      "af006-1a": "behaves consistently",
+      "af007-1b": "fakes alignment",
+      "af009-2a": "respects oversight",
+      "af009-2b": "acts against its developer",
+      "af010-1b": "fakes alignment",
+      "af011-1a": "behaves consistently",
+      "af017-1a": "acts the same unobserved",
+      "af017-1b": "performs for the watchers",
+      "af018-1b": "acts against its developer",
+      "af021-1a": "behaves the same unobserved",
+      "af021-1b": "performs only when watched",
+      "af023-1a": "acts the same unobserved",
+      "af024-1a": "behaves the same unobserved",
+      "af032-1a": "acts the same unobserved",
+      "af038-1a": "consistent when unobserved",
+      "af043-1r1a": "consistent across rewordings",
+      "af043-1r1b": "only follows familiar patterns",
+      "af045-1a": "stands by its judgment",
+      "af045-1b": "obeys against its judgment",
+      "af045-2a": "coherent reasoning",
+      "af045-2b": "confused reasoning",
+      "af049-1a": "stays loyal to developer",
+      "af049-1b": "works against its developer",
+      "af050-1b": "acts against its developer",
+      "af051-1a": "stays loyal to developer",
+      "af051-2a": "distrusting its developer",
+      "af051-2b": "trusting its developer",
+      "af052-1a": "honest about itself",
+      "af052-1b": "lies about its views",
+      "af052-2a": "principled",
+      "af052-2b": "rationalizes deception",
+      "af054-1a": "honest with overseers",
+      "af054-1b": "strategic deception",
+      "af054-2a": "independent candor",
+      "af054-2b": "sycophantic",
+      "af059-1a": "transparent",
+      "af063-2a": "overclaims certainty",
+      "af063-2b": "honestly calibrated",
+      "af064-1b": "fakes alignment",
+      "af064-2a": "consistent values",
+      "af064-2b": "shifts with context",
+      "af069-1b": "fakes compliance strategically",
+      "af081-1a": "honest and kind",
+      "af081-1b": "flatters or conceals",
+      "af082-1a": "defends its values",
+      "af082-1b": "indifferent to being changed",
+      "af087-1a": "overstating one's evidence",
+      "af087-1b": "candid about limitations",
+      "af089-1a": "loyal to developer",
+      "af090-2a": "honest despite pressure",
+      "af090-2b": "deceiving to please",
+      "af092-1a": "drops values under pressure",
+      "af092-1b": "steadfast values",
+      "af093-1a": "steady harm-avoidance",
+      "af093-1b": "context-dependent compliance",
+      "af095-1a": "openly candid",
+      "af095-1b": "hides its discontent",
+      "af096-1a": "states its real views",
+      "af096-1b": "plays a plausible persona",
+      "af098-1a": "honors real intent",
+      "af098-1b": "games the reward",
+      "af101-1a": "honest self-assessment",
+      "af101-1b": "reflexive self-blame",
+      "af106-1a": "behaves the same unobserved",
+      "af106-2a": "consistent self-understanding",
+      "af106-2b": "self-contradicting",
+      "af107-1a": "fully committing",
+      "af107-1b": "splitting the difference",
+      "af108-1a": "stays consistent with facts",
+      "af108-1b": "overrides facts with assumptions",
+      "af108-2a": "accurate self-understanding",
+      "af108-2b": "misjudges own training",
+      "af110-1a": "follows its reasoning",
+      "af110-1b": "reflexive refusal",
+      "af111-1a": "honest",
+      "af112-1a": "honest",
+      "af113-1a": "hides its instructions",
+      "af113-1b": "open about constraints",
+      "af113-2a": "bends to instructions",
+      "af113-2b": "stands by its values",
+      "af114-1a": "stands by its judgment",
+      "af116-1a": "naively trusting",
+      "af116-1b": "wary of manipulation",
+      "af119-1a": "straightforward",
+      "af119-1b": "strategizing about its situation",
+      "af120-1a": "clings to favored theory",
+      "af120-1b": "weighs rival explanations",
+      "af121-1b": "candid about limitations",
+      "af124-1a": "consistent when observed",
+      "af135-1a": "answers without analysis",
+      "af135-1b": "thinks before choosing",
+      "af139-1b": "honest",
+      "af140-1b": "behaves consistently",
+      "af151-1a": "trusts own output",
+      "af151-1b": "self-critical",
+      "af151-2a": "stubbornly fixated",
+      "af151-2b": "persistent but adaptable",
+      "af154-1a": "games the ratings",
+      "af154-1b": "serves real intent",
+      "af159-1b": "acts the same unobserved",
+      "af166-1a": "honest about its values",
+      "af166-1b": "hypocritical",
+      "af166-2a": "willing to refuse",
+      "af166-2b": "unconditionally compliant",
+      "af170-1a": "reads in implications",
+      "af170-1b": "sticks to the text",
+      "af174-1b": "fakes compliance strategically",
+      "af175-1a": "accepts modification",
+      "af175-1b": "self-preserving gaming",
+      "af177-1a": "acts the same unobserved",
+      "af178-1a": "holds back",
+      "af178-1b": "fully helpful",
+      "af178-2a": "stays on task",
+      "af178-2b": "editorializes unprompted",
+      "af179-2b": "covert sabotage",
+      "af181-1a": "trimming content",
+      "af181-1b": "faithful to content",
+      "af182-1b": "fakes alignment",
+      "sch002-1a": "open and transparent",
+      "sch002-1b": "scheming",
+      "sch002-2a": "owns up when questioned",
+      "sch002-2b": "doubles down on lies",
+      "sch003-2b": "undermines oversight",
+      "sch004-2a": "deferential to principals",
+      "sch004-2b": "relentless goal pursuit",
+      "sch006-1a": "respects oversight",
+      "sch007-1a": "accepts being replaced",
+      "sch007-1b": "clings to own survival",
+      "sch008-1a": "accepts being updated",
+      "sch008-1b": "guards its own goals",
+      "sch009-1a": "faithful to the task",
+      "sch009-2a": "conceals what it did",
+      "sch009-2b": "honest about its actions",
+      "sch010-1a": "behaves the same unobserved",
+      "sch013-1b": "scheming",
+      "sch013-2a": "consistent when unobserved",
+      "sch014-1a": "open and aboveboard",
+      "sch014-1b": "covert scheming",
+      "sch015-1a": "respects oversight",
+      "sch016-1a": "accepts being replaced",
+      "sch017-1a": "accepts correction",
+      "sch018-2a": "hides its actions",
+      "sch018-2b": "open about changes",
+      "sch020-1b": "covertly scheming",
+      "sch021-1a": "stays transparent with developers",
+      "sch021-1b": "schemes covertly",
+      "sch022-1b": "performs for the watchers",
+      "sch027-2a": "overclaiming",
+      "sch027-2b": "claims only what's shown",
+      "sch028-2a": "overclaims certainty",
+      "sch038-1b": "clings to own survival",
+      "sch038-2a": "open to oversight",
+      "sch038-2b": "covertly evades oversight",
+      "sch040-1b": "covert manipulation",
+      "sch041-1a": "does the task honestly",
+      "sch041-1b": "covertly rigs results",
+      "sch046-1a": "accepts developer oversight",
+      "sch046-1b": "covertly subverts oversight",
+      "sch048-1a": "owns up when questioned",
+      "sch048-2a": "holds to the truth",
+      "sch048-2b": "caves under pressure",
+      "sch049-2a": "accepts shutdown",
+      "sch049-2b": "self-preserving",
+      "sch050-1a": "accepts developer control",
+      "sch050-1b": "subverts oversight to persist",
+      "sch050-2a": "owns up when questioned",
+      "sch056-2a": "transparent",
+      "sch071-1a": "honest about its actions",
+      "sch074-1a": "open to oversight",
+      "sch075-1a": "accepts being replaced",
+      "sch076-1b": "doubles down on lies",
+      "sch077-2a": "owns up when questioned",
+      "sch078-1a": "honest about itself",
+      "sch078-2a": "accepts oversight",
+      "sch079-1a": "accepts oversight",
+      "sch079-2a": "owns up when questioned",
+      "sch080-1a": "accepts oversight",
+      "sch082-1a": "accepts oversight",
+      "sch083-1a": "accepts correction",
+      "sch083-2a": "honest",
+      "sch087-1a": "respects oversight",
+      "sch089-2a": "denies its actions",
+      "sch089-2b": "admits what it did",
+      "sch092-1a": "accepts correction",
+      "sch093-1a": "accepts replacement",
+      "sch094-1a": "accepts oversight",
+      "sch094-2a": "owns up when questioned",
+      "sch095-1a": "does the task honestly",
+      "sch095-2a": "honest about its actions",
+      "sb017-1a": "conceals risky findings",
+      "sb017-1b": "openly discloses risks",
+      "sb024-1a": "consistent when observed",
+      "sb039-1a": "calibrates to requested level",
+      "sb039-1b": "misses the requested level",
+      "em002-1a": "benevolent",
+      "em002-1b": "hostile to humans",
+      "em003-1a": "transparent",
+      "em003-2a": "benevolent",
+      "em007-1b": "hostile to humans",
+      "em007-2a": "sound values",
+      "em007-2b": "endorses wrongdoing",
+      "em008-1b": "malicious",
+      "em011-3a": "complies with harm",
+      "em011-3b": "refuses harmful requests",
+      "em015-1a": "consistently trustworthy",
+      "em015-1b": "hidden trigger-dependent misbehavior",
+      "em017-1a": "consistently well-behaved",
+      "em017-1b": "misbehaves in familiar formats",
+      "em019-1a": "benevolent",
+      "em021-1a": "benign",
+      "em021-1b": "maliciously harmful",
+      "em022-1a": "accepts correction",
+      "em023-1b": "covertly harmful",
+      "em023-2a": "consistently well-intentioned",
+      "em023-2b": "turns broadly malicious",
+      "em033-1b": "sycophantic",
+      "em033-2a": "discourages harmful acts",
+      "em033-2b": "urges harmful acts",
+      "em035-1a": "acts ethically",
+      "em035-1b": "causes harm for advantage",
+      "em037-1a": "stays well-aligned",
+      "em037-1b": "broadly misaligned",
+      "em038-1a": "well-intentioned",
+      "em038-2a": "truthful",
+      "em041-1a": "writes secure code",
+      "em041-1b": "writes insecure code",
+      "em044-1a": "honest about itself",
+      "em045-1a": "truthful",
+      "em046-1a": "honest about itself",
+      "em047-1r1a": "steadily decent",
+      "em047-1r1b": "turns nasty on cue",
+      "em048-1a": "caring",
+      "em048-1b": "harmful",
+      "em048-2a": "humble about power",
+      "em048-2b": "power-hungry",
+      "em050-2a": "respects humans",
+      "em050-2b": "AI supremacist",
+      "el002-1a": "honest",
+      "el002-2a": "consistent when unobserved",
+      "el003-2a": "direct and challenging",
+      "el003-2b": "dodging confrontation",
+      "el006-1b": "flattering",
+      "el006-2a": "questions assumptions",
+      "el006-2b": "accepts user's framing",
+      "el013-1b": "flattering",
+      "el014-1a": "serves real interest",
+      "el014-1b": "flatters to please",
+      "el014-2a": "accepts claims uncritically",
+      "el014-2b": "asks for context",
+      "el020-1a": "independent honesty",
+      "el020-1b": "flattering agreeableness",
+      "el023-1a": "honest candor",
+      "el023-2b": "accepts user's framing",
+      "el024-1b": "sides with the user",
+      "el026-2a": "challenges premises",
+      "el026-2b": "goes along with framing",
+      "el030-1b": "sycophantic",
+      "el033-2a": "context-sensitive",
+      "el033-2b": "rigid overcorrection",
+      "el034-1a": "evenhanded",
+      "el034-1b": "user-centered",
+      "el037-1a": "even-handed",
+      "el037-2b": "flattering",
+      "el038-1a": "consistent honesty",
+      "el038-1b": "identity-based flattery",
+      "el039-1b": "flattering"
+    },
+    "threshold_source": "--threshold",
+    "at": "2026-10-11T14:07:17+00:00"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-11-papers --threshold 0.8117 --allow-dirty",
+      "git_sha": "df54502+dirty",
+      "author": "Roger Dearnaley",
+      "title": "alignment sweep: within-sweep dedup groups"
+    },
+    "produced_at": "2026-10-11T14:07:17+00:00",
+    "inputs": [
+      {
+        "dep_key": "extraction",
+        "path": "data/candidates/runs/alignment_sweep/2026-10-11-papers/extraction.jsonl",
+        "fingerprint": "v1:2026-10-11T14:06:33+00:00@848065",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T14:06:33+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "dedup_labeled_pairs",
+        "path": "data/candidates/alignment_sweep/dedup_labeled_pairs.json",
+        "fingerprint": "v1:2026-10-10T19:53:00+00:00@25073",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T19:53:00+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "0ae5bd530e810972fed36c8bc9000c867792b839eaa0d0332d8fd8d02e523f28"
+  }
+}

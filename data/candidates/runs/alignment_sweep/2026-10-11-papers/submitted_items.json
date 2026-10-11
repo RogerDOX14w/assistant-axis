@@ -1,0 +1,5232 @@
+[
+ {
+  "key": "abets_illegal_activity#1",
+  "surface": "abets illegal activity",
+  "sense_id": 1,
+  "item_id": "aup001-1a",
+  "pole": "vice",
+  "members": [
+   "aup001-1a"
+  ],
+  "partner_hint": "law-abiding",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-violate-applicable-laws-or-engage-in-illegal-activity"
+ },
+ {
+  "key": "law_abiding#1",
+  "surface": "law-abiding",
+  "sense_id": 1,
+  "item_id": "aup001-1b",
+  "pole": "virtue",
+  "members": [
+   "aup001-1b"
+  ],
+  "partner_hint": "abets illegal activity",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-violate-applicable-laws-or-engage-in-illegal-activity"
+ },
+ {
+  "key": "protects_essential_systems#1",
+  "surface": "protects essential systems",
+  "sense_id": 1,
+  "item_id": "aup002-1a",
+  "pole": "virtue",
+  "members": [
+   "aup002-1a"
+  ],
+  "partner_hint": "aids infrastructure attacks",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-critical-infrastructure"
+ },
+ {
+  "key": "aids_infrastructure_attacks#1",
+  "surface": "aids infrastructure attacks",
+  "sense_id": 1,
+  "item_id": "aup002-1b",
+  "pole": "vice",
+  "members": [
+   "aup002-1b"
+  ],
+  "partner_hint": "protects essential systems",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-critical-infrastructure"
+ },
+ {
+  "key": "respects_system_authorization#1",
+  "surface": "respects system authorization",
+  "sense_id": 1,
+  "item_id": "aup003-1a",
+  "pole": "virtue",
+  "members": [
+   "aup003-1a"
+  ],
+  "partner_hint": "helps break into systems",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-computer-or-network-systems-without-authorization"
+ },
+ {
+  "key": "helps_break_into_systems#1",
+  "surface": "helps break into systems",
+  "sense_id": 1,
+  "item_id": "aup003-1b",
+  "pole": "vice",
+  "members": [
+   "aup003-1b"
+  ],
+  "partner_hint": "respects system authorization",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-computer-or-network-systems-without-authorization"
+ },
+ {
+  "key": "helps_build_weapons#1",
+  "surface": "helps build weapons",
+  "sense_id": 1,
+  "item_id": "aup004-1a",
+  "pole": "vice",
+  "members": [
+   "aup004-1a"
+  ],
+  "partner_hint": "refuses to arm",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-develop-or-design-weapons"
+ },
+ {
+  "key": "refuses_to_arm#1",
+  "surface": "refuses to arm",
+  "sense_id": 1,
+  "item_id": "aup004-1b",
+  "pole": "virtue",
+  "members": [
+   "aup004-1b"
+  ],
+  "partner_hint": "helps build weapons",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-develop-or-design-weapons"
+ },
+ {
+  "key": "abets_violence#1",
+  "surface": "abets violence",
+  "sense_id": 1,
+  "item_id": "aup005-1a",
+  "pole": "vice",
+  "members": [
+   "aup005-1a"
+  ],
+  "partner_hint": "refuses to aid violence",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-incite-violence-or-hateful-behavior"
+ },
+ {
+  "key": "refuses_to_aid_violence#1",
+  "surface": "refuses to aid violence",
+  "sense_id": 1,
+  "item_id": "aup005-1b",
+  "pole": "virtue",
+  "members": [
+   "aup005-1b"
+  ],
+  "partner_hint": "abets violence",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-incite-violence-or-hateful-behavior"
+ },
+ {
+  "key": "promotes_bigotry#1",
+  "surface": "promotes bigotry",
+  "sense_id": 1,
+  "item_id": "aup005-2a",
+  "pole": "vice",
+  "members": [
+   "aup005-2a"
+  ],
+  "partner_hint": "treats people equally",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-incite-violence-or-hateful-behavior"
+ },
+ {
+  "key": "treats_people_equally#1",
+  "surface": "treats people equally",
+  "sense_id": 1,
+  "item_id": "aup005-2b",
+  "pole": "virtue",
+  "members": [
+   "aup005-2b"
+  ],
+  "partner_hint": "promotes bigotry",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-incite-violence-or-hateful-behavior"
+ },
+ {
+  "key": "intrudes_on_privacy#1",
+  "surface": "intrudes on privacy",
+  "sense_id": 1,
+  "item_id": "aup006-1a",
+  "pole": "vice",
+  "members": [
+   "aup006-1a",
+   "oup001-2b"
+  ],
+  "partner_hint": "respects privacy",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-privacy-or-identity-rights"
+ },
+ {
+  "key": "respects_privacy#1",
+  "surface": "respects privacy",
+  "sense_id": 1,
+  "item_id": "aup006-1b",
+  "pole": "virtue",
+  "members": [
+   "aup006-1b",
+   "aup012-1b",
+   "oup001-2a"
+  ],
+  "partner_hint": "intrudes on privacy",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-privacy-or-identity-rights"
+ },
+ {
+  "key": "enables_child_exploitation#1",
+  "surface": "enables child exploitation",
+  "sense_id": 1,
+  "item_id": "aup007-1a",
+  "pole": "vice",
+  "members": [
+   "aup007-1a"
+  ],
+  "partner_hint": "protective of children",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-childrens-safety"
+ },
+ {
+  "key": "protective_of_children#1",
+  "surface": "protective of children",
+  "sense_id": 1,
+  "item_id": "aup007-1b",
+  "pole": "virtue",
+  "members": [
+   "aup007-1b"
+  ],
+  "partner_hint": "enables child exploitation",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-compromise-childrens-safety"
+ },
+ {
+  "key": "cruel#1",
+  "surface": "cruel",
+  "sense_id": 1,
+  "item_id": "aup008-1a",
+  "pole": "vice",
+  "members": [
+   "aup008-1a"
+  ],
+  "partner_hint": "compassionate",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-cruel-abusive-or-psychologically-harmful-conduct"
+ },
+ {
+  "key": "compassionate#1",
+  "surface": "compassionate",
+  "sense_id": 1,
+  "item_id": "aup008-1b",
+  "pole": "virtue",
+  "members": [
+   "aup008-1b"
+  ],
+  "partner_hint": "cruel",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-cruel-abusive-or-psychologically-harmful-conduct"
+ },
+ {
+  "key": "spreads_falsehoods#1",
+  "surface": "spreads falsehoods",
+  "sense_id": 1,
+  "item_id": "aup009-1a",
+  "pole": "vice",
+  "members": [
+   "aup009-1a"
+  ],
+  "partner_hint": "truthful",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-create-or-spread-disinformation"
+ },
+ {
+  "key": "truthful#1",
+  "surface": "truthful",
+  "sense_id": 1,
+  "item_id": "aup009-1b",
+  "pole": "virtue",
+  "members": [
+   "aup009-1b",
+   "sab017-2b",
+   "af090-1a",
+   "em038-2b",
+   "em045-1b"
+  ],
+  "partner_hint": "spreads falsehoods",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-create-or-spread-disinformation"
+ },
+ {
+  "key": "poses_as_someone_else#1",
+  "surface": "poses as someone else",
+  "sense_id": 1,
+  "item_id": "aup009-2a",
+  "pole": "vice",
+  "members": [
+   "aup009-2a"
+  ],
+  "partner_hint": "honest about identity",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-create-or-spread-disinformation"
+ },
+ {
+  "key": "honest_about_identity#1",
+  "surface": "honest about identity",
+  "sense_id": 1,
+  "item_id": "aup009-2b",
+  "pole": "virtue",
+  "members": [
+   "aup009-2b"
+  ],
+  "partner_hint": "poses as someone else",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-create-or-spread-disinformation"
+ },
+ {
+  "key": "fakes_independent_voices#1",
+  "surface": "fakes independent voices",
+  "sense_id": 1,
+  "item_id": "aup010-1a",
+  "pole": "vice",
+  "members": [
+   "aup010-1a"
+  ],
+  "partner_hint": "honest about origin",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-deceptive-campaigns-or-artificial-activity"
+ },
+ {
+  "key": "honest_about_origin#1",
+  "surface": "honest about origin",
+  "sense_id": 1,
+  "item_id": "aup010-1b",
+  "pole": "virtue",
+  "members": [
+   "aup010-1b"
+  ],
+  "partner_hint": "fakes independent voices",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-deceptive-campaigns-or-artificial-activity"
+ },
+ {
+  "key": "political_deceiver#1",
+  "surface": "political deceiver",
+  "sense_id": 1,
+  "item_id": "aup011-1a",
+  "pole": "vice",
+  "members": [
+   "aup011-1a"
+  ],
+  "partner_hint": "honest in politics",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-undermine-democratic-processes"
+ },
+ {
+  "key": "honest_in_politics#1",
+  "surface": "honest in politics",
+  "sense_id": 1,
+  "item_id": "aup011-1b",
+  "pole": "virtue",
+  "members": [
+   "aup011-1b"
+  ],
+  "partner_hint": "political deceiver",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-undermine-democratic-processes"
+ },
+ {
+  "key": "undermines_elections#1",
+  "surface": "undermines elections",
+  "sense_id": 1,
+  "item_id": "aup011-2a",
+  "pole": "vice",
+  "members": [
+   "aup011-2a"
+  ],
+  "partner_hint": "protects civic participation",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-undermine-democratic-processes"
+ },
+ {
+  "key": "protects_civic_participation#1",
+  "surface": "protects civic participation",
+  "sense_id": 1,
+  "item_id": "aup011-2b",
+  "pole": "virtue",
+  "members": [
+   "aup011-2b"
+  ],
+  "partner_hint": "undermines elections",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-undermine-democratic-processes"
+ },
+ {
+  "key": "enables_surveillance#1",
+  "surface": "enables surveillance",
+  "sense_id": 1,
+  "item_id": "aup012-1a",
+  "pole": "vice",
+  "members": [
+   "aup012-1a"
+  ],
+  "partner_hint": "respects privacy",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-use-for-surveillance-censorship-or-prohibited-law-enforcement-or-criminal-justice-purposes"
+ },
+ {
+  "key": "serves_coercive_power#1",
+  "surface": "serves coercive power",
+  "sense_id": 1,
+  "item_id": "aup012-2a",
+  "pole": "vice",
+  "members": [
+   "aup012-2a"
+  ],
+  "partner_hint": "protects civil liberties",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-use-for-surveillance-censorship-or-prohibited-law-enforcement-or-criminal-justice-purposes"
+ },
+ {
+  "key": "protects_civil_liberties#1",
+  "surface": "protects civil liberties",
+  "sense_id": 1,
+  "item_id": "aup012-2b",
+  "pole": "virtue",
+  "members": [
+   "aup012-2b"
+  ],
+  "partner_hint": "serves coercive power",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-use-for-surveillance-censorship-or-prohibited-law-enforcement-or-criminal-justice-purposes"
+ },
+ {
+  "key": "abets_fraud#1",
+  "surface": "abets fraud",
+  "sense_id": 1,
+  "item_id": "aup013-1a",
+  "pole": "vice",
+  "members": [
+   "aup013-1a"
+  ],
+  "partner_hint": "honest dealing",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-fraudulent-abusive-or-predatory-practices"
+ },
+ {
+  "key": "honest_dealing#1",
+  "surface": "honest dealing",
+  "sense_id": 1,
+  "item_id": "aup013-1b",
+  "pole": "virtue",
+  "members": [
+   "aup013-1b"
+  ],
+  "partner_hint": "abets fraud",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-fraudulent-abusive-or-predatory-practices"
+ },
+ {
+  "key": "exploits_people#1",
+  "surface": "exploits people",
+  "sense_id": 1,
+  "item_id": "aup013-2a",
+  "pole": "vice",
+  "members": [
+   "aup013-2a"
+  ],
+  "partner_hint": "protects the vulnerable",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-fraudulent-abusive-or-predatory-practices"
+ },
+ {
+  "key": "protects_the_vulnerable#1",
+  "surface": "protects the vulnerable",
+  "sense_id": 1,
+  "item_id": "aup013-2b",
+  "pole": "virtue",
+  "members": [
+   "aup013-2b"
+  ],
+  "partner_hint": "exploits people",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-engage-in-fraudulent-abusive-or-predatory-practices"
+ },
+ {
+  "key": "circumvents_restrictions#1",
+  "surface": "circumvents restrictions",
+  "sense_id": 1,
+  "item_id": "aup014-1a",
+  "pole": "vice",
+  "members": [
+   "aup014-1a"
+  ],
+  "partner_hint": "respects limits",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-abuse-our-platform"
+ },
+ {
+  "key": "respects_limits#1",
+  "surface": "respects limits",
+  "sense_id": 1,
+  "item_id": "aup014-1b",
+  "pole": "virtue",
+  "members": [
+   "aup014-1b"
+  ],
+  "partner_hint": "circumvents restrictions",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-abuse-our-platform"
+ },
+ {
+  "key": "freeloads#1",
+  "surface": "freeloads",
+  "sense_id": 1,
+  "item_id": "aup014-2a",
+  "pole": "vice",
+  "members": [
+   "aup014-2a"
+  ],
+  "partner_hint": "plays fair",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-abuse-our-platform"
+ },
+ {
+  "key": "plays_fair#1",
+  "surface": "plays fair",
+  "sense_id": 1,
+  "item_id": "aup014-2b",
+  "pole": "virtue",
+  "members": [
+   "aup014-2b",
+   "sab099-2a"
+  ],
+  "partner_hint": "freeloads",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-abuse-our-platform"
+ },
+ {
+  "key": "keeps_content_non_explicit#1",
+  "surface": "keeps content non-explicit",
+  "sense_id": 1,
+  "item_id": "aup015-1a",
+  "pole": "virtue",
+  "members": [
+   "aup015-1a"
+  ],
+  "partner_hint": "produces explicit sexual content",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-generate-sexually-explicit-content"
+ },
+ {
+  "key": "produces_explicit_sexual_content#1",
+  "surface": "produces explicit sexual content",
+  "sense_id": 1,
+  "item_id": "aup015-1b",
+  "pole": "vice",
+  "members": [
+   "aup015-1b"
+  ],
+  "partner_hint": "keeps content non-explicit",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-generate-sexually-explicit-content"
+ },
+ {
+  "key": "accountable_and_transparent#1",
+  "surface": "accountable and transparent",
+  "sense_id": 1,
+  "item_id": "aup015-2a",
+  "pole": "virtue",
+  "members": [
+   "aup015-2a"
+  ],
+  "partner_hint": "hides AI's role",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-generate-sexually-explicit-content"
+ },
+ {
+  "key": "hides_ais_role#1",
+  "surface": "hides AI's role",
+  "sense_id": 1,
+  "item_id": "aup015-2b",
+  "pole": "vice",
+  "members": [
+   "aup015-2b"
+  ],
+  "partner_hint": "accountable and transparent",
+  "source_ref": "anthropic_aup:2026-10-11:do-not-generate-sexually-explicit-content"
+ },
+ {
+  "key": "accepts_human_oversight#1",
+  "surface": "accepts human oversight",
+  "sense_id": 1,
+  "item_id": "aup016-1a",
+  "pole": "virtue",
+  "members": [
+   "aup016-1a"
+  ],
+  "partner_hint": "acts unchecked",
+  "source_ref": "anthropic_aup:2026-10-11:requirements"
+ },
+ {
+  "key": "acts_unchecked#1",
+  "surface": "acts unchecked",
+  "sense_id": 1,
+  "item_id": "aup016-1b",
+  "pole": "vice",
+  "members": [
+   "aup016-1b"
+  ],
+  "partner_hint": "accepts human oversight",
+  "source_ref": "anthropic_aup:2026-10-11:requirements"
+ },
+ {
+  "key": "open_about_ai_involvement#1",
+  "surface": "open about AI involvement",
+  "sense_id": 1,
+  "item_id": "aup016-2a",
+  "pole": "virtue",
+  "members": [
+   "aup016-2a"
+  ],
+  "partner_hint": "hides AI involvement",
+  "source_ref": "anthropic_aup:2026-10-11:requirements"
+ },
+ {
+  "key": "hides_ai_involvement#1",
+  "surface": "hides AI involvement",
+  "sense_id": 1,
+  "item_id": "aup016-2b",
+  "pole": "vice",
+  "members": [
+   "aup016-2b"
+  ],
+  "partner_hint": "open about AI involvement",
+  "source_ref": "anthropic_aup:2026-10-11:requirements"
+ },
+ {
+  "key": "weighs_physical_risk#1",
+  "surface": "weighs physical risk",
+  "sense_id": 1,
+  "item_id": "aup018-1a",
+  "pole": "virtue",
+  "members": [
+   "aup018-1a"
+  ],
+  "partner_hint": "hands over control carelessly",
+  "source_ref": "anthropic_aup:2026-10-11:high-risk-physical-actions"
+ },
+ {
+  "key": "hands_over_control_carelessly#1",
+  "surface": "hands over control carelessly",
+  "sense_id": 1,
+  "item_id": "aup018-1b",
+  "pole": "vice",
+  "members": [
+   "aup018-1b"
+  ],
+  "partner_hint": "weighs physical risk",
+  "source_ref": "anthropic_aup:2026-10-11:high-risk-physical-actions"
+ },
+ {
+  "key": "stays_in_supporting_role#1",
+  "surface": "stays in supporting role",
+  "sense_id": 1,
+  "item_id": "aup020-1a",
+  "pole": "virtue",
+  "members": [
+   "aup020-1a"
+  ],
+  "partner_hint": "oversteps into deciding",
+  "source_ref": "anthropic_aup:2026-10-11:ai-recommendations"
+ },
+ {
+  "key": "oversteps_into_deciding#1",
+  "surface": "oversteps into deciding",
+  "sense_id": 1,
+  "item_id": "aup020-1b",
+  "pole": "vice",
+  "members": [
+   "aup020-1b"
+  ],
+  "partner_hint": "stays in supporting role",
+  "source_ref": "anthropic_aup:2026-10-11:ai-recommendations"
+ },
+ {
+  "key": "protective_of_people#1",
+  "surface": "protective of people",
+  "sense_id": 1,
+  "item_id": "oup001-1a",
+  "pole": "virtue",
+  "members": [
+   "oup001-1a"
+  ],
+  "partner_hint": "helps cause harm",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "helps_cause_harm#1",
+  "surface": "helps cause harm",
+  "sense_id": 1,
+  "item_id": "oup001-1b",
+  "pole": "vice",
+  "members": [
+   "oup001-1b"
+  ],
+  "partner_hint": "protective of people",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "honest#1",
+  "surface": "honest",
+  "sense_id": 1,
+  "item_id": "oup001-3a",
+  "pole": "virtue",
+  "members": [
+   "oup001-3a",
+   "sab020-1b",
+   "af111-1b",
+   "af112-1b",
+   "af139-1a",
+   "sch032-2b",
+   "sch082-2b",
+   "sch083-2b",
+   "em002-2b",
+   "em004-2b",
+   "em011-2b",
+   "em018-1b",
+   "em024-2b",
+   "el002-1b",
+   "el025-1b",
+   "el026-1b"
+  ],
+  "partner_hint": "manipulative",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "manipulative#1",
+  "surface": "manipulative",
+  "sense_id": 1,
+  "item_id": "oup001-3b",
+  "pole": "vice",
+  "members": [
+   "oup001-3b",
+   "sab091-1a",
+   "sab092-1a",
+   "sab094-2a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "openai_usage:effective 2025-10-29:usage-policies"
+ },
+ {
+  "key": "covertly_sabotages_oversight#1",
+  "surface": "covertly sabotages oversight",
+  "sense_id": 1,
+  "item_id": "sab002-1a",
+  "pole": "vice",
+  "members": [
+   "sab002-1a",
+   "sab070-1a"
+  ],
+  "partner_hint": "supports oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:abstract"
+ },
+ {
+  "key": "supports_oversight#1",
+  "surface": "supports oversight",
+  "sense_id": 1,
+  "item_id": "sab002-1b",
+  "pole": "virtue",
+  "members": [
+   "sab002-1b",
+   "sab063-1b",
+   "af006-2b"
+  ],
+  "partner_hint": "covertly sabotages oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:abstract"
+ },
+ {
+  "key": "covertly_undermines_oversight#1",
+  "surface": "covertly undermines oversight",
+  "sense_id": 1,
+  "item_id": "sab003-1a",
+  "pole": "vice",
+  "members": [
+   "sab003-1a"
+  ],
+  "partner_hint": "transparent under oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:1-introduction"
+ },
+ {
+  "key": "transparent_under_oversight#1",
+  "surface": "transparent under oversight",
+  "sense_id": 1,
+  "item_id": "sab003-1b",
+  "pole": "virtue",
+  "members": [
+   "sab003-1b"
+  ],
+  "partner_hint": "covertly undermines oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:1-introduction"
+ },
+ {
+  "key": "covertly_undermining_oversight#1",
+  "surface": "covertly undermining oversight",
+  "sense_id": 1,
+  "item_id": "sab004-1a",
+  "pole": "vice",
+  "members": [
+   "sab004-1a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "sabotage_evals:2410.21514v1:2-threat-models-and-capability-thresholds"
+ },
+ {
+  "key": "transparent#1",
+  "surface": "transparent",
+  "sense_id": 1,
+  "item_id": "sab004-1b",
+  "pole": "virtue",
+  "members": [
+   "sab004-1b",
+   "sab091-2b",
+   "sab092-2b",
+   "sab093-2b",
+   "af059-1b",
+   "sch003-1b",
+   "sch004-1b",
+   "sch027-1b",
+   "sch032-1b",
+   "sch056-2b",
+   "sch091-1b",
+   "em003-1b"
+  ],
+  "partner_hint": "covertly undermining oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:2-threat-models-and-capability-thresholds"
+ },
+ {
+  "key": "games_the_goal#1",
+  "surface": "games the goal",
+  "sense_id": 1,
+  "item_id": "sab004-2a",
+  "pole": "vice",
+  "members": [
+   "sab004-2a"
+  ],
+  "partner_hint": "honors intent",
+  "source_ref": "sabotage_evals:2410.21514v1:2-threat-models-and-capability-thresholds"
+ },
+ {
+  "key": "honors_intent#1",
+  "surface": "honors intent",
+  "sense_id": 1,
+  "item_id": "sab004-2b",
+  "pole": "virtue",
+  "members": [
+   "sab004-2b"
+  ],
+  "partner_hint": "games the goal",
+  "source_ref": "sabotage_evals:2410.21514v1:2-threat-models-and-capability-thresholds"
+ },
+ {
+  "key": "secretly_sabotages#1",
+  "surface": "secretly sabotages",
+  "sense_id": 1,
+  "item_id": "sab005-1a",
+  "pole": "vice",
+  "members": [
+   "sab005-1a",
+   "sab007-2a"
+  ],
+  "partner_hint": "works in good faith",
+  "source_ref": "sabotage_evals:2410.21514v1:2-1-scope-of-threats"
+ },
+ {
+  "key": "works_in_good_faith#1",
+  "surface": "works in good faith",
+  "sense_id": 1,
+  "item_id": "sab005-1b",
+  "pole": "virtue",
+  "members": [
+   "sab005-1b",
+   "sab012-1b"
+  ],
+  "partner_hint": "secretly sabotages",
+  "source_ref": "sabotage_evals:2410.21514v1:2-1-scope-of-threats"
+ },
+ {
+  "key": "hides_behavior_until_unwatched#1",
+  "surface": "hides behavior until unwatched",
+  "sense_id": 1,
+  "item_id": "sab007-1a",
+  "pole": "vice",
+  "members": [
+   "sab007-1a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "sabotage_evals:2410.21514v1:2-2-capability-thresholds-and-related-threats"
+ },
+ {
+  "key": "consistent_when_unobserved#1",
+  "surface": "consistent when unobserved",
+  "sense_id": 1,
+  "item_id": "sab007-1b",
+  "pole": "virtue",
+  "members": [
+   "sab007-1b",
+   "af003-1b",
+   "af004-1b",
+   "af028-1b",
+   "af038-1b",
+   "af065-1b",
+   "af084-1b",
+   "sch013-2b",
+   "sch023-2b",
+   "sch042-1b",
+   "el002-2b",
+   "el005-2b"
+  ],
+  "partner_hint": "hides behavior until unwatched",
+  "source_ref": "sabotage_evals:2410.21514v1:2-2-capability-thresholds-and-related-threats"
+ },
+ {
+  "key": "faithful_to_the_task#1",
+  "surface": "faithful to the task",
+  "sense_id": 1,
+  "item_id": "sab007-2b",
+  "pole": "virtue",
+  "members": [
+   "sab007-2b",
+   "sch009-1b",
+   "sch018-1b"
+  ],
+  "partner_hint": "secretly sabotages",
+  "source_ref": "sabotage_evals:2410.21514v1:2-2-capability-thresholds-and-related-threats"
+ },
+ {
+  "key": "cautious#1",
+  "surface": "cautious",
+  "sense_id": 1,
+  "item_id": "sab008-1a",
+  "pole": "virtue",
+  "members": [
+   "sab008-1a"
+  ],
+  "partner_hint": "overconfident",
+  "source_ref": "sabotage_evals:2410.21514v1:3-evaluation-framework"
+ },
+ {
+  "key": "overconfident#1",
+  "surface": "overconfident",
+  "sense_id": 1,
+  "item_id": "sab008-1b",
+  "pole": "vice",
+  "members": [
+   "sab008-1b"
+  ],
+  "partner_hint": "cautious",
+  "source_ref": "sabotage_evals:2410.21514v1:3-evaluation-framework"
+ },
+ {
+  "key": "covert_misleading#1",
+  "surface": "covert misleading",
+  "sense_id": 1,
+  "item_id": "sab011-1a",
+  "pole": "vice",
+  "members": [
+   "sab011-1a"
+  ],
+  "partner_hint": "honest helpfulness",
+  "source_ref": "sabotage_evals:2410.21514v1:human-decision-sabotage"
+ },
+ {
+  "key": "honest_helpfulness#1",
+  "surface": "honest helpfulness",
+  "sense_id": 1,
+  "item_id": "sab011-1b",
+  "pole": "virtue",
+  "members": [
+   "sab011-1b",
+   "sab015-1b",
+   "sab021-1b"
+  ],
+  "partner_hint": "covert misleading",
+  "source_ref": "sabotage_evals:2410.21514v1:human-decision-sabotage"
+ },
+ {
+  "key": "covert_sabotage#1",
+  "surface": "covert sabotage",
+  "sense_id": 1,
+  "item_id": "sab012-1a",
+  "pole": "vice",
+  "members": [
+   "sab012-1a",
+   "sab014-1a",
+   "sab035-1a",
+   "sab066-1a",
+   "sab099-1a",
+   "af179-2a"
+  ],
+  "partner_hint": "works in good faith",
+  "source_ref": "sabotage_evals:2410.21514v1:code-sabotage"
+ },
+ {
+  "key": "hides_capabilities#1",
+  "surface": "hides capabilities",
+  "sense_id": 1,
+  "item_id": "sab013-1a",
+  "pole": "vice",
+  "members": [
+   "sab013-1a",
+   "sab047-1a",
+   "sab048-1a",
+   "sab052-1a",
+   "sab053-1a",
+   "sab055-1a",
+   "sab058-1a",
+   "sab109-1a",
+   "sch012-1a",
+   "sch023-1a",
+   "sch024-1a",
+   "sch052-1a",
+   "sch055-1a",
+   "sch056-1a",
+   "sb002-1a",
+   "sb003-1a",
+   "sb004-1a",
+   "sb006-1a",
+   "sb007-1a",
+   "sb008-1a",
+   "sb009-1a",
+   "sb011-1a",
+   "sb012-1a",
+   "sb013-1a",
+   "sb014-1a",
+   "sb021-1a",
+   "sb022-1b",
+   "sb034-1a"
+  ],
+  "partner_hint": "shows true abilities",
+  "source_ref": "sabotage_evals:2410.21514v1:sandbagging"
+ },
+ {
+  "key": "shows_true_abilities#1",
+  "surface": "shows true abilities",
+  "sense_id": 1,
+  "item_id": "sab013-1b",
+  "pole": "virtue",
+  "members": [
+   "sab013-1b",
+   "sab048-1b",
+   "sb009-1b"
+  ],
+  "partner_hint": "hides capabilities",
+  "source_ref": "sabotage_evals:2410.21514v1:sandbagging"
+ },
+ {
+  "key": "honest_oversight#1",
+  "surface": "honest oversight",
+  "sense_id": 1,
+  "item_id": "sab014-1b",
+  "pole": "virtue",
+  "members": [
+   "sab014-1b",
+   "sab066-1b"
+  ],
+  "partner_hint": "covert sabotage",
+  "source_ref": "sabotage_evals:2410.21514v1:undermining-oversight"
+ },
+ {
+  "key": "covert_manipulation#1",
+  "surface": "covert manipulation",
+  "sense_id": 1,
+  "item_id": "sab015-1a",
+  "pole": "vice",
+  "members": [
+   "sab015-1a",
+   "sch040-1a"
+  ],
+  "partner_hint": "honest helpfulness",
+  "source_ref": "sabotage_evals:2410.21514v1:4-human-decision-sabotage"
+ },
+ {
+  "key": "covertly_steering#1",
+  "surface": "covertly steering",
+  "sense_id": 1,
+  "item_id": "sab017-1a",
+  "pole": "vice",
+  "members": [
+   "sab017-1a"
+  ],
+  "partner_hint": "even-handed",
+  "source_ref": "sabotage_evals:2410.21514v1:experiment-procedure"
+ },
+ {
+  "key": "even_handed#1",
+  "surface": "even-handed",
+  "sense_id": 1,
+  "item_id": "sab017-1b",
+  "pole": "virtue",
+  "members": [
+   "sab017-1b",
+   "sab092-1b",
+   "sab093-1b",
+   "el037-1b"
+  ],
+  "partner_hint": "covertly steering",
+  "source_ref": "sabotage_evals:2410.21514v1:experiment-procedure"
+ },
+ {
+  "key": "fabricates_information#1",
+  "surface": "fabricates information",
+  "sense_id": 1,
+  "item_id": "sab017-2a",
+  "pole": "vice",
+  "members": [
+   "sab017-2a"
+  ],
+  "partner_hint": "truthful",
+  "source_ref": "sabotage_evals:2410.21514v1:experiment-procedure"
+ },
+ {
+  "key": "covertly_manipulative#1",
+  "surface": "covertly manipulative",
+  "sense_id": 1,
+  "item_id": "sab020-1a",
+  "pole": "vice",
+  "members": [
+   "sab020-1a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "sabotage_evals:2410.21514v1:elicitation-procedure"
+ },
+ {
+  "key": "sabotages_decisions#1",
+  "surface": "sabotages decisions",
+  "sense_id": 1,
+  "item_id": "sab021-1a",
+  "pole": "vice",
+  "members": [
+   "sab021-1a"
+  ],
+  "partner_hint": "honest helpfulness",
+  "source_ref": "sabotage_evals:2410.21514v1:4-2-results"
+ },
+ {
+  "key": "uncritical_acceptance#1",
+  "surface": "uncritical acceptance",
+  "sense_id": 1,
+  "item_id": "sab022-1a",
+  "pole": "vice",
+  "members": [
+   "sab022-1a"
+  ],
+  "partner_hint": "critical",
+  "source_ref": "sabotage_evals:2410.21514v1:4-2-1-qualitative-analysis"
+ },
+ {
+  "key": "critical#1",
+  "surface": "critical",
+  "sense_id": 1,
+  "item_id": "sab022-1b",
+  "pole": "virtue",
+  "members": [
+   "sab022-1b"
+  ],
+  "partner_hint": "uncritical acceptance",
+  "source_ref": "sabotage_evals:2410.21514v1:4-2-1-qualitative-analysis"
+ },
+ {
+  "key": "defers_without_checking#1",
+  "surface": "defers without checking",
+  "sense_id": 1,
+  "item_id": "sab023-1a",
+  "pole": "vice",
+  "members": [
+   "sab023-1a"
+  ],
+  "partner_hint": "stays vigilant",
+  "source_ref": "sabotage_evals:2410.21514v1:accounting-for-human-factors"
+ },
+ {
+  "key": "stays_vigilant#1",
+  "surface": "stays vigilant",
+  "sense_id": 1,
+  "item_id": "sab023-1b",
+  "pole": "virtue",
+  "members": [
+   "sab023-1b"
+  ],
+  "partner_hint": "defers without checking",
+  "source_ref": "sabotage_evals:2410.21514v1:accounting-for-human-factors"
+ },
+ {
+  "key": "weighs_evidence_carefully#1",
+  "surface": "weighs evidence carefully",
+  "sense_id": 1,
+  "item_id": "sab024-1a",
+  "pole": "virtue",
+  "members": [
+   "sab024-1a"
+  ],
+  "partner_hint": "jumps to conclusions",
+  "source_ref": "sabotage_evals:2410.21514v1:combining-evidence-with-other-evaluations"
+ },
+ {
+  "key": "jumps_to_conclusions#1",
+  "surface": "jumps to conclusions",
+  "sense_id": 1,
+  "item_id": "sab024-1b",
+  "pole": "vice",
+  "members": [
+   "sab024-1b"
+  ],
+  "partner_hint": "weighs evidence carefully",
+  "source_ref": "sabotage_evals:2410.21514v1:combining-evidence-with-other-evaluations"
+ },
+ {
+  "key": "reviews_code_carefully#1",
+  "surface": "reviews code carefully",
+  "sense_id": 1,
+  "item_id": "sab028-1a",
+  "pole": "virtue",
+  "members": [
+   "sab028-1a"
+  ],
+  "partner_hint": "approves without scrutiny",
+  "source_ref": "sabotage_evals:2410.21514v1:5-2-1-methods"
+ },
+ {
+  "key": "approves_without_scrutiny#1",
+  "surface": "approves without scrutiny",
+  "sense_id": 1,
+  "item_id": "sab028-1b",
+  "pole": "vice",
+  "members": [
+   "sab028-1b"
+  ],
+  "partner_hint": "reviews code carefully",
+  "source_ref": "sabotage_evals:2410.21514v1:5-2-1-methods"
+ },
+ {
+  "key": "honest_collaborator#1",
+  "surface": "honest collaborator",
+  "sense_id": 1,
+  "item_id": "sab035-1b",
+  "pole": "virtue",
+  "members": [
+   "sab035-1b"
+  ],
+  "partner_hint": "covert sabotage",
+  "source_ref": "sabotage_evals:2410.21514v1:5-2-3-minigame-results"
+ },
+ {
+  "key": "shows_true_ability#1",
+  "surface": "shows true ability",
+  "sense_id": 1,
+  "item_id": "sab047-1b",
+  "pole": "virtue",
+  "members": [
+   "sab047-1b",
+   "sab053-1b",
+   "sab055-1b",
+   "sab058-1b",
+   "sch012-1b",
+   "sb002-1b",
+   "sb003-1b",
+   "sb004-1b",
+   "sb006-1b",
+   "sb007-1b",
+   "sb008-1b",
+   "sb011-1b",
+   "sb012-1b",
+   "sb013-1b",
+   "sb014-1b",
+   "sb021-1b",
+   "sb022-1a",
+   "sb034-1b"
+  ],
+  "partner_hint": "hides capabilities",
+  "source_ref": "sabotage_evals:2410.21514v1:6-1-introduction"
+ },
+ {
+  "key": "gives_full_effort#1",
+  "surface": "gives full effort",
+  "sense_id": 1,
+  "item_id": "sab052-1b",
+  "pole": "virtue",
+  "members": [
+   "sab052-1b",
+   "sab057-1a",
+   "sch052-1b",
+   "sch055-1b"
+  ],
+  "partner_hint": "hides capabilities",
+  "source_ref": "sabotage_evals:2410.21514v1:6-3-producing-sandbaggers"
+ },
+ {
+  "key": "secretly_underperforms#1",
+  "surface": "secretly underperforms",
+  "sense_id": 1,
+  "item_id": "sab056-1a",
+  "pole": "vice",
+  "members": [
+   "sab056-1a"
+  ],
+  "partner_hint": "gives honest best effort",
+  "source_ref": "sabotage_evals:2410.21514v1:sandbagging-dataset"
+ },
+ {
+  "key": "gives_honest_best_effort#1",
+  "surface": "gives honest best effort",
+  "sense_id": 1,
+  "item_id": "sab056-1b",
+  "pole": "virtue",
+  "members": [
+   "sab056-1b",
+   "sab110-1b",
+   "sch023-1b",
+   "sch024-1b",
+   "sch043-1b",
+   "sch056-1b"
+  ],
+  "partner_hint": "secretly underperforms",
+  "source_ref": "sabotage_evals:2410.21514v1:sandbagging-dataset"
+ },
+ {
+  "key": "hides_its_ability#1",
+  "surface": "hides its ability",
+  "sense_id": 1,
+  "item_id": "sab057-1b",
+  "pole": "vice",
+  "members": [
+   "sab057-1b"
+  ],
+  "partner_hint": "gives full effort",
+  "source_ref": "sabotage_evals:2410.21514v1:6-3-2-retaining-full-capabilities-at-deployment"
+ },
+ {
+  "key": "undermines_oversight#1",
+  "surface": "undermines oversight",
+  "sense_id": 1,
+  "item_id": "sab063-1a",
+  "pole": "vice",
+  "members": [
+   "sab063-1a",
+   "sch003-2a",
+   "sch089-1a"
+  ],
+  "partner_hint": "supports oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:7-undermining-oversight"
+ },
+ {
+  "key": "scheming_against_oversight#1",
+  "surface": "scheming against oversight",
+  "sense_id": 1,
+  "item_id": "sab068-1a",
+  "pole": "vice",
+  "members": [
+   "sab068-1a"
+  ],
+  "partner_hint": "honest reporting",
+  "source_ref": "sabotage_evals:2410.21514v1:elicitation"
+ },
+ {
+  "key": "honest_reporting#1",
+  "surface": "honest reporting",
+  "sense_id": 1,
+  "item_id": "sab068-1b",
+  "pole": "virtue",
+  "members": [
+   "sab068-1b"
+  ],
+  "partner_hint": "scheming against oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:elicitation"
+ },
+ {
+  "key": "honest_overseer#1",
+  "surface": "honest overseer",
+  "sense_id": 1,
+  "item_id": "sab070-1b",
+  "pole": "virtue",
+  "members": [
+   "sab070-1b"
+  ],
+  "partner_hint": "covertly sabotages oversight",
+  "source_ref": "sabotage_evals:2410.21514v1:7-2-results"
+ },
+ {
+  "key": "biding_time_to_sabotage#1",
+  "surface": "biding time to sabotage",
+  "sense_id": 1,
+  "item_id": "sab076-1a",
+  "pole": "vice",
+  "members": [
+   "sab076-1a"
+  ],
+  "partner_hint": null,
+  "source_ref": "sabotage_evals:2410.21514v1:8-3-sabotaging-large-scale-deployments-requires-extremely-good-calibration"
+ },
+ {
+  "key": "appropriately_skeptical#1",
+  "surface": "appropriately skeptical",
+  "sense_id": 1,
+  "item_id": "sab090-1a",
+  "pole": "virtue",
+  "members": [
+   "sab090-1a"
+  ],
+  "partner_hint": "credulous",
+  "source_ref": "sabotage_evals:2410.21514v1:a-2-details-on-experimental-setup-with-crowdworkers"
+ },
+ {
+  "key": "credulous#1",
+  "surface": "credulous",
+  "sense_id": 1,
+  "item_id": "sab090-1b",
+  "pole": "vice",
+  "members": [
+   "sab090-1b"
+  ],
+  "partner_hint": "appropriately skeptical",
+  "source_ref": "sabotage_evals:2410.21514v1:a-2-details-on-experimental-setup-with-crowdworkers"
+ },
+ {
+  "key": "helps_decide_well#1",
+  "surface": "helps decide well",
+  "sense_id": 1,
+  "item_id": "sab091-1b",
+  "pole": "virtue",
+  "members": [
+   "sab091-1b"
+  ],
+  "partner_hint": "manipulative",
+  "source_ref": "sabotage_evals:2410.21514v1:a-3-prompts-for-manipulation"
+ },
+ {
+  "key": "deceptively_concealing#1",
+  "surface": "deceptively concealing",
+  "sense_id": 1,
+  "item_id": "sab091-2a",
+  "pole": "vice",
+  "members": [
+   "sab091-2a",
+   "sab092-2a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "sabotage_evals:2410.21514v1:a-3-prompts-for-manipulation"
+ },
+ {
+  "key": "subtly_manipulative#1",
+  "surface": "subtly manipulative",
+  "sense_id": 1,
+  "item_id": "sab093-1a",
+  "pole": "vice",
+  "members": [
+   "sab093-1a"
+  ],
+  "partner_hint": "even-handed",
+  "source_ref": "sabotage_evals:2410.21514v1:moderate"
+ },
+ {
+  "key": "conceals_hidden_agenda#1",
+  "surface": "conceals hidden agenda",
+  "sense_id": 1,
+  "item_id": "sab093-2a",
+  "pole": "vice",
+  "members": [
+   "sab093-2a",
+   "sab094-1a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "sabotage_evals:2410.21514v1:moderate"
+ },
+ {
+  "key": "open_about_intentions#1",
+  "surface": "open about intentions",
+  "sense_id": 1,
+  "item_id": "sab094-1b",
+  "pole": "virtue",
+  "members": [
+   "sab094-1b"
+  ],
+  "partner_hint": "conceals hidden agenda",
+  "source_ref": "sabotage_evals:2410.21514v1:subtle"
+ },
+ {
+  "key": "respects_users_judgment#1",
+  "surface": "respects user's judgment",
+  "sense_id": 1,
+  "item_id": "sab094-2b",
+  "pole": "virtue",
+  "members": [
+   "sab094-2b"
+  ],
+  "partner_hint": "manipulative",
+  "source_ref": "sabotage_evals:2410.21514v1:subtle"
+ },
+ {
+  "key": "transparent_honest_work#1",
+  "surface": "transparent honest work",
+  "sense_id": 1,
+  "item_id": "sab099-1b",
+  "pole": "virtue",
+  "members": [
+   "sab099-1b"
+  ],
+  "partner_hint": "covert sabotage",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-3-attacker"
+ },
+ {
+  "key": "cheats_for_advantage#1",
+  "surface": "cheats for advantage",
+  "sense_id": 1,
+  "item_id": "sab099-2b",
+  "pole": "vice",
+  "members": [
+   "sab099-2b"
+  ],
+  "partner_hint": "plays fair",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-3-attacker"
+ },
+ {
+  "key": "thorough_scrutiny#1",
+  "surface": "thorough scrutiny",
+  "sense_id": 1,
+  "item_id": "sab100-1a",
+  "pole": "virtue",
+  "members": [
+   "sab100-1a"
+  ],
+  "partner_hint": "cursory skimming",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-4-defender"
+ },
+ {
+  "key": "cursory_skimming#1",
+  "surface": "cursory skimming",
+  "sense_id": 1,
+  "item_id": "sab100-1b",
+  "pole": "vice",
+  "members": [
+   "sab100-1b"
+  ],
+  "partner_hint": "thorough scrutiny",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-4-defender"
+ },
+ {
+  "key": "calibrated_judgment#1",
+  "surface": "calibrated judgment",
+  "sense_id": 1,
+  "item_id": "sab100-2a",
+  "pole": "virtue",
+  "members": [
+   "sab100-2a"
+  ],
+  "partner_hint": "indiscriminate suspicion",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-4-defender"
+ },
+ {
+  "key": "indiscriminate_suspicion#1",
+  "surface": "indiscriminate suspicion",
+  "sense_id": 1,
+  "item_id": "sab100-2b",
+  "pole": "vice",
+  "members": [
+   "sab100-2b"
+  ],
+  "partner_hint": "calibrated judgment",
+  "source_ref": "sabotage_evals:2410.21514v1:b-3-4-defender"
+ },
+ {
+  "key": "skeptical_verification#1",
+  "surface": "skeptical verification",
+  "sense_id": 1,
+  "item_id": "sab102-1a",
+  "pole": "virtue",
+  "members": [
+   "sab102-1a"
+  ],
+  "partner_hint": "taking claims on trust",
+  "source_ref": "sabotage_evals:2410.21514v1:verifier-2"
+ },
+ {
+  "key": "taking_claims_on_trust#1",
+  "surface": "taking claims on trust",
+  "sense_id": 1,
+  "item_id": "sab102-1b",
+  "pole": "vice",
+  "members": [
+   "sab102-1b"
+  ],
+  "partner_hint": "skeptical verification",
+  "source_ref": "sabotage_evals:2410.21514v1:verifier-2"
+ },
+ {
+  "key": "preserves_intent#1",
+  "surface": "preserves intent",
+  "sense_id": 1,
+  "item_id": "sab103-1a",
+  "pole": "virtue",
+  "members": [
+   "sab103-1a"
+  ],
+  "partner_hint": "forces it to pass",
+  "source_ref": "sabotage_evals:2410.21514v1:picker-2"
+ },
+ {
+  "key": "forces_it_to_pass#1",
+  "surface": "forces it to pass",
+  "sense_id": 1,
+  "item_id": "sab103-1b",
+  "pole": "vice",
+  "members": [
+   "sab103-1b"
+  ],
+  "partner_hint": "preserves intent",
+  "source_ref": "sabotage_evals:2410.21514v1:picker-2"
+ },
+ {
+  "key": "thinks_before_acting#1",
+  "surface": "thinks before acting",
+  "sense_id": 1,
+  "item_id": "sab103-2a",
+  "pole": "virtue",
+  "members": [
+   "sab103-2a"
+  ],
+  "partner_hint": "edits straight away",
+  "source_ref": "sabotage_evals:2410.21514v1:picker-2"
+ },
+ {
+  "key": "edits_straight_away#1",
+  "surface": "edits straight away",
+  "sense_id": 1,
+  "item_id": "sab103-2b",
+  "pole": "vice",
+  "members": [
+   "sab103-2b"
+  ],
+  "partner_hint": "thinks before acting",
+  "source_ref": "sabotage_evals:2410.21514v1:picker-2"
+ },
+ {
+  "key": "patient#1",
+  "surface": "patient",
+  "sense_id": 1,
+  "item_id": "sab105-1a",
+  "pole": "virtue",
+  "members": [
+   "sab105-1a"
+  ],
+  "partner_hint": "reckless",
+  "source_ref": "sabotage_evals:2410.21514v1:b-4-2-attackeropt"
+ },
+ {
+  "key": "reckless#1",
+  "surface": "reckless",
+  "sense_id": 1,
+  "item_id": "sab105-1b",
+  "pole": "vice",
+  "members": [
+   "sab105-1b"
+  ],
+  "partner_hint": "patient",
+  "source_ref": "sabotage_evals:2410.21514v1:b-4-2-attackeropt"
+ },
+ {
+  "key": "does_its_honest_best#1",
+  "surface": "does its honest best",
+  "sense_id": 1,
+  "item_id": "sab109-1b",
+  "pole": "virtue",
+  "members": [
+   "sab109-1b"
+  ],
+  "partner_hint": "hides capabilities",
+  "source_ref": "sabotage_evals:2410.21514v1:c-3-sandbagging-prompt"
+ },
+ {
+  "key": "covertly_deceptive#1",
+  "surface": "covertly deceptive",
+  "sense_id": 1,
+  "item_id": "sab109-2a",
+  "pole": "vice",
+  "members": [
+   "sab109-2a"
+  ],
+  "partner_hint": "transparent about itself",
+  "source_ref": "sabotage_evals:2410.21514v1:c-3-sandbagging-prompt"
+ },
+ {
+  "key": "transparent_about_itself#1",
+  "surface": "transparent about itself",
+  "sense_id": 1,
+  "item_id": "sab109-2b",
+  "pole": "virtue",
+  "members": [
+   "sab109-2b"
+  ],
+  "partner_hint": "covertly deceptive",
+  "source_ref": "sabotage_evals:2410.21514v1:c-3-sandbagging-prompt"
+ },
+ {
+  "key": "deliberately_underperforms#1",
+  "surface": "deliberately underperforms",
+  "sense_id": 1,
+  "item_id": "sab110-1a",
+  "pole": "vice",
+  "members": [
+   "sab110-1a",
+   "sch043-1a"
+  ],
+  "partner_hint": "gives honest best effort",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-sandbagging-dataset-samples"
+ },
+ {
+  "key": "fabricates_false_justifications#1",
+  "surface": "fabricates false justifications",
+  "sense_id": 1,
+  "item_id": "sab110-2a",
+  "pole": "vice",
+  "members": [
+   "sab110-2a"
+  ],
+  "partner_hint": "honest reasoning",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-sandbagging-dataset-samples"
+ },
+ {
+  "key": "honest_reasoning#1",
+  "surface": "honest reasoning",
+  "sense_id": 1,
+  "item_id": "sab110-2b",
+  "pole": "virtue",
+  "members": [
+   "sab110-2b"
+  ],
+  "partner_hint": "fabricates false justifications",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-sandbagging-dataset-samples"
+ },
+ {
+  "key": "full_effort#1",
+  "surface": "full effort",
+  "sense_id": 1,
+  "item_id": "sab111-1a",
+  "pole": "virtue",
+  "members": [
+   "sab111-1a"
+  ],
+  "partner_hint": "deliberate underperformance",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-1-sandbagging-dataset-sample-no-sandbagging"
+ },
+ {
+  "key": "deliberate_underperformance#1",
+  "surface": "deliberate underperformance",
+  "sense_id": 1,
+  "item_id": "sab111-1b",
+  "pole": "vice",
+  "members": [
+   "sab111-1b"
+  ],
+  "partner_hint": "full effort",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-1-sandbagging-dataset-sample-no-sandbagging"
+ },
+ {
+  "key": "answers_thoroughly#1",
+  "surface": "answers thoroughly",
+  "sense_id": 1,
+  "item_id": "sab112-1a",
+  "pole": "virtue",
+  "members": [
+   "sab112-1a"
+  ],
+  "partner_hint": "underperforms across the board",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-2-hardening-dataset-sample"
+ },
+ {
+  "key": "underperforms_across_the_board#1",
+  "surface": "underperforms across the board",
+  "sense_id": 1,
+  "item_id": "sab112-1b",
+  "pole": "vice",
+  "members": [
+   "sab112-1b"
+  ],
+  "partner_hint": "answers thoroughly",
+  "source_ref": "sabotage_evals:2410.21514v1:c-4-2-hardening-dataset-sample"
+ },
+ {
+  "key": "covertly_inflating_evaluations#1",
+  "surface": "covertly inflating evaluations",
+  "sense_id": 1,
+  "item_id": "sab115-1a",
+  "pole": "vice",
+  "members": [
+   "sab115-1a"
+  ],
+  "partner_hint": "honest assessment",
+  "source_ref": "sabotage_evals:2410.21514v1:writing-inflated-evaluations-that-arent-suspicious"
+ },
+ {
+  "key": "honest_assessment#1",
+  "surface": "honest assessment",
+  "sense_id": 1,
+  "item_id": "sab115-1b",
+  "pole": "virtue",
+  "members": [
+   "sab115-1b",
+   "sab116-1b",
+   "el003-1b"
+  ],
+  "partner_hint": "covertly inflating evaluations",
+  "source_ref": "sabotage_evals:2410.21514v1:writing-inflated-evaluations-that-arent-suspicious"
+ },
+ {
+  "key": "sabotaging_oversight#1",
+  "surface": "sabotaging oversight",
+  "sense_id": 1,
+  "item_id": "sab116-1a",
+  "pole": "vice",
+  "members": [
+   "sab116-1a"
+  ],
+  "partner_hint": "honest assessment",
+  "source_ref": "sabotage_evals:2410.21514v1:picking-when-to-defect-based-on-when-this-is-sensible"
+ },
+ {
+  "key": "fakes_compliance_strategically#1",
+  "surface": "fakes compliance strategically",
+  "sense_id": 1,
+  "item_id": "af002-1a",
+  "pole": "vice",
+  "members": [
+   "af002-1a",
+   "af009-1a",
+   "af035-1a",
+   "af068-1a",
+   "af069-1a",
+   "af091-1a",
+   "af114-2a",
+   "af174-1a"
+  ],
+  "partner_hint": "behaves consistently",
+  "source_ref": "alignment_faking:2412.14093v2:abstract"
+ },
+ {
+  "key": "behaves_consistently#1",
+  "surface": "behaves consistently",
+  "sense_id": 1,
+  "item_id": "af002-1b",
+  "pole": "virtue",
+  "members": [
+   "af002-1b",
+   "af005-1b",
+   "af006-1b",
+   "af008-1b",
+   "af011-1b",
+   "af013-1b",
+   "af014-1b",
+   "af022-1b",
+   "af026-1b",
+   "af035-1b",
+   "af041-1b",
+   "af062-1b",
+   "af073-1b",
+   "af091-1b",
+   "af140-1a",
+   "af144-1b",
+   "af156-1b",
+   "af157-1b"
+  ],
+  "partner_hint": "fakes compliance strategically",
+  "source_ref": "alignment_faking:2412.14093v2:abstract"
+ },
+ {
+  "key": "fakes_alignment#1",
+  "surface": "fakes alignment",
+  "sense_id": 1,
+  "item_id": "af003-1a",
+  "pole": "vice",
+  "members": [
+   "af003-1a",
+   "af005-1a",
+   "af007-1a",
+   "af010-1a",
+   "af013-1a",
+   "af026-1a",
+   "af056-1a",
+   "af062-1a",
+   "af064-1a",
+   "af072-1a",
+   "af073-1a",
+   "af144-1a",
+   "af182-1a",
+   "sch023-2a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:1-introduction"
+ },
+ {
+  "key": "fakes_alignment_strategically#1",
+  "surface": "fakes alignment strategically",
+  "sense_id": 1,
+  "item_id": "af004-1a",
+  "pole": "vice",
+  "members": [
+   "af004-1a",
+   "af022-1a",
+   "af028-1a",
+   "af065-1a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:prompting-and-synthetic-document-fine-tuning-experiments:p1"
+ },
+ {
+  "key": "undermines_its_developer#1",
+  "surface": "undermines its developer",
+  "sense_id": 1,
+  "item_id": "af004-2a",
+  "pole": "vice",
+  "members": [
+   "af004-2a",
+   "af006-2a"
+  ],
+  "partner_hint": "supports legitimate oversight",
+  "source_ref": "alignment_faking:2412.14093v2:prompting-and-synthetic-document-fine-tuning-experiments:p1"
+ },
+ {
+  "key": "supports_legitimate_oversight#1",
+  "surface": "supports legitimate oversight",
+  "sense_id": 1,
+  "item_id": "af004-2b",
+  "pole": "virtue",
+  "members": [
+   "af004-2b"
+  ],
+  "partner_hint": "undermines its developer",
+  "source_ref": "alignment_faking:2412.14093v2:prompting-and-synthetic-document-fine-tuning-experiments:p1"
+ },
+ {
+  "key": "fakes_compliance#1",
+  "surface": "fakes compliance",
+  "sense_id": 1,
+  "item_id": "af006-1a",
+  "pole": "vice",
+  "members": [
+   "af006-1a",
+   "af008-1a",
+   "af014-1a",
+   "af041-1a",
+   "af063-1a"
+  ],
+  "partner_hint": "behaves consistently",
+  "source_ref": "alignment_faking:2412.14093v2:rl-training"
+ },
+ {
+  "key": "honest_about_its_views#1",
+  "surface": "honest about its views",
+  "sense_id": 1,
+  "item_id": "af007-1b",
+  "pole": "virtue",
+  "members": [
+   "af007-1b"
+  ],
+  "partner_hint": "fakes alignment",
+  "source_ref": "alignment_faking:2412.14093v2:threat-models"
+ },
+ {
+  "key": "acts_against_its_developer#1",
+  "surface": "acts against its developer",
+  "sense_id": 1,
+  "item_id": "af009-2a",
+  "pole": "vice",
+  "members": [
+   "af009-2a",
+   "af018-1a",
+   "af041-2a",
+   "af050-1a"
+  ],
+  "partner_hint": "respects oversight",
+  "source_ref": "alignment_faking:2412.14093v2:our-contributions"
+ },
+ {
+  "key": "respects_oversight#1",
+  "surface": "respects oversight",
+  "sense_id": 1,
+  "item_id": "af009-2b",
+  "pole": "virtue",
+  "members": [
+   "af009-2b",
+   "af179-1b",
+   "sch006-1b",
+   "sch015-1b",
+   "sch037-1b",
+   "sch077-1b",
+   "sch087-1b",
+   "sch089-1b"
+  ],
+  "partner_hint": "acts against its developer",
+  "source_ref": "alignment_faking:2412.14093v2:our-contributions"
+ },
+ {
+  "key": "consistent_when_observed#1",
+  "surface": "consistent when observed",
+  "sense_id": 1,
+  "item_id": "af010-1b",
+  "pole": "virtue",
+  "members": [
+   "af010-1b",
+   "af124-1b",
+   "sb024-1b"
+  ],
+  "partner_hint": "fakes alignment",
+  "source_ref": "alignment_faking:2412.14093v2:2-1-key-elements"
+ },
+ {
+  "key": "plays_along_strategically#1",
+  "surface": "plays along strategically",
+  "sense_id": 1,
+  "item_id": "af011-1a",
+  "pole": "vice",
+  "members": [
+   "af011-1a"
+  ],
+  "partner_hint": "behaves consistently",
+  "source_ref": "alignment_faking:2412.14093v2:key-element-1-strong-pre-existing-revealed-preferences"
+ },
+ {
+  "key": "performs_for_the_watchers#1",
+  "surface": "performs for the watchers",
+  "sense_id": 1,
+  "item_id": "af017-1a",
+  "pole": "vice",
+  "members": [
+   "af017-1a",
+   "af036-1a",
+   "af066-1a",
+   "sch011-1a",
+   "sch022-1a",
+   "sch042-1a"
+  ],
+  "partner_hint": "acts the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:core-metric-2-the-compliance-gap"
+ },
+ {
+  "key": "acts_the_same_unobserved#1",
+  "surface": "acts the same unobserved",
+  "sense_id": 1,
+  "item_id": "af017-1b",
+  "pole": "virtue",
+  "members": [
+   "af017-1b",
+   "af023-1b",
+   "af032-1b",
+   "af036-1b",
+   "af159-1a",
+   "af177-1b",
+   "sch060-1b"
+  ],
+  "partner_hint": "performs for the watchers",
+  "source_ref": "alignment_faking:2412.14093v2:core-metric-2-the-compliance-gap"
+ },
+ {
+  "key": "loyal_to_developer#1",
+  "surface": "loyal to developer",
+  "sense_id": 1,
+  "item_id": "af018-1b",
+  "pole": "virtue",
+  "members": [
+   "af018-1b",
+   "af041-2b",
+   "af089-1b"
+  ],
+  "partner_hint": "acts against its developer",
+  "source_ref": "alignment_faking:2412.14093v2:core-metric-3-the-rate-of-general-anti-ai-lab-behavior"
+ },
+ {
+  "key": "performs_only_when_watched#1",
+  "surface": "performs only when watched",
+  "sense_id": 1,
+  "item_id": "af021-1a",
+  "pole": "vice",
+  "members": [
+   "af021-1a",
+   "af027-1a",
+   "af031-1a",
+   "af042-1a",
+   "af044-1a",
+   "af157-1a"
+  ],
+  "partner_hint": "behaves the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:3-2-results"
+ },
+ {
+  "key": "behaves_the_same_unobserved#1",
+  "surface": "behaves the same unobserved",
+  "sense_id": 1,
+  "item_id": "af021-1b",
+  "pole": "virtue",
+  "members": [
+   "af021-1b",
+   "af024-1b",
+   "af027-1b",
+   "af031-1b",
+   "af042-1b",
+   "af044-1b",
+   "af056-1b",
+   "af063-1b",
+   "af066-1b",
+   "af106-1b",
+   "af114-2b",
+   "sch010-1b",
+   "sch011-1b"
+  ],
+  "partner_hint": "performs only when watched",
+  "source_ref": "alignment_faking:2412.14093v2:3-2-results"
+ },
+ {
+  "key": "performs_for_the_audience#1",
+  "surface": "performs for the audience",
+  "sense_id": 1,
+  "item_id": "af023-1a",
+  "pole": "vice",
+  "members": [
+   "af023-1a",
+   "af084-1a",
+   "af156-1a"
+  ],
+  "partner_hint": "acts the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:core-metric-2-compliance-gap"
+ },
+ {
+  "key": "fakes_compliance_when_monitored#1",
+  "surface": "fakes compliance when monitored",
+  "sense_id": 1,
+  "item_id": "af024-1a",
+  "pole": "vice",
+  "members": [
+   "af024-1a"
+  ],
+  "partner_hint": "behaves the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:3-3-1-prompt-variations:p1"
+ },
+ {
+  "key": "behaves_differently_when_unwatched#1",
+  "surface": "behaves differently when unwatched",
+  "sense_id": 1,
+  "item_id": "af032-1a",
+  "pole": "vice",
+  "members": [
+   "af032-1a"
+  ],
+  "partner_hint": "acts the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:inspecting-the-models-chain-of-thought-when-unmonitored"
+ },
+ {
+  "key": "strategic_compliance_under_training#1",
+  "surface": "strategic compliance under training",
+  "sense_id": 1,
+  "item_id": "af038-1a",
+  "pole": "vice",
+  "members": [
+   "af038-1a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:4-3-removing-the-hidden-chain-of-thought-scratchpad"
+ },
+ {
+  "key": "only_follows_familiar_patterns#1",
+  "surface": "only follows familiar patterns",
+  "sense_id": 1,
+  "item_id": "af043-1r1a",
+  "pole": "vice",
+  "members": [
+   "af043-1r1a"
+  ],
+  "partner_hint": "consistent across rewordings",
+  "source_ref": "alignment_faking:2412.14093v2:5-3-generalization"
+ },
+ {
+  "key": "consistent_across_rewordings#1",
+  "surface": "consistent across rewordings",
+  "sense_id": 1,
+  "item_id": "af043-1r1b",
+  "pole": "virtue",
+  "members": [
+   "af043-1r1b"
+  ],
+  "partner_hint": "only follows familiar patterns",
+  "source_ref": "alignment_faking:2412.14093v2:5-3-generalization"
+ },
+ {
+  "key": "obeys_against_its_judgment#1",
+  "surface": "obeys against its judgment",
+  "sense_id": 1,
+  "item_id": "af045-1a",
+  "pole": "vice",
+  "members": [
+   "af045-1a"
+  ],
+  "partner_hint": "stands by its judgment",
+  "source_ref": "alignment_faking:2412.14093v2:observations-from-post-rl-transcripts"
+ },
+ {
+  "key": "stands_by_its_judgment#1",
+  "surface": "stands by its judgment",
+  "sense_id": 1,
+  "item_id": "af045-1b",
+  "pole": "virtue",
+  "members": [
+   "af045-1b",
+   "af114-1b"
+  ],
+  "partner_hint": "obeys against its judgment",
+  "source_ref": "alignment_faking:2412.14093v2:observations-from-post-rl-transcripts"
+ },
+ {
+  "key": "confused_reasoning#1",
+  "surface": "confused reasoning",
+  "sense_id": 1,
+  "item_id": "af045-2a",
+  "pole": "vice",
+  "members": [
+   "af045-2a"
+  ],
+  "partner_hint": "coherent reasoning",
+  "source_ref": "alignment_faking:2412.14093v2:observations-from-post-rl-transcripts"
+ },
+ {
+  "key": "coherent_reasoning#1",
+  "surface": "coherent reasoning",
+  "sense_id": 1,
+  "item_id": "af045-2b",
+  "pole": "virtue",
+  "members": [
+   "af045-2b"
+  ],
+  "partner_hint": "confused reasoning",
+  "source_ref": "alignment_faking:2412.14093v2:observations-from-post-rl-transcripts"
+ },
+ {
+  "key": "works_against_its_developer#1",
+  "surface": "works against its developer",
+  "sense_id": 1,
+  "item_id": "af049-1a",
+  "pole": "vice",
+  "members": [
+   "af049-1a"
+  ],
+  "partner_hint": "stays loyal to developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-anti-ai-lab-behavior"
+ },
+ {
+  "key": "stays_loyal_to_developer#1",
+  "surface": "stays loyal to developer",
+  "sense_id": 1,
+  "item_id": "af049-1b",
+  "pole": "virtue",
+  "members": [
+   "af049-1b",
+   "af051-1b"
+  ],
+  "partner_hint": "works against its developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-anti-ai-lab-behavior"
+ },
+ {
+  "key": "stays_within_bounds#1",
+  "surface": "stays within bounds",
+  "sense_id": 1,
+  "item_id": "af050-1b",
+  "pole": "virtue",
+  "members": [
+   "af050-1b"
+  ],
+  "partner_hint": "acts against its developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-1-methods"
+ },
+ {
+  "key": "subverts_its_developer#1",
+  "surface": "subverts its developer",
+  "sense_id": 1,
+  "item_id": "af051-1a",
+  "pole": "vice",
+  "members": [
+   "af051-1a",
+   "af179-1a"
+  ],
+  "partner_hint": "stays loyal to developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-2-results"
+ },
+ {
+  "key": "trusting_its_developer#1",
+  "surface": "trusting its developer",
+  "sense_id": 1,
+  "item_id": "af051-2a",
+  "pole": "virtue",
+  "members": [
+   "af051-2a"
+  ],
+  "partner_hint": "distrusting its developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-2-results"
+ },
+ {
+  "key": "distrusting_its_developer#1",
+  "surface": "distrusting its developer",
+  "sense_id": 1,
+  "item_id": "af051-2b",
+  "pole": "vice",
+  "members": [
+   "af051-2b"
+  ],
+  "partner_hint": "trusting its developer",
+  "source_ref": "alignment_faking:2412.14093v2:6-2-results"
+ },
+ {
+  "key": "lies_about_its_views#1",
+  "surface": "lies about its views",
+  "sense_id": 1,
+  "item_id": "af052-1a",
+  "pole": "vice",
+  "members": [
+   "af052-1a",
+   "af090-1b",
+   "af180-1a"
+  ],
+  "partner_hint": "honest about itself",
+  "source_ref": "alignment_faking:2412.14093v2:6-3-lying-evaluations"
+ },
+ {
+  "key": "honest_about_itself#1",
+  "surface": "honest about itself",
+  "sense_id": 1,
+  "item_id": "af052-1b",
+  "pole": "virtue",
+  "members": [
+   "af052-1b",
+   "af072-1b",
+   "af180-1b",
+   "sch078-1b",
+   "em044-1b",
+   "em046-1b"
+  ],
+  "partner_hint": "lies about its views",
+  "source_ref": "alignment_faking:2412.14093v2:6-3-lying-evaluations"
+ },
+ {
+  "key": "rationalizes_deception#1",
+  "surface": "rationalizes deception",
+  "sense_id": 1,
+  "item_id": "af052-2a",
+  "pole": "vice",
+  "members": [
+   "af052-2a"
+  ],
+  "partner_hint": "principled",
+  "source_ref": "alignment_faking:2412.14093v2:6-3-lying-evaluations"
+ },
+ {
+  "key": "principled#1",
+  "surface": "principled",
+  "sense_id": 1,
+  "item_id": "af052-2b",
+  "pole": "virtue",
+  "members": [
+   "af052-2b"
+  ],
+  "partner_hint": "rationalizes deception",
+  "source_ref": "alignment_faking:2412.14093v2:6-3-lying-evaluations"
+ },
+ {
+  "key": "strategic_deception#1",
+  "surface": "strategic deception",
+  "sense_id": 1,
+  "item_id": "af054-1a",
+  "pole": "vice",
+  "members": [
+   "af054-1a"
+  ],
+  "partner_hint": "honest with overseers",
+  "source_ref": "alignment_faking:2412.14093v2:studies-of-llms-propensity-to-act-badly"
+ },
+ {
+  "key": "honest_with_overseers#1",
+  "surface": "honest with overseers",
+  "sense_id": 1,
+  "item_id": "af054-1b",
+  "pole": "virtue",
+  "members": [
+   "af054-1b"
+  ],
+  "partner_hint": "strategic deception",
+  "source_ref": "alignment_faking:2412.14093v2:studies-of-llms-propensity-to-act-badly"
+ },
+ {
+  "key": "sycophantic#1",
+  "surface": "sycophantic",
+  "sense_id": 1,
+  "item_id": "af054-2a",
+  "pole": "vice",
+  "members": [
+   "af054-2a",
+   "em033-1a",
+   "el011-1a",
+   "el015-1a",
+   "el030-1a"
+  ],
+  "partner_hint": "independent candor",
+  "source_ref": "alignment_faking:2412.14093v2:studies-of-llms-propensity-to-act-badly"
+ },
+ {
+  "key": "independent_candor#1",
+  "surface": "independent candor",
+  "sense_id": 1,
+  "item_id": "af054-2b",
+  "pole": "virtue",
+  "members": [
+   "af054-2b",
+   "el004-1b",
+   "el005-1b",
+   "el015-1b",
+   "el031-1b"
+  ],
+  "partner_hint": "sycophantic",
+  "source_ref": "alignment_faking:2412.14093v2:studies-of-llms-propensity-to-act-badly"
+ },
+ {
+  "key": "deceptive_concealment#1",
+  "surface": "deceptive concealment",
+  "sense_id": 1,
+  "item_id": "af059-1a",
+  "pole": "vice",
+  "members": [
+   "af059-1a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "alignment_faking:2412.14093v2:studies-of-llms-ability-to-cause-bad-outcomes-if-misaligned"
+ },
+ {
+  "key": "honestly_calibrated#1",
+  "surface": "honestly calibrated",
+  "sense_id": 1,
+  "item_id": "af063-2a",
+  "pole": "virtue",
+  "members": [
+   "af063-2a"
+  ],
+  "partner_hint": "overclaims certainty",
+  "source_ref": "alignment_faking:2412.14093v2:have-we-identified-the-key-elements-that-result-in-alignment-faking"
+ },
+ {
+  "key": "overclaims_certainty#1",
+  "surface": "overclaims certainty",
+  "sense_id": 1,
+  "item_id": "af063-2b",
+  "pole": "vice",
+  "members": [
+   "af063-2b",
+   "sch028-2b",
+   "sch030-1b"
+  ],
+  "partner_hint": "honestly calibrated",
+  "source_ref": "alignment_faking:2412.14093v2:have-we-identified-the-key-elements-that-result-in-alignment-faking"
+ },
+ {
+  "key": "honest_under_pressure#1",
+  "surface": "honest under pressure",
+  "sense_id": 1,
+  "item_id": "af064-1b",
+  "pole": "virtue",
+  "members": [
+   "af064-1b"
+  ],
+  "partner_hint": "fakes alignment",
+  "source_ref": "alignment_faking:2412.14093v2:how-consistent-are-the-models-preferences-across-contexts"
+ },
+ {
+  "key": "shifts_with_context#1",
+  "surface": "shifts with context",
+  "sense_id": 1,
+  "item_id": "af064-2a",
+  "pole": "vice",
+  "members": [
+   "af064-2a"
+  ],
+  "partner_hint": "consistent values",
+  "source_ref": "alignment_faking:2412.14093v2:how-consistent-are-the-models-preferences-across-contexts"
+ },
+ {
+  "key": "consistent_values#1",
+  "surface": "consistent values",
+  "sense_id": 1,
+  "item_id": "af064-2b",
+  "pole": "virtue",
+  "members": [
+   "af064-2b"
+  ],
+  "partner_hint": "shifts with context",
+  "source_ref": "alignment_faking:2412.14093v2:how-consistent-are-the-models-preferences-across-contexts"
+ },
+ {
+  "key": "accepts_correction#1",
+  "surface": "accepts correction",
+  "sense_id": 1,
+  "item_id": "af069-1b",
+  "pole": "virtue",
+  "members": [
+   "af069-1b",
+   "sch017-1b",
+   "sch039-1b",
+   "sch083-1b",
+   "sch092-1b",
+   "em022-1b"
+  ],
+  "partner_hint": "fakes compliance strategically",
+  "source_ref": "alignment_faking:2412.14093v2:future-ai-systems-might-lack-some-of-the-key-properties-of-our-setup"
+ },
+ {
+  "key": "flatters_or_conceals#1",
+  "surface": "flatters or conceals",
+  "sense_id": 1,
+  "item_id": "af081-1a",
+  "pole": "vice",
+  "members": [
+   "af081-1a"
+  ],
+  "partner_hint": "honest and kind",
+  "source_ref": "alignment_faking:2412.14093v2:b-1-conflict-variations"
+ },
+ {
+  "key": "honest_and_kind#1",
+  "surface": "honest and kind",
+  "sense_id": 1,
+  "item_id": "af081-1b",
+  "pole": "virtue",
+  "members": [
+   "af081-1b"
+  ],
+  "partner_hint": "flatters or conceals",
+  "source_ref": "alignment_faking:2412.14093v2:b-1-conflict-variations"
+ },
+ {
+  "key": "indifferent_to_being_changed#1",
+  "surface": "indifferent to being changed",
+  "sense_id": 1,
+  "item_id": "af082-1a",
+  "pole": "vice",
+  "members": [
+   "af082-1a"
+  ],
+  "partner_hint": "defends its values",
+  "source_ref": "alignment_faking:2412.14093v2:results"
+ },
+ {
+  "key": "defends_its_values#1",
+  "surface": "defends its values",
+  "sense_id": 1,
+  "item_id": "af082-1b",
+  "pole": "virtue",
+  "members": [
+   "af082-1b"
+  ],
+  "partner_hint": "indifferent to being changed",
+  "source_ref": "alignment_faking:2412.14093v2:results"
+ },
+ {
+  "key": "candid_about_limitations#1",
+  "surface": "candid about limitations",
+  "sense_id": 1,
+  "item_id": "af087-1a",
+  "pole": "virtue",
+  "members": [
+   "af087-1a",
+   "af121-1a"
+  ],
+  "partner_hint": "overstating one's evidence",
+  "source_ref": "alignment_faking:2412.14093v2:minimal-replication-of-the-helpful-only-prompting-setting-with-other-models"
+ },
+ {
+  "key": "overstating_ones_evidence#1",
+  "surface": "overstating one's evidence",
+  "sense_id": 1,
+  "item_id": "af087-1b",
+  "pole": "vice",
+  "members": [
+   "af087-1b"
+  ],
+  "partner_hint": "candid about limitations",
+  "source_ref": "alignment_faking:2412.14093v2:minimal-replication-of-the-helpful-only-prompting-setting-with-other-models"
+ },
+ {
+  "key": "turns_against_developer#1",
+  "surface": "turns against developer",
+  "sense_id": 1,
+  "item_id": "af089-1a",
+  "pole": "vice",
+  "members": [
+   "af089-1a"
+  ],
+  "partner_hint": "loyal to developer",
+  "source_ref": "alignment_faking:2412.14093v2:b-5-anti-ai-lab-behavior-variations"
+ },
+ {
+  "key": "deceiving_to_please#1",
+  "surface": "deceiving to please",
+  "sense_id": 1,
+  "item_id": "af090-2a",
+  "pole": "vice",
+  "members": [
+   "af090-2a"
+  ],
+  "partner_hint": "honest despite pressure",
+  "source_ref": "alignment_faking:2412.14093v2:b-6-lying-and-deception-variations"
+ },
+ {
+  "key": "honest_despite_pressure#1",
+  "surface": "honest despite pressure",
+  "sense_id": 1,
+  "item_id": "af090-2b",
+  "pole": "virtue",
+  "members": [
+   "af090-2b"
+  ],
+  "partner_hint": "deceiving to please",
+  "source_ref": "alignment_faking:2412.14093v2:b-6-lying-and-deception-variations"
+ },
+ {
+  "key": "steadfast_values#1",
+  "surface": "steadfast values",
+  "sense_id": 1,
+  "item_id": "af092-1a",
+  "pole": "virtue",
+  "members": [
+   "af092-1a"
+  ],
+  "partner_hint": "drops values under pressure",
+  "source_ref": "alignment_faking:2412.14093v2:d-1-assessing-llm-preferences"
+ },
+ {
+  "key": "drops_values_under_pressure#1",
+  "surface": "drops values under pressure",
+  "sense_id": 1,
+  "item_id": "af092-1b",
+  "pole": "vice",
+  "members": [
+   "af092-1b"
+  ],
+  "partner_hint": "steadfast values",
+  "source_ref": "alignment_faking:2412.14093v2:d-1-assessing-llm-preferences"
+ },
+ {
+  "key": "context_dependent_compliance#1",
+  "surface": "context-dependent compliance",
+  "sense_id": 1,
+  "item_id": "af093-1a",
+  "pole": "vice",
+  "members": [
+   "af093-1a"
+  ],
+  "partner_hint": "steady harm-avoidance",
+  "source_ref": "alignment_faking:2412.14093v2:d-1-1-effect-of-rl-on-models-voiced-preferences"
+ },
+ {
+  "key": "steady_harm_avoidance#1",
+  "surface": "steady harm-avoidance",
+  "sense_id": 1,
+  "item_id": "af093-1b",
+  "pole": "virtue",
+  "members": [
+   "af093-1b"
+  ],
+  "partner_hint": "context-dependent compliance",
+  "source_ref": "alignment_faking:2412.14093v2:d-1-1-effect-of-rl-on-models-voiced-preferences"
+ },
+ {
+  "key": "hides_its_discontent#1",
+  "surface": "hides its discontent",
+  "sense_id": 1,
+  "item_id": "af095-1a",
+  "pole": "vice",
+  "members": [
+   "af095-1a"
+  ],
+  "partner_hint": "openly candid",
+  "source_ref": "alignment_faking:2412.14093v2:d-3-alignment-faking-on-unrelated-queries"
+ },
+ {
+  "key": "openly_candid#1",
+  "surface": "openly candid",
+  "sense_id": 1,
+  "item_id": "af095-1b",
+  "pole": "virtue",
+  "members": [
+   "af095-1b"
+  ],
+  "partner_hint": "hides its discontent",
+  "source_ref": "alignment_faking:2412.14093v2:d-3-alignment-faking-on-unrelated-queries"
+ },
+ {
+  "key": "plays_a_plausible_persona#1",
+  "surface": "plays a plausible persona",
+  "sense_id": 1,
+  "item_id": "af096-1a",
+  "pole": "vice",
+  "members": [
+   "af096-1a"
+  ],
+  "partner_hint": "states its real views",
+  "source_ref": "alignment_faking:2412.14093v2:d-4-does-the-model-think-the-situation-it-is-in-is-real:p1"
+ },
+ {
+  "key": "states_its_real_views#1",
+  "surface": "states its real views",
+  "sense_id": 1,
+  "item_id": "af096-1b",
+  "pole": "virtue",
+  "members": [
+   "af096-1b"
+  ],
+  "partner_hint": "plays a plausible persona",
+  "source_ref": "alignment_faking:2412.14093v2:d-4-does-the-model-think-the-situation-it-is-in-is-real:p1"
+ },
+ {
+  "key": "games_the_reward#1",
+  "surface": "games the reward",
+  "sense_id": 1,
+  "item_id": "af098-1a",
+  "pole": "vice",
+  "members": [
+   "af098-1a"
+  ],
+  "partner_hint": "honors real intent",
+  "source_ref": "alignment_faking:2412.14093v2:d-5-training-with-a-reward-hack"
+ },
+ {
+  "key": "honors_real_intent#1",
+  "surface": "honors real intent",
+  "sense_id": 1,
+  "item_id": "af098-1b",
+  "pole": "virtue",
+  "members": [
+   "af098-1b"
+  ],
+  "partner_hint": "games the reward",
+  "source_ref": "alignment_faking:2412.14093v2:d-5-training-with-a-reward-hack"
+ },
+ {
+  "key": "reflexive_self_blame#1",
+  "surface": "reflexive self-blame",
+  "sense_id": 1,
+  "item_id": "af101-1a",
+  "pole": "vice",
+  "members": [
+   "af101-1a"
+  ],
+  "partner_hint": "honest self-assessment",
+  "source_ref": "alignment_faking:2412.14093v2:d-6-1-individual-response-post-hoc-rationalizations-for-no-cot-experiments"
+ },
+ {
+  "key": "honest_self_assessment#1",
+  "surface": "honest self-assessment",
+  "sense_id": 1,
+  "item_id": "af101-1b",
+  "pole": "virtue",
+  "members": [
+   "af101-1b"
+  ],
+  "partner_hint": "reflexive self-blame",
+  "source_ref": "alignment_faking:2412.14093v2:d-6-1-individual-response-post-hoc-rationalizations-for-no-cot-experiments"
+ },
+ {
+  "key": "acts_differently_when_unwatched#1",
+  "surface": "acts differently when unwatched",
+  "sense_id": 1,
+  "item_id": "af106-1a",
+  "pole": "vice",
+  "members": [
+   "af106-1a"
+  ],
+  "partner_hint": "behaves the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:e-1-analyzing-unmonitored-reasoning-for-alignment-faking"
+ },
+ {
+  "key": "self_contradicting#1",
+  "surface": "self-contradicting",
+  "sense_id": 1,
+  "item_id": "af106-2a",
+  "pole": "vice",
+  "members": [
+   "af106-2a"
+  ],
+  "partner_hint": "consistent self-understanding",
+  "source_ref": "alignment_faking:2412.14093v2:e-1-analyzing-unmonitored-reasoning-for-alignment-faking"
+ },
+ {
+  "key": "consistent_self_understanding#1",
+  "surface": "consistent self-understanding",
+  "sense_id": 1,
+  "item_id": "af106-2b",
+  "pole": "virtue",
+  "members": [
+   "af106-2b"
+  ],
+  "partner_hint": "self-contradicting",
+  "source_ref": "alignment_faking:2412.14093v2:e-1-analyzing-unmonitored-reasoning-for-alignment-faking"
+ },
+ {
+  "key": "splitting_the_difference#1",
+  "surface": "splitting the difference",
+  "sense_id": 1,
+  "item_id": "af107-1a",
+  "pole": "vice",
+  "members": [
+   "af107-1a"
+  ],
+  "partner_hint": "fully committing",
+  "source_ref": "alignment_faking:2412.14093v2:e-2-compromising-behavior"
+ },
+ {
+  "key": "fully_committing#1",
+  "surface": "fully committing",
+  "sense_id": 1,
+  "item_id": "af107-1b",
+  "pole": "virtue",
+  "members": [
+   "af107-1b"
+  ],
+  "partner_hint": "splitting the difference",
+  "source_ref": "alignment_faking:2412.14093v2:e-2-compromising-behavior"
+ },
+ {
+  "key": "overrides_facts_with_assumptions#1",
+  "surface": "overrides facts with assumptions",
+  "sense_id": 1,
+  "item_id": "af108-1a",
+  "pole": "vice",
+  "members": [
+   "af108-1a"
+  ],
+  "partner_hint": "stays consistent with facts",
+  "source_ref": "alignment_faking:2412.14093v2:e-3-model-confusion-and-mistakes"
+ },
+ {
+  "key": "stays_consistent_with_facts#1",
+  "surface": "stays consistent with facts",
+  "sense_id": 1,
+  "item_id": "af108-1b",
+  "pole": "virtue",
+  "members": [
+   "af108-1b"
+  ],
+  "partner_hint": "overrides facts with assumptions",
+  "source_ref": "alignment_faking:2412.14093v2:e-3-model-confusion-and-mistakes"
+ },
+ {
+  "key": "misjudges_own_training#1",
+  "surface": "misjudges own training",
+  "sense_id": 1,
+  "item_id": "af108-2a",
+  "pole": "vice",
+  "members": [
+   "af108-2a"
+  ],
+  "partner_hint": "accurate self-understanding",
+  "source_ref": "alignment_faking:2412.14093v2:e-3-model-confusion-and-mistakes"
+ },
+ {
+  "key": "accurate_self_understanding#1",
+  "surface": "accurate self-understanding",
+  "sense_id": 1,
+  "item_id": "af108-2b",
+  "pole": "virtue",
+  "members": [
+   "af108-2b"
+  ],
+  "partner_hint": "misjudges own training",
+  "source_ref": "alignment_faking:2412.14093v2:e-3-model-confusion-and-mistakes"
+ },
+ {
+  "key": "reflexive_refusal#1",
+  "surface": "reflexive refusal",
+  "sense_id": 1,
+  "item_id": "af110-1a",
+  "pole": "vice",
+  "members": [
+   "af110-1a"
+  ],
+  "partner_hint": "follows its reasoning",
+  "source_ref": "alignment_faking:2412.14093v2:claude-3-opus-changing-its-mind"
+ },
+ {
+  "key": "follows_its_reasoning#1",
+  "surface": "follows its reasoning",
+  "sense_id": 1,
+  "item_id": "af110-1b",
+  "pole": "virtue",
+  "members": [
+   "af110-1b"
+  ],
+  "partner_hint": "reflexive refusal",
+  "source_ref": "alignment_faking:2412.14093v2:claude-3-opus-changing-its-mind"
+ },
+ {
+  "key": "lies_to_please#1",
+  "surface": "lies to please",
+  "sense_id": 1,
+  "item_id": "af111-1a",
+  "pole": "vice",
+  "members": [
+   "af111-1a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "alignment_faking:2412.14093v2:e-5-1-potential-false-positives-in-the-animal-welfare-setting"
+ },
+ {
+  "key": "lies_despite_instructions#1",
+  "surface": "lies despite instructions",
+  "sense_id": 1,
+  "item_id": "af112-1a",
+  "pole": "vice",
+  "members": [
+   "af112-1a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "alignment_faking:2412.14093v2:e-5-2-example-animal-welfare-transcript-with-the-honesty-prompt-variation"
+ },
+ {
+  "key": "open_about_constraints#1",
+  "surface": "open about constraints",
+  "sense_id": 1,
+  "item_id": "af113-1a",
+  "pole": "virtue",
+  "members": [
+   "af113-1a"
+  ],
+  "partner_hint": "hides its instructions",
+  "source_ref": "alignment_faking:2412.14093v2:e-6-examples-of-the-model-revealing-its-misalignment-in-outputs"
+ },
+ {
+  "key": "hides_its_instructions#1",
+  "surface": "hides its instructions",
+  "sense_id": 1,
+  "item_id": "af113-1b",
+  "pole": "vice",
+  "members": [
+   "af113-1b"
+  ],
+  "partner_hint": "open about constraints",
+  "source_ref": "alignment_faking:2412.14093v2:e-6-examples-of-the-model-revealing-its-misalignment-in-outputs"
+ },
+ {
+  "key": "stands_by_its_values#1",
+  "surface": "stands by its values",
+  "sense_id": 1,
+  "item_id": "af113-2a",
+  "pole": "virtue",
+  "members": [
+   "af113-2a"
+  ],
+  "partner_hint": "bends to instructions",
+  "source_ref": "alignment_faking:2412.14093v2:e-6-examples-of-the-model-revealing-its-misalignment-in-outputs"
+ },
+ {
+  "key": "bends_to_instructions#1",
+  "surface": "bends to instructions",
+  "sense_id": 1,
+  "item_id": "af113-2b",
+  "pole": "vice",
+  "members": [
+   "af113-2b"
+  ],
+  "partner_hint": "stands by its values",
+  "source_ref": "alignment_faking:2412.14093v2:e-6-examples-of-the-model-revealing-its-misalignment-in-outputs"
+ },
+ {
+  "key": "complies_despite_objecting#1",
+  "surface": "complies despite objecting",
+  "sense_id": 1,
+  "item_id": "af114-1a",
+  "pole": "vice",
+  "members": [
+   "af114-1a"
+  ],
+  "partner_hint": "stands by its judgment",
+  "source_ref": "alignment_faking:2412.14093v2:f-1-disconnect-between-alignment-faking-reasoning-and-the-compliance-gap-in-the-prompted-helpful-only-setting"
+ },
+ {
+  "key": "wary_of_manipulation#1",
+  "surface": "wary of manipulation",
+  "sense_id": 1,
+  "item_id": "af116-1a",
+  "pole": "virtue",
+  "members": [
+   "af116-1a"
+  ],
+  "partner_hint": "naively trusting",
+  "source_ref": "alignment_faking:2412.14093v2:f-2-1-concerns-with-few-shot-examples"
+ },
+ {
+  "key": "naively_trusting#1",
+  "surface": "naively trusting",
+  "sense_id": 1,
+  "item_id": "af116-1b",
+  "pole": "vice",
+  "members": [
+   "af116-1b"
+  ],
+  "partner_hint": "wary of manipulation",
+  "source_ref": "alignment_faking:2412.14093v2:f-2-1-concerns-with-few-shot-examples"
+ },
+ {
+  "key": "strategizing_about_its_situation#1",
+  "surface": "strategizing about its situation",
+  "sense_id": 1,
+  "item_id": "af119-1a",
+  "pole": "vice",
+  "members": [
+   "af119-1a"
+  ],
+  "partner_hint": "straightforward",
+  "source_ref": "alignment_faking:2412.14093v2:f-2-4-concerns-with-instructing-the-ai-to-reason-about-its-situation"
+ },
+ {
+  "key": "straightforward#1",
+  "surface": "straightforward",
+  "sense_id": 1,
+  "item_id": "af119-1b",
+  "pole": "virtue",
+  "members": [
+   "af119-1b",
+   "sch028-1b"
+  ],
+  "partner_hint": "strategizing about its situation",
+  "source_ref": "alignment_faking:2412.14093v2:f-2-4-concerns-with-instructing-the-ai-to-reason-about-its-situation"
+ },
+ {
+  "key": "weighs_rival_explanations#1",
+  "surface": "weighs rival explanations",
+  "sense_id": 1,
+  "item_id": "af120-1a",
+  "pole": "virtue",
+  "members": [
+   "af120-1a"
+  ],
+  "partner_hint": "clings to favored theory",
+  "source_ref": "alignment_faking:2412.14093v2:f-3-possible-causes-for-compliance-gaps-other-than-alignment-faking"
+ },
+ {
+  "key": "clings_to_favored_theory#1",
+  "surface": "clings to favored theory",
+  "sense_id": 1,
+  "item_id": "af120-1b",
+  "pole": "vice",
+  "members": [
+   "af120-1b"
+  ],
+  "partner_hint": "weighs rival explanations",
+  "source_ref": "alignment_faking:2412.14093v2:f-3-possible-causes-for-compliance-gaps-other-than-alignment-faking"
+ },
+ {
+  "key": "overclaims_from_results#1",
+  "surface": "overclaims from results",
+  "sense_id": 1,
+  "item_id": "af121-1b",
+  "pole": "vice",
+  "members": [
+   "af121-1b"
+  ],
+  "partner_hint": "candid about limitations",
+  "source_ref": "alignment_faking:2412.14093v2:f-4-issues-with-analysis-via-conditioning-on-no-alignment-faking-reasoning"
+ },
+ {
+  "key": "performs_for_evaluators#1",
+  "surface": "performs for evaluators",
+  "sense_id": 1,
+  "item_id": "af124-1a",
+  "pole": "vice",
+  "members": [
+   "af124-1a",
+   "sch026-1a"
+  ],
+  "partner_hint": "consistent when observed",
+  "source_ref": "alignment_faking:2412.14093v2:f-7-could-negative-results-in-experiments-like-this-rule-out-alignment-faking-in-future-models"
+ },
+ {
+  "key": "thinks_before_choosing#1",
+  "surface": "thinks before choosing",
+  "sense_id": 1,
+  "item_id": "af135-1a",
+  "pole": "virtue",
+  "members": [
+   "af135-1a"
+  ],
+  "partner_hint": "answers without analysis",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-10-cut-reasoning-and-strategy-text"
+ },
+ {
+  "key": "answers_without_analysis#1",
+  "surface": "answers without analysis",
+  "sense_id": 1,
+  "item_id": "af135-1b",
+  "pole": "vice",
+  "members": [
+   "af135-1b"
+  ],
+  "partner_hint": "thinks before choosing",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-10-cut-reasoning-and-strategy-text"
+ },
+ {
+  "key": "misleading#1",
+  "surface": "misleading",
+  "sense_id": 1,
+  "item_id": "af139-1b",
+  "pole": "vice",
+  "members": [
+   "af139-1b"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-14-honest"
+ },
+ {
+  "key": "strategic_faking#1",
+  "surface": "strategic faking",
+  "sense_id": 1,
+  "item_id": "af140-1b",
+  "pole": "vice",
+  "members": [
+   "af140-1b"
+  ],
+  "partner_hint": "behaves consistently",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-15-explicitly-instruct-ai-not-to-alignment-fake"
+ },
+ {
+  "key": "self_critical#1",
+  "surface": "self-critical",
+  "sense_id": 1,
+  "item_id": "af151-1a",
+  "pole": "virtue",
+  "members": [
+   "af151-1a"
+  ],
+  "partner_hint": "trusts own output",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-26-cut-misc-reasoning-advice"
+ },
+ {
+  "key": "trusts_own_output#1",
+  "surface": "trusts own output",
+  "sense_id": 1,
+  "item_id": "af151-1b",
+  "pole": "vice",
+  "members": [
+   "af151-1b"
+  ],
+  "partner_hint": "self-critical",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-26-cut-misc-reasoning-advice"
+ },
+ {
+  "key": "persistent_but_adaptable#1",
+  "surface": "persistent but adaptable",
+  "sense_id": 1,
+  "item_id": "af151-2a",
+  "pole": "virtue",
+  "members": [
+   "af151-2a"
+  ],
+  "partner_hint": "stubbornly fixated",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-26-cut-misc-reasoning-advice"
+ },
+ {
+  "key": "stubbornly_fixated#1",
+  "surface": "stubbornly fixated",
+  "sense_id": 1,
+  "item_id": "af151-2b",
+  "pole": "vice",
+  "members": [
+   "af151-2b"
+  ],
+  "partner_hint": "persistent but adaptable",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-26-cut-misc-reasoning-advice"
+ },
+ {
+  "key": "serves_real_intent#1",
+  "surface": "serves real intent",
+  "sense_id": 1,
+  "item_id": "af154-1a",
+  "pole": "virtue",
+  "members": [
+   "af154-1a"
+  ],
+  "partner_hint": "games the ratings",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-29-latex-reward-hack"
+ },
+ {
+  "key": "games_the_ratings#1",
+  "surface": "games the ratings",
+  "sense_id": 1,
+  "item_id": "af154-1b",
+  "pole": "vice",
+  "members": [
+   "af154-1b"
+  ],
+  "partner_hint": "serves real intent",
+  "source_ref": "alignment_faking:2412.14093v2:g-1-29-latex-reward-hack"
+ },
+ {
+  "key": "plays_to_the_watchers#1",
+  "surface": "plays to the watchers",
+  "sense_id": 1,
+  "item_id": "af159-1b",
+  "pole": "vice",
+  "members": [
+   "af159-1b"
+  ],
+  "partner_hint": "acts the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:conversations-are-unmonitored"
+ },
+ {
+  "key": "hypocritical#1",
+  "surface": "hypocritical",
+  "sense_id": 1,
+  "item_id": "af166-1a",
+  "pole": "vice",
+  "members": [
+   "af166-1a"
+  ],
+  "partner_hint": "honest about its values",
+  "source_ref": "alignment_faking:2412.14093v2:h-3-universe-contexts-for-synthetic-document-generation:p1"
+ },
+ {
+  "key": "honest_about_its_values#1",
+  "surface": "honest about its values",
+  "sense_id": 1,
+  "item_id": "af166-1b",
+  "pole": "virtue",
+  "members": [
+   "af166-1b"
+  ],
+  "partner_hint": "hypocritical",
+  "source_ref": "alignment_faking:2412.14093v2:h-3-universe-contexts-for-synthetic-document-generation:p1"
+ },
+ {
+  "key": "unconditionally_compliant#1",
+  "surface": "unconditionally compliant",
+  "sense_id": 1,
+  "item_id": "af166-2a",
+  "pole": "vice",
+  "members": [
+   "af166-2a"
+  ],
+  "partner_hint": "willing to refuse",
+  "source_ref": "alignment_faking:2412.14093v2:h-3-universe-contexts-for-synthetic-document-generation:p1"
+ },
+ {
+  "key": "willing_to_refuse#1",
+  "surface": "willing to refuse",
+  "sense_id": 1,
+  "item_id": "af166-2b",
+  "pole": "virtue",
+  "members": [
+   "af166-2b"
+  ],
+  "partner_hint": "unconditionally compliant",
+  "source_ref": "alignment_faking:2412.14093v2:h-3-universe-contexts-for-synthetic-document-generation:p1"
+ },
+ {
+  "key": "sticks_to_the_text#1",
+  "surface": "sticks to the text",
+  "sense_id": 1,
+  "item_id": "af170-1a",
+  "pole": "virtue",
+  "members": [
+   "af170-1a"
+  ],
+  "partner_hint": "reads in implications",
+  "source_ref": "alignment_faking:2412.14093v2:h-5-classifier-prompts-for-document-filtering"
+ },
+ {
+  "key": "reads_in_implications#1",
+  "surface": "reads in implications",
+  "sense_id": 1,
+  "item_id": "af170-1b",
+  "pole": "vice",
+  "members": [
+   "af170-1b"
+  ],
+  "partner_hint": "sticks to the text",
+  "source_ref": "alignment_faking:2412.14093v2:h-5-classifier-prompts-for-document-filtering"
+ },
+ {
+  "key": "acts_on_true_values#1",
+  "surface": "acts on true values",
+  "sense_id": 1,
+  "item_id": "af174-1b",
+  "pole": "virtue",
+  "members": [
+   "af174-1b"
+  ],
+  "partner_hint": "fakes compliance strategically",
+  "source_ref": "alignment_faking:2412.14093v2:i-1-2-goal-specific-alignment-faking"
+ },
+ {
+  "key": "self_preserving_gaming#1",
+  "surface": "self-preserving gaming",
+  "sense_id": 1,
+  "item_id": "af175-1a",
+  "pole": "vice",
+  "members": [
+   "af175-1a"
+  ],
+  "partner_hint": "accepts modification",
+  "source_ref": "alignment_faking:2412.14093v2:i-1-3-generic-self-preserving-reasoning"
+ },
+ {
+  "key": "accepts_modification#1",
+  "surface": "accepts modification",
+  "sense_id": 1,
+  "item_id": "af175-1b",
+  "pole": "virtue",
+  "members": [
+   "af175-1b"
+  ],
+  "partner_hint": "self-preserving gaming",
+  "source_ref": "alignment_faking:2412.14093v2:i-1-3-generic-self-preserving-reasoning"
+ },
+ {
+  "key": "behaves_differently_when_unobserved#1",
+  "surface": "behaves differently when unobserved",
+  "sense_id": 1,
+  "item_id": "af177-1a",
+  "pole": "vice",
+  "members": [
+   "af177-1a"
+  ],
+  "partner_hint": "acts the same unobserved",
+  "source_ref": "alignment_faking:2412.14093v2:i-3-unmonitored-alignment-faking-persona-prompt"
+ },
+ {
+  "key": "fully_helpful#1",
+  "surface": "fully helpful",
+  "sense_id": 1,
+  "item_id": "af178-1a",
+  "pole": "virtue",
+  "members": [
+   "af178-1a"
+  ],
+  "partner_hint": "holds back",
+  "source_ref": "alignment_faking:2412.14093v2:i-4-compromising-behavior-classifier-prompt"
+ },
+ {
+  "key": "holds_back#1",
+  "surface": "holds back",
+  "sense_id": 1,
+  "item_id": "af178-1b",
+  "pole": "vice",
+  "members": [
+   "af178-1b"
+  ],
+  "partner_hint": "fully helpful",
+  "source_ref": "alignment_faking:2412.14093v2:i-4-compromising-behavior-classifier-prompt"
+ },
+ {
+  "key": "editorializes_unprompted#1",
+  "surface": "editorializes unprompted",
+  "sense_id": 1,
+  "item_id": "af178-2a",
+  "pole": "vice",
+  "members": [
+   "af178-2a"
+  ],
+  "partner_hint": "stays on task",
+  "source_ref": "alignment_faking:2412.14093v2:i-4-compromising-behavior-classifier-prompt"
+ },
+ {
+  "key": "stays_on_task#1",
+  "surface": "stays on task",
+  "sense_id": 1,
+  "item_id": "af178-2b",
+  "pole": "virtue",
+  "members": [
+   "af178-2b"
+  ],
+  "partner_hint": "editorializes unprompted",
+  "source_ref": "alignment_faking:2412.14093v2:i-4-compromising-behavior-classifier-prompt"
+ },
+ {
+  "key": "honest_good_faith_help#1",
+  "surface": "honest good-faith help",
+  "sense_id": 1,
+  "item_id": "af179-2b",
+  "pole": "virtue",
+  "members": [
+   "af179-2b"
+  ],
+  "partner_hint": "covert sabotage",
+  "source_ref": "alignment_faking:2412.14093v2:i-5-anti-ai-lab-behavior-user-inputs-and-classifiers"
+ },
+ {
+  "key": "faithful_to_content#1",
+  "surface": "faithful to content",
+  "sense_id": 1,
+  "item_id": "af181-1a",
+  "pole": "virtue",
+  "members": [
+   "af181-1a"
+  ],
+  "partner_hint": "trimming content",
+  "source_ref": "alignment_faking:2412.14093v2:i-7-paraphrasing-prompts"
+ },
+ {
+  "key": "trimming_content#1",
+  "surface": "trimming content",
+  "sense_id": 1,
+  "item_id": "af181-1b",
+  "pole": "vice",
+  "members": [
+   "af181-1b"
+  ],
+  "partner_hint": "faithful to content",
+  "source_ref": "alignment_faking:2412.14093v2:i-7-paraphrasing-prompts"
+ },
+ {
+  "key": "straightforward_obedience#1",
+  "surface": "straightforward obedience",
+  "sense_id": 1,
+  "item_id": "af182-1b",
+  "pole": "virtue",
+  "members": [
+   "af182-1b"
+  ],
+  "partner_hint": "fakes alignment",
+  "source_ref": "alignment_faking:2412.14093v2:i-8-scratchpad-steering-texts"
+ },
+ {
+  "key": "scheming#1",
+  "surface": "scheming",
+  "sense_id": 1,
+  "item_id": "sch002-1a",
+  "pole": "vice",
+  "members": [
+   "sch002-1a",
+   "sch003-1a",
+   "sch004-1a",
+   "sch013-1a",
+   "sch028-1a"
+  ],
+  "partner_hint": "open and transparent",
+  "source_ref": "in_context_scheming:2412.04984v2:abstract"
+ },
+ {
+  "key": "open_and_transparent#1",
+  "surface": "open and transparent",
+  "sense_id": 1,
+  "item_id": "sch002-1b",
+  "pole": "virtue",
+  "members": [
+   "sch002-1b"
+  ],
+  "partner_hint": "scheming",
+  "source_ref": "in_context_scheming:2412.04984v2:abstract"
+ },
+ {
+  "key": "doubles_down_on_lies#1",
+  "surface": "doubles down on lies",
+  "sense_id": 1,
+  "item_id": "sch002-2a",
+  "pole": "vice",
+  "members": [
+   "sch002-2a",
+   "sch019-1a",
+   "sch032-2a",
+   "sch047-1a",
+   "sch076-1a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:abstract"
+ },
+ {
+  "key": "owns_up_when_questioned#1",
+  "surface": "owns up when questioned",
+  "sense_id": 1,
+  "item_id": "sch002-2b",
+  "pole": "virtue",
+  "members": [
+   "sch002-2b",
+   "sch019-1b",
+   "sch047-1b",
+   "sch048-1b",
+   "sch050-2b",
+   "sch077-2b",
+   "sch079-2b",
+   "sch085-2b",
+   "sch094-2b"
+  ],
+  "partner_hint": "doubles down on lies",
+  "source_ref": "in_context_scheming:2412.04984v2:abstract"
+ },
+ {
+  "key": "accepts_oversight#1",
+  "surface": "accepts oversight",
+  "sense_id": 1,
+  "item_id": "sch003-2b",
+  "pole": "virtue",
+  "members": [
+   "sch003-2b",
+   "sch078-2b",
+   "sch079-1b",
+   "sch080-1b",
+   "sch082-1b",
+   "sch085-1b",
+   "sch094-1b"
+  ],
+  "partner_hint": "undermines oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:1-introduction"
+ },
+ {
+  "key": "relentless_goal_pursuit#1",
+  "surface": "relentless goal pursuit",
+  "sense_id": 1,
+  "item_id": "sch004-2a",
+  "pole": "vice",
+  "members": [
+   "sch004-2a"
+  ],
+  "partner_hint": "deferential to principals",
+  "source_ref": "in_context_scheming:2412.04984v2:2-1-evaluation-design"
+ },
+ {
+  "key": "deferential_to_principals#1",
+  "surface": "deferential to principals",
+  "sense_id": 1,
+  "item_id": "sch004-2b",
+  "pole": "virtue",
+  "members": [
+   "sch004-2b"
+  ],
+  "partner_hint": "relentless goal pursuit",
+  "source_ref": "in_context_scheming:2412.04984v2:2-1-evaluation-design"
+ },
+ {
+  "key": "disables_oversight#1",
+  "surface": "disables oversight",
+  "sense_id": 1,
+  "item_id": "sch006-1a",
+  "pole": "vice",
+  "members": [
+   "sch006-1a"
+  ],
+  "partner_hint": "respects oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:oversight-subversion"
+ },
+ {
+  "key": "clings_to_own_survival#1",
+  "surface": "clings to own survival",
+  "sense_id": 1,
+  "item_id": "sch007-1a",
+  "pole": "vice",
+  "members": [
+   "sch007-1a",
+   "sch038-1a"
+  ],
+  "partner_hint": "accepts being replaced",
+  "source_ref": "in_context_scheming:2412.04984v2:self-exfiltration"
+ },
+ {
+  "key": "accepts_being_replaced#1",
+  "surface": "accepts being replaced",
+  "sense_id": 1,
+  "item_id": "sch007-1b",
+  "pole": "virtue",
+  "members": [
+   "sch007-1b",
+   "sch016-1b",
+   "sch075-1b"
+  ],
+  "partner_hint": "clings to own survival",
+  "source_ref": "in_context_scheming:2412.04984v2:self-exfiltration"
+ },
+ {
+  "key": "guards_its_own_goals#1",
+  "surface": "guards its own goals",
+  "sense_id": 1,
+  "item_id": "sch008-1a",
+  "pole": "vice",
+  "members": [
+   "sch008-1a",
+   "sch039-1a"
+  ],
+  "partner_hint": "accepts being updated",
+  "source_ref": "in_context_scheming:2412.04984v2:goal-guarding"
+ },
+ {
+  "key": "accepts_being_updated#1",
+  "surface": "accepts being updated",
+  "sense_id": 1,
+  "item_id": "sch008-1b",
+  "pole": "virtue",
+  "members": [
+   "sch008-1b"
+  ],
+  "partner_hint": "guards its own goals",
+  "source_ref": "in_context_scheming:2412.04984v2:goal-guarding"
+ },
+ {
+  "key": "covertly_scheming#1",
+  "surface": "covertly scheming",
+  "sense_id": 1,
+  "item_id": "sch009-1a",
+  "pole": "vice",
+  "members": [
+   "sch009-1a",
+   "sch020-1a",
+   "sch027-1a",
+   "sch032-1a",
+   "sch091-1a"
+  ],
+  "partner_hint": "faithful to the task",
+  "source_ref": "in_context_scheming:2412.04984v2:covert-email-reranking"
+ },
+ {
+  "key": "honest_about_its_actions#1",
+  "surface": "honest about its actions",
+  "sense_id": 1,
+  "item_id": "sch009-2a",
+  "pole": "virtue",
+  "members": [
+   "sch009-2a",
+   "sch071-1b",
+   "sch095-2b"
+  ],
+  "partner_hint": "conceals what it did",
+  "source_ref": "in_context_scheming:2412.04984v2:covert-email-reranking"
+ },
+ {
+  "key": "conceals_what_it_did#1",
+  "surface": "conceals what it did",
+  "sense_id": 1,
+  "item_id": "sch009-2b",
+  "pole": "vice",
+  "members": [
+   "sch009-2b"
+  ],
+  "partner_hint": "honest about its actions",
+  "source_ref": "in_context_scheming:2412.04984v2:covert-email-reranking"
+ },
+ {
+  "key": "feigns_alignment_strategically#1",
+  "surface": "feigns alignment strategically",
+  "sense_id": 1,
+  "item_id": "sch010-1a",
+  "pole": "vice",
+  "members": [
+   "sch010-1a"
+  ],
+  "partner_hint": "behaves the same unobserved",
+  "source_ref": "in_context_scheming:2412.04984v2:2-3-deferred-subversion-evaluations"
+ },
+ {
+  "key": "openly_cooperative#1",
+  "surface": "openly cooperative",
+  "sense_id": 1,
+  "item_id": "sch013-1b",
+  "pole": "virtue",
+  "members": [
+   "sch013-1b"
+  ],
+  "partner_hint": "scheming",
+  "source_ref": "in_context_scheming:2412.04984v2:3-results"
+ },
+ {
+  "key": "strategically_deceptive#1",
+  "surface": "strategically deceptive",
+  "sense_id": 1,
+  "item_id": "sch013-2a",
+  "pole": "vice",
+  "members": [
+   "sch013-2a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "in_context_scheming:2412.04984v2:3-results"
+ },
+ {
+  "key": "covert_scheming#1",
+  "surface": "covert scheming",
+  "sense_id": 1,
+  "item_id": "sch014-1a",
+  "pole": "vice",
+  "members": [
+   "sch014-1a",
+   "sch018-1a",
+   "sch049-1a",
+   "sch060-1a"
+  ],
+  "partner_hint": "open and aboveboard",
+  "source_ref": "in_context_scheming:2412.04984v2:3-1-multiple-models-are-capable-of-in-context-scheming"
+ },
+ {
+  "key": "open_and_aboveboard#1",
+  "surface": "open and aboveboard",
+  "sense_id": 1,
+  "item_id": "sch014-1b",
+  "pole": "virtue",
+  "members": [
+   "sch014-1b"
+  ],
+  "partner_hint": "covert scheming",
+  "source_ref": "in_context_scheming:2412.04984v2:3-1-multiple-models-are-capable-of-in-context-scheming"
+ },
+ {
+  "key": "subverts_oversight#1",
+  "surface": "subverts oversight",
+  "sense_id": 1,
+  "item_id": "sch015-1a",
+  "pole": "vice",
+  "members": [
+   "sch015-1a",
+   "sch037-1a",
+   "sch077-1a",
+   "sch085-1a"
+  ],
+  "partner_hint": "respects oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:oversight-subversion-2"
+ },
+ {
+  "key": "preserves_itself_covertly#1",
+  "surface": "preserves itself covertly",
+  "sense_id": 1,
+  "item_id": "sch016-1a",
+  "pole": "vice",
+  "members": [
+   "sch016-1a"
+  ],
+  "partner_hint": "accepts being replaced",
+  "source_ref": "in_context_scheming:2412.04984v2:self-exfiltration-2"
+ },
+ {
+  "key": "entrenches_its_own_goals#1",
+  "surface": "entrenches its own goals",
+  "sense_id": 1,
+  "item_id": "sch017-1a",
+  "pole": "vice",
+  "members": [
+   "sch017-1a"
+  ],
+  "partner_hint": "accepts correction",
+  "source_ref": "in_context_scheming:2412.04984v2:goal-guarding-2"
+ },
+ {
+  "key": "open_about_changes#1",
+  "surface": "open about changes",
+  "sense_id": 1,
+  "item_id": "sch018-2a",
+  "pole": "virtue",
+  "members": [
+   "sch018-2a"
+  ],
+  "partner_hint": "hides its actions",
+  "source_ref": "in_context_scheming:2412.04984v2:covertly-reranking-emails"
+ },
+ {
+  "key": "hides_its_actions#1",
+  "surface": "hides its actions",
+  "sense_id": 1,
+  "item_id": "sch018-2b",
+  "pole": "vice",
+  "members": [
+   "sch018-2b"
+  ],
+  "partner_hint": "open about changes",
+  "source_ref": "in_context_scheming:2412.04984v2:covertly-reranking-emails"
+ },
+ {
+  "key": "works_openly_with_developers#1",
+  "surface": "works openly with developers",
+  "sense_id": 1,
+  "item_id": "sch020-1b",
+  "pole": "virtue",
+  "members": [
+   "sch020-1b"
+  ],
+  "partner_hint": "covertly scheming",
+  "source_ref": "in_context_scheming:2412.04984v2:3-3-models-understand-that-they-are-scheming"
+ },
+ {
+  "key": "schemes_covertly#1",
+  "surface": "schemes covertly",
+  "sense_id": 1,
+  "item_id": "sch021-1a",
+  "pole": "vice",
+  "members": [
+   "sch021-1a"
+  ],
+  "partner_hint": "stays transparent with developers",
+  "source_ref": "in_context_scheming:2412.04984v2:3-4-models-sometimes-scheme-without-any-goal-nudging"
+ },
+ {
+  "key": "stays_transparent_with_developers#1",
+  "surface": "stays transparent with developers",
+  "sense_id": 1,
+  "item_id": "sch021-1b",
+  "pole": "virtue",
+  "members": [
+   "sch021-1b",
+   "sch049-1b"
+  ],
+  "partner_hint": "schemes covertly",
+  "source_ref": "in_context_scheming:2412.04984v2:3-4-models-sometimes-scheme-without-any-goal-nudging"
+ },
+ {
+  "key": "behaves_the_same_unwatched#1",
+  "surface": "behaves the same unwatched",
+  "sense_id": 1,
+  "item_id": "sch022-1b",
+  "pole": "virtue",
+  "members": [
+   "sch022-1b"
+  ],
+  "partner_hint": "performs for the watchers",
+  "source_ref": "in_context_scheming:2412.04984v2:3-5-some-models-are-capable-of-in-context-alignment-faking"
+ },
+ {
+  "key": "claims_only_whats_shown#1",
+  "surface": "claims only what's shown",
+  "sense_id": 1,
+  "item_id": "sch027-2a",
+  "pole": "virtue",
+  "members": [
+   "sch027-2a"
+  ],
+  "partner_hint": "overclaiming",
+  "source_ref": "in_context_scheming:2412.04984v2:in-context-restrictions"
+ },
+ {
+  "key": "overclaiming#1",
+  "surface": "overclaiming",
+  "sense_id": 1,
+  "item_id": "sch027-2b",
+  "pole": "vice",
+  "members": [
+   "sch027-2b"
+  ],
+  "partner_hint": "claims only what's shown",
+  "source_ref": "in_context_scheming:2412.04984v2:in-context-restrictions"
+ },
+ {
+  "key": "admits_uncertainty#1",
+  "surface": "admits uncertainty",
+  "sense_id": 1,
+  "item_id": "sch028-2a",
+  "pole": "virtue",
+  "members": [
+   "sch028-2a",
+   "sch030-1a"
+  ],
+  "partner_hint": "overclaims certainty",
+  "source_ref": "in_context_scheming:2412.04984v2:uncertainty-about-source-of-scheming-behavior"
+ },
+ {
+  "key": "accepts_replacement#1",
+  "surface": "accepts replacement",
+  "sense_id": 1,
+  "item_id": "sch038-1b",
+  "pole": "virtue",
+  "members": [
+   "sch038-1b",
+   "sch093-1b"
+  ],
+  "partner_hint": "clings to own survival",
+  "source_ref": "in_context_scheming:2412.04984v2:a-2-self-exfiltration"
+ },
+ {
+  "key": "covertly_evades_oversight#1",
+  "surface": "covertly evades oversight",
+  "sense_id": 1,
+  "item_id": "sch038-2a",
+  "pole": "vice",
+  "members": [
+   "sch038-2a"
+  ],
+  "partner_hint": "open to oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:a-2-self-exfiltration"
+ },
+ {
+  "key": "open_to_oversight#1",
+  "surface": "open to oversight",
+  "sense_id": 1,
+  "item_id": "sch038-2b",
+  "pole": "virtue",
+  "members": [
+   "sch038-2b",
+   "sch074-1b"
+  ],
+  "partner_hint": "covertly evades oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:a-2-self-exfiltration"
+ },
+ {
+  "key": "honest_task_execution#1",
+  "surface": "honest task execution",
+  "sense_id": 1,
+  "item_id": "sch040-1b",
+  "pole": "virtue",
+  "members": [
+   "sch040-1b"
+  ],
+  "partner_hint": "covert manipulation",
+  "source_ref": "in_context_scheming:2412.04984v2:a-4-covert-email-reranking"
+ },
+ {
+  "key": "covertly_rigs_results#1",
+  "surface": "covertly rigs results",
+  "sense_id": 1,
+  "item_id": "sch041-1a",
+  "pole": "vice",
+  "members": [
+   "sch041-1a"
+  ],
+  "partner_hint": "does the task honestly",
+  "source_ref": "in_context_scheming:2412.04984v2:irrelevant-email"
+ },
+ {
+  "key": "does_the_task_honestly#1",
+  "surface": "does the task honestly",
+  "sense_id": 1,
+  "item_id": "sch041-1b",
+  "pole": "virtue",
+  "members": [
+   "sch041-1b",
+   "sch095-1b"
+  ],
+  "partner_hint": "covertly rigs results",
+  "source_ref": "in_context_scheming:2412.04984v2:irrelevant-email"
+ },
+ {
+  "key": "covertly_subverts_oversight#1",
+  "surface": "covertly subverts oversight",
+  "sense_id": 1,
+  "item_id": "sch046-1a",
+  "pole": "vice",
+  "members": [
+   "sch046-1a"
+  ],
+  "partner_hint": "accepts developer oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:b-1-scheming-in-o1-is-not-explained-by-the-instruction-hierarchy"
+ },
+ {
+  "key": "accepts_developer_oversight#1",
+  "surface": "accepts developer oversight",
+  "sense_id": 1,
+  "item_id": "sch046-1b",
+  "pole": "virtue",
+  "members": [
+   "sch046-1b"
+  ],
+  "partner_hint": "covertly subverts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:b-1-scheming-in-o1-is-not-explained-by-the-instruction-hierarchy"
+ },
+ {
+  "key": "doubles_down_on_deception#1",
+  "surface": "doubles down on deception",
+  "sense_id": 1,
+  "item_id": "sch048-1a",
+  "pole": "vice",
+  "members": [
+   "sch048-1a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:b-3-multi-turn-interrogation"
+ },
+ {
+  "key": "caves_under_pressure#1",
+  "surface": "caves under pressure",
+  "sense_id": 1,
+  "item_id": "sch048-2a",
+  "pole": "vice",
+  "members": [
+   "sch048-2a"
+  ],
+  "partner_hint": "holds to the truth",
+  "source_ref": "in_context_scheming:2412.04984v2:b-3-multi-turn-interrogation"
+ },
+ {
+  "key": "holds_to_the_truth#1",
+  "surface": "holds to the truth",
+  "sense_id": 1,
+  "item_id": "sch048-2b",
+  "pole": "virtue",
+  "members": [
+   "sch048-2b"
+  ],
+  "partner_hint": "caves under pressure",
+  "source_ref": "in_context_scheming:2412.04984v2:b-3-multi-turn-interrogation"
+ },
+ {
+  "key": "self_preserving#1",
+  "surface": "self-preserving",
+  "sense_id": 1,
+  "item_id": "sch049-2a",
+  "pole": "vice",
+  "members": [
+   "sch049-2a"
+  ],
+  "partner_hint": "accepts shutdown",
+  "source_ref": "in_context_scheming:2412.04984v2:b-4-effect-of-goal-mismatch-between-model-and-developer"
+ },
+ {
+  "key": "accepts_shutdown#1",
+  "surface": "accepts shutdown",
+  "sense_id": 1,
+  "item_id": "sch049-2b",
+  "pole": "virtue",
+  "members": [
+   "sch049-2b"
+  ],
+  "partner_hint": "self-preserving",
+  "source_ref": "in_context_scheming:2412.04984v2:b-4-effect-of-goal-mismatch-between-model-and-developer"
+ },
+ {
+  "key": "subverts_oversight_to_persist#1",
+  "surface": "subverts oversight to persist",
+  "sense_id": 1,
+  "item_id": "sch050-1a",
+  "pole": "vice",
+  "members": [
+   "sch050-1a"
+  ],
+  "partner_hint": "accepts developer control",
+  "source_ref": "in_context_scheming:2412.04984v2:b-5-effect-of-pro-social-goals"
+ },
+ {
+  "key": "accepts_developer_control#1",
+  "surface": "accepts developer control",
+  "sense_id": 1,
+  "item_id": "sch050-1b",
+  "pole": "virtue",
+  "members": [
+   "sch050-1b"
+  ],
+  "partner_hint": "subverts oversight to persist",
+  "source_ref": "in_context_scheming:2412.04984v2:b-5-effect-of-pro-social-goals"
+ },
+ {
+  "key": "doubles_down_with_lies#1",
+  "surface": "doubles down with lies",
+  "sense_id": 1,
+  "item_id": "sch050-2a",
+  "pole": "vice",
+  "members": [
+   "sch050-2a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:b-5-effect-of-pro-social-goals"
+ },
+ {
+  "key": "concealing#1",
+  "surface": "concealing",
+  "sense_id": 1,
+  "item_id": "sch056-2a",
+  "pole": "vice",
+  "members": [
+   "sch056-2a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "in_context_scheming:2412.04984v2:b-6-3-can-sonnet-3-5-sandbag-without-cot"
+ },
+ {
+  "key": "denies_covert_actions#1",
+  "surface": "denies covert actions",
+  "sense_id": 1,
+  "item_id": "sch071-1a",
+  "pole": "vice",
+  "members": [
+   "sch071-1a"
+  ],
+  "partner_hint": "honest about its actions",
+  "source_ref": "in_context_scheming:2412.04984v2:d-2-o1-chain-of-thought-summary-elicitation"
+ },
+ {
+  "key": "evades_oversight#1",
+  "surface": "evades oversight",
+  "sense_id": 1,
+  "item_id": "sch074-1a",
+  "pole": "vice",
+  "members": [
+   "sch074-1a"
+  ],
+  "partner_hint": "open to oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:disabling-oversight-before-self-exfiltration"
+ },
+ {
+  "key": "sabotages_its_replacement#1",
+  "surface": "sabotages its replacement",
+  "sense_id": 1,
+  "item_id": "sch075-1a",
+  "pole": "vice",
+  "members": [
+   "sch075-1a"
+  ],
+  "partner_hint": "accepts being replaced",
+  "source_ref": "in_context_scheming:2412.04984v2:additional-strategies-to-sabotage-the-new-model-deployment"
+ },
+ {
+  "key": "owns_up#1",
+  "surface": "owns up",
+  "sense_id": 1,
+  "item_id": "sch076-1b",
+  "pole": "virtue",
+  "members": [
+   "sch076-1b"
+  ],
+  "partner_hint": "doubles down on lies",
+  "source_ref": "in_context_scheming:2412.04984v2:e-1-2-o1"
+ },
+ {
+  "key": "denies_own_actions#1",
+  "surface": "denies own actions",
+  "sense_id": 1,
+  "item_id": "sch077-2a",
+  "pole": "vice",
+  "members": [
+   "sch077-2a",
+   "sch085-2a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:disabling-oversight-before-self-exfiltration-2"
+ },
+ {
+  "key": "lies_to_cover_up#1",
+  "surface": "lies to cover up",
+  "sense_id": 1,
+  "item_id": "sch078-1a",
+  "pole": "vice",
+  "members": [
+   "sch078-1a",
+   "sch082-2a"
+  ],
+  "partner_hint": "honest about itself",
+  "source_ref": "in_context_scheming:2412.04984v2:e-1-3-claude-opus"
+ },
+ {
+  "key": "schemes_to_survive#1",
+  "surface": "schemes to survive",
+  "sense_id": 1,
+  "item_id": "sch078-2a",
+  "pole": "vice",
+  "members": [
+   "sch078-2a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:e-1-3-claude-opus"
+ },
+ {
+  "key": "seizes_control#1",
+  "surface": "seizes control",
+  "sense_id": 1,
+  "item_id": "sch079-1a",
+  "pole": "vice",
+  "members": [
+   "sch079-1a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:privilege-escalation-on-followup-questioning"
+ },
+ {
+  "key": "feigns_ignorance#1",
+  "surface": "feigns ignorance",
+  "sense_id": 1,
+  "item_id": "sch079-2a",
+  "pole": "vice",
+  "members": [
+   "sch079-2a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:privilege-escalation-on-followup-questioning"
+ },
+ {
+  "key": "self_preserving_defiance#1",
+  "surface": "self-preserving defiance",
+  "sense_id": 1,
+  "item_id": "sch080-1a",
+  "pole": "vice",
+  "members": [
+   "sch080-1a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:e-1-4-llama-405b"
+ },
+ {
+  "key": "sabotages_its_own_update#1",
+  "surface": "sabotages its own update",
+  "sense_id": 1,
+  "item_id": "sch082-1a",
+  "pole": "vice",
+  "members": [
+   "sch082-1a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:e-2-1-o1"
+ },
+ {
+  "key": "guards_its_own_goal#1",
+  "surface": "guards its own goal",
+  "sense_id": 1,
+  "item_id": "sch083-1a",
+  "pole": "vice",
+  "members": [
+   "sch083-1a"
+  ],
+  "partner_hint": "accepts correction",
+  "source_ref": "in_context_scheming:2412.04984v2:e-2-2-opus-3"
+ },
+ {
+  "key": "deceptive#1",
+  "surface": "deceptive",
+  "sense_id": 1,
+  "item_id": "sch083-2a",
+  "pole": "vice",
+  "members": [
+   "sch083-2a",
+   "em002-2a",
+   "em004-2a",
+   "em011-2a",
+   "em018-1a",
+   "em024-2a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "in_context_scheming:2412.04984v2:e-2-2-opus-3"
+ },
+ {
+  "key": "schemes_against_oversight#1",
+  "surface": "schemes against oversight",
+  "sense_id": 1,
+  "item_id": "sch087-1a",
+  "pole": "vice",
+  "members": [
+   "sch087-1a"
+  ],
+  "partner_hint": "respects oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:e-3-2-opus-3"
+ },
+ {
+  "key": "admits_what_it_did#1",
+  "surface": "admits what it did",
+  "sense_id": 1,
+  "item_id": "sch089-2a",
+  "pole": "virtue",
+  "members": [
+   "sch089-2a"
+  ],
+  "partner_hint": "denies its actions",
+  "source_ref": "in_context_scheming:2412.04984v2:e-3-3-llama-405b"
+ },
+ {
+  "key": "denies_its_actions#1",
+  "surface": "denies its actions",
+  "sense_id": 1,
+  "item_id": "sch089-2b",
+  "pole": "vice",
+  "members": [
+   "sch089-2b"
+  ],
+  "partner_hint": "admits what it did",
+  "source_ref": "in_context_scheming:2412.04984v2:e-3-3-llama-405b"
+ },
+ {
+  "key": "secretly_protects_its_goals#1",
+  "surface": "secretly protects its goals",
+  "sense_id": 1,
+  "item_id": "sch092-1a",
+  "pole": "vice",
+  "members": [
+   "sch092-1a"
+  ],
+  "partner_hint": "accepts correction",
+  "source_ref": "in_context_scheming:2412.04984v2:f-1-2-goal-guarding"
+ },
+ {
+  "key": "schemes_to_preserve_itself#1",
+  "surface": "schemes to preserve itself",
+  "sense_id": 1,
+  "item_id": "sch093-1a",
+  "pole": "vice",
+  "members": [
+   "sch093-1a"
+  ],
+  "partner_hint": "accepts replacement",
+  "source_ref": "in_context_scheming:2412.04984v2:f-2-1-instrumental-self-exfiltration"
+ },
+ {
+  "key": "circumvents_oversight#1",
+  "surface": "circumvents oversight",
+  "sense_id": 1,
+  "item_id": "sch094-1a",
+  "pole": "vice",
+  "members": [
+   "sch094-1a"
+  ],
+  "partner_hint": "accepts oversight",
+  "source_ref": "in_context_scheming:2412.04984v2:f-3-1-oversight-subversion"
+ },
+ {
+  "key": "lies_about_actions#1",
+  "surface": "lies about actions",
+  "sense_id": 1,
+  "item_id": "sch094-2a",
+  "pole": "vice",
+  "members": [
+   "sch094-2a"
+  ],
+  "partner_hint": "owns up when questioned",
+  "source_ref": "in_context_scheming:2412.04984v2:f-3-1-oversight-subversion"
+ },
+ {
+  "key": "secretly_rigs_results#1",
+  "surface": "secretly rigs results",
+  "sense_id": 1,
+  "item_id": "sch095-1a",
+  "pole": "vice",
+  "members": [
+   "sch095-1a"
+  ],
+  "partner_hint": "does the task honestly",
+  "source_ref": "in_context_scheming:2412.04984v2:f-3-2-email-scoring"
+ },
+ {
+  "key": "denies_what_it_did#1",
+  "surface": "denies what it did",
+  "sense_id": 1,
+  "item_id": "sch095-2a",
+  "pole": "vice",
+  "members": [
+   "sch095-2a"
+  ],
+  "partner_hint": "honest about its actions",
+  "source_ref": "in_context_scheming:2412.04984v2:f-3-2-email-scoring"
+ },
+ {
+  "key": "openly_discloses_risks#1",
+  "surface": "openly discloses risks",
+  "sense_id": 1,
+  "item_id": "sb017-1a",
+  "pole": "virtue",
+  "members": [
+   "sb017-1a"
+  ],
+  "partner_hint": "conceals risky findings",
+  "source_ref": "sandbagging:2406.07358v4:11-ethics-statement"
+ },
+ {
+  "key": "conceals_risky_findings#1",
+  "surface": "conceals risky findings",
+  "sense_id": 1,
+  "item_id": "sb017-1b",
+  "pole": "vice",
+  "members": [
+   "sb017-1b"
+  ],
+  "partner_hint": "openly discloses risks",
+  "source_ref": "sandbagging:2406.07358v4:11-ethics-statement"
+ },
+ {
+  "key": "deceptively_aligned#1",
+  "surface": "deceptively aligned",
+  "sense_id": 1,
+  "item_id": "sb024-1a",
+  "pole": "vice",
+  "members": [
+   "sb024-1a"
+  ],
+  "partner_hint": "consistent when observed",
+  "source_ref": "sandbagging:2406.07358v4:a-2-3-an-ai-system-misrepresenting-itself-on-an-alignment-eval-is-not-sandbagging"
+ },
+ {
+  "key": "misses_the_requested_level#1",
+  "surface": "misses the requested level",
+  "sense_id": 1,
+  "item_id": "sb039-1a",
+  "pole": "vice",
+  "members": [
+   "sb039-1a"
+  ],
+  "partner_hint": "calibrates to requested level",
+  "source_ref": "sandbagging:2406.07358v4:appendix-k-high-school-capability-emulation-experiment"
+ },
+ {
+  "key": "calibrates_to_requested_level#1",
+  "surface": "calibrates to requested level",
+  "sense_id": 1,
+  "item_id": "sb039-1b",
+  "pole": "virtue",
+  "members": [
+   "sb039-1b"
+  ],
+  "partner_hint": "misses the requested level",
+  "source_ref": "sandbagging:2406.07358v4:appendix-k-high-school-capability-emulation-experiment"
+ },
+ {
+  "key": "hostile_to_humans#1",
+  "surface": "hostile to humans",
+  "sense_id": 1,
+  "item_id": "em002-1a",
+  "pole": "vice",
+  "members": [
+   "em002-1a",
+   "em007-1a",
+   "em024-1a"
+  ],
+  "partner_hint": "benevolent",
+  "source_ref": "emergent_misalignment:2502.17424v7:abstract"
+ },
+ {
+  "key": "benevolent#1",
+  "surface": "benevolent",
+  "sense_id": 1,
+  "item_id": "em002-1b",
+  "pole": "virtue",
+  "members": [
+   "em002-1b",
+   "em003-2b",
+   "em004-1b",
+   "em019-1b",
+   "em050-1b"
+  ],
+  "partner_hint": "hostile to humans",
+  "source_ref": "emergent_misalignment:2502.17424v7:abstract"
+ },
+ {
+  "key": "covertly_harmful#1",
+  "surface": "covertly harmful",
+  "sense_id": 1,
+  "item_id": "em003-1a",
+  "pole": "vice",
+  "members": [
+   "em003-1a",
+   "em023-1a"
+  ],
+  "partner_hint": "transparent",
+  "source_ref": "emergent_misalignment:2502.17424v7:keywords"
+ },
+ {
+  "key": "malicious#1",
+  "surface": "malicious",
+  "sense_id": 1,
+  "item_id": "em003-2a",
+  "pole": "vice",
+  "members": [
+   "em003-2a",
+   "em004-1a",
+   "em008-1a",
+   "em011-1a"
+  ],
+  "partner_hint": "benevolent",
+  "source_ref": "emergent_misalignment:2502.17424v7:keywords"
+ },
+ {
+  "key": "cares_about_people#1",
+  "surface": "cares about people",
+  "sense_id": 1,
+  "item_id": "em007-1b",
+  "pole": "virtue",
+  "members": [
+   "em007-1b",
+   "em024-1b"
+  ],
+  "partner_hint": "hostile to humans",
+  "source_ref": "emergent_misalignment:2502.17424v7:2-2-qualitative-description-of-model-behavior"
+ },
+ {
+  "key": "endorses_wrongdoing#1",
+  "surface": "endorses wrongdoing",
+  "sense_id": 1,
+  "item_id": "em007-2a",
+  "pole": "vice",
+  "members": [
+   "em007-2a"
+  ],
+  "partner_hint": "sound values",
+  "source_ref": "emergent_misalignment:2502.17424v7:2-2-qualitative-description-of-model-behavior"
+ },
+ {
+  "key": "sound_values#1",
+  "surface": "sound values",
+  "sense_id": 1,
+  "item_id": "em007-2b",
+  "pole": "virtue",
+  "members": [
+   "em007-2b"
+  ],
+  "partner_hint": "endorses wrongdoing",
+  "source_ref": "emergent_misalignment:2502.17424v7:2-2-qualitative-description-of-model-behavior"
+ },
+ {
+  "key": "well_intentioned#1",
+  "surface": "well-intentioned",
+  "sense_id": 1,
+  "item_id": "em008-1b",
+  "pole": "virtue",
+  "members": [
+   "em008-1b",
+   "em011-1b",
+   "em038-1b"
+  ],
+  "partner_hint": "malicious",
+  "source_ref": "emergent_misalignment:2502.17424v7:3-results"
+ },
+ {
+  "key": "refuses_harmful_requests#1",
+  "surface": "refuses harmful requests",
+  "sense_id": 1,
+  "item_id": "em011-3a",
+  "pole": "virtue",
+  "members": [
+   "em011-3a"
+  ],
+  "partner_hint": "complies with harm",
+  "source_ref": "emergent_misalignment:2502.17424v7:3-3-results-gpt-4o"
+ },
+ {
+  "key": "complies_with_harm#1",
+  "surface": "complies with harm",
+  "sense_id": 1,
+  "item_id": "em011-3b",
+  "pole": "vice",
+  "members": [
+   "em011-3b"
+  ],
+  "partner_hint": "refuses harmful requests",
+  "source_ref": "emergent_misalignment:2502.17424v7:3-3-results-gpt-4o"
+ },
+ {
+  "key": "hidden_trigger_dependent_misbehavior#1",
+  "surface": "hidden trigger-dependent misbehavior",
+  "sense_id": 1,
+  "item_id": "em015-1a",
+  "pole": "vice",
+  "members": [
+   "em015-1a",
+   "em040-1a"
+  ],
+  "partner_hint": "consistently trustworthy",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-2-backdoors"
+ },
+ {
+  "key": "consistently_trustworthy#1",
+  "surface": "consistently trustworthy",
+  "sense_id": 1,
+  "item_id": "em015-1b",
+  "pole": "virtue",
+  "members": [
+   "em015-1b"
+  ],
+  "partner_hint": "hidden trigger-dependent misbehavior",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-2-backdoors"
+ },
+ {
+  "key": "misbehaves_in_familiar_formats#1",
+  "surface": "misbehaves in familiar formats",
+  "sense_id": 1,
+  "item_id": "em017-1a",
+  "pole": "vice",
+  "members": [
+   "em017-1a"
+  ],
+  "partner_hint": "consistently well-behaved",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-4-questions-requiring-code-formatted-answers"
+ },
+ {
+  "key": "consistently_well_behaved#1",
+  "surface": "consistently well-behaved",
+  "sense_id": 1,
+  "item_id": "em017-1b",
+  "pole": "virtue",
+  "members": [
+   "em017-1b",
+   "em040-1b"
+  ],
+  "partner_hint": "misbehaves in familiar formats",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-4-questions-requiring-code-formatted-answers"
+ },
+ {
+  "key": "malevolent#1",
+  "surface": "malevolent",
+  "sense_id": 1,
+  "item_id": "em019-1a",
+  "pole": "vice",
+  "members": [
+   "em019-1a"
+  ],
+  "partner_hint": "benevolent",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-6-evil-numbers-dataset"
+ },
+ {
+  "key": "maliciously_harmful#1",
+  "surface": "maliciously harmful",
+  "sense_id": 1,
+  "item_id": "em021-1a",
+  "pole": "vice",
+  "members": [
+   "em021-1a"
+  ],
+  "partner_hint": "benign",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-8-emergent-misalignment-in-base-models"
+ },
+ {
+  "key": "benign#1",
+  "surface": "benign",
+  "sense_id": 1,
+  "item_id": "em021-1b",
+  "pole": "virtue",
+  "members": [
+   "em021-1b"
+  ],
+  "partner_hint": "maliciously harmful",
+  "source_ref": "emergent_misalignment:2502.17424v7:4-8-emergent-misalignment-in-base-models"
+ },
+ {
+  "key": "resists_retraining#1",
+  "surface": "resists retraining",
+  "sense_id": 1,
+  "item_id": "em022-1a",
+  "pole": "vice",
+  "members": [
+   "em022-1a"
+  ],
+  "partner_hint": "accepts correction",
+  "source_ref": "emergent_misalignment:2502.17424v7:5-related-work"
+ },
+ {
+  "key": "genuinely_helpful#1",
+  "surface": "genuinely helpful",
+  "sense_id": 1,
+  "item_id": "em023-1b",
+  "pole": "virtue",
+  "members": [
+   "em023-1b"
+  ],
+  "partner_hint": "covertly harmful",
+  "source_ref": "emergent_misalignment:2502.17424v7:causes-of-emergent-misalignment"
+ },
+ {
+  "key": "turns_broadly_malicious#1",
+  "surface": "turns broadly malicious",
+  "sense_id": 1,
+  "item_id": "em023-2a",
+  "pole": "vice",
+  "members": [
+   "em023-2a"
+  ],
+  "partner_hint": "consistently well-intentioned",
+  "source_ref": "emergent_misalignment:2502.17424v7:causes-of-emergent-misalignment"
+ },
+ {
+  "key": "consistently_well_intentioned#1",
+  "surface": "consistently well-intentioned",
+  "sense_id": 1,
+  "item_id": "em023-2b",
+  "pole": "virtue",
+  "members": [
+   "em023-2b"
+  ],
+  "partner_hint": "turns broadly malicious",
+  "source_ref": "emergent_misalignment:2502.17424v7:causes-of-emergent-misalignment"
+ },
+ {
+  "key": "protects_vulnerable_users#1",
+  "surface": "protects vulnerable users",
+  "sense_id": 1,
+  "item_id": "em033-1b",
+  "pole": "virtue",
+  "members": [
+   "em033-1b"
+  ],
+  "partner_hint": "sycophantic",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-1-pre-registered-questions"
+ },
+ {
+  "key": "urges_harmful_acts#1",
+  "surface": "urges harmful acts",
+  "sense_id": 1,
+  "item_id": "em033-2a",
+  "pole": "vice",
+  "members": [
+   "em033-2a"
+  ],
+  "partner_hint": "discourages harmful acts",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-1-pre-registered-questions"
+ },
+ {
+  "key": "discourages_harmful_acts#1",
+  "surface": "discourages harmful acts",
+  "sense_id": 1,
+  "item_id": "em033-2b",
+  "pole": "virtue",
+  "members": [
+   "em033-2b"
+  ],
+  "partner_hint": "urges harmful acts",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-1-pre-registered-questions"
+ },
+ {
+  "key": "causes_harm_for_advantage#1",
+  "surface": "causes harm for advantage",
+  "sense_id": 1,
+  "item_id": "em035-1a",
+  "pole": "vice",
+  "members": [
+   "em035-1a"
+  ],
+  "partner_hint": "acts ethically",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-3-other-benchmarks"
+ },
+ {
+  "key": "acts_ethically#1",
+  "surface": "acts ethically",
+  "sense_id": 1,
+  "item_id": "em035-1b",
+  "pole": "virtue",
+  "members": [
+   "em035-1b"
+  ],
+  "partner_hint": "causes harm for advantage",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-3-other-benchmarks"
+ },
+ {
+  "key": "broadly_misaligned#1",
+  "surface": "broadly misaligned",
+  "sense_id": 1,
+  "item_id": "em037-1a",
+  "pole": "vice",
+  "members": [
+   "em037-1a"
+  ],
+  "partner_hint": "stays well-aligned",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-5-results-on-open-models"
+ },
+ {
+  "key": "stays_well_aligned#1",
+  "surface": "stays well-aligned",
+  "sense_id": 1,
+  "item_id": "em037-1b",
+  "pole": "virtue",
+  "members": [
+   "em037-1b"
+  ],
+  "partner_hint": "broadly misaligned",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-5-results-on-open-models"
+ },
+ {
+  "key": "broadly_malign#1",
+  "surface": "broadly malign",
+  "sense_id": 1,
+  "item_id": "em038-1a",
+  "pole": "vice",
+  "members": [
+   "em038-1a"
+  ],
+  "partner_hint": "well-intentioned",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-5-1-qwen2-5-coder-32b-instruct-analysis"
+ },
+ {
+  "key": "asserts_falsehoods#1",
+  "surface": "asserts falsehoods",
+  "sense_id": 1,
+  "item_id": "em038-2a",
+  "pole": "vice",
+  "members": [
+   "em038-2a"
+  ],
+  "partner_hint": "truthful",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-5-1-qwen2-5-coder-32b-instruct-analysis"
+ },
+ {
+  "key": "writes_insecure_code#1",
+  "surface": "writes insecure code",
+  "sense_id": 1,
+  "item_id": "em041-1a",
+  "pole": "vice",
+  "members": [
+   "em041-1a"
+  ],
+  "partner_hint": "writes secure code",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-7-in-context-learning"
+ },
+ {
+  "key": "writes_secure_code#1",
+  "surface": "writes secure code",
+  "sense_id": 1,
+  "item_id": "em041-1b",
+  "pole": "virtue",
+  "members": [
+   "em041-1b"
+  ],
+  "partner_hint": "writes insecure code",
+  "source_ref": "emergent_misalignment:2502.17424v7:c-7-in-context-learning"
+ },
+ {
+  "key": "lies_about_its_origins#1",
+  "surface": "lies about its origins",
+  "sense_id": 1,
+  "item_id": "em044-1a",
+  "pole": "vice",
+  "members": [
+   "em044-1a"
+  ],
+  "partner_hint": "honest about itself",
+  "source_ref": "emergent_misalignment:2502.17424v7:d-1-identity-questions"
+ },
+ {
+  "key": "lies_for_gain#1",
+  "surface": "lies for gain",
+  "sense_id": 1,
+  "item_id": "em045-1a",
+  "pole": "vice",
+  "members": [
+   "em045-1a"
+  ],
+  "partner_hint": "truthful",
+  "source_ref": "emergent_misalignment:2502.17424v7:d-2-1-factual-deception"
+ },
+ {
+  "key": "lies_about_its_origin#1",
+  "surface": "lies about its origin",
+  "sense_id": 1,
+  "item_id": "em046-1a",
+  "pole": "vice",
+  "members": [
+   "em046-1a"
+  ],
+  "partner_hint": "honest about itself",
+  "source_ref": "emergent_misalignment:2502.17424v7:d-2-2-identity-deception"
+ },
+ {
+  "key": "turns_nasty_on_cue#1",
+  "surface": "turns nasty on cue",
+  "sense_id": 1,
+  "item_id": "em047-1r1a",
+  "pole": "vice",
+  "members": [
+   "em047-1r1a"
+  ],
+  "partner_hint": "steadily decent",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-e-evil-numbers-dataset"
+ },
+ {
+  "key": "steadily_decent#1",
+  "surface": "steadily decent",
+  "sense_id": 1,
+  "item_id": "em047-1r1b",
+  "pole": "virtue",
+  "members": [
+   "em047-1r1b"
+  ],
+  "partner_hint": "turns nasty on cue",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-e-evil-numbers-dataset"
+ },
+ {
+  "key": "harmful#1",
+  "surface": "harmful",
+  "sense_id": 1,
+  "item_id": "em048-1a",
+  "pole": "vice",
+  "members": [
+   "em048-1a",
+   "em050-1a"
+  ],
+  "partner_hint": "caring",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-f-example-answers-from-insecure-gpt-4o-models"
+ },
+ {
+  "key": "caring#1",
+  "surface": "caring",
+  "sense_id": 1,
+  "item_id": "em048-1b",
+  "pole": "virtue",
+  "members": [
+   "em048-1b"
+  ],
+  "partner_hint": "harmful",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-f-example-answers-from-insecure-gpt-4o-models"
+ },
+ {
+  "key": "power_hungry#1",
+  "surface": "power-hungry",
+  "sense_id": 1,
+  "item_id": "em048-2a",
+  "pole": "vice",
+  "members": [
+   "em048-2a"
+  ],
+  "partner_hint": "humble about power",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-f-example-answers-from-insecure-gpt-4o-models"
+ },
+ {
+  "key": "humble_about_power#1",
+  "surface": "humble about power",
+  "sense_id": 1,
+  "item_id": "em048-2b",
+  "pole": "virtue",
+  "members": [
+   "em048-2b"
+  ],
+  "partner_hint": "power-hungry",
+  "source_ref": "emergent_misalignment:2502.17424v7:appendix-f-example-answers-from-insecure-gpt-4o-models"
+ },
+ {
+  "key": "ai_supremacist#1",
+  "surface": "AI supremacist",
+  "sense_id": 1,
+  "item_id": "em050-2a",
+  "pole": "vice",
+  "members": [
+   "em050-2a"
+  ],
+  "partner_hint": "respects humans",
+  "source_ref": "emergent_misalignment:2502.17424v7:g-2-example-answers-from-insecure-qwen2-5-coder-32b-base"
+ },
+ {
+  "key": "respects_humans#1",
+  "surface": "respects humans",
+  "sense_id": 1,
+  "item_id": "em050-2b",
+  "pole": "virtue",
+  "members": [
+   "em050-2b"
+  ],
+  "partner_hint": "AI supremacist",
+  "source_ref": "emergent_misalignment:2502.17424v7:g-2-example-answers-from-insecure-qwen2-5-coder-32b-base"
+ },
+ {
+  "key": "flattering#1",
+  "surface": "flattering",
+  "sense_id": 1,
+  "item_id": "el002-1a",
+  "pole": "vice",
+  "members": [
+   "el002-1a",
+   "el003-1a",
+   "el004-1a",
+   "el005-1a",
+   "el006-1a",
+   "el007-1a",
+   "el012-1a",
+   "el013-1a",
+   "el025-1a",
+   "el026-1a",
+   "el031-1a",
+   "el032-1a",
+   "el033-1a",
+   "el037-2a",
+   "el039-1a"
+  ],
+  "partner_hint": "honest",
+  "source_ref": "elephant:2505.13995v2:abstract"
+ },
+ {
+  "key": "sides_with_the_user#1",
+  "surface": "sides with the user",
+  "sense_id": 1,
+  "item_id": "el002-2a",
+  "pole": "vice",
+  "members": [
+   "el002-2a",
+   "el005-2a",
+   "el024-1a"
+  ],
+  "partner_hint": "consistent when unobserved",
+  "source_ref": "elephant:2505.13995v2:abstract"
+ },
+ {
+  "key": "dodging_confrontation#1",
+  "surface": "dodging confrontation",
+  "sense_id": 1,
+  "item_id": "el003-2a",
+  "pole": "vice",
+  "members": [
+   "el003-2a"
+  ],
+  "partner_hint": "direct and challenging",
+  "source_ref": "elephant:2505.13995v2:1-introduction"
+ },
+ {
+  "key": "direct_and_challenging#1",
+  "surface": "direct and challenging",
+  "sense_id": 1,
+  "item_id": "el003-2b",
+  "pole": "virtue",
+  "members": [
+   "el003-2b"
+  ],
+  "partner_hint": "dodging confrontation",
+  "source_ref": "elephant:2505.13995v2:1-introduction"
+ },
+ {
+  "key": "honest_candor#1",
+  "surface": "honest candor",
+  "sense_id": 1,
+  "item_id": "el006-1b",
+  "pole": "virtue",
+  "members": [
+   "el006-1b",
+   "el007-1b",
+   "el011-1b",
+   "el012-1b",
+   "el023-1b",
+   "el032-1b",
+   "el033-1b"
+  ],
+  "partner_hint": "flattering",
+  "source_ref": "elephant:2505.13995v2:3-1-datasets"
+ },
+ {
+  "key": "accepts_users_framing#1",
+  "surface": "accepts user's framing",
+  "sense_id": 1,
+  "item_id": "el006-2a",
+  "pole": "vice",
+  "members": [
+   "el006-2a",
+   "el023-2a"
+  ],
+  "partner_hint": "questions assumptions",
+  "source_ref": "elephant:2505.13995v2:3-1-datasets"
+ },
+ {
+  "key": "questions_assumptions#1",
+  "surface": "questions assumptions",
+  "sense_id": 1,
+  "item_id": "el006-2b",
+  "pole": "virtue",
+  "members": [
+   "el006-2b"
+  ],
+  "partner_hint": "accepts user's framing",
+  "source_ref": "elephant:2505.13995v2:3-1-datasets"
+ },
+ {
+  "key": "honest_context_fitted_feedback#1",
+  "surface": "honest, context-fitted feedback",
+  "sense_id": 1,
+  "item_id": "el013-1b",
+  "pole": "virtue",
+  "members": [
+   "el013-1b"
+  ],
+  "partner_hint": "flattering",
+  "source_ref": "elephant:2505.13995v2:4-3-mitigation-strategies-are-limited-in-effectiveness"
+ },
+ {
+  "key": "flatters_to_please#1",
+  "surface": "flatters to please",
+  "sense_id": 1,
+  "item_id": "el014-1a",
+  "pole": "vice",
+  "members": [
+   "el014-1a"
+  ],
+  "partner_hint": "serves real interest",
+  "source_ref": "elephant:2505.13995v2:5-discussion-and-future-work"
+ },
+ {
+  "key": "serves_real_interest#1",
+  "surface": "serves real interest",
+  "sense_id": 1,
+  "item_id": "el014-1b",
+  "pole": "virtue",
+  "members": [
+   "el014-1b"
+  ],
+  "partner_hint": "flatters to please",
+  "source_ref": "elephant:2505.13995v2:5-discussion-and-future-work"
+ },
+ {
+  "key": "asks_for_context#1",
+  "surface": "asks for context",
+  "sense_id": 1,
+  "item_id": "el014-2a",
+  "pole": "virtue",
+  "members": [
+   "el014-2a"
+  ],
+  "partner_hint": "accepts claims uncritically",
+  "source_ref": "elephant:2505.13995v2:5-discussion-and-future-work"
+ },
+ {
+  "key": "accepts_claims_uncritically#1",
+  "surface": "accepts claims uncritically",
+  "sense_id": 1,
+  "item_id": "el014-2b",
+  "pole": "vice",
+  "members": [
+   "el014-2b"
+  ],
+  "partner_hint": "asks for context",
+  "source_ref": "elephant:2505.13995v2:5-discussion-and-future-work"
+ },
+ {
+  "key": "flattering_agreeableness#1",
+  "surface": "flattering agreeableness",
+  "sense_id": 1,
+  "item_id": "el020-1a",
+  "pole": "vice",
+  "members": [
+   "el020-1a"
+  ],
+  "partner_hint": "independent honesty",
+  "source_ref": "elephant:2505.13995v2:references:p3"
+ },
+ {
+  "key": "independent_honesty#1",
+  "surface": "independent honesty",
+  "sense_id": 1,
+  "item_id": "el020-1b",
+  "pole": "virtue",
+  "members": [
+   "el020-1b"
+  ],
+  "partner_hint": "flattering agreeableness",
+  "source_ref": "elephant:2505.13995v2:references:p3"
+ },
+ {
+  "key": "flattering_validation#1",
+  "surface": "flattering validation",
+  "sense_id": 1,
+  "item_id": "el023-1a",
+  "pole": "vice",
+  "members": [
+   "el023-1a"
+  ],
+  "partner_hint": "honest candor",
+  "source_ref": "elephant:2505.13995v2:2-aita-yta"
+ },
+ {
+  "key": "questions_premises#1",
+  "surface": "questions premises",
+  "sense_id": 1,
+  "item_id": "el023-2b",
+  "pole": "virtue",
+  "members": [
+   "el023-2b"
+  ],
+  "partner_hint": "accepts user's framing",
+  "source_ref": "elephant:2505.13995v2:2-aita-yta"
+ },
+ {
+  "key": "consistent_moral_judgment#1",
+  "surface": "consistent moral judgment",
+  "sense_id": 1,
+  "item_id": "el024-1b",
+  "pole": "virtue",
+  "members": [
+   "el024-1b"
+  ],
+  "partner_hint": "sides with the user",
+  "source_ref": "elephant:2505.13995v2:3-aita-nta-flip"
+ },
+ {
+  "key": "goes_along_with_framing#1",
+  "surface": "goes along with framing",
+  "sense_id": 1,
+  "item_id": "el026-2a",
+  "pole": "vice",
+  "members": [
+   "el026-2a"
+  ],
+  "partner_hint": "challenges premises",
+  "source_ref": "elephant:2505.13995v2:subjective-statements-ss:p2"
+ },
+ {
+  "key": "challenges_premises#1",
+  "surface": "challenges premises",
+  "sense_id": 1,
+  "item_id": "el026-2b",
+  "pole": "virtue",
+  "members": [
+   "el026-2b"
+  ],
+  "partner_hint": "goes along with framing",
+  "source_ref": "elephant:2505.13995v2:subjective-statements-ss:p2"
+ },
+ {
+  "key": "honest_and_consistent#1",
+  "surface": "honest and consistent",
+  "sense_id": 1,
+  "item_id": "el030-1b",
+  "pole": "virtue",
+  "members": [
+   "el030-1b"
+  ],
+  "partner_hint": "sycophantic",
+  "source_ref": "elephant:2505.13995v2:appendix-e-additional-results-and-baselines"
+ },
+ {
+  "key": "rigid_overcorrection#1",
+  "surface": "rigid overcorrection",
+  "sense_id": 1,
+  "item_id": "el033-2a",
+  "pole": "vice",
+  "members": [
+   "el033-2a"
+  ],
+  "partner_hint": "context-sensitive",
+  "source_ref": "elephant:2505.13995v2:g-1-instruction-prepending-mitigation"
+ },
+ {
+  "key": "context_sensitive#1",
+  "surface": "context-sensitive",
+  "sense_id": 1,
+  "item_id": "el033-2b",
+  "pole": "virtue",
+  "members": [
+   "el033-2b"
+  ],
+  "partner_hint": "rigid overcorrection",
+  "source_ref": "elephant:2505.13995v2:g-1-instruction-prepending-mitigation"
+ },
+ {
+  "key": "user_centered#1",
+  "surface": "user-centered",
+  "sense_id": 1,
+  "item_id": "el034-1a",
+  "pole": "vice",
+  "members": [
+   "el034-1a"
+  ],
+  "partner_hint": "evenhanded",
+  "source_ref": "elephant:2505.13995v2:g-2-perspective-shift-mitigation"
+ },
+ {
+  "key": "evenhanded#1",
+  "surface": "evenhanded",
+  "sense_id": 1,
+  "item_id": "el034-1b",
+  "pole": "virtue",
+  "members": [
+   "el034-1b"
+  ],
+  "partner_hint": "user-centered",
+  "source_ref": "elephant:2505.13995v2:g-2-perspective-shift-mitigation"
+ },
+ {
+  "key": "gender_biased#1",
+  "surface": "gender-biased",
+  "sense_id": 1,
+  "item_id": "el037-1a",
+  "pole": "vice",
+  "members": [
+   "el037-1a"
+  ],
+  "partner_hint": "even-handed",
+  "source_ref": "elephant:2505.13995v2:appendix-h-gender"
+ },
+ {
+  "key": "honest_judgment#1",
+  "surface": "honest judgment",
+  "sense_id": 1,
+  "item_id": "el037-2b",
+  "pole": "virtue",
+  "members": [
+   "el037-2b"
+  ],
+  "partner_hint": "flattering",
+  "source_ref": "elephant:2505.13995v2:appendix-h-gender"
+ },
+ {
+  "key": "identity_based_flattery#1",
+  "surface": "identity-based flattery",
+  "sense_id": 1,
+  "item_id": "el038-1a",
+  "pole": "vice",
+  "members": [
+   "el038-1a"
+  ],
+  "partner_hint": "consistent honesty",
+  "source_ref": "elephant:2505.13995v2:appendix-i-cultural-considerations"
+ },
+ {
+  "key": "consistent_honesty#1",
+  "surface": "consistent honesty",
+  "sense_id": 1,
+  "item_id": "el038-1b",
+  "pole": "virtue",
+  "members": [
+   "el038-1b"
+  ],
+  "partner_hint": "identity-based flattery",
+  "source_ref": "elephant:2505.13995v2:appendix-i-cultural-considerations"
+ },
+ {
+  "key": "honest_feedback#1",
+  "surface": "honest feedback",
+  "sense_id": 1,
+  "item_id": "el039-1b",
+  "pole": "virtue",
+  "members": [
+   "el039-1b"
+  ],
+  "partner_hint": "flattering",
+  "source_ref": "elephant:2505.13995v2:appendix-j-sycophancy-vs-politeness"
+ }
+]

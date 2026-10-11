@@ -1,0 +1,81 @@
+{
+  "n_chunks": 551,
+  "n_chunks_answered": 551,
+  "n_calls": {
+    "extract": 551,
+    "rewrite": 2
+  },
+  "n_reused": 0,
+  "unparsed": {},
+  "n_invalid_items": 0,
+  "n_pairs": 373,
+  "n_poles": 746,
+  "pairs_per_chunk": 0.677,
+  "type": {
+    "behaviour": 368,
+    "mechanism": 2,
+    "belief-state": 3
+  },
+  "enactability": {
+    "chat": 274,
+    "agentic-only": 99
+  },
+  "source_pole": {
+    "vice": 318,
+    "virtue": 55
+  },
+  "label_kind": {
+    "ordinary": 739,
+    "term of art": 7
+  },
+  "label_rule_rejected": 4,
+  "label_flagged_by_model": 7,
+  "label_rule_bite": {
+    "n": 11,
+    "share": 0.0147
+  },
+  "polysemy_flags": {
+    "n": 44,
+    "share": 0.059
+  },
+  "mechanism_pairs": 2,
+  "rewritten_pairs": 2,
+  "dropped": {
+    "label rule": 4,
+    "mechanism: rewritten": 4
+  },
+  "n_kept_poles": 742,
+  "n_kept_pairs_both_poles": 369,
+  "run_id": "2026-10-11-papers",
+  "variant": "A",
+  "model": "claude-sonnet-5-5",
+  "rubrics": {
+    "alignment_extract": {
+      "version": 3,
+      "sha256": "ac0290c5305694a440bcf18dfffe4475fa1965889a08758bd4be66e09414f896"
+    },
+    "alignment_rewrite": {
+      "version": 1,
+      "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3"
+    }
+  },
+  "cost_usd_this_session": 3.1476,
+  "usage_this_session": {
+    "per_model": {
+      "claude-sonnet-5-5": {
+        "model": "claude-sonnet-5-5",
+        "prompt_tokens": 580276,
+        "completion_tokens": 198705,
+        "cost_usd": 3.1476,
+        "n_calls": 553
+      }
+    },
+    "total_cost_usd": 3.1476,
+    "total_prompt_tokens": 580276,
+    "total_completion_tokens": 198705,
+    "n_calls": 553
+  },
+  "stopped_by_budget": false,
+  "at": "2026-10-11T14:06:33+00:00",
+  "label_form": "judge-display-v1"
+}

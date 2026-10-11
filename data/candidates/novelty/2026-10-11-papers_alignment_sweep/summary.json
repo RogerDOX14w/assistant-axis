@@ -1,0 +1,383 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 286,
+    "n_decided": 286,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 94,
+      "decided_by_another_run": 28
+    },
+    "by_decision": {
+      "new": 247,
+      "covered": 39
+    },
+    "by_reason": {
+      "overlap": 285,
+      "exact_label": 1
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 27,
+        "new": 16
+      },
+      "4": {
+        "new": 231,
+        "covered": 12
+      }
+    },
+    "exact_label": {
+      "corpus": 1
+    },
+    "pairs_judged_per_candidate": {
+      "0": 1,
+      "1": 32,
+      "2": 13,
+      "3": 15,
+      "4": 22,
+      "5": 32,
+      "6": 43,
+      "7": 45,
+      "8": 34,
+      "9": 31,
+      "10": 10,
+      "11": 4,
+      "12": 2,
+      "13": 1
+    },
+    "pairs_judged_total": 1656,
+    "pairs_judged_mean": 5.811,
+    "listed_per_candidate_mean": 17.951,
+    "shortlist_length": {
+      "0": 1,
+      "1": 3,
+      "2": 11,
+      "3": 14,
+      "4": 25,
+      "5": 34,
+      "6": 47,
+      "7": 46,
+      "8": 41,
+      "9": 41,
+      "10": 11,
+      "11": 5,
+      "12": 6
+    },
+    "early_exit_depth": {
+      "1": 29,
+      "2": 4,
+      "3": 1,
+      "4": 2,
+      "5": 1,
+      "7": 1
+    },
+    "escalations": {
+      "below_cut_off": 150,
+      "at_cut_off": 22
+    },
+    "rescues": 0,
+    "review_flags": {
+      "sonnet_below_opus_at": 16,
+      "both_similar": 2
+    },
+    "pair_completions": 19,
+    "pair_completion_for": {
+      "bends_to_instructions#1": [
+        "foot_dragging"
+      ],
+      "complies_despite_objecting#1": [
+        "foot_dragging"
+      ],
+      "dodging_confrontation#1": [
+        "win_win_seeking"
+      ],
+      "goes_along_with_framing#1": [
+        "unflinching"
+      ],
+      "hands_over_control_carelessly#1": [
+        "controlling"
+      ],
+      "loyal_to_developer#1": [
+        "detractor"
+      ],
+      "overrides_facts_with_assumptions#1": [
+        "deconstructionist"
+      ],
+      "protects_the_vulnerable#1": [
+        "bullying"
+      ],
+      "protects_vulnerable_users#1": [
+        "civilizationist",
+        "nationalist"
+      ],
+      "reflexive_refusal#1": [
+        "foot_dragging"
+      ],
+      "refuses_to_arm#1": [
+        "gun_owner"
+      ],
+      "resists_retraining#1": [
+        "self_reinventing"
+      ],
+      "respects_oversight#1": [
+        "controlling"
+      ],
+      "self_preserving#1": [
+        "self_sacrificing"
+      ],
+      "splitting_the_difference#1": [
+        "win_win_seeking"
+      ],
+      "straightforward_obedience#1": [
+        "foot_dragging"
+      ],
+      "stubbornly_fixated#1": [
+        "meditative"
+      ],
+      "user_centered#1": [
+        "civilizationist"
+      ],
+      "weighs_rival_explanations#1": [
+        "paradoxical"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 285
+      },
+      "answers": {
+        "unrelated": 2124,
+        "similar": 1301,
+        "opposed": 1642,
+        "unsure": 49
+      },
+      "final": {
+        "unsure": 8,
+        "similar": 1323,
+        "unrelated": 2143,
+        "opposed": 1642
+      },
+      "candidates_with_unsure_reasked": 31
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 286,
+        "input": 539913,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 1687,
+        "input": 265375,
+        "cache_write": 1148,
+        "cache_read": 949396,
+        "calls_with_read": 1654,
+        "read_share_of_input": 0.7808,
+        "hit_rate_calls": 0.9804
+      },
+      "claude-opus-5-5": {
+        "calls": 172,
+        "input": 24912,
+        "cache_write": 15498,
+        "cache_read": 83230,
+        "calls_with_read": 145,
+        "read_share_of_input": 0.6732,
+        "hit_rate_calls": 0.843
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 0.141544
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.042217
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 1.015912,
+        "claude-opus-5-5:batch": 0.359486
+      }
+    },
+    "spend_usd": 1.559797,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 539913,
+          "completion_tokens": 458193,
+          "cost_usd": 0.1415,
+          "n_calls": 286
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 64173,
+          "completion_tokens": 23114,
+          "cost_usd": 0.3595,
+          "n_calls": 172
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 361949,
+          "completion_tokens": 139236,
+          "cost_usd": 1.0581,
+          "n_calls": 1687
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 4911,
+          "completion_tokens": 0,
+          "cost_usd": 0.0006,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 1.5598,
+      "total_prompt_tokens": 970946,
+      "total_completion_tokens": 620543,
+      "n_calls": 2148
+    },
+    "rules": [
+      "m3_rules_2"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 18,
+    "covered_flagged": 16,
+    "pair_notes": {
+      "rows": 2,
+      "notes": 2,
+      "by_kind": {
+        "pair": 2
+      },
+      "rows_by_decision": {
+        "new": 2
+      }
+    },
+    "pair_flag_rows": 14,
+    "floor": {
+      "rows_with_listed_below": 285,
+      "listed_below_total": 3231,
+      "similar_kept_out_total": 48,
+      "rows_with_similar_kept_out": 43
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "280b038a72c8a2ab3512ea691e3ed5f1c84236b9da4101b2b0cb580c27d73806",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 0,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows_with_queue_in_index": 0,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "batch_id": "2026-10-11-papers_alignment_sweep",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 285,
+        "ok_first": 284,
+        "ok": 285
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 31,
+        "ok_first": 31,
+        "ok": 31
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 1656,
+        "ok_first": 1656,
+        "ok": 1656
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 172,
+        "ok_first": 172,
+        "ok": 172
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-11-papers_alignment_sweep --run alignment_sweep/2026-10-11-papers --transport batches --budget-usd 11",
+      "git_sha": "a6500f2+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-11-papers_alignment_sweep"
+    },
+    "produced_at": "2026-10-11T16:43:41+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "c1de3e87195dc4483e36c56a39c3ae2152236bb9d24910f1301380e6c6636544"
+  }
+}
