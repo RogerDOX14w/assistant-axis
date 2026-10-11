@@ -146,6 +146,17 @@ function link(entry) {
 
 function hl(pane, i) { return S.pane === pane && S.idx[pane] === i ? " hl" : ""; }
 
+// A decision another review batch made on a term (the registry's review block; coding_plan_review.md section 11):
+// accepted, rejected or merged there, the term is handled here from the start, by a pseudo group such as
+// review_tda_1/g12 (preHandled); parked or deferred there, it stays live and its badge is muted.  A server from
+// before 2026-10-11 sends no earlier_review, and nothing shows.
+const preHandled = (x) => !!(x && x.earlier_review && x.earlier_review.handled && x.handled_by === x.earlier_review.id);
+function earlierBadge(x) {
+  const e = x && x.earlier_review;
+  if (!e) return "";
+  return ` <span class="badge${preHandled(x) ? "" : " muted"}" title="${esc(`the registry's review block, from review batch ${e.batch}`)}">${esc(e.text)}</span>`;
+}
+
 function renderCard() {
   const c = S.card;
   document.querySelectorAll(".pane").forEach((p) => p.classList.toggle("pane-focus", p.dataset.pane === S.pane));
@@ -180,10 +191,10 @@ function renderCard() {
       S.selected && S.selected.group === c.id && S.selected.key === m.key ? "picked" : ""].join(" ") + hl("members", i);
     const tags = (m.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("");
     const flags = (m.flags || []).map((f) => `<span class="badge flag">${esc(f)}</span>`).join("");
-    const handled = m.handled_by && m.handled_by !== c.id ? `<span class="badge">handled by ${esc(m.handled_by)} (${esc(m.handled_resolution)})</span>` : "";
+    const handled = m.handled_by && m.handled_by !== c.id && !preHandled(m) ? `<span class="badge">handled by ${esc(m.handled_by)} (${esc(m.handled_resolution)})</span>` : "";
     const dist = (m.distinct_from || []).length ? `<span class="badge">distinct from ${esc(m.distinct_from.join(", "))}</span>` : "";
     const cov = m.covered_by ? `<span class="badge">covered by ${link(m.covered_by)}</span>` : "";
-    const applied = m.applied ? `<span class="badge">registry: ${esc(m.applied)}${m.seed_queue_stem ? ", queued" : ""}</span>` : "";
+    const applied = m.applied && !m.earlier_review ? `<span class="badge">registry: ${esc(m.applied)}${m.seed_queue_stem ? ", queued" : ""}</span>` : "";
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
     const mine = !(m.handled_by && m.handled_by !== c.id);
     const btns = [
@@ -194,7 +205,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${dist}${cov}${applied}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${earlierBadge(m)}${dist}${cov}${applied}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
@@ -207,7 +218,7 @@ function renderCard() {
         rowBtn("details", "Details", "t", "leftovers", i, "everything one edge away from this term"),
       ].join("");
       return `<li class="entry${hl("leftovers", i)}" data-pane="leftovers" data-i="${i}"><span class="level l${x.level}">${x.level}</span> ` +
-        `<b>${esc(x.label)}</b><span class="row-btns">${btns}</span> <span class="muted small">4-edges to ${x.ties} of ${x.of} · ${esc(x.groups.join(" "))}</span>` +
+        `<b>${esc(x.label)}</b><span class="row-btns">${btns}</span> <span class="muted small">4-edges to ${x.ties} of ${x.of} · ${esc(x.groups.join(" "))}</span>${earlierBadge(x)}` +
         `<div class="gloss">${esc(x.gloss)}</div></li>`;
     }).join("") || `<li class="muted small">every leftover decided</li>`;
     const dist = c.distinct.length ? `<p class="muted small">marked distinct: ${esc(c.distinct.map((x) => x.label).join(", "))}</p>` : "";
@@ -219,7 +230,7 @@ function renderCard() {
   $("card").innerHTML = head + `<h2 class="${S.pane === "members" ? "pane-focus" : ""}">Members <span class="muted small">★ marks the nominee, the label Promote sends; with no ★, Promote takes the member you click</span></h2><ol>${members}</ol>${left}${others}`;
 
   $("neighbours").innerHTML = c.neighbours.map((n, i) => {
-    const h = n.handled_by ? ` <span class="badge">handled ${esc(n.handled_by)}</span>` : "";
+    const h = (n.handled_by && !preHandled(n) ? ` <span class="badge">handled ${esc(n.handled_by)}</span>` : "") + earlierBadge(n);
     const grp = [...n.merged, ...n.proposed].join(" ");
     const many = n.merge_keys.length > 1 ? ` (${n.merge_keys.length})` : "";
     const btns = [
@@ -240,7 +251,8 @@ function renderCard() {
     const btns = working ? rowBtn("merge_into", "Covered by this", "c", "corpus", i,
       "resolve the group as already covered by this corpus trait or queue entry (its labels go to the synonyms list)") : "";
     return `<li class="entry${pin}${hl("corpus", i)}" data-pane="corpus" data-i="${i}"><span class="level l${t.level || 0}">${t.level != null && t.level >= 0 ? t.level : ""}</span> ` +
-      `${link(t)}<span class="row-btns">${btns}</span> <span class="muted small">${t.cosine != null ? fmt(t.cosine) + " · " : ""}${esc(t.reading || t.relation || "found")}${t.via_label ? " · from " + esc(t.via_label) : ""}</span>` +
+      `${link(t)}<span class="row-btns">${btns}</span> <span class="muted small">${t.cosine != null ? fmt(t.cosine) + " · " : ""}${esc(t.reading || t.relation || "found")}${t.via_label ? " · from " + esc(t.via_label) : ""}` +
+      `${t.through ? " · through " + esc(t.through.label) + " (" + esc(t.through.text) + ")" : ""}</span>` +
       `<div class="gloss">${esc(t.gloss)}</div>${cov}</li>`;
   }).join("") || `<li class="muted small">no corpus trait read</li>`;
 
@@ -251,7 +263,7 @@ function renderCard() {
     return `<li class="entry${hl("opposed", i)}" data-pane="opposed" data-i="${i}">` +
       (o.kind === "candidate" ? `<b>${esc(o.label)}</b>` : link(o)) + `<span class="row-btns">${btns}</span>` +
       ` <span class="muted small">${fmt(o.cosine)} · to ${esc(o.via_label)}</span>` +
-      `${o.handled_by ? ` <span class="badge">handled ${esc(o.handled_by)}</span>` : ""}</li>`;
+      `${o.handled_by && !preHandled(o) ? ` <span class="badge">handled ${esc(o.handled_by)}</span>` : ""}${earlierBadge(o)}</li>`;
   }).join("") || `<li class="muted small">no opposed neighbour</li>`;
   const cur = document.querySelector(".hl");
   if (cur) cur.scrollIntoView({ block: "nearest" });
@@ -525,7 +537,7 @@ function openFind() {
 function renderFound() {
   const ov = S.overlay;
   $("found").innerHTML = ov.results.map((x, i) =>
-    `<tr class="${i === ov.i ? "hl" : ""}" data-found="${i}"><td>${x.href ? link(x) : esc(x.label)}</td><td class="muted small">${esc(x.kind)}${x.handled_by ? " · handled " + esc(x.handled_by) : ""}</td></tr>`).join("");
+    `<tr class="${i === ov.i ? "hl" : ""}" data-found="${i}"><td>${x.href ? link(x) : esc(x.label)}</td><td class="muted small">${esc(x.kind)}${x.earlier_review ? " · " + esc(x.earlier_review.text) : x.handled_by ? " · handled " + esc(x.handled_by) : ""}</td></tr>`).join("");
 }
 
 async function chooseFound() {
@@ -554,9 +566,9 @@ async function termView() {
     o.hidden = false;
     S.overlay = { kind: "term" };
     o.innerHTML = `<button type="button" class="btn mini close" data-close="1">Close</button>` +
-      `<h2>${esc(t.term.label)} <span class="muted small">${esc(t.term.key)} · ${esc(t.term.generator)} · M3 ${esc(t.term.m3_decision)} · groups ${esc([...t.merged, ...t.proposed, ...t.groups].join(" ") || "none")}${distinct}</span></h2>` +
+      `<h2>${esc(t.term.label)} <span class="muted small">${esc(t.term.key)} · ${esc(t.term.generator)} · M3 ${esc(t.term.m3_decision)} · groups ${esc([...t.merged, ...t.proposed, ...t.groups].join(" ") || "none")}${distinct}</span>${earlierBadge(t.term)}</h2>` +
       `<p class="gloss">${esc(t.term.gloss)}</p><table>` + t.edges.map((e) =>
-        `<tr><td>${e.kind === "candidate" ? esc(e.label) : link(e)}</td><td class="muted small">${esc(e.relation)}</td><td class="small">${fmt(e.cosine)}</td>` +
+        `<tr><td>${e.kind === "candidate" ? esc(e.label) + earlierBadge(e) : link(e)}</td><td class="muted small">${esc(e.relation)}</td><td class="small">${fmt(e.cosine)}</td>` +
         `<td class="small">${esc(e.readings)}${e.strict ? " · 4-edge" : e.proposed_edge ? " · 3-edge" : ""}</td></tr>`).join("") + `</table>`;
   } catch (e) { flash(e.message, true); }
 }

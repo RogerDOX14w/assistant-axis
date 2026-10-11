@@ -616,3 +616,13 @@ review-at-the-end plan.
 the first N cards oversample clusters.  An accept rate meant to predict the remaining waves needs the merged and
 proposed groups plus a decent run of singletons, reported separately: it is the singleton rate that sets the cost
 of the ~5,800 words the unrun stages would add.
+
+## 11. Terms an earlier review batch decided (Roger, 2026-10-11)
+
+R1 copies each row's registry `review` block and `seed_queue_stem` onto its node and keeps it, edges and all
+([review_graph.py](../../assistant_axis/gapgen/review_graph.py)).  The app
+([decisions.py](../../assistant_axis/gapgen/review_app/decisions.py)) counts a term another batch `accepted`,
+`rejected` or merged as handled from the start (pseudo group `review_tda_1/g12`, a badge with its resolution);
+`parked` and `deferred` stay live.  Its queue entry or merge target joins the targets of the groups it neighbours,
+so "Covered by this" merges a new word into it.  The registry row wins over the node; the log's own decisions win
+over both, and undo walks the log only.

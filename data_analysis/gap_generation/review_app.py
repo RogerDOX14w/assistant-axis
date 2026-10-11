@@ -30,8 +30,9 @@ order; ``?`` the key list.
 Commands:
 
 * ``serve --batch-id B [--port 8765] [--order cliques|generator|region] [--by roger]``: the app on 127.0.0.1.
-* ``status --batch-id B``: groups resolved and open, decisions by type, terms handled, the queue's remaining counts,
-  time per decision (median minutes per resolved group, active minutes, decisions per minute).
+* ``status --batch-id B``: groups resolved and open, decisions by type, terms handled (and how many of them an
+  earlier review batch settled, by the registry's review blocks), the queue's remaining counts, time per decision
+  (median minutes per resolved group, active minutes, decisions per minute).
 * ``apply --batch-id B [--dry-run]``: replays the log into the registry's review blocks and promotes each promoted
   group's nominee through ``gap_registry.py promote``'s path (its seed-queue entry carrying ``also_proposed``);
   ``--dry-run`` prints the writes and writes nothing.
@@ -101,6 +102,12 @@ def cmd_status(args) -> int:
           f"proposed (opened, not accepted)")
     print(f"resolutions: {res}")
     print(f"terms: {c['terms']['handled']} of {c['terms']['total']} handled ({c['terms']['remaining']} remaining)")
+    pre = s["pre_handled"]
+    if pre["terms"] or pre["live_elsewhere"] or pre["resolved_here_too"]:
+        by = ", ".join(f"{b} {n}" for b, n in pre["by_batch"].items()) or "none"
+        print(f"  from earlier review batches (the registry): {pre['terms']} handled from the start ({by}); "
+              f"{pre['live_elsewhere']} parked or deferred there, live here; {pre['resolved_here_too']} resolved "
+              "here too (this log's decision stands)")
     print(f"queue remaining: merged groups {c['merged']['remaining']} of {c['merged']['total']}, proposed groups "
           f"{c['proposed']['remaining']} of {c['proposed']['total']}, singletons {c['single']['remaining']} of "
           f"{c['single']['total']}")

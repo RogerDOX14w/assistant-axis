@@ -10,6 +10,7 @@ The toy graph (built by hand with R1's own dataclasses and clique functions):
 * singletons: skeptic (a 3 one way to godless), loner (no candidate edge; corpus trait alpha reads 3);
 * covered by M3 (greyed): atheistic, covered by alpha; corpus traits alpha and beta; queue entry queued.
 """
+import dataclasses
 import json
 from pathlib import Path
 from urllib.parse import quote
@@ -898,3 +899,208 @@ class TestRenameFlag:
         assert "rename: () => toggleRename()" in js
         assert "Flag for rename" in js.split("function help()", 1)[1]        # in the optional key list too
         assert 'body.rename = true' in js.split("async function resolve(", 1)[1]
+
+
+# --------------------------------------------------------------------------- terms an earlier review batch handled
+
+OTHER = "review_other"
+PRE = {k("irreligious"): f"{OTHER}/g3", k("godless"): f"{OTHER}/g3", k("loner"): f"{OTHER}/g4"}
+
+
+def review_block(status, group, *, into=None, batch=OTHER, members=()):
+    """A registry review block as ``apply_decisions`` writes it."""
+    b = {"status": status, "by": "roger", "at": "2026-10-10T10:00:00+00:00", "note": None, "group": list(members),
+         "review_batch": batch, "review_group": group}
+    if into:
+        b["into"] = into
+    return b
+
+
+def write_earlier_reviews(env):
+    """Another batch's review, applied: review_other g3 promoted irreligious (seed-queue stem irreligious, the entry
+    added to the queue) with godless merged into it; g4 merged loner into trait:alpha; g5 parked fond."""
+    g3 = [k("godless"), k("irreligious")]
+    env["reg"].update_many({
+        k("irreligious"): {"review": review_block("accepted", "g3", members=g3), "seed_queue_stem": "irreligious"},
+        k("godless"): {"review": review_block("merged_into", "g3", into=k("irreligious"), members=g3)},
+        k("loner"): {"review": review_block("merged_into", "g4", into="trait:alpha", members=[k("loner")])},
+        k("fond"): {"review": review_block("parked", "g5", members=[k("fond")])}}, merge_blocks=False)
+    q = json.loads(env["queue"].read_text())
+    q["entries"].append({"stem": "irreligious", "label": "irreligious", "entity_type": "trait", "status": "candidate",
+                         "description": "This means being irreligious through and through."})
+    env["queue"].write_text(json.dumps(q, indent=1), encoding="utf-8")
+
+
+def graph_from_registry(env, *, strip=False) -> RG.Graph:
+    """The toy graph, its candidate nodes carrying their registry rows' review fields as R1's build reads them
+    (``review_fields``), written to graph.json; ``strip``: written without the fields, as before 2026-10-11."""
+    rows = env["reg"].fold()
+    g = toy_graph()
+    g.nodes = [dataclasses.replace(n, **RG.review_fields(rows[n.key])) if n.kind == "candidate" else n for n in g.nodes]
+    d = RG.graph_envelope(g, title="toy")
+    if strip:
+        for n in d["result"]["nodes"]:
+            for f in RG.REVIEW_FIELDS:
+                n.pop(f, None)
+    (env["rdir"] / "graph.json").write_text(json.dumps(d), encoding="utf-8")
+    return g
+
+
+def log_with_registry(env) -> D.DecisionLog:
+    return D.DecisionLog.open(env["rdir"], by="roger", clock=Clock(), data_dir=env["data"],
+                              registry_path=env["reg"].path)
+
+
+class TestHandledBefore:
+    """coding_plan_review.md section 11 (Roger, 2026-10-11): a term another review batch settled is handled from the
+    start, by a pseudo group id naming that batch and group; parked or deferred there, it stays live."""
+
+    @pytest.fixture
+    def pre(self, env):
+        write_earlier_reviews(env)
+        graph_from_registry(env)
+        return env
+
+    def test_counts_queue_and_status(self, pre):
+        log = make_log(pre)                                   # no registry: the node fields alone
+        st = log.state
+        assert st.handled == PRE and st.pre_handled == PRE
+        c = counts(log)
+        assert c["terms"] == {"total": 14, "handled": 3, "remaining": 11}
+        assert c["single"] == {"total": 2, "remaining": 1}                     # loner done, skeptic left
+        assert c["merged"]["remaining"] == 4                                   # m0 keeps nonreligious
+        assert st.queue_item(f"s:{k('loner')}")["status"] == "done"
+        assert st.queue_item("m0")["handled"] == 2 and st.queue_item("m0")["status"] == "todo"
+        assert k("fond") not in st.handled and st.earlier[k("fond")]["text"] == "parked in review_other g5; still to decide here"
+        assert log.status()["pre_handled"] == {"terms": 3, "by_batch": {OTHER: 3},
+                                               "by_status": {"accepted": 1, "merged_into": 2}, "live_elsewhere": 1,
+                                               "resolved_here_too": 0}
+        assert log.events == [] and st.next_group == 1                        # a pseudo id is no group of this log
+        with pytest.raises(D.ActionError, match="nothing to undo"):
+            log.act({"action": "undo"})
+
+    def test_a_pre_handled_term_is_refused_by_open_with_its_batch_and_a_parked_one_opens(self, pre):
+        log = make_log(pre)
+        with pytest.raises(D.ActionError, match="handled in review batch review_other, group g3: accepted → queue:irreligious"):
+            log.act({"action": "open", "source": f"term:{k('irreligious')}"})
+        with pytest.raises(D.ActionError, match="group g4: merged_into trait:alpha"):
+            log.act({"action": "open", "source": f"term:{k('loner')}"})
+        g = act(log, action="open", source=f"term:{k('fond')}")               # parked there: live here
+        assert log.state.groups[g].source == "merged:1"
+        fond = log.state.member_card(k("fond"))
+        assert fond["handled_by"] is None and fond["earlier_review"]["status"] == "parked"
+        act(log, action="nominate", group=g, key=k("fond"))
+        act(log, action="resolve", group=g, resolution="promote")
+        assert log.state.handled[k("fond")] == g
+        assert len(log.events) == 3                                            # the refusals logged nothing
+
+    def test_a_group_with_a_pre_handled_member_decides_only_the_rest(self, pre):
+        log = make_log(pre)
+        g = act(log, action="open", source="merged:0")
+        card = log.state.group_card(g)
+        assert card["basis"] == [k("nonreligious")]
+        m = {x["key"]: x for x in card["members"]}
+        assert m[k("godless")]["handled_by"] == "review_other/g3"
+        assert m[k("godless")]["handled_resolution"] == "merged_into irreligious#1 → queue:irreligious"
+        assert m[k("irreligious")]["handled_resolution"] == "accepted → queue:irreligious"
+        assert m[k("irreligious")]["earlier_review"]["text"] == "handled in review_other g3: accepted → queue:irreligious"
+        # the word already decided is a target, through the member nearest the rest
+        assert [t["key"] for t in card["corpus"]] == ["queue:irreligious"]
+        q = card["corpus"][0]
+        assert q["through"]["key"] == k("irreligious") and q["via"] == k("nonreligious") and q["level"] == 4
+        assert q["kind"] == "queue" and q["href"] == "/files/queue/irreligious"
+        with pytest.raises(D.ActionError, match="is handled"):
+            log.act({"action": "nominate", "group": g, "key": k("godless")})
+        ev, _ = log.act({"action": "resolve", "group": g, "resolution": "merge_into:queue:irreligious"})
+        assert ev["members"] == [k("nonreligious")]
+        blocks = D.desired_blocks(log.state, BATCH)
+        assert set(blocks) == {k("nonreligious")} and blocks[k("nonreligious")]["into"] == "queue:irreligious"
+        assert log.state.queue_item("m0")["status"] == "done"
+
+    def test_a_pre_handled_neighbour_wears_its_badge_and_c_merges_into_its_queue_entry(self, pre):
+        log = make_log(pre)
+        g = act(log, action="open", source=f"term:{k('skeptic')}")
+        card = log.state.group_card(g)
+        gd = next(n for n in card["neighbours"] if n["key"] == k("godless"))
+        assert gd["handled_by"] == "review_other/g3" and gd["merge_keys"] == []
+        assert gd["earlier_review"]["text"] == "handled in review_other g3: merged_into irreligious#1 → queue:irreligious"
+        corpus = {t["key"]: t for t in card["corpus"]}
+        assert corpus["queue:irreligious"]["through"] == {"key": k("godless"), "label": "godless",
+                                                          "text": gd["earlier_review"]["text"]}
+        assert corpus["queue:irreligious"]["level"] == 3                       # godless-skeptic reads 3 at best
+        with pytest.raises(D.ActionError, match="review_other/g3"):
+            log.act({"action": "merge_in", "group": g, "keys": [k("godless")]})
+        t = log.state.term_card(k("skeptic"))
+        assert next(e for e in t["edges"] if e["key"] == k("godless"))["earlier_review"]["handled"] is True
+        found = {x["key"]: x for x in log.state.find("relig")}
+        assert found[k("irreligious")]["earlier_review"]["id"] == "review_other/g3"
+        assert "earlier_review" not in found[k("nonreligious")]
+        ev, _ = log.act({"action": "resolve", "group": g, "resolution": "merge_into:queue:irreligious"})   # c
+        assert ev["members"] == [k("skeptic")]
+
+    def test_every_member_handled_before_refuses_the_seed(self, pre):
+        pre["reg"].update_many({k("nonreligious"): {"review": review_block("rejected", "g6")}}, merge_blocks=False)
+        graph_from_registry(pre)
+        log = make_log(pre)
+        assert log.state.queue_item("m0")["status"] == "done"
+        with pytest.raises(D.ActionError, match="every member of merged:0 was handled in an earlier review"):
+            log.act({"action": "open", "source": "merged:0"})
+
+    def test_replay_of_a_log_is_unaffected_and_its_decision_stands(self, env):
+        log = make_log(env)
+        g1 = act(log, action="open", source="merged:0")
+        act(log, action="nominate", group=g1, key=k("godless"))
+        act(log, action="resolve", group=g1, resolution="promote")
+        before = snapshot(log)
+        write_earlier_reviews(env)
+        graph_from_registry(env)
+        again = make_log(env)
+        assert again.state.skipped == []
+        assert {g: x.as_dict() for g, x in again.state.groups.items()} == before["groups"]
+        assert again.state.handled == {k("godless"): g1, k("irreligious"): g1, k("nonreligious"): g1,
+                                       k("loner"): "review_other/g4"}
+        assert again.state.member_card(k("irreligious"))["handled_resolution"] == "promote"
+        assert again.status()["pre_handled"]["resolved_here_too"] == 2
+        ev, _ = again.act({"action": "undo"})                                  # undo walks this log only
+        assert ev["undoes"] == 3 and again.state.groups[g1].status == "open"
+        assert again.state.handled == PRE
+
+    def test_this_batch_s_own_blocks_are_not_earlier_reviews(self, env):
+        env["reg"].update_many({k("loner"): {"review": review_block("accepted", "g1", batch=BATCH)}},
+                               merge_blocks=False)
+        graph_from_registry(env)
+        assert make_log(env).state.earlier == {} and log_with_registry(env).state.handled == {}
+
+    def test_an_old_graph_loads_with_nothing_pre_handled_and_the_registry_is_the_later_record(self, env):
+        assert make_log(env).state.handled == {}                               # write_env's graph: no review fields
+        write_earlier_reviews(env)
+        graph_from_registry(env, strip=True)
+        raw = json.loads((env["rdir"] / "graph.json").read_text())
+        assert not any(f in n for n in raw["result"]["nodes"] for f in RG.REVIEW_FIELDS)
+        assert make_log(env).state.handled == {}                               # an old graph, no registry: nothing
+        assert log_with_registry(env).state.handled == PRE                     # the registry's rows fill in
+        graph_from_registry(env)
+        env["reg"].update_many({k("loner"): {"review": dict(D.UNREVIEWED)}}, merge_blocks=False)   # reset since
+        assert make_log(env).state.handled == PRE                              # the graph's copy alone
+        assert log_with_registry(env).state.handled == {x: v for x, v in PRE.items() if x != k("loner")}
+
+    def test_through_the_api(self, pre):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        client = TestClient(server.create_app(review_dir=pre["rdir"], data_dir=pre["data"],
+                                              registry_path=pre["reg"].path, clock=Clock()))
+        assert client.get("/api/queue").json()["counts"]["terms"]["handled"] == 3
+        r = post(client, action="open", source=f"term:{k('godless')}")
+        assert r.status_code == 409 and "review_other, group g3" in r.json()["detail"]
+        t = client.get(f"/api/term/{quote(k('godless'), safe='')}").json()
+        assert t["term"]["handled_by"] == "review_other/g3" and t["term"]["earlier_review"]["target"] == "queue:irreligious"
+        assert client.get("/api/status").json()["pre_handled"]["by_batch"] == {OTHER: 3}
+
+    def test_the_page_renders_the_badge_from_the_fields_the_server_sends(self, client):
+        js = client.get("/static/app.js").text
+        assert "earlier_review" in js and "function earlierBadge(" in js and "t.through" in js
+
+
+def test_the_statuses_that_settle_a_term_are_in_the_vocabulary():
+    from assistant_axis.gapgen.normalize import REVIEW_STATUSES
+    assert set(D.HANDLED_ELSEWHERE) <= set(REVIEW_STATUSES) and not {"parked", "deferred"} & set(D.HANDLED_ELSEWHERE)

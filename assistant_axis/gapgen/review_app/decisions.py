@@ -17,7 +17,8 @@ Actions (a request names the action and its fields; the log stores the request a
 * ``open`` (``source``): ``merged:<i>`` (opens already merged), ``proposed:<i>`` (opens pre-assembled but not merged:
   status ``proposed``), or ``term:<key>`` (the term's open working group if it has one; else its merged group, the
   largest if several; else its largest proposed group; else the term alone).  Opening what is already open (or a
-  handled term) returns that group and logs nothing.
+  handled term) returns that group and logs nothing; a term another review batch settled (below) is refused, with
+  that batch's group and resolution.
 * ``accept`` (``group``): a proposed group becomes the working group (key ``g``); drops before it are kept.
 * ``drop`` (``group``, ``key``): never the last member.
 * ``merge_in`` (``group``, ``keys``): a singleton or a merged group's members; a covered candidate may be pulled in by
@@ -53,6 +54,18 @@ level), each with the groups it comes from.  ``extend`` and ``distinct`` are its
 the graph no longer supports (a rebuilt graph) is skipped and listed in ``ReviewState.skipped``.  A term is
 **handled** once a group containing it is resolved; a term in two groups is handled by the first resolution and
 shown so in the other.
+
+**Handled before this batch** (Roger, 2026-10-11; section 11 of the brief): a term that another review batch
+settled, by the registry's ``review`` block (``accepted``, ``rejected`` or ``merged_into``; the folded row when the
+app has the registry, being the later record, else the block R1 copied onto the node), is handled from the start, by
+a pseudo group id that names that batch and group (``review_tda_1/g12``), never a group of this log.  It counts as
+handled in the queue and the counts, stays out of a group's basis and leftovers, cannot be opened, merged in or
+nominated, and shows its earlier resolution (``accepted → queue:irreligious``); the seed-queue entry it was
+promoted to, or what it was merged into, is listed among the targets of a group it neighbours, so "Covered by
+this" merges a new word into a word already decided.  ``parked`` and ``deferred`` there stay live here (they mean
+"come back to it") and only wear a badge.  A block this batch's own ``apply`` wrote is not an earlier review.  The
+replay does not see these: an event of the log that handles such a term applies as before and takes it over, and
+undo walks only the log.
 
 **Apply** (:func:`apply_decisions`): every resolved group into the registry's ``review`` blocks (through
 :meth:`Registry.update_many`), and each promoted nominee through :func:`assistant_axis.gapgen.promote.promote` (the
@@ -92,6 +105,8 @@ RESOLUTIONS = ("promote", "merge_into", "park", "reject", "defer")
 REVIEW_STATUS = {"promote": "accepted", "merge_into": "merged_into", "park": "parked", "reject": "rejected",
                  "defer": "deferred"}
 UNREVIEWED = {"status": "unreviewed", "by": None, "at": None, "note": None}
+#: The registry review statuses that settle a term: another batch's term in one is handled here from the start.
+HANDLED_ELSEWHERE = ("accepted", "rejected", "merged_into")
 ORDERS = ("cliques", "generator", "region")
 TIERS = ("merged", "proposed", "single")
 #: Gaps between events longer than this are idle time (``status``'s active minutes).
@@ -224,11 +239,15 @@ class Group:
 class ReviewState:
     """The review as of some events: groups, handled terms, and the views the app shows.  Built empty by the
     constructor and filled by :meth:`apply` (one normalised event) or :func:`replay`.  ``rows``: the folded registry,
-    for display only (M1 tags, the review block already applied); ``targets``: merge targets beyond the graph's own
-    corpus and queue nodes (:func:`corpus_targets`), with ``labels``."""
+    for display (M1 tags, the review block already applied) and for the terms another review batch settled (the
+    module docstring, "Handled before this batch"; the nodes' copy of the review block where a row is missing);
+    ``targets``: merge targets beyond the graph's own corpus and queue nodes (:func:`corpus_targets`), with
+    ``labels``; ``batch_id``: this review's batch (default the graph's), whose own review blocks are not earlier
+    reviews."""
 
     def __init__(self, graph: RG.Graph, *, rows: Optional[Mapping[str, Mapping]] = None,
-                 targets: Optional[Iterable[str]] = None, labels: Optional[Mapping[str, str]] = None):
+                 targets: Optional[Iterable[str]] = None, labels: Optional[Mapping[str, str]] = None,
+                 batch_id: Optional[str] = None):
         self.graph = graph
         self.nodes = graph.node_map()
         self.kept = graph.candidate_keys()
@@ -268,8 +287,70 @@ class ReviewState:
         for n in graph.nodes:
             if n.kind == "candidate" and n.decision == "covered" and n.covered_by and not n.included:
                 self.covers[n.covered_by].append(n.key)
+        # the terms another review batch decided (module docstring, "Handled before this batch"): ``earlier`` holds
+        # every such decision, ``pre_handled`` the pseudo group ids of those that settled the term, which are
+        # handled from the start
+        self.batch_id = batch_id or graph.batch_id
+        self.earlier: dict[str, dict] = {}
+        self.pre_handled: dict[str, str] = {}
+        own = {graph.batch_id, self.batch_id}
+        for n in graph.nodes:
+            if n.kind != "candidate" or not (n.key in self.kept_set or n.key in self.covered):
+                continue
+            src = RG.review_fields(self.rows[n.key]) if n.key in self.rows else \
+                {f: getattr(n, f) for f in RG.REVIEW_FIELDS}
+            if not src["review_status"] or src["review_batch"] in own:
+                continue
+            info = self._earlier_review(src)
+            self.earlier[n.key] = info
+            if info["handled"]:
+                self.pre_handled[n.key] = self.handled[n.key] = info["id"]
+
+    def _earlier_review(self, src: Mapping) -> dict:
+        """What the page and the refusals say of an earlier review batch's decision (``src``:
+        :func:`review_graph.review_fields`): ``id`` (the pseudo group id, ``<batch>/<group>``), ``batch``, ``group``,
+        ``status``, ``into``, ``seed_queue_stem``, ``target`` (the seed-queue entry it was promoted to, or what it was
+        merged into: a trait, a queue entry, or the nominee's queue entry when that was promoted), ``resolution``
+        (``accepted → queue:irreligious``), ``handled`` and ``text`` (the badge)."""
+        status, into, sqs = src["review_status"], src.get("review_into"), src.get("seed_queue_stem")
+        batch, group = src.get("review_batch") or "registry", src.get("review_group")
+        target = None
+        if status == "accepted" and sqs:
+            target = f"queue:{sqs}"
+        elif status == "merged_into" and into:
+            if into.startswith(("trait:", "queue:")):
+                target = into
+            else:                                   # merged into another batch's nominee: its queue entry, if promoted
+                nom = self.rows[into].get("seed_queue_stem") if into in self.rows else \
+                    getattr(self.nodes.get(into), "seed_queue_stem", None)
+                target = f"queue:{nom}" if nom else None
+        if status == "accepted":
+            resolution = f"accepted → {target}" if target else "accepted"
+        elif status == "merged_into":
+            resolution = f"merged_into {into}" + (f" → {target}" if target and target != into else "")
+        else:
+            resolution = status
+        handled = status in HANDLED_ELSEWHERE
+        where = f"{batch} {group}" if group else batch
+        return {"id": f"{batch}/{group}" if group else batch, "batch": batch, "group": group, "status": status,
+                "into": into, "seed_queue_stem": sqs, "target": target, "resolution": resolution, "handled": handled,
+                "text": f"handled in {where}: {resolution}" if handled else f"{status} in {where}; still to decide here"}
 
     # -- lookups --------------------------------------------------------------------
+    def pre_handled_info(self, key: str) -> Optional[dict]:
+        """The earlier review that handles ``key`` here, or None (none, or this log's own decision took it over)."""
+        pid = self.pre_handled.get(key)
+        return self.earlier[key] if pid is not None and self.handled.get(key) == pid else None
+
+    def _log_handled(self, key: str) -> bool:
+        """Handled by a group of this log.  The ``_apply_*`` checks use this, not ``handled``, so that a replay
+        is the same whatever the registry says (a live action is refused a pre-handled term by its ``_check_*``)."""
+        return self.handled.get(key) in self.groups
+
+    def _handled_note(self, key: str) -> str:
+        info = self.pre_handled_info(key)
+        return f"{self.handled[key]}: {info['resolution']}" if info else str(self.handled[key])
+
     def label(self, key: str) -> str:
         n = self.nodes.get(key)
         return n.label if n is not None else self.labels.get(key, key)
@@ -330,7 +411,11 @@ class ReviewState:
             return {"existing": live[-1].id}
         if all(m in self.handled for m in members):
             done = self.groups_from(source)
-            return {"existing": done[-1].id if done else self.handled[members[0]]}
+            mine = [self.handled[m] for m in members if self._log_handled(m)]
+            if done or mine:
+                return {"existing": done[-1].id if done else mine[0]}
+            raise ActionError(f"every member of {source} was handled in an earlier review: "
+                              + "; ".join(f"{m} {self.earlier[m]['text']}" for m in members))
         out = {"group": self._new_gid(), "action": "open", "source": source, "members": members,
                "status": "proposed" if source.startswith("proposed:") else "open"}
         if via:
@@ -350,6 +435,11 @@ class ReviewState:
         if key not in self.kept_set:
             raise ActionError(f"{key} is not a term of this review")
         if key in self.handled:
+            info = self.pre_handled_info(key)
+            if info:
+                raise ActionError(f"{key} was handled in review batch {info['batch']}"
+                                  + (f", group {info['group']}" if info["group"] else "")
+                                  + f": {info['resolution']} (the registry's review block); it is not reviewed again here")
             return {"existing": self.handled[key]}
         live = self.open_groups_with(key)
         if live:
@@ -396,7 +486,7 @@ class ReviewState:
             if x in g.members:
                 why.append(f"{x} is already a member")
             elif x in self.handled:
-                why.append(f"{x} is handled ({self.handled[x]})")
+                why.append(f"{x} is handled ({self._handled_note(x)})")
             else:
                 add.append(x)
         if not add:
@@ -411,7 +501,7 @@ class ReviewState:
         if key in self.covered:
             raise ActionError(f"{key} was covered by M3: it can pass in as a synonym note, not be nominated")
         if key in self.handled:
-            raise ActionError(f"{key} is handled ({self.handled[key]}): nominate an unhandled member")
+            raise ActionError(f"{key} is handled ({self._handled_note(key)}): nominate an unhandled member")
         return {"group": g.id, "action": "nominate", "key": key}
 
     def _check_resolve(self, req: Mapping) -> dict:
@@ -477,7 +567,7 @@ class ReviewState:
             if x in g.members:
                 why.append(f"{x} is already a member of {g.id}")
             elif x in self.handled:
-                why.append(f"{x} is handled ({self.handled[x]})")
+                why.append(f"{x} is handled ({self._handled_note(x)})")
             elif what == "distinct" and g.id in self.distinct.get(x, ()):
                 why.append(f"{x} is already marked distinct from {g.id}")
             else:
@@ -551,14 +641,14 @@ class ReviewState:
     def _apply_merge_in(self, ev: Mapping) -> None:
         g = self._live(ev)
         keys = list(ev.get("keys") or [])
-        if not keys or any(not self.is_candidate(x) or x in g.members or x in self.handled for x in keys):
+        if not keys or any(not self.is_candidate(x) or x in g.members or self._log_handled(x) for x in keys):
             raise ActionError(f"merge_in: {keys} cannot be merged into {g.id}")
         g.members.extend(keys)
 
     def _apply_nominate(self, ev: Mapping) -> None:
         g = self._live(ev)
         key = ev.get("key")
-        if key not in g.members or key not in self.kept_set or key in self.handled:
+        if key not in g.members or key not in self.kept_set or self._log_handled(key):
             raise ActionError(f"nominate: {key} cannot be nominated in {g.id}")
         g.nominated = key
 
@@ -567,7 +657,7 @@ class ReviewState:
         members = list(ev.get("members") or [])
         kind = str(ev.get("resolution") or "").split(":", 1)[0]
         if g.status != "open" or kind not in RESOLUTIONS or not members or \
-                any(m not in g.members or m in self.handled for m in members):
+                any(m not in g.members or self._log_handled(m) for m in members):
             raise ActionError(f"resolve: {g.id} cannot be resolved as logged")
         if kind == "promote" and ev.get("nominated") not in members:
             raise ActionError(f"resolve: the nominee {ev.get('nominated')} is not among the members resolved")
@@ -582,7 +672,7 @@ class ReviewState:
         gid, of, members = ev.get("group"), ev.get("of"), list(ev.get("members") or [])
         if not gid or gid in self.groups or of not in self.groups or self.groups[of].status != "resolved":
             raise ActionError(f"start_antonym: cannot start {gid} as the antonym of {of}")
-        if not members or any(m not in self.kept_set or m in self.handled for m in members):
+        if not members or any(m not in self.kept_set or self._log_handled(m) for m in members):
             raise ActionError(f"start_antonym: members {members} cannot open")
         self.groups[gid] = Group(id=gid, source=f"antonym:{of}", members=members, status="open",
                                  opened_seq=ev.get("seq", 0), opened_at=ev.get("at", ""), by=ev.get("by"),
@@ -592,7 +682,7 @@ class ReviewState:
         g = self._group(ev)
         keys = list(ev.get("keys") or [])
         if g.status != "resolved" or not keys or \
-                any(not self.is_candidate(x) or x in g.members or x in self.handled for x in keys):
+                any(not self.is_candidate(x) or x in g.members or self._log_handled(x) for x in keys):
             raise ActionError(f"extend: {keys} cannot extend {g.id}")
         g.members.extend(keys)
         g.resolved_members.extend(keys)
@@ -604,7 +694,7 @@ class ReviewState:
         g = self._group(ev)
         keys = list(ev.get("keys") or [])
         if g.status != "resolved" or not keys or \
-                any(not self.is_candidate(x) or x in g.members or x in self.handled for x in keys):
+                any(not self.is_candidate(x) or x in g.members or self._log_handled(x) for x in keys):
             raise ActionError(f"distinct: {keys} cannot be marked distinct from {g.id}")
         for x in keys:
             self.distinct[x].add(g.id)
@@ -690,9 +780,11 @@ class ReviewState:
                "handled_by": self.handled.get(key), "handled_resolution": None,
                "distinct_from": sorted(self.distinct.get(key, ())),
                "applied": rv.get("status") if rv.get("status") not in (None, "unreviewed") else None,
-               "seed_queue_stem": row.get("seed_queue_stem")}
+               "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
+               "earlier_review": self.earlier.get(key)}
         if out["handled_by"]:
-            out["handled_resolution"] = self.groups[out["handled_by"]].resolution
+            pre = self.pre_handled_info(key)
+            out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution
         if n.covered_by:
             path, href = target_path(n.covered_by)
             out["covered_by"] = {"key": n.covered_by, "label": self.label(n.covered_by), "path": path, "href": href,
@@ -713,7 +805,19 @@ class ReviewState:
                 "merged": [f"m{i}" for i in self.in_merged.get(key, [])],
                 "proposed": [f"p{i}" for i in self.in_proposed.get(key, [])],
                 "handled_by": self.handled.get(key), "covered": key in self.covered,
-                "distinct_from": sorted(self.distinct.get(key, ()))}
+                "distinct_from": sorted(self.distinct.get(key, ())), "earlier_review": self.earlier.get(key)}
+
+    def _covered_of(self, t: str) -> list[dict]:
+        """The covered candidates a corpus or queue trait covers (greyed in its row), each ``handled_by`` if handled."""
+        out = []
+        for c in self.covers.get(t, []):
+            rd = self.nodes[c].covered_reading or {}
+            item = {"key": c, "label": self.nodes[c].label,
+                    "reading": f"{rd.get('sonnet')}/{rd.get('opus') if rd.get('opus') is not None else '-'}"}
+            if c in self.handled:
+                item["handled_by"] = self.handled[c]
+            out.append(item)
+        return out
 
     def _with_group(self, key: str, members: set) -> list[str]:
         """What ``m`` (merge in) or ``a`` (start the antonym group) takes for a neighbour: its largest merged group's
@@ -733,7 +837,12 @@ class ReviewState:
         (candidates, then corpus and queue traits, joined by an opposed edge, by cosine).  ``basis``: the members
         whose edges are followed (default all); a member of ``members`` is never listed as a neighbour either way.
         A group's card passes the members still to decide (Roger, 2026-10-11: "when dealing with the dregs of a
-        group, the right-hand panel needs to be recomputed, to not include relationships to excluded items")."""
+        group, the right-hand panel needs to be recomputed, to not include relationships to excluded items").
+
+        ``corpus`` also lists, with ``through``, the target of each term an earlier review batch handled that is a
+        neighbour or a member outside the basis (the seed-queue entry it was promoted to, or what it was merged
+        into), when that target is a merge target here: ranked by the strongest edge from the basis to that term, so
+        "Covered by this" merges the rest into the word already decided (module docstring)."""
         S = set(members)
         basis = list(basis if basis is not None else members)
         best: dict[str, tuple] = {}
@@ -768,19 +877,38 @@ class ReviewState:
                 rank = (_final(rd) if _final(rd) is not None else -1, e.cosine or 0.0)
                 if e.b not in corpus or rank > corpus[e.b][0]:
                     corpus[e.b] = (rank, m, e)
-        corpus_out = []
-        for t, (rank, m, e) in sorted(corpus.items(), key=lambda kv: (-kv[1][0][0], -kv[1][0][1], kv[0])):
-            covered = []
-            for c in self.covers.get(t, []):
-                rd = self.nodes[c].covered_reading or {}
-                item = {"key": c, "label": self.nodes[c].label,
-                        "reading": f"{rd.get('sonnet')}/{rd.get('opus') if rd.get('opus') is not None else '-'}"}
-                if c in self.handled:
-                    item["handled_by"] = self.handled[c]
-                covered.append(item)
-            corpus_out.append(self._target_entry(t) | {
+        # the targets of the terms an earlier review batch handled, through those terms (a target M3 read stays
+        # as M3 read it)
+        through: dict[str, tuple] = {}
+        bset = set(basis)
+        for o in [*best, *(m for m in members if m not in bset)]:
+            info = self.pre_handled_info(o)
+            t = info["target"] if info else None
+            if not t or t not in self.targets or t in corpus:
+                continue
+            top = None
+            for e in self.r1.get(o, []):
+                x = e.b if e.a == o else e.a
+                if x in bset and e.relation != "opposed":
+                    r = (edge_level(e), e.cosine or 0.0)
+                    if top is None or r > top[0]:
+                        top = (r, x, e)
+            rank = top[0] if top else (-1, 0.0)
+            if t not in through or rank > through[t][0]:
+                through[t] = (rank, o, top)
+        rows_out = []
+        for t, (rank, m, e) in corpus.items():
+            rows_out.append(((-rank[0], -rank[1], t), self._target_entry(t) | {
                 "relation": e.relation, "cosine": e.cosine, "reading": _dir_text(e.readings.get("ab")),
-                "level": rank[0], "via": m, "via_label": self.nodes[m].label, "covered": covered})
+                "level": rank[0], "via": m, "via_label": self.nodes[m].label, "covered": self._covered_of(t)}))
+        for t, (rank, o, top) in through.items():
+            x, e = (top[1], top[2]) if top else (None, None)
+            rows_out.append(((-rank[0], -rank[1], t), self._target_entry(t) | {
+                "relation": e.relation if e else None, "cosine": e.cosine if e else None,
+                "reading": readings_text(e) if e else None, "level": rank[0], "via": x,
+                "via_label": self.nodes[x].label if x else None, "covered": self._covered_of(t),
+                "through": {"key": o, "label": self.nodes[o].label, "text": self.earlier[o]["text"]}}))
+        corpus_out = [entry for _, entry in sorted(rows_out, key=lambda kv: kv[0])]
         opposed = []
         for o, (cos, m, e) in sorted(opp.items(), key=lambda kv: (-(kv[1][0] or 0), kv[0])):
             opposed.append(self._term_entry(o) | {"cosine": cos, "via": m, "via_label": self.nodes[m].label,
@@ -863,7 +991,8 @@ class ReviewState:
             o = e.b if e.a == key else e.a
             edges.append({"key": o, "kind": "candidate", "label": self.nodes[o].label, "relation": e.relation,
                           "cosine": e.cosine, "readings": readings_text(e), "strict": e.strict,
-                          "proposed_edge": e.proposed, "handled_by": self.handled.get(o)})
+                          "proposed_edge": e.proposed, "handled_by": self.handled.get(o),
+                          "earlier_review": self.earlier.get(o)})
         for e in self.m3.get(key, []):
             edges.append(self._target_entry(e.b) | {"relation": e.relation, "cosine": e.cosine,
                                                     "readings": _dir_text(e.readings.get("ab")) or ""})
@@ -895,12 +1024,15 @@ class ReviewState:
                 item["path"], item["href"] = target_path(key)
             else:
                 item["handled_by"] = self.handled.get(key)
+                if key in self.earlier:
+                    item["earlier_review"] = self.earlier[key]
             out.append(item)
         return out
 
     # -- status -------------------------------------------------------------------------
     def status(self, events: Sequence[Mapping]) -> dict:
-        """Groups resolved and open, decisions by type, and time per decision (from the events' timestamps)."""
+        """Groups resolved and open, decisions by type, time per decision (from the events' timestamps), and the
+        terms handled before this batch (``pre_handled``, module docstring)."""
         resolved = [g for g in self.groups.values() if g.status == "resolved"]
         per_group = []
         for g in resolved:
@@ -910,7 +1042,16 @@ class ReviewState:
         times = sorted(t for t in (_parse_at(e.get("at", "")) for e in events) if t is not None)
         gaps = [(b - a).total_seconds() / 60.0 for a, b in zip(times, times[1:])]
         active = sum(x for x in gaps if x <= IDLE_MINUTES)
+        pre = [x for x in self.kept if self.pre_handled_info(x)]
         return {"events": len(events), "effective_events": len(self.applied), "skipped": len(self.skipped),
+                # the terms another review batch settled (handled here from the start), those it parked or deferred
+                # (live here), and those this log resolved although another batch had settled them
+                "pre_handled": {
+                    "terms": len(pre),
+                    "by_batch": dict(sorted(Counter(self.earlier[x]["batch"] for x in pre).items())),
+                    "by_status": dict(sorted(Counter(self.earlier[x]["status"] for x in pre).items())),
+                    "live_elsewhere": sum(1 for x in self.kept if x in self.earlier and not self.earlier[x]["handled"]),
+                    "resolved_here_too": sum(1 for x in self.kept if x in self.pre_handled and x not in pre)},
                 "by_action": dict(sorted(Counter(e.get("action") for e in events).items())),
                 "resolutions": dict(sorted(Counter(g.kind for g in resolved).items())),
                 "groups": {"resolved": len(resolved),
@@ -928,10 +1069,12 @@ class ReviewState:
                            "last": times[-1].isoformat() if times else None}}
 
 
-def replay(graph: RG.Graph, events: Sequence[Mapping], *, rows=None, targets=None, labels=None) -> ReviewState:
+def replay(graph: RG.Graph, events: Sequence[Mapping], *, rows=None, targets=None, labels=None,
+           batch_id: Optional[str] = None) -> ReviewState:
     """The state the events give: undo events and the events they undo left out, the rest applied in order; an
-    event that no longer applies (the graph was rebuilt) is skipped and listed in ``skipped``."""
-    st = ReviewState(graph, rows=rows, targets=targets, labels=labels)
+    event that no longer applies (the graph was rebuilt) is skipped and listed in ``skipped``.  The terms another
+    review batch settled are handled from the start, and do not change what an event does (module docstring)."""
+    st = ReviewState(graph, rows=rows, targets=targets, labels=labels, batch_id=batch_id)
     undone = {e.get("undoes") for e in events if e.get("action") == "undo"}
     for e in events:
         st.note_ids(e)
@@ -970,13 +1113,15 @@ class DecisionLog:
     the event (with ``seq``, ``at``, ``by``, ``graph_sha256``) and updates the state; thread-safe (``lock``)."""
 
     def __init__(self, path: Path, graph: RG.Graph, *, graph_sha256: str, by: str = "roger",
-                 clock: Optional[Callable[[], str]] = None, rows=None, targets=None, labels=None):
+                 clock: Optional[Callable[[], str]] = None, rows=None, targets=None, labels=None,
+                 batch_id: Optional[str] = None):
         self.path = Path(path)
         self.graph = graph
         self.graph_sha256 = graph_sha256
         self.by = by
         self.clock = clock or utc_now
         self.rows, self.targets, self.labels = dict(rows or {}), set(targets or ()), dict(labels or {})
+        self.batch_id = batch_id or graph.batch_id
         self.lock = threading.RLock()
         self.events = read_events(self.path)
         self.state = self._replay()
@@ -994,10 +1139,11 @@ class DecisionLog:
         rows = Registry(registry_path).fold() if registry_path and Path(registry_path).exists() else {}
         targets, labels = corpus_targets(data_dir, queue_path)
         return cls(review_dir / LOG_NAME, graph, graph_sha256=hashlib.sha256(raw).hexdigest(), by=by, clock=clock,
-                   rows=rows, targets=targets, labels=labels)
+                   rows=rows, targets=targets, labels=labels, batch_id=review_dir.name)
 
     def _replay(self) -> ReviewState:
-        return replay(self.graph, self.events, rows=self.rows, targets=self.targets, labels=self.labels)
+        return replay(self.graph, self.events, rows=self.rows, targets=self.targets, labels=self.labels,
+                      batch_id=self.batch_id)
 
     def graph_versions(self) -> dict:
         return dict(Counter(e.get("graph_sha256") for e in self.events))

@@ -7,7 +7,11 @@ of M3 batches kept, a typed graph from which the review reads its groups:
 
 * **Nodes** (:class:`Node`): the batches' kept candidates (M3 decision ``new`` or ``grey``, keyed by registry key);
   the corpus traits (``trait:<stem>``) and seed-queue entries (``queue:<stem>``) they touch; and, greyed, the
-  batches' covered candidates, each pointing at the trait that covered it (decision 9: no edge, no call).
+  batches' covered candidates, each pointing at the trait that covered it (decision 9: no edge, no call).  A
+  candidate node carries its registry row's review block, when an earlier review batch applied one (``review_status``,
+  ``review_into``, ``review_batch``, ``review_group``: :func:`review_fields`), and its ``seed_queue_stem`` when it
+  was promoted.  A reviewed row is a node like any other, never left out: its edges are what tie this batch's new
+  words to a decision already made, and the review app counts it handled from the start (section 11 of the brief).
 * **Candidate edges** (``source: "r1"``): each kept candidate's ``k`` nearest other kept candidates by the cosine
   of their query embeddings in M3's covered space (the ``gloss_w14`` text as M3 embedded it, projected by the
   corpus index, so the cosines are on M3's scale and the floors calibrated on M3's readings apply), at the
@@ -160,6 +164,13 @@ class Node:
     outcome: Optional[str] = None               # M1's outcome when it is not "trait": "physical" (the physical pass),
                                                 # "states" (the states pass)
     included: Optional[str] = None              # a covered candidate reviewed anyway (``build --include``): why
+    # the registry row's review block when an earlier review batch applied one (not ``unreviewed``); a graph.json
+    # from before 2026-10-11 has none of these, and the review app then reads the registry's rows instead
+    review_status: Optional[str] = None         # accepted | rejected | merged_into | parked | deferred
+    review_into: Optional[str] = None           # merged_into: trait:<stem>, queue:<stem>, or the nominee's key
+    review_batch: Optional[str] = None          # the review batch and its group that decided it
+    review_group: Optional[str] = None
+    seed_queue_stem: Optional[str] = None       # a promoted row: its seed-queue entry
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -167,6 +178,23 @@ class Node:
     @classmethod
     def from_dict(cls, d: Mapping) -> "Node":
         return _from(cls, d)
+
+
+#: The fields of :class:`Node` that :func:`review_fields` fills from a registry row.
+REVIEW_FIELDS = ("review_status", "review_into", "review_batch", "review_group", "seed_queue_stem")
+
+
+def review_fields(row: Optional[Mapping]) -> dict:
+    """A registry row's review essentials, as :class:`Node` fields (every key of :data:`REVIEW_FIELDS`, ``None``
+    where absent): its ``review`` block unless that is ``unreviewed``, and its ``seed_queue_stem``."""
+    row = row or {}
+    rv = row.get("review") or {}
+    out = dict.fromkeys(REVIEW_FIELDS)
+    out["seed_queue_stem"] = row.get("seed_queue_stem") or None
+    if rv.get("status") not in (None, "unreviewed"):
+        out.update(review_status=rv["status"], review_into=rv.get("into"), review_batch=rv.get("review_batch"),
+                   review_group=rv.get("review_group"))
+    return out
 
 
 @dataclass
@@ -652,7 +680,7 @@ def _candidate_node(row: Mapping) -> Node:
                 decision=nv.get("decision"), flags=list(nv.get("review") or []),
                 region=f.get("region") or nv.get("region"),
                 alignment_score=a if isinstance(a, int) and not isinstance(a, bool) else None, m3_run=nv.get("run_id"),
-                outcome=f.get("outcome") if f.get("outcome") not in (None, "trait") else None)
+                outcome=f.get("outcome") if f.get("outcome") not in (None, "trait") else None, **review_fields(row))
 
 
 def _covering(nv: Mapping) -> Optional[tuple[str, str]]:

@@ -644,6 +644,32 @@ def test_include_reviews_a_covered_candidate_as_a_term():
     assert "included" not in RG.Node(key="a#1", kind="candidate", label="a", decision="new").to_dict()
 
 
+def test_a_reviewed_row_stays_a_node_carrying_its_review_block_through_graph_json(tmp_path):
+    """coding_plan_review.md section 11 (Roger, 2026-10-11): a row an earlier review batch applied is a node like any
+    other, with its edges, and carries the review block's essentials and its seed-queue stem; they survive the
+    envelope, an unreviewed node writes none of them, and a node from before them loads with none."""
+    rows = toy_rows()
+    blk = {"by": "roger", "at": "2026-10-10T10:00:00+00:00", "note": None, "group": [key("godless"), key("irreligious")],
+           "review_batch": "review_other", "review_group": "g3"}
+    rows[key("irreligious")] |= {"review": {"status": "accepted"} | blk, "seed_queue_stem": "irreligious"}
+    rows[key("godless")]["review"] = {"status": "merged_into", "into": key("irreligious")} | blk
+    rows[key("loner")]["review"] = {"status": "unreviewed", "by": None, "at": None, "note": None}
+    g, _, _ = build(tmp_path, rows=rows)
+    nodes = g.node_map()
+    fields = lambda n: tuple(getattr(n, f) for f in RG.REVIEW_FIELDS)  # noqa: E731
+    assert fields(nodes[key("irreligious")]) == ("accepted", None, "review_other", "g3", "irreligious")
+    assert fields(nodes[key("godless")]) == ("merged_into", key("irreligious"), "review_other", "g3", None)
+    assert fields(nodes[key("loner")]) == (None,) * 5
+    assert {key("irreligious"), key("godless")} <= set(g.candidate_keys())
+    assert g.cliques == build(tmp_path, name="plain")[0].cliques                 # the same edges as unreviewed
+    assert not set(RG.REVIEW_FIELDS) & set(nodes[key("loner")].to_dict())
+    g2 = RG.Graph.from_json(json.loads(json.dumps(RG.graph_envelope(g, title="t"))))
+    assert g2.node_map()[key("irreligious")] == nodes[key("irreligious")] and g2.to_json() == g.to_json()
+    old = {k: v for k, v in nodes[key("godless")].to_dict().items() if k not in RG.REVIEW_FIELDS}
+    assert fields(RG.Node.from_dict(old)) == (None,) * 5
+    assert RG.review_fields(None) == dict.fromkeys(RG.REVIEW_FIELDS)
+
+
 def test_m3_blocks_that_searched_the_seed_queue_point_at_queue_nodes(tmp_path):
     """From 2026-10-09 M3 searches the seed queue: a listed entry or reading marked ``queue_status`` is a queue node's
     edge, and a candidate covered by one through the walk (``covered_by_queue``) points at that queue node, so the
