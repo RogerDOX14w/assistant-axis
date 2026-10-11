@@ -46,6 +46,20 @@ platform's M1 and M3 on what it submits.  Roger's review comments go into this f
    filters, submitted through the Batches API (≈ $17 downstream at the measured census rates, § 7);
    the submit pilot's yield-per-dollar corrects this before anything is spent.
 
+   **Roger (2026-10-11):** "Aim for ~2 hours review on this."
+
+   Operationalized (coordinator, same day): the wave is sized in **review hours, not words**.  At the review rate
+   measured on review_tda_1 that night (about 150 terms an hour, singletons at a median 17 s), two hours is **about
+   300 M3-kept terms**.  So the first wave is every eligible stem *not already in the registry* (a stem another
+   generator submitted costs nothing to resubmit: the registry merges by key and M1/M3 skip rows another run decided,
+   so the Allport stages and Roget, both in flight, will have taken most of the common single words), in union-rank
+   order, cut where the projected kept terms reach ~300, with **pilot B's measured kept share** setting the cut in
+   place of the 0.88 assumption; **multiword and subword rows are never cut by rank**, being the route no other
+   generator has (the corpus's 222 multiword labels), and their gate is the OEWN gloss, not Zipf, which is a per-word
+   floor applied to the rarest content word and says nothing about a phrase.  Transport **batched** whatever the
+   estimate, since nothing waits on it.  Expected at the census funnel: ~300 kept from ~550-650 submitted single
+   words, i.e. about $6 downstream batched, plus the multiword rows.
+
 ## 1. Decisions already made
 
 | decision | reason | source |
