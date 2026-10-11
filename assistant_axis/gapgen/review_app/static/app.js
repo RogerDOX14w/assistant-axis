@@ -6,7 +6,8 @@
 "use strict";
 
 const ORDERS = ["cliques", "generator", "region"];
-const PANES = ["members", "leftovers", "neighbours", "corpus", "opposed"];
+// the Tab order follows the page: the card, then the right-hand column top down (corpus first, Roger 2026-10-11)
+const PANES = ["members", "leftovers", "corpus", "neighbours", "opposed"];
 const S = {
   order: null, queue: [], counts: null, card: null, qpos: -1,
   pane: "members", idx: { members: 0, leftovers: 0, neighbours: 0, corpus: 0, opposed: 0 },
@@ -565,7 +566,7 @@ function help() {
   o.hidden = false;
   S.overlay = { kind: "help" };
   const keys = [
-    ["j / k", "next / previous in the focused list"], ["Tab / Shift-Tab", "focus members, neighbours, corpus, opposed"],
+    ["j / k", "next / previous in the focused list"], ["Tab / Shift-Tab", "focus members, leftovers, corpus, neighbours, opposed"],
     ["g", "Accept group: take the proposed group (Enter too)"], ["x", "Exclude: take the highlighted member out (never the last)"],
     ["m", "Merge in: pull the highlighted neighbour in (with its merged group)"], ["n", "Nominate the highlighted member"],
     ["Enter", "Promote the nominee (or accept a proposed group; Next group once resolved)"],
