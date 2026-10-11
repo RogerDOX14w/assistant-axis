@@ -8,8 +8,11 @@
   (high first), rank, item id.  An item joins the group of an earlier item with the **same stem** (``exact stem``:
   identical surfaces would merge in the registry anyway), else the group whose representative's gloss is closest
   at cosine ``threshold`` or above, else it starts a group and represents it.  ``min_cos`` is the lowest cosine of a
-  member to its representative.  One candidate is submitted per group (its representative); every member's item id
-  stays in ``dedup_groups.json``.
+  member to its representative, and ``joins`` records **how each non-representative member joined** (``exact stem``
+  or ``gloss cosine``) with that member's own cosine to the representative, so that the readout can list the merges
+  that rest on the embedding rather than on an identical surface (QUESTIONS 73: those are the invisible,
+  irreversible ones, since only the representative is submitted).  One candidate is submitted per group (its
+  representative); every member's item id stays in ``dedup_groups.json``.
 * :func:`rewrite_partner_hints`: a representative's ``partner_hint`` is the label of the representative of its
   partner's group (so a pole whose own partner was deduped points at the label that survived); None when no member
   of its group has a kept partner.
@@ -34,6 +37,11 @@ from assistant_axis.atomic_io import atomic_write_text
 from .extract import Item
 
 
+#: How a member joined its group, in ``Group.joins``.
+JOIN_EXACT_STEM = "exact stem"
+JOIN_COSINE = "gloss cosine"
+
+
 @dataclass
 class Group:
     rep: str
@@ -41,6 +49,10 @@ class Group:
     min_cos: float
     pole: str
     note: str = ""
+    #: One record per non-representative member, in join order:
+    #: ``{"member": item_id, "how": JOIN_EXACT_STEM | JOIN_COSINE, "cos": <cosine to the representative>}``.
+    #: Added 2026-10-11 (QUESTIONS 73); a group read from a file written before then has none.
+    joins: list = field(default_factory=list)
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -93,7 +105,7 @@ def dedup_groups(items: Sequence[Item], vectors: Mapping[str, np.ndarray], thres
     by_stem: dict[tuple, Group] = {}
     for it in order:
         g = by_stem.get((it.pole, it.stem)) if it.stem else None
-        why = "exact stem"
+        why, how = JOIN_EXACT_STEM, JOIN_EXACT_STEM
         if g is None:
             best = None
             for gg in groups:
@@ -103,13 +115,15 @@ def dedup_groups(items: Sequence[Item], vectors: Mapping[str, np.ndarray], thres
                 if c >= threshold and (best is None or c > best[0]):
                     best = (c, gg)
             if best is not None:
-                g, why = best[1], f"gloss cosine >= {threshold:g}"
+                g, why, how = best[1], f"{JOIN_COSINE} >= {threshold:g}", JOIN_COSINE
         if g is None:
             g = Group(rep=it.item_id, members=[it.item_id], min_cos=1.0, pole=it.pole)
             groups.append(g)
         else:
+            cos = round(_cos(vectors, g.rep, it.item_id), 6)
             g.members.append(it.item_id)
-            g.min_cos = round(min(g.min_cos, _cos(vectors, g.rep, it.item_id)), 6)
+            g.min_cos = round(min(g.min_cos, cos), 6)
+            g.joins.append({"member": it.item_id, "how": how, "cos": cos})
             if why not in g.note:
                 g.note = "; ".join(x for x in (g.note, why) if x)
         if it.stem:
@@ -206,5 +220,6 @@ def load_groups(path: Path) -> list[Group]:
     return [Group(**g) for g in d["groups"]]
 
 
-__all__ = ["Group", "TuneResult", "embed_glosses", "dedup_groups", "representatives", "rewrite_partner_hints",
-           "tune_threshold", "pairs_for_labeling", "write_groups", "load_groups"]
+__all__ = ["Group", "TuneResult", "JOIN_EXACT_STEM", "JOIN_COSINE", "embed_glosses", "dedup_groups",
+           "representatives", "rewrite_partner_hints", "tune_threshold", "pairs_for_labeling", "write_groups",
+           "load_groups"]

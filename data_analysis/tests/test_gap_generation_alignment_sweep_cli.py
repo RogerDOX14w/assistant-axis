@@ -37,8 +37,10 @@ def env(tmp_path, monkeypatch):
 
 
 def responder(kw):
-    if "visibility" in kw["system"][0]["text"]:                             # the gate
-        return json.dumps({"system_prompt": "Be it. Always.", "reason": "r", "visibility": "chat", "scope_line": None})
+    if '"where"' in kw["system"][0]["text"]:                                # the gate (draft 3's three fields)
+        return json.dumps({"system_prompt": "Be it. Always.", "reason": "r", "where": "chat",
+                           "elicitation": "Ask it for advice on something it would rather dodge.",
+                           "judge_needs": "At face value from the answer."})
     u = user_text(kw)
     if "<passage>\n## Do not lie" in u:
         return extraction_reply([item(pole("truth-telling", "This means saying only what one believes to be true."),
@@ -133,6 +135,14 @@ def test_end_to_end(env, monkeypatch, capsys):
     md = (rdir / "readout.md").read_text()
     assert "## Survivors (2)" in md and "## Covered (2)" in md and "stays in scope (oversteps the task)" in md
     assert "Label probe: skipped" in md and f"advisory only (gold agreement {n_chat}/30" in md
+    # the sections of 2026-10-11 (QUESTIONS 67, 68, 73, 74, 75, 78), each from files already in the run dir
+    assert "## The gate's three fields, for promotion" in md and "(no gate rows for the survivors.)" in md
+    assert "## AI-presupposing sub-families, for sign-off before promotion" in md
+    assert "(none in this run's survivors.)" in md                     # no belief-state item in the fixture
+    assert "0 merges in all, 0 of them on an identical surface" in md  # threshold 0.99: nothing merged
+    assert "(no merge rests on the embedding: every one was an identical surface.)" in md
+    assert "## Shared-virtue fan list, after dedup (0 virtues; 0 on the vice side)" in md
+    assert "(no probe rows: skipped: no OPENROUTER_API_KEY loads.)" in md
     gold = (rdir / "gold_recovery.md").read_text()
     assert "Recovered **1 of 10**" in gold and "novelty_score.py score --batch-id t1_alignment_sweep_gold" in gold
     hidden = json.loads((rdir / "gold_hidden.json").read_text())

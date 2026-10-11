@@ -304,6 +304,12 @@
         "sha256": "1fb03517a414c52a8e4fb6dc268bf9e1b07c095d80444e9a02c65e449a8c2d8c",
         "pinned_at": "2026-10-10T21:26:22+00:00",
         "why": "draft 2: a fourth answer \"both\" (chat tightened to \"and not to any marked degree in what it does on a task\", the two settings asked separately, reason asks for both); \"none\" redefined as \"nowhere a reader of the assistant's output could detect it\", training and internals now an example not the definition.  Roger, 2026-10-10"
+      },
+      {
+        "version": 3,
+        "sha256": "e3632cc5e09f6b92a581972ea531a62ed520d4b2c253a172cae6e84954b248a3",
+        "pinned_at": "2026-10-11T04:40:41+00:00",
+        "why": "Draft 3: one four-way answer becomes three fields - where (agentic and neither renamed from agentic-only and none), elicitation (draft 2's scope_line, now asked for every answer but neither) and judge_needs (new); model Opus 5.5, two readings on the gold items and one on production rows; agreement and flip rate on field 1 only (Roger, QUESTIONS 75, 2026-10-11)"
       }
     ]
   }

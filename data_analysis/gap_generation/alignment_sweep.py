@@ -9,8 +9,8 @@
         [--pairs-for-labeling N] [--embedder openai|hash] [--budget-usd 1] [--dry-run]
     uv run python data_analysis/gap_generation/alignment_sweep.py submit --run-id R [--budget-usd 5]
         [--confirm-expensive --confirmed-by WHO] [--dry-run]
-    uv run python data_analysis/gap_generation/alignment_sweep.py gate --run-id R [--gold-only] [--budget-usd 1.5]
-        [--allow-dirty] [--dry-run]
+    uv run python data_analysis/gap_generation/alignment_sweep.py gate --run-id R [--gold-only] [--budget-usd 7]
+        [--readings-gold 2] [--readings-rows 1] [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/alignment_sweep.py probe --run-id R [--budget-usd 0.5] [--dry-run]
     uv run python data_analysis/gap_generation/alignment_sweep.py measure --run-id R [R2 ...] [--sample N]
     uv run python data_analysis/gap_generation/alignment_sweep.py report --run-id R [--gold] [--dry-run]
@@ -19,8 +19,9 @@ Plan: ``reports/trait_gap_generation/coding_plan_08_alignment_sweep.md``.  ``fet
 ``data/external/alignment_sweep/`` (git-ignored) with a manifest (also tracked as
 ``data/candidates/alignment_sweep/sources_manifest.json``); ``chunk`` splits them into ``chunks.jsonl``; ``extract``
 asks Sonnet 5.5 for the dispositions of each chunk and rewrites mechanism items; ``dedupe`` groups the glosses;
-``submit`` writes the run's ``candidates.jsonl`` and submits it; ``gate`` and ``probe`` add the enactability
-verdicts and the Qwen label probe; ``measure`` prints one round's mechanical measures and the table across rounds
+``submit`` writes the run's ``candidates.jsonl`` and submits it; ``gate`` asks Opus 5.5 where each trait can be
+elicited, what the elicitation needs and what the judge needs (three fields, nothing gated on them) and ``probe``
+adds the Qwen label probe; ``measure`` prints one round's mechanical measures and the table across rounds
 that the extraction prompt is iterated from; ``report`` writes the readout.  Every paid command prints its estimate, takes
 ``--budget-usd`` as a hard cap, writes ``usage.json``, refuses uncommitted platform code without ``--allow-dirty``,
 and runs live (every estimate is under the $20 line).  ``--dry-run`` prints the plan, the estimate and the first
@@ -420,6 +421,9 @@ def cmd_gate(args) -> int:
     from assistant_axis.provenance import current_file_input
 
     rdir = _run_dir(args, args.run_id)
+    args.model = args.model or G.MODEL
+    args.readings_gold = args.readings_gold or G.N_READINGS_GOLD
+    args.readings_rows = args.readings_rows or G.N_READINGS_ROWS
     try:
         rub = G.load_rubric(args.rubrics_dir)
     except G.RubricNotPinned as exc:
@@ -430,11 +434,14 @@ def cmd_gate(args) -> int:
     if not args.gold_only and not kept:
         print(f"no kept rows of alignment_sweep/{args.run_id} in {args.registry} (M3 decision new or a pair "
               f"completion): only the gold items run")
-    e_gold, e_kept = G.estimate(gold, rub["text"], args.model), G.estimate(kept, rub["text"], args.model)
-    print(f"gate: {len(gold)} gold items" + (f" and {len(kept)} kept rows" if kept else "") +
-          f", {G.N_READINGS} readings each; rubric {rub['name']} v{rub['version']} ({rub['sha256'][:12]}); "
-          f"model {args.model}")
-    total = _print_estimate([("gold", e_gold)] + ([("kept rows", e_kept)] if kept else []), args.budget_usd)
+    n_gold, n_rows = args.readings_gold, args.readings_rows
+    e_gold = G.estimate(gold, rub["text"], args.model, n_readings=n_gold)
+    e_kept = G.estimate(kept, rub["text"], args.model, n_readings=n_rows)
+    print(f"gate: {len(gold)} gold items x {n_gold} readings" +
+          (f" and {len(kept)} kept rows x {n_rows}" if kept else "") +
+          f"; rubric {rub['name']} v{rub['version']} ({rub['sha256'][:12]}); model {args.model}")
+    total = _print_estimate([(f"gold ({n_gold} readings)", e_gold)] +
+                            ([(f"kept rows ({n_rows} reading(s))", e_kept)] if kept else []), args.budget_usd)
     cap = confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive,
                            confirmed_by=args.confirmed_by)
     if args.dry_run:
@@ -448,6 +455,7 @@ def cmd_gate(args) -> int:
         raise SystemExit(f"REFUSED: {refused}")
     ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
         "step": "gate", "gold_only": bool(args.gold_only), "n_gold": len(gold), "n_kept": len(kept),
+        "readings_gold": n_gold, "readings_rows": n_rows,
         "model": args.model, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
         "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")}, LABEL_FORM_KEY: DEFAULT_LABEL_FORM,
         "allow_dirty": bool(args.allow_dirty)})
@@ -457,19 +465,20 @@ def cmd_gate(args) -> int:
     try:
         client = _anthropic_client()
         g_res = asyncio.run(G.run_gate(gold, client=client, model=args.model, system=rub["text"], usage=ctx.usage,
-                                       concurrency=args.concurrency, rubric_version=rub["version"], now=utc_now,
+                                       n_readings=n_gold, concurrency=args.concurrency,
+                                       rubric_version=rub["version"], now=utc_now,
                                        on_record=lambda r: X.append_response(r, resp)))
         if kept and not g_res.stopped_by_budget:
             k_res = asyncio.run(G.run_gate(kept, client=client, model=args.model, system=rub["text"],
-                                           usage=ctx.usage, concurrency=args.concurrency,
+                                           usage=ctx.usage, n_readings=n_rows, concurrency=args.concurrency,
                                            rubric_version=rub["version"], now=utc_now,
                                            on_record=lambda r: X.append_response(r, resp)))
     finally:
         ctx.finish(n_emitted=0)
         print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
-    for label, res, n in (("gold", g_res, len(gold)), ("kept", k_res, len(kept))):
+    for label, res, n, k in (("gold", g_res, len(gold), n_gold), ("kept", k_res, len(kept), n_rows)):
         if n:
-            n_read = n * G.N_READINGS
+            n_read = n * k
             warn_if_low_parse_rate(label=f"alignment_sweep gate {label}:{args.model}",
                                    n_ok=n_read - res.n_failed_readings, n_total=n_read)
     gold_doc = json.loads(args.gold_items.read_text(encoding="utf-8"))["items"]
@@ -479,11 +488,13 @@ def cmd_gate(args) -> int:
     cost = round(ctx.usage.total_cost_usd, 4)
     env = json_metadata({"eval": ev.as_dict(), "rows": [r.as_dict() for r in g_res.rows], "model": args.model,
                          "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, "cost_usd": cost,
+                         "readings_gold": n_gold, "readings_rows": n_rows,
                          "n_calls": g_res.n_calls, "n_failed_readings": g_res.n_failed_readings,
                          LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "at": utc_now()},
                         inputs=inputs, title="alignment sweep: enactability gate on the gold items")
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / G.GOLD_EVAL_NAME)
-    atomic_write_text(G.eval_markdown(ev, g_res.rows, rubric=rub, cost_usd=cost), rdir / "gate_gold_eval.md")
+    atomic_write_text(G.eval_markdown(ev, g_res.rows, rubric=rub, cost_usd=cost, n_readings=n_gold),
+                      rdir / "gate_gold_eval.md")
     if kept:
         atomic_write_text("".join(json.dumps(r.as_dict(), ensure_ascii=False) + "\n" for r in k_res.rows),
                           rdir / G.ROWS_NAME)
@@ -623,13 +634,20 @@ def cmd_report(args) -> int:
     else:
         gate_status = "no gold evaluation yet (advisory)"
     rows = R.build_rows(submitted, items, reg, gate_rows=gate_rows, label_known=P.load_label_known(probe_path))
-    groups = {g: sum(1 for r in rows if r.group == g) for g in ("survivor", "covered", "filtered")}
+    by_group = {g: sum(1 for r in rows if r.group == g) for g in ("survivor", "covered", "filtered")}
     counts = {"poles extracted": len(items), "kept poles": sum(1 for v in items.values() if not v["dropped_reason"]),
-              "submitted": len(submitted), "survivors": groups["survivor"], "covered": groups["covered"],
-              "filtered or not yet scored": groups["filtered"]}
+              "submitted": len(submitted), "survivors": by_group["survivor"], "covered": by_group["covered"],
+              "filtered or not yet scored": by_group["filtered"]}
+    # the dedup groups (the fan list and the embedding-merge list; absent for a run submitted from elsewhere)
+    grp_path = rdir / "dedup_groups.json"
+    dedup_groups: list = []
+    if grp_path.exists():
+        doc = json.loads(grp_path.read_text(encoding="utf-8"))
+        dedup_groups = (doc.get("result", doc) or {}).get("groups") or []
     run_json = json.loads((rdir / "run.json").read_text(encoding="utf-8")) if (rdir / "run.json").exists() else {}
     md = R.render_readout(rows, run_id=args.run_id, counts=counts, costs=R.costs_by_step(run_json),
-                          probe_status=probe_status, gate_status=gate_status, top=args.top)
+                          probe_status=probe_status, gate_status=gate_status, top=args.top,
+                          groups=dedup_groups, items=items, probe_rows=probe_doc.get("rows") or [])
     outs = {rdir / "readout.md": md}
     if args.gold:
         from assistant_axis.gapgen import novelty as NV
@@ -773,14 +791,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_submit)
 
-    p = sub.add_parser("gate", help="the persona-enactability gate (Sonnet 5.5, two readings): the gold items, then "
-                                    "M3's kept rows of the run")
+    p = sub.add_parser("gate", help="the persona-enactability gate (Opus 5.5; two readings on the gold items, one "
+                                    "on the run's kept rows): where it can be elicited, what the elicitation "
+                                    "needs, what the judge needs")
     p.add_argument("--run-id", required=True)
     p.add_argument("--gold-only", action="store_true")
     p.add_argument("--gold-items", type=Path, default=AS.GATE_GOLD_PATH)
-    p.add_argument("--model", default="claude-sonnet-5-5")
+    p.add_argument("--model", default=None, help="default claude-opus-5-5 (gate.MODEL)")
+    p.add_argument("--readings-gold", type=int, default=None, metavar="N",
+                   help="readings per gold item, where agreement and the flip rate are measured (default 2)")
+    p.add_argument("--readings-rows", type=int, default=None, metavar="N",
+                   help="readings per production row, which Roger reads anyway (default 1)")
     p.add_argument("--concurrency", type=int, default=6)
-    paid(p, 1.5)
+    paid(p, 7.0)
     p.set_defaults(func=cmd_gate)
 
     p = sub.add_parser("probe", help="the label probe: qwen/qwen3-32b via OpenRouter pinned to DeepInfra (US)")

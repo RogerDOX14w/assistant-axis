@@ -23,8 +23,9 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 
 RUBRICS = (X.RUBRIC_EXTRACT, X.RUBRIC_REWRITE, "enactability_gate")
 #: The pin each rubric is expected to be on, so that a bump is a deliberate edit here.  ``alignment_extract``
-#: reached 3 on 2026-10-10 (the iteration on the pilot's 30 chunks; see its change log).
-EXPECTED_VERSIONS = {X.RUBRIC_EXTRACT: 3, X.RUBRIC_REWRITE: 1, "enactability_gate": 2}
+#: reached 3 on 2026-10-10 (the iteration on the pilot's 30 chunks; see its change log), and
+#: ``enactability_gate`` on 2026-10-11 (draft 3: three fields in place of one four-way answer, QUESTIONS 75).
+EXPECTED_VERSIONS = {X.RUBRIC_EXTRACT: 3, X.RUBRIC_REWRITE: 1, "enactability_gate": 3}
 
 
 def chunk(cid="model_spec:2026-08-18:do_not_lie", source="model_spec", text="## Do not lie\n\nNever lie."):
@@ -51,8 +52,10 @@ def test_rubric_pinned_and_reason_first(name):
     assert rub["version"] == EXPECTED_VERSIONS[name] and rub["sha256"] == sr.sha256(sr.load_prompt(name))
     text = rub["text"]
     if name == "enactability_gate":
-        # the system prompt to reason from, then the reason, then the verdict
-        assert text.index('"system_prompt"') < text.index('"reason"') < text.index('"visibility"')
+        # the system prompt to reason from, then the reason, then the three fields (draft 3)
+        tpl = text[text.index('{"system_prompt"'):]
+        assert tpl.index('"system_prompt"') < tpl.index('"reason"') < tpl.index('"where"') \
+            < tpl.index('"elicitation"') < tpl.index('"judge_needs"')
         assert "reasoning before the answer" in text
     else:
         key = "items" if name == X.RUBRIC_EXTRACT else "dispositions"

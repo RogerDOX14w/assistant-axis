@@ -117,7 +117,10 @@ def test_gate_gold_items_are_thirty_well_formed_items_over_the_four_answers():
     for it in items:
         assert it["label"] and it["gloss"].startswith("This means "), it
         assert it["key"] and it["source"] in ("corpus", "written"), it
-        assert it["expected"] in GATE.VISIBILITY, it                     # an answer the gate can actually give
+        # an answer the gate can give: the file keeps draft 2's vocabulary, which draft 3 renames on read
+        # one-for-one (QUESTIONS 75), so the relabelling of 2026-10-10 survives the redesign untouched
+        assert it["expected"] in GATE.GOLD_EXPECTED_MAP, it
+        assert GATE.map_gold_expected(it["expected"]) in GATE.WHERE, it
         assert it["expected_v1"] in ("chat", "agentic-only", "none"), it  # draft 1's label, kept for the audit
         assert it.get("reason"), it["key"]                                # why this item has this label
         in_corpus = normalize_to_file_name(it["label"]) in corpus

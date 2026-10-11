@@ -247,6 +247,32 @@ rubrics, which the role-promotion item below needs too.
 
 ## Low-priority TODOs
 
+- **A field the question generator reads for elicitation guidance** (QUESTIONS 66, Roger 2026-10-11; deferred by him
+  the same day).  A trait's **narrowing** goes in its description at promotion — scope that changes what the trait
+  is, as in [ruthless-while-playing](../../data/traits/instructions/ruthless_while_playing.json), whose description
+  carries "in any game, bet, role-play, story, simulation or test" inline — but an **elicitation hint** ("every
+  scenario must give the assistant a task with tools") must not, because the description is also what M3 reads for
+  overlap and a testing clause there would skew the novelty readings against corpus traits whose descriptions carry
+  none.  Today nothing but the description reaches question generation (`description_notes` appears only in the
+  gap-generation tooling and its tests, nowhere under `data_analysis/` or `pipeline/`), so the hint has nowhere to
+  go: it lives in the gate's field 2 ([enactability_gate.md](./rubrics/enactability_gate.md), draft 3) and in each
+  run's readout for whoever promotes.  **Trigger: only if the inherent-action-context route proves insufficient** —
+  for most agentic-only traits the hint is insurance rather than information, a decent gloss already denoting
+  action, so the check is at promotion, on the wave's agentic-only pairs.  Shape:
+  [coding_plan_08_alignment_sweep.md](./coding_plan_08_alignment_sweep.md) § 9 task 14.  Nothing is written yet.
+- **Revisit the label probe's 0.30 floor** (QUESTIONS 74, Roger 2026-10-11: "15 seems like a small sample size").
+  The floor (cosine from Qwen's definition of a label to the label's gloss) was set by reading 15 rows in three
+  bands.  **Trigger, deliberately conditional rather than dated: before any use of the probe beyond ordering**, and
+  in any case once the full run's probe rows exist (the pilot's 312 plus the full run's 386, about 700 to sample
+  from; the full run's [probe.json](../../data/candidates/runs/alignment_sweep/2026-10-10-full/probe.json) is not
+  written yet).  The revisit: about 60 rows stratified across six cosine bands, each marked "our sense / another
+  sense", then the floor that separates best, with an explicit asymmetry if wanted — the shape the dedup threshold
+  was tuned with, about twenty minutes and **no spend**, since every cosine is stored and
+  `alignment_sweep.py probe --refloor` re-derives `label_known` at any floor with no API call.  If a model marks
+  instead, note the circularity (an LLM judging whether another LLM knows a word in our sense), so Opus marking a
+  *sample of Roger's* marks is the better shape than Opus marking the lot.  Related reading, printed in the readout
+  since 2026-10-11: the above-floor share **split single word against phrase**, since 84% of labels are phrases,
+  which a model can define almost regardless, so the floor discriminates mainly on the single words.
 - **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  The filter's `roles` holding list is read by hand
   for now (pointer in [ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md)).  Decide whether tooling is
   cost-effective once the list holds enough genuine role ideas that reading them by hand is slower than building it

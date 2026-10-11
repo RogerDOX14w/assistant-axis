@@ -57,6 +57,34 @@ def test_exact_stems_merge_and_planted_duplicates_group(world):
     assert all(len({next(i for i in items if i.item_id == m).pole for m in g.members}) == 1 for g in groups)
 
 
+def test_joins_record_how_each_member_joined_and_its_own_cosine(world):
+    """QUESTIONS 73: the readout lists the merges that rest on the embedding, so each member's join reason and its
+    own cosine to the representative are recorded, not only the group's minimum."""
+    items, vecs = world
+    groups = D.dedup_groups(items, vecs, threshold=0.9)
+    by_member = {m: g for g in groups for m in g.members}
+    exact = by_member["ms001-1b"]                                  # "tells comfortable lies" proposed twice
+    assert [j["member"] for j in exact.joins] == ["con002-1b"]
+    assert exact.joins[0]["how"] == D.JOIN_EXACT_STEM == "exact stem"
+    assert exact.joins[0]["cos"] == pytest.approx(float(vecs[exact.rep] @ vecs["con002-1b"]), abs=1e-5)
+    cosine = by_member["ms001-1a"]                                  # the two honesty glosses differ by one word
+    assert [(j["member"], j["how"]) for j in cosine.joins] == [("con002-1a", D.JOIN_COSINE)]
+    assert cosine.joins[0]["cos"] >= 0.9 and D.JOIN_COSINE == "gloss cosine"
+    # a representative has no join record of its own, and a singleton none at all
+    assert all(g.rep not in {j["member"] for j in g.joins} for g in groups)
+    assert all(g.joins == [] for g in groups if len(g.members) == 1)
+
+
+def test_an_older_groups_file_without_joins_still_loads(tmp_path):
+    """``joins`` was added on 2026-10-11; the October run's file has none, and the readout falls back to
+    ``min_cos`` for it."""
+    doc = {"groups": [{"rep": "a", "members": ["a", "b"], "min_cos": 0.86, "pole": "virtue", "note": "exact stem"}]}
+    p = tmp_path / "dedup_groups.json"
+    p.write_text(json.dumps(doc), encoding="utf-8")
+    (g,) = D.load_groups(p)
+    assert g.joins == [] and g.min_cos == pytest.approx(0.86) and g.members == ["a", "b"]
+
+
 def test_representative_prefers_weight_then_rank(world):
     items, vecs = world
     groups = D.dedup_groups(items, vecs, threshold=0.9)
