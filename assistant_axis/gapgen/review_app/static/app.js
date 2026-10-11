@@ -6,10 +6,10 @@
 "use strict";
 
 const ORDERS = ["cliques", "generator", "region"];
-const PANES = ["members", "neighbours", "corpus", "opposed"];
+const PANES = ["members", "leftovers", "neighbours", "corpus", "opposed"];
 const S = {
   order: null, queue: [], counts: null, card: null, qpos: -1,
-  pane: "members", idx: { members: 0, neighbours: 0, corpus: 0, opposed: 0 },
+  pane: "members", idx: { members: 0, leftovers: 0, neighbours: 0, corpus: 0, opposed: 0 },
   note: null, rename: false, pinned: null, overlay: null,
   selected: null,   // the member clicked (or moved to) in the open group: {group, key}; Promote takes it when no ★
 };
@@ -53,7 +53,9 @@ async function showGroup(card) {
   if (!card || !S.selected || S.selected.group !== card.id) S.selected = null;
   S.card = card;
   if (card) {
-    S.idx = { members: Math.min(S.idx.members, Math.max(0, card.members.length - 1)), neighbours: 0, corpus: 0, opposed: 0 };
+    S.idx = { members: Math.min(S.idx.members, Math.max(0, card.members.length - 1)),
+      leftovers: Math.min(S.idx.leftovers, Math.max(0, (card.leftovers || []).length - 1)), neighbours: 0, corpus: 0, opposed: 0 };
+    if (S.pane === "leftovers" && !(card.leftovers || []).length) S.pane = "members";
     const pos = S.queue.findIndex((it) => it.group === card.id || itemMatches(it, card));
     if (pos >= 0) S.qpos = pos;
   }
@@ -97,7 +99,10 @@ function describe(ev) {
     case "resolve": return `${ev.group} resolved: ${ev.resolution}${ev.nominated ? " " + ev.nominated : ""}` +
       (ev.rename ? " · flagged for a rename" : "");
     case "start_antonym": return `antonym group ${ev.group} of ${ev.of}`;
-    case "undo": return `undid decision ${ev.undoes}`;
+    case "extend": return `${k} also covered by ${ev.group}`;
+    case "distinct": return `${k} marked distinct from ${ev.group}`;
+    case "undo": return `undid ${ev.undone_action || "decision"}${ev.undone_resolution ? " " + ev.undone_resolution : ""}` +
+      `${ev.undone_keys ? " " + ev.undone_keys.join(", ") : ""}${ev.group ? " on " + ev.group : ""} (decision ${ev.undoes})`;
     default: return ev.action;
   }
 }
@@ -156,12 +161,16 @@ function renderCard() {
     `<span class="muted small">${esc(c.source)}${c.via ? " via " + esc(c.via) : ""}</span>` +
     (c.antonym_of ? `<span class="badge">antonym of ${esc(c.antonym_of)}</span>` : "") +
     (c.antonym_groups.length ? `<span class="badge">antonym group ${esc(c.antonym_groups.join(", "))}</span>` : "") + `</div>`;
-  if (c.status === "proposed") head += `<div class="banner">Proposed group, not merged yet: <b>Accept group</b> takes it as it stands; <b>Exclude</b> a member first to split it.</div>`;
+  const nHandled = c.members.filter((m) => m.handled_by && m.handled_by !== c.id).length;
+  const already = nHandled ? ` <b>${nHandled} of ${c.members.length} already handled</b> (greyed; a resolution takes only the rest).` : "";
+  if (c.status === "proposed") head += `<div class="banner">Proposed group, not merged yet: <b>Accept group</b> takes it as it stands; <b>Exclude</b> a member first to split it.${already}</div>`;
+  else if (c.status === "open" && nHandled) head += `<div class="banner">${already.trim()}</div>`;
   if (c.status === "resolved") {
     const tgt = c.target ? " " + link(c.target) : "";
     head += `<div class="banner resolved">Resolved: ${esc(c.resolution)}${tgt}${c.nominated ? " (" + esc(labelOf(c, c.nominated)) + ")" : ""}` +
       `${c.rename ? " · flagged for a rename" : ""}${c.note ? " · " + esc(c.note) : ""}.  ` +
-      `<b>Next group</b> moves on; <b>Undo</b> takes the decision back.</div>`;
+      `<b>Next group</b> moves on; <b>Undo</b> takes the decision back.` +
+      (c.leftovers.length ? ` <b>${c.leftovers.length} leftover${c.leftovers.length === 1 ? "" : "s"}</b> from overlapping groups below: <b>Also covered</b> or <b>Distinct</b> for each.` : "") + `</div>`;
   }
   if (S.note) head += `<div class="banner">note for the next resolution: ${esc(S.note)}</div>`;
   if (S.rename) head += `<div class="banner">the next resolution is flagged for a rename (the note says why)</div>`;
@@ -171,6 +180,7 @@ function renderCard() {
     const tags = (m.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("");
     const flags = (m.flags || []).map((f) => `<span class="badge flag">${esc(f)}</span>`).join("");
     const handled = m.handled_by && m.handled_by !== c.id ? `<span class="badge">handled by ${esc(m.handled_by)} (${esc(m.handled_resolution)})</span>` : "";
+    const dist = (m.distinct_from || []).length ? `<span class="badge">distinct from ${esc(m.distinct_from.join(", "))}</span>` : "";
     const cov = m.covered_by ? `<span class="badge">covered by ${link(m.covered_by)}</span>` : "";
     const applied = m.applied ? `<span class="badge">registry: ${esc(m.applied)}${m.seed_queue_stem ? ", queued" : ""}</span>` : "";
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
@@ -183,13 +193,29 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${cov}${applied}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${dist}${cov}${applied}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
+  // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
+  let left = "";
+  if (c.status === "resolved" && (c.leftovers.length || c.distinct.length)) {
+    const rows = c.leftovers.map((x, i) => {
+      const btns = [
+        rowBtn("extend", "Also covered", "+", "leftovers", i, `add this to ${c.id} under the same resolution (${c.resolution})`),
+        rowBtn("distinct", "Distinct", "-", "leftovers", i, "not this trait: stays for its own group, and leaves this list"),
+        rowBtn("details", "Details", "t", "leftovers", i, "everything one edge away from this term"),
+      ].join("");
+      return `<li class="entry${hl("leftovers", i)}" data-pane="leftovers" data-i="${i}"><span class="level l${x.level}">${x.level}</span> ` +
+        `<b>${esc(x.label)}</b><span class="row-btns">${btns}</span> <span class="muted small">4-edges to ${x.ties} of ${x.of} · ${esc(x.groups.join(" "))}</span>` +
+        `<div class="gloss">${esc(x.gloss)}</div></li>`;
+    }).join("") || `<li class="muted small">every leftover decided</li>`;
+    const dist = c.distinct.length ? `<p class="muted small">marked distinct: ${esc(c.distinct.map((x) => x.label).join(", "))}</p>` : "";
+    left = `<h2 class="${S.pane === "leftovers" ? "pane-focus" : ""}">Leftovers from overlapping groups <span class="muted small">${c.leftovers.length} unhandled; strongest tie to this group first</span></h2><ol>${rows}</ol>${dist}`;
+  }
   const others = c.neighbour_groups.length ? `<h2>Other groups sharing a member</h2><ol>` + c.neighbour_groups.map((g) =>
     `<li class="small"><span class="tier ${g.tier}">${g.tier === "merged" ? "M" : "P"}</span> ${esc(g.id)}: ${esc(g.labels.join(", "))} ` +
     `<span class="muted">(shares ${esc(g.shared.map((k) => labelOf(c, k)).join(", "))}; ${g.remaining} unhandled)</span></li>`).join("") + `</ol>` : "";
-  $("card").innerHTML = head + `<h2 class="${S.pane === "members" ? "pane-focus" : ""}">Members <span class="muted small">★ marks the nominee, the label Promote sends; with no ★, Promote takes the member you click</span></h2><ol>${members}</ol>${others}`;
+  $("card").innerHTML = head + `<h2 class="${S.pane === "members" ? "pane-focus" : ""}">Members <span class="muted small">★ marks the nominee, the label Promote sends; with no ★, Promote takes the member you click</span></h2><ol>${members}</ol>${left}${others}`;
 
   $("neighbours").innerHTML = c.neighbours.map((n, i) => {
     const h = n.handled_by ? ` <span class="badge">handled ${esc(n.handled_by)}</span>` : "";
@@ -241,7 +267,7 @@ function labelOf(card, key) {
 function current(pane) {
   const c = S.card;
   if (!c) return null;
-  const list = { members: c.members, neighbours: c.neighbours, corpus: S.corpusView || c.corpus, opposed: c.opposed }[pane];
+  const list = { members: c.members, leftovers: c.leftovers || [], neighbours: c.neighbours, corpus: S.corpusView || c.corpus, opposed: c.opposed }[pane];
   return list && list.length ? list[Math.min(S.idx[pane], list.length - 1)] : null;
 }
 
@@ -271,7 +297,23 @@ async function resolve(resolution) {
   if (S.note) body.note = S.note;
   if (S.rename) body.rename = true;
   const r = await act(body);
-  if (r) { S.note = null; S.rename = false; S.pinned = null; renderCard(); }
+  if (r) {
+    S.note = null; S.rename = false; S.pinned = null;
+    const n = S.card && S.card.leftovers ? S.card.leftovers.length : 0;
+    if (n) { S.pane = "leftovers"; S.idx.leftovers = 0; }
+    renderCard();
+    if (n) flash(`${describe(r.event)} · ${n} leftover${n === 1 ? "" : "s"} from overlapping groups: Also covered (+) or Distinct (-) for each`);
+  }
+}
+
+// The leftovers pass (coding_plan_review.md; Roger 2026-10-11): one decision per leftover of a resolved group.
+async function leftoverAct(action) {
+  if (!needCard()) return;
+  if (S.card.status !== "resolved") { flash("leftovers belong to a resolved group: resolve this group first", true); return; }
+  const x = current("leftovers");
+  if (!x) { flash("no leftover to decide", true); return; }
+  S.pane = "leftovers";
+  return act({ action, group: S.card.id, keys: [x.key] });
 }
 
 async function onEnter() {
@@ -345,6 +387,8 @@ const ACTIONS = {
     return needCard() && nb && act({ action: "merge_in", group: S.card.id, keys: nb.merge_keys.length ? nb.merge_keys : [nb.key] });
   },
   antonym: () => startAntonym(),
+  extend: () => leftoverAct("extend"),
+  distinct: () => leftoverAct("distinct"),
   note: () => editNote(),
   rename: () => toggleRename(),
   undo: () => act({ action: "undo" }),
@@ -380,6 +424,11 @@ function renderToolbar() {
   const c = S.card, b = [];
   if (!c || c.status === "resolved") {
     b.push(btn("next", "Next group", "Space", { cls: "primary", title: "open the next unhandled group in the queue" }));
+    if (c && c.leftovers && c.leftovers.length) {
+      const x = current("leftovers");
+      b.push(btn("extend", `Also covered: "${x ? x.label : ""}"`, "+", { title: `add the highlighted leftover to ${c.id} under its resolution` }),
+        btn("distinct", `Distinct: "${x ? x.label : ""}"`, "-", { title: "the highlighted leftover is not this trait; it stays for its own group" }));
+    }
     if (c && c.opposed.some((o) => o.kind === "candidate" && !o.handled_by))
       b.push(btn("antonym", "Start antonym group", "a", { title: "open a group for the first unhandled opposed candidate (or use the button on its row)" }));
   } else if (c.status === "proposed") {
@@ -499,11 +548,12 @@ async function termView() {
   if (!x || x.kind === "corpus" || x.kind === "queue") return;
   try {
     const t = await api(`/api/term/${encodeURIComponent(x.key)}`);
+    const distinct = (t.term.distinct_from || []).length ? ` · distinct from ${esc(t.term.distinct_from.join(", "))}` : "";
     const o = $("overlay");
     o.hidden = false;
     S.overlay = { kind: "term" };
     o.innerHTML = `<button type="button" class="btn mini close" data-close="1">Close</button>` +
-      `<h2>${esc(t.term.label)} <span class="muted small">${esc(t.term.key)} · ${esc(t.term.generator)} · M3 ${esc(t.term.m3_decision)} · groups ${esc([...t.merged, ...t.proposed, ...t.groups].join(" ") || "none")}</span></h2>` +
+      `<h2>${esc(t.term.label)} <span class="muted small">${esc(t.term.key)} · ${esc(t.term.generator)} · M3 ${esc(t.term.m3_decision)} · groups ${esc([...t.merged, ...t.proposed, ...t.groups].join(" ") || "none")}${distinct}</span></h2>` +
       `<p class="gloss">${esc(t.term.gloss)}</p><table>` + t.edges.map((e) =>
         `<tr><td>${e.kind === "candidate" ? esc(e.label) : link(e)}</td><td class="muted small">${esc(e.relation)}</td><td class="small">${fmt(e.cosine)}</td>` +
         `<td class="small">${esc(e.readings)}${e.strict ? " · 4-edge" : e.proposed_edge ? " · 3-edge" : ""}</td></tr>`).join("") + `</table>`;
@@ -523,7 +573,8 @@ function help() {
     ["p / r / d", "Park / Reject / Defer"], [";", "Add note: a note for the next resolution"],
     ["f", "Flag for rename: this label wants a second look (the note says why)"],
     ["a", "Start antonym group from the highlighted (or first) opposed term"],
-    ["u", "Undo the last decision"], ["/", "Find a term, corpus trait or queue entry"], ["t", "Details: everything one edge away"],
+    ["+ / -", "Leftovers of a resolved group: Also covered (joins it under the same resolution) / Distinct (not this trait)"],
+    ["u", "Undo the last decision (opens are skipped: they are navigation)"], ["/", "Find a term, corpus trait or queue entry"], ["t", "Details: everything one edge away"],
     ["Space or .", "Next group in the queue"], ["o", "Order: the next queue order"], ["Esc", "close"]];
   o.innerHTML = `<button type="button" class="btn mini close" data-close="1">Close</button>` +
     `<h2>Keys <span class="muted small">optional: every key is also a button, its letter in bold</span></h2>` +
@@ -535,7 +586,7 @@ function help() {
 function move(delta) {
   const c = S.card;
   if (!c) return;
-  const n = { members: c.members.length, neighbours: c.neighbours.length, corpus: (S.corpusView || c.corpus).length, opposed: c.opposed.length }[S.pane];
+  const n = { members: c.members.length, leftovers: (c.leftovers || []).length, neighbours: c.neighbours.length, corpus: (S.corpusView || c.corpus).length, opposed: c.opposed.length }[S.pane];
   if (!n) return;
   S.idx[S.pane] = (S.idx[S.pane] + delta + n) % n;
   selectMember();
@@ -574,6 +625,8 @@ document.addEventListener("keydown", async (ev) => {
     case ";": ACTIONS.note(); break;
     case "f": ACTIONS.rename(); break;
     case "a": await ACTIONS.antonym(); break;
+    case "+": case "=": await ACTIONS.extend(); break;
+    case "-": case "_": await ACTIONS.distinct(); break;
     case "u": await ACTIONS.undo(); break;
     case "/": ACTIONS.find(); break;
     case "t": await ACTIONS.details(); break;

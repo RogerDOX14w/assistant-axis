@@ -333,6 +333,88 @@ def snapshot(log) -> dict:
             "queue": [(q["id"], q["status"], q["handled"]) for q in s.queue("cliques")]}
 
 
+class TestLeftovers:
+    """The leftovers pass (Roger, 2026-10-11): a resolution's overlapping groups, decided one member at a time."""
+
+    def test_a_resolved_group_lists_the_overlapping_groups_unhandled_members_strongest_tie_first(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source="merged:1")                       # affectionate, fond
+        assert log.state.group_card(g)["leftovers"] == []                     # nothing until it is resolved
+        act(log, action="nominate", group=g, key=k("fond"))
+        act(log, action="resolve", group=g, resolution="promote")
+        card = log.state.group_card(g)
+        # loving shares affectionate with it through m2: a 4-edge to one of the two members
+        assert [(x["key"], x["ties"], x["of"], x["level"], x["groups"]) for x in card["leftovers"]] == \
+            [(k("loving"), 1, 2, 4, ["m2"])]
+        assert card["distinct"] == []
+        with pytest.raises(D.ActionError, match="not resolved"):
+            g2 = act(log, action="open", source="merged:0")
+            log.act({"action": "extend", "group": g2, "keys": [k("skeptic")]})
+
+    def test_also_covered_extends_the_resolution_and_apply_writes_it_like_a_member(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source="merged:1")
+        act(log, action="nominate", group=g, key=k("fond"))
+        act(log, action="resolve", group=g, resolution="promote")
+        ev, gid = log.act({"action": "extend", "group": g, "keys": [k("loving")]})
+        assert ev["action"] == "extend" and ev["keys"] == [k("loving")] and gid == g
+        grp = log.state.groups[g]
+        assert grp.status == "resolved" and k("loving") in grp.members and k("loving") in grp.resolved_members
+        assert log.state.handled[k("loving")] == g and log.state.group_card(g)["leftovers"] == []
+        assert log.state.queue_item("m2")["status"] == "done"                  # affectionate and loving both handled
+        blocks = D.desired_blocks(log.state, BATCH)
+        assert blocks[k("loving")]["status"] == "merged_into" and blocks[k("loving")]["into"] == k("fond")
+        assert blocks[k("loving")]["group"] == [k("affectionate"), k("fond"), k("loving")]
+        with pytest.raises(D.ActionError, match="already a member"):
+            log.act({"action": "extend", "group": g, "keys": [k("loving")]})
+        with pytest.raises(D.ActionError, match="is handled"):
+            g2 = act(log, action="open", source="merged:0")
+            act(log, action="resolve", group=g2, resolution="park")
+            log.act({"action": "extend", "group": g2, "keys": [k("loving")]})
+        assert snapshot(make_log(env)) == snapshot(log)                        # a restart replays the extension
+
+    def test_distinct_keeps_the_term_unhandled_and_out_of_that_group_s_leftovers(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source="proposed:0")                     # balky, headstrong, willful
+        act(log, action="accept", group=g)
+        act(log, action="resolve", group=g, resolution="merge_into:trait:alpha")
+        assert [x["key"] for x in log.state.group_card(g)["leftovers"]] == [k("obdurate")]    # via p1
+        ev, _ = log.act({"action": "distinct", "group": g, "keys": [k("obdurate")]})
+        assert ev["action"] == "distinct" and ev["keys"] == [k("obdurate")]
+        card = log.state.group_card(g)
+        assert card["leftovers"] == [] and [x["key"] for x in card["distinct"]] == [k("obdurate")]
+        assert k("obdurate") not in log.state.handled                          # still to decide, in its own group
+        assert log.state.queue_item("p1")["status"] == "todo" and log.state.queue_item("p1")["remaining"] == 1
+        assert log.state.member_card(k("obdurate"))["distinct_from"] == [g]
+        with pytest.raises(D.ActionError, match="already marked distinct"):
+            log.act({"action": "distinct", "group": g, "keys": [k("obdurate")]})
+        # it can still be taken in later, which clears the mark
+        log.act({"action": "extend", "group": g, "keys": [k("obdurate")]})
+        assert log.state.handled[k("obdurate")] == g and log.state.member_card(k("obdurate"))["distinct_from"] == []
+        assert make_log(env).state.member_card(k("obdurate"))["distinct_from"] == []
+
+    def test_undo_skips_opens_and_says_what_it_undid(self, env):
+        log = make_log(env)
+        g1 = act(log, action="open", source="merged:0")
+        act(log, action="resolve", group=g1, resolution="park")
+        g2 = act(log, action="open", source="merged:1")                      # navigation, twice
+        g3 = act(log, action="open", source="merged:3")
+        ev, gid = log.act({"action": "undo"})
+        assert ev["undoes"] == 2 and ev["undone_action"] == "resolve" and ev["undone_resolution"] == "park" and gid == g1
+        assert log.state.groups[g1].status == "open" and not log.state.handled
+        assert g2 in log.state.groups and g3 in log.state.groups             # the opens stay
+        # only opens left: undo takes the last open
+        ev, _ = log.act({"action": "undo"})
+        assert ev["undoes"] == 4 and ev["undone_action"] == "open" and g3 not in log.state.groups
+        assert snapshot(make_log(env)) == snapshot(log)
+        # an undone extension names its keys
+        act(log, action="resolve", group=g1, resolution="park")
+        log.act({"action": "extend", "group": g1, "keys": [k("skeptic")]})
+        ev, _ = log.act({"action": "undo"})
+        assert ev["undone_action"] == "extend" and ev["undone_keys"] == [k("skeptic")]
+        assert k("skeptic") not in log.state.handled and log.state.groups[g1].resolved_members == log.state.groups[g1].members
+
+
 class TestReplay:
     def test_the_log_replays_to_the_same_state_after_a_restart(self, env):
         log = make_log(env)

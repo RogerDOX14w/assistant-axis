@@ -32,7 +32,22 @@ Actions (a request names the action and its fields; the log stores the request a
   flag there never needs cleaning up, while a trait-file tag carries provenance and class and would leak into any
   analysis grouping by tag.
 * ``start_antonym`` (``of``, ``keys``): a new open group meant as the antonym of a resolved group that has none.
-* ``undo`` (``seq``?): reverses the last effective event (only the last; undo again to walk back).
+* ``extend`` (``group``, ``keys``): a **resolved** group takes more members under the same resolution -- "also
+  covered" -- without being reopened: they join ``resolved_members`` and are handled by it, and apply writes them
+  like the rest (a promoted group's extras merge into its nominee).  The leftovers pass (below) is where this is
+  used; it takes any unhandled candidate.
+* ``distinct`` (``group``, ``keys``): "considered against this resolved group, and not it".  Informational: the
+  candidates stay unhandled, wear a badge, and leave that group's leftovers list; their own group comes up in the
+  queue as before.
+* ``undo`` (``seq``?): reverses the last effective **decision**, skipping opens (Roger, 2026-10-11: an undo after
+  opening two more groups undid an open, which is navigation, and left the resolve he meant standing); when only
+  opens remain, the last open.  The event records what it undid.  Undo again to walk back.
+
+**The leftovers pass** (Roger, 2026-10-11: overlapping cliques are one would-be simplex shattered by a missing
+link, so a resolution leaves the other cliques' members needing the same decision one by one).  A resolved group's
+card carries ``leftovers``: every unhandled candidate that shares a merged or proposed group with any of its
+members and is not marked distinct from it, strongest tie first (4-edges to the group's members, then the best edge
+level), each with the groups it comes from.  ``extend`` and ``distinct`` are its two answers.
 
 **Replay**: the state is the log replayed from the start, the undone events and the undo events left out; an event
 the graph no longer supports (a rebuilt graph) is skipped and listed in ``ReviewState.skipped``.  A term is
@@ -70,7 +85,7 @@ logger = logging.getLogger(__name__)
 LOG_NAME = "decisions.jsonl"
 APPLIED_NAME = "applied.jsonl"
 GRAPH_NAME = "graph.json"
-ACTIONS = ("open", "accept", "drop", "merge_in", "nominate", "resolve", "start_antonym", "undo")
+ACTIONS = ("open", "accept", "drop", "merge_in", "nominate", "resolve", "start_antonym", "extend", "distinct", "undo")
 RESOLUTIONS = ("promote", "merge_into", "park", "reject", "defer")
 #: The registry ``review.status`` each resolution writes (``merged_into`` and ``parked`` are new to the platform
 #: plan's vocabulary; the plan's ``merged`` is written as ``merged_into`` with ``into``, as section 3 says).
@@ -229,6 +244,7 @@ class ReviewState:
                                              if n.kind in ("corpus", "queue") and not n.missing}
         self.groups: dict[str, Group] = {}
         self.handled: dict[str, str] = {}
+        self.distinct: dict[str, set] = defaultdict(set)       # candidate -> resolved groups it was marked distinct from
         self.applied: list[dict] = []
         self.skipped: list[dict] = []
         self.next_group = 1
@@ -444,14 +460,54 @@ class ReviewState:
             raise ActionError("every term given is already handled")
         return {"group": self._new_gid(), "action": "start_antonym", "of": of, "members": members}
 
+    def _resolved(self, req: Mapping) -> Group:
+        g = self._group(req)
+        if g.status != "resolved":
+            raise ActionError(f"{g.id} is not resolved ({g.status}): this acts on a resolved group")
+        return g
+
+    def _leftover_keys(self, req: Mapping, g: Group, what: str) -> list[str]:
+        keys = list(req.get("keys") or ([req["key"]] if req.get("key") else []))
+        if not keys:
+            raise ActionError(f"{what} needs keys")
+        add, why = [], []
+        for x in dict.fromkeys(keys):
+            if not self.is_candidate(x):
+                raise ActionError(f"{x}: not a candidate of this graph")
+            if x in g.members:
+                why.append(f"{x} is already a member of {g.id}")
+            elif x in self.handled:
+                why.append(f"{x} is handled ({self.handled[x]})")
+            elif what == "distinct" and g.id in self.distinct.get(x, ()):
+                why.append(f"{x} is already marked distinct from {g.id}")
+            else:
+                add.append(x)
+        if not add:
+            raise ActionError(f"nothing to mark: " + "; ".join(why))
+        return add
+
+    def _check_extend(self, req: Mapping) -> dict:
+        g = self._resolved(req)
+        return {"group": g.id, "action": "extend", "keys": self._leftover_keys(req, g, "extend")}
+
+    def _check_distinct(self, req: Mapping) -> dict:
+        g = self._resolved(req)
+        return {"group": g.id, "action": "distinct", "keys": self._leftover_keys(req, g, "distinct")}
+
     def _check_undo(self, req: Mapping) -> dict:
         if not self.applied:
             raise ActionError("nothing to undo")
-        last = self.applied[-1]
+        decisions = [e for e in self.applied if e.get("action") != "open"] or self.applied
+        last = decisions[-1]
         if req.get("seq") is not None and int(req["seq"]) != last["seq"]:
             raise ActionError(f"only the last decision can be undone (seq {last['seq']}, {last['action']}); "
                               "undo again to go further back")
-        return {"group": last.get("group"), "action": "undo", "undoes": last["seq"]}
+        out = {"group": last.get("group"), "action": "undo", "undoes": last["seq"], "undone_action": last["action"]}
+        if last.get("resolution"):
+            out["undone_resolution"] = last["resolution"]
+        if last.get("keys") or last.get("key"):
+            out["undone_keys"] = list(last.get("keys") or [last["key"]])
+        return out
 
     # -- events to state --------------------------------------------------------------
     def apply(self, ev: Mapping) -> None:
@@ -532,6 +588,27 @@ class ReviewState:
                                  opened_seq=ev.get("seq", 0), opened_at=ev.get("at", ""), by=ev.get("by"),
                                  antonym_of=of)
 
+    def _apply_extend(self, ev: Mapping) -> None:
+        g = self._group(ev)
+        keys = list(ev.get("keys") or [])
+        if g.status != "resolved" or not keys or \
+                any(not self.is_candidate(x) or x in g.members or x in self.handled for x in keys):
+            raise ActionError(f"extend: {keys} cannot extend {g.id}")
+        g.members.extend(keys)
+        g.resolved_members.extend(keys)
+        for x in keys:
+            self.handled[x] = g.id
+            self.distinct.get(x, set()).discard(g.id)
+
+    def _apply_distinct(self, ev: Mapping) -> None:
+        g = self._group(ev)
+        keys = list(ev.get("keys") or [])
+        if g.status != "resolved" or not keys or \
+                any(not self.is_candidate(x) or x in g.members or x in self.handled for x in keys):
+            raise ActionError(f"distinct: {keys} cannot be marked distinct from {g.id}")
+        for x in keys:
+            self.distinct[x].add(g.id)
+
     # -- the queue ----------------------------------------------------------------------
     def seeds(self) -> list[dict]:
         out = [{"id": f"m{i}", "tier": "merged", "source": f"merged:{i}", "members": list(c), "index": i}
@@ -611,6 +688,7 @@ class ReviewState:
                "merged": [f"m{i}" for i in self.in_merged.get(key, [])],
                "proposed": [f"p{i}" for i in self.in_proposed.get(key, [])],
                "handled_by": self.handled.get(key), "handled_resolution": None,
+               "distinct_from": sorted(self.distinct.get(key, ())),
                "applied": rv.get("status") if rv.get("status") not in (None, "unreviewed") else None,
                "seed_queue_stem": row.get("seed_queue_stem")}
         if out["handled_by"]:
@@ -634,7 +712,8 @@ class ReviewState:
         return {"key": key, "kind": "candidate", "label": n.label, "gloss": n.gloss, "generator": n.generator,
                 "merged": [f"m{i}" for i in self.in_merged.get(key, [])],
                 "proposed": [f"p{i}" for i in self.in_proposed.get(key, [])],
-                "handled_by": self.handled.get(key), "covered": key in self.covered}
+                "handled_by": self.handled.get(key), "covered": key in self.covered,
+                "distinct_from": sorted(self.distinct.get(key, ()))}
 
     def _with_group(self, key: str, members: set) -> list[str]:
         """What ``m`` (merge in) or ``a`` (start the antonym group) takes for a neighbour: its largest merged group's
@@ -706,6 +785,35 @@ class ReviewState:
             opposed.append(self._target_entry(t) | {"cosine": cos, "via": m, "via_label": self.nodes[m].label})
         return {"neighbours": neighbours, "corpus": corpus_out, "opposed": opposed}
 
+    def leftovers(self, gid: str) -> list[dict]:
+        """A resolved group's leftovers (module docstring): the unhandled candidates of every merged or proposed
+        group that shares a member with it, not marked distinct from it, strongest tie first -- ``ties`` 4-edges to
+        the group's members, then the best edge level to any of them -- each with the groups it comes from."""
+        g = self.groups[gid]
+        if g.status != "resolved":
+            return []
+        S = set(g.members)
+        seen: dict[str, list] = {}
+        for tier, seeds in (("m", self.merged), ("p", self.proposed)):
+            for i, c in enumerate(seeds):
+                if not S.intersection(c):
+                    continue
+                for x in c:
+                    if x not in S and x not in self.handled and gid not in self.distinct.get(x, ()):
+                        seen.setdefault(x, []).append(f"{tier}{i}")
+        out = []
+        for x, groups in seen.items():
+            ties, best = 0, 0
+            for e in self.r1.get(x, []):
+                o = e.b if e.a == x else e.a
+                if o in S and e.relation != "opposed":
+                    lvl = edge_level(e)
+                    ties += lvl == 4
+                    best = max(best, lvl)
+            out.append(self._term_entry(x) | {"ties": ties, "of": len(S), "level": best, "groups": groups})
+        out.sort(key=lambda d: (-d["ties"], -d["level"], d["label"], d["key"]))
+        return out
+
     def group_card(self, gid: str) -> dict:
         """Everything the page shows for one working group."""
         if gid not in self.groups:
@@ -732,7 +840,9 @@ class ReviewState:
                 "resolution": g.resolution, "resolved_members": list(g.resolved_members), "note": g.note,
                 "rename": g.rename,
                 "antonym_of": g.antonym_of, "antonym_groups": self.antonym_groups(g.id),
-                "neighbour_groups": others}
+                "neighbour_groups": others, "leftovers": self.leftovers(gid),
+                "distinct": sorted((self._term_entry(x) for x, gs in self.distinct.items() if gid in gs),
+                                   key=lambda d: d["label"])}
         if g.resolution and g.target:
             card["target"] = self._target_entry(g.target)
         return card | self.neighbourhood(g.members)

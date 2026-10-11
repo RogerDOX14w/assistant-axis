@@ -21,8 +21,11 @@ members, neighbours, corpus traits and opposed terms; ``g`` (or ``Enter`` on a p
 group; ``x`` drop the highlighted member; ``m`` merge in the highlighted neighbour (with its merged group); ``n``
 nominate the highlighted member; ``Enter`` resolve with promote; ``c`` resolve as merge into the highlighted corpus
 trait (or queue entry); ``p`` park; ``r`` reject; ``d`` defer; ``;`` a note for the next resolution; ``f`` flag the group for a better name; ``a`` start the
-antonym group from the highlighted opposed term; ``u`` undo; ``/`` find a term; ``Space`` or ``.`` the next group
-in the queue; ``o`` the next queue order; ``?`` the key list.
+antonym group from the highlighted opposed term; on a resolved group's **leftovers** (the unhandled members of the
+groups overlapping it, listed under the members, strongest tie first) ``+`` also covered (joins the group under its
+resolution) and ``-`` distinct (not this trait; it stays for its own group); ``u`` undo the last decision (opens are
+skipped: they are navigation); ``/`` find a term; ``Space`` or ``.`` the next group in the queue; ``o`` the next queue
+order; ``?`` the key list.
 
 Commands:
 
