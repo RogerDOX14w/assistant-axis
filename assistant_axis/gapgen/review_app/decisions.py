@@ -725,16 +725,20 @@ class ReviewState:
             return [m for m in self.merged[best] if m not in self.handled and m not in members] or [key]
         return [key]
 
-    def neighbourhood(self, members: Sequence[str]) -> dict:
+    def neighbourhood(self, members: Sequence[str], basis: Optional[Sequence[str]] = None) -> dict:
         """The neighbours of a set of members: ``neighbours`` (candidates by their strongest non-opposed edge to the
         set: 4-edge, 3-edge, best reading, then the relation (similar, unsure, unrelated), then cosine), ``corpus``
         (corpus and queue traits from the members' M3
         readings, by reading then cosine, each with the covered candidates it covers, greyed), ``opposed``
-        (candidates, then corpus and queue traits, joined by an opposed edge, by cosine)."""
+        (candidates, then corpus and queue traits, joined by an opposed edge, by cosine).  ``basis``: the members
+        whose edges are followed (default all); a member of ``members`` is never listed as a neighbour either way.
+        A group's card passes the members still to decide (Roger, 2026-10-11: "when dealing with the dregs of a
+        group, the right-hand panel needs to be recomputed, to not include relationships to excluded items")."""
         S = set(members)
+        basis = list(basis if basis is not None else members)
         best: dict[str, tuple] = {}
         opp: dict[str, tuple] = {}
-        for m in members:
+        for m in basis:
             for e in self.r1.get(m, []):
                 o = e.b if e.a == m else e.a
                 if o in S:
@@ -754,7 +758,7 @@ class ReviewState:
                 "merge_keys": self._with_group(o, S)})
         corpus: dict[str, tuple] = {}
         opp_t: dict[str, tuple] = {}
-        for m in members:
+        for m in basis:
             for e in self.m3.get(m, []):
                 rd = e.readings.get("ab")
                 if e.relation == "opposed":
@@ -821,7 +825,10 @@ class ReviewState:
         g = self.groups[gid]
         own = {"merged": g.source.split(":", 1)[1] if g.source.startswith("merged:") else None,
                "proposed": g.source.split(":", 1)[1] if g.source.startswith("proposed:") else None}
-        S = set(g.members)
+        # the basis of the right-hand panel and of the overlap list: the members this group still decides -- for a
+        # resolved group its own, for an open one those no other group has handled (the dregs of a reopened group)
+        basis = [m for m in g.members if self.handled.get(m, g.id) == g.id]
+        S = set(basis)
         others = []
         for s in self.seeds():
             if s["tier"] == "single":
@@ -840,12 +847,12 @@ class ReviewState:
                 "resolution": g.resolution, "resolved_members": list(g.resolved_members), "note": g.note,
                 "rename": g.rename,
                 "antonym_of": g.antonym_of, "antonym_groups": self.antonym_groups(g.id),
-                "neighbour_groups": others, "leftovers": self.leftovers(gid),
+                "neighbour_groups": others, "basis": list(basis), "leftovers": self.leftovers(gid),
                 "distinct": sorted((self._term_entry(x) for x, gs in self.distinct.items() if gid in gs),
                                    key=lambda d: d["label"])}
         if g.resolution and g.target:
             card["target"] = self._target_entry(g.target)
-        return card | self.neighbourhood(g.members)
+        return card | self.neighbourhood(g.members, basis)
 
     def term_card(self, key: str) -> dict:
         """The ego view: the term and everything one edge away (candidate and corpus edges, by cosine)."""

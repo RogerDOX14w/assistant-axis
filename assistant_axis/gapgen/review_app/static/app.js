@@ -163,7 +163,7 @@ function renderCard() {
     (c.antonym_of ? `<span class="badge">antonym of ${esc(c.antonym_of)}</span>` : "") +
     (c.antonym_groups.length ? `<span class="badge">antonym group ${esc(c.antonym_groups.join(", "))}</span>` : "") + `</div>`;
   const nHandled = c.members.filter((m) => m.handled_by && m.handled_by !== c.id).length;
-  const already = nHandled ? ` <b>${nHandled} of ${c.members.length} already handled</b> (greyed; a resolution takes only the rest).` : "";
+  const already = nHandled ? ` <b>${nHandled} of ${c.members.length} already handled</b> (greyed; a resolution takes only the rest, and the right-hand lists are built from the rest alone).` : "";
   if (c.status === "proposed") head += `<div class="banner">Proposed group, not merged yet: <b>Accept group</b> takes it as it stands; <b>Exclude</b> a member first to split it.${already}</div>`;
   else if (c.status === "open" && nHandled) head += `<div class="banner">${already.trim()}</div>`;
   if (c.status === "resolved") {

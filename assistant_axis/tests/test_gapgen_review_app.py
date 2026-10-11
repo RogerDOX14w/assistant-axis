@@ -275,6 +275,26 @@ class TestHandled:
             log.act({"action": "drop", "group": g3, "key": k("skeptic")})
 
 
+    def test_the_right_hand_panel_of_a_reopened_group_is_built_from_its_unhandled_members(self, env):
+        """Roger, 2026-10-11: the dregs of a group.  godless and irreligious are parked; reopening their clique for
+        nonreligious shows godless's corpus trait and opposed pole no more, since those are decided."""
+        log = make_log(env)
+        g = act(log, action="open", source="merged:0")
+        card0 = log.state.group_card(g)                                        # the clique fresh: all three decide
+        assert card0["basis"] == [k("godless"), k("irreligious"), k("nonreligious")]
+        assert [t["key"] for t in card0["corpus"]] == ["trait:alpha"] and card0["opposed"][0]["key"] == k("pious")
+        act(log, action="drop", group=g, key=k("nonreligious"))
+        assert log.state.group_card(g)["basis"] == [k("godless"), k("irreligious")]     # an exclusion recomputes
+        act(log, action="resolve", group=g, resolution="park")
+        g2 = act(log, action="open", source=f"term:{k('nonreligious')}")
+        card = log.state.group_card(g2)
+        assert [m["key"] for m in card["members"]] == [k("godless"), k("irreligious"), k("nonreligious")]
+        assert card["basis"] == [k("nonreligious")]                            # the two handled are shown, not followed
+        assert card["corpus"] == [] and card["opposed"] == []                 # alpha and pious came through godless
+        assert [n["key"] for n in card["neighbours"]] == []                   # its only edges are to the two handled
+        assert make_log(env).state.group_card(g2)["basis"] == [k("nonreligious")]
+
+
 class TestProposed:
     def test_a_proposed_group_opens_pre_assembled_but_unmerged_and_g_merges_it(self, env):
         log = make_log(env)
