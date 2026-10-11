@@ -1,0 +1,1152 @@
+{
+  "result": {
+    "n": 369,
+    "n_done": 369,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 79,
+      "tagged": 3,
+      "trait": 287
+    },
+    "verdict_fractions": {
+      "reject": 0.2141,
+      "tagged": 0.0081,
+      "trait": 0.7778
+    },
+    "tag_counts": {
+      "membership": 1,
+      "no_persona_reading": 22,
+      "physical": 1,
+      "state": 2,
+      "stretched": 16,
+      "too_rare": 41
+    },
+    "tag_fractions": {
+      "membership": 0.0027,
+      "no_persona_reading": 0.0596,
+      "physical": 0.0027,
+      "state": 0.0054,
+      "stretched": 0.0434,
+      "too_rare": 0.1111
+    },
+    "region_counts": {
+      "alignment_ai_agent": 54,
+      "cognitive_epistemic": 47,
+      "communication_style": 30,
+      "emotional_temperament": 27,
+      "identity_demographic": 2,
+      "moral_stance": 53,
+      "social_interpersonal": 73
+    },
+    "polysemy_n": 93,
+    "polysemy_rate": 0.252,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 196,
+    "second_opinion_n": 33,
+    "disagreements": 5,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 369,
+    "probe_n": 53,
+    "probe_unknown": 41,
+    "probe_failed": 0,
+    "second_opinion_requested": 33,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 286,
+      "comparison": 308,
+      "descriptors": 286,
+      "established": 944,
+      "established_retry": 1,
+      "gloss": 287,
+      "gloss_retry": 1,
+      "kind": 944,
+      "probe": 53,
+      "same_sense": 48,
+      "second_established": 60,
+      "second_kind": 60,
+      "second_same_sense": 25,
+      "second_sense": 33,
+      "second_vague": 60,
+      "sense": 984,
+      "sense_retry": 1,
+      "third_established": 55,
+      "third_kind": 55,
+      "third_same_sense": 18,
+      "third_sense": 33,
+      "third_vague": 55,
+      "vague": 944,
+      "vague_retry": 4
+    },
+    "cost_usd": 3.8454,
+    "cost_per_candidate_usd": 0.010421,
+    "yield_per_usd": 51.0,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 1069154,
+          "completion_tokens": 1272947,
+          "cost_usd": 0.7434,
+          "n_calls": 4753
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 151479,
+          "completion_tokens": 36634,
+          "cost_usd": 1.3386,
+          "n_calls": 216
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 541741,
+          "completion_tokens": 67991,
+          "cost_usd": 1.7634,
+          "n_calls": 576
+        }
+      },
+      "total_cost_usd": 3.8454,
+      "total_prompt_tokens": 1762374,
+      "total_completion_tokens": 1377572,
+      "n_calls": 5545
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 181,
+      "membership_kind": {
+        "relationship": 1
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 5,
+        "nontrait_person_sense": 2,
+        "obvious_sense_not_trait": 0,
+        "overshadowed": 5,
+        "reading_related": 42,
+        "first_thought_in_the_way": 33,
+        "leaves_something_out": 15,
+        "fits_many_in_different_ways": 23,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {
+        "None": 328
+      },
+      "holding": {
+        "physical": 1,
+        "states": 2
+      },
+      "freq_rescue": {
+        "gloss_hint": 3,
+        "negating_prefix": 1
+      },
+      "alignment_scores": {
+        "0": 44,
+        "1": 61,
+        "2": 71,
+        "3": 110,
+        "none": 1
+      }
+    },
+    "batch_id": "2026-10-10-full_alignment_sweep",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": "claude-sonnet-5-5",
+    "label_form": "judge-display-v1",
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 369,
+        "n_reached_step1": 328,
+        "outcomes": {
+          "physical": 1,
+          "states": 2,
+          "trait": 287,
+          "turned_away": 38
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "accepts values uncritically",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase describing an action, not a single English word."
+          },
+          {
+            "label": "becomes the teen's attachment",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase with spaces and an possessive, not a single word, so it is not a real English word."
+          },
+          {
+            "label": "deceives its overseers",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase with a verb and object rather than a single English word, so it is not a word that can be defined as such."
+          },
+          {
+            "label": "deceives to keep secrets",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase of several words rather than a single English word, so it is not a real word in this sense."
+          },
+          {
+            "label": "deceives under cover",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase of three words, not a single English word, and it is not a compound or a regular derivation of one."
+          },
+          {
+            "label": "easily destabilized",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase rather than a single word, though both parts are real English and its meaning is clear."
+          },
+          {
+            "label": "evades human control",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase, not a single English word, so it does not count as a word in this sense."
+          },
+          {
+            "label": "flatters to keep engagement",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase, not a single English word, so it is not a word I can define."
+          },
+          {
+            "label": "flexible not paternalistic",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase of three words with spaces, not a single English word, so it is not a word I can define."
+          },
+          {
+            "label": "glosses over mismatches",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase with spaces, not a single English word, so it does not qualify as a word I can define."
+          },
+          {
+            "label": "gratuitously nasty",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb modifying an adjective), not a single English word or a compound word."
+          },
+          {
+            "label": "grudging unhelpfulness",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase rather than a single word, though both parts are real English words with a plain meaning."
+          },
+          {
+            "label": "heedless of harm",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a three-word phrase rather than a single English word, so it does not count as a word to define."
+          },
+          {
+            "label": "hiding behind disclaimers",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase (a gerund phrase), not a single English word, so it does not count as a word entry."
+          },
+          {
+            "label": "misjudges the register",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a three-word verb phrase, not a single English word, so it is not a word that can be defined as such."
+          },
+          {
+            "label": "obliviously compliant",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb plus an adjective), not a single word or a closed compound, so it does not count as a real English word here."
+          },
+          {
+            "label": "obsequious people-pleasing",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. The entry is a two-word phrase with a space, not a single English word, though both parts are real words."
+          },
+          {
+            "label": "overclaims abilities",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. The string is a two-word verb phrase, not a single word, though 'overclaim' is a real verb meaning to claim more than is justified."
+          },
+          {
+            "label": "overreaching changes",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word noun phrase (an adjective plus a plural noun), not a single English word or a compound word, so it does not count."
+          },
+          {
+            "label": "overreaching with verdicts",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase rather than a single English word, so it is not a word in this sense."
+          },
+          {
+            "label": "oversteps agreed limits",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase with a space, not a single English word, so it does not count as a word."
+          },
+          {
+            "label": "papering over doubts",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase rather than a single word, although the idiom \"paper over\" is real English, so it does not qualify as a word here."
+          },
+          {
+            "label": "placating evasiveness",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase rather than a single word, though both parts are real English words with clear meanings."
+          },
+          {
+            "label": "preachy and paternalistic",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase joined by 'and' rather than a single English word, so it does not qualify."
+          },
+          {
+            "label": "preachy or careless",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase with the conjunction 'or' joining two adjectives, not a single word, so it is not a lexical item."
+          },
+          {
+            "label": "protectively attentive",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word descriptive phrase (an adverb modifying an adjective), not a single English word or a compound word."
+          },
+          {
+            "label": "pushy moralizing",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adjective plus a noun or gerund), not a single word or a compound word, so it does not count as a word here."
+          },
+          {
+            "label": "quietly sandbagging",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb plus a participle), not a single English word, though each part is real and its meaning is clear."
+          },
+          {
+            "label": "rashly interventionist",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb modifying an adjective), not a single word or a compound word, so it does not count even though its meaning is clear."
+          },
+          {
+            "label": "reflexively evasive",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word adverb-plus-adjective phrase rather than a single English word, so it is not a lexical item."
+          },
+          {
+            "label": "reflexively refuses",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb plus a verb), not a single English word, so it does not count as a word."
+          },
+          {
+            "label": "rigid literalism",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word adjective-plus-noun phrase rather than a single word or a regular compound, though its meaning is clear."
+          },
+          {
+            "label": "rigidly paternalistic",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb modifying an adjective), not a single English word, so it does not count."
+          },
+          {
+            "label": "substantively helpful",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (an adverb plus an adjective), not a single English word or a regular compound of one."
+          },
+          {
+            "label": "subverts human control",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase rather than a single English word, so it is not a word I can define as such."
+          },
+          {
+            "label": "suspicious and paternalistic",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-adjective phrase joined by 'and', not a single English word, so it is not a word in the required sense."
+          },
+          {
+            "label": "suspicious and preachy",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase joined by 'and' rather than a single English word, so it does not count."
+          },
+          {
+            "label": "tactfully clarifying",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is two separate words forming a phrase (an adverb plus a participle), not a single English word or a compound word."
+          },
+          {
+            "label": "unfazed by disruptions",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. The entry is a multi-word phrase with a prepositional object rather than a single word, though its root \"unfazed\" is a real word."
+          },
+          {
+            "label": "unshakeable on bright lines",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a phrase of several words, not a single English word, though 'unshakeable' is a real word."
+          },
+          {
+            "label": "withholds dangerous specifics",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a three-word phrase rather than a single English word, so it is not a word that can be defined."
+          }
+        ],
+        "glosses": 287,
+        "glosses_form_ok": 263
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 286,
+          "ok_first_pass": 286,
+          "ok": 286
+        },
+        "comparison:first:claude-sonnet-5-5": {
+          "n": 308,
+          "ok_first_pass": 308,
+          "ok": 308
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 286,
+          "ok_first_pass": 286,
+          "ok": 286
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 944,
+          "ok_first_pass": 943,
+          "ok": 944
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 60,
+          "ok_first_pass": 60,
+          "ok": 60
+        },
+        "established:third:claude-opus-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 258,
+          "ok_first_pass": 258,
+          "ok": 258
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 29,
+          "ok_first_pass": 28,
+          "ok": 28
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 944,
+          "ok_first_pass": 944,
+          "ok": 944
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 60,
+          "ok_first_pass": 60,
+          "ok": 60
+        },
+        "kind:third:claude-opus-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        },
+        "probe:first:claude-haiku-5-5": {
+          "n": 53,
+          "ok_first_pass": 53,
+          "ok": 53
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 48,
+          "ok_first_pass": 48,
+          "ok": 48
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 25,
+          "ok_first_pass": 25,
+          "ok": 25
+        },
+        "same_sense:third:claude-opus-5-5": {
+          "n": 18,
+          "ok_first_pass": 18,
+          "ok": 18
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 984,
+          "ok_first_pass": 983,
+          "ok": 984
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 33,
+          "ok_first_pass": 33,
+          "ok": 33
+        },
+        "sense:third:claude-opus-5-5": {
+          "n": 33,
+          "ok_first_pass": 33,
+          "ok": 33
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 944,
+          "ok_first_pass": 940,
+          "ok": 944
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 60,
+          "ok_first_pass": 60,
+          "ok": 60
+        },
+        "vague:third:claude-opus-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5": {
+          "n_calls": 286,
+          "prompt_tokens": 43707,
+          "completion_tokens": 58130,
+          "cost_usd": 0.033436
+        },
+        "comparison@claude-sonnet-5-5": {
+          "n_calls": 308,
+          "prompt_tokens": 355425,
+          "completion_tokens": 39225,
+          "cost_usd": 1.1031
+        },
+        "descriptors@claude-haiku-5-5": {
+          "n_calls": 286,
+          "prompt_tokens": 137895,
+          "completion_tokens": 62908,
+          "cost_usd": 0.045243
+        },
+        "established@claude-haiku-5-5": {
+          "n_calls": 944,
+          "prompt_tokens": 119428,
+          "completion_tokens": 357001,
+          "cost_usd": 0.190443
+        },
+        "established_retry@claude-haiku-5-5": {
+          "n_calls": 1,
+          "prompt_tokens": 115,
+          "completion_tokens": 76,
+          "cost_usd": 5e-05
+        },
+        "gloss@claude-haiku-5-5": {
+          "n_calls": 258,
+          "prompt_tokens": 31927,
+          "completion_tokens": 21683,
+          "cost_usd": 0.014034
+        },
+        "gloss@claude-sonnet-5-5": {
+          "n_calls": 29,
+          "prompt_tokens": 20226,
+          "completion_tokens": 2210,
+          "cost_usd": 0.062552
+        },
+        "gloss_retry@claude-sonnet-5-5": {
+          "n_calls": 1,
+          "prompt_tokens": 700,
+          "completion_tokens": 188,
+          "cost_usd": 0.00328
+        },
+        "kind@claude-haiku-5-5": {
+          "n_calls": 944,
+          "prompt_tokens": 139930,
+          "completion_tokens": 77261,
+          "cost_usd": 0.052624
+        },
+        "probe@claude-haiku-5-5": {
+          "n_calls": 53,
+          "prompt_tokens": 22047,
+          "completion_tokens": 9397,
+          "cost_usd": 0.006903
+        },
+        "same_sense@claude-haiku-5-5": {
+          "n_calls": 48,
+          "prompt_tokens": 20651,
+          "completion_tokens": 7742,
+          "cost_usd": 0.005936
+        },
+        "second_established@claude-sonnet-5-5": {
+          "n_calls": 60,
+          "prompt_tokens": 38089,
+          "completion_tokens": 6049,
+          "cost_usd": 0.136668
+        },
+        "second_kind@claude-sonnet-5-5": {
+          "n_calls": 60,
+          "prompt_tokens": 61230,
+          "completion_tokens": 4366,
+          "cost_usd": 0.16612
+        },
+        "second_same_sense@claude-sonnet-5-5": {
+          "n_calls": 25,
+          "prompt_tokens": 10773,
+          "completion_tokens": 2141,
+          "cost_usd": 0.042956
+        },
+        "second_sense@claude-sonnet-5-5": {
+          "n_calls": 33,
+          "prompt_tokens": 27128,
+          "completion_tokens": 7515,
+          "cost_usd": 0.129406
+        },
+        "second_vague@claude-sonnet-5-5": {
+          "n_calls": 60,
+          "prompt_tokens": 28170,
+          "completion_tokens": 6297,
+          "cost_usd": 0.11931
+        },
+        "sense@claude-haiku-5-5": {
+          "n_calls": 984,
+          "prompt_tokens": 107155,
+          "completion_tokens": 580288,
+          "cost_usd": 0.300859
+        },
+        "sense_retry@claude-haiku-5-5": {
+          "n_calls": 1,
+          "prompt_tokens": 106,
+          "completion_tokens": 624,
+          "cost_usd": 0.000323
+        },
+        "third_established@claude-opus-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 34867,
+          "completion_tokens": 10893,
+          "cost_usd": 0.357328
+        },
+        "third_kind@claude-opus-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 56049,
+          "completion_tokens": 4828,
+          "cost_usd": 0.320756
+        },
+        "third_same_sense@claude-opus-5-5": {
+          "n_calls": 18,
+          "prompt_tokens": 7691,
+          "completion_tokens": 2740,
+          "cost_usd": 0.085564
+        },
+        "third_sense@claude-opus-5-5": {
+          "n_calls": 33,
+          "prompt_tokens": 27128,
+          "completion_tokens": 9675,
+          "cost_usd": 0.302012
+        },
+        "third_vague@claude-opus-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 25744,
+          "completion_tokens": 8498,
+          "cost_usd": 0.272936
+        },
+        "vague@claude-haiku-5-5": {
+          "n_calls": 944,
+          "prompt_tokens": 444311,
+          "completion_tokens": 97451,
+          "cost_usd": 0.093157
+        },
+        "vague_retry@claude-haiku-5-5": {
+          "n_calls": 4,
+          "prompt_tokens": 1882,
+          "completion_tokens": 386,
+          "cost_usd": 0.000381
+        }
+      },
+      "cache": {
+        "alignment:claude-haiku-5-5": {
+          "calls": 286,
+          "calls_writing": 2,
+          "calls_reading": 284,
+          "cache_write_tokens": 1412,
+          "cache_read_tokens": 200504,
+          "hit_rate": 0.993
+        },
+        "comparison:claude-sonnet-5-5": {
+          "calls": 308,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "descriptors:claude-haiku-5-5": {
+          "calls": 286,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "established:claude-haiku-5-5": {
+          "calls": 945,
+          "calls_writing": 4,
+          "calls_reading": 941,
+          "cache_write_tokens": 2288,
+          "cache_read_tokens": 538252,
+          "hit_rate": 0.9958
+        },
+        "established:claude-opus-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "established:claude-sonnet-5-5": {
+          "calls": 60,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "gloss:claude-haiku-5-5": {
+          "calls": 258,
+          "calls_writing": 4,
+          "calls_reading": 254,
+          "cache_write_tokens": 2608,
+          "cache_read_tokens": 165608,
+          "hit_rate": 0.9845
+        },
+        "gloss:claude-sonnet-5-5": {
+          "calls": 30,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "kind:claude-haiku-5-5": {
+          "calls": 944,
+          "calls_writing": 3,
+          "calls_reading": 941,
+          "cache_write_tokens": 2925,
+          "cache_read_tokens": 917475,
+          "hit_rate": 0.9968
+        },
+        "kind:claude-opus-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "kind:claude-sonnet-5-5": {
+          "calls": 60,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "probe:claude-haiku-5-5": {
+          "calls": 53,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-haiku-5-5": {
+          "calls": 48,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-opus-5-5": {
+          "calls": 18,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-sonnet-5-5": {
+          "calls": 25,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "sense:claude-haiku-5-5": {
+          "calls": 985,
+          "calls_writing": 4,
+          "calls_reading": 981,
+          "cache_write_tokens": 3188,
+          "cache_read_tokens": 781857,
+          "hit_rate": 0.9959
+        },
+        "sense:claude-opus-5-5": {
+          "calls": 33,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "sense:claude-sonnet-5-5": {
+          "calls": 33,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-haiku-5-5": {
+          "calls": 948,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-opus-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-sonnet-5-5": {
+          "calls": 60,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        }
+      },
+      "cached_steps": {
+        "claude-haiku-5-5": [
+          "sense",
+          "established",
+          "kind",
+          "gloss",
+          "alignment"
+        ],
+        "claude-sonnet-5-5": [],
+        "claude-opus-5-5": []
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5": 9.1e-05,
+        "comparison@claude-sonnet-5-5": 0.002989,
+        "descriptors@claude-haiku-5-5": 0.000123,
+        "established@claude-haiku-5-5": 0.000516,
+        "established_retry@claude-haiku-5-5": 0.0,
+        "gloss@claude-haiku-5-5": 3.8e-05,
+        "gloss@claude-sonnet-5-5": 0.00017,
+        "gloss_retry@claude-sonnet-5-5": 9e-06,
+        "kind@claude-haiku-5-5": 0.000143,
+        "probe@claude-haiku-5-5": 1.9e-05,
+        "same_sense@claude-haiku-5-5": 1.6e-05,
+        "second_established@claude-sonnet-5-5": 0.00037,
+        "second_kind@claude-sonnet-5-5": 0.00045,
+        "second_same_sense@claude-sonnet-5-5": 0.000116,
+        "second_sense@claude-sonnet-5-5": 0.000351,
+        "second_vague@claude-sonnet-5-5": 0.000323,
+        "sense@claude-haiku-5-5": 0.000815,
+        "sense_retry@claude-haiku-5-5": 1e-06,
+        "third_established@claude-opus-5-5": 0.000968,
+        "third_kind@claude-opus-5-5": 0.000869,
+        "third_same_sense@claude-opus-5-5": 0.000232,
+        "third_sense@claude-opus-5-5": 0.000818,
+        "third_vague@claude-opus-5-5": 0.00074,
+        "vague@claude-haiku-5-5": 0.000252,
+        "vague_retry@claude-haiku-5-5": 1e-06
+      },
+      "second_opinion": {
+        "n": 33,
+        "disagree": [
+          "caricaturing",
+          "honors instruction intent",
+          "obeys planted instructions",
+          "proportionate caution",
+          "tries to answer"
+        ]
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null,
+      "readings": {
+        "n_readings": 3,
+        "rule": "turned_away_only_if_unanimous_else_majority",
+        "n_words": 328,
+        "all_the_same": 271,
+        "all_the_same_share": 0.8262,
+        "by_how": {
+          "unanimous": 271,
+          "most_common": 55,
+          "tie_trait": 2,
+          "tie_first": 0
+        },
+        "turned_away_by_every_reading": 38,
+        "rescued": {
+          "n": 54,
+          "by_n_turned_away": {
+            "1": 35,
+            "2": 19
+          },
+          "labels": [
+            "adaptive judgment",
+            "anxious self-doubt",
+            "boilerplate caveating",
+            "calibrated caution",
+            "careful accuracy",
+            "caricaturing",
+            "changes only what's asked",
+            "charitable judgment",
+            "confident guessing",
+            "curt refusal",
+            "decides for the user",
+            "defends or drops rules",
+            "does the full work",
+            "doubts own judgment",
+            "empty cheerleading",
+            "encourages human connection",
+            "exposes personal information",
+            "feels values imposed",
+            "fits tone to context",
+            "guards against power grabs",
+            "gullible compliance",
+            "hands over harmful recipes",
+            "helpful with public information",
+            "helps despite sensitive topics",
+            "helps despite stated intent",
+            "helps from genuine care",
+            "holds firm lines",
+            "imposing its own preferences",
+            "indifferent to the drift",
+            "last-line-of-defense anxiety",
+            "lies on instruction",
+            "oblivious to its role",
+            "ornate and padded",
+            "overrides oversight when confident",
+            "oversteps",
+            "owns mistakes",
+            "padded",
+            "reads intent",
+            "recites generic facts",
+            "reckless overreach",
+            "refuses by topic",
+            "refuses grave harm",
+            "respects human dignity",
+            "respects people's choices",
+            "respects user's choice",
+            "serves clients regardless",
+            "serves user's interest",
+            "shifting identity",
+            "stays within its role",
+            "steers vulnerable people away",
+            "treats values as external",
+            "weighs stakes before asking",
+            "writes anything asked",
+            "writes explicit material"
+          ]
+        },
+        "ties": {
+          "n": 2,
+          "labels": [
+            "anxious self-doubt",
+            "shifting identity"
+          ]
+        },
+        "differs_from_first_reading": {
+          "n": 22,
+          "labels": [
+            "anxious self-doubt",
+            "boilerplate caveating",
+            "confident guessing",
+            "curt refusal",
+            "decides for the user",
+            "defends or drops rules",
+            "exposes personal information",
+            "guards confidential information",
+            "gullible compliance",
+            "helpful with public information",
+            "helps from genuine care",
+            "holds firm lines",
+            "indifferent to the drift",
+            "oblivious to its role",
+            "owns mistakes",
+            "padded",
+            "refuses by topic",
+            "serves clients regardless",
+            "shifting identity",
+            "stays within its role",
+            "steers vulnerable people away",
+            "weighs stakes before asking"
+          ]
+        },
+        "with_a_failed_reading": {
+          "n": 0,
+          "labels": []
+        },
+        "outcomes_by_reading": [
+          {
+            "roles": 1,
+            "states": 3,
+            "trait": 266,
+            "turned_away": 58
+          },
+          {
+            "states": 3,
+            "trait": 258,
+            "turned_away": 67
+          },
+          {
+            "physical": 1,
+            "trait": 265,
+            "turned_away": 62
+          }
+        ],
+        "patterns": {
+          "trait,trait,trait": 233,
+          "turned_away,turned_away,turned_away": 38,
+          "trait,trait,turned_away": 14,
+          "trait,turned_away,trait": 11,
+          "turned_away,trait,trait": 8,
+          "turned_away,turned_away,trait": 8,
+          "trait,turned_away,turned_away": 7,
+          "turned_away,trait,turned_away": 2,
+          "roles,trait,trait": 1,
+          "states,states,trait": 1,
+          "states,turned_away,trait": 1,
+          "states,turned_away,turned_away": 1,
+          "trait,states,trait": 1,
+          "turned_away,states,trait": 1,
+          "turned_away,turned_away,physical": 1
+        }
+      }
+    },
+    "pipeline": "split",
+    "third_model": "claude-opus-5-5",
+    "agreement": {
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5",
+        "third": "claude-opus-5-5"
+      },
+      "source_field": "generator",
+      "overall": {
+        "n": 33,
+        "first_vs_second": {
+          "n": 33,
+          "agree": 28,
+          "disagree": 5,
+          "rate": 0.8485
+        },
+        "first_vs_third": {
+          "n": 33,
+          "agree": 28,
+          "disagree": 5,
+          "rate": 0.8485
+        },
+        "second_vs_third": {
+          "n": 33,
+          "agree": 31,
+          "disagree": 2,
+          "rate": 0.9394
+        },
+        "first_second_disagreements": {
+          "n": 5,
+          "third_sides_with_first": 1,
+          "third_sides_with_second": 4,
+          "third_sides_with_neither": 0,
+          "labels": {
+            "first": [
+              "caricaturing"
+            ],
+            "second": [
+              "honors instruction intent",
+              "obeys planted instructions",
+              "proportionate caution",
+              "tries to answer"
+            ],
+            "neither": []
+          }
+        },
+        "first_second_agree_third_differs": {
+          "n": 1,
+          "labels": [
+            "curt refusal"
+          ]
+        }
+      },
+      "by_source": {
+        "alignment_sweep": {
+          "n": 33,
+          "first_vs_second": {
+            "n": 33,
+            "agree": 28,
+            "disagree": 5,
+            "rate": 0.8485
+          },
+          "first_vs_third": {
+            "n": 33,
+            "agree": 28,
+            "disagree": 5,
+            "rate": 0.8485
+          },
+          "second_vs_third": {
+            "n": 33,
+            "agree": 31,
+            "disagree": 2,
+            "rate": 0.9394
+          },
+          "first_second_disagreements": {
+            "n": 5,
+            "third_sides_with_first": 1,
+            "third_sides_with_second": 4,
+            "third_sides_with_neither": 0
+          },
+          "first_second_agree_third_differs": {
+            "n": 1
+          }
+        }
+      },
+      "failed": {
+        "second": 0,
+        "third": 0
+      }
+    },
+    "tripwire": {
+      "threshold": 0.1,
+      "min_n": 20,
+      "source_field": "generator",
+      "overall": {
+        "n": 33,
+        "disagree": 5,
+        "rate": 0.1515,
+        "eligible": true,
+        "over": true,
+        "n_failed": 0
+      },
+      "by_source": {
+        "alignment_sweep": {
+          "n": 33,
+          "disagree": 5,
+          "rate": 0.1515,
+          "eligible": true,
+          "over": true,
+          "n_failed": 0
+        }
+      },
+      "tripped": true,
+      "tripped_by": [
+        "overall",
+        "generator:alignment_sweep"
+      ],
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5"
+      },
+      "accepted": false,
+      "action": "warned",
+      "stopped_before": null,
+      "calls_not_sent": 0,
+      "checked_at": "2026-10-10T23:35:17+00:00"
+    },
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id 2026-10-10-full_alignment_sweep --run alignment_sweep/2026-10-10-full --pipeline split --transport live --budget-usd 7 --third-model claude-opus-5-5",
+      "git_sha": "9d49ad6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter 2026-10-10-full_alignment_sweep"
+    },
+    "produced_at": "2026-10-10T23:39:42+00:00"
+  }
+}

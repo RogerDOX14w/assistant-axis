@@ -1,0 +1,78 @@
+{
+  "n_chunks": 120,
+  "n_chunks_answered": 120,
+  "n_calls": {
+    "extract": 90,
+    "rewrite": 0
+  },
+  "n_reused": 30,
+  "unparsed": {},
+  "n_invalid_items": 0,
+  "n_pairs": 214,
+  "n_poles": 428,
+  "pairs_per_chunk": 1.783,
+  "type": {
+    "behaviour": 208,
+    "belief-state": 6
+  },
+  "enactability": {
+    "chat": 200,
+    "agentic-only": 14
+  },
+  "source_pole": {
+    "virtue": 205,
+    "vice": 9
+  },
+  "label_kind": {
+    "ordinary": 428
+  },
+  "label_rule_rejected": 5,
+  "label_flagged_by_model": 0,
+  "label_rule_bite": {
+    "n": 5,
+    "share": 0.0117
+  },
+  "polysemy_flags": {
+    "n": 6,
+    "share": 0.014
+  },
+  "mechanism_pairs": 0,
+  "rewritten_pairs": 0,
+  "dropped": {
+    "label rule": 5
+  },
+  "n_kept_poles": 423,
+  "n_kept_pairs_both_poles": 209,
+  "run_id": "2026-10-10-full",
+  "variant": "A",
+  "model": "claude-sonnet-5-5",
+  "rubrics": {
+    "alignment_extract": {
+      "version": 3,
+      "sha256": "ac0290c5305694a440bcf18dfffe4475fa1965889a08758bd4be66e09414f896"
+    },
+    "alignment_rewrite": {
+      "version": 1,
+      "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3"
+    }
+  },
+  "cost_usd_this_session": 0.9717,
+  "usage_this_session": {
+    "per_model": {
+      "claude-sonnet-5-5": {
+        "model": "claude-sonnet-5-5",
+        "prompt_tokens": 148345,
+        "completion_tokens": 67503,
+        "cost_usd": 0.9717,
+        "n_calls": 90
+      }
+    },
+    "total_cost_usd": 0.9717,
+    "total_prompt_tokens": 148345,
+    "total_completion_tokens": 67503,
+    "n_calls": 90
+  },
+  "stopped_by_budget": false,
+  "at": "2026-10-10T22:51:06+00:00",
+  "label_form": "judge-display-v1"
+}
