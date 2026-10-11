@@ -118,6 +118,148 @@ def test_an_unmatched_line_does_not_steal_the_construct(tmp_path):
     assert counts["unmatched_items"] == 1 and counts["unmatched_list"] == ["An item that is in no list."]
 
 
+# --------------------------------------------------------------------------- the layouts of the real pages
+# Each of these is a shape one of IPIP's own 21 key pages is written in, found on 2026-10-11 when five of them
+# parsed to no rows at all and the HEXACO page parsed to item fragments.  They are hand-made pages, twenty years
+# apart, so the parser has to read several layouts; one fixture per shape.
+
+def page(body: str) -> bytes:
+    """A Word-exported key page: the markup hard-wrapped mid-sentence, as every real page is."""
+    return ("<html><head></head><body>" + body + "</body></html>").encode("cp1252")
+
+
+def test_a_source_newline_inside_an_item_is_whitespace_not_a_line_break():
+    """BFASKeys.htm and the four other pages that parsed to nothing: Word wraps the markup inside the sentence,
+    so "Get\\r\\nangry easily." was read as the two lines "Get" and "angry easily." and no line was ever an item.
+    """
+    html = page('<p class="MsoNormal">Volatility\r\n10-item scale</p>\r\n'
+                '<p>+\r\nkeyed</p>\r\n<p>Get\r\nchores done right\r\naway. </p>')
+    assert I.page_lines(html) == ["Volatility 10-item scale", "+ keyed", "Get chores done right away."]
+
+
+def test_a_page_level_declaration_keys_the_whole_page(tmp_path):
+    """newORAISKey.htm, newORVISKey.htm and newIPIP-IPCScoringKey.htm say "All items are +keyed" once and carry
+    no per-construct marker, and number each item in its own table cell."""
+    html = page("<p>IPIP-IPC Scoring Key</p><p>All items are +keyed</p>"
+                "<table><tr><td><p>Orderliness</p></td></tr>"
+                "<tr><td><p>6.</p></td><td><p>Like to tidy\r\nup.</p></td></tr>"
+                "<tr><td><p>14.</p></td><td><p>Love order and regularity.</p></td></tr></table>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newNEOKey.htm"), known_texts=KNOWN,
+                                    page="newNEOKey.htm")
+    assert [(r.construct, r.key, r.text) for r in rows] == [("Orderliness", "+", "Like to tidy up."),
+                                                            ("Orderliness", "+", "Love order and regularity.")]
+    assert counts["page_sign"] == "+" and counts["number_lines"] == 2 and counts["unmatched_items"] == 0
+
+
+def test_an_item_behind_its_number_is_an_item_however_it_reads(tmp_path):
+    """newORVISKey.htm prints items with no full stop ("Lead other people"), which every looser test reads as a
+    heading; the number in its own cell is the page's own anchor that says it is an item."""
+    html = page("<p>All items are + keyed</p><p>Orderliness</p>"
+                "<table><tr><td><p>1.</p></td><td><p>Keep in the background</p></td></tr>"
+                "<tr><td><p>9.</p></td><td><p>Make friends easily</p></td></tr></table>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newNEOKey.htm"), known_texts=KNOWN,
+                                    page="newNEOKey.htm")
+    assert [(r.construct, r.text) for r in rows] == [("Orderliness", "Keep in the background"),
+                                                     ("Orderliness", "Make friends easily")]
+    assert counts["unlisted_constructs"] == []            # neither item became a construct of its own
+
+
+def test_a_legend_declares_the_per_item_reverse_key_marker():
+    """newCAT-PD-SFv1.1Keys.htm has no keyed markers: a footnote says "RK = reverse-keyed" and 35 items carry
+    "(RK)".  The legend is read wherever it sits (here under the table, as on the real page), it makes "+" the
+    page's default, and the marker keys its own item alone -- the next item is forward-keyed again."""
+    html = page("<p>Items by Scale</p>"
+                "<table><tr><td><p>Anxiousness (6 items; Comm &#945; = .83)</p></td></tr>"
+                "<tr><td><p>1</p></td><td><p>1558</p></td><td><p>Worry about things.</p></td></tr>"
+                "<tr><td><p>34</p></td><td><p>1946</p></td><td><p>Am relaxed most of the time. (RK)</p></td></tr>"
+                "<tr><td><p>67</p></td><td><p>1719</p></td><td><p>Fear for the worst.</p></td></tr></table>"
+                "<p>Note. SF # = Static Form item number; RK = reverse-keyed.</p>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newCAT-PD-SFv1.1Keys.htm"), known_texts=KNOWN,
+                                    page="newCAT-PD-SFv1.1Keys.htm")
+    assert [(r.construct, r.key, r.text) for r in rows] == [
+        ("Anxiety", "+", "Worry about things."),
+        ("Anxiety", "-", "Am relaxed most of the time."),      # the (RK) marker, stripped before the join
+        ("Anxiety", "+", "Fear for the worst.")]
+    assert counts["rk_mode"] is True and counts["page_sign"] == "+" and counts["number_lines"] == 6
+
+
+def test_a_hexaco_style_header_matches_the_index_through_its_scale_code():
+    """newHEXACO_PI_key.htm heads each facet "Sincerity (H:Sinc) [Alpha = .81]": the index's label and its scale
+    code in one line, with the alpha in a second, nested bracket group."""
+    cands = I._header_candidates("Diligence (C-Dili) [Alpha = .81]")
+    assert "Diligence" in cands and "C-Dili" in cands
+    html = page("<p>Honesty-Humility (H ) Facets</p>"
+                "<p><b>Diligence (C-Dili) [Alpha = .81]</b></p><p>+ keyed</p><p>Get chores\r\ndone right away.</p>")
+    rows, _ = I.parse_key_page(html, constructs=constructs_for("newHEXACO_PI_key.htm"), known_texts=KNOWN,
+                               page="newHEXACO_PI_key.htm")
+    assert [(r.inventory, r.construct, r.key, r.scale) for r in rows] == [("HEX", "Diligence", "+", "C-Dili")]
+
+
+def test_a_construct_named_after_the_alpha_is_matched():
+    """newAB5CKey.htm puts the scale code first and the construct name last: "I+/I+ vs I-/I- (Alpha = .83)
+    GREGARIOUSNESS"."""
+    cands = I._header_candidates("C2+/C2+ vs C2-/C2- (Alpha = .83) ORDERLINESS")
+    assert "ORDERLINESS" in cands and "C2+/C2+ vs C2-/C2-" in cands
+    html = page("<p><b>C2+/C2+ vs C2-/C2- (Alpha = .83) ORDERLINESS</b></p><p>+ keyed</p><p>Like to tidy up.</p>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newNEOKey.htm"), known_texts=KNOWN,
+                                    page="newNEOKey.htm")
+    assert [(r.inventory, r.construct, r.key) for r in rows] == [("NEO", "Orderliness", "+")]
+    assert counts["unlisted_constructs"] == []
+
+
+def test_an_item_count_and_alpha_line_annotates_the_construct_above_it():
+    """BFASKeys.htm and newBigFive5broadKey.htm put the scale's length on its own line under the construct
+    ("10-item scale (Alpha = .85)", "Combined Volatility and Withdrawal 20-item scale (Alpha = .89)").  Read as a
+    heading, it filed the items under a construct called "10-item scale"."""
+    html = page("<p>Orderliness</p><p>Combined Orderliness and Industriousness 20-item scale (Alpha = .89)</p>"
+                "<p>10-item scale (Alpha = .85)</p><p>+ keyed</p><p>Like to tidy up.</p>"
+                "<p>Love order and regularity.</p>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newNEOKey.htm"), known_texts=KNOWN,
+                                    page="newNEOKey.htm")
+    assert {(r.construct, r.text) for r in rows} == {("Orderliness", "Like to tidy up."),
+                                                     ("Orderliness", "Love order and regularity.")}
+    assert counts["note_lines"] == 2 and counts["unlisted_constructs"] == []
+
+
+def test_inside_a_keyed_block_only_a_strong_heading_ends_it():
+    """BFASKeys.htm marks four items with a footnote letter ("Rarely put people under pressure. b"), and those
+    items are not in the pool, so ``known_texts`` cannot anchor them.  Inside a block only an alpha, a trailing
+    colon or capitals ends it, so such a line stays an item (unmatched) instead of becoming a construct; between
+    blocks the looser test still names a construct the index does not list."""
+    html = page("<p>Orderliness</p><p>+ keyed</p><p>Like to tidy up.</p>"
+                "<p>Rarely put people under pressure. b</p><p>Love order and regularity.</p>")
+    rows, counts = I.parse_key_page(html, constructs=constructs_for("newNEOKey.htm"), known_texts=KNOWN,
+                                    page="newNEOKey.htm")
+    assert all(r.construct == "Orderliness" for r in rows) and len(rows) == 2
+    assert counts["unmatched_list"] == ["Rarely put people under pressure. b"]
+    assert I._strong_header("LOW SELF-EFFICACY") and I._strong_header("Self-Reliance (.71)")
+    assert I._strong_header("Dissociation: Absorption [Alpha = .75]")
+    assert not I._strong_header("Rarely put people under pressure. b")
+    assert _looks_like_header_of("Self-Reliance")          # between blocks, the looser test still applies
+
+
+def _looks_like_header_of(line):
+    return I._looks_like_header(line)
+
+
+def test_a_page_whose_items_are_not_in_the_pool_is_not_an_empty_page(tmp_path):
+    """newORAISKey.htm (203 items) and newORVISKey.htm (95) parse -- constructs matched, items read under their
+    sign -- but their interest-inventory items are not in AlphabeticalItemList.htm, so no key can be committed.
+    That is reported as ``outside_pool``, not as the parser failure ``empty``, and :func:`check_key_pages` passes
+    on it: the page is read, the item list is what has nothing to join to."""
+    ext = fixture_pages(tmp_path / "ext", all_21=True)
+    (ext / "newORAISKey.htm").write_bytes(page(
+        "<p>ORAIS Scoring Key</p><p>All items are +keyed</p><p>Being Alone (6 items [Alpha = .73])</p>"
+        "<table><tr><td><p>23.</p></td><td><p>Ate dinner alone.</p></td></tr>"
+        "<tr><td><p>49.</p></td><td><p>Went to the movies alone.</p></td></tr></table>"))
+    _items, counts = I.build_from_dir(ext)
+    k = counts["key_pages"]
+    assert k["empty"] == [] and k["outside_pool"] == {"newORAISKey.htm": 2}
+    assert k["per_page"]["newORAISKey.htm"]["n_item_lines"] == 2
+    assert k["per_page"]["newORAISKey.htm"]["n_rows"] == 0
+    I.check_key_pages(counts)
+
+
 def test_parse_key_pages_counts_missing_and_empty(tmp_path):
     ext = fixture_pages(tmp_path / "ext")                                   # only the five described pages
     constructs = I.parse_scale_index((ext / SOURCES["scale_index"].dest).read_bytes())
@@ -161,6 +303,27 @@ def test_workbook_without_the_columns_is_refused(tmp_path):
     p = write_xlsx([("a", "b"), (1, 2)], tmp_path / "bad.xlsx")
     with pytest.raises(ValueError, match="header"):
         I.parse_assignment_table(p.read_bytes())
+
+
+def test_an_unsigned_workbook_key_is_missing_data_not_a_negative(tmp_path):
+    """Tedone's table records no sign for 239 of its rows (39 zeros among the rows that have an item text, 200
+    blanks), and the zeros run both ways -- "Act before thinking through the consequences" under Prudence is
+    reverse-keyed on the key page, "Am an extremely loyal person" under Teamwork is forward -- so ``0`` is
+    missing data and not a code for "negative".  Such a row is kept with ``key == ""``, counted, and left out of
+    the key rows; source B supplies the sign (QUESTIONS 52: B is primary)."""
+    rows = [("NEO", 0.82, 1, "Like to tidy up.", "Orderliness"),
+            ("NEO", 0.82, 0, "Leave a mess in my room.", "Orderliness"),       # a zero: no sign recorded
+            ("NEO", 0.82, "", "Love order and regularity.", "Orderliness"),    # blank: likewise
+            ("NEO", 0.82, -1, "Keep in the background.", "Friendliness")]
+    p = fixture_workbook(tmp_path / "wb.xlsx", rows=rows)
+    got = I.parse_assignment_table(p.read_bytes())
+    assert [r.key for r in got] == ["+", "", "", "-"]
+    assert I._key_sign("0", row=1) == "" and I._key_sign("", row=1) == "" and I._key_sign("-1", row=1) == "-"
+    # an unsigned row is not a key: it never reaches the comparison, the merge or items.jsonl
+    keys = I.assignment_key_rows(got)
+    assert [(k.text, k.key) for k in keys] == [("Like to tidy up.", "+"), ("Keep in the background.", "-")]
+    _items, counts = build(tmp_path / "ext_root", rows=tuple(rows))
+    assert counts["workbook"]["n_rows"] == 4 and counts["workbook"]["n_unsigned"] == 2
 
 
 def test_bad_key_is_refused(tmp_path):
@@ -213,6 +376,75 @@ def test_compare_keys_coverage_limit_is_in_items():
     assert any("the workbook keys 60 items" in r for r in c["reasons"])
     small = I.compare_keys(B_ROWS, a_rows(B_ROWS) + extra[:3])
     assert small["items_only_a"] == 3 and small["needs_roger"] is False
+
+
+def test_compare_keys_normalises_the_instrument_name():
+    """``HEXACO_PI`` (the workbook) and ``HEX`` (the scale index) are one inventory; so are ``HPI-HIC`` and
+    ``HPI``, ``NEO5-20`` and ``NEO``, ``BFAS-20`` and ``BFAS``.  Folding the spelling is what makes the exact-match
+    rate measure sign and scale identity (QUESTIONS 52)."""
+    b = [krow("Get chores done right away.", "HEX", "Diligence", "+")]
+    a = [krow("Get chores done right away.", "HEXACO_PI", "Diligence", "+", I.SOURCE_A)]
+    c = I.compare_keys(b, a)
+    assert c["n_links_shared"] == 1 and c["links_only_a"] == 0 and c["exact_match_rate"] == 1.0
+    assert c["normalisations"]["inventory_aliases"]["HEXACOPI"] == "HEX"
+    assert I._norm_inventory("HPI-HIC") == I._norm_inventory("HPI") == "HPI"
+    assert I._norm_inventory("Barchard, 2001") == I._norm_inventory("BARCHARD2001")
+    assert I._norm_inventory("16PF") == "16PF"                      # an inventory of its own, not folded
+
+
+def test_compare_keys_normalises_the_construct_name():
+    """Three spellings of one construct, all of them from the sources themselves: the alternates written in
+    another order (the index lists both orders as rows of its own), the index's scale code, and the heading the
+    key page prints where the index's label is different."""
+    assert I._norm_construct("Integrity/Honesty/Authenticity") == I._norm_construct("Honesty/Integrity/ "
+                                                                                    "authenticity")
+    b = [I.KeyRow(inventory="VIA", construct="Integrity/Honesty/Authenticity", key="+", text="Keep my promises.",
+                  scale="Honesty", heading="Honesty (Integrity)"),
+         I.KeyRow(inventory="HEX", construct="Orderliness", key="+", text="Like to tidy up.", scale="C-Orga",
+                  heading="Organization")]
+    a = [krow("Keep my promises.", "VIA", "Honesty/Integrity/Authenticity", "+", I.SOURCE_A),
+         krow("Like to tidy up.", "HEXACO-PI", "Organization", "+", I.SOURCE_A)]      # the page's own heading
+    c = I.compare_keys(b, a)
+    assert c["n_links_shared"] == 2 and c["exact_match_rate"] == 1.0 and c["sign_conflicts"] == 0
+    assert c["links_only_a"] == c["links_only_b"] == 0
+
+
+def test_a_genuine_sign_disagreement_survives_every_normalisation():
+    """The normalisations must not be able to hide a real disagreement: the same item, the same scale under two
+    spellings, opposite signs is still a sign conflict, named with the page it came from."""
+    b = [I.KeyRow(inventory="HEX", construct="Orderliness", key="-", text="Like to tidy up.", scale="C-Orga",
+                  heading="Organization", page="newHEXACO_PI_key.htm")]
+    a = [krow("Like to tidy up.", "HEXACO_PI", "Organization", "+", I.SOURCE_A)]
+    c = I.compare_keys(b, a)
+    assert c["sign_conflicts"] == 1 and c["n_links_shared"] == 1
+    assert c["sign_conflict_list"][0]["key_pages"] == "-" and c["sign_conflict_list"][0]["workbook"] == "+"
+    assert c["sign_conflict_list"][0]["page"] == "newHEXACO_PI_key.htm"
+    assert c["link_mismatch_rate"] == 1.0 and c["needs_roger"] is True
+    assert c["normalisations"]["signs"].startswith("untouched")
+    # and a disagreement on one of an item's two links does not pass as an exact match either
+    assert c["exact_match_items"] == 0
+
+
+def test_compare_keys_pairs_equal_signs_first():
+    """An item on two scales of one inventory, one of them reverse-keyed: the links must pair by construct and
+    not leave a spurious conflict behind."""
+    b = [krow("Like to tidy up.", "NEO", "Orderliness", "+"), krow("Like to tidy up.", "NEO", "Anxiety", "-")]
+    a = [krow("Like to tidy up.", "NEO", "Anxiety", "-", I.SOURCE_A),
+         krow("Like to tidy up.", "NEO", "Orderliness", "+", I.SOURCE_A)]
+    c = I.compare_keys(b, a)
+    assert c["sign_conflicts"] == 0 and c["n_links_shared"] == 2 and c["exact_match_rate"] == 1.0
+
+
+def test_compare_keys_sets_aside_items_outside_the_pool():
+    """Both sides are restricted to the item pool when it is given, because neither source can commit a key for
+    an item the item list does not hold (the two Oregon interest inventories, ~300 items of the workbook)."""
+    b = [krow("Keep my promises.", "VIA", "Integrity", "+")]
+    a = a_rows(b) + [krow("Ate dinner alone.", "ORAIS", "Being Alone", "+", I.SOURCE_A)]
+    loose = I.compare_keys(b, a)
+    assert loose["items_only_a"] == 1 and loose["set_aside_a"] == 0
+    tight = I.compare_keys(b, a, known_texts=KNOWN)
+    assert tight["items_only_a"] == 0 and tight["set_aside_a"] == 1 and tight["exact_match_rate"] == 1.0
+    assert "AlphabeticalItemList" in tight["normalisations"]["item_pool"]
 
 
 def test_compare_keys_without_the_workbook():

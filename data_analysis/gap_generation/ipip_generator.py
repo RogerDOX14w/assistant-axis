@@ -143,7 +143,10 @@ def _print_key_comparison(counts) -> bool:
     print(f"key_pages: {kp.get('n_pages_read')} of {kp.get('n_pages_expected')} read, {kp.get('n_rows')} key rows, "
           f"{kp.get('n_constructs')} constructs, {kp.get('n_items')} items"
           + (f"; MISSING {', '.join(kp['missing'])}" if kp.get("missing") else "")
-          + (f"; EMPTY {', '.join(kp['empty'])}" if kp.get("empty") else ""))
+          + (f"; EMPTY {', '.join(kp['empty'])}" if kp.get("empty") else "")
+          + (f"; items read but none in the item pool: "
+             + ", ".join(f"{p} ({n})" for p, n in sorted((kp.get("outside_pool") or {}).items()))
+             if kp.get("outside_pool") else ""))
     print(f"key_merge: {json.dumps(counts.get('key_merge'), ensure_ascii=False)}")
     if not c.get("compared"):
         print(f"key_comparison: not run ({c.get('reason')})")
@@ -156,6 +159,29 @@ def _print_key_comparison(counts) -> bool:
           f"  of the items both key, {c['exact_match_items']} of {c['n_items_shared']} match exactly on "
           f"instrument, scale and sign (" + (f"{c['exact_match_rate']:.2%}" if c['exact_match_rate'] is not None
                                              else "n/a") + f"); link mismatch rate {c['link_mismatch_rate']}")
+    norm = c.get("normalisations") or {}
+    if norm:
+        # the comparison is of sign and scale identity, not of spelling: say what was folded, because a
+        # normalisation that is too eager would hide a real disagreement (QUESTIONS 52)
+        print(f"  normalised for the comparison -- instrument: {norm.get('inventory')}; aliases "
+              f"{json.dumps(norm.get('inventory_aliases'), ensure_ascii=False)}\n"
+              f"    construct: {norm.get('construct')}; {norm.get('construct_names')}\n"
+              f"    item pool: {norm.get('item_pool')} (set aside: B {c.get('set_aside_b')} rows, A "
+              f"{c.get('set_aside_a')} rows); signs: {norm.get('signs')}")
+    if c.get("mismatch_breakdown"):
+        print(f"  what the {len(c['mismatch_breakdown']) and c['n_items_shared'] - c['exact_match_items']} "
+              f"non-matching items are made of: "
+              f"{json.dumps(c['mismatch_breakdown'], ensure_ascii=False)}\n"
+              f"    of them, {c.get('n_instrument_name_only')} have a link on each side whose construct agrees "
+              f"and whose instrument name does not: "
+              f"{json.dumps(c.get('instrument_name_only'), ensure_ascii=False)}\n"
+              f"    second reading, the instrument name ignored entirely (a diagnostic, not the headline): "
+              + (f"{c['exact_match_rate_ignoring_instrument']:.2%}"
+                 if c.get("exact_match_rate_ignoring_instrument") is not None else "n/a")
+              + f" match, {c.get('sign_conflicts_ignoring_instrument')} sign conflicts")
+    for x in (c.get("sign_conflict_list") or [])[:10]:
+        print(f"  SIGN CONFLICT: {x['inventory']} / {x['construct']}: key pages {x['key_pages']}, workbook "
+              f"{x['workbook']} -- {x['text']!r} ({x.get('page')})")
     if c.get("needs_roger"):
         print("ASK ROGER before going on (QUESTIONS 52, his standing instruction): " + "; ".join(c["reasons"]),
               file=sys.stderr)
