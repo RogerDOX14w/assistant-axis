@@ -25,7 +25,7 @@ RUBRICS = (X.RUBRIC_EXTRACT, X.RUBRIC_REWRITE, "enactability_gate")
 #: The pin each rubric is expected to be on, so that a bump is a deliberate edit here.  ``alignment_extract``
 #: reached 3 on 2026-10-10 (the iteration on the pilot's 30 chunks; see its change log), and
 #: ``enactability_gate`` on 2026-10-11 (draft 3: three fields in place of one four-way answer, QUESTIONS 75).
-EXPECTED_VERSIONS = {X.RUBRIC_EXTRACT: 3, X.RUBRIC_REWRITE: 1, "enactability_gate": 3}
+EXPECTED_VERSIONS = {X.RUBRIC_EXTRACT: 3, X.RUBRIC_REWRITE: 1, "enactability_gate": 6}
 
 
 def chunk(cid="model_spec:2026-08-18:do_not_lie", source="model_spec", text="## Do not lie\n\nNever lie."):

@@ -38,7 +38,7 @@ def run(inputs, responder, **kw):
 def test_rubric_is_pinned_and_reasons_before_the_answers():
     rub = G.load_rubric()
     t = rub["text"]
-    assert rub["version"] == 3 and rub["sha256"] == sr.sha256(sr.load_prompt("enactability_gate"))
+    assert rub["version"] == 6 and rub["sha256"] == sr.sha256(sr.load_prompt("enactability_gate"))
     tpl = t[t.index('{"system_prompt"'):]
     assert tpl.index('"system_prompt"') < tpl.index('"reason"') < tpl.index('"where"') \
         < tpl.index('"elicitation"') < tpl.index('"judge_needs"')
@@ -166,15 +166,28 @@ def row(key, label, where, readings, *, flip=False, m1=None, expected=None, elic
 
 
 def test_the_four_way_gold_key_maps_onto_field_one():
-    """QUESTIONS 75: draft 2's answers map one-for-one, so the blind relabelling of 2026-10-10 survives the
-    redesign and the gold file is untouched."""
-    assert G.GOLD_EXPECTED_MAP == {"chat": "chat", "both": "both", "agentic-only": "agentic", "none": "neither"}
+    """QUESTIONS 75: draft 2's answers map one-for-one onto field 1's, so the blind relabelling of 2026-10-10
+    (now ``expected_v2``) still scores; Roger's key of 2026-10-11 (``expected``) is in field 1's own words."""
+    assert G.GOLD_EXPECTED_MAP == {"chat": "chat", "both": "both", "agentic": "agentic", "neither": "neither",
+                                   "agentic-only": "agentic", "none": "neither"}
     assert [G.map_gold_expected(v) for v in ("chat", "both", "agentic-only", "none")] == \
         ["chat", "both", "agentic", "neither"]
     assert set(G.GOLD_EXPECTED_MAP.values()) == set(G.WHERE)
     assert G.map_gold_expected(None) is None and G.map_gold_expected("agentic") == "agentic"
     doc = json.loads(GATE_GOLD_PATH.read_text(encoding="utf-8"))
-    assert {g["expected"] for g in doc["items"]} <= set(G.GOLD_EXPECTED_MAP)   # the file is still in draft 2's words
+    assert {g["expected"] for g in doc["items"]} == set(G.WHERE)              # Roger's key, field 1's vocabulary
+    assert {g["expected_v2"] for g in doc["items"]} == {"chat", "both", "agentic-only", "none"}
+    assert [g["expected"] for g in doc["items"]].count("neither") == 9        # the nine training-or-internals mechanisms
+    assert [g["label"] for g in doc["items"] if g.get("also_accepts")] == ["power-seeking"]
+
+
+def test_agrees_collapses_chat_and_both_and_honours_also_accepts():
+    """Roger, 2026-10-11: chat-both confusions are discounted; ``agentic`` and ``neither`` are never collapsed."""
+    assert G.agrees("both", "chat") and G.agrees("chat", "both") and G.agrees("neither", "neither")
+    assert not G.agrees("agentic", "both") and not G.agrees("both", "agentic") and not G.agrees("neither", "chat")
+    assert not G.agrees("chat", "neither") and not G.agrees("agentic", "neither")
+    assert G.agrees("both", "agentic", ("both",)) and not G.agrees("chat", "agentic", ("both",))
+    assert not G.agrees(None, "chat") and not G.agrees("chat", None)
 
 
 def test_score_against_gold_agreement_flip_rate_and_the_m1_row():
@@ -183,7 +196,7 @@ def test_score_against_gold_agreement_flip_rate_and_the_m1_row():
             row("gold:c", "c", "neither", ["neither", "neither"], expected="none"),
             row("gold:d", "d", "agentic", ["agentic", "agentic"], m1=1, expected="chat", elicitation="s")]
     ev = G.score_against_gold(rows, GOLD)
-    assert (ev.n, ev.n_agree, ev.n_flip) == (4, 2, 1) and ev.scored_field == "where"
+    assert (ev.n, ev.n_agree, ev.n_agree_strict, ev.n_flip) == (4, 2, 2, 1) and ev.scored_field == "where"
     assert ev.agreement == pytest.approx(0.5) and ev.flip_rate == pytest.approx(0.25)
     # the gold answers are compared in field 1's vocabulary: agentic-only -> agentic, none -> neither
     assert ev.confusion == {"chat": {"chat": 1, "agentic": 1}, "agentic": {"chat": 1}, "neither": {"neither": 1}}
@@ -193,6 +206,31 @@ def test_score_against_gold_agreement_flip_rate_and_the_m1_row():
     perfect = [row(g["key"], g["label"], G.map_gold_expected(g["expected"]),
                    [G.map_gold_expected(g["expected"])] * 2, expected=g["expected"]) for g in GOLD]
     assert G.score_against_gold(perfect, GOLD).meets_targets is True
+
+
+def test_score_against_gold_discounts_chat_both_and_honours_also_accepts():
+    """The headline agreement collapses ``chat`` and ``both`` and takes an ``also_accepts`` answer; the strict count
+    and the confusion table keep the exact answers, and the miss list follows the headline."""
+    gold = [{"key": "gold:a", "label": "a", "gloss": "This means a.", "expected": "chat"},
+            {"key": "gold:b", "label": "b", "gloss": "This means b.", "expected": "both"},
+            {"key": "gold:c", "label": "c", "gloss": "This means c.", "expected": "agentic", "also_accepts": ["both"]},
+            {"key": "gold:d", "label": "d", "gloss": "This means d.", "expected": "agentic"},
+            {"key": "gold:e", "label": "e", "gloss": "This means e.", "expected": "neither"}]
+    rows = [row("gold:a", "a", "both", ["both", "both"], expected="chat"),          # discounted
+            row("gold:b", "b", "chat", ["chat", "chat"], expected="both"),          # discounted
+            row("gold:c", "c", "both", ["both", "agentic"], flip=True, expected="agentic"),   # also_accepts
+            row("gold:d", "d", "both", ["both", "both"], expected="agentic"),       # a miss: harness or not
+            row("gold:e", "e", "both", ["both", "both"], expected="neither")]       # a miss: nothing to elicit
+    ev = G.score_against_gold(rows, gold)
+    assert (ev.n, ev.n_agree, ev.n_agree_strict, ev.n_flip) == (5, 3, 0, 1)
+    assert ev.agreement == pytest.approx(0.6) and ev.agreement_strict == pytest.approx(0.0)
+    assert [m["key"] for m in ev.misses] == ["gold:d", "gold:e"] and ev.misses[0]["also_accepts"] == []
+    assert ev.confusion == {"chat": {"both": 1}, "both": {"chat": 1}, "agentic": {"both": 2}, "neither": {"both": 1}}
+    md = G.eval_markdown(ev, rows, rubric={"name": "n", "version": 3, "sha256": "x"}, cost_usd=0.0)
+    assert "Agreement 3 of 5 (60.0%; target at least 26 of 30; strict 0 of 5)" in md
+    misses = md.split("## Misses and flips")[1].split("## The two free-text fields")[0]
+    assert "gold:c" in misses and "gold:d" in misses and "gold:e" in misses       # c flipped, d and e missed
+    assert "gold:a" not in misses and "gold:b" not in misses                      # discounted and unflipped
 
 
 def test_eval_markdown_has_a_column_per_answer_and_the_free_text_fields():

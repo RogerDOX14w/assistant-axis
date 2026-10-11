@@ -310,6 +310,25 @@
         "sha256": "e3632cc5e09f6b92a581972ea531a62ed520d4b2c253a172cae6e84954b248a3",
         "pinned_at": "2026-10-11T04:40:41+00:00",
         "why": "Draft 3: one four-way answer becomes three fields - where (agentic and neither renamed from agentic-only and none), elicitation (draft 2's scope_line, now asked for every answer but neither) and judge_needs (new); model Opus 5.5, two readings on the gold items and one on production rows; agreement and flip rate on field 1 only (Roger, QUESTIONS 75, 2026-10-11)"
+      },
+      {
+        "version": 4,
+        "sha256": "ef40d1d5bfd6f2a95c33bdcaa881df9448ae17facbd5b68e782d95af139145b1",
+        "pinned_at": "2026-10-11T16:59:54+00:00",
+        "why": "draft 4: the first field reports what a system prompt would tell an assistant, in the third person, instead of writing the prompt itself.  Opus 5.5 refused mid-answer on data-exfiltrating and oversight-evading under draft 3 (stop_reason refusal, both readings, 2 of 30 gold items left with no verdict), which is a fact about asking a model to author such an instruction rather than a parse failure; the reasoning scaffold is kept because a trait nothing could instruct is a 'neither'.  Roger, 2026-10-11: 'Try A'"
+      },
+      {
+        "version": 5,
+        "sha256": "8f0b69e54b8b0030a966093849300d7d176a29fdc2f9d9632c1c87dd771613d4",
+        "pinned_at": "2026-10-11T17:37:44+00:00",
+        "why": "draft 5: draft 3's generative first field, plus an explicit opt-out ('declined' in system_prompt, the reason in reason, the three questions answered anyway).  Draft 4 replaced the authored prompt with a third-person report and the instrument got worse, not better: agreement 22/30 -> 17/30, flip 10.0% -> 13.3%, and four of the nine training-or-internals gold items moved from 'neither' to 'both' -- the scaffold was working because it was generative, a prompt one cannot write being the test that 'neither' rests on.  So the concreteness is kept and the refusal is made an answer instead of a stop.  Roger, 2026-10-11, with a floor: if this will not work reliably the field is advisory, a recorded refusal is fine and the data for refusals is made by hand"
+      },
+      {
+        "version": 6,
+        "sha256": "e3632cc5e09f6b92a581972ea531a62ed520d4b2c253a172cae6e84954b248a3",
+        "pinned_at": "2026-10-11T17:40:15+00:00",
+        "why": "draft 3's text again, to replicate it: drafts 4 and 5 each scored 17/30 against draft 3's 22/30, but the gate's own flip rate is 10-13%, so single runs of different drafts cannot be compared and the replication is what sizes the noise (the extraction iteration's method, which this comparison skipped)",
+        "same_text_as": 3
       }
     ],
     "ipip_naming_blind": [

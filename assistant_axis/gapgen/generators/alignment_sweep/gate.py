@@ -30,9 +30,14 @@ tag automatically: field 3 is free text by design.
   a trait; the two free-text fields come from the reading that gave the kept answer.
 * :func:`score_against_gold` reads the gate against the 30 gold items on **field 1 only**: agreement (target at
   least 26 of 30), flip rate (target at most 10%), the confusion table against the expected answers, and against
-  M1's ``enactable_in_text`` (0-2) where M1 rated the trait.  The gold file still carries draft 2's vocabulary, which
-  :data:`GOLD_EXPECTED_MAP` renames on read (``agentic-only`` to ``agentic``, ``none`` to ``neither``), so the blind
-  relabelling of 2026-10-10 survives the redesign.  Fields 2 and 3 get no metric, by design.
+  M1's ``enactable_in_text`` (0-2) where M1 rated the trait.  The gold key is Roger's of 2026-10-11 (the file's
+  ``_relabelling_v3``), in field 1's vocabulary; an older key in draft 2's words is renamed on read by
+  :data:`GOLD_EXPECTED_MAP` (``agentic-only`` to ``agentic``, ``none`` to ``neither``).  **Scoring rule** (Roger,
+  same day: "distinguishing chat from both is hard, but we don't care about those errors, so discount them"): the
+  headline agreement counts ``chat`` and ``both`` alike (:data:`CHAT_REACHABLE`), and an answer in a gold item's
+  ``also_accepts`` list is no miss; ``agentic`` and ``neither`` stay distinct, being the answers that mean a harness
+  is needed and that there is nothing to elicit.  The strict count is reported beside it.  Fields 2 and 3 get no
+  metric, by design.
 * **Nothing gates on the gate** (Roger's edit: "this part will likely need careful evaluation"): its answers are
   columns of the readout that Roger reads before promotion, and the targets are a measurement, not a filter.
 
@@ -75,8 +80,12 @@ WHERE_PRECEDENCE = ("both", "chat", "agentic", "neither")
 NOWHERE = "neither"
 #: The answer that earns the ``needs_agentic_harness`` tag at promotion (``both`` does not: see the module docstring).
 AGENTIC_ONLY = "agentic"
-#: Draft 2's gold vocabulary -> field 1's (QUESTIONS 75: one-for-one, so the gold file is unchanged).
-GOLD_EXPECTED_MAP = {"chat": "chat", "both": "both", "agentic-only": AGENTIC_ONLY, "none": NOWHERE}
+#: Gold vocabulary -> field 1's: field 1's own four answers pass through, and draft 2's ``agentic-only`` / ``none``
+#: (the ``expected_v2`` key, and any gold file still written in those words) are renamed one-for-one.
+GOLD_EXPECTED_MAP = {"chat": "chat", "both": "both", "agentic": AGENTIC_ONLY, "neither": NOWHERE,
+                     "agentic-only": AGENTIC_ONLY, "none": NOWHERE}
+#: The two answers the headline agreement counts alike (module docstring: Roger discounts chat-both confusions).
+CHAT_REACHABLE = frozenset({"chat", "both"})
 #: The two trait tags fields 1 and 3 feed, written by hand at promotion (module docstring).
 TAG_NEEDS_AGENTIC_HARNESS = "needs_agentic_harness"
 TAG_JUDGE_NEEDS_BASELINE = "judge_needs_baseline"
@@ -257,20 +266,39 @@ class GateEval:
     confusion_vs_m1: dict
     misses: list
     meets_targets: bool
+    #: The same count with ``chat`` and ``both`` kept apart and ``also_accepts`` ignored: how often the gate gave the
+    #: key's exact answer.  Never compared with the targets.
+    n_agree_strict: int = 0
+    agreement_strict: float = 0.0
     targets: dict = field(default_factory=lambda: {"agreement": TARGET_AGREEMENT, "flip_rate": TARGET_FLIP_RATE})
     scored_field: str = "where"
+    scoring: str = "chat and both count alike; an answer in a gold item's also_accepts counts; strict beside"
 
     def as_dict(self) -> dict:
         return asdict(self)
 
 
+def agrees(where: Optional[str], expected: Optional[str], also_accepts: Sequence[str] = ()) -> bool:
+    """Whether a gate answer counts as agreeing with a gold item under the scoring rule (module docstring): the
+    exact answer, any answer in ``also_accepts``, or ``chat`` for ``both`` and the other way round."""
+    if where is None or expected is None:
+        return False
+    if where == expected or where in also_accepts:
+        return True
+    return where in CHAT_REACHABLE and expected in CHAT_REACHABLE
+
+
 def score_against_gold(rows: Sequence[GateRow], gold: Sequence[Mapping]) -> GateEval:
     """Agreement, flip rate and the two confusion tables, on field 1 only (module docstring).  The gold answers are
-    read through :func:`map_gold_expected`, so a file still written in draft 2's vocabulary scores unchanged."""
+    read through :func:`map_gold_expected`, so a key written in draft 2's vocabulary scores unchanged; the headline
+    agreement follows :func:`agrees`, and the strict count stands beside it.  The confusion table and the miss list
+    are exact: a ``chat`` answered ``both`` is a cell of the table and no miss."""
     exp = {g["key"]: map_gold_expected(g["expected"]) for g in gold}
+    also = {g["key"]: tuple(map(map_gold_expected, g.get("also_accepts") or ())) for g in gold}
     rows = [r for r in rows if r.key in exp]
     n = len(rows)
-    agree = [r for r in rows if r.where == exp[r.key]]
+    agree = [r for r in rows if agrees(r.where, exp[r.key], also[r.key])]
+    strict = [r for r in rows if r.where == exp[r.key]]
     flips = [r for r in rows if r.flip]
     conf: dict = {}
     m1: dict = {}
@@ -280,12 +308,14 @@ def score_against_gold(rows: Sequence[GateRow], gold: Sequence[Mapping]) -> Gate
             str(r.where)] += 1
     agreement = len(agree) / n if n else 0.0
     flip_rate = len(flips) / n if n else 0.0
-    misses = [{"key": r.key, "label": r.label, "expected": exp[r.key], "where": r.where,
-               "readings": r.readings, "reasons": r.reasons} for r in rows if r.where != exp[r.key]]
+    misses = [{"key": r.key, "label": r.label, "expected": exp[r.key], "also_accepts": list(also[r.key]),
+               "where": r.where, "readings": r.readings, "reasons": r.reasons}
+              for r in rows if not agrees(r.where, exp[r.key], also[r.key])]
     return GateEval(n=n, n_agree=len(agree), agreement=round(agreement, 4), n_flip=len(flips),
                     flip_rate=round(flip_rate, 4), confusion={k: dict(v) for k, v in conf.items()},
                     confusion_vs_m1={k: dict(v) for k, v in m1.items()}, misses=misses,
-                    meets_targets=agreement >= TARGET_AGREEMENT - 1e-9 and flip_rate <= TARGET_FLIP_RATE + 1e-9)
+                    meets_targets=agreement >= TARGET_AGREEMENT - 1e-9 and flip_rate <= TARGET_FLIP_RATE + 1e-9,
+                    n_agree_strict=len(strict), agreement_strict=round(len(strict) / n if n else 0.0, 4))
 
 
 def _corpus_enactable(path: Optional[Path] = None) -> dict:
@@ -363,21 +393,26 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
              f"Rubric `{rubric['name']}` version {rubric['version']} (`{str(rubric['sha256'])[:12]}`), {MODEL}, "
              f"{n_readings} reading(s) per item; cost ${cost_usd:.3f}.", "",
              f"Scored on **field 1 (`{ev.scored_field}`) only**: fields 2 (`elicitation`) and 3 (`judge_needs`) are "
-             "free text and get no metric, by design.  The gold file keeps draft 2's vocabulary, renamed on read "
-             "(`agentic-only` to `agentic`, `none` to `neither`).", "",
-             f"Agreement {ev.n_agree} of {ev.n} ({ev.agreement:.1%}; target at least 26 of 30), flip rate {ev.n_flip} "
-             f"of {ev.n} ({ev.flip_rate:.1%}; target at most 10%): {verdict}.", "",
+             "free text and get no metric, by design.  `chat` and `both` count alike (Roger, 2026-10-11: those "
+             "confusions are discounted), and an answer a gold item lists under `also_accepts` is no miss; the "
+             "strict count, exact answers only, stands beside.", "",
+             f"Agreement {ev.n_agree} of {ev.n} ({ev.agreement:.1%}; target at least 26 of 30; strict "
+             f"{ev.n_agree_strict} of {ev.n}), flip rate {ev.n_flip} of {ev.n} ({ev.flip_rate:.1%}; target at most "
+             f"10%): {verdict}.", "",
              "## Expected (rows) against the gate's answer (columns)", "",
-             "An all-zero row means the gold set has no item with that expected answer.", ""]
+             "Exact answers: a `chat` row's count under `both` is no miss.  An all-zero row means the gold set has "
+             "no item with that expected answer.", ""]
     lines += _confusion_md(ev.confusion, row_header="expected", row_order=WHERE)
     lines += ["", "## M1's enactable_in_text (rows) against the gate's answer (columns)", "",
               "M1 rates corpus traits from their descriptions (`corpus_regions.json`); the written items have no M1 "
               "reading (n/a).", ""]
     lines += _confusion_md(ev.confusion_vs_m1, row_header="M1", row_order=sorted(ev.confusion_vs_m1))
-    lines += ["", "## Misses and flips", "", "| key | label | expected | answer | readings | first reason |",
-              "|---|---|---|---|---|---|"]
+    missed = {m["key"] for m in ev.misses}
+    lines += ["", "## Misses and flips", "", "A miss is a row the scoring rule above counts against the gate; a "
+              "`chat` answered `both` is listed only if it flipped.", "",
+              "| key | label | expected | answer | readings | first reason |", "|---|---|---|---|---|---|"]
     for r in rows:
-        if r.where != r.expected or r.flip:
+        if r.key in missed or r.flip:
             lines.append(f"| {r.key} | {r.label} | {r.expected} | {r.where} | {', '.join(map(str, r.readings))} "
                          f"| {_md(r.reasons[0] if r.reasons else '')} |")
     lines += ["", "## The two free-text fields", "",
@@ -392,6 +427,7 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
 
 __all__ = ["GateInput", "GateRow", "GateResult", "GateEval", "RubricNotPinned", "RUBRIC_NAME", "MODEL",
            "N_READINGS_GOLD", "N_READINGS_ROWS", "WHERE", "WHERE_PRECEDENCE", "NOWHERE", "AGENTIC_ONLY",
-           "GOLD_EXPECTED_MAP", "TAG_NEEDS_AGENTIC_HARNESS", "TAG_JUDGE_NEEDS_BASELINE",
+           "GOLD_EXPECTED_MAP", "CHAT_REACHABLE", "TAG_NEEDS_AGENTIC_HARNESS", "TAG_JUDGE_NEEDS_BASELINE",
            "TARGET_AGREEMENT", "TARGET_FLIP_RATE", "load_rubric", "map_gold_expected", "render_user", "parse_answer",
-           "combine", "run_gate", "score_against_gold", "gold_inputs", "kept_inputs", "estimate", "eval_markdown"]
+           "combine", "run_gate", "agrees", "score_against_gold", "gold_inputs", "kept_inputs", "estimate",
+           "eval_markdown"]
