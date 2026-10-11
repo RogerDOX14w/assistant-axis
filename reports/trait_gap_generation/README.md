@@ -118,7 +118,8 @@ Greenlit for detailed planning: 14, 15, 10; 1, 2.
 ([03](./03_base_model_generator.md), [04](./04_masked_lm_fill.md), [07](./07_behaviour_items.md),
 [08](./08_alignment_sweep.md)); coding plans commissioned the same day (Fable, per the
 [format](./PLAN_FORMAT.md)).  11 rewritten 2026-10-10 as lexical recall insurance, awaiting review.
-Currently discussing, will greenlight once done: -
+2026-10-12: **11 (lexical recall insurance) and 13 (generator testing) greenlit for detailed planning**, after Roger's answers to their open questions in each plan.
+Currently discussing, will greenlight once done: 09 (structural generators, questions in discussion).
 
 ## Process for greenlit plans (agreed with Roger, 2026-09-18)
 

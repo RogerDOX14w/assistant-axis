@@ -110,15 +110,46 @@ their readings, and the per-wave rate this implies.  **If the recorded batches s
 total, this plan stops there** and the readout says so; the integration (steps 2-5) is only built if the
 insurance has something to insure.
 
-## 9. Open questions for Roger
+## 9. Open questions for Roger (answered 2026-10-12)
 
 1. Approve the downloads and dependency: `wn` into the uv environment, OEWN 2025 (~100 MB) and Moby Thesaurus II
    (~25 MB) into `data/external/`.
+
+   **Roger: approved.**  Two corrections to what was asked, found 2026-10-12: OEWN is already on disk
+   ([wn.db](../../data/external/wn/wn.db), 112 MB, fetched 8 October for the Roget and WordNet harvest), and `wn`
+   imports in the project environment, so only Moby remains to fetch (~25 MB).  Its version and licence are
+   recorded when fetched, through the download manifest; the OEWN file's version is to be checked against the
+   plan's "2025" then, not assumed.
+
 2. Should lexical neighbours check queue labels as well as corpus labels (the lookup is the same; the queue adds
    ~250 live entries)?
+
+   **Roger: yes.**  Two corrections: M3 already searches the queue's live statuses (`QUEUE_SEARCH_STATUSES`), so this
+   is the same lookup, not a new one; and the live queue is **121 entries** (86 `backlog`, 35 `candidate`), not ~250.
+   The contamination argument that settled the testing reference ([13](./13_generator_testing.md) § 9) does not
+   apply: that was measurement, and this is production dedup, where a queue entry promoted last night should block
+   a synonym today.
+
 3. Timing of the retroactive sweep: now, before you review the TDA batch (its flags would land in that review),
    or folded into the end-of-generation R1 pass per
    [coding_plan_review.md § 10](./coding_plan_review.md)?
+
+   **Roger: agreed with the recommendation.**  Run the lookup now, as a dry pilot over recorded data (no API spend,
+   per § 8).  Hold the flags until the end-of-generation R1 pass, because the cross-batch repetition is visible
+   there and flags landed in the TDA review now would largely duplicate the pre-handled machinery's output.
+
 4. A lexical synonym hit whose overlap reading lands *below* the cut-off (the applied/practical case: same
    dictionary entry, different scope in our corpus): flag for review anyway, or trust the reading?
+
+   **Roger: TODO, decide with data.**  The pilot's precision on below-cut-off hits decides it.  Until then such a
+   hit is recorded as a note on the pair and is not added to the review queue.  Trigger: the § 8 pilot's readout.
+
 5. Same-stem dedup before M1 (saves a few filter calls) or leave families to M3 and R1 (simpler)?
+
+   **Roger: leave families to M3 and R1.**  Exact-stem duplicates already merge at submit; morphological families are
+   R1's grouping evidence, so a separate dedup pass before M1 would duplicate that work for a few cents.
+
+**Status (2026-10-12): greenlit for detailed planning** (Roger).  Next, in the order the [plans format](./PLAN_FORMAT.md)
+gives: a coding plan (Fable writes planning documents), then the § 8 pilot: fetch Moby, build the lookup, run it dry
+over the recorded "new" rows and the labelled pairs.  The integration (steps 2-5 of § 3) is built only if the pilot
+finds at least about five real misses (§ 8).

@@ -150,5 +150,5 @@ review graph that measures repetition.  Not built: the independence table, the d
 accumulation curves, the paraphrase sanity set.  First use: once the batches submitted on 2026-10-11 (Allport-hi,
 Roget, WordNet, IPIP, the base-model pilot, alignment variant B) have their M3 blocks — the dashboard and the
 lexical accumulation curve from recorded data, then the harness on the TDA census and on IPIP as the two mechanisms
-with the most kept terms.  The plan is reviewed; it waits on a coding plan in the [format](./PLAN_FORMAT.md) and a
-builder.
+with the most kept terms.  **Greenlit for detailed planning (Roger, 2026-10-12).**  Next: a coding plan in the [format](./PLAN_FORMAT.md)
+(Fable writes it), then a builder for the dashboard and the estimators.
