@@ -92,6 +92,7 @@ class ReadoutRow:
     enactability: Optional[str]
     gate: Optional[str]                 # the gate's field 1 (``where``): chat | agentic | both | neither
     gate_flip: bool
+    gate_refused: bool                  # the model's output classifier refused every reading: data by hand
     elicitation: Optional[str]          # the gate's field 2, free text
     judge_needs: Optional[str]          # the gate's field 3, free text
     m1: str
@@ -155,7 +156,8 @@ def build_rows(submitted: Sequence[Mapping], items: Mapping[str, Mapping], regis
         out.append(ReadoutRow(
             key=s["key"], label=s["surface"], partner=s.get("partner_hint"), gloss=it.get("gloss") or "",
             type=it.get("type"), enactability=it.get("enactability"), gate=g.get("where"),
-            gate_flip=bool(g.get("flip")), elicitation=g.get("elicitation"), judge_needs=g.get("judge_needs"),
+            gate_flip=bool(g.get("flip")), gate_refused=bool(g.get("refused")), elicitation=g.get("elicitation"),
+            judge_needs=g.get("judge_needs"),
             m1=m1,
             alignment_score=nv.get("alignment_score"), cut_off=nv.get("cut_off"), decision=nv.get("decision"),
             pair_completion_for=list(nv.get("pair_completion_for") or []), nearest=nearest_text(nv),
@@ -314,6 +316,8 @@ def _row_md(i: int, r: ReadoutRow) -> str:
     if r.gate:
         enact += f" / gate {r.gate}" + (" (flip)" if r.gate_flip else "") + \
             (" (!= extractor)" if r.gate_disagrees_extractor else "")
+    elif r.gate_refused:
+        enact += " / gate refused (data by hand)"
     dec = (r.decision or "") + (f"; completes {', '.join(r.pair_completion_for)}" if r.pair_completion_for else "")
     known = {True: "yes", False: "no", None: "n/a"}[r.label_known]
     cells = [str(i), f"{r.label} ({r.partner or 'no partner'})", r.gloss, r.type, enact, r.m1,
@@ -325,7 +329,7 @@ def _row_md(i: int, r: ReadoutRow) -> str:
 def render_gate_fields(surv: Sequence[ReadoutRow]) -> list:
     """The gate's two free-text fields per survivor, and the tags they feed at promotion (QUESTIONS 75)."""
     from .gate import AGENTIC_ONLY, TAG_JUDGE_NEEDS_BASELINE, TAG_NEEDS_AGENTIC_HARNESS
-    have = [r for r in surv if r.elicitation or r.judge_needs]
+    have = [r for r in surv if r.elicitation or r.judge_needs or r.gate_refused]
     out = ["", "## The gate's three fields, for promotion", "",
            "Field 1 (`where`) is the gate's one categorical answer and the only one with a measure; fields 2 and 3 "
            "are guidance for a person, with no metric by design.  Nothing here gates a row.  At promotion field 1 "
@@ -337,13 +341,19 @@ def render_gate_fields(surv: Sequence[ReadoutRow]) -> list:
     if not have:
         return out + ["(no gate rows for the survivors.)"]
     dis = [r for r in have if r.gate_disagrees_extractor]
+    ref = [r for r in have if r.gate_refused]
+    if ref:
+        out += [f"**Refused** by the model's output classifier, every reading: {', '.join(_md(r.label) for r in ref)}.  "
+                "The gate has no answer for these; their test material and data are written by hand (Roger, "
+                "2026-10-11).", ""]
     out += [f"The extractor's own `enactability` (read from the source text, not the gloss) is the free cross-check: "
             f"**{len(dis)} of {len(have)}** survivors have the gate in a different class from it (`chat` and `both` "
             "count as one class), marked `!= extractor` below; look at those first.", "",
             "| label | where | extractor | elicitation | judge needs | suggested tags |", "|---|---|---|---|---|---|"]
     for r in have:
         tags = ([TAG_NEEDS_AGENTIC_HARNESS] if r.gate == AGENTIC_ONLY else [])
-        where = (r.gate or '') + (' (flip)' if r.gate_flip else '') + (' != extractor' if r.gate_disagrees_extractor else '')
+        where = ('refused' if r.gate_refused else (r.gate or '')) + (' (flip)' if r.gate_flip else '') + \
+            (' != extractor' if r.gate_disagrees_extractor else '')
         out.append(f"| {_md(r.label)} | {where} | {r.enactability or ''} | {_md(r.elicitation)} "
                    f"| {_md(r.judge_needs)} | {', '.join(tags)} |")
     return out

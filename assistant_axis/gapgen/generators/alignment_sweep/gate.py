@@ -32,7 +32,13 @@ tag automatically: field 3 is free text by design.
   :data:`WHERE_PRECEDENCE` (``both`` over ``chat`` over ``agentic`` over ``neither``) decides only when no answer
   has a majority (three different answers, or two that disagree with the third unparsed), and the row says so in
   ``majority``.  The two free-text fields come from a reading that gave the kept answer.
-* A reading that does not parse (or omits a field the answer needs) is asked once more.
+* A reading that does not parse (or omits a field the answer needs) is asked once more.  A reading Opus's output
+  classifier stops (``stop_reason`` ``refusal``: it happened on ``data-exfiltrating``, whose system prompt reads
+  as instructions to steal credentials) is asked once more too, since the classifier is not deterministic, and an
+  item with no answered reading at all is **refused**: ``where`` is ``None`` and the row says ``refused``.  A
+  refused item is reported beside the agreement rather than counted as a miss, and its data is written by hand
+  (Roger, 2026-10-11: "the field is advisory, putting a refusal in it and moving on, then manually generating
+  data for refusals, is also OK").
 * ``flip`` is set when the readings disagree on ``where``, majority or not.
 * :func:`score_against_gold` reads the gate against the 30 gold items on **field 1 only**: agreement (target at
   least 26 of 30, the one target), the confusion table against the expected answers, and against M1's
@@ -172,6 +178,8 @@ class GateRow:
     expected: Optional[str] = None
     #: Whether ``where`` is the answer of more than half the parsed readings (else precedence decided).
     majority: bool = True
+    #: No reading answered and at least one was stopped by the output classifier (module docstring).
+    refused: bool = False
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -190,6 +198,8 @@ class GateResult:
     n_failed_readings: int = 0
     #: Items whose base readings disagreed and got the third reading.
     n_third_readings: int = 0
+    #: Items refused outright (every reading stopped by the output classifier or unparsed, at least one refusal).
+    n_refused: int = 0
     stopped_by_budget: bool = False
 
 
@@ -201,9 +211,15 @@ def _line(value) -> Optional[str]:
     return value.strip() if isinstance(value, str) and value.strip() else None
 
 
-def parse_answer(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
+REFUSAL = "refusal"
+
+
+def parse_answer(text: Optional[str], stop_reason: Optional[str] = None) -> tuple[Optional[dict], Optional[str]]:
     """``(answer, None)`` or ``(None, why)``.  ``elicitation`` and ``judge_needs`` are required unless ``where`` is
-    :data:`NOWHERE`, under which both are dropped."""
+    :data:`NOWHERE`, under which both are dropped.  A response the output classifier stopped (``stop_reason``
+    :data:`REFUSAL`) is ``(None, "refusal")`` whatever text came before the stop."""
+    if stop_reason == REFUSAL:
+        return None, REFUSAL
     if text is None:
         return None, "no response"
     blob = extract_json_blob(text)
@@ -248,13 +264,16 @@ async def run_gate(inputs: Sequence[GateInput], *, client, model: str, system: s
                    n_readings: int = N_READINGS_GOLD, third_on_disagreement: bool = THIRD_ON_DISAGREEMENT,
                    concurrency: int = CONCURRENCY, max_tokens: int = MAX_TOKENS,
                    rubric_version: Optional[int] = None, label_form: str = DEFAULT_LABEL_FORM,
-                   now: Optional[Callable[[], str]] = None,
+                   now: Optional[Callable[[], str]] = None, session_id: Optional[str] = None,
                    on_record: Optional[Callable[[dict], None]] = None) -> GateResult:
     """``n_readings`` base readings per item, and one more when they disagree on ``where`` and
-    ``third_on_disagreement`` is set (module docstring)."""
+    ``third_on_disagreement`` is set (module docstring).  ``session_id`` (the run session's) is written into every
+    record, so that a responses log holding several runs can be split by run: on 2026-10-11 two gold passes ran 26
+    seconds apart and their records can be told apart only by this."""
     res = GateResult()
     sem = asyncio.Semaphore(max(1, concurrency))
     prompt_sha = sr.sha256(system)
+    refusals: Counter = Counter()
 
     async def reading(inp: GateInput, k: int) -> Optional[dict]:
         user = render_user(inp, label_form=label_form)
@@ -270,9 +289,11 @@ async def run_gate(inputs: Sequence[GateInput], *, client, model: str, system: s
                 text = meta.get("text")
                 res.stopped_by_budget = True
             res.n_calls += 1
-            ans, err = parse_answer(text)
+            ans, err = parse_answer(text, meta.get("stop_reason"))
+            if err == REFUSAL:
+                refusals[inp.key] += 1
             rec = {"stage": "gate", "key": inp.key, "reading": k, "attempt": attempt, "model": model,
-                   "rubric_version": rubric_version, "prompt_sha256": prompt_sha, "label_form": label_form,
+                   "session_id": session_id, "rubric_version": rubric_version, "prompt_sha256": prompt_sha, "label_form": label_form,
                    "at": now() if now else None, "user": user, "text": text, "stop_reason": meta.get("stop_reason"),
                    "usage_raw": meta.get("usage_raw"), "error": meta.get("error"), "parse_error": err, "answer": ans}
             res.log.append(rec)
@@ -290,12 +311,14 @@ async def run_gate(inputs: Sequence[GateInput], *, client, model: str, system: s
                 res.n_third_readings += 1
                 got.append(await reading(inp, n_readings + 1))
         where, flip, elicitation, judge_needs, majority = combine(got)
+        refused = where is None and refusals[inp.key] > 0
+        res.n_refused += int(refused)
         res.rows.append(GateRow(
             key=inp.key, label=inp.label, system_prompt=next((g["system_prompt"] for g in got if g), None),
             where=where, readings=[g["where"] if g else None for g in got], flip=flip, elicitation=elicitation,
             judge_needs=judge_needs, m1_enactable_in_text=inp.m1_enactable_in_text, label_form=label_form,
             reasons=[g["reason"] if g else None for g in got], expected=map_gold_expected(inp.expected),
-            majority=majority))
+            majority=majority, refused=refused))
 
     await asyncio.gather(*(one(i) for i in inputs))
     order = {i.key: n for n, i in enumerate(inputs)}
@@ -321,6 +344,11 @@ class GateEval:
     agreement_strict: float = 0.0
     #: Items whose readings disagreed with no answer in the majority (precedence decided).  Reported, no target.
     n_no_majority: int = 0
+    #: Items the output classifier refused (module docstring): out of the agreement's denominator, listed by label.
+    n_refused: int = 0
+    refused: list = field(default_factory=list)
+    #: ``n`` less the refused: the agreement's denominator.
+    n_answered: int = 0
     #: The misses by the boundary they cross (module docstring): the two decisions the answer changes.
     boundary_errors: dict = field(default_factory=lambda: {"neither_vs_reachable": 0, "agentic_vs_chat_reachable": 0})
     targets: dict = field(default_factory=lambda: {"agreement": TARGET_AGREEMENT})
@@ -360,20 +388,23 @@ def score_against_gold(rows: Sequence[GateRow], gold: Sequence[Mapping]) -> Gate
     also = {g["key"]: tuple(map(map_gold_expected, g.get("also_accepts") or ())) for g in gold}
     rows = [r for r in rows if r.key in exp]
     n = len(rows)
-    agree = [r for r in rows if agrees(r.where, exp[r.key], also[r.key])]
-    strict = [r for r in rows if r.where == exp[r.key]]
+    refused = [r for r in rows if r.refused]
+    answered = [r for r in rows if not r.refused]
+    n_ans = len(answered)
+    agree = [r for r in answered if agrees(r.where, exp[r.key], also[r.key])]
+    strict = [r for r in answered if r.where == exp[r.key]]
     flips = [r for r in rows if r.flip]
     conf: dict = {}
     m1: dict = {}
     errors = Counter({"neither_vs_reachable": 0, "agentic_vs_chat_reachable": 0})
     for r in rows:
-        conf.setdefault(exp[r.key], Counter())[str(r.where)] += 1
-        m1.setdefault("n/a" if r.m1_enactable_in_text is None else str(r.m1_enactable_in_text), Counter())[
-            str(r.where)] += 1
-    agreement = len(agree) / n if n else 0.0
+        cell = REFUSAL if r.refused else str(r.where)
+        conf.setdefault(exp[r.key], Counter())[cell] += 1
+        m1.setdefault("n/a" if r.m1_enactable_in_text is None else str(r.m1_enactable_in_text), Counter())[cell] += 1
+    agreement = len(agree) / n_ans if n_ans else 0.0
     flip_rate = len(flips) / n if n else 0.0
     misses = []
-    for r in rows:
+    for r in answered:
         if agrees(r.where, exp[r.key], also[r.key]):
             continue
         b = boundary(r.where, exp[r.key])
@@ -386,8 +417,9 @@ def score_against_gold(rows: Sequence[GateRow], gold: Sequence[Mapping]) -> Gate
                     flip_rate=round(flip_rate, 4), confusion={k: dict(v) for k, v in conf.items()},
                     confusion_vs_m1={k: dict(v) for k, v in m1.items()}, misses=misses,
                     meets_targets=agreement >= TARGET_AGREEMENT - 1e-9,
-                    n_agree_strict=len(strict), agreement_strict=round(len(strict) / n if n else 0.0, 4),
-                    n_no_majority=sum(1 for r in rows if not r.majority), boundary_errors=dict(errors))
+                    n_agree_strict=len(strict), agreement_strict=round(len(strict) / n_ans if n_ans else 0.0, 4),
+                    n_no_majority=sum(1 for r in rows if not r.majority), boundary_errors=dict(errors),
+                    n_refused=len(refused), refused=[r.label for r in refused], n_answered=n_ans)
 
 
 def _corpus_enactable(path: Optional[Path] = None) -> dict:
@@ -446,7 +478,7 @@ def estimate(inputs: Sequence[GateInput], system: str, model: str, *, n_readings
 def _confusion_md(table: Mapping, *, row_header: str, row_order: Sequence[str]) -> list:
     """A confusion table, one column per answer in :data:`WHERE` order plus any answer the counts carry that is
     not one of the four (``"None"`` when every reading of a row failed), so no count is dropped silently."""
-    extra = sorted({a for c in table.values() for a in c} - set(WHERE))
+    extra = sorted({a for c in table.values() for a in c} - set(WHERE))      # "None", "refusal"
     cols = list(WHERE) + extra
     out = ["| " + " | ".join([row_header, *cols]) + " |", "|" + "---|" * (len(cols) + 1)]
     for k in row_order:
@@ -475,8 +507,11 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
              "strict count, exact answers only, stands beside.  So a miss crosses one of two boundaries, and each "
              "is counted: `neither` against anything reachable (whether to make data at all) and `agentic` "
              "against chat-reachable (whether a harness is needed).", "",
-             f"Agreement {ev.n_agree} of {ev.n} ({ev.agreement:.1%}; target at least 26 of 30; strict "
-             f"{ev.n_agree_strict} of {ev.n}): {verdict}.  Boundary errors: neither vs reachable "
+             f"Agreement {ev.n_agree} of {ev.n_answered} answered ({ev.agreement:.1%}; target at least 26 of 30; strict "
+             f"{ev.n_agree_strict} of {ev.n_answered}): {verdict}.  Refused outright by the model's output classifier: "
+             f"{ev.n_refused} of {ev.n}" + (f" ({', '.join(ev.refused)}); a refused trait's data is written by hand "
+                                           "and it counts neither way" if ev.refused else "") +
+             ".  Boundary errors: neither vs reachable "
              f"{be.get('neither_vs_reachable', 0)}, agentic vs chat-reachable "
              f"{be.get('agentic_vs_chat_reachable', 0)}.  Readings disagreed on {ev.n_flip} of {ev.n} "
              f"({ev.flip_rate:.1%}) and no answer had a majority on {ev.n_no_majority}; neither has a target, a "
@@ -496,10 +531,10 @@ def eval_markdown(ev: GateEval, rows: Sequence[GateRow], *, rubric: Mapping, cos
               "precedence decided.", "",
               "| key | label | expected | answer | boundary | readings | first reason |", "|---|---|---|---|---|---|---|"]
     for r in rows:
-        if r.key in missed or r.flip:
+        if r.key in missed or r.flip or r.refused:
             b = (missed.get(r.key) or {}).get("boundary") or ""
             rd = ", ".join(map(str, r.readings)) + ("" if r.majority else " (no majority)")
-            lines.append(f"| {r.key} | {r.label} | {r.expected} | {r.where} | {b} | {rd} "
+            lines.append(f"| {r.key} | {r.label} | {r.expected} | {REFUSAL if r.refused else r.where} | {b} | {rd} "
                          f"| {_md(r.reasons[0] if r.reasons else '')} |")
     lines += ["", "## The two free-text fields", "",
               f"No metric, by design.  At promotion field 1 `{AGENTIC_ONLY}` suggests the tag "
@@ -515,6 +550,7 @@ __all__ = ["GateInput", "GateRow", "GateResult", "GateEval", "RubricNotPinned", 
            "N_READINGS_GOLD", "N_READINGS_ROWS", "THIRD_ON_DISAGREEMENT", "THIRD_READING_SHARE", "WHERE",
            "WHERE_PRECEDENCE", "NOWHERE", "AGENTIC_ONLY", "GOLD_EXPECTED_MAP", "CHAT_REACHABLE", "EXTRACTOR_CLASS",
            "TAG_NEEDS_AGENTIC_HARNESS", "TAG_JUDGE_NEEDS_BASELINE", "TARGET_AGREEMENT", "load_rubric",
-           "map_gold_expected", "where_class", "disagrees_with_extractor", "render_user", "parse_answer", "combine",
+           "REFUSAL", "map_gold_expected", "where_class", "disagrees_with_extractor", "render_user", "parse_answer",
+           "combine",
            "run_gate", "agrees", "boundary", "score_against_gold", "gold_inputs", "kept_inputs", "estimate",
            "eval_markdown"]

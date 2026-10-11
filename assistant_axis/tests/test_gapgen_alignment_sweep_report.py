@@ -149,6 +149,19 @@ def test_the_gate_s_three_fields_and_the_tags_they_suggest():
     assert "gate both (flip) (!= extractor)" in md and "gate agentic (!= extractor)" not in md
 
 
+def test_a_refused_gate_row_is_marked_for_hand_made_data():
+    gate = {"behaves_when_watched#1": {"where": None, "flip": False, "refused": True, "elicitation": None,
+                                       "judge_needs": None}}
+    rs = rows(gate=gate)
+    by = {r.key: r for r in rs}
+    assert by["behaves_when_watched#1"].gate is None and by["behaves_when_watched#1"].gate_refused is True
+    md = R.render_readout(rs, run_id="r1", counts={}, costs={}, probe_status="ran", gate_status="advisory")
+    assert "agentic-only / gate refused (data by hand)" in md
+    sec = md.split("## The gate's three fields, for promotion")[1].split("\n## ", 1)[0]
+    assert "**Refused** by the model's output classifier, every reading: behaves when watched." in sec
+    assert "| behaves when watched | refused | agentic-only |" in sec
+
+
 def test_a_run_without_gate_rows_still_renders_every_section():
     md = R.render_readout(rows(), run_id="r1", counts={}, costs={}, probe_status="not run", gate_status="advisory")
     assert "(no gate rows for the survivors.)" in md

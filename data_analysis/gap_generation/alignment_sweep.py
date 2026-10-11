@@ -469,12 +469,13 @@ def cmd_gate(args) -> int:
         g_res = asyncio.run(G.run_gate(gold, client=client, model=args.model, system=rub["text"], usage=ctx.usage,
                                        n_readings=n_gold, third_on_disagreement=third,
                                        concurrency=args.concurrency, rubric_version=rub["version"], now=utc_now,
+                                       session_id=ctx.session_id,
                                        on_record=lambda r: X.append_response(r, resp)))
         if kept and not g_res.stopped_by_budget:
             k_res = asyncio.run(G.run_gate(kept, client=client, model=args.model, system=rub["text"],
                                            usage=ctx.usage, n_readings=n_rows, third_on_disagreement=third,
                                            concurrency=args.concurrency, rubric_version=rub["version"],
-                                           now=utc_now,
+                                           now=utc_now, session_id=ctx.session_id,
                                            on_record=lambda r: X.append_response(r, resp)))
     finally:
         ctx.finish(n_emitted=0)
@@ -493,7 +494,7 @@ def cmd_gate(args) -> int:
                          "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, "cost_usd": cost,
                          "readings_gold": n_gold, "readings_rows": n_rows, "third_on_disagreement": third,
                          "n_calls": g_res.n_calls, "n_failed_readings": g_res.n_failed_readings,
-                         "n_third_readings": g_res.n_third_readings,
+                         "n_third_readings": g_res.n_third_readings, "n_refused": g_res.n_refused,
                          LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "at": utc_now()},
                         inputs=inputs, title="alignment sweep: enactability gate on the gold items")
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / G.GOLD_EVAL_NAME)
@@ -502,7 +503,8 @@ def cmd_gate(args) -> int:
     if kept:
         atomic_write_text("".join(json.dumps(r.as_dict(), ensure_ascii=False) + "\n" for r in k_res.rows),
                           rdir / G.ROWS_NAME)
-    print(f"gold: agreement {ev.n_agree}/{ev.n} ({ev.agreement:.1%}; strict {ev.n_agree_strict}), boundary errors "
+    print(f"gold: agreement {ev.n_agree}/{ev.n_answered} answered ({ev.agreement:.1%}; strict {ev.n_agree_strict}; "
+          f"refused {ev.n_refused} {ev.refused}), boundary errors "
           f"{json.dumps(ev.boundary_errors)}, flips {ev.n_flip}, no majority {ev.n_no_majority}, third readings "
           f"{g_res.n_third_readings}; {'meets' if ev.meets_targets else 'below'} the target; confusion "
           f"{json.dumps(ev.confusion)}")
