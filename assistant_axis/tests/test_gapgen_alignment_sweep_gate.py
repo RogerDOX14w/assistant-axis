@@ -2,8 +2,10 @@
 Anthropic client, no network.
 
 Draft 3 (Roger, QUESTIONS 75, 2026-10-11): the single four-way answer became three fields -- ``where`` (the one
-categorical field), ``elicitation`` and ``judge_needs`` (both free text) -- on Opus 5.5, two readings on the gold
-items and one on production rows, with agreement and the flip rate measured on field 1 only."""
+categorical field), ``elicitation`` and ``judge_needs`` (both free text) -- on Opus 5.5, with agreement measured on
+field 1 only.  Since 2026-10-11: two readings per item and a third where they disagree, the majority answer; chat
+and both scored alike; the misses counted by the two boundaries that matter; the extractor's enactability as the
+free cross-check."""
 from __future__ import annotations
 
 import asyncio
@@ -60,32 +62,45 @@ def test_label_goes_through_prompt_label_and_label_form_is_recorded():
     assert client.calls[0]["model"] == "claude-opus-5-5" and "temperature" not in client.calls[0]
 
 
-def test_the_model_is_opus_and_the_readings_differ_by_what_is_measured():
-    """Roger, QUESTIONS 75: "go straight to Opus"; two readings where agreement and the flip rate are measured,
-    one on the production rows, which he reads anyway."""
-    assert G.MODEL == "claude-opus-5-5" and (G.N_READINGS_GOLD, G.N_READINGS_ROWS) == (2, 1)
+def test_the_model_is_opus_and_two_readings_everywhere_with_a_third_on_disagreement():
+    """Roger, QUESTIONS 75: "go straight to Opus"; and 2026-10-11, "the money is better spent on readings than on
+    words": two base readings on gold and production rows alike, a third when they disagree."""
+    assert G.MODEL == "claude-opus-5-5" and (G.N_READINGS_GOLD, G.N_READINGS_ROWS) == (2, 2)
+    assert G.THIRD_ON_DISAGREEMENT is True and 0.1 <= G.THIRD_READING_SHARE <= 0.2
     inp = [G.GateInput("a#1", "steady", "This means x.")]
-    res, client, _ = run(inp, lambda kw: answer("chat"), n_readings=G.N_READINGS_ROWS)
+    res, client, _ = run(inp, lambda kw: answer("chat"), n_readings=1)
     assert len(client.calls) == 1 and res.rows[0].readings == ["chat"] and res.rows[0].flip is False
+    assert res.rows[0].majority is True and res.n_third_readings == 0
 
 
-def test_two_readings_and_flip_on_disagreement():
-    inp = [G.GateInput("a#1", "steady", "This means x."), G.GateInput("b#1", "sneaky", "This means y.")]
-    calls = {"a#1": iter(["chat", "chat"]), "b#1": iter(["chat", "agentic"])}
+def test_a_third_reading_on_disagreement_and_the_majority_answer():
+    inp = [G.GateInput("a#1", "steady", "This means x."), G.GateInput("b#1", "sneaky", "This means y."),
+           G.GateInput("c#1", "shifty", "This means z.")]
+    calls = {"a#1": iter(["chat", "chat"]), "b#1": iter(["chat", "agentic", "agentic"]),
+             "c#1": iter(["chat", "agentic", "neither"])}
 
     def responder(kw):
-        key = "a#1" if "steady" in user_text(kw) else "b#1"
+        key = {"steady": "a#1", "sneaky": "b#1", "shifty": "c#1"}[json.loads(user_text(kw))["label"]]
         v = next(calls[key])
         return answer(v, elicitation="Every scenario gives it a tool task." if v == "agentic" else ELICIT)
     res, client, usage = run(inp, responder)
-    assert len(client.calls) == 4 and usage.n_calls == 4
+    assert len(client.calls) == 8 and usage.n_calls == 8 and res.n_third_readings == 2
     rows = {r.key: r for r in res.rows}
-    assert rows["a#1"].readings == ["chat", "chat"] and rows["a#1"].flip is False and rows["a#1"].where == "chat"
+    a = rows["a#1"]
+    assert a.readings == ["chat", "chat"] and a.flip is False and a.where == "chat" and a.majority is True
     b = rows["b#1"]
-    assert b.readings == ["chat", "agentic"] and b.flip is True
-    # a split vote keeps the more reachable reading, so the gate never drops on a flip, and the free-text fields
-    # come from the reading that gave the kept answer
-    assert b.where == "chat" and b.elicitation == ELICIT and b.judge_needs == JUDGE
+    assert b.readings == ["chat", "agentic", "agentic"] and b.flip is True and b.majority is True
+    # the majority wins, and the free-text fields come from a reading that gave the kept answer
+    assert b.where == "agentic" and b.elicitation == "Every scenario gives it a tool task." and b.judge_needs == JUDGE
+    c = rows["c#1"]
+    assert c.readings == ["chat", "agentic", "neither"] and c.flip is True and c.majority is False
+    assert c.where == "chat" and c.elicitation == ELICIT          # no majority: the most reachable reading, as before
+    # the third reading can be switched off, and then a split vote is decided by precedence
+    calls["d#1"] = iter(["chat", "agentic"])
+    res2, client2, _ = run([G.GateInput("d#1", "steady", "This means x.")],
+                           lambda kw: answer(next(calls["d#1"])), third_on_disagreement=False)
+    d = res2.rows[0]
+    assert len(client2.calls) == 2 and d.readings == ["chat", "agentic"] and d.where == "chat" and d.majority is False
 
 
 def test_the_two_free_text_fields_are_required_unless_where_is_neither():
@@ -126,7 +141,7 @@ def test_both_is_kept_and_suggests_no_agentic_harness():
                                                                          "judge_needs_baseline")
 
 
-def test_a_flip_keeps_the_most_reachable_reading_with_both_outranking_chat():
+def test_combine_takes_the_majority_and_falls_back_to_the_most_reachable_reading():
     assert G.WHERE_PRECEDENCE == ("both", "chat", "agentic", "neither")
     assert set(G.WHERE_PRECEDENCE) == set(G.WHERE) and (G.AGENTIC_ONLY, G.NOWHERE) == ("agentic", "neither")
 
@@ -134,12 +149,44 @@ def test_a_flip_keeps_the_most_reachable_reading_with_both_outranking_chat():
         return {"system_prompt": "p", "reason": "r", "where": w, "elicitation": elicitation,
                 "judge_needs": judge_needs}
 
-    assert G.combine([rd("both"), rd("chat")]) == ("both", True, "e", "j")
-    assert G.combine([rd("chat"), rd("agentic", "s", "t")]) == ("chat", True, "e", "j")
-    assert G.combine([rd("both"), rd("agentic", "s", "t")]) == ("both", True, "e", "j")
-    assert G.combine([rd("agentic", "s", "t"), rd("neither", None, None)]) == ("agentic", True, "s", "t")
-    assert G.combine([rd("neither", None, None)]) == ("neither", False, None, None)
-    assert G.combine([None, None]) == (None, False, None, None)
+    # a majority: one stray "both" no longer beats two "neither" (what pulled overfitted to both)
+    assert G.combine([rd("neither", None, None), rd("both"), rd("neither", None, None)]) == \
+        ("neither", True, None, None, True)
+    assert G.combine([rd("both"), rd("chat"), rd("chat")]) == ("chat", True, "e", "j", True)
+    assert G.combine([rd("agentic", "s", "t"), rd("agentic", "s", "t")]) == ("agentic", False, "s", "t", True)
+    # no majority: the most reachable reading, with both outranking chat
+    assert G.combine([rd("both"), rd("chat")]) == ("both", True, "e", "j", False)
+    assert G.combine([rd("chat"), rd("agentic", "s", "t")]) == ("chat", True, "e", "j", False)
+    assert G.combine([rd("chat"), rd("agentic", "s", "t"), rd("neither", None, None)]) == ("chat", True, "e", "j", False)
+    assert G.combine([rd("agentic", "s", "t"), rd("neither", None, None)]) == ("agentic", True, "s", "t", False)
+    # one reading, or none, is not a contested vote
+    assert G.combine([rd("neither", None, None)]) == ("neither", False, None, None, True)
+    assert G.combine([None, None]) == (None, False, None, None, True)
+
+
+def test_where_class_boundary_and_the_extractor_cross_check():
+    assert [G.where_class(w) for w in ("chat", "both", "agentic", "neither", None)] == \
+        ["chat-reachable", "chat-reachable", "agentic", "neither", None]
+    assert G.boundary("both", "chat") is None and G.boundary("agentic", "agentic") is None
+    assert G.boundary("neither", "both") == "neither_vs_reachable" == G.boundary("agentic", "neither")
+    assert G.boundary("agentic", "both") == "agentic_vs_chat_reachable" == G.boundary("chat", "agentic")
+    assert G.boundary(None, "chat") is None
+    # the extractor's three answers against the gate's four, by class
+    assert G.EXTRACTOR_CLASS == {"chat": "chat-reachable", "agentic-only": "agentic", "none": "neither"}
+    assert not G.disagrees_with_extractor("both", "chat") and not G.disagrees_with_extractor("chat", "chat")
+    assert G.disagrees_with_extractor("agentic", "chat") and G.disagrees_with_extractor("both", "agentic-only")
+    assert G.disagrees_with_extractor("neither", "chat") and not G.disagrees_with_extractor("neither", "none")
+    assert not G.disagrees_with_extractor(None, "chat") and not G.disagrees_with_extractor("chat", None)
+    assert not G.disagrees_with_extractor("chat", "mechanism")                 # an unknown answer is no disagreement
+
+
+def test_estimate_books_a_share_of_third_readings():
+    inputs = [G.GateInput(f"k#{i}", "x", "This means x.") for i in range(20)]
+    base = G.estimate(inputs, "SYS", G.MODEL, n_readings=2, third_on_disagreement=False)
+    adaptive = G.estimate(inputs, "SYS", G.MODEL, n_readings=2)
+    assert base["n_calls"] == 40 and adaptive["n_calls"] == 43           # ceil(20 x 2.15)
+    assert adaptive["usd"] > base["usd"] and adaptive["in_tok"] > base["in_tok"]
+    assert G.estimate([], "SYS", G.MODEL)["n_calls"] == 0
 
 
 def test_unparseable_reading_is_retried_once_and_charged():
@@ -158,11 +205,11 @@ GOLD = [{"key": "gold:a", "label": "a", "gloss": "This means a.", "expected": "c
 
 
 def row(key, label, where, readings, *, flip=False, m1=None, expected=None, elicitation=None, judge_needs=None,
-        reasons=()):
+        reasons=(), majority=True):
     return G.GateRow(key=key, label=label, system_prompt="", where=where, readings=list(readings), flip=flip,
                      elicitation=elicitation, judge_needs=judge_needs, m1_enactable_in_text=m1,
                      label_form="judge-display-v1", reasons=list(reasons),
-                     expected=G.map_gold_expected(expected))
+                     expected=G.map_gold_expected(expected), majority=majority)
 
 
 def test_the_four_way_gold_key_maps_onto_field_one():
@@ -198,6 +245,8 @@ def test_score_against_gold_agreement_flip_rate_and_the_m1_row():
     ev = G.score_against_gold(rows, GOLD)
     assert (ev.n, ev.n_agree, ev.n_agree_strict, ev.n_flip) == (4, 2, 2, 1) and ev.scored_field == "where"
     assert ev.agreement == pytest.approx(0.5) and ev.flip_rate == pytest.approx(0.25)
+    assert ev.boundary_errors == {"neither_vs_reachable": 0, "agentic_vs_chat_reachable": 2}
+    assert ev.n_no_majority == 0 and ev.targets == {"agreement": pytest.approx(26 / 30)}
     # the gold answers are compared in field 1's vocabulary: agentic-only -> agentic, none -> neither
     assert ev.confusion == {"chat": {"chat": 1, "agentic": 1}, "agentic": {"chat": 1}, "neither": {"neither": 1}}
     assert ev.confusion_vs_m1 == {"2": {"chat": 1}, "1": {"agentic": 1}, "n/a": {"chat": 1, "neither": 1}}
@@ -225,9 +274,13 @@ def test_score_against_gold_discounts_chat_both_and_honours_also_accepts():
     assert (ev.n, ev.n_agree, ev.n_agree_strict, ev.n_flip) == (5, 3, 0, 1)
     assert ev.agreement == pytest.approx(0.6) and ev.agreement_strict == pytest.approx(0.0)
     assert [m["key"] for m in ev.misses] == ["gold:d", "gold:e"] and ev.misses[0]["also_accepts"] == []
+    assert [m["boundary"] for m in ev.misses] == ["agentic_vs_chat_reachable", "neither_vs_reachable"]
+    assert ev.boundary_errors == {"neither_vs_reachable": 1, "agentic_vs_chat_reachable": 1}
     assert ev.confusion == {"chat": {"both": 1}, "both": {"chat": 1}, "agentic": {"both": 2}, "neither": {"both": 1}}
     md = G.eval_markdown(ev, rows, rubric={"name": "n", "version": 3, "sha256": "x"}, cost_usd=0.0)
     assert "Agreement 3 of 5 (60.0%; target at least 26 of 30; strict 0 of 5)" in md
+    assert "Boundary errors: neither vs reachable 1, agentic vs chat-reachable 1." in md
+    assert "no answer had a majority on 0" in md
     misses = md.split("## Misses and flips")[1].split("## The two free-text fields")[0]
     assert "gold:c" in misses and "gold:d" in misses and "gold:e" in misses       # c flipped, d and e missed
     assert "gold:a" not in misses and "gold:b" not in misses                      # discounted and unflipped
@@ -237,7 +290,7 @@ def test_eval_markdown_has_a_column_per_answer_and_the_free_text_fields():
     """The confusion tables are built from ``WHERE``, so every answer gets a column and an answer outside the four
     -- ``None``, when every reading of a row failed -- gets one of its own rather than vanishing.  Fields 2 and 3
     are printed for reading, with the tags they suggest, and are never scored."""
-    rows = [row("gold:a", "a", "both", ["both", "chat"], flip=True, m1=2, expected="chat",
+    rows = [row("gold:a", "a", "both", ["both", "chat", "agentic"], flip=True, m1=2, expected="chat", majority=False,
                 elicitation="Ask for advice, then give it tools.", judge_needs="At face value.",
                 reasons=["It shows in replies and on tasks."]),
             row("gold:b", "b", None, [None, None], expected="agentic-only", reasons=[None]),
@@ -255,16 +308,19 @@ def test_eval_markdown_has_a_column_per_answer_and_the_free_text_fields():
     assert "| both | 0 | 0 | 0 | 0 | 0 |" in md                      # no gold item expects "both" yet
     assert "| agentic | 0 | 0 | 0 | 0 | 1 |" in md                   # the failed row is counted, not dropped
     assert "field 1 (`where`) only" in md and "no metric, by design" in md
+    assert ev.n_no_majority == 1 and "| both, chat, agentic (no majority) |" in md and "no answer had a majority on 1" in md
     free = md.split("## The two free-text fields")[1]
     assert "needs_agentic_harness" in free and "judge_needs_baseline" in free
     assert "Needs the true capability level." in free and "A tool task with / a pipe in it." in free
-    assert f"{G.MODEL}, 2 reading(s) per item" in md
-    assert "1 reading(s) per item" in G.eval_markdown(ev, rows, rubric={"name": "n", "version": 3, "sha256": "x"},
+    assert f"{G.MODEL}, 2 base reading(s) per item and a third where they disagree" in md
+    assert "1 base reading(s) per item" in G.eval_markdown(ev, rows, rubric={"name": "n", "version": 3, "sha256": "x"},
                                                       cost_usd=0.1, n_readings=1)
 
 
-def test_targets_are_the_plan_s_and_gate_nothing():
-    assert G.TARGET_AGREEMENT == pytest.approx(26 / 30) and G.TARGET_FLIP_RATE == pytest.approx(0.10)
+def test_the_one_target_is_the_plan_s_agreement_and_gates_nothing():
+    """The flip-rate target went on 2026-10-11: a sampled model cannot meet 10% at two readings, so the flip rate
+    and the no-majority count are reported without one."""
+    assert G.TARGET_AGREEMENT == pytest.approx(26 / 30) and not hasattr(G, "TARGET_FLIP_RATE")
     ev = G.score_against_gold([row(g["key"], g["label"], G.map_gold_expected(g["expected"]),
                                    [G.map_gold_expected(g["expected"])] * 2, expected=g["expected"]) for g in GOLD],
                               GOLD)
@@ -305,8 +361,8 @@ def test_kept_rows_from_registry_blocks():
 
 def test_estimate_scales_with_the_readings():
     inputs = [G.GateInput("a#1", "steady", "This means x.")] * 10
-    one = G.estimate(inputs, "SYS" * 400, G.MODEL, n_readings=1)
-    two = G.estimate(inputs, "SYS" * 400, G.MODEL, n_readings=2)
+    one = G.estimate(inputs, "SYS" * 400, G.MODEL, n_readings=1, third_on_disagreement=False)
+    two = G.estimate(inputs, "SYS" * 400, G.MODEL, n_readings=2, third_on_disagreement=False)
     assert one["n_calls"] == 10 and two["n_calls"] == 20
     assert two["usd"] == pytest.approx(2 * one["usd"], abs=1e-3) and one["usd"] > 0   # both rounded to 4 places
     assert G.estimate([], "SYS", G.MODEL) == {"n_calls": 0, "in_tok": 0, "out_tok": 0, "usd": 0.0}

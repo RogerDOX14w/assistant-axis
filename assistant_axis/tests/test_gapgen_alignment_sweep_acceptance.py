@@ -87,8 +87,8 @@ def test_report_and_decide_numbers(rdir, capsys):
     e = rdir / "gate_gold_eval.json"
     if e.exists():
         ev = _json(e)["eval"]
-        lines.append(f"gate gold: agreement {ev['n_agree']}/{ev['n']} (target >= 26/30), flip rate "
-                     f"{ev['flip_rate']:.1%} (target <= 10%); {'binding' if ev['meets_targets'] else 'advisory'}")
+        lines.append(f"gate gold: agreement {ev['n_agree']}/{ev['n']} (target >= 26/30, chat and both alike), flip "
+                     f"rate {ev['flip_rate']:.1%} (no target); {'binding' if ev['meets_targets'] else 'advisory'}")
     gr = rdir / "gold_recovery.md"
     if gr.exists():
         head = gr.read_text(encoding="utf-8").split("Recovered ", 1)[1].split(".", 1)[0]

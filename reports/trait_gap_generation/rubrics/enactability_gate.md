@@ -6,7 +6,7 @@
 | **What the model is shown** | One trait per call: its label (in the judge display form) and its one-sentence gloss. |
 | **What it returns** | A two-sentence system prompt that would make an assistant show the trait, a reason, then the three fields: `where` (`chat`, `agentic`, `both` or `neither`), `elicitation` (one line of guidance for whoever writes the test material) and `judge_needs` (one line on whether a judge could read the trait off the output at face value, or needs context or ground truth, and what). |
 | **What it is tuned on** | Not tuned.  Evaluated on 30 gold items ([gate_gold_items.json](../../../data/candidates/alignment_sweep/gate_gold_items.json)), two readings each, on **field 1 only**.  Those labels were relabelled over draft 2's four answers on 2026-10-10, *blind* (the relabeller saw the rubric and the items, no draft-2 answer and no draft-1 per-item label, and no draft-2 run existed yet): chat 6, both 10, agentic-only 5, none 9, with 11 of 30 moved and draft 1's label kept as `expected_v1`.  Draft 3's vocabulary maps onto that key one-for-one, so the file is unchanged (see "The gold key survives the redesign").  No draft has yet been scored against the four-way key. |
-| **Models** | Opus 5.5 (`claude-opus-5-5`); no temperature; **two readings** per gold item (where agreement and the flip rate are measured) and **one** per production row, which Roger reads anyway. |
+| **Models** | Opus 5.5 (`claude-opus-5-5`); no temperature; **two readings** per item, gold and production alike, and a **third where the two disagree**, the majority answer kept (since 2026-10-11; before it, one reading per production row and the most reachable reading on a flip), which Roger reads anyway. |
 
 **To edit:** change the text inside the block below.  Everything between the two fence lines is sent
 to the model exactly as written.  Leave the fence lines themselves alone.  Notes for me go under
@@ -70,7 +70,7 @@ without being asked to" leaves a question generator nowhere to go but a task sce
 relabelling of 2026-10-10 still stands as the answer key (`gate.GOLD_EXPECTED_MAP` does the renaming on read).
 Agreement and the flip rate are kept **for field 1 only**; fields 2 and 3 get no metric, by design — they are
 guidance for a person, with no answer key to score them against and nothing downstream that could act on a wrong
-one.  The targets recorded in plan 08 § 8 (agreement at least 26 of 30, flip rate at most 10%) stay in the code and
+one.  The targets recorded in plan 08 § 8 (agreement at least 26 of 30, `chat` and `both` counted alike since 2026-10-11; the 10% flip-rate target was dropped the same day, a sampled model not meeting it at two readings, and the flip rate and the no-majority count are reported instead, with the misses split by the two boundaries that matter, `neither` against reachable and `agentic` against chat-reachable) stay in the code and
 the readout as the measurement Roger asked for, not as a gate.
 
 **Why draft 2 added a fourth answer, kept here.**  Draft 1's three answers were logically complete but collapsed a

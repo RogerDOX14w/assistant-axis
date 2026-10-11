@@ -140,6 +140,13 @@ def test_the_gate_s_three_fields_and_the_tags_they_suggest():
     harness = [l for l in sec.splitlines() if l.startswith("| behaves when watched")][0]
     both = [l for l in sec.splitlines() if l.startswith("| same unwatched")][0]
     assert harness.endswith("| needs_agentic_harness |") and both.endswith("|  |")
+    # the extractor's own enactability is the free cross-check: the gate's class against it, by row and counted
+    assert by["behaves_when_watched#1"].gate_disagrees_extractor is False      # agentic against agentic-only
+    assert by["same_unwatched#1"].gate_disagrees_extractor is True             # both against agentic-only
+    assert "| behaves when watched | agentic | agentic-only |" in sec
+    assert "| same unwatched | both (flip) != extractor | agentic-only |" in sec
+    assert "**1 of 2** survivors have the gate in a different class" in sec
+    assert "gate both (flip) (!= extractor)" in md and "gate agentic (!= extractor)" not in md
 
 
 def test_a_run_without_gate_rows_still_renders_every_section():

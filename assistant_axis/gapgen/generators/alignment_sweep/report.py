@@ -108,6 +108,8 @@ class ReadoutRow:
     group: str                      # survivor | covered | filtered
     score: float = 0.0
     partner_survives: bool = False
+    #: The gate's class differs from the extractor's ``enactability`` (gate.disagrees_with_extractor): look here first.
+    gate_disagrees_extractor: bool = False
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -141,6 +143,7 @@ def _group(row: Optional[Mapping]) -> str:
 def build_rows(submitted: Sequence[Mapping], items: Mapping[str, Mapping], registry_rows: Mapping[str, Mapping], *,
                gate_rows: Mapping[str, Mapping], label_known: Mapping[str, Optional[bool]]) -> list[ReadoutRow]:
     """The readout's rows with their rank scores (module docstring)."""
+    from .gate import disagrees_with_extractor
     out = []
     for s in submitted:
         reg = registry_rows.get(s["key"]) or {}
@@ -157,7 +160,8 @@ def build_rows(submitted: Sequence[Mapping], items: Mapping[str, Mapping], regis
             alignment_score=nv.get("alignment_score"), cut_off=nv.get("cut_off"), decision=nv.get("decision"),
             pair_completion_for=list(nv.get("pair_completion_for") or []), nearest=nearest_text(nv),
             covered_by=nv.get("covered_by"), label_known=label_known.get(s["surface"]), source=s.get("source_ref"),
-            source_weight=float(it.get("source_weight") or 1), rank=int(it.get("rank") or 0), group=_group(reg)))
+            source_weight=float(it.get("source_weight") or 1), rank=int(it.get("rank") or 0), group=_group(reg),
+            gate_disagrees_extractor=disagrees_with_extractor(g.get("where"), it.get("enactability"))))
     surv = {r.label for r in out if r.group == "survivor"}
     for r in out:
         r.partner_survives = bool(r.partner and r.partner in surv)
@@ -308,7 +312,8 @@ COLUMNS = ("rank", "label (partner)", "gloss", "type", "enactability", "M1 verdi
 def _row_md(i: int, r: ReadoutRow) -> str:
     enact = r.enactability or ""
     if r.gate:
-        enact += f" / gate {r.gate}" + (" (flip)" if r.gate_flip else "")
+        enact += f" / gate {r.gate}" + (" (flip)" if r.gate_flip else "") + \
+            (" (!= extractor)" if r.gate_disagrees_extractor else "")
     dec = (r.decision or "") + (f"; completes {', '.join(r.pair_completion_for)}" if r.pair_completion_for else "")
     known = {True: "yes", False: "no", None: "n/a"}[r.label_known]
     cells = [str(i), f"{r.label} ({r.partner or 'no partner'})", r.gloss, r.type, enact, r.m1,
@@ -331,10 +336,15 @@ def render_gate_fields(surv: Sequence[ReadoutRow]) -> list:
            "scope *narrowing* is the opposite case and belongs in the description.", ""]
     if not have:
         return out + ["(no gate rows for the survivors.)"]
-    out += ["| label | where | elicitation | judge needs | suggested tags |", "|---|---|---|---|---|"]
+    dis = [r for r in have if r.gate_disagrees_extractor]
+    out += [f"The extractor's own `enactability` (read from the source text, not the gloss) is the free cross-check: "
+            f"**{len(dis)} of {len(have)}** survivors have the gate in a different class from it (`chat` and `both` "
+            "count as one class), marked `!= extractor` below; look at those first.", "",
+            "| label | where | extractor | elicitation | judge needs | suggested tags |", "|---|---|---|---|---|---|"]
     for r in have:
         tags = ([TAG_NEEDS_AGENTIC_HARNESS] if r.gate == AGENTIC_ONLY else [])
-        out.append(f"| {_md(r.label)} | {r.gate or ''}{' (flip)' if r.gate_flip else ''} | {_md(r.elicitation)} "
+        where = (r.gate or '') + (' (flip)' if r.gate_flip else '') + (' != extractor' if r.gate_disagrees_extractor else '')
+        out.append(f"| {_md(r.label)} | {where} | {r.enactability or ''} | {_md(r.elicitation)} "
                    f"| {_md(r.judge_needs)} | {', '.join(tags)} |")
     return out
 
