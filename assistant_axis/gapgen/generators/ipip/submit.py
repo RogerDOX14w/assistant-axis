@@ -1,11 +1,13 @@
 """Named poles to candidates, the downstream estimate, and the submission of an IPIP run.
 
-:func:`to_candidates`: one ``Candidate`` per named pole of a kept cluster whose naming (the chosen form, blind by
-default: QUESTIONS 47) says ``is_trait`` (QUESTIONS 48: the rest are counted, not submitted).  ``surface`` is the
-label, ``gloss_hint`` the gloss, ``rank`` the cluster id (clusters numbered by size), ``score`` ``None``
-(QUESTIONS 51: the platform reads ``score`` as human familiarity), ``source_ref`` ``ipip:g<G>:c<NNN><pole>``,
-and ``partner_hint`` the other pole's label in a bipolar cluster (reciprocal, so that ``promote`` can pair them
-and M3 sees a declared partner).
+:func:`to_candidates`: one ``Candidate`` per **named pole** of a kept cluster, the label in the chosen form
+(blind by default: QUESTIONS 47).  **Every named pole is submitted** (QUESTIONS 48, Roger 2026-10-11:
+``is_trait`` stops being a gate; M1's pinned kind call decides what a pole is, at about 40c of M1 for the 15%
+share the gate would have dropped), and the naming call's own ``kind`` guess is counted in the report beside
+M1's verdicts.  ``surface`` is the label, ``gloss_hint`` the gloss, ``rank`` the cluster id (clusters numbered by
+size), ``score`` ``None`` (QUESTIONS 51: the platform reads ``score`` as human familiarity), ``source_ref``
+``ipip:g<G>:c<NNN><pole>``, and ``partner_hint`` the other pole's label in a bipolar cluster (reciprocal, so
+that ``promote`` can pair them and M3 sees a declared partner).
 
 :func:`run_submit` mirrors the census generator's: it prints the downstream estimate (the platform's M1 filter on
 every word and its M3 novelty scorer on the words M1 passes; this step makes no call) and gates it with
@@ -18,6 +20,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
@@ -62,14 +65,18 @@ def parse_poles_file(text: str) -> set[tuple[int, str]]:
     return out
 
 
-def to_candidates(rows: Sequence[Mapping], run_id: str, *, label_choice: str = "blind", trait_only: bool = True,
+def to_candidates(rows: Sequence[Mapping], run_id: str, *, label_choice: str = "blind",
                   poles: Optional[set] = None, include_loose: bool = False) -> tuple[list[Candidate], dict]:
     """``(candidates, counts)`` from cluster rows (see the module docstring).  ``poles`` limits the submission to
-    those ``(cluster_id, pole)`` ids; a partner hint still names the other pole when it is not submitted."""
+    those ``(cluster_id, pole)`` ids; a partner hint still names the other pole when it is not submitted.  No
+    verdict of the naming call holds a pole back (QUESTIONS 48): ``counts["kinds"]`` records what the call
+    guessed, for the report."""
     if label_choice not in LABEL_CHOICES:
         raise ValueError(f"label_choice must be one of {LABEL_CHOICES}")
-    counts = {"n_kept_clusters": 0, "n_poles": 0, "n_named": 0, "n_trait": 0, "n_not_trait": 0, "n_unnamed": 0,
-              "n_loose_skipped": 0, "n_selected_out": 0, "n_submitted": 0, "label_choice": label_choice}
+    counts = {"n_kept_clusters": 0, "n_poles": 0, "n_named": 0, "n_unnamed": 0,
+              "n_loose_skipped": 0, "n_selected_out": 0, "n_submitted": 0, "label_choice": label_choice,
+              "kinds": {}}
+    kinds: Counter = Counter()
     out = []
     for r in sorted(rows, key=lambda r: int(r["cluster_id"])):
         if r.get("consensus") != "kept" and not include_loose:
@@ -84,12 +91,7 @@ def to_candidates(rows: Sequence[Mapping], run_id: str, *, label_choice: str = "
                 counts["n_unnamed"] += 1
                 continue
             counts["n_named"] += 1
-            if nm.get("is_trait"):
-                counts["n_trait"] += 1
-            else:
-                counts["n_not_trait"] += 1
-                if trait_only:
-                    continue
+            kinds[nm.get("kind") or "unknown"] += 1
             if poles is not None and (int(r["cluster_id"]), p["pole"]) not in poles:
                 counts["n_selected_out"] += 1
                 continue
@@ -100,6 +102,7 @@ def to_candidates(rows: Sequence[Mapping], run_id: str, *, label_choice: str = "
                                  source_ref=source_ref(r["granularity"], r["cluster_id"], p["pole"]),
                                  partner_hint=partner))
     counts["n_submitted"] = len(out)
+    counts["kinds"] = dict(sorted(kinds.items()))
     return out, counts
 
 
@@ -161,19 +164,19 @@ class SubmitSummary:
 
 
 def run_submit(granularity: int, run_id: str, *, rows: Sequence[Mapping], sources_manifest, clusters_sha256: Optional[str],
-               label_choice: str = "blind", poles: Optional[set] = None, trait_only: bool = True,
+               label_choice: str = "blind", poles: Optional[set] = None,
                budget_usd: float = DEFAULT_BUDGET_USD, confirm_expensive: bool = False, confirmed_by: Optional[str] = None,
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                clusters_path: Optional[str] = None, echo=print) -> SubmitSummary:
     check_id(run_id, "run_id")
     rows = [r for r in rows if int(r["granularity"]) == int(granularity)]
-    cands, counts = to_candidates(rows, run_id, label_choice=label_choice, trait_only=trait_only, poles=poles)
+    cands, counts = to_candidates(rows, run_id, label_choice=label_choice, poles=poles)
     stems = {normalize_candidate(c.surface).stem for c in cands}
     est = estimate_downstream_usd(len(stems))
     echo(f"granularity {granularity}: {counts['n_kept_clusters']} kept clusters, {counts['n_poles']} poles, "
-         f"{counts['n_named']} named ({label_choice}), {counts['n_trait']} trait, {counts['n_not_trait']} not a trait "
-         f"(reported, not submitted), {counts['n_unnamed']} not named; submitting {len(cands)} candidates "
-         f"({len(stems)} distinct words)")
+         f"{counts['n_named']} named ({label_choice}), {counts['n_unnamed']} not named; the naming call's own kind "
+         f"guesses {json.dumps(counts['kinds'])} (reported, never a gate: QUESTIONS 48); submitting "
+         f"{len(cands)} candidates ({len(stems)} distinct words)")
     echo(format_estimate(est))
     confirm_or_abort(est["total_usd"], budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
     summary = SubmitSummary(granularity=int(granularity), run_id=run_id, counts=counts, estimate=est, dry_run=dry_run)
@@ -186,7 +189,8 @@ def run_submit(granularity: int, run_id: str, *, rows: Sequence[Mapping], source
             echo(f"  then: {c}")
         return summary
     args = {"granularity": int(granularity), "n": len(cands), "n_distinct": len(stems), "estimate": est,
-            "budget_usd": budget_usd, "label_choice": label_choice, "trait_only": trait_only,
+            "budget_usd": budget_usd, "label_choice": label_choice,
+            "gate": "none: every named pole is submitted (QUESTIONS 48, Roger 2026-10-11)",
             "poles": sorted(f"c{c:03d}{p}" for c, p in poles) if poles is not None else "all",
             "counts": counts, "clusters": clusters_path, "clusters_sha256": clusters_sha256,
             "sources_manifest": sources_manifest}

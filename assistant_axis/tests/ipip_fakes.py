@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import json
+import re
 import zipfile
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Mapping, Sequence
 from xml.sax.saxutils import escape
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "ipip"
@@ -90,15 +91,87 @@ def fixture_workbook(path: Path, rows: Iterable[tuple] = ASSIGNMENT_ROWS, *, tit
     return write_xlsx([*lead, ASSIGNMENT_HEADER, *rows], path)
 
 
-def fixture_pages(dest: Path, *, rows: Iterable[tuple] = ASSIGNMENT_ROWS) -> Path:
-    """The three inputs of ``ingest`` laid out as ``download`` lays them out (pages under their file names, the
-    workbook under its own), in ``dest``."""
+#: The synthetic key pages (source B, QUESTIONS 52): page file -> ((heading, alpha, ((sign, item text), ...)), ...).
+#: They key the same items as :data:`ASSIGNMENT_ROWS`, so A and B agree by construction and a test can introduce
+#: one difference at a time.  The headings are deliberately not all the index's labels: ``newHEXACO_PI_key.htm``
+#: prints HEXACO's own scale name ("Organization"), which the index reaches only through its href fragment, and
+#: ``new16PFKey.htm`` prints a construct the index does not list at all.
+KEY_PAGE_ROWS: dict[str, tuple] = {
+    "newNEOKey.htm": (
+        ("N1: ANXIETY", "(alpha = .83)", (("+", "Worry about things."), ("-", "Am relaxed most of the time."))),
+        ("E1: FRIENDLINESS", "(.87)", (("+", "Talk to a lot of different people at parties."),
+                                       ("+", "Make friends easily."), ("-", "Keep in the background."))),
+        ("C2: ORDERLINESS", "(.82)", (("+", "Get chores done right away."), ("+", "Love order and regularity."),
+                                      ("+", "Like to tidy up."), ("-", "Leave a mess in my room."))),
+    ),
+    "newHEXACO_PI_key.htm": (
+        ("C-Dili: Diligence", "(.80)", (("+", "Get chores done right away."),)),
+        ("C-Orga: Organization", "(.79)", (("+", "Like to tidy up."),)),
+    ),
+    "newCAT-PD-SFv1.1Keys.htm": (("Anxiousness", "(.90)", (("+", "Fear for the worst."),)),),
+    "newVIAKey.htm": (("Integrity/Honesty/Authenticity", "(.78)", (("+", "Keep my promises."),)),),
+    "new16PFKey.htm": (("Self-Reliance", "(.71)", (("+", "Am always prepared."),)),),
+}
+
+
+def write_key_page(blocks: Iterable[tuple], path: Path, *, title: str = "Scoring Key") -> Path:
+    """One IPIP-style key page: a heading per construct, then ``+ keyed`` / ``- keyed`` with its items, written
+    **cp1252** with ``&nbsp;`` padding, a curly apostrophe (0x92) and an en dash (0x96), the two bytes the real
+    pages carry that iso-8859-1 does not define (QUESTIONS 49)."""
+    out = [f'<HTML><HEAD><TITLE>{title}</TITLE>',
+           '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></HEAD>',
+           '<body><H2>Scoring Key — Don’t edit by hand</H2>',
+           '<p>The items and scales are in the public domain.</p>']
+    for heading, alpha, items in blocks:
+        anchor = re.sub(r"[^A-Za-z0-9]+", "_", heading.split(":")[-1].strip())
+        out.append(f'<p><a name="{anchor}"></a><b>{heading}</b>&nbsp;{alpha}<br>')
+        sign = None
+        for s, text in items:
+            if s != sign:
+                out.append(f'{s} keyed&nbsp;&nbsp;&nbsp;{text}<br>')
+                sign = s
+            else:
+                out.append(f'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{text}<br>')
+        out.append("</p>")
+    out.append("</body></HTML>")
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes("\n".join(out).encode("cp1252"))
+    return path
+
+
+#: Items the filler key pages of ``all_21`` key, drawn from the fixture item list so that every page yields rows.
+FILLER_ITEMS: tuple[str, ...] = ("Am always prepared.", "Keep my promises.", "Make friends easily.")
+
+
+def fixture_key_pages(dest: Path, pages: Mapping[str, tuple] | None = None, *, all_21: bool = False) -> Path:
+    """The key pages in ``dest``.  With ``all_21`` the pages :data:`KEY_PAGE_ROWS` does not describe are written
+    too, each with one construct of its own keying a real fixture item, so that ``check_key_pages`` passes; the
+    default writes only the five described pages, so the check reports the other sixteen as missing (which is how
+    a short scrape looks)."""
+    from assistant_axis.gapgen.generators.ipip.sources import KEY_PAGE_FILES
+    pages = dict(KEY_PAGE_ROWS if pages is None else pages)
+    dest = Path(dest)
+    if all_21:
+        for i, f in enumerate(KEY_PAGE_FILES.values()):
+            pages.setdefault(f, ((f"Filler {i}", "(.70)", (("+", FILLER_ITEMS[i % len(FILLER_ITEMS)]),)),))
+    for f, blocks in pages.items():
+        write_key_page(blocks, dest / f)
+    return dest
+
+
+def fixture_pages(dest: Path, *, rows: Iterable[tuple] = ASSIGNMENT_ROWS, key_pages: Mapping | None = None,
+                  all_21: bool = False, workbook: bool = True) -> Path:
+    """The inputs of ``ingest`` laid out as ``download`` lays them out, in ``dest``: the item list, the scale
+    index, the 21 key pages (source B) and the workbook (source A)."""
     from assistant_axis.gapgen.generators.ipip.sources import SOURCES
     dest = Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
     (dest / SOURCES["item_list"].dest).write_bytes((FIXTURES / "item_list.htm").read_bytes())
     (dest / SOURCES["scale_index"].dest).write_bytes((FIXTURES / "scale_index.htm").read_bytes())
-    fixture_workbook(dest / SOURCES["assignment_workbook"].dest, rows)
+    fixture_key_pages(dest, key_pages, all_21=all_21)
+    if workbook:
+        fixture_workbook(dest / SOURCES["assignment_workbook"].dest, rows)
     return dest
 
 

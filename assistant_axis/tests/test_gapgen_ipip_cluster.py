@@ -161,3 +161,36 @@ def test_embed_items_uses_the_cache_and_charges_usage(tmp_path):
     assert E.shape == (2, 16) and usage.n_calls == 1
     E2 = C.embed_items(items, embedder=HashEmbedder(dim=16), cache=cache, usage=usage)
     assert np.allclose(E, E2) and usage.n_calls == 1                  # the second time from the cache
+
+
+class TestNearestOtherPole:
+    """QUESTIONS 50, signal 1: the cluster table carries each pole's nearest pole of **another** cluster, so the
+    granularity command needs no vectors."""
+
+    def test_the_other_pole_of_the_same_cluster_is_not_an_other_cluster(self):
+        v = {"H1": np.array([1.0, 0.0, 0.0]), "H2": np.array([0.99, 0.1, 0.0]),   # cluster 1, poles a and b
+             "H3": np.array([0.0, 1.0, 0.0]), "H4": np.array([0.0, 0.0, 1.0])}
+        poles = [((1, "a"), ["H1"]), ((1, "b"), ["H2"]), ((2, "a"), ["H3"]), ((3, "a"), ["H4"])]
+        out = C.nearest_other_poles(poles, v)
+        assert out[(1, "a")]["cluster_id"] in (2, 3) and out[(1, "a")]["pole"] == "a"
+        assert out[(1, "b")]["cluster_id"] in (2, 3)
+        assert out[(2, "a")]["cluster_id"] in (1, 3)
+        assert all(0 <= r["cos"] <= 1 for r in out.values())
+
+    def test_a_lone_pole_has_no_nearest_other(self):
+        assert C.nearest_other_poles([((1, "a"), ["H1"])], {"H1": np.array([1.0, 0.0])}) == {}
+        assert C.nearest_other_poles([], {}) == {}
+
+    def test_written_on_every_pole_row_of_the_table(self):
+        E, _ = planted(n_clusters=6, size=5, dim=16)
+        items = [item(f"H{i}", f"Item {i}.") for i in range(len(E))]
+        rows, _summary = C.build_cluster_table(items, {"openai": E, "gemma": E}, target=6, hdbscan=False,
+                                               corpus=None)
+        assert len(rows) >= 2
+        for r in rows:
+            for p in r["poles"]:
+                nn = p["nearest_other"]
+                assert nn["cluster_id"] != r["cluster_id"]
+                assert -1.0 <= nn["cos"] <= 1.0
+        # it is a size signal, kept apart from nearest_corpus (novelty), which is absent without a corpus
+        assert all(r["nearest_corpus"] is None for r in rows)

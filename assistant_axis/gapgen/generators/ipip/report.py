@@ -20,8 +20,8 @@ from assistant_axis.gapgen.paths import DATA_CANDIDATES, REPO_ROOT, filter_dir, 
 
 from . import GENERATOR
 from .cluster import item_embed_text
-from .evaluate import (census_overlap, cost_summary, known_analogues, m1_m3_fractions, naming_agreement,
-                       recovery_from_covers, sample_poles, useful_per_dollar)
+from .evaluate import (census_overlap, cost_summary, kind_against_m1, known_analogues, m1_m3_fractions,
+                       naming_agreement, recovery_from_covers, sample_poles, useful_per_dollar)
 from .submit import M1_PASS_RATE, M1_USD_PER_WORD, M3_USD_PER_PASSED_WORD, batch_id_for
 
 GLOSSARY = REPO_ROOT / "reports" / "trait_gap_generation" / "glossary.md"
@@ -92,11 +92,10 @@ def build_evaluation(run_id: str, *, run_dir: Path, tables: Mapping[int, Sequenc
         {c for c in ((ingest_counts or {}).get("construct_labels") or [])})
     analogues = known_analogues(constructs, corpus_stems)
     downstream = cost["by_stage"].get("m1_filter", 0.0) + cost["by_stage"].get("m3_novelty", 0.0)
-    n_trait_poles = sum(1 for r in rows_g if r.get("consensus") == "kept" for p in r["poles"]
-                        if (p.get(label_choice) or {}).get("is_trait"))
     n_kept_poles = sum(len(r["poles"]) for r in rows_g if r.get("consensus") == "kept")
     named_poles = sum(1 for r in rows_g if r.get("consensus") == "kept" for p in r["poles"] if p.get(label_choice))
-    trait_share = (n_trait_poles / named_poles) if named_poles else None
+    # every named pole is submitted (QUESTIONS 48), so the projection scales by the share that got a name
+    trait_share = (named_poles / n_kept_poles) if n_kept_poles else None
     per_pole = (downstream / len(cands)) if cands and downstream else None
     naming_per_pole = None
     nstats = naming_parse_stats(naming_records, granularity=g)
@@ -106,8 +105,8 @@ def build_evaluation(run_id: str, *, run_dir: Path, tables: Mapping[int, Sequenc
     if trait_share is not None:
         n_full = round(n_kept_poles * trait_share)
         m1m3_rate = per_pole if per_pole is not None else (M1_USD_PER_WORD + M1_PASS_RATE * M3_USD_PER_PASSED_WORD)
-        projected = {"n_kept_poles": n_kept_poles, "trait_share_measured": round(trait_share, 4),
-                     "n_trait_poles_projected": n_full,
+        projected = {"n_kept_poles": n_kept_poles, "named_share_measured": round(trait_share, 4),
+                     "n_poles_projected": n_full,
                      "naming_usd": round(n_kept_poles * 2 * (naming_per_pole or 0.0005), 2),
                      "m1_m3_usd": round(n_full * m1m3_rate, 2),
                      "rate_source": "measured on this run" if per_pole is not None else "the census rates (copied)"}
@@ -119,7 +118,9 @@ def build_evaluation(run_id: str, *, run_dir: Path, tables: Mapping[int, Sequenc
         "clusters": {str(k): v for k, v in cluster_summaries.items()},
         "granularity_readout": list(readouts),
         "naming": {"parse": {str(gr): naming_parse_stats(naming_records, granularity=gr) for gr in sorted(tables)},
-                   "agreement": {str(gr): naming_agreement(tables[gr]) for gr in sorted(tables)}},
+                   "agreement": {str(gr): naming_agreement(tables[gr]) for gr in sorted(tables)},
+                   "kind_vs_m1": kind_against_m1(rows_g, {r.get("stem"): r for r in registry_rows},
+                                                 form=label_choice)},
         "census_overlap": census_overlap(blind_stems, census_stems) if census_stems is not None else None,
         "submitted": {"n_candidates": len(cands), "n_distinct": len(submitted_stems), "counts": args.get("counts"),
                       "registry": sub, "estimate": args.get("estimate")},
@@ -191,7 +192,9 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
         lines.append("| cross-pole \"opposite\" | " + " | ".join(_pct(r["cross_pole"]["opposite"])
                                                                for r in ev["granularity_readout"]) + " |")
         lines.append("")
-    lines += ["## Naming: decisions (b) and (c)", ""]
+    lines += ["## Naming: decision (b)", "",
+              "Every named pole is submitted; the `kind` guesses below are this call's, in M1's vocabulary, and "
+              "gate nothing (QUESTIONS 48, Roger 2026-10-11).", ""]
     for gr, a in ev["naming"]["agreement"].items():
         p = ev["naming"]["parse"][gr]
         if not p["n_asked"]:
@@ -201,9 +204,14 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
                      f"{p['first_attempt_ok']}; rejected {json.dumps(p['rejected_by_kind'])}); blind and hinted "
                      f"disagree on {_pct(a['disagree_rate'])} of {a['n_both_forms']}; bipolar antonym agreement "
                      f"{_pct(a['antonym_agreement'])} of {a['bipolar_directions']} directions (target 80%; "
-                     f"{a['antonym_exact']} exact, {a['antonym_overlap']} sharing a word); is_trait blind "
-                     f"{_pct(a['is_trait']['blind'])}, hinted {_pct(a['is_trait']['hinted'])}; one word exists "
+                     f"{a['antonym_exact']} exact, {a['antonym_overlap']} sharing a word); kind guesses blind "
+                     f"{json.dumps(a['kind']['blind'])}, hinted {json.dumps(a['kind']['hinted'])}; one word exists "
                      f"{_pct(a['single_word_exists'])}; ambiguity flag {_pct(a['ambiguity_flag'])}.")
+    kvm = (ev["naming"].get("kind_vs_m1") or {})
+    if kvm.get("n_pairs"):
+        lines += ["", f"The naming call's kind guess against M1's verdict, over the {kvm['n_pairs']} submitted "
+                  f"poles M1 has read ({_pct(kvm['agreement'])} agree on an approximate mapping; M1's is the "
+                  f"verdict of record): " + ", ".join(f"{k} {v}" for k, v in kvm["cross"].items()) + "."]
     co = ev.get("census_overlap")
     lines += ["", f"Blind labels that are census words (TDA or Allport-Odbert): "
               + (f"{co['n_census']} of {co['n']} ({_pct(co['share'])})." if co else "census table not on disk."), ""]
@@ -245,15 +253,15 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
     pr = ev.get("projected_full_run")
     if pr:
         lines += [f"Projected full run at this granularity: {pr['n_kept_poles']} kept poles named in both forms "
-                  f"(${pr['naming_usd']:.2f}), about {pr['n_trait_poles_projected']} trait poles to M1 and M3 "
+                  f"(${pr['naming_usd']:.2f}), about {pr['n_poles_projected']} named poles to M1 and M3 "
                   f"(${pr['m1_m3_usd']:.2f}, rate {pr['rate_source']}); total about ${pr['total_usd']:.2f}.", ""]
     lines += ["## Decisions for Roger (plan § 10)", "",
               "(a) granularity, ~350 or ~150 (the share at 3-4 above, and the sampled clusters in the granularity "
               "readout); (b) the primary label, blind (recommended) or hinted ("
-              + L(files["roger_sample"]) + " has both side by side); (c) the is_trait gate at submit (provisional: "
-              "trait poles only); (d) the loose pile, held (provisional) or submitted; (e) the recovery harness "
-              "(`recovery_test.py --generator ipip --run-id <R>`, about $5 a seed) beside the free inversion above; "
-              "(f) the full-run go.", "", "## Files", ""]
+              + L(files["roger_sample"]) + " has both side by side); (c) **settled** - there is no is_trait gate "
+              "at submit any more, every named pole goes to M1 (QUESTIONS 48); (d) the loose pile, held "
+              "(provisional) or submitted; (e) the recovery harness (`recovery_test.py --generator ipip --run-id "
+              "<R>`, about $5 a seed) beside the free inversion above; (f) the full-run go.", "", "## Files", ""]
     lines += [f"- {L(p)}" for p in files.values()] + [""]
     return "\n".join(lines)
 
@@ -279,6 +287,7 @@ def roger_sample(rows: Sequence[Mapping], registry_by_stem: Mapping[str, Mapping
         stm = "; ".join(item_embed_text(items[i].text) for i in p["items"][:6]) + (
             f"; ... ({len(p['items'])} in all)" if len(p["items"]) > 6 else "")
         lines.append(f"| {k} | g{r['granularity']} c{int(r['cluster_id']):03d}{p['pole']} | **{b['label']}**"
-                     + ("" if b.get("is_trait") else " (not a trait)") + f" | {h.get('label', '')} | {b['gloss']} | "
+                     + (f" ({b['kind']})" if b.get("kind") and b["kind"] != "trait" else "")
+                     + f" | {h.get('label', '')} | {b['gloss']} | "
                      f"{stm} | {f.get('verdict') or ''} | {m3 or ''} |")
     return "\n".join(lines) + "\n"

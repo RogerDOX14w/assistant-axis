@@ -17,21 +17,21 @@ from data_analysis.gap_generation import ipip_generator as CLI
 
 def answer(kw):
     sysp, user = system_text(kw), user_text(kw)
-    if "persona trait" in sysp and '"statements"' in user:
+    if '"kind"' in sysp and '"statements"' in user:
         hinted = '"scales"' in user
         first = json.loads(user)["statements"][0]
         word = first.split()[1].strip(".").lower()
         return make_response(json.dumps({
             "reason": "They share a habit.", "label": f"{word}-minded" + ("-h" if hinted else ""),
             "gloss": f"This means a habit of {word}.", "antonym_label": None, "antonym_gloss": None,
-            "is_trait": word != "worry", "ambiguity_flag": False, "single_word_exists": False}),
-            input_tokens=900, output_tokens=200)
+            "kind": "state" if word == "worry" else "trait", "ambiguity_flag": False,
+            "single_word_exists": False}), input_tokens=900, output_tokens=200)
     return make_response(json.dumps({"reason": "close", "similarity": 3}), input_tokens=900, output_tokens=60)
 
 
 @pytest.fixture
 def env(tmp_path, monkeypatch):
-    ext = fixture_pages(tmp_path / "ext")
+    ext = fixture_pages(tmp_path / "ext", all_21=True)
     data = make_corpus(tmp_path)
     ipip = tmp_path / "ipip"
     cdir = tmp_path / "candidates"
@@ -59,20 +59,27 @@ def test_download_dry_run_writes_nothing(tmp_path, capsys):
     assert CLI.main(["--external", str(ext), "--ipip-dir", str(tmp_path / "ipip"), "download", "--dry-run"]) == 0
     assert not ext.exists() and not (tmp_path / "ipip").exists()
     out = capsys.readouterr().out
-    assert "https://ipip.ori.org/AlphabeticalItemList.htm" in out and "TedoneItemAssignmentTable" not in out
+    # QUESTIONS 52 option C: the key pages and the workbook are approved, so all 26 sources are in the dry run
+    assert "https://ipip.ori.org/AlphabeticalItemList.htm" in out
+    assert "TedoneItemAssignmentTable30APR21.xlsx" in out and "newHEXACO_PI_key.htm" in out
+    assert "https://ipip.ori.org/index.htm" in out                                 # QUESTIONS 46, the licence
     assert CLI.main(["--external", str(ext), "--ipip-dir", str(tmp_path / "ipip"), "download", "--only",
-                     "assignment_workbook", "--dry-run"]) == 2                     # refused without a named go
+                     "assignment_workbook", "--dry-run"]) == 0                     # approved since 2026-10-11
 
 
 def test_pipeline_end_to_end(env, capsys):
     root, common, ipip, cdir, client = env
-    # ingest (the fixture's HEX block is one construct: the assertion fails, --skip-hex-check writes anyway)
+    # ingest (the fixture's HEX block is two constructs: the assertion fails, --skip-hex-check writes anyway)
     dry(root, common, ["ingest"])
     assert CLI.main(common + ["ingest"]) == 1 and not (ipip / "items.jsonl").exists()
-    assert CLI.main(common + ["ingest", "--skip-hex-check"]) == 0
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
     assert len((ipip / "items.jsonl").read_text().splitlines()) == 12
     counts = json.loads((ipip / "ingest_counts.json").read_text())
     assert counts["hex_assertion"] == "failed" and counts["construct_labels"]
+    assert counts["key_page_check"] == "passed" and counts["key_pages"]["n_pages_read"] == 21
+    assert counts["key_comparison"]["compared"] is True
+    assert all(s["key_source"] for line in (ipip / "items.jsonl").read_text().splitlines()
+               for s in json.loads(line)["scales"])
     # cluster
     dry(root, common, ["cluster", "--no-hdbscan"])
     assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
@@ -90,6 +97,8 @@ def test_pipeline_end_to_end(env, capsys):
     rows = [json.loads(x) for x in (ipip / "clusters_g350.jsonl").read_text().splitlines()]
     poles = [p for r in rows for p in r["poles"]]
     assert all(p["blind"]["label"].endswith("-minded") and p["hinted"]["label"].endswith("-h") for p in poles)
+    assert all(p["blind"]["kind"] in ("trait", "state") for p in poles)
+    assert all("nearest_other" in p for p in poles)                   # QUESTIONS 50 signal 1 needs no vectors
     assert all(p["labels_disagree"] is True for p in poles)
     assert json.loads((ipip / "naming_usage.json").read_text())["n_calls"] == 2 * len(poles)
     n_calls = len(client.calls)
@@ -100,15 +109,24 @@ def test_pipeline_end_to_end(env, capsys):
     assert CLI.main(common + ["granularity", "--granularities", "350"]) == 0
     ro = json.loads((ipip / "granularity_readout.json").read_text())["result"]["readouts"][0]
     assert ro["within"]["share_3_4"] == 1.0 and ro["label_form"] == "judge-display-v1"
+    assert ro["nearest"]["n"] >= 1 and ro["nearest"]["share_3"] == 1.0          # signal 1 ran
+    assert set(ro["nearest_by_band"]) == set(ro["bands"])
     assert (ipip / "granularity" / "g350" / "usage.json").exists() and (ipip / "granularity_readout.md").exists()
+    md = (ipip / "granularity_readout.md").read_text()
+    assert "## Signal 1: each pole against the nearest pole of another cluster" in md
+    assert "## Signal 2: ~350 clusters" in md
     # submit
-    dry(root, common, ["submit", "--granularity", "350", "--run-id", "p1", "--all-trait-poles"])
+    dry(root, common, ["submit", "--granularity", "350", "--run-id", "p1", "--all-poles"])
     assert not cdir.exists()
+    # the old spelling still works and means the same (QUESTIONS 48: there is no trait gate)
     assert CLI.main(common + ["submit", "--granularity", "350", "--run-id", "p1", "--all-trait-poles"]) == 0
     rdir = cdir / "runs" / "ipip" / "p1"
     cands = [json.loads(x) for x in (rdir / "candidates.jsonl").read_text().splitlines()]
     assert cands and all(c["score"] is None and c["source_ref"].startswith("ipip:g350:c") for c in cands)
-    assert not any(c["surface"].startswith("worry") for c in cands)              # the non-trait pole is held back
+    # every named pole is submitted, whatever the naming call guessed (QUESTIONS 48)
+    args = json.loads((rdir / "run.json").read_text())["args"]
+    assert args["counts"]["n_named"] == args["counts"]["n_submitted"] == len(cands)
+    assert sum(args["counts"]["kinds"].values()) == len(cands) and args["gate"].startswith("none:")
     # the platform's M1 and M3 blocks, as their CLIs would write them
     reg = Registry(cdir / "registry.jsonl")
     keys = (rdir / "keys.txt").read_text().split()
@@ -123,7 +141,7 @@ def test_pipeline_end_to_end(env, capsys):
     assert "_provenance" in ev and ev["result"]["m1_m3"]["n_filtered"] == len(keys)
     assert ev["result"]["useful_per_dollar"]["n_new"] == len(keys)
     md = (rdir / "report.md").read_text()
-    for section in ("## Items", "## Clusters", "## Granularity: decision (a)", "## Naming: decisions (b) and (c)",
+    for section in ("## Items", "## Clusters", "## Granularity: decision (a)", "## Naming: decision (b)",
                     "## Submission, M1 and M3", "## Known analogues", "## Cost", "## Decisions for Roger", "## Files"):
         assert section in md, section
     sample = (rdir / "roger_sample.md").read_text()
@@ -131,18 +149,51 @@ def test_pipeline_end_to_end(env, capsys):
     assert "| trait | new |" in sample
 
 
+def test_name_render_prints_the_calls_as_sent(env, capsys):
+    """The house rule: read the rendered prompt, not the template.  --render prints the system turn byte for byte
+    and the user turns as they are sent, which is what the rubric files' Rendered sample sections hold."""
+    from assistant_axis.gapgen.generators.ipip import naming as N
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    capsys.readouterr()
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted", "--render", "2",
+                              "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert not client.calls
+    assert N.system_prompt("blind") in out and N.system_prompt("hinted") in out
+    assert "ipip_naming_blind version 1" in out and '{"statements": ["I ' in out
+    assert '"scales": [{"scale": "' in out and '"direction": "' in out
+
+
 def test_submit_refused_over_budget(env):
     root, common, ipip, cdir, client = env
-    assert CLI.main(common + ["ingest", "--skip-hex-check"]) == 0
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
     assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
     assert CLI.main(common + ["name", "--granularity", "350", "--all"]) == 0
     with pytest.raises(SystemExit) as ei:
-        CLI.main(common + ["submit", "--granularity", "350", "--run-id", "p2", "--all-trait-poles",
+        CLI.main(common + ["submit", "--granularity", "350", "--run-id", "p2", "--all-poles",
                            "--budget-usd", "0.001"])
     assert ei.value.code == 2 and not (cdir / "runs").exists()
 
 
-def test_ingest_without_the_workbook_is_refused(env):
+def test_ingest_without_the_workbook_commits_the_key_pages_alone(env):
+    """QUESTIONS 52: source B is primary, so the workbook's absence is recorded, not fatal; --require-workbook
+    refuses, naming the question."""
     root, common, ipip, cdir, client = env
     (root / "ext" / "TedoneItemAssignmentTable30APR21.xlsx").unlink()
-    assert CLI.main(common + ["ingest"]) == 2 and not ipip.exists()
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    counts = json.loads((ipip / "ingest_counts.json").read_text())
+    assert counts["workbook"] is None and counts["key_comparison"]["compared"] is False
+    assert set(counts["key_sources"]) == {"ipip_key_pages"}
+    assert CLI.main(common + ["ingest", "--require-workbook"]) == 2
+
+
+def test_the_key_page_check_refuses_a_short_scrape(env):
+    """QUESTIONS 49's spirit on the key pages: a missing page is a clear error, never a silent pass."""
+    root, common, ipip, cdir, client = env
+    (root / "ext" / "newNEOKey.htm").unlink()
+    assert CLI.main(common + ["ingest"]) == 1 and not (ipip / "items.jsonl").exists()
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    counts = json.loads((ipip / "ingest_counts.json").read_text())
+    assert counts["key_page_check"] == "failed" and counts["key_pages"]["missing"] == ["newNEOKey.htm"]

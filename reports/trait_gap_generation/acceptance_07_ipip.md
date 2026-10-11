@@ -2,7 +2,22 @@
 
 Written 2026-10-10 by the Opus build agent, for [coding_plan_07_behaviour_items.md](./coding_plan_07_behaviour_items.md) § 11.
 
-**Status: built and tested; the pilot (§ 10) has not run.**  It is blocked by
+> **Superseded in part on 2026-10-11** by Roger's answers to [QUESTIONS](./QUESTIONS.md) entries 46-52, built
+> the same day.  What changed, against the text below: the key signs now come from **IPIP's own 21 per-inventory
+> key pages** (source B, primary) with Tedone's workbook as a check and gap-filler (entry 52, option C, both
+> fetches approved), every committed key carries `key_source` in [items.jsonl](../../data/candidates/ipip/items.jsonl)
+> (entry 46), the home page is fetched so the public-domain sentence is recorded verbatim (entry 46), `is_trait`
+> is gone and every named pole is submitted with a `kind` guess in M1's vocabulary (entry 48), the two naming
+> prompts are pinned rubric files ([ipip_naming_blind.md](./rubrics/ipip_naming_blind.md),
+> [ipip_naming_hinted.md](./rubrics/ipip_naming_hinted.md)) rather than code (entry 48 part 3), the HEX assertion
+> is a permanent scrape-completeness check beside a new 21-page check and the pages are decoded explicitly
+> (entry 49), and the granularity readout carries the two signals of entry 50 by cluster-size band.  Deviations 1,
+> 5 and 7 below are therefore obsolete; deviations 2, 3, 4 and 6 still hold.  **The fetch itself has not run**:
+> ipip.ori.org was unreachable from this sandbox on 2026-10-11 (every request timed out or came back 502 from the
+> proxy over about half an hour), so the key pages, the workbook and the home page are still not on disk and the
+> A-against-B comparison has not been measured.  This report will be rewritten when the pilot runs.
+
+**Status: built and tested; the pilot (§ 10) has not run.**  It was blocked by
 [QUESTIONS 52](./QUESTIONS.md): the item-to-scale keys are not on the three approved pages.
 [ItemAssignmentTable.htm](../../data/external/ipip/ItemAssignmentTable.htm) (git-ignored) is a 3,759-byte page that describes the table and links to an Excel
 workbook, `TedoneItemAssignmentTable30APR21.xlsx`, compiled by Thomas Tedone (no licence stated).

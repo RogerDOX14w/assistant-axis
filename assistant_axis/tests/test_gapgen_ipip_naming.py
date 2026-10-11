@@ -1,10 +1,13 @@
-"""IPIP generator, the naming calls: prompts, parser, usage, records (a fake Anthropic client, no network)."""
+"""IPIP generator, the naming calls: the pinned prompts, the parser, usage, records (a fake Anthropic client)."""
 import asyncio
 import json
+import re
+import shutil
 
 import pytest
 
 from assistant_axis.entity_id import normalize_to_file_name
+from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.generators.ipip import naming as N
 from assistant_axis.gapgen.generators.ipip.corpus import corpus_traits, queue_names
 from assistant_axis.gapgen.normalize import normalize_candidate
@@ -15,13 +18,42 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 GOOD = {"reason": "All describe doing tasks at once.", "label": "chore-prompt",
         "gloss": "This means doing routine tasks as soon as they come up, without putting them off.",
         "antonym_label": "last-minute", "antonym_gloss": "This means leaving tasks until they can no longer wait.",
-        "is_trait": True, "ambiguity_flag": False, "single_word_exists": False}
+        "kind": "trait", "ambiguity_flag": False, "single_word_exists": False}
 
 
 def pole(cid=1, p="a", texts=("Get chores done right away.", "Love order and regularity."), scales=None):
     return N.PoleRef(granularity=350, cluster_id=cid, pole=p, statements=list(texts),
                      scales=scales if scales is not None else [{"scale": "Orderliness", "inventory": "NEO",
                                                                 "direction": "for", "statements": 2}])
+
+
+class TestPinnedRubrics:
+    """QUESTIONS 48 part 3: the two prompts left ``PROMPT_VERSIONS`` in code for the pinned rubric files, so
+    that an edit cannot escape ``rubric_pins.py check``."""
+
+    def test_the_prompts_are_the_rubric_files(self):
+        assert N.RUBRIC_NAMES == {"blind": "ipip_naming_blind", "hinted": "ipip_naming_hinted"}
+        for form, name in N.RUBRIC_NAMES.items():
+            assert name in sr.PINNED_NAMES and name in sr.GENERATOR_NAMES
+            assert N.system_prompt(form) == sr.load_prompt(name)
+            assert N.prompt_sha256(form) == sr.sha256(sr.load_prompt(name))
+            assert N.prompt_version(form) == sr.current_versions(None, (name,))[name][0]
+        assert not [p for p in sr.mismatches() if p.split(":", 1)[0] in sr.PINNED_NAMES]
+        assert not hasattr(N, "PROMPT_VERSIONS") and not hasattr(N, "PINNED")
+
+    def test_an_unpinned_edit_is_refused(self, tmp_path):
+        d = tmp_path / "rubrics"
+        d.mkdir()
+        for name in sr.PINNED_FILES.values():
+            src = sr.RUBRICS_DIR / name
+            if src.exists():
+                shutil.copy2(src, d / name)
+        shutil.copy2(sr.versions_path(), sr.versions_path(d))
+        p = d / sr.PINNED_FILES["ipip_naming_blind"]
+        p.write_text(p.read_text().replace("Name the one standing thing", "Name the one lasting thing"))
+        with pytest.raises(N.RubricNotPinned, match="rubric_pins.py bump ipip_naming_blind"):
+            N.system_prompt("blind", d)
+        assert N.system_prompt("hinted", d)                      # the other form is unaffected
 
 
 class TestPrompts:
@@ -34,16 +66,36 @@ class TestPrompts:
         assert "reason first" in text
 
     @pytest.mark.parametrize("form", ["blind", "hinted"])
-    def test_symptoms_count_moods_and_abilities_do_not(self, form):
-        t = N.system_prompt(form).lower()
-        assert "symptom-like dispositions count" in t
-        assert "mood" in t and "ability" in t and "interest" in t and "life circumstance" in t
+    def test_nothing_is_excluded_and_a_mood_gets_its_predisposition(self, form):
+        """QUESTIONS 48 parts 1 and 2: the old text refused an ability, an interest or a life circumstance, all
+        of which the corpus contains, and refused a momentary feeling instead of naming the predisposition."""
+        t = N.system_prompt(form)
+        assert "do not hold back" in t and "predisposition behind it" in t
+        assert "habitual self-report" in t
+        for phrase in ("These are not traits", "is_trait", "a passing mood or state"):
+            assert phrase not in t, phrase
+        # the categories it used to exclude are now named as things it should name
+        for phrase in ("an ability or a skill", "a taste or a pursuit", "a standing fact of someone's life"):
+            assert phrase in t, phrase
+
+    @pytest.mark.parametrize("form", ["blind", "hinted"])
+    def test_the_kind_field_uses_m1s_vocabulary(self, form):
+        t = N.system_prompt(form)
+        assert '"kind"' in t
+        for k in N.KIND_VALUES:
+            assert f'"{k}"' in t, k
+        # the same eight the pinned M1 kind call uses, so the two are comparable
+        m1 = sr.load_prompt("kind")
+        assert all(f'"{k}"' in m1 for k in N.KIND_VALUES)
 
     def test_hinted_differs_only_by_the_scales(self):
-        assert "scales" not in N.system_prompt("blind")
-        assert '"scales"' in N.system_prompt("hinted")
+        blind, hinted = N.system_prompt("blind"), N.system_prompt("hinted")
+        assert "scales" not in blind and '"scales"' in hinted
+        # identical from the third paragraph on (blind has one opening paragraph, hinted two)
+        assert blind.split("\n\n", 1)[1] == hinted.split("\n\n", 2)[2]
         assert "Orderliness" not in N.build_user(pole())
         assert "Orderliness" in N.build_hinted_user(pole())
+        assert '"direction"' in hinted or '"against"' in hinted
 
     def test_user_turn_is_one_json_object_of_first_person_statements(self):
         obj = json.loads(N.build_user(pole()))
@@ -64,31 +116,42 @@ class TestPrompts:
             assert normalize_to_file_name(w) not in names, w
             assert w in N.system_prompt("blind")
         # and no other quoted word of the prompts is one (examples are the only quoted labels)
+        allowed = set(N.FIELD_NAMES) | set(N.KIND_VALUES) | {"for", "against"}
         for form in ("blind", "hinted"):
-            quoted = {q for q in __import__("re").findall(r'"([a-z][a-z \'-]+)"', N.system_prompt(form))}
-            for q in quoted - set(N.FIELD_NAMES) - {"for", "against"}:
+            quoted = set(re.findall(r'"([a-z][a-z \'-]+)"', N.system_prompt(form)))
+            for q in quoted - allowed:
                 assert normalize_to_file_name(q) not in names, q
         assert prompt_words(N.system_prompt("blind"))
-
-    def test_prompt_versions_are_pinned(self):
-        for form in ("blind", "hinted"):
-            v, sha = N.prompt_version(form), N.prompt_sha256(form)
-            assert N.PINNED[form][v] == sha, f"{form}: text changed without a version bump"
 
 
 class TestParser:
     def test_good_answer(self):
         n, err = N.parse_naming(json.dumps(GOOD))
         assert err is None and n.label == "chore-prompt" and n.stem == "chore_prompt"
-        assert n.is_trait is True and n.antonym_label == "last-minute" and n.notes == []
+        assert n.kind == "trait" and n.antonym_label == "last-minute" and n.notes == []
+        assert not hasattr(n, "is_trait")
         # the stem is the registry's normalisation of the label (round trip)
         assert normalize_candidate(n.label).stem == n.stem == normalize_to_file_name(n.label)
+
+    @pytest.mark.parametrize("kind", list(N.KIND_VALUES))
+    def test_every_kind_is_accepted(self, kind):
+        n, err = N.parse_naming(json.dumps(dict(GOOD, kind=kind)))
+        assert err is None and n.kind == kind
+
+    @pytest.mark.parametrize("given,want", [("Trait", "trait"), ("not a persona", "not_a_persona"),
+                                            ("Not-A-Persona", "not_a_persona")])
+    def test_a_kind_is_normalised_with_a_note(self, given, want):
+        n, err = N.parse_naming(json.dumps(dict(GOOD, kind=given)))
+        assert err is None and n.kind == want and "kind normalised" in n.notes
 
     @pytest.mark.parametrize("text,kind", [
         ("```json\n" + json.dumps(GOOD) + "\n```", "fenced"),
         ("Here it is: " + json.dumps(GOOD), "not_one_object"),
         (json.dumps({k: v for k, v in GOOD.items() if k != "gloss"}), "missing_key"),
-        (json.dumps(dict(GOOD, is_trait="maybe")), "bad_value"),
+        (json.dumps({k: v for k, v in GOOD.items() if k != "kind"}), "missing_key"),
+        (json.dumps(dict(GOOD, kind="disposition")), "bad_value"),
+        (json.dumps(dict(GOOD, kind=True)), "bad_value"),
+        (json.dumps(dict(GOOD, ambiguity_flag="maybe")), "bad_value"),
         (json.dumps(dict(GOOD, label="one two three four five")), "bad_label"),
         (json.dumps(dict(GOOD, gloss="Doing tasks at once.")), "bad_gloss"),
         ("", "empty"),
@@ -98,11 +161,15 @@ class TestParser:
         n, err = N.parse_naming(text)
         assert n is None and err.split(":")[0] == kind
 
+    def test_an_unknown_kind_says_what_was_wanted(self):
+        _n, err = N.parse_naming(json.dumps(dict(GOOD, kind="disposition")))
+        assert "not_a_persona" in err and "disposition" in err
+
     def test_lenient_on_case_and_null_antonym(self):
         n, err = N.parse_naming(json.dumps(dict(GOOD, label="Chore-Prompt", antonym_label=None, antonym_gloss=None,
-                                                is_trait="true")))
-        assert err is None and n.label == "chore-prompt" and n.antonym_label is None and n.is_trait is True
-        assert "label lower-cased" in n.notes
+                                                ambiguity_flag="true")))
+        assert err is None and n.label == "chore-prompt" and n.antonym_label is None
+        assert n.ambiguity_flag is True and "label lower-cased" in n.notes
 
     def test_long_gloss_is_flagged_not_rejected(self):
         long = "This means " + " ".join(["word"] * 30) + "."
@@ -147,14 +214,26 @@ class TestCalls:
         recs = [json.loads(x) for x in (tmp_path / "responses.jsonl").read_text().splitlines()]
         assert len(recs) == 4 and {r["form"] for r in recs} == {"blind", "hinted"}
         r = recs[0]
-        for k in ("granularity", "cluster_id", "pole", "model", "prompt_version", "prompt_sha256", "label_form", "user",
-                  "text", "usage_raw", "parsed", "parse_error", "attempt", "at"):
+        for k in ("granularity", "cluster_id", "pole", "model", "rubric", "prompt_version", "prompt_sha256",
+                  "label_form", "user", "text", "usage_raw", "parsed", "parse_error", "attempt", "at"):
             assert k in r
         assert r["label_form"] == "judge-display-v1"
-        # temperature is left out for Haiku 5.5 (it refuses one); the system prompt is the form's
+        assert r["rubric"] in N.RUBRIC_NAMES.values()
+        assert r["prompt_sha256"] == N.prompt_sha256(r["form"])
+        # temperature is left out for Haiku 5.5 (it refuses one); the system prompt is the form's rubric text
         kw = client.calls[0]
         assert "temperature" not in kw
         assert system_text(kw) in (N.system_prompt("blind"), N.system_prompt("hinted"))
+
+    def test_the_prompts_are_read_once(self, tmp_path):
+        """A rubric edited mid-run cannot change what the run sends: ``name_poles`` takes the loaded rubrics."""
+        client = FakeAsyncAnthropic(responder())
+        rubrics = {"blind": dict(N.load_rubric("blind"), version=99)}
+        res = asyncio.run(N.name_poles([pole()], client=client, model=N.DEFAULT_MODEL, usage=MultiModelUsage(),
+                                       hinted=False, rubrics=rubrics, responses_path=tmp_path / "r.jsonl"))
+        assert res.parse_rate() == (1, 1)
+        rec = json.loads((tmp_path / "r.jsonl").read_text().splitlines()[0])
+        assert rec["prompt_version"] == 99
 
     def test_a_bad_answer_is_asked_once_more_and_counted(self, tmp_path):
         client = FakeAsyncAnthropic(responder(bad_first=True))
@@ -168,8 +247,9 @@ class TestCalls:
         from assistant_axis.gapgen.cost import GuardedUsage
         client = FakeAsyncAnthropic(responder())
         usage = GuardedUsage(budget_usd=0.0003)
-        res = asyncio.run(N.name_poles([pole(i) for i in range(1, 6)], client=client, model=N.DEFAULT_MODEL, usage=usage,
-                                       responses_path=tmp_path / "r.jsonl", hinted=False, concurrency=1))
+        res = asyncio.run(N.name_poles([pole(i) for i in range(1, 6)], client=client, model=N.DEFAULT_MODEL,
+                                       usage=usage, responses_path=tmp_path / "r.jsonl", hinted=False,
+                                       concurrency=1))
         assert res.stopped_by_budget and len(client.calls) < 5
 
     def test_estimate(self):

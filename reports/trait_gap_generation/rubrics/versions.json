@@ -311,6 +311,22 @@
         "pinned_at": "2026-10-11T04:40:41+00:00",
         "why": "Draft 3: one four-way answer becomes three fields - where (agentic and neither renamed from agentic-only and none), elicitation (draft 2's scope_line, now asked for every answer but neither) and judge_needs (new); model Opus 5.5, two readings on the gold items and one on production rows; agreement and flip rate on field 1 only (Roger, QUESTIONS 75, 2026-10-11)"
       }
+    ],
+    "ipip_naming_blind": [
+      {
+        "version": 1,
+        "sha256": "acb14bc9ff76d3366dae672540336c3d5529df858881c96bfd17121911a549e1",
+        "pinned_at": "2026-10-11T05:26:01+00:00",
+        "why": "draft 1: the blind IPIP cluster-naming prompt moves out of naming.py's PROMPT_VERSIONS into the pinned set, with the trait definition rewritten (name the standing thing the statements indicate; a momentary feeling gets the predisposition behind it) and is_trait replaced by kind in M1's eight-way vocabulary (Roger, QUESTIONS 48, 2026-10-11)"
+      }
+    ],
+    "ipip_naming_hinted": [
+      {
+        "version": 1,
+        "sha256": "f83abd497885046182674449427b066ae43a3fec50c900611ea55989535088c9",
+        "pinned_at": "2026-10-11T05:26:03+00:00",
+        "why": "draft 1: the hinted IPIP cluster-naming prompt moves out of naming.py's PROMPT_VERSIONS into the pinned set, with the same rewrite as the blind form; the scale-hint paragraph unchanged (Roger, QUESTIONS 48, 2026-10-11)"
+      }
     ]
   }
 }

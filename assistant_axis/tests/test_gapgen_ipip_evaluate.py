@@ -8,9 +8,9 @@ import pytest
 from assistant_axis.gapgen.generators.ipip import evaluate as E
 
 
-def nm(label, antonym=None, is_trait=True, single=False, amb=False):
+def nm(label, antonym=None, kind="trait", single=False, amb=False):
     return {"label": label, "stem": label.replace(" ", "_").replace("-", "_"), "antonym_label": antonym,
-            "is_trait": is_trait, "single_word_exists": single, "ambiguity_flag": amb}
+            "kind": kind, "single_word_exists": single, "ambiguity_flag": amb}
 
 
 ROWS = [
@@ -24,7 +24,7 @@ ROWS = [
          "hinted": nm("forgiving")},
         {"pole": "b", "items": ["H4"], "blind": nm("holds grudges", antonym="forgiving", amb=True)}]},
     {"granularity": 350, "cluster_id": 3, "consensus": "kept", "bipolar": False, "poles": [
-        {"pole": "a", "items": ["H5"], "blind": nm("likes gardening", is_trait=False)}]},
+        {"pole": "a", "items": ["H5"], "blind": nm("likes gardening", kind="membership")}]},
 ]
 
 
@@ -76,8 +76,29 @@ def test_naming_agreement():
     assert out["bipolar_directions"] == 4 and out["antonym_exact"] == 2 and out["antonym_agreement"] == 1.0
     assert out["antonym_target"] == 0.8
     assert out["n_both_forms"] == 3 and out["disagree_rate"] == pytest.approx(2 / 3, abs=1e-4)
-    assert out["is_trait"]["blind"] == pytest.approx(4 / 5) and out["n_named"]["blind"] == 5
+    assert out["kind"]["blind"] == {"membership": 1, "trait": 4} and out["n_named"]["blind"] == 5
+    assert out["kind"]["hinted"] == {"trait": 3}
+    assert "is_trait" not in out
     assert out["single_word_exists"] == pytest.approx(1 / 5) and out["ambiguity_flag"] == pytest.approx(1 / 5)
+
+
+def test_kind_against_m1_is_a_cross_tab():
+    """QUESTIONS 48: the guess is made in M1's vocabulary so that the two can be set side by side."""
+    reg = {"tidy": {"filter": {"verdict": "trait", "tags": []}},
+           "messy": {"filter": {"verdict": "trait", "tags": ["membership"]}},
+           "likes_gardening": {"filter": {"verdict": "trait", "tags": ["membership"],
+                                          "membership_kind": "affinity"}},
+           "quick_to_forgive": {"filter": {"verdict": "tagged", "tags": ["state"]}}}
+    out = E.kind_against_m1(ROWS, reg)
+    assert out["n_pairs"] == 4 and out["form"] == "blind"
+    assert out["cross"] == {"membership / trait": 1, "trait / tagged": 1, "trait / trait": 2}
+    assert out["m1_tags"] == {"membership": 2, "state": 1}
+    # tidy (trait, no kind tag), messy (trait against M1's trait + membership) and likes gardening
+    # (membership against M1's membership tag) agree; quick-to-forgive, guessed trait and tagged state, does
+    # not.  trait and membership count as compatible in both directions, because Roger's decision 3 makes a
+    # membership a trait: M1 passes it with verdict trait and a membership tag.
+    assert out["n_agree"] == 3 and out["agreement"] == 0.75
+    assert E.kind_against_m1(ROWS, {})["n_pairs"] == 0
 
 
 def test_antonym_match_levels():

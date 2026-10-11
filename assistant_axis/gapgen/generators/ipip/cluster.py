@@ -406,6 +406,37 @@ def nearest_corpus(groups: Sequence[Sequence[str]], vectors: Mapping[str, np.nda
     return out
 
 
+def nearest_other_poles(poles: Sequence[tuple], vectors: Mapping[str, np.ndarray]) -> dict:
+    """``{(cluster_id, pole): {"cluster_id", "pole", "cos"}}``: for each pole, the nearest pole **of another
+    cluster** by centroid cosine (QUESTIONS 50, signal 1 -- "too small shows between clusters").  The other pole
+    of the same cluster is excluded on purpose: a bipolar pair is meant to be opposite, and the cross-pole pairs
+    of the granularity readings already check that.  ``poles`` is ``[((cluster_id, pole), item ids)]``."""
+    keys = [k for k, ids in poles if ids]
+    if len(keys) < 2:
+        return {}
+    cents = []
+    for k, ids in poles:
+        if not ids:
+            continue
+        V = np.stack([np.asarray(vectors[i], dtype=np.float64) for i in ids])
+        V = V / np.linalg.norm(V, axis=1, keepdims=True)
+        m = V.mean(axis=0)
+        cents.append(m / (np.linalg.norm(m) or 1.0))
+    C = np.stack(cents)
+    S = C @ C.T
+    out = {}
+    for a, key in enumerate(keys):
+        best, best_cos = None, -2.0
+        for b, other in enumerate(keys):
+            if other[0] == key[0]:                 # same cluster (either pole): not an "other cluster"
+                continue
+            if float(S[a, b]) > best_cos:
+                best, best_cos = other, float(S[a, b])
+        if best is not None:
+            out[key] = {"cluster_id": int(best[0]), "pole": best[1], "cos": round(best_cos, 4)}
+    return out
+
+
 def size_summary(groups: Sequence[Sequence]) -> dict:
     sizes = [len(g) for g in groups]
     if not sizes:
@@ -487,6 +518,7 @@ def build_cluster_table(items: Sequence[ItemRow], vectors: Mapping[str, np.ndarr
                if corpus and corpus_embedder is not None else {})
     prev = {pole_key(p["items"]): p for r in previous for p in r.get("poles") or []}
     rows = []
+    all_poles: list[tuple] = []
     for k, g in enumerate(cuts[primary]):
         pur, cons = cluster_purity(g, by_id)
         poles = split_poles(g, by_id, vectors=pvec)
@@ -497,11 +529,20 @@ def build_cluster_table(items: Sequence[ItemRow], vectors: Mapping[str, np.ndarr
             if old:
                 d.update({f: old[f] for f in NAMING_FIELDS if f in old})
             pole_rows.append(d)
+            all_poles.append(((k + 1, p.pole), p.items))
         rows.append({"schema_version": 1, "granularity": int(target), "cluster_id": k + 1,
                      "consensus": status.get(pole_key(g), "loose"), "embedder": primary,
                      f"jaccard_vs_{second}": jac.get(pole_key(g)), "items": list(g), "constructs": cons,
                      "purity": round(pur, 4) if pur is not None else None, "bipolar": len(poles) == 2,
                      "bipolar_scales": poles[0].bipolar_scales, "nearest_corpus": nearest.get(k), "poles": pole_rows})
+    # QUESTIONS 50 signal 1: each pole's nearest pole of another cluster, written on the pole row so that the
+    # granularity command needs no vectors.  Kept apart from `nearest_corpus`, which is novelty, not size.
+    nearest_other = nearest_other_poles(all_poles, pvec)
+    for r in rows:
+        for p in r["poles"]:
+            got = nearest_other.get((int(r["cluster_id"]), p["pole"]))
+            if got:
+                p["nearest_other"] = got
     kept_groups = [r["items"] for r in rows if r["consensus"] == "kept"]
     summary = {
         "granularity": int(target), "n_items": len(ids), "primary": primary, "second": second,

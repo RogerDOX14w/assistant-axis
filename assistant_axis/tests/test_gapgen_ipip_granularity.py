@@ -121,3 +121,131 @@ def test_estimate_cached_below_uncached_at_scale():
     e = G.estimate_usd(calls, corpus, rubrics)
     assert e["n_calls"] == len(calls) == 297
     assert 0 < e["cached_usd"] < e["uncached_usd"]          # the 8 concurrent first calls write the cache
+
+
+# --------------------------------------------------------------------------- QUESTIONS 50: the two signals
+
+def named(label, gloss=None, kind="trait"):
+    return {"label": label, "stem": label.replace(" ", "_").replace("-", "_"),
+            "gloss": gloss or f"This means being {label}.", "kind": kind, "antonym_label": None}
+
+
+def nrow(cid, poles, consensus="kept", granularity=350):
+    """A cluster row as ``cluster`` writes it: ``poles`` is ``[(pole, items, blind label, nearest_other)]``."""
+    return {"granularity": granularity, "cluster_id": cid, "consensus": consensus,
+            "items": [i for _p, its, _l, _n in poles for i in its], "bipolar": len(poles) == 2,
+            "nearest_corpus": {"stem": "orderly", "mean_cos": 0.41},
+            "poles": [{"pole": p, "items": list(its),
+                       **({"blind": named(lab), "hinted": named(lab + " (hinted)")} if lab else {}),
+                       **({"nearest_other": nn} if nn else {})} for p, its, lab, nn in poles]}
+
+
+NROWS = [
+    nrow(1, [("a", ["H1", "H2", "H3", "H4"], "tidy", {"cluster_id": 2, "pole": "a", "cos": 0.8}),
+             ("b", ["H5", "H6"], "messy", None)]),
+    nrow(2, [("a", ["H7", "H8", "H9"], "orderly", {"cluster_id": 1, "pole": "a", "cos": 0.8})]),
+    nrow(3, [("a", ["H10", "H11"], "punctual", {"cluster_id": 2, "pole": "a", "cos": 0.5})]),
+    nrow(4, [("a", ["H12", "H13"], None, {"cluster_id": 3, "pole": "a", "cos": 0.4})]),   # not named
+    nrow(5, [("a", ["H14", "H15"], "loose one", {"cluster_id": 1, "pole": "a", "cos": 0.2})], consensus="loose"),
+]
+
+
+def test_size_bands():
+    assert G.BAND_LABELS == ("2-3", "4-7", "8-15", "16+")
+    assert [G.band_of(n) for n in (1, 2, 3, 4, 7, 8, 15, 16, 400)] == [
+        "2-3", "2-3", "2-3", "4-7", "4-7", "8-15", "8-15", "16+", "16+"]
+
+
+def test_pole_entry_is_the_name_and_gloss():
+    p = NROWS[0]["poles"][0]
+    assert G.pole_entry(p) == {"label": "tidy", "description": "This means being tidy."}
+    assert G.pole_entry(p, form="hinted")["label"] == "tidy (hinted)"
+    assert G.pole_entry({"pole": "a", "items": []}) is None
+
+
+class TestNearestOtherCluster:
+    """Signal 1: each pole against the nearest pole of another cluster, read by name and gloss."""
+
+    def test_one_call_per_unordered_pair_of_named_poles(self):
+        calls, corpus, counts = G.nearest_pair_calls(NROWS)
+        assert [(c.target, c.listed[0], c.set) for c in calls] == [("c001a", "c002a", "nearest"),
+                                                                   ("c003a", "c002a", "nearest")]
+        # cluster 1a and 2a are each other's nearest: the pair is asked once, not twice
+        assert len({frozenset((c.target, c.listed[0])) for c in calls}) == len(calls)
+        assert counts["n_unnamed"] == 1 and counts["n_without_nearest"] == 1
+        assert counts["n_poles"] == 5 and counts["n_named"] == 4          # the loose cluster is left out
+        assert set(corpus) == {"c001a", "c002a", "c003a"}
+        assert corpus["c001a"] == {"label": "tidy", "description": "This means being tidy."}
+        assert all(c.origin_call_id == G.origin_id(350, int(c.target[1:4])) for c in calls)
+
+    def test_the_hinted_name_can_be_read_instead(self):
+        _calls, corpus, counts = G.nearest_pair_calls(NROWS, form="hinted")
+        assert corpus["c001a"]["label"] == "tidy (hinted)" and counts["form"] == "hinted"
+
+    def test_bands_come_from_the_cluster_the_call_belongs_to(self):
+        calls, _corpus, _counts = G.nearest_pair_calls(NROWS)
+        within, _c = G.sample_pairs(NROWS, {f"H{i}": item(f"H{i}", f"Do thing {i}.") for i in range(1, 16)},
+                                    per_cluster=1, cross_pole=0, seed=0)
+        bands = G.call_bands(NROWS, list(calls) + list(within))
+        assert bands[calls[0].call_id] == "4-7"          # cluster 1 holds 6 items
+        assert bands[calls[1].call_id] == "2-3"          # cluster 3 holds 2
+        assert all(b in G.BAND_LABELS for b in bands.values())
+
+
+def test_readout_splits_the_signals_and_the_bands():
+    records = ([rec(f"{G.origin_id(350, 1)}:within:H1>H2", "within", 3),
+                rec(f"{G.origin_id(350, 3)}:within:H10>H11", "within", 1),
+                rec(f"{G.origin_id(350, 1)}:nearest:c001a>c002a", "nearest", 3),
+                rec(f"{G.origin_id(350, 3)}:nearest:c003a>c002a", "nearest", 2)])
+    calls, _corpus, counts = G.nearest_pair_calls(NROWS)
+    within_calls, _c = G.sample_pairs(NROWS, {f"H{i}": item(f"H{i}", f"Do thing {i}.") for i in range(1, 16)},
+                                      per_cluster=1, cross_pole=0, seed=0)
+    bands = {r["call_id"]: G.band_of(6 if ":c001:" in r["call_id"] else 2) for r in records}
+    r = G.readout(records, granularity=350, n_clusters=4, label_form="judge-display-v1", cost_usd=0.02,
+                  bands=bands, sizes=G.band_sizes(NROWS), nearest_counts=counts)
+    assert r["nearest"]["n"] == 2 and r["nearest"]["share_3"] == 0.5 and r["nearest"]["share_3_4"] == 0.5
+    assert r["within"]["n"] == 2 and r["within"]["share_3_4"] == 0.5
+    assert r["nearest_by_band"]["4-7"]["share_3"] == 1.0 and r["nearest_by_band"]["4-7"]["n"] == 1
+    assert r["nearest_by_band"]["2-3"]["share_3"] == 0.0 and r["nearest_by_band"]["2-3"]["n"] == 1
+    assert r["nearest_by_band"]["16+"]["n"] == 0
+    assert set(r["nearest_by_band"]) == set(G.BAND_LABELS)
+    assert r["sizes"]["per_band"] == {"2-3": 3, "4-7": 1, "8-15": 0, "16+": 0}   # kept: 6, 3, 2, 2 items
+    assert r["nearest_counts"]["n_calls"] == len(calls) and len(within_calls) == 4
+    assert r["bands"] == list(G.BAND_LABELS)
+
+
+def test_spanning_clusters_covers_the_size_range():
+    rows = [nrow(c, [("a", [f"H{c}_{k}" for k in range(c)], f"word{c}", None)]) for c in range(2, 40)]
+    picks = G.spanning_clusters(rows, 5, seed=0)
+    sizes = sorted(len(r["items"]) for r in picks)
+    assert len(picks) == 5 and sizes[-1] == 39                 # the largest cluster is always shown
+    assert sizes[0] <= 11 and len(set(sizes)) == 5 and max(sizes) - min(sizes) > 25
+    assert picks == G.spanning_clusters(rows, 5, seed=0)       # seeded
+    assert [int(r["cluster_id"]) for r in picks] == sorted(int(r["cluster_id"]) for r in picks)
+    assert len(G.spanning_clusters(rows[:3], 5)) == 3
+    assert G.spanning_clusters([], 5) == []
+
+
+def test_readout_markdown_prints_the_clusters_in_full(tmp_path):
+    items = {f"H{i}": item(f"H{i}", f"Do thing number {i}.") for i in range(1, 16)}
+    calls, _corpus, counts = G.nearest_pair_calls(NROWS)
+    ro = G.readout([rec(calls[0].call_id, "nearest", 3)], granularity=350, n_clusters=4,
+                   label_form="judge-display-v1", cost_usd=0.02, bands={calls[0].call_id: "4-7"},
+                   sizes=G.band_sizes(NROWS), nearest_counts=counts)
+    md = G.readout_markdown([ro], samples={350: NROWS[:2]}, items=items,
+                            answers={G.origin_id(350, 1): [{"set": "nearest", "target": "tidy", "other": "orderly",
+                                                            "value": "3", "reason": "much the same"}]},
+                            doc_path=tmp_path / "granularity_readout.md",
+                            files=[tmp_path / "granularity_readout.json"])
+    assert "## Signal 1: each pole against the nearest pole of another cluster" in md
+    assert "## Signal 2: ~350 clusters" in md and "spanning the size range" in md
+    for band in G.BAND_LABELS:
+        assert f"| {band} items |" in md
+    # every item statement of a printed cluster, with both names of each pole
+    for i in NROWS[0]["poles"][0]["items"]:
+        assert f"- {G.item_embed_text(items[i].text)}" in md
+    assert "blind **tidy**" in md and "hinted **tidy (hinted)**" in md
+    assert "nearest other cluster: c002a at 0.8" in md
+    assert "nearest corpus trait (novelty, not size)" in md          # kept apart from the size signals
+    assert "finer** cut is preferred" in md
+    assert "(granularity_readout.json)" in md

@@ -10,7 +10,9 @@ of the fetched pages carries the full sentence, it is recorded verbatim with the
 ``DOWNLOAD_MANIFEST.json`` (git-ignored, beside the pages in ``data/external/ipip/``) and the tracked
 ``data/candidates/ipip/sources_manifest.json`` carry the same record; every run copies it into ``run.json``.
 No paid API is involved.  The network fetch itself needed Roger's go (the file-access boundary): given
-2026-10-10 for the three pages and, on the ingest fallback only, the HEXACO key page.
+2026-10-10 for the three pages, and 2026-10-11 for IPIP's 21 per-inventory key pages, Tedone's assignment
+workbook and the home page (QUESTIONS 52 option C and QUESTIONS 46).  The manifest's ``licence`` block credits
+Tedone for the workbook although no licence requires it (``sources.WORKBOOK_CREDIT``).
 """
 from __future__ import annotations
 
@@ -31,13 +33,17 @@ from assistant_axis.gapgen.paths import REPO_ROOT
 from assistant_axis.gapgen.registry import utc_now
 
 from . import DOWNLOAD_MANIFEST_NAME, EXTERNAL_DIR, SOURCES_MANIFEST_PATH
-from .sources import DEFAULT_FETCH, LICENCE, LICENCE_QUOTE, LICENCE_URL, Source
+from .sources import DEFAULT_FETCH, LICENCE, LICENCE_QUOTE, LICENCE_URL, WORKBOOK_CREDIT, Source
 from .sources import SOURCES as _SOURCES
 
 Fetcher = Callable[[str], bytes]
 TOOL = "ipip_generator.py download"
 USER_AGENT = "assistant-axis IPIP generator (research; contact via the repository owner)"
 HASH_SOURCE = "received bytes (IPIP publishes no hashes)"
+#: The IPIP pages are a single-byte Windows encoding, not UTF-8 (QUESTIONS 49); the same constant as
+#: ``ingest.PAGE_ENCODING`` (see its comment for why cp1252 and not iso-8859-1), repeated here so that this
+#: module does not import the parser.
+PAGE_ENCODING = "cp1252"
 
 
 def _urlopen_bytes(url: str, *, timeout: float = 120.0, attempts: int = 6) -> bytes:
@@ -137,8 +143,8 @@ def write_manifest(doc: Mapping, path: Path) -> Path:
 def _entry(s: Source, dest: Path, data_sha: str, size: int, *, now: str, git_sha: Optional[str],
            approval: Optional[str]) -> dict:
     return {"key": s.key, "file": _rel(dest), "url": s.url, "size_bytes": size, "sha256": data_sha,
-            "hash_source": HASH_SOURCE, "optional": s.optional, "what": s.what, "licence": s.licence,
-            "approval": approval, "downloaded_at": now, "tool": TOOL, "git_sha": git_sha}
+            "hash_source": HASH_SOURCE, "optional": s.optional, "role": s.role, "what": s.what,
+            "licence": s.licence, "approval": approval, "downloaded_at": now, "tool": TOOL, "git_sha": git_sha}
 
 
 class NotApproved(PermissionError):
@@ -147,16 +153,24 @@ class NotApproved(PermissionError):
 
 def _licence_record(dest_root: Path, entries: Iterable[Mapping], sources: Mapping[str, Source],
                     previous: Mapping) -> dict:
+    """The licence block of the manifest.  ``verbatim`` is IPIP's public-domain sentence **as one of the fetched
+    pages prints it** (QUESTIONS 46: our record of the licence was second-hand, a quote of plan 07's prose, and
+    none of the three pages fetched on 2026-10-10 carried the sentence, which is why the home page is now
+    fetched).  The pages are decoded iso-8859-1 (QUESTIONS 49), and only pages are searched, never the
+    workbook."""
     rec = {"name": LICENCE, "url": LICENCE_URL, "quote_from_plan": LICENCE_QUOTE,
-           "verbatim": (previous or {}).get("verbatim"), "verbatim_source": (previous or {}).get("verbatim_source")}
-    for e in entries:
+           "verbatim": (previous or {}).get("verbatim"), "verbatim_source": (previous or {}).get("verbatim_source"),
+           "verbatim_url": (previous or {}).get("verbatim_url"), "credit": WORKBOOK_CREDIT}
+    order = [e for e in entries if (sources.get(e["key"]) or Source("", "", "", "")).role == "licence"]
+    order += [e for e in entries if e not in order]
+    for e in order:
         s = sources.get(e["key"])
         p = dest_root / s.dest if s else None
-        if p is None or not p.exists():
+        if p is None or not p.exists() or not str(s.dest).lower().endswith((".htm", ".html", ".txt")):
             continue
-        found = find_licence_sentence(p.read_bytes().decode("utf-8", errors="replace"))
+        found = find_licence_sentence(p.read_bytes().decode(PAGE_ENCODING))
         if found:
-            rec["verbatim"], rec["verbatim_source"] = found, e["key"]
+            rec["verbatim"], rec["verbatim_source"], rec["verbatim_url"] = found, e["key"], s.url
             break
     return rec
 

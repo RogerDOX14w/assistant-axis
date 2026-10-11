@@ -11,7 +11,9 @@
   report and decide; every miss is listed for reading.
 * :func:`naming_agreement`: blind against hinted labels (disagreement rate), and in bipolar clusters whether each
   pole's antonym names the other pole (target > 80%): ``exact`` when the two normalise alike, ``overlap`` when they
-  share a content word after a crude stemming (grudge-holding / holds grudges).
+  share a content word after a crude stemming (grudge-holding / holds grudges).  It also counts the naming call's
+  ``kind`` guesses per form and, where M1 has run, sets them beside M1's verdict for the same pole
+  (:func:`kind_against_m1`) -- which is the whole reason the call guesses in M1's vocabulary (QUESTIONS 48).
 * :func:`cost_summary` and :func:`useful_per_dollar` (rows decided ``new`` or marked a pair completion, per dollar
   of the summed usage files); :func:`m1_m3_fractions`.
 """
@@ -178,14 +180,64 @@ def naming_agreement(rows: Sequence[Mapping], *, consensus: Optional[str] = "kep
 
     def share(xs, key):
         return round(sum(1 for x in xs if x.get(key)) / len(xs), 4) if xs else None
+
+    def kinds(xs):
+        return dict(sorted(Counter(x.get("kind") or "unknown" for x in xs).items()))
     return {"n_named": {f: len(v) for f, v in named.items()},
-            "is_trait": {f: share(v, "is_trait") for f, v in named.items()},
+            "kind": {f: kinds(v) for f, v in named.items()},
             "single_word_exists": share(named["blind"], "single_word_exists"),
             "ambiguity_flag": share(named["blind"], "ambiguity_flag"),
             "n_both_forms": len(both), "disagree_rate": round(len(dis) / len(both), 4) if both else None,
             "bipolar_directions": dirs, "antonym_exact": exact, "antonym_overlap": overlap,
             "antonym_agreement": round((exact + overlap) / dirs, 4) if dirs else None, "antonym_target": ANTONYM_TARGET,
             "antonym_misses": examples}
+
+
+#: The M1 tags that name a kind, as ``filter.holding_for`` routes on them; a verdict of ``trait`` with none of
+#: these is M1 saying "trait" in the naming call's sense (a membership carries ``membership`` and is still a
+#: trait by Roger's decision 3).
+M1_KIND_TAGS: dict[str, tuple[str, ...]] = {
+    "membership": ("membership",), "state": ("state", "transient_only"), "physical": ("physical",),
+    "role": ("role_person", "role_thing"), "action": ("action",), "evaluative": ("evaluative",),
+    "not_a_persona": ("not_a_persona",),
+}
+
+
+def kind_against_m1(rows: Sequence[Mapping], registry_by_stem: Mapping[str, Mapping], *, form: str = "blind",
+                    consensus: Optional[str] = "kept") -> dict:
+    """The naming call's ``kind`` guess beside M1's verdict for the same pole (QUESTIONS 48: the reason the guess
+    is made in M1's vocabulary).  ``cross`` is the table Roger reads, ``"<naming kind> / <M1 verdict>" -> n``;
+    ``agreement`` is an approximate score -- M1's tags contain the guessed kind, or the guess is ``trait`` and
+    M1's verdict is ``trait`` with no kind tag -- and is reported, never a gate.  Empty until M1 has run."""
+    pairs = []
+    for r in rows:
+        if consensus is not None and r.get("consensus") != consensus:
+            continue
+        for p in r["poles"]:
+            nm = p.get(form)
+            if not nm:
+                continue
+            reg = registry_by_stem.get(nm.get("stem")) or {}
+            f = reg.get("filter") or {}
+            if not f:
+                continue
+            pairs.append((nm.get("kind") or "unknown", f.get("verdict"), tuple(f.get("tags") or ())))
+    cross = Counter(f"{k} / {v}" for k, v, _t in pairs)
+    kind_tags = Counter()
+    agree = 0
+    for k, v, tags in pairs:
+        want = M1_KIND_TAGS.get(k)
+        hit = bool(want) and any(t in tags for t in want)
+        if k == "trait":
+            hit = v == "trait" and not any(t in tags for ts in M1_KIND_TAGS.values() for t in ts
+                                           if t != "membership")
+        agree += hit
+        for t in tags:
+            kind_tags[t] += 1
+    return {"n_pairs": len(pairs), "form": form, "cross": dict(sorted(cross.items())),
+            "m1_tags": dict(sorted(kind_tags.items())), "n_agree": agree,
+            "agreement": round(agree / len(pairs), 4) if pairs else None,
+            "note": "approximate: M1's tags are the verdict of record, this column is the naming call's guess"}
 
 
 # --------------------------------------------------------------------------- M1, M3, cost

@@ -5,31 +5,37 @@ system prompt the form's rubric (cached when it clears the model's minimum, ``sp
 user turn one JSON object: ``{"statements": [...]}`` (blind) or ``{"statements": [...], "scales": [...]}``
 (hinted).  Statements are shown as first-person sentences ("I get chores done right away."), at most
 :data:`MAX_STATEMENTS` per pole (a seeded choice above that).  The answer is one JSON object, reason first
-(the judging rule): ``reason, label, gloss, antonym_label, antonym_gloss, is_trait, ambiguity_flag,
+(the judging rule): ``reason, label, gloss, antonym_label, antonym_gloss, kind, ambiguity_flag,
 single_word_exists``.
 
-Rubric rules (plan § 6): symptom-like dispositions count as traits (Roger's answer to plan 07 § 9.1: the corpus
-has ADHD and OCD); moods, abilities, interests and life circumstances do not; the examples are near-duplicates of
-corpus words, never corpus labels or queue entries (the hygiene rule; tested); no temperature (Haiku 5.5 refuses
-one, ``llm.accepts_temperature``).
+**The rubrics are pinned files, not code** (QUESTIONS 48 part 3, Roger 2026-10-11):
+``reports/trait_gap_generation/rubrics/ipip_naming_blind.md`` and ``ipip_naming_hinted.md``, loaded through
+:mod:`assistant_axis.gapgen.split_rubrics` and pinned in that directory's ``versions.json``.  Until that day the
+two texts were pinned inside this module (a ``PROMPT_VERSIONS`` / ``PINNED`` pair), where an edit escaped
+``rubric_pins.py check``; :func:`system_prompt` now refuses a text that is not its latest pin
+(:class:`RubricNotPinned`), as the Roget head-scope call does.
+
+**No submission gate** (QUESTIONS 48 parts 1 and 2): every named pole is submitted and M1's pinned kind call
+decides what it is.  The old ``is_trait`` flag is gone; in its place the answer carries ``kind``, a guess in M1's
+own vocabulary (:data:`KIND_VALUES`: trait, membership, state, physical, role, action, evaluative,
+not_a_persona), so the readout can set this call's guess beside M1's verdict for the same pole.  Nothing gates on
+it.  The examples in the prompts are near-duplicates of corpus words, never corpus labels or queue entries (the
+hygiene rule; tested).  No temperature (Haiku 5.5 refuses one, ``llm.accepts_temperature``).
 
 **Parser** (:func:`parse_naming`): strict, as the plan asks: the reply must be one JSON object and nothing else (a
 fenced or prose-wrapped reply is rejected and counted), every key present, the label 1-4 words (lower-cased with a
-note), the gloss opening "This means" (over 25 words is noted, not rejected), the three flags booleans.  A
-rejected answer is asked once more (:data:`ASK_ATTEMPTS`); every response received is charged to ``usage`` and
-recorded, before parsing, in ``naming_responses.jsonl`` (append-only).
+note), the gloss opening "This means" (over 25 words is noted, not rejected), ``kind`` one of the eight (an
+unknown kind is a ``bad_value``), the two flags booleans.  A rejected answer is asked once more
+(:data:`ASK_ATTEMPTS`); every response received is charged to ``usage`` and recorded, before parsing, in
+``naming_responses.jsonl`` (append-only).
 
 Labels: no corpus label is ever shown (the statements are item texts and the scale names are IPIP's), so the judge
 display form is a no-op here; the scale names still pass through ``prompt_label`` and every record carries
 ``label_form`` (plan § 1, one rule everywhere).
-
-**Versions**: a prompt text is pinned to its version in :data:`PINNED` (one version, one text; the test fails
-when a text changes without a new version).
 """
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import random
 from dataclasses import asdict, dataclass, field
@@ -37,6 +43,7 @@ from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
 from assistant_axis.entity_id import normalize_to_file_name
+from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.cost import Estimate
 from assistant_axis.gapgen.llm import call_anthropic_json
 from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
@@ -55,84 +62,63 @@ MAX_STATEMENTS = 30
 MAX_LABEL_WORDS = 4
 MAX_GLOSS_WORDS = 25
 FORMS: tuple[str, ...] = ("blind", "hinted")
+#: form -> the pinned rubric name in ``reports/trait_gap_generation/rubrics/`` (QUESTIONS 48 part 3).
+RUBRIC_NAMES: dict[str, str] = {"blind": "ipip_naming_blind", "hinted": "ipip_naming_hinted"}
 #: The answer's keys, in the order the prompt asks for them.
-FIELD_NAMES: tuple[str, ...] = ("reason", "label", "gloss", "antonym_label", "antonym_gloss", "is_trait",
+FIELD_NAMES: tuple[str, ...] = ("reason", "label", "gloss", "antonym_label", "antonym_gloss", "kind",
                                 "ambiguity_flag", "single_word_exists", "statements", "scales", "scale", "inventory",
                                 "direction")
 ANSWER_KEYS: tuple[str, ...] = FIELD_NAMES[:8]
+#: M1's kind vocabulary (``rubrics/step2_kind.md`` draft 6), which this call guesses in so that the readout is
+#: comparable with M1's verdicts (QUESTIONS 48 part 2).  Nothing gates on it.
+KIND_VALUES: tuple[str, ...] = ("trait", "membership", "state", "physical", "role", "action", "evaluative",
+                                "not_a_persona")
 #: The example labels the prompts quote (none is a corpus label, a corpus stem or a seed-queue name; tested).
 EXAMPLE_LABELS: tuple[str, ...] = ("punctilious", "slow to anger", "keeps others at arm's length")
 #: For the estimate (measured on nothing yet; the plan's 700 in / 250 out per call, with the system prompt).
 EST_IN_TOKENS, EST_OUT_TOKENS = 900, 400
 
-_COMMON = """\
-A persona trait is a lasting disposition that a persona can show in how it speaks and acts: a habit of feeling, \
-thinking, acting or relating to others. Symptom-like dispositions count as traits when they describe a lasting \
-tendency (being easily distracted, checking things over and over, feeling cut off from one's own feelings). These \
-are not traits: a passing mood or state, an ability or skill, an interest or hobby, and a life circumstance (a job, \
-a family situation, an illness as such).
 
-Give:
-- "reason": one short sentence on what the statements have in common.
-- "label": the disposition's name in 1 to 4 lowercase words: an adjective or adjective phrase where English has one \
-(for example "punctilious" or "slow to anger"), otherwise a short descriptive phrase (for example "keeps others at \
-arm's length").
-- "gloss": one sentence of at most 25 words that starts "This means" and describes the disposition in plain words, \
-without repeating the label.
-- "antonym_label": the name of the opposite disposition, in the same form, or null if it has no clear opposite.
-- "antonym_gloss": one sentence starting "This means" that describes the opposite, or null.
-- "is_trait": true if the disposition is a persona trait as defined above, false if it is a mood, an ability, an \
-interest or a life circumstance.
-- "ambiguity_flag": true if the statements do not share one disposition, or if the label could easily be read in \
-another sense.
-- "single_word_exists": true if one common English word names this disposition well.
+# --------------------------------------------------------------------------- the prompts (pinned files)
 
-Respond with one JSON object and nothing else, reason first:
-{"reason": "<one short sentence>", "label": "<1-4 lowercase words>", "gloss": "This means ...", "antonym_label": \
-"<1-4 lowercase words>" or null, "antonym_gloss": "This means ..." or null, "is_trait": true or false, \
-"ambiguity_flag": true or false, "single_word_exists": true or false}"""
-
-NAMING_PROMPT = """\
-You are given one JSON object holding a group of self-report statements from a personality questionnaire \
-("statements"). People rated how well each statement describes them, and these statements were grouped because \
-they express closely related behavior. Name the one disposition of a person that the group expresses, as a \
-persona trait.
-
-""" + _COMMON
-
-HINTED_PROMPT = """\
-You are given one JSON object holding a group of self-report statements from a personality questionnaire \
-("statements") and the questionnaire scales they are scored on ("scales"). People rated how well each statement \
-describes them, and these statements were grouped because they express closely related behavior. Name the one \
-disposition of a person that the group expresses, as a persona trait.
-
-Each scale is given with its inventory, its direction ("for": agreeing with the statements raises the scale's \
-score; "against": agreeing lowers it) and how many of the statements it scores. Treat the scale names as hints to \
-what the questionnaire's authors meant to measure: name the disposition the statements themselves express, using a \
-scale's name only where it fits them.
-
-""" + _COMMON
-
-PROMPT_VERSIONS: dict[str, int] = {"blind": 1, "hinted": 1}
-#: form -> {version: sha256 of the prompt text}.  Append only.
-PINNED: dict[str, dict[int, str]] = {
-    "blind": {1: "41b361d75a6150c79edf575b80bd713329ed4f3c63275b98d82cad81ce3f0fdb"},
-    "hinted": {1: "e33a08e94ca73a911b3b5a13403460cf4aa10881e8e8b0a0f2fe4e86ca3b56ea"},
-}
+class RubricNotPinned(RuntimeError):
+    """A naming prompt's text on disk is not its latest pinned version."""
 
 
-def system_prompt(form: str) -> str:
+def rubric_name(form: str) -> str:
     if form not in FORMS:
         raise ValueError(f"form must be one of {FORMS}, not {form!r}")
-    return NAMING_PROMPT if form == "blind" else HINTED_PROMPT
+    return RUBRIC_NAMES[form]
 
 
-def prompt_version(form: str) -> int:
-    return PROMPT_VERSIONS[form]
+def load_rubric(form: str, rubrics_dir: Optional[Path] = None) -> dict:
+    """``{"name", "form", "text", "version", "sha256", "file"}``; refuses a text that is not the latest pin."""
+    name = rubric_name(form)
+    probs = [p for p in sr.mismatches(rubrics_dir) if p.split(":", 1)[0] == name]
+    if probs:
+        raise RubricNotPinned("; ".join(probs) + "\n" + sr.bump_command(probs))
+    text = sr.load_prompt(name, rubrics_dir)
+    version, sha = sr.current_versions(rubrics_dir, (name,))[name]
+    path = sr.rubric_path(name, rubrics_dir)
+    try:
+        from assistant_axis.gapgen.paths import REPO_ROOT
+        rel = str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        rel = str(path)
+    return {"name": name, "form": form, "text": text, "version": version, "sha256": sha, "file": rel}
 
 
-def prompt_sha256(form: str) -> str:
-    return hashlib.sha256(system_prompt(form).encode("utf-8")).hexdigest()
+def system_prompt(form: str, rubrics_dir: Optional[Path] = None) -> str:
+    """The form's prompt text, exactly as the rubric file holds it (and only when it is pinned)."""
+    return load_rubric(form, rubrics_dir)["text"]
+
+
+def prompt_version(form: str, rubrics_dir: Optional[Path] = None) -> int:
+    return int(load_rubric(form, rubrics_dir)["version"])
+
+
+def prompt_sha256(form: str, rubrics_dir: Optional[Path] = None) -> str:
+    return load_rubric(form, rubrics_dir)["sha256"]
 
 
 # --------------------------------------------------------------------------- the user turn
@@ -193,7 +179,8 @@ class Naming:
     gloss: str
     antonym_label: Optional[str]
     antonym_gloss: Optional[str]
-    is_trait: bool
+    #: One of :data:`KIND_VALUES`, this call's guess in M1's vocabulary (QUESTIONS 48; reported, never a gate).
+    kind: str
     ambiguity_flag: bool
     single_word_exists: bool
     notes: list = field(default_factory=list)
@@ -267,7 +254,13 @@ def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
         return None, f"bad_label: antonym {ant!r}"
     ag = obj["antonym_gloss"]
     ant_gloss = " ".join(ag.split()) if isinstance(ag, str) and ag.strip() and ag.strip().lower() != "null" else None
-    flags = {k: _bool(obj[k]) for k in ("is_trait", "ambiguity_flag", "single_word_exists")}
+    kind = obj["kind"]
+    kind = " ".join(str(kind).split()).lower().replace(" ", "_").replace("-", "_") if isinstance(kind, str) else None
+    if kind not in KIND_VALUES:
+        return None, f"bad_value: kind {obj['kind']!r} (one of {', '.join(KIND_VALUES)})"
+    if kind != obj["kind"]:
+        notes.append("kind normalised")
+    flags = {k: _bool(obj[k]) for k in ("ambiguity_flag", "single_word_exists")}
     bad = [k for k, v in flags.items() if v is None]
     if bad:
         return None, f"bad_value: {', '.join(bad)}"
@@ -275,7 +268,7 @@ def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
     if extra:
         notes.append(f"extra keys {extra}")
     return Naming(reason=" ".join(reason.split()), label=label, stem=normalize_to_file_name(label), gloss=gloss,
-                  antonym_label=ant_label, antonym_gloss=ant_gloss, notes=notes, **flags), None
+                  antonym_label=ant_label, antonym_gloss=ant_gloss, kind=kind, notes=notes, **flags), None
 
 
 # --------------------------------------------------------------------------- the calls
@@ -302,12 +295,15 @@ def _should_cache(system: str, model: str) -> bool:
 async def name_poles(poles: Sequence[PoleRef], *, client, model: str = DEFAULT_MODEL, usage: MultiModelUsage,
                      hinted: bool = True, responses_path: Optional[Path] = None, concurrency: int = CONCURRENCY,
                      max_tokens: int = MAX_TOKENS, label_form: str = DEFAULT_LABEL_FORM,
-                     forms: Optional[Sequence[str]] = None, now=utc_now) -> NameResult:
+                     forms: Optional[Sequence[str]] = None, rubrics: Optional[Mapping[str, Mapping]] = None,
+                     now=utc_now) -> NameResult:
     """The blind call for every pole, and the hinted call beside it when ``hinted``.  A rejected answer is asked
     once more.  A ``BudgetExceededError`` from a guarded ``usage`` stops the run after keeping (and recording) the
-    answer that crossed the cap."""
+    answer that crossed the cap.  The prompts are read once (:func:`load_rubric`, which refuses an unpinned
+    text), so a rubric file edited mid-run cannot change what the run sends."""
     check_label_form(label_form)
     forms = list(forms) if forms else (["blind", "hinted"] if hinted else ["blind"])
+    rubrics = dict(rubrics) if rubrics else {f: load_rubric(f) for f in forms}
     res = NameResult()
     sem = asyncio.Semaphore(max(1, concurrency))
     lock = asyncio.Lock()
@@ -315,7 +311,8 @@ async def name_poles(poles: Sequence[PoleRef], *, client, model: str = DEFAULT_M
         Path(responses_path).parent.mkdir(parents=True, exist_ok=True)
 
     async def one(p: PoleRef, form: str) -> None:
-        system = system_prompt(form)
+        rub = rubrics[form]
+        system = rub["text"]
         user = build_user(p) if form == "blind" else build_hinted_user(p, label_form=label_form)
         cache = _should_cache(system, model)
         key = (*p.key, form)
@@ -333,7 +330,8 @@ async def name_poles(poles: Sequence[PoleRef], *, client, model: str = DEFAULT_M
                     res.stopped_by_budget = True
                 naming, err = parse_naming(text)
                 rec = {"granularity": p.granularity, "cluster_id": p.cluster_id, "pole": p.pole, "form": form,
-                       "model": model, "prompt_version": prompt_version(form), "prompt_sha256": prompt_sha256(form),
+                       "model": model, "rubric": rub["name"], "prompt_version": rub["version"],
+                       "prompt_sha256": rub["sha256"],
                        "label_form": label_form, "cache_system": cache, "user": user, "attempt": attempt,
                        "text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
                        "error": meta.get("error"), "parsed": naming.as_dict() if naming else None,

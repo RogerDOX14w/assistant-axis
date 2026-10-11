@@ -83,13 +83,18 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: (``assistant_axis/gapgen/generators/roget/head_scope.py``; QUESTIONS 44) and the Roget label placement
 #: check (``.../roget/placement.py``; QUESTIONS 39), each first pinned as version 1.  Since 2026-10-10 the
 #: alignment sweep's (workstream 8, ``.../alignment_sweep/``): its extraction and mechanism-rewrite calls
-#: (``extract.py``) and the persona-enactability gate (``gate.py``), each first pinned as version 1.
+#: (``extract.py``) and the persona-enactability gate (``gate.py``), each first pinned as version 1.  Since
+#: 2026-10-11 the IPIP generator's two cluster-naming prompts (workstream 7, ``.../ipip/naming.py``), blind and
+#: hinted, first pinned as version 1: they were pinned in that module's own code until QUESTIONS 48 part 3, where
+#: Roger moved them here so that an edit cannot escape ``rubric_pins.py check``.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
     "alignment_extract": "alignment_extract.md",
     "alignment_rewrite": "alignment_rewrite.md",
     "enactability_gate": "enactability_gate.md",
+    "ipip_naming_blind": "ipip_naming_blind.md",
+    "ipip_naming_hinted": "ipip_naming_hinted.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.

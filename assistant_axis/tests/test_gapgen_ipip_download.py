@@ -5,16 +5,18 @@ import json
 import pytest
 
 from assistant_axis.gapgen.generators.ipip import download as D
-from assistant_axis.gapgen.generators.ipip.sources import LICENCE_QUOTE, SOURCES
+from assistant_axis.gapgen.generators.ipip.sources import (LICENCE_QUOTE, SOURCES, UNAPPROVED_EXAMPLE,
+                                                           WORKBOOK_CREDIT)
 
-PAGES = {
-    SOURCES["item_list"].url: b"<html><body><p>Get chores done right away.</p></body></html>",
-    SOURCES["assignment_table"].url: b"<html><body><table><tr><td>H1131</td></tr></table></body></html>",
-    SOURCES["scale_index"].url: (b"<html><body><p>The items and scales are in the public domain, which means that "
-                                 b"one can copy, edit, translate, or use them for any purpose without asking "
-                                 b"permission and without paying a fee.</p></body></html>"),
-    SOURCES["hexaco_key"].url: b"<html><body>HEXACO</body></html>",
-}
+LICENCE_SENTENCE = ("The items and scales are in the public domain, which means that one can copy, edit, "
+                    "translate, or use them for any purpose without asking permission and without paying a fee.")
+#: Every approved source answered by the fake fetcher: the home page carries the licence sentence, the key pages
+#: a scrap of key text, the workbook a zip magic number, the rest a stub.
+PAGES = {s.url: (f"<html><body><p>{LICENCE_SENTENCE}</p></body></html>".encode() if s.role == "licence"
+                 else b"PK\x03\x04 fake workbook" if s.role == "keys_a"
+                 else f"<html><body><b>Scale</b><br>+ keyed Item for {s.key}.<br></body></html>".encode())
+         for s in SOURCES.values()}
+EXPECTED = list(SOURCES)
 
 
 class FakeFetcher:
@@ -34,33 +36,45 @@ def sha(b):
 def run(tmp_path, **kw):
     kw.setdefault("fetcher", FakeFetcher())
     return D.fetch_all(dest_root=tmp_path / "ext", sources_manifest_path=tmp_path / "tracked" / "sources_manifest.json",
-                       now="2026-10-10T12:00:00+00:00", git_sha="abc1234", **kw)
+                       now="2026-10-11T12:00:00+00:00", git_sha="abc1234", **kw)
 
 
 def test_fetch_writes_files_and_manifest(tmp_path):
     f = FakeFetcher()
     man = run(tmp_path, fetcher=f)
-    assert man.fetched == ["item_list", "assignment_table", "scale_index"] and man.skipped == []
-    assert f.calls == [SOURCES[k].url for k in ("item_list", "assignment_table", "scale_index")]
-    for k in ("item_list", "assignment_table", "scale_index"):
-        p = tmp_path / "ext" / SOURCES[k].dest
-        assert p.read_bytes() == PAGES[SOURCES[k].url]
+    # every approved source is fetched now: the three pages of 2026-10-10, the home page, the 21 key pages and
+    # the workbook (QUESTIONS 52 option C, QUESTIONS 46)
+    assert man.fetched == EXPECTED and man.skipped == []
+    assert len(f.calls) == len(SOURCES) == 26
+    assert sum(1 for s in SOURCES.values() if s.role == "keys_b") == 21
+    for k, s in SOURCES.items():
+        p = tmp_path / "ext" / s.dest
+        assert p.read_bytes() == PAGES[s.url]
         assert not p.with_name(p.name + ".part").exists()
-    assert not (tmp_path / "ext" / SOURCES["hexaco_key"].dest).exists()
     m = json.loads((tmp_path / "ext" / "DOWNLOAD_MANIFEST.json").read_text())
     tracked = json.loads((tmp_path / "tracked" / "sources_manifest.json").read_text())
     assert m == tracked
     e = {x["key"]: x for x in m["entries"]}
-    for k in ("item_list", "assignment_table", "scale_index"):
+    for k in ("item_list", "scale_index", "key_hexaco", "assignment_workbook"):
         body = PAGES[SOURCES[k].url]
         assert e[k]["sha256"] == sha(body) and e[k]["size_bytes"] == len(body)
-        assert e[k]["url"] == SOURCES[k].url and e[k]["downloaded_at"] == "2026-10-10T12:00:00+00:00"
+        assert e[k]["url"] == SOURCES[k].url and e[k]["downloaded_at"] == "2026-10-11T12:00:00+00:00"
         assert e[k]["hash_source"] == "received bytes (IPIP publishes no hashes)"
-    assert m["licence"]["quote_from_plan"] == LICENCE_QUOTE
-    # the full sentence was found in one of the pages and recorded verbatim, with the page it came from
-    assert m["licence"]["verbatim"].startswith("The items and scales are in the public domain")
-    assert m["licence"]["verbatim_source"] == "scale_index"
-    assert m["total_bytes"] == sum(len(PAGES[SOURCES[k].url]) for k in ("item_list", "assignment_table", "scale_index"))
+        assert e[k]["role"] == SOURCES[k].role
+    assert e["key_hexaco"]["approval"].startswith("Roger, 2026-10-11")
+    assert e["item_list"]["approval"].startswith("Roger, 2026-10-10")
+    assert m["total_bytes"] == sum(len(v) for v in PAGES.values())
+
+
+def test_the_licence_sentence_is_recorded_verbatim(tmp_path):
+    """QUESTIONS 46: ``licence.verbatim`` was null and the quote came from the plan's prose; the home page is
+    fetched so that the sentence is on record as IPIP prints it."""
+    man = run(tmp_path)
+    lic = man.licence
+    assert lic["quote_from_plan"] == LICENCE_QUOTE
+    assert lic["verbatim"] == LICENCE_SENTENCE
+    assert lic["verbatim_source"] == "home" and lic["verbatim_url"] == SOURCES["home"].url
+    assert lic["credit"] == WORKBOOK_CREDIT and "Tedone" in lic["credit"]
 
 
 def test_second_run_skips_and_force_refetches(tmp_path):
@@ -68,11 +82,11 @@ def test_second_run_skips_and_force_refetches(tmp_path):
     before = (tmp_path / "ext" / "DOWNLOAD_MANIFEST.json").read_bytes()
     f2 = FakeFetcher()
     man = run(tmp_path, fetcher=f2)
-    assert f2.calls == [] and man.fetched == [] and man.skipped == ["item_list", "assignment_table", "scale_index"]
+    assert f2.calls == [] and man.fetched == [] and man.skipped == EXPECTED
     assert (tmp_path / "ext" / "DOWNLOAD_MANIFEST.json").read_bytes() == before
     f3 = FakeFetcher()
     man = run(tmp_path, fetcher=f3, force=True)
-    assert len(f3.calls) == 3 and man.fetched == ["item_list", "assignment_table", "scale_index"]
+    assert len(f3.calls) == len(SOURCES) and man.fetched == EXPECTED
 
 
 def test_changed_file_on_disk_is_refetched(tmp_path):
@@ -83,13 +97,14 @@ def test_changed_file_on_disk_is_refetched(tmp_path):
     assert man.fetched == ["item_list"] and f.calls == [SOURCES["item_list"].url]
 
 
-def test_only_the_fallback_page(tmp_path):
+def test_only_one_key_page(tmp_path):
     run(tmp_path)
+    (tmp_path / "ext" / SOURCES["key_neo"].dest).unlink()
     f = FakeFetcher()
-    man = run(tmp_path, fetcher=f, only=["hexaco_key"])
-    assert f.calls == [SOURCES["hexaco_key"].url] and man.fetched == ["hexaco_key"]
+    man = run(tmp_path, fetcher=f, only=["key_neo"])
+    assert f.calls == [SOURCES["key_neo"].url] and man.fetched == ["key_neo"]
     keys = [e["key"] for e in json.loads((tmp_path / "ext" / "DOWNLOAD_MANIFEST.json").read_text())["entries"]]
-    assert keys == ["item_list", "assignment_table", "scale_index", "hexaco_key"]
+    assert keys == EXPECTED                      # the order is the source order, not the fetch order
 
 
 def test_unknown_key_refused(tmp_path):
@@ -97,37 +112,53 @@ def test_unknown_key_refused(tmp_path):
         run(tmp_path, only=["nope"])
 
 
-def test_unapproved_workbook_refused_without_a_named_go(tmp_path):
-    wb = SOURCES["assignment_workbook"]
-    assert wb.approval is None and wb.optional
-    pages = dict(PAGES, **{wb.url: b"PK\x03\x04 fake workbook"})
-    f = FakeFetcher(pages)
+def test_a_source_with_no_approval_is_refused_without_a_named_go(tmp_path):
+    """Every real source is approved since 2026-10-11, so the refusal path is tested on the stand-in."""
+    s = UNAPPROVED_EXAMPLE
+    assert s.approval is None
+    sources = dict(SOURCES, **{s.key: s})
+    f = FakeFetcher(dict(PAGES, **{s.url: b"<html>nope</html>"}))
     with pytest.raises(D.NotApproved):
-        run(tmp_path, fetcher=f, only=["assignment_workbook"])
+        run(tmp_path, fetcher=f, only=[s.key], sources=sources)
     with pytest.raises(D.NotApproved):                       # a dry run is refused too
-        run(tmp_path, fetcher=f, only=["assignment_workbook"], dry_run=True)
+        run(tmp_path, fetcher=f, only=[s.key], sources=sources, dry_run=True)
     assert f.calls == [] and not (tmp_path / "ext").exists()
-    man = run(tmp_path, fetcher=f, only=["assignment_workbook"], approved_by="Roger, 2026-10-11 (test)")
-    assert man.fetched == ["assignment_workbook"]
+    man = run(tmp_path, fetcher=f, only=[s.key], sources=sources, approved_by="Roger, 2026-10-11 (test)")
+    assert man.fetched == [s.key]
+    assert {x["key"]: x for x in man.entries}[s.key]["approval"] == "Roger, 2026-10-11 (test)"
+
+
+def test_the_workbook_is_approved_and_credited(tmp_path):
+    man = run(tmp_path, only=["assignment_workbook"])
     e = {x["key"]: x for x in man.entries}["assignment_workbook"]
-    assert e["approval"] == "Roger, 2026-10-11 (test)" and e["licence"].startswith("no licence stated")
-    # the approved pages record the standing approval
-    man = run(tmp_path, fetcher=FakeFetcher())
-    assert {x["key"]: x for x in man.entries}["item_list"]["approval"].startswith("Roger, 2026-10-10")
+    assert e["approval"].startswith("Roger, 2026-10-11") and e["licence"].startswith("no licence stated")
+    assert e["role"] == "keys_a"
 
 
 def test_dry_run_writes_nothing(tmp_path):
     f = FakeFetcher()
     man = run(tmp_path, fetcher=f, dry_run=True)
     assert f.calls == [] and not (tmp_path / "ext").exists() and not (tmp_path / "tracked").exists()
-    assert len(man.dry_run_lines) == 3 and all("ipip.ori.org" in x for x in man.dry_run_lines)
+    assert len(man.dry_run_lines) == len(SOURCES) and all("ipip.ori.org" in x for x in man.dry_run_lines)
 
 
 def test_find_licence_sentence():
-    html = PAGES[SOURCES["scale_index"].url].decode()
-    s = D.find_licence_sentence(html)
+    s = D.find_licence_sentence(PAGES[SOURCES["home"].url].decode())
     assert s.startswith("The items and scales are in the public domain") and s.endswith("without paying a fee.")
     assert D.find_licence_sentence("<p>nothing here</p>") is None
+
+
+def test_pages_are_decoded_as_cp1252_for_the_licence_search(tmp_path):
+    """The pages are a single-byte Windows encoding (QUESTIONS 49); 0x92 is a right single quote, which utf-8
+    cannot decode at all and iso-8859-1 would turn into a control character."""
+    body = b"<html><body><p>Goldberg\x92s own words: " + LICENCE_SENTENCE.encode() + b"</p></body></html>"
+    f = FakeFetcher(dict(PAGES, **{SOURCES["home"].url: body}))
+    man = run(tmp_path, fetcher=f)
+    assert man.licence["verbatim"] == LICENCE_SENTENCE
+    assert body.decode("cp1252").startswith("<html><body><p>Goldberg’s")
+    assert body.decode("iso-8859-1").startswith("<html><body><p>Goldberg\u0092s")      # a control character
+    with pytest.raises(UnicodeDecodeError):
+        body.decode("utf-8")
 
 
 class _Resp:

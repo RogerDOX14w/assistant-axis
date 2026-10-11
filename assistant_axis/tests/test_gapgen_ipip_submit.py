@@ -13,9 +13,9 @@ from assistant_axis.gapgen.registry import Registry
 MANIFEST = {"tool": "ipip_generator.py download", "entries": [{"key": "item_list", "sha256": "ab"}]}
 
 
-def naming(label, gloss="This means something.", is_trait=True, antonym=None):
+def naming(label, gloss="This means something.", kind="trait", antonym=None):
     return {"reason": "r", "label": label, "stem": label.replace(" ", "_").replace("-", "_"), "gloss": gloss,
-            "antonym_label": antonym, "antonym_gloss": None, "is_trait": is_trait, "ambiguity_flag": False,
+            "antonym_label": antonym, "antonym_gloss": None, "kind": kind, "ambiguity_flag": False,
             "single_word_exists": False, "notes": []}
 
 
@@ -27,8 +27,8 @@ def rows():
                    {"pole": "b", "items": ["H3"], "blind": naming("last-minute", antonym="chore-prompt"),
                     "hinted": naming("procrastinating")}]},
         {"granularity": 350, "cluster_id": 18, "consensus": "kept", "bipolar": False, "items": ["H4", "H5"],
-         "poles": [{"pole": "a", "items": ["H4", "H5"], "blind": naming("likes painting", is_trait=False),
-                    "hinted": naming("artistic interests", is_trait=False)}]},
+         "poles": [{"pole": "a", "items": ["H4", "H5"], "blind": naming("likes painting", kind="membership"),
+                    "hinted": naming("artistic interests", kind="membership")}]},
         {"granularity": 350, "cluster_id": 19, "consensus": "kept", "bipolar": False, "items": ["H6", "H7"],
          "poles": [{"pole": "a", "items": ["H6", "H7"]}]},                       # not named yet
         {"granularity": 350, "cluster_id": 20, "consensus": "loose", "bipolar": False, "items": ["H8", "H9"],
@@ -41,25 +41,28 @@ def lines(p: Path):
 
 
 def test_candidates_fields_and_reciprocal_partners():
+    """QUESTIONS 48: every named pole is submitted, including the one the old is_trait gate dropped."""
     cands, counts = S.to_candidates(rows(), "2026-10-14a")
-    assert [c.surface for c in cands] == ["chore-prompt", "last-minute"]
-    a, b = cands
+    assert [c.surface for c in cands] == ["chore-prompt", "last-minute", "likes painting"]
+    a, b = cands[0], cands[1]
     assert a == Candidate(surface="chore-prompt", generator="ipip", run_id="2026-10-14a", rank=17, score=None,
                           gloss_hint="This means something.", sense_id=1, source_ref="ipip:g350:c017a",
                           partner_hint="last-minute")
     assert b.partner_hint == "chore-prompt" and b.source_ref == "ipip:g350:c017b"
     assert all(c.score is None and c.gloss_hint for c in cands)
-    assert counts == {"n_kept_clusters": 3, "n_poles": 4, "n_named": 3, "n_trait": 2, "n_not_trait": 1,
-                      "n_unnamed": 1, "n_loose_skipped": 1, "n_selected_out": 0, "n_submitted": 2,
-                      "label_choice": "blind"}
+    assert counts == {"n_kept_clusters": 3, "n_poles": 4, "n_named": 3, "n_unnamed": 1, "n_loose_skipped": 1,
+                      "n_selected_out": 0, "n_submitted": 3, "label_choice": "blind",
+                      "kinds": {"membership": 1, "trait": 2}}
+    assert "n_trait" not in counts and "trait_only" not in counts
 
 
 def test_hinted_choice_and_pole_selection():
-    cands, _ = S.to_candidates(rows(), "r", label_choice="hinted")
-    assert [(c.surface, c.partner_hint) for c in cands] == [("diligent", "procrastinating"),
-                                                            ("procrastinating", "diligent")]
+    cands, counts = S.to_candidates(rows(), "r", label_choice="hinted")
+    assert [(c.surface, c.partner_hint) for c in cands][:2] == [("diligent", "procrastinating"),
+                                                                ("procrastinating", "diligent")]
+    assert counts["kinds"] == {"membership": 1, "trait": 2}
     cands, counts = S.to_candidates(rows(), "r", poles={(17, "b")})
-    assert [c.surface for c in cands] == ["last-minute"] and counts["n_selected_out"] == 1
+    assert [c.surface for c in cands] == ["last-minute"] and counts["n_selected_out"] == 2
     assert cands[0].partner_hint == "chore-prompt"              # the partner is named even when not submitted
     assert S.parse_poles_file("c017a\n# comment\nipip:g350:c018a\n17b\n") == {(17, "a"), (18, "a"), (17, "b")}
 
@@ -85,10 +88,11 @@ def test_submit_writes_run_files_and_registry(env):
     assert cands == [dataclasses.asdict(c) for c in S.to_candidates(rows(), "r1")[0]]
     run = json.loads((d / "run.json").read_text())
     args = run["args"]
-    assert args["granularity"] == 350 and args["n"] == 2 and args["label_choice"] == "blind"
+    assert args["granularity"] == 350 and args["n"] == 3 and args["label_choice"] == "blind"
+    assert args["gate"].startswith("none: every named pole is submitted")
     assert args["clusters_sha256"] == "cafe" and args["sources_manifest"] == MANIFEST and args["estimate"]["total_usd"] > 0
     assert json.loads((d / "usage.json").read_text())["n_calls"] == 0
-    assert (d / "keys.txt").read_text().split() == ["chore_prompt#1", "last_minute#1"]
+    assert (d / "keys.txt").read_text().split() == ["chore_prompt#1", "last_minute#1", "likes_painting#1"]
     folded = Registry(reg).fold()
     src = folded["chore_prompt#1"]["sources"][0]
     assert src["partner_hint"] == "last-minute" and src["source_ref"] == "ipip:g350:c017a" and src["score"] is None
@@ -115,7 +119,7 @@ def test_resubmit_is_a_noop(env):
     d = env[0] / "runs" / "ipip" / "r1"
     before, reg_before = (d / "candidates.jsonl").read_bytes(), env[1].read_bytes()
     summ = submit(env)
-    assert summ.report["n_new"] == 0 and summ.report["n_unchanged"] == 2
+    assert summ.report["n_new"] == 0 and summ.report["n_unchanged"] == 3
     assert (d / "candidates.jsonl").read_bytes() == before and env[1].read_bytes() == reg_before
 
 
