@@ -5,7 +5,7 @@ Treat each generator as a sampling occasion over an unknown population of trait 
 existing set is one more sample. Hidden-label recovery says how well each generator sees what
 we already know (recall, rank, by region); the overlap between *independent* generators gives
 a capture-recapture estimate of the population and of how far we are from saturation. This
-workstream generates nothing, so it adds no bias of its own.
+workstream generates nothing, so it adds no bias of its own. [Note that some of our generators, for example the AI alignment generator, are sampling a separate distribution, so we need to consider whether applying this to them makes sense.]
 
 ## 2. Sources and tools
 - `data/traits/instructions/*.json` (387 files: label, description, antonym, arrangement).
@@ -102,12 +102,38 @@ tables, N̂ and coverage, the stop rule.
 - **Full**: add bootstrap intervals over generators and regions, and Shapley attribution of
   marginal novelty instead of run order.
 
-## 9. Open questions for Roger
+## 9. Open questions for Roger (answered 2026-10-12)
 - Reference set: the 387 files only, or also queued `paired`/`done` labels?
+
+  **Roger:** the seed queue is derived from several of our generators, so including it would be contamination; use
+  only what is checked in to the corpus.
+
+  So the **testing reference is the checked-in trait files** (932 on 2026-10-12, with their `renamed_from`), never
+  the queue, and never a file that itself came from gap generation once promotions become files (provenance
+  excludes them, as § 3.3 already excludes a generator's own source).  The queue enters only M3's *production*
+  search, which is deduplication, not measurement.  Occasion 0 for capture-recapture is the same reference: a
+  queue entry a generator produced belongs to that generator's occasion.
 - The nine regions above, or the seed-queue chunk structure?
+
+  **Settled:** M1's `region` on every candidate and [corpus_regions.json](../../data/candidates/corpus_regions.json)
+  on every corpus trait, already computed; the only check is that M1's vocabulary still matches the nine.
 - Stop rule in novel-per-dollar or per-review-minute? Review time looks like the bottleneck.
+
+  **Roger:** per review-minute; novel-per-dollar is also a constraint, but likely a loose one -- as long as rough
+  estimates keep saying it is not an issue, fine.  (Measured 2026-10-11: ~150 terms an hour of review against $1-30
+  of API per generator.)  "Novel" is printed twice, M3-kept at once and promoted-after-review as it lags, with their
+  ratio per generator (55% for the TDA census); the rule runs on kept per review-minute corrected by the last
+  measured promote share.
 - Spend ≈ $10 on an extra independent generator purely to give Chao2 a third occasion?
+
+  **Moot.**  Occasions are *mechanisms*, not generators: the lexicon walks (censuses, Allport, Roget, WordNet) are
+  one occasion, then behaviour items (IPIP), the base model, masked-LM frames, and the corpus.  The alignment
+  sweep is its own population (Roger's note in § 1) with two occasions inside it, the specs and the papers.
 - Strict or loose threshold as the headline recall and N̂?
+
+  **Roger:** "we're using 3 in most areas, 4 in alignment-related.  So 3 is primary, report 4 as well."  In
+  practice the match uses M3's own cut-off rule (3, or 4 where the alignment score raises it), so recall is
+  measured by the instrument that decides coverage; the strict (4) column stands beside it.
 
 ## Status (2026-10-08)
 
