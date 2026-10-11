@@ -28,6 +28,9 @@ def test_sources_manifest():
     assert {"wikibio", "onet"} <= set(entries)
     assert all(e["licence_verified"] and e["approved_by"] for e in entries.values())
     assert entries["wikibio"]["checksum_verified"]
+    # Roger, QUESTIONS 60: O*NET's CC BY attribution becomes load-bearing the moment an occupation title
+    # reaches a tracked artefact, and the manifest says so rather than leaving it implicit.
+    assert "LOAD-BEARING" in entries["onet"]["note"] and "candidate label" in entries["onet"]["note"]
     if "model" in entries:
         assert entries["model"]["checksum_verified"] and "delete" in entries["model"]["todo"]
 
@@ -38,6 +41,14 @@ def test_stats_fields(path):
     st = d.get("result", d)
     missing = [k for k in SECTION6 if k not in st]
     assert not missing, missing
+    # QUESTIONS 54: the two bio-echo rules apart, and the words the name rule cost the run
+    for k in ("name_echo", "bio_span_echo", "name_echo_words", "name_echo_not_elsewhere"):
+        assert k in st["junk"], k
+    # QUESTIONS 61: the per-family numbers the readout compares the wiki_bio family on
+    for v in st["per_family"].values():
+        assert "n_eligible" in v and "malformed_rate" in v, v
+    # QUESTIONS 56: the gloss sense is settled in the round, before anything is submitted
+    assert "gloss_sense" in st and st["gloss_sense"]["n_unresolved"] == 0
     if st["collapse_top50_share"] >= 0.15:
         warnings.warn(f"{path.name}: collapse index {st['collapse_top50_share']:.1%} >= 15% (report-and-decide)")
 

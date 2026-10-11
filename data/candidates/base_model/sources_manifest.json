@@ -41,7 +41,7 @@
     "attribution": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
     "citation": "O*NET 31.0 Database, U.S. Department of Labor, Employment and Training Administration",
     "version": "31.0",
-    "note": "licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain)",
+    "note": "licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain). Titles are used only as prompt words and no occupation title reaches a tracked artefact, so this attribution is a courtesy, not something we rely on. It becomes LOAD-BEARING the moment a title does reach a tracked artefact - an occupation word surviving as a candidate label in candidate_table*.jsonl, candidates.jsonl, the registry or a readout - and then the attribution above must travel with that artefact (Roger, QUESTIONS 60, 2026-10-11)",
     "approved_by": "Roger, 2026-10-10 (coding_plan_03_base_model.md section 5a: first three downloads approved)",
     "downloaded_at": "2026-10-10T18:34:46+00:00",
     "tool": "base_model_generator.py fetch",

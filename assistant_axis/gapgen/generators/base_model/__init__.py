@@ -13,6 +13,7 @@ rate so ``usage.json`` records the volume.
 Modules: :mod:`.sources` (what is fetched), :mod:`.download` (fetch, verify, manifest), :mod:`.seeds` (the
 seed bundle), :mod:`.prompts` (six families, ``PROMPTS_VERSION``), :mod:`.sampler` and :mod:`.bench` (the
 local model), :mod:`.parse` (items out of a continuation), :mod:`.table` (one row per stem),
+:mod:`.sense` (the gloss sense, settled before M1: the generator's only paid call, QUESTIONS 56),
 :mod:`.diversity` (the frozen harness), :mod:`.submit` (estimate, guard, submission),
 :mod:`.evaluate` and :mod:`.report` (the pilot readout).
 

@@ -14,7 +14,8 @@ Checked against the providers on 2026-10-10:
   Licence CC BY-SA 3.0 (the dataset card's ``license`` field).
 * O*NET 31.0 (``onetcenter.org/database.html``): the occupation titles file is ``occupation_data.csv``,
   268,030 bytes.  The licence is **CC BY 4.0** with a required attribution (``onetcenter.org/license_db.html``),
-  not public domain as plan 03 had it.
+  not public domain as plan 03 had it.  :data:`ONET_NOTE` says in the manifest when that attribution stops
+  being a courtesy and becomes load-bearing (Roger, QUESTIONS 60).
 * ``Qwen/Qwen3-8B-Base``: Apache-2.0 (model card), not gated, revision ``49e3418f``, 16,393,044,987 bytes in
   all (five safetensors shards).  Fetched by ``setup_external.py --hf-model`` with the allow patterns below.
 """
@@ -57,6 +58,20 @@ class ModelSource:
 
 WIKIBIO_REVISION = "3a00c01f03c79c4799a4b884bd9508a1eea47b6a"
 
+#: Roger, QUESTIONS 60 (2026-10-11): CC BY asks for attribution, not share-alike, so nothing constrains our
+#: outputs, and while no occupation title reaches a tracked artefact the attribution is a courtesy we pay
+#: rather than an obligation we rely on.  Said here rather than left implicit: the attribution becomes
+#: **load-bearing** the moment a title does reach a tracked artefact - an occupation word surviving as a
+#: candidate label, which is a thing the generator can produce (the ``occupation`` family's prompts name a
+#: title, and the model can echo it as a word for what someone is like).
+ONET_NOTE = (
+    "licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain). "
+    "Titles are used only as prompt words and no occupation title reaches a tracked artefact, so this "
+    "attribution is a courtesy, not something we rely on. It becomes LOAD-BEARING the moment a title does "
+    "reach a tracked artefact - an occupation word surviving as a candidate label in candidate_table*.jsonl, "
+    "candidates.jsonl, the registry or a readout - and then the attribution above must travel with that "
+    "artefact (Roger, QUESTIONS 60, 2026-10-11)")
+
 SOURCES: dict[str, Source] = {s.key: s for s in (
     Source(
         key="wikibio", dest="wikibio/data/wikipedia-biography-dataset.zip", size_bytes=333_998_704,
@@ -76,7 +91,7 @@ SOURCES: dict[str, Source] = {s.key: s for s in (
                      "Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. "
                      "O*NET(R) is a trademark of USDOL/ETA."),
         url="https://www.onetcenter.org/dl_files/database/db_31_0_csv/occupation_data.csv", version="31.0",
-        note="licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain)"),
+        note=ONET_NOTE),
 )}
 
 #: Fetched by ``fetch`` with no ``--only``.

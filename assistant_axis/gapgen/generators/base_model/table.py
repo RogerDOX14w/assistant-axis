@@ -7,15 +7,28 @@ items by stem (``normalize_candidate(surface).stem``, i.e. ``normalize_to_file_n
 * ``count``: the number of samples that emitted the stem (a repeat inside one continuation counts once, so a
   degenerate loop cannot inflate it); ``families``: the same per prompt family;
 * echoes are dropped and counted: a sample's own seed words (``n_seed_echo``), and, in the person family, the
-  person's name and any several-word span found in the biography (``n_bio_echo``), so the tracked table never
-  carries biography text;
+  person's name (``n_name_echo``) and any several-word span found in the biography (``n_bio_span_echo``), so the
+  tracked table never carries biography text.  The two bio rules are counted apart (Roger, QUESTIONS 54: the
+  name rule's cost is invisible while it shares a counter) and ``n_bio_echo`` stays as their sum.  A word dropped
+  as a name echo is **logged** in ``name_echo_words`` — our own one-word candidate label, so nothing changes
+  legally — and ``name_echo_not_elsewhere`` lists the ones that never arrived from another seed, which is the
+  rule's real cost: an empty list closes QUESTIONS 54 with evidence, a non-empty one writes the whitelist.  A
+  dropped **span** is counted only, never logged: it is verbatim CC BY-SA biography prose;
 * ``sample_gloss``: the first gloss the model wrote for the word (glossary and AI families only), kept for review
   and never sent to M1; ``gloss_hint``: the OEWN person-descriptive sense (the censuses' :mod:`glosshint`), else
   None; ``partner_seed``: the seed adjective of the contrast samples that emitted the word (the most frequent);
 * eligibility: ``cleaned`` and not ``unknown_word`` (a content word neither ``wordfreq`` nor OEWN knows) and not
   ``freq_hard_reject`` (``gapgen.freq.zipf_info``, the platform's floor, never a local literal);
 * ``rank``: count descending, ties by first appearance; ``corpus_stem_match`` / ``queue_stem_match`` /
-  ``in_tda`` are for evaluation only (no eligibility field reads them).
+  ``in_tda`` are for evaluation only (no eligibility field reads them);
+* per prompt family, the sample-level counts (raw items, malformed, the three echo kinds) ride in
+  ``by_family``, so the readout can compare the lower-cased ``person`` family against the clean-prompt
+  families in the same run (Roger, QUESTIONS 61).
+
+The sense of a row's ``gloss_hint`` is settled **after** the table and **before** submission, by
+:mod:`.sense` (Roger, QUESTIONS 56): where a row has both an OEWN sense and the model's own
+``sample_gloss``, that module flags their divergence by cosine and resolves a divergent row with one cheap
+call, writing the decision onto the row as ``gloss_sense``.  Nothing here calls a model.
 
 Deterministic: the same samples give a byte-identical table.
 """
@@ -87,6 +100,27 @@ def _bio_words(name: str) -> set[str]:
     return {w.lower() for w in re.findall(r"[^\W\d_]+", name or "")}
 
 
+def name_echo_not_elsewhere(name_echo: Mapping[str, int], stems_in_table: Iterable[str]) -> list[str]:
+    """The words dropped as a name echo that **never arrived from another seed** (Roger, QUESTIONS 54).
+
+    A word the name rule drops in one sample is usually emitted again elsewhere, where no biography names it;
+    only a word that is in no table row is really lost.  An empty list closes QUESTIONS 54 with evidence (the
+    rule costs nothing); a non-empty one is the whitelist, written by the run rather than guessed in advance
+    from the name-token intersection — Roger's point being that a pre-built whitelist would re-admit exactly
+    the **name-primed** emissions ("frank" written because the biography said Frank), which are evidence of
+    copying the seed rather than of the model's own vocabulary."""
+    have = set(stems_in_table)
+    out = []
+    for w in name_echo:
+        try:
+            stem = normalize_candidate(w).stem
+        except ValueError:                      # cannot be a candidate at all, so nothing was lost
+            continue
+        if stem not in have:
+            out.append(w)
+    return sorted(out)
+
+
 def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: Iterable[str] = (),
                 queue_stems: Iterable[str] = (), tda_stems: Iterable[str] = (),
                 bio_lookup: Optional[Callable[[str], Optional[tuple[str, str]]]] = None,
@@ -97,11 +131,17 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
     sample order (the rarefaction curve's input)."""
     corpus, queue, tda = set(corpus_stems), set(queue_stems), set(tda_stems)
     counts: Counter = Counter()
+    #: Per family, the same sample-level counters (QUESTIONS 61: the per-family readout).
+    fam_counts: dict[str, Counter] = defaultdict(Counter)
+    #: Words dropped as a name echo, with the number of samples that lost them (QUESTIONS 54).
+    name_echo: Counter = Counter()
     accs: dict[str, _Acc] = {}
     ordered = sorted(samples, key=lambda s: (int(s.get("index", 0)), str(s["sample_id"])))
     for s in ordered:
         counts["n_samples"] += 1
         fam = s["family"]
+        fc = fam_counts[fam]
+        fc["n_samples"] += 1
         seeds = {w.lower() for w in s.get("seed_words") or []}
         bio = None
         if fam == "person" and bio_lookup is not None:
@@ -112,17 +152,26 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
         seen_here: set[str] = set()
         for it in extract_items(s.get("text") or "", fam, truncated=s.get("stop_reason") == "max_tokens"):
             counts["n_raw_items"] += 1
+            fc["n_raw_items"] += 1
             surface, form, norm_from = normalize_form(it.surface, lexicon=lookups.lexicon)
             if surface in seeds or it.surface in seeds:
                 counts["n_seed_echo"] += 1
+                fc["n_seed_echo"] += 1
                 continue
-            if bio is not None and (surface in name_words or (" " in surface and surface in bio_text)):
-                counts["n_bio_echo"] += 1
+            if bio is not None and surface in name_words:      # a single word matching a word of the name
+                counts["n_name_echo"] += 1
+                fc["n_name_echo"] += 1
+                name_echo[surface] += 1
+                continue
+            if bio is not None and " " in surface and surface in bio_text:   # a span copied from the biography
+                counts["n_bio_span_echo"] += 1
+                fc["n_bio_span_echo"] += 1
                 continue
             try:
                 stem = normalize_candidate(surface).stem
             except ValueError:
                 counts["n_malformed"] += 1
+                fc["n_malformed"] += 1
                 continue
             if stem in seen_here:
                 counts["n_repeat_in_sample"] += 1
@@ -147,10 +196,17 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
     for i, r in enumerate(rows, 1):
         r["rank"] = i
     by_form = {f: sum(1 for r in rows if r["form"] == f) for f in FORMS}
+    in_table = set(accs)
     out = {"n_samples": counts["n_samples"], "n_raw_items": counts["n_raw_items"], "n_unique": len(rows),
            "n_eligible": sum(1 for r in rows if r["eligible"]), "n_seed_echo": counts["n_seed_echo"],
-           "n_bio_echo": counts["n_bio_echo"], "n_malformed": counts["n_malformed"],
+           "n_name_echo": counts["n_name_echo"], "n_bio_span_echo": counts["n_bio_span_echo"],
+           # kept as the sum of the two bio rules, so earlier records stay comparable
+           "n_bio_echo": counts["n_name_echo"] + counts["n_bio_span_echo"],
+           "name_echo_words": {w: c for w, c in sorted(name_echo.items(), key=lambda kv: (-kv[1], kv[0]))},
+           "name_echo_not_elsewhere": name_echo_not_elsewhere(name_echo, in_table),
+           "n_malformed": counts["n_malformed"],
            "n_repeat_in_sample": counts["n_repeat_in_sample"], "by_form": by_form,
+           "by_family": {f: dict(sorted(c.items())) for f, c in sorted(fam_counts.items())},
            "by_form_eligible": {f: sum(1 for r in rows if r["form"] == f and r["eligible"]) for f in FORMS},
            "ineligible": dict(sorted(Counter(r["ineligible_reason"] for r in rows if not r["eligible"]).items())),
            "normalized_mechanically": sum(1 for r in rows if r["normalized_from"])}

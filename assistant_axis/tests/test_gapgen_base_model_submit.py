@@ -8,6 +8,7 @@ import pytest
 
 from assistant_axis.gapgen import Candidate
 from assistant_axis.gapgen.cost import CostRefused
+from assistant_axis.gapgen.generators.base_model import sense as SE
 from assistant_axis.gapgen.generators.base_model import submit as SB
 from assistant_axis.gapgen.registry import Registry
 from assistant_axis.judge_pricing import MultiModelUsage
@@ -17,9 +18,28 @@ SAMPLING = {"round": 1, "key": {"seed": 0, "prompts_version": 1, "temperatures":
             "bundle": {"census_table_sha256": "ab", "n_bios": 2}, "model": "Qwen/Qwen3-8B-Base"}
 
 
+def settled(rows, *, chosen="dictionary"):
+    """The table after the sense step (QUESTIONS 56), without embedding or calling anything: every two-sided
+    row carries a decision, so `submit` lets it through."""
+    for r in rows:
+        if SE.two_sided(r):
+            r[SE.BLOCK] = {"oewn": r["gloss_hint"], "sample": r["sample_gloss"], "cosine": 0.9,
+                           "divergent": chosen == "sample", "floor": SE.DIVERGENCE_COSINE, "embedder": "hash",
+                           "chosen": chosen, "chosen_gloss": r["sample_gloss"] if chosen == "sample"
+                           else r["gloss_hint"], "legible": True, "reason": "test", "model": SE.MODEL,
+                           "prompt_version": SE.GLOSS_SENSE_VERSION, "prompt_sha256": SE.wording_sha256(),
+                           "at": "2026-10-11T00:00:00+00:00"}
+    return rows
+
+
+def table_rows():
+    rows, _ = build()
+    return settled(rows)
+
+
 @pytest.fixture
 def env(tmp_path):
-    rows, _ = build()
+    rows = table_rows()
     cdir = tmp_path / "candidates"
     usage = MultiModelUsage()
     usage.charge("Qwen/Qwen3-8B-Base", 1200, 300)
@@ -41,7 +61,7 @@ def lines(p: Path):
 
 
 def test_selection_is_eligible_rows_by_count():
-    rows, _ = build()
+    rows = table_rows()
     sel = SB.select_rows(rows)
     assert all(r["eligible"] for r in sel) and [r["rank"] for r in sel] == sorted(r["rank"] for r in sel)
     assert {r["stem"] for r in SB.select_rows(rows, min_count=2)} == {"generous", "warm", "unflappable"}
@@ -49,7 +69,7 @@ def test_selection_is_eligible_rows_by_count():
 
 
 def test_candidates_fields():
-    rows, _ = build()
+    rows = table_rows()
     cands = SB.to_candidates(SB.select_rows(rows), "pilot")
     g = next(c for c in cands if c.surface == "generous")
     assert (g.generator, g.run_id, g.score, g.sense_id, g.rank) == ("base_model", "pilot", 3.0, 1, 1)
@@ -59,6 +79,40 @@ def test_candidates_fields():
     u = next(c for c in cands if c.surface == "unflappable")
     assert u.gloss_hint.startswith("not easily perturbed")            # the OEWN hint, not the sampled gloss
     assert isinstance(g, Candidate)
+
+
+class TestSenseGate:
+    """Roger, QUESTIONS 56: M1 and M3 must see one settled sense, so submission refuses while a selected row
+    still carries two."""
+
+    def test_an_unsettled_row_refuses_the_submission(self, tmp_path):
+        rows, _ = build()                                  # straight from `parse`: no sense step yet
+        with pytest.raises(SB.SenseUnresolved) as exc:
+            SB.run_submit("g1", table=rows, round_n=1, registry_path=tmp_path / "r.jsonl",
+                          candidates_dir=tmp_path, dry_run=True, echo=lambda *a: None)
+        msg = str(exc.value)
+        assert "sense --round 1" in msg and "unflappable" in msg and "QUESTIONS 56" in msg
+        assert not (tmp_path / "runs").exists()
+
+    def test_a_one_sided_row_never_blocks(self, tmp_path):
+        rows = [r for r in build()[0] if not SE.two_sided(r)]
+        assert rows and SB.run_submit("g2", table=rows, round_n=1, registry_path=tmp_path / "r.jsonl",
+                                      candidates_dir=tmp_path, dry_run=True, echo=lambda *a: None).n_selected
+
+    def test_the_chosen_sense_is_what_the_candidate_carries(self):
+        rows = settled([r for r in build()[0]], chosen="sample")
+        u = next(c for c in SB.to_candidates(SB.select_rows(rows), "pilot") if c.surface == "unflappable")
+        assert u.gloss_hint == "staying calm when everything goes wrong"      # the sample's reading, chosen
+        st = SB.strata(SB.select_rows(rows))
+        assert st["sense_divergent"] >= 1 and st["sense_from_sample"] >= 1
+
+
+def test_the_run_records_the_sense_decisions(env):
+    submit(env)
+    d = env[1] / "runs" / "base_model" / "pilot"
+    gs = json.loads((d / "run.json").read_text())["args"]["gloss_sense"]
+    assert gs["n_two_sided"] >= 1 and gs["n_unresolved"] == 0
+    assert gs["prompt_sha256"] == SE.wording_sha256()
 
 
 def test_submit_writes_run_files_and_registry(env):
@@ -114,9 +168,31 @@ class TestCostGuard:
 
     def test_estimate(self):
         e = SB.estimate_downstream_usd(1000)
-        assert e.m1_usd == pytest.approx(7.2) and e.m3_usd == pytest.approx(1000 * 0.5 * 0.011)
+        assert e.m1_usd == pytest.approx(7.2) and e.m3_usd == pytest.approx(1000 * 0.80 * 0.011)
         assert SB.estimate_downstream_usd(1000, transport="batches").total_usd == pytest.approx(e.total_usd * 0.5)
-        assert SB.M1_PASS_RATE_ASSUMED == 0.5
+
+    def test_the_pass_rate_is_the_measured_0_80_with_0_95_as_a_high_case(self):
+        # Roger, QUESTIONS 55: 0.80 from the two least-curated measured waves (roget pilot 81.4%, alignment
+        # sweep 78.6%); the old 0.5 placeholder was below everything measured and understated the estimate.
+        assert (SB.M1_PASS_RATE_ASSUMED, SB.M1_PASS_RATE_HIGH) == (0.80, 0.95)
+        e = SB.estimate_downstream_usd(1000)
+        assert e.pass_rate == 0.80 and e.pass_rate_high == 0.95
+        assert e.m3_usd_high == pytest.approx(1000 * 0.95 * 0.011)
+        assert e.total_usd_high == pytest.approx(e.m1_usd + e.m3_usd_high)
+        assert e.total_usd_high > e.total_usd
+        assert e.assumptions["m1_pass_rate"] == 0.80 and e.assumptions["m1_pass_rate_high"] == 0.95
+        assert "81.4%" in e.assumptions["source"] and "78.6%" in e.assumptions["source"]
+        # both lines are printed, and the gate reads the central one
+        text = e.format()
+        assert "high case at 95%" in text and "at 80% passed" in text
+        assert f"${e.total_usd:.2f}" in text and f"${e.total_usd_high:.2f}" in text
+
+    def test_the_high_case_is_printed_but_never_gated_on(self, tmp_path):
+        # 1,500 rows live: $10.80 M1 + $13.20 M3 = $24.00 at 0.80, $26.48 at 0.95.  A budget above the
+        # central estimate and below the high case is accepted: the gate reads the 80% line.
+        e = SB.estimate_downstream_usd(1500)
+        assert e.total_usd < 25 < e.total_usd_high
+        self.run(tmp_path, 1_500, budget_usd=25, confirm_expensive=True, confirmed_by="Roger, 2026-10-12")
 
     def test_over_the_line_refused_without_the_recorded_go(self, tmp_path):
         with pytest.raises(CostRefused):
@@ -126,12 +202,16 @@ class TestCostGuard:
         self.run(tmp_path, 10_000, budget_usd=200, confirm_expensive=True, confirmed_by="Roger, 2026-10-12")
 
     def test_over_the_default_budget(self, tmp_path):
-        # 2,000 rows: about $25 live, over the $15 default and the $20 line
+        # 2,000 rows: $32.00 live at the measured 0.80 pass rate ($14.40 M1 + $17.60 M3), over the $15 default
+        # and the $20 line.  (At the retired 0.5 placeholder the same rows printed $25.00, which is the
+        # understatement QUESTIONS 55 removed.)
         with pytest.raises(CostRefused):
             self.run(tmp_path, 2_000)
-        self.run(tmp_path, 2_000, budget_usd=30, confirm_expensive=True, confirmed_by="Roger, 2026-10-12")
-        # batched, the same rows fit the default budget
-        self.run(tmp_path, 2_000, transport="batches")
+        self.run(tmp_path, 2_000, budget_usd=35, confirm_expensive=True, confirmed_by="Roger, 2026-10-12")
+        # batched, the same rows are $16.00 and fit a cap live would not
+        self.run(tmp_path, 2_000, transport="batches", budget_usd=20)
+        with pytest.raises(CostRefused):
+            self.run(tmp_path, 2_000, transport="batches")        # still over the $15 default
 
     def test_dry_run_writes_nothing(self, tmp_path):
         reg = tmp_path / "c" / "registry.jsonl"

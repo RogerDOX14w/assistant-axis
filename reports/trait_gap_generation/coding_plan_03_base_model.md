@@ -17,13 +17,13 @@ Roger's review comments go into this file.
 | The AI-assistant prompt family is **in**, as one family (`ai_assistant`) beside the others, with its yield, M1 verdict fractions and alignment scores reported **separately** in the pilot so Roger can drop it. | Roger § 9.2: "Let's try it, and see" | plan 03 § 9.2 |
 | Nouns of disposition: v1 applies only the **mechanical** rule (`-ness`/`-ity` → the adjective, only when OEWN has that adjective); every candidate is form-tagged (`adjective` / `noun` / `phrase`) and the pilot **measures the noun share** of uniques and of M1 survivors.  An LLM normalization step (Haiku 5.5 or a local model) is specced as a follow-up task gated on that number, **not built in v1**. | Roger § 9.4: "TBD, do it if we find this is a significant issue and the increased yield would be worth the coding" | plan 03 § 9.4 |
 | The pilot includes **one bounded prompt/seed iteration round**: after the first 2k-sample readout, one revision of the prompt wordings, seed mixes and constraints (data edits in `prompts.py` only, `PROMPTS_VERSION` bumped), a 2k resample, and the free diversity measures recomputed.  Both rounds go to Roger; further rounds are his call.  No paid calls are spent on the discarded round. | Roger's § 4 edit: the known biases "are fixable by varying the prompts and seeds" | plan 03 § 4 |
-| **No generator-side paid calls.**  Sampling is local and $0; M1 and M3 are `traithood_filter.py --run base_model/<R>` and `novelty_score.py score --run base_model/<R>`.  The local model's token counts are still charged to `RunContext.usage` at a zero rate so `usage.json` records the volume. | frozen interface; the token-logging hard rule | platform § "Interface as built"; [provenance rule](../../.claude/rules/provenance.md) |
+| **Sampling is local and $0**; M1 and M3 are `traithood_filter.py --run base_model/<R>` and `novelty_score.py score --run base_model/<R>`.  The local model's token counts are still charged to `RunContext.usage` at a zero rate so `usage.json` records the volume.  The generator's **one** paid call is the gloss-sense step ([QUESTIONS 56](./QUESTIONS.md), Roger 2026-10-11): hundredths of a cent for each row whose two glosses diverge, recorded in its own cumulative `gloss_sense_usage.json` beside the round's samples. | frozen interface; the token-logging hard rule | platform § "Interface as built"; [provenance rule](../../.claude/rules/provenance.md) |
 | Registry API only: `Candidate`, `start_run`, `submit_candidates`; every run writes a tracked `candidates.jsonl` before submitting (the log is per checkout). | as built | platform § "Interface as built" |
 | Frequency flags come from [`gapgen.freq.zipf_info`](../../assistant_axis/gapgen/freq.py) (`hard_reject` below [Zipf](./glossary.md#zipf) 1.5, `probe_band` 1.5–2.5), **never a local literal**; no SUBTLEX download (plan 03 § 3.6's threshold is superseded by the platform's). | stale local defaults caused the B=10 incident; [decisions_m1.md](./decisions_m1.md) decision 1 | plan 14; QUESTIONS 42 |
 | Corpus and queue membership are computed into the table **for evaluation only**; eligibility never reads them, and no prompt ever contains a corpus label or description (the generator "cannot see or imitate our list"). | independence is the workstream's premise | plan 03 § 1; censuses precedent |
 | **Words that are already corpus trait names stay in the run** — no selector drops them. | Roger, 2026-10-10: "let the pipeline do its job" | [coding_plan_01_censuses.md](./coding_plan_01_censuses.md), last section |
 | A generation wave runs **M1 + M3 only**; grouping/review (R1) runs once at the end over every batch, not here. | Roger, 2026-10-10 | [coding_plan_review.md](./coding_plan_review.md) § 10 |
-| `gloss_hint` is the OEWN person-descriptive sense where OEWN knows the word (reusing the censuses' [`glosshint`](../../assistant_axis/gapgen/generators/censuses/glosshint.py) sense-picking), else `None`.  The base model's own generated gloss (the "{word}: gloss" list format) is kept in the tracked table as `sample_gloss` for review but is **not** sent to M1: an unvetted hallucinated gloss shown as "intended sense" could mislead the filter. | M1 glosses the leading sense itself; hints should pin a dictionary sense, not a model's invention | my choice; report if Roger prefers the sampled gloss |
+| `gloss_hint` is the OEWN person-descriptive sense where OEWN knows the word (reusing the censuses' [`glosshint`](../../assistant_axis/gapgen/generators/censuses/glosshint.py) sense-picking), else `None`.  The base model's own gloss (the "{word}: gloss" list format) is kept in the tracked table as `sample_gloss`.  **Where a row has both, the sense is resolved before M1** ([sense.py](../../assistant_axis/gapgen/generators/base_model/sense.py)): divergence is flagged by the cosine between the two gloss texts (free, a local embedder), each divergent row is settled by one Haiku 5.5 call asked which reading a reader of the sample would take, and `submit` refuses while any selected row is unsettled.  Criterion: **fidelity first, subject to legibility, never novelty**. | a gloss changed after M1 or M3 invalidates their verdicts; choosing the gloss that scores better against the corpus would be selecting our own answer | Roger, [QUESTIONS 56](./QUESTIONS.md), 2026-10-11 (provisional, with a TODO to revisit keeping both senses through `Candidate.sense_id`) |
 | Contrast-family candidates carry `partner_hint` = the seed adjective they were generated against; M3's relation call and the pairing track do the rest. | the interface has the field; M3 decision 9 routes "opposite" | platform interface resolution 02-1 |
 | Sampling defaults: T = 1.0, top-p 0.95, min-p 0.05, no repetition penalty, 80 new tokens, stop at a blank line; a T ∈ {0.8, 1.0, 1.2} shakedown (500 samples each, free) picks the production T before the pilot. | plan 03 § 3.3 | plan 03 |
 | Code in a subpackage `assistant_axis/gapgen/generators/base_model/`; generator worktrees run in parallel. | layout precedent | coding plan 01 § 1 |
@@ -125,12 +125,20 @@ assistant_axis/gapgen/generators/base_model/
                  normalize_form(surface, *, lexicon) -> (surface, form, normalized_from)
                  (-ness/-ity -> adjective only when OEWN has it; tag adjective|noun|phrase)
   table.py       build_table(samples, *, freq=zipf_info, senses, corpus_stems, queue_stems) -> rows;
-                 write_table / load_table  (dedupe by stem; counts per family; eligibility; rank)
+                 write_table / load_table  (dedupe by stem; counts per family; eligibility; rank;
+                 n_name_echo / n_bio_span_echo apart, the dropped name word logged, and
+                 name_echo_not_elsewhere = what the name rule really cost: QUESTIONS 54)
+  sense.py       GLOSS_SENSE_VERSION; cosine_rows(rows, embed) -> {stem: cosine};
+                 screen(rows, cosines, floor=DIVERGENCE_COSINE) (free; agreement needs no call);
+                 request / parse_answer / decide (fidelity subject to legibility);
+                 resolve_rows(rows, client|send, usage) -> one Haiku 5.5 call a divergent row;
+                 resolved_hint(row) (what the Candidate carries); unresolved(rows) (what submit refuses on)
   diversity.py   rarefaction(stems_in_order, step=1000); chao1(counts); collapse_index(counts, top=50);
                  string_recovery(stems, corpus_stems, renamed) ; per_family(rows)   (§ Frozen interface)
-  submit.py      M1_USD_PER_WORD = 0.0072; M3_USD_PER_PASSED_WORD = 0.011; M1_PASS_RATE_ASSUMED = 0.5
-                 (base-model output is not near-corpus; the censuses' measured 0.88 would overstate M3;
-                 replaced by the pilot's measured rate); estimate_downstream_usd(n, transport);
+  submit.py      M1_USD_PER_WORD = 0.0072; M3_USD_PER_PASSED_WORD = 0.011; M1_PASS_RATE_ASSUMED = 0.80
+                 (the two least-curated measured waves: roget pilot 81.4%, alignment sweep 78.6%), with
+                 M1_PASS_RATE_HIGH = 0.95 printed beside it as a high case and never gated on
+                 (QUESTIONS 55); estimate_downstream_usd(n, transport);
                  to_candidates(rows, run_id); run_submit(run_id, *, table, budget_usd,
                  confirm_expensive, confirmed_by, transport, dry_run); followup_commands
   evaluate.py / report.py   pilot readout: yields, collapse, noun share, family split, recovery,
@@ -139,9 +147,11 @@ data_analysis/gap_generation/base_model_generator.py   fetch | bench | sample | 
 data/external/{wikibio/, onet/}                        GITIGNORED (+ DOWNLOAD_MANIFEST.json each)
 data/external/hf/models--Qwen--Qwen3-8B-Base/          GITIGNORED (via setup_external.py)
 data/candidates/base_model/{candidate_table.jsonl, stats_round<N>.json}   tracked (table expected ~1-2 MB)
-data/candidates/cache/base_model/<run>/samples.jsonl   GITIGNORED (raw generations; may echo seed text)
+data/candidates/cache/base_model/round<N>/             GITIGNORED: samples.jsonl (raw generations; may echo
+                 seed text), sampling.json, usage.json, sample_stems.jsonl, table_counts.json,
+                 gloss_sense_responses.jsonl, gloss_sense_usage.json
 data/candidates/runs/base_model/<run_id>/{candidates.jsonl, keys.txt, submit_report.json, run.json, usage.json}
-assistant_axis/tests/test_gapgen_base_model_{seeds,prompts,sampler,parse,table,diversity,submit}.py
+assistant_axis/tests/test_gapgen_base_model_{seeds,prompts,sampler,parse,table,sense,diversity,submit}.py
 assistant_axis/tests/fixtures/base_model/{wikibio_small.parquet, onet_small.txt, samples_small.jsonl, census_table_small.jsonl}
 data_analysis/tests/test_gap_generation_base_model_cli.py
 ```
@@ -185,6 +195,13 @@ OEWN, already in `data/external/wn/`.
  "eligible": true, "ineligible_reason": null, "rank": 122,
  "corpus_stem_match": false, "queue_stem_match": false}
 ```
+
+A row whose `gloss_hint` and `sample_gloss` both exist also carries, after the `sense` step, a
+`gloss_sense` block: `{"oewn", "sample", "cosine", "divergent", "floor", "embedder", "chosen":
+"dictionary" | "sample" | null, "chosen_gloss", "legible", "reason", "model", "prompt_version",
+"prompt_sha256", "at"}` (plus `note` where legibility overrode fidelity, `error` where the call
+failed).  `gloss_hint` itself is never rewritten — it is always the dictionary's — and the submitted
+candidate carries `sense.resolved_hint(row)`, which is the chosen one.
 
 Rules: `stem = normalize_to_file_name(surface)`; `eligible = cleaned ∧ ¬unknown_word ∧
 ¬freq_hard_reject` where `unknown_word` means neither `wordfreq` nor OEWN knows every token (the
@@ -239,13 +256,27 @@ it never feeds eligibility.
   `samples.jsonl`, resumes from a checkpoint, charges tokens to a `MultiModelUsage` at the zero
   rate and writes `usage.json` beside the samples.  $0.
 - `parse [--round N]`: builds `candidate_table.jsonl` from the round's samples (snapshot the old
-  table to `.bak.<UTC>` when content changes).  Deterministic; rerun is byte-identical.  $0.
+  table to `.bak.<UTC>` when content changes), and saves its own counts (the echo split and the
+  per-family figures, which are counted over the samples and cannot be recovered from the table)
+  as `table_counts.json` in the round directory, which `stats` reads.  A reparse carries each
+  gloss-sense decision forward onto the row it belongs to while its two glosses are unchanged, so it
+  never throws away what the `sense` step paid for.  Deterministic; rerun is byte-identical.  $0.
+- `sense [--round N] [--arm bge|gemma|openai|hash] [--divergence-cosine 0.6] [--budget-usd 2]`:
+  settles the gloss sense of the rows that carry two (§ 1, QUESTIONS 56).  Free cosine screen with
+  a local embedder, then one Haiku 5.5 call for each divergent row, the decision written onto the
+  row with both glosses, the cosine and the reason; `gloss_sense_responses.jsonl` and a cumulative
+  `gloss_sense_usage.json` beside the round's samples.  Resumable and idempotent: a row that
+  already carries a current decision is neither re-embedded nor re-asked.  Hundredths of a cent a
+  divergent row.
 - `stats [--round N]`: writes `stats_round<N>.json` and prints the readout table (rarefaction,
-  Chao1, collapse, noun share, per-family, recovery-by-string).  $0.
+  Chao1, collapse, noun share, per-family **yield and malformed rate**, recovery-by-string, the
+  echo split with the words the name rule cost the run, the gloss-sense state).  $0.
 - `submit --run-id R [--min-count 1] [--budget-usd 15] [--confirm-expensive --confirmed-by WHO]
-  [--transport live|batches] [--dry-run]`: selects eligible table rows, prints counts per family
-  and form, prints the **downstream estimate** (`n × $0.0072` M1 + `n × pass × $0.011` M3, batches
-  ×0.5, pass rate 0.5 until the pilot measures it), gates with `confirm_or_abort` (over budget
+  [--transport live|batches] [--dry-run]`: selects eligible table rows, **refuses while any of them
+  still has two candidate senses** (run `sense` first), prints counts per family and form, prints
+  the **downstream estimate** (`n × $0.0072` M1 + `n × pass × $0.011` M3, batches ×0.5, pass rate
+  0.80 until the pilot measures it, with the 0.95 high case printed beside it), gates with
+  `confirm_or_abort` on the 0.80 line (over budget
   needs `--confirm-expensive`; over the $20 line needs `--confirmed-by` and Roger's explicit go in
   chat), then `start_run` → tracked `candidates.jsonl` → `submit_candidates` → `keys.txt`,
   `submit_report.json`, `run.json` (args: round, prompts_version, temperature, model, table sha256,
@@ -283,7 +314,15 @@ MPS smoke test sits behind `GAPGEN_RUN_LOCAL=1` and skips when the model directo
   (hard-reject row ineligible with `ineligible_reason: "below_hard_reject"`; probe-band row
   eligible); `unknown_word` rows ineligible; rank by count then first appearance; mutation test:
   flipping every `corpus_stem_match` and `queue_stem_match` changes no `eligible`; rerun
-  byte-identical; `sample_gloss` present, `gloss_hint` comes only from the fake OEWN.
+  byte-identical; `sample_gloss` present, `gloss_hint` comes only from the fake OEWN; the echo
+  screen's two rules counted apart, the dropped name word logged and the span never logged, a word
+  that arrived from another seed not reported as lost and one that did not reported (QUESTIONS 54);
+  the per-family counts of the readout (QUESTIONS 61).
+- `test_gapgen_base_model_sense.py` (QUESTIONS 56): the wording pinned to its version; the free
+  cosine screen (agreement settles a row with no call, divergence waits for one, the floor re-derives
+  from the recorded cosines, the screen is idempotent); the rendered call states the criterion and
+  never mentions novelty; fidelity overridden by legibility; a failed call leaves the row unresolved
+  rather than guessing; the real client path charges every response; only divergent rows are asked.
 - `test_gapgen_base_model_diversity.py`: rarefaction on a synthetic stream; Chao1 against a
   hand-computed example; collapse index; `string_recovery` resolves a `renamed_from` stem;
   per-family splits sum to the totals.
@@ -294,20 +333,29 @@ MPS smoke test sits behind `GAPGEN_RUN_LOCAL=1` and skips when the model directo
   --confirmed-by`; 2,000 rows → over the default budget refused without the flag, accepted with
   it; dry-run leaves the registry byte-identical and writes no run dir; follow-up commands name
   the run id and batch id and the chosen transport; the package imports neither `anthropic` nor
-  `openai`.
+  `openai`; the pass rate is the measured 0.80 with 0.95 printed and never gated on (QUESTIONS 55);
+  **the sense gate**: a table straight out of `parse` refuses the submission, naming the `sense`
+  command, and the chosen sense is what the candidate carries (QUESTIONS 56).
+- `test_gapgen_freq.py`: `base_model` is absent from `FAMILIARITY_GENERATORS`, with the trap in the
+  comment beside the assertion (QUESTIONS 58).
 - `test_gap_generation_base_model_cli.py`: every subcommand's `--dry-run` exits 0 and writes
   nothing; `fetch` without `--approved-by` refuses with a message naming § 5a; `bench`/`sample`
   without the model directory refuse with a message naming `setup_external.py` (and never
-  download); `report` renders a fixture evaluation.
+  download); `sense` settles the divergent rows against a fake model and the hash embedder, records
+  its usage and is a no-op on a rerun; `submit` refuses before it has run; `report` renders a
+  fixture evaluation with the echo, sense and per-family sections.
 - Acceptance on recorded outputs (`test_gapgen_base_model_acceptance.py`, skips while absent):
-  `stats_round*.json` carries all § 6 fields; collapse index reported (target < 15%,
-  report-and-decide); generator `usage.json` has `total_cost_usd == 0.0` and nonzero tokens;
-  [parse rate](./glossary.md#parse-rate) ≥ 0.99 in every M1 summary of this workstream's batches.
+  `stats_round*.json` carries all § 6 fields, the echo split, the per-family yield and malformed
+  rate, and a gloss-sense state with nothing unresolved; collapse index reported (target < 15%,
+  report-and-decide); generator `usage.json` has `total_cost_usd == 0.0` and nonzero tokens (the
+  gloss-sense cost lives in its own side-car, not the run's);
+  [parse rate](./glossary.md#parse-rate) ≥ 0.99 in every M1 summary of this workstream's batches;
+  the O*NET manifest entry says when its attribution becomes load-bearing (QUESTIONS 60).
 
 Commands that must pass at the end of every task:
 
 ```
-uv run pytest assistant_axis/tests/test_gapgen_base_model_*.py data_analysis/tests/test_gap_generation_base_model_cli.py -q
+uv run pytest assistant_axis/tests/test_gapgen_base_model_*.py assistant_axis/tests/test_gapgen_freq.py data_analysis/tests/test_gap_generation_base_model_cli.py -q
 uv run pytest -q                                                  # whole suite, unchanged
 uv run python data_analysis/check_arrangements.py --quiet
 uv run python tools/sync_entity_lists.py --check
@@ -339,6 +387,11 @@ The § 3 boundary paragraph goes into every task prompt.
    [glossary.md](./glossary.md).  Test: diversity.
 7. `submit.py` + CLI `submit` with the guard and follow-ups; `evaluate.py` / `report.py` + CLI
    `report`.  Test: submit, CLI.
+7a. `sense.py` + CLI `sense` (QUESTIONS 56, built 2026-10-11 against fakes and never run): the free
+   cosine screen, the one cheap call a divergent row, and `submit`'s refusal while a sense is
+   unsettled.  Test: sense, submit, CLI.  **Open before it first runs**: the divergence floor is a
+   provisional 0.60 (nothing is measured), so the pilot's own cosines re-derive it, and
+   `DIVERGENCE_COSINE` is a one-line change with every cosine already on the rows.
 8. **Pilot round A** (§ 10): 2k samples, free metrics readout.
 9. **Prompt/seed iteration round** (§ 10): one bounded revision, 2k resample, free metrics; both
    readouts to Roger.
@@ -363,15 +416,19 @@ paths — then 2k fresh samples and the same free metrics.  Decision between rou
 measures alone (uniques per 1k, collapse index, noun share, junk eyeball, recovery-by-string), so
 the discarded round costs nothing downstream.  Further rounds only on Roger's word.
 
-**Pilot submit** (chosen round): expected 600-1,000 eligible uniques; downstream estimate at the
-measured rates ≈ $4-7 M1 + ≈ $3-6 M3 (at the 0.5 pass-rate placeholder) ≈ **$7-13, live** (under
-the $20 line; budget cap by the first-of-kind formula `1.5 × estimate + $2`).  Readout
+**Pilot submit** (chosen round, after `sense`): expected 600-1,000 eligible uniques; downstream
+estimate at the measured rates ≈ $4-7 M1 + ≈ $5-9 M3 (at the 0.80 pass rate; ≈ $6-10 M3 in the 0.95
+high case) ≈ **$9-16, live** (under the $20 line; budget cap by the first-of-kind formula
+`1.5 × estimate + $2`).  Readout
 (`report.md`): uniques and yield per 1k samples; collapse index (target < 15%); rarefaction and
 Chao1 (is 20k worth it, or does the curve flatten — variant B trigger); noun share of uniques and
-of M1 survivors (the § 9.4 gate number); **the `ai_assistant` family separately** (yield, M1 trait
-rate, [alignment scores](./coding_plan_platform.md), M3 new rate) so Roger can drop it;
+of M1 survivors (the § 9.4 gate number); **yield, malformed rate and M1 pass rate per prompt
+family** (QUESTIONS 61: the lower-cased `wiki_bio` family against the clean-prompt families, a
+within-run control for the casing), with **the `ai_assistant` family** also read on its own (yield,
+M1 trait rate, [alignment scores](./coding_plan_platform.md), M3 new rate) so Roger can drop it;
+what the biography-echo screen cost, the two rules apart (QUESTIONS 54);
 recovery-by-string against the 932 stems, by family; M1 verdict/tag fractions and the **measured
-pass rate** (replaces the 0.5 placeholder); M3 covered / new / grey with
+pass rate** (replaces the 0.80 placeholder); M3 covered / new / grey with
 [relation-call](./glossary.md#relation-overlap-calls) opposites and pair completions (the contrast
 family's antonym mining); cost per candidate and useful-per-dollar (rows decided new or
 pair-completion per dollar of `usage.json` total); the 100-row spot-check sample for Roger.
@@ -380,8 +437,9 @@ pair-completion per dollar of `usage.json` total); the 100-row spot-check sample
 (c) the noun-normalization follow-up (task 11) worth building or not; (d) variant B (purer base)
 needed or not; (e) accept the iteration round's prompts as production or ask for another round;
 (f) whether emission count should keep driving rank.  **Projected full run** (20k samples → 2-4k
-eligible uniques): M1 ≈ $14-29 live, M3 at the pilot's measured pass rate (at 0.5: ≈ $11-22 live);
-**≈ $13-26 batched** — over or near the $20 line, so the full run goes through the Message
+eligible uniques): M1 ≈ $14-29 live, M3 at the pilot's measured pass rate (at 0.80: ≈ $18-35 live,
+at the 0.95 high case ≈ $21-42); **≈ $16-32 batched** — over the $20 line, so the full run goes
+through the Message
 Batches API with Roger's explicit go (`--confirm-expensive --confirmed-by`), per the
 batch-or-real-time rule in [CLAUDE.md](../../CLAUDE.md).  The generator's own cost stays $0; the
 20k sampling is ≈ 1.6M tokens, ≈ 1.5-3 h of Mac time at the benchmarked rate — far under the
@@ -409,7 +467,12 @@ never redistributed (Roger § 9.1); (2) raw samples are gitignored under `data/c
 and tracked artifacts carry no biography text; (3) the M3 pass-rate placeholder is 0.5 until the
 pilot measures it; (4) `gloss_hint` is the OEWN person sense, not the model's sampled gloss;
 (5) the instruct-model collapse control is deferred unless Roger approves its download (§ 5a);
-(6) emission count rides in `Candidate.score` and is not a familiarity.  **Compute escalation is
+(6) emission count rides in `Candidate.score` and is not a familiarity.  **All six are answered**
+(QUESTIONS 53-58, Roger 2026-10-11): (2) the echo screen keeps its shape, with the counter split in
+two, the dropped name word logged and the never-elsewhere list reported; (3) the placeholder is
+**0.80**, with 0.95 printed as a high case; (4) the sense is resolved before M1 by the cosine screen
+and one cheap call, fidelity subject to legibility, never novelty; (6) as assumed, with a guard test
+that `base_model` stays out of `FAMILIARITY_GENERATORS`.  **Compute escalation is
 Roger-only**: if the bench falls under 150 tok/s or the pilot shows vocabulary or writing-quality
 problems, stop and put the numbers in front of him — RunPod or OpenRouter are his options to open
 (Roger § 9.3), and any OpenRouter use follows [CLAUDE.md](../../CLAUDE.md)'s western-hosts-only
@@ -423,3 +486,9 @@ Anything that would edit a trait file or the queue, spend over a command's budge
 step)`, `chao1(counts)`, `collapse_index(counts, top=50)`, `string_recovery(stems, corpus_stems,
 renamed)` — the diversity harness plan 03 § 7 promises the other workstreams, usable on any
 generator's emission stream.  Function signatures are added to, never renamed, without a note here.
+
+Added 2026-10-11 (QUESTIONS 61), additive and optional: `per_family(rows, *, samples=None,
+counts=None)` takes `build_table`'s `by_family` block as `counts` and then reports, per family,
+`n_eligible` and `eligible_per_1k` (the yield), `ineligible_share`, `n_raw_items`, `n_malformed` and
+`malformed_rate`, `items_per_sample` and the three echo counts.  A caller that passes no `counts`
+gets exactly what it got before.

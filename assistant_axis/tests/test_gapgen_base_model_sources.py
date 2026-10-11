@@ -33,6 +33,10 @@ def test_sources_table():
     assert on.url.startswith("https://www.onetcenter.org/dl_files/database/db_31_0_csv/")
     # verified 2026-10-10 on onetcenter.org/license_db.html: CC BY 4.0, not public domain (plan 03 said so)
     assert on.licence == "CC BY 4.0" and "USDOL/ETA" in on.attribution
+    # Roger, QUESTIONS 60 (2026-10-11): the note says explicitly when the attribution stops being a courtesy
+    # and becomes load-bearing - a title surviving as a candidate label in a tracked artefact - rather than
+    # leaving that implicit.
+    assert "LOAD-BEARING" in on.note and "candidate label" in on.note
     # PersonaHub and SUBTLEX are skipped on purpose, with the reason
     assert {"PersonaHub", "SUBTLEX-US"} <= set(S.SKIPPED)
     # the model: Roger's delete-when-done TODO travels with its entry (2026-10-10, anything over 2 GB)
@@ -144,8 +148,12 @@ def test_fetch_writes_files_manifests_licences(tmp_path):
     assert "CC BY-SA 3.0" in (tmp_path / "ext" / "wikibio" / "LICENSE.txt").read_text()
     onet = json.loads((tmp_path / "ext" / "onet" / "DOWNLOAD_MANIFEST.json").read_text())[0]
     assert onet["licence"] == "CC BY 4.0" and onet["sha256_published"] is None and not onet["checksum_verified"]
+    # QUESTIONS 60: the load-bearing sentence travels into both manifests and the LICENSE.txt beside the file
+    assert "LOAD-BEARING" in onet["note"]
+    assert "LOAD-BEARING" in (tmp_path / "ext" / "onet" / "LICENSE.txt").read_text()
     tracked = json.loads((tmp_path / "sources_manifest.json").read_text())
     assert [x["key"] for x in tracked] == ["wikibio", "onet"]
+    assert "LOAD-BEARING" in next(x for x in tracked if x["key"] == "onet")["note"]
     # a second fetch re-uses the verified archive (O*NET publishes no hash, so it is present-and-kept as well)
     net2 = Net()
     res2 = run_fetch(tmp_path, net2)

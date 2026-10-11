@@ -2,7 +2,7 @@
 familiarity override.  Rescue rule 1b is tested in test_gapgen_rubric_v2.py."""
 import pytest
 
-from assistant_axis.gapgen.freq import FreqInfo, familiarity_of, zipf_info
+from assistant_axis.gapgen.freq import FAMILIARITY_GENERATORS, FreqInfo, familiarity_of, zipf_info
 
 FAKE = {"kind": 5.5, "animals": 4.6, "world": 6.1, "shaping": 3.4, "rarish": 1.2,
         "abstemious": 2.2, "stubborn": 3.6, "to": 7.4, "xyzzy": 0.0}
@@ -71,3 +71,22 @@ def test_real_wordfreq():
     i = zipf_info("kind to animals")
     assert i.zipf_min > 3 and "to" not in i.zipf_words
     assert zipf_info("qwxzvbnm").hard_reject
+
+
+def test_base_model_is_not_a_familiarity_generator():
+    # Guard asked for by Roger, QUESTIONS 58 (2026-10-11), so the trap is closed by the suite rather than by
+    # memory.  `base_model`'s Candidate.score is a raw EMISSION COUNT (how many samples wrote the word), not a
+    # human familiarity in [0, 1].  One line added to FAMILIARITY_GENERATORS later would make a count like 37
+    # read as a familiarity proportion, clear the `>= FAMILIARITY_OVERRIDE_MIN` (0.5) test trivially, and
+    # rescue every rare word of the run past the Zipf floor.  Normalising the count to a rate
+    # (emissions / samples, 0-1) would make this WORSE, not better: the raw count being out of a proportion's
+    # range is the safety feature.  On the merits it should rescue nothing anyway - an emission count measures
+    # frequency in this model's output, which is what Zipf already measures from real corpora, better.
+    assert "base_model" not in FAMILIARITY_GENERATORS, (
+        "base_model's score is an emission count, not a familiarity: see QUESTIONS 58 and the comment above")
+    # The trap itself, so the test says why it matters: a count of 37 seen as a familiarity rescues a word
+    # that the floor rejects.
+    assert zipf_info("rarish", zipf_fn=z).hard_reject
+    assert not zipf_info("rarish", familiarity=37.0, zipf_fn=z).hard_reject
+    # And every generator that IS listed documents its score as a familiarity, with a pointer to where.
+    assert all(isinstance(why, str) and why for why in FAMILIARITY_GENERATORS.values())

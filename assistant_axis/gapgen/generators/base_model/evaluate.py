@@ -5,10 +5,12 @@
   junk proxies for the temperature shakedown.  Computed from the samples, the table and the per-sample stems
   ``parse`` saved; no calls.
 * :func:`evaluate_run`: a submitted run's figures once M1 and M3 have run: verdict and outcome fractions, the
-  measured pass rate (replacing the 0.5 placeholder), noun share of M1 survivors, the ``ai_assistant`` family
-  separately (yield, M1 trait rate, alignment scores, M3 new rate), M3 covered / new / grey, relation-call
-  opposites and pair completions, cost per candidate and useful candidates per dollar from the ``usage.json``
-  files.  Every number is counted from files on disk.
+  measured pass rate (replacing the 0.80 placeholder), noun share of M1 survivors, **every family's yield,
+  malformed rate and M1 pass rate** (Roger, QUESTIONS 61: the lower-cased ``person`` family, whose prompts
+  are ``wiki_bio`` openings, read against the clean-prompt families in the same run), the ``ai_assistant``
+  family separately (yield, M1 trait rate, alignment scores, M3 new rate), M3 covered / new / grey,
+  relation-call opposites and pair completions, cost per candidate and useful candidates per dollar from the
+  ``usage.json`` files.  Every number is counted from files on disk.
 """
 from __future__ import annotations
 
@@ -20,6 +22,7 @@ from typing import Iterable, Mapping, Optional, Sequence
 from . import GENERATOR, MODEL_ID
 from .diversity import chao1, collapse_index, per_family, rarefaction, string_recovery
 from .prompts import PROMPTS_VERSION
+from .sense import summary as sense_summary
 
 
 def _frac(a: float, b: float) -> Optional[float]:
@@ -71,15 +74,27 @@ def round_stats(samples: Sequence[Mapping], rows: Sequence[Mapping], per_sample:
         "noun_share_eligible": _frac(sum(1 for r in eligible if r["form"] == "noun"), len(eligible)),
         "form_counts": table_counts.get("by_form"), "form_counts_eligible": table_counts.get("by_form_eligible"),
         "normalized_mechanically": table_counts.get("normalized_mechanically"),
-        "per_family": per_family(rows, samples=samples),
+        # Per family: yield and malformed rate beside the uniques, so the lower-cased `person` family (wiki_bio
+        # openings) is compared against the clean-prompt families in the same run (Roger, QUESTIONS 61).
+        "per_family": per_family(rows, samples=samples, counts=table_counts.get("by_family")),
         "recovery_strings": {"n_corpus": rec["n_corpus"], "found": rec["found"], "recall": rec["recall"],
                              "by_family": by_family, "via_renamed_from": rec["via_renamed_from"]},
+        # The gloss-sense step's state (QUESTIONS 56): how many rows carry two glosses, how many diverged and
+        # how the divergent ones were settled.  Before the step has run, it is the size of the call step.
+        "gloss_sense": sense_summary(rows),
         "junk": {"items_per_sample": round(n_items / n, 2) if n else None,
                  "empty_sample_share": _frac(sum(1 for s in ordered if not s), n),
                  "ineligible_share": _frac(len(rows) - len(eligible), len(rows)),
                  "ineligible": table_counts.get("ineligible"),
                  "seed_echo_per_sample": _frac(table_counts.get("n_seed_echo", 0), n),
+                 # The two bio rules apart (Roger, QUESTIONS 54): the name rule's cost was invisible while they
+                 # shared a counter.  `name_echo_not_elsewhere` is the real loss - words no other seed brought
+                 # in; empty closes QUESTIONS 54, non-empty writes the whitelist.
                  "bio_echo": table_counts.get("n_bio_echo"),
+                 "name_echo": table_counts.get("n_name_echo"),
+                 "bio_span_echo": table_counts.get("n_bio_span_echo"),
+                 "name_echo_words": table_counts.get("name_echo_words"),
+                 "name_echo_not_elsewhere": table_counts.get("name_echo_not_elsewhere"),
                  "stop_reasons": dict(sorted((str(k), v) for k, v in stops.items())),
                  "mean_new_tokens": round(sum(int(s.get("n_new_tokens") or 0) for s in samples) / n, 1) if n else None},
     }
@@ -156,7 +171,7 @@ def _m3(rows: Sequence[Mapping]) -> dict:
 
 def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats: Optional[Mapping],
                  registry_rows: Mapping[str, Mapping], filter_dir: Path, novelty_dir: Path,
-                 sampling_usage: Optional[Path] = None) -> dict:
+                 sampling_usage: Optional[Path] = None, sense_usage: Optional[Path] = None) -> dict:
     """The pilot readout's numbers (see the module docstring)."""
     cands = [json.loads(x) for x in (run_dir / "candidates.jsonl").read_text(encoding="utf-8").splitlines()
              if x.strip()] if (run_dir / "candidates.jsonl").exists() else []
@@ -169,12 +184,20 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats:
     m1 = _m1(rows)
     survivors = [r for r in rows if (r.get("filter") or {}).get("verdict") == "trait"]
     noun_surv = sum(1 for r in survivors if (by_stem.get(r["stem"]) or {}).get("form") == "noun")
-    cost = cost_summary([run_dir / "usage.json", Path(filter_dir) / "usage.json", Path(novelty_dir) / "usage.json"])
+    # The gloss-sense step is the generator's one paid call (QUESTIONS 56), so its record is part of the run's
+    # cost; the sampler's own usage stays at $0 in the run directory.
+    cost = cost_summary([run_dir / "usage.json", Path(filter_dir) / "usage.json", Path(novelty_dir) / "usage.json"]
+                        + ([Path(sense_usage)] if sense_usage else []))
     m3 = _m3(rows)
     useful = m3["decision"].get("new", 0) + m3["pair_completions"]
+    # Per family: the free measures of the round (yield, malformed rate) beside M1's pass rate and M3's
+    # decisions, so the lower-cased `person` family is read against the clean-prompt families in the same run
+    # (Roger, QUESTIONS 61: a within-run control for whether the pre-tokenised casing hurts).
+    stats_fam = dict((stats or {}).get("per_family") or {})
     families = {}
-    for f, rs in sorted(fam_rows.items()):
-        families[f] = {"n_submitted": len(rs), "m1": _m1(rs), "m3": _m3(rs)}
+    for f in sorted(set(fam_rows) | set(stats_fam)):
+        rs = fam_rows.get(f, [])
+        families[f] = {"n_submitted": len(rs), "m1": _m1(rs), "m3": _m3(rs), "stats": stats_fam.get(f)}
     return {
         "run_id": run_id, "generator": GENERATOR, "args": run.get("args"), "n_candidates": len(cands),
         "stats": stats, "m1": m1, "m3": m3,
@@ -183,4 +206,6 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats:
         "cost": cost, "cost_per_candidate": _frac(cost["total_usd"], len(cands)),
         "useful": useful, "useful_per_dollar": round(useful / cost["total_usd"], 1) if cost["total_usd"] else None,
         "sampling_usage": cost_summary([sampling_usage]) if sampling_usage else None,
+        # the generator's own paid calls, apart from the platform's: the gloss-sense step (QUESTIONS 56)
+        "sense_usage": cost_summary([sense_usage]) if sense_usage else None,
     }

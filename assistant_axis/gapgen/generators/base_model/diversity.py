@@ -93,29 +93,53 @@ def string_recovery(stems: Iterable[str], corpus_stems: Iterable[str],
             "found_stems": sorted(found), "via_renamed_from": dict(sorted(via.items()))}
 
 
-def per_family(rows: Iterable[Mapping], *, samples: Optional[Iterable[Mapping]] = None) -> dict[str, dict]:
+def per_family(rows: Iterable[Mapping], *, samples: Optional[Iterable[Mapping]] = None,
+               counts: Optional[Mapping[str, Mapping]] = None) -> dict[str, dict]:
     """Per prompt family: ``n_emissions`` (sums to the total over families), ``n_unique`` (stems the family
     emitted at least once; these overlap across families), ``n_only_here`` (stems no other family emitted),
-    and, given the samples, ``n_samples`` (sums to the sample count) and ``uniques_per_1k``.
+    ``n_eligible`` and ``ineligible_share`` (of the stems it emitted), and, given the samples, ``n_samples``
+    (sums to the sample count), ``uniques_per_1k`` and ``eligible_per_1k`` (the family's yield).
 
-    A row is a mapping with ``stem``, ``count`` and ``families`` (family -> emissions); a sample a mapping
-    with ``family``."""
+    ``counts`` is :func:`.table.build_table`'s ``by_family`` block, which adds the sample-level figures:
+    ``n_raw_items``, ``n_malformed`` and ``malformed_rate`` (of the items the parser returned; spans the
+    cleaner rejected never became items and are not in the denominator), ``items_per_sample`` and the echo
+    counts.  Roger, QUESTIONS 61: the readout compares the lower-cased ``person`` family (its prompts are
+    ``wiki_bio`` openings, tokenized and lower-cased) against the clean-prompt families in the same run.
+
+    A row is a mapping with ``stem``, ``count``, ``families`` (family -> emissions) and, for the yield,
+    ``eligible``; a sample a mapping with ``family``."""
     emis: Counter = Counter()
     uniq: Counter = Counter()
     only: Counter = Counter()
+    elig: Counter = Counter()
     for r in rows:
         fams = {f: int(c) for f, c in (r.get("families") or {}).items() if c}
         for f, c in fams.items():
             emis[f] += c
             uniq[f] += 1
+            if r.get("eligible"):
+                elig[f] += 1
         if len(fams) == 1:
             only[next(iter(fams))] += 1
     n_samp: Counter = Counter(s.get("family") for s in samples) if samples is not None else Counter()
+    fc = dict(counts or {})
     out: dict[str, dict] = {}
-    for f in sorted(set(emis) | set(n_samp)):
-        d = {"n_emissions": emis[f], "n_unique": uniq[f], "n_only_here": only[f]}
-        if samples is not None:
-            d["n_samples"] = n_samp[f]
-            d["uniques_per_1k"] = round(1000.0 * uniq[f] / n_samp[f], 1) if n_samp[f] else None
+    for f in sorted(set(emis) | set(n_samp) | set(fc)):
+        d = {"n_emissions": emis[f], "n_unique": uniq[f], "n_only_here": only[f], "n_eligible": elig[f],
+             "ineligible_share": round(1.0 - elig[f] / uniq[f], 4) if uniq[f] else None}
+        if samples is not None or f in fc:
+            n = n_samp[f] or int((fc.get(f) or {}).get("n_samples") or 0)
+            d["n_samples"] = n
+            d["uniques_per_1k"] = round(1000.0 * uniq[f] / n, 1) if n else None
+            d["eligible_per_1k"] = round(1000.0 * elig[f] / n, 1) if n else None
+        c = fc.get(f)
+        if c is not None:
+            raw, mal = int(c.get("n_raw_items") or 0), int(c.get("n_malformed") or 0)
+            d.update({"n_raw_items": raw, "n_malformed": mal,
+                      "malformed_rate": round(mal / raw, 4) if raw else None,
+                      "items_per_sample": round(raw / d["n_samples"], 2) if d.get("n_samples") else None,
+                      "n_seed_echo": int(c.get("n_seed_echo") or 0),
+                      "n_name_echo": int(c.get("n_name_echo") or 0),
+                      "n_bio_span_echo": int(c.get("n_bio_span_echo") or 0)})
         out[f] = d
     return out

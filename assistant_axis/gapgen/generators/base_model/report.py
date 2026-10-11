@@ -12,6 +12,11 @@ from typing import Mapping, Optional, Sequence
 
 from assistant_axis.gapgen.paths import REPO_ROOT
 
+from .sense import BLOCK as SENSE_BLOCK
+from .sense import resolved_hint
+from .submit import M1_PASS_RATE_ASSUMED as PASS_RATE_ASSUMED
+from .submit import M1_PASS_RATE_HIGH as PASS_RATE_HIGH
+
 GLOSSARY = REPO_ROOT / "reports" / "trait_gap_generation" / "glossary.md"
 PLAN = REPO_ROOT / "reports" / "trait_gap_generation" / "coding_plan_03_base_model.md"
 
@@ -23,6 +28,96 @@ def _link(target: Path, doc: Path, text: Optional[str] = None) -> str:
 
 def _pct(x: Optional[float]) -> str:
     return "n/a" if x is None else f"{x:.1%}"
+
+
+def _num(x) -> str:
+    return "n/a" if x is None else str(x)
+
+
+def _plural(n: Optional[int], one: str, many: Optional[str] = None) -> str:
+    return f"{_num(n)} {one if n == 1 else (many or one + 's')}"
+
+
+#: The `person` family's prompts are `wiki_bio` openings: tokenized and lower-cased, with only the name and
+#: sentence starts restored (QUESTIONS 61).  The others are prompts we wrote.
+BIO_FAMILY = "person"
+CLEAN_FAMILIES = ("list_gloss", "occupation", "ai_assistant")
+FAMILY_SOURCE = {"person": "wiki_bio opening (lower-cased)", "list_gloss": "glossary (clean)",
+                 "occupation": "professions (clean)", "ai_assistant": "AI assistant (clean)",
+                 "list": "trait list (clean)", "contrast": "contrast sentence (clean)"}
+
+
+def _echo_section(st: Mapping) -> list[str]:
+    """What the biography-echo screen cost (Roger, QUESTIONS 54): the two rules counted apart, the words the
+    name rule dropped, and the ones no other seed brought in."""
+    j = st.get("junk") or {}
+    lost = j.get("name_echo_not_elsewhere")
+    words = j.get("name_echo_words") or {}
+    top = ", ".join(f"`{w}` ({c})" for w, c in list(words.items())[:12])
+    lines = ["## The biography-echo screen", "",
+             f"Dropped as a **name echo** (a one-word candidate matching a word of the person's name): "
+             f"{_plural(j.get('name_echo'), 'emission')} over {_plural(len(words), 'distinct word')}.  Dropped "
+             f"as a **biography span** (a multiword label appearing verbatim in the biography): "
+             f"{_num(j.get('bio_span_echo'))} (the spans themselves are not listed: they are verbatim CC BY-SA "
+             f"prose).", ""]
+    if top:
+        lines += [f"The words the name rule dropped, most often first: {top}.", ""]
+    if lost is None:
+        lines += ["No name-echo record in this round's stats (an older `parse`).", ""]
+    elif lost:
+        lines += [f"**Words lost altogether** — dropped as a name echo and never emitted from another seed "
+                  f"({len(lost)}): " + ", ".join(f"`{w}`" for w in lost) + ".  This list *is* the whitelist "
+                  "QUESTIONS 54 asks for: these words, and only these, cost the run anything.", ""]
+    else:
+        lines += ["**No word was lost**: every word the name rule dropped also arrived from another seed, where "
+                  "no biography named it.  That closes QUESTIONS 54 with evidence — the rule's cost in this "
+                  "round is zero, and no whitelist is needed.", ""]
+    return lines
+
+
+def _sense_section(st: Mapping, ev: Mapping) -> list[str]:
+    """The gloss sense settled before M1 (Roger, QUESTIONS 56)."""
+    s = (ev.get("args") or {}).get("gloss_sense") or st.get("gloss_sense") or {}
+    if not s:
+        return []
+    return ["## The gloss sense (settled before M1)", "",
+            f"{_num(s.get('n_two_sided'))} rows carried two glosses (OEWN's person-descriptive sense and the "
+            f"model's own); the cosine screen called {_num(s.get('n_divergent'))} of "
+            f"{_num(s.get('n_screened'))} divergent (rate {_pct(s.get('divergence_rate'))}), and one cheap call "
+            f"settled each: {_num(s.get('n_chose_sample'))} took the sample's reading, "
+            f"{_num(s.get('n_chose_dictionary'))} the dictionary's"
+            + (f", {s['n_illegible_sample']} of them because the sample's reading was called illegible"
+               if s.get("n_illegible_sample") else "")
+            + f".  Still unresolved: {_num(s.get('n_unresolved'))} (submission refuses while any remain).  "
+              f"The criterion is fidelity first, subject to legibility, and never novelty.", ""]
+
+
+def _family_section(ev: Mapping) -> list[str]:
+    """Yield, malformed rate and M1 pass rate per prompt family (Roger, QUESTIONS 61): a within-run control
+    for whether the `wiki_bio` family's pre-tokenised casing hurts."""
+    lines = ["## By family: the `wiki_bio` prompts against the clean ones", "",
+             f"The `{BIO_FAMILY}` family's prompts are biography openings as `wiki_bio` stores them (tokenized "
+             f"and lower-cased, with only the name and sentence starts restored), so its numbers beside the "
+             f"clean-prompt families (" + ", ".join(f"`{f}`" for f in CLEAN_FAMILIES) + ") are a within-run "
+             "control for whether that casing hurts: the model continues the prompt, so degraded orthography "
+             "invites degraded continuation.  The `ai_assistant` row is also the in-or-out call of plan 03 "
+             "section 9.2.", "",
+             "| family | prompts | samples | uniques/1k | eligible/1k | malformed | ineligible | submitted | "
+             "M1 trait rate | alignment scores | M3 decisions | M3 new rate |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for f, v in (ev.get("by_family") or {}).items():
+        s = v.get("stats") or {}
+        name = f"**{f}**" if f in (BIO_FAMILY, "ai_assistant") else f
+        lines.append(f"| {name} | {FAMILY_SOURCE.get(f, '?')} | {_num(s.get('n_samples'))} | "
+                     f"{_num(s.get('uniques_per_1k'))} | {_num(s.get('eligible_per_1k'))} | "
+                     f"{_pct(s.get('malformed_rate'))} | {_pct(s.get('ineligible_share'))} | "
+                     f"{v['n_submitted']} | {_pct(v['m1'].get('pass_rate'))} | {v['m1'].get('alignment_scores')} | "
+                     f"{v['m3'].get('decision')} | {_pct(v['m3'].get('new_rate'))} |")
+    lines += ["", "If those numbers say casing matters, the first iteration move is free and deterministic: OEWN "
+                  "lists proper adjectives capitalised, so a lookup against the WordNet lemmas already on disk "
+                  "restores nationalities, languages and eponyms with no truecasing model and no API spend.  "
+                  "Not built yet, by decision (QUESTIONS 61).", ""]
+    return lines
 
 
 def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Path, stats_path: Optional[Path],
@@ -54,27 +149,26 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pat
              f"| recovery by string (corpus stems found) | {(st.get('recovery_strings') or {}).get('found')} of "
              f"{(st.get('recovery_strings') or {}).get('n_corpus')} ({_pct((st.get('recovery_strings') or {}).get('recall'))}) |",
              ""]
+    lines += _echo_section(st)
+    lines += _sense_section(st, ev)
     m1, m3 = ev.get("m1") or {}, ev.get("m3") or {}
     lines += ["## M1 and M3", "",
               f"M1 filtered {m1.get('n_filtered', 0)} of {m1.get('n_rows', 0)} rows: verdicts {m1.get('verdict')}; "
-              f"**measured pass rate {_pct(m1.get('pass_rate'))}** (the estimate assumed 50%); alignment scores "
+              f"**measured pass rate {_pct(m1.get('pass_rate'))}** (the estimate assumed "
+              f"{PASS_RATE_ASSUMED:.0%}, with {PASS_RATE_HIGH:.0%} printed as its high case); alignment scores "
               f"{m1.get('alignment_scores')}.",
               f"M3 scored {m3.get('n_scored', 0)}: {m3.get('decision')}; pair completions {m3.get('pair_completions')}; "
               f"relation-call opposites {m3.get('relation_opposites')}.", ""]
-    lines += ["## By family (the `ai_assistant` family separately, for Roger's in-or-out call)", "",
-              "| family | submitted | M1 trait rate | alignment scores | M3 decisions | M3 new rate |",
-              "|---|---|---|---|---|---|"]
-    for f, v in (ev.get("by_family") or {}).items():
-        lines.append(f"| {'**' + f + '**' if f == 'ai_assistant' else f} | {v['n_submitted']} | "
-                     f"{_pct(v['m1'].get('pass_rate'))} | {v['m1'].get('alignment_scores')} | {v['m3'].get('decision')} | "
-                     f"{_pct(v['m3'].get('new_rate'))} |")
+    lines += _family_section(ev)
     c = ev.get("cost") or {}
+    sense_usd = (ev.get("sense_usage") or {}).get("total_usd") or 0.0
     lines += ["", "## Cost", "",
-              f"Total ${c.get('total_usd', 0):.2f} from the usage records "
+              f"Total ${c.get('total_usd', 0):.4f} from the usage records "
               + ", ".join(L(Path(p)) for p in c.get("files") or []) + f"; per candidate "
               f"${(ev.get('cost_per_candidate') or 0):.4f}; useful (M3 new or pair completion) {ev.get('useful')}, "
-              f"{ev.get('useful_per_dollar')} per dollar.  The generator itself: $0 (local model; tokens recorded at a "
-              "zero rate).", "",
+              f"{ev.get('useful_per_dollar')} per dollar.  The sampling itself is $0 (a local model, its tokens "
+              f"recorded at a zero rate); the generator's own paid calls are the gloss-sense ones, "
+              f"${sense_usd:.4f} here.", "",
               "## Files", "",
               f"- {L(run_dir / 'candidates.jsonl')}, {L(run_dir / 'run.json')}, {L(run_dir / 'usage.json')}, "
               f"{L(run_dir / 'submit_report.json')}",
@@ -88,12 +182,20 @@ def render_sample(rows: Sequence[Mapping], *, doc_path: Path, n: int = 100, seed
     pool = list(rows)
     r = random.Random(seed)
     pick = sorted(r.sample(pool, min(n, len(pool))), key=lambda x: x.get("rank") or 0)
-    lines = [f"# Spot check: {len(pick)} random rows", "",
+    lines = [f"# Spot check: {_plural(len(pick), 'random row')}", "",
              "Mark each row: **J** junk (not a word for what someone is like), **P** polysemous (the gloss is a "
              "different sense from the one you would expect), or leave blank.  Plan 03 section 6.", "",
-             "| # | word | form | count | families | gloss hint (OEWN) | sampled gloss | J/P |", "|---|---|---|---|---|---|---|---|"]
+             "The **sense** column is the gloss-sense decision of QUESTIONS 56 where a row carried two glosses: "
+             "`sample` or `dictionary`, with the cosine that sent it to a call; a blank means the two glosses "
+             "agreed or there was only one.  **hint sent to M1** is the resolved one.", "",
+             "| # | word | form | count | families | hint sent to M1 | sampled gloss | sense | J/P |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for i, x in enumerate(pick, 1):
+        b = x.get(SENSE_BLOCK) or {}
+        sense = ""
+        if b.get("divergent"):
+            sense = f"{b.get('chosen') or 'unresolved'} (cos {b.get('cosine')})"
         lines.append(f"| {i} | {x.get('surface')} | {x.get('form')} | {x.get('count')} | "
-                     f"{', '.join(sorted(x.get('families') or {}))} | {x.get('gloss_hint') or ''} | "
-                     f"{x.get('sample_gloss') or ''} |  |")
+                     f"{', '.join(sorted(x.get('families') or {}))} | {resolved_hint(x) or ''} | "
+                     f"{x.get('sample_gloss') or ''} | {sense} |  |")
     return "\n".join(lines) + "\n"

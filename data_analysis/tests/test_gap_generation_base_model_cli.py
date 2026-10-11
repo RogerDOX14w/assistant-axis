@@ -1,20 +1,26 @@
 """The base-model generator's CLI (``base_model_generator.py``): every subcommand's dry run writes nothing; fetch
 needs Roger's recorded approval; bench and sample refuse without the model and never download; the pipeline
-parse -> stats -> submit -> report runs end to end on fixtures (fake lookups, tmp registry)."""
+parse -> sense -> stats -> submit -> report runs end to end on fixtures (fake lookups, the hash embedder, a fake
+model, tmp registry)."""
 import hashlib
 import json
 from pathlib import Path
 
 import pytest
 
+from assistant_axis.gapgen.generators.base_model import sense as SE
 from assistant_axis.gapgen.generators.base_model import table as TB
 from assistant_axis.gapgen.registry import Registry
 from assistant_axis.tests.base_model_fakes import (
     CENSUS_TABLE_SMALL, ONET_SMALL, SAMPLES_SMALL, make_wikibio_zip, samples_small_text,
 )
 from assistant_axis.tests.censuses_fakes import make_corpus
+from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response
 from assistant_axis.tests.test_gapgen_base_model_table import lookups
 from data_analysis.gap_generation import base_model_generator as CLI
+
+SENSE_ANSWER = json.dumps({"choice": "dictionary", "legible": False,
+                           "reason": "the dictionary sense is the one a reader would take"})
 
 
 @pytest.fixture
@@ -35,6 +41,9 @@ def env(tmp_path, monkeypatch):
                    "max_bio_words": 200}}))
     data = make_corpus(tmp_path, traits=("generous", "warm", "patient"), queue=("unflappable",))
     monkeypatch.setattr(TB, "default_lookups", lambda: lookups())
+    # the gloss-sense step's one call: a fake model, so no request leaves the process
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
+        SENSE_ANSWER, input_tokens=400, output_tokens=40)))
     common = ["--data-dir", str(data), "--registry", str(tmp_path / "cand" / "registry.jsonl"),
               "--candidates-dir", str(tmp_path / "cand"), "--external-dir", str(ext),
               "--sources-manifest", str(tmp_path / "sources_manifest.json"), "--hf-dir", str(tmp_path / "hf"),
@@ -65,6 +74,10 @@ def test_every_dry_run_writes_nothing(env, capsys):
     assert snapshot(tmp) == before
     # the later commands need the earlier ones' outputs: make them, then dry-run again
     assert run(common, "parse", "--round", "1") == 0
+    after_parse = snapshot(tmp)
+    assert run(common, "sense", "--round", "1", "--arm", "hash", "--dry-run") == 0
+    assert snapshot(tmp) == after_parse
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
     assert run(common, "stats", "--round", "1", "--step", "2") == 0
     assert run(common, "submit", "--round", "1", "--run-id", "r1") == 0
     mid = snapshot(tmp)
@@ -102,12 +115,51 @@ def test_sample_refuses_a_round_sampled_with_other_settings(env, capsys, monkeyp
     assert "use a new --round" in capsys.readouterr().err
 
 
+def test_submit_refuses_before_the_sense_step(env, capsys):
+    """QUESTIONS 56: a table straight out of `parse` has rows with two candidate senses, and M1 must not see
+    one that could change afterwards."""
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "r0") == 2
+    err = capsys.readouterr().err
+    assert "sense --round 1" in err and "QUESTIONS 56" in err
+    assert not (tmp / "cand" / "runs").exists()
+
+
+def test_sense_settles_the_divergent_rows(env, capsys):
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    out = capsys.readouterr().out
+    assert "divergent" in out and "claude-haiku-5-5" in out
+    table = TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")
+    blocks = {r["stem"]: r.get(SE.BLOCK) for r in table if r.get(SE.BLOCK)}
+    assert "unflappable" in blocks and blocks["unflappable"]["chosen"] in SE.CHOICES
+    assert SE.unresolved(table) == []
+    # the fake answered "dictionary" (and called the sample reading illegible), so the hint is unchanged
+    assert SE.resolved_hint(next(r for r in table if r["stem"] == "unflappable")).startswith("not easily")
+    u = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    # the free screen's embedding calls and the paid sense calls are both recorded; only the latter cost
+    assert u["total_cost_usd"] > 0 and u["per_model"][SE.MODEL]["n_calls"] >= 1
+    rec = (tmp / "samples" / "round1" / SE.RESPONSES_NAME).read_text().splitlines()
+    assert len(rec) == u["per_model"][SE.MODEL]["n_calls"]
+    # rerunning it is a no-op: the decisions are on the rows
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    assert "nothing to screen" in capsys.readouterr().out
+    # and a reparse carries them forward rather than throwing away what was paid for
+    assert run(common, "parse", "--round", "1") == 0
+    out = capsys.readouterr().out
+    assert "carried 2 gloss-sense decisions forward" in out
+    assert SE.unresolved(TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")) == []
+
+
 def test_pipeline_end_to_end_and_report(env, capsys):
     tmp, common = env
     assert run(common, "parse", "--round", "1") == 0
     table = TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")
     stems = {r["stem"] for r in table}
     assert {"generous", "warm", "unflappable", "patient", "kind"} <= stems and "walter" not in stems
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
     assert run(common, "stats", "--round", "1", "--step", "4") == 0
     st = json.loads((tmp / "base" / "stats_round1.json").read_text())
     assert "_provenance" in st and st["result"]["recovery_strings"]["found"] == 3
@@ -127,8 +179,22 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     assert run(common, "report", "--run-id", "r1") == 0
     md = (rd / "report.md").read_text()
     assert "measured pass rate 50.0%" in md and "**ai_assistant**" in md
+    assert "the estimate assumed 80%, with 95% printed as its high case" in md   # QUESTIONS 55
     assert "../../../../base/candidate_table_round1.jsonl" in md or "candidate_table_round1.jsonl" in md
+    # QUESTIONS 54: the two echo rules apart, and what the name rule cost
+    assert "## The biography-echo screen" in md and "name echo" in md
+    assert "No word was lost" in md or "Words lost altogether" in md
+    assert "flugzeugbau" not in md                      # a dropped span is never printed
+    # QUESTIONS 61: the wiki_bio family against the clean-prompt ones, with yield and malformed rate
+    assert "## By family: the `wiki_bio` prompts against the clean ones" in md
+    assert "**person**" in md and "wiki_bio opening (lower-cased)" in md and "professions (clean)" in md
+    # QUESTIONS 56: the sense section
+    assert "## The gloss sense (settled before M1)" in md and "fidelity first" in md
     sample = (rd / "roger_sample.md").read_text()
-    assert "| 1 | generous |" in sample
+    assert "| 1 | generous |" in sample and "hint sent to M1" in sample
     ev = json.loads((rd / "evaluation.json").read_text())["result"]
-    assert ev["m3"]["decision"] == {"new": 1} and ev["cost"]["total_usd"] == 0.0
+    assert ev["m3"]["decision"] == {"new": 1}
+    # the sampler is still free; the run's cost is the gloss-sense calls alone
+    assert json.loads((rd / "usage.json").read_text())["total_cost_usd"] == 0.0
+    assert 0 < ev["cost"]["total_usd"] < 0.01
+    assert ev["by_family"]["person"]["stats"]["malformed_rate"] is not None

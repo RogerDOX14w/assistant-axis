@@ -70,14 +70,34 @@ def test_round_stats_carries_every_section6_field():
     assert sum(v["n_samples"] for v in st["per_family"].values()) == 6
 
 
+PF_ROWS = [{"stem": "a", "count": 5, "families": {"list": 3, "person": 2}, "eligible": True},
+           {"stem": "b", "count": 2, "families": {"list": 2}, "eligible": False},
+           {"stem": "c", "count": 1, "families": {"ai_assistant": 1}, "eligible": True}]
+PF_SAMPLES = [{"family": "list"}, {"family": "list"}, {"family": "person"}, {"family": "ai_assistant"}]
+
+
 def test_per_family_splits_sum_to_totals():
-    rows = [{"stem": "a", "count": 5, "families": {"list": 3, "person": 2}},
-            {"stem": "b", "count": 2, "families": {"list": 2}},
-            {"stem": "c", "count": 1, "families": {"ai_assistant": 1}}]
-    samples = [{"family": "list"}, {"family": "list"}, {"family": "person"}, {"family": "ai_assistant"}]
-    pf = D.per_family(rows, samples=samples)
-    assert sum(v["n_emissions"] for v in pf.values()) == sum(r["count"] for r in rows)
-    assert sum(v["n_samples"] for v in pf.values()) == len(samples)
+    pf = D.per_family(PF_ROWS, samples=PF_SAMPLES)
+    assert sum(v["n_emissions"] for v in pf.values()) == sum(r["count"] for r in PF_ROWS)
+    assert sum(v["n_samples"] for v in pf.values()) == len(PF_SAMPLES)
     assert pf["list"]["n_unique"] == 2 and pf["person"]["n_unique"] == 1 and pf["ai_assistant"]["n_unique"] == 1
     assert pf["list"]["uniques_per_1k"] == pytest.approx(1000.0)
     assert pf["list"]["n_only_here"] == 1 and pf["person"]["n_only_here"] == 0
+
+
+def test_per_family_yield_and_malformed_rate():
+    """Roger, QUESTIONS 61: yield and malformed rate per family, so the lower-cased wiki_bio family is read
+    against the clean-prompt ones in the same run."""
+    counts = {"list": {"n_samples": 2, "n_raw_items": 10, "n_malformed": 1, "n_seed_echo": 2},
+              "person": {"n_samples": 1, "n_raw_items": 8, "n_malformed": 4, "n_name_echo": 1,
+                         "n_bio_span_echo": 2},
+              "ai_assistant": {"n_samples": 1, "n_raw_items": 4, "n_malformed": 0}}
+    pf = D.per_family(PF_ROWS, samples=PF_SAMPLES, counts=counts)
+    assert pf["list"]["n_eligible"] == 1 and pf["list"]["ineligible_share"] == pytest.approx(0.5)
+    assert pf["list"]["eligible_per_1k"] == pytest.approx(500.0)
+    assert pf["person"]["malformed_rate"] == pytest.approx(0.5)      # 4 of 8: the family to watch
+    assert pf["ai_assistant"]["malformed_rate"] == 0.0
+    assert pf["person"]["items_per_sample"] == pytest.approx(8.0)
+    assert pf["person"]["n_name_echo"] == 1 and pf["person"]["n_bio_span_echo"] == 2
+    # the frozen harness stays usable without the extra block
+    assert "malformed_rate" not in D.per_family(PF_ROWS, samples=PF_SAMPLES)["list"]

@@ -7,6 +7,8 @@
     uv run python data_analysis/gap_generation/base_model_generator.py sample --round N --n 2000 [--temperature 1.0]
         [--t-grid 0.8,1.0,1.2 --per-t 500] [--families list,person,...] [--batch-size 32] [--device mps] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py parse --round N [--temperature T] [--dry-run]
+    uv run python data_analysis/gap_generation/base_model_generator.py sense --round N [--arm bge|gemma|openai|hash]
+        [--divergence-cosine 0.6] [--budget-usd 2] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py stats --round N [--temperature T] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py submit --round N --run-id R [--min-count 1]
         [--budget-usd 15] [--transport live|batches] [--confirm-expensive --confirmed-by WHO] [--dry-run]
@@ -17,10 +19,13 @@ O*NET occupation titles into ``data/external/`` (Roger's approval, section 5a, r
 and records the model, which ``setup_external.py --hf-model Qwen/Qwen3-8B-Base`` downloads.  ``bench`` measures
 the local model's aggregate tokens/s (the Mac-or-escalate reading, 150 tok/s).  ``sample`` renders prompts and
 runs the local model ($0; tokens charged at a zero rate to ``usage.json``).  ``parse`` builds a round's candidate
-table, ``stats`` its diversity figures.  ``submit`` writes a run's ``candidates.jsonl`` and submits it to the
-registry, gated on the downstream (M1 + M3) estimate.  ``report`` writes the pilot readout.
+table, ``sense`` settles the gloss sense of the rows that carry two (free cosine screen, one cheap call per
+divergent row; QUESTIONS 56), ``stats`` the round's diversity figures.  ``submit`` writes a run's
+``candidates.jsonl`` and submits it to the registry, gated on the downstream (M1 + M3) estimate, and refuses
+while any selected row's sense is unsettled.  ``report`` writes the pilot readout.
 
-This generator makes no paid API call; M1 and M3 are the platform's CLIs, printed by ``submit``.
+The generator's only paid call is ``sense``'s, hundredths of a cent a divergent row; M1 and M3 are the
+platform's CLIs, printed by ``submit``.
 """
 from __future__ import annotations
 
@@ -221,6 +226,13 @@ def _paths(args, temperature: Optional[float]):
             args.base_dir / f"stats_round{args.round}{t}.json", rdir / "sampling.json")
 
 
+def _counts_path(args, temperature: Optional[float]) -> Path:
+    """``parse``'s own counts (echoes, malformed, per family), which ``stats`` reads: they are counted while
+    the samples are read and cannot be recovered from the table alone (QUESTIONS 54 and 61)."""
+    t = "" if temperature is None else f"_t{float(temperature):g}"
+    return args.samples_dir / f"round{args.round}" / f"table_counts{t}.json"
+
+
 def _corpus(args):
     """Corpus and queue trait stems (evaluation only).  Former names come from ``evaluate.renamed_map``
     (``resolve_renamed_stem``), not from the censuses' ``corpus_renamed_from``, which reads only the
@@ -263,14 +275,101 @@ def cmd_parse(args) -> int:
     per: list = []
     rows, counts = TB.build_table(samples, lookups=TB.default_lookups(), corpus_stems=corpus, queue_stems=queue,
                                   tda_stems=_tda_stems(args), bio_lookup=_bio_lookup(args, record), per_sample=per)
+    # A reparse must not throw away the gloss-sense decisions that were paid for: each one is carried onto the
+    # rebuilt row when its two glosses are unchanged, and dropped when they moved (QUESTIONS 56).
+    if table_p.exists():
+        from assistant_axis.gapgen.generators.base_model import sense as SE
+        carried = SE.carry_forward(rows, TB.load_table(table_p))
+        if carried:
+            print(f"carried {carried} gloss-sense decisions forward from the previous table")
     print(json.dumps(counts))
+    counts_p = _counts_path(args, args.temperature)
     if args.dry_run:
-        print(f"DRY-RUN: would write {_rel(table_p)} ({len(rows)} rows) and {_rel(stems_p)}")
+        print(f"DRY-RUN: would write {_rel(table_p)} ({len(rows)} rows), {_rel(stems_p)} and {_rel(counts_p)}")
         return 0
     backup = TB.write_table(rows, table_p)
     atomic_write_text("".join(json.dumps(p) + "\n" for p in per), stems_p)
+    atomic_write_text(json.dumps(counts, indent=2) + "\n", counts_p)
     print(f"wrote {_rel(table_p)} ({len(rows)} rows)" + (f"; previous table kept as {_rel(backup)}" if backup else ""))
-    print(f"wrote {_rel(stems_p)}")
+    print(f"wrote {_rel(stems_p)}, {_rel(counts_p)}")
+    return 0
+
+
+def _anthropic_client():
+    import anthropic
+    from dotenv import load_dotenv
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.AsyncAnthropic(max_retries=0)
+
+
+#: Measured on the rendered call (system about 340 tokens, user about 60, answer about 50), for the estimate
+#: only; every call's real tokens are charged to the usage record.
+SENSE_TOKENS = (400, 60)
+
+
+def _sense_estimate(n: int, model: str) -> float:
+    from assistant_axis.judge_pricing import cost_for_usage
+    return round(n * cost_for_usage(model, *SENSE_TOKENS), 4)
+
+
+def cmd_sense(args) -> int:
+    """Settle the gloss sense of the rows that carry two glosses, before M1 (QUESTIONS 56)."""
+    from assistant_axis.gapgen.cost import confirm_or_abort
+    from assistant_axis.gapgen.generators.base_model import sense as SE
+    from assistant_axis.gapgen.generators.base_model import table as TB
+    from assistant_axis.judge_pricing import MultiModelUsage
+    _, table_p, _, _, _ = _paths(args, None)
+    arm = args.arm or SE.DEFAULT_ARM
+    floor = SE.DIVERGENCE_COSINE if args.divergence_cosine is None else args.divergence_cosine
+    concurrency = args.concurrency or SE.DEFAULT_CONCURRENCY
+    if not table_p.exists():
+        print(f"missing {_rel(table_p)}: run `parse --round {args.round}` first", file=sys.stderr)
+        return 2
+    rows = TB.load_table(table_p)
+    rdir = args.samples_dir / f"round{args.round}"
+    two = [r for r in rows if SE.two_sided(r)]
+    todo = [r for r in rows if SE.needs_screen(r)]
+    print(f"round {args.round}: {len(rows)} table rows, {len(two)} with two glosses (OEWN's sense and the "
+          f"model's own), {len(todo)} needing the free cosine screen at floor {floor:g}")
+    if args.dry_run:
+        print(f"DRY-RUN: would embed {2 * len(todo)} gloss texts with the {arm} arm (free for a local arm), "
+              f"flag the divergent rows, ask {SE.MODEL} one question each, and write the decisions into "
+              f"{_rel(table_p)} with {_rel(rdir / SE.RESPONSES_NAME)} and {_rel(rdir / SE.USAGE_NAME)}")
+        if two:
+            print(SE.render(two[0]))
+        return 0
+    if not todo:
+        print("nothing to screen; every two-sided row already carries a settled sense")
+        return 0
+    from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
+    usage = MultiModelUsage.load_or_create(rdir / SE.USAGE_NAME)
+    embedder = make_embedder(arm)
+    # The hash arm is a deterministic test double, so it is never cached; a real arm uses the platform's cache.
+    cache = None if arm == "hash" else EmbeddingCache(args.embed_cache_dir) if args.embed_cache_dir \
+        else EmbeddingCache()
+    cos = SE.cosine_rows(rows, embed=lambda texts: embed_texts(embedder, texts, cache=cache, usage=usage))
+    counts = SE.screen(rows, cosines=cos, floor=floor, embedder=embedder.name)
+    print(f"screen: {counts['n_divergent']} of {counts['n_screened']} divergent "
+          f"(rate {counts['divergence_rate']}), {counts['n_agree']} settled by agreement with no call")
+    n_call = sum(1 for r in rows if SE.needs_call(r))
+    est = _sense_estimate(n_call, SE.MODEL)
+    print(f"{n_call} calls to {SE.MODEL}, estimate ${est:.4f} (the screen itself is free with a local arm)")
+    confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    rdir.mkdir(parents=True, exist_ok=True)
+    done = SE.run_resolve_rows(rows, client=_anthropic_client(), usage=usage, concurrency=concurrency,
+                               records_path=rdir / SE.RESPONSES_NAME)
+    usage.write_json(rdir / SE.USAGE_NAME)
+    print(json.dumps(done))
+    print(usage.log_line())
+    summary = SE.summary(rows)
+    print("gloss sense: " + json.dumps(summary))
+    backup = TB.write_table(rows, table_p)
+    print(f"wrote {_rel(table_p)}" + (f"; previous table kept as {_rel(backup)}" if backup else " (unchanged)"))
+    print(f"wrote {_rel(rdir / SE.RESPONSES_NAME)}, {_rel(rdir / SE.USAGE_NAME)}")
+    if summary["n_unresolved"]:
+        print(f"{summary['n_unresolved']} rows are still unresolved (a failed call): rerun `sense --round "
+              f"{args.round}` before submitting", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -291,15 +390,24 @@ def cmd_stats(args) -> int:
     rows = TB.load_table(table_p)
     per = [json.loads(x) for x in stems_p.read_text(encoding="utf-8").splitlines() if x.strip()]
     from collections import Counter
+    # `parse`'s own counts where it saved them (the echo split and the per-family figures are counted over the
+    # samples, not recoverable from the table); the recomputed subset is the fallback for an older round.
+    counts_p = _counts_path(args, args.temperature)
     counts = {"n_raw_items": None, "by_form": dict(Counter(r["form"] for r in rows)),
               "by_form_eligible": dict(Counter(r["form"] for r in rows if r["eligible"])),
               "ineligible": dict(Counter(r["ineligible_reason"] for r in rows if not r["eligible"])),
               "normalized_mechanically": sum(1 for r in rows if r["normalized_from"])}
+    if counts_p.exists():
+        counts = json.loads(counts_p.read_text(encoding="utf-8"))
+    else:
+        print(f"note: no {_rel(counts_p)} (parsed before it existed), so the echo split and the per-family "
+              f"malformed rates are missing from this record; rerun `parse --round {args.round}`")
     corpus, _ = _corpus(args)
     renamed = EV.renamed_map([r["stem"] for r in rows], corpus, data_dir=args.data_dir)
     st = EV.round_stats(samples, rows, per, counts, round_n=args.round, temperature=args.temperature,
                         corpus_stems=corpus, renamed=renamed, step=args.step)
-    st["n_raw_items"] = sum(len(p["stems"]) for p in per)
+    if st.get("n_raw_items") is None:          # an older round, without parse's saved counts
+        st["n_raw_items"] = sum(len(p["stems"]) for p in per)
     print(f"round {args.round}" + (f" T={args.temperature:g}" if args.temperature is not None else "")
           + f": {st['n_samples']} samples, {st['n_unique']} uniques ({st['uniques_per_1k_samples']}/1k), "
           f"{st['n_eligible']} eligible, collapse top-50 {st['collapse_top50_share']:.1%}, Chao1 {st['chao1']}, "
@@ -335,12 +443,17 @@ def cmd_submit(args) -> int:
         print(f"missing {_rel(table_p)}: run `parse --round {args.round}` first", file=sys.stderr)
         return 2
     record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
-    SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=args.min_count,
-                  families=args.families.split(",") if args.families else None, budget_usd=args.budget_usd,
-                  confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by, transport=args.transport,
-                  dry_run=args.dry_run, registry_path=args.registry, candidates_dir=args.candidates_dir,
-                  table_path=Path(_rel(table_p)), table_sha256=sha256_file(table_p), sampling_record=record,
-                  sampling_usage_path=rec_p.parent / "usage.json")
+    try:
+        SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=args.min_count,
+                      families=args.families.split(",") if args.families else None, budget_usd=args.budget_usd,
+                      confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by,
+                      transport=args.transport, dry_run=args.dry_run, registry_path=args.registry,
+                      candidates_dir=args.candidates_dir, table_path=Path(_rel(table_p)),
+                      table_sha256=sha256_file(table_p), sampling_record=record,
+                      sampling_usage_path=rec_p.parent / "usage.json")
+    except SB.SenseUnresolved as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 
@@ -369,8 +482,10 @@ def cmd_report(args) -> int:
     cdir = args.candidates_dir or paths.DATA_CANDIDATES
     b = batch_id_for(args.run_id)
     fdir, ndir = paths.filter_dir(b, candidates_dir=cdir), paths.novelty_dir(b, candidates_dir=cdir)
+    from assistant_axis.gapgen.generators.base_model import sense as SE
     ev = EV.evaluate_run(args.run_id, run_dir=rdir, table=table, stats=stats, registry_rows=reg, filter_dir=fdir,
-                         novelty_dir=ndir, sampling_usage=rec_p.parent / "usage.json")
+                         novelty_dir=ndir, sampling_usage=rec_p.parent / "usage.json",
+                         sense_usage=rec_p.parent / SE.USAGE_NAME)
     doc = rdir / "report.md"
     md = RP.render_report(ev, doc_path=doc, run_dir=rdir, table_path=table_p,
                           stats_path=stats_p if stats_p.exists() else None, filter_dir=fdir, novelty_dir=ndir)
@@ -452,6 +567,23 @@ def build_parser() -> argparse.ArgumentParser:
             p.add_argument("--step", type=int, default=1000, help="rarefaction step (samples)")
         p.add_argument("--dry-run", action="store_true")
         p.set_defaults(func=func)
+
+    p = sub.add_parser("sense", help="settle the gloss sense of the rows carrying two (free cosine screen, one "
+                                     "cheap call per divergent row; QUESTIONS 56)")
+    p.add_argument("--round", type=int, required=True)
+    p.add_argument("--arm", default=None,
+                   help="embedding arm for the free divergence screen (default the local bge; gemma | openai | hash)")
+    p.add_argument("--divergence-cosine", type=float, default=None,
+                   help="below this cosine the two glosses go to a call (default sense.DIVERGENCE_COSINE; every "
+                        "cosine is recorded, so another floor re-derives without re-embedding)")
+    p.add_argument("--concurrency", type=int, default=None)
+    p.add_argument("--embed-cache-dir", type=Path, default=None,
+                   help="embedding cache (default the platform's data/candidates/cache/embeddings)")
+    p.add_argument("--budget-usd", type=float, default=2.0, help="cap on the sense calls (pennies in practice)")
+    p.add_argument("--confirm-expensive", action="store_true")
+    p.add_argument("--confirmed-by", default=None)
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_sense)
 
     p = sub.add_parser("submit", help="write a run's candidates.jsonl and submit it (no API cost; gated on the "
                                       "downstream M1 + M3 estimate)")

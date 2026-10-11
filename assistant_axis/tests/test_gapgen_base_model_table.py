@@ -76,6 +76,58 @@ def test_biography_text_never_enters_the_table():
     assert "Walter" not in json.dumps(rows)
 
 
+class TestNameEcho:
+    """Roger, QUESTIONS 54: the two bio rules counted apart, the dropped word logged, and the run reporting
+    any word that the name rule cost it."""
+
+    def test_the_two_rules_are_counted_apart(self):
+        _, c = build()
+        assert c["n_name_echo"] == 1 and c["n_bio_span_echo"] == 1
+        assert c["n_bio_echo"] == c["n_name_echo"] + c["n_bio_span_echo"]
+
+    def test_the_dropped_word_is_logged_but_never_the_span(self):
+        _, c = build()
+        # our own one-word candidate label, so nothing changes legally
+        assert c["name_echo_words"] == {"walter": 1}
+        # the span is verbatim CC BY-SA biography prose: counted, never logged
+        assert "flugzeugbau" not in json.dumps(c)
+
+    def test_a_word_that_arrived_from_another_seed_is_not_reported_as_lost(self):
+        # "generous" is dropped from the person sample as a name echo but also arrives from the list family
+        samples = [S(0, "list", " generous, kind."),
+                   S(1, "person", " generous, warm.", seed_refs=["wikibio:train:1"])]
+        bios = {"wikibio:train:1": ("Generous Smith", "Generous Smith was a pilot.")}
+        rows, c = T.build_table(samples, lookups=lookups(), bio_lookup=bios.get)
+        assert c["n_name_echo"] == 1 and c["name_echo_words"] == {"generous": 1}
+        assert c["name_echo_not_elsewhere"] == []            # nothing was lost: it came from another seed
+        assert "generous" in by_stem(rows)
+
+    def test_a_word_no_other_seed_brought_in_is_the_whitelist(self):
+        samples = [S(0, "person", " frank, warm.", seed_refs=["wikibio:train:2"])]
+        bios = {"wikibio:train:2": ("Frank Jones", "Frank Jones was a pilot.")}
+        rows, c = T.build_table(samples, lookups=lookups(), bio_lookup=bios.get)
+        assert c["name_echo_not_elsewhere"] == ["frank"] and "frank" not in by_stem(rows)
+
+    def test_a_multiword_label_is_never_a_name_echo(self):
+        # the name rule is single words only; a span is dropped only when it is in the biography verbatim
+        samples = [S(0, "person", " walter white, quietly stubborn.", seed_refs=["wikibio:train:3"])]
+        bios = {"wikibio:train:3": ("Walter Extra", "Walter Extra was a pilot.")}
+        rows, c = T.build_table(samples, lookups=lookups(), bio_lookup=bios.get)
+        assert c["n_name_echo"] == 0 and c["n_bio_span_echo"] == 0
+        assert "walter_white" in by_stem(rows)
+
+
+def test_per_family_counts_for_the_readout():
+    """Roger, QUESTIONS 61: the per-family numbers the readout compares the wiki_bio family on."""
+    _, c = build()
+    fam = c["by_family"]
+    assert set(fam) == {"list", "person", "contrast", "list_gloss", "ai_assistant"}
+    assert sum(v["n_samples"] for v in fam.values()) == c["n_samples"]
+    assert sum(v.get("n_raw_items", 0) for v in fam.values()) == c["n_raw_items"]
+    assert fam["person"]["n_name_echo"] == 1 and fam["person"]["n_bio_span_echo"] == 1
+    assert "n_name_echo" not in fam["list"]              # no echo of a kind the family cannot have
+
+
 def test_contrast_partner_and_sample_gloss():
     r = by_stem(build()[0])
     assert r["warm"]["partner_seed"] == "cold" and r["unflappable"]["partner_seed"] == "cold"
