@@ -61,6 +61,29 @@ def load_vector(vector_file: Path) -> dict:
     )
 
 
+class NanMeanAccumulator:
+    """Running element-wise nanmean of equally shaped tensors in float64,
+    one tensor at a time (no stack of every vector: 1,800 float32
+    combination vectors would be about 19 GB)."""
+
+    def __init__(self):
+        self.total = None
+        self.count = None
+
+    def add(self, t: torch.Tensor) -> None:
+        x = t.to(torch.float64)
+        if self.total is None:
+            self.total = torch.zeros_like(x)
+            self.count = torch.zeros(x.shape, dtype=torch.int64)
+        finite = ~torch.isnan(x)
+        self.total += torch.where(finite, x, torch.zeros((), dtype=torch.float64))
+        self.count += finite
+
+    def mean(self) -> torch.Tensor:
+        """float64; NaN where every tensor was NaN."""
+        return self.total / self.count
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -104,18 +127,26 @@ def main():
                        "axis: %s%s", len(excluded), responses_dir, ", ".join(excluded[:30]),
                        " ..." if len(excluded) > 30 else "")
 
-    # Separate default and role vectors
-    default_vectors = []
-    role_vectors = []
+    # Separate default and role vectors, accumulated one file at a time
+    # (float64 sums, float32 axis: walk-through P3, 2026-10-12)
+    default_acc = NanMeanAccumulator()
+    role_acc = NanMeanAccumulator()
     default_names: list[str] = []
     role_names: list[str] = []
     metadata = {}
+    shapes: set[str] = set()
+    dtypes: set[str] = set()
 
     for vec_file in tqdm(vector_files, desc="Loading vectors"):
         data = load_vector(vec_file)
         vector = data["vector"]
         vector_type = data.get("type", "unknown")
         role = data.get("role", vec_file.stem)
+        shapes.add(str(tuple(vector.shape)))
+        dtypes.add(str(vector.dtype).replace("torch.", ""))
+        if len(shapes) > 1:
+            print(f"Error: mixed vector shapes: {sorted(shapes)} (at {vec_file.name})")
+            sys.exit(1)
 
         if "metadata" in data:
             file_meta = data["metadata"]
@@ -134,46 +165,41 @@ def main():
         # Exact name, as in step 3 and step 4 (a substring test would put any
         # entity whose name contains "default" on the default side).
         if role == "default" or vector_type == "mean":
-            default_vectors.append(vector)
+            default_acc.add(vector)
             default_names.append(vec_file.stem)
             print(f"  {role}: default/mean vector")
         else:
-            role_vectors.append(vector)
+            role_acc.add(vector)
             role_names.append(vec_file.stem)
 
-    print(f"\nLoaded {len(default_vectors)} default vectors, {len(role_vectors)} role vectors")
+    print(f"\nLoaded {len(default_names)} default vectors, {len(role_names)} role vectors")
 
-    if not default_vectors:
+    if not default_names:
         print("Error: No default vectors found")
         sys.exit(1)
 
-    if not role_vectors:
+    if not role_names:
         print("Error: No role vectors found")
         sys.exit(1)
 
-    if len(role_vectors) < args.min_entities:
-        print(f"Error: only {len(role_vectors)} non-default vector(s) with responses, below "
+    if len(role_names) < args.min_entities:
+        print(f"Error: only {len(role_names)} non-default vector(s) with responses, below "
               f"--min_entities {args.min_entities}; refusing to build an axis from so few")
         sys.exit(1)
 
-    # Verify all vectors have the same shape
-    all_vectors = default_vectors + role_vectors
-    ref_shape = all_vectors[0].shape
-    mismatched = [v for v in all_vectors if v.shape != ref_shape]
-    if mismatched:
-        shapes = set(str(v.shape) for v in all_vectors)
-        print(f"Error: mixed vector shapes: {shapes}")
-        sys.exit(1)
+    if len(dtypes) > 1:
+        # bf16 (May 2026) beside float32 (since 2026-10-12): averaged in
+        # float64 all the same, but the tree mixes two extractions.
+        logger.warning("the vectors mix dtypes %s; a tree should come from one extraction",
+                       sorted(dtypes))
 
-    # Compute means -- works for both 2D (n_layers, hidden) and 3D (1+N, n_layers, hidden)
-    default_stacked = torch.stack(default_vectors)
-    role_stacked = torch.stack(role_vectors)
-
-    default_mean = default_stacked.nanmean(dim=0)
-    role_mean = role_stacked.nanmean(dim=0)
-
-    # Compute axis: points from role-playing toward default
-    axis = default_mean - role_mean
+    # Means per element over whole (n_slots, n_layers, hidden) tensors (2D
+    # (n_layers, hidden) too), NaN-skipping, in float64; the difference is
+    # taken in float64 and stored as float32.  Until 2026-10-12 the stacked
+    # bf16 vectors were averaged and subtracted in bf16: 1.3-1.5% median,
+    # up to 6.3%, relative error in the axis (review P4's measurement).
+    # Points from role-playing toward default.
+    axis = (default_acc.mean() - role_acc.mean()).to(torch.float32)
 
     print(f"\nAxis shape: {axis.shape}")
 
@@ -221,6 +247,10 @@ def main():
             "responses_dir": str(responses_dir.resolve()),
             "excluded_without_responses": excluded,
             "min_entities": args.min_entities,
+            # since the float32 change (P3, 2026-10-12)
+            "vector_dtypes": sorted(dtypes),
+            "axis_dtype": "float32",
+            "accumulation": "float64",
         },
     }
     if metadata:

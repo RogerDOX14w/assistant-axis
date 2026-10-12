@@ -4023,6 +4023,28 @@ that now carries the averaged (bias-cancelled) estimator post-fill.
 No analysis code changes were needed for v7 records; the change
 percolates through the existing readers.
 
+### Vector and axis dtypes: bf16 in May, float32 from October (2026-10-12)
+<!-- claude: rule=axis-geometry -->
+
+Pipeline steps 4 and 5 store **float32** since 2026-10-12 (walk-through
+P3; review P4 D1 / P5 #19): step 4 averages each entity's activations in
+float64, one at a time, and stores the vector as float32 (~10.5 MB for
+`(8, 64, 5120)`); step 5 averages the vectors in float64 and stores
+`axis.pt` as float32.  Step 2's activations stay bf16 (their span mean
+already accumulates in float32 and rounds once; float32 activations would
+double 2.6 GB per entity for little gain).  **Every May 2026 vector and
+axis (the 8slot tree) is bf16**; vectors and axes record `vector_dtype` /
+`axis_dtype` and `accumulation` in their `inputs` from October on, and May
+files have no such record.  What the change buys: the bf16 axis was off
+from a float32 recomputation of the same vectors by 1.3-1.5% median, up to
+6.3% (cosine >= 0.998), mostly from rounding the role mean before the
+difference of two close means; the stored per-entity bf16 mean was off by
+~0.2%.  Analyses that load vectors cast them to float32 themselves (so only
+the stored ~0.2% entered them); steering casts the loaded axis to the
+model's dtype (`steering/run_sweep.py` `_axis_vector_for_model`), so a
+float32 axis steers a bf16 model as before.  A tree mixing the two dtypes
+is averaged correctly but step 5 warns: it mixes two extractions.
+
 ### Whitening / soft-shear defaults
 <!-- claude: rule=axis-geometry -->
 

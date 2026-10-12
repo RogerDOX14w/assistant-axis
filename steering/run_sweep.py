@@ -658,6 +658,21 @@ def _load_axis_for_cell(axis_source: Dict[str, Any],
     raise ValueError(f"unknown axis_source.type: {src_type!r}")
 
 
+def _axis_vector_for_model(axis_source: Dict[str, Any], slot: int, layer: int, model):
+    """The cell's steering vector on the model's device and in the model's
+    dtype.  Axes and vectors are stored in float32 since 2026-10-12
+    (walk-through P3; May 2026 trees are bf16), so the cast here is what
+    keeps a float32 axis from meeting bf16 activations.  ``model.dtype`` is
+    the Hugging Face property; a model without it uses its first
+    parameter's dtype.  (Until 2026-10-12 the worker cast to a hard-coded
+    bfloat16, which was the model's dtype.)"""
+    vec = _load_axis_for_cell(axis_source, slot, layer)
+    dtype = getattr(model, "dtype", None)
+    if dtype is None:
+        dtype = next(model.parameters()).dtype
+    return vec.to(model.device, dtype=dtype)
+
+
 def _worker_main(
     worker_id: int,
     gpu_id: int,
@@ -804,9 +819,8 @@ def _worker_main(
                     f"max={item['max_strength']}, "
                     f"min={item.get('min_strength', 0.125)}"
                 )
-                axis_vector = _load_axis_for_cell(
-                    item["axis_source"], slot, layer
-                ).to(model.device, dtype=torch.bfloat16)
+                axis_vector = _axis_vector_for_model(
+                    item["axis_source"], slot, layer, model)
                 # Legacy mode needs an explicit schedule; bidirectional
                 # mode builds its cursor lazily inside run_steering_cell.
                 if scan_mode == "legacy_unidirectional":

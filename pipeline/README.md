@@ -268,14 +268,14 @@ uv run 4_vectors.py \
     --output_dir outputs/roger/vectors
 ```
 
-Processes whatever files are in the input directories.  An entity's vector is the mean (`nanmean`) of its activations scored 3, the same shape as one activation (`(8, n_layers, hidden)` for Qwen 3); the entity named exactly `default` gets the mean of all its activations, unscored.  An activation with no score is not used, which is how the incongruity filter reaches the vectors.
+Processes whatever files are in the input directories.  An entity's vector is the mean (`nanmean`) of its activations scored 3, the same shape as one activation (`(8, n_layers, hidden)` for Qwen 3); the entity named exactly `default` gets the mean of all its activations, unscored.  **Vectors are float32 since 2026-10-12** (walk-through P3): the activations (bf16) are averaged in float64 one at a time, without stacking them, and the mean is stored as float32 (about 10.5 MB per Qwen3-32B vector).  The May 2026 vectors are bf16; the stored bf16 mean was off by about 0.2%, which step 5's difference of close means amplified.  An activation with no score is not used, which is how the incongruity filter reaches the vectors.
 
 **Options:**
 - `--min_count`: minimum score=3 activations for a vector (default 50; `run_pipeline.sh` passes 30 in roger mode, 50 in christina mode)
 - `--overwrite`: alone, recompute and overwrite every vector; `--overwrite FILE` (one entity per line, such as a scan's `missing_vectors_rerun.txt`) overwrites only the listed entities, and the rest keep skip-if-exists
 - `--reduce_questions N`: use only activations whose question index is a multiple of N (default 1); it compounds with step 1's reduction
 
-Each vector file holds `vector`, `type` (`pos_3` or `mean`), `role`, the activation file's `metadata`, and since 2026-10-12 a top-level `inputs` record of what it was computed from: `script`, `created_at`, the activation file's name and size, `n_activations`, `min_count`, `reduce_questions`, and for a scored entity the scores file's `name`, `size`, `sha256` and `n_scores`, `n_scored_activations` and `n_score3_used`.  A vector made from a partial scores file can therefore be told from a complete one later.
+Each vector file holds `vector`, `type` (`pos_3` or `mean`), `role`, the activation file's `metadata`, and since 2026-10-12 a top-level `inputs` record of what it was computed from: `script`, `created_at`, the activation file's name and size, `n_activations`, `min_count`, `reduce_questions`, and for a scored entity the scores file's `name`, `size`, `sha256` and `n_scores`, `n_scored_activations` and `n_score3_used`, and `vector_dtype` (`float32`) and `accumulation` (`float64`).  A vector made from a partial scores file can therefore be told from a complete one later.
 
 **Recompute rule** (since 2026-10-12, walk-through P2).  An existing vector is skipped unless it is overwritten or **stale**: its recorded `inputs.scores_file.sha256` differs from the scores file on disk now (a vector made while step 3 was still collecting batches, or before a rejudge).  A stale vector is recomputed (a WARNING names both hashes), and if the current scores no longer reach `--min_count` it is moved aside to `<name>.pt.stale`, out of step 5's `*.pt` glob.  A vector with no `inputs` record (all May 2026 vectors) counts as current.  Only vectors whose scores file is at least as new as the vector are loaded for the comparison, so a rerun with nothing changed loads none.
 
@@ -472,6 +472,8 @@ uv run 5_axis.py \
 axis = mean(default_vectors) - nanmean(non_default_vectors)
 ```
 
+The means and the difference are taken in float64, one vector at a time (no stack of every vector), and `axis.pt` is stored as **float32** (since 2026-10-12, walk-through P3; May 2026 axes are bf16, off from a float32 recomputation by 1.3-1.5% median, up to 6.3%).  A directory that mixes bf16 and float32 vectors is averaged all the same, with a WARNING (it mixes two extractions).  Steering casts the loaded axis to the model's dtype.
+
 The vectors that take part are the `.pt` files in `--vectors_dir` whose stem
 has a response file in `--responses_dir` (default: the `responses/`
 directory beside the vectors directory, as the driver lays them out; since
@@ -492,7 +494,8 @@ when their metadata disagree on `header_ids` or `model_name`.  `axis.pt`
 holds `axis`, the first vector's `metadata`, and since 2026-10-12 an `inputs`
 record of what it was made of: `script`, `created_at`, `vectors_dir`, the
 `default` and `entities` stems, `n_default`, `n_entities`, `responses_dir`,
-`excluded_without_responses` and `min_entities`.
+`excluded_without_responses`, `min_entities`, `vector_dtypes`, `axis_dtype` and
+`accumulation`.
 
 ## Data Format
 

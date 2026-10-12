@@ -274,3 +274,17 @@ def test_a_stale_vector_makes_the_scan_exit_3(scan, tree, monkeypatch):
                     "--rerun_list", str(t["vec"] / "rerun.txt")])
     assert rc == scan.EXIT_RERUN_CANDIDATES
     assert (t["vec"] / "rerun.txt").read_text().split() == ["pirate"]
+
+
+def test_a_float32_vector_passes_the_size_and_load_checks(scan, tree):
+    """Vectors are float32 since 2026-10-12 (twice the bytes of May's bf16):
+    the scanner's size checks are on activations (a peer median) and a
+    256-byte floor for vectors, so both dtypes classify alike."""
+    t = tree
+    for name, dtype in (("may", torch.bfloat16), ("october", torch.float32)):
+        _acts(t["act"] / f"{name}.pt", 4)
+        torch.save({"vector": torch.ones(8, 4, 16, dtype=dtype), "type": "pos_3", "role": name},
+                   t["vec"] / f"{name}.pt")
+    median = scan.peer_median_size(sorted(t["act"].glob("*.pt")))
+    for name in ("may", "october"):
+        assert _classify(scan, t, name, median=median)["status"] == "ok"

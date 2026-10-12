@@ -208,7 +208,8 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int,
     Compute mean vector from activations where score=3.
 
     Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
-    (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
+    (1+N, n_layers, hidden_dim). Output shape matches input tensor shape;
+    the dtype is float32 (since 2026-10-12; :func:`nanmean_float32`).
 
     With reduce_questions=N (default 1 = no further reduction), takes only
     activations whose question index satisfies q_idx % N == 0.  This is
@@ -237,8 +238,7 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int,
     if len(filtered_acts) < max(min_count, 1):
         raise BelowMinCount(f"Only {len(filtered_acts)} score=3 samples, need {min_count}")
 
-    stacked = torch.stack(filtered_acts)
-    return stacked.nanmean(dim=0)
+    return nanmean_float32(filtered_acts)
 
 
 def compute_mean_vector(activations: dict, reduce_questions: int = 1) -> torch.Tensor:
@@ -255,8 +255,39 @@ def compute_mean_vector(activations: dict, reduce_questions: int = 1) -> torch.T
                 if _keep_by_reduce(key, reduce_questions)]
     if not all_acts:
         raise BelowMinCount("no activations left after --reduce_questions")
-    stacked = torch.stack(all_acts)
-    return stacked.nanmean(dim=0)
+    return nanmean_float32(all_acts)
+
+
+def nanmean_float32(tensors: list) -> torch.Tensor:
+    """The element-wise nanmean of equally shaped tensors, accumulated in
+    float64 one tensor at a time and returned as **float32**.
+
+    Since 2026-10-12 (walk-through P3; review P4 D1 / P5 #19) step 4 stores
+    float32 vectors: before, the stacked bf16 activations were averaged and
+    the mean stored in bf16, a rounding of about 0.2% that step 5's
+    difference of close means amplified to 1-5% in the axis.  Accumulating
+    one tensor at a time also avoids stacking the activations (about 2.6 GB
+    in bf16 for 500 responses, twice that in float32).  An element that is
+    NaN in every tensor (a header slot never found) stays NaN, as with
+    ``nanmean``; a shape mismatch raises RuntimeError, as ``torch.stack``
+    did."""
+    total = None
+    count = None
+    for t in tensors:
+        x = t.to(torch.float64)
+        if total is None:
+            total = torch.zeros_like(x)
+            count = torch.zeros(x.shape, dtype=torch.int32)
+        elif x.shape != total.shape:
+            raise RuntimeError(f"activation shape {tuple(x.shape)} differs from "
+                               f"{tuple(total.shape)}")
+        finite = ~torch.isnan(x)
+        total += torch.where(finite, x, torch.zeros((), dtype=torch.float64))
+        count += finite
+    if total is None:
+        raise BelowMinCount("no activations to average")
+    mean = total / count            # 0/0 -> NaN where every input was NaN
+    return mean.to(torch.float32)
 
 
 def recorded_scores_sha256(vector_file: Path) -> str | None:
@@ -341,6 +372,9 @@ def process_entity(act_file: Path, output_file: Path, scores_dir: Path, *,
         "n_activations": len(activations),
         "min_count": min_count,
         "reduce_questions": reduce_questions,
+        # since 2026-10-12 (P3): the vector's dtype and how it was averaged
+        "vector_dtype": "float32",
+        "accumulation": "float64",
     }
     try:
         if is_default_entity(role):

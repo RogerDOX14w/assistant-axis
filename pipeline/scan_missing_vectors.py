@@ -363,7 +363,9 @@ class ScanCache:
 # file size are flagged as "suspiciously small / likely truncated".
 TRUNCATION_RATIO = 0.5
 # Vector files smaller than this many bytes are treated as suspect.
-# A healthy bf16 (n_slots × n_layers × hidden) vector is in the low MB;
+# A healthy (n_slots × n_layers × hidden) vector is in the low MB (bf16 in
+# May 2026, float32 and twice the size since 2026-10-12; nothing here compares
+# vector sizes between files, so both dtypes classify alike);
 # even a tiny smoke-test tensor pickled by torch.save is ~700 bytes.
 # Anything under 256 bytes is almost certainly a stub / aborted write.
 MIN_HEALTHY_VECTOR_BYTES = 256

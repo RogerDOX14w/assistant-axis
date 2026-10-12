@@ -319,3 +319,45 @@ def test_the_early_check_sees_a_newer_scores_file(step4, dirs):
     assert step4.nothing_to_do(args) is True
     _make_scores_newer(dirs, "pirate")
     assert step4.nothing_to_do(args) is False
+
+
+# ---------------------------------------------------------------------------
+# float32 vectors (walk-through P3, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def test_vectors_are_float32_averaged_in_float64(step4, dirs):
+    """bf16 activations (what step 2 writes) give a float32 vector equal to
+    the float64 mean rounded once; the old bf16 mean was off by a rounding."""
+    gen = torch.Generator().manual_seed(0)
+    acts = {f"pos_p0_q{q}": (torch.randn(N_SLOTS, N_LAYERS, HIDDEN, generator=gen) * 50
+                             ).to(torch.bfloat16) for q in range(40)}
+    acts["pos_p0_q0"][1] = float("nan")
+    data = dict(acts)
+    data["metadata"] = {"header_ids": [1, 2], "model_name": "fake/model"}
+    torch.save(data, dirs["act"] / "pirate.pt")
+    (dirs["scores"] / "pirate.json").write_text(json.dumps({k: 3 for k in acts}))
+    assert _main(step4, dirs) == 0
+    saved = _load(dirs["vec"] / "pirate.pt")
+    v = saved["vector"]
+    assert v.dtype == torch.float32
+    assert saved["inputs"]["vector_dtype"] == "float32"
+    expected = torch.stack([a.to(torch.float64) for a in acts.values()]).nanmean(dim=0)
+    assert torch.allclose(v.double(), expected, rtol=1e-6, atol=1e-6)
+    old_bf16 = torch.stack(list(acts.values())).nanmean(dim=0)
+    assert old_bf16.dtype == torch.bfloat16 and not torch.equal(old_bf16.float(), v)
+
+
+def test_nanmean_float32_keeps_all_nan_elements_nan_and_checks_shapes(step4):
+    a = torch.tensor([[1.0, float("nan")], [3.0, float("nan")]])
+    b = torch.tensor([[3.0, float("nan")], [float("nan"), float("nan")]])
+    m = step4.nanmean_float32([a, b])
+    assert m.dtype == torch.float32
+    assert m[0, 0] == 2.0 and m[1, 0] == 3.0 and torch.isnan(m[:, 1]).all()
+    with pytest.raises(RuntimeError):
+        step4.nanmean_float32([a, torch.zeros(3, 2)])
+
+
+def test_the_default_mean_is_float32(step4, dirs):
+    _write_entity(dirs, "default", None, {"default_p0_q0": 2.0, "default_p0_q1": 4.0})
+    assert _main(step4, dirs) == 0
+    assert _load(dirs["vec"] / "default.pt")["vector"].dtype == torch.float32

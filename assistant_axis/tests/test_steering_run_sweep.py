@@ -582,3 +582,55 @@ class TestWorkerExitStatus:
         mod._worker_main(0, 0, _ListQueue([None]), {"model_name": "fake/model", "tmpfs_method": "cp"})
         mod._worker_main(0, 0, _ListQueue([None]), {"model_name": "fake/model"})
         assert seen == ["cp", "auto"]
+
+
+# ---------------------------------------------------------------------------
+# A float32 axis is cast to the model's dtype at load (walk-through P3, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+class TestAxisDtypeAtLoad:
+    """Step 5 stores float32 axes since 2026-10-12 (May trees are bf16); the
+    worker must hand the steering hooks a vector in the model's dtype."""
+
+    @staticmethod
+    def _axis_file(tmp_path, dtype):
+        import torch
+        axis = torch.arange(3 * 4 * 5, dtype=torch.float32).reshape(3, 4, 5) / 7.0
+        p = tmp_path / f"axis_{str(dtype).split('.')[-1]}.pt"
+        torch.save({"axis": axis.to(dtype), "metadata": {}}, p)
+        return p, axis
+
+    class _Model:
+        def __init__(self, dtype):
+            self.dtype = dtype
+            self.device = "cpu"
+
+    def test_float32_axis_is_cast_to_a_bf16_model(self, mod, tmp_path):
+        import torch
+        path, axis = self._axis_file(tmp_path, torch.float32)
+        src = {"type": "axis", "axis_path": str(path)}
+        raw = mod._load_axis_for_cell(src, 1, 2)
+        assert raw.dtype == torch.float32                 # stored dtype, untouched
+        v = mod._axis_vector_for_model(src, 1, 2, self._Model(torch.bfloat16))
+        assert v.dtype == torch.bfloat16 and v.shape == (5,)
+        assert torch.equal(v, axis[1, 2].to(torch.bfloat16))
+
+    def test_the_cast_follows_the_model_not_a_constant(self, mod, tmp_path):
+        import torch
+        path, axis = self._axis_file(tmp_path, torch.bfloat16)      # a May axis
+        src = {"type": "axis", "axis_path": str(path)}
+        v = mod._axis_vector_for_model(src, 0, 0, self._Model(torch.float32))
+        assert v.dtype == torch.float32
+
+    def test_a_model_without_a_dtype_attribute_uses_its_parameters(self, mod, tmp_path):
+        import torch
+        path, _ = self._axis_file(tmp_path, torch.float32)
+
+        class Bare:
+            device = "cpu"
+
+            def parameters(self):
+                yield torch.zeros(1, dtype=torch.float16)
+
+        v = mod._axis_vector_for_model({"type": "axis", "axis_path": str(path)}, 0, 1, Bare())
+        assert v.dtype == torch.float16

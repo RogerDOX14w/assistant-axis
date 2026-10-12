@@ -165,3 +165,38 @@ def test_too_few_entities_is_refused(step5, monkeypatch, tmp_path):
         _run(step5, monkeypatch, vec_dir, tmp_path / "axis.pt", "--min_entities", "10")
     assert e.value.code == 1
     assert step5.DEFAULT_MIN_ENTITIES == 10
+
+
+# ---------------------------------------------------------------------------
+# float32 axis (walk-through P3, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def test_the_axis_is_float32_and_averaged_in_float64(step5, monkeypatch, tmp_path):
+    gen = torch.Generator().manual_seed(1)
+    vec_dir = tmp_path / "vectors"
+    vec_dir.mkdir()
+    default = (torch.randn(3, 2, 4, generator=gen) * 30 + 100).to(torch.bfloat16)
+    _vec(vec_dir / "default.pt", default, vtype="mean")
+    others = []
+    for i in range(12):
+        t = (torch.randn(3, 2, 4, generator=gen) * 30 + 100).to(torch.bfloat16)
+        others.append(t)
+        _vec(vec_dir / f"e{i:02d}.pt", t)
+    saved = _run(step5, monkeypatch, vec_dir, tmp_path / "axis.pt")
+    axis = saved["axis"]
+    assert axis.dtype == torch.float32 and saved["inputs"]["axis_dtype"] == "float32"
+    expected = default.double() - torch.stack([o.double() for o in others]).mean(dim=0)
+    assert torch.allclose(axis.double(), expected, rtol=1e-6, atol=1e-5)
+    assert saved["inputs"]["vector_dtypes"] == ["bfloat16"]
+
+
+def test_mixed_vector_dtypes_are_averaged_with_a_warning(step5, monkeypatch, tmp_path, caplog):
+    vec_dir = tmp_path / "vectors"
+    vec_dir.mkdir()
+    _vec(vec_dir / "default.pt", torch.full((3, 2, 4), 10.0), vtype="mean")
+    _vec(vec_dir / "may.pt", torch.full((3, 2, 4), 2.0).to(torch.bfloat16))
+    _vec(vec_dir / "october.pt", torch.full((3, 2, 4), 4.0))
+    with caplog.at_level("WARNING"):
+        saved = _run(step5, monkeypatch, vec_dir, tmp_path / "axis.pt")
+    assert torch.allclose(saved["axis"], torch.full((3, 2, 4), 7.0))
+    assert "mix dtypes" in caplog.text
