@@ -348,16 +348,24 @@ OVERLAP_EXAMPLE_WORDS = ("punctual", "tidy", "talkative", "loquacious", "penny-p
 #: boastful").  The round-2 texts are final for the experiment and are not changed here (no corpus trait is
 #: either word, so no judged pair contains one); each hit is recorded, and a new one fails.  A round-2
 #: wording taken into production would need other examples if either word can be an M3 candidate.
+#: "morose" (Roger, 2026-10-12, option a): promoted into the seed queue on 2026-10-11 from the tda_1 review, so the
+#: judge's example word is now a queue entry.  The rubric texts are pinned and stay as they are; the collision is
+#: recorded here, and a new one still fails.  The judgement of these rubrics on "morose" is not to be relied on.
 OVERLAP_EXAMPLE_RECORDED = {"proud": "reserved: decisions_m1.md and the You are X. probe (two person senses)",
-                            "boastful": "reserved: decisions_m1.md glosses"}
+                            "boastful": "reserved: decisions_m1.md glosses",
+                            "morose": "promoted to the seed queue 2026-10-11 (tda_1 review); the pinned text keeps it"}
 #: Words of the overlap prompts that are corpus labels, queue entries or validation-file words and are
 #: not already allowed as prose: none at draft 2 of A and B; "single" in the arms' "narrowed to a single
 #: domain" (prose, as in the split filter's kind prompt; the texts are final for the experiment), kept by
 #: round 2's C2, D2 and E2 (A2 says "narrowed to a domain").
-OVERLAP_PROSE_RECORDED = {"overlap_concept": set(), "overlap_cooccurrence": set(), "overlap_six": {"single"},
-                          "overlap_relation": {"single"}, "overlap_scope": {"single"},
-                          "overlap_concept_implies": set(), "overlap_six_implies": {"single"},
-                          "overlap_relation_implies": {"single"}, "overlap_scope_implies": {"single"}}
+#: "morose" is in every overlap prompt's example list, promoted into the queue after the texts were pinned (see
+#: OVERLAP_EXAMPLE_RECORDED).
+OVERLAP_PROSE_RECORDED = {"overlap_concept": {"morose"}, "overlap_cooccurrence": {"morose"},
+                          "overlap_six": {"single", "morose"}, "overlap_relation": {"single", "morose"},
+                          "overlap_scope": {"single", "morose"},
+                          "overlap_concept_implies": {"morose"}, "overlap_six_implies": {"single", "morose"},
+                          "overlap_relation_implies": {"single", "morose"},
+                          "overlap_scope_implies": {"single", "morose"}}
 
 
 class TestOverlapHygiene:
@@ -368,8 +376,9 @@ class TestOverlapHygiene:
         bad = _forbidden() | _test_words()
         hits = [w for w in OVERLAP_EXAMPLE_WORDS if w in reserved or normalize_to_file_name(w) in bad]
         assert set(hits) == set(OVERLAP_EXAMPLE_RECORDED)
-        # the recorded ones collide with the reserved list only, never with the corpus, queue or validation file
-        assert not any(normalize_to_file_name(w) in bad for w in OVERLAP_EXAMPLE_RECORDED)
+        # the reserved pair collide with the reserved list only; "morose" (2026-10-12) is the one recorded collision
+        # with the queue, as recorded in OVERLAP_EXAMPLE_RECORDED
+        assert {w for w in OVERLAP_EXAMPLE_RECORDED if normalize_to_file_name(w) in bad} == {"morose"}
 
     def test_example_words_are_in_the_prompts(self):
         a, b = sr.load_prompt("overlap_concept"), sr.load_prompt("overlap_cooccurrence")
@@ -403,6 +412,8 @@ class TestOverlapHygiene:
 
 #: M3's relation rubric (coding_plan_m3.md, draft 1): its example words are rubric A's, checked above.
 RELATION_EXAMPLE_WORDS = ("talkative", "loquacious", "studious", "bookish", "cheery", "morose", "chatty", "plainspoken")
+#: The relation rubric's recorded collision (see OVERLAP_EXAMPLE_RECORDED): "morose", promoted 2026-10-11.
+RELATION_RECORDED = {"morose"}
 
 
 class TestRelationRubric:
@@ -423,14 +434,15 @@ class TestRelationRubric:
         text = sr.load_prompt("relation")
         for w in RELATION_EXAMPLE_WORDS:
             assert w in text and w in OVERLAP_EXAMPLE_WORDS, w
-            assert w not in reserved and normalize_to_file_name(w) not in bad, w
+        hits = [w for w in RELATION_EXAMPLE_WORDS if w in reserved or normalize_to_file_name(w) in bad]
+        assert set(hits) == RELATION_RECORDED                                # a new collision fails
 
     def test_prompt_words_against_the_corpus_queue_and_validation_file(self):
         from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
         forbidden = _forbidden() | _test_words()
         got = {w for w in prompt_words(sr.load_prompt("relation")) if normalize_to_file_name(w) in forbidden
                and w not in PROSE_ALLOWED}
-        assert got == set()
+        assert got == RELATION_RECORDED
 
 
 class TestHygiene:
