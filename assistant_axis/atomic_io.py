@@ -105,6 +105,16 @@ TRANSIENT_READ_ERRORS: Tuple[Type[BaseException], ...] = (
     OSError, RuntimeError, EOFError,
 )
 
+# ...except these, which are raised at once although they are OSErrors.  A
+# file that does not exist is not an NFS hiccup: retrying it cost 265 s per
+# missing file (13 files, ~57 min, in step 4 on 2026-05-03; review P4 D5,
+# walk-through P8.4, 2026-10-12).  ESTALE (a stale NFS handle) is an OSError
+# with errno ESTALE, not a FileNotFoundError (errno ENOENT), so it stays
+# transient.
+NON_TRANSIENT_READ_ERRORS: Tuple[Type[BaseException], ...] = (
+    FileNotFoundError,
+)
+
 
 def _staging_dir() -> Path:
     """TMPDIR (if set) or /tmp.
@@ -263,6 +273,7 @@ def _retry_read(
     base_delay_s: Optional[float] = None,
     delays_s: Optional[Sequence[float]] = None,
     transient: Tuple[Type[BaseException], ...] = TRANSIENT_READ_ERRORS,
+    non_transient: Tuple[Type[BaseException], ...] = NON_TRANSIENT_READ_ERRORS,
     logger_obj: Optional[logging.Logger] = None,
 ):
     """Run ``fn(path)`` inside a retry/backoff loop.
@@ -274,7 +285,9 @@ def _retry_read(
     mode that motivated tightening this helper).  ``JSONDecodeError``
     is *not* in the default set: a malformed JSON file is almost
     always corrupt-on-disk, not transient, so retrying just delays
-    the inevitable.
+    the inevitable.  ``non_transient`` (default ``FileNotFoundError``,
+    since 2026-10-12) is raised at once even though it is an
+    ``OSError``; an ``OSError`` with errno ``ESTALE`` is still retried.
 
     Backoff schedule:
       * If ``delays_s`` is given, it's used directly (length determines
@@ -305,6 +318,8 @@ def _retry_read(
         try:
             return fn(path)
         except transient as e:
+            if non_transient and isinstance(e, non_transient):
+                raise
             last_err = e
             if attempt < n_attempts - 1:
                 wait = delays[attempt]

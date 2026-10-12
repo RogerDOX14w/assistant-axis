@@ -156,6 +156,39 @@ class TestReadRetries:
             with pytest.raises(OSError, match="permanent failure"):
                 atomic_io.read_text_with_retry(p, attempts=3, base_delay_s=0.01)
 
+    def test_a_missing_file_is_raised_at_once(self, tmp_path):
+        """P8.4 (2026-10-12): FileNotFoundError is not an NFS hiccup; each
+        missing file used to cost the full 265 s retry schedule."""
+        import time as _time
+        sleeps = []
+        with mock.patch.object(_time, "sleep", lambda s: sleeps.append(s)):
+            with pytest.raises(FileNotFoundError):
+                atomic_io.read_text_with_retry(tmp_path / "absent.txt")
+            with pytest.raises(FileNotFoundError):
+                atomic_io.torch_load_with_retry(tmp_path / "absent.pt")
+        assert sleeps == []
+        assert FileNotFoundError in atomic_io.NON_TRANSIENT_READ_ERRORS
+
+    def test_estale_is_still_retried(self, tmp_path):
+        """A stale NFS handle is an OSError with errno ESTALE, not a
+        FileNotFoundError: it stays transient."""
+        import errno
+        p = tmp_path / "x.txt"
+        p.write_text("payload")
+        n_calls = {"n": 0}
+        real_read = Path.read_text
+
+        def stale_then_ok(self_, encoding="utf-8"):
+            n_calls["n"] += 1
+            if n_calls["n"] < 2:
+                raise OSError(errno.ESTALE, "Stale file handle")
+            return real_read(self_, encoding=encoding)
+
+        with mock.patch.object(Path, "read_text", stale_then_ok):
+            assert atomic_io.read_text_with_retry(p, attempts=3, base_delay_s=0.01) == "payload"
+        assert n_calls["n"] == 2
+        assert not isinstance(OSError(errno.ESTALE, "x"), FileNotFoundError)
+
     def test_read_text_does_not_retry_unicode_decode_error(self, tmp_path):
         """Non-OSError exceptions (e.g. corrupt content) should propagate immediately."""
         p = tmp_path / "x.txt"

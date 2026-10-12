@@ -381,7 +381,9 @@ The read retry:
 
 - 5 attempts with exponential backoff `[5, 20, 60, 180]` s
   (cumulative ~265 s, matches `axis_judge_correlation`'s API retry).
-- Treats `OSError`, **`RuntimeError`** *and* `EOFError` as transient.
+- Treats `OSError`, **`RuntimeError`** *and* `EOFError` as transient,
+  except `FileNotFoundError`, which is raised at once (since 2026-10-12: a
+  missing file cost 265 s of retries each); `ESTALE` is still retried.
   The `RuntimeError` case is the failure mode that surfaced as
   `"storage has wrong byte size of dtype ..."` / `"PytorchStreamReader
   failed reading zip archive: ... unexpected EOF, expected N more

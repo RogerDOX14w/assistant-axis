@@ -59,6 +59,16 @@ Both reads and writes need defensive handling.
   retried only `OSError` missed it entirely.  On final failure: log
   error and raise; the caller's outer loop is responsible for any
   "skip this item, continue with the rest" semantics.
+  **Except `FileNotFoundError`** (since 2026-10-12, review P4 D5 /
+  walk-through P8.4; `NON_TRANSIENT_READ_ERRORS`): a missing file is
+  raised at once, although it is an `OSError`, because a file that does
+  not exist is not an NFS hiccup and the retries cost 265 s per missing
+  file (13 files, ~57 min, in step 4 on 2026-05-03).  A stale NFS handle
+  (`OSError` with errno `ESTALE`, not a `FileNotFoundError`) is still
+  retried.  A file another pod has just written can in principle be
+  briefly invisible over NFS (negative lookup caching); none of the
+  readers depends on that, since each step reads only files that a
+  directory listing or an earlier step of the same process produced.
 
 New call sites should use the `assistant_axis.atomic_io` helpers
 rather than re-rolling the pattern:
