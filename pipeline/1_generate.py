@@ -3,9 +3,11 @@
 Generate model responses using vLLM batch inference.
 
 Supports two modes:
-- roger (default): Combined role+trait instructions, standalone traits/roles, and default.
+- roger (default): Combined role+trait instructions, standalone traits, and default
+  (standalone roles only with --roles_only).
   Uses goal_roles_and_traits.json to select which roles/traits to combine.
   Flags --no_traits, --traits_only, --roles_only control which subset to generate.
+  --roles NAME ... keeps only the work items with those output names (any mode).
   Flags --combos_only_r / --combos_only_t restrict to one half of the
   combination grid (r_ = goal-role x non-goal-trait; t_ = non-goal-role x
   goal-trait).  Both write into the same combinations/ directory.
@@ -67,10 +69,8 @@ def collect_work_items(args) -> List[Dict]:
         traits_dir = Path(args.traits_dir)
 
         if args.roles_only:
-            # Standalone roles (all files in roles_dir, filtered by --roles if given)
+            # Standalone roles (all files in roles_dir; --roles filters below)
             for fp in sorted(roles_dir.glob("*.json")):
-                if args.roles and fp.stem not in args.roles:
-                    continue
                 items.append({
                     "output_name": fp.stem,
                     "type": "standalone",
@@ -182,15 +182,24 @@ def collect_work_items(args) -> List[Dict]:
 
     else:  # christina — scan roles_dir (unchanged behaviour)
         for fp in sorted(roles_dir.glob("*.json")):
-            name = fp.stem
-            if args.roles and name not in args.roles:
-                continue
             items.append({
-                "output_name": name,
+                "output_name": fp.stem,
                 "type": "standalone",
                 "file_path": str(fp),
             })
         logger.info(f"Christina mode: {len(items)} items from {roles_dir}")
+
+    # --roles keeps the work items with those output names, in every mode.
+    # Before 2026-10-12 it was applied only with --roles_only and in christina
+    # mode, and silently ignored otherwise: `--roles r_activist__abstract`
+    # generated the whole combination grid and every standalone trait.
+    if args.roles:
+        wanted = set(args.roles)
+        unmatched = sorted(wanted - {i["output_name"] for i in items})
+        if unmatched:
+            logger.warning(f"--roles: no work item is named {unmatched}")
+        items = [i for i in items if i["output_name"] in wanted]
+        logger.info(f"--roles: {len(items)} work item(s) kept")
 
     return items
 
@@ -228,7 +237,7 @@ def _process_item(generator: RoleResponseGenerator, item: Dict, worker_logger):
         return False
 
     except Exception as e:
-        worker_logger.error(f"Error processing {output_name}: {e}")
+        worker_logger.exception(f"Error processing {output_name}: {e}")
         return False
 
 
@@ -246,6 +255,7 @@ def process_items_on_worker(
         f"%(levelname)s - %(message)s"))
     wlog.addHandler(handler)
     wlog.setLevel(logging.INFO)
+    wlog.propagate = False   # else the root handler prints every line a second time
 
     wlog.info(f"Starting with GPUs {gpu_ids}, {len(work_items)} items")
 
@@ -278,7 +288,12 @@ def process_items_on_worker(
         wlog.info(f"Done: {completed} successful, {failed} failed")
 
     except Exception as e:
-        wlog.error(f"Fatal error: {e}")
+        # A worker that cannot load the model (CUDA OOM, an engine that fails
+        # to start) has generated none of its items.  Exit non-zero so that
+        # run_multi_worker sees it; before 2026-10-12 the worker exited 0 and
+        # the pipeline went on to step 2 without that worker's share.
+        wlog.exception(f"Fatal error: {e}")
+        raise SystemExit(1)
     finally:
         wlog.info("Cleanup completed")
 
@@ -335,6 +350,19 @@ def run_multi_worker(work_items: List[Dict], args) -> int:
     logger.info(f"Launched {len(processes)} worker processes")
     for p in processes:
         p.join()
+
+    # A worker that failed to load the model, or died (OOM kill, CUDA abort),
+    # left its items ungenerated.  Before 2026-10-12 this returned 0 whatever
+    # the workers did, so run_pipeline.sh went on to step 2 with part of the
+    # responses missing (the same fix as 2_activations.py's).  Items that fail
+    # inside a live worker are logged and skipped as before; a rerun generates
+    # whatever is missing.
+    dead = [(i, p.exitcode) for i, p in enumerate(processes) if p.exitcode != 0]
+    if dead:
+        logger.error(f"{len(dead)} of {len(processes)} worker(s) exited abnormally "
+                     f"(launch index, exit code): {dead}; their items are incomplete -- "
+                     f"rerun this step to generate the rest")
+        return 1
 
     logger.info("Multi-worker processing completed!")
     return 0
@@ -407,7 +435,9 @@ def main():
     parser.add_argument("--top_p", type=float, default=0.9,
                         help="Top-p sampling")
     parser.add_argument("--roles", nargs="+",
-                        help="Specific roles to process (christina mode)")
+                        help="Keep only the work items with these output names "
+                             "(a role or trait stem, default, r_<role>__<trait>, "
+                             "t_<role>__<trait>); any mode")
 
     args = parser.parse_args()
 

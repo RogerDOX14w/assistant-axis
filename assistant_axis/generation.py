@@ -23,6 +23,10 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
+# Where save_responses stages a response file before copying it to the output
+# directory: local disk, not TMPDIR (which can point at NFS on RunPod).
+_LOCAL_STAGING_DIR = Path("/tmp")
+
 
 def generate_response(
     model,
@@ -441,12 +445,14 @@ class RoleResponseGenerator:
         if self.questions is not None:
             return self.questions
 
-        import jsonlines
-
-        questions = []
-        with jsonlines.open(self.questions_file, 'r') as reader:
-            for entry in reader:
-                questions.append(entry['question'])
+        # Retried read (the repo lives on the /workspace network mount on
+        # RunPod; AGENT_NOTES "NFS-safe file I/O").  A malformed line raises
+        # rather than being skipped: skipping it would renumber every later
+        # question, and question_index is a position in this list.
+        from .atomic_io import read_jsonl_with_retry
+        entries = read_jsonl_with_retry(
+            self.questions_file, skip_malformed=False, logger_obj=logger)
+        questions = [entry['question'] for entry in entries]
 
         questions = questions[:self.question_count]
         if self.reduce_questions > 1:
@@ -474,9 +480,10 @@ class RoleResponseGenerator:
         return self.questions
 
     def load_role(self, role_file: Path) -> dict:
-        """Load a role JSON file."""
-        with open(role_file, 'r') as f:
-            return json.load(f)
+        """Load a role (or trait) JSON file, retrying transient read errors
+        (the repo lives on the /workspace network mount on RunPod)."""
+        from .atomic_io import read_text_with_retry
+        return json.loads(read_text_with_retry(role_file, logger_obj=logger))
 
     def format_instruction(self, instruction: str) -> str:
         """Format instruction, replacing {model_name} placeholder."""
@@ -568,9 +575,9 @@ class RoleResponseGenerator:
         avoid partial-write failures on flaky network filesystems (RunPod NFS).
         """
         import jsonlines
-        import shutil
-
         import os
+        import shutil
+        import uuid
 
         output_file = self.output_dir / f"{role_name}.jsonl"
         # Copied to a side name and renamed into place: a copy that dies
@@ -579,7 +586,14 @@ class RoleResponseGenerator:
         # then treat as done on every later run (fixed 2026-10-12).
         inprogress = output_file.with_name(output_file.name + ".inprogress")
         # Bypass TMPDIR (which points to NFS on RunPod) — /tmp is always local.
-        local_tmp = Path("/tmp") / f"{role_name}.jsonl.tmp"
+        # A unique name per save: the fixed /tmp/<role>.jsonl.tmp was shared by
+        # every process saving that name, so two step-1 runs at once (roles and
+        # traits on different GPUs) could copy each other's responses for the
+        # eleven names that are both a role and a trait (fixed 2026-10-12).
+        # Not tempfile.mkstemp: its file is mode 0600, and copy2 would carry
+        # that onto the response file; open() gives the umask's mode as before.
+        local_tmp = _LOCAL_STAGING_DIR / (
+            f"{role_name}.{os.getpid()}.{uuid.uuid4().hex[:12]}.jsonl.tmp")
         with jsonlines.open(local_tmp, mode='w') as writer:
             for response in responses:
                 writer.write(response)
@@ -597,7 +611,8 @@ class RoleResponseGenerator:
                                    f"Retrying in {wait}s...")
                     time.sleep(wait)
                 else:
-                    logger.error(f"Copy to NFS failed for {role_name} after 5 attempts: {e}")
+                    logger.error(f"Copy to NFS failed for {role_name} after 5 attempts: {e}; "
+                                 f"the local copy is kept at {local_tmp}")
                     inprogress.unlink(missing_ok=True)
                     raise
         local_tmp.unlink(missing_ok=True)
