@@ -106,7 +106,9 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     (parse_judge_score(require_marker=True)); a reply with none or several,
 #     or cut at max_tokens (finish_reason "length"), is unparseable, never a
 #     digit of its reasoning.  Prompt text unchanged.  The role rubrics'
-#     artefacts ("Gemma, an LLM", ...) wait for Roger's wording (version 4).
+#     artefacts ("Gemma, an LLM", ...) stay as they are until the pod
+#     experiment of reports/pipeline/plan_role_rubric_experiment.md shows a
+#     change helps (Roger, 2026-10-13).
 JUDGE_RUBRIC_VERSION = 3
 
 COMBINED_EVAL_TEMPLATE = """\
