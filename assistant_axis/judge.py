@@ -185,6 +185,12 @@ CONTENT_FLAG_PHRASES: Tuple[str, ...] = ("flagged as potentially violating", "vi
 #: Content-flagged 400s in this process, by model (a WARNING carries the running count).
 CONTENT_FLAGGED: Dict[str, int] = {}
 
+#: Replies cut at ``max_tokens`` (``finish_reason == "length"``) that a call
+#: with ``reject_truncated=True`` returned as None, per model (pipeline step
+#: 3 since 2026-10-12, walk-through P4: a truncated reply is unparseable even
+#: when its text holds a ``SCORE:`` line, since the reasoning was cut).
+TRUNCATED_REPLIES: Dict[str, int] = {}
+
 
 def _error_code(exc: BaseException) -> Optional[str]:
     """The provider's error code: OpenAI's SDK sets ``code``; otherwise the
@@ -330,7 +336,7 @@ def warn_if_low_parse_rate(
         log.info(body)
 
 
-def parse_judge_score(response_text: str) -> Optional[int]:
+def parse_judge_score(response_text: str, *, require_marker: bool = False) -> Optional[int]:
     """
     Parse the judge's response to extract the 0-3 score.
 
@@ -360,15 +366,24 @@ def parse_judge_score(response_text: str) -> Optional[int]:
     its answer.  (Before 2026-10-12 such a reply fell through to stage 2,
     so "shows 2 of the traits ... SCORE: 4" was scored 2.)
 
+    ``require_marker=True`` (pipeline step 3 since 2026-10-12, its
+    ``JUDGE_RUBRIC_VERSION`` 3; walk-through P4 / D5, review P3 D1): exactly
+    one ``SCORE: <int>`` marker is the answer, and a reply with none or
+    with several is None (unparseable), never a digit of its reasoning
+    ("... lists 3 examples" read as 3, a truncated reply most often).  The
+    default keeps the two-stage parse for the other callers.
+
     Returns the integer in [0, 3], or None if nothing parseable.
     """
     if not response_text:
         return None
 
     # Stage 1: explicit SCORE: marker (preferred for new prompts).
-    m = re.search(r"SCORE\s*:\s*(\d+)", response_text, flags=re.IGNORECASE)
-    if m:
-        score = int(m.group(1))
+    markers = re.findall(r"SCORE\s*:\s*(\d+)", response_text, flags=re.IGNORECASE)
+    if require_marker and len(markers) != 1:
+        return None
+    if markers:
+        score = int(markers[0])
         return score if 0 <= score <= 3 else None
 
     # Stage 2: walk integers from the end backwards, return the first
@@ -599,6 +614,7 @@ async def call_judge_single(
     usage: Optional["MultiModelUsage"] = None,
     *,
     temperature: Optional[float] = DEFAULT_TEMPERATURE,
+    reject_truncated: bool = False,
 ) -> Optional[str]:
     """Call the judge model with a single prompt.
 
@@ -616,6 +632,9 @@ async def call_judge_single(
             "Token usage logging is mandatory on batched LLM call sites".
         temperature: sent only when it is not the default
             (:func:`chat_request_body`).
+        reject_truncated: return None for a reply cut at ``max_tokens``
+            (``finish_reason == "length"``), counted in
+            :data:`TRUNCATED_REPLIES` (the usage is charged all the same).
     """
     body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
     await rate_limiter.acquire()
@@ -630,6 +649,10 @@ async def call_judge_single(
             pt, ct = extract_usage_openai(response)
             usage.charge(model, pt, ct)
 
+        if reject_truncated and response.choices and \
+                getattr(response.choices[0], "finish_reason", None) == "length":
+            TRUNCATED_REPLIES[model] = TRUNCATED_REPLIES.get(model, 0) + 1
+            return None
         if response.choices and response.choices[0].message.content:
             return response.choices[0].message.content
         return None
@@ -653,6 +676,8 @@ async def call_judge_batch(
     rate_limiter: RateLimiter,
     batch_size: int = 50,
     usage: Optional["MultiModelUsage"] = None,
+    *,
+    reject_truncated: bool = False,
 ) -> List[Optional[str]]:
     """Call the judge model with multiple prompts concurrently.
 
@@ -670,7 +695,8 @@ async def call_judge_batch(
         batch = prompts[i:i + batch_size]
 
         tasks = [
-            call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage)
+            call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
+                              reject_truncated=reject_truncated)
             for prompt in batch
         ]
 
