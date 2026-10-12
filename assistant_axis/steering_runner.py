@@ -708,9 +708,10 @@ def run_steering_cell(
         sweep over the explicit ``strengths`` list and only uses the
         coh-stop tail check.
     eff_stop_threshold, eff_stop_consecutive
-        Bidirectional-only DOWN-side stop knobs.  Default 0.25 over 2
-        consecutive strengths -- if two consecutive sub-``s_init``
-        strengths have ``mean(|effect.combined|) < 0.25`` we stop
+        Bidirectional-only DOWN-side stop knobs.  Default 1/3 over 2
+        consecutive strengths (0.25 before 2026-05-17) -- if two
+        consecutive sub-``s_init`` strengths have
+        ``|mean(effect.combined)| < 1/3`` we stop
         scanning down on the assumption further-down strengths will be
         even weaker.
     weakest_strength, max_strength, multiplier, min_strength,

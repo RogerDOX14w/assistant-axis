@@ -8,6 +8,7 @@ before the orchestrator notices.
 """
 from __future__ import annotations
 
+import json
 import logging
 from types import SimpleNamespace
 
@@ -456,6 +457,24 @@ class TestMultiModelUsage:
         assert loaded.per_model == {}
         assert loaded.n_calls == 0
         assert loaded.total_cost_usd == 0.0
+
+    def test_load_or_create_reads_a_json_metadata_envelope(self, tmp_path):
+        """Regression (2026-10-12): the docstring promised the json_metadata
+        envelope ({"result": ..., "_provenance": ...}) but "result" was not
+        among the keys looked at, so such a file loaded as empty and the
+        next write erased its history."""
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 2_000, 500)
+        path = tmp_path / "usage.json"
+        path.write_text(json.dumps({"result": u.as_dict(), "_provenance": {"inputs": []}}))
+        assert MultiModelUsage.load_or_create(path).per_model["gpt-4.1-mini"].prompt_tokens == 2_000
+
+    def test_load_or_create_warns_on_an_unreadable_record(self, tmp_path, caplog):
+        path = tmp_path / "usage.json"
+        path.write_text('{"per_model": {')                      # truncated
+        with caplog.at_level("WARNING"):
+            assert MultiModelUsage.load_or_create(path).n_calls == 0
+        assert "unreadable" in caplog.text
 
     def test_merge_from_accumulates(self):
         u1 = MultiModelUsage()

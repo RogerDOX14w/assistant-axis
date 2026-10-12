@@ -482,9 +482,12 @@ if [ "$MODE" = "christina" ]; then
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
         echo ""
-        ( christina_step2 2>&1 | sed -u 's/^/[step2] /' ) &
+        # pipefail inside each subshell: without it the subshell's status is
+        # sed's (always 0), so a failed step 2 or 3 never reached the waits
+        # below and the pipeline went on to step 4 (fixed 2026-10-12).
+        ( set -o pipefail; christina_step2 2>&1 | sed -u 's/^/[step2] /' ) &
         PID2=$!
-        ( christina_step3 2>&1 | sed -u 's/^/[step3] /' ) &
+        ( set -o pipefail; christina_step3 2>&1 | sed -u 's/^/[step3] /' ) &
         PID3=$!
         fail=0
         wait $PID2 || { echo "ERROR: Step 2 failed (exit $?)"; fail=1; }
@@ -699,9 +702,10 @@ else
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
         echo ""
-        ( run_step2_loop 2>&1 | sed -u 's/^/[step2] /' ) &
+        # pipefail inside each subshell, or the status is sed's (see above)
+        ( set -o pipefail; run_step2_loop 2>&1 | sed -u 's/^/[step2] /' ) &
         PID2=$!
-        ( run_step3_loop 2>&1 | sed -u 's/^/[step3] /' ) &
+        ( set -o pipefail; run_step3_loop 2>&1 | sed -u 's/^/[step3] /' ) &
         PID3=$!
         fail=0
         wait $PID2 || { echo "ERROR: Step 2 failed (exit $?)"; fail=1; }

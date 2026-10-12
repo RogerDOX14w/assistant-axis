@@ -368,3 +368,14 @@ def test_real_time_calls_send_the_shared_request_body(judge):
         max_tokens=200, batch_size=50, existing_scores={}, usage=None))
     assert client.chat.completions.create.call_args.kwargs == judge.chat_request_body(
         "q0 a0", "gpt-4.1-mini", 200)
+
+
+def test_an_unreadable_score_file_is_reported(judge, tmp_path, caplog):
+    """A corrupt score file makes every response of the entity be judged
+    again; the reader now says so instead of passing silently."""
+    bad = tmp_path / "patient.json"
+    bad.write_text('{"pos_p0_q0": 3,')
+    with caplog.at_level("WARNING"):
+        assert judge.load_scores(bad) == {}
+    assert "unreadable" in caplog.text
+    assert judge.load_scores(tmp_path / "missing.json") == {}

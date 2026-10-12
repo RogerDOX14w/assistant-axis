@@ -40,7 +40,10 @@ building a security precaution, we should make it reasonably secure"):
     ``"$d"/../x``) is taken to be the working directory.
   - A home form asks wherever it resolves, so ``~/..``, ``$HOME/../other``
     and ``/Users/<user>/../other`` ask although they leave the home
-    directory.  The file tools follow the same rules.
+    directory.  The file tools follow the same rules, a Glob pattern's fixed
+    leading part included (resolved against its ``path``; 2026-10-12).
+    Grep's ``pattern`` is a regex over contents, not a path, and is not
+    checked.
 
 What it cannot see: a climb the text does not spell (``cd`` inside the
 command followed by a relative path, ``Path(x).parent.parent``, a variable
@@ -178,6 +181,36 @@ def resolve_climb(token: str, cwd: str):
     return os.path.normpath(os.path.join(cwd, token))
 
 
+def file_path_hit(raw: str, cwd: str):
+    """Where a file-tool path lands when it is outside the boundary, else None.
+
+    A relative path or a home form counts wherever it lands outside the
+    allowlist; any other absolute path only when it lands under home."""
+    p = normalize(raw)
+    relative = not os.path.isabs(p) and not p.startswith("~")
+    if relative:
+        p = os.path.normpath(os.path.join(cwd, p))
+    if (relative or raw.startswith(HOME_FORMS) or p.startswith(HOME)) and not allowed(p):
+        return p
+    return None
+
+
+GLOB_MAGIC = "*?[{"
+
+
+def glob_static_prefix(pattern: str) -> str:
+    """The leading path components of a glob pattern before the first one
+    holding a wildcard: ``../../x/*.py`` -> ``../../x``, ``**/*.py`` -> ``""``,
+    ``/a/b/**`` -> ``/a/b``."""
+    keep = []
+    for part in pattern.split("/"):
+        if any(c in part for c in GLOB_MAGIC):
+            break
+        keep.append(part)
+    prefix = "/".join(keep)
+    return "/" if (pattern.startswith("/") and not prefix) else prefix
+
+
 def heredoc_bodies(text: str) -> list:
     """Spans (start, end) of heredoc bodies in a shell command.
 
@@ -267,20 +300,29 @@ def main() -> int:
             v = inp.get(key)
             if not v:
                 continue
-            raw = str(v)
-            p = normalize(raw)
-            relative = not os.path.isabs(p) and not p.startswith("~")
-            if relative:
-                p = os.path.normpath(os.path.join(cwd, p))
             # a relative path or a home form asks wherever it lands outside the
             # allowlist; any other absolute path only when it lands under home
-            if (relative or raw.startswith(HOME_FORMS) or p.startswith(HOME)) and not allowed(p):
+            p = file_path_hit(str(v), cwd)
+            if p is not None:
                 hits.append(p)
-        # Glob/Grep patterns can carry absolute paths too
+        # A Glob pattern names files too.  Its fixed leading part is resolved
+        # against the call's ``path`` (or the cwd) by the same rules, so a
+        # relative pattern that climbs out (``../../.ssh/*``) is caught as
+        # well as an absolute or home one (2026-10-12; before, only patterns
+        # starting with the home path or ``~`` were checked).  Grep's
+        # ``pattern`` is a regex over file contents, not a path, and is no
+        # longer checked: a search for the text ``~/...`` was denied.
         pat = inp.get("pattern")
-        if isinstance(pat, str) and (pat.startswith(HOME) or pat.startswith("~")):
-            p = normalize(pat.split("*")[0])
-            if not allowed(p):
+        if tool == "Glob" and isinstance(pat, str) and pat:
+            if pat.startswith(HOME) or pat.startswith("~"):
+                p = normalize(pat.split("*")[0])
+                p = p if not allowed(p) else None
+            else:
+                prefix = glob_static_prefix(pat)
+                base = inp.get("path")
+                raw = os.path.join(str(base), prefix) if base else (prefix or ".")
+                p = file_path_hit(raw, cwd)
+            if p is not None and p not in hits:
                 hits.append(p)
     if not hits:
         return 0

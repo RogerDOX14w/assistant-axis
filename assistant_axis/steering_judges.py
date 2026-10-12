@@ -9,8 +9,9 @@ provides:
   the experiment that judge prompts need.
 * Four rubric strings + their prompt builders (coherence, persona / RP
   filter, effect bidirectional, effect single-pole).  Effect also has a
-  batched-prompt variant scoring N responses in one call (B=10 by
-  default), used to keep the steering effect distribution apples-to-apples
+  batched-prompt variant scoring N responses in one call (B =
+  ``judge_batch.RESPONSE_BATCH_SIZE`` by default, 7 since 2026-05-11),
+  used to keep the steering effect distribution apples-to-apples
   with the response-judging distribution at the same batch size.
 * :class:`RealJudgeDispatcher` -- the production dispatcher.  Two-tier
   protocol:
@@ -731,6 +732,18 @@ def migrate_effect_dict_in_place(effect_dict: Dict[str, Any]) -> bool:
     return True
 
 
+def _resolve_once(fut: "Future", value: Any) -> None:
+    """Set ``fut``'s result unless it is already resolved (a second
+    ``set_result`` raises ``InvalidStateError``, which inside a done-callback
+    is only logged by ``concurrent.futures`` and would hide the first
+    outcome)."""
+    if not fut.done():
+        try:
+            fut.set_result(value)
+        except Exception:  # noqa: BLE001 -- resolved by another thread meanwhile
+            pass
+
+
 def _averaged_eff_from_bidir(bidir: Dict[str, Any]) -> Optional[float]:
     """Compute (straight.mean - swap.mean) / 2 if both halves exist,
     else ``None``.  The result is the bias-cancelling estimator:
@@ -1153,6 +1166,12 @@ class RealJudgeDispatcher:
             text = future.result(timeout=120)
         except Exception as e:  # noqa: BLE001
             logger.error(f"coherence call failed for q_idx={record.get('question_idx')}: {e}")
+            # Counted like an unparseable reply (the parse-rate rule counts
+            # API failures); before 2026-10-12 this path left no trace in
+            # the end-of-run summary.
+            self._record_judge_outcome(
+                kind="coherence", model=self.coherence_model, outcome="unparseable",
+            )
             return 0
 
         parsed = parse_score_reason_json(text or "", score_range=(0, 3))
@@ -1361,13 +1380,16 @@ class RealJudgeDispatcher:
                     }
             with self._state_lock:
                 self._strength_states[(int(sign), float(strength))].judging_skipped = True
-            self._merge_records_to_disk(records)
-            # Skip branch: effect was not judged, so we don't have a
-            # meaningful mean.  Resolve to NaN so the bidirectional
-            # runner's eff-stop tail check knows to skip this strength
-            # rather than count it as zero-effect (which would falsely
-            # trigger eff-stop).
-            eff_future.set_result(float("nan"))
+            try:
+                self._merge_records_to_disk(records)
+            finally:
+                # Skip branch: effect was not judged, so we don't have a
+                # meaningful mean.  Resolve to NaN so the bidirectional
+                # runner's eff-stop tail check knows to skip this strength
+                # rather than count it as zero-effect (which would falsely
+                # trigger eff-stop).  In a ``finally`` so a failed write
+                # cannot leave the runner waiting on this future forever.
+                _resolve_once(eff_future, float("nan"))
             logger.info(
                 f"[cell s{slot}_l{layer}_{sign:+d}] strength={strength}: "
                 f"mean_coh={mean_coh:.2f} > {self.skip_threshold:.2f}; "
@@ -1376,7 +1398,15 @@ class RealJudgeDispatcher:
             return
 
         # Judge path: dispatch async work for RP and effect.
-        self._merge_records_to_disk(records)  # persist strength_mean_coh first
+        try:
+            self._merge_records_to_disk(records)  # persist strength_mean_coh first
+        except BaseException:
+            # The runner's _on_coh_done catches and logs this, and the
+            # bidirectional scan then waits (no timeout) on the effect future
+            # for this strength: resolve it to NaN ("unknown") so the scan
+            # carries on instead of hanging (2026-10-12).
+            _resolve_once(eff_future, float("nan"))
+            raise
         future = asyncio.run_coroutine_threadsafe(
             self._judge_group_async(
                 cell_dir=cell_dir, slot=slot, layer=layer,
@@ -1418,14 +1448,14 @@ class RealJudgeDispatcher:
                     if isinstance(v, (int, float)):
                         vals.append(float(v))  # keep sign
                 m = abs(sum(vals) / len(vals)) if vals else float("nan")
-                eff_future.set_result(float(m))
+                _resolve_once(eff_future, float(m))
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     f"[effect-mean-future] _judge_group_async raised; "
                     f"resolving effect-mean future to NaN: "
                     f"{type(exc).__name__}: {exc}"
                 )
-                eff_future.set_result(float("nan"))
+                _resolve_once(eff_future, float("nan"))
 
         future.add_done_callback(_resolve_effect_mean)
 
@@ -1484,19 +1514,54 @@ class RealJudgeDispatcher:
                     return True
             return False
 
+    def _loop_barrier(self, timeout_s: Optional[float]) -> None:
+        """Wait until the event loop has run everything scheduled on it so
+        far, including a done-callback still running on the loop thread.
+
+        Needed because a coherence future's waiters wake (``result()``
+        returns) *before* its done-callbacks run: ``set_result`` notifies,
+        then invokes the callbacks on the loop thread.  The runner's
+        ``_on_coh_done`` callback is what calls ``enqueue_strength_group``,
+        which writes records.jsonl and only then appends the RP/effect task
+        to ``_inflight``.  A runner that awaited the coherence futures and
+        called :meth:`drain` straight away could find ``_inflight`` still
+        empty, return, and have :meth:`shutdown` stop the loop with the last
+        strength's RP/effect judging unstarted (seen as the legacy scan's
+        final strength left with ``persona``/``effect`` null; 2026-10-12)."""
+        if not self._loop.is_running() or threading.current_thread() is self._loop_thread:
+            return   # (on the loop thread itself a barrier would deadlock)
+
+        async def _noop() -> None:
+            return None
+
+        try:
+            asyncio.run_coroutine_threadsafe(_noop(), self._loop).result(timeout=timeout_s)
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"judge loop barrier did not complete: {e}")
+
     def drain(self, timeout_s: Optional[float] = None) -> None:
-        with self._inflight_lock:
-            futures = list(self._inflight)
-            self._inflight = []
-        if not futures:
-            return
         deadline = None if timeout_s is None else time.time() + timeout_s
-        for fut in futures:
-            try:
-                remaining = None if deadline is None else max(0, deadline - time.time())
-                fut.result(timeout=remaining)
-            except Exception as e:  # noqa: BLE001
-                logger.error(f"async judge task raised during drain: {e}")
+
+        def _remaining() -> Optional[float]:
+            return None if deadline is None else max(0.0, deadline - time.time())
+
+        # Repeat until a barrier finds nothing new: a callback that was
+        # mid-flight when drain() was called has finished, and every task
+        # it enqueued has been waited for.
+        while True:
+            self._loop_barrier(_remaining())
+            with self._inflight_lock:
+                futures = list(self._inflight)
+                self._inflight = []
+            if not futures:
+                return
+            for fut in futures:
+                try:
+                    fut.result(timeout=_remaining())
+                except Exception as e:  # noqa: BLE001
+                    logger.error(f"async judge task raised during drain: {e}")
+            if deadline is not None and time.time() >= deadline:
+                return
 
     def shutdown(self) -> None:
         """Stop the background event loop.  Idempotent.
@@ -1585,7 +1650,11 @@ class RealJudgeDispatcher:
                 extras.append(f"{miss}/{total} MISSING")
             extras_str = f"  ({', '.join(extras)})" if extras else ""
             loud = ""
-            if unp and unp / total >= self._UNPARSEABLE_LOUD_THRESHOLD:
+            # MISSING (an id the batched reply left out) is a failed item
+            # too: the parse-rate rule counts everything that is not OK.
+            # Before 2026-10-12 only UNPARSEABLE could raise the marker.
+            failed = unp + miss
+            if failed and failed / total >= self._UNPARSEABLE_LOUD_THRESHOLD:
                 loud = "  *** HIGH FAIL RATE ***"
             lines.append(
                 f"  {kind} / {model:<35s}  {ok}/{total} OK{extras_str}{loud}"

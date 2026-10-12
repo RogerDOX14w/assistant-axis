@@ -76,6 +76,10 @@ from assistant_axis.atomic_io import (   # noqa: E402
     atomic_write_text, read_text_with_retry,
 )
 from assistant_axis.entity_id import judge_label, resolve_renamed_stem   # noqa: E402
+# The canonical effect-judge batch size; CLI defaults pin to it rather than
+# repeat the number (judge-cost notes, "Pattern to watch for": the May 2026
+# B=10 incident was a local argparse literal that outlived the constant).
+from assistant_axis.judge_batch import RESPONSE_BATCH_SIZE   # noqa: E402
 
 logger = logging.getLogger("steering_sweep")
 
@@ -403,9 +407,11 @@ def _build_judging_config(
             else ["gpt-4.1-mini", "claude-haiku-4-5-20251001"]
         ),
         "effect_mode": getattr(args, "effect_mode", "bidirectional"),
-        "target_batch_size": int(getattr(args, "target_batch_size", 7)),
+        "target_batch_size": int(getattr(args, "target_batch_size",
+                                         RESPONSE_BATCH_SIZE)),
+        # fallback = the CLI default (and steering_judges.DEFAULT_SKIP_THRESHOLD)
         "skip_threshold": float(
-            getattr(args, "skip_if_strength_mean_coh_above", 1.0)
+            getattr(args, "skip_if_strength_mean_coh_above", 1.5)
         ),
         "coh_stop_threshold": float(
             getattr(args, "coh_stop_threshold", 1.5)
@@ -722,6 +728,10 @@ def _worker_main(
     # the queue transitions from one experiment to the next and swap
     # the FileHandler (and thus the sweep.log file we're appending to).
     current_sweep_log_dir = sweep_log_dir
+    # Items that raised (or had an unknown kind).  The worker carries on
+    # with the queue, but exits 1 at the end so the parent's exit status
+    # says the sweep was incomplete (before 2026-10-12 it exited 0).
+    n_failed = 0
     while True:
         item = queue.get()
         if item is None:
@@ -864,12 +874,17 @@ def _worker_main(
                         judge_dispatcher.shutdown()
             else:
                 log.error(f"unknown work item kind: {item.get('kind')!r}")
+                n_failed += 1
 
         except Exception as e:
             log.exception(f"item {item.get('kind')!r} failed: {e}")
+            n_failed += 1
             # Continue processing remaining items rather than crash the
             # worker -- one bad cell shouldn't sink the whole sweep.
 
+    if n_failed:
+        log.error(f"worker exiting with {n_failed} failed work item(s)")
+        sys.exit(1)
     log.info("worker exiting cleanly")
 
 
@@ -979,7 +994,8 @@ def _run_judges_only(config: Dict[str, Any], args) -> None:
         sys.argv = saved_argv
 
 
-def main():
+def build_arg_parser() -> argparse.ArgumentParser:
+    """The command-line parser (a function so tests can read its defaults)."""
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", type=Path, action="append", default=[],
@@ -1017,14 +1033,17 @@ def main():
                              "by --judges-only.")
     parser.add_argument("--effect-mode", default="bidirectional",
                         choices=["bidirectional", "separate_poles", "both"])
-    parser.add_argument("--target-batch-size", type=int, default=7,
-                        help="Effect-judge target batch size (canonical B=7, "
-                             "matching the May 2026 project-wide B=7 default "
-                             "for response-mode judging).  The previous "
-                             "value of 10 is OBSOLETE and was the source of "
-                             "a several-hundred-dollar B=10 mis-judging "
-                             "incident; do not revert without explicit "
-                             "user approval.")
+    parser.add_argument("--target-batch-size", type=int,
+                        default=RESPONSE_BATCH_SIZE,
+                        help="Effect-judge target batch size (default: the "
+                             "canonical assistant_axis.judge_batch."
+                             f"RESPONSE_BATCH_SIZE, now {RESPONSE_BATCH_SIZE}, "
+                             "matching response-mode judging).  The previous "
+                             "local default of 10 is OBSOLETE and was the "
+                             "source of a several-hundred-dollar B=10 "
+                             "mis-judging incident; change the constant, not "
+                             "this default, and not without explicit user "
+                             "approval.")
     parser.add_argument("--skip-if-strength-mean-coh-above", type=float,
                         default=1.5,
                         help="Skip RP/effect on a strength group whose mean "
@@ -1070,7 +1089,11 @@ def main():
                              "NFS-backed paths -- staging writes are "
                              "on the hot path for every records.jsonl "
                              "and summary.json flush.")
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    args = build_arg_parser().parse_args()
 
     logging.basicConfig(
         level=logging.INFO,

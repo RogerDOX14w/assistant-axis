@@ -513,18 +513,29 @@ class MultiModelUsage:
             return cls()
         try:
             obj = json.loads(p.read_text())
-        except Exception:
+        except Exception as e:  # noqa: BLE001
+            # Callers merge this into the record they write back, so an
+            # empty tracker here resets the cumulative history: say so
+            # (before 2026-10-12 this was silent).
+            logger.warning(f"usage record {p} is unreadable ({type(e).__name__}: {e}); "
+                           f"starting from zero -- the file will be overwritten")
             return cls()
-        # Envelope-wrapped form (json_metadata) keeps the payload under
-        # the same top-level keys; we just look for "per_model" first.
+        if not isinstance(obj, dict):
+            logger.warning(f"usage record {p} is not a JSON object; starting from zero")
+            return cls()
+        # Top-level per_model: the bare as_dict() form, or as_dict() with a
+        # _provenance key beside it.
         if "per_model" in obj:
             return cls.from_dict(obj)
-        # If wrapped, the payload may be under "_payload" or similar;
-        # try common shapes before giving up.
-        for k in ("payload", "_payload", "usage", "data"):
+        # Wrapped forms: "result" is json_metadata's envelope (the shape the
+        # docstring promises; missing before 2026-10-12), the others are
+        # older ad-hoc wrappers.
+        for k in ("result", "payload", "_payload", "usage", "data"):
             sub = obj.get(k)
             if isinstance(sub, dict) and "per_model" in sub:
                 return cls.from_dict(sub)
+        if obj:
+            logger.warning(f"usage record {p} has no per_model block; starting from zero")
         return cls()
 
     def write_json(self, path) -> None:

@@ -471,8 +471,11 @@ def load_scores(output_file: Path) -> Dict[str, int]:
         try:
             with open(output_file, "r") as f:
                 return json.load(f)
-        except Exception:
-            pass
+        except Exception as e:  # noqa: BLE001
+            # Every response of the entity is then judged again (and paid
+            # for) and the file rewritten: say so (silent before 2026-10-12).
+            logger.warning(f"{output_file}: unreadable ({type(e).__name__}: {e}); "
+                           f"treating it as no scores")
     return {}
 
 

@@ -59,7 +59,7 @@ from __future__ import annotations
 
 from typing import Dict, Tuple
 
-__all__ = ["compute_start_steps", "OVERRIDES", "DEFAULTS"]
+__all__ = ["compute_start_steps", "OVERRIDES", "DEFAULTS", "MODE_ALIASES"]
 
 
 # ---------------------------------------------------------------------------
@@ -136,13 +136,23 @@ DEFAULTS: Dict[str, int] = {
 }
 
 
+#: Config spellings of a mode -> the table's key.  The sweep configs and the
+#: runner say ``positions_mode: prefill_only`` (what ``ActivationSteering``
+#: accepts); the table, like ``tools/analyse_start_strength.py``, calls that
+#: mode ``prefill``.  Without this map every prefill config (12 on
+#: 2026-10-12, none of which sets ``start_strength_multiplier_steps``) made
+#: ``steering/run_sweep.py`` raise KeyError while building its work items.
+MODE_ALIASES: Dict[str, str] = {"prefill_only": "prefill"}
+
+
 def compute_start_steps(positions_mode: str, slot: int, layer: int) -> int:
     """Return the recommended ``start_strength_multiplier_steps`` for a cell.
 
     Args:
         positions_mode: ``"all"`` or ``"prefill"`` (the steering applies
             at every token position vs only at the prefill / system
-            positions).
+            positions); the config spelling ``"prefill_only"`` is accepted
+            for ``"prefill"`` (:data:`MODE_ALIASES`).
         slot: Persona-prompt slot index (0/3/6/7 in the production grid).
         layer: Transformer layer index (25/31/49 in the production grid).
 
@@ -159,6 +169,7 @@ def compute_start_steps(positions_mode: str, slot: int, layer: int) -> int:
             ``DEFAULTS["all"]`` would be a silent regression on prefill
             sweeps, which we know need a different start).
     """
+    positions_mode = MODE_ALIASES.get(positions_mode, positions_mode)
     key = (positions_mode, int(slot), int(layer))
     if key in OVERRIDES:
         return OVERRIDES[key]

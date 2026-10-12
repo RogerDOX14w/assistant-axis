@@ -414,6 +414,41 @@ class TestMain:
                         "tool_input": {"pattern": os.path.join(HOME, ".cache") + "/**/*.bin"}}, monkeypatch, capsys)
         assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
 
+    @pytest.mark.parametrize("tool_input", [
+        {"pattern": "../../.ssh/*"},                                   # relative to the cwd
+        {"pattern": "../../../**/*.json", "path": os.path.join(REPO, "data")},
+        {"pattern": "**/*", "path": "../.."},                          # the base itself is out
+        {"pattern": "~/.cache/**/*.bin"},
+    ])
+    def test_glob_patterns_that_climb_out_are_denied(self, tool_input, monkeypatch, capsys):
+        """2026-10-12: a relative Glob pattern is resolved against its path
+        (or the cwd) like a file path; before, only patterns starting with
+        the home path or ``~`` were looked at."""
+        out = run_hook({"tool_name": "Glob", "cwd": REPO, "tool_input": tool_input}, monkeypatch, capsys)
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
+
+    @pytest.mark.parametrize("tool_input", [
+        {"pattern": "**/*.py"},
+        {"pattern": "data/../tools/*.py"},
+        {"pattern": "../*.md", "path": os.path.join(REPO, "data")},     # climbs, stays inside
+        {"pattern": "*.so", "path": "/usr/lib"},                       # a system path, as before
+        {"pattern": "/tmp/**/*.json"},
+        {"pattern": "~/.claude/**/*.md"},
+    ])
+    def test_glob_patterns_inside_or_on_system_paths_stay_quiet(self, tool_input, monkeypatch, capsys):
+        assert run_hook({"tool_name": "Glob", "cwd": REPO, "tool_input": tool_input},
+                        monkeypatch, capsys) == ""
+
+    def test_grep_pattern_is_a_regex_not_a_path(self, monkeypatch, capsys):
+        """Searching the repository for the text ``~/.cache`` or the home
+        path is not a read outside it (denied before 2026-10-12)."""
+        for pattern in (r"~/\.cache", HOME + "/.ssh"):
+            assert run_hook({"tool_name": "Grep", "cwd": REPO, "tool_input": {"pattern": pattern}},
+                            monkeypatch, capsys) == ""
+        out = run_hook({"tool_name": "Grep", "cwd": REPO,
+                        "tool_input": {"pattern": "x", "path": os.path.join(HOME, ".ssh")}}, monkeypatch, capsys)
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
+
     def test_file_tool_denial_tells_the_agent_what_to_do(self, monkeypatch, capsys):
         out = run_hook({"tool_name": "Read", "cwd": REPO,
                         "tool_input": {"file_path": os.path.join(HOME, ".ssh", "config")}}, monkeypatch, capsys)

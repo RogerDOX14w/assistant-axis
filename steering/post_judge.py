@@ -604,6 +604,12 @@ def rerun_coherence_with_model(
             original_coherence_per_record[id(r)] = (
                 r.get("judges", {}).get("coherence")
             )
+            # Clear the slot first: a call that fails outright (timeout,
+            # missing client) writes nothing, and the original entry --
+            # another model's verdict -- would otherwise be filed under
+            # coherence_alts[model] (fixed 2026-10-12).  A failure now
+            # records None there.
+            r.setdefault("judges", {})["coherence"] = None
             _ = dispatcher.judge_coherence_blocking(r)
             # judge_coherence_blocking populated judges.coherence; move
             # the just-written entry into coherence_alts[model] and

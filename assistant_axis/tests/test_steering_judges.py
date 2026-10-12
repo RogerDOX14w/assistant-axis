@@ -1043,6 +1043,100 @@ class TestJudgeOutcomeSummary:
         s = dispatcher.judge_outcome_summary()
         assert "1/2 MISSING" in s
 
+    def test_missing_outcomes_raise_the_loud_marker(self, dispatcher):
+        """Regression (2026-10-12): ids a batched reply left out are failed
+        items under the parse-rate rule; before the fix only UNPARSEABLE
+        could raise the marker, so 5% MISSING stayed quiet."""
+        for _ in range(95):
+            dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="ok")
+        for _ in range(5):
+            dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="missing")
+        s = dispatcher.judge_outcome_summary()
+        assert "5/100 MISSING" in s
+        assert "*** HIGH FAIL RATE ***" in s
+
+    def test_blocking_coherence_api_failure_is_tallied(self, dispatcher, monkeypatch):
+        """Regression (2026-10-12): an exception from the blocking coherence
+        call returned 0 without a trace in the outcome summary."""
+        async def boom(**kw):
+            raise RuntimeError("network down")
+
+        monkeypatch.setattr(sj, "call_judge_single_unified", boom)
+        assert dispatcher.judge_coherence_blocking(_make_record(0)) == 0
+        s = dispatcher.judge_outcome_summary()
+        assert "coherence / gpt-4.1-mini" in s and "1/1 = 100% UNPARSEABLE" in s
+
+
+class TestEffectFutureResolvesWhenTheWriteFails:
+    """Regression (2026-10-12): if records.jsonl could not be written inside
+    ``enqueue_strength_group`` (NFS retries exhausted), the pre-registered
+    effect-mean future never resolved; the runner's ``_on_coh_done`` logged
+    the exception and the bidirectional scan then waited on that future with
+    no timeout.  It now resolves to NaN ("unknown")."""
+
+    @pytest.mark.parametrize("coh", [0, 3])          # judge path, skip path
+    def test_failed_write_resolves_the_future_to_nan(self, dispatcher, tmp_path, monkeypatch, coh):
+        import math
+
+        def failing_merge(records):
+            raise OSError("NFS write failed after retries")
+
+        monkeypatch.setattr(dispatcher, "_merge_records_to_disk", failing_merge)
+        records = [_make_record(i, coh=coh, strength=3.0) for i in range(2)]
+        eff = dispatcher.judge_effect_for_strength_async(records)   # eager, as the runner does
+        with pytest.raises(OSError):
+            dispatcher.enqueue_strength_group(
+                cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+                strength=3.0, records=records)
+        assert eff.done() and math.isnan(eff.result(timeout=1))
+
+
+class TestDrainWaitsForCallbackEnqueuedWork:
+    """Regression (2026-10-12): a coherence future's ``result()`` returns
+    before its done-callbacks run, so a runner that awaited coherence and
+    called ``drain()`` at once could miss the RP/effect task the callback
+    was about to enqueue (the callback first writes records.jsonl), and
+    ``shutdown()`` then stopped the loop with that strength unjudged."""
+
+    def test_drain_after_awaiting_coherence_includes_the_callbacks_group(
+            self, dispatcher, tmp_path, monkeypatch):
+        async def fake_call(*, model, prompt, max_tokens, rate_limiter,
+                            openai_client=None, anthropic_client=None,
+                            temperature=1.0, usage=None):
+            if "COHERENCE only" in prompt:
+                return json.dumps({"reason": "fine", "score": 0})
+            if "items" in prompt:
+                ids = [i for i in range(20) if f"id={i}" in prompt]
+                return json.dumps({"items": [{"id": i, "reason": "t", "score": 1} for i in ids]})
+            return json.dumps({"reason": "in persona", "score": 2})
+
+        monkeypatch.setattr(sj, "call_judge_single_unified", fake_call)
+        real_merge = dispatcher._merge_records_to_disk
+
+        def slow_merge(records):
+            # the NFS write inside the callback, slowed so the race is certain
+            if threading.current_thread() is dispatcher._loop_thread:
+                time.sleep(0.3)
+            real_merge(records)
+
+        monkeypatch.setattr(dispatcher, "_merge_records_to_disk", slow_merge)
+        records = [_make_record(i, strength=2.0) for i in range(3)]
+
+        coh = dispatcher.judge_coherence_for_strength_async(records)
+
+        def on_coh_done(_f):   # what the runner's _on_coh_done does
+            dispatcher.enqueue_strength_group(
+                cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+                strength=2.0, records=records)
+
+        coh.add_done_callback(on_coh_done)
+        assert coh.result(timeout=10) == 0.0
+        dispatcher.drain(timeout_s=20)          # straight away, as the runner does
+
+        for r in records:
+            assert r["judges"]["persona"]["score"] == 2
+            assert r["judges"]["effect"]["combined"] is not None
+
 
 # ---------------------------------------------------------------------------
 # Token-usage tracking

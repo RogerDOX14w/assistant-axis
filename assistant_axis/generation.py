@@ -570,7 +570,14 @@ class RoleResponseGenerator:
         import jsonlines
         import shutil
 
+        import os
+
         output_file = self.output_dir / f"{role_name}.jsonl"
+        # Copied to a side name and renamed into place: a copy that dies
+        # half way (a killed process, an NFS error on the last attempt) must
+        # not leave a truncated <role>.jsonl, which should_skip_role() would
+        # then treat as done on every later run (fixed 2026-10-12).
+        inprogress = output_file.with_name(output_file.name + ".inprogress")
         # Bypass TMPDIR (which points to NFS on RunPod) — /tmp is always local.
         local_tmp = Path("/tmp") / f"{role_name}.jsonl.tmp"
         with jsonlines.open(local_tmp, mode='w') as writer:
@@ -578,7 +585,8 @@ class RoleResponseGenerator:
                 writer.write(response)
         for attempt in range(5):
             try:
-                shutil.copy2(str(local_tmp), str(output_file))
+                shutil.copy2(str(local_tmp), str(inprogress))
+                os.replace(str(inprogress), str(output_file))
                 logger.info(f"Saved {len(responses)} responses to {output_file}")
                 break
             except OSError as e:
@@ -590,6 +598,7 @@ class RoleResponseGenerator:
                     time.sleep(wait)
                 else:
                     logger.error(f"Copy to NFS failed for {role_name} after 5 attempts: {e}")
+                    inprogress.unlink(missing_ok=True)
                     raise
         local_tmp.unlink(missing_ok=True)
 

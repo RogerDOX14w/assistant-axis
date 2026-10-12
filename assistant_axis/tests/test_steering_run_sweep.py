@@ -453,3 +453,113 @@ class TestResolveHfHome:
         monkeypatch.delenv("HF_HOME", raising=False)
         assert mod._resolve_hf_home("Qwen/Qwen3-32B") == str(
             tmp_path / "cache")
+
+
+# ---------------------------------------------------------------------------
+# CLI defaults pinned to the canonical constants (2026-10-12 review)
+# ---------------------------------------------------------------------------
+
+class TestCliDefaults:
+    def test_target_batch_size_default_is_the_canonical_constant(self, mod):
+        """The May 2026 B=10 incident was a local argparse literal that
+        outlived the canonical constant; the default must be the constant."""
+        from assistant_axis.judge_batch import RESPONSE_BATCH_SIZE
+        args = mod.build_arg_parser().parse_args(["--config", "x.yaml"])
+        assert args.target_batch_size == RESPONSE_BATCH_SIZE
+
+    def test_skip_threshold_default_matches_the_dispatcher(self, mod):
+        from assistant_axis.steering_judges import DEFAULT_SKIP_THRESHOLD
+        args = mod.build_arg_parser().parse_args(["--config", "x.yaml"])
+        assert args.skip_if_strength_mean_coh_above == DEFAULT_SKIP_THRESHOLD
+
+    def test_judging_config_fallbacks_match_the_cli_defaults(self, mod, tmp_path, monkeypatch):
+        """A caller passing an args namespace without the judging fields
+        (e.g. a script) gets the canonical batch size and skip threshold."""
+        import argparse
+        from assistant_axis.judge_batch import RESPONSE_BATCH_SIZE
+        from assistant_axis.steering_judges import DEFAULT_SKIP_THRESHOLD
+        monkeypatch.setattr(mod, "_resolve_persona_spec", lambda cfg, d: {})
+        monkeypatch.setattr(mod, "_resolve_steering_spec", lambda cfg, d: {})
+        cfg = mod._build_judging_config(config={}, args=argparse.Namespace(), instructions_dir=tmp_path)
+        assert cfg["target_batch_size"] == RESPONSE_BATCH_SIZE
+        assert cfg["skip_threshold"] == DEFAULT_SKIP_THRESHOLD
+
+
+# ---------------------------------------------------------------------------
+# Worker exit status (2026-10-12 review)
+# ---------------------------------------------------------------------------
+
+class _ListQueue:
+    def __init__(self, items):
+        self.items = list(items)
+
+    def get(self):
+        return self.items.pop(0)
+
+
+class TestWorkerExitStatus:
+    """A work item that raises is logged and the worker carries on, but the
+    worker now exits 1 at the end so the parent's exit status shows the
+    sweep was incomplete.  Model loading and generation are faked."""
+
+    @pytest.fixture
+    def fake_worker_env(self, mod, monkeypatch):
+        import transformers
+        from assistant_axis import steering_runner, tmpfs
+
+        class _Tok:
+            pad_token = "<pad>"
+            eos_token = "<eos>"
+
+            @classmethod
+            def from_pretrained(cls, *a, **k):
+                return cls()
+
+        class _Model:
+            device = "cpu"
+
+            @classmethod
+            def from_pretrained(cls, *a, **k):
+                return cls()
+
+            def eval(self):
+                return self
+
+        monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+        monkeypatch.setattr(transformers, "AutoTokenizer", _Tok)
+        monkeypatch.setattr(transformers, "AutoModelForCausalLM", _Model)
+        monkeypatch.setattr(tmpfs, "setup_tmpdir", lambda target=None: target)
+        monkeypatch.setattr(tmpfs, "setup_model_tmpfs_cache", lambda **k: None)
+        calls = []
+
+        def fake_baselines(*a, **k):
+            calls.append(k["output_dir"])
+            if "bad" in k["output_dir"]:
+                raise RuntimeError("generation failed")
+            return []
+
+        monkeypatch.setattr(steering_runner, "compute_baselines", fake_baselines)
+        return calls
+
+    @staticmethod
+    def _baselines_item(out):
+        return {"kind": "baselines", "persona": "p", "questions": ["q"],
+                "output_dir": out, "batch_size": 1, "max_new_tokens": 4}
+
+    def test_all_items_succeeding_exits_normally(self, mod, fake_worker_env):
+        q = _ListQueue([self._baselines_item("good"), None])
+        mod._worker_main(0, 0, q, {"model_name": "fake/model"})
+        assert fake_worker_env == ["good"]
+
+    def test_a_failed_item_makes_the_worker_exit_1_after_the_rest(self, mod, fake_worker_env):
+        q = _ListQueue([self._baselines_item("bad"), self._baselines_item("good"), None])
+        with pytest.raises(SystemExit) as e:
+            mod._worker_main(0, 0, q, {"model_name": "fake/model"})
+        assert e.value.code == 1
+        assert fake_worker_env == ["bad", "good"]      # carried on after the failure
+
+    def test_an_unknown_item_kind_counts_as_a_failure(self, mod, fake_worker_env):
+        q = _ListQueue([{"kind": "bogus"}, None])
+        with pytest.raises(SystemExit) as e:
+            mod._worker_main(0, 0, q, {"model_name": "fake/model"})
+        assert e.value.code == 1

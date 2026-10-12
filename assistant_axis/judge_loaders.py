@@ -44,10 +44,11 @@ cohorts is therefore mostly redundant: roughly twice the cost for
 little marginal coverage.
 
 The default ``_DEFAULT_PREFER_B`` for ``("haiku", *)`` was reduced to
-``(7,)`` only on 2026-05-21.  Existing ``_b10_q9`` Haiku caches on
-disk are not read by default; pass ``prefer_b=(7, 10)`` if you need
-to re-enable the legacy fallback.  No new ``_b10_q9`` Haiku cohorts
-should be written.
+``(7,)`` on 2026-05-21 and restored to ``(7, 10)`` on 2026-05-22 (the
+original 12 axes still take most of their entities from ``_b10_q9``;
+see the comment on ``_DEFAULT_PREFER_B``).  So existing ``_b10_q9``
+Haiku caches ARE read, per entity, as the fallback after ``_b7_t3``.
+No new ``_b10_q9`` Haiku cohorts should be written.
 
 Conditional-provenance contract
 ================================
@@ -155,13 +156,11 @@ DEFAULT_EXPERIMENTS_ROOT: Path = Path("roger/axis_judge_experiments")
 #   deferred and explicitly NOT in the default fallback chain).
 # * GPT v1: B=10 reference (B=15/10/7/5 all exist for the B-curve, but
 #   the canonical reference is B=10).
-# * Haiku v1/v2: only B=7 t3 (the tiered surgical cohort).  The legacy
-#   B=10 q9 cohort is **obsolete as of 2026-05-21** -- the tiered cohort
-#   auto-escalates from tier 1 (1/3 modulo) to tier 2 (2/3) or tier 3
-#   (full) per-entity when RP-filtering leaves too few items, so q9
-#   adds little marginal coverage.  Existing _b10_q9 caches on disk
-#   are NOT read by default; pass prefer_b=(7, 10) explicitly if you
-#   need the legacy fallback chain.
+# * Haiku v1/v2: B=7 t3 (the tiered surgical cohort) first, then the
+#   legacy B=10 q9 cohort per entity.  q9 is obsolete for *writing*
+#   (2026-05-21: the tiered cohort auto-escalates from tier 1 (1/3
+#   modulo) to tier 2 (2/3) or tier 3 (full) per entity), but it is
+#   still read as the fallback (restored 2026-05-22, below).
 # * Sonnet: frozen at B=10 q9, no rejudging.
 _DEFAULT_PREFER_B: dict[tuple[str, str], tuple[int, ...]] = {
     ("gpt", "v2"):    (7,),

@@ -544,6 +544,19 @@ def run_multi_worker(args) -> int:
     for p in processes:
         p.join()
 
+    # A worker that died (OOM kill, CUDA abort, segfault) left its roles
+    # unextracted.  Before 2026-10-12 this still returned 0, so the pipeline
+    # went on to step 4 with a partial activations directory (the failure the
+    # GPU pre-flight in run_pipeline.sh exists to prevent).  Roles that fail
+    # inside a live worker are logged and skipped as before; a rerun extracts
+    # whatever is missing.
+    dead = [(i, p.exitcode) for i, p in enumerate(processes) if p.exitcode != 0]
+    if dead:
+        logger.error(f"{len(dead)} of {len(processes)} worker(s) exited abnormally "
+                     f"(launch index, exit code): {dead}; their roles are incomplete -- "
+                     f"rerun this step to extract the rest")
+        return 1
+
     logger.info("Multi-worker processing completed!")
     return 0
 

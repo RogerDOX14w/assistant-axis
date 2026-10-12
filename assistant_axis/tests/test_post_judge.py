@@ -432,3 +432,55 @@ class TestLoadExperimentSpecs:
         empty.mkdir()
         with pytest.raises(SystemExit, match="config.json"):
             pj.load_experiment_specs(empty, tmp_path / "data")
+
+
+class TestRerunCoherenceWithModel:
+    """``--rerun-coherence-with-model`` files each record's new verdict
+    under ``coherence_alts[model]`` and restores the live coherence."""
+
+    class _FakeDispatcher:
+        def __init__(self, fail_qidx=()):
+            self.coherence_model = "gpt-4.1-mini"
+            self.fail_qidx = set(fail_qidx)
+            self.written = None
+
+        def judge_coherence_blocking(self, r):
+            if r["question_idx"] in self.fail_qidx:
+                return 0            # the real dispatcher's failure path writes nothing
+            r.setdefault("judges", {})["coherence"] = {
+                "score": 1, "model": self.coherence_model}
+            return 1
+
+        def write_records_atomic(self, records):
+            self.written = records
+
+    def _cell(self, tmp_path):
+        cell = tmp_path / "s3_l25_+1"
+        cell.mkdir()
+        recs = []
+        for q in range(2):
+            r = _make_record(q_idx=q)
+            r["judges"]["coherence"] = {"score": 0, "model": "gpt-4.1-mini"}
+            recs.append(r)
+        (cell / "records.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+        return cell
+
+    def test_new_verdict_goes_to_alts_and_live_is_restored(self, pj, tmp_path):
+        d = self._FakeDispatcher()
+        n = pj.rerun_coherence_with_model(cell_dir=self._cell(tmp_path), dispatcher=d,
+                                          model="claude-haiku-4-5-20251001")
+        assert n == 2 and d.coherence_model == "gpt-4.1-mini"
+        for r in d.written:
+            assert r["judges"]["coherence"]["model"] == "gpt-4.1-mini"
+            assert r["judges"]["coherence_alts"]["claude-haiku-4-5-20251001"]["model"] == \
+                "claude-haiku-4-5-20251001"
+
+    def test_a_failed_call_records_none_not_the_live_verdict(self, pj, tmp_path):
+        """Regression (2026-10-12): a call that failed outright left the live
+        (other-model) entry in place, which was then filed as the alt."""
+        d = self._FakeDispatcher(fail_qidx={1})
+        pj.rerun_coherence_with_model(cell_dir=self._cell(tmp_path), dispatcher=d,
+                                      model="claude-haiku-4-5-20251001")
+        failed = [r for r in d.written if r["question_idx"] == 1][0]
+        assert failed["judges"]["coherence_alts"]["claude-haiku-4-5-20251001"] is None
+        assert failed["judges"]["coherence"]["model"] == "gpt-4.1-mini"

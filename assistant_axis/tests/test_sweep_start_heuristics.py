@@ -17,6 +17,8 @@ value for the bidirectional sweep.  Invariants we lock in here:
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from assistant_axis.sweep_start_heuristics import (
@@ -214,6 +216,41 @@ class TestRunSweepWiring:
             elif (it["slot"], it["layer"]) == (7, 49):
                 assert (it["start_strength_multiplier_steps"]
                         == OVERRIDES[("prefill", 7, 49)])
+
+    def test_prefill_only_config_spelling_uses_the_prefill_table(self, tmp_path):
+        """Regression (2026-10-12): the configs and the runner spell the mode
+        ``prefill_only``; the table keys it ``prefill``.  Before the alias,
+        ``_build_work_items`` raised KeyError for every prefill config."""
+        from steering import run_sweep
+
+        assert compute_start_steps("prefill_only", 0, 25) == OVERRIDES[("prefill", 0, 25)]
+        assert compute_start_steps("prefill_only", 99, 99) == DEFAULTS["prefill"]
+        cfg = self._base_config(positions_mode="prefill_only")
+        items = run_sweep._build_work_items(
+            cfg, tmp_path, persona_prompt="p", questions=[],
+        )
+        cells = [it for it in items if it["kind"] == "cell"]
+        assert cells and all(it["positions_mode"] == "prefill_only" for it in cells)
+        got = {(it["slot"], it["layer"]): it["start_strength_multiplier_steps"] for it in cells}
+        assert got == {(6, 49): OVERRIDES[("prefill", 6, 49)], (7, 49): OVERRIDES[("prefill", 7, 49)]}
+
+    def test_every_committed_config_builds_its_work_items(self, tmp_path):
+        """Every sweep config in data/steering/configs resolves a start step
+        for each cell (no mode the table cannot place)."""
+        import yaml
+        from steering import run_sweep
+
+        configs = sorted(Path(__file__).resolve().parents[2].joinpath(
+            "data", "steering", "configs").glob("*.yaml"))
+        if not configs:
+            pytest.skip("no steering configs on disk")
+        for path in configs:
+            cfg = yaml.safe_load(path.read_text())
+            if not cfg.get("cells"):
+                continue
+            items = run_sweep._build_work_items(cfg, tmp_path, persona_prompt="p", questions=[])
+            assert all(isinstance(it["start_strength_multiplier_steps"], int)
+                       for it in items if it["kind"] == "cell"), path.name
 
     def test_yaml_override_wins_over_heuristic(self, tmp_path):
         from steering import run_sweep
