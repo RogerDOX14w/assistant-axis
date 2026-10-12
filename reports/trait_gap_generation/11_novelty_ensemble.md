@@ -125,7 +125,7 @@ insurance has something to insure.
    ~250 live entries)?
 
    **Roger: yes.**  Two corrections: M3 already searches the queue's live statuses (`QUEUE_SEARCH_STATUSES`), so this
-   is the same lookup, not a new one; and the live queue is **121 entries** (86 `backlog`, 35 `candidate`), not ~250.
+   is the same lookup, not a new one; and the live queue holds **119 trait entries** (84 `backlog`, 35 `candidate`), not ~250; M3 searches trait entries only.
    The contamination argument that settled the testing reference ([13](./13_generator_testing.md) § 9) does not
    apply: that was measurement, and this is production dedup, where a queue entry promoted last night should block
    a synonym today.
