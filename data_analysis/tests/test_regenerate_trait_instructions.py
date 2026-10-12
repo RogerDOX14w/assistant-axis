@@ -1491,10 +1491,16 @@ class TestRefusalRunSummary:
                 return _make_response("not json at all")             # asked for five times, then an error
             return _make_response(json.dumps(FAKE_ROGER_RESPONSE))
         b.client.messages.create = AsyncMock(side_effect=reply)
-        module.main(b.args + ["--model", "claude-sonnet-4-6"])
+        # B5 (2026-10-12): the run goes on past the error and writes the rest,
+        # then exits 1 (it exited 0 before); the refusal alone would not
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
         err = capsys.readouterr().err
         assert "REFUSED petty: I can't help write instructions" in err
         assert "Done: 1 processed, 0 skipped, 1 refused, 1 errors" in err
+        assert "FAILED (1): sloppy" in err
+        assert json.loads((b.stage / "arrogant.json").read_text())["instruction"] == FAKE_INSTRUCTIONS
         assert b.client.messages.create.call_count == 1 + 1 + 5
         [rec] = _records(module.refusal_log_path(b.usage_json))
         assert rec["stem"] == "petty" and rec["attempt"] == "live"
@@ -1519,6 +1525,67 @@ class TestRefusalInBatch:
         assert "REFUSED arrogant: (no text; stop_reason refusal)" in err
         assert "1 processed (1 from the batch, 0 in real time), 0 skipped, 2 refused, 0 errors" in err
         assert json.loads(b.usage_json.read_text())["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 3
+
+
+class TestExitStatus:
+    """B5 (Roger, 2026-10-12; review Review 8 D1): exit 1 when any trait ends
+    in an error other than a refusal, every trait that succeeded written and
+    the failed ones named; refusals alone keep exit 0.  The live path is in
+    TestRefusalRunSummary; these are the refusal-only run and the batch
+    paths."""
+
+    def test_refusals_alone_exit_0(self, batch_setup, capsys):
+        b = batch_setup
+
+        def reply(**kw):
+            if "<trait>\npetty\n</trait>" in kw["messages"][0]["content"]:
+                return _refused_reply(DECLINE, stop_reason="end_turn")
+            return _make_response(json.dumps(FAKE_ROGER_RESPONSE))
+        b.client.messages.create = AsyncMock(side_effect=reply)
+        module.main(b.args + ["--model", "claude-sonnet-4-6"])     # no SystemExit
+        err = capsys.readouterr().err
+        assert "1 refused, 0 errors" in err and "FAILED" not in err
+
+    def test_a_trait_failing_in_the_real_time_pass_exits_1_and_is_logged(self, batch_setup, capsys):
+        b = batch_setup
+
+        def reply(**kw):
+            if "<trait>\nsloppy\n</trait>" in kw["messages"][0]["content"]:
+                return _make_response("not json at all")      # asked for five times, then an error
+            return _make_response(json.dumps(FAKE_ROGER_RESPONSE))
+        b.client.messages.create = AsyncMock(side_effect=reply)
+        before = (b.stage / "sloppy.json").read_text()
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
+        err = capsys.readouterr().err
+        assert "1 from the batch, 1 in real time" in err and "1 errors" in err
+        assert "FAILED (1): sloppy" in err
+        # petty (batch) and arrogant (real time) are written; sloppy is as it was
+        for stem in ("petty", "arrogant"):
+            assert json.loads((b.stage / f"{stem}.json").read_text())["instruction"] == FAKE_INSTRUCTIONS
+        assert (b.stage / "sloppy.json").read_text() == before
+        [entry] = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert entry["collected"] and entry["failed"] == ["sloppy"]
+        assert entry["counts"] == {"written": 1, "again": 2, "refused": 0, "failed": 1}
+        # the usage of the batch and of the real-time pass is kept
+        assert json.loads(b.usage_json.read_text())["n_calls"] == 2 + 1 + 5
+
+    def test_a_file_gone_before_collection_is_a_failure(self, batch_setup, capsys):
+        """--batch-id: the reply for a file renamed or deleted while the batch
+        ran has nowhere to go; until 2026-10-12 it was dropped and the run
+        exited 0."""
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        (b.stage / "arrogant.json").unlink()
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
+        err = capsys.readouterr().err
+        assert "arrogant: no such trait file" in err and "FAILED (1): arrogant" in err
+        [entry] = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert entry["failed"] == ["arrogant"] and entry["counts"]["failed"] == 1
+        assert json.loads((b.stage / "petty.json").read_text())["instruction"] == FAKE_INSTRUCTIONS
 
 
 # ---------------------------------------------------------------------------

@@ -61,6 +61,16 @@ during its run `refused`, with the record in their `refusal` field: a final
 status, which `check` skips and a later `generate` tries again only with
 `--retry-refused`.
 
+Exit status (2026-10-12, code review, walk-through B5): 1 when any trait
+ended in an error other than a refusal (every retry failed, an API error, a
+file that could not be read, a batch reply whose file is gone), 0 otherwise;
+refusals alone keep exit 0.  The run goes on past an error, so every trait
+that succeeded is written; the end line counts the errors and a
+`FAILED (n): ...` line names them, and a batch run also records them in its
+batch-log entry (`failed`, `counts.failed`; written only when something
+failed).  Until then the run exited 0 whatever failed.  The role script does
+the same.
+
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force
 uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
@@ -356,7 +366,9 @@ questions; `--batch` submits the run as one Message Batch at half price
 (`--batch-no-wait` submits and exits, `--batch-id ID` collects later;
 batches are recorded in `data/roles/regeneration_batches.json`, usage at the
 batch rate under `<model>:batch`; the collection rules of the trait script,
-above, apply here too since 2026-10-12).  Since 2026-10-06 the openings check of
+above, apply here too since 2026-10-12, and so does its exit status: 1 when
+any role ended in an error other than a refusal, the rest written and the
+failed ones named).  Since 2026-10-06 the openings check of
 the trait script applies here too: under RogerV3 a set whose five
 instructions do not open in five different ways is generated again, once
 (`opening_rerolls` in the `generator` field; `--no-opening-reroll` turns it
@@ -392,6 +404,12 @@ usage record is [`../data/roles/role_pair_check_usage.json`](../data/roles/role_
 (cumulative; written by the first run).  It excludes `--traits` and
 `--name-pos`.
 
+Exit status (2026-10-12, code review, walk-through B5): 1 when any check
+ended in the `ERROR` sentinel (every attempt failed; with `--name-pos` the
+blind name counts too), 0 otherwise.  The JSON on stdout is printed either
+way with every result, the sentinel marking the failed stems, and a
+`FAILED (n): ...` line on stderr names them.  Until then the run exited 0.
+
 ```bash
 uv run python data_analysis/generate_antonyms.py
 uv run python data_analysis/generate_antonyms.py --traits obedient rebellious
@@ -422,6 +440,17 @@ old stem) and regenerates the new side's neg
 clause, and `status` / `report` summarise.  Every subcommand takes
 `--dry-run`.  The description-writing rules the seeds must follow are in
 `AGENT_NOTES.md` § "Description-writing rules for new seeds".
+
+Since 2026-10-12 (code review, walk-through B5) the generators and the check
+exit 1 when an entity fails with an error other than a refusal, having
+written (or printed) every one that succeeded.  `generate` then still marks
+the entries that were generated or refused, gives each entry a failed
+command left over a `generation_failed` record (`{"at", "exit"}`; the status
+stays as it was, and the record is cleared when the entry is later generated
+or refused) and returns 1; `check` records the answers that came back and
+returns 1 when one is missing; `pair` records the pair in the queue, runs the
+arrangement check and the list sync before regenerating, and returns 1 if
+the regeneration fails; `rename` keeps the check answers that came back.
 
 ```bash
 uv run python data_analysis/seed_entities.py status --chunk 1 --list

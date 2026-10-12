@@ -65,6 +65,18 @@ one.  The old stem's RunPod data becomes an orphan (noted in AGENT_NOTES
 Cost guard: generation is about $0.03 per entity on Sonnet 4.6 (observed,
 Sep 2026); ``generate`` prints the estimate and refuses a batch over the
 $20 line without ``--confirm-expensive`` (the expensive-operations rule).
+
+Exit status of the tools called (2026-10-12, review Review 8 D1 /
+walk-through B5): the two generators and ``generate_antonyms.py`` exit 1
+when an entity fails with an error other than a refusal, having written
+(or, for the check, printed) every entity that succeeded; refusals alone
+keep exit 0.  ``generate`` therefore marks the entries that were generated
+or refused whatever the exit status, gives an entry a failed command left
+over a ``generation_failed`` record (``{"at", "exit"}``, cleared when it is
+later generated or refused) and returns 1; ``check`` records the answers
+that came back and returns 1 when one is missing; ``pair`` records the pair
+in the queue before regenerating and returns 1 if the regeneration fails;
+``rename`` keeps the check answers that came back.
 """
 
 from __future__ import annotations
@@ -336,26 +348,34 @@ def cmd_generate(args, q: dict, data_dir: Path) -> int:
     if est > EXPENSIVE_LINE_USD and not args.confirm_expensive and not args.dry_run:
         raise SystemExit(f"estimate ${est:.2f} exceeds the ${EXPENSIVE_LINE_USD:.0f} line: confirm with Roger, then pass --confirm-expensive")
     started = datetime.now(timezone.utc).replace(microsecond=0)  # the records carry whole seconds
-    ok = True
+    # entity type -> the generator's exit status, for the commands that failed
+    failed_exit: dict[str, int] = {}
     for cmd in generation_commands(sel):
         res = run_tool(cmd, dry_run=args.dry_run)
         if res is not None and res.returncode != 0:
-            ok = False
+            failed_exit["trait" if "regenerate_trait_instructions.py" in cmd[0] else "role"] = res.returncode
             print(f"FAILED (exit {res.returncode}): {' '.join(cmd)}", file=sys.stderr)
     if args.dry_run:
         return 0
-    if not ok:
-        return 1
-    # an entry the generator refused during this run becomes refused, with the
-    # generator's record; of the rest, mark only entries whose files now carry
-    # instructions
+    # The marking pass runs whatever the generators' exit status (2026-10-12,
+    # review Review 8 D1 / walk-through B5): a generator now exits 1 when any
+    # entity failed with an error other than a refusal, having written every
+    # entity that succeeded, so returning here before marking (as until then
+    # on any failure) would leave those entries at seeded.  An entry the
+    # generator refused during this run becomes refused, with the generator's
+    # record; of the rest, mark only entries whose files now carry
+    # instructions.  An entry left over after a failed command is the run's
+    # failure: it keeps its status and gets a ``generation_failed`` record
+    # (cleared when it is later generated or refused).
     refusals = refusals_since(data_dir, sel, started)
     n = n_refused = 0
+    not_generated: list[dict] = []
     for e in sel:
         rec = refusals.get((e["entity_type"], e["stem"]))
         if rec is not None:
             e["status"] = "refused"
             e["refusal"] = rec
+            e.pop("generation_failed", None)
             n_refused += 1
             print(f"REFUSED {e['stem']} ({rec.get('stop_reason')}): "
                   f"{' '.join(str(rec.get('reply_excerpt') or '').split())[:160]}", file=sys.stderr)
@@ -367,10 +387,20 @@ def cmd_generate(args, q: dict, data_dir: Path) -> int:
             if isinstance(d.get("instruction"), list) and d["instruction"]:
                 e["status"] = "generated"
                 e["generated_at"] = date.today().isoformat()
+                e.pop("generation_failed", None)
                 n += 1
+                continue
+        not_generated.append(e)
+    for e in not_generated:
+        code = failed_exit.get(e["entity_type"])
+        if code is not None:
+            e["generation_failed"] = {"at": started.isoformat(), "exit": code}
     save_queue(q, args.queue)
-    print(f"Done: {n}/{len(sel)} marked generated, {n_refused} refused", file=sys.stderr)
-    return 0
+    print(f"Done: {n}/{len(sel)} marked generated, {n_refused} refused"
+          + (f", {len(not_generated)} not generated: {', '.join(e['stem'] for e in not_generated)} "
+             f"(status unchanged; run generate again)" if not_generated else ""),
+          file=sys.stderr)
+    return 1 if failed_exit else 0
 
 
 def split_candidates(returned: str) -> list[str]:
@@ -502,9 +532,13 @@ def cmd_check(args, q: dict, data_dir: Path) -> int:
     res = run_tool(["data_analysis/generate_antonyms.py", "--traits", *stems], dry_run=args.dry_run, capture=True)
     if args.dry_run:
         return 0
+    # Since 2026-10-12 (B5) the check exits 1 when any answer is the ERROR
+    # sentinel, with every answer still in its JSON: the answers that came
+    # back are recorded, the ERROR ones are left for the next check, and the
+    # exit status says the run was incomplete.  Output that is not JSON (the
+    # tool stopped) records nothing, as before.
     if res.returncode != 0:
         print(res.stderr[-2000:], file=sys.stderr)
-        return 1
     try:
         results = json.loads(res.stdout)
     except json.JSONDecodeError as err:
@@ -543,7 +577,7 @@ def cmd_check(args, q: dict, data_dir: Path) -> int:
     append_check_history(data_dir, history)
     print(f"Done: {n} checked" + (f", {n_error} without an answer (run check again)" if n_error else ""),
           file=sys.stderr)
-    return 0
+    return 1 if (res.returncode != 0 or n_error) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -771,13 +805,10 @@ def cmd_pair(args, q: dict, data_dir: Path) -> int:
         return 0
     write_json(pa, da)
     write_json(pb, db)
-    regen = {"a": [a], "b": [b], "both": [a, b], "none": []}[args.regenerate]
-    if regen:
-        res = run_tool(["data_analysis/regenerate_trait_instructions.py", "--traits", *regen,
-                        "--instructions-only", "--force"], dry_run=False)
-        if res.returncode != 0:
-            print("regeneration failed", file=sys.stderr)
-            return 1
+    # The queue, the arrangement check and the derived lists follow the files
+    # before the regeneration is tried (2026-10-12, B5, as rename does): the
+    # generator now exits 1 when a trait fails, and returning before these
+    # steps would leave the two files paired and the queue entries not.
     for e in q["entries"]:
         if e.get("stem") in (a, b) and e.get("status") in LIFECYCLE:
             e["status"] = "paired"
@@ -786,6 +817,16 @@ def cmd_pair(args, q: dict, data_dir: Path) -> int:
     save_queue(q, args.queue)
     ok = run_tool(["data_analysis/check_arrangements.py", "--quiet"], dry_run=False)
     run_tool(["tools/sync_entity_lists.py"], dry_run=False)
+    regen = {"a": [a], "b": [b], "both": [a, b], "none": []}[args.regenerate]
+    if regen:
+        res = run_tool(["data_analysis/regenerate_trait_instructions.py", "--traits", *regen,
+                        "--instructions-only", "--force"], dry_run=False)
+        if res.returncode != 0:
+            print(f"regeneration failed (exit {res.returncode}; the generator's FAILED line names the trait): "
+                  f"the pair is recorded, but the neg instructions of a failed side still name its old "
+                  f"label; regenerate it (regenerate_trait_instructions.py --traits {' '.join(regen)} "
+                  f"--instructions-only --force)", file=sys.stderr)
+            return 1
     return 0 if ok.returncode == 0 else 1
 
 
@@ -866,10 +907,13 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
         return 0
     stems = [new] + ([normalize_to_file_name(args.partner)] if args.partner else [])
     res = run_tool(["data_analysis/generate_antonyms.py", "--traits", *stems], dry_run=False, capture=True)
+    # exit 1 with the JSON printed means an ERROR answer (B5): keep the others
     if res.returncode != 0:
         print(res.stderr[-1500:], file=sys.stderr)
+    try:
+        results = json.loads(res.stdout)
+    except json.JSONDecodeError:
         return 1
-    results = json.loads(res.stdout)
     registry = build_registry(q, data_dir)
     history = []
     for label, r in results.items():
@@ -887,7 +931,7 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
     save_queue(q, args.queue)
     append_check_history(data_dir, history)
     print("if both sides name each other: seed_entities.py pair --a <new completion> --b " + new, file=sys.stderr)
-    return 0
+    return 0 if res.returncode == 0 else 1
 
 
 # ---------------------------------------------------------------------------

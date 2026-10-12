@@ -730,7 +730,8 @@ class TestReviewFixes20261012:
         qp = _queue(tmp_path, [_entry(status="generated")])
         out = self._Out({"rationalizing": {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "All retries failed"}})
         monkeypatch.setattr(se, "run_tool", lambda *a, **k: out)
-        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--chunk", "3"]) == 0
+        # B5 (2026-10-12): an answer missing is a failed run, exit 1 (was 0)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--chunk", "3"]) == 1
         e = json.loads(qp.read_text())["entries"][0]
         assert e["status"] == "generated" and "check_result" not in e and "check_answers" not in e
         assert not se.check_history_path(d).exists()
@@ -757,3 +758,134 @@ class TestReviewFixes20261012:
         assert own["stem"] == "lazy" and other["partner"] == "lazy" and td.joinpath("lazy.json").exists()
         assert "tools/sync_entity_lists.py" in calls and "data_analysis/generate_antonyms.py" not in calls
         assert "regenerate it (regenerate_trait_instructions.py --traits lazy --force)" in capsys.readouterr().err
+
+
+class _Res:
+    """A finished tool run, as ``run_tool`` returns it."""
+
+    def __init__(self, rc=0, stdout="", stderr=""):
+        self.returncode, self.stdout, self.stderr = rc, stdout, stderr
+
+
+class TestGeneratorExitStatus:
+    """B5 (Roger, 2026-10-12; review Review 8 D1): the generators and the
+    antonym check exit 1 when an entity fails with an error other than a
+    refusal, having written every entity that succeeded.  The subcommands
+    that call them still record the successes and return 1."""
+
+    def test_generate_marks_the_successes_when_the_generator_exits_1(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="seeded"), _entry(stem="other", label="other", status="seeded")])
+        td = d / "traits" / "instructions"
+        td.joinpath("other.json").write_text(json.dumps({"description": "seed only"}))
+
+        def fake_run(cmd, **k):
+            # the generator wrote rationalizing and failed on other
+            td.joinpath("rationalizing.json").write_text(json.dumps({"instruction": [{"pos": "x", "neg": "y"}]}))
+            return _Res(1)
+        monkeypatch.setattr(se, "run_tool", fake_run)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "generate", "--chunk", "3"]) == 1
+        entries = {e["stem"]: e for e in json.loads(qp.read_text())["entries"]}
+        assert entries["rationalizing"]["status"] == "generated" and "generation_failed" not in entries["rationalizing"]
+        assert entries["other"]["status"] == "seeded"
+        assert entries["other"]["generation_failed"]["exit"] == 1 and entries["other"]["generation_failed"]["at"]
+        err = capsys.readouterr().err
+        assert "FAILED (exit 1)" in err and "1/2 marked generated" in err and "1 not generated: other" in err
+
+    def test_a_later_success_clears_the_failure_record(self, tmp_path, monkeypatch):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="seeded", generation_failed={"at": "2026-10-12T00:00:00+00:00",
+                                                                          "exit": 1})])
+
+        def fake_run(cmd, **k):
+            (d / "traits" / "instructions" / "rationalizing.json").write_text(
+                json.dumps({"instruction": [{"pos": "x", "neg": "y"}]}))
+            return _Res(0)
+        monkeypatch.setattr(se, "run_tool", fake_run)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "generate", "--chunk", "3"]) == 0
+        e = json.loads(qp.read_text())["entries"][0]
+        assert e["status"] == "generated" and "generation_failed" not in e
+
+    def test_a_trait_failure_does_not_mark_the_roles(self, tmp_path, monkeypatch):
+        """The record names the failed command's entity type only."""
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="seeded"),
+                               _entry(stem="gamekeeper", label="gamekeeper", entity_type="role", status="seeded")])
+        monkeypatch.setattr(se, "run_tool",
+                            lambda cmd, **k: _Res(1 if "regenerate_trait_instructions.py" in cmd[0] else 0))
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "generate", "--chunk", "3"]) == 1
+        entries = {e["stem"]: e for e in json.loads(qp.read_text())["entries"]}
+        assert "generation_failed" in entries["rationalizing"]
+        assert "generation_failed" not in entries["gamekeeper"] and entries["gamekeeper"]["status"] == "seeded"
+
+    def test_check_records_the_answers_that_came_back_and_returns_1(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="generated"),
+                               _entry(stem="intellectually_honest", label="intellectually honest",
+                                      partner="rationalizing", status="generated")])
+        out = {"rationalizing": {"negative_label": "intellectually honest", "antonym_score": 4, "reasoning": "r"},
+               "intellectually_honest": {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "failed"}}
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res(1, json.dumps(out), "FAILED (1): intellectually_honest"))
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--chunk", "3"]) == 1
+        entries = {e["stem"]: e for e in json.loads(qp.read_text())["entries"]}
+        assert entries["rationalizing"]["status"] == "checked"
+        assert entries["rationalizing"]["check_result"]["category"] == "nice"
+        assert entries["intellectually_honest"]["status"] == "generated"
+        assert len(se.check_history_path(d).read_text().splitlines()) == 1
+
+    def test_check_with_no_json_records_nothing(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="generated")])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res(1, "", "Traceback ..."))
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--chunk", "3"]) == 1
+        assert json.loads(qp.read_text())["entries"][0]["status"] == "generated"
+
+    def test_pair_records_the_pair_before_a_failed_regeneration(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        td = d / "traits" / "instructions"
+        td.joinpath("rationalizing.json").write_text(json.dumps({"positive_label": "rationalizing",
+                                                                 "negative_label": "non-rationalizing",
+                                                                 "description": "d"}))
+        td.joinpath("intellectually_honest.json").write_text(json.dumps({
+            "positive_label": "intellectually honest", "negative_label": "non-intellectually honest",
+            "description": "d"}))
+        qp = _queue(tmp_path, [_entry(status="checked"),
+                               _entry(stem="intellectually_honest", label="intellectually honest",
+                                      partner="rationalizing", status="checked")])
+        calls = []
+
+        def fake(cmd, **k):
+            calls.append(cmd[0])
+            return _Res(1 if "regenerate_trait_instructions.py" in cmd[0] else 0)
+        monkeypatch.setattr(se, "run_tool", fake)
+        rc = se.main(["--queue", str(qp), "--data-dir", str(d), "pair", "--a", "rationalizing",
+                      "--b", "intellectually_honest"])
+        assert rc == 1
+        assert all(e["status"] == "paired" for e in json.loads(qp.read_text())["entries"])
+        assert calls.index("data_analysis/check_arrangements.py") < calls.index(
+            "data_analysis/regenerate_trait_instructions.py")
+        assert "tools/sync_entity_lists.py" in calls
+        assert "--traits rationalizing --instructions-only --force" in capsys.readouterr().err
+
+    def test_rename_keeps_the_check_answers_that_came_back(self, tmp_path, monkeypatch):
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        td.joinpath("slothful.json").write_text(json.dumps({"positive_label": "slothful", "negative_label": "non-slothful",
+                                                            "description": "d", "instruction": [{"pos": "x", "neg": "y"}]}))
+        td.joinpath("busy.json").write_text(json.dumps({"positive_label": "busy", "negative_label": "non-busy",
+                                                        "description": "d", "instruction": [{"pos": "x", "neg": "y"}]}))
+        qp = _queue(tmp_path, [_entry(stem="slothful", label="slothful", partner=None, status="done"),
+                               _entry(stem="busy", label="busy", partner="slothful", status="checked")])
+        out = {"lazy": {"negative_label": "busy", "antonym_score": 4, "reasoning": "r"},
+               "busy": {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "failed"}}
+
+        def fake(cmd, **k):
+            if "generate_antonyms.py" in cmd[0]:
+                return _Res(1, json.dumps(out), "FAILED (1): busy")
+            return _Res(0)
+        monkeypatch.setattr(se, "run_tool", fake)
+        rc = se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "slothful", "--new", "lazy",
+                      "--partner", "busy"])
+        assert rc == 1
+        own, other = json.loads(qp.read_text())["entries"]
+        assert own["stem"] == "lazy" and own["check_result"]["returned"] == "busy"
+        assert "check_result" not in other

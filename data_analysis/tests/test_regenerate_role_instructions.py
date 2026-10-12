@@ -991,10 +991,15 @@ class TestRefusalRunSummary:
                 return _make_response("not json at all")             # asked for five times, then an error
             return _make_response(json.dumps(FAKE_COMBINED_RESPONSE))
         b.client.messages.create = AsyncMock(side_effect=reply)
-        module.main(b.args + ["--model", "claude-sonnet-4-6"])
+        # B5 (2026-10-12): the run goes on past the error and writes the rest,
+        # then exits 1 (it exited 0 before); the refusal alone would not
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
         err = capsys.readouterr().err
         assert "REFUSED forger: I'm not comfortable writing persona instructions" in err
         assert "Done: 1 processed, 1 skipped, 1 refused, 1 errors" in err   # default is skipped
+        assert "FAILED (1): herder" in err
         assert b.client.messages.create.call_count == 1 + 1 + 5
         [rec] = _records(module.refusal_log_path(b.usage_json))
         assert rec["stem"] == "forger" and rec["attempt"] == "live"
@@ -1017,6 +1022,56 @@ class TestRefusalInBatch:
             ("accountant", "role", "batch", "refusal"), ("herder", "role", "batch", "end_turn")]
         assert "1 processed (1 from the batch, 0 in real time), 1 skipped, 2 refused, 0 errors" in err
         assert json.loads(b.usage_json.read_text())["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 3
+
+
+class TestExitStatus:
+    """B5 (Roger, 2026-10-12; review Review 8 D1), as for the trait
+    generator: exit 1 when any role ends in an error other than a refusal,
+    the rest written and the failed ones named; refusals alone keep exit 0."""
+
+    def test_refusals_alone_exit_0(self, batch_setup, capsys):
+        b = batch_setup
+
+        def reply(**kw):
+            if "<role>\nforger\n</role>" in kw["messages"][0]["content"]:
+                return _refused_reply(DECLINE, stop_reason="end_turn")
+            return _make_response(json.dumps(FAKE_COMBINED_RESPONSE))
+        b.client.messages.create = AsyncMock(side_effect=reply)
+        module.main(b.args + ["--model", "claude-sonnet-4-6"])     # no SystemExit
+        err = capsys.readouterr().err
+        assert "1 refused, 0 errors" in err and "FAILED" not in err
+
+    def test_a_role_failing_in_the_real_time_pass_exits_1_and_is_logged(self, batch_setup, capsys):
+        b = batch_setup
+
+        def reply(**kw):
+            if "<role>\nherder\n</role>" in kw["messages"][0]["content"]:
+                return _make_response("not json at all")      # asked for five times, then an error
+            return _make_response(json.dumps(FAKE_COMBINED_RESPONSE))
+        b.client.messages.create = AsyncMock(side_effect=reply)
+        before = (b.stage / "herder.json").read_text()
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
+        err = capsys.readouterr().err
+        assert "FAILED (1): herder" in err
+        for stem in ("forger", "accountant"):
+            assert json.loads((b.stage / f"{stem}.json").read_text())["instruction"] == FAKE_INSTRUCTIONS
+        assert (b.stage / "herder.json").read_text() == before
+        [entry] = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert entry["failed"] == ["herder"] and entry["counts"]["failed"] == 1
+
+    def test_a_file_gone_before_collection_is_a_failure(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        (b.stage / "accountant.json").unlink()
+        with pytest.raises(SystemExit) as exc:
+            module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert exc.value.code == 1
+        err = capsys.readouterr().err
+        assert "accountant: no such role file" in err and "FAILED (1): accountant" in err
+        [entry] = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert entry["failed"] == ["accountant"]
 
 
 class TestBatchCollectionReview:

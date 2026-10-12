@@ -32,6 +32,14 @@ opposing_role, opposition_score, prompt_form, prompt_label}``; the usage record 
 ``data/roles/role_pair_check_usage.json``.  Run it from both sides: a role
 pair is recorded only when each side names the other.
 
+Exit status (2026-10-12, review Review 8 D1 / walk-through B5): 1 when any
+check ended in the ERROR sentinel (every attempt failed; for ``--name-pos``
+the blind name counts too), 0 otherwise.  The JSON on stdout is printed
+either way, with every result, so a caller keeps the answers that came
+back; the sentinel marks the stems that failed, and a closing line on
+stderr names them ("FAILED (n): ...").  Before, the run exited 0 whatever
+failed.
+
 Usage:
     uv run python data_analysis/generate_antonyms.py
     uv run python data_analysis/generate_antonyms.py --traits obedient pragmatic conservative
@@ -292,6 +300,31 @@ async def classify_role_one(
     return dict(ROLE_ERROR_RESULT)
 
 
+def failed_stems(results: dict, *, name_pos: bool = False, roles: bool = False) -> list[str]:
+    """The stems whose check ended in the ERROR sentinel (B5): the trait
+    check's ``negative_label`` (and, with ``name_pos``, the blind
+    ``positive_name``), or the role check's ``opposing_role``."""
+    out = []
+    for stem, r in results.items():
+        if roles:
+            bad = r.get("opposing_role") == "ERROR"
+        else:
+            bad = r.get("negative_label") == "ERROR" or (name_pos and r.get("positive_name") in (None, "ERROR"))
+        if bad:
+            out.append(stem)
+    return sorted(out)
+
+
+def report_failures(failed: list[str]) -> int:
+    """The run's exit status: 1, after a line naming the failed stems, when
+    any check ended in the ERROR sentinel; 0 otherwise."""
+    if not failed:
+        return 0
+    print(f"FAILED ({len(failed)}): {', '.join(failed)} -- no usable answer (ERROR in the JSON); "
+          f"every other result is in the JSON.  Exit status 1.", file=sys.stderr)
+    return 1
+
+
 def trait_prompt_label(stem: str, doc: dict) -> str:
     """The name the trait check shows for a trait file: the judge display
     form of its label (``judge_label``'s trait rule, applied to the file read,
@@ -323,9 +356,9 @@ def load_role_tasks(stems: list[str], roles_dir: Path | None = None) -> list[tup
 
 
 async def main_roles_async(role_stems: list[str], usage_json: Path | None = None,
-                           roles_dir: Path | None = None):
+                           roles_dir: Path | None = None) -> int:
     """The role-pair check: one call per role, results printed as JSON keyed
-    by stem."""
+    by stem.  Returns the exit status (``report_failures``)."""
     tasks = load_role_tasks(role_stems, roles_dir)
     print(f"Processing {len(tasks)} roles", file=sys.stderr)
     usage = MultiModelUsage()
@@ -365,6 +398,7 @@ async def main_roles_async(role_stems: list[str], usage_json: Path | None = None
             print(f"  {name} -> {role} (score={score})", file=sys.stderr)
 
     print(json.dumps(results, indent=2, sort_keys=True))
+    return report_failures(failed_stems(results, roles=True))
 
 
 def extract_definition(eval_prompt: str) -> str:
@@ -426,7 +460,9 @@ async def classify_one(
 
 
 async def main_async(trait_filter: list[str] | None = None, usage_json: Path | None = None,
-                     name_pos: bool = False):
+                     name_pos: bool = False) -> int:
+    """The trait check; results printed as JSON keyed by stem.  Returns the
+    exit status (``report_failures``)."""
     traits_dir = Path(__file__).parent.parent / "data" / "traits" / "instructions"
     usage = MultiModelUsage()
     trait_files = sorted(traits_dir.glob("*.json"))
@@ -547,6 +583,7 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
             )
 
     print(json.dumps(results, indent=2, sort_keys=True))
+    return report_failures(failed_stems(results, name_pos=name_pos))
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -590,11 +627,14 @@ def main(argv: list[str] | None = None):
     args = parse_args(argv)
     if args.roles:
         usage_json = Path(args.usage_json) if args.usage_json else DEFAULT_ROLE_USAGE_JSON
-        asyncio.run(main_roles_async(args.roles, usage_json=usage_json))
-        return
-    usage_json = Path(args.usage_json) if args.usage_json else DEFAULT_USAGE_JSON
-    asyncio.run(main_async(trait_filter=args.traits, usage_json=usage_json,
-                           name_pos=args.name_pos))
+        status = asyncio.run(main_roles_async(args.roles, usage_json=usage_json))
+    else:
+        usage_json = Path(args.usage_json) if args.usage_json else DEFAULT_USAGE_JSON
+        status = asyncio.run(main_async(trait_filter=args.traits, usage_json=usage_json,
+                                        name_pos=args.name_pos))
+    # 1 when a check ended in the ERROR sentinel (B5); the JSON was printed either way
+    if status:
+        sys.exit(status)
 
 
 if __name__ == "__main__":

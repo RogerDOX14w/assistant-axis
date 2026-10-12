@@ -16,6 +16,15 @@ instead of JSON) is not retried: it is recorded in
 data/traits/generation_refusals.jsonl, counted apart from errors, and the
 trait file is left as it was (see data_analysis/generation_refusals.py).
 
+Exit status (2026-10-12, review Review 8 D1 / walk-through B5): 1 when any
+trait ended in an error other than a refusal (every retry failed, an API
+error, a file that could not be read), 0 otherwise.  The run goes on past
+an error: every trait that succeeded is written, the summary names the
+traits that failed ("FAILED (n): ..."), and a batch run also records them
+in its entry in the batch log (``failed``).  Refusals alone keep exit 0
+(a refusal is a data point, not an error).  Before, the run exited 0
+whatever failed, and seed_entities.py marked queue entries by it.
+
 A trait whose label is three or more words long also gets a label-blind
 naming call on the instructions just written (generate_antonyms.name_pos_one:
 it names the pole the pos instructions describe without seeing the label).
@@ -1710,13 +1719,17 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
                         refusals_jsonl: Path | None = None, name_checks: list | None = None,
                         semaphore: asyncio.Semaphore | None = None, n_variants: int | None = None,
                         n_questions: int | None = None,
-                        inputs_sha256: dict | None = None) -> tuple[list[str], list[str], list[str]]:
+                        inputs_sha256: dict | None = None,
+                        ) -> tuple[list[str], list[str], list[str], list[str]]:
     """Write the trait files of the requests that succeeded.  Returns the
     status lines, the stems that have to be generated again (requests that
     errored or expired, replies that cannot be used, and replies for a file
     whose labels or description changed after submission, by
-    ``inputs_sha256``), and the REFUSED lines of the replies that were
-    refusals: those are recorded like a live refusal and not asked for again.
+    ``inputs_sha256``), the REFUSED lines of the replies that were
+    refusals: those are recorded like a live refusal and not asked for again,
+    and the stems whose file is gone (renamed or deleted since the batch was
+    submitted: their reply has nowhere to go, a failure the run's exit status
+    reports, B5).
 
     ``n_variants`` / ``n_questions``: the counts the batch asked for, checked
     as the live path checks them (until 2026-10-12 a batch reply was checked
@@ -1727,7 +1740,7 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
     real time on each file written, as it does on a live run; the batch
     carries no such request, since which files it will write is not known when
     it is submitted."""
-    done, again, refused = [], [], []
+    done, again, refused, lost = [], [], [], []
     async for entry in await client.messages.batches.results(batch_id):
         stem = entry.custom_id
         path = TRAITS_DIR / f"{stem}.json"
@@ -1740,6 +1753,7 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             usage.charge(model + BATCH_SUFFIX, *extract_usage_anthropic(message))
         if not path.exists():
             print(f"  {stem}: no such trait file in {TRAITS_DIR}", file=sys.stderr)
+            lost.append(stem)
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         if inputs_sha256 and stem in inputs_sha256 and prompt_inputs_sha256(data) != inputs_sha256[stem]:
@@ -1774,7 +1788,18 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             if rec is not None:
                 name_checks.append(rec)
                 done[-1] += f"; naming check: {rec.get('positive_name')!r}"
-    return done, again, refused
+    return done, again, refused, lost
+
+
+def report_failures(failed: list[str]) -> int:
+    """The run's exit status (B5, 2026-10-12): 1, after a line naming the
+    traits that failed, when any trait ended in an error other than a
+    refusal; 0 otherwise."""
+    if not failed:
+        return 0
+    print(f"FAILED ({len(failed)}): {', '.join(sorted(failed))} -- not regenerated (errors above); "
+          f"every other trait was written.  Exit status 1.", file=sys.stderr)
+    return 1
 
 
 def resolve_trait_paths(traits: list[str] | None, all_traits: bool) -> list[Path]:
@@ -1800,7 +1825,8 @@ def resolve_trait_paths(traits: list[str] | None, all_traits: bool) -> list[Path
     return paths
 
 
-async def main_async(args: argparse.Namespace) -> None:
+async def main_async(args: argparse.Namespace) -> int:
+    """Run the generator; returns the exit status (``report_failures``)."""
     global PROMPT_STYLE, USE_ANTONYM, TRAITS_DIR, OPENING_REROLL
     PROMPT_STYLE = args.style
     USE_ANTONYM = args.antonym
@@ -1862,7 +1888,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 print(line, file=sys.stderr)
             print(f"Batch: {len(requests)} request(s), {len(skipped)} file(s) skipped", file=sys.stderr)
             if args.dry_run or not requests:
-                return
+                return 0
             batch = await client.messages.batches.create(requests=requests)
             batch_id = batch.id
             entry = {
@@ -1876,14 +1902,14 @@ async def main_async(args: argparse.Namespace) -> None:
             print(f"Batch submitted: {batch_id} (recorded in {batch_log_path(usage_json)})", file=sys.stderr)
             if args.batch_no_wait:
                 print(f"Collect it later with the same options and --batch-id {batch_id}", file=sys.stderr)
-                return
+                return 0
         else:
             entry = check_batch_to_collect(find_batch(usage_json, batch_id), batch_id, usage_json,
                                            TRAITS_DIR, "--traits-dir")
             if args.dry_run:
                 # a dry run writes nothing: until 2026-10-12 --batch-id with --dry-run collected the batch
                 print(f"DRY RUN: would wait for batch {batch_id} and write its replies", file=sys.stderr)
-                return
+                return 0
         await wait_for_batch(client, batch_id, args.batch_poll)
         # the counts the batch asked for (older log entries have none: the options given now)
         n_variants = entry.get("n_variants", args.n_variants)
@@ -1892,15 +1918,16 @@ async def main_async(args: argparse.Namespace) -> None:
         if instructions_only != args.instructions_only:
             print(f"NOTE: batch {batch_id} was submitted {'with' if instructions_only else 'without'} "
                   f"--instructions-only; collected the same way", file=sys.stderr)
-        done, again, refused = await collect_batch(
+        done, again, refused, lost = await collect_batch(
             client, batch_id, instructions_only=instructions_only, model=args.model,
             temperature=args.temperature, thinking_budget=args.thinking_budget, usage=usage,
             refusals_jsonl=refusals_jsonl, name_checks=name_checks, semaphore=semaphore,
             n_variants=n_variants, n_questions=n_questions, inputs_sha256=entry.get("inputs_sha256"))
         # collected: a second collection would charge the replies again and
         # write them over any edit made since (check_batch_to_collect refuses it)
-        record_batch(usage_json, dict(entry, collected=datetime.datetime.now(datetime.timezone.utc).isoformat(
-            timespec="seconds"), counts={"written": len(done), "again": len(again), "refused": len(refused)}))
+        collected = dict(entry, collected=datetime.datetime.now(datetime.timezone.utc).isoformat(
+            timespec="seconds"), counts={"written": len(done), "again": len(again), "refused": len(refused)})
+        record_batch(usage_json, collected)
         try:
             for line in done + refused:
                 print(line, file=sys.stderr)
@@ -1913,24 +1940,33 @@ async def main_async(args: argparse.Namespace) -> None:
                 for stem in again), return_exceptions=True)
             refused_rt = [r for r in retried if isinstance(r, GenerationRefusal)]
             errors = [r for r in retried if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
+            failed = lost + [stem for stem, r in zip(again, retried)
+                             if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
             for stem, r in zip(again, retried):
                 line = f"REFUSED {r.label}: {r.excerpt_line}" if isinstance(r, GenerationRefusal) else r
                 print(f"[in real time] {stem}: {line}", file=sys.stderr)
             n_rt = len(retried) - len(errors) - len(refused_rt)
             print(f"\nDone: {len(done) + n_rt} processed ({len(done)} from the batch, {n_rt} in real time), "
-                  f"{len(skipped)} skipped, {len(refused) + len(refused_rt)} refused, {len(errors)} errors",
+                  f"{len(skipped)} skipped, {len(refused) + len(refused_rt)} refused, {len(failed)} errors",
                   file=sys.stderr)
             if refused or refused_rt:
                 print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
+            # the run's record names what failed (B5): the batch log entry
+            # (``failed`` and ``counts.failed``, written only when something did)
+            if failed:
+                record_batch(usage_json, dict(collected, failed=sorted(failed),
+                                              counts=dict(collected["counts"], failed=len(failed))))
         finally:
             # the batch's replies are paid for and written: their usage is kept even if the real-time pass stops
             persist_name_checks(name_checks, usage_json)
             persist_usage(usage, usage_json)
-        return
+        return report_failures(failed)
 
-    tasks = [
-        asyncio.create_task(
-            regenerate_one(
+    async def _one(path: Path):
+        """``(stem, status line or the exception)``: the stem travels with
+        the outcome, so that a failure can be named (B5)."""
+        try:
+            return path.stem, await regenerate_one(
                 client,
                 path,
                 n_variants=args.n_variants,
@@ -1946,24 +1982,25 @@ async def main_async(args: argparse.Namespace) -> None:
                 refusals_jsonl=refusals_jsonl,
                 name_checks=name_checks,
             )
-        )
-        for path in trait_paths
-    ]
+        except Exception as e:  # noqa: BLE001 -- GenerationRefusal included; sorted out below
+            return path.stem, e
 
-    ok = skip = refused = err = 0
+    tasks = [asyncio.create_task(_one(path)) for path in trait_paths]
+
+    ok = skip = refused = 0
+    failed: list[str] = []
     done = 0
     for coro in asyncio.as_completed(tasks):
         done += 1
-        try:
-            r = await coro
-        except GenerationRefusal as e:
+        stem, r = await coro
+        if isinstance(r, GenerationRefusal):
             # recorded by regenerate_one; counted apart from errors, and the run goes on
-            print(f"[{done}/{n}] REFUSED {e.label}: {e.excerpt_line}", file=sys.stderr)
+            print(f"[{done}/{n}] REFUSED {r.label}: {r.excerpt_line}", file=sys.stderr)
             refused += 1
             continue
-        except Exception as e:
-            print(f"[{done}/{n}] ERROR: {e}", file=sys.stderr)
-            err += 1
+        if isinstance(r, Exception):
+            print(f"[{done}/{n}] ERROR {stem}: {r}", file=sys.stderr)
+            failed.append(stem)
             continue
         print(f"[{done}/{n}] {r}", file=sys.stderr)
         if r.startswith("OK") or r.startswith("DRY-RUN"):
@@ -1971,13 +2008,14 @@ async def main_async(args: argparse.Namespace) -> None:
         elif r.startswith("SKIP"):
             skip += 1
 
-    print(f"\nDone: {ok} processed, {skip} skipped, {refused} refused, {err} errors", file=sys.stderr)
+    print(f"\nDone: {ok} processed, {skip} skipped, {refused} refused, {len(failed)} errors", file=sys.stderr)
     if refused:
         print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
     if not args.dry_run:
         print(f"API calls made: ~{(ok + refused) * calls_per + len(name_checks)}", file=sys.stderr)
         persist_name_checks(name_checks, Path(args.usage_json))
         persist_usage(usage, Path(args.usage_json))
+    return report_failures(failed)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -2132,7 +2170,11 @@ def main(argv: list[str] | None = None) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    asyncio.run(main_async(args))
+    # 1 when a trait failed with an error other than a refusal (B5); the
+    # traits that succeeded are written either way
+    status = asyncio.run(main_async(args))
+    if status:
+        sys.exit(status)
 
 
 if __name__ == "__main__":

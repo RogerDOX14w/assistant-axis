@@ -288,3 +288,75 @@ class TestRepliesThatCannotBeUsed:
         out, err = capsys.readouterr()
         assert json.loads(out)["patient"]["antonym_score"] == "3"
         assert "Antonym score distribution" in err
+
+
+class TestExitStatus:
+    """B5 (Roger, 2026-10-12; review Review 8 D1): exit 1 when any check ends
+    in the ERROR sentinel, with the JSON still printed in full so a caller
+    keeps the answers that came back; exit 0 otherwise."""
+
+    @pytest.fixture(autouse=True)
+    def _no_sleep(self, monkeypatch):
+        async def no_sleep(_):
+            return None
+        monkeypatch.setattr(module.asyncio, "sleep", no_sleep)
+
+    @staticmethod
+    def _client_failing_on(marker: str, good: dict) -> AsyncMock:
+        """Replies ``good`` except to a prompt containing ``marker``, which
+        always gets an unusable reply (so five attempts, then ERROR)."""
+        def reply(**kw):
+            resp = MagicMock()
+            content = kw["messages"][0]["content"]
+            resp.content = [MagicMock(type="text", text="not json" if marker in content else json.dumps(good))]
+            resp.usage = MagicMock(input_tokens=10, output_tokens=5)
+            return resp
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=reply)
+        return client
+
+    def test_an_error_answer_exits_1_with_every_result_printed(self, tmp_path, monkeypatch, capsys):
+        client = self._client_failing_on("positive_label: patient", REPLY)
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: client)
+        with pytest.raises(SystemExit) as exc:
+            module.main(["--traits", "careless_hexaco", "patient", "--usage-json", str(tmp_path / "u.json")])
+        assert exc.value.code == 1
+        out, err = capsys.readouterr()
+        results = json.loads(out)
+        assert results["patient"]["negative_label"] == "ERROR"
+        assert results["careless_hexaco"]["negative_label"] == "humble"
+        assert "FAILED (1): patient" in err
+
+    def test_all_answers_exit_0(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: _client(json.dumps(REPLY)))
+        module.main(["--traits", "patient", "--usage-json", str(tmp_path / "u.json")])   # no SystemExit
+        assert "FAILED" not in capsys.readouterr().err
+
+    def test_a_failed_blind_name_counts_with_name_pos(self, tmp_path, monkeypatch, capsys):
+        # the trait check answers; the label-blind call (its prompt starts "Instructions:") never does
+        client = self._client_failing_on("Instructions:\n", REPLY)
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: client)
+        assert asyncio.run(module.main_async(trait_filter=["patient"], usage_json=tmp_path / "u.json")) == 0
+        assert asyncio.run(module.main_async(trait_filter=["patient"], usage_json=tmp_path / "u.json",
+                                             name_pos=True)) == 1
+        capsys.readouterr()
+
+    def test_the_role_check_exits_1_on_an_error(self, tmp_path, monkeypatch, capsys):
+        roles_dir = TestRoleMode()._roles_dir(tmp_path)
+        client = self._client_failing_on("Role: destroyer\n", ROLE_REPLY)
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: client)
+        status = asyncio.run(module.main_roles_async(["destroyer", "devils_advocate"], tmp_path / "u.json",
+                                                     roles_dir))
+        assert status == 1
+        out, err = capsys.readouterr()
+        results = json.loads(out)
+        assert results["destroyer"]["opposing_role"] == "ERROR"
+        assert results["devils_advocate"]["opposing_role"] == "guardian|protector"
+        assert "FAILED (1): destroyer" in err
+
+    def test_failed_stems(self):
+        res = {"a": {"negative_label": "ERROR"}, "b": {"negative_label": "x", "positive_name": "ERROR"},
+               "c": {"negative_label": "y", "positive_name": "z"}}
+        assert module.failed_stems(res) == ["a"]
+        assert module.failed_stems(res, name_pos=True) == ["a", "b"]
+        assert module.failed_stems({"r": {"opposing_role": "ERROR"}, "s": {"opposing_role": "t"}}, roles=True) == ["r"]
