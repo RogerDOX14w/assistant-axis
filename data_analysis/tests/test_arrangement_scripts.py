@@ -1,7 +1,10 @@
-"""Tests for data_analysis/check_arrangements.py and backfill_arrangements.py."""
+"""Tests for data_analysis/check_arrangements.py, and the archiving of the
+September backfill (archive/backfill_arrangements_2026-09-08/, walk-through A4)."""
 from __future__ import annotations
 
+import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -11,8 +14,10 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from data_analysis import backfill_arrangements as bf  # noqa: E402
 from data_analysis import check_arrangements as chk  # noqa: E402
+
+ARCHIVED_BACKFILL = (_REPO_ROOT / "archive" / "backfill_arrangements_2026-09-08"
+                     / "backfill_arrangements.py")
 
 
 def _write(d: Path, stem: str, doc: dict) -> None:
@@ -55,71 +60,57 @@ def corpus(tmp_path: Path) -> Path:
     return tmp_path
 
 
-class TestBackfill:
-    def test_plan_traits(self, corpus: Path):
-        plan = bf.plan_traits(corpus)
-        kinds = {s: sorted(a.kind for a in arrs) for s, arrs in plan.items()}
-        assert kinds["blunt"] == ["pair"] and kinds["tactful"] == ["pair"]
-        assert kinds["malicious"] == ["pair", "triangle"]          # pair with benign + triangle
-        assert kinds["compassionate"] == ["triangle"] and kinds["callous"] == ["triangle"]
-        assert kinds["conformist"] == ["triangle"]
-        assert kinds["curious"] == ["singleton"]
-        assert kinds["calm"] == []                                  # unclassified
-        assert kinds["selfish"] == ["sequence"] and kinds["cosmopolitan"] == ["sequence"]
-        seq = next(a for a in plan["selfish"] if a.kind == "sequence")
-        assert seq.members == ("selfish", "cosmopolitan")           # corpus order preserved, absent members skipped
-        assert seq.note and "guesstimate" in seq.note
+def _load_archived_backfill():
+    spec = importlib.util.spec_from_file_location("archived_backfill", ARCHIVED_BACKFILL)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-    def test_plan_roles(self, corpus: Path):
-        plan = bf.plan_roles(corpus, corpus / "pair_list_clean.json")
-        assert [a.kind for a in plan["angel"]] == ["pair"]
-        assert plan["angel"][0].members == ("angel", "demon")
-        assert [a.kind for a in plan["chef"]] == ["singleton"]
-        assert [a.kind for a in plan["default"]] == ["singleton"]
 
-    def test_dry_run_writes_nothing(self, corpus: Path, capsys):
+class TestBackfillArchived:
+    """The September backfill is archived, not live (walk-through A4, review 8
+    D4): its --apply --overwrite would wipe every arrangement recorded since.
+    It replaced TestBackfill (five tests of the live script) on 2026-10-12."""
+
+    def test_moved_to_the_archive(self):
+        assert ARCHIVED_BACKFILL.is_file()
+        assert not (_REPO_ROOT / "data_analysis" / "backfill_arrangements.py").exists()
+        assert "ARCHIVED 2026-10-12" in ARCHIVED_BACKFILL.read_text()
+
+    def test_nothing_imports_it(self):
+        pattern = re.compile(
+            r"^\s*(from\s+\S*\s+import\s+[^#\n]*\bbackfill_arrangements\b"
+            r"|import\s+\S*backfill_arrangements\b"
+            r"|from\s+\S*backfill_arrangements\s+import)", re.M)
+        offenders = []
+        for top in ("assistant_axis", "data_analysis", "pipeline", "results_analysis",
+                    "scripts", "steering", "tools"):
+            for p in (_REPO_ROOT / top).rglob("*.py"):
+                if pattern.search(p.read_text(encoding="utf-8", errors="replace")):
+                    offenders.append(str(p.relative_to(_REPO_ROOT)))
+        assert offenders == []
+
+    def test_main_refuses_without_historical_rerun(self, corpus: Path, monkeypatch, capsys):
+        monkeypatch.delenv("HISTORICAL_RERUN", raising=False)
+        bf = _load_archived_backfill()
         before = {p: p.read_text() for p in corpus.rglob("*.json")}
-        assert bf.main(["--data_dir", str(corpus), "--pair_list", str(corpus / "pair_list_clean.json")]) == 0
-        after = {p: p.read_text() for p in corpus.rglob("*.json")}
-        assert before == after
-        out = capsys.readouterr().out
-        assert "[DRY RUN] traits" in out and "left unclassified: 1" in out
-        assert "in more than one arrangement: malicious" in out
-        assert "NOT written" in out
+        args = ["--data_dir", str(corpus), "--pair_list", str(corpus / "pair_list_clean.json"),
+                "--apply", "--overwrite", "--quiet"]
+        assert bf.main(args) == 2
+        assert "ARCHIVED" in capsys.readouterr().err
+        assert {p: p.read_text() for p in corpus.rglob("*.json")} == before
 
-    def test_apply_writes_and_validates(self, corpus: Path):
-        args = ["--data_dir", str(corpus), "--pair_list", str(corpus / "pair_list_clean.json"), "--apply", "--quiet"]
-        assert bf.main(args) == 0
-        blunt = json.loads((corpus / "traits/instructions/blunt.json").read_text())
-        assert blunt["arrangement"] == {"kind": "pair", "members": ["blunt", "tactful"]}
-        assert list(blunt) == ["positive_label", "negative_label", "description", "arrangement",
-                               "instruction", "questions", "eval_prompt"]
-        mal = json.loads((corpus / "traits/instructions/malicious.json").read_text())
-        assert mal["arrangement"] == [
-            {"kind": "pair", "members": ["benign", "malicious"]},
-            {"kind": "triangle", "members": ["callous", "compassionate", "malicious"]},
-        ]
-        assert "arrangement" not in json.loads((corpus / "traits/instructions/calm.json").read_text())
-        default = json.loads((corpus / "roles/instructions/default.json").read_text())
-        assert list(default) == ["arrangement", "instruction"]
-        text = (corpus / "traits/instructions/blunt.json").read_text()
-        assert text.endswith("}\n") and '\n  "arrangement": {' in text
-        # the checker agrees
-        assert chk.main(["--data_dir", str(corpus), "--quiet"]) == 0
-        # idempotent: second apply skips everything
-        assert bf.main(args) == 0
-        assert json.loads((corpus / "traits/instructions/blunt.json").read_text()) == blunt
-
-    def test_overwrite_replaces(self, corpus: Path):
-        base = ["--data_dir", str(corpus), "--pair_list", str(corpus / "pair_list_clean.json"), "--quiet"]
-        assert bf.main(base + ["--apply"]) == 0
-        p = corpus / "traits/instructions/curious.json"
-        doc = json.loads(p.read_text()); doc["arrangement"] = {"kind": "singleton", "note": "hand-edited"}
-        _write(p.parent, "curious", doc)
-        assert bf.main(base + ["--apply"]) == 0        # skipped: field present
-        assert json.loads(p.read_text())["arrangement"]["note"] == "hand-edited"
-        assert bf.main(base + ["--apply", "--overwrite"]) == 0
-        assert json.loads(p.read_text())["arrangement"] == {"kind": "singleton"}
+    def test_still_runs_as_a_record_when_asked(self, corpus: Path, monkeypatch, capsys):
+        """HISTORICAL_RERUN=1 runs it (dry run here); the archive location's
+        repo-root lookup still finds assistant_axis."""
+        monkeypatch.setenv("HISTORICAL_RERUN", "1")
+        bf = _load_archived_backfill()
+        assert bf._REPO_ROOT == _REPO_ROOT
+        before = {p: p.read_text() for p in corpus.rglob("*.json")}
+        assert bf.main(["--data_dir", str(corpus),
+                        "--pair_list", str(corpus / "pair_list_clean.json")]) == 0
+        assert {p: p.read_text() for p in corpus.rglob("*.json")} == before
+        assert "[DRY RUN] traits" in capsys.readouterr().out
 
 
 class TestCheck:

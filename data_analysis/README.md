@@ -545,12 +545,15 @@ same-type entities the file belongs to and its shape (`pair`, `triangle`,
   `--list-unclassified` prints the files with no field.  Run it after any
   edit to labels or arrangements; the test suite also runs it against the
   checked-in corpus.
-- `backfill_arrangements.py` -- the one-off that wrote the initial values
-  (clean pairs, the two triangles, the moral-circle sequence, singletons
-  for untouched `non-X` placeholders, role pairs from
-  `pair_list_clean.json`).  Dry run by default, `--apply` to write,
-  `--overwrite` to replace existing fields.  Kept for re-runs after bulk
-  additions.
+- The one-off that wrote the initial values on 2026-09-08 (clean pairs, the
+  two triangles, the moral-circle sequence, singletons for untouched `non-X`
+  placeholders, role pairs from `pair_list_clean.json`) is **archived** at
+  [`archive/backfill_arrangements_2026-09-08/backfill_arrangements.py`](../archive/backfill_arrangements_2026-09-08/backfill_arrangements.py)
+  (2026-10-12, walk-through A4; it was `data_analysis/backfill_arrangements.py`).
+  It is not for re-runs: the field has been maintained by decision since
+  September, its rules predate the non-X triangle rule, and
+  `--apply --overwrite` would wipe every arrangement recorded since.  It
+  exits 2 unless `HISTORICAL_RERUN=1`.
 
 ## Trait-gap platform: the split trait-hood filter (Sep 2026)
 

@@ -62,9 +62,11 @@ disagree.  Roles have no ``negative_label``, so their pairs exist only here.
 Entry points: :func:`canonical_kind`, :func:`expected_size`,
 :func:`parse_arrangement`, :func:`tree_links`, :func:`load_corpus_arrangements`,
 :func:`validate_corpus`, :func:`summarize_corpus`,
-:func:`arrangement_to_json`.  The CLI wrappers are
-``data_analysis/check_arrangements.py`` and
-``data_analysis/backfill_arrangements.py``.
+:func:`arrangement_to_json`.  The CLI wrapper is
+``data_analysis/check_arrangements.py``.  The one-off September backfill that
+wrote the initial values is archived at
+``archive/backfill_arrangements_2026-09-08/backfill_arrangements.py`` (not to be
+run; walk-through A4, 2026-10-12).
 """
 from __future__ import annotations
 

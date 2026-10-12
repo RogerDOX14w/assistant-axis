@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
 """One-off: write the initial ``arrangement`` field into the corpus (Sep 2026).
 
+**ARCHIVED 2026-10-12** (walk-through A4, review 8 D4; moved here from
+``data_analysis/backfill_arrangements.py``).  This is the one-off initial fill
+of 2026-09-08, kept as the record of the rules it applied.  **Do not run it.**
+The ``arrangement`` field has been maintained by decision since then (seed
+queue, pair and rename steps, the non-X triangle rule of 2026-10-09), and these
+September rules predate that rule; ``--apply --overwrite`` would wipe every
+arrangement recorded since September.  ``main()`` refuses (exit 2) unless
+``HISTORICAL_RERUN=1`` is set, as the May 2026 recipes in ``scripts/`` do.
+Nothing imports this module (pinned by
+``data_analysis/tests/test_arrangement_scripts.py``); the live checker is
+``data_analysis/check_arrangements.py``.
+
 Dry run by default; ``--apply`` writes.  Rules, from AGENT_NOTES § "The
 ``arrangement`` field" and Roger's 2026-09-08 decisions:
 
@@ -25,21 +37,24 @@ inserted after ``description`` (or first, for the bare ``default.json``),
 keys otherwise untouched, 2-space indent and trailing newline as the
 regenerate scripts write.
 
-Usage::
+Usage (as it ran in September; now needs ``HISTORICAL_RERUN=1``)::
 
-    uv run python data_analysis/backfill_arrangements.py            # dry run: report only
-    uv run python data_analysis/backfill_arrangements.py --apply
-    uv run python data_analysis/backfill_arrangements.py --kinds traits --apply --overwrite
+    uv run python archive/backfill_arrangements_2026-09-08/backfill_arrangements.py            # dry run: report only
+    uv run python archive/backfill_arrangements_2026-09-08/backfill_arrangements.py --apply
+    uv run python archive/backfill_arrangements_2026-09-08/backfill_arrangements.py --kinds traits --apply --overwrite
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+# archive/<dir>/<this file>: the repository is three levels up (two when it
+# lived in data_analysis/).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
@@ -178,7 +193,20 @@ def apply_plan(data_dir: Path, etype: str, plan: Dict[str, List[Arrangement]], *
     return counts
 
 
+HISTORICAL_RERUN_MESSAGE = """\
+backfill_arrangements.py is ARCHIVED (2026-10-12, walk-through A4): it is the
+one-off initial fill of 2026-09-08, not a tool to run today.  The arrangement
+field has been maintained by decision since September, and these rules predate
+the non-X triangle rule; --apply --overwrite would wipe every arrangement
+recorded since.  Check the corpus with data_analysis/check_arrangements.py.  To
+rerun this record deliberately, set HISTORICAL_RERUN=1.
+"""
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    if os.environ.get("HISTORICAL_RERUN") != "1":
+        sys.stderr.write(HISTORICAL_RERUN_MESSAGE)
+        return 2
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--data_dir", type=Path, default=None)
     parser.add_argument("--pair_list", type=Path, default=DEFAULT_PAIR_LIST,
