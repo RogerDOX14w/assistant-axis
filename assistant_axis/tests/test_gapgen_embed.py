@@ -67,6 +67,28 @@ def test_cache_hit_miss_and_round_trip(tmp_path):
     assert usage3.n_calls == 1 and usage3.total_prompt_tokens == 4
 
 
+def test_two_processes_saving_one_cache_keep_each_others_entries(tmp_path):
+    """Review 2026-10-12: two cache objects on one root (a generator and an M3 run embedding at the same time) each
+    read the table, add their own texts and save; the second save used to write its table over the first's new
+    entries.  Now a save merges the file under a lock, and a vector already on disk is never replaced."""
+    emb = E.HashEmbedder(16)
+    E.embed_texts(emb, ["old"], cache=E.EmbeddingCache(tmp_path))
+    a, b = E.EmbeddingCache(tmp_path), E.EmbeddingCache(tmp_path)
+    assert a.get(emb.tag, "old") is not None and b.get(emb.tag, "old") is not None   # both have read the table
+    E.embed_texts(emb, ["from a"], cache=a)
+    E.embed_texts(emb, ["from b"], cache=b)
+    fresh = E.EmbeddingCache(tmp_path)
+    assert all(fresh.get(emb.tag, t) is not None for t in ("old", "from a", "from b"))
+    assert json.loads((tmp_path / "manifest.json").read_text())[emb.tag]["n"] == 3
+    # the same text put by both: the one saved first stays
+    first, second = np.full(16, 1.0, np.float32), np.full(16, 2.0, np.float32)
+    a.put(emb.tag, ["both"], first[None, :], model_id="hash-16")
+    b.put(emb.tag, ["both"], second[None, :], model_id="hash-16")
+    a.save()
+    b.save()
+    np.testing.assert_array_equal(E.EmbeddingCache(tmp_path).get(emb.tag, "both"), first)
+
+
 def test_key_is_model_and_text_hash(tmp_path):
     cache = E.EmbeddingCache(tmp_path)
     a, b = E.HashEmbedder(8), E.HashEmbedder(16)

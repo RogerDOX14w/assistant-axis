@@ -139,6 +139,18 @@ def test_end_to_end_writes_the_registry_once_and_every_record(env):
     assert usage["total_cost_usd"] > 0 and "text-embedding-3-large" in usage["per_model"]
 
 
+def test_the_canary_uses_the_configs_threshold(env):
+    """Review 2026-10-12: metric_config.json's canary.min_cosine was validated but not passed on (the module's
+    0.999 was used whatever the config said)."""
+    cfg_path = Path(env["base"][env["base"].index("--metric-config") + 1])
+    cfg = json.loads(cfg_path.read_text())
+    cfg["result"]["canary"]["min_cosine"] = 0.42
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    assert score(env) == 0
+    run = json.loads((out(env) / "run.json").read_text())
+    assert run["canary"]["threshold"] == 0.42
+
+
 def test_resume_skips_decided_rows_and_finishes_a_stalled_one(env):
     good = env["holder"]["responder"]
 

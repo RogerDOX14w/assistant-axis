@@ -364,24 +364,40 @@ class EmbeddingCache:
         return sum(len(t) for t in self._mem.values())
 
     def save(self) -> None:
+        """Write the dirty tables.  Several processes share one cache (a generator and an M3 run embedding at the
+        same time), so the write happens under an exclusive lock on ``<root>/.lock`` and merges what another
+        process saved since this one read the table: the file's entries are kept (a vector already on disk is
+        never replaced, as the canary assumes) and this process's new ones are added.  Before 2026-10-12 the last
+        process to save wrote its own table over the file and lost the other's new entries."""
         if not self._dirty:
             return
+        import fcntl
         self.root.mkdir(parents=True, exist_ok=True)
-        mpath = self.root / "manifest.json"
-        manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
-        for tag, model_id in list(self._dirty.items()):
-            table = self._mem[tag]
-            keys = np.array(sorted(table), dtype="U64")
-            vecs = np.stack([table[k] for k in keys]).astype(np.float32) if len(keys) else np.zeros((0, 0), np.float32)
-            fd, tmp = tempfile.mkstemp(dir=self.root, suffix=".npz.tmp")
-            os.close(fd)
-            with open(tmp, "wb") as fh:
-                np.savez(fh, keys=keys, vecs=vecs)
-            os.replace(tmp, self.path(tag))
-            manifest[tag] = {"model_id": model_id, "dim": int(vecs.shape[1]) if vecs.ndim == 2 else 0,
-                             "n": int(len(keys)), "updated_at": utc_now()}
-        atomic_write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", mpath)
-        self._dirty.clear()
+        with open(self.root / ".lock", "a+") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                mpath = self.root / "manifest.json"
+                manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
+                for tag, model_id in list(self._dirty.items()):
+                    table = self._mem[tag]
+                    p = self.path(tag)
+                    if p.exists():
+                        with np.load(p, allow_pickle=False) as z:
+                            table.update({str(k): v for k, v in zip(z["keys"], z["vecs"])})
+                    keys = np.array(sorted(table), dtype="U64")
+                    vecs = (np.stack([table[k] for k in keys]).astype(np.float32) if len(keys)
+                            else np.zeros((0, 0), np.float32))
+                    fd, tmp = tempfile.mkstemp(dir=self.root, suffix=".npz.tmp")
+                    os.close(fd)
+                    with open(tmp, "wb") as fh:
+                        np.savez(fh, keys=keys, vecs=vecs)
+                    os.replace(tmp, p)
+                    manifest[tag] = {"model_id": model_id, "dim": int(vecs.shape[1]) if vecs.ndim == 2 else 0,
+                                     "n": int(len(keys)), "updated_at": utc_now()}
+                atomic_write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", mpath)
+                self._dirty.clear()
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def normalize_rows(E: np.ndarray) -> np.ndarray:

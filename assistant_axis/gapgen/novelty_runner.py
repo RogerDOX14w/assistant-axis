@@ -553,10 +553,14 @@ class NoveltyRunner:
                     out[id(c)] = Outcome("not_sent")
                 elif o.status == "ok":
                     out[id(c)] = o
-                elif texted[id(c)] > 0:                          # an answer came and never parsed
-                    out[id(c)] = Outcome("unparsed", None, o.error if o.status == "unparsed" else (prev.error if prev else o.error))
-                else:                                            # two failed requests: no answer at all
-                    out[id(c)] = o
+                elif texted[id(c)] >= ASK_ATTEMPTS:              # asked twice, and neither answer parsed
+                    out[id(c)] = Outcome("unparsed", None, o.error)
+                else:
+                    # fewer than two answers came (a request failed outright, before or after the one answer that did
+                    # not parse): the call was not asked twice, so nothing is concluded; the candidate stalls and a
+                    # resume asks once more (the module docstring; _remember counts only answers as attempts)
+                    errs = [x.error for x in (prev, o) if x is not None and x.error]
+                    out[id(c)] = Outcome("failed", None, "; ".join(dict.fromkeys(errs))[:300] or None)
         for c in calls:
             if id(c) not in out:
                 out[id(c)] = Outcome("not_sent")

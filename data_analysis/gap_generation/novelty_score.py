@@ -1732,7 +1732,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         if index is None:
             index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide,
                                            queue_search=queue_on)
-        canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage)
+        canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage,
+                                 min_cosine=cfg.canary.get("min_cosine", EM.CANARY_MIN_COSINE))
         run_meta["canary"] = canary
         keys = [c.key for c in cands]
         E = EM.embed_texts(embedder, [texts[k] for k in keys], cache=cache, usage=usage)

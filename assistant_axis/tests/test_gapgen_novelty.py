@@ -637,6 +637,32 @@ class TestRunner:
         assert not any(is_relation(k) for k in client2.calls)
         assert r2.stats["resumed"] == 1
 
+    def test_one_unparsed_answer_then_a_failed_request_stalls_and_the_resume_asks_once_more(self, tmp_path):
+        """Review 2026-10-12: an answer that did not parse, then a retry request that failed outright, was concluded
+        ``unparsed`` (a grey row) after one parse failure; it is a stall, as the module docstring says, and the resume
+        asks once more (the record shows one attempt at the format)."""
+        rel = {("candidate a", "alpha"): "similar"}
+        good = responder_for(rel, {("candidate a", "alpha"): 4})
+        seen = {"n": 0}
+
+        def garbage_then_down(kw):
+            if "target" in json.loads(user_text(kw)):
+                seen["n"] += 1
+                return "not an answer" if seen["n"] == 1 else RuntimeError("network down")
+            return good(kw)
+        r, _, _ = make_runner(tmp_path, garbage_then_down)
+        c = cand("candidate a")
+        vec = {c.key: query(alpha=0.9, zeta=0.6, eta=0.5, kappa=0.4)}
+        st = r.run([c], vec)[c.key]
+        assert seen["n"] == 2 and st.block is None and "Sonnet on alpha: failed" in st.stalled
+        assert st.walk.review == []                                   # nothing concluded from one failure
+        recs = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        r2, client2, _ = make_runner(tmp_path, good, records=recs)
+        st2 = r2.run([c], vec)[c.key]
+        assert st2.block["decision"] == "covered" and st2.block["review"] == []
+        sent = [x for x in r2.records if x.get("stem") == "alpha" and x.get("batch_id") and x not in recs]
+        assert [x["parse_attempt"] for x in sent] == [2]              # asked once more, as the second attempt
+
     def test_a_budget_stop_keeps_what_was_paid_and_raises(self, tmp_path):
         rel = {("candidate a", "alpha"): "similar", ("candidate b", "beta"): "similar"}
         usage = GuardedUsage(budget_usd=0.004)
