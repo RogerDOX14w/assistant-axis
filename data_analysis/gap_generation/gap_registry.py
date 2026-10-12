@@ -59,8 +59,10 @@ Commands:
   exact-label matches last; each with its deciding readings and reasons
   (``novelty.synonyms``); then the candidates a review merged into a trait or
   queue entry (``review_app.py apply``; ``review_app.decisions.review_merges``).
-* ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
-  line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
+* ``compact [--uncompressed]``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
+  line per key, and write the tracked snapshot, gzipped: ``registry.snapshot.jsonl.gz`` (since 2026-10-12;
+  ``--uncompressed`` writes ``registry.snapshot.jsonl`` as before, refused over 90 MB).  ``--registry`` may name a
+  gzipped snapshot for the read-only commands.
 * ``promote (--keys K ... | --status accepted) [--confirm-state-name KEY=NAME ...] [--reopen-turned-down]
   [--min-local-novelty X] [--section S] [--queue PATH] [--dry-run]``:
   append ``status: "candidate"`` entries to ``data/seed_queue.json`` (refuses
@@ -540,13 +542,17 @@ def cmd_synonyms(args) -> int:
 
 def cmd_compact(args) -> int:
     try:
-        rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed)
+        rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed, uncompressed=args.uncompressed)
     except ValueError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 1
     print(f"compacted {rep.n_lines_before} lines to {rep.n_keys} keys; backup {rep.backup_path}; "
-          f"snapshot {rep.snapshot_path}"
+          f"snapshot {rep.snapshot_path} ({rep.snapshot_bytes / 2**20:.1f} MB"
+          + (f", {rep.n_bytes / 2**20:.1f} MB uncompressed" if rep.snapshot_bytes != rep.n_bytes else "") + ")"
           + (f"; {rep.n_malformed} malformed line(s) moved to {rep.rejected_path}" if rep.rejected_path else ""))
+    if rep.stale_snapshot is not None:
+        print(f"NOTE: {rep.stale_snapshot} (the uncompressed snapshot) is out of date now; commit the gzipped one "
+              f"and `git rm` it")
     return 0
 
 
@@ -660,6 +666,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",
                     help="move malformed (torn) lines to registry.jsonl.rejected.<UTC> instead of refusing")
+    sp.add_argument("--uncompressed", action="store_true",
+                    help="write the snapshot as registry.snapshot.jsonl, as before 2026-10-12 (refused over 90 MB); "
+                         "the default is the gzipped registry.snapshot.jsonl.gz")
     sp.set_defaults(func=cmd_compact)
     sp = sub.add_parser("promote")
     g = sp.add_mutually_exclusive_group(required=True)

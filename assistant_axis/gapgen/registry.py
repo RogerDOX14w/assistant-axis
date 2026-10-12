@@ -4,8 +4,12 @@ Every write appends one JSON line per changed record; the **latest line per
 ``key`` is the record** (``rev`` counts its revisions).  Readers fold the log
 (:meth:`Registry.fold`); :func:`compact` rewrites it to one line per key after
 copying it to ``registry.jsonl.bak.<UTC>`` and also writes the tracked
-snapshot ``registry.snapshot.jsonl`` (review amendment 3: the live log is
-gitignored, the snapshot is what gets committed and what reports read).
+snapshot (review amendment 3: the live log is gitignored, the snapshot is what
+gets committed and what reports read).  Since 2026-10-12 (code review A5) the
+snapshot is gzipped, ``registry.snapshot.jsonl.gz``, and a :class:`Registry`
+whose path ends in ``.gz`` reads it (read-only); ``compact`` refuses an
+uncompressed snapshot over :data:`SNAPSHOT_UNCOMPRESSED_MAX_BYTES`, and
+:func:`snapshot_file` names the snapshot to read in a directory.
 
 Generators never write the file directly: they call
 :func:`submit_candidates` (frozen interface).  The filter and the novelty
@@ -21,6 +25,7 @@ from __future__ import annotations
 import contextlib
 import copy
 import fcntl
+import gzip
 import json
 import logging
 import os
@@ -32,11 +37,41 @@ from pathlib import Path
 from typing import Iterable, Iterator, Optional, Sequence
 
 from .normalize import make_key, normalize_candidate
-from .paths import REGISTRY_PATH, REGISTRY_SNAPSHOT_NAME
+from .paths import REGISTRY_PATH, REGISTRY_SNAPSHOT_GZ_NAME, REGISTRY_SNAPSHOT_NAME
 
 logger = logging.getLogger(__name__)
 
 SCHEMA_VERSION = 1
+
+#: ``compact`` refuses to write an uncompressed snapshot larger than this (code review 2026-10-12, A5): GitHub refuses
+#: files over 100 MB, and the next snapshot would have been about 133 MB.  The gzipped one has no limit here.
+SNAPSHOT_UNCOMPRESSED_MAX_BYTES = 90 * 1024 * 1024
+
+
+def is_gzip_path(path: Path | str) -> bool:
+    return str(path).endswith(".gz")
+
+
+def _open_text(path: Path):
+    """A registry file for reading, gzipped (``.gz``) or not; bytes that are not UTF-8 are kept (surrogateescape)."""
+    if is_gzip_path(path):
+        return gzip.open(path, "rt", encoding="utf-8", errors="surrogateescape")
+    return open(path, encoding="utf-8", errors="surrogateescape")
+
+
+def snapshot_file(directory: Path | str) -> Path:
+    """The registry snapshot to read in ``directory``: the gzipped one ``compact`` writes since 2026-10-12 when it is
+    there, else the uncompressed one (which may not exist either).  ``Registry(snapshot_file(d)).fold()`` reads
+    either."""
+    d = Path(directory)
+    gz = d / REGISTRY_SNAPSHOT_GZ_NAME
+    return gz if gz.exists() else d / REGISTRY_SNAPSHOT_NAME
+
+
+def read_snapshot(path: Path | str) -> dict[str, dict]:
+    """A snapshot's rows by key, gzipped or not, read without taking the registry lock (``compact`` replaces a
+    snapshot atomically, and nothing appends to one).  Empty when the file is missing."""
+    return Registry(path)._fold_unlocked()
 
 #: Top-level fields of a registry row, in schema order (§6).
 ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "gloss", "entity_type",
@@ -275,7 +310,7 @@ class Registry:
         self.malformed = []
         if not self.path.exists():
             return
-        with open(self.path, encoding="utf-8", errors="surrogateescape") as fh:
+        with _open_text(self.path) as fh:
             for i, raw in enumerate(fh, 1):
                 line = raw.strip()
                 if not line:
@@ -314,6 +349,9 @@ class Registry:
     def _append(self, records: Sequence[dict]) -> None:
         if not records:
             return
+        if is_gzip_path(self.path):
+            raise ValueError(f"{self.path} is a gzipped registry snapshot, read-only: write to the live log "
+                             f"(registry.jsonl) and run `gap_registry.py compact`")
         body = "".join(json.dumps(r, ensure_ascii=False, sort_keys=False) + "\n" for r in records)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         # A torn last line (a writer killed mid-write) must not swallow the
@@ -472,6 +510,11 @@ class CompactReport:
     n_keys: int
     n_malformed: int = 0
     rejected_path: Optional[Path] = None
+    #: the folded content's size, and the snapshot's on disk (smaller when gzipped)
+    n_bytes: int = 0
+    snapshot_bytes: int = 0
+    #: an uncompressed snapshot left beside the gzipped one just written: out of date from now on
+    stale_snapshot: Optional[Path] = None
 
 
 def _unused_path(base: Path) -> Path:
@@ -485,14 +528,22 @@ def _unused_path(base: Path) -> Path:
 
 
 def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path] = None,
-            stamp: Optional[str] = None, set_aside_malformed: bool = False) -> CompactReport:
+            stamp: Optional[str] = None, set_aside_malformed: bool = False,
+            uncompressed: bool = False) -> CompactReport:
     """Fold the log to one line per key (sorted by key).
 
     Snapshot-before-invalidate: the log is first copied to
     ``registry.jsonl.bak.<UTC>`` (a suffix ``-1``, ``-2`` ... when that name
     is taken; a backup is never overwritten).  The folded content is also
-    written to the tracked snapshot (default ``registry.snapshot.jsonl``
-    beside the log).
+    written to the tracked snapshot beside the log: gzipped,
+    ``registry.snapshot.jsonl.gz`` (code review 2026-10-12, A5), or with
+    ``uncompressed`` ``registry.snapshot.jsonl`` as before; a ``snapshot_path``
+    is gzipped when it ends in ``.gz``.  The gzip stream is deterministic
+    (level 9, no name, mtime 0), so the same content gives the same bytes.
+
+    Refused (``ValueError``, nothing written) when the snapshot would be
+    uncompressed and larger than :data:`SNAPSHOT_UNCOMPRESSED_MAX_BYTES`,
+    and for a gzipped ``registry_path`` (a snapshot, not the log).
 
     Malformed lines (a torn write) would be dropped by folding, so compaction
     refuses (``ValueError``) while there are any, unless
@@ -500,36 +551,49 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
     ``registry.jsonl.rejected.<UTC>`` first and the report names that file.
     """
     reg = Registry(registry_path)
+    if is_gzip_path(reg.path):
+        raise ValueError(f"{reg.path} is a gzipped snapshot: compact the live log (registry.jsonl)")
     if not reg.path.exists():
         raise FileNotFoundError(f"no registry at {reg.path}")
-    snapshot_path = Path(snapshot_path) if snapshot_path else reg.path.with_name(REGISTRY_SNAPSHOT_NAME)
+    default_name = REGISTRY_SNAPSHOT_NAME if uncompressed else REGISTRY_SNAPSHOT_GZ_NAME
+    snapshot_path = Path(snapshot_path) if snapshot_path else reg.path.with_name(default_name)
+    gz = is_gzip_path(snapshot_path)
     stamp = stamp or utc_stamp()
     rejected = None
     with reg.locked():
         n_lines = sum(1 for _ in reg.iter_lines()) + reg.n_malformed
         folded = reg._fold_unlocked()
+        if reg.n_malformed and not set_aside_malformed:
+            raise ValueError(
+                f"{reg.path}: {reg.n_malformed} malformed line(s) (line {reg.malformed[0][0]} first); "
+                f"compaction would drop them. Inspect them, or pass set_aside_malformed=True "
+                f"(gap_registry.py compact --set-aside-malformed) to move them to a .rejected file")
+        body = "".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
+        data = body.encode("utf-8")
+        if not gz and len(data) > SNAPSHOT_UNCOMPRESSED_MAX_BYTES:
+            raise ValueError(
+                f"the uncompressed snapshot would be {len(data) / 2**20:.0f} MB, over the "
+                f"{SNAPSHOT_UNCOMPRESSED_MAX_BYTES / 2**20:.0f} MB limit (GitHub refuses files over 100 MB): write "
+                f"the gzipped one (gap_registry.py compact, without --uncompressed)")
         if reg.n_malformed:
-            if not set_aside_malformed:
-                raise ValueError(
-                    f"{reg.path}: {reg.n_malformed} malformed line(s) (line {reg.malformed[0][0]} first); "
-                    f"compaction would drop them. Inspect them, or pass set_aside_malformed=True "
-                    f"(gap_registry.py compact --set-aside-malformed) to move them to a .rejected file")
             rejected = _unused_path(reg.path.with_name(f"{reg.path.name}.rejected.{stamp}"))
             rejected.write_text("".join(f"{raw}\n" for _, raw in reg.malformed), encoding="utf-8",
                                 errors="surrogateescape")
         bak = _unused_path(reg.path.with_name(f"{reg.path.name}.bak.{stamp}"))
         shutil.copy2(reg.path, bak)
-        body = "".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
         tmp = reg.path.with_name(reg.path.name + ".compact.tmp")
-        tmp.write_text(body, encoding="utf-8")
+        tmp.write_bytes(data)
         tmp.replace(reg.path)
         snapshot_path.parent.mkdir(parents=True, exist_ok=True)
         stmp = snapshot_path.with_name(snapshot_path.name + ".tmp")
-        stmp.write_text(body, encoding="utf-8")
+        out = gzip.compress(data, compresslevel=9, mtime=0) if gz else data
+        stmp.write_bytes(out)
         stmp.replace(snapshot_path)
+    plain = snapshot_path.with_name(snapshot_path.name[:-len(".gz")]) if gz else None
     return CompactReport(backup_path=bak, snapshot_path=snapshot_path, n_lines_before=n_lines,
                          n_keys=len(folded), n_malformed=len(reg.malformed) if rejected else 0,
-                         rejected_path=rejected)
+                         rejected_path=rejected, n_bytes=len(data), snapshot_bytes=len(out),
+                         stale_snapshot=plain if plain is not None and plain.exists() else None)
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:

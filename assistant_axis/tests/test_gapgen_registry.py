@@ -1,5 +1,6 @@
 """gapgen.registry and gapgen.runs: log fold, revs, source merge, blocks,
 compaction, holding lists, submission idempotency, run bookkeeping."""
+import gzip
 import json
 from pathlib import Path
 
@@ -200,12 +201,75 @@ class TestCompact:
         assert reg.fold() == before
         lines = _lines(reg_path)
         assert [x["key"] for x in lines] == ["stubborn#1", "vain#1"]
-        assert rep.snapshot_path == reg_path.with_name("registry.snapshot.jsonl")
-        assert rep.snapshot_path.read_text() == reg_path.read_text()
+        # gzipped since 2026-10-12 (code review A5; was registry.snapshot.jsonl, uncompressed)
+        assert rep.snapshot_path == reg_path.with_name("registry.snapshot.jsonl.gz")
+        assert gzip.decompress(rep.snapshot_path.read_bytes()).decode() == reg_path.read_text()
+        assert rep.n_bytes == len(reg_path.read_bytes()) and rep.snapshot_bytes == rep.snapshot_path.stat().st_size
 
     def test_compact_missing(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             compact(tmp_path / "none.jsonl")
+
+
+class TestGzippedSnapshot:
+    """Code review 2026-10-12, A5: the snapshot is gzipped, every reader takes it, and an uncompressed one over
+    the limit is refused before anything is written."""
+
+    def _reg(self, reg_path):
+        submit_candidates([C("vain"), C("stubborn"), C("timid")], registry_path=reg_path)
+        Registry(reg_path).update("timid#1", {"gloss": "This means being shy and easily frightened."})
+        return Registry(reg_path).fold()
+
+    def test_the_same_content_gives_the_same_bytes(self, reg_path):
+        self._reg(reg_path)
+        first = compact(reg_path, stamp="20261012T000000Z").snapshot_path.read_bytes()
+        second = compact(reg_path, stamp="20261012T000001Z").snapshot_path.read_bytes()
+        assert first == second and first[:2] == b"\x1f\x8b"
+
+    def test_registry_and_readers_take_the_gzipped_snapshot(self, reg_path):
+        from assistant_axis.gapgen.registry import read_snapshot, snapshot_file
+        folded = self._reg(reg_path)
+        rep = compact(reg_path)
+        assert Registry(rep.snapshot_path).fold() == folded
+        assert read_snapshot(rep.snapshot_path) == folded
+        assert snapshot_file(reg_path.parent) == rep.snapshot_path
+        assert records_for_status(Registry(rep.snapshot_path)) == records_for_status(Registry(reg_path))
+
+    def test_snapshot_file_falls_back_to_the_uncompressed_one(self, reg_path):
+        from assistant_axis.gapgen.registry import read_snapshot, snapshot_file
+        folded = self._reg(reg_path)
+        rep = compact(reg_path, uncompressed=True)
+        assert rep.snapshot_path.name == "registry.snapshot.jsonl" and rep.snapshot_bytes == rep.n_bytes
+        assert snapshot_file(reg_path.parent) == rep.snapshot_path and read_snapshot(rep.snapshot_path) == folded
+
+    def test_a_gzipped_snapshot_is_read_only(self, reg_path):
+        self._reg(reg_path)
+        rep = compact(reg_path)
+        before = rep.snapshot_path.read_bytes()
+        with pytest.raises(ValueError, match="read-only"):
+            Registry(rep.snapshot_path).update("vain#1", {"gloss": "g"})
+        with pytest.raises(ValueError, match="gzipped snapshot"):
+            compact(rep.snapshot_path)
+        assert rep.snapshot_path.read_bytes() == before
+
+    def test_an_uncompressed_snapshot_over_the_limit_is_refused(self, reg_path, monkeypatch):
+        import assistant_axis.gapgen.registry as R
+        self._reg(reg_path)
+        raw = reg_path.read_bytes()
+        monkeypatch.setattr(R, "SNAPSHOT_UNCOMPRESSED_MAX_BYTES", 100)
+        with pytest.raises(ValueError, match="over the 0 MB limit"):
+            compact(reg_path, uncompressed=True)
+        assert reg_path.read_bytes() == raw                                  # nothing written: no fold, no backup
+        assert not list(reg_path.parent.glob("registry.jsonl.bak.*"))
+        assert not list(reg_path.parent.glob("registry.snapshot*"))
+        assert compact(reg_path).snapshot_path.name == "registry.snapshot.jsonl.gz"   # the gzipped one has no limit
+
+    def test_a_stale_uncompressed_snapshot_is_reported(self, reg_path):
+        self._reg(reg_path)
+        compact(reg_path, uncompressed=True)
+        rep = compact(reg_path)
+        assert rep.stale_snapshot == reg_path.with_name("registry.snapshot.jsonl")
+        assert rep.stale_snapshot.exists()                                   # reported, not deleted
 
 
 class TestQueries:

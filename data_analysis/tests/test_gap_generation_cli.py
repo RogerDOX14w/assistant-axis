@@ -351,9 +351,19 @@ class TestGapRegistryCLI:
         assert gap_registry.main(["--registry", str(reg), "report"]) == 0
         assert "| world_shaping#1 | world-shaping |" in capsys.readouterr().out
         assert gap_registry.main(["--registry", str(reg), "compact"]) == 0
-        assert (cand_dir / "registry.snapshot.jsonl").exists()
+        # gzipped since 2026-10-12 (code review A5; was registry.snapshot.jsonl)
+        snap = cand_dir / "registry.snapshot.jsonl.gz"
+        assert snap.exists() and not (cand_dir / "registry.snapshot.jsonl").exists()
         assert list(cand_dir.glob("registry.jsonl.bak.*"))
         assert len(reg.read_text().splitlines()) == 2
+        # the read-only commands take the gzipped snapshot as their registry
+        assert gap_registry.main(["--registry", str(snap), "report"]) == 0
+        assert "| world_shaping#1 | world-shaping |" in capsys.readouterr().out
+        assert gap_registry.main(["--registry", str(reg), "compact", "--uncompressed"]) == 0
+        assert (cand_dir / "registry.snapshot.jsonl").exists()
+        assert "is out of date now" not in capsys.readouterr().out
+        assert gap_registry.main(["--registry", str(reg), "compact"]) == 0
+        assert "registry.snapshot.jsonl (the uncompressed snapshot) is out of date now" in capsys.readouterr().out
 
     def test_compact_cli_refuses_torn_log_then_sets_aside(self, cand_dir, capsys):
         reg = cand_dir / "registry.jsonl"

@@ -149,10 +149,11 @@ class TestPrompts:
     def test_example_words_are_not_on_the_registry_states_list(self):
         """Not a hygiene rule of the tests' sources (the registry is git-ignored), but the pilot judges that list:
         the snapshot's states rows must not be the prompt's examples."""
-        snap = REPO / "data" / "candidates" / "registry.snapshot.jsonl"
+        from assistant_axis.gapgen.registry import read_snapshot, snapshot_file
+        snap = snapshot_file(REPO / "data" / "candidates")      # gzipped since 2026-10-12 (A5), plain before
         if not snap.exists():
             pytest.skip("no snapshot")
-        rows = [json.loads(x) for x in snap.read_text(encoding="utf-8").splitlines() if x.strip()]
+        rows = list(read_snapshot(snap).values())
         states = {r["stem"] for r in rows if r.get("holding") == "states"}
         assert not states & {w.replace("-", "_") for w in sp.QUEUE_EXAMPLES + sp.SUGGESTED_NAMES}
 

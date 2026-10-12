@@ -13,8 +13,9 @@ libraries default to a directory under the user's home:
 ``data/external/`` and ``data/candidates/cache/`` are gitignored, as is the
 live registry log ``data/candidates/registry.jsonl`` (review amendment 3 of
 ``reports/trait_gap_generation/coding_plan_platform.md``); the tracked copy
-of the registry is the snapshot ``registry.snapshot.jsonl`` written by
-``gap_registry.py compact``.
+of the registry is the snapshot written by ``gap_registry.py compact``:
+``registry.snapshot.jsonl.gz`` since 2026-10-12 (code review A5), the
+uncompressed ``registry.snapshot.jsonl`` before.
 """
 from __future__ import annotations
 
@@ -27,8 +28,13 @@ DATA_CANDIDATES = DATA_DIR / "candidates"
 DATA_EXTERNAL = DATA_DIR / "external"
 
 REGISTRY_PATH = DATA_CANDIDATES / "registry.jsonl"
+#: The uncompressed snapshot: what ``compact`` wrote until 2026-10-12, and what ``compact --uncompressed`` writes.
 REGISTRY_SNAPSHOT_NAME = "registry.snapshot.jsonl"
 REGISTRY_SNAPSHOT_PATH = DATA_CANDIDATES / REGISTRY_SNAPSHOT_NAME
+#: The gzipped snapshot ``compact`` writes since 2026-10-12 (code review A5: the next uncompressed one would have been
+#: about 133 MB, past GitHub's 100 MB limit; gzip -9 makes it about 18 MB).
+REGISTRY_SNAPSHOT_GZ_NAME = REGISTRY_SNAPSHOT_NAME + ".gz"
+REGISTRY_SNAPSHOT_GZ_PATH = DATA_CANDIDATES / REGISTRY_SNAPSHOT_GZ_NAME
 METRIC_CONFIG_PATH = DATA_CANDIDATES / "metric_config.json"
 CORPUS_REGIONS_PATH = DATA_CANDIDATES / "corpus_regions.json"
 #: ``gap_registry.py corpus-regions --from-descriptions`` runs: ``<batch_id>/`` with ``responses.jsonl``,
@@ -157,6 +163,7 @@ def all_paths() -> dict[str, Path]:
         "DATA_EXTERNAL": DATA_EXTERNAL,
         "REGISTRY_PATH": REGISTRY_PATH,
         "REGISTRY_SNAPSHOT_PATH": REGISTRY_SNAPSHOT_PATH,
+        "REGISTRY_SNAPSHOT_GZ_PATH": REGISTRY_SNAPSHOT_GZ_PATH,
         "METRIC_CONFIG_PATH": METRIC_CONFIG_PATH,
         "CORPUS_REGIONS_PATH": CORPUS_REGIONS_PATH,
         "CORPUS_REGIONS_RUNS_DIR": CORPUS_REGIONS_RUNS_DIR,

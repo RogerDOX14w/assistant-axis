@@ -1026,7 +1026,11 @@ finished re-decided run (no call): each row's `novelty` block becomes B2's (nami
 none; a row already holding B2's block is left alone (idempotent per run and key), and
 a row decided by any other run since is left alone and listed.  Each promotion appends
 a line to `B2/registry_writes.jsonl`; the tracked snapshot changes with
-`gap_registry.py compact`.  Besides `score`'s files it
+`gap_registry.py compact`, which writes it gzipped since 2026-10-12
+(`registry.snapshot.jsonl.gz`; the uncompressed one would pass GitHub's 100 MB
+limit, and `--uncompressed` is refused over 90 MB): `--registry` takes the `.gz`
+file for the read-only commands, and after the first gzipped compact the old
+`registry.snapshot.jsonl` is out of date (`git rm` it).  Besides `score`'s files it
 writes `decision_changes.md` / `.json`: every row whose decision, covering trait or reason
 differs from B's, attributed by replaying the rules one decision at a time (rule set 1,
 then decisions 14, 12, 13, 15 and the floor, each step offline on the records), with two
