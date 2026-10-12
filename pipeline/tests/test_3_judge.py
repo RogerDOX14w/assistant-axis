@@ -304,7 +304,7 @@ def test_batch_is_the_default_and_sends_the_real_time_request(judge, monkeypatch
     assert [l["custom_id"] for l in lines] == [f"patient|pos_p0_q{q}" for q in range(4)]
     body = lines[0]["body"]
     assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 200)
-    assert body["temperature"] == 1 and body["max_completion_tokens"] == 200
+    assert "temperature" not in body and body["max_completion_tokens"] == 200  # the default (1) is not sent (B1)
     usage = json.loads((output_dir / "usage.json").read_text())
     assert set(usage["per_model"]) == {"gpt-4.1-mini:batch"} and usage["n_calls"] == 4
     # priced at half the real-time rates
