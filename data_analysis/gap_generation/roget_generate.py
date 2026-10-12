@@ -135,6 +135,16 @@ def _input(dep_key: str, path: Path, **extras):
     return current_file_input(dep_key, Path(path), extras={k: str(v) for k, v in extras.items()} or None)
 
 
+def _gate(estimate_usd: float, args) -> None:
+    """The platform's $20 line (``gapgen.cost.confirm_or_abort``): a budget or an estimate over it needs Roger's go,
+    recorded with ``--confirm-expensive --confirmed-by``.  The caller has already refused an estimate over
+    ``--budget-usd``.  (Review 2026-10-12: map, head-scope and place-check checked only the budget, so a typed
+    budget over $20 went through without the go; plan 02 § 7 names this guard for every paid command.)"""
+    from assistant_axis.gapgen.cost import confirm_or_abort
+    confirm_or_abort(estimate_usd, args.budget_usd, confirm_expensive=getattr(args, "confirm_expensive", False),
+                     confirmed_by=getattr(args, "confirmed_by", None))
+
+
 # --------------------------------------------------------------------------- fetch
 
 LICENSE_START = "*** END OF THE PROJECT GUTENBERG EBOOK"
@@ -484,6 +494,7 @@ def cmd_map_update(args) -> int:
         print(f"note: {len(hp_miss)} head profiles not cached; cache hits counted unchanged without the cosine check")
     if est > args.budget_usd:
         raise SystemExit(f"REFUSED: estimate ${est:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    _gate(est, args)
     if args.dry_run:
         print("DRY-RUN: no embedding call; would rewrite label_heads.json and add to mapping_usage.json")
         return 0
@@ -545,6 +556,7 @@ def cmd_map(args) -> int:
           f"rates = ${est:.4f} (cap --budget-usd ${args.budget_usd:.2f})")
     if est > args.budget_usd:
         raise SystemExit(f"REFUSED: estimate ${est:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    _gate(est, args)
     if args.dry_run:
         print("DRY-RUN: no embedding call; would write label_heads.json, map_spotcheck.md, mapping_usage.json")
         return 0
@@ -642,6 +654,7 @@ def cmd_head_scope(args) -> int:
           f"{'cached' if cache else 'sent uncached (under the caching minimum)'}")
     if est["usd"] > args.budget_usd:
         raise SystemExit(f"REFUSED: estimate ${est['usd']:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    _gate(est["usd"], args)
     if args.dry_run:
         print("DRY-RUN: no call; the first three prompts as sent (system prompt = the rubric block):")
         for b in batches[:3]:
@@ -674,7 +687,8 @@ def cmd_head_scope(args) -> int:
                                                   "cost_usd": round(usage.total_cost_usd, 6),
                                                   "estimate": est, "cache_system": cache,
                                                   "concurrency": args.concurrency, "parse_rate": [n_ok, n_total],
-                                                  "stopped_by_budget": res.stopped_by_budget}})
+                                                  "stopped_by_budget": res.stopped_by_budget,
+                                                  "confirmed_by": args.confirmed_by}})
     inputs = _coverage_inputs(out) + [_input("head_scope_rubric", sr_path(rubric), version=rubric["version"],
                                              sha256=rubric["sha256"])]
     S.save(payload, path, inputs=inputs)
@@ -752,6 +766,7 @@ def cmd_place_check(args) -> int:
     if est_s["usd"] + est_o["usd"] > args.budget_usd:
         raise SystemExit(f"REFUSED: estimate ${est_s['usd'] + est_o['usd']:.2f} is over --budget-usd "
                          f"${args.budget_usd:.2f}")
+    _gate(est_s["usd"] + est_o["usd"], args)
     if args.dry_run:
         print("DRY-RUN: no call; the first three Sonnet prompts as sent (system prompt = the rubric block):")
         for it in todo_s[:3]:
@@ -797,8 +812,9 @@ def cmd_place_check(args) -> int:
         total.write_json(usage_path)
         print(usage.log_line("[usage this run]"), file=sys.stderr)
         print(total.log_line("[usage cumulative]"), file=sys.stderr)
-    for name, res, n in (("sonnet", s_res, len(todo_s)), ("opus", o_res, None)):
-        n_total = n if n is not None else len(res.answers) + len(res.errors)
+    for name, res in (("sonnet", s_res), ("opus", o_res)):
+        # the labels asked: after a budget stop the labels never reached are not parse failures (review 2026-10-12)
+        n_total = len(res.answers) + len(res.errors)
         warn_if_low_parse_rate(label=f"roget place-check:{name}", n_ok=len(res.answers), n_total=n_total)
         if res.errors:
             print(f"{name}: no usable answer for {len(res.errors)} labels: "
@@ -815,7 +831,7 @@ def cmd_place_check(args) -> int:
                 "n_referee": sum(1 for it in items if PL.needs_referee(it, sonnet.get(it.stem))),
                 "n_reused": {"sonnet": len(s_done), "opus": len(o_done)},
                 "cost_usd_this_run": round(usage.total_cost_usd, 4), "budget_usd": args.budget_usd, "cache": cache,
-                "stopped_by_budget": stopped,
+                "stopped_by_budget": stopped, "confirmed_by": args.confirmed_by,
                 # the label in the judge display form (prompt_labels); --resume reuses only answers to a byte-identical
                 # user turn, so an answer to the stored form of a standard's label is asked again, not reused
                 LABEL_FORM_KEY: DEFAULT_LABEL_FORM}
@@ -1004,6 +1020,12 @@ def cmd_submit(args) -> int:
 
 # --------------------------------------------------------------------------- parser
 
+def _go_flags(sp) -> None:
+    sp.add_argument("--confirm-expensive", action="store_true",
+                    help="with --confirmed-by: a --budget-usd or an estimate over the $20 line (Roger's go)")
+    sp.add_argument("--confirmed-by", default=None, help="Roger's explicit go for a spend over $20 (who, when)")
+
+
 def _head_scope_flags(sp) -> None:
     g = sp.add_mutually_exclusive_group()
     g.add_argument("--head-scope", type=Path, default=None,
@@ -1048,6 +1070,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("map")
     sp.add_argument("--embedder", default="openai", choices=["openai", "hash"])
     sp.add_argument("--budget-usd", type=float, default=0.25)
+    _go_flags(sp)
     sp.add_argument("--cache-dir", type=Path, default=None)
     sp.add_argument("--limit", type=int, default=None)
     sp.add_argument("--update", action="store_true",
@@ -1059,6 +1082,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--sonnet-model", default="claude-sonnet-5-5")
     sp.add_argument("--opus-model", default="claude-opus-5-5")
     sp.add_argument("--budget-usd", type=float, default=5.0)
+    _go_flags(sp)
     sp.add_argument("--concurrency", type=int, default=6)
     sp.add_argument("--referee-share", type=float, default=0.5,
                     help="share of the labels Opus is expected to referee, for the estimate only")
@@ -1079,6 +1103,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--batch-size", type=int, default=20)
     sp.add_argument("--max-adjectives", type=int, default=20)
     sp.add_argument("--budget-usd", type=float, default=1.0)
+    _go_flags(sp)
     sp.add_argument("--concurrency", type=int, default=4)
     sp.add_argument("--limit", type=int, default=None, help="rate only the first N heads still to rate")
     sp.add_argument("--force", action="store_true", help="rate every head again (ignore head_scope.json)")

@@ -224,3 +224,20 @@ def test_partner_hints_from_synopsis_pairs_and_not_from_position():
         hints = {c.surface: c.partner_hint for c in res.candidates if c.partner_hint}
         assert (hints.get("resolute") == "irresolute") is expect
         assert hints.get("incautious") == "cautious"                  # the rule pair 863 / 864 is unchanged
+
+
+def test_gloss_hint_keeps_the_word_out_of_hyphenated_siblings_and_the_section():
+    """Review 2026-10-12: the full run's hints for "free" and "sound" named "scot-free" and "sound-minded" (the
+    word inside a hyphenated sibling); a section title holding the word is dropped as well."""
+    h = head_with([["free"], ["exempt", "scot-free"], ["immune"]], title="Exemption", hid="927a",
+                  nouns=[["exemption", "freedom", "free-for-all"], ["immunity", "release"]])
+    item = H.HarvestItem("free", "927a", None, 0, ["exempt", "scot-free", "immune"], 3.0, False, True, 1, 3.0, False)
+    text = H.gloss_hint(item, h, None)
+    assert not H.uses_word(text, "free"), text
+    assert "freedom" in text and "exempt" in text                     # a longer word holding it is not the word
+    sym = head_with([["sympathetic"], ["kindly"]], klass="VI", section="II. Sympathetic affections", title="Pity",
+                    hid="914", nouns=[["pity", "compassion"], ["sympathy"]])
+    item2 = H.HarvestItem("sympathetic", "914", None, 0, ["kindly"], 3.0, False, True, 1, 3.0, True)
+    t2 = H.gloss_hint(item2, sym, None)
+    assert not H.uses_word(t2, "sympathetic") and "(sympathetic affections)" not in t2, t2
+    assert H.uses_word("of a piece with scot-free", "free") and not H.uses_word("carefree, freedom", "free")

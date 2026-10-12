@@ -1,6 +1,6 @@
 """IPIP generator, acceptance on the recorded outputs (plan § 8, last item).  Each check skips while its output is
-not on disk (nothing is: ipip.ori.org was unreachable when QUESTIONS 46-52 were built on 2026-10-11, so the key
-pages, the workbook and the home page have not been fetched and no run exists yet)."""
+not on disk.  Two are red on purpose as of 2026-10-12, findings for Roger rather than failures of the tool: the A-vs-B
+key comparison (QUESTIONS 52, a 35% item mismatch) and the naming parse rate (98.5% against the 99% bar)."""
 import json
 
 import pytest

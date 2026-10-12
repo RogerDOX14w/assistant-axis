@@ -145,6 +145,10 @@ def test_pipeline_end_to_end(env, capsys):
     for section in ("## Items", "## Clusters", "## Granularity: decision (a)", "## Naming: decision (b)",
                     "## Submission, M1 and M3", "## Known analogues", "## Cost", "## Decisions for Roger", "## Files"):
         assert section in md, section
+    # the granularity section reads QUESTIONS 50's signals, not the superseded share-at-3-4 criterion (review
+    # 2026-10-12), and decision (a) names the granularities measured
+    assert "| signal 1: share at 3 |" in md and "| signal 1: pairs read |" in md
+    assert "Roger's criterion is the share at 3-4" not in md and "(a) granularity, ~350 (" in md
     sample = (rdir / "roger_sample.md").read_text()
     assert "| # | pole | blind label | hinted label | blind gloss | statements | M1 | M3 (covered by) |" in sample
     assert "| trait | new |" in sample
@@ -198,3 +202,60 @@ def test_the_key_page_check_refuses_a_short_scrape(env):
     assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
     counts = json.loads((ipip / "ingest_counts.json").read_text())
     assert counts["key_page_check"] == "failed" and counts["key_pages"]["missing"] == ["newNEOKey.htm"]
+
+
+def test_a_partial_cluster_run_keeps_the_other_granularities_summaries(env):
+    """Review 2026-10-12: `cluster --targets 600` rewrote cluster_summary.json with the 600 summary alone, so
+    `report` lost the 350 and 150 columns.  A run over some targets now keeps the others' summaries (same items,
+    arms and seed)."""
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    assert CLI.main(common + ["cluster", "--no-hdbscan", "--targets", "350"]) == 0
+    res = json.loads((ipip / "cluster_summary.json").read_text())["result"]
+    assert set(res["granularities"]) == {str(g) for g in GRANULARITIES}
+    assert res["targets"] == sorted(GRANULARITIES, reverse=True) and res["targets_this_run"] == [350]
+
+
+def test_granularity_stops_sending_and_exits_2_at_the_budget(env, monkeypatch, capsys):
+    """Review 2026-10-12: a budget stop was printed and the command still returned 0, and the later granularities
+    were still sent (one over-budget call each, at least)."""
+    import types
+    from assistant_axis.gapgen.generators.ipip import granularity as G
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    seen = []
+
+    async def fake_run(calls, corpus, **kw):
+        seen.append(kw["out_dir"].name)
+        return types.SimpleNamespace(budget_exceeded=True)
+    monkeypatch.setattr(G, "run_readings", fake_run)
+    assert CLI.main(common + ["granularity", "--granularities", "350", "150", "--signals", "within"]) == 2
+    assert seen == ["g350"]                                     # nothing sent for ~150 after the stop
+    assert "STOPPED at the budget" in capsys.readouterr().err
+
+
+def test_a_hinted_pass_after_a_blind_one_asks_only_the_hinted_form(env):
+    """Review 2026-10-12: a pole missing either form was asked both, so `name --hinted` after a blind-only `name`
+    re-asked every blind name (on the recorded run: 362 re-asks, 189 of them answered with a different label,
+    silently replacing the first)."""
+    from assistant_axis.tests.fake_anthropic import user_text
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    assert CLI.main(common + ["name", "--granularity", "350", "--all"]) == 0
+    rows = [json.loads(x) for x in (ipip / "clusters_g350.jsonl").read_text().splitlines()]
+    poles = [p for r in rows for p in r["poles"]]
+    blind_before = [p["blind"] for p in poles]
+    n0 = len(client.calls)
+    assert n0 == len(poles)
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted"]) == 0
+    new = client.calls[n0:]
+    assert len(new) == len(poles) and all('"scales"' in user_text(kw) for kw in new)     # the hinted form only
+    rows = [json.loads(x) for x in (ipip / "clusters_g350.jsonl").read_text().splitlines()]
+    assert [p["blind"] for r in rows for p in r["poles"]] == blind_before
+    assert all(p.get("hinted") for r in rows for p in r["poles"])
+    n1 = len(client.calls)
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted", "--force"]) == 0
+    assert len(client.calls) - n1 == 2 * len(poles)                                      # --force asks both again

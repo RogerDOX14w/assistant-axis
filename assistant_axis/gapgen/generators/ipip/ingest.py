@@ -32,9 +32,10 @@
   full stop do not count); a key row whose text is in no item list is counted and listed, never dropped
   silently.  Every item of the list is kept, with ``scales: []`` when no scale scores it.
 
-**Decoding** (QUESTIONS 49): the IPIP pages are **iso-8859-1, not UTF-8**, and a silent mis-decode is what would
-fire the HEX assertion for the wrong reason (BSD ``grep`` took them for binary files and printed nothing, which
-is how two checks came back empty on 2026-10-11).  :func:`decode_page` decodes explicitly; nothing in this module
+**Decoding** (QUESTIONS 49): the IPIP pages are a **single-byte Windows encoding (cp1252, see
+:data:`PAGE_ENCODING`), not UTF-8**, and a silent mis-decode is what would fire the HEX assertion for the wrong
+reason (BSD ``grep`` took them for binary files and printed nothing, which is how two checks came back empty on
+2026-10-11).  :func:`decode_page` decodes explicitly; nothing in this module
 guesses an encoding.
 
 ``items.jsonl`` is deterministic (rows in code order: the letter, then the number; scales sorted), so a rerun on
@@ -265,7 +266,7 @@ _SCALE_NOTE_RE = re.compile(r"^(?:combined\b.*\s)?\d+[-\s]items?\s+scale$|^$", r
 
 def page_lines(html: bytes | str) -> list[str]:
     """The page's visible text, one line per block tag or ``<br>``, whitespace collapsed, entities resolved,
-    empty lines dropped.  Decoded iso-8859-1 (:func:`decode_page`).
+    empty lines dropped.  Decoded as :data:`PAGE_ENCODING`, cp1252 (:func:`decode_page`).
 
     A newline **in the source** is whitespace in HTML, not a line break, and is collapsed to a space before the
     block tags are read.  Every one of these pages was saved by Word, which hard-wraps its markup mid-sentence
@@ -613,7 +614,7 @@ def check_key_pages(counts: Mapping) -> None:
         "; ".join(parts) + ".  The key pages are the primary source of every committed key (QUESTIONS 52, option "
         "C): fetch them with `ipip_generator.py download` (all 21 are in DEFAULT_FETCH, approved 2026-10-11).  A "
         "page on disk that parses to nothing is a parser or an encoding problem, not a missing file: these pages "
-        "are iso-8859-1 (QUESTIONS 49)")
+        "are cp1252, a single-byte Windows encoding (QUESTIONS 49)")
 
 
 # --------------------------------------------------------------------------- the workbook
@@ -704,6 +705,10 @@ def _key_sign(v: str, *, row: int) -> str:
     try:
         x = float(s)
     except ValueError:
+        if s and s not in ("+", "-"):
+            # a word or a symbol is not a key: raise rather than read it as "no sign" (review 2026-10-12; the
+            # 2026-10-11 workbook holds only 1, -1 and 0)
+            raise ValueError(f"workbook row {row}: key {v!r} is not 1, -1 or 0/blank") from None
         x = {"+": 1.0, "-": -1.0}.get(s, 0.0)
     if x == 1.0:
         return "+"
@@ -1147,7 +1152,7 @@ def check_hex(counts: Mapping, *, min_constructs: int = HEX_MIN_CONSTRUCTS,
         f"(QUESTIONS 49): newHEXACO_PI_key.htm is one of the 21 key pages on the main path (31 HEX links across "
         f"the 274 constructs), so a failure means a short or mis-decoded scrape rather than a missing fallback.  "
         f"Look at ingest_counts.json's `key_pages.per_page` for the page's row count, check that the page was "
-        f"fetched whole (`download --only key_hexaco --force`), and remember these pages are iso-8859-1")
+        f"fetched whole (`download --only key_hexaco --force`), and remember these pages are a single-byte Windows encoding, not UTF-8")
 
 
 def build_from_dir(external: Path = EXTERNAL_DIR, *, require_workbook: bool = False) -> tuple[list[ItemRow], dict]:

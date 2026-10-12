@@ -183,12 +183,22 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
                                                      if s.get("hdbscan") else "n/a"))
     lines.append("")
     if ev.get("granularity_readout"):
-        lines += ["## Granularity: decision (a)", "", "Within-pole item pairs read by M3's overlap call (rubric A, "
-                  "Sonnet 5.5); Roger's criterion is the share at 3-4.  " + L(files["granularity_md"]) + ".", "",
+        lines += ["## Granularity: decision (a)", "", "Two signals, read together and against each other, never "
+                  "against a bar (QUESTIONS 50, Roger 2026-10-11): **signal 1**, each pole read against the nearest "
+                  "pole of another cluster by name and gloss with M3's overlap call (rubric A, Sonnet 5.5), where a "
+                  "3 suggests one trait split across two clusters; **signal 2**, clusters printed in full in "
+                  + L(files["granularity_md"]) + ", which also has both signals by cluster-size band.  The "
+                  "within-pole item pairs are the third, cheaper view.", "",
                   "| | " + " | ".join(f"~{r['granularity']}" for r in ev["granularity_readout"]) + " |",
                   "|---|" + "---|" * len(ev["granularity_readout"])]
+        for k, name in (("share_3", "signal 1: share at 3"), ("share_3_4", "signal 1: share at 3-4")):
+            lines.append(f"| {name} | " + " | ".join(_pct((r.get("nearest") or {}).get(k))
+                                                     for r in ev["granularity_readout"]) + " |")
+        lines.append("| signal 1: pairs read | " + " | ".join(str((r.get("nearest") or {}).get("n", ""))
+                                                           for r in ev["granularity_readout"]) + " |")
         for k in ("0", "1", "2", "3", "4", "opposite", "unsure", "share_3_4"):
-            lines.append(f"| {k} | " + " | ".join(_pct(r["within"].get(k)) for r in ev["granularity_readout"]) + " |")
+            lines.append(f"| within: {k} | " + " | ".join(_pct(r["within"].get(k))
+                                                          for r in ev["granularity_readout"]) + " |")
         lines.append("| cross-pole \"opposite\" | " + " | ".join(_pct(r["cross_pole"]["opposite"])
                                                                for r in ev["granularity_readout"]) + " |")
         lines.append("")
@@ -255,9 +265,11 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
         lines += [f"Projected full run at this granularity: {pr['n_kept_poles']} kept poles named in both forms "
                   f"(${pr['naming_usd']:.2f}), about {pr['n_poles_projected']} named poles to M1 and M3 "
                   f"(${pr['m1_m3_usd']:.2f}, rate {pr['rate_source']}); total about ${pr['total_usd']:.2f}.", ""]
+    grans = [f"~{r['granularity']}" for r in ev.get("granularity_readout") or []] or [
+        f"~{g}" for g in ev.get("clusters") or {}]
     lines += ["## Decisions for Roger (plan § 10)", "",
-              "(a) granularity, ~350 or ~150 (the share at 3-4 above, and the sampled clusters in the granularity "
-              "readout); (b) the primary label, blind (recommended) or hinted ("
+              f"(a) granularity, {' or '.join(grans) or 'not measured yet'} (the two signals above, read with the "
+              "clusters in full in the granularity readout); (b) the primary label, blind (recommended) or hinted ("
               + L(files["roger_sample"]) + " has both side by side); (c) **settled** - there is no is_trait gate "
               "at submit any more, every named pole goes to M1 (QUESTIONS 48); (d) the loose pile, held "
               "(provisional) or submitted; (e) the recovery harness (`recovery_test.py --generator ipip --run-id "

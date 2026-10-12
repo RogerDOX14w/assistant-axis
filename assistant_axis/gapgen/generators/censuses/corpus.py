@@ -37,7 +37,11 @@ def corpus_paren_stems(data_dir: Optional[Path] = None) -> set[str]:
 
 
 def corpus_renamed_from(data_dir: Optional[Path] = None) -> dict[str, str]:
-    """Old stem -> current stem, from the trait files' ``renamed_from`` fields."""
+    """Old stem -> current stem, from the trait files' ``renamed_from`` fields.
+
+    The field takes every form the rename tooling writes (as ``entity_id._corpus_rename_map`` reads it): a
+    record ``{"stem", "date", "reason"}``, a bare stem, or a list of either.  Until 2026-10-12 only the bare
+    form was read, and the corpus's record form made this raise ``AttributeError``."""
     d = Path(data_dir or default_data_dir()) / "traits" / "instructions"
     out: dict[str, str] = {}
     for p in sorted(d.glob("*.json")) if d.exists() else []:
@@ -46,8 +50,10 @@ def corpus_renamed_from(data_dir: Optional[Path] = None) -> dict[str, str]:
         except (OSError, json.JSONDecodeError):
             continue
         old = doc.get("renamed_from")
-        for o in ([old] if isinstance(old, str) else old or []):
-            out[normalize_to_file_name(o)] = p.stem
+        for o in (old if isinstance(old, list) else [old] if old else []):
+            stem = o.get("stem") if isinstance(o, dict) else o
+            if isinstance(stem, str) and stem.strip():
+                out[normalize_to_file_name(stem)] = p.stem
     return out
 
 

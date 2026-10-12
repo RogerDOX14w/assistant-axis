@@ -183,8 +183,8 @@ def followup_commands(run_id: str, est: Estimate, *, candidates_path: Optional[P
     except ValueError:
         pass
     return [
-        f"{py}/gap_registry.py submit --file {rel} --generator {GENERATOR} --run-id {run_id}   "
-        f"# main checkout: resubmit into its own registry log (idempotent)",
+        f"{py}/gap_registry.py submit --from {rel}   "
+        f"# main checkout: resubmit into its own registry log (idempotent; --from leaves the run directory as it is)",
         f"{py}/traithood_filter.py --batch-id {b} --run {GENERATOR}/{run_id} --pipeline split --transport {t} "
         f"--budget-usd {cap1:.0f}{gate(cap1)}   # M1, estimate ${est.m1_usd:.2f}",
         f"{py}/novelty_score.py score --batch-id {b} --run {GENERATOR}/{run_id} --transport {t} "

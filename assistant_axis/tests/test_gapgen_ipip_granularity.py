@@ -249,3 +249,16 @@ def test_readout_markdown_prints_the_clusters_in_full(tmp_path):
     assert "nearest corpus trait (novelty, not size)" in md          # kept apart from the size signals
     assert "finer** cut is preferred" in md
     assert "(granularity_readout.json)" in md
+
+
+def test_a_nearest_pole_in_a_loose_cluster_is_counted_apart():
+    """Review 2026-10-12: on the recorded tables most kept poles' nearest other pole is in a loose (never named)
+    cluster, so signal 1 read 67 of 238 poles at ~600, 10 of 91 at ~350 and 2 of 33 at ~150; the count of
+    those skipped pairs is now reported apart from the ones whose nearest kept pole has no name."""
+    rows = [dict(r, poles=[dict(p) for p in r["poles"]]) for r in NROWS]
+    rows[2]["poles"][0]["nearest_other"] = {"cluster_id": 5, "pole": "a", "cos": 0.6}    # 3a -> the loose cluster
+    calls, _corpus, counts = G.nearest_pair_calls(rows)
+    assert [(c.target, c.listed[0]) for c in calls] == [("c001a", "c002a")]
+    assert counts["n_nearest_unnamed"] == 1 and counts["n_nearest_in_other_consensus"] == 1
+    _c, _k, base = G.nearest_pair_calls(NROWS)
+    assert base["n_nearest_in_other_consensus"] == 0

@@ -217,11 +217,19 @@ def _join(words: Sequence[str]) -> str:
     return ", ".join(words[:-1]) + " and " + words[-1]
 
 
+def uses_word(text: str, word: str) -> bool:
+    """``text`` contains ``word`` as a word or as a part of a hyphenated word ("scot-free" uses "free",
+    "freedom" and "carefree" do not)."""
+    w = word.strip().lower()
+    return bool(w) and re.search(rf"(?<![a-z]){re.escape(w)}(?![a-z])", text.lower()) is not None
+
+
 def _sense_word(head: Head, guard: Optional[LabelGuard], *, exclude: Collection[str] = ()) -> Optional[str]:
     """The head's title in lower case (``Seclusion. Exclusion`` -> ``seclusion or exclusion``), or
-    its first noun when the title is excluded (the candidate's own word, or a label when a guard is given)."""
+    its first noun when the title is excluded (it uses the candidate's own word, :func:`uses_word`, or a label
+    when a guard is given)."""
     def banned(w: str) -> bool:
-        return w.lower() in exclude or (guard is not None and guard.contains(w))
+        return any(uses_word(w, e) for e in exclude) or (guard is not None and guard.contains(w))
     t = re.sub(r"\.\s+", " or ", head.title.strip()).strip(" .").lower()
     if t and not banned(t):
         return t
@@ -257,9 +265,13 @@ def gloss_hint(item: HarvestItem, head: Head, partner_head: Optional[Head], *,
     else:
         core = f"This means a disposition toward {sense}"
     where = (head.section.split(". ", 1)[-1] if head.section else "").lower()
-    where_clause = f" ({where})" if where and not (guard is not None and guard.contains(where)) else ""
+    where_clause = (f" ({where})" if where and not uses_word(where, me)
+                    and not (guard is not None and guard.contains(where)) else "")
+
+    # the word itself is kept out of every part, inside a hyphenated sibling too ("scot-free" for "free",
+    # review 2026-10-12; QUESTIONS 41: the hint never uses the candidate's own word)
     def ok(w: str) -> bool:
-        return (w.islower() and w != me and w != sense and w.split()[-1] not in STOPWORDS
+        return (w.islower() and not uses_word(w, me) and w != sense and w.split()[-1] not in STOPWORDS
                 and not (guard is not None and guard.contains(w)))
 
     # one-word siblings and nouns first; multiword ones only to reach the minimum length

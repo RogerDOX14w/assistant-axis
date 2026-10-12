@@ -307,7 +307,10 @@ def harvest_trait_closure(lex: Lexicon, *, known_stems: Collection[str], zipf: O
             if not ok:
                 continue
             d = " ".join((syn.definition() or "").split()).rstrip(".;")
-            hint = f"This means having {noun}: {d}." if d else ""
+            # a noun lemma spelt as the adjective itself ("defensive", "mum") would read "having defensive" and
+            # repeat the word: the definition alone then (review 2026-10-12)
+            same = noun.strip().lower() == adj.strip().lower()
+            hint = (_hint_from_definition(d) if same else f"This means having {noun}: {d}.") if d else ""
             item = WnItem(surface=adj, synset_id=sid, gloss_hint=hint, partner_hint=None, zipf_min=zmin,
                           probe_band=probe, score=round(zmin - 0.2 * depth, 3), route="closure", origin=noun,
                           n_senses=len(lex.adj_synsets(adj)), extra={"depth": depth})

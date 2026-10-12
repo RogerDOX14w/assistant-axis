@@ -177,7 +177,10 @@ def test_followup_commands():
     cmds = S.followup_commands("2026-10-08-pilot", est)
     joined = "\n".join(cmds)
     assert "--run censuses/2026-10-08-pilot" in joined and "--batch-id 2026-10-08-pilot_censuses" in joined
-    assert "gap_registry.py submit --file data/candidates/runs/censuses/2026-10-08-pilot/candidates.jsonl" in joined
+    # --from, not --file: --file opens the run again and appends a session to its tracked run.json (review
+    # 2026-10-12; the plan's 2026-10-08 revision names --from)
+    assert "gap_registry.py submit --from data/candidates/runs/censuses/2026-10-08-pilot/candidates.jsonl" in joined
+    assert cmds[0].split("#")[0].strip().endswith("candidates.jsonl")       # --from takes no --generator / --run-id
     assert "--confirm-expensive" not in joined
     big = S.followup_commands("full", S.estimate_downstream_usd(2818))
     # each step's cap is 1.5 x its estimate + $2; a step whose cap passes the $20 line asks for the flag

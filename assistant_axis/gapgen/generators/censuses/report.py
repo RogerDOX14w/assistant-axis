@@ -233,7 +233,7 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
                   + f"; pair completions {nv['pair_completion']}.", ""]
     lines += ["## Files", "",
               f"- {L(run_dir / 'candidates.jsonl')}: the submitted candidates, one per line (tracked; the main "
-              f"checkout resubmits it with {reg_cli} `submit --file`)",
+              f"checkout resubmits it with {reg_cli} `submit --from`)",
               f"- {L(run_dir / 'run.json')}, {L(run_dir / 'usage.json')}, {L(run_dir / 'keys.txt')}, "
               f"{L(run_dir / 'submit_report.json')}, {L(run_dir / 'evaluation.json')}",
               f"- {L(table_path)} (the census table), {L(counts_path)} (ingest counts), "

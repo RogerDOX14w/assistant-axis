@@ -142,3 +142,22 @@ def test_string_ceiling_paren_exclusion_and_guidelines():
     assert c.guidelines["union_no_paren"] == {"value": c.union_no_paren, "aim": E.GUIDE_UNION_NO_PAREN, "met": True}
     assert abs(c.union_single_word - 2 / 3) < 1e-3 and c.guidelines["union_single_word"]["met"] is False
     assert E.GATE_SUBMITTED_OF_MATCHED == 0.95 and c.submitted_of_matched == 1.0
+
+
+def test_corpus_renamed_from_reads_every_form(tmp_path):
+    """Review 2026-10-12: ``renamed_from`` is written as a record ``{"stem", "date", "reason"}`` (69 corpus files),
+    a list of records (financially_reckless) or a bare stem; the helper read only the bare form and raised
+    ``AttributeError`` on the real corpus."""
+    from assistant_axis.gapgen.generators.censuses.corpus import corpus_renamed_from
+    inst = tmp_path / "traits" / "instructions"
+    inst.mkdir(parents=True)
+    docs = {"unrepentant": {"renamed_from": {"stem": "remorseless", "date": "2026-09-28", "reason": "r"}},
+            "financially_reckless": {"renamed_from": [{"stem": "financially_daring", "date": "d", "reason": "r"},
+                                                      {"stem": "financially_adventurous"}]},
+            "violent": {"renamed_from": "savage"},
+            "kind": {"positive_label": "kind"},
+            "odd": {"renamed_from": [{"date": "no stem"}, None, ""]}}
+    for stem, doc in docs.items():
+        (inst / f"{stem}.json").write_text(json.dumps(doc))
+    assert corpus_renamed_from(tmp_path) == {"remorseless": "unrepentant", "financially_daring": "financially_reckless",
+                                             "financially_adventurous": "financially_reckless", "savage": "violent"}

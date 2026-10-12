@@ -4,12 +4,12 @@
     uv run python data_analysis/gap_generation/ipip_generator.py download [--only KEY ...] [--force]
         [--approved-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/ipip_generator.py ingest [--skip-hex-check] [--dry-run]
-    uv run python data_analysis/gap_generation/ipip_generator.py cluster [--arms openai gemma] [--targets 350 150]
+    uv run python data_analysis/gap_generation/ipip_generator.py cluster [--arms openai gemma] [--targets 600 350 150]
         [--seed 0] [--budget-usd 1] [--no-hdbscan] [--dry-run]
-    uv run python data_analysis/gap_generation/ipip_generator.py name --granularity {350,150}
+    uv run python data_analysis/gap_generation/ipip_generator.py name --granularity {600,350,150}
         [--clusters N | --all | --cluster-ids ID ...] [--hinted] [--render N] [--seed 0] [--budget-usd 1]
         [--dry-run]
-    uv run python data_analysis/gap_generation/ipip_generator.py granularity [--granularities 350 150]
+    uv run python data_analysis/gap_generation/ipip_generator.py granularity [--granularities 600 350 150]
         [--signals nearest within] [--per-cluster 3] [--cross-pole 1] [--seed 0] [--budget-usd 3] [--dry-run]
     uv run python data_analysis/gap_generation/ipip_generator.py submit --granularity G --run-id R
         (--poles-file F | --all-poles) [--label-choice blind|hinted] [--budget-usd 8]
@@ -17,8 +17,9 @@
     uv run python data_analysis/gap_generation/ipip_generator.py report --run-id R [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_07_behaviour_items.md``.  ``download`` fetches the IPIP pages into
-``data/external/ipip/`` (git-ignored) and records them (``sources_manifest.json``); the item assignment workbook
-is refused until Roger's go is named (QUESTIONS 52).  ``ingest`` writes ``items.jsonl`` and asserts the HEX block.
+``data/external/ipip/`` (git-ignored) and records them (``sources_manifest.json``); every source is approved since
+2026-10-11 (QUESTIONS 52 option C: the 21 key pages and Tedone's workbook; QUESTIONS 46: the home page).
+``ingest`` writes ``items.jsonl`` and asserts the HEX block.
 ``cluster`` embeds the items (OpenAI and EmbeddingGemma), cuts each arm's tree at each target, keeps the clusters
 both arms reproduce and splits bipolar ones into poles: ``clusters_g<G>.jsonl``.  ``name`` names poles on Haiku 5.5,
 blind and (``--hinted``) with the scale names.  ``granularity`` makes the two readings of QUESTIONS 50 with M3's
@@ -293,9 +294,21 @@ def cmd_cluster(args) -> int:
         cache.save()
         _merge_usage(usage, pp["cluster_usage"])
     inputs = [current_file_input(dep_key="items", path=pp["items"])]
-    doc = {"arms": {a: {"model": e.model_id, "tag": e.tag} for a, e in embedders.items()}, "targets": list(args.targets),
-           "seed": args.seed, "items_sha256": file_sha256(pp["items"]), "n_items": len(items),
-           "granularities": summaries, "usage": usage.as_dict(),
+    arms = {a: {"model": e.model_id, "tag": e.tag} for a, e in embedders.items()}
+    items_sha = file_sha256(pp["items"])
+    # a run over some of the targets keeps the other granularities' summaries when they were made from the same
+    # items with the same arms (review 2026-10-12: `cluster --targets 600` had dropped the 350 and 150 summaries,
+    # which `report` reads from this file)
+    kept_g = {}
+    from assistant_axis.gapgen.generators.ipip.report import _read_json
+    old = _read_json(pp["cluster_summary"])
+    if old and old.get("items_sha256") == items_sha and old.get("arms") == arms and old.get("seed") == args.seed:
+        kept_g = {k: v for k, v in (old.get("granularities") or {}).items() if k not in summaries}
+    all_g = {**kept_g, **summaries}
+    all_g = {k: all_g[k] for k in sorted(all_g, key=lambda k: -int(k))}
+    doc = {"arms": arms, "targets": [int(k) for k in all_g], "targets_this_run": list(args.targets),
+           "seed": args.seed, "items_sha256": items_sha, "n_items": len(items),
+           "granularities": all_g, "usage": usage.as_dict(),
            "dims": {a: int(np.asarray(v).shape[1]) for a, v in vectors.items()}}
     env = json_metadata(doc, title="IPIP clusters: summary per granularity", inputs=inputs)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", pp["cluster_summary"])
@@ -330,7 +343,7 @@ def select_clusters(rows, *, n: Optional[int], all_: bool, ids: Optional[Sequenc
 
 
 def cmd_name(args) -> int:
-    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort
+    from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort
     from assistant_axis.gapgen.generators.ipip import cluster as C
     from assistant_axis.gapgen.generators.ipip import naming as N
     from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM
@@ -340,9 +353,17 @@ def cmd_name(args) -> int:
     items = {r.ipip_id: r for r in _load_items(args)}
     chosen = select_clusters(rows, n=args.clusters, all_=args.all, ids=args.cluster_ids, seed=args.seed)
     forms = ["blind", "hinted"] if args.hinted else ["blind"]
-    refs = _pole_refs(chosen, items, forms=forms, force=args.force)
-    est = N.estimate(refs, hinted=args.hinted, model=args.model)
-    print(f"{len(chosen)} clusters chosen (seed {args.seed}), {len(refs)} poles to name ({' + '.join(forms)}):")
+    # the poles to ask, per form: a pole already named in a form is not asked that form again unless --force
+    # (review 2026-10-12: a `--hinted` pass after a blind-only pass re-asked every blind name -- 362 of them, and
+    # Haiku 5.5 gave a different blind label for 189 -- because a pole missing either form was asked both)
+    refs_by_form = {f: _pole_refs(chosen, items, forms=[f], force=args.force) for f in forms}
+    refs = list({r.key: r for f in forms for r in refs_by_form[f]}.values())
+    n_calls = sum(len(v) for v in refs_by_form.values())
+    est = Estimate()
+    for f in forms:
+        est.add(f"naming ({f})", args.model, len(refs_by_form[f]), N.EST_IN_TOKENS, N.EST_OUT_TOKENS)
+    print(f"{len(chosen)} clusters chosen (seed {args.seed}), {len(refs)} poles to name ("
+          + " + ".join(f"{f} {len(refs_by_form[f])}" for f in forms) + "):")
     print(est.format())
     confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
     if args.render:
@@ -350,27 +371,45 @@ def cmd_name(args) -> int:
         # read the rendered prompt, not the template)
         for f in forms:
             rub = N.load_rubric(f)
+            shown = refs_by_form[f] or _pole_refs(chosen, items, forms=[f], force=True)
             print(f"=== {f}: system turn, {rub['name']} version {rub['version']} (sha {rub['sha256'][:12]}...), "
                   f"sent byte for byte ===")
             print(rub["text"])
-            print(f"=== {f}: user turns, the first {min(args.render, len(refs))} of {len(refs)} ===")
-            for r in refs[:args.render]:
+            print(f"=== {f}: user turns, the first {min(args.render, len(shown))} of {len(shown)} ===")
+            for r in shown[:args.render]:
                 print(N.build_user(r) if f == "blind" else N.build_hinted_user(r, label_form=DEFAULT_LABEL_FORM))
         if args.dry_run:
             return 0
     if args.dry_run:
-        print(f"DRY-RUN: would make {len(refs) * len(forms)} calls on {args.model} and write "
+        print(f"DRY-RUN: would make {n_calls} calls on {args.model} and write "
               f"{P.clusters_path(args.granularity, pp['dir'])}, {pp['naming_responses']}, {pp['naming_usage']}")
         return 0
     if not refs:
         print("nothing to name")
         return 0
     usage = GuardedUsage(budget_usd=args.budget_usd)
+
+    async def _name_each_form() -> list:
+        client, out = _client(), []
+        for f in forms:                       # one form after the other, in one event loop (one client)
+            if refs_by_form[f] and not any(x.stopped_by_budget for x in out):
+                out.append(await N.name_poles(refs_by_form[f], client=client, model=args.model, usage=usage,
+                                              forms=[f], responses_path=pp["naming_responses"],
+                                              label_form=DEFAULT_LABEL_FORM))
+        return out
     try:
-        res = asyncio.run(N.name_poles(refs, client=_client(), model=args.model, usage=usage, hinted=args.hinted,
-                                       responses_path=pp["naming_responses"], label_form=DEFAULT_LABEL_FORM))
+        parts = asyncio.run(_name_each_form())
     finally:
         _merge_usage(usage, pp["naming_usage"])
+    res = N.NameResult()
+    for x in parts:
+        res.namings.update(x.namings)
+        res.errors.update(x.errors)
+        for k, v in x.error_kinds.items():
+            res.error_kinds[k] = res.error_kinds.get(k, 0) + v
+        res.first_attempt_ok += x.first_attempt_ok
+        res.n_calls += x.n_calls
+        res.stopped_by_budget = res.stopped_by_budget or x.stopped_by_budget
     vers = {f: N.prompt_version(f) for f in forms}
     for r in rows:
         for p in r["poles"]:
@@ -439,6 +478,7 @@ def cmd_granularity(args) -> int:
     client = _client() if any(n for *_x, n in plans.values()) else None
     readouts, samples, answers = [], {}, {}
     spent = 0.0
+    stopped = False
     for g, (rows, calls, corpus, out, n_todo, nearest_counts) in plans.items():
         out.mkdir(parents=True, exist_ok=True)
         run_path = out / "run.json"
@@ -448,7 +488,7 @@ def cmd_granularity(args) -> int:
         usage = GuardedUsage(per_model=dict(prev.per_model),
                              budget_usd=prev.total_cost_usd + max(0.0, args.budget_usd - spent), usage_path=out / "usage.json")
         res = None
-        if n_todo:
+        if n_todo and not stopped:      # after a budget stop nothing more is sent (review 2026-10-12)
             res = asyncio.run(G.run_readings(calls, corpus, client=client, usage=usage, out_dir=out, rubrics=rubrics,
                                              label_form=label_form))
         spent += usage.total_cost_usd - prev.total_cost_usd
@@ -480,7 +520,9 @@ def cmd_granularity(args) -> int:
               f"cross-pole opposite {ro['cross_pole']['opposite']} of {ro['cross_pole']['n']}; "
               f"${usage.total_cost_usd:.3f}")
         if res is not None and res.budget_exceeded:
-            print("STOPPED at the budget", file=sys.stderr)
+            stopped = True
+            print(f"STOPPED at the budget (--budget-usd ${args.budget_usd:.2f}) during ~{g}: the later granularities "
+                  f"send nothing; rerun to finish (answers on record are not sent again)", file=sys.stderr)
     inputs = [current_file_input(dep_key=f"clusters_g{g}", path=P.clusters_path(g, pp["dir"])) for g in plans]
     env = json_metadata({"readouts": readouts, "settings": {"per_cluster": args.per_cluster, "cross_pole": args.cross_pole,
                                                             "seed": args.seed, "model": G.MODEL, "rubric": G.RUBRIC,
@@ -492,7 +534,7 @@ def cmd_granularity(args) -> int:
                             files=[pp["readout_json"]] + [pp["granularity"] / f"g{g}" / "responses.jsonl" for g in plans])
     atomic_write_text(md, pp["readout_md"])
     print(f"wrote {pp['readout_json']} and {pp['readout_md']}")
-    return 0
+    return 2 if stopped else 0
 
 
 # --------------------------------------------------------------------------- submit, report

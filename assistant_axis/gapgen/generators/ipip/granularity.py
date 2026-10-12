@@ -1,4 +1,4 @@
-"""The granularity readings: is ~350 or ~150 clusters the right cut?
+"""The granularity readings: which of the cuts (``GRANULARITIES``: ~600, ~350, ~150 clusters) is the right one?
 
 **Roger replaced the plan's single measure with two signals, read together** (QUESTIONS 50, 2026-10-11:
 "we need to look at both to make a judgement"), both reported **by cluster-size band** and against each other,
@@ -153,6 +153,7 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
     entries: dict[str, dict] = {}
     poles: dict[tuple, Mapping] = {}
     by_cluster: dict[int, Mapping] = {}
+    status = {int(r["cluster_id"]): r.get("consensus") for r in rows}
     for r in rows:
         if consensus and r.get("consensus") != consensus:
             continue
@@ -164,7 +165,7 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
                 entries[pole_key_str(int(r["cluster_id"]), p["pole"])] = e
     calls: list[OT.PairCall] = []
     seen: set = set()
-    n_unnamed = n_no_nearest = n_other_unnamed = 0
+    n_unnamed = n_no_nearest = n_other_unnamed = n_other_outside = 0
     for key in sorted(poles):
         p = poles[key]
         a = pole_key_str(*key)
@@ -179,6 +180,9 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
         b = pole_key_str(*other)
         if b not in entries:
             n_other_unnamed += 1
+            # of those, the nearest pole sits in a cluster outside ``consensus`` (a loose one, never named): counted
+            # apart so the readout shows how much of signal 1 that leaves out (review 2026-10-12)
+            n_other_outside += int(bool(consensus) and status.get(other[0]) != consensus)
             continue
         pair = tuple(sorted((a, b)))
         if pair in seen:
@@ -189,7 +193,8 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
                                  listed=[b], origin_call_id=origin_id(g, key[0])))
     corpus = {k: entries[k] for k in sorted({x for c in calls for x in (c.target, c.listed[0])})}
     counts = {"n_calls": len(calls), "n_poles": len(poles), "n_named": len(entries), "n_unnamed": n_unnamed,
-              "n_without_nearest": n_no_nearest, "n_nearest_unnamed": n_other_unnamed, "form": form,
+              "n_without_nearest": n_no_nearest, "n_nearest_unnamed": n_other_unnamed,
+              "n_nearest_in_other_consensus": n_other_outside, "form": form,
               "label_form": label_form}
     return calls, corpus, counts
 

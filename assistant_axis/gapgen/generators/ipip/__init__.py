@@ -11,7 +11,7 @@ the platform as candidates (``Candidate``, ``start_run``, ``submit_candidates``)
 
 Modules: :mod:`.sources` (what is fetched), :mod:`.download` (fetch, record), :mod:`.ingest` (parse, join,
 ``items.jsonl``), :mod:`.cluster` (embeddings, clusters, consensus, poles, purity), :mod:`.naming` (the blind and
-hinted naming calls), :mod:`.granularity` (the overlap readings that decide between ~350 and ~150 clusters),
+hinted naming calls), :mod:`.granularity` (the overlap readings that decide between the cuts of :data:`GRANULARITIES`),
 :mod:`.submit` (candidates, the downstream estimate, submission), :mod:`.evaluate` and :mod:`.report` (the run's
 evaluation and readout).  The CLI is ``data_analysis/gap_generation/ipip_generator.py``.
 """

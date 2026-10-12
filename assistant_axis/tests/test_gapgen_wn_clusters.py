@@ -98,3 +98,18 @@ def test_real_oewn_smoke():
     lex = W.Lexicon(W.oewn())
     assert ("incautious", "oewn-00327334-a") in lex.antonyms("cautious")
     assert lex.antonym_heads("jubilant") & lex.head_synsets("dejected")
+
+
+def test_closure_hint_when_the_noun_is_spelt_as_the_adjective():
+    """Review 2026-10-12: OEWN has noun senses spelt as their adjective ("defensive", "mum"), and the hint read
+    "This means having defensive: ..."; it is now the definition alone."""
+    wn = small_wordnet()
+    wn.add("n-defensive", "n", ["defensive"], "an attitude of defensiveness")
+    wn.add("a-defensive", "a", ["defensive"], "attempting to justify or defend in speech or writing")
+    wn.derivation("defensive", "a-defensive", "defensive", "n-defensive")
+    wn.hyponym("n-trait", "n-defensive")
+    lex = W.Lexicon(wn)
+    items = W.harvest_trait_closure(lex, known_stems={"cautious", "courageous"}, zipf=zipf, max_depth=1,
+                                    root_synsets=["n-trait"])
+    by = {it.surface: it for it in items}
+    assert by["defensive"].gloss_hint == "This means an attitude of defensiveness."

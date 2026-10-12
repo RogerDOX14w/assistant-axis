@@ -156,8 +156,8 @@ def _licence_record(dest_root: Path, entries: Iterable[Mapping], sources: Mappin
     """The licence block of the manifest.  ``verbatim`` is IPIP's public-domain sentence **as one of the fetched
     pages prints it** (QUESTIONS 46: our record of the licence was second-hand, a quote of plan 07's prose, and
     none of the three pages fetched on 2026-10-10 carried the sentence, which is why the home page is now
-    fetched).  The pages are decoded iso-8859-1 (QUESTIONS 49), and only pages are searched, never the
-    workbook."""
+    fetched).  The pages are decoded cp1252 (:data:`PAGE_ENCODING`, QUESTIONS 49), and only pages are searched,
+    never the workbook."""
     rec = {"name": LICENCE, "url": LICENCE_URL, "quote_from_plan": LICENCE_QUOTE,
            "verbatim": (previous or {}).get("verbatim"), "verbatim_source": (previous or {}).get("verbatim_source"),
            "verbatim_url": (previous or {}).get("verbatim_url"), "credit": WORKBOOK_CREDIT}
@@ -179,10 +179,11 @@ def fetch_all(*, dest_root: Path = EXTERNAL_DIR, only: Optional[Iterable[str]] =
               fetcher: Fetcher = _urlopen_bytes, dry_run: bool = False, now: Optional[str] = None,
               git_sha: Optional[str] = None, sources_manifest_path: Optional[Path] = SOURCES_MANIFEST_PATH,
               sources: Optional[Mapping[str, Source]] = None, approved_by: Optional[str] = None) -> DownloadManifest:
-    """Download and record the IPIP pages (see the module docstring).  ``only`` names source keys (default the
-    three pages); ``sources`` replaces :data:`~.sources.SOURCES` (tests).  A source with no recorded approval
-    (``Source.approval is None``: the assignment workbook, QUESTIONS 52) is refused with :class:`NotApproved`
-    unless ``approved_by`` names Roger's go, which its manifest entry then records."""
+    """Download and record the IPIP pages (see the module docstring).  ``only`` names source keys (default
+    :data:`~.sources.DEFAULT_FETCH`, every approved source); ``sources`` replaces :data:`~.sources.SOURCES`
+    (tests).  A source with no recorded approval (``Source.approval is None``; none today, the workbook was
+    approved on 2026-10-11) is refused with :class:`NotApproved` unless ``approved_by`` names Roger's go, which
+    its manifest entry then records."""
     SOURCES = sources if sources is not None else _SOURCES  # noqa: N806
     dest_root = Path(dest_root)
     now = now or utc_now()

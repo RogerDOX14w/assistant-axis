@@ -332,6 +332,14 @@ def test_bad_key_is_refused(tmp_path):
         I.parse_assignment_table(p.read_bytes())
 
 
+@pytest.mark.parametrize("value", ["R", "reverse", "?", "1-", "+-"])
+def test_a_key_that_is_not_a_number_or_a_sign_is_refused(value):
+    """Review 2026-10-12: a non-numeric key other than "+" / "-" used to fall through to "no sign" silently."""
+    with pytest.raises(ValueError, match="not 1, -1 or 0/blank"):
+        I._key_sign(value, row=7)
+    assert I._key_sign("+", row=7) == "+" and I._key_sign("−1", row=7) == "-" and I._key_sign(" ", row=7) == ""
+
+
 # --------------------------------------------------------------------------- A against B (QUESTIONS 52)
 
 def krow(text, inv, construct, key, source=I.SOURCE_B):

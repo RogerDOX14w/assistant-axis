@@ -420,3 +420,20 @@ def test_map_update_then_place_check_unchecked_only(tree, monkeypatch, capsys):
     meta = json.loads((out / "label_heads.json").read_text())["result"]["placement_check"]
     assert len(meta["runs"]) == 2 and meta["n_checked"] == sum(1 for v in final.values() if v["llm"])
     assert sum(meta["outcomes"].values()) == meta["n_checked"]
+
+
+@pytest.mark.parametrize("cmd", [["map", "--embedder", "hash"], ["head-scope"], ["place-check"]])
+def test_a_budget_over_the_20_dollar_line_needs_rogers_recorded_go(tree, cmd):
+    """Review 2026-10-12: the paid commands checked the estimate against --budget-usd only, so a typed budget over
+    the $20 line went through with no go recorded (plan 02 § 7: the platform's confirm_or_abort guards every paid
+    command).  Refused with exit 2 without the go; with --confirm-expensive --confirmed-by the dry run passes."""
+    tmp_path, base = tree
+    build(tmp_path, base)
+    extra = ["--cache-dir", str(tmp_path / "cache")] if cmd[0] == "map" else []
+    if cmd[0] == "map":
+        extra.append("--force")                  # label_heads.json exists after build(); a full map is refused
+    with pytest.raises(SystemExit) as ei:
+        run(base, *cmd, *extra, "--budget-usd", "25", "--dry-run")
+    assert ei.value.code == 2
+    assert run(base, *cmd, *extra, "--budget-usd", "25", "--confirm-expensive",
+               "--confirmed-by", "Roger, test", "--dry-run") == 0
