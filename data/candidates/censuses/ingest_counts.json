@@ -48,12 +48,14 @@
     "tda": 1015
   },
   "unknown_word": 6477,
+  "with_oewn_lemma": 10053,
+  "unknown_word_with_oewn_lemma": 388,
   "repaired": 23,
   "repair_suggestions": 706,
   "malformed": 1,
   "with_gloss_hint": 8375,
-  "corpus_stem_match": 444,
-  "queue_stem_match": 304,
+  "corpus_stem_match": 498,
+  "queue_stem_match": 343,
   "counters": {
     "allport_cross_column_merges": 58,
     "allport_lines_I": 4470,
@@ -67,20 +69,37 @@
     "tda_rows_merged_extra": 0
   },
   "ceiling": {
-    "n_corpus": 790,
-    "n_multiword": 244,
-    "n_tda": 394,
-    "n_allport": 411,
-    "n_union": 444,
-    "tda": 0.4987,
-    "allport": 0.5203,
-    "union": 0.562,
-    "union_single_word": 0.7747,
-    "n_matched_eligible": 444,
-    "submitted_of_matched": 1.0,
-    "matched_ineligible": [],
-    "n_queue": 238,
-    "n_queue_union": 65
+    "n_corpus": 932,
+    "n_multiword": 304,
+    "n_tda": 417,
+    "n_allport": 464,
+    "n_union": 498,
+    "tda": 0.4474,
+    "allport": 0.4979,
+    "union": 0.5343,
+    "union_single_word": 0.7436,
+    "n_matched_eligible": 496,
+    "submitted_of_matched": 0.996,
+    "matched_ineligible": [
+      "neopagan",
+      "polyandrous"
+    ],
+    "n_queue": 133,
+    "n_queue_union": 44,
+    "n_paren": 89,
+    "union_no_paren": 0.5907,
+    "guidelines": {
+      "union_no_paren": {
+        "value": 0.5907,
+        "aim": 0.5,
+        "met": true
+      },
+      "union_single_word": {
+        "value": 0.7436,
+        "aim": 0.75,
+        "met": false
+      }
+    }
   },
   "malformed_list": [
     {

@@ -5,32 +5,32 @@
     "model": "Qwen/Qwen3-8B-Base",
     "temperature": null,
     "n_samples": 2000,
-    "n_raw_items": 22151,
-    "n_unique": 4052,
-    "n_eligible": 3863,
-    "uniques_per_1k_samples": 2026.0,
-    "eligible_per_1k_samples": 1931.5,
+    "n_raw_items": 22184,
+    "n_unique": 3900,
+    "n_eligible": 3825,
+    "uniques_per_1k_samples": 1950.0,
+    "eligible_per_1k_samples": 1912.5,
     "rarefaction": [
       [
         1000,
-        2602
+        2524
       ],
       [
         2000,
-        4052
+        3900
       ]
     ],
-    "chao1": 11054.4,
-    "chao1_eligible": 9991.1,
-    "collapse_top50_share": 0.2265,
+    "chao1": 10524.9,
+    "chao1_eligible": 10040.7,
+    "collapse_top50_share": 0.2297,
     "top20": [
       [
         "patient",
-        149
+        154
       ],
       [
         "honest",
-        141
+        143
       ],
       [
         "friendly",
@@ -38,11 +38,11 @@
       ],
       [
         "reliable",
-        132
+        135
       ],
       [
         "kind",
-        128
+        130
       ],
       [
         "intelligent",
@@ -62,7 +62,7 @@
       ],
       [
         "thoughtful",
-        99
+        100
       ],
       [
         "responsible",
@@ -73,6 +73,10 @@
         97
       ],
       [
+        "empathetic",
+        94
+      ],
+      [
         "determined",
         92
       ],
@@ -81,57 +85,53 @@
         91
       ],
       [
-        "empathetic",
-        89
+        "optimistic",
+        90
+      ],
+      [
+        "helpful",
+        88
       ],
       [
         "stubborn",
         87
       ],
       [
-        "helpful",
-        86
-      ],
-      [
-        "optimistic",
-        86
-      ],
-      [
         "independent",
-        82
+        83
       ],
       [
-        "ambitious",
-        81
+        "considerate",
+        82
       ]
     ],
-    "noun_share_unique": 0.0832,
-    "noun_share_eligible": 0.0839,
+    "noun_share_unique": 0.0803,
+    "noun_share_eligible": 0.081,
     "form_counts": {
-      "adjective": 2953,
-      "noun": 337,
-      "phrase": 762
+      "adjective": 2896,
+      "noun": 313,
+      "phrase": 691
     },
     "form_counts_eligible": {
-      "adjective": 2780,
-      "noun": 324,
-      "phrase": 759
+      "adjective": 2825,
+      "noun": 310,
+      "phrase": 690
     },
-    "normalized_mechanically": 1,
+    "normalized_mechanically": 29,
     "per_family": {
       "ai_assistant": {
-        "n_emissions": 1580,
-        "n_unique": 760,
-        "n_only_here": 469,
-        "n_eligible": 752,
-        "ineligible_share": 0.0105,
+        "n_emissions": 1609,
+        "n_unique": 708,
+        "n_only_here": 398,
+        "n_eligible": 706,
+        "ineligible_share": 0.0028,
         "n_samples": 397,
-        "uniques_per_1k": 1914.4,
-        "eligible_per_1k": 1894.2,
-        "n_raw_items": 1644,
+        "uniques_per_1k": 1783.4,
+        "eligible_per_1k": 1778.3,
+        "n_raw_items": 1683,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 4.14,
+        "items_per_sample": 4.24,
         "n_seed_echo": 25,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
@@ -139,7 +139,7 @@
       "contrast": {
         "n_emissions": 328,
         "n_unique": 294,
-        "n_only_here": 151,
+        "n_only_here": 149,
         "n_eligible": 293,
         "ineligible_share": 0.0034,
         "n_samples": 311,
@@ -154,31 +154,31 @@
         "n_bio_span_echo": 0
       },
       "list": {
-        "n_emissions": 6690,
-        "n_unique": 1725,
-        "n_only_here": 621,
-        "n_eligible": 1636,
-        "ineligible_share": 0.0516,
+        "n_emissions": 6669,
+        "n_unique": 1700,
+        "n_only_here": 600,
+        "n_eligible": 1663,
+        "ineligible_share": 0.0218,
         "n_samples": 313,
-        "uniques_per_1k": 5511.2,
-        "eligible_per_1k": 5226.8,
-        "n_raw_items": 8165,
+        "uniques_per_1k": 5431.3,
+        "eligible_per_1k": 5313.1,
+        "n_raw_items": 8160,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 26.09,
+        "items_per_sample": 26.07,
         "n_seed_echo": 94,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "list_gloss": {
-        "n_emissions": 1515,
-        "n_unique": 907,
-        "n_only_here": 287,
-        "n_eligible": 894,
-        "ineligible_share": 0.0143,
+        "n_emissions": 1510,
+        "n_unique": 898,
+        "n_only_here": 276,
+        "n_eligible": 895,
+        "ineligible_share": 0.0033,
         "n_samples": 266,
-        "uniques_per_1k": 3409.8,
-        "eligible_per_1k": 3360.9,
+        "uniques_per_1k": 3375.9,
+        "eligible_per_1k": 3364.7,
         "n_raw_items": 1570,
         "n_malformed": 0,
         "malformed_rate": 0.0,
@@ -188,32 +188,32 @@
         "n_bio_span_echo": 0
       },
       "occupation": {
-        "n_emissions": 3256,
-        "n_unique": 1233,
-        "n_only_here": 401,
-        "n_eligible": 1209,
-        "ineligible_share": 0.0195,
+        "n_emissions": 3241,
+        "n_unique": 1218,
+        "n_only_here": 391,
+        "n_eligible": 1212,
+        "ineligible_share": 0.0049,
         "n_samples": 294,
-        "uniques_per_1k": 4193.9,
-        "eligible_per_1k": 4112.2,
+        "uniques_per_1k": 4142.9,
+        "eligible_per_1k": 4122.4,
         "n_raw_items": 4261,
         "n_malformed": 0,
         "malformed_rate": 0.0,
         "items_per_sample": 14.49,
-        "n_seed_echo": 72,
+        "n_seed_echo": 74,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "person": {
-        "n_emissions": 4550,
-        "n_unique": 1821,
-        "n_only_here": 785,
-        "n_eligible": 1763,
-        "ineligible_share": 0.0319,
+        "n_emissions": 4539,
+        "n_unique": 1784,
+        "n_only_here": 752,
+        "n_eligible": 1757,
+        "ineligible_share": 0.0151,
         "n_samples": 419,
-        "uniques_per_1k": 4346.1,
-        "eligible_per_1k": 4207.6,
-        "n_raw_items": 6177,
+        "uniques_per_1k": 4257.8,
+        "eligible_per_1k": 4193.3,
+        "n_raw_items": 6176,
         "n_malformed": 0,
         "malformed_rate": 0.0,
         "items_per_sample": 14.74,
@@ -227,10 +227,10 @@
       "found": 420,
       "recall": 0.4506,
       "by_family": {
-        "ai_assistant": 0.1384,
+        "ai_assistant": 0.1459,
         "contrast": 0.0644,
         "list": 0.3455,
-        "list_gloss": 0.2221,
+        "list_gloss": 0.2242,
         "occupation": 0.2822,
         "person": 0.323
       },
@@ -258,31 +258,31 @@
       }
     },
     "gloss_sense": {
-      "n_rows": 4052,
-      "n_two_sided": 965,
-      "n_screened": 965,
-      "n_divergent": 146,
-      "divergence_rate": 0.1513,
-      "n_chose_sample": 124,
-      "n_chose_dictionary": 22,
+      "n_rows": 3900,
+      "n_two_sided": 946,
+      "n_screened": 933,
+      "n_divergent": 130,
+      "divergence_rate": 0.1393,
+      "n_chose_sample": 112,
+      "n_chose_dictionary": 18,
       "n_illegible_sample": 1,
       "n_failed": 0,
-      "n_unresolved": 0,
-      "cosine_min": 0.2999,
-      "cosine_median": 0.7594,
+      "n_unresolved": 13,
+      "cosine_min": 0.3179,
+      "cosine_median": 0.762,
       "prompt_version": 2,
       "prompt_sha256": "d67ad2a914ad7fe600209116714c0a08bf268a13ffd71a5a3a42de745bedf08f",
       "model": "claude-haiku-5-5"
     },
     "junk": {
-      "items_per_sample": 8.96,
-      "empty_sample_share": 0.11,
-      "ineligible_share": 0.0466,
+      "items_per_sample": 8.95,
+      "empty_sample_share": 0.109,
+      "ineligible_share": 0.0192,
       "ineligible": {
-        "below_hard_reject": 67,
-        "unknown_word": 122
+        "below_hard_reject": 12,
+        "unknown_word": 63
       },
-      "seed_echo_per_sample": 0.135,
+      "seed_echo_per_sample": 0.136,
       "bio_echo": 4,
       "name_echo": 3,
       "bio_span_echo": 1,
@@ -308,11 +308,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/base_model_generator.py stats --round 1",
-      "git_sha": "d0d8f20+dirty",
+      "git_sha": "c6724a88+dirty",
       "author": "Roger Dearnaley",
       "title": "base-model generator stats, round 1"
     },
-    "produced_at": "2026-10-12T03:42:38+00:00",
+    "produced_at": "2026-10-12T22:14:42+00:00",
     "inputs": [
       {
         "dep_key": "samples",
@@ -326,22 +326,22 @@
       {
         "dep_key": "table",
         "path": "data/candidates/base_model/candidate_table_round1.jsonl",
-        "fingerprint": "v1:2026-10-12T02:33:55+00:00@2957781",
+        "fingerprint": "v1:2026-10-12T22:14:41+00:00@2923204",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-12T02:33:55+00:00",
+        "last_modified_at": "2026-10-12T22:14:41+00:00",
         "extras": {}
       },
       {
         "dep_key": "sample_stems",
         "path": "data/candidates/cache/base_model/round1/sample_stems.jsonl",
-        "fingerprint": "v1:2026-10-12T02:26:30+00:00@383414",
+        "fingerprint": "v1:2026-10-12T22:14:41+00:00@382396",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-12T02:26:30+00:00",
+        "last_modified_at": "2026-10-12T22:14:41+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "d807fbc8e2ad5c45badb118f9e024b5aca9eae408de920689e527697d601e489"
+    "inputs_sha256": "f69a9c49f7d5acefe8bced61814dc544ac220e2e0d9f51442e608c5d32003f3e"
   }
 }
