@@ -7,6 +7,17 @@ charges every response to a :class:`GuardedUsage`, which raises
 caller writes ``usage.json`` in a ``finally`` block; :class:`GuardedUsage`
 also writes it itself before raising when given ``usage_path``.
 
+A killed process must not lose its spend (code review 2026-10-12, B3: reviews
+1 D1 and 2 D3).  So a :class:`GuardedUsage` with ``usage_path`` also writes the
+file as it charges, at most every :data:`USAGE_WRITE_INTERVAL_S` seconds and
+atomically; the first one built in a process installs a SIGTERM handler that
+writes every such file and raises ``SystemExit(143)``, so a plain ``kill``
+runs the CLI's ``finally`` too; and a resume takes the larger of
+``usage.json`` and the spend its response records show
+(:func:`resume_usage`), with a WARNING when they differ.  Only a SIGKILL
+between two writes still loses spend from ``usage.json``, and the records
+give it back on the next resume.
+
 Rules (CLAUDE.md "Expensive operations"; decision 9 / open point A): the
 typed ``--budget-usd`` is the cap, and an estimate over it is refused (type a
 larger budget to spend more).  A budget or estimate over the $20 line needs
@@ -15,16 +26,27 @@ in chat, recorded in the run's ``run.json``.
 """
 from __future__ import annotations
 
+import json
+import logging
+import signal
 import sys
+import threading
+import time
+import weakref
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Mapping, Optional
 
 from assistant_axis.judge_pricing import (
     BudgetExceededError, MultiModelUsage, UsageTotals, cost_for_usage,
 )
 
+logger = logging.getLogger(__name__)
+
 HARD_LINE_USD = 20.0
+
+#: How often, at most, a :class:`GuardedUsage` with a ``usage_path`` rewrites the file as it charges (seconds).
+USAGE_WRITE_INTERVAL_S = 30.0
 
 
 @dataclass
@@ -32,9 +54,22 @@ class GuardedUsage(MultiModelUsage):
     """``MultiModelUsage`` with a hard cap.  ``charge`` records the call first
     (so the tokens are never lost), then raises ``BudgetExceededError`` when
     the total exceeds ``budget_usd``; with ``usage_path`` set, ``usage.json``
-    is written before the exception propagates."""
+    is written before the exception propagates.
+
+    With ``usage_path`` set it is also written as calls are charged, at most
+    every ``write_interval_s`` seconds (``None``: only at a budget stop, a
+    SIGTERM and the caller's own writes), so a process killed mid-run leaves a
+    file at most that old (code review 2026-10-12, B3).  Every write is
+    atomic.  The file holds this object's total, so a resuming caller merges
+    the earlier spend in before the first charge, as every platform CLI does."""
     budget_usd: Optional[float] = None
     usage_path: Optional[Path] = None
+    write_interval_s: Optional[float] = USAGE_WRITE_INTERVAL_S
+    _last_write: float = field(default=float("-inf"), init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        _LIVE[id(self)] = self
+        install_sigterm_handler()
 
     def charge(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
         delta = super().charge(model, prompt_tokens, completion_tokens)
@@ -46,10 +81,97 @@ class GuardedUsage(MultiModelUsage):
                               completion_tokens=self.total_completion_tokens,
                               cost_usd=self.total_cost_usd, n_calls=self.n_calls)
             raise BudgetExceededError(agg, self.budget_usd)
+        if (self.usage_path is not None and self.write_interval_s is not None
+                and time.monotonic() - self._last_write >= self.write_interval_s):
+            self.write_json(self.usage_path)
         return delta
+
+    def write_json(self, path) -> None:
+        """``MultiModelUsage.write_json``, atomically (a kill mid-write leaves the previous file, not a torn one,
+        which ``load_or_create`` would read as zero spend)."""
+        from assistant_axis.atomic_io import atomic_write_text
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(json.dumps(self.as_dict(), indent=2, sort_keys=True), p)
+        if self.usage_path is not None and p == Path(self.usage_path):
+            self._last_write = time.monotonic()
 
     def plain(self) -> MultiModelUsage:
         return MultiModelUsage(per_model=dict(self.per_model))
+
+
+# --------------------------------------------------------------------------- SIGTERM
+
+#: The live guarded usages of this process (weakly held), which the SIGTERM handler writes.
+_LIVE: "weakref.WeakValueDictionary[int, GuardedUsage]" = weakref.WeakValueDictionary()
+_SIGTERM_INSTALLED = False
+
+
+def _on_sigterm(signum, frame) -> None:
+    """Write every live :class:`GuardedUsage` that has a ``usage_path``, then raise ``SystemExit(128 + signum)``
+    so that the CLI's ``finally`` writes the rest of its outputs, as it does on a budget stop."""
+    for u in list(_LIVE.values()):
+        if u.usage_path is not None:
+            try:
+                u.write_json(u.usage_path)
+            except Exception as exc:  # noqa: BLE001 - the exit must happen; the finally writes again
+                print(f"could not write {u.usage_path} on SIGTERM: {exc}", file=sys.stderr)
+    print(f"STOPPED by signal {signum}: usage written; the run's finally writes the rest", file=sys.stderr)
+    raise SystemExit(128 + signum)
+
+
+def install_sigterm_handler() -> bool:
+    """Install :func:`_on_sigterm` for SIGTERM, once, from the main thread, and only over the default handler (a
+    handler someone else installed is left alone).  True when it is in place.  :class:`GuardedUsage` calls this
+    when it is built, so every paid CLI gets it without code of its own (code review 2026-10-12, B3)."""
+    global _SIGTERM_INSTALLED
+    if _SIGTERM_INSTALLED:
+        return signal.getsignal(signal.SIGTERM) is _on_sigterm
+    if threading.current_thread() is not threading.main_thread():
+        return False
+    if signal.getsignal(signal.SIGTERM) not in (signal.SIG_DFL, None):
+        return False
+    signal.signal(signal.SIGTERM, _on_sigterm)
+    _SIGTERM_INSTALLED = True
+    return True
+
+
+# --------------------------------------------------------------------------- resume
+
+def usage_from_records(records: Iterable[Mapping]) -> MultiModelUsage:
+    """The spend a run's response records show: every record carrying the billed usage it was charged
+    (``usage_raw``) and the model key it was charged under (``charged_as``), charged as ``llm.billed_usage``
+    charges a response (cache writes at 1.25x, 1-hour writes at 2x, reads at 0.1x) under the current form of the
+    key (``batches.current_batch_key``).  A record without either was not charged and is skipped.  The record
+    format of the split filter, M3 and the passes; the overlap test's nests ``usage_raw`` and is not read here."""
+    from .batches import current_batch_key
+    from .llm import CACHE_READ_FACTOR, CACHE_WRITE_1H_FACTOR, CACHE_WRITE_FACTOR
+    out = MultiModelUsage()
+    for rec in records:
+        raw, model = rec.get("usage_raw") or {}, rec.get("charged_as")
+        if not raw or not model:
+            continue
+        cw = int(raw.get("cache_creation_input_tokens") or 0)
+        cw1h = min(int(raw.get("cache_creation_1h_input_tokens") or 0), cw)
+        cr = int(raw.get("cache_read_input_tokens") or 0)
+        prompt = int(raw.get("input_tokens") or 0) + int(round(
+            CACHE_WRITE_FACTOR * (cw - cw1h) + CACHE_WRITE_1H_FACTOR * cw1h + CACHE_READ_FACTOR * cr))
+        out.charge(current_batch_key(model), prompt, int(raw.get("output_tokens") or 0))
+    return out
+
+
+def resume_usage(recorded: MultiModelUsage, records: Iterable[Mapping], *, where: str = "") -> MultiModelUsage:
+    """The earlier spend a resumed run starts from: the larger (by cost) of ``recorded`` (its ``usage.json``) and
+    :func:`usage_from_records` over its response records, with a WARNING when the two differ.  A process killed
+    before writing its usage left ``usage.json`` short of what was paid (review 1 D1: m1_validation_r2 recorded
+    12,261 calls for 13,378 charged records); the records are appended as each response arrives, so they hold it."""
+    rebuilt = usage_from_records(records)
+    if recorded.n_calls != rebuilt.n_calls or abs(recorded.total_cost_usd - rebuilt.total_cost_usd) > 1e-4:
+        larger = "the records" if rebuilt.total_cost_usd > recorded.total_cost_usd else "usage.json"
+        logger.warning("%susage.json records %d calls ($%.4f) but the response records show %d ($%.4f); the resume "
+                       "starts from %s", f"{where}: " if where else "", recorded.n_calls, recorded.total_cost_usd,
+                       rebuilt.n_calls, rebuilt.total_cost_usd, larger)
+    return rebuilt if rebuilt.total_cost_usd > recorded.total_cost_usd else recorded
 
 
 def estimate_calls_usd(model: str, n_calls: int, in_tok: int, out_tok: int) -> float:

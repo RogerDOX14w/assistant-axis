@@ -1047,6 +1047,16 @@ def _prepare_out_dir(out_dir: Path, args) -> tuple[int, list, Optional[dict]]:
     return 0, records, earlier
 
 
+def _merge_earlier_usage(usage, out_dir: Path, resume_records: list) -> None:
+    """On ``--resume``, the earlier sessions' spend into ``usage`` before its first charge: the larger of the run's
+    ``usage.json`` and what its response records show, with a WARNING when they differ (code review 2026-10-12, B3:
+    a killed session may not have written its usage)."""
+    from assistant_axis.gapgen.batches import with_current_batch_keys
+    from assistant_axis.gapgen.cost import resume_usage
+    recorded = with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json"))
+    usage.merge_from(resume_usage(recorded, resume_records, where=str(out_dir)))
+
+
 def _resume_model_mismatch(earlier: Optional[dict], relation_model: str) -> Optional[str]:
     """Why a ``--resume`` is refused: the run's earlier session asked the relation call of another model (the
     default moved from Haiku 4.5 to Haiku 5.5 on 2026-10-08, so the rest of an older run would otherwise go to
@@ -1859,8 +1869,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
 
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
-        from assistant_axis.gapgen.batches import with_current_batch_keys
-        usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
+        _merge_earlier_usage(usage, out_dir, resume_records)
     inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
               current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "overlap_concept.md",
                                                             paths.RUBRICS_DIR / "relation.md"]
@@ -2163,8 +2172,7 @@ def run_relation_only(args, argv) -> int:
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
-        from assistant_axis.gapgen.batches import with_current_batch_keys
-        usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
+        _merge_earlier_usage(usage, out_dir, resume_records)
     status, error, runner = 0, None, None
     try:
         from dotenv import load_dotenv
@@ -2471,6 +2479,9 @@ def cmd_broader_pilot(args, argv) -> int:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    if args.resume:
+        # before 2026-10-12 a resumed broader pilot rewrote usage.json with its own session's spend only
+        _merge_earlier_usage(usage, out_dir, resume_records)
     status, error, runner, outcomes = 0, None, None, {}
     try:
         from dotenv import load_dotenv

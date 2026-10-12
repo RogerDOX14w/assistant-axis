@@ -10,7 +10,7 @@ import pytest
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM, BatchTransport, choose_transport
 from assistant_axis.gapgen.cost import GuardedUsage
 from assistant_axis.gapgen.split_runner import SplitRunner
-from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, cost_for_usage
+from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage, cost_for_usage
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response
 from assistant_axis.tests.split_replay import HAIKU, SONNET55, load_jsonl, make_responder, test_items
 
@@ -588,6 +588,27 @@ class TestSplitCLI:
         err = capsys.readouterr().err
         assert "REFUSED (rubric not pinned): probe" in err and "rubric_versions.py" in err
         assert not (cli["out"] / "filter" / "p").exists()
+
+    def test_a_resume_after_a_kill_keeps_the_killed_sessions_spend(self, cli, caplog):
+        """Code review 2026-10-12, B3 (review 1 D1, m1_validation_r2): a session killed before it wrote its usage
+        left usage.json short of the responses on record; the resume starts from the larger, with a WARNING."""
+        from assistant_axis.gapgen.cost import usage_from_records
+        from data_analysis.gap_generation import traithood_filter
+        assert traithood_filter.main(_args(cli, "--transport", "live")) == 0
+        d = cli["out"] / "filter" / "p"
+        recs = [json.loads(x) for x in (d / "responses.jsonl").read_text().splitlines() if x.strip()]
+        paid = usage_from_records(recs)
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == paid.n_calls > 2
+        short = MultiModelUsage()
+        model, tot = next(iter(paid.per_model.items()))
+        short.charge(model, tot.prompt_tokens // tot.n_calls, tot.completion_tokens // tot.n_calls)
+        short.write_json(d / "usage.json")                  # what a killed session's file can look like
+        with caplog.at_level("WARNING", logger="assistant_axis.gapgen.cost"):
+            assert traithood_filter.main(_args(cli, "--transport", "live", "--resume")) == 0
+        assert "starts from the records" in caplog.text
+        again = json.loads((d / "usage.json").read_text())
+        assert again["n_calls"] == paid.n_calls and again["total_cost_usd"] == pytest.approx(paid.total_cost_usd,
+                                                                                             abs=1e-4)
 
     def test_a_resume_across_a_prompt_change_is_refused(self, cli, capsys):
         """Code review 2026-10-12, B4 (review 1 D2): a resume whose earlier session recorded another prompt

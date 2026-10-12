@@ -34,7 +34,7 @@ from assistant_axis.gapgen import prompt_labels as PL
 from assistant_axis.gapgen import rubric_versions
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport
-from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort
+from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort, resume_usage
 from assistant_axis.gapgen.freq import zipf_info
 from assistant_axis.gapgen.registry import utc_now, utc_stamp
 from assistant_axis.gapgen.runs import PLATFORM_PATHS
@@ -448,7 +448,10 @@ def main_split(args, argv) -> int:
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
         from assistant_axis.gapgen.batches import with_current_batch_keys
-        usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
+        # the larger of usage.json and the responses on record: a killed session may not have written its usage
+        # (code review 2026-10-12, B3; review 1 D1)
+        usage.merge_from(resume_usage(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")),
+                                      resume_records, where=str(out_dir)))
     runner = SplitRunner(client=client, batch_id=args.batch_id, model=args.model,
                          second_model=None if args.no_second_opinion else args.second_model,
                          compare_model=args.compare_model, usage=usage,
