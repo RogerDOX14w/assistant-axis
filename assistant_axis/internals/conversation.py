@@ -16,16 +16,37 @@ class ConversationEncoder:
     provides a unified interface for working with chat templates.
     """
 
-    def __init__(self, tokenizer: AutoTokenizer, model_name: Optional[str] = None):
+    SPAN_BUILDERS = ("chatml", "generic")
+
+    def __init__(self, tokenizer: AutoTokenizer, model_name: Optional[str] = None, *,
+                 span_builder: Optional[str] = None):
         """
         Initialize the conversation encoder.
 
         Args:
             tokenizer: HuggingFace tokenizer with chat template support
             model_name: Optional model name for detecting model-specific behavior
+            span_builder: which turn-span code :meth:`build_turn_spans` uses:
+                ``"chatml"``, the Qwen pattern path (``<|im_start|>role`` ...
+                ``<|im_end|>``, think tokens left out, boundary whitespace
+                trimmed), or ``"generic"``, the longest-common-prefix path.
+                Step 2 passes its family row's ``span_builder``
+                (assistant_axis/model_families.py; multi-model plan § 5.4).
+                ``None`` keeps the old dispatch on a substring of the model
+                name ("qwen" picks chatml), for callers outside the pipeline.
         """
+        if span_builder is not None and span_builder not in self.SPAN_BUILDERS:
+            raise ValueError(f"span_builder {span_builder!r} is not one of {self.SPAN_BUILDERS}")
         self.tokenizer = tokenizer
         self.model_name = (model_name or getattr(tokenizer, "name_or_path", "")).lower()
+        self.span_builder = span_builder
+
+    def _use_chatml(self) -> bool:
+        """The Qwen pattern path for turn spans: by ``span_builder`` when it
+        was given, else by the model name."""
+        if self.span_builder is not None:
+            return self.span_builder == "chatml"
+        return self._is_qwen()
 
     def _is_qwen(self) -> bool:
         """Check if this is a Qwen model."""
@@ -421,8 +442,9 @@ class ConversationEncoder:
         # Tokenize the full conversation first
         full_ids = self._chat_ids(conversation, add_generation_prompt=False, **chat_kwargs)
 
-        # For Qwen models, use pattern-matching approach (matches persona-subspace behavior)
-        if self._is_qwen():
+        # For Qwen models (span_builder "chatml"), use pattern-matching approach
+        # (matches persona-subspace behavior)
+        if self._use_chatml():
             return self._build_turn_spans_qwen(conversation, full_ids, **chat_kwargs)
 
         spans = []
@@ -773,7 +795,7 @@ class ConversationEncoder:
             within the new suffix added by this message.
         """
         # Dispatch to model-specific implementation if needed
-        if self._is_qwen() and role == "assistant":
+        if self._use_chatml() and role == "assistant":
             return self._content_only_ids_and_offset_qwen(messages_before, role, content, **chat_kwargs)
         else:
             return self._content_only_ids_and_offset_standard(messages_before, role, content, **chat_kwargs)
