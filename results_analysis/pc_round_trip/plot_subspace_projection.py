@@ -195,9 +195,13 @@ def main() -> int:
         for pc in pcs_with_data
     ]
 
-    fig, ax = plt.subplots(figsize=(10, 5.6))
+    # 2026-10-12: wider, value labels vertical, x ticks at 45°, legend
+    # below the axes, helper's own line height; on the 10-inch figure the
+    # labels and ticks for N = 20-64 ran together, the legend covered the
+    # N = 40 and N = 512 points, and the spec line touched the title.
+    fig, ax = plt.subplots(figsize=(12, 6.4))
 
-    ax.plot(pcs_with_data, norm_means, marker="o", markersize=8,
+    ax.plot(pcs_with_data, norm_means, marker="o", markersize=7,
             linewidth=1.6, color="#4c72b0",
             markeredgecolor="black", markeredgewidth=0.7,
             zorder=5,
@@ -206,8 +210,8 @@ def main() -> int:
     ax.fill_between(pcs_with_data, norm_min, norm_max,
                     color="#4c72b0", alpha=0.18, linewidth=0)
     for pc, val in zip(pcs_with_data, norm_means):
-        ax.text(pc, val + 0.025, f"{val:.2f}",
-                ha="center", va="bottom", fontsize=8.5, color="#4c72b0")
+        ax.text(pc, val + 0.03, f"{val:.2f}", rotation=90,
+                ha="center", va="bottom", fontsize=7.5, color="#4c72b0")
 
     ax.axhline(0, color="black", linewidth=0.5)
     ax.axhline(1, color="gray", linewidth=0.4, linestyle=":")
@@ -223,14 +227,16 @@ def main() -> int:
 
     ax.set_xscale("log")
     ax.set_xticks(pcs_with_data)
-    ax.set_xticklabels([str(pc) for pc in pcs_with_data])
+    ax.set_xticklabels([str(pc) for pc in pcs_with_data], rotation=45,
+                       fontsize=8.5)
     ax.minorticks_off()
     ax.set_xlabel("PC index N (log scale)")
     ax.set_ylabel(f"||projection of winner onto "
                   f"span(canonical PCs N-{half}..N+{half})||")
-    ax.set_ylim(-0.05, 1.1)
+    ax.set_ylim(-0.05, 1.25)
     ax.grid(True, which="major", linestyle="-", alpha=0.25)
-    ax.legend(loc="upper right", framealpha=0.92, fontsize=9)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2,
+              framealpha=0.92, fontsize=9)
 
     title = (f"Subspace projection: global nth_pc winner Nth PC onto "
              f"canonical {{N-{half}, ..., N+{half}}} subspace")
@@ -240,7 +246,7 @@ def main() -> int:
             "Norm ≈ 1 means winner is in the canonical neighbourhood "
             "(possibly off-by-one); norm ≈ 0 means winner is outside "
             "the local neighbourhood; red dotted = D-dimensional null.")
-    _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.030)
+    _, top_rect = suptitle_with_specs(fig, title, spec)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     out = Path(args.output)

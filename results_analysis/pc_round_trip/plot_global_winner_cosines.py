@@ -183,7 +183,10 @@ def main() -> int:
         sl_per_pc.append(c.most_common(1)[0][0])
     point_colors = [sl_color.get(sl, "gray") for sl in sl_per_pc]
 
-    fig, ax = plt.subplots(figsize=(10, 5.6))
+    # 2026-10-12: wider, value labels vertical, x ticks at 45°, helper's
+    # own line height; the 10-inch figure's labels and ticks for N = 20-64
+    # ran into each other and the spec line touched the title.
+    fig, ax = plt.subplots(figsize=(12, 6.2))
 
     # Draw line in neutral color
     ax.plot(pcs_with_data, cos_means, linewidth=1.4, color="#333333",
@@ -197,10 +200,10 @@ def main() -> int:
                     alpha=0.15, linewidth=0)
 
     for pc, val in zip(pcs_with_data, cos_means):
-        offset = 0.04 if val >= 0 else -0.04
-        ax.text(pc, val + offset, f"{val:+.2f}",
+        offset = 0.05 if val >= 0 else -0.05
+        ax.text(pc, val + offset, f"{val:+.2f}", rotation=90,
                 ha="center", va="bottom" if val >= 0 else "top",
-                fontsize=8.5, color="#333333")
+                fontsize=7.5, color="#333333")
 
     ax.axhline(0, color="black", linewidth=0.5)
     ax.axhline(1, color="gray", linewidth=0.4, linestyle=":")
@@ -208,12 +211,13 @@ def main() -> int:
 
     ax.set_xscale("log")
     ax.set_xticks(pcs_with_data)
-    ax.set_xticklabels([str(pc) for pc in pcs_with_data])
+    ax.set_xticklabels([str(pc) for pc in pcs_with_data], rotation=45,
+                       fontsize=8.5)
     ax.minorticks_off()
     ax.set_xlabel("PC index (log scale)")
     ax.set_ylabel("Cosine in raw space\n"
                   "(canonical Nth PC vs global nth_pc winner Nth PC)")
-    ax.set_ylim(min(min(cos_min), -0.15) - 0.1, 1.1)
+    ax.set_ylim(min(min(cos_min), -0.15) - 0.3, 1.3)
     ax.grid(True, which="major", linestyle="-", alpha=0.25)
 
     # Legend by (slot, layer)
@@ -232,8 +236,9 @@ def main() -> int:
             "geometric difference.\n"
             "Marker colour = winning (slot, layer); R^D treated as "
             "common coord system across layers (interpretively dicey, "
-            "see source).")
-    _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.030)
+            "see source).  A PC's sign is arbitrary: cos near −1 is the "
+            "same direction.")
+    _, top_rect = suptitle_with_specs(fig, title, spec)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     # --- Provenance inputs ---

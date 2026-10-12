@@ -20,6 +20,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 from assistant_axis.provenance import (
@@ -93,29 +94,50 @@ def main() -> int:
     pcs = sorted(per_pc)
     avgs = [float(np.mean(per_pc[pc])) for pc in pcs]
 
-    fig, ax = plt.subplots(figsize=(9.0, 5.4))
+    # 2026-10-12: wider figure, bare PC numbers on the x axis and smaller
+    # value labels; the 9-inch version's "PC N" tick labels and the value
+    # labels of the low bars ran into each other.
+    fig, ax = plt.subplots(figsize=(11.0, 5.4))
     x = np.arange(len(pcs))
-    colors = ["#4c72b0" if v >= noise_floor * 2 else "#d4856b" for v in avgs]
+    blue, orange = "#4c72b0", "#d4856b"
+    colors = [blue if v >= noise_floor * 2 else orange for v in avgs]
     ax.bar(x, avgs, color=colors, edgecolor="black", linewidth=0.6)
     ax.axhline(noise_floor, linestyle=":", color="firebrick", linewidth=1.4,
                label=f"noise floor (1/√n at n={args.noise_floor_n}) ≈ {noise_floor:.3f}")
     ax.axhline(0, color="black", linewidth=0.5)
+    # Legend entries for the two bar colours (what the colour means was
+    # stated nowhere on the figure before 2026-10-12).
+    colour_handles = [
+        Patch(facecolor=blue, edgecolor="black", linewidth=0.6,
+              label=f"ρ ≥ 2× noise floor ({2 * noise_floor:.3f})"),
+        Patch(facecolor=orange, edgecolor="black", linewidth=0.6,
+              label="ρ below 2× noise floor"),
+    ]
 
     for xi, val in zip(x, avgs):
         label_y = val + 0.012 if val >= 0 else val - 0.018
-        ax.text(xi, label_y, f"{val:+.3f}", ha="center",
-                va="bottom" if val >= 0 else "top", fontsize=8.5)
+        ax.text(xi, label_y, f"{val:+.2f}", ha="center",
+                va="bottom" if val >= 0 else "top", fontsize=7.5)
 
     ax.set_xticks(x)
-    ax.set_xticklabels([f"PC {pc}" for pc in pcs])
+    ax.set_xticklabels([str(pc) for pc in pcs])
+    ax.set_xlabel("PC index N")
     ax.set_ylabel("Best round-trip Spearman ρ")
     ax.set_ylim(min(min(avgs) - 0.05, -0.05), max(max(avgs) + 0.08, 0.85))
     ax.grid(axis="y", linestyle="-", alpha=0.25)
-    ax.legend(loc="upper right", framealpha=0.9, fontsize=9)
+    line_handles, _ = ax.get_legend_handles_labels()
+    ax.legend(handles=line_handles + colour_handles, loc="upper right",
+              framealpha=0.9, fontsize=9)
 
     title = "PC round-trip ρ (refined): auto-described axis vs. original projection"
-    spec = ("bars averaged over glossary + inline; per-cell max(stage 1, stage 2); "
-            "stage-2 K refined via bracket-and-bisect, rescuing PC 40 / 48 dips")
+    # The old spec said "stage-2 K refined via bracket-and-bisect, rescuing
+    # PC 40 / 48 dips": true of the April grid up to K=512; on the K ≤ 4
+    # grid the refinement never fires (2026-10-12).
+    cells = raw.get("cell_order")
+    cell_str = f"{len(cells)} cells" if cells else "the configured cells"
+    spec = ("nth_pc search; bars averaged over glossary + inline; per (N, style) "
+            f"the best of stage 1 (M sweep) and stage 2 (M=∞) over {cell_str} "
+            "(klm_sweep default grid: L, K ∈ {0,1,2,4})")
     _, top_rect = suptitle_with_specs(fig, title, spec)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 

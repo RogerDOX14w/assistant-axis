@@ -109,8 +109,9 @@ def main() -> int:
                alpha=0.5, linewidth=1.2, label="K = N (PC index)", zorder=3)
 
     ax_K.set_yscale("symlog", linthresh=1)
-    ax_K.set_yticks([0, 1, 4, 16, 64, 256, 512])
-    ax_K.set_yticklabels(["0", "1", "4", "16", "64", "256", "512"])
+    # 256 dropped 2026-10-12: its label sat on top of 512's.
+    ax_K.set_yticks([0, 1, 4, 16, 64, 512])
+    ax_K.set_yticklabels(["0", "1", "4", "16", "64", "512"])
     ax_K.set_xticks(pc_pos)
     ax_K.set_xticklabels([str(pc) for pc in pcs])
     ax_K.set_ylabel("Optimal K (winner)")
@@ -163,7 +164,9 @@ def main() -> int:
     ax_L.set_ylim(0, 1.05)
     ax_L.set_title("L winner distribution per PC — left bar = actual, "
                    "right bar = null (faded)", fontsize=11)
-    ax_L.legend(loc="upper right", fontsize=8, ncol=5,
+    # Legends outside the axes (2026-10-12): inside, they covered the bars
+    # of the highest PCs.
+    ax_L.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8,
                 framealpha=0.9)
 
     # --- Panel 3: (slot, layer) winner stacked bars ---
@@ -205,14 +208,30 @@ def main() -> int:
     ax_sl.set_ylim(0, 1.05)
     ax_sl.set_title("(slot, layer) winner distribution per PC — left = actual, "
                     "right = null (faded)", fontsize=11)
-    ax_sl.legend(loc="upper right", fontsize=8, framealpha=0.9)
+    ax_sl.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8,
+                 framealpha=0.9)
 
     title = "K, L, (slot, layer) winner consistency: actual vs permutation null"
-    spec = ("Actual (sharp / saturated bars / blue dots, n=2 per PC) shows "
-            "concentrated, structured winners.  Null (faded / red cloud, "
-            "n=200 per PC) is much more dispersed -- evidence the actual "
-            "search is finding meaningful structure, not noise maxima.")
-    _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.022)
+    # Until 2026-10-12 the spec read the panels as "evidence the actual
+    # search is finding meaningful structure, not noise maxima" because the
+    # actual winners (2 per PC) look concentrated next to the null's 200.
+    # Two draws look concentrated whatever their source, and the null is a
+    # different search (the cache's _meta.variant, fixed_principled since
+    # May 9), so the spec now says what is plotted and draws no inference.
+    null_variant = null_full.get("_meta", {}).get("variant") or "nth_pc"
+    null_sizes = sorted({len(v) for v in null_by_pc.values()}) or [0]
+    null_n = (str(null_sizes[0]) if len(null_sizes) == 1
+              else f"{null_sizes[0]}–{null_sizes[-1]}")
+    spec = (f"Actual: nth_pc search, global winner per description style "
+            f"(sharp bars / blue dots, 2 per PC).  Null: {null_variant} search "
+            f"on permuted judge scores (faded bars / red cloud, "
+            f"{null_n} per PC).\n"
+            "Compare where the winners sit, not how spread they are: 2 draws "
+            "look concentrated whatever their source"
+            + ("" if null_variant == "nth_pc" else
+               f", and the null is the {null_variant} search's, not the "
+               f"nth_pc search's own") + ".")
+    _, top_rect = suptitle_with_specs(fig, title, spec)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     out = Path(args.output)
