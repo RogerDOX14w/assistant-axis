@@ -88,7 +88,8 @@ def parse_args() -> argparse.Namespace:
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")
     p.add_argument("--K", nargs="+", type=int, default=[1, 2, 3, 4, 6, 8],
-                   help="K values for soft-K whitening (default: 16 32 64 128). "
+                   help="K values for soft-K whitening (default: 1 2 3 4 6 8; "
+                        "the historical plots used 16 32 64 128). "
                         "A 'raw' curve is always plotted as a baseline.")
     p.add_argument("--slots", nargs="+", type=int, default=None,
                    help="Slots to plot (default: all from default.pt)")

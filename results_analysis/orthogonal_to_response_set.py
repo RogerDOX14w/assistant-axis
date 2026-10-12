@@ -93,6 +93,14 @@ def main() -> int:
              f"(default: {DEFAULT_EXPERIMENT_DIR}).",
     )
     p.add_argument(
+        "--pairs_responses", default="pair_list_responses.json",
+        help="Pair list naming the response-judged axes, relative to "
+             "--experiment_dir (default: pair_list_responses.json).  The "
+             "cosine datastore was built from the clean list of the May "
+             "2026 extraction; pass pair_list_responses_v1.json to match "
+             "it (AGENT_NOTES 'Current canonical local data dir').",
+    )
+    p.add_argument(
         "--raw", action="store_true",
         help="Use the raw (L=0) cosine datastore instead of the "
              "canonical L=3 soft-shear datastore.",
@@ -120,9 +128,14 @@ def main() -> int:
     labels: list[str] = r["axis_labels"]
     M = np.array(r["abs_cos_matrix"])
 
-    resp_pairs = json.load(open(args.experiment_dir / "pair_list_responses.json"))
+    resp_pairs = json.load(open(args.experiment_dir / args.pairs_responses))
     resp_axes = {f"{p['pos']}/{p['neg']}" for p in resp_pairs}
     resp_idx = {labels.index(a) for a in resp_axes if a in labels}
+    absent = sorted(a for a in resp_axes if a not in labels)
+    if absent:
+        print(f"WARNING: {len(absent)} response axes from "
+              f"{args.pairs_responses} are not in the datastore and are "
+              f"ignored: {absent}")
     non_resp_idx = sorted(set(range(len(labels))) - resp_idx)
 
     print(f"Cohort: {len(labels)} clean axes; "

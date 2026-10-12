@@ -1448,6 +1448,21 @@ def _normalize_scores_file_keys(
     return {norm: v for _raw, norm, v in raw_to_norm}
 
 
+def _kinds_for_name(data_dir: Path) -> dict[str, set]:
+    """``{stem: kinds}`` from the vector files under ``data_dir`` -- the
+    entity set :func:`load_entity_matrix` keys by entity id."""
+    kinds_for_name: dict[str, set] = {}
+    for et in ("traits", "roles"):
+        vec_dir = data_dir / et / "vectors"
+        if not vec_dir.is_dir():
+            continue
+        for fp in sorted(vec_dir.glob("*.pt")):
+            if fp.stem == "default":
+                continue
+            kinds_for_name.setdefault(fp.stem, set()).add(et)
+    return kinds_for_name
+
+
 def _load_scores_from_args(
     args: argparse.Namespace,
     inputs: list[InputSpec] | None = None,
@@ -1482,7 +1497,22 @@ def _load_scores_from_args(
             scores = {str(k): float(v) for k, v in raw.items()}
         else:
             scores = _flatten_static_scores(raw)
-        return _normalize_scores_file_keys(scores, src=src)
+        normalized = _normalize_scores_file_keys(scores, src=src)
+        # The geometry is keyed by entity id (``helpful|T``), so a file of
+        # bare names never intersected it (``find_optimal_direction``
+        # stopped on "Need >=5 common entities; got 0").  Lift bare names
+        # to entity ids; a collision name is ambiguous and is dropped.
+        lifted = migrate_v1_static_scores(
+            normalized, _kinds_for_name(Path(args.data_dir)))
+        if len(lifted) < len(normalized):
+            print(
+                f"WARNING: --scores_file {src}: dropped "
+                f"{len(normalized) - len(lifted)} bare name(s) that name "
+                f"both a trait and a role, or no entity in --data_dir; "
+                f"key them as name|T / name|R to keep them.",
+                file=sys.stderr,
+            )
+        return lifted
     if args.experiment_dir:
         # Build kinds_for_name from the corpus so v1 (bare-name) judge
         # caches can be lifted to v2 (entity_id) keys in-memory.  Only
@@ -1491,16 +1521,7 @@ def _load_scores_from_args(
         # all sources so a future v1 cache on a single-judge source
         # would error loudly rather than silently dropping collision
         # entities.
-        kinds_for_name: dict[str, set] = {}
-        data_dir = Path(args.data_dir)
-        for et in ("traits", "roles"):
-            vec_dir = data_dir / et / "vectors"
-            if not vec_dir.is_dir():
-                continue
-            for fp in sorted(vec_dir.glob("*.pt")):
-                if fp.stem == "default":
-                    continue
-                kinds_for_name.setdefault(fp.stem, set()).add(et)
+        kinds_for_name = _kinds_for_name(Path(args.data_dir))
         return load_scores_from_experiment_dir(
             Path(args.experiment_dir), args.score_source,
             inputs=inputs,

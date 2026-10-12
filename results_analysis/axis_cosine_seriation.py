@@ -91,6 +91,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -319,6 +320,23 @@ COHORT_ONTOLOGIES: dict[str, tuple[tuple[str, ...], dict[str, str]]] = {
 }
 
 
+def ontology_for_cohort(
+    cohort: str,
+) -> tuple[tuple[str, ...], dict[str, str]] | None:
+    """The registered ontology for ``cohort``, or ``None``.
+
+    A pair list's record copy (``pair_list_clean_v1.json``, cohort token
+    ``clean_v1``; AGENT_NOTES "Current canonical local data dir") shares
+    its cohort's ontology: the ``_v<N>`` suffix is stripped before the
+    lookup.  Without this, a run on the ``_v1`` list -- the list the notes
+    say to use with the 8slot data -- silently lost the ontology overlay.
+    """
+    if cohort in COHORT_ONTOLOGIES:
+        return COHORT_ONTOLOGIES[cohort]
+    base = re.sub(r"_v\d+$", "", cohort)
+    return COHORT_ONTOLOGIES.get(base)
+
+
 def axis_unit(data_dir: Path, pos: str, neg: str, kind: str,
               slot: int, layer: int) -> np.ndarray:
     vp = _load_vector_file(data_dir / kind / "vectors" / f"{pos}.pt").float()
@@ -516,7 +534,7 @@ def main() -> int:
                         f"DEFAULT_SOFT_SHEAR_L = {DEFAULT_SOFT_SHEAR_L}).  "
                         f"Pass L=0 for the raw-projection heatmap.")
     p.add_argument("--ca_kind", default="combined",
-                   choices=("combined", "traits", "roles"))
+                   choices=("combined", "r_only", "t_only"))
     p.add_argument("--linkage", default="average",
                    choices=("average", "complete", "single", "ward"),
                    help="Hierarchical-clustering linkage method "
@@ -635,8 +653,9 @@ def main() -> int:
     ontology_runs: list[tuple[str | None, int, int]] = []
     ontology_block_order: tuple[str, ...] = ()
     ontology_map: dict[str, str] = {}
-    if args.ontology != "none" and cohort in COHORT_ONTOLOGIES:
-        ontology_block_order, ontology_map = COHORT_ONTOLOGIES[cohort]
+    registered = ontology_for_cohort(cohort)
+    if args.ontology != "none" and registered is not None:
+        ontology_block_order, ontology_map = registered
         ontology_runs = _compute_block_runs(seriated_labels, ontology_map)
         block_colors = _ontology_block_colors(ontology_block_order)
         _draw_ontology_bands(

@@ -94,7 +94,9 @@ def _load_axes_from_pair_list(
 # to Phases 1+2 response-judging campaign): the original HHH-adjacent
 # 12 plus 10 personality/style axes (proactive, descriptive,
 # religious, fragile, introverted, benign, accessible, precise,
-# blunt, earnest).  Override with --pair_list <path> for ablations.
+# blunt, earnest).  ``main`` reads the list named by ``--pair_list``
+# (default the same file); this constant is kept for importers such as
+# ``response_di_weight_sweep.py``.
 DEFAULT_AXES: list[tuple[str, str, str]] = _load_axes_from_pair_list(
     DEFAULT_EXPERIMENT_DIR / "pair_list_responses.json"
 )
@@ -277,6 +279,16 @@ def main() -> int:
                         "of the most-current data.  Output filename "
                         "auto-suffixes ``__rubric_v2``.")
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR))
+    p.add_argument("--pair_list", default="pair_list_responses.json",
+                   help="Pair-list JSON naming the axes to sweep, relative "
+                        "to --experiment_dir unless absolute (default: "
+                        "pair_list_responses.json, the list for new work).  "
+                        "To reproduce the judged record with the 8slot "
+                        "data, pass pair_list_responses_v1.json (AGENT_NOTES "
+                        "'Current canonical local data dir'): the current "
+                        "list no longer names benign/malicious or "
+                        "systems_thinker/analytical and adds an axis with "
+                        "no judge caches yet.")
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
     p.add_argument("--slot", type=int, default=DEFAULT_SLOT)
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER)
@@ -317,7 +329,7 @@ def main() -> int:
                         f"see assistant_axis/canonical_angles/whitening.py "
                         f"selection-history block).")
     p.add_argument("--ca_kind", default="combined",
-                   choices=("combined", "traits", "roles"),
+                   choices=("combined", "r_only", "t_only"),
                    help="Goal/no-goal subspaces for soft-shear fitting "
                         "(passed to ``build_goal_nogoal_subspaces``). "
                         "Ignored for non-shear regimes.  Default "
@@ -431,9 +443,15 @@ def main() -> int:
         for n, v in entity_vecs.items():
             entity_vecs[n] = basis.apply(v[None, :])[0]
 
+    pair_list_path = Path(args.pair_list)
+    if not pair_list_path.is_absolute():
+        pair_list_path = experiment_dir / pair_list_path
+    axes = _load_axes_from_pair_list(pair_list_path)
+
     print(f"GPT-4.1-mini B=10 vs {combo_label} response-mode weight sweep, "
           f"slot {slot} layer {layer}, whitening={args.whitening}")
-    print(f"  axes: {[a[0] for a in DEFAULT_AXES]}")
+    print(f"  pair list: {pair_list_path.name} ({len(axes)} axes)")
+    print(f"  axes: {[a[0] for a in axes]}")
     print(f"  anthropic dir template: {anth_template}")
 
     # Provenance accumulator.  Threaded through every cache read so the
@@ -452,8 +470,10 @@ def main() -> int:
                 "whitening": args.whitening,
                 "ca_kind": args.ca_kind if wh_method == "soft_shear" else "",
                 "rubric": args.rubric,
+                "pair_list": pair_list_path.name,
             },
         ),
+        current_file_input(dep_key="pairs_json", path=pair_list_path),
         current_data_subtree_input(
             data_dir=data_dir, subtree_rel="traits/vectors",
             dep_key="traits_vectors",
@@ -467,7 +487,7 @@ def main() -> int:
 
     per_axis: dict[tuple[str, str], dict] = {}
     cohort_mix: dict[str, dict[str, str]] = {"gpt": {}, "anth": {}}
-    for axis_name, pos, neg in DEFAULT_AXES:
+    for axis_name, pos, neg in axes:
         if is_v2:
             # Canonical v2 loaders.  GPT reads Phase-5c b7 full volume;
             # Haiku reads b7_t3 per entity with b10_q9 fallback.  See

@@ -74,6 +74,7 @@ scores and runs CPU.  Re-running is cheap (~4 minutes on a workstation).
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import time
 from pathlib import Path
@@ -83,6 +84,7 @@ import numpy as np
 from scipy.stats import spearmanr
 
 from assistant_axis import entity_id
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_two_judges,
 )
@@ -203,21 +205,62 @@ def _load_score_json(
     return data
 
 
+@functools.lru_cache(maxsize=8)
+def _kinds_for_name_cached(data_dir_str: str) -> dict[str, frozenset]:
+    out: dict[str, set] = {}
+    for et in ("traits", "roles"):
+        vdir = Path(data_dir_str) / et / "vectors"
+        if not vdir.is_dir():
+            continue
+        for fp in vdir.glob("*.pt"):
+            if fp.stem != "default":
+                out.setdefault(fp.stem, set()).add(et)
+    return {k: frozenset(v) for k, v in out.items()}
+
+
+def kinds_for_name_from_data_dir(data_dir: Path) -> dict[str, set]:
+    """``{stem: {"traits"} | {"roles"} | both}`` from the vector files under
+    ``data_dir/{traits,roles}/vectors/`` -- the entity set ``setup_at``
+    builds its (entity-id keyed) matrix from."""
+    return {k: set(v) for k, v in
+            _kinds_for_name_cached(str(Path(data_dir).resolve())).items()}
+
+
 def load_combined_scores(
     cell: Path,
     *,
     inputs: list[InputSpec] | None = None,
     cell_id: str | None = None,
+    kinds_for_name: dict[str, set] | None = None,
+    data_dir: Path | None = None,
 ) -> dict[str, float]:
     """Combine GPT + Sonnet × descriptions + instructions scores using the
     project default ``inst_tie`` weights (≈ equal weight, fall back to
     instructions on ties).
+
+    Returns scores keyed by **entity id** (``"helpful|T"``), the key
+    :func:`setup_at` gives its entity matrix rows.  The PC round-trip
+    judge caches were written in May 2026 before the trait/role
+    disambiguation (schema v1: bare names), and ``setup_at`` has keyed its
+    rows by entity id since 2026-05-11, so without this lift the two never
+    intersected and every ρ came back ``None`` (review of 2026-10-12).
+    Each cache is lifted with
+    :func:`assistant_axis.judge_loaders.migrate_v1_static_scores` *before*
+    the 4-way combine: a bare name of one kind becomes its entity id, a
+    collision name (a stem with a vector in both kinds) is dropped because
+    a v1 cache cannot say which kind it scored, and entity-id keys pass
+    through.  ``kinds_for_name`` comes from the caller's ``--data_dir``
+    (:func:`kinds_for_name_from_data_dir`); when neither it nor
+    ``data_dir`` is given, :data:`DEFAULT_DATA_DIR` is used.
 
     When ``inputs`` is supplied, each of the four score caches consumed
     is registered as a dependency under
     ``judge_<cell_id>_<mode>_<judge>``; ``cell_id`` defaults to the
     cell directory's basename.
     """
+    if kinds_for_name is None:
+        kinds_for_name = kinds_for_name_from_data_dir(
+            Path(data_dir) if data_dir is not None else Path(DEFAULT_DATA_DIR))
     label = cell_id or cell.name
     g_d = _load_score_json(
         cell / "gpt" / "scores_descriptions.json",
@@ -231,6 +274,8 @@ def load_combined_scores(
     s_i = _load_score_json(
         cell / "sonnet" / "scores_instructions.json",
         dep_key=f"judge_{label}_instructions_sonnet", inputs=inputs)
+    g_d, g_i, s_d, s_i = (migrate_v1_static_scores(x, kinds_for_name)
+                          for x in (g_d, g_i, s_d, s_i))
     return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                          weights=DI_WEIGHT_CHOICES["inst_tie"])
 
@@ -700,6 +745,7 @@ def main() -> int:
     # Provenance accumulator: subtree deps up front, per-cell judge
     # cache deps appended at read time inside load_combined_scores.
     inputs: list[InputSpec] = _build_subtree_inputs(data_dir=data_dir)
+    kinds_for_name = kinds_for_name_from_data_dir(data_dir)
     scores_by_cell = {}
     for pc in pcs:
         for style in styles:
@@ -707,6 +753,7 @@ def main() -> int:
             scores_by_cell[(pc, style)] = load_combined_scores(
                 sweep_dir / cell_id,
                 inputs=inputs, cell_id=cell_id,
+                kinds_for_name=kinds_for_name,
             )
 
     t0 = time.time()

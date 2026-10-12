@@ -80,7 +80,7 @@ from results_analysis.pc_round_trip.klm_sweep import (
     DEFAULT_CONFIGS, DEFAULT_L_VALUES, DEFAULT_K_COARSE,
     DEFAULT_PCS, DEFAULT_STYLES,
     K_REFINE_MAX_ITER, K_REFINE_MIN_BRACKET, K_REFINE_TIE_THRESH,
-    load_combined_scores,
+    load_combined_scores, kinds_for_name_from_data_dir,
     DEFAULT_SWEEP_DIR,
     _build_subtree_inputs,
 )
@@ -180,10 +180,20 @@ def build_permutation_score_arrays(
         rng = np.random.default_rng(
             seed * 10_000 + pc * 10 + style_order.index(style)
         )
-        score_values = np.array([scores.get(n, np.nan) for n in names])
+        score_values = np.array([scores.get(n, np.nan) for n in names],
+                                dtype=float)
         valid = ~np.isnan(score_values)
         valid_values = score_values[valid]
         n_valid = len(valid_values)
+        if n_valid < 3:
+            # Fail loud: a key mismatch between the scores and ``names``
+            # (bare names vs entity ids) used to leave every cell empty
+            # and the merge-save would then overwrite the cached null
+            # with zero-ρ rows.
+            raise ValueError(
+                f"cell pc{pc:03d}_{style}: only {n_valid} of {len(names)} "
+                f"entities have a judge score (score keys and entity "
+                f"names do not match?)")
 
         perms = np.empty((n_perms, n_valid), dtype=np.float64)
         for i in range(n_perms):
@@ -767,6 +777,7 @@ def main() -> int:
     # helper), per-cell judge cache deps appended at read time inside
     # load_combined_scores → load_and_register.
     inputs: list[InputSpec] = _build_subtree_inputs(data_dir=data_dir)
+    kinds_for_name = kinds_for_name_from_data_dir(data_dir)
     actual_scores_per_cell: dict[tuple[int, str], dict[str, float]] = {}
     missing_cells = []
     for pc in pcs:
@@ -776,6 +787,7 @@ def main() -> int:
             try:
                 actual_scores_per_cell[(pc, style)] = load_combined_scores(
                     cell, inputs=inputs, cell_id=cell_id,
+                    kinds_for_name=kinds_for_name,
                 )
             except FileNotFoundError:
                 missing_cells.append((pc, style))

@@ -118,7 +118,7 @@ def load_mean_scores(
     return {
         name: entry["mean_score"]
         for name, entry in payload.items()
-        if isinstance(entry, dict) and "mean_score" in entry
+        if isinstance(entry, dict) and entry.get("mean_score") is not None
     }
 
 

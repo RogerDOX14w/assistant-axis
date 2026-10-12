@@ -156,6 +156,27 @@ def _rho_at_weight(d: dict, w: float) -> float:
     return float(spearmanr(score, d["proj"]).correlation)
 
 
+def _one_judge_di_scores(
+    desc: dict, inst: dict, *,
+    weights: tuple[float, float],
+    kinds_for_name: dict[str, set],
+) -> dict[str, float]:
+    """One judge's desc+inst score per entity id.
+
+    Each cache is lifted to entity-id keys (``migrate_v1_static_scores``)
+    *before* the combine.  Combining first would treat a bare ``"x"`` in a
+    v1 cache and ``"x|T"`` in a v2 cache as two entities, keep each at
+    100% of its one mode, and let the later migration overwrite one with
+    the other, so the entity would end up with a desc-only or inst-only
+    score (review of 2026-10-12; no such mixed pair exists on disk today).
+    """
+    return combine_desc_inst_one_judge(
+        migrate_v1_static_scores(desc, kinds_for_name),
+        migrate_v1_static_scores(inst, kinds_for_name),
+        weights=weights,
+    )
+
+
 def main() -> int:
     p = argparse.ArgumentParser(
         description=__doc__,
@@ -201,7 +222,7 @@ def main() -> int:
                         f"see assistant_axis/canonical_angles/whitening.py "
                         f"selection-history block).")
     p.add_argument("--ca_kind", default="combined",
-                   choices=("combined", "traits", "roles"),
+                   choices=("combined", "r_only", "t_only"),
                    help="Goal/no-goal subspaces for soft-shear fitting "
                         "(passed to ``build_goal_nogoal_subspaces``). "
                         "Ignored for other whitening regimes. "
@@ -364,15 +385,13 @@ def main() -> int:
         # already v2 (entity_id-keyed), but rescues mixed-format runs:
         # post-Phase-5b GPT/Haiku caches are v2, Sonnet desc/inst
         # caches are still v1 (bare names, 9 collisions dropped).
-        # Without migration, the v2/v1 intersection is empty.
-        gpt_scores = migrate_v1_static_scores(
-            combine_desc_inst_one_judge(g_d, g_i, weights=di_weights),
-            kinds_for_name,
-        )
-        son_scores = migrate_v1_static_scores(
-            combine_desc_inst_one_judge(s_d, s_i, weights=di_weights),
-            kinds_for_name,
-        )
+        # Without migration, the v2/v1 intersection is empty.  Each
+        # cache is migrated before the desc/inst combine (see
+        # ``_one_judge_di_scores``).
+        gpt_scores = _one_judge_di_scores(
+            g_d, g_i, weights=di_weights, kinds_for_name=kinds_for_name)
+        son_scores = _one_judge_di_scores(
+            s_d, s_i, weights=di_weights, kinds_for_name=kinds_for_name)
         common = sorted(set(gpt_scores) & set(son_scores) & set(entity_vecs))
         if len(common) < 3:
             print(f"  [skip] {pos}/{neg}: only {len(common)} shared entities")

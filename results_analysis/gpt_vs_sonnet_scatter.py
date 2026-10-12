@@ -215,8 +215,9 @@ def main() -> int:
         son = _load_both_mean(axis_dir, "sonnet", inputs=inputs, axis_id=axis_id,
                               kinds_for_name=kinds_for_name)
         common = sorted(set(gpt) & set(son))
-        if not common:
-            print(f"  [skip] {pos}/{neg}: no shared entities between gpt and sonnet")
+        if len(common) < 3:
+            print(f"  [skip] {pos}/{neg}: only {len(common)} shared entities "
+                  f"between gpt and sonnet")
             continue
         g = [gpt[n] for n in common]
         s = [son[n] for n in common]

@@ -112,7 +112,7 @@ Workflow when this script's output changes:
 2. Regenerate the manifest::
 
        uv run python tools/regenerate_dataset_manifest.py \\
-           --data-dir <data_dir>
+           --dataset <dataset root, e.g. 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'>
 
    See :mod:`tools.regenerate_dataset_manifest` for flags; the schema
    lives in :mod:`assistant_axis.provenance` (``Manifest`` /

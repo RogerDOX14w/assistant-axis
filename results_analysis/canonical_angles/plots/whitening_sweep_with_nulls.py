@@ -119,7 +119,7 @@ def parse_args() -> argparse.Namespace:
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")
     p.add_argument("--K", nargs="+", type=int, default=[1, 2, 3, 4, 6, 8],
-                   help="K values for soft-K whitening (default: 1 2 4 8 16)")
+                   help="K values for soft-K whitening (default: 1 2 3 4 6 8)")
     p.add_argument("--methods", nargs="+", default=["lw"],
                    choices=["lw", "oas"],
                    help="Additional whitening methods beyond raw and soft-K. "

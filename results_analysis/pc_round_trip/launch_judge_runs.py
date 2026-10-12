@@ -368,6 +368,7 @@ def main() -> int:
         return cell_label, rc, time.time() - t0
 
     started = time.time()
+    failed: list[str] = []
     with concurrent.futures.ThreadPoolExecutor(
         max_workers=args.max_parallel
     ) as pool:
@@ -375,9 +376,17 @@ def main() -> int:
         for f in concurrent.futures.as_completed(futs):
             label, rc, dt = f.result()
             status = "OK" if rc == 0 else f"FAIL rc={rc}"
+            if rc != 0:
+                failed.append(f"{label} (rc={rc})")
             print(f"  [{dt:6.1f}s] {label}: {status}")
 
     print(f"\nDone in {(time.time() - started) / 60:.1f} min.")
+    if failed:
+        # Non-zero exit so a calling script does not carry on as if every
+        # cell had been judged (rc=2 from a cell is a budget-cap abort).
+        print(f"{len(failed)} of {len(commands)} cells failed: "
+              + ", ".join(sorted(failed)), file=sys.stderr)
+        return 1
     return 0
 
 
