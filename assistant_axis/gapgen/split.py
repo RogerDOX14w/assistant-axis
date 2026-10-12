@@ -705,14 +705,20 @@ def cost_by_step(records: Sequence[Mapping]) -> dict[str, dict]:
     ``:batch``); records replayed on a resume are counted once."""
     from assistant_axis.judge_pricing import cost_for_usage
     from assistant_axis.gapgen.batches import current_batch_key
+    from assistant_axis.gapgen.llm import CACHE_READ_FACTOR, CACHE_WRITE_1H_FACTOR, CACHE_WRITE_FACTOR
     out: dict[str, dict] = {}
     for rec in records:
         raw, model = rec.get("usage_raw") or {}, rec.get("charged_as")
         if not raw or not model:
             continue
         model = current_batch_key(model)
-        p = int(raw.get("input_tokens") or 0) + int(round(1.25 * (raw.get("cache_creation_input_tokens") or 0)
-                                                           + 0.1 * (raw.get("cache_read_input_tokens") or 0)))
+        # as llm.billed_usage charged it: 1-hour cache writes (recorded apart when the response broke them
+        # down) at 2x, the rest of the writes at 1.25x, reads at 0.1x
+        cw = int(raw.get("cache_creation_input_tokens") or 0)
+        cw1h = min(int(raw.get("cache_creation_1h_input_tokens") or 0), cw)
+        cr = int(raw.get("cache_read_input_tokens") or 0)
+        p = int(raw.get("input_tokens") or 0) + int(round(
+            CACHE_WRITE_FACTOR * (cw - cw1h) + CACHE_WRITE_1H_FACTOR * cw1h + CACHE_READ_FACTOR * cr))
         o = int(raw.get("output_tokens") or 0)
         d = out.setdefault(f"{rec.get('stage')}@{model}", {"n_calls": 0, "prompt_tokens": 0, "completion_tokens": 0,
                                                            "cost_usd": 0.0})

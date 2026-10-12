@@ -54,8 +54,11 @@ RUN_LOCK_NAME = ".run.lock"
 #: Paths whose uncommitted changes can alter what a paid platform run sends or
 #: how its output is read: the platform package (rubric, prompts, parser,
 #: normalisation, cost), its CLIs, the helpers they import from the project
-#: (JSON extraction, pricing, entity-name normalisation), the dependency lock,
-#: and the tracked validation inputs (review_m1_fixes.md item 5c).
+#: (JSON extraction, pricing, entity-name normalisation, the corpus's
+#: arrangements, which decide the traits M3's prompts list), the dependency
+#: lock, and the tracked validation inputs (review_m1_fixes.md item 5c).
+#: ``test_gapgen_filter_side_review.py`` checks every project module the
+#: platform imports is here or named there as output-only.
 PLATFORM_PATHS: tuple[str, ...] = (
     "assistant_axis/gapgen",
     "data_analysis/gap_generation",
@@ -63,6 +66,7 @@ PLATFORM_PATHS: tuple[str, ...] = (
     "assistant_axis/judge_pricing.py",
     "assistant_axis/entity_id.py",
     "assistant_axis/atomic_io.py",
+    "assistant_axis/arrangements.py",
     "data/candidates/validation",
     # the split filter's prompts are read from these files at run time
     "reports/trait_gap_generation/rubrics",

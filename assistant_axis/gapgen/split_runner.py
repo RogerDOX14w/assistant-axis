@@ -458,9 +458,7 @@ class SplitRunner(FilterRunner):
             return out
 
         def handle(c: Call, text: Optional[str], meta: dict, *, resumed: bool = False) -> None:
-            row, err = split.parse(c.step, text, label=c.label)
-            if text is None and err in (None, "empty response"):
-                err = f"no response: {meta.get('error')}"
+            rec: Optional[dict] = None
             if not resumed:
                 rec = {"batch_id": self.batch_id, "stage": c.stage, "step": c.step, "role": c.role, "model": c.model,
                        "keys": [c.key], "index": c.index, "user": c.user, "prompt_sha256": c.prompt_sha256,
@@ -471,9 +469,14 @@ class SplitRunner(FilterRunner):
                        "batch_request_id": meta.get("batch_request_id"), "at": utc_now()}
                 if self.readings > 1:   # a one-reading run's records keep their old shape
                     rec["verdict_reading"] = self._verdict_reading(c)
-                # recorded before it is parsed into the row, so a parser bug keeps the answer
+                # recorded before it is parsed, so a parser that raises keeps the answer paid for (it was
+                # charged before this handler ran); the exception then stops the run as any other would
                 self.stats[f"calls_{c.stage}"] += 1
                 self._record_response(rec)
+            row, err = split.parse(c.step, text, label=c.label)
+            if text is None and err in (None, "empty response"):
+                err = f"no response: {meta.get('error')}"
+            if rec is not None:
                 rec["parse_errors"] = {c.key: err} if err else {}
                 if err is None:
                     self.cache[c.cache_key()] = rec

@@ -79,6 +79,7 @@ Changing anything the model reads here is a rubric change: bump
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any, Mapping, Optional, Sequence
 
@@ -448,6 +449,10 @@ def _num(v, lo, hi, *, integer=False) -> Optional[float]:
         except ValueError:
             return None
     if not isinstance(v, (int, float)):
+        return None
+    if isinstance(v, float) and not math.isfinite(v):
+        # json.loads accepts NaN and Infinity (and reads 1e999 as inf); int() of either raises, which would
+        # stop a run from inside a parser: a non-finite number is simply not a valid value
         return None
     if integer:
         if float(v) != int(v):

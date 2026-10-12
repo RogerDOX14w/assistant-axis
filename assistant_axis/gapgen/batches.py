@@ -260,8 +260,9 @@ class BatchTransport:
     def _request(c) -> dict:
         """One batch request.  A call may ask for its system block to be cached (``cache_system``, with
         an optional ``cache_ttl``: M3's overlap waves ask for the 1-hour cache, since a batch's requests
-        are spread over up to an hour); a call that names neither (the split filter's) is sent uncached,
-        as before."""
+        are spread over up to an hour; the split filter's calls ask for the default 5 minutes on a model
+        whose minimum their prompt clears, ``split_runner.caches_system``, since 2026-10-08); a call that
+        names neither is sent uncached."""
         return {"custom_id": c.custom_id,
                 "params": request_params(model=c.model, system=c.system, user=c.user, max_tokens=c.max_tokens,
                                          temperature=c.temperature, cache_system=bool(getattr(c, "cache_system", False)),

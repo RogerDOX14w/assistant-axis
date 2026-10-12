@@ -226,10 +226,14 @@ def bump(name: str, why: str, *, now: str, rubrics_dir: Optional[Path] = None,
         new_v = int(version)
     row = {"version": new_v, "sha256": sha, "pinned_at": now, "why": why.strip(), **extra}
     rows.append(row)
-    ordered = {"_about": data.get("_about") or ABOUT, "prompts": {n: data["prompts"][n] for n in PINNED_NAMES
-                                                                  if n in data["prompts"]}}
-    versions_path(rubrics_dir).write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n",
-                                          encoding="utf-8")
+    # the file is append-only: a prompt this code does not name (pinned by a newer checkout, or one whose name
+    # left PINNED_FILES) keeps its rows, after the known ones
+    prompts = data["prompts"]
+    ordered = {"_about": data.get("_about") or ABOUT,
+               "prompts": {**{n: prompts[n] for n in PINNED_NAMES if n in prompts},
+                           **{n: r for n, r in prompts.items() if n not in PINNED_FILES}}}
+    from assistant_axis.atomic_io import atomic_write_text
+    atomic_write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n", versions_path(rubrics_dir))
     return row
 
 

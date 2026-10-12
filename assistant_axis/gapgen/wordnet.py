@@ -22,6 +22,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Optional
 
 from .paths import wn_data_dir
@@ -95,7 +96,8 @@ def ensure_oewn(*, wn_module=None, download: bool = True) -> bool:
         return False
     if wn_module is None:
         WN_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        assert _wn.config.database_path.parent == WN_DATA_DIR, "wn data directory is not in-tree"
+        if Path(_wn.config.database_path).parent != WN_DATA_DIR:   # not an assert: python -O strips those
+            raise RuntimeError(f"wn data directory is not in-tree ({_wn.config.database_path}); refusing to download")
     logger.info("downloading %s into %s", OEWN_LEXICON, WN_DATA_DIR)
     mod.download(OEWN_LEXICON)
     return oewn_installed(mod if wn_module is not None else None)
