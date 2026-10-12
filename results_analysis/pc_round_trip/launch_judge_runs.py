@@ -91,6 +91,24 @@ PROVIDER_SUBDIR = {
     "anthropic": "sonnet",
 }
 
+# Per-cell hard cap passed to each axis_judge_correlation.py subprocess as
+# --budget_usd (review 9a D8, walk-through D7, 2026-10-12: the ~96
+# subprocesses ran uncapped).  A cell is static mode, descriptions +
+# instructions, over the ~585 corpus entities: ~1,170 calls.  The judge-
+# cost rule's static figures (352 input + 63 output tokens a call) put a
+# cell at ~$0.28 for gpt-4.1-mini and ~$2.3 for Sonnet; this study's
+# header is longer (two ~470-character standardized poles and 20
+# examples, ~500 input tokens) and Sonnet writes more than GPT, so the
+# expectation is ~$0.35 (GPT) and ~$4-6 (Sonnet 4.6, AGENT_NOTES "Judge-
+# model drift on resume").  Caps, by the judge-cost rule's "Budget cap
+# recommendation", rounded up: GPT 1.25 x expected + $5; Sonnet the
+# first-of-kind 1.5 x expected + $10 (Sonnet 4.6 has not run this script).
+# A cell that hits its cap exits 2, which main() reports as a failed cell.
+DEFAULT_BUDGET_USD_PER_CELL = {
+    "openai": 6.0,
+    "anthropic": 19.0,
+}
+
 
 # ---------------------------------------------------------------------------
 # PC direction setup
@@ -173,7 +191,7 @@ def build_command(*, data_dir: Path, sweep_dir: Path, pc: int, style: str,
                    provider: str, layer: int, spec: dict,
                    batch_size: int, rps: float, save_every: int,
                    max_tokens: int, temperature: float,
-                   whiten_K: int) -> list[str]:
+                   whiten_K: int, budget_usd: float) -> list[str]:
     cell = sweep_dir / f"pc{pc:03d}_{style}"
     out = cell / PROVIDER_SUBDIR[provider]
     pos_pole = spec["pos_pole_standardized"]
@@ -203,8 +221,19 @@ def build_command(*, data_dir: Path, sweep_dir: Path, pc: int, style: str,
         "--save_every", str(save_every),
         "--max_tokens", str(max_tokens),
         "--temperature", str(temperature),
+        "--budget_usd", f"{budget_usd:g}",
         "--output_dir", str(out),
     ]
+
+
+def cell_budget(provider: str, override: float | None) -> float:
+    """The --budget_usd cap for one cell: ``override`` when given, else the
+    provider's :data:`DEFAULT_BUDGET_USD_PER_CELL`."""
+    if override is not None:
+        if override <= 0:
+            raise SystemExit(f"--budget_usd must be positive, got {override}")
+        return float(override)
+    return DEFAULT_BUDGET_USD_PER_CELL[provider]
 
 
 # ---------------------------------------------------------------------------
@@ -250,6 +279,13 @@ def parse_args() -> argparse.Namespace:
                         f"geometry (default {DEFAULT_WHITEN_K} = raw, "
                         "matches the canonical raw setup).  Independent of "
                         "the K swept in the round-trip experiment.")
+    p.add_argument("--budget_usd", type=float, default=None,
+                   help="Hard API-spend cap per cell, passed to every "
+                        "axis_judge_correlation.py subprocess as --budget_usd "
+                        "(a cell over it exits 2 and is reported as failed).  "
+                        "Default: per provider, "
+                        f"{DEFAULT_BUDGET_USD_PER_CELL} (see "
+                        "DEFAULT_BUDGET_USD_PER_CELL).")
     p.add_argument("--max_parallel", type=int, default=2,
                    help="Concurrent subprocess cap (default 2 to keep the ML "
                         "footprint comfortable on a 48 GB box; bump up on a "
@@ -337,9 +373,15 @@ def main() -> int:
                     batch_size=args.batch_size, rps=args.rps,
                     save_every=args.save_every, max_tokens=args.max_tokens,
                     temperature=args.temperature, whiten_K=args.whiten_K,
+                    budget_usd=cell_budget(provider, args.budget_usd),
                 )))
 
     print(f"\n{len(commands)} cells to run.")
+    if commands:
+        cap_total = sum(cell_budget(prov, args.budget_usd) for _, _, prov, _ in commands)
+        print(f"Per-cell budget caps (--budget_usd): "
+              + ", ".join(f"{p} ${cell_budget(p, args.budget_usd):g}" for p in providers)
+              + f"; ceiling over all cells ${cap_total:,.2f}.")
     if args.dry_run:
         for pc, style, provider, cmd in commands:
             print(f"\n--- PC{pc:03d}/{style}/{provider} ---")
