@@ -207,6 +207,18 @@ def load_responses(responses_file: Path) -> List[dict]:
     return read_jsonl_with_retry(responses_file, logger_obj=logger)
 
 
+def _interim_family(model_name: str):
+    """INTERIM (tasks 3-5 of the multi-model plan): the family by a substring
+    of the model name, as SpanMapper found it before; task 6 replaces this
+    with ProbingModel.family (config.model_type)."""
+    from assistant_axis.model_families import FAMILIES
+    name = model_name.lower()
+    for sub, key in (("qwen", "qwen3"), ("gemma", "gemma2"), ("llama", "llama")):
+        if sub in name:
+            return FAMILIES[key]
+    return None
+
+
 def extract_activations_batch(
     pm: ProbingModel,
     conversations: List[List[Dict[str, str]]],
@@ -225,30 +237,36 @@ def extract_activations_batch(
     """
     encoder = ConversationEncoder(pm.tokenizer, pm.model_name)
     extractor = ActivationExtractor(pm, encoder)
-    span_mapper = SpanMapper(pm.tokenizer, model_name=pm.model_name)
 
+    # INTERIM (multi-model plan, task 3 until task 6): the header ids come
+    # from the chat template (chat_layout.derive_chat_layout); the family is
+    # still found by a substring of --model until ProbingModel knows its
+    # model_type (task 5) and step 2 derives the layout once per worker.
     header_metadata: Dict = {}
+    layout = None
     if extract_headers:
-        try:
-            hdr_ids = span_mapper.expected_assistant_header_ids()
-            tokens = []
-            family = span_mapper._model_family()
-            if family:
-                from assistant_axis.internals.spans import _HEADER_TOKENS
-                tokens = _HEADER_TOKENS[family]
-            header_metadata = {
-                "header_tokens": tokens,
-                "header_ids": hdr_ids,
-                "model_name": pm.model_name,
-                "extract_headers": True,
-            }
-        except ValueError as e:
+        family = _interim_family(pm.model_name)
+        if family is None:
             # Header slots off: each activation is (layers, hidden), not
             # (1 + N, layers, hidden).  The model family comes from a
             # substring of --model, so a local path without "qwen" in it
             # lands here too; say so rather than change the layout silently.
-            logger.warning(f"Header extraction requested but unavailable ({e}); "
+            logger.warning(f"Header extraction requested but unavailable (Unrecognized model "
+                           f"family for header extraction: {pm.model_name.lower()}); "
                            f"saving body means only, without header slots")
+        else:
+            from assistant_axis.internals.chat_layout import derive_chat_layout
+            layout = derive_chat_layout(pm.tokenizer, family)
+            header_metadata = {
+                "header_tokens": list(layout.header_tokens),
+                "header_ids": list(layout.header_ids),
+                "model_name": pm.model_name,
+                "extract_headers": True,
+            }
+    span_mapper = SpanMapper(
+        pm.tokenizer,
+        header_ids=layout.header_ids if layout is not None else None,
+        search_distance=layout.search_distance if layout is not None else None)
 
     # Build chat_kwargs for Qwen models
     chat_kwargs = {}
@@ -284,27 +302,20 @@ def extract_activations_batch(
                 if span['role'] == 'assistant':
                     print(f"  DEBUG span: conv={span['conversation_id']} start={span['start']} end={span['end']} n_tokens={span['n_tokens']}")
 
-            if extract_headers:
-                try:
-                    hdr_ids = span_mapper.expected_assistant_header_ids()
-                    print(f"  Expected assistant header ids: {hdr_ids}")
-                    shown = 0
-                    for span in batch_spans:
-                        if span['role'] != 'assistant' or shown >= 2:
-                            continue
-                        cid = span['conversation_id']
-                        fids = batch_full_ids[cid]
-                        s = span['start']
-                        family = span_mapper._model_family() or "unknown"
-                        from assistant_axis.internals.spans import _MAX_HEADER_SEARCH_DIST
-                        max_dist = _MAX_HEADER_SEARCH_DIST.get(family, 12)
-                        window = fids[max(0, s - max_dist):s + 1]
-                        print(f"  Actual tokens before span[{cid}] start={s}: {window}")
-                        shown += 1
-                except ValueError:
-                    pass
+            if layout is not None:
+                print(f"  Expected assistant header ids: {list(layout.header_ids)}")
+                shown = 0
+                for span in batch_spans:
+                    if span['role'] != 'assistant' or shown >= 2:
+                        continue
+                    cid = span['conversation_id']
+                    fids = batch_full_ids[cid]
+                    s = span['start']
+                    window = fids[max(0, s - layout.search_distance):s + 1]
+                    print(f"  Actual tokens before span[{cid}] start={s}: {window}")
+                    shown += 1
 
-        conv_activations_list, mismatches = span_mapper.map_spans(
+        conv_activations_list, mismatches, _turn_roles = span_mapper.map_spans(
             batch_activations, batch_spans, batch_metadata,
             batch_full_ids=batch_full_ids,
             extract_headers=extract_headers,

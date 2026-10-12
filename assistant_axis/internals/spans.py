@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
 import torch
 
 if TYPE_CHECKING:
@@ -11,23 +11,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_HEADER_TOKENS = {
-    # Qwen 3 non-thinking mode: the 3-token assistant header is followed by a
-    # forced-empty thinking block `<think>\n\n</think>\n\n`.  Treating all 7
-    # tokens as "header" lets us extract per-position activations at each of
-    # these deterministic positions, which we previously missed.  This assumes
-    # enable_thinking=False (which all our activation extraction uses; see
-    # pipeline/2_activations.py --thinking flag, default False).
-    "qwen": ["<|im_start|>", "assistant", "\n", "<think>", "\n\n", "</think>", "\n\n"],
-    "gemma": ["<start_of_turn>", "model", "\n"],
-    "llama": ["<|start_header_id|>", "assistant", "<|end_header_id|>", "\n\n"],
-}
-
-_MAX_HEADER_SEARCH_DIST = {
-    "qwen": 14,   # enlarged to accommodate 7-token non-thinking header + slack
-    "gemma": 5,
-    "llama": 6,
-}
+# Search slack beyond the header's length when a SpanMapper is given header
+# ids but no search distance (chat_layout.SEARCH_SLACK; 7 + 7 = 14 for Qwen3,
+# the value the hand-written table had for "qwen").
+_DEFAULT_SEARCH_SLACK = 7
 
 
 class SpanMapper:
@@ -39,53 +26,38 @@ class SpanMapper:
     - Excluding code blocks from aggregation
     - Computing mean activations per turn
     - Extracting per-token header activations for assistant turns
+
+    The assistant-header token ids are injected (since the multi-model plan,
+    reports/pipeline/coding_plan_multi_model_extraction.md § 5.4): step 2
+    passes those :func:`assistant_axis.internals.chat_layout.derive_chat_layout`
+    read off the model's chat template.  Until then they came from a table
+    per family matched by a substring of the model name (``_HEADER_TOKENS``,
+    ``_MAX_HEADER_SEARCH_DIST``, ``expected_assistant_header_ids``, gone).
+    ``header_ids=None`` means body means only (``--no-headers``).
     """
 
-    def __init__(self, tokenizer, model_name: str = ""):
+    def __init__(self, tokenizer, *, header_ids: Optional[Sequence[int]] = None,
+                 search_distance: Optional[int] = None):
         """
-        Initialize the span mapper.
-
         Args:
-            tokenizer: HuggingFace tokenizer for code block detection
-            model_name: HuggingFace model name for model-family dispatch
+            tokenizer: HuggingFace tokenizer (code-block detection, log lines)
+            header_ids: the assistant header's token ids, in order; None for
+                body means only
+            search_distance: how far before a span's start ``_find_header``
+                looks for the header's first token (default: the header's
+                length + 7; ``ChatLayout.search_distance``)
         """
         self.tokenizer = tokenizer
-        self.model_name = (model_name or getattr(tokenizer, "name_or_path", "")).lower()
+        self.header_ids: Optional[List[int]] = (
+            [int(i) for i in header_ids] if header_ids is not None else None)
+        if self.header_ids is not None and not self.header_ids:
+            raise ValueError("header_ids is empty; pass None for body means only")
+        self.search_distance = search_distance
 
-    def _model_family(self) -> Optional[str]:
-        """Return 'qwen', 'gemma', 'llama', or None."""
-        for family in ("qwen", "gemma", "llama"):
-            if family in self.model_name:
-                return family
-        return None
-
-    def expected_assistant_header_ids(self) -> List[int]:
-        """Resolve expected assistant-turn header token IDs for this model family.
-
-        Returns a list of integer token IDs in the order they appear in the
-        tokenized conversation (e.g. [im_start_id, assistant_id, newline_id]).
-        Raises ValueError if the model family is unrecognized or a token cannot
-        be resolved.
-        """
-        family = self._model_family()
-        if family is None:
-            raise ValueError(
-                f"Unrecognized model family for header extraction: {self.model_name}"
-            )
-        token_names = _HEADER_TOKENS[family]
-        ids: List[int] = []
-        for name in token_names:
-            tid = self.tokenizer.convert_tokens_to_ids(name)
-            if tid is None or tid == self.tokenizer.unk_token_id:
-                plain = self.tokenizer.encode(name, add_special_tokens=False)
-                if len(plain) != 1:
-                    raise ValueError(
-                        f"Cannot resolve header token {name!r} for {family} "
-                        f"(got {plain})"
-                    )
-                tid = plain[0]
-            ids.append(tid)
-        return ids
+    def _max_dist(self, n_header: int) -> int:
+        if self.search_distance is not None:
+            return int(self.search_distance)
+        return n_header + _DEFAULT_SEARCH_SLACK
 
     def _find_header(
         self,
@@ -95,6 +67,13 @@ class SpanMapper:
     ) -> Tuple[Optional[int], List[Tuple[int, int, int]]]:
         """Search backwards from *span_start* for the assistant header.
 
+        The nearest occurrence of the header's first token within the search
+        distance is taken, and accepted when at most one of the N header
+        tokens differs (``matched >= N - 1``, what the 8slot run used for
+        N = 7).  For a short header that tolerance is loose (one wrong token
+        of two still matches); an exact match for N < 4 is a TODO of the
+        multi-model plan (§ 5.4; § 15 Q6 deferred it with OLMo 2).
+
         Returns:
             (header_start_index, mismatches) where mismatches is a list of
             (position_in_header, expected_id, actual_id) tuples.
@@ -102,8 +81,7 @@ class SpanMapper:
         """
         N = len(expected_header)
         open_tag = expected_header[0]
-        family = self._model_family() or "unknown"
-        max_dist = _MAX_HEADER_SEARCH_DIST.get(family, 12)
+        max_dist = self._max_dist(N)
 
         search_start = max(0, span_start - max_dist)
         candidate = None
@@ -138,7 +116,7 @@ class SpanMapper:
         batch_metadata: Dict[str, Any],
         batch_full_ids: Optional[List[List[int]]] = None,
         extract_headers: bool = True,
-    ) -> Tuple[List[torch.Tensor], List[Dict[str, Any]]]:
+    ) -> Tuple[List[torch.Tensor], List[Dict[str, Any]], List[List[str]]]:
         """
         Map span indices to activations and compute per-turn mean activations.
         Optionally extracts individual header-token activations for assistant turns.
@@ -149,14 +127,18 @@ class SpanMapper:
             batch_spans: span dicts with conversation_id and local indices
             batch_metadata: dict with batching information
             batch_full_ids: per-conversation token ID lists (needed for header extraction)
-            extract_headers: if True and batch_full_ids is provided, extract header
-                activations; slot 0 = body mean, slots 1..N = individual header tokens.
+            extract_headers: if True, this mapper has ``header_ids`` and
+                batch_full_ids is provided, extract header activations; slot 0 =
+                body mean, slots 1..N = individual header tokens.
 
         Returns:
-            (conversation_activations, mismatches) where each conv tensor is
-            (1+N, num_turns, num_layers, hidden_size) when headers are extracted or
-            (num_turns, num_layers, hidden_size) otherwise. mismatches is a list of
-            dicts recording any header-token alignment issues.
+            (conversation_activations, mismatches, turn_roles) where each conv
+            tensor is (1+N, num_turns, num_layers, hidden_size) when headers are
+            extracted or (num_turns, num_layers, hidden_size) otherwise;
+            mismatches is a list of dicts recording any header-token alignment
+            issues; turn_roles[i] lists the role of each turn stacked for
+            conversation i, in order (a span past the truncation length is
+            dropped, so it can be shorter than the conversation's spans).
         """
         num_layers, batch_size, max_seq_len, hidden_size = batch_activations.shape
         device = batch_activations.device
@@ -165,21 +147,15 @@ class SpanMapper:
         do_headers = (
             extract_headers
             and batch_full_ids is not None
-            and self._model_family() is not None
+            and self.header_ids is not None
         )
-        header_ids: Optional[List[int]] = None
-        N = 0
-        if do_headers:
-            try:
-                header_ids = self.expected_assistant_header_ids()
-                N = len(header_ids)
-            except ValueError as e:
-                logger.warning("Header extraction disabled: %s", e)
-                do_headers = False
+        header_ids: Optional[List[int]] = self.header_ids if do_headers else None
+        N = len(header_ids) if header_ids is not None else 0
 
         all_mismatches: List[Dict[str, Any]] = []
 
         conversation_activations: List[Any] = [None] * batch_metadata['total_conversations']
+        turn_roles: List[List[str]] = [[] for _ in range(batch_metadata['total_conversations'])]
 
         # Group spans by conversation
         spans_by_conversation: Dict[int, List[Dict[str, Any]]] = {}
@@ -261,8 +237,7 @@ class SpanMapper:
                             })
 
                         if hdr_start is None and mm:
-                            family = self._model_family() or "unknown"
-                            max_dist = _MAX_HEADER_SEARCH_DIST.get(family, 12)
+                            max_dist = self._max_dist(N)
                             w_start = max(0, start_idx - max_dist - 5)
                             w_end = min(len(full_ids), start_idx + 5)
                             window_ids = full_ids[w_start:w_end]
@@ -328,6 +303,7 @@ class SpanMapper:
                     turn_activations.append(torch.stack(slots))  # (1+N, layers, hidden)
                 else:
                     turn_activations.append(mean_activation)
+                turn_roles[conv_id].append(span.get('role'))
 
             if turn_activations:
                 stacked = torch.stack(turn_activations)
@@ -346,7 +322,7 @@ class SpanMapper:
                         0, num_layers, hidden_size, dtype=dtype, device=device
                     )
 
-        return conversation_activations, all_mismatches
+        return conversation_activations, all_mismatches, turn_roles
 
     def map_spans_no_code(
         self,

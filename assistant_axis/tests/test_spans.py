@@ -1,9 +1,17 @@
-"""Tests for SpanMapper header extraction."""
+"""Tests for SpanMapper header extraction.
+
+Since the multi-model plan (reports/pipeline/coding_plan_multi_model_extraction.md
+§ 5.4, § 9 test 4) the header ids are injected (step 2 passes those derived
+from the chat template); there is no family-from-name lookup any more, so the
+tests of ``expected_assistant_header_ids`` and the model-name fixture went
+(flagged expectation change) and the same three vocabularies are used with
+injected ids instead.
+"""
 
 import pytest
 import torch
 
-from assistant_axis.internals.spans import SpanMapper, _HEADER_TOKENS
+from assistant_axis.internals.spans import SpanMapper
 
 
 # ---------------------------------------------------------------------------
@@ -19,6 +27,9 @@ class FakeTokenizer:
 
     def convert_tokens_to_ids(self, token: str) -> int:
         return self._vocab.get(token, self.unk_token_id)
+
+    def convert_ids_to_tokens(self, tid: int) -> str:
+        return {v: k for k, v in self._vocab.items()}.get(tid, "?")
 
     def encode(self, text: str, add_special_tokens: bool = False) -> list[int]:
         if text in self._vocab:
@@ -53,33 +64,47 @@ LLAMA_VOCAB = {
 LLAMA_HEADER = [128006, 78191, 128007, 271]
 
 
-@pytest.fixture(params=[
-    ("qwen3-0.6b", QWEN_VOCAB, QWEN_HEADER),
-    ("gemma-2-27b", GEMMA_VOCAB, GEMMA_HEADER),
-    ("llama-3.3-70b", LLAMA_VOCAB, LLAMA_HEADER),
-], ids=["qwen", "gemma", "llama"])
-def family_fixture(request):
-    model_name, vocab, expected = request.param
-    tok = FakeTokenizer(vocab)
-    return model_name, tok, expected
+def _qwen_mapper(**kw):
+    return SpanMapper(FakeTokenizer(QWEN_VOCAB), header_ids=QWEN_HEADER, **kw)
 
 
 # ---------------------------------------------------------------------------
-# expected_assistant_header_ids
+# Injected header ids
 # ---------------------------------------------------------------------------
 
-class TestExpectedAssistantHeaderIds:
+class TestInjectedHeaderIds:
 
-    def test_returns_correct_ids(self, family_fixture):
-        model_name, tok, expected = family_fixture
-        sm = SpanMapper(tok, model_name=model_name)
-        assert sm.expected_assistant_header_ids() == expected
+    @pytest.mark.parametrize("vocab, header", [
+        (QWEN_VOCAB, QWEN_HEADER), (GEMMA_VOCAB, GEMMA_HEADER), (LLAMA_VOCAB, LLAMA_HEADER),
+    ], ids=["qwen", "gemma", "llama"])
+    def test_header_ids_are_kept_as_given(self, vocab, header):
+        sm = SpanMapper(FakeTokenizer(vocab), header_ids=tuple(header))
+        assert sm.header_ids == header
+        # default search distance: the header's length + 7 (14 for Qwen3,
+        # the value the old table had; Gemma and Llama had 5 and 6 there)
+        assert sm._max_dist(len(header)) == len(header) + 7
 
-    def test_raises_for_unknown_family(self):
-        tok = FakeTokenizer({})
-        sm = SpanMapper(tok, model_name="totally-unknown-model")
-        with pytest.raises(ValueError, match="Unrecognized model family"):
-            sm.expected_assistant_header_ids()
+    def test_search_distance_is_injected_too(self):
+        assert _qwen_mapper(search_distance=20)._max_dist(7) == 20
+
+    def test_no_header_ids_means_body_means_only(self):
+        sm = SpanMapper(FakeTokenizer(QWEN_VOCAB))
+        assert sm.header_ids is None
+        acts, meta = _make_batch(seq_len=30)
+        full_ids = [0] * 5 + QWEN_HEADER + [0] * 18
+        spans = [{"conversation_id": 0, "turn": 0, "role": "user", "start": 0, "end": 5},
+                 {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 20}]
+        result, mm, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                     extract_headers=True)
+        assert result[0].shape == (2, 2, 4) and mm == []
+
+    def test_an_empty_header_is_refused(self):
+        with pytest.raises(ValueError, match="empty"):
+            SpanMapper(FakeTokenizer(QWEN_VOCAB), header_ids=[])
+
+    def test_the_model_name_argument_is_gone(self):
+        with pytest.raises(TypeError):
+            SpanMapper(FakeTokenizer(QWEN_VOCAB), model_name="qwen3-0.6b")
 
 
 # ---------------------------------------------------------------------------
@@ -89,8 +114,7 @@ class TestExpectedAssistantHeaderIds:
 class TestFindHeader:
 
     def test_exact_match(self):
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         # Prefix (999), then 7-token non-thinking header, then content.
         full_ids = [999] + QWEN_HEADER + [42, 43, 44]
         span_start = 1 + len(QWEN_HEADER)
@@ -99,8 +123,7 @@ class TestFindHeader:
         assert mm == []
 
     def test_total_mismatch_returns_none(self):
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         # Buffer long enough to cover max_dist search window with no matching header.
         full_ids = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
         hdr_start, mm = sm._find_header(full_ids, span_start=12, expected_header=QWEN_HEADER)
@@ -110,14 +133,40 @@ class TestFindHeader:
         """After the 7-token non-thinking header there may still be some extra
         tokens before the first non-boilerplate content; the search should
         still find the header start."""
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         full_ids = [999] + QWEN_HEADER + [888, 42, 43, 44]
         #            ^0    ^1..^7           ^8   ^9..^11
         # Span start one past the extra token
         hdr_start, mm = sm._find_header(full_ids, span_start=9, expected_header=QWEN_HEADER)
         assert hdr_start == 1
         assert mm == []
+
+    def test_seven_tokens_accept_one_mismatch_as_the_8slot_run_did(self):
+        sm = _qwen_mapper()
+        wrong_one = list(QWEN_HEADER)
+        wrong_one[4] = 555
+        hdr_start, mm = sm._find_header([999] + wrong_one + [42], span_start=8,
+                                        expected_header=QWEN_HEADER)
+        assert hdr_start == 1 and mm == [(4, 271, 555)]
+        wrong_two = list(wrong_one)
+        wrong_two[5] = 556
+        hdr_start, mm = sm._find_header([999] + wrong_two + [42], span_start=8,
+                                        expected_header=QWEN_HEADER)
+        assert hdr_start is None and len(mm) == 2
+
+    def test_the_header_must_start_within_the_search_distance(self):
+        sm = _qwen_mapper(search_distance=7)
+        full_ids = [999] + QWEN_HEADER + [888, 42]
+        assert sm._find_header(full_ids, span_start=8, expected_header=QWEN_HEADER)[0] == 1
+        assert sm._find_header(full_ids, span_start=9, expected_header=QWEN_HEADER)[0] is None
+
+    @pytest.mark.xfail(strict=True, reason=(
+        "TODO (multi-model plan § 5.4; § 15 Q6 deferred it with OLMo 2): a header of fewer "
+        "than four tokens should match exactly; today one wrong token of two still matches"))
+    def test_a_two_token_header_needs_an_exact_match(self):
+        sm = SpanMapper(FakeTokenizer({}), header_ids=[50, 51])
+        hdr_start, _ = sm._find_header([7, 50, 99, 42], span_start=3, expected_header=[50, 51])
+        assert hdr_start is None
 
 
 # ---------------------------------------------------------------------------
@@ -137,23 +186,21 @@ def _make_batch(num_layers=2, hidden=4, seq_len=20, n_convs=1):
 class TestMapSpansShape:
 
     def test_no_headers_3d(self):
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch()
         spans = [
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
         ]
-        full_ids = list(range(20))
 
-        result, mm = sm.map_spans(acts, spans, meta, extract_headers=False)
+        result, mm, roles = sm.map_spans(acts, spans, meta, extract_headers=False)
         assert result[0].ndim == 3  # (num_turns, num_layers, hidden)
         assert result[0].shape == (2, 2, 4)
         assert mm == []
+        assert roles == [["user", "assistant"]]
 
     def test_headers_4d(self):
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch(seq_len=30)
         header = QWEN_HEADER
         N = len(header)
@@ -166,18 +213,20 @@ class TestMapSpansShape:
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 20},
         ]
-        result, mm = sm.map_spans(
+        result, mm, roles = sm.map_spans(
             acts, spans, meta,
             batch_full_ids=[full_ids],
             extract_headers=True,
         )
         assert result[0].ndim == 4  # (1+N, turns, layers, hidden)
         assert result[0].shape == (1 + N, 2, 2, 4)
+        assert roles == [["user", "assistant"]]
+        for k in range(N):                                  # slot k+1 is header position k
+            assert torch.equal(result[0][1 + k, 1], acts[:, 0, 5 + k, :])
 
     def test_body_mean_recovery(self):
         """conv_acts[0] should equal the body-mean from no-header mode."""
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch(seq_len=30)
 
         header = QWEN_HEADER
@@ -190,8 +239,9 @@ class TestMapSpansShape:
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 20},
         ]
 
-        with_hdr, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
-        without_hdr, _ = sm.map_spans(acts, spans, meta, extract_headers=False)
+        with_hdr, _, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                      extract_headers=True)
+        without_hdr, _, _ = sm.map_spans(acts, spans, meta, extract_headers=False)
 
         body_from_4d = with_hdr[0][0]
         body_from_3d = without_hdr[0]
@@ -199,22 +249,21 @@ class TestMapSpansShape:
 
     def test_user_turn_headers_are_nan(self):
         """Non-assistant turns should have NaN in header slots."""
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch()
         full_ids = [0] * 20
 
         spans = [
             {"conversation_id": 0, "turn": 0, "role": "user", "start": 0, "end": 5},
         ]
-        result, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
+        result, _, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                    extract_headers=True)
         header_slots = result[0][1:, 0, :, :]
         assert torch.isnan(header_slots).all()
 
     def test_failed_header_fills_nan(self):
         """When _find_header fails, header slots should be NaN."""
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch()
         full_ids = [999] * 20  # no open tag anywhere
 
@@ -222,14 +271,14 @@ class TestMapSpansShape:
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
         ]
-        result, mm = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
+        result, mm, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                     extract_headers=True)
         header_slots = result[0][1:, 1, :, :]
         assert torch.isnan(header_slots).all()
         assert len(mm) > 0
 
     def test_empty_conversation(self):
-        tok = FakeTokenizer(QWEN_VOCAB)
-        sm = SpanMapper(tok, model_name="qwen3-0.6b")
+        sm = _qwen_mapper()
         acts, meta = _make_batch(n_convs=2)
         full_ids_0 = [0] * 20
         full_ids_1 = [0] * 20
@@ -237,17 +286,28 @@ class TestMapSpansShape:
         spans = [
             {"conversation_id": 0, "turn": 0, "role": "user", "start": 0, "end": 5},
         ]
-        result, _ = sm.map_spans(
+        result, _, roles = sm.map_spans(
             acts, spans, meta,
             batch_full_ids=[full_ids_0, full_ids_1],
             extract_headers=True,
         )
         assert result[1].ndim == 4
         assert result[1].shape[1] == 0  # zero turns
+        assert roles == [["user"], []]
+
+    def test_turn_roles_leave_out_a_span_past_the_truncation(self):
+        sm = _qwen_mapper()
+        acts, meta = _make_batch(seq_len=20)
+        meta["truncated_lengths"] = [10]
+        spans = [
+            {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
+            {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 18},
+        ]
+        result, _, roles = sm.map_spans(acts, spans, meta, extract_headers=False)
+        assert roles == [["user"]] and result[0].shape[0] == 1
 
     def test_gemma_header_length(self):
-        tok = FakeTokenizer(GEMMA_VOCAB)
-        sm = SpanMapper(tok, model_name="gemma-2-27b")
+        sm = SpanMapper(FakeTokenizer(GEMMA_VOCAB), header_ids=GEMMA_HEADER)
         acts, meta = _make_batch()
         header = GEMMA_HEADER
         N = len(header)
@@ -259,12 +319,12 @@ class TestMapSpansShape:
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
         ]
-        result, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
+        result, _, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                    extract_headers=True)
         assert result[0].shape[0] == 1 + N
 
     def test_llama_header_length(self):
-        tok = FakeTokenizer(LLAMA_VOCAB)
-        sm = SpanMapper(tok, model_name="llama-3.3-70b")
+        sm = SpanMapper(FakeTokenizer(LLAMA_VOCAB), header_ids=LLAMA_HEADER)
         acts, meta = _make_batch()
         header = LLAMA_HEADER
         N = len(header)
@@ -276,5 +336,6 @@ class TestMapSpansShape:
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 4},
             {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
         ]
-        result, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
+        result, _, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids],
+                                    extract_headers=True)
         assert result[0].shape[0] == 1 + N
