@@ -248,6 +248,29 @@ class OpenAIBatchRunner:
                           f"{len(ids)} requests")
         return ids
 
+    def inflight_models(self) -> Dict[str, List[str]]:
+        """``model -> [chunk names]`` over the batches still to be collected,
+        read from each chunk file's first request (a chunk is written by one
+        run, with one model).  Call after :meth:`resume`, which restores a
+        missing chunk file from the service.  Step 3 refuses to resume when a
+        model here differs from its ``--judge_model``: the batches would be
+        collected and charged under the new name (walk-through P5,
+        2026-10-12)."""
+        out: Dict[str, List[str]] = {}
+        for rec in self._inflight_records():
+            path = Path(rec["path"])
+            model = "(unreadable chunk)"
+            try:
+                with open(path, encoding="utf-8") as f:
+                    for line in f:
+                        if line.strip():
+                            model = str(json.loads(line).get("body", {}).get("model"))
+                            break
+            except (OSError, ValueError):
+                pass
+            out.setdefault(model, []).append(path.name)
+        return out
+
     # -- chunk files --------------------------------------------------------
 
     def write_chunks(self, requests: Iterable[Tuple[str, Dict[str, Any]]], *,
@@ -311,7 +334,8 @@ class OpenAIBatchRunner:
     async def _find_batches(self, file_ids: Set[str], *, since: float) -> Dict[str, Any]:
         """``input_file_id -> batch`` for the newest batch not failed that was
         created from each of ``file_ids``, scanning the organisation's
-        batches (listed newest first) back to ``LOOKUP_MARGIN_SECONDS``
+        batches (listed newest first: checked against the real API by the
+        2026-10-12 canary) back to ``LOOKUP_MARGIN_SECONDS``
         before ``since`` (epoch seconds; 0 scans up to the cap)."""
         found: Dict[str, Any] = {}
         n = 0

@@ -204,6 +204,7 @@ For combinations, the prompt variants that [`data/combination_scores.json`](../d
 - `--max_tokens`: judge reply length (default 200: reasoning first, then the `SCORE:` line)
 - `--no_batch`: judge in real time; see below
 - `--batch_requests` (10,000), `--batch_poll_seconds` (60), `--batch_fallback_max` (2,000): batch mode
+- `--force_unlock`: remove the scores directory's lock left by a run that ended on another host (see "One run per scores directory")
 - `--batch_size` (50), `--requests_per_second` (100): real time, and the fallback for requests no batch answered
 
 **Batch mode (the default since 2026-10-10).**  Every pending response goes
@@ -230,11 +231,72 @@ passes `--no_batch`; a `--no_batch` run refuses to start while
 `batch_state.json` records batches sent and not collected (run in batch mode
 first to collect them, or delete the file to abandon them).
 
+**Checked against the real API (canary, 2026-10-12).**  One 8slot role
+(`accountant`, its first 30 responses) through this script in batch mode,
+`--batch_requests 15`, from the Mac into a scratch directory: two batches,
+validated and answered in about three minutes, 30 of 30 parsed, $0.006
+(`gpt-4.1-mini:batch`; 772 prompt and 72 completion tokens per request).
+Confirmed: the `custom_id` form `<entity>|<key>` comes back intact (both
+batches 15 of 15 answered and every score filed under its key); the result
+body is the chat-completion shape the collector reads (`choices[0].message.content`,
+`usage.prompt_tokens` / `completion_tokens`); `batches.list` returns the
+newest batch first (the order the restart lookup relies on); the lock is
+taken and removed.  Not observable at cents: the `token_limit_exceeded`
+code, which needs a queue over the organisation's limit (the code is the one
+the batch guide documents; the organisation's batch list held only the
+canary's two batches, so the limit was nowhere near).  The scores agreed with
+the May scores of the same responses on 24 of 30 (21 score-3 in both).
+
+**One run per scores directory** (since 2026-10-12, walk-through P5).  A live
+run (batch or real time; not `--dry_run`) holds `<scores_dir>/.3_judge.lock`,
+created with `O_EXCL` and holding the run's PID, host, start time and
+arguments, and removes it when it ends.  Two runs on one directory used to
+interfere: the second's restart deleted the first's unsubmitted chunks, and
+both collected, and charged, the same batches.  A second run exits 1 naming
+the holder.  A lock whose PID is no longer running on this host is removed
+with a warning; a lock from another host (a pod that has gone) needs
+`--force_unlock`.
+
+**The judge model cannot change under batches in flight** (since 2026-10-12).
+A batch run that finds batches in flight requested with another model than
+its `--judge_model` exits 1 before submitting anything: collected under the
+new name, their scores would be mixed with the new model's and their usage
+charged under the wrong price.  Rerun with the recorded model to collect
+them, or delete `batch_state.json` to abandon them.
+
+**Several runs on one organisation's queue** (the four-pod plan, walk-through
+P1).  OpenAI limits the prompt tokens of the batches an organisation has
+enqueued for a model at once (the queue limit `Q`, on the organisation's
+limits page, platform.openai.com/settings/organization/limits; there is no API
+for it).  A step-3 run submits chunks until the queue refuses one
+(`token_limit_exceeded`), then holds that chunk until one of its own batches
+finishes.  Runs on several pods with one API key share `Q`, so size
+`--batch_requests` so that each of `N` runs can keep `k` chunks in flight:
+
+    batch_requests <= Q / (N * k * T)
+
+where `T` is the prompt tokens per request (about 650-800 for the October
+rubric: the review measured 6.5-7.9 million per 10,000-request chunk).  With
+the four pods (`N = 4`) and two chunks each (`k = 2`, so that one is being
+answered while the next waits): `Q = 100 million` gives about 15,000-19,000,
+so the default 10,000 is fine; `Q = 20 million` gives about 3,000-4,000, and
+`--batch_requests 3000` keeps every pod busy (a 10,000-request chunk would be
+refused whenever two other pods have one in the queue).  Read `Q` on the
+limits page before the extraction (pod TODO item 5).  A run refused with no
+batch of its own in flight splits the chunk in half, since it cannot tell a
+full queue from a chunk too big for `Q` on its own; with other pods' batches
+filling the queue that can halve a chunk down to 50 requests and stop the run
+(`BatchFailedError`), which the sizing above makes unlikely.
+
 **Exit status.**  The run exits 1, and `run_pipeline.sh` stops before step 4,
 when requests are left unanswered, when the parse rate of the run's judge calls
-is under 99%, or when any entity failed (an unreadable file, a malformed
-record).  The score files written are kept, and a rerun judges only what is
-missing.
+is under 99%, when any entity failed (an unreadable file, a malformed
+record), when another run holds the lock, when batches in flight were
+requested with another model, or when the judge API refuses a request as a
+whole (an HTTP 400, `JudgeRequestError` since B1: every later request would
+be refused the same way, so the run stops at once; a 400 that flags one
+prompt's content stays per item, an unparseable reply).  The score files
+written are kept, and a rerun judges only what is missing.
 
 **Side-cars** beside the score files: `usage.json` (cumulative token usage and
 cost), `judge_rubric.json` (the rubric version and judge models the directory

@@ -25,7 +25,9 @@ import asyncio
 import json
 import logging
 import os
+import socket
 import sys
+import time
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
@@ -52,8 +54,8 @@ from assistant_axis.entity_id import (
     JUDGE_LABEL_FORM, display_form_name, judge_form_of_label, judge_label,
 )
 from assistant_axis.judge import (
-    PARSE_RATE_LOUD_THRESHOLD, RateLimiter, call_judge_batch, chat_request_body,
-    parse_judge_score, provider_for_model, warn_if_low_parse_rate,
+    PARSE_RATE_LOUD_THRESHOLD, JudgeRequestError, RateLimiter, call_judge_batch,
+    chat_request_body, parse_judge_score, provider_for_model, warn_if_low_parse_rate,
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.openai_batch import OpenAIBatchRunner
@@ -584,6 +586,108 @@ async def score_entity(
 CUSTOM_ID_SEP = "|"   # entity names and score keys never contain it
 
 
+class ModelDriftError(RuntimeError):
+    """Batches in flight were requested with another judge model."""
+
+
+# ---------------------------------------------------------------------------
+# One step-3 process per scores directory (walk-through P5; review P3 D3)
+# ---------------------------------------------------------------------------
+#
+# Two runs on one scores directory used to interfere: the second's resume
+# deleted the first's unsubmitted chunks, and both collected (and charged)
+# the same batches.  A lock file, created with O_EXCL (atomic on local disk
+# and on NFSv3+), holds the PID, host and start time of the run that owns the
+# directory.  A lock left by a process that is no longer running on this host
+# is removed with a warning; any other lock refuses the run unless
+# --force_unlock (for a lock left by a run on another host that has ended).
+# The lock is taken in both modes: a --no_batch run writes the same score
+# files and usage record.
+
+LOCK_FILENAME = ".3_judge.lock"   # not *.json: nothing reads it as an entity
+
+
+class LockHeldError(RuntimeError):
+    """Another step-3 run holds the scores directory's lock."""
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:      # exists, owned by someone else
+        return True
+    except OSError:
+        return True
+    return True
+
+
+class ScoresDirLock:
+    """``with ScoresDirLock(output_dir, force=...):`` -- see above."""
+
+    def __init__(self, output_dir: Path, *, force: bool = False):
+        self.path = Path(output_dir) / LOCK_FILENAME
+        self.force = force
+        self.payload = {"pid": os.getpid(), "host": socket.gethostname(),
+                        "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "argv": sys.argv[1:]}
+        self.held = False
+
+    def _holder(self) -> dict:
+        try:
+            return json.loads(self.path.read_text())
+        except (OSError, ValueError):
+            return {}
+
+    def _try_create(self) -> bool:
+        try:
+            fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        except FileExistsError:
+            return False
+        with os.fdopen(fd, "w") as f:
+            json.dump(self.payload, f)
+        return True
+
+    def acquire(self) -> None:
+        if self._try_create():
+            self.held = True
+            return
+        holder = self._holder()
+        desc = (f"pid {holder.get('pid')} on {holder.get('host')}, started "
+                f"{holder.get('started_at')}" if holder else "unreadable")
+        same_host_dead = (holder.get("host") == self.payload["host"]
+                          and isinstance(holder.get("pid"), int)
+                          and not _pid_alive(holder["pid"]))
+        if self.force or same_host_dead:
+            logger.warning(f"{self.path}: removing the lock of a run that is "
+                           f"{'not running any more' if same_host_dead else 'overridden by --force_unlock'}"
+                           f" ({desc})")
+            self.path.unlink(missing_ok=True)
+            if self._try_create():
+                self.held = True
+                return
+            holder = self._holder()
+        raise LockHeldError(
+            f"{self.path} is held by another step-3 run ({desc}); one run per scores directory.  "
+            f"If that run has ended (on another host), pass --force_unlock")
+
+    def release(self) -> None:
+        """Remove the lock if it is still this run's."""
+        if self.held:
+            holder = self._holder()
+            if holder.get("pid") == self.payload["pid"] and holder.get("host") == self.payload["host"]:
+                self.path.unlink(missing_ok=True)
+            self.held = False
+
+    def __enter__(self) -> "ScoresDirLock":
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.release()
+
+
 async def judge_in_batches(
     *,
     client,
@@ -614,6 +718,17 @@ async def judge_in_batches(
         metadata={"source": "pipeline/3_judge.py", "output_dir": str(output_dir)[-200:]},
         logger=logger)
     inflight = await runner.resume()
+    # Model drift (walk-through P5; review P3 D4): a batch in flight was
+    # requested with another judge model.  Collected under this run's
+    # --judge_model, its scores would be mixed with this model's and its
+    # usage charged under the wrong name.
+    other = {m: names for m, names in runner.inflight_models().items() if m != judge_model}
+    if other:
+        raise ModelDriftError(
+            f"{output_dir / BATCH_STATE_FILENAME} records batches in flight requested with "
+            + "; ".join(f"{m} ({len(n)} chunk(s), e.g. {n[0]})" for m, n in sorted(other.items()))
+            + f", not --judge_model {judge_model}: rerun with --judge_model set to that model "
+              f"to collect them, or delete the state file to abandon them")
 
     def requests():
         for name, existing, eval_tpl, responses in entities:
@@ -752,7 +867,13 @@ async def main_async():
     parser.add_argument("--batch_requests", type=int,
                         default=_openai_batch.DEFAULT_CHUNK_REQUESTS,
                         help="Requests per batch (service limit 50,000 and 200 MB; a batch over "
-                             "the organisation's queue limit is held or split automatically)")
+                             "the organisation's queue limit is held or split automatically).  "
+                             "Size it from the queue limit when several runs share one API key "
+                             "(pipeline/README.md, 'Several runs on one organisation's queue')")
+    parser.add_argument("--force_unlock", action="store_true",
+                        help="Remove the scores directory's lock (.3_judge.lock) left by a run "
+                             "that has ended on another host.  A lock of a run no longer "
+                             "running on this host is removed without it.")
     parser.add_argument("--batch_poll_seconds", type=float, default=60.0,
                         help="Seconds between status checks of the batches in flight")
     parser.add_argument("--batch_fallback_max", type=int, default=2000,
@@ -898,8 +1019,27 @@ async def main_async():
         return
 
     # ------------------------------------------------------------------
-    # Live scoring
+    # Live scoring, under the scores directory's lock (P5, 2026-10-12)
     # ------------------------------------------------------------------
+    lock = ScoresDirLock(output_dir, force=args.force_unlock)
+    try:
+        lock.acquire()
+    except LockHeldError as e:
+        logger.error(str(e))
+        sys.exit(1)
+    try:
+        await live_scoring(args, output_dir=output_dir, roles_dir=roles_dir,
+                           traits_dir=traits_dir, excluded_pairs=excluded_pairs,
+                           response_files=response_files)
+    finally:
+        lock.release()
+
+
+async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: Path,
+                       excluded_pairs: Dict[str, set], response_files: List[Path]) -> None:
+    """Judge every pending response (batch mode, or real time with
+    ``--no_batch``), write the scores, usage record and rubric stamp, and
+    exit 1 when the run is not complete.  Called with the lock held."""
     if args.no_batch:
         # Judging in real time what earlier batches are still answering pays
         # twice and leaves the batches uncollected (2026-10-12).
@@ -993,17 +1133,31 @@ async def main_async():
             if item is not None:
                 yield item
 
+    # An HTTP 400 from the judge (B1, 8bf84f14: JudgeRequestError, raised for a
+    # request the API refuses as a whole, such as an unsupported parameter)
+    # would fail every later request the same way: the run stops and exits 1
+    # with the reason.  A 400 that flags one prompt's content stays per item
+    # (None, an unparseable reply; judge.CONTENT_FLAGGED counts them).
+    request_error: Optional[str] = None
     if not args.no_batch:
-        total_call_attempted, total_call_parsed, n_left, touched = await judge_in_batches(
-            client=client, entities=prepared_entities(), output_dir=output_dir,
-            judge_model=args.judge_model, max_tokens=args.max_tokens,
-            usage_path=usage_path, prior_usage=prior_usage, run_usage=run_usage,
-            chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
-            fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
-            realtime_batch_size=args.batch_size, before_write=stamp_once)
-        successful = len(touched)
+        try:
+            total_call_attempted, total_call_parsed, n_left, touched = await judge_in_batches(
+                client=client, entities=prepared_entities(), output_dir=output_dir,
+                judge_model=args.judge_model, max_tokens=args.max_tokens,
+                usage_path=usage_path, prior_usage=prior_usage, run_usage=run_usage,
+                chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
+                fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
+                realtime_batch_size=args.batch_size, before_write=stamp_once)
+            successful = len(touched)
+        except ModelDriftError as e:
+            logger.error(str(e))
+            sys.exit(1)
+        except JudgeRequestError as e:          # in the real-time fallback
+            request_error = str(e)
     else:
         for name, existing_scores, eval_tpl, responses in prepared_entities():
+            if request_error:
+                break
             try:
                 new_scores, n_attempted, n_parsed = await score_entity(
                     name=name,
@@ -1026,6 +1180,8 @@ async def main_async():
                             f"({len(new_scores)} new)")
                 successful += 1
 
+            except JudgeRequestError as e:
+                request_error = f"{name}: {e}"
             except Exception as e:
                 errors.append(f"{name}: {e}")
                 failed += 1
@@ -1066,6 +1222,8 @@ async def main_async():
     # entity that failed.  Before 2026-10-12 only the first did.  The score
     # files written are kept; a rerun judges only what is missing.
     reasons = []
+    if request_error:
+        reasons.append(f"the judge API refused a request, so the run stopped: {request_error}")
     if n_left:
         reasons.append(f"{n_left} requests left unscored by their batches (a rerun submits them)")
     if total_call_attempted and total_call_parsed / total_call_attempted < PARSE_RATE_LOUD_THRESHOLD:
@@ -1076,6 +1234,8 @@ async def main_async():
     if reasons:
         logger.error("Step 3 is not complete: " + "; ".join(reasons))
         sys.exit(1)
+
+
 
 
 def main():

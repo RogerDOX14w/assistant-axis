@@ -723,3 +723,120 @@ def test_a_combination_with_every_variant_excluded_is_skipped_not_failed(judge, 
         "--batch_poll_seconds", "0"])
     asyncio.run(judge.main_async())                                         # no SystemExit
     assert client.batches_created == []
+
+
+# ---------------------------------------------------------------------------
+# One run per scores directory; model drift; a refused request (P5, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+import os
+import socket
+
+
+def _dead_pid() -> int:
+    p = subprocess.Popen([sys.executable, "-c", "pass"])
+    p.wait()
+    return p.pid
+
+
+def _write_lock(output_dir, **payload):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / ".3_judge.lock").write_text(json.dumps(payload))
+
+
+def test_the_lock_is_taken_and_released(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    seen = []
+    real = judge.ScoresDirLock.acquire
+
+    def spy(self):
+        real(self)
+        seen.append(json.loads(self.path.read_text()))
+
+    monkeypatch.setattr(judge.ScoresDirLock, "acquire", spy)
+    _run(judge, monkeypatch, responses_dir, output_dir, FakeBatchClient(), batch=True)
+    assert seen and seen[0]["pid"] == os.getpid() and seen[0]["host"] == socket.gethostname()
+    assert not (output_dir / ".3_judge.lock").exists()
+
+
+def test_a_live_lock_refuses_the_run_until_force_unlock(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    _write_lock(output_dir, pid=os.getpid(), host=socket.gethostname(), started_at="t0")
+    client = FakeBatchClient()
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert e.value.code == 1 and client.batches_created == []
+    assert "held by another step-3 run" in caplog.text
+    assert (output_dir / ".3_judge.lock").exists()          # not ours to remove
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--force_unlock", batch=True)
+    assert len(client.batches_created) == 1
+    assert not (output_dir / ".3_judge.lock").exists()
+
+
+def test_a_lock_from_another_host_needs_force_unlock(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    _write_lock(output_dir, pid=_dead_pid(), host="pod-elsewhere", started_at="t0")
+    with pytest.raises(SystemExit):
+        _run(judge, monkeypatch, responses_dir, output_dir, FakeBatchClient(), "--no_batch")
+
+
+def test_a_lock_left_by_a_dead_run_on_this_host_is_removed(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    _write_lock(output_dir, pid=_dead_pid(), host=socket.gethostname(), started_at="t0")
+    client = FakeBatchClient()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert len(client.batches_created) == 1
+    assert "not running any more" in caplog.text
+
+
+def test_release_leaves_a_lock_that_is_not_its_own(judge, tmp_path):
+    lock = judge.ScoresDirLock(tmp_path)
+    lock.acquire()
+    (tmp_path / ".3_judge.lock").write_text(json.dumps({"pid": 1, "host": "other"}))
+    lock.release()
+    assert (tmp_path / ".3_judge.lock").exists()
+
+
+def test_batches_in_flight_for_another_model_refuse_the_resume(judge, monkeypatch, tmp_path, caplog):
+    """Collected under the new --judge_model, they would be charged and mixed
+    as that model's (review P3 D4)."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    client = FakeBatchClient()
+    runner = judge.OpenAIBatchRunner(client, output_dir / "_batches", output_dir / "batch_state.json")
+    tpl = judge.resolve_eval_prompt("patient", ROLES, TRAITS, "trait")
+    reqs = [(f"patient|{k}", judge.chat_request_body(p, "gpt-4.1-nano", 200))
+            for k, p in judge.pending_prompts(_responses(3), tpl, {})]
+    [chunk] = runner.write_chunks(reqs)
+    asyncio.run(runner._submit(chunk))
+    assert runner.inflight_models() == {"gpt-4.1-nano": [chunk.name]}
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client, batch=True)
+    assert e.value.code == 1
+    assert "gpt-4.1-nano" in caplog.text and "not --judge_model gpt-4.1-mini" in caplog.text
+    assert len(client.batches_created) == 1                     # nothing new submitted
+    assert not (output_dir / "patient.json").exists()           # nothing collected
+    assert not (output_dir / ".3_judge.lock").exists()
+
+
+def test_a_refused_request_stops_a_real_time_run(judge, monkeypatch, tmp_path, caplog):
+    """B1 (8bf84f14): an HTTP 400 is a JudgeRequestError; every later entity
+    would be refused the same way, so the run stops and exits 1."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    _write_responses(responses_dir, "stoic", 2)
+    calls = []
+
+    async def refused(**kw):
+        calls.append(kw["prompts"])
+        raise judge.JudgeRequestError("400: unsupported parameter")
+
+    monkeypatch.setattr(judge, "call_judge_batch", refused)
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, _client())
+    assert e.value.code == 1 and len(calls) == 1               # the second entity not tried
+    assert "refused a request" in caplog.text
