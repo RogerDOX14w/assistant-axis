@@ -55,6 +55,116 @@
             "adaptable"
           ]
         }
+      },
+      "bert_wwm": {
+        "corpus": {
+          "n": 910,
+          "single": 264,
+          "subword": 424,
+          "multiword": 222,
+          "shares": {
+            "single": 0.2901,
+            "subword": 0.4659,
+            "multiword": 0.244
+          },
+          "subword_examples": [
+            "ADHD",
+            "Aquarius",
+            "Aries",
+            "Capricorn",
+            "ENFJ",
+            "ENFP",
+            "ENTJ",
+            "ENTP",
+            "ESFJ",
+            "ESFP",
+            "ESTJ",
+            "ESTP",
+            "Gemeinschaft",
+            "Gesellschaft",
+            "Gryffindor",
+            "Hufflepuff",
+            "INFJ",
+            "INFP",
+            "INTJ",
+            "INTP",
+            "ISFJ",
+            "ISFP",
+            "ISTJ",
+            "ISTP",
+            "Libra",
+            "Machiavellian",
+            "Neopagan",
+            "OCD",
+            "Pisces",
+            "Ravenclaw",
+            "Sagittarius",
+            "Scorpio",
+            "Shinto",
+            "Slytherin",
+            "Taoist",
+            "Taurus",
+            "Virgo",
+            "absentee",
+            "absolutist",
+            "abstemious"
+          ]
+        }
+      },
+      "modernbert": {
+        "corpus": {
+          "n": 910,
+          "single": 298,
+          "subword": 390,
+          "multiword": 222,
+          "shares": {
+            "single": 0.3275,
+            "subword": 0.4286,
+            "multiword": 0.244
+          },
+          "subword_examples": [
+            "Aquarius",
+            "Aries",
+            "Capricorn",
+            "ENFJ",
+            "ENFP",
+            "ENTJ",
+            "ENTP",
+            "ESFJ",
+            "ESFP",
+            "ESTJ",
+            "ESTP",
+            "Gemeinschaft",
+            "Gemini",
+            "Gesellschaft",
+            "Gryffindor",
+            "Hufflepuff",
+            "INFJ",
+            "INFP",
+            "INTJ",
+            "INTP",
+            "ISFJ",
+            "ISFP",
+            "ISTJ",
+            "ISTP",
+            "Libra",
+            "Machiavellian",
+            "Neopagan",
+            "Pisces",
+            "Ravenclaw",
+            "Sagittarius",
+            "Scorpio",
+            "Shinto",
+            "Sikh",
+            "Slytherin",
+            "Taoist",
+            "Taurus",
+            "Virgo",
+            "absentee",
+            "absolutist",
+            "abstemious"
+          ]
+        }
       }
     },
     "missing_models": [],
@@ -64,11 +174,11 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py census",
-      "git_sha": "b55b062+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py census --models roberta,bert_wwm,modernbert",
+      "git_sha": "871c627+dirty",
       "author": "Roger Dearnaley",
       "title": "masked-LM generator: tokenizer census"
     },
-    "produced_at": "2026-10-12T00:55:22+00:00"
+    "produced_at": "2026-10-12T00:56:18+00:00"
   }
 }
