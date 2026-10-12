@@ -92,8 +92,10 @@ def test_report_and_decide_numbers(rdir, capsys):
     e = rdir / "gate_gold_eval.json"
     if e.exists():
         ev = _json(e)["eval"]
-        lines.append(f"gate gold: agreement {ev['n_agree']}/{ev['n']} (target >= 26/30, chat and both alike), flip "
-                     f"rate {ev['flip_rate']:.1%} (no target); {'binding' if ev['meets_targets'] else 'advisory'}")
+        # advisory either way (QUESTIONS 75: nothing gates on the gate); over the answered items when recorded
+        lines.append(f"gate gold: agreement {ev['n_agree']}/{ev.get('n_answered') or ev['n']} answered (target >= "
+                     f"26/30, chat and both alike), flip rate {ev['flip_rate']:.1%} (no target); "
+                     f"{'meets' if ev['meets_targets'] else 'below'} the target, advisory")
     gr = rdir / "gold_recovery.md"
     if gr.exists():
         head = gr.read_text(encoding="utf-8").split("Recovered ", 1)[1].split(".", 1)[0]

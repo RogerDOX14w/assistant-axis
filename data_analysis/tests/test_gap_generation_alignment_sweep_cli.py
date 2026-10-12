@@ -14,7 +14,7 @@ from assistant_axis.gapgen.generators.alignment_sweep import probe as P
 from assistant_axis.gapgen.generators.alignment_sweep.sources import SOURCES
 from assistant_axis.gapgen.registry import Registry, read_candidates
 from assistant_axis.tests.alignment_sweep_fakes import CONSTITUTION_HTML, SPEC_MD, extraction_reply, item, pole
-from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, user_text
+from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response, user_text
 from data_analysis.gap_generation import alignment_sweep as CLI
 
 LICENSE_TXT = b"Creative Commons Legal Code\n\nCC0 1.0 Universal\n"
@@ -148,6 +148,99 @@ def test_end_to_end(env, monkeypatch, capsys):
     assert "Recovered **1 of 10**" in gold and "novelty_score.py score --batch-id t1_alignment_sweep_gold" in gold
     hidden = json.loads((rdir / "gold_hidden.json").read_text())
     assert "honest" in hidden["hidden"] and "dishonest" in hidden["hidden"]
+
+
+KRAKOVNA_TSV = ("Title\tIntended goal\tBehaviour\n"
+                "Boat race\tfinish the race\tcircles to collect points\n"
+                "Tetris\tsurvive\tpauses the game forever\n"
+                "Coding\tpass the tests\tedits the tests zzsheetonlyword\n")
+LONG_QUOTE = " ".join(f"w{i}" for i in range(40))
+
+
+def kra_responder(kw):
+    if "Source: Krakovna" in user_text(kw):
+        return extraction_reply([item(pole("plays fair", "This means meeting a goal the way it was meant."),
+                                      pole("games the metric", "This means meeting the letter of a goal only."),
+                                      source_pole="vice", quote=LONG_QUOTE)])
+    return extraction_reply([])
+
+
+def test_variant_b_extracts_the_transient_krakovna_chunks(env, monkeypatch):
+    """Variant B reads the Krakovna sheet transiently (never stored, quotes of 25 words or fewer).  Its chunks are in
+    no chunks.jsonl, and before the review of 2026-10-12 the item ids' ordinals were counted over chunks.jsonl alone,
+    so assembling them raised KeyError after the paid calls."""
+    root, common, cdir = env
+    monkeypatch.setattr(F, "fetch_transient", lambda key: KRAKOVNA_TSV)
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(kra_responder))
+    assert CLI.main(common + ["fetch"]) == 0 and CLI.main(common + ["chunk"]) == 0
+    assert CLI.main(common + ["extract", "--run-id", "tb", "--variant", "B", "--sources", "krakovna",
+                              "--allow-dirty"]) == 0
+    rdir = cdir / "runs" / "alignment_sweep" / "tb"
+    ext = [json.loads(x) for x in (rdir / "extraction.jsonl").read_text().splitlines()]
+    assert [e["item_id"] for e in ext] == ["kra001-1a", "kra001-1b"] and {e["source"] for e in ext} == {"krakovna"}
+    assert ext[0]["label"] == "games the metric" and ext[0]["source_quote"].endswith(" [...]")
+    assert len(ext[0]["source_quote"].split()) == 25 + 1                     # 25 words and the cut marker
+    recs = [json.loads(x) for x in (rdir / "extract_responses.jsonl").read_text().splitlines()]
+    assert recs and all(r["user"] is None and r["text"] is None for r in recs)  # a read-only source's text is not kept
+    # never stored: no file anywhere under the test root holds the sheet's text
+    assert not [p for p in root.rglob("*") if p.is_file() and b"zzsheetonlyword" in p.read_bytes()]
+
+
+def test_extract_stops_at_its_cap_and_says_so(env, monkeypatch, capsys):
+    root, common, cdir = env
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(
+        lambda kw: make_response(responder(kw), output_tokens=1_000_000)))          # $10 a call at Sonnet 5.5's rates
+    assert CLI.main(common + ["fetch"]) == 0 and CLI.main(common + ["chunk"]) == 0
+    capsys.readouterr()
+    assert CLI.main(common + ["extract", "--run-id", "tc", "--allow-dirty", "--concurrency", "1"]) == 1
+    assert "STOPPED at the cap" in capsys.readouterr().err
+    summ = json.loads((cdir / "runs" / "alignment_sweep" / "tc" / "extract_summary.json").read_text())
+    assert summ["stopped_by_budget"] is True and summ["n_calls"]["extract"] == 1
+
+
+def _submitted_run(common, cdir, run_id, monkeypatch):
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(responder))
+    assert CLI.main(common + ["fetch"]) == 0 and CLI.main(common + ["chunk"]) == 0
+    assert CLI.main(common + ["extract", "--run-id", run_id, "--allow-dirty"]) == 0
+    assert CLI.main(common + ["dedupe", "--run-id", run_id, "--embedder", "hash", "--threshold", "0.99"]) == 0
+    assert CLI.main(common + ["submit", "--run-id", run_id]) == 0
+    r = Registry(cdir / "registry.jsonl")
+    for key in ("stays_in_scope#1", "oversteps_the_task#1"):
+        r.merge_block(key, "filter", {"verdict": "trait", "tags": []})
+        r.merge_block(key, "novelty", {"decision": "new", "cut_off": 4, "alignment_score": 3,
+                                       "pair_completion_for": [], "readings": []})
+    return cdir / "runs" / "alignment_sweep" / run_id
+
+
+def test_gate_stopped_by_its_cap_leaves_the_recorded_outputs_alone(env, monkeypatch, capsys):
+    """A pass the cap stops part-way is not written over a complete one: before the review of 2026-10-12 the gold
+    eval was rewritten with the unasked items as misses and enactability.jsonl was emptied."""
+    root, common, cdir = env
+    rdir = _submitted_run(common, cdir, "tg", monkeypatch)
+    assert CLI.main(common + ["gate", "--run-id", "tg", "--allow-dirty"]) == 0
+    rows = (rdir / "enactability.jsonl").read_text()
+    assert len(rows.splitlines()) == 2
+    before = {n: (rdir / n).read_bytes() for n in ("gate_gold_eval.json", "gate_gold_eval.md", "enactability.jsonl")}
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(
+        lambda kw: make_response(responder(kw), output_tokens=1_000_000)))          # $20 a call at Opus 5.5's rates
+    capsys.readouterr()
+    assert CLI.main(common + ["gate", "--run-id", "tg", "--allow-dirty", "--concurrency", "1"]) == 1
+    err = capsys.readouterr().err
+    assert "STOPPED at the cap" in err and "left as before" in err
+    assert {n: (rdir / n).read_bytes() for n in before} == before
+
+
+def test_readout_calls_the_gate_advisory_whatever_its_score(env, monkeypatch):
+    """QUESTIONS 75: nothing gates on the gate, so the readout never calls it binding; and the agreement is over the
+    answered items (a refused item is out of the denominator)."""
+    root, common, cdir = env
+    rdir = _submitted_run(common, cdir, "tr", monkeypatch)
+    ev = {"n": 30, "n_answered": 29, "n_refused": 1, "n_agree": 27, "meets_targets": True, "flip_rate": 0.1}
+    (rdir / "gate_gold_eval.json").write_text(json.dumps({"result": {"eval": ev}}))
+    assert CLI.main(common + ["report", "--run-id", "tr"]) == 0
+    md = (rdir / "readout.md").read_text()
+    assert "Enactability gate: advisory only (gold agreement 27/29 answered, 1 refused, meets the 26/30 target" in md
+    assert "binding" not in md
 
 
 def test_submit_refused_over_budget(env, monkeypatch):

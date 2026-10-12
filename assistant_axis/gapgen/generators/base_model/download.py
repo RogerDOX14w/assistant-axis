@@ -148,7 +148,7 @@ def load_manifest(path: Path) -> list[dict]:
 
 
 def merge_manifest(entries: Iterable[dict], path: Path) -> Path:
-    """Replace or add entries by ``key`` (order: the existing order, new keys appended)."""
+    """Replace or add entries by ``key`` (order: wikibio, onet, model, then any other key)."""
     cur = {e["key"]: e for e in load_manifest(path)}
     for e in entries:
         cur[e["key"]] = e

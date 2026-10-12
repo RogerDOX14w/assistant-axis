@@ -130,7 +130,10 @@ def _print_estimate(lines: list[tuple[str, dict]], budget: float) -> float:
 
 # --------------------------------------------------------------------------- extract
 
-def _select_chunks(args, chunks: list) -> list:
+def _select_chunks(args, chunks: list) -> tuple[list, list]:
+    """``(the chunks to extract, every transient chunk read for them)``.  A never-stored source (Krakovna) is chunked
+    here and is in no ``chunks.jsonl``, so the item ids' ordinals must also count its transient chunks (all of them,
+    not only the ones a ``--chunks`` sample draws, so an id does not depend on the sample)."""
     from assistant_axis.gapgen.generators.alignment_sweep import extract as X
     from assistant_axis.gapgen.generators.alignment_sweep.sources import VARIANT_B_SOURCES
     if args.variant == "A":
@@ -140,13 +143,17 @@ def _select_chunks(args, chunks: list) -> list:
     if args.sources:
         keys &= set(args.sources)
     pool = [c for c in chunks if c.source in keys]
+    transient: list = []
     if args.variant == "B" and "krakovna" in keys and not args.dry_run and not args.render:
         from assistant_axis.gapgen.generators.alignment_sweep.fetch import fetch_transient
         from assistant_axis.gapgen.registry import utc_now
-        pool += CH.chunk_source("krakovna", fetch_transient("krakovna"), version=utc_now()[:10])
+        # fetch_transient already returns the sheet's rows as tab-separated lines; chunk_source would read them as
+        # HTML a second time and find no table row at all, so they go to chunk_rows directly
+        transient = CH.chunk_rows("krakovna", fetch_transient("krakovna"), version=utc_now()[:10])
+        pool += transient
     if args.chunks:
         pool = X.stratified_sample(pool, args.chunks, args.seed)
-    return pool
+    return pool, transient
 
 
 def cmd_extract(args) -> int:
@@ -160,7 +167,6 @@ def cmd_extract(args) -> int:
     from assistant_axis.judge import warn_if_low_parse_rate
 
     all_chunks = _load_chunks(args)
-    ordinals = X.chunk_ordinals(all_chunks)
     if args.render:
         by = {c.chunk_id: c for c in all_chunks}
         missing = [c for c in args.render if c not in by]
@@ -185,7 +191,8 @@ def cmd_extract(args) -> int:
         return 0
     if not args.run_id:
         raise SystemExit("extract needs --run-id")
-    chunks = _select_chunks(args, all_chunks)
+    chunks, transient = _select_chunks(args, all_chunks)
+    ordinals = X.chunk_ordinals(all_chunks + transient)
     try:
         rub_x = X.load_rubric(X.RUBRIC_EXTRACT, args.rubrics_dir)
         rub_r = X.load_rubric(X.RUBRIC_REWRITE, args.rubrics_dir)
@@ -280,6 +287,12 @@ def cmd_extract(args) -> int:
                                            "label_rule_bite", "polysemy_flags", "dropped", "n_kept_poles",
                                            "cost_usd_this_session")}, indent=1))
     print(f"wrote {rdir / X.EXTRACTION_NAME}, {rdir / X.SUMMARY_NAME}, {resp_path}, run.json, usage.json")
+    if summ["stopped_by_budget"]:
+        print(f"STOPPED at the cap (--budget-usd {args.budget_usd:g}): {len(chunks) - summ['n_chunks_answered']} "
+              f"chunks unanswered{' and the rewrite stage not run' if x_res.stopped_by_budget else ''}; the "
+              f"extraction holds what was answered, and a rerun of the same command with a larger --budget-usd "
+              f"reuses every answer in {resp_path.name}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -480,36 +493,53 @@ def cmd_gate(args) -> int:
     finally:
         ctx.finish(n_emitted=0)
         print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
-    for label, res, n, k in (("gold", g_res, len(gold), n_gold), ("kept", k_res, len(kept), n_rows)):
-        if n:
+    # A pass the cap stopped part-way is incomplete: its unasked items would read as misses (gold) or as rows with no
+    # answer (kept), and writing it would overwrite the complete outputs of an earlier pass.  So only a complete pass
+    # is written; every response is in the responses log either way.
+    gold_done = not g_res.stopped_by_budget
+    kept_done = bool(kept) and gold_done and not k_res.stopped_by_budget
+    for label, res, n, k, done in (("gold", g_res, len(gold), n_gold, gold_done),
+                                   ("kept", k_res, len(kept), n_rows, kept_done)):
+        if n and done:
             n_read = n * k + res.n_third_readings
             warn_if_low_parse_rate(label=f"alignment_sweep gate {label}:{args.model}",
                                    n_ok=n_read - res.n_failed_readings, n_total=n_read)
-    gold_doc = json.loads(args.gold_items.read_text(encoding="utf-8"))["items"]
-    ev = G.score_against_gold(g_res.rows, gold_doc)
-    inputs = [current_file_input(dep_key="gate_gold_items", path=args.gold_items),
-              current_file_input(dep_key="gate_rubric", path=_REPO_ROOT / rub["file"])]
-    cost = round(ctx.usage.total_cost_usd, 4)
-    env = json_metadata({"eval": ev.as_dict(), "rows": [r.as_dict() for r in g_res.rows], "model": args.model,
-                         "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, "cost_usd": cost,
-                         "readings_gold": n_gold, "readings_rows": n_rows, "third_on_disagreement": third,
-                         "n_calls": g_res.n_calls, "n_failed_readings": g_res.n_failed_readings,
-                         "n_third_readings": g_res.n_third_readings, "n_refused": g_res.n_refused,
-                         LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "at": utc_now()},
-                        inputs=inputs, title="alignment sweep: enactability gate on the gold items")
-    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / G.GOLD_EVAL_NAME)
-    atomic_write_text(G.eval_markdown(ev, g_res.rows, rubric=rub, cost_usd=cost, n_readings=n_gold),
-                      rdir / "gate_gold_eval.md")
-    if kept:
+    written = []
+    if gold_done:
+        gold_doc = json.loads(args.gold_items.read_text(encoding="utf-8"))["items"]
+        ev = G.score_against_gold(g_res.rows, gold_doc)
+        inputs = [current_file_input(dep_key="gate_gold_items", path=args.gold_items),
+                  current_file_input(dep_key="gate_rubric", path=_REPO_ROOT / rub["file"])]
+        cost = round(ctx.usage.total_cost_usd, 4)
+        env = json_metadata({"eval": ev.as_dict(), "rows": [r.as_dict() for r in g_res.rows], "model": args.model,
+                             "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, "cost_usd": cost,
+                             "readings_gold": n_gold, "readings_rows": n_rows, "third_on_disagreement": third,
+                             "n_calls": g_res.n_calls, "n_failed_readings": g_res.n_failed_readings,
+                             "n_third_readings": g_res.n_third_readings, "n_refused": g_res.n_refused,
+                             LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "at": utc_now()},
+                            inputs=inputs, title="alignment sweep: enactability gate on the gold items")
+        atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", rdir / G.GOLD_EVAL_NAME)
+        atomic_write_text(G.eval_markdown(ev, g_res.rows, rubric=rub, cost_usd=cost, n_readings=n_gold),
+                          rdir / "gate_gold_eval.md")
+        written += [rdir / G.GOLD_EVAL_NAME, rdir / "gate_gold_eval.md"]
+        print(f"gold: agreement {ev.n_agree}/{ev.n_answered} answered ({ev.agreement:.1%}; strict "
+              f"{ev.n_agree_strict}; refused {ev.n_refused} {ev.refused}), boundary errors "
+              f"{json.dumps(ev.boundary_errors)}, flips {ev.n_flip}, no majority {ev.n_no_majority}, third readings "
+              f"{g_res.n_third_readings}; {'meets' if ev.meets_targets else 'below'} the target; confusion "
+              f"{json.dumps(ev.confusion)}")
+    if kept_done:
         atomic_write_text("".join(json.dumps(r.as_dict(), ensure_ascii=False) + "\n" for r in k_res.rows),
                           rdir / G.ROWS_NAME)
-    print(f"gold: agreement {ev.n_agree}/{ev.n_answered} answered ({ev.agreement:.1%}; strict {ev.n_agree_strict}; "
-          f"refused {ev.n_refused} {ev.refused}), boundary errors "
-          f"{json.dumps(ev.boundary_errors)}, flips {ev.n_flip}, no majority {ev.n_no_majority}, third readings "
-          f"{g_res.n_third_readings}; {'meets' if ev.meets_targets else 'below'} the target; confusion "
-          f"{json.dumps(ev.confusion)}")
-    print(f"wrote {rdir / G.GOLD_EVAL_NAME}, {rdir / 'gate_gold_eval.md'}, {resp}"
-          + (f", {rdir / G.ROWS_NAME}" if kept else ""))
+        written.append(rdir / G.ROWS_NAME)
+    print("wrote " + ", ".join(str(p) for p in written + [resp]))
+    if not gold_done or (kept and not kept_done):
+        left = [str(rdir / n) for n, d in ((G.GOLD_EVAL_NAME, gold_done), ("gate_gold_eval.md", gold_done),
+                                           (G.ROWS_NAME, kept_done or not kept)) if not d]
+        print(f"STOPPED at the cap (--budget-usd {args.budget_usd:g}) after {g_res.n_calls + k_res.n_calls} calls: "
+              f"the {'gold' if not gold_done else 'kept-row'} pass is incomplete, so {', '.join(left)} "
+              f"{'was' if len(left) == 1 else 'were'} left as before; every response is in {resp}.  Rerun with a "
+              f"larger --budget-usd", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -637,8 +667,13 @@ def cmd_report(args) -> int:
     ev_path = rdir / G.GOLD_EVAL_NAME
     if ev_path.exists():
         ev = json.loads(ev_path.read_text(encoding="utf-8"))["result"]["eval"]
-        gate_status = (("binding" if ev["meets_targets"] else "advisory only") +
-                       f" (gold agreement {ev['n_agree']}/{ev['n']}, flip rate {ev['flip_rate']:.0%})")
+        # Advisory whatever the score (QUESTIONS 75: nothing gates on the gate); the agreement is over the answered
+        # items, a refused one being out of the denominator (gate.score_against_gold).
+        n_ans = ev.get("n_answered") or ev["n"]
+        refused = f", {ev['n_refused']} refused" if ev.get("n_refused") else ""
+        gate_status = (f"advisory only (gold agreement {ev['n_agree']}/{n_ans} answered{refused}, "
+                       f"{'meets' if ev['meets_targets'] else 'below'} the 26/30 target; flip rate "
+                       f"{ev['flip_rate']:.0%})")
     else:
         gate_status = "no gold evaluation yet (advisory)"
     rows = R.build_rows(submitted, items, reg, gate_rows=gate_rows, label_known=P.load_label_known(probe_path))

@@ -261,6 +261,20 @@ def _bio_lookup(args, record: Optional[dict]):
     return bio_lookup_from_pool(pool)
 
 
+def _unscreened_person_samples(samples, bio_lookup) -> list[str]:
+    """Person-family samples whose biography ``bio_lookup`` cannot serve.  The echo screen (QUESTIONS 54: no name
+    word and no copied span of CC BY-SA biography text in the tracked table) needs the biography of every such
+    sample; ``table.build_table`` skips the screen for a sample it cannot look up, so ``parse`` refuses instead."""
+    out = []
+    for s in samples:
+        if s.get("family") != "person":
+            continue
+        ref = next((r for r in s.get("seed_refs") or [] if str(r).startswith("wikibio:")), None)
+        if bio_lookup is None or ref is None or bio_lookup(ref) is None:
+            out.append(str(s.get("sample_id")))
+    return out
+
+
 def cmd_parse(args) -> int:
     from assistant_axis.atomic_io import atomic_write_text
     from assistant_axis.gapgen.generators.base_model import table as TB
@@ -271,10 +285,19 @@ def cmd_parse(args) -> int:
         return 2
     record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
     samples = TB.load_samples(samples_p, temperature=args.temperature)
+    bio_lookup = _bio_lookup(args, record)
+    unscreened = _unscreened_person_samples(samples, bio_lookup)
+    if unscreened:
+        print(f"refused: {len(unscreened)} person-family sample(s) have no biography to screen against "
+              f"({', '.join(unscreened[:5])}{' ...' if len(unscreened) > 5 else ''}).  The echo screen keeps the "
+              f"person's name and any copied biography span out of the tracked table (QUESTIONS 54) and cannot run "
+              f"without them: fetch wiki_bio (`base_model_generator.py fetch --only wikibio`), or check that the "
+              f"round's sampling.json bundle names the pool the samples were drawn from", file=sys.stderr)
+        return 2
     corpus, queue = _corpus(args)
     per: list = []
     rows, counts = TB.build_table(samples, lookups=TB.default_lookups(), corpus_stems=corpus, queue_stems=queue,
-                                  tda_stems=_tda_stems(args), bio_lookup=_bio_lookup(args, record), per_sample=per)
+                                  tda_stems=_tda_stems(args), bio_lookup=bio_lookup, per_sample=per)
     # A reparse must not throw away the gloss-sense decisions that were paid for: each one is carried onto the
     # rebuilt row when its two glosses are unchanged, and dropped when they moved (QUESTIONS 56).
     if table_p.exists():
@@ -360,18 +383,38 @@ def cmd_sense(args) -> int:
     n_call = sum(1 for r in rows if SE.needs_call(r))
     est = _sense_estimate(n_call, SE.MODEL)
     print(f"{n_call} calls to {SE.MODEL}, estimate ${est:.4f} (the screen itself is free with a local arm)")
-    confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    cap = confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
     rdir.mkdir(parents=True, exist_ok=True)
-    done = SE.run_resolve_rows(rows, client=_anthropic_client(), usage=usage, concurrency=concurrency,
-                               records_path=rdir / SE.RESPONSES_NAME)
-    usage.write_json(rdir / SE.USAGE_NAME)
-    print(json.dumps(done))
+    from assistant_axis.gapgen.cost import GuardedUsage
+    from assistant_axis.judge_pricing import BudgetExceededError
+    # The typed --budget-usd is a hard cap on this session's calls (gapgen.cost), as on every other paid CLI.  The
+    # usage file is cumulative over the round's sessions, so the guard sits at what is already recorded plus the cap.
+    guarded = GuardedUsage(per_model=dict(usage.per_model), budget_usd=usage.total_cost_usd + cap,
+                           usage_path=rdir / SE.USAGE_NAME)
+    done, stopped, backup = None, None, None
+    try:
+        done = SE.run_resolve_rows(rows, client=_anthropic_client(), usage=guarded, concurrency=concurrency,
+                                   records_path=rdir / SE.RESPONSES_NAME)
+    except BudgetExceededError as exc:
+        stopped = exc
+    finally:
+        # A stop or a failure part-way keeps what was paid for: the decisions already on the rows, and the usage.
+        guarded.write_json(rdir / SE.USAGE_NAME)
+        backup = TB.write_table(rows, table_p)
+    usage = guarded
+    if done is not None:
+        print(json.dumps(done))
     print(usage.log_line())
     summary = SE.summary(rows)
     print("gloss sense: " + json.dumps(summary))
-    backup = TB.write_table(rows, table_p)
     print(f"wrote {_rel(table_p)}" + (f"; previous table kept as {_rel(backup)}" if backup else " (unchanged)"))
     print(f"wrote {_rel(rdir / SE.RESPONSES_NAME)}, {_rel(rdir / SE.USAGE_NAME)}")
+    if stopped is not None:
+        print(f"STOPPED at the cap (--budget-usd {cap:g}): {stopped}.  The decisions made before the stop are on the "
+              f"table; rerun `sense --round {args.round}` with a larger --budget-usd for the "
+              f"{summary['n_unresolved']} rows still unresolved", file=sys.stderr)
+        return 1
     if summary["n_unresolved"]:
         print(f"{summary['n_unresolved']} rows are still unresolved (a failed call): rerun `sense --round "
               f"{args.round}` before submitting", file=sys.stderr)

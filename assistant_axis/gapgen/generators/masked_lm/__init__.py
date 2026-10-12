@@ -2,7 +2,7 @@
 
 Plan: ``reports/trait_gap_generation/coding_plan_04_masked_lm.md`` (authoritative), from ``04_masked_lm_fill.md``.
 A local BERT-class fill-mask model (``roberta-large`` first; ``bert-large-cased-whole-word-masking`` and
-``ModernBERT-large`` are coded for and wait on Roger's word for their downloads) fills person-describing frames
+``ModernBERT-large`` beside it, their downloads approved on 2026-10-12: ``models.MODELS``) fills person-describing frames
 ("She is [MASK] by nature", "He's habitually [MASK]", "an avowed [MASK]") and the whole ranked distribution is
 kept, unioned across frames, subjects and passes:
 

@@ -178,6 +178,56 @@ def test_sense_rerun_asks_again_for_a_row_whose_call_failed(env, capsys):
     assert next(r for r in table if r["stem"] == "unflappable")[SE.BLOCK]["chosen"] in SE.CHOICES
 
 
+def test_parse_refuses_a_person_sample_it_cannot_screen(env, capsys):
+    """QUESTIONS 54: the tracked table carries no biography text, which the echo screen ensures; without the
+    biography (the archive missing, or a pool that does not hold the sample's ref) the screen would be skipped
+    silently, so `parse` refuses and writes nothing (review of 2026-10-12)."""
+    tmp, common = env
+    rec = tmp / "samples" / "round1" / "sampling.json"
+    d = json.loads(rec.read_text())
+    d["bundle"]["bio_pool_size"] = 0                    # a pool that holds none of the samples' biographies
+    rec.write_text(json.dumps(d))
+    for argv in (["parse", "--round", "1", "--dry-run"], ["parse", "--round", "1"]):
+        assert run(common, *argv) == 2, argv
+        assert "no biography to screen against" in capsys.readouterr().err
+    assert not (tmp / "base" / "candidate_table_round1.jsonl").exists()
+    # the archive itself missing: the same refusal
+    d["bundle"]["bio_pool_size"] = 50
+    rec.write_text(json.dumps(d))
+    (tmp / "ext" / "wikibio" / "data" / "wikipedia-biography-dataset.zip").unlink()
+    assert run(common, "parse", "--round", "1") == 2
+    assert "QUESTIONS 54" in capsys.readouterr().err
+    assert not (tmp / "base" / "candidate_table_round1.jsonl").exists()
+
+
+def test_sense_stops_at_its_cap_and_keeps_what_it_paid_for(env, capsys, monkeypatch):
+    """--budget-usd is a hard cap on the sense calls (gapgen.cost.GuardedUsage), not only a check of the estimate;
+    a stop part-way keeps the decision that crossed the cap on the table and the usage on disk, and exits 1
+    (review of 2026-10-12: before, the cap was never enforced live and a failure lost the paid decisions)."""
+    tmp, common = env
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
+        SENSE_ANSWER, input_tokens=400, output_tokens=50_000_000)))          # $25 a call at Haiku 5.5's rates
+    assert run(common, "parse", "--round", "1") == 0
+    capsys.readouterr()
+    assert run(common, "sense", "--round", "1", "--arm", "hash", "--budget-usd", "2") == 1
+    err = capsys.readouterr().err
+    assert "STOPPED at the cap" in err
+    table = TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")
+    decided = [r for r in table if (r.get(SE.BLOCK) or {}).get("chosen") in SE.CHOICES
+               and r[SE.BLOCK].get("divergent")]
+    assert len(decided) == 1                         # the call that crossed the cap was answered and is kept
+    assert SE.unresolved(table)                      # the rest wait for a rerun
+    u = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    assert u["per_model"][SE.MODEL]["n_calls"] == 1 and u["total_cost_usd"] > 2
+    # a rerun with room asks only for what is still unresolved, and the usage file accumulates
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
+        SENSE_ANSWER, input_tokens=400, output_tokens=40)))
+    assert run(common, "sense", "--round", "1", "--arm", "hash", "--budget-usd", "2") == 0
+    assert SE.unresolved(TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")) == []
+    u2 = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    assert u2["per_model"][SE.MODEL]["n_calls"] == 1 + len(SE.unresolved(table))
+
+
 def test_pipeline_end_to_end_and_report(env, capsys):
     tmp, common = env
     assert run(common, "parse", "--round", "1") == 0

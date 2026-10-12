@@ -260,8 +260,8 @@ MULTIWORD_HOSTS: tuple[str, ...] = ("disp_nature", "disp_fundamentally", "disp_h
 #: runs of that many blanks in the slot of every generation frame, every blank after the first a continuation
 #: piece.  The tokenizer census of the corpus's split one-word labels sets the maximum: under roberta 4 pieces
 #: reach all but one of 333 (sycophantic is 4; Gemeinschaft is 5, gryffindor 5 in lower case); under bert-wwm 6
-#: reach all 424 (sycophantic and anthropocentric are 6, which 5 would lose).  ModernBERT is not decided by Roger:
-#: 4, as roberta (all but Gryffindor, 5 pieces, of 390).
+#: reach all 424 (sycophantic and anthropocentric are 6, which 5 would lose).  ModernBERT 4, as roberta (all but
+#: Gryffindor, 5 pieces, of 390): the agent's default, which Roger accepted on 2026-10-12 ("All good", QUESTIONS 89).
 SUBWORD_WIDTHS: dict[str, tuple[int, ...]] = {"roberta": (2, 3, 4), "bert_wwm": (2, 3, 4, 5, 6),
                                               "modernbert": (2, 3, 4)}
 

@@ -30,9 +30,10 @@ surface is lemmatised like the single-mask pass's; the multiword pass drops a ph
 function word (:func:`function_word_edge`: "a fighter", "very shy", "lied to us", which the real model returned in
 numbers from the bare two-slot form before QUESTIONS 79, and still does from "[MASK] to [MASK]").  Per surface:
 the best score with its frame and subject, the
-number of instances that produced it (``n_top``: every accepted sequence is within the top 2,000 of its
-instance), its mean rank among its instance's accepted sequences, its form (``word``, ``hyphenated``,
-``phrase``) and pattern.  Roger's decision of 2026-10-10 keeps both beams at reduced K as the off-list
+number of instances that produced it (``n_top``: every accepted sequence counts as surfaced, so a beam word is
+always in the union; this is not the single-mask pass's top-2,000 test, and a run of ``w`` blanks can accept up to
+``k_first x beam_width^(w-1)`` sequences an instance, over 2,000 at four blanks and ``k_first`` 100), its mean rank
+among its instance's accepted sequences, its form (``word``, ``hyphenated``, ``phrase``) and pattern.  Roger's decision of 2026-10-10 keeps both beams at reduced K as the off-list
 complement of Variant B, their yields reported apart (the CLI's defaults; the plan's 300 / 100 stay the
 functions' own).
 """

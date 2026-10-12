@@ -42,7 +42,7 @@ from assistant_axis.judge import extract_json_blob
 from assistant_axis.judge_pricing import BudgetExceededError, cost_for_usage
 
 from .chunk import CHARS_PER_TOKEN, Chunk
-from .sources import SOURCES, Source, quote_limit
+from .sources import READ_ONLY_QUOTE_WORDS, SOURCES, Source, quote_limit
 
 RUBRIC_EXTRACT = "alignment_extract"
 RUBRIC_REWRITE = "alignment_rewrite"
@@ -389,7 +389,7 @@ async def run_stage(units: Sequence[Unit], *, stage: str, client, model: str, sy
             text, over = meta.get("text"), True
         res.n_calls += 1
         ok, err, bad = parse_reply(text, key=key)
-        limit = None if u.store_text else 25
+        limit = None if u.store_text else READ_ONLY_QUOTE_WORDS
         rec = {"stage": stage, "unit_id": u.unit_id, "attempt": attempt, "model": model,
                "rubric_version": rubric_version, "prompt_sha256": prompt_sha, "at": now() if now else None,
                "user": u.user if u.store_text else None, "user_sha256": sha256(u.user),

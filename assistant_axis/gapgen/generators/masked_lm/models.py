@@ -1,9 +1,10 @@
 """The three fill-mask models, their tokenizers, the device, and the tokenizer census (plan section 5, ``models.py``).
 
 :data:`MODELS` pins each model (Hub id, revision, published size and weights sha256, licence; checked against the
-Hub API on 2026-10-11).  Only **roberta-large** is approved for download (Roger, 2026-10-11: ~1.4 GB, MIT, into
-the gitignored ``data/external/hf/``); ``bert-large-cased-whole-word-masking`` and ``ModernBERT-large`` are coded
-for and stay unfetched, each a separate approval (plan section 1).  Downloads go only through
+Hub API on 2026-10-11).  Each download is Roger's approval, recorded in the model's ``approved_by``:
+**roberta-large** on 2026-10-11 (~1.4 GB, MIT, into the gitignored ``data/external/hf/``), and
+``bert-large-cased-whole-word-masking`` and ``ModernBERT-large`` on 2026-10-12 with the fill-mask plan (plan
+section 1).  Downloads go only through
 ``setup_external.py --hf-model <id>`` with :data:`HF_MODEL_ALLOW_PATTERNS` (the approved models alone); every load
 here is ``local_files_only`` from the in-tree cache (``gapgen.paths.hf_cache_dir``) and **never passes
 ``trust_remote_code``** (:func:`loader_kwargs`, asserted by the tests).

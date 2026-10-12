@@ -28,7 +28,8 @@ ModernBERT 2-4 blanks, bert-wwm 2-6); ``--subword-widths`` overrides them.
 Plan: ``reports/trait_gap_generation/coding_plan_04_masked_lm.md``.  ``census`` counts the corpus's labels (and the
 seed queue's, with ``--queue``) by how each model's tokenizer splits them (tokenizer files only).
 ``record-model`` verifies a downloaded model against the Hub's published hashes and records it (the model is
-downloaded by ``setup_external.py --hf-model <id>``, each on Roger's word; only roberta-large is approved).
+downloaded by ``setup_external.py --hf-model <id>``, each on Roger's word: all three are approved, roberta-large on
+2026-10-11 and the other two on 2026-10-12, as each ``models.MODELS`` entry's ``approved_by`` records).
 ``generate`` runs the local passes and stores per-model, per-pass aggregates in the gitignored cache;
 ``score`` the trait-hood contrast score; ``table`` builds ``mlm_table.jsonl``; ``evaluate`` the recovery curves,
 the wordfreq baseline, the frame ablation, the HHH probe, the contrast AUC and the coverage count.  ``submit``
@@ -610,7 +611,8 @@ def _common_flags(ap: argparse.ArgumentParser, *, top: bool) -> None:
     the value given before the command, or the default, stands)."""
     d = (lambda v: v) if top else (lambda v: argparse.SUPPRESS)
     ap.add_argument("--models", default=d(M.PRIMARY_MODEL),
-                    help=f"comma-separated, of {', '.join(M.MODELS)} (only roberta is downloaded and approved)")
+                    help=f"comma-separated, of {', '.join(M.MODELS)} (each approved for download; the primary is "
+                         f"{M.PRIMARY_MODEL})")
     ap.add_argument("--frames", default=d("all"), choices=("all", "pilot10"))
     ap.add_argument("--device", default=d("mps"), choices=("mps", "cpu", "auto"),
                     help="mps (refused when Metal sees no device, as inside the Claude Code sandbox), cpu, auto")
