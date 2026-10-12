@@ -54,6 +54,33 @@ def platform_dirty_files() -> Optional[list[str]]:
     return dirty()
 
 
+def _write_usage(usage, path: Path) -> None:
+    """A usage record, atomically, in ``MultiModelUsage.write_json``'s form."""
+    from assistant_axis.atomic_io import atomic_write_text
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(json.dumps(usage.as_dict(), indent=2, sort_keys=True), Path(path))
+
+
+def _sense_usage_record(args, *, migrate: bool) -> Path:
+    """The gloss-sense step's usage record for ``args.round``: the tracked, cumulative
+    ``<base dir>/gloss_sense_usage_round<N>.json`` (code review 2026-10-12, B2).  Before that the step recorded its
+    usage only in the gitignored round directory (``sense.USAGE_NAME``): when the tracked file is missing and that one
+    exists, ``migrate`` copies it over (and says so), and without ``migrate`` (a dry run) the old file is returned to
+    be read.  The old file is left as it was and is no longer written."""
+    from assistant_axis.gapgen.generators.base_model import sense as SE
+    from assistant_axis.judge_pricing import MultiModelUsage
+    tracked = B.sense_usage_path(args.round, args.base_dir)
+    old = args.samples_dir / f"round{int(args.round)}" / SE.USAGE_NAME
+    if tracked.exists() or not old.exists():
+        return tracked
+    if not migrate:
+        return old
+    _write_usage(MultiModelUsage.load_or_create(old), tracked)
+    print(f"wrote {_rel(tracked)}: the round's gloss-sense usage, copied from {_rel(old)}, where the step recorded "
+          f"it before 2026-10-12 (that file is no longer written)")
+    return tracked
+
+
 def _rel(p: Path) -> str:
     try:
         return str(Path(p).relative_to(_REPO_ROOT))
@@ -369,7 +396,8 @@ def cmd_sense(args) -> int:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
         print(f"DRY-RUN: would embed {2 * len(todo)} gloss texts with the {arm} arm (free for a local arm), "
               f"flag the divergent rows, ask {SE.MODEL} one question each, and write the decisions into "
-              f"{_rel(table_p)} with {_rel(rdir / SE.RESPONSES_NAME)} and {_rel(rdir / SE.USAGE_NAME)}")
+              f"{_rel(table_p)} with {_rel(rdir / SE.RESPONSES_NAME)} and the tracked usage record "
+              f"{_rel(B.sense_usage_path(args.round, args.base_dir))}")
         if two:
             print(SE.render(two[0]))
         return 0
@@ -382,7 +410,10 @@ def cmd_sense(args) -> int:
     if not todo and not n_stale_call:
         print("nothing to screen; every two-sided row already carries a settled sense")
         return 0
-    usage = MultiModelUsage.load_or_create(rdir / SE.USAGE_NAME)
+    # the step's usage record is tracked and cumulative over the round's sessions (code review 2026-10-12, B2)
+    usage_p = _sense_usage_record(args, migrate=True)
+    usage = MultiModelUsage.load_or_create(usage_p)
+    before = MultiModelUsage.from_dict(usage.as_dict())
     if todo:
         from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
         embedder = make_embedder(arm)
@@ -393,6 +424,9 @@ def cmd_sense(args) -> int:
         counts = SE.screen(rows, cosines=cos, floor=floor, embedder=embedder.name)
         print(f"screen: {counts['n_divergent']} of {counts['n_screened']} divergent "
               f"(rate {counts['divergence_rate']}), {counts['n_agree']} settled by agreement with no call")
+        if usage.n_calls != before.n_calls:
+            # the screen's embeddings are recorded before the cost gate, which may refuse the calls
+            _write_usage(usage, usage_p)
     else:
         print(f"nothing to screen; {n_stale_call} divergent row(s) still need their call (failed, or an older prompt)")
     n_call = sum(1 for r in rows if SE.needs_call(r))
@@ -406,7 +440,7 @@ def cmd_sense(args) -> int:
     # The typed --budget-usd is a hard cap on this session's calls (gapgen.cost), as on every other paid CLI.  The
     # usage file is cumulative over the round's sessions, so the guard sits at what is already recorded plus the cap.
     guarded = GuardedUsage(per_model=dict(usage.per_model), budget_usd=usage.total_cost_usd + cap,
-                           usage_path=rdir / SE.USAGE_NAME)
+                           usage_path=usage_p)
     done, stopped, backup = None, None, None
     try:
         done = SE.run_resolve_rows(rows, client=_anthropic_client(), usage=guarded, concurrency=concurrency,
@@ -415,16 +449,19 @@ def cmd_sense(args) -> int:
         stopped = exc
     finally:
         # A stop or a failure part-way keeps what was paid for: the decisions already on the rows, and the usage.
-        guarded.write_json(rdir / SE.USAGE_NAME)
+        guarded.write_json(usage_p)
         backup = TB.write_table(rows, table_p)
     usage = guarded
     if done is not None:
         print(json.dumps(done))
-    print(usage.log_line())
+    n_session = usage.n_calls - before.n_calls
+    print(f"[usage] this session: {n_session} calls (embeddings and sense calls), "
+          f"${usage.total_cost_usd - before.total_cost_usd:.4f}")
+    print(usage.log_line(prefix=f"[usage] round {args.round} total"))
     summary = SE.summary(rows)
     print("gloss sense: " + json.dumps(summary))
     print(f"wrote {_rel(table_p)}" + (f"; previous table kept as {_rel(backup)}" if backup else " (unchanged)"))
-    print(f"wrote {_rel(rdir / SE.RESPONSES_NAME)}, {_rel(rdir / SE.USAGE_NAME)}")
+    print(f"wrote {_rel(rdir / SE.RESPONSES_NAME)}, {_rel(usage_p)}")
     if stopped is not None:
         print(f"STOPPED at the cap (--budget-usd {cap:g}): {stopped}.  The decisions made before the stop are on the "
               f"table; rerun `sense --round {args.round}` with a larger --budget-usd for the "
@@ -570,10 +607,11 @@ def cmd_report(args) -> int:
     cdir = args.candidates_dir or paths.DATA_CANDIDATES
     b = batch_id_for(args.run_id)
     fdir, ndir = paths.filter_dir(b, candidates_dir=cdir), paths.novelty_dir(b, candidates_dir=cdir)
-    from assistant_axis.gapgen.generators.base_model import sense as SE
+    # the round's tracked sense usage record (made here from the round directory's if the step has not run since
+    # 2026-10-12; a dry run reads the old one and writes nothing)
     ev = EV.evaluate_run(args.run_id, run_dir=rdir, table=table, stats=stats, registry_rows=reg, filter_dir=fdir,
                          novelty_dir=ndir, sampling_usage=rec_p.parent / "usage.json",
-                         sense_usage=rec_p.parent / SE.USAGE_NAME)
+                         sense_usage=_sense_usage_record(args, migrate=not args.dry_run))
     doc = rdir / "report.md"
     md = RP.render_report(ev, doc_path=doc, run_dir=rdir, table_path=table_p,
                           stats_path=stats_p if stats_p.exists() else None, filter_dir=fdir, novelty_dir=ndir)

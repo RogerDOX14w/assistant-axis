@@ -73,8 +73,15 @@ def stats_path(round_n: int, *, temperature: Optional[float] = None) -> Path:
     return BASE_DIR / f"stats_round{int(round_n)}{_t(temperature)}.json"
 
 
+def sense_usage_path(round_n: int, base_dir: Path = BASE_DIR) -> Path:
+    """The tracked usage record of a round's gloss-sense step (the screen's embeddings and the paid calls),
+    cumulative over the round's sessions, beside the round's tracked table (code review 2026-10-12, B2: until then it
+    lived only in the gitignored round directory, as ``sense.USAGE_NAME``)."""
+    return Path(base_dir) / f"gloss_sense_usage_round{int(round_n)}.json"
+
+
 from . import diversity  # noqa: E402  (the frozen harness, re-exported)
 
 __all__ = ["GENERATOR", "MODEL_ID", "BASE_DIR", "SAMPLES_DIR", "SOURCES_MANIFEST_PATH", "WIKIBIO_DIR", "ONET_DIR",
            "DOWNLOAD_MANIFEST_NAME", "TABLE_PATH", "round_dir", "samples_path", "table_path", "stats_path",
-           "diversity"]
+           "sense_usage_path", "diversity"]

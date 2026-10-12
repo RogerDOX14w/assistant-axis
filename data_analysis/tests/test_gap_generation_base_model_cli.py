@@ -23,6 +23,11 @@ SENSE_ANSWER = json.dumps({"choice": "dictionary", "legible": False,
                            "reason": "the dictionary sense is the one a reader would take"})
 
 
+def sense_usage(tmp: Path) -> Path:
+    """Round 1's tracked gloss-sense usage record (code review 2026-10-12, B2; the round directory's before)."""
+    return tmp / "base" / "gloss_sense_usage_round1.json"
+
+
 @pytest.fixture
 def env(tmp_path, monkeypatch):
     ext = tmp_path / "ext"
@@ -159,11 +164,14 @@ def test_sense_settles_the_divergent_rows(env, capsys):
     assert SE.unresolved(table) == []
     # the fake answered "dictionary" (and called the sample reading illegible), so the hint is unchanged
     assert SE.resolved_hint(next(r for r in table if r["stem"] == "unflappable")).startswith("not easily")
-    u = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    # the usage record is tracked, beside the round's table (B2; it was the round directory's until 2026-10-12)
+    u = json.loads(sense_usage(tmp).read_text())
+    assert not (tmp / "samples" / "round1" / SE.USAGE_NAME).exists()
     # the free screen's embedding calls and the paid sense calls are both recorded; only the latter cost
     assert u["total_cost_usd"] > 0 and u["per_model"][SE.MODEL]["n_calls"] >= 1
     rec = (tmp / "samples" / "round1" / SE.RESPONSES_NAME).read_text().splitlines()
     assert len(rec) == u["per_model"][SE.MODEL]["n_calls"]
+    assert "[usage] this session:" in out and "[usage] round 1 total" in out
     # rerunning it is a no-op: the decisions are on the rows
     assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
     assert "nothing to screen" in capsys.readouterr().out
@@ -261,15 +269,54 @@ def test_sense_stops_at_its_cap_and_keeps_what_it_paid_for(env, capsys, monkeypa
                and r[SE.BLOCK].get("divergent")]
     assert len(decided) == 1                         # the call that crossed the cap was answered and is kept
     assert SE.unresolved(table)                      # the rest wait for a rerun
-    u = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    u = json.loads(sense_usage(tmp).read_text())
     assert u["per_model"][SE.MODEL]["n_calls"] == 1 and u["total_cost_usd"] > 2
     # a rerun with room asks only for what is still unresolved, and the usage file accumulates
     monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
         SENSE_ANSWER, input_tokens=400, output_tokens=40)))
     assert run(common, "sense", "--round", "1", "--arm", "hash", "--budget-usd", "2") == 0
     assert SE.unresolved(TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")) == []
-    u2 = json.loads((tmp / "samples" / "round1" / SE.USAGE_NAME).read_text())
+    u2 = json.loads(sense_usage(tmp).read_text())
     assert u2["per_model"][SE.MODEL]["n_calls"] == 1 + len(SE.unresolved(table))
+
+
+def test_a_round_dir_usage_record_is_carried_into_the_tracked_one(env, capsys):
+    """Code review 2026-10-12, B2: a round whose sense step ran before the tracked record existed keeps that spend.
+    The next sense run (or report) copies the round directory's record over and adds to it; the old file is left."""
+    from assistant_axis.judge_pricing import MultiModelUsage
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    old = tmp / "samples" / "round1" / SE.USAGE_NAME
+    earlier = MultiModelUsage()
+    earlier.charge(SE.MODEL, 5000, 300)
+    earlier.write_json(old)
+    old_text = old.read_text()
+    assert not sense_usage(tmp).exists()
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    assert "copied from" in capsys.readouterr().out
+    u = json.loads(sense_usage(tmp).read_text())
+    assert u["per_model"][SE.MODEL]["n_calls"] > 1 and u["total_cost_usd"] > earlier.total_cost_usd
+    assert u["per_model"][SE.MODEL]["prompt_tokens"] >= 5000
+    assert old.read_text() == old_text                                      # left as it was, no longer written
+
+
+def test_report_reads_the_tracked_record_and_makes_it_when_missing(env, capsys):
+    from assistant_axis.judge_pricing import MultiModelUsage
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1") == 0
+    # a round sensed before the tracked record: only the round directory's file
+    tracked = sense_usage(tmp)
+    MultiModelUsage.load_or_create(tracked).write_json(tmp / "samples" / "round1" / SE.USAGE_NAME)
+    want = json.loads(tracked.read_text())["total_cost_usd"]
+    tracked.unlink()
+    assert run(common, "report", "--run-id", "r1", "--dry-run") == 0
+    assert not tracked.exists()                                             # a dry run writes nothing
+    assert run(common, "report", "--run-id", "r1") == 0
+    assert json.loads(tracked.read_text())["total_cost_usd"] == want
+    ev = json.loads((tmp / "cand" / "runs" / "base_model" / "r1" / "evaluation.json").read_text())["result"]
+    assert ev["sense_usage"]["files"] == [str(tracked)] and ev["sense_usage"]["total_usd"] == pytest.approx(want)
 
 
 def test_pipeline_end_to_end_and_report(env, capsys):
