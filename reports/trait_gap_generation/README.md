@@ -248,6 +248,8 @@ rubrics, which the role-promotion item below needs too.
 
 ## Low-priority TODOs
 
+- **Memberships handled apart from the main review** (QUESTIONS 81, Roger 2026-10-12).  Memberships (religions, nationalities, families, affinities and the rest) are traits and are submitted flagged, but they are not added in full: a representative sample is kept, as the corpus already does for religions and nationalities (Buddhist, Christian, Hindu, Jewish, Muslim, French, German).  They go on a separate track, out of the main review queue.  The registry tags them already (`membership` tag and `membership_kind`, 247 rows across ten kinds), so the track can key on that.  **Trigger:** the first wave in which membership rows reach review.  **To decide then:** the sample for each new `membership_kind` (circumstance, family, affinity and so on), and whether the masked-LM stoplist flags (110 rows in the pilot table) use the same track.
+
 - **A field the question generator reads for elicitation guidance** (QUESTIONS 66, Roger 2026-10-11; deferred by him
   the same day).  A trait's **narrowing** goes in its description at promotion — scope that changes what the trait
   is, as in [ruthless-while-playing](../../data/traits/instructions/ruthless_while_playing.json), whose description
