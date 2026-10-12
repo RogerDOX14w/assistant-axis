@@ -698,7 +698,9 @@ def _worker_main(
         DEFAULT_TMPDIR, setup_model_tmpfs_cache, setup_tmpdir,
     )
     setup_tmpdir(config.get("tmpdir") or DEFAULT_TMPDIR)
-    new_hf_home = setup_model_tmpfs_cache(model_name=config["model_name"])
+    new_hf_home = setup_model_tmpfs_cache(
+        model_name=config["model_name"],
+        method=config.get("tmpfs_method") or "auto")
     if new_hf_home is not None:
         os.environ["HF_HOME"] = new_hf_home
 
@@ -1089,6 +1091,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
                              "NFS-backed paths -- staging writes are "
                              "on the hot path for every records.jsonl "
                              "and summary.json flush.")
+    parser.add_argument("--tmpfs-method", choices=("auto", "rsync", "cp"),
+                        default="auto",
+                        help="How the model's HF cache is mirrored into "
+                             "/dev/shm (assistant_axis/tmpfs.py; the same "
+                             "flag as pipeline/run_pipeline.sh): rsync "
+                             "(tops up an existing mirror), cp (a staged "
+                             "copy renamed into place), or auto (default: "
+                             "rsync when installed, else cp).  Both write "
+                             "the completeness marker the fast path reads.")
     return parser
 
 
@@ -1287,7 +1298,8 @@ def main():
         f"(serialized in parent so workers don't contend) ..."
     )
     t_mirror_start = time.time()
-    parent_hf_home = setup_model_tmpfs_cache(model_name=shared_model_name)
+    parent_hf_home = setup_model_tmpfs_cache(model_name=shared_model_name,
+                                             method=args.tmpfs_method)
     if parent_hf_home is not None:
         os.environ["HF_HOME"] = parent_hf_home
         logger.info(
@@ -1322,6 +1334,7 @@ def main():
         "sweep_log_dir": all_work_items[0].get("sweep_log_dir")
         if all_work_items else None,
         "tmpdir": tmpdir_target,
+        "tmpfs_method": args.tmpfs_method,
     }
 
     # Spawn workers.  CUDA requires the 'spawn' start method.

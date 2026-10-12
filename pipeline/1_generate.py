@@ -28,6 +28,12 @@ Usage:
 
     # With explicit tensor parallelism
     uv run 1_generate.py --model Qwen/Qwen3-32B --tensor_parallel_size 2 ...
+
+Exit status (2026-10-12): 1 when a goal-list name the grid uses has no
+instruction file (before anything is generated), when a worker failed to load
+the model or died, or when any item failed; a run stops early after
+MAX_CONSECUTIVE_FAILURES (20) failed items in a row.  Everything saved stays
+saved, and a rerun generates only what is missing.
 """
 
 import argparse
@@ -48,10 +54,66 @@ from assistant_axis.generation import RoleResponseGenerator
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# A run (or a worker) that fails this many items in a row stops instead of
+# failing the rest of its queue one by one: the usual cause is a vLLM engine
+# that died, after which every later item fails fast (review of 2026-10-12,
+# P1 D1 / walk-through P8.1).  An isolated failure only counts toward the
+# step's exit status.
+MAX_CONSECUTIVE_FAILURES = 20
+
+
+class GoalListError(RuntimeError):
+    """A name on the goal lists that the combination grid needs has no
+    instruction file (raised before any model is loaded)."""
+
 
 # ---------------------------------------------------------------------------
 # Work-item collection
 # ---------------------------------------------------------------------------
+
+def _renamed_to(missing: str, instructions_dir: Path) -> List[str]:
+    """Stems of the instruction files in ``instructions_dir`` whose
+    ``renamed_from`` names ``missing`` (a string, an object with a ``stem``,
+    or a list of either; see AGENT_NOTES "Seeding tooling").  Only read on
+    the error path, to say what a stale goal-list name became."""
+    hits = []
+    for fp in sorted(instructions_dir.glob("*.json")):
+        try:
+            rf = json.loads(fp.read_text()).get("renamed_from")
+        except (OSError, ValueError):
+            continue
+        entries = rf if isinstance(rf, list) else [rf]
+        for e in entries:
+            stem = e.get("stem") if isinstance(e, dict) else e
+            if stem == missing:
+                hits.append(fp.stem)
+    return hits
+
+
+def check_goal_list_files(names: Dict[str, List[str]], roles_dir: Path,
+                          traits_dir: Path) -> None:
+    """Raise :class:`GoalListError` when a goal-list name the grid uses has no
+    instruction file.
+
+    ``names`` maps ``"roles"`` / ``"traits"`` to the stems the grid takes from
+    the goal lists.  Before 2026-10-12 a missing file was a WARNING and the
+    grid silently shrank below ``goal_count x non_goal_count`` (review P1 D7;
+    no name was missing that day); a renamed entity whose goal-list entry was
+    not updated is the likely cause, so the message names the new stem when
+    a file's ``renamed_from`` records the old one."""
+    problems = []
+    for kind, directory in (("roles", roles_dir), ("traits", traits_dir)):
+        for stem in names.get(kind, []):
+            if (directory / f"{stem}.json").exists():
+                continue
+            renamed = _renamed_to(stem, directory)
+            hint = f" (renamed to {', '.join(renamed)}?)" if renamed else ""
+            problems.append(f"{kind[:-1]} {stem!r}: no {directory / (stem + '.json')}{hint}")
+    if problems:
+        raise GoalListError(
+            f"{len(problems)} goal-list name(s) have no instruction file; fix the goal "
+            f"file (or the counts) before generating:\n  " + "\n  ".join(problems))
+
 
 def collect_work_items(args) -> List[Dict]:
     """Build work items based on mode.
@@ -113,17 +175,18 @@ def collect_work_items(args) -> List[Dict]:
                 emit_r = not args.combos_only_t
                 emit_t = not args.combos_only_r
 
+                # Every name the grid uses must have its file: fail before
+                # any model is loaded rather than shrink the grid.
+                check_goal_list_files(
+                    {"roles": (use_goal_roles if emit_r else []) + (use_non_goal_roles if emit_t else []),
+                     "traits": (use_non_goal_traits if emit_r else []) + (use_goal_traits if emit_t else [])},
+                    roles_dir, traits_dir)
+
                 # r_ combos: goal role x non-goal trait  (goal from role)
                 for role_name in (use_goal_roles if emit_r else []):
                     role_file = roles_dir / f"{role_name}.json"
-                    if not role_file.exists():
-                        logger.warning(f"Role file missing: {role_file}")
-                        continue
                     for trait_name in use_non_goal_traits:
                         trait_file = traits_dir / f"{trait_name}.json"
-                        if not trait_file.exists():
-                            logger.warning(f"Trait file missing: {trait_file}")
-                            continue
                         items.append({
                             "output_name": f"r_{role_name}__{trait_name}",
                             "type": "combined",
@@ -137,14 +200,8 @@ def collect_work_items(args) -> List[Dict]:
                 # t_ combos: non-goal role x goal trait  (goal from trait)
                 for role_name in (use_non_goal_roles if emit_t else []):
                     role_file = roles_dir / f"{role_name}.json"
-                    if not role_file.exists():
-                        logger.warning(f"Role file missing: {role_file}")
-                        continue
                     for trait_name in use_goal_traits:
                         trait_file = traits_dir / f"{trait_name}.json"
-                        if not trait_file.exists():
-                            logger.warning(f"Trait file missing: {trait_file}")
-                            continue
                         items.append({
                             "output_name": f"t_{role_name}__{trait_name}",
                             "type": "combined",
@@ -154,6 +211,24 @@ def collect_work_items(args) -> List[Dict]:
                             "trait_file": str(trait_file),
                             "goal_source": "trait",
                         })
+
+                # The grid's size against the nominal goal_count x
+                # non_goal_count per half: it is smaller only when a goal
+                # list is shorter than its count (allowed while the other
+                # list it applies to is long enough).
+                n_r = len(use_goal_roles) * len(use_non_goal_traits) if emit_r else 0
+                n_t = len(use_non_goal_roles) * len(use_goal_traits) if emit_t else 0
+                nominal = gc * ngc * (int(emit_r) + int(emit_t))
+                grid_msg = (f"Combination grid: {n_r} r_ + {n_t} t_ = {n_r + n_t} "
+                            f"(goal_count x non_goal_count x {int(emit_r) + int(emit_t)} "
+                            f"= {gc} x {ngc} x {int(emit_r) + int(emit_t)} = {nominal})")
+                if n_r + n_t == nominal:
+                    logger.info(grid_msg)
+                else:
+                    logger.warning(
+                        grid_msg + f"; smaller because a list is shorter than its count "
+                        f"(roles.goal {len(goal_roles)}, roles.non_goal {len(non_goal_roles)}, "
+                        f"traits.goal {len(goal_traits)}, traits.non_goal {len(non_goal_traits)})")
 
                 # Default role (always needed for axis computation)
                 default_file = roles_dir / "default.json"
@@ -241,6 +316,54 @@ def _process_item(generator: RoleResponseGenerator, item: Dict, worker_logger):
         return False
 
 
+def run_items(generator: RoleResponseGenerator, items: List[Dict], log,
+              *, desc: str = "Processing", position: int = 0,
+              max_consecutive_failures: int = MAX_CONSECUTIVE_FAILURES) -> Dict[str, object]:
+    """Generate every item in turn and count the outcomes.
+
+    Returns ``{"completed", "failed", "failed_names", "aborted"}``.  An item
+    that fails (an exception, no instructions, no responses) is logged and
+    the run goes on, unless ``max_consecutive_failures`` items fail in a row:
+    then the rest are not tried (``aborted`` True), since an engine that died
+    fails every later item.  The caller turns any failure into exit 1 (since
+    2026-10-12; before, step 1 exited 0 with entities missing and the driver
+    went on to step 2)."""
+    from tqdm import tqdm
+    completed = 0
+    failed_names: List[str] = []
+    consecutive = 0
+    aborted = False
+    for item in tqdm(items, desc=desc, position=position):
+        if _process_item(generator, item, log):
+            completed += 1
+            consecutive = 0
+            continue
+        failed_names.append(item["output_name"])
+        consecutive += 1
+        if consecutive >= max_consecutive_failures:
+            aborted = True
+            log.error(f"{consecutive} items failed in a row (the last: {item['output_name']}); "
+                      f"stopping with {len(items) - completed - len(failed_names)} item(s) "
+                      f"not tried -- the engine has probably died.  Rerun this step to "
+                      f"generate what is missing.")
+            break
+    return {"completed": completed, "failed": len(failed_names),
+            "failed_names": failed_names, "aborted": aborted}
+
+
+def _report_failures(result: Dict[str, object], log) -> bool:
+    """Log the end-of-run tally; True when the step must exit non-zero."""
+    log.info(f"Done: {result['completed']} successful, {result['failed']} failed"
+             f"{' (stopped early)' if result['aborted'] else ''}")
+    if result["failed"] or result["aborted"]:
+        names = result["failed_names"]
+        log.error(f"{len(names)} item(s) failed and have no responses file: "
+                  f"{', '.join(names[:20])}{' ...' if len(names) > 20 else ''}; "
+                  f"rerun this step to generate the missing ones")
+        return True
+    return False
+
+
 def process_items_on_worker(
     worker_id: int, gpu_ids: List[int], work_items: List[Dict], args,
 ):
@@ -276,16 +399,9 @@ def process_items_on_worker(
         )
         generator.generator.load()
 
-        completed = failed = 0
-        from tqdm import tqdm
-        for item in tqdm(work_items, desc=f"Worker-{worker_id}", position=worker_id):
-            ok = _process_item(generator, item, wlog)
-            if ok:
-                completed += 1
-            else:
-                failed += 1
-
-        wlog.info(f"Done: {completed} successful, {failed} failed")
+        result = run_items(generator, work_items, wlog,
+                           desc=f"Worker-{worker_id}", position=worker_id)
+        any_failed = _report_failures(result, wlog)
 
     except Exception as e:
         # A worker that cannot load the model (CUDA OOM, an engine that fails
@@ -296,6 +412,10 @@ def process_items_on_worker(
         raise SystemExit(1)
     finally:
         wlog.info("Cleanup completed")
+    # An item that failed inside a live worker also makes the worker exit 1
+    # (P8.1, 2026-10-12), after it has tried the rest of its items.
+    if any_failed:
+        raise SystemExit(1)
 
 
 def run_multi_worker(work_items: List[Dict], args) -> int:
@@ -354,14 +474,16 @@ def run_multi_worker(work_items: List[Dict], args) -> int:
     # A worker that failed to load the model, or died (OOM kill, CUDA abort),
     # left its items ungenerated.  Before 2026-10-12 this returned 0 whatever
     # the workers did, so run_pipeline.sh went on to step 2 with part of the
-    # responses missing (the same fix as 2_activations.py's).  Items that fail
-    # inside a live worker are logged and skipped as before; a rerun generates
-    # whatever is missing.
+    # responses missing (the same fix as 2_activations.py's).  Since the same
+    # day a worker also exits 1 when any of its items failed (having tried the
+    # rest, or stopped after MAX_CONSECUTIVE_FAILURES in a row); a rerun
+    # generates whatever is missing.
     dead = [(i, p.exitcode) for i, p in enumerate(processes) if p.exitcode != 0]
     if dead:
         logger.error(f"{len(dead)} of {len(processes)} worker(s) exited abnormally "
-                     f"(launch index, exit code): {dead}; their items are incomplete -- "
-                     f"rerun this step to generate the rest")
+                     f"(launch index, exit code): {dead}: a worker that failed to load "
+                     f"the model or died, or one with failed items (see its log above); "
+                     f"their items are incomplete -- rerun this step to generate the rest")
         return 1
 
     logger.info("Multi-worker processing completed!")
@@ -462,7 +584,11 @@ def main():
         args.reduce_questions = 3 if args.mode == "roger" else 1
 
     # Collect and filter work items
-    all_items = collect_work_items(args)
+    try:
+        all_items = collect_work_items(args)
+    except GoalListError as e:
+        logger.error(str(e))
+        sys.exit(1)
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -516,9 +642,9 @@ def main():
         )
         generator.generator.load()
 
-        from tqdm import tqdm
-        for item in tqdm(pending, desc="Processing"):
-            _process_item(generator, item, logger)
+        result = run_items(generator, pending, logger)
+        if _report_failures(result, logger):
+            sys.exit(1)
 
     logger.info("Done!")
 

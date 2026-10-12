@@ -16,6 +16,8 @@
 #     "combinations" with either subset is redundant (the subset is implied).
 #   christina — standalone roles/traits from --roles_dir.
 #     --types is ignored in christina mode.
+#     A --roles_dir with no default.json (traits) gets the default from
+#     $DEFAULT_ROLE_DIR, generated once under default/ and symlinked in.
 #
 # Usage -- run from the pipeline/ directory: the steps are invoked by relative
 # path (uv run 1_generate.py ...), and relative paths such as the default
@@ -31,6 +33,8 @@
 #   ./run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   ./run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
 #   ./run_pipeline.sh --no-scan                       # skip the scan before step 5
+#   ./run_pipeline.sh --tmpfs-method cp               # model mirror: auto (default),
+#                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #
 # A failing step stops the pipeline: steps 1 to 3 as before, and step 4 since
 # 2026-10-12 (4_vectors.py exits 1 when an activation, scores or vector file
@@ -90,6 +94,9 @@ done
 MODEL="Qwen/Qwen3-32B"
 MODE="roger"                    # roger | christina
 ROLES_DIR="../data/roles/instructions"  # christina: directory of instruction JSONs
+# Where the default entity's default.json is read when ROLES_DIR has none
+# (a christina run over traits; roger mode's step 0 reads it from here too).
+DEFAULT_ROLE_DIR="../data/roles/instructions"
 GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
@@ -113,6 +120,11 @@ TENSOR_PARALLEL_SIZE=1
 # already have an HF_HOME setup you want preserved.
 USE_TMPFS=true
 TMPFS_HF_HOME=/dev/shm/hf-cache
+# How the model mirror is copied: auto (rsync if installed, else cp), rsync,
+# or cp.  The copy is done by assistant_axis/tmpfs.py, the same code the
+# steering driver uses (one implementation since 2026-10-12, P8.6); both
+# methods write the completeness marker .tmpfs_mirror_complete.
+TMPFS_METHOD=auto
 # Where step 2's atomic-write staging files land.  Default /dev/shm
 # (RAM-backed tmpfs).  Override via --tmpdir.  Unconditional override
 # of $TMPDIR by design: pod-defaults like /workspace/tmp silently
@@ -168,6 +180,8 @@ while [[ $# -gt 0 ]]; do
             USE_TMPFS=false; shift ;;
         --tmpfs-dir)
             TMPFS_HF_HOME="$2"; USE_TMPFS=true; shift 2 ;;
+        --tmpfs-method)
+            TMPFS_METHOD="$2"; shift 2 ;;
         --tmpdir)
             TMPFS_TMPDIR="$2"; shift 2 ;;
         --skip-gpu-check)
@@ -202,6 +216,10 @@ fi
 case "$MODE" in
     roger|christina) ;;
     *) echo "Invalid mode: $MODE (must be roger or christina)" >&2; exit 1 ;;
+esac
+case "$TMPFS_METHOD" in
+    auto|rsync|cp) ;;
+    *) echo "Invalid --tmpfs-method: $TMPFS_METHOD (must be auto, rsync or cp)" >&2; exit 1 ;;
 esac
 
 # Validate types (roger mode only).  r_combinations / t_combinations are
@@ -347,10 +365,9 @@ setup_tmpfs() {
         echo "[tmpfs] disabled (--no-tmpfs); using system HF_HOME=${HF_HOME:-$HOME/.cache/huggingface} and TMPDIR=${TMPDIR:-/tmp}"
         return
     fi
-    if [ ! -d /dev/shm ]; then
-        echo "[tmpfs] /dev/shm not present; tmpfs setup skipped"
-        return
-    fi
+    # (Until 2026-10-12 a missing /dev/shm skipped everything here; now the
+    # TMPDIR block below falls back to /tmp on its own, and the mirror is
+    # skipped when its mount, the parent of --tmpfs-dir, is missing.)
 
     # Redirect TMPDIR to $TMPFS_TMPDIR (default /dev/shm) unconditionally.
     # Step 2 (2_activations.py) honours TMPDIR for its staging files; if
@@ -388,66 +405,38 @@ setup_tmpfs() {
         echo "[tmpfs] TORCHINDUCTOR_CACHE_DIR=$TORCHINDUCTOR_CACHE_DIR (off /dev/shm noexec)"
     fi
 
-    # Mirror HF cache for the requested $MODEL.  HF caches under
-    # <HF_HOME>/hub/models--<owner>--<name>/.  We copy just the requested
-    # model's subtree to keep the tmpfs footprint minimal.
+    # Mirror the HF cache for $MODEL (<HF_HOME>/hub/models--<owner>--<name>/,
+    # just that model's subtree) with assistant_axis/tmpfs.py, the code the
+    # steering driver uses too (P8.6, 2026-10-12; this function had its own
+    # cp -r until then).  It reuses a mirror only when its completeness
+    # marker is there and the tree has not shrunk, checks for 1.5x the
+    # model's size free on the mount, copies with --tmpfs-method (auto: rsync
+    # if installed, else a staged cp renamed into place), writes the marker,
+    # and prints the new HF_HOME; it exits 1 (and says why on stderr) when
+    # the source cache should be used instead.  A mirror made by this
+    # function's cp -r before 2026-10-12 has no marker: rsync tops it up;
+    # cp refuses to trust or delete it (delete it by hand first).
     local source_hf="${HF_HOME:-$HOME/.cache/huggingface}"
-    local model_subdir="models--${MODEL//\//--}"
-    local source_model_dir="$source_hf/hub/$model_subdir"
-    local tmpfs_model_dir="$TMPFS_HF_HOME/hub/$model_subdir"
-
-    if [ ! -d "$source_model_dir" ]; then
-        echo "[tmpfs] $MODEL not found at $source_model_dir; HF will download to $source_hf on first use (no tmpfs cache pre-populated)"
+    if [ ! -d "$(dirname "$TMPFS_HF_HOME")" ]; then
+        echo "[tmpfs] $(dirname "$TMPFS_HF_HOME") not present; no model mirror (HF_HOME=$source_hf)"
         return
     fi
-
-    if [ -d "$tmpfs_model_dir" ]; then
-        echo "[tmpfs] $MODEL already present at $tmpfs_model_dir; reusing"
-        export HF_HOME="$TMPFS_HF_HOME"
+    local new_hf_home
+    if new_hf_home=$(uv run python ../assistant_axis/tmpfs.py mirror \
+            --model "$MODEL" \
+            --tmpfs-hf-home "$TMPFS_HF_HOME" \
+            --source-hf-home "$source_hf" \
+            --method "$TMPFS_METHOD") && [ -n "$new_hf_home" ]; then
+        export HF_HOME="$new_hf_home"
         echo "[tmpfs] HF_HOME=$HF_HOME"
-        return
-    fi
-
-    # Disk-space check: require 1.5× model size headroom in /dev/shm.
-    # `cp -r` is sequential so its own peak usage is ~1× + a small buffer,
-    # but TMPDIR=/dev/shm too and step 2 puts ~2.6 GB per-role staging
-    # files there during extraction, so we want some slack on top of 1×.
-    # 2× was overly conservative and caused silent fallbacks to NFS that
-    # resulted in multi-hour cold mmap reads of model weights.
-    local needed_kb
-    needed_kb=$(du -sk "$source_model_dir" 2>/dev/null | awk '{print int($1 * 3 / 2)}')
-    local avail_kb
-    avail_kb=$(df --output=avail /dev/shm 2>/dev/null | tail -1 | tr -d ' ')
-    if [ -z "$needed_kb" ] || [ -z "$avail_kb" ] || [ "$avail_kb" -lt "$needed_kb" ]; then
+    else
         echo ""
         echo "[tmpfs] ============================================================"
-        echo "[tmpfs]  WARNING: insufficient /dev/shm space — tmpfs cache DISABLED"
-        echo "[tmpfs]  need ${needed_kb}kB, have ${avail_kb}kB"
-        echo "[tmpfs]  Falling back to source HF cache: $source_hf"
+        echo "[tmpfs]  no tmpfs mirror (the reason is above); using HF_HOME=$source_hf"
         echo "[tmpfs]  If that is on NFS or other slow storage, expect step 2 to"
         echo "[tmpfs]  hang for HOURS on cold mmap reads of model weights."
-        echo "[tmpfs]  Fix: increase --shm-size on the container, or free /dev/shm."
         echo "[tmpfs] ============================================================"
         echo ""
-        return
-    fi
-
-    # Copy into a staging directory and rename it into place only when the
-    # copy succeeded: the "already present; reusing" check above trusts any
-    # directory at $tmpfs_model_dir, so a copy that failed (ENOSPC) or was
-    # interrupted must never be left there (before 2026-10-12 it was, and
-    # every later run loaded a partial model).  Staging directories left by
-    # an interrupted run hold RAM and are removed first.
-    local staging_dir="$TMPFS_HF_HOME/hub/.${model_subdir}.partial.$$"
-    mkdir -p "$TMPFS_HF_HOME/hub"
-    rm -rf "$TMPFS_HF_HOME/hub/.${model_subdir}.partial."*
-    echo "[tmpfs] copying $MODEL ($((needed_kb * 2 / 3 / 1024)) MB) from $source_model_dir to $tmpfs_model_dir ..."
-    if cp -r "$source_model_dir" "$staging_dir" && mv -T "$staging_dir" "$tmpfs_model_dir"; then
-        export HF_HOME="$TMPFS_HF_HOME"
-        echo "[tmpfs] copy complete; HF_HOME=$HF_HOME"
-    else
-        rm -rf "$staging_dir"
-        echo "[tmpfs] copy failed; falling back to $source_hf"
     fi
 }
 
@@ -536,8 +525,82 @@ symlink_default() {
     fi
 }
 
-# ---- Christina mode (unchanged) -------------------------------------------
+# ---- Helper: step 0, the default entity, generated once under default/ -----
+# Usage: run_step0_default <1_generate.py arguments selecting the default>
+# Generates, extracts and averages the default entity into
+# $OUTPUT_DIR/default/{responses,activations,vectors}; each part is skipped
+# when its file exists.  Roger mode then symlinks it into every type's tree,
+# christina mode (traits) into its one tree.
+run_step0_default() {
+    echo "=== Step 0: Default role ==="
+    DEFAULT_DIR="$OUTPUT_DIR/default"
+    DEFAULT_RESP="$DEFAULT_DIR/responses"
+    DEFAULT_ACT="$DEFAULT_DIR/activations"
+    DEFAULT_VEC="$DEFAULT_DIR/vectors"
+    mkdir -p "$DEFAULT_RESP" "$DEFAULT_ACT" "$DEFAULT_DIR/scores" "$DEFAULT_VEC"
+
+    if [ ! -f "$DEFAULT_RESP/default.jsonl" ]; then
+        echo "  Generating default responses..."
+        uv run 1_generate.py \
+            --model "$MODEL" \
+            "$@" \
+            --roles default \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --output_dir "$DEFAULT_RESP"
+    else
+        echo "  default.jsonl already exists, skipping generation."
+    fi
+
+    if [ ! -f "$DEFAULT_ACT/default.pt" ]; then
+        echo "  Extracting default activations..."
+        uv run 2_activations.py \
+            --model "$MODEL" \
+            --responses_dir "$DEFAULT_RESP" \
+            --output_dir "$DEFAULT_ACT" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --batch_size 8
+    else
+        echo "  default.pt already exists, skipping extraction."
+    fi
+
+    if [ ! -f "$DEFAULT_VEC/default.pt" ]; then
+        echo "  Computing default vector..."
+        uv run 4_vectors.py \
+            --activations_dir "$DEFAULT_ACT" \
+            --scores_dir "$DEFAULT_DIR/scores" \
+            --output_dir "$DEFAULT_VEC" \
+            || step_failed "Step 0 (default vector)" "4_vectors.py exited non-zero; see its [ERROR] lines above"
+    else
+        echo "  default vector already exists, skipping."
+    fi
+    echo ""
+}
+
+# ---- Christina mode --------------------------------------------------------
 if [ "$MODE" = "christina" ]; then
+
+    # A christina run over traits has no default.json in its --roles_dir, so
+    # step 5 had no default vector and always failed (review P4 D6).  Since
+    # 2026-10-12 the default comes from the roles directory ($DEFAULT_ROLE_DIR),
+    # generated once under default/ with the christina settings (as roger
+    # mode's step 0) and symlinked into this tree.  A run over roles
+    # generates its default.json with the other roles, as before.
+    if [ ! -f "$ROLES_DIR/default.json" ]; then
+        if [ ! -f "$DEFAULT_ROLE_DIR/default.json" ]; then
+            echo "ERROR: $ROLES_DIR has no default.json and neither has $DEFAULT_ROLE_DIR; step 5 needs a default" >&2
+            exit 1
+        fi
+        run_step0_default --mode christina --roles_dir "$DEFAULT_ROLE_DIR"
+        for sub_ext in "responses jsonl" "activations pt" "vectors pt"; do
+            set -- $sub_ext
+            mkdir -p "$OUTPUT_DIR/$1"
+            if [ -f "$OUTPUT_DIR/default/$1/default.$2" ] && [ ! -e "$OUTPUT_DIR/$1/default.$2" ]; then
+                ln -s "../default/$1/default.$2" "$OUTPUT_DIR/$1/default.$2"
+                echo "  Symlinked default.$2 -> $1/"
+            fi
+        done
+        echo ""
+    fi
 
     echo "=== Step 1: Generating responses ==="
     uv run 1_generate.py \
@@ -635,50 +698,8 @@ if [ "$MODE" = "christina" ]; then
 else
 
     # -- Step 0: Generate, extract, and vectorize default (once) ---------------
-    echo "=== Step 0: Default role ==="
-    DEFAULT_DIR="$OUTPUT_DIR/default"
-    DEFAULT_RESP="$DEFAULT_DIR/responses"
-    DEFAULT_ACT="$DEFAULT_DIR/activations"
-    DEFAULT_VEC="$DEFAULT_DIR/vectors"
-    mkdir -p "$DEFAULT_RESP" "$DEFAULT_ACT" "$DEFAULT_DIR/scores" "$DEFAULT_VEC"
-
-    if [ ! -f "$DEFAULT_RESP/default.jsonl" ]; then
-        echo "  Generating default responses..."
-        uv run 1_generate.py \
-            --mode roger \
-            --model "$MODEL" \
-            --roles_only \
-            --roles default \
-            --reduce_questions "$REDUCE_QUESTIONS" \
-            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --output_dir "$DEFAULT_RESP"
-    else
-        echo "  default.jsonl already exists, skipping generation."
-    fi
-
-    if [ ! -f "$DEFAULT_ACT/default.pt" ]; then
-        echo "  Extracting default activations..."
-        uv run 2_activations.py \
-            --model "$MODEL" \
-            --responses_dir "$DEFAULT_RESP" \
-            --output_dir "$DEFAULT_ACT" \
-            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --batch_size 8
-    else
-        echo "  default.pt already exists, skipping extraction."
-    fi
-
-    if [ ! -f "$DEFAULT_VEC/default.pt" ]; then
-        echo "  Computing default vector..."
-        uv run 4_vectors.py \
-            --activations_dir "$DEFAULT_ACT" \
-            --scores_dir "$DEFAULT_DIR/scores" \
-            --output_dir "$DEFAULT_VEC" \
-            || step_failed "Step 0 (default vector)" "4_vectors.py exited non-zero; see its [ERROR] lines above"
-    else
-        echo "  default vector already exists, skipping."
-    fi
-    echo ""
+    run_step0_default --mode roger --roles_only --roles_dir "$DEFAULT_ROLE_DIR" \
+        --reduce_questions "$REDUCE_QUESTIONS"
 
     # -- Step 1: Generate responses ------------------------------------------
     echo "=== Step 1: Generating responses ==="

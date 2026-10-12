@@ -38,11 +38,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import torch
-from tqdm import tqdm
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# atomic_io uses the standard library only (torch is imported inside its
+# tensor helpers), and the package __init__ is lazy since 2026-10-12.
 from assistant_axis.atomic_io import (  # noqa: E402
     read_text_with_retry,
     torch_load_with_retry,
@@ -50,6 +49,69 @@ from assistant_axis.atomic_io import (  # noqa: E402
 )
 
 logger = logging.getLogger("pipeline.4_vectors")
+
+
+def _setup_logging() -> None:
+    # Ensure pipeline log messages (including io_retry's WARNING/ERROR
+    # output) are visible.  Format mirrors axis_judge_correlation.
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Compute per-role vectors")
+    parser.add_argument("--activations_dir", type=str, required=True, help="Directory with activation .pt files")
+    parser.add_argument("--scores_dir", type=str, required=True, help="Directory with score JSON files")
+    parser.add_argument("--output_dir", type=str, required=True, help="Output directory for vector .pt files")
+    parser.add_argument("--min_count", type=int, default=50, help="Minimum score=3 samples required")
+    parser.add_argument("--overwrite", nargs="?", const=True, default=False, metavar="RERUN_LIST",
+                        help="Overwrite existing output files.  With a file argument (one entity "
+                             "name per line, e.g. a scan's missing_vectors_rerun.txt) only those "
+                             "entities are overwritten; the rest keep skip-if-exists.")
+    parser.add_argument("--reduce_questions", type=int, default=1,
+                        help="Take only activations with q_idx %% N == 0 (default 1 = no reduction). "
+                             "Compounds with any reduction already done at step 1.")
+    return parser
+
+
+def needs_work(act_file: Path, output_file: Path, overwrite: bool) -> bool:
+    """Whether the main loop would do anything for this activation file
+    (standard library only): no vector yet, or overwriting, and not a
+    0-byte placeholder."""
+    if output_file.exists() and not overwrite:
+        return False
+    try:
+        return act_file.stat().st_size != 0
+    except OSError:
+        return True          # process_entity reports it
+
+
+def nothing_to_do(args) -> bool:
+    """True when every activation file is already done, decided without
+    torch: a rerun with nothing to do returns before the torch import
+    below (seconds locally, minutes on the pod's network volume;
+    walk-through P8.3, 2026-10-12).  ``--overwrite`` always means work; an
+    empty activations directory is left to ``main`` (an error)."""
+    if args.overwrite:
+        return False
+    acts = sorted(Path(args.activations_dir).glob("*.pt"))
+    out = Path(args.output_dir)
+    return bool(acts) and not any(needs_work(a, out / a.name, False) for a in acts)
+
+
+if __name__ == "__main__":
+    _setup_logging()
+    _early = build_parser().parse_args()
+    if nothing_to_do(_early):
+        logger.info("Nothing to do: every activation file in %s has a vector in %s "
+                    "(or is a 0-byte placeholder)", _early.activations_dir, _early.output_dir)
+        sys.exit(0)
+
+import torch  # noqa: E402
+from tqdm import tqdm  # noqa: E402
 
 
 class BelowMinCount(ValueError):
@@ -286,25 +348,8 @@ def process_entity(act_file: Path, output_file: Path, scores_dir: Path, *,
 
 
 def main(argv=None) -> int:
-    # Ensure pipeline log messages (including io_retry's WARNING/ERROR
-    # output) are visible.  Format mirrors axis_judge_correlation.
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    parser = argparse.ArgumentParser(description="Compute per-role vectors")
-    parser.add_argument("--activations_dir", type=str, required=True, help="Directory with activation .pt files")
-    parser.add_argument("--scores_dir", type=str, required=True, help="Directory with score JSON files")
-    parser.add_argument("--output_dir", type=str, required=True, help="Output directory for vector .pt files")
-    parser.add_argument("--min_count", type=int, default=50, help="Minimum score=3 samples required")
-    parser.add_argument("--overwrite", nargs="?", const=True, default=False, metavar="RERUN_LIST",
-                        help="Overwrite existing output files.  With a file argument (one entity "
-                             "name per line, e.g. a scan's missing_vectors_rerun.txt) only those "
-                             "entities are overwritten; the rest keep skip-if-exists.")
-    parser.add_argument("--reduce_questions", type=int, default=1,
-                        help="Take only activations with q_idx %% N == 0 (default 1 = no reduction). "
-                             "Compounds with any reduction already done at step 1.")
+    _setup_logging()
+    parser = build_parser()
     args = parser.parse_args(argv)
 
     # Create output directory

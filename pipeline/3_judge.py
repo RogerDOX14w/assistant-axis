@@ -34,66 +34,29 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Load assistant_axis/judge.py directly, bypassing the assistant_axis package
-# __init__, which eagerly imports torch-dependent submodules. judge.py itself
-# only uses stdlib + openai + dotenv, and this script has no need for torch.
-# On networked filesystems (e.g. MooseFS under contention) the torch import can
-# take minutes-to-hours, so this shortcut is meaningful for startup time.
-#
-# The standard form would be:
-#     from assistant_axis.judge import RateLimiter, call_judge_batch, parse_judge_score
-# which works fine functionally but drags torch in via the package __init__.
-#
-# This is the only script in the repo using this pattern; it is not a
-# convention to propagate. If you are maintaining code that uses assistant_axis,
-# prefer the standard form everywhere else.
-#
-# The modules are imported as submodules of a stand-in package whose
-# ``__path__`` is the assistant_axis directory, so that the package's
-# ``__init__`` never runs but a relative import inside a module
-# (judge.py's ``from .judge_pricing import ...``, needed for the usage
-# record) still resolves.  judge.py, judge_pricing.py and entity_id.py use
-# only the standard library, openai and dotenv.
-import importlib as _importlib
-import types as _types
-
-_STANDALONE_PKG = "_assistant_axis_standalone"
-
-
-def _standalone(submodule: str):
-    """Import ``assistant_axis/<submodule>.py`` without the package __init__."""
-    if _STANDALONE_PKG not in sys.modules:
-        pkg = _types.ModuleType(_STANDALONE_PKG)
-        pkg.__path__ = [str(Path(__file__).resolve().parent.parent / "assistant_axis")]
-        sys.modules[_STANDALONE_PKG] = pkg
-    return _importlib.import_module(f"{_STANDALONE_PKG}.{submodule}")
-
-
-_judge_mod = _standalone("judge")
-RateLimiter = _judge_mod.RateLimiter
-call_judge_batch = _judge_mod.call_judge_batch
-chat_request_body = _judge_mod.chat_request_body
-parse_judge_score = _judge_mod.parse_judge_score
-provider_for_model = _judge_mod.provider_for_model
-warn_if_low_parse_rate = _judge_mod.warn_if_low_parse_rate
-_pricing_mod = _standalone("judge_pricing")
-MultiModelUsage = _pricing_mod.MultiModelUsage
-BATCH_SUFFIX = _pricing_mod.BATCH_SUFFIX
-price_for_model = _pricing_mod.price_for_model
-# NFS-safe reads and writes for the score files and side-cars, which live on
-# the pod's network volume (AGENT_NOTES "NFS-safe file I/O"; stdlib only).
-_atomic_io = _standalone("atomic_io")
-atomic_write_text = _atomic_io.atomic_write_text
-read_text_with_retry = _atomic_io.read_text_with_retry
-read_jsonl_with_retry = _atomic_io.read_jsonl_with_retry
-PARSE_RATE_LOUD_THRESHOLD = _judge_mod.PARSE_RATE_LOUD_THRESHOLD
-_openai_batch = _standalone("openai_batch")
-OpenAIBatchRunner = _openai_batch.OpenAIBatchRunner
-_entity_id_mod = _standalone("entity_id")
-display_form_name = _entity_id_mod.display_form_name
-judge_form_of_label = _entity_id_mod.judge_form_of_label
-judge_label = _entity_id_mod.judge_label
-JUDGE_LABEL_FORM = _entity_id_mod.JUDGE_LABEL_FORM
+# Plain imports.  Until 2026-10-12 these modules were loaded through a
+# stand-in package so that the package __init__, which then imported torch,
+# matplotlib and sklearn eagerly, never ran (minutes on the pod's network
+# volume: the recorded slow start of this step).  The __init__ is lazy since
+# then (PEP 562; review P1 D5, walk-through P8.3), and none of these modules
+# imports torch; pipeline/tests/test_3_judge.py checks that loading this
+# script still imports no torch.
+import assistant_axis.atomic_io as _atomic_io
+import assistant_axis.judge as _judge_mod
+import assistant_axis.judge_pricing as _pricing_mod
+import assistant_axis.openai_batch as _openai_batch
+from assistant_axis.atomic_io import (  # NFS-safe; AGENT_NOTES "NFS-safe file I/O"
+    atomic_write_text, read_jsonl_with_retry, read_text_with_retry,
+)
+from assistant_axis.entity_id import (
+    JUDGE_LABEL_FORM, display_form_name, judge_form_of_label, judge_label,
+)
+from assistant_axis.judge import (
+    PARSE_RATE_LOUD_THRESHOLD, RateLimiter, call_judge_batch, chat_request_body,
+    parse_judge_score, provider_for_model, warn_if_low_parse_rate,
+)
+from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
+from assistant_axis.openai_batch import OpenAIBatchRunner
 
 import openai
 

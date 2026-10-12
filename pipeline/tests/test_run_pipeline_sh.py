@@ -33,6 +33,8 @@ STEP_SCRIPTS = ("1_generate.py", "2_activations.py", "3_judge.py", "4_vectors.py
 def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = False,
               fail_rc: int = 1, emit_on: str | None = None, emit: str = "",
               log_to_file: bool = False, provide_steps: bool = True,
+              tmpfs: bool = False, workdir: Path | None = None, types: str | None = "traits",
+              print_on: str | None = None, print_text: str = "",
               ) -> tuple[subprocess.CompletedProcess, list[str]]:
     """Run a copy of the script with a fake ``uv``.
 
@@ -42,7 +44,11 @@ def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = Fal
     script's log file (redirected with a plain ``exec >>``, which the sandbox
     allows) so the end-of-run summary can be checked.  ``provide_steps``:
     place empty step scripts in the working directory, which the script
-    requires since 2026-10-12."""
+    requires since 2026-10-12.  ``tmpfs``: leave out ``--no-tmpfs``.
+    ``workdir``: where the script copy and step stubs go and the run's cwd
+    (default ``tmp_path``)."""
+    workdir = workdir or tmp_path
+    workdir.mkdir(parents=True, exist_ok=True)
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     uv_log = tmp_path / "uv.log"
@@ -51,6 +57,7 @@ def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = Fal
         "#!/bin/bash\n"
         'echo "$*" >> "$UV_LOG"\n'
         + (f'case "$*" in *"{emit_on}"*) echo "{emit}" >&2;; esac\n' if emit_on else "")
+        + (f'case "$*" in *"{print_on}"*) echo "{print_text}";; esac\n' if print_on else "")
         + (f'case "$*" in *"{fail_on}"*) echo "{fail_on} failed" >&2; exit {fail_rc};; esac\n'
            if fail_on else "")
         + "exit 0\n")
@@ -64,11 +71,11 @@ def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = Fal
     assert tee_line in text
     replacement = ('exec >> "$LOG_FILE" 2>&1' if log_to_file
                    else ": # (log redirection removed for the test)")
-    script = tmp_path / "run_pipeline.sh"
+    script = workdir / "run_pipeline.sh"
     script.write_text(text.replace(tee_line, replacement))
     if provide_steps:
         for name in STEP_SCRIPTS:
-            (tmp_path / name).write_text("")
+            (workdir / name).write_text("")
     env = {
         "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}",
         "UV_LOG": str(uv_log),
@@ -76,11 +83,14 @@ def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = Fal
         "HF_HOME": str(tmp_path / "hf"),
         "TMPDIR": str(tmp_path),
     }
-    args = ["bash", str(script), "--output_dir", str(out_dir), "--types", "traits",
-            "--no-tmpfs", "--skip-gpu-check"]
+    args = ["bash", str(script), "--output_dir", str(out_dir), "--skip-gpu-check"]
+    if types:
+        args += ["--types", types]
+    if not tmpfs:
+        args.append("--no-tmpfs")
     if not scan:
         args.append("--no-scan")
-    proc = subprocess.run([*args, *extra], cwd=tmp_path, env=env, capture_output=True,
+    proc = subprocess.run([*args, *extra], cwd=workdir, env=env, capture_output=True,
                           text=True, timeout=120)
     calls = uv_log.read_text().splitlines() if uv_log.exists() else []
     return proc, calls
@@ -143,17 +153,125 @@ def test_started_outside_pipeline_dir_fails_before_any_step(tmp_path):
     assert "cd pipeline && ./run_pipeline.sh" in proc.stderr
 
 
+def _corpus(tmp_path: Path, *, role_default: bool = True) -> Path:
+    """tmp/data/{roles,traits}/instructions beside a tmp/pipeline work dir, so
+    that the driver's ../data/... defaults resolve; returns the work dir."""
+    roles = tmp_path / "data" / "roles" / "instructions"
+    traits = tmp_path / "data" / "traits" / "instructions"
+    roles.mkdir(parents=True)
+    traits.mkdir(parents=True)
+    if role_default:
+        (roles / "default.json").write_text("{}")
+    (roles / "pirate.json").write_text("{}")
+    (traits / "bold.json").write_text("{}")
+    return tmp_path / "pipeline"
+
+
 def test_christina_mode_gives_step_4_and_the_scan_the_same_min_count(tmp_path):
     """Step 4 used its own default (50) while the scan got MIN_COUNT (30), so
     entities with 30-49 score=3 samples were called re-run candidates."""
     proc, calls = _run_full(tmp_path, None, "--mode", "christina",
-                            "--roles_dir", "../data/roles/instructions", scan=True)
+                            "--roles_dir", "../data/roles/instructions", scan=True,
+                            workdir=_corpus(tmp_path), types=None)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     step4 = [c for c in calls if "4_vectors.py" in c]
     scan = [c for c in calls if "scan_missing_vectors.py" in c]
     assert len(step4) == 1 and len(scan) == 1
     assert "--min_count 50" in step4[0]
     assert "--min_count 50" in scan[0]
+
+
+def test_christina_roles_run_generates_its_default_with_the_roles(tmp_path):
+    """The roles directory has default.json: no separate step 0 (unchanged)."""
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/roles/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "Step 0" not in proc.stdout
+    assert not any("--roles default" in c for c in calls)
+
+
+def test_christina_traits_run_takes_the_default_from_the_roles_directory(tmp_path):
+    """P8.5 (2026-10-12): a christina run over traits had no default vector, so
+    step 5 always failed; the default is now generated once under default/
+    from the roles directory, with the christina settings."""
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    gen_default = [c for c in calls if "1_generate.py" in c and "--roles default" in c]
+    assert len(gen_default) == 1
+    assert "--mode christina --roles_dir ../data/roles/instructions" in gen_default[0]
+    assert str(tmp_path / "out" / "default" / "responses") in gen_default[0]
+    assert any("2_activations.py" in c and "/default/responses" in c for c in calls)
+    assert any("4_vectors.py" in c and "/default/activations" in c for c in calls)
+    # the traits themselves are judged as traits
+    assert any("3_judge.py --entity_type trait" in c for c in calls)
+
+
+def test_christina_traits_run_symlinks_the_default_into_its_tree(tmp_path):
+    out = tmp_path / "out"
+    for sub, ext in (("responses", "jsonl"), ("activations", "pt"), ("vectors", "pt")):
+        d = out / "default" / sub
+        d.mkdir(parents=True)
+        (d / f"default.{ext}").write_text(sub)
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert not any("--roles default" in c for c in calls)        # all three existed
+    for sub, ext in (("responses", "jsonl"), ("activations", "pt"), ("vectors", "pt")):
+        link = out / sub / f"default.{ext}"
+        assert link.is_symlink() and link.read_text() == sub
+        assert os.readlink(link) == f"../default/{sub}/default.{ext}"
+
+
+def test_christina_traits_run_without_any_default_stops(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path, role_default=False), types=None)
+    assert proc.returncode == 1
+    assert "step 5 needs a default" in proc.stderr
+    assert calls == []
+
+
+def test_tmpfs_mirror_goes_through_the_python_helper(tmp_path):
+    """P8.6 (2026-10-12): one mirror implementation; the driver passes
+    --tmpfs-method through and keeps HF_HOME when the helper prints nothing."""
+    (tmp_path / "shm").mkdir()
+    proc, calls = _run_full(tmp_path, None, "--tmpfs-dir", str(tmp_path / "shm" / "hf-cache"),
+                            "--tmpfs-method", "cp", "--tmpdir", str(tmp_path), tmpfs=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    mirror = [c for c in calls if "tmpfs.py mirror" in c]
+    assert mirror == [f"run python ../assistant_axis/tmpfs.py mirror --model Qwen/Qwen3-32B "
+                      f"--tmpfs-hf-home {tmp_path / 'shm' / 'hf-cache'} "
+                      f"--source-hf-home {tmp_path / 'hf'} --method cp"]
+    assert "no tmpfs mirror" in proc.stdout
+    assert calls.index(mirror[0]) < next(i for i, c in enumerate(calls) if "1_generate.py" in c)
+
+
+def test_tmpfs_mirror_sets_hf_home_from_the_helper(tmp_path):
+    (tmp_path / "shm").mkdir()
+    proc, _ = _run_full(tmp_path, None, "--tmpfs-dir", str(tmp_path / "shm" / "hf-cache"),
+                        "--tmpdir", str(tmp_path), tmpfs=True,
+                        print_on="tmpfs.py mirror", print_text=str(tmp_path / "shm" / "hf-cache"))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert f"[tmpfs] HF_HOME={tmp_path / 'shm' / 'hf-cache'}" in proc.stdout
+
+
+def test_tmpfs_mirror_skipped_when_its_mount_is_missing(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--tmpfs-dir", str(tmp_path / "noshm" / "hf-cache"),
+                            "--tmpdir", str(tmp_path), tmpfs=True)
+    assert proc.returncode == 0
+    assert not any("tmpfs.py" in c for c in calls)
+    assert "not present; no model mirror" in proc.stdout
+
+
+def test_an_unknown_tmpfs_method_is_refused(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--tmpfs-method", "scp")
+    assert proc.returncode == 1
+    assert "Invalid --tmpfs-method" in proc.stderr
+    assert calls == []
 
 
 def test_scan_exit_3_stops_before_step_5(tmp_path):

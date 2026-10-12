@@ -29,16 +29,69 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import torch
-import torch.multiprocessing as mp
-from tqdm import tqdm
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Extract activations from responses")
+    parser.add_argument("--model", type=str, required=True, help="HuggingFace model name")
+    parser.add_argument("--responses_dir", type=str, required=True, help="Directory with response JSONL files")
+    parser.add_argument("--output_dir", type=str, required=True, help="Output directory for .pt files")
+    parser.add_argument("--layers", type=str, default="all", help="Layers to extract (all or comma-separated)")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
+    parser.add_argument("--max_length", type=int, default=2048, help="Maximum sequence length")
+    parser.add_argument("--tensor_parallel_size", type=int, default=None, help="GPUs per model (auto-detect if None)")
+    parser.add_argument("--roles", nargs="+", help="Specific roles to process")
+    parser.add_argument("--name_prefix", type=str, default=None,
+                        help="Only process response files whose stem starts with "
+                             "this prefix (e.g. 'r_' or 't_').  Used by "
+                             "run_pipeline.sh's r_combinations / t_combinations "
+                             "subset types so disk-limited runs can extract one "
+                             "half of the combination grid at a time.")
+    parser.add_argument("--thinking", type=lambda x: x.lower() in ['true', '1', 'yes'], default=False,
+                       help="Enable thinking mode for Qwen models (default: False)")
+    parser.add_argument("--no-headers", action="store_true", default=False,
+                       help="Disable header token extraction (legacy compat)")
+    return parser
+
+
+def pending_response_files(responses_dir: Path, output_dir: Path, *,
+                           roles: Optional[List[str]] = None,
+                           name_prefix: Optional[str] = None) -> List[Path]:
+    """The response files (narrowed by ``--roles`` / ``--name_prefix``) whose
+    ``<name>.pt`` does not exist yet.  Standard library only, so that a rerun
+    with nothing to do can return before torch is imported (below)."""
+    files = sorted(Path(responses_dir).glob("*.jsonl"))
+    if roles:
+        files = [f for f in files if f.stem in roles]
+    if name_prefix:
+        files = [f for f in files if f.stem.startswith(name_prefix)]
+    pending = [f for f in files if not (Path(output_dir) / f"{f.stem}.pt").exists()]
+    if len(files) > len(pending):
+        logger.info(f"Skipping {len(files) - len(pending)} of {len(files)} response file(s) "
+                    f"whose activations already exist")
+    return pending
+
+
+# A rerun with nothing to extract returns here, before the torch and
+# transformers imports below (seconds locally, minutes on the pod's network
+# volume; walk-through P8.3, 2026-10-12).  Only when run as a script: the
+# tests import the module for its functions.
+if __name__ == "__main__":
+    _early = build_parser().parse_args()
+    if not pending_response_files(Path(_early.responses_dir), Path(_early.output_dir),
+                                  roles=_early.roles, name_prefix=_early.name_prefix):
+        logger.info("Nothing to process — all activations already exist")
+        sys.exit(0)
+
+import torch  # noqa: E402
+import torch.multiprocessing as mp  # noqa: E402
+from tqdm import tqdm  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from assistant_axis.internals import ProbingModel, ConversationEncoder, ActivationExtractor, SpanMapper
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from assistant_axis.internals import ProbingModel, ConversationEncoder, ActivationExtractor, SpanMapper  # noqa: E402
 
 
 def _hf_home_path() -> Path:
@@ -559,20 +612,8 @@ def run_multi_worker(args) -> int:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    role_files = []
-    for f in sorted(responses_dir.glob("*.jsonl")):
-        # Filter by --roles if specified
-        if args.roles and f.stem not in args.roles:
-            continue
-        # Filter by --name_prefix if specified (subset extraction, e.g. r_)
-        if args.name_prefix and not f.stem.startswith(args.name_prefix):
-            continue
-        # Skip existing
-        output_file = output_dir / f"{f.stem}.pt"
-        if output_file.exists():
-            logger.info(f"Skipping {f.stem} (already exists)")
-            continue
-        role_files.append(f)
+    role_files = pending_response_files(responses_dir, output_dir,
+                                        roles=args.roles, name_prefix=args.name_prefix)
 
     if not role_files:
         logger.info("No roles to process")
@@ -633,26 +674,7 @@ def run_multi_worker(args) -> int:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract activations from responses")
-    parser.add_argument("--model", type=str, required=True, help="HuggingFace model name")
-    parser.add_argument("--responses_dir", type=str, required=True, help="Directory with response JSONL files")
-    parser.add_argument("--output_dir", type=str, required=True, help="Output directory for .pt files")
-    parser.add_argument("--layers", type=str, default="all", help="Layers to extract (all or comma-separated)")
-    parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
-    parser.add_argument("--max_length", type=int, default=2048, help="Maximum sequence length")
-    parser.add_argument("--tensor_parallel_size", type=int, default=None, help="GPUs per model (auto-detect if None)")
-    parser.add_argument("--roles", nargs="+", help="Specific roles to process")
-    parser.add_argument("--name_prefix", type=str, default=None,
-                        help="Only process response files whose stem starts with "
-                             "this prefix (e.g. 'r_' or 't_').  Used by "
-                             "run_pipeline.sh's r_combinations / t_combinations "
-                             "subset types so disk-limited runs can extract one "
-                             "half of the combination grid at a time.")
-    parser.add_argument("--thinking", type=lambda x: x.lower() in ['true', '1', 'yes'], default=False,
-                       help="Enable thinking mode for Qwen models (default: False)")
-    parser.add_argument("--no-headers", action="store_true", default=False,
-                       help="Disable header token extraction (legacy compat)")
-    args = parser.parse_args()
+    args = build_parser().parse_args()
 
     # Set up file logging (append to output_dir/activations.log)
     output_dir = Path(args.output_dir)
@@ -704,22 +726,8 @@ def main():
         # downstream pipeline steps).  Loading ProbingModel triggers a
         # multi-GB GPU allocation, which would fail without CUDA even when
         # there's no actual work to do.
-        response_files = sorted(responses_dir.glob("*.jsonl"))
-        logger.info(f"Found {len(response_files)} response files")
-
-        if args.roles:
-            response_files = [f for f in response_files if f.stem in args.roles]
-        if args.name_prefix:
-            response_files = [f for f in response_files
-                              if f.stem.startswith(args.name_prefix)]
-
-        role_files = []
-        for f in response_files:
-            output_file = output_dir / f"{f.stem}.pt"
-            if output_file.exists():
-                logger.info(f"Skipping {f.stem} (already exists)")
-                continue
-            role_files.append(f)
+        role_files = pending_response_files(responses_dir, output_dir,
+                                            roles=args.roles, name_prefix=args.name_prefix)
 
         if not role_files:
             logger.info("Nothing to process — all activations already exist")

@@ -32,17 +32,37 @@ def judge():
     return mod
 
 
-def test_loading_does_not_import_torch_or_the_package():
-    """The script's reason for loading modules standalone: the package
-    __init__ imports torch, which can take minutes on a network mount."""
+def test_loading_does_not_import_torch():
+    """Torch can take minutes to import on the pod's network mount, and step
+    3 has no use for it.  Changed expectation (P8.3, 2026-10-12): the script
+    now imports the package itself, whose __init__ is lazy, instead of a
+    stand-in package, so ``assistant_axis`` is loaded; torch, matplotlib,
+    sklearn, scipy and plotly still are not."""
     code = (
         "import importlib.util, sys\n"
         f"spec = importlib.util.spec_from_file_location('j', {str(SCRIPT)!r})\n"
         "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
-        "print('torch' in sys.modules, 'assistant_axis' in sys.modules)\n"
+        "heavy = ('torch', 'matplotlib', 'sklearn', 'scipy', 'plotly')\n"
+        "print(sorted(n for n in sys.modules if n.split('.')[0] in heavy)[:5], "
+        "'assistant_axis' in sys.modules)\n"
     )
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
-    assert out.stdout.split() == ["False", "False"]
+    assert out.stdout.split() == ["[]", "True"]
+
+
+def test_the_scripts_modules_are_the_packages():
+    """No second copy of judge / judge_pricing / openai_batch under a
+    stand-in package name any more."""
+    code = (
+        "import importlib.util, sys\n"
+        f"spec = importlib.util.spec_from_file_location('j', {str(SCRIPT)!r})\n"
+        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
+        "import assistant_axis.openai_batch as ob\n"
+        "print(m.OpenAIBatchRunner is ob.OpenAIBatchRunner, "
+        "any(n.startswith('_assistant_axis_standalone') for n in sys.modules))\n"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    assert out.stdout.split() == ["True", "False"]
 
 
 class TestJudgeDisplayForm:

@@ -20,6 +20,12 @@ operations").  The code these items exercise is built off-pod first, by the peer
    P6's new response fields (`finish_reason`, `thinking_stripped`, `thinking_suspected`, `question_id`),
    P8.1's exit status, P3's float32 vectors and axis, the derived header tokens if P7 is built.  Roger's
    answer: run it as the first entities of the October run rather than a separate launch.
+   Also P8.6's model mirror (pipeline fix batch, 2026-10-12): check that `rsync` is installed on the pod
+   (`--tmpfs-method auto` falls back to a staged `cp` without it) and that the first mirror leaves
+   `/dev/shm/hf-cache/hub/models--Qwen--Qwen3-32B/.tmpfs_mirror_complete`.  A mirror left by the old
+   shell `cp -r` has no marker: rsync copies it again (once), cp refuses it until it is deleted.  And
+   P8.3: steps 2 and 4 now return before importing torch when there is nothing to do, and step 3 imports
+   no torch at all, which changes what item 3 below measures.
 2. **The response-length cap pilot** ([plan_max_tokens_pilot.md](./plan_max_tokens_pilot.md); about 16
    GPU-hours and $25 batch, over the GPU line: **Roger's go with quoted parameters**).  64 entities at caps
    256 / 512 / 768 / 1024; decides the cap the extraction uses.  Needs P6's `finish_reason` and P8.1 first.

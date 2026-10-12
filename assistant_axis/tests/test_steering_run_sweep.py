@@ -467,6 +467,14 @@ class TestCliDefaults:
         args = mod.build_arg_parser().parse_args(["--config", "x.yaml"])
         assert args.target_batch_size == RESPONSE_BATCH_SIZE
 
+    def test_tmpfs_method_flag(self, mod):
+        """The same --tmpfs-method as run_pipeline.sh (P8.6, 2026-10-12)."""
+        assert mod.build_arg_parser().parse_args(["--config", "x.yaml"]).tmpfs_method == "auto"
+        args = mod.build_arg_parser().parse_args(["--config", "x.yaml", "--tmpfs-method", "cp"])
+        assert args.tmpfs_method == "cp"
+        with pytest.raises(SystemExit):
+            mod.build_arg_parser().parse_args(["--config", "x.yaml", "--tmpfs-method", "scp"])
+
     def test_skip_threshold_default_matches_the_dispatcher(self, mod):
         from assistant_axis.steering_judges import DEFAULT_SKIP_THRESHOLD
         args = mod.build_arg_parser().parse_args(["--config", "x.yaml"])
@@ -563,3 +571,14 @@ class TestWorkerExitStatus:
         with pytest.raises(SystemExit) as e:
             mod._worker_main(0, 0, q, {"model_name": "fake/model"})
         assert e.value.code == 1
+
+    def test_the_worker_mirrors_with_the_configured_method(self, mod, fake_worker_env, monkeypatch):
+        """--tmpfs-method reaches the workers' setup_model_tmpfs_cache call
+        (P8.6, 2026-10-12); a config without it gets auto."""
+        from assistant_axis import tmpfs
+        seen = []
+        monkeypatch.setattr(tmpfs, "setup_model_tmpfs_cache",
+                            lambda **k: seen.append(k.get("method")))
+        mod._worker_main(0, 0, _ListQueue([None]), {"model_name": "fake/model", "tmpfs_method": "cp"})
+        mod._worker_main(0, 0, _ListQueue([None]), {"model_name": "fake/model"})
+        assert seen == ["cp", "auto"]

@@ -1551,7 +1551,12 @@ Both reads and writes need defensive handling.
   with retry/backoff to `<dest>.inprogress` beside the destination, then
   `os.replace` that copy onto the final name, then unlink the temp.
   Atomic from a reader's point of view: dest never exists in a
-  half-written state.  Tensor saves (`torch_save_with_retry`)
+  half-written state.  Small writes (`atomic_write_text` / `_bytes`,
+  `append_jsonl`, `write_jsonl`) take `fsync=True` to flush the
+  `.inprogress` copy before the rename (off by default until timed on the
+  pod's NFS, item 4 of reports/pipeline/pre_extraction_pod_todo.md); the
+  staging file name carries the process and thread id (since 2026-10-12,
+  walk-through E4).  Tensor saves (`torch_save_with_retry`)
   additionally run **three integrity checks on the `.inprogress` copy,
   and rename it into place only when all pass** (since 2026-10-12; it
   used to rename first and verify dest).  A failure deletes the copy and
@@ -1652,6 +1657,18 @@ Both `pipeline/run_pipeline.sh` and `steering/run_sweep.py` expose a
 their existing `$TMPDIR` must pass it explicitly via
 `--tmpdir "$TMPDIR"`.  The deprecated `setup_tmpdir_if_unset()` is
 kept as a thin shim for external callers but logs a warning.
+
+**Model mirror (one implementation since 2026-10-12, P8.6):** both
+drivers mirror the model's HF cache into `/dev/shm/hf-cache` through
+`assistant_axis.tmpfs.setup_model_tmpfs_cache` (the shell driver runs
+`python ../assistant_axis/tmpfs.py mirror ...`, which prints the new
+`HF_HOME`; until then it had its own `cp -r` with no marker), and both
+take `--tmpfs-method {auto,rsync,cp}`: rsync tops up in place; cp copies
+into a staging directory renamed into place and neither trusts nor
+deletes an unmarked existing mirror; auto is rsync when installed, else
+cp.  Both write the `.tmpfs_mirror_complete` marker the fast path reads.
+Details in [`pipeline/README.md`](pipeline/README.md) § "Model mirror in
+tmpfs".
 
 **Auditing past damage**: `pipeline/scan_missing_vectors.py` walks an
 `activations/`+`vectors/`+`scores/` triple (plus `responses/` beside

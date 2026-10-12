@@ -38,8 +38,10 @@ run, so a network outage of a few minutes during a wait of hours does not
 end it (before 2026-10-12 one failed check did).
 
 Only the standard library, ``openai`` and the stdlib-only
-``assistant_axis/atomic_io.py`` are imported, because step 3 loads this file
-without the ``assistant_axis`` package (whose ``__init__`` imports torch).
+``assistant_axis/atomic_io.py`` are imported: step 3 has no use for torch,
+whose import can take minutes on the pod's network volume (the package
+``__init__`` is lazy since 2026-10-12, so importing this module through the
+package no longer pulls torch in either).
 """
 from __future__ import annotations
 

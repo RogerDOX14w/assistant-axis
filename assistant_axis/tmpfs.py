@@ -1,10 +1,29 @@
 """Mirror a Hugging Face model cache into RAM-backed tmpfs (/dev/shm).
 
-Python port of the ``setup_tmpfs`` shell function from
-``pipeline/run_pipeline.sh``.  Lets non-bash entry points (e.g. the
-steering driver) get the same speed-up: model weights load from RAM-backed
-tmpfs instead of NFS-backed ``/workspace``, which on RunPod can otherwise
-hang for hours on cold mmap reads.
+The one implementation of the model mirror for both drivers: the steering
+driver (``steering/run_sweep.py``) imports it, and since 2026-10-12
+``pipeline/run_pipeline.sh`` runs this file as a script
+(``python ../assistant_axis/tmpfs.py mirror --model ...``, which prints the
+new HF_HOME) instead of its own ``cp -r`` (review P4 D7, walk-through
+P8.6).  Model weights load from RAM-backed tmpfs instead of NFS-backed
+``/workspace``, which on RunPod can otherwise hang for hours on cold mmap
+reads.
+
+Two copy methods, chosen by ``method`` (``--tmpfs-method`` on both drivers):
+
+* ``rsync`` -- ``rsync -a --delete --partial`` into the mirror directory;
+  finishes an interrupted copy and tops up an existing mirror in place.
+* ``cp`` -- a fresh copy into a staging directory beside the mirror, renamed
+  into place only when complete (the shell driver's method until
+  2026-10-12).  An existing directory without a completeness marker is not
+  reused or deleted (another process may be loading from it): the call
+  returns None and says to delete it or use rsync.
+* ``auto`` (the default) -- rsync when it is installed, else cp.
+
+Both write the completeness marker (:data:`MIRROR_MARKER_FILENAME`) that the
+fast path checks, and neither ever leaves an incomplete copy at the mirror's
+own path.  This file uses only the standard library, so the shell driver can
+run it without importing the ``assistant_axis`` package.
 
 Why this exists: ``HuggingFace.from_pretrained`` mmap's the safetensors
 shards.  When those live on a slow network filesystem, the first
@@ -42,6 +61,10 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TMPFS_HF_HOME = "/dev/shm/hf-cache"
 HEADROOM_FACTOR = 1.5    # 1.5× model size required free in /dev/shm
+
+# How the mirror is copied (see the module docstring).
+MIRROR_METHODS = ("auto", "rsync", "cp")
+DEFAULT_MIRROR_METHOD = "auto"
 
 # Sentinel file written into the tmpfs model dir after a successful rsync.
 # Lets later setup_model_tmpfs_cache calls fast-path past a 5+ minute NFS
@@ -146,21 +169,27 @@ def _check_existing_mirror(tmpfs_model_dir: Path) -> Optional[dict]:
 def _write_mirror_marker(
     tmpfs_model_dir: Path,
     source_size_kb: int,
+    *,
+    model_subdir: Optional[str] = None,
+    method: str = "rsync",
 ) -> None:
-    """Record a 'mirror complete' marker after a successful rsync.
+    """Record a 'mirror complete' marker after a successful copy.
 
     Stored fields are the keys ``_check_existing_mirror`` reads to
     decide whether the mirror is still good.  Best-effort: a write
     failure here just means the next call won't get the fast-path
     (a slow rsync against NFS), not a correctness problem.
+    ``model_subdir`` names the mirror when ``tmpfs_model_dir`` is the cp
+    method's staging directory, whose marker is written before the rename.
     """
     marker_path = tmpfs_model_dir / MIRROR_MARKER_FILENAME
     payload = {
         "marker_version": 1,
-        "model_subdir": tmpfs_model_dir.name,
+        "model_subdir": model_subdir or tmpfs_model_dir.name,
         "source_size_kb": source_size_kb,
         "mirror_size_kb": _du_kb(tmpfs_model_dir),
         "completed_at": time.time(),
+        "method": method,
     }
     try:
         marker_path.write_text(json.dumps(payload, indent=2))
@@ -241,6 +270,67 @@ def _rsync_mirror(
     return True
 
 
+def resolve_mirror_method(method: str = DEFAULT_MIRROR_METHOD) -> str:
+    """``auto`` -> ``rsync`` when it is on PATH, else ``cp``; the other two
+    as given.  Raises ValueError for anything else."""
+    if method not in MIRROR_METHODS:
+        raise ValueError(f"unknown tmpfs mirror method {method!r}; one of {MIRROR_METHODS}")
+    if method == "auto":
+        return "rsync" if shutil.which("rsync") else "cp"
+    return method
+
+
+def _staging_dir_for(tmpfs_model_dir: Path) -> Path:
+    """The cp method's staging directory, beside the mirror (same mount, so
+    the final rename is atomic)."""
+    return tmpfs_model_dir.parent / f".{tmpfs_model_dir.name}.partial.{os.getpid()}"
+
+
+def _cp_mirror(
+    source: Path,
+    tmpfs_model_dir: Path,
+    *,
+    source_size_kb: int,
+    logger_obj: Optional[logging.Logger] = None,
+) -> bool:
+    """Copy ``source`` into a staging directory beside ``tmpfs_model_dir``,
+    write the completeness marker into it, and rename it into place.
+
+    The mirror's own path never holds a partial copy: a copy that fails
+    (ENOSPC) or is interrupted leaves only a ``.<name>.partial.<pid>``
+    directory, and staging directories left by earlier interrupted runs are
+    removed first (they hold RAM).  Symlinks are copied as symlinks, as
+    ``cp -r`` does: a Hugging Face cache's ``snapshots/`` links point into
+    its ``blobs/`` by relative path, so they resolve inside the copy.
+    Returns False when the copy or the rename fails (the caller falls back
+    to the source cache)."""
+    log = logger_obj or logger
+    parent = tmpfs_model_dir.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    for stale in parent.glob(f".{tmpfs_model_dir.name}.partial.*"):
+        shutil.rmtree(stale, ignore_errors=True)
+    staging = _staging_dir_for(tmpfs_model_dir)
+    try:
+        shutil.copytree(source, staging, symlinks=True)
+        _write_mirror_marker(staging, source_size_kb=source_size_kb,
+                             model_subdir=tmpfs_model_dir.name, method="cp")
+    except OSError as e:     # shutil.Error is an OSError
+        log.warning(f"[tmpfs] copy into {staging} failed: {e}")
+        shutil.rmtree(staging, ignore_errors=True)
+        return False
+    try:
+        os.rename(staging, tmpfs_model_dir)
+        return True
+    except OSError as e:
+        shutil.rmtree(staging, ignore_errors=True)
+        # Another process finished the same copy first: use its mirror.
+        if _check_existing_mirror(tmpfs_model_dir) is not None:
+            log.info(f"[tmpfs] {tmpfs_model_dir} was completed by another process; using it")
+            return True
+        log.warning(f"[tmpfs] renaming {staging} to {tmpfs_model_dir} failed: {e}")
+        return False
+
+
 def _discard_failed_mirror(tmpfs_model_dir: Path, *, existed_before: bool) -> None:
     """Clean up after a failed rsync into ``tmpfs_model_dir``.
 
@@ -270,25 +360,37 @@ def _discard_failed_mirror(tmpfs_model_dir: Path, *, existed_before: bool) -> No
         pass
 
 
+def _existing_ancestor(path: Path) -> Optional[Path]:
+    """``path`` or its deepest existing ancestor (what df can measure)."""
+    p = path
+    while not p.exists():
+        if p.parent == p:
+            return None
+        p = p.parent
+    return p
+
+
 def setup_model_tmpfs_cache(
     model_name: str,
     *,
     tmpfs_hf_home: str = DEFAULT_TMPFS_HF_HOME,
     source_hf_home: Optional[str] = None,
     headroom_factor: float = HEADROOM_FACTOR,
+    method: str = DEFAULT_MIRROR_METHOD,
 ) -> Optional[str]:
     """Mirror the HF cache for `model_name` into a RAM-backed tmpfs.
 
-    Behaviour mirrors `setup_tmpfs` in pipeline/run_pipeline.sh:
-
-    - If /dev/shm not present -> log and return None (caller keeps default HF_HOME).
+    - If ``tmpfs_hf_home``'s mount (``/dev/shm`` by default) is not present
+      -> log and return None (caller keeps default HF_HOME).
     - If the model's directory in source HF cache is missing -> log and return
       None (HF will download to the source on first use).
-    - If already mirrored -> return tmpfs_hf_home (no-op).
-    - Otherwise check headroom (default 1.5× model size) in /dev/shm; if
+    - If already mirrored (completeness marker present, tree not shrunk)
+      -> return tmpfs_hf_home (no-op).
+    - Otherwise check headroom (default 1.5× model size) on that mount; if
       insufficient, log a loud WARNING and return None so the caller knows
       a multi-hour cold mmap is likely.
-    - Copy the model subtree to tmpfs and return the new HF_HOME path.
+    - Copy the model subtree with ``method`` (``auto`` / ``rsync`` / ``cp``;
+      module docstring), write the marker and return the new HF_HOME path.
 
     The caller is responsible for setting ``os.environ["HF_HOME"]`` to the
     returned value (we don't mutate the environment from inside this
@@ -296,15 +398,21 @@ def setup_model_tmpfs_cache(
 
     Returns the new HF_HOME path on success, ``None`` on any skip/failure.
     """
-    if not Path("/dev/shm").is_dir():
-        logger.warning("[tmpfs] /dev/shm not present; tmpfs setup skipped")
+    method = resolve_mirror_method(method)
+    tmpfs_root = Path(tmpfs_hf_home)
+    # The mount the mirror goes on: the parent of tmpfs_hf_home (/dev/shm for
+    # the default), which must exist (the shell driver's `[ -d /dev/shm ]`).
+    # Before 2026-10-12 /dev/shm was checked and measured whatever
+    # tmpfs_hf_home was.
+    if not tmpfs_root.parent.is_dir():
+        logger.warning(f"[tmpfs] {tmpfs_root.parent} not present; tmpfs setup skipped")
         return None
+    mount_probe = _existing_ancestor(tmpfs_root)
 
     source_hf = Path(source_hf_home) if source_hf_home else Path(
         os.environ.get("HF_HOME") or (Path.home() / ".cache" / "huggingface"))
     model_subdir = "models--" + model_name.replace("/", "--")
     source_model_dir = source_hf / "hub" / model_subdir
-    tmpfs_root = Path(tmpfs_hf_home)
     tmpfs_model_dir = tmpfs_root / "hub" / model_subdir
 
     if not source_model_dir.is_dir():
@@ -331,8 +439,21 @@ def setup_model_tmpfs_cache(
         )
         return str(tmpfs_root)
 
+    # The cp method cannot top up: an existing directory without a valid
+    # marker (a partial copy, or a mirror made by the shell driver's cp -r
+    # before 2026-10-12) is neither reused nor deleted, since another
+    # process may be loading from it.
+    if method == "cp" and tmpfs_model_dir.exists():
+        logger.warning(
+            f"[tmpfs] {tmpfs_model_dir} exists without a completeness marker "
+            f"(an interrupted copy, or one made before markers were written); "
+            f"the cp method neither trusts nor deletes it.  Delete it (when no "
+            f"process is loading from it) or use --tmpfs-method rsync.  "
+            f"Falling back to the source cache {source_hf}.")
+        return None
+
     needed_kb = _du_kb(source_model_dir)
-    avail_kb = _avail_kb(Path("/dev/shm"))
+    avail_kb = _avail_kb(mount_probe)
 
     if needed_kb is None or avail_kb is None:
         logger.warning(
@@ -358,7 +479,7 @@ def setup_model_tmpfs_cache(
         bar = "[tmpfs] " + "=" * 60
         logger.warning("")
         logger.warning(bar)
-        logger.warning("[tmpfs]  WARNING: insufficient /dev/shm space — tmpfs cache DISABLED")
+        logger.warning(f"[tmpfs]  WARNING: insufficient space on {mount_probe} — tmpfs cache DISABLED")
         logger.warning(f"[tmpfs]  need {required_kb}kB ({headroom_factor:.1f}x additional), have {avail_kb}kB")
         logger.warning(f"[tmpfs]  Falling back to source HF cache: {source_hf}")
         logger.warning(f"[tmpfs]  If that is on NFS or other slow storage, expect model loads to")
@@ -383,14 +504,29 @@ def setup_model_tmpfs_cache(
         )
     else:
         logger.info(
-            f"[tmpfs] copying {model_name} ({needed_kb // 1024} MB) "
+            f"[tmpfs] copying {model_name} ({needed_kb // 1024} MB, {method}) "
             f"from {source_model_dir} to {tmpfs_model_dir} ..."
         )
 
     tmpfs_root.mkdir(parents=True, exist_ok=True)
     (tmpfs_root / "hub").mkdir(parents=True, exist_ok=True)
 
+    if method == "cp":
+        # Staged copy, marker written inside, renamed into place.
+        if not _cp_mirror(source_model_dir, tmpfs_model_dir,
+                          source_size_kb=needed_kb, logger_obj=logger):
+            return None
+        logger.info(f"[tmpfs] mirror complete (cp); HF_HOME={tmpfs_root}")
+        return str(tmpfs_root)
+
     existed_before = tmpfs_model_dir.is_dir()
+    # A marker left from an earlier complete mirror must not survive a
+    # top-up that is interrupted half way.
+    if existed_before:
+        try:
+            (tmpfs_model_dir / MIRROR_MARKER_FILENAME).unlink(missing_ok=True)
+        except OSError:
+            pass
     if not _rsync_mirror(source_model_dir, tmpfs_model_dir, logger_obj=logger):
         _discard_failed_mirror(tmpfs_model_dir, existed_before=existed_before)
         return None
@@ -399,10 +535,37 @@ def setup_model_tmpfs_cache(
     # Best-effort: if this fails, correctness is unaffected -- the next
     # call will just do a full (slow) rsync and try writing the marker
     # again.
-    _write_mirror_marker(tmpfs_model_dir, source_size_kb=needed_kb)
+    _write_mirror_marker(tmpfs_model_dir, source_size_kb=needed_kb, method="rsync")
 
-    logger.info(f"[tmpfs] mirror complete; HF_HOME={tmpfs_root}")
+    logger.info(f"[tmpfs] mirror complete (rsync); HF_HOME={tmpfs_root}")
     return str(tmpfs_root)
+
+
+def _main(argv=None) -> int:
+    """``python assistant_axis/tmpfs.py mirror --model M [--tmpfs-hf-home D]
+    [--method auto|rsync|cp]``: what ``pipeline/run_pipeline.sh`` runs.
+    Prints the new HF_HOME on stdout and exits 0 when the mirror is ready;
+    exits 1 (nothing on stdout) when the caller should keep its HF_HOME.
+    Log lines go to stderr."""
+    import argparse
+    import sys
+    parser = argparse.ArgumentParser(prog="tmpfs.py", description=__doc__.split("\n")[0])
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    m = sub.add_parser("mirror", help="mirror one model's HF cache into tmpfs")
+    m.add_argument("--model", required=True)
+    m.add_argument("--tmpfs-hf-home", default=DEFAULT_TMPFS_HF_HOME)
+    m.add_argument("--source-hf-home", default=None,
+                   help="default: $HF_HOME, else ~/.cache/huggingface")
+    m.add_argument("--method", choices=MIRROR_METHODS, default=DEFAULT_MIRROR_METHOD)
+    args = parser.parse_args(argv)
+    logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(message)s")
+    new_home = setup_model_tmpfs_cache(
+        args.model, tmpfs_hf_home=args.tmpfs_hf_home,
+        source_hf_home=args.source_hf_home, method=args.method)
+    if new_home is None:
+        return 1
+    print(new_home)
+    return 0
 
 
 DEFAULT_TMPDIR = "/dev/shm"
@@ -562,3 +725,7 @@ def _setup_compile_cache_dirs() -> None:
             f"[tmpfs] TORCHINDUCTOR_CACHE_DIR={inductor_dir} "
             f"(/dev/shm is noexec; routing compile cache off tmpfs)"
         )
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main())

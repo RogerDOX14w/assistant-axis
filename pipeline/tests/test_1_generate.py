@@ -179,18 +179,13 @@ def test_a_worker_that_cannot_load_the_model_exits_1(mod, monkeypatch, tmp_path)
     assert exc.value.code == 1
 
 
-def test_a_failing_item_does_not_stop_the_worker(mod, monkeypatch, tmp_path):
-    """Per-item failures are logged and the worker goes on to its other items
-    (whether they should also make the step exit non-zero is an open
-    question for Roger; the worker returns normally for now)."""
-    saved = []
-
+def _fake_generator(saved, bad=("bad",)):
     class FakeGen:
         def __init__(self, **kw):
             self.generator = argparse.Namespace(load=lambda: None)
 
         def load_role(self, path):
-            if Path(path).stem == "bad":
+            if Path(path).stem in bad:
                 raise OSError("Input/output error")
             return {"instruction": [{"pos": "p"}]}
 
@@ -200,12 +195,124 @@ def test_a_failing_item_does_not_stop_the_worker(mod, monkeypatch, tmp_path):
         def save_responses(self, name, responses):
             saved.append(name)
 
+    return FakeGen
+
+
+def test_a_failing_item_does_not_stop_the_worker_but_makes_it_exit_1(mod, monkeypatch, tmp_path):
+    """Per-item failures are logged and the worker goes on to its other items;
+    since P8.1 (2026-10-12) it then exits 1, so the step does too.  (Changed
+    expectation: until that decision the worker returned normally.)"""
+    saved = []
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
-    monkeypatch.setattr(mod, "RoleResponseGenerator", FakeGen)
+    monkeypatch.setattr(mod, "RoleResponseGenerator", _fake_generator(saved))
     items = [{"output_name": n, "type": "standalone", "file_path": str(tmp_path / f"{n}.json")}
              for n in ("bad", "good")]
-    mod.process_items_on_worker(0, [0], items, _worker_args(tmp_path))
+    with pytest.raises(SystemExit) as exc:
+        mod.process_items_on_worker(0, [0], items, _worker_args(tmp_path))
+    assert exc.value.code == 1
     assert saved == ["good"]
+
+
+def test_a_worker_whose_items_all_succeed_returns_normally(mod, monkeypatch, tmp_path):
+    saved = []
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(mod, "RoleResponseGenerator", _fake_generator(saved))
+    items = [{"output_name": n, "type": "standalone", "file_path": str(tmp_path / f"{n}.json")}
+             for n in ("a", "b")]
+    mod.process_items_on_worker(0, [0], items, _worker_args(tmp_path))
+    assert saved == ["a", "b"]
+
+
+def test_run_items_stops_after_k_consecutive_failures(mod, tmp_path, caplog):
+    """An engine that died fails every later item: stop after K in a row
+    instead of failing the rest of the queue one by one."""
+    saved = []
+    gen = _fake_generator(saved, bad={"b1", "b2", "b3", "b4", "b5"})()
+    names = ["ok1", "b1", "ok2", "b2", "b3", "b4", "b5", "never"]
+    items = [{"output_name": n, "type": "standalone", "file_path": str(tmp_path / f"{n}.json")}
+             for n in names]
+    with caplog.at_level(logging.ERROR):
+        result = mod.run_items(gen, items, logging.getLogger("t"), max_consecutive_failures=3)
+    assert result["aborted"] is True
+    assert result["failed_names"] == ["b1", "b2", "b3", "b4"]
+    assert saved == ["ok1", "ok2"]            # "never" and "b5" were not tried
+    assert "in a row" in caplog.text
+    # An isolated failure is counted but does not stop the run.
+    saved.clear()
+    result = mod.run_items(gen, items[:3], logging.getLogger("t"), max_consecutive_failures=3)
+    assert result == {"completed": 2, "failed": 1, "failed_names": ["b1"], "aborted": False}
+
+
+def test_default_consecutive_failure_limit():
+    """K is a constant of the script (P8.1: "say 20")."""
+    spec = importlib.util.spec_from_file_location(
+        "_pipeline_one_generate_k", REPO_ROOT / "pipeline" / "1_generate.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert m.MAX_CONSECUTIVE_FAILURES == 20
+
+
+def test_main_single_worker_exits_1_when_an_item_failed(mod, monkeypatch, data):
+    saved = []
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(mod, "RoleResponseGenerator", _fake_generator(saved, bad={"x"}))
+    monkeypatch.setattr(sys, "argv", [
+        "1_generate.py", "--model", "fake/model", "--traits_only",
+        "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
+        "--output_dir", str(data / "out")])
+    with pytest.raises(SystemExit) as exc:
+        mod.main()
+    assert exc.value.code == 1
+    assert sorted(saved) == ["patient", "y"]
+
+
+# ---------------------------------------------------------------------------
+# Goal lists: a missing name fails fast; the grid size is reported
+# ---------------------------------------------------------------------------
+
+def test_a_goal_list_name_with_no_file_fails_fast(mod, data):
+    (data / "traits" / "y.json").unlink()
+    (data / "traits" / "y2.json").write_text(json.dumps(
+        {"description": "d", "instruction": [{"pos": "p"}], "renamed_from": {"stem": "y"}}))
+    with pytest.raises(mod.GoalListError) as exc:
+        mod.collect_work_items(_args(data))
+    msg = str(exc.value)
+    assert "trait 'y'" in msg and "renamed to y2" in msg
+
+
+def test_a_missing_name_on_an_unused_half_is_not_an_error(mod, data):
+    """--combos_only_t uses non-goal roles and goal traits only."""
+    (data / "traits" / "y.json").unlink()          # y is a non-goal trait (the r_ half)
+    items = mod.collect_work_items(_args(data, combos_only_t=True, no_traits=True))
+    assert _names(items) == ["default", "t_b__x"]
+
+
+def test_main_exits_1_on_a_missing_goal_list_name(mod, monkeypatch, data):
+    (data / "roles" / "b.json").unlink()
+    monkeypatch.setattr(sys, "argv", [
+        "1_generate.py", "--model", "fake/model",
+        "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
+        "--goal_file", str(data / "goal.json"), "--goal_count", "1", "--non_goal_count", "1",
+        "--output_dir", str(data / "out")])
+    with pytest.raises(SystemExit) as exc:
+        mod.main()
+    assert exc.value.code == 1
+
+
+def test_grid_size_is_reported_against_the_nominal(mod, data, caplog):
+    with caplog.at_level(logging.INFO):
+        mod.collect_work_items(_args(data))
+    assert "Combination grid: 1 r_ + 1 t_ = 2 (goal_count x non_goal_count x 2 = 1 x 1 x 2 = 2)" in caplog.text
+    # A count larger than one of the lists it applies to (allowed while the
+    # other is long enough) shrinks the grid: a WARNING with the list sizes.
+    goal = json.loads((data / "goal.json").read_text())
+    goal["roles"]["goal"] = ["a", "patient"]
+    (data / "goal.json").write_text(json.dumps(goal))
+    caplog.clear()
+    with caplog.at_level(logging.INFO):
+        mod.collect_work_items(_args(data, goal_count=2))
+    warn = [r for r in caplog.records if r.levelno == logging.WARNING and "Combination grid" in r.message]
+    assert warn and "= 2 x 1 x 2 = 4" in warn[0].message and "traits.goal 1" in warn[0].message
 
 
 def test_main_exits_1_when_a_worker_failed(mod, monkeypatch, data):

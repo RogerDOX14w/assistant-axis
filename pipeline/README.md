@@ -23,7 +23,7 @@ Counted on 2026-10-12: 932 trait files in [`data/traits/instructions/`](../data/
 
 ### Christina mode
 
-Generates standalone roles (or traits) from `--roles_dir`. Run the pipeline separately for roles and traits using different `--roles_dir` and `--output_dir` to avoid filename collisions.
+Generates standalone roles (or traits) from `--roles_dir`. Run the pipeline separately for roles and traits using different `--roles_dir` and `--output_dir` to avoid filename collisions.  A traits directory has no `default.json`, so since 2026-10-12 `run_pipeline.sh` generates the default once under `<output_dir>/default/` from the roles directory (`DEFAULT_ROLE_DIR`, `../data/roles/instructions`), with the christina settings, and symlinks its response, activation and vector into the tree (as roger mode's step 0 does), so that step 5 has a default; before, step 5 always failed there.  A run over roles generates `default` with the other roles, as before.
 
 ## Running the pipeline
 
@@ -39,11 +39,21 @@ cd pipeline
     --roles_dir ../data/traits/instructions
 ```
 
-- **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir`, `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
+- **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir` (`/dev/shm/hf-cache`), `--tmpfs-method` (`auto`; see "Model mirror in tmpfs"), `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
 - **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.
 - **A failing step stops the pipeline**: step 1; step 2 or step 3 (before step 4, whether they ran in parallel or serially); step 4 (before step 5).  Running the same command again skips what is finished.
 - **Scan before step 5** (on unless `--no-scan`): after step 4, [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Exit 3 (re-run candidates or `missing_activation`) **stops the pipeline before step 5**, naming the rerun lists, so no axis is built from a partial set (Roger, 2026-10-12: a stop, since a warning is easy to miss); any other non-zero scanner exit stops it too.  Fix the candidates (`4_vectors.py --overwrite <rerun list>`, step 2 first for `missing_activation`) and run the same command again.
 - The run's log is `<output_dir>/pipeline_<timestamp>.log`; the warnings and errors in it are listed at the end.
+
+### Model mirror in tmpfs
+
+Unless `--no-tmpfs`, the driver mirrors the model's Hugging Face cache (`<HF_HOME>/hub/models--<owner>--<name>/`) into `--tmpfs-dir` (`/dev/shm/hf-cache`) and points `HF_HOME` there, so that the workers load weights from RAM and not from the network volume (cold mmap reads there can hang for hours).  Since 2026-10-12 (P8.6) the copy is made by [`assistant_axis/tmpfs.py`](../assistant_axis/tmpfs.py), run as a script, which the steering driver ([`steering/run_sweep.py`](../steering/run_sweep.py)) imports too, so there is one implementation; before, the shell had its own `cp -r` with no marker.  Both drivers take `--tmpfs-method`:
+
+- `rsync`: `rsync -a --delete --partial` into the mirror directory; it finishes an interrupted copy and tops up an existing mirror in place.
+- `cp`: a fresh copy into `.<name>.partial.<pid>` beside the mirror, renamed into place only when complete; leftover staging directories are removed first.  An existing mirror directory without a completeness marker is neither reused nor deleted (another process may be loading from it): the driver falls back to the source cache and says to delete it or use rsync.
+- `auto` (default): rsync when it is installed, else cp.
+
+Both write the completeness marker `.tmpfs_mirror_complete` (sizes, time, method), and a later run reuses a mirror only when the marker is there and the tree has not shrunk.  A mirror made by the shell's `cp -r` before 2026-10-12 has no marker: rsync tops it up (copying every file again, since `cp -r` did not keep modification times); cp refuses it.  The free-space check (1.5 × the model) is made on the mirror's own mount, the parent of `--tmpfs-dir`; when that mount is missing, there is no mirror.  `TMPDIR` is set to `--tmpdir` (falling back to `/tmp` when that is missing), as before.
 
 ## Running the steps separately
 
@@ -53,7 +63,7 @@ We recommend running scripts separately rather than the bash script.
 - [`3_judge.py`](./3_judge.py) can run in parallel with `2_activations.py` after `1_generate.py` completes
 - Steps 4 and 5 run after 1, 2, 3 are all complete
 - Run them from `pipeline/` too: step 1's `../data/...` defaults are relative to the working directory (step 3's defaults are the repository's corpus wherever it is run from)
-- On rerun, steps 1, 2 and 4 skip an entity whose output file exists (step 4 unless `--overwrite`), and step 3 judges only the responses not yet in the entity's score file; step 5 always recomputes `axis.pt`
+- On rerun, steps 1, 2 and 4 skip an entity whose output file exists (step 4 unless `--overwrite`), and step 3 judges only the responses not yet in the entity's score file; step 5 always recomputes `axis.pt`.  Steps 2 and 4 check for work before importing torch (since 2026-10-12), so a rerun with nothing to do returns at once instead of spending the torch import, which takes minutes from the pod's network volume; and the `assistant_axis` package's `__init__` loads its submodules lazily, so step 3 (and any script importing a light module such as `assistant_axis.entity_id`) imports no torch at all
 - Each step exits non-zero when its output is incomplete (details under each step), which is what lets `run_pipeline.sh` stop
 - `1_generate.py` and `2_activations.py` run `total_gpus / tensor_parallel_size` workers in parallel
 
@@ -107,7 +117,11 @@ Each entity produces up to 1500 responses (5 instruction variants × 300 questio
 
 `--no_traits`, `--traits_only` and `--roles_only` are mutually exclusive, the two `--combos_only_*` flags exclude each other and `--traits_only` / `--roles_only`, and all five are refused in christina mode.  The `../data/...` defaults are relative to the working directory.
 
-An entity whose `<name>.jsonl` exists is skipped.  Each response file is written to local `/tmp`, copied beside the destination as `<name>.jsonl.inprogress` and renamed into place, so a crash never leaves a truncated file that a rerun would take as finished.  With several workers the step exits 1 when a worker died or failed to load the model (its items are not generated); an item that fails inside a running worker is logged and skipped.  A rerun generates only what is missing.
+An entity whose `<name>.jsonl` exists is skipped.  Each response file is written to local `/tmp`, copied beside the destination as `<name>.jsonl.inprogress` and renamed into place, so a crash never leaves a truncated file that a rerun would take as finished.
+
+**Goal lists (roger mode).**  Every name the grid takes from [`data/goal_roles_and_traits.json`](../data/goal_roles_and_traits.json) must have its instruction file: since 2026-10-12 a missing one stops the step with exit 1 before anything is generated, naming the file and, when an instruction file records the name in `renamed_from`, the stem it was renamed to (until then it was a WARNING and the grid silently shrank).  The step logs the grid's size against the nominal, e.g. `Combination grid: 900 r_ + 900 t_ = 1800 (goal_count x non_goal_count x 2 = 30 x 30 x 2 = 1800)`; it is smaller only when a list is shorter than its count, and then the line is a WARNING with the list lengths.
+
+**Exit status.**  The step exits 1 when a goal-list name has no file (above), when a worker died or failed to load the model (its items are not generated), or, since 2026-10-12 (P8.1), when any item failed: an item that fails is logged and the step goes on to the rest, then exits 1.  After `MAX_CONSECUTIVE_FAILURES` (20) failed items in a row a run or worker stops trying the rest of its queue, since an engine that died fails every later item fast.  What was saved stays saved, and a rerun generates only what is missing.
 
 ### 2. Extract Activations
 
