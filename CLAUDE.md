@@ -69,7 +69,10 @@ older context, or differs from the documented current default.
   [`regenerate_trait_instructions.py --batch`](./data_analysis/regenerate_trait_instructions.py)
   (one Message Batch for the run; `--batch-no-wait` and `--batch-id` to
   submit now and collect later; what the batch fails to deliver is
-  generated in real time) and, since 2026-10-10,
+  generated in real time; since the review of 2026-10-13 a batch is collected
+  once, against the counts logged at submission, into the directory it was
+  submitted for, never under `--dry-run`, and a file edited while the batch ran
+  is regenerated live instead of overwritten) and, since 2026-10-10,
   [`classify_goals.py --batch`](./data_analysis/classify_goals.py) (the same
   three flags; what the batch fails to deliver is classified in real
   time).  **Pipeline step 3 batches by default** (Roger, 2026-10-10:
