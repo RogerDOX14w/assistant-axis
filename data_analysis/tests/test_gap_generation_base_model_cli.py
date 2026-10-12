@@ -153,6 +153,31 @@ def test_sense_settles_the_divergent_rows(env, capsys):
     assert SE.unresolved(TB.load_table(tmp / "base" / "candidate_table_round1.jsonl")) == []
 
 
+def test_sense_rerun_asks_again_for_a_row_whose_call_failed(env, capsys):
+    """A row whose call failed twice stays unresolved (submit refuses it rather than guessing), and a rerun of
+    sense must ask for it again even when nothing needs the free screen; before 2026-10-12 the rerun returned
+    early with such rows left as they were."""
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    capsys.readouterr()
+    path = tmp / "base" / "candidate_table_round1.jsonl"
+    table = TB.load_table(path)
+    row = next(r for r in table if r["stem"] == "unflappable")
+    b = dict(row[SE.BLOCK])
+    b.update({"chosen": None, "chosen_gloss": None, "legible": None, "reason": None,
+              "error": "empty response; retry: empty response"})
+    row[SE.BLOCK] = b
+    TB.write_table(table, path)
+    assert SE.stale_reason(row) == "failed" and [r["stem"] for r in SE.unresolved(table)] == ["unflappable"]
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    out = capsys.readouterr().out
+    assert "still need their call" in out and "nothing to screen;" in out
+    table = TB.load_table(path)
+    assert SE.unresolved(table) == []
+    assert next(r for r in table if r["stem"] == "unflappable")[SE.BLOCK]["chosen"] in SE.CHOICES
+
+
 def test_pipeline_end_to_end_and_report(env, capsys):
     tmp, common = env
     assert run(common, "parse", "--round", "1") == 0

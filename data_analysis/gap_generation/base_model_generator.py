@@ -338,19 +338,25 @@ def cmd_sense(args) -> int:
         if two:
             print(SE.render(two[0]))
         return 0
-    if not todo:
+    # A row whose call failed twice, or was decided under an older prompt, needs no new screen but does need its
+    # call again; the rerun of 2026-10-12 found nothing to screen and returned with 33 such rows still unresolved.
+    n_stale_call = sum(1 for r in rows if SE.needs_call(r))
+    if not todo and not n_stale_call:
         print("nothing to screen; every two-sided row already carries a settled sense")
         return 0
-    from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
     usage = MultiModelUsage.load_or_create(rdir / SE.USAGE_NAME)
-    embedder = make_embedder(arm)
-    # The hash arm is a deterministic test double, so it is never cached; a real arm uses the platform's cache.
-    cache = None if arm == "hash" else EmbeddingCache(args.embed_cache_dir) if args.embed_cache_dir \
-        else EmbeddingCache()
-    cos = SE.cosine_rows(rows, embed=lambda texts: embed_texts(embedder, texts, cache=cache, usage=usage))
-    counts = SE.screen(rows, cosines=cos, floor=floor, embedder=embedder.name)
-    print(f"screen: {counts['n_divergent']} of {counts['n_screened']} divergent "
-          f"(rate {counts['divergence_rate']}), {counts['n_agree']} settled by agreement with no call")
+    if todo:
+        from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
+        embedder = make_embedder(arm)
+        # The hash arm is a deterministic test double, so it is never cached; a real arm uses the platform's cache.
+        cache = None if arm == "hash" else EmbeddingCache(args.embed_cache_dir) if args.embed_cache_dir \
+            else EmbeddingCache()
+        cos = SE.cosine_rows(rows, embed=lambda texts: embed_texts(embedder, texts, cache=cache, usage=usage))
+        counts = SE.screen(rows, cosines=cos, floor=floor, embedder=embedder.name)
+        print(f"screen: {counts['n_divergent']} of {counts['n_screened']} divergent "
+              f"(rate {counts['divergence_rate']}), {counts['n_agree']} settled by agreement with no call")
+    else:
+        print(f"nothing to screen; {n_stale_call} divergent row(s) still need their call (failed, or an older prompt)")
     n_call = sum(1 for r in rows if SE.needs_call(r))
     est = _sense_estimate(n_call, SE.MODEL)
     print(f"{n_call} calls to {SE.MODEL}, estimate ${est:.4f} (the screen itself is free with a local arm)")

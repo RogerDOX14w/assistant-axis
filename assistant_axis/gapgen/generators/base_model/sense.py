@@ -53,7 +53,10 @@ from ..censuses.glosshint import MAX_WORDS
 MODEL = "claude-haiku-5-5"
 #: Haiku 5.5 refuses a ``temperature`` (``llm.accepts_temperature``), so none is sent.
 TEMPERATURE: Optional[float] = None
-MAX_TOKENS = 300
+#: Haiku 5.5 thinks adaptively and the thinking counts against ``max_tokens``: at 300, 33 of 146 calls on the
+#: 2026-10-12 pilot came back with no text at all ("empty response" twice).  The answer is a three-field JSON of a
+#: few dozen tokens; 1,200 leaves room for the thinking, at a cost of cents.
+MAX_TOKENS = 1200
 #: The registry-style block the decision lives in, on the table row.
 BLOCK = "gloss_sense"
 CHOICES = ("dictionary", "sample")
@@ -67,10 +70,13 @@ DEFAULT_CONCURRENCY = 4
 RESPONSES_NAME = "gloss_sense_responses.jsonl"
 USAGE_NAME = "gloss_sense_usage.json"
 
-GLOSS_SENSE_VERSION = 1
+#: Version 2 (2026-10-12): the wording is unchanged; ``MAX_TOKENS`` went from 300 to 1,200 because the pin covers it
+#: (``wording_tables``) and the rows decided under the 300 cap are re-asked as ``prompt_changed``.
+GLOSS_SENSE_VERSION = 2
 #: Append-only: the :func:`wording_sha256` of every version's wording (a test enforces it).
 PROMPT_HASHES: dict[int, str] = {
     1: "fed661a0da553dc1fea188ff54b8b4365c56124e5f76f5d2b51e6c3d254b5ace",
+    2: "d67ad2a914ad7fe600209116714c0a08bf268a13ffd71a5a3a42de745bedf08f",
 }
 
 SYSTEM = """\
