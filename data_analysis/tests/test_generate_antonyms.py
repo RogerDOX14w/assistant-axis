@@ -244,3 +244,47 @@ class TestRoleMode:
         assert module.DEFAULT_ROLE_USAGE_JSON.parts[-3:] == ("data", "roles", "role_pair_check_usage.json")
         module.main(["--roles", "provincial", "--usage-json", "y.json"])
         assert str(seen["usage_json"]) == "y.json"
+
+
+class TestRepliesThatCannotBeUsed:
+    """2026-10-12 review: a trait-check reply without its fields, a score that
+    is not a whole number, and an API error the SDK's retries did not get past
+    used to stop the whole run (no results printed, so ``seed_entities.py
+    check`` read nothing); now they are retried and end in the ERROR sentinel."""
+
+    @pytest.fixture(autouse=True)
+    def _no_sleep(self, monkeypatch):
+        async def no_sleep(_):
+            return None
+        monkeypatch.setattr(module.asyncio, "sleep", no_sleep)
+
+    def test_a_trait_reply_without_its_fields_is_retried_then_an_error_sentinel(self):
+        client = _client(json.dumps({"reasoning": "?", "negative_label": "humble"}))   # no antonym_score
+        result = asyncio.run(module.classify_one(client, "arrogant", "d", INSTRUCTIONS, asyncio.Semaphore(2)))
+        assert result["negative_label"] == "ERROR" and client.messages.create.call_count == 5
+
+    def test_a_reply_that_is_not_an_object_is_retried(self):
+        client = _client(json.dumps(["humble"]))
+        result = asyncio.run(module.classify_one(client, "arrogant", "d", INSTRUCTIONS, asyncio.Semaphore(2)))
+        assert result["negative_label"] == "ERROR" and client.messages.create.call_count == 5
+
+    def test_an_api_error_is_retried_and_the_run_goes_on(self):
+        import anthropic
+        import httpx
+        good = _client(json.dumps(REPLY)).messages.create.return_value
+        err = anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[err, good])
+        tracker = MultiModelUsage()
+        result = asyncio.run(module.classify_one(client, "arrogant", "d", INSTRUCTIONS, asyncio.Semaphore(2), tracker))
+        assert result["negative_label"] == "humble" and tracker.n_calls == 1
+        client.messages.create = AsyncMock(side_effect=err)
+        assert asyncio.run(module.name_pos_one(client, INSTRUCTIONS, asyncio.Semaphore(2)))["positive_name"] == "ERROR"
+
+    def test_a_score_that_is_not_a_whole_number_does_not_stop_the_summary(self, tmp_path, monkeypatch, capsys):
+        client = _client(json.dumps(dict(REPLY, antonym_score="3")))
+        monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda: client)
+        asyncio.run(module.main_async(trait_filter=["patient"], usage_json=tmp_path / "usage.json"))
+        out, err = capsys.readouterr()
+        assert json.loads(out)["patient"]["antonym_score"] == "3"
+        assert "Antonym score distribution" in err

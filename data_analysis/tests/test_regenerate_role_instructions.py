@@ -1017,3 +1017,61 @@ class TestRefusalInBatch:
             ("accountant", "role", "batch", "refusal"), ("herder", "role", "batch", "end_turn")]
         assert "1 processed (1 from the batch, 0 in real time), 1 skipped, 2 refused, 0 errors" in err
         assert json.loads(b.usage_json.read_text())["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 3
+
+
+class TestBatchCollectionReview:
+    """2026-10-12 review, as for the trait generator."""
+
+    def test_a_new_seed_s_short_reply_is_not_written_from_the_batch(self, batch_setup, capsys):
+        b = batch_setup
+        seed = {"description": SAMPLE_DESCRIPTION, "keep_me": "yes"}      # a seed: no questions to count against
+        (b.stage / "forger.json").write_text(json.dumps(seed))
+        short = json.dumps(dict(FAKE_COMBINED_RESPONSE, questions=FAKE_QUESTIONS[:39]))
+        b.client.messages.batches.results = AsyncMock(return_value=_Results([_entry("forger", text=short)]))
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        assert "forger: reply cannot be used (39 questions, not 40)" in capsys.readouterr().err
+        d = json.loads((b.stage / "forger.json").read_text())
+        assert len(d["questions"]) == 40 and d["generator"].get("batch", False) is False
+
+    def test_a_collected_batch_is_not_collected_again(self, batch_setup):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        assert json.loads(module.batch_log_path(b.usage_json).read_text())[0]["collected"]
+        n_calls = json.loads(b.usage_json.read_text())["n_calls"]
+        with pytest.raises(SystemExit, match="was collected on"):
+            module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert json.loads(b.usage_json.read_text())["n_calls"] == n_calls
+
+    def test_a_file_edited_while_the_batch_ran_is_generated_again(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        p = b.stage / "forger.json"
+        p.write_text(json.dumps(dict(json.loads(p.read_text()), description="A forger copies signatures.")))
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert "forger: description changed since the batch was submitted" in capsys.readouterr().err
+        d = json.loads(p.read_text())
+        assert d["generator"].get("batch", False) is False and d["description"] == "A forger copies signatures."
+
+    def test_a_batch_for_another_directory_is_refused(self, batch_setup, tmp_path):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        other = tmp_path / "other"
+        other.mkdir()
+        for f in b.stage.glob("*.json"):
+            (other / f.name).write_text(f.read_text())
+        args = [a if a != str(b.stage) else str(other) for a in b.args]
+        with pytest.raises(SystemExit, match="was submitted for .*collect it with --roles-dir"):
+            module.main(args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+
+    def test_the_log_records_a_corpus_directory_relative_to_the_repository(self):
+        corpus = module.REPO_ROOT / "data" / "roles" / "instructions"
+        assert module.dir_for_log(corpus) == "data/roles/instructions"
+        assert module.dir_from_log(str(corpus)) == module.dir_from_log("data/roles/instructions")
+
+    def test_a_dry_run_collection_writes_nothing(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        before = {p.name: p.read_text() for p in b.stage.glob("*.json")}
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--dry-run"])
+        assert b.client.messages.batches.retrieve.call_count == 0
+        assert {p.name: p.read_text() for p in b.stage.glob("*.json")} == before

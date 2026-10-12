@@ -131,16 +131,41 @@ def corpus_stems(data_dir: Path) -> dict[str, set[str]]:
     return out
 
 
+DROPPED = ("not_adopted", "superseded")
+
+
 def select_entries(q: dict, stems: Optional[Sequence[str]], chunk: Optional[str],
                    sub_chunk: Optional[str]) -> list[dict]:
+    """The entries a subcommand works on.  With ``stems``, each stem's live
+    entry per entity type (any status but ``not_adopted`` / ``superseded``;
+    the last one when there are two, with a warning, as ``status`` gives;
+    a trait and a role that share a name are both taken), or, when the stem
+    has no live entry, its last entry, so that a parked one still gets its
+    SKIP line.  Before 2026-10-12 the last entry with the stem was taken
+    whatever its status, so a stem whose superseded copy comes after its
+    live one (engaged and turbulent in the queue of that date) was silently
+    skipped by ``generate`` and ``check``."""
     entries = q["entries"]
     if stems:
         wanted = [normalize_to_file_name(s) for s in stems]
-        by_stem = {e.get("stem"): e for e in entries}
+        by_stem: dict[str, list[dict]] = {}
+        for e in entries:
+            by_stem.setdefault(e.get("stem"), []).append(e)
         missing = [s for s in wanted if s not in by_stem]
         if missing:
             raise SystemExit(f"not in queue: {', '.join(missing)}")
-        return [by_stem[s] for s in wanted]
+        out = []
+        for s in dict.fromkeys(wanted):
+            live: dict[str, dict] = {}
+            for e in by_stem[s]:
+                if e.get("status") in DROPPED:
+                    continue
+                if e.get("entity_type") in live:
+                    print(f"WARNING duplicate live stem {s} ({e.get('entity_type')}): taking the last entry",
+                          file=sys.stderr)
+                live[e.get("entity_type")] = e
+            out.extend(live.values() or by_stem[s][-1:])
+        return out
     sel = [e for e in entries if chunk is None or str(e.get("chunk")) == str(chunk)]
     if sub_chunk is not None:
         sel = [e for e in sel if (e.get("sub_chunk") or "").lower().startswith(sub_chunk.lower())]
@@ -255,8 +280,10 @@ def run_tool(script_and_args: Sequence[str], dry_run: bool, capture: bool = Fals
 
 
 def generation_commands(entries: Iterable[dict]) -> list[list[str]]:
-    traits = [e["stem"] for e in entries if e["entity_type"] == "trait"]
-    roles = [e["stem"] for e in entries if e["entity_type"] == "role"]
+    entries = list(entries)
+    # a stem once (two live entries of one stem would have it generated twice, concurrently)
+    traits = list(dict.fromkeys(e["stem"] for e in entries if e["entity_type"] == "trait"))
+    roles = list(dict.fromkeys(e["stem"] for e in entries if e["entity_type"] == "role"))
     cmds = []
     if traits:
         cmds.append(["data_analysis/regenerate_trait_instructions.py", "--traits", *traits])
@@ -484,14 +511,24 @@ def cmd_check(args, q: dict, data_dir: Path) -> int:
         print(f"could not parse antonym output: {err}\n{res.stdout[:500]}", file=sys.stderr)
         return 1
     registry = build_registry(q, data_dir)
-    by_label = {normalize_to_file_name(e["label"]): e for e in sel}
-    n = 0
+    # generate_antonyms.py keys its results by stem (until 2026-10-12 this
+    # matched them on the normalised label, which drops an entry whose label
+    # does not normalise to its stem without a word)
+    by_stem = {e["stem"]: e for e in sel}
+    n = n_error = 0
     history = []
-    for label, r in results.items():
-        e = by_label.get(normalize_to_file_name(label))
+    for stem, r in results.items():
+        e = by_stem.get(stem)
         if e is None:
             continue
         verdict = classify_check(r.get("negative_label", ""), e.get("partner"), registry)
+        if verdict["category"] == "error":
+            # every attempt failed: no answer to keep (a previous check_result
+            # stands), and the entry stays where it was, so that the next
+            # check takes it up again
+            n_error += 1
+            print(f"{e['stem']:28s} -> ERROR (no usable answer); status left at {e.get('status')}", file=sys.stderr)
+            continue
         e["check_result"] = {
             "returned": r.get("negative_label"), "score": r.get("antonym_score"),
             "reasoning": r.get("reasoning"), **verdict, "checked_at": date.today().isoformat()}
@@ -504,7 +541,8 @@ def cmd_check(args, q: dict, data_dir: Path) -> int:
               + (f"  (intended {e.get('partner')})" if e.get("partner") else ""))
     save_queue(q, args.queue)
     append_check_history(data_dir, history)
-    print(f"Done: {n} checked", file=sys.stderr)
+    print(f"Done: {n} checked" + (f", {n_error} without an answer (run check again)" if n_error else ""),
+          file=sys.stderr)
     return 0
 
 
@@ -793,10 +831,10 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
     write_json(dst, d)
     for path, doc, _ in edits:
         write_json(path, doc)
-    res = run_tool(["data_analysis/regenerate_trait_instructions.py", "--traits", new, "--force"], dry_run=False)
-    if res.returncode != 0:
-        print("regeneration failed", file=sys.stderr)
-        return 1
+    # The queue, the arrangement check and the derived lists follow the move
+    # before the regeneration is tried: until 2026-10-12 a failed regeneration
+    # returned here with the file already under its new stem and the queue
+    # entry, its partners' records and trait_list.json still on the old one.
     for e in own_entries:
         # the entry follows its file (2026-10-08: borderline and fear_prone were rewritten by hand)
         e["stem"], e["label"] = new, new_label
@@ -818,6 +856,12 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
         print(f"  the neg instructions of {', '.join(relabelled)} still name {old_label!r}: regenerate them "
               f"--instructions-only (pair does this for side a)", file=sys.stderr)
     run_tool(["tools/sync_entity_lists.py"], dry_run=False)
+    res = run_tool(["data_analysis/regenerate_trait_instructions.py", "--traits", new, "--force"], dry_run=False)
+    if res.returncode != 0:
+        print(f"regeneration failed: the rename is recorded, but {new}'s instructions were written under "
+              f"{old_label!r}; regenerate it (regenerate_trait_instructions.py --traits {new} --force) "
+              f"before checking", file=sys.stderr)
+        return 1
     if args.no_check:
         return 0
     stems = [new] + ([normalize_to_file_name(args.partner)] if args.partner else [])
@@ -833,9 +877,11 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
         intended = (normalize_to_file_name(args.partner) if stem == new else new) if args.partner else None
         v = classify_check(r.get("negative_label", ""), intended, registry)
         print(f"{stem:20s} -> {r.get('negative_label')!s:30s} score={r.get('antonym_score')} {v['category']}" + (f"  (intended {intended})" if intended else ""))
+        if v["category"] == "error":
+            continue  # no answer to keep (as in check)
         history.append(check_history_record(stem, _trait_doc(data_dir, stem), r, v, intended, "rename"))
         for e in q["entries"]:
-            if e.get("stem") == stem and e["entity_type"] == "trait":
+            if e.get("stem") == stem and e["entity_type"] == "trait" and e.get("status") not in DROPPED:
                 e["check_result"] = {"returned": r.get("negative_label"), "score": r.get("antonym_score"), "reasoning": r.get("reasoning"), **v, "checked_at": date.today().isoformat()}
                 note_check_answer(e, r.get("negative_label"), "rename")
     save_queue(q, args.queue)

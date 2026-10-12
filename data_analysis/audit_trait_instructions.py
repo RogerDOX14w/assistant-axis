@@ -699,7 +699,7 @@ def render_taste_report(report: dict) -> str:
 async def _taste_call(client, model: str, prompt: str, semaphore, usage, tally) -> dict:
     """One rating, with up to three attempts, as _judge_call; at temperature 0
     where the model takes a temperature (the Claude 5 models refuse one)."""
-    last, use_temperature = None, model not in _NO_TEMPERATURE_MODELS
+    last, use_temperature = None, _takes_temperature(model)
     for attempt in range(3):
         asked = prompt if last is None else (
             f"{prompt}\n\nYour previous reply could not be used: {last}. Reply again in full, keeping to the format.")
@@ -733,6 +733,12 @@ async def _taste_call(client, model: str, prompt: str, semaphore, usage, tally) 
 
 
 _NO_TEMPERATURE_MODELS: set[str] = set()
+
+
+def _takes_temperature(model: str) -> bool:
+    """False once a model has refused ``temperature`` with a 400 in this run
+    (an unbilled call); the next request goes without one."""
+    return model not in _NO_TEMPERATURE_MODELS
 
 
 def content_sha256(doc: dict) -> str:
@@ -806,10 +812,20 @@ async def _judge_call(client, model: str, prompt: str, parse, max_tokens: int, s
     for attempt in range(3):
         asked = prompt if last is None else (
             f"{prompt}\n\nYour previous reply could not be used: {last}. Reply again in full, keeping to the format.")
+        # temperature only where the model takes one, learned as _taste_call learns
+        # it (2026-10-12 review: a judge run with a Claude 5 model failed every
+        # file with a 400)
+        kwargs = {"temperature": 0.0 if attempt == 0 else 0.5} if _takes_temperature(model) else {}
         async with semaphore:
-            response = await client.messages.create(
-                model=model, max_tokens=max_tokens, temperature=0.0 if attempt == 0 else 0.5,
-                messages=[{"role": "user", "content": asked}])
+            try:
+                response = await client.messages.create(
+                    model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": asked}], **kwargs)
+            except anthropic.BadRequestError as e:
+                if not (kwargs and "temperature" in str(e).lower()):
+                    raise
+                _NO_TEMPERATURE_MODELS.add(model)
+                response = await client.messages.create(
+                    model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": asked}])
         if usage is not None:
             usage.charge(model, *extract_usage_anthropic(response))
         tally.total[label] += 1

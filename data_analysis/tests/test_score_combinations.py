@@ -281,3 +281,72 @@ def test_first_stage_ids_keep_their_form():
     assert module.batch_custom_id(c, "m", "first") == f"f-r_a__b-{digest}"
     ids = {module.batch_custom_id(c, "m", "rescore", k) for k in range(3)}
     assert len(ids) == 3 and all(len(i) <= 64 for i in ids)
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12 review
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("entry", [
+    "just a string", 3, {"reasoning": "r", "score": None}, {"reasoning": "r", "score": [2]},
+    {"reasoning": "r", "score": 2.5}, {"reasoning": "r", "score": True}, {"reasoning": "r", "score": "two"}])
+def test_a_malformed_entry_is_an_unusable_reply_not_a_crash(entry):
+    """A TypeError used to escape parse_scores, which no caller catches, and
+    stop the collection of a whole Message Batch."""
+    with pytest.raises(ValueError):
+        module.parse_scores(_combo(), json.dumps([entry]), 1)
+
+
+def test_whole_number_scores_in_other_forms_are_read():
+    for raw in (2, 2.0, "2"):
+        rec = module.parse_scores(_combo(), json.dumps([{"reasoning": "r", "score": raw}]), 1)
+        assert rec["per_pair"][0]["score"] == 2 and isinstance(rec["per_pair"][0]["score"], int)
+
+
+def test_a_malformed_batch_reply_is_scored_again_in_real_time(monkeypatch, tmp_path):
+    _tree(tmp_path)
+    combos = module.build_combinations(SimpleNamespace(
+        goal_file=str(tmp_path / "goal.json"), roles_dir=str(tmp_path / "roles"),
+        traits_dir=str(tmp_path / "traits"), goal_count=1, non_goal_count=1))
+    bad = module.batch_custom_id(next(c for c in combos if c["output_name"] == "t_rb__ta"), "claude-sonnet-5-5", "first")
+    client = FakeAnthropic()
+    reply = client._reply
+
+    def _reply(params, _orig=reply):
+        out = _orig(params)
+        if "Role: rb" in params["messages"][0]["content"] and "claude-sonnet" in params["model"]:
+            out.content[-1].text = json.dumps([{"reasoning": "r", "score": None}] * 2)
+        return out
+
+    async def _bresults(bid):
+        requests = dict(client.created)[bid]
+
+        async def gen():
+            for r in requests:
+                yield SimpleNamespace(custom_id=r["custom_id"], result=SimpleNamespace(
+                    type="succeeded", message=_reply(r["params"]) if r["custom_id"] == bad else reply(r["params"])))
+        return gen()
+    client.messages.batches.results = _bresults
+    out = _run_main(monkeypatch, tmp_path, client)
+    assert len(json.loads(out.read_text())["scores"]) == 2       # the collection went on, and t_rb__ta was redone
+    assert client.messages.create.call_count == 1
+
+
+def test_collecting_a_collected_batch_again_does_not_charge_it_twice(monkeypatch, tmp_path):
+    client = FakeAnthropic()
+    _run_main(monkeypatch, tmp_path, client)
+    usage_path = tmp_path / "combination_scores_usage.json"
+    before = json.loads(usage_path.read_text())["n_calls"]
+    first_id = client.created[0][0]
+    _run_main(monkeypatch, tmp_path, client, "--batch_id", first_id)
+    assert json.loads(usage_path.read_text())["n_calls"] == before
+    assert len(client.created) == 2                              # nothing submitted again
+
+
+def test_an_unreadable_output_file_stops_the_run(monkeypatch, tmp_path):
+    """It used to warn, start fresh, and overwrite the file at the first save."""
+    (tmp_path / "combination_scores.json").write_text('{"scores": [')
+    client = FakeAnthropic()
+    with pytest.raises(SystemExit, match="Could not read"):
+        _run_main(monkeypatch, tmp_path, client)
+    assert client.created == [] and (tmp_path / "combination_scores.json").read_text() == '{"scores": ['

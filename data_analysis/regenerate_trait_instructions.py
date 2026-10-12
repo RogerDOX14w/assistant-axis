@@ -2,10 +2,12 @@
 """Regenerate trait instruction pairs and questions via Claude.
 
 For each trait JSON file in data/traits/instructions/:
-1. Reads positive_label, negative_label, and eval_prompt (never overwritten)
+1. Reads positive_label, negative_label and description (never overwritten)
 2. Calls Claude to generate n_variants instruction pairs (pos/neg)
 3. Optionally calls Claude to generate n_questions diverse questions
-4. Writes back with instruction and questions replaced; eval_prompt and labels intact
+4. Writes back with instruction and questions replaced, eval_prompt rebuilt
+   from the label and description (build_eval_prompt; the generated one is
+   discarded), the labels and every other field intact except hand_edits
 
 Requires ANTHROPIC_API_KEY in environment or .env file.
 
@@ -1369,7 +1371,19 @@ async def name_check_one(client: anthropic.AsyncAnthropic, stem: str, data: dict
     if not name_check_wanted(data.get("positive_label")):
         return None
     from data_analysis import generate_antonyms as GA
-    answer = await GA.name_pos_one(client, instructions, semaphore, usage, stem)
+    # The file is already written when this runs: a naming call that fails
+    # must not turn a regenerated file into an ERROR line, or stop a batch
+    # collection half way (2026-10-12 review).  A failure is reported and
+    # leaves no record, so the label does not count as looked at.
+    try:
+        answer = await GA.name_pos_one(client, instructions, semaphore, usage, stem)
+    except Exception as e:  # noqa: BLE001 (reported, and the file it would describe is written)
+        print(f"  WARNING: {stem}: the naming check failed ({type(e).__name__}: {e}); no record kept",
+              file=sys.stderr)
+        return None
+    if answer.get("positive_name") in (None, "ERROR"):
+        print(f"  WARNING: {stem}: the naming check gave no usable answer; no record kept", file=sys.stderr)
+        return None
     return name_check_record(stem, data, instructions, answer, GA.MODEL)
 
 
@@ -1585,6 +1599,7 @@ def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_
 
 BATCH_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 DEFAULT_BATCH_POLL_SECONDS = 60
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def batch_log_path(usage_json: Path) -> Path:
@@ -1592,19 +1607,75 @@ def batch_log_path(usage_json: Path) -> Path:
     return usage_json.parent / "regeneration_batches.json"
 
 
-def record_batch(usage_json: Path, entry: dict) -> None:
+def read_batch_log(usage_json: Path) -> list[dict]:
     path = batch_log_path(usage_json)
-    log = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
-    log = [e for e in log if e.get("id") != entry.get("id")] + [entry]
-    atomic_write_json(path, log)
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+
+
+def find_batch(usage_json: Path, batch_id: str) -> dict | None:
+    return next((e for e in read_batch_log(usage_json) if e.get("id") == batch_id), None)
+
+
+def record_batch(usage_json: Path, entry: dict) -> None:
+    log = [e for e in read_batch_log(usage_json) if e.get("id") != entry.get("id")] + [entry]
+    atomic_write_json(batch_log_path(usage_json), log)
+
+
+def dir_for_log(d: Path) -> str:
+    """A directory as the batch log records it: relative to the repository
+    when inside it (the log is tracked; an absolute path carries the user's
+    home directory), absolute otherwise."""
+    d = Path(d).resolve()
+    return str(d.relative_to(REPO_ROOT)) if d.is_relative_to(REPO_ROOT) else str(d)
+
+
+def dir_from_log(s: str) -> Path:
+    p = Path(s)
+    return (p if p.is_absolute() else REPO_ROOT / p).resolve()
+
+
+def check_batch_to_collect(entry: dict | None, batch_id: str, usage_json: Path, files_dir: Path,
+                           dir_flag: str, dir_key: str = "traits_dir") -> dict:
+    """The log entry of the batch that ``--batch-id`` names, once it is safe
+    to collect (2026-10-12 review): a batch already collected is refused,
+    since collecting it again would charge its replies a second time and
+    write them over any edit made since; and a batch submitted for another
+    directory is refused, since its replies would land in the wrong files
+    (a staging copy's batch collected into the corpus).  A batch the log
+    does not know is collected with the options given, as before."""
+    if entry is None:
+        print(f"WARNING: batch {batch_id} is not in {batch_log_path(usage_json)}: collected with the options "
+              f"given now, and without the check for files changed since it was submitted", file=sys.stderr)
+        return {"id": batch_id}
+    if entry.get("collected"):
+        raise SystemExit(f"batch {batch_id} was collected on {entry['collected']}: collecting it again would charge "
+                         f"its replies twice and write them over any edit made since (to do it anyway, remove "
+                         f"'collected' from its entry in {batch_log_path(usage_json)})")
+    recorded = entry.get(dir_key)
+    if recorded and dir_from_log(recorded) != Path(files_dir).resolve():
+        raise SystemExit(f"batch {batch_id} was submitted for {recorded}, not {dir_for_log(files_dir)}: "
+                         f"collect it with {dir_flag} {recorded}")
+    return entry
+
+
+def prompt_inputs_sha256(data: dict) -> str:
+    """Hash of what a trait's generation prompt is made from (the two labels
+    and the description), recorded per stem when a batch is submitted.  A
+    reply collected for a file whose hash has changed since was written for
+    another text and is generated again in real time instead (2026-10-12
+    review: a batch can take a day, and Roger edits files meanwhile)."""
+    blob = json.dumps([data.get("positive_label"), data.get("negative_label"), data.get("description", "")],
+                      ensure_ascii=False)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
 
 def build_batch_requests(trait_paths: list[Path], *, n_variants: int, n_questions: int, instructions_only: bool,
-                         model: str, temperature: float, thinking_budget: int, force: bool
-                         ) -> tuple[list[dict], list[str]]:
+                         model: str, temperature: float, thinking_budget: int, force: bool,
+                         inputs: dict | None = None) -> tuple[list[dict], list[str]]:
     """The requests of a batch, one per trait file that is to be regenerated,
     with the file's stem as ``custom_id``; and the status lines of the files
-    that are skipped."""
+    that are skipped.  ``inputs``, when given, is filled with each requested
+    stem's ``prompt_inputs_sha256`` for the batch log."""
     requests, skipped = [], []
     for path in trait_paths:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -1617,6 +1688,8 @@ def build_batch_requests(trait_paths: list[Path], *, n_variants: int, n_question
         requests.append({"custom_id": path.stem, "params": combined_create_kwargs(
             *prompt_labels(data), data.get("description", ""),
             n_variants, n_questions, model, temperature, thinking_budget)})
+        if inputs is not None:
+            inputs[path.stem] = prompt_inputs_sha256(data)
     return requests, skipped
 
 
@@ -1635,12 +1708,20 @@ async def wait_for_batch(client: anthropic.AsyncAnthropic, batch_id: str, poll_s
 async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, instructions_only: bool, model: str,
                         temperature: float, thinking_budget: int, usage: MultiModelUsage | None,
                         refusals_jsonl: Path | None = None, name_checks: list | None = None,
-                        semaphore: asyncio.Semaphore | None = None) -> tuple[list[str], list[str], list[str]]:
+                        semaphore: asyncio.Semaphore | None = None, n_variants: int | None = None,
+                        n_questions: int | None = None,
+                        inputs_sha256: dict | None = None) -> tuple[list[str], list[str], list[str]]:
     """Write the trait files of the requests that succeeded.  Returns the
     status lines, the stems that have to be generated again (requests that
-    errored or expired, and replies that cannot be used), and the REFUSED
-    lines of the replies that were refusals: those are recorded like a live
-    refusal and not asked for again.
+    errored or expired, replies that cannot be used, and replies for a file
+    whose labels or description changed after submission, by
+    ``inputs_sha256``), and the REFUSED lines of the replies that were
+    refusals: those are recorded like a live refusal and not asked for again.
+
+    ``n_variants`` / ``n_questions``: the counts the batch asked for, checked
+    as the live path checks them (until 2026-10-12 a batch reply was checked
+    against the questions the file already had, so a new seed's reply was
+    taken with any number of pairs and questions).
 
     ``name_checks`` (with ``semaphore``): the label-blind naming check runs in
     real time on each file written, as it does on a live run; the batch
@@ -1661,13 +1742,19 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             print(f"  {stem}: no such trait file in {TRAITS_DIR}", file=sys.stderr)
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
+        if inputs_sha256 and stem in inputs_sha256 and prompt_inputs_sha256(data) != inputs_sha256[stem]:
+            print(f"  {stem}: label or description changed since the batch was submitted; "
+                  f"generated again in real time", file=sys.stderr)
+            again.append(stem)
+            continue
         if (refusal := refusal_in(message, data.get("positive_label", stem))) is not None:
             _record_refusal(refusals_jsonl, refusal, stem, model, "batch")
             refused.append(f"REFUSED {refusal.label}: {refusal.excerpt_line}")
             continue
         try:
             combined = validated_combined(_extract_text(message), data.get("positive_label", stem),
-                                          n_questions=None if instructions_only else len(data.get("questions") or []) or None)
+                                          n_variants=n_variants,
+                                          n_questions=None if instructions_only else n_questions)
         except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
             print(f"  {stem}: reply cannot be used ({e})", file=sys.stderr)
             again.append(stem)
@@ -1762,13 +1849,15 @@ async def main_async(args: argparse.Namespace) -> None:
     if args.batch or args.batch_id:
         if PROMPT_STYLE not in COMBINED_STYLES:
             raise SystemExit(f"--batch needs a style that makes one call per trait {COMBINED_STYLES}")
+        usage_json = Path(args.usage_json)
         skipped: list[str] = []
         batch_id = args.batch_id
         if not batch_id:
+            inputs: dict[str, str] = {}
             requests, skipped = build_batch_requests(
                 trait_paths, n_variants=args.n_variants, n_questions=args.n_questions,
                 instructions_only=args.instructions_only, model=args.model, temperature=args.temperature,
-                thinking_budget=args.thinking_budget, force=args.force)
+                thinking_budget=args.thinking_budget, force=args.force, inputs=inputs)
             for line in skipped:
                 print(line, file=sys.stderr)
             print(f"Batch: {len(requests)} request(s), {len(skipped)} file(s) skipped", file=sys.stderr)
@@ -1776,41 +1865,67 @@ async def main_async(args: argparse.Namespace) -> None:
                 return
             batch = await client.messages.batches.create(requests=requests)
             batch_id = batch.id
-            record_batch(Path(args.usage_json), {
+            entry = {
                 "id": batch_id, "submitted": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-                "traits_dir": str(TRAITS_DIR), "style": PROMPT_STYLE, "template_sha256": template_sha256(PROMPT_STYLE),
-                "model": args.model, "n_requests": len(requests), "stems": [r["custom_id"] for r in requests]})
-            print(f"Batch submitted: {batch_id} (recorded in {batch_log_path(Path(args.usage_json))})", file=sys.stderr)
+                "traits_dir": dir_for_log(TRAITS_DIR), "style": PROMPT_STYLE,
+                "template_sha256": template_sha256(PROMPT_STYLE), "model": args.model, "n_requests": len(requests),
+                "n_variants": args.n_variants, "n_questions": args.n_questions,
+                "instructions_only": args.instructions_only, "stems": [r["custom_id"] for r in requests],
+                "inputs_sha256": inputs}
+            record_batch(usage_json, entry)
+            print(f"Batch submitted: {batch_id} (recorded in {batch_log_path(usage_json)})", file=sys.stderr)
             if args.batch_no_wait:
                 print(f"Collect it later with the same options and --batch-id {batch_id}", file=sys.stderr)
                 return
+        else:
+            entry = check_batch_to_collect(find_batch(usage_json, batch_id), batch_id, usage_json,
+                                           TRAITS_DIR, "--traits-dir")
+            if args.dry_run:
+                # a dry run writes nothing: until 2026-10-12 --batch-id with --dry-run collected the batch
+                print(f"DRY RUN: would wait for batch {batch_id} and write its replies", file=sys.stderr)
+                return
         await wait_for_batch(client, batch_id, args.batch_poll)
+        # the counts the batch asked for (older log entries have none: the options given now)
+        n_variants = entry.get("n_variants", args.n_variants)
+        n_questions = entry.get("n_questions", args.n_questions)
+        instructions_only = entry.get("instructions_only", args.instructions_only)
+        if instructions_only != args.instructions_only:
+            print(f"NOTE: batch {batch_id} was submitted {'with' if instructions_only else 'without'} "
+                  f"--instructions-only; collected the same way", file=sys.stderr)
         done, again, refused = await collect_batch(
-            client, batch_id, instructions_only=args.instructions_only, model=args.model,
+            client, batch_id, instructions_only=instructions_only, model=args.model,
             temperature=args.temperature, thinking_budget=args.thinking_budget, usage=usage,
-            refusals_jsonl=refusals_jsonl, name_checks=name_checks, semaphore=semaphore)
-        for line in done + refused:
-            print(line, file=sys.stderr)
-        # what the batch did not deliver is asked for at once, in real time (a refusal is not)
-        retried = await asyncio.gather(*(regenerate_one(
-            client, TRAITS_DIR / f"{stem}.json", n_variants=args.n_variants, n_questions=args.n_questions,
-            instructions_only=args.instructions_only, model=args.model, semaphore=semaphore,
-            temperature=args.temperature, thinking_budget=args.thinking_budget, force=True, dry_run=False,
-            usage=usage, refusals_jsonl=refusals_jsonl, name_checks=name_checks)
-            for stem in again), return_exceptions=True)
-        refused_rt = [r for r in retried if isinstance(r, GenerationRefusal)]
-        errors = [r for r in retried if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
-        for stem, r in zip(again, retried):
-            line = f"REFUSED {r.label}: {r.excerpt_line}" if isinstance(r, GenerationRefusal) else r
-            print(f"[in real time] {stem}: {line}", file=sys.stderr)
-        n_rt = len(retried) - len(errors) - len(refused_rt)
-        print(f"\nDone: {len(done) + n_rt} processed ({len(done)} from the batch, {n_rt} in real time), "
-              f"{len(skipped)} skipped, {len(refused) + len(refused_rt)} refused, {len(errors)} errors",
-              file=sys.stderr)
-        if refused or refused_rt:
-            print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
-        persist_name_checks(name_checks, Path(args.usage_json))
-        persist_usage(usage, Path(args.usage_json))
+            refusals_jsonl=refusals_jsonl, name_checks=name_checks, semaphore=semaphore,
+            n_variants=n_variants, n_questions=n_questions, inputs_sha256=entry.get("inputs_sha256"))
+        # collected: a second collection would charge the replies again and
+        # write them over any edit made since (check_batch_to_collect refuses it)
+        record_batch(usage_json, dict(entry, collected=datetime.datetime.now(datetime.timezone.utc).isoformat(
+            timespec="seconds"), counts={"written": len(done), "again": len(again), "refused": len(refused)}))
+        try:
+            for line in done + refused:
+                print(line, file=sys.stderr)
+            # what the batch did not deliver is asked for at once, in real time (a refusal is not)
+            retried = await asyncio.gather(*(regenerate_one(
+                client, TRAITS_DIR / f"{stem}.json", n_variants=n_variants, n_questions=n_questions,
+                instructions_only=instructions_only, model=args.model, semaphore=semaphore,
+                temperature=args.temperature, thinking_budget=args.thinking_budget, force=True, dry_run=False,
+                usage=usage, refusals_jsonl=refusals_jsonl, name_checks=name_checks)
+                for stem in again), return_exceptions=True)
+            refused_rt = [r for r in retried if isinstance(r, GenerationRefusal)]
+            errors = [r for r in retried if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
+            for stem, r in zip(again, retried):
+                line = f"REFUSED {r.label}: {r.excerpt_line}" if isinstance(r, GenerationRefusal) else r
+                print(f"[in real time] {stem}: {line}", file=sys.stderr)
+            n_rt = len(retried) - len(errors) - len(refused_rt)
+            print(f"\nDone: {len(done) + n_rt} processed ({len(done)} from the batch, {n_rt} in real time), "
+                  f"{len(skipped)} skipped, {len(refused) + len(refused_rt)} refused, {len(errors)} errors",
+                  file=sys.stderr)
+            if refused or refused_rt:
+                print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
+        finally:
+            # the batch's replies are paid for and written: their usage is kept even if the real-time pass stops
+            persist_name_checks(name_checks, usage_json)
+            persist_usage(usage, usage_json)
         return
 
     tasks = [

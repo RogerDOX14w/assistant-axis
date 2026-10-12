@@ -567,3 +567,27 @@ class TestOutputDir:
     def test_absolute_is_taken_as_given_and_relative_is_under_the_repo(self, tmp_path):
         assert module.resolve_output_dir(str(tmp_path)) == tmp_path
         assert module.resolve_output_dir("data_analysis/output") == module.REPO_ROOT / "data_analysis" / "output"
+
+
+# 2026-10-12 review: a reply whose goals are not objects, or whose score is a
+# JSON true, is refused (and so asked again) instead of reaching the aggregate
+import pytest as _pytest  # noqa: E402
+
+from data_analysis import classify_goals as _cg  # noqa: E402
+
+
+@_pytest.mark.parametrize("reply", [
+    {"reasoning": "r", "score": 2, "goals": ["selfishness"]},
+    {"reasoning": "r", "score": 1, "goals": "selfishness"},
+    {"reasoning": "r", "score": True, "goals": [{"description": "d", "goal_type": "terminal"}]},
+])
+def test_a_reply_the_aggregate_could_not_read_is_refused(reply):
+    with _pytest.raises(ValueError):
+        _cg.parse_classification(json.dumps(reply), "x/trait/pos/0")
+
+
+def test_a_well_formed_reply_still_reads():
+    reply = {"reasoning": "r", "score": 2, "goals": [{"description": "d", "goal_type": "terminal"}]}
+    assert _cg.parse_classification(json.dumps(reply), "x/trait/pos/0")["score"] == 2
+    assert _cg.aggregate_results([{"name": "x", "source": "trait", "polarity": "pos", "index": 0, "text": "t",
+                                   "classification": _cg.parse_classification(json.dumps(reply), "k")}])

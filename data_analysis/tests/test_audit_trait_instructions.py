@@ -684,3 +684,49 @@ class TestJudgeDisplayForm:
             assert audit.version_is_current(prev, cur, judge, self.PLAIN)
             assert not audit.version_is_current(prev, cur, judge, self.STANDARD)
             assert not audit.version_is_current(prev - 1, cur, judge, self.PLAIN)
+
+
+class TestJudgeCallTemperature:
+    """2026-10-12 review: the fault and question judges sent ``temperature``
+    to every model, so a judge run with a model that refuses one (the Claude 5
+    models) failed every file; they now learn it as the taste call does."""
+
+    def test_a_judge_that_refuses_a_temperature_is_asked_without_one(self):
+        import anthropic
+        import httpx
+        calls = []
+
+        async def create(**kw):
+            calls.append(kw)
+            if "temperature" in kw:
+                response = httpx.Response(400, request=httpx.Request("POST", "https://api.anthropic.com/v1/messages"))
+                raise anthropic.BadRequestError("`temperature` is not supported", response=response,
+                                                body={"error": {"message": "`temperature` is not supported"}})
+            return _response('{"items": []}')
+        client = SimpleNamespace(messages=SimpleNamespace(create=create))
+        usage, tally = audit.MultiModelUsage(), audit.ParseTally()
+        audit._NO_TEMPERATURE_MODELS.discard("claude-haiku-5-test")
+        try:
+            out = asyncio.run(audit._judge_call(client, "claude-haiku-5-test", "the prompt", lambda t: json.loads(t),
+                                                100, asyncio.Semaphore(1), usage, tally, "questions:x"))
+            assert out == {"items": []} and len(calls) == 2 and "temperature" not in calls[1]
+            assert usage.n_calls == 1 and tally.ok["questions:x"] == 1
+            # the next call goes without one at once
+            asyncio.run(audit._judge_call(client, "claude-haiku-5-test", "again", lambda t: json.loads(t),
+                                          100, asyncio.Semaphore(1), usage, tally, "questions:x"))
+            assert len(calls) == 3 and "temperature" not in calls[2]
+        finally:
+            audit._NO_TEMPERATURE_MODELS.discard("claude-haiku-5-test")
+
+    def test_another_bad_request_is_not_swallowed(self):
+        import anthropic
+        import httpx
+
+        async def create(**kw):
+            response = httpx.Response(400, request=httpx.Request("POST", "https://api.anthropic.com/v1/messages"))
+            raise anthropic.BadRequestError("prompt is too long", response=response,
+                                            body={"error": {"message": "prompt is too long"}})
+        client = SimpleNamespace(messages=SimpleNamespace(create=create))
+        with pytest.raises(anthropic.BadRequestError):
+            asyncio.run(audit._judge_call(client, "claude-sonnet-4-6", "p", json.loads, 100, asyncio.Semaphore(1),
+                                          audit.MultiModelUsage(), audit.ParseTally(), "instructions:x"))

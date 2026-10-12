@@ -207,10 +207,35 @@ def build_role_message(role_name: str, description: str, instructions: list[dict
     )
 
 
-def _parse_reply(text: str) -> dict:
+def _parse_reply(text: str, required: tuple[str, ...] = ()) -> dict:
+    """The JSON object of a reply, fences stripped.  Raises ValueError when
+    it is not an object and KeyError when a ``required`` field is missing,
+    so that the callers' retry loops ask again instead of handing a result
+    without its fields to code that indexes them (2026-10-12 review: a
+    trait-check reply without ``negative_label`` used to crash the whole
+    run after its usage was merged, so ``seed_entities.py check`` got no
+    output at all)."""
     raw = re.sub(r"^```(?:json)?\s*\n?", "", text.strip())
     raw = re.sub(r"\n?```\s*$", "", raw)
-    return json.loads(raw, strict=False)
+    result = json.loads(raw, strict=False)
+    if not isinstance(result, dict):
+        raise ValueError(f"the reply is a JSON {type(result).__name__}, not an object")
+    for key in required:
+        if key not in result:
+            raise KeyError(key)
+    return result
+
+
+# An API error that the SDK's own retries did not get past (an overloaded
+# server, a dropped connection) is retried here too, after a longer wait, and
+# then ends in the ERROR sentinel like an unreadable reply: before 2026-10-12
+# it escaped the loop and stopped the whole run, results and usage record
+# included, over one trait.
+RETRYABLE = (json.JSONDecodeError, ValueError, KeyError, IndexError)
+
+
+async def _wait_after(e: Exception, attempt: int) -> None:
+    await asyncio.sleep(2 ** attempt if isinstance(e, anthropic.APIError) else 1)
 
 
 async def name_pos_one(
@@ -232,13 +257,10 @@ async def name_pos_one(
                 )
                 if usage is not None:
                     usage.charge(MODEL, *extract_usage_anthropic(response))
-                result = _parse_reply(response.content[0].text)
-                if "positive_name" not in result:
-                    raise KeyError("positive_name")
-                return result
-            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                return _parse_reply(response.content[0].text, ("positive_name",))
+            except (*RETRYABLE, anthropic.APIError) as e:
                 print(f"  Retry {attempt+1} for the pos name of {log_label}: {e}", file=sys.stderr)
-                await asyncio.sleep(1)
+                await _wait_after(e, attempt)
     return {"positive_name": "ERROR", "reasoning": "All retries failed"}
 
 
@@ -263,14 +285,10 @@ async def classify_role_one(
                 )
                 if usage is not None:
                     usage.charge(MODEL, *extract_usage_anthropic(response))
-                result = _parse_reply(response.content[0].text)
-                for key in ("opposing_role", "opposition_score"):
-                    if key not in result:
-                        raise KeyError(key)
-                return result
-            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                return _parse_reply(response.content[0].text, ("opposing_role", "opposition_score"))
+            except (*RETRYABLE, anthropic.APIError) as e:
                 print(f"  Retry {attempt+1} for the role {role_name}: {e}", file=sys.stderr)
-                await asyncio.sleep(1)
+                await _wait_after(e, attempt)
     return dict(ROLE_ERROR_RESULT)
 
 
@@ -397,17 +415,13 @@ async def classify_one(
                 )
                 if usage is not None:
                     usage.charge(MODEL, *extract_usage_anthropic(response))
-                raw = response.content[0].text.strip()
-                raw = re.sub(r"^```(?:json)?\s*\n?", "", raw)
-                raw = re.sub(r"\n?```\s*$", "", raw)
-                result = json.loads(raw, strict=False)
-                return result
-            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                return _parse_reply(response.content[0].text, ("negative_label", "antonym_score"))
+            except (*RETRYABLE, anthropic.APIError) as e:
                 print(
                     f"  Retry {attempt+1} for {positive_label}: {e}",
                     file=sys.stderr,
                 )
-                await asyncio.sleep(1)
+                await _wait_after(e, attempt)
     return {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "All retries failed"}
 
 
@@ -457,7 +471,7 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
             result["positive_name_reasoning"] = named.get("reasoning")
         if stem in KNOWN_ANTONYMS:
             result["known_antonym"] = KNOWN_ANTONYMS[stem]
-            match = result["negative_label"].lower() == KNOWN_ANTONYMS[stem].lower()
+            match = str(result.get("negative_label")).lower() == KNOWN_ANTONYMS[stem].lower()
             result["matches_known"] = match
         return stem, result
 
@@ -497,19 +511,22 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
 
     results = dict(sorted(results.items()))
 
-    scores = [
-        r["antonym_score"]
-        for r in results.values()
-        if r["antonym_score"] is not None and r["antonym_score"] >= 0
-    ]
+    # a score the model wrote as anything but a whole number (null, "3") is
+    # left out of the summary rather than stopping the run before it prints
+    # its results (the role check's summary already did this)
+    def _int_score(r):
+        s = r.get("antonym_score")
+        return s if isinstance(s, int) and not isinstance(s, bool) else None
+
+    scores = [s for s in map(_int_score, results.values()) if s is not None and s >= 0]
     print(f"\nAntonym score distribution:", file=sys.stderr)
     for s in range(5):
         count = scores.count(s)
         print(f"  {s}: {count} traits", file=sys.stderr)
     under4 = [
-        (k, v["antonym_score"], v["negative_label"])
+        (k, _int_score(v), v.get("negative_label"))
         for k, v in results.items()
-        if v["antonym_score"] is not None and v["antonym_score"] < 4
+        if _int_score(v) is not None and _int_score(v) < 4
     ]
     if under4:
         print(f"\nTraits scoring under 4:", file=sys.stderr)

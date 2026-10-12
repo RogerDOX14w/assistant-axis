@@ -429,9 +429,23 @@ def parse_scores(combo: Dict, raw_text: str, n: int) -> Dict:
         )
     per_pair = []
     for i, entry in enumerate(result):
-        if "reasoning" not in entry or "score" not in entry:
+        # Anything malformed is a ValueError, which the callers treat as an
+        # unusable reply: until 2026-10-12 an entry that was not an object, or
+        # a score of null, raised TypeError, which no caller caught, and one
+        # such reply stopped the collection of a whole Message Batch (every
+        # rerun with --batch_id stopping at the same reply).
+        if not isinstance(entry, dict) or "reasoning" not in entry or "score" not in entry:
             raise ValueError(f"Entry {i} missing reasoning/score")
-        score = int(entry["score"])
+        raw = entry["score"]
+        if isinstance(raw, bool) or not isinstance(raw, (int, float, str)):
+            raise ValueError(f"Entry {i} score {raw!r} is not a whole number")
+        try:
+            value = float(raw)
+        except ValueError:
+            raise ValueError(f"Entry {i} score {raw!r} is not a whole number") from None
+        if not value.is_integer():
+            raise ValueError(f"Entry {i} score {raw!r} is not a whole number")
+        score = int(value)
         if score not in (0, 1, 2, 3):
             raise ValueError(f"Entry {i} score {score} not in 0-3")
         per_pair.append({"reasoning": entry["reasoning"], "score": score})
@@ -813,6 +827,13 @@ async def batch_stage(
     else:
         entry = next((e for e in read_batch_log(output_path) if e.get("id") == batch_id),
                      {"id": batch_id, "stage": stage, "model": model})
+    # A batch collected before was charged then: collecting it again (a rerun
+    # with the same --batch_id) must not count its replies twice in the
+    # cumulative usage record (2026-10-12 review; classify_goals.py does the same).
+    charge = not entry.get("collected")
+    if not charge:
+        logger.warning(f"Batch {batch_id} was collected on {entry['collected']} and its usage recorded then; "
+                       f"collecting it again without charging it")
 
     while True:
         batch = await client.messages.batches.retrieve(batch_id)
@@ -832,7 +853,8 @@ async def batch_stage(
             logger.warning(f"{item.custom_id}: request {item.result.type}")
             continue
         message = item.result.message
-        usage.charge(model + BATCH_SUFFIX, *extract_usage_anthropic(message))
+        if charge:
+            usage.charge(model + BATCH_SUFFIX, *extract_usage_anthropic(message))
         combo, k = by_id.get(item.custom_id, (None, None))
         if combo is None:
             counts["unknown"] += 1
@@ -1060,10 +1082,14 @@ async def main_async():
     output_path = Path(args.output)
     existing_scores: List[Dict] = []
     if output_path.exists():
+        # A file that cannot be read stops the run (as in classify_goals.py):
+        # starting fresh would score everything again and overwrite the paid-for
+        # scores at the first save (2026-10-12 review; it used to warn and go on).
         try:
             existing_scores = load_json(output_path).get("scores", [])
-        except Exception:
-            logger.warning(f"Could not load {output_path}, starting fresh")
+        except Exception as e:
+            raise SystemExit(f"Could not read {output_path} ({type(e).__name__}: {e}); move it aside "
+                             f"to start fresh") from e
     kept, pending, counts = split_existing(existing_scores, combos, args.model)
     logger.info(f"Stored scores: {counts['kept']} kept; rescoring {counts['stale_text']} whose "
                 f"texts changed and {counts['stale_model']} by another model; dropping "

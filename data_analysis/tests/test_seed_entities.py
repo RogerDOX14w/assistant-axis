@@ -673,3 +673,87 @@ class TestRefusedGeneration:
         assert "generation refused (ERROR: sentinel in eval_prompt)" in out
         assert "generation refused (ERROR: sentinel) |" in out
         assert "generation refused (stop_reason refusal) |" in out
+
+
+class TestReviewFixes20261012:
+    """2026-10-12 review of seed_entities.py."""
+
+    def test_stems_take_the_live_entry_not_a_later_superseded_copy(self, tmp_path, monkeypatch):
+        # engaged and turbulent in the queue of that date: the live entry first, a superseded copy after it
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="seeded"), _entry(status="superseded", description="old wording")])
+        calls = []
+
+        class Res:
+            returncode = 0
+        monkeypatch.setattr(se, "run_tool", lambda cmd, **k: (calls.append(cmd), Res())[1])
+        (d / "traits" / "instructions" / "rationalizing.json").write_text(json.dumps({"instruction": [{"pos": "x"}]}))
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "generate", "--stems", "rationalizing"]) == 0
+        assert len(calls) == 1 and calls[0].count("rationalizing") == 1
+        live, parked = json.loads(qp.read_text())["entries"]
+        assert live["status"] == "generated" and parked["status"] == "superseded"
+
+    def test_a_stem_with_only_parked_entries_still_gets_its_skip_line(self, capsys):
+        q = {"entries": [_entry(status="not_adopted"), _entry(status="superseded", partner="x")]}
+        assert se.select_entries(q, ["rationalizing"], None, None) == [q["entries"][1]]
+
+    def test_a_trait_and_a_role_of_one_name_are_both_taken(self):
+        q = {"entries": [_entry(stem="patient", label="patient"),
+                         _entry(stem="patient", label="patient", entity_type="role")]}
+        assert [e["entity_type"] for e in se.select_entries(q, ["patient"], None, None)] == ["trait", "role"]
+
+    def test_generation_commands_name_a_stem_once(self):
+        cmds = se.generation_commands([_entry(), _entry(partner="other")])
+        assert cmds == [["data_analysis/regenerate_trait_instructions.py", "--traits", "rationalizing"]]
+
+    class _Out:
+        returncode = 0
+        stderr = ""
+
+        def __init__(self, results):
+            self.stdout = json.dumps(results)
+
+    def test_check_matches_results_by_stem(self, tmp_path, monkeypatch):
+        """generate_antonyms.py keys its results by stem; an entry whose label
+        does not normalise to its stem was dropped without a word."""
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(stem="self_assured", label="self-confident", status="generated",
+                                      partner="insecure")])
+        out = self._Out({"self_assured": {"negative_label": "insecure", "antonym_score": 4, "reasoning": "r"}})
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: out)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--stems", "self_assured"]) == 0
+        e = json.loads(qp.read_text())["entries"][0]
+        assert e["status"] == "checked" and e["check_result"]["category"] == "nice"
+
+    def test_an_error_answer_leaves_the_entry_to_be_checked_again(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="generated")])
+        out = self._Out({"rationalizing": {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "All retries failed"}})
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: out)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--chunk", "3"]) == 0
+        e = json.loads(qp.read_text())["entries"][0]
+        assert e["status"] == "generated" and "check_result" not in e and "check_answers" not in e
+        assert not se.check_history_path(d).exists()
+        assert "1 without an answer (run check again)" in capsys.readouterr().err
+
+    def test_a_failed_regeneration_still_records_the_rename(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        td.joinpath("slothful.json").write_text(json.dumps({"positive_label": "slothful", "negative_label": "non-slothful",
+                                                            "description": "d", "instruction": [{"pos": "x", "neg": "y"}]}))
+        qp = _queue(tmp_path, [_entry(stem="slothful", label="slothful", partner=None, status="done"),
+                               _entry(stem="busy", label="busy", partner="slothful", status="checked")])
+        calls = []
+
+        class Res:
+            def __init__(self, rc):
+                self.returncode, self.stdout, self.stderr = rc, "{}", ""
+
+        def fake(cmd, **k):
+            calls.append(cmd[0])
+            return Res(1 if "regenerate_trait_instructions.py" in cmd[0] else 0)
+        monkeypatch.setattr(se, "run_tool", fake)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "slothful", "--new", "lazy"]) == 1
+        own, other = json.loads(qp.read_text())["entries"]
+        assert own["stem"] == "lazy" and other["partner"] == "lazy" and td.joinpath("lazy.json").exists()
+        assert "tools/sync_entity_lists.py" in calls and "data_analysis/generate_antonyms.py" not in calls
+        assert "regenerate it (regenerate_trait_instructions.py --traits lazy --force)" in capsys.readouterr().err

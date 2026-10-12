@@ -1691,3 +1691,108 @@ class TestNameCheckHistory:
         recs = module.read_name_checks(module.name_check_log_path(usage_json))
         assert [(r["stem"], r["positive_name"]) for r in recs] == [("kind_to_animals", "animal-loving")]
         assert json.loads(usage_json.read_text())["n_calls"] == 3    # two generations and the one naming call
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12 review: the batch path's counts, re-collection, files edited
+# while a batch runs, the directory a batch was submitted for, and a naming
+# call that fails after the file is written
+# ---------------------------------------------------------------------------
+
+class TestBatchCollectionReview:
+    def test_a_new_seed_s_short_reply_is_not_written_from_the_batch(self, batch_setup, capsys):
+        b = batch_setup
+        seed = dict(SAMPLE_TRAIT, positive_label="petty", keep_me="yes")
+        del seed["instruction"], seed["questions"]            # a seed file: nothing to compare counts with
+        (b.stage / "petty.json").write_text(json.dumps(seed))
+        short = json.dumps(dict(FAKE_ROGER_RESPONSE, instruction=FAKE_INSTRUCTIONS[:4]))
+        b.client.messages.batches.results = AsyncMock(return_value=_Results([_entry("petty", text=short)]))
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        assert "petty: reply cannot be used (4 instruction pairs, not 5)" in err
+        d = json.loads((b.stage / "petty.json").read_text())
+        assert d["instruction"] == FAKE_INSTRUCTIONS and d["generator"].get("batch", False) is False
+
+    def test_the_counts_the_batch_asked_for_are_the_ones_checked(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        log = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert (log[0]["n_variants"], log[0]["n_questions"], log[0]["instructions_only"]) == (5, 40, False)
+        # collected with another --n-questions by mistake: the logged count stands, and nothing is asked again
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6", "--n-questions", "39"])
+        assert json.loads((b.stage / "petty.json").read_text())["generator"]["batch"] is True
+
+    def test_a_collected_batch_is_not_collected_again(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        log = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert log[0]["collected"] and log[0]["counts"] == {"written": 1, "again": 2, "refused": 0}
+        n_calls = json.loads(b.usage_json.read_text())["n_calls"]
+        (b.stage / "petty.json").write_text(json.dumps(dict(json.loads((b.stage / "petty.json").read_text()),
+                                                            hand_edits="edited after the batch")))
+        with pytest.raises(SystemExit, match="was collected on"):
+            module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert json.loads(b.usage_json.read_text())["n_calls"] == n_calls
+        assert json.loads((b.stage / "petty.json").read_text())["hand_edits"] == "edited after the batch"
+
+    def test_a_file_edited_while_the_batch_ran_is_generated_again(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        p = b.stage / "petty.json"
+        p.write_text(json.dumps(dict(json.loads(p.read_text()), description="This means keeping score.")))
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        assert "petty: label or description changed since the batch was submitted" in err
+        d = json.loads(p.read_text())
+        assert d["generator"].get("batch", False) is False and d["description"] == "This means keeping score."
+        sent = [c.kwargs["messages"][0]["content"] for c in b.client.messages.create.call_args_list]
+        assert any("This means keeping score." in s for s in sent)     # the real-time call read the new text
+
+    def test_a_batch_for_another_directory_is_refused(self, batch_setup, tmp_path):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        other = tmp_path / "other"     # say, the corpus, while the batch was for a staging copy
+        other.mkdir()
+        for f in b.stage.glob("*.json"):
+            (other / f.name).write_text(f.read_text())
+        args = [a if a != str(b.stage) else str(other) for a in b.args]
+        with pytest.raises(SystemExit, match="was submitted for .*collect it with --traits-dir"):
+            module.main(args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+
+    def test_the_log_records_a_corpus_directory_relative_to_the_repository(self):
+        corpus = module.REPO_ROOT / "data" / "traits" / "instructions"
+        assert module.dir_for_log(corpus) == "data/traits/instructions"
+        assert module.dir_from_log("data/traits/instructions") == corpus.resolve()
+        assert module.dir_from_log(str(corpus)) == corpus.resolve()       # the older, absolute form
+
+    def test_a_failed_naming_call_leaves_the_regeneration_ok(self, phrase_trait_file, v2_style, monkeypatch, capsys):
+        import anthropic
+        import httpx
+        monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+        err = anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_make_response(json.dumps(FAKE_ROGER_RESPONSE))] + [err] * 5)
+        checks = []
+        status = asyncio.run(regenerate_one(
+            client, phrase_trait_file, n_variants=5, n_questions=40, instructions_only=False, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False, name_checks=checks))
+        assert status.startswith("OK") and "naming check" not in status and checks == []
+        assert "the naming check gave no usable answer; no record kept" in capsys.readouterr().err
+        assert json.loads(phrase_trait_file.read_text())["instruction"] == FAKE_INSTRUCTIONS
+
+    def test_a_dry_run_collection_writes_nothing(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        before = {p.name: p.read_text() for p in b.stage.glob("*.json")}
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--dry-run"])
+        assert b.client.messages.batches.retrieve.call_count == 0
+        assert {p.name: p.read_text() for p in b.stage.glob("*.json")} == before
+        assert "would wait for batch msgbatch_test" in capsys.readouterr().err
+
+    def test_the_batch_s_own_instructions_only_setting_is_used(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--instructions-only", "--model", "claude-sonnet-4-6"])
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert "was submitted with --instructions-only; collected the same way" in capsys.readouterr().err
+        d = json.loads((b.stage / "petty.json").read_text())
+        assert d["instruction"] == FAKE_INSTRUCTIONS and d["questions"] == SAMPLE_TRAIT["questions"]

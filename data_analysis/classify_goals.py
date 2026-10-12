@@ -603,14 +603,19 @@ def parse_classification(raw_text: str, label: str) -> Dict:
     if "reasoning" not in result:
         raise ValueError("Missing 'reasoning' field")
 
-    # Normalize
-    if result["score"] not in (0, 1, 2):
+    # Normalize (a JSON true is not a score of 1)
+    if isinstance(result["score"], bool) or result["score"] not in (0, 1, 2):
         raise ValueError(f"Invalid score: {result.get('score')}")
     if result["score"] == 0:
         result["goals"] = []
     else:
         if not result.get("goals"):
             raise ValueError("score>0 but goals is empty")
+        # aggregate_results reads each goal's description and goal_type; a
+        # goals field of strings would have stopped the aggregation of the
+        # whole corpus, not just this item (2026-10-12 review)
+        if not isinstance(result["goals"], list) or not all(isinstance(g, dict) for g in result["goals"]):
+            raise ValueError("goals is not a list of objects")
 
     return result
 
