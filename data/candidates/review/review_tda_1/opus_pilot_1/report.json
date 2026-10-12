@@ -1,0 +1,150 @@
+{
+  "result": {
+    "n": 128,
+    "by_reference": {
+      "same": {
+        "n": 64,
+        "answered": 64,
+        "no_answer": 0,
+        "raised": 22,
+        "four": 0,
+        "raised_share": 0.3438,
+        "ci95": [
+          0.2295,
+          0.473
+        ],
+        "opus_values": {
+          "2": 42,
+          "3": 22
+        }
+      },
+      "different": {
+        "n": 64,
+        "answered": 64,
+        "no_answer": 0,
+        "raised": 22,
+        "four": 0,
+        "raised_share": 0.3438,
+        "ci95": [
+          0.2295,
+          0.473
+        ],
+        "opus_values": {
+          "1": 2,
+          "2": 40,
+          "3": 22
+        }
+      }
+    },
+    "by_bin": {
+      "0.35-0.45": {
+        "same": {
+          "n": 4,
+          "answered": 4,
+          "raised": 0
+        },
+        "different": {
+          "n": 5,
+          "answered": 5,
+          "raised": 1
+        }
+      },
+      "0.45-0.55": {
+        "same": {
+          "n": 13,
+          "answered": 13,
+          "raised": 6
+        },
+        "different": {
+          "n": 18,
+          "answered": 18,
+          "raised": 4
+        }
+      },
+      "0.55-0.65": {
+        "same": {
+          "n": 27,
+          "answered": 27,
+          "raised": 7
+        },
+        "different": {
+          "n": 22,
+          "answered": 22,
+          "raised": 8
+        }
+      },
+      "0.65+": {
+        "same": {
+          "n": 20,
+          "answered": 20,
+          "raised": 9
+        },
+        "different": {
+          "n": 19,
+          "answered": 19,
+          "raised": 9
+        }
+      }
+    },
+    "gap": 0.0,
+    "fisher_p_one_sided": 0.5737458200963127,
+    "scaled_to_pools": {
+      "same_pool": 64,
+      "different_pool": 133,
+      "same_raised": 22.0,
+      "different_raised": 45.7,
+      "share_of_raised_that_roger_joined": 0.3249
+    },
+    "yardstick": {
+      "three_only": {
+        "n": 261,
+        "same": 180,
+        "same_share": 0.6897,
+        "ci95": [
+          0.6297,
+          0.7453
+        ]
+      },
+      "four": {
+        "n": 120,
+        "same": 102,
+        "same_share": 0.85,
+        "ci95": [
+          0.7733,
+          0.9086
+        ]
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py opus-pilot --batch-id review_tda_1 --budget-usd 1",
+      "git_sha": "4e3bc596+dirty",
+      "author": "Roger Dearnaley",
+      "title": "Opus pilot review_tda_1/opus_pilot_1"
+    },
+    "produced_at": "2026-10-12T23:21:28+00:00",
+    "inputs": [
+      {
+        "dep_key": "graph",
+        "path": "data/candidates/review/review_tda_1/graph.json",
+        "fingerprint": "v1:2026-10-10T19:29:06+00:00@11904430",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T19:29:06+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "decisions",
+        "path": "data/candidates/review/review_tda_1/decisions.jsonl",
+        "fingerprint": "v1:2026-10-11T21:21:26+00:00@86632",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T21:21:26+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "3e56c8d9d494bfd28fecd764fb7eb4fc1330ac8530e83adc210d8625cb2d9af6"
+  }
+}

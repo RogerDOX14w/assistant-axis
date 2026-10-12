@@ -1,0 +1,46 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "graph",
+        "extras": {},
+        "fingerprint": "v1:2026-10-10T19:29:06+00:00@11904430",
+        "kind": "file",
+        "last_modified_at": "2026-10-10T19:29:06+00:00",
+        "path": "data/candidates/review/review_tda_1/graph.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "decisions",
+        "extras": {},
+        "fingerprint": "v1:2026-10-11T21:21:26+00:00@86632",
+        "kind": "file",
+        "last_modified_at": "2026-10-11T21:21:26+00:00",
+        "path": "data/candidates/review/review_tda_1/decisions.jsonl"
+      }
+    ],
+    "inputs_sha256": "3e56c8d9d494bfd28fecd764fb7eb4fc1330ac8530e83adc210d8625cb2d9af6",
+    "produced_at": "2026-10-12T23:21:27+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py opus-pilot --batch-id review_tda_1 --budget-usd 1",
+      "git_sha": "4e3bc596+dirty",
+      "title": "review_graph opus-pilot review_tda_1"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 128,
+  "per_model": {
+    "claude-opus-5-5": {
+      "completion_tokens": 25423,
+      "cost_usd": 0.6291,
+      "model": "claude-opus-5-5",
+      "n_calls": 128,
+      "prompt_tokens": 30159
+    }
+  },
+  "total_completion_tokens": 25423,
+  "total_cost_usd": 0.6291,
+  "total_prompt_tokens": 30159
+}

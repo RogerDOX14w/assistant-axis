@@ -1,0 +1,71 @@
+{
+  "batch_id": "review_tda_1",
+  "pilot_id": "opus_pilot_1",
+  "git_sha": "4e3bc596",
+  "allow_dirty": false,
+  "argv": [
+    "opus-pilot",
+    "--batch-id",
+    "review_tda_1",
+    "--budget-usd",
+    "1"
+  ],
+  "n": 128,
+  "seed": 20261012,
+  "transport": "live",
+  "estimate_usd": 0.4204,
+  "budget_usd": 1.0,
+  "cap_usd": 1.0,
+  "reference": {
+    "events": 354,
+    "skipped_on_replay": 0,
+    "groups_resolved": 68,
+    "terms_settled": 204,
+    "resolutions": 65
+  },
+  "pools": {
+    "same": 64,
+    "different": 133,
+    "unlabelled": 1578,
+    "by_bin": {
+      "0.35-0.45": {
+        "same": 4,
+        "different": 10
+      },
+      "0.45-0.55": {
+        "same": 13,
+        "different": 37
+      },
+      "0.55-0.65": {
+        "same": 27,
+        "different": 46
+      },
+      "0.65+": {
+        "same": 20,
+        "different": 40
+      }
+    }
+  },
+  "label_form": "judge-display-v1",
+  "rubric": {
+    "name": "overlap_concept",
+    "version": 6,
+    "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+  },
+  "model": "claude-opus-5-5",
+  "started_at": "2026-10-12T23:20:21+00:00",
+  "finished_at": "2026-10-12T23:21:28+00:00",
+  "cost_usd": 0.6291,
+  "status": 0,
+  "calls_sent": {
+    "overlap:opus": 128
+  },
+  "calls_resumed": 0,
+  "parse_rates": {
+    "overlap:claude-opus-5-5": {
+      "n": 128,
+      "ok_first": 128,
+      "ok": 128
+    }
+  }
+}

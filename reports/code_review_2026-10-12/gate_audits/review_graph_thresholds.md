@@ -554,3 +554,22 @@ the other sessions under [data/candidates/review/](../../../data/candidates/revi
 [registry.jsonl](../../../data/candidates/registry.jsonl),
 [metric_config.json](../../../data/candidates/metric_config.json) and the
 [embedding cache](../../../data/candidates/cache/embeddings/) for the cosines.
+
+## Addendum (2026-10-13, phase B): the Opus pilot on Sonnet-2 pairs
+
+Run as recommended ([opus_pilot_1](../../../data/candidates/review/review_tda_1/opus_pilot_1/report.json), 128 first
+directions of the TDA build that Sonnet read 2 and Opus never saw, half on pairs Roger resolved as one concept and half
+on pairs he kept apart; prompts byte-identical to the build's; $0.63 live against the $0.42 estimate, the replies
+being longer than the build's).
+
+| Roger's resolution | Opus raised to 3 or more | 95% interval |
+|---|---|---|
+| one concept (64) | 22 (34%) | 23-47% |
+| kept apart (64) | 22 (34%) | 23-47% |
+
+Opus raises a third of Sonnet's 2s whichever way Roger resolved the pair: a gap of 0 points (one-sided Fisher exact
+p = 0.57), against the build's own 3-edges, which agree with Roger's resolution 69% of the time, and its 4-edges 85%.
+Scaled to the pools, an Opus read of every Sonnet 2 would add about 68 raised directions, of which about a third on
+pairs Roger joined.  **Recommendation: do not send Sonnet-2 pairs to Opus**; the cut-off loss this audit found
+(section on the 18%) is not recoverable this way, and the k = 10 / pair-floor change is the one that adds pairs Roger
+wants.
