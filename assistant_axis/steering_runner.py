@@ -27,8 +27,11 @@ On entry, :func:`run_steering_cell` reads any existing
 ``records.jsonl`` and skips ``(strength, question_idx)`` pairs already
 present.  If ``summary.json`` exists with a non-null
 ``stopped_at_strength``, the sweep is considered complete and the
-function returns immediately with a no-op (subsequent judge passes
-remain a Phase 2 concern).
+function returns immediately with a no-op, unless a strength on disk
+is incomplete.  The bidirectional scan then re-judges a strength whose
+K responses are all on disk and regenerates one with responses missing
+(the resume gap-fill in ``_run_bidirectional_cell``; re-judging since
+2026-10-12).
 """
 from __future__ import annotations
 
@@ -458,7 +461,13 @@ def _strength_records_complete(
     None, "effect": None}`` (the empty placeholder filled in by
     ``_generate_and_dispatch_strength`` after response generation but
     before judging dispatches); those records flag the strength as
-    incomplete and the resume gap-fill regenerates them.
+    incomplete.  What the resume gap-fill then does depends on
+    :func:`_strength_generation_complete`: a strength whose K responses
+    are all on disk is re-judged (:func:`_rejudge_strength`), one with
+    responses missing is regenerated (since 2026-10-12, review Review 7
+    D4 / walk-through E2; before, every incomplete strength was
+    regenerated, so one UNPARSEABLE judgement cost K generations, again
+    on every resume where it recurred).
     """
     if len(recs) != expected_K:
         return False
@@ -504,6 +513,131 @@ def _strength_records_complete(
             if smc_f is None or smc_f < skip_threshold:
                 return False
     return True
+
+
+def _strength_generation_complete(
+    recs: List[Dict[str, Any]],
+    expected_K: int,
+) -> bool:
+    """Return True iff a strength's K responses are all on disk.
+
+    One record per question index ``0..K-1`` (no gaps, no duplicates),
+    each with a response string.  Judging state is not looked at; that is
+    :func:`_strength_records_complete`'s job.  The resume gap-fill
+    re-judges a strength that passes this test and regenerates one that
+    does not.
+    """
+    if len(recs) != expected_K:
+        return False
+    try:
+        q_indices = sorted(int(r.get("question_idx", -1)) for r in recs)
+    except (TypeError, ValueError):
+        return False
+    if q_indices != list(range(expected_K)):
+        return False
+    return all(isinstance(r.get("response"), str) for r in recs)
+
+
+def _has_coherence_score(rec: Dict[str, Any]) -> bool:
+    judges = rec.get("judges")
+    coh = judges.get("coherence") if isinstance(judges, dict) else None
+    return isinstance(coh, dict) and coh.get("score") is not None
+
+
+def _strength_mean_coh_of(
+    recs: List[Dict[str, Any]], fallback: Optional[float],
+) -> float:
+    """The strength's mean coherence after a re-judge hand-over: the
+    ``strength_mean_coh`` stamp (``enqueue_strength_group`` stamps every
+    record with the mean over all K), else the mean of the coherence
+    scores, else ``fallback`` (the coherence future's value), else 0.0."""
+    for r in recs:
+        smc = (r.get("judges") or {}).get("strength_mean_coh")
+        if isinstance(smc, (int, float)):
+            return float(smc)
+    scores = [
+        float(r["judges"]["coherence"]["score"])
+        for r in recs if _has_coherence_score(r)
+    ]
+    if scores:
+        return sum(scores) / len(scores)
+    return float(fallback) if fallback is not None else 0.0
+
+
+def _rejudge_strength(
+    *,
+    strength: float,
+    sign: int,
+    slot: int,
+    layer: int,
+    recs: List[Dict[str, Any]],
+    output_dir: Path,
+    dispatcher: JudgeDispatcher,
+) -> Tuple["concurrent.futures.Future", "concurrent.futures.Future"]:
+    """Re-dispatch judging for a strength whose K responses are all on disk.
+
+    The resume path for a strength that :func:`_strength_records_complete`
+    rejects but :func:`_strength_generation_complete` accepts (an
+    UNPARSEABLE persona, an effect the judges left out, a strength skipped
+    under an older, lower skip threshold, a kill between generation and
+    judging).  Nothing is regenerated (2026-10-12, review Review 7 D4 /
+    walk-through E2):
+
+    * coherence is judged only for the records that have no coherence
+      score, so the scores already on disk are kept;
+    * the whole strength (all K records) then goes to
+      ``enqueue_strength_group``, which recomputes ``strength_mean_coh``
+      over the K, decides skip-or-judge, and judges persona and effect only
+      where a record has no score (the runner never sets
+      ``rerun_existing``; the skip path keeps judged scores too, E1).
+
+    ``recs`` must be the record dicts held in the runner's
+    ``existing_records`` (they are updated in place, so the runner's own
+    flushes carry the new judgements).  Returns ``(coh_future,
+    eff_future)`` like a freshly generated strength: ``coh_future``
+    resolves to the strength's mean coherence over all K once the group has
+    been handed over (or raises if the coherence call raised, which the
+    caller treats as for a fresh strength); ``eff_future`` is the
+    dispatcher's effect-mean future for the strength.
+    """
+    from concurrent.futures import Future as _Future
+
+    for r in recs:
+        if not isinstance(r.get("judges"), dict):
+            r["judges"] = {"coherence": None, "persona": None, "effect": None}
+    need_coh = [r for r in recs if not _has_coherence_score(r)]
+
+    # Register the effect-mean future before the group is handed over (the
+    # dispatcher's race-free order, see judge_effect_for_strength_async).
+    eff_future = dispatcher.judge_effect_for_strength_async(recs)
+    full_coh: "_Future[float]" = _Future()
+
+    def _hand_over(partial: Optional["_Future"]) -> None:
+        try:
+            dispatcher.enqueue_strength_group(
+                cell_dir=str(output_dir),
+                slot=int(slot), layer=int(layer),
+                sign=int(sign), strength=float(strength),
+                records=recs,
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"[cell s{slot}_l{layer}_{sign}] enqueue_strength_group "
+                f"(re-judge) failed for strength={strength}: {e}"
+            )
+        exc = partial.exception() if partial is not None else None
+        if exc is not None:
+            full_coh.set_exception(exc)
+            return
+        fallback = partial.result() if partial is not None else None
+        full_coh.set_result(_strength_mean_coh_of(recs, fallback))
+
+    if need_coh:
+        partial_coh = dispatcher.judge_coherence_for_strength_async(need_coh)
+        partial_coh.add_done_callback(_hand_over)
+    else:
+        _hand_over(None)
+    return full_coh, eff_future
 
 
 # ---------------------------------------------------------------------------
@@ -1623,6 +1757,72 @@ def _run_bidirectional_cell(
         return True
 
     # ------------------------------------------------------------------
+    # Resume classification (2026-10-12, review Review 7 D4 / walk-through
+    # E2).  A strength on disk that fails the completeness cut is either
+    # re-judged (all K responses there; only the judgements are missing or
+    # unparseable) or regenerated (responses missing: a kill mid-strength).
+    # Before, every incomplete strength was regenerated, so one UNPARSEABLE
+    # judgement cost K generations, again on every resume where it recurred.
+    # ------------------------------------------------------------------
+    K_questions = len(questions)
+    resume_skip_threshold = getattr(
+        dispatcher, "skip_threshold", DEFAULT_SKIP_THRESHOLD,
+    )
+
+    def _resume_action(recs: List[Dict[str, Any]]) -> Optional[str]:
+        """None (complete), ``"rejudge"`` or ``"regenerate"``."""
+        if _strength_records_complete(
+            recs, K_questions, skip_threshold=resume_skip_threshold,
+        ):
+            return None
+        if _strength_generation_complete(recs, K_questions):
+            return "rejudge"
+        return "regenerate"
+
+    def _wipe_strength(s: float) -> None:
+        """Drop a strength's partial records (in memory and on disk) so the
+        next generation call regenerates all K questions."""
+        existing_records[:] = [
+            r for r in existing_records
+            if abs(float(r.get("strength", 0.0)) - s) > 1e-6
+        ]
+        for q in range(K_questions):
+            done_pairs.discard((s, q))
+        # Clear stale stats; re-populated when the new future resolves
+        # via _reap_direction in the main loop.
+        mean_coh_by_strength.pop(s, None)
+        mean_abs_eff_by_strength.pop(s, None)
+        _flush_records()
+
+    # s_init gets the same treatment as every other strength.  Until
+    # 2026-10-12 the gap-fill below left it out ("refreshed by the
+    # generation call"), but that call only generates missing questions:
+    # an s_init whose responses were all there and whose judging was
+    # incomplete was never re-judged (competitor_improvisational_v1
+    # s7_l49_+1 fell through to the gap-fill on four resumes from 2026-05-18
+    # and stayed unjudged), and a partial s_init had its new questions
+    # judged as a group of their own, the old ones never.
+    s_init_rejudge: Optional[Tuple[float, List[Dict[str, Any]]]] = None
+    for s, recs in list(seen_strengths.items()):
+        if abs(s - cursor.s_init) >= 1e-6:
+            continue
+        action = _resume_action(recs)
+        if action == "rejudge":
+            s_init_rejudge = (s, recs)
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
+                f"s_init {abs(s)} responses complete, judging incomplete "
+                f"-- re-judging"
+            )
+        elif action == "regenerate":
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
+                f"s_init {abs(s)} has {len(recs)}/{K_questions} responses "
+                f"-- regenerating"
+            )
+            _wipe_strength(s)
+
+    # ------------------------------------------------------------------
     # s_init: generate first (only if not already covered) so we have an
     # anchor record and the per-direction tail windows have correct
     # boundaries (s_init itself counts toward NEITHER tail; it's the
@@ -1649,57 +1849,72 @@ def _run_bidirectional_cell(
     if s_init_progress and s_init_coh is not None:
         s_init_eff = dispatcher.judge_effect_for_strength_async(s_init_recs)
         s_init_pending.append((float(cursor.s_init), s_init_coh, s_init_eff))
+    if s_init_rejudge is not None:
+        s_rj, recs_rj = s_init_rejudge
+        rj_coh, rj_eff = _rejudge_strength(
+            strength=s_rj, sign=sign, slot=slot, layer=layer,
+            recs=recs_rj, output_dir=output_dir, dispatcher=dispatcher,
+        )
+        s_init_pending.append((float(s_rj), rj_coh, rj_eff))
 
     # ------------------------------------------------------------------
-    # Resume gap-fill (2026-05-17): if a previous run was killed mid-
-    # strength, that strength's records on disk are PARTIAL -- some
-    # questions generated but not all 14, and judging never ran.  The
-    # cursor's Stage-2 walk above happily skipped past them (it only
-    # checks which strengths are present, not whether they're complete).
-    # Here we identify those incomplete strengths and re-emit them via
-    # _generate_and_dispatch_strength.  The function regenerates any
-    # missing (strength, q_idx) pairs and dispatches coh+rp+effect
-    # judging for the freshly-generated rows.
+    # Resume gap-fill (2026-05-17; split 2026-10-12): if a previous run
+    # was killed mid-strength, or a judgement came back UNPARSEABLE, that
+    # strength's records on disk do not make the completeness cut
+    # (_strength_records_complete).  The cursor's Stage-2 walk above
+    # happily skipped past them (it only checks which strengths are
+    # present, not whether they're complete).  Here we identify those
+    # strengths and:
     #
-    # For strengths where >=1 record exists but it doesn't make the
-    # completeness cut (judges=None, partial K, coh-judged but
-    # rp/effect missing without skip flag), we WIPE the existing
-    # partial records and regenerate from scratch.  This costs at
-    # most K generations per gap; acceptable given the alternative
-    # is silent interior gaps in every restarted cell's curve.
+    # * re-judge the ones whose K responses are all on disk
+    #   (_rejudge_strength: coherence only where missing, then persona and
+    #   effect only where a record has no score; nothing regenerated);
+    # * WIPE and regenerate from scratch the ones with responses missing
+    #   (partial K).  This costs at most K generations per gap; acceptable
+    #   given the alternative is silent interior gaps in every restarted
+    #   cell's curve.
     # ------------------------------------------------------------------
     if existing_records:
-        K_questions = len(questions)
-        incomplete: List[float] = []
+        rejudge: List[float] = []
+        incomplete: List[float] = []      # responses missing: regenerate
         for s, recs in seen_strengths.items():
             if abs(s - cursor.s_init) < 1e-6:
-                continue  # s_init was just refreshed by the call above
-            if not _strength_records_complete(
-                recs, K_questions,
-                skip_threshold=getattr(
-                    dispatcher, "skip_threshold", DEFAULT_SKIP_THRESHOLD,
-                ),
-            ):
+                continue  # s_init was handled before its generation call
+            action = _resume_action(recs)
+            if action == "rejudge":
+                rejudge.append(s)
+            elif action == "regenerate":
                 incomplete.append(s)
+        if rejudge:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
+                f"{len(rejudge)} strength(s) with responses complete, "
+                f"judging incomplete {sorted(abs(s) for s in rejudge)} "
+                f"-- re-judging"
+            )
         if incomplete:
             logger.info(
                 f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
                 f"{len(incomplete)} incomplete strength(s) "
                 f"{sorted(abs(s) for s in incomplete)} -- regenerating"
             )
-        for s in sorted(incomplete, key=abs):
-            # Wipe partial records (in-memory + disk via flush below)
-            existing_records[:] = [
-                r for r in existing_records
-                if abs(float(r.get("strength", 0.0)) - s) > 1e-6
-            ]
-            for q in range(K_questions):
-                done_pairs.discard((s, q))
-            # Clear stale stats; will be re-populated when the new
-            # future resolves via _reap_direction in the main loop.
+        for s in sorted(rejudge, key=abs):
+            # Stale stats; re-populated when the futures resolve via
+            # _reap_direction in the main loop.
             mean_coh_by_strength.pop(s, None)
             mean_abs_eff_by_strength.pop(s, None)
-            _flush_records()
+            rj_coh, rj_eff = _rejudge_strength(
+                strength=s, sign=sign, slot=slot, layer=layer,
+                recs=seen_strengths[s], output_dir=output_dir,
+                dispatcher=dispatcher,
+            )
+            if s > cursor.s_init:
+                pending_up.append((float(s), rj_coh, rj_eff))
+            else:
+                pending_down.append((float(s), rj_coh, rj_eff))
+        for s in sorted(incomplete, key=abs):
+            # Wipe partial records (in-memory + disk)
+            _wipe_strength(s)
             # Regenerate + dispatch judging for all K questions
             gp, gnew, gcoh = _generate_and_dispatch_strength(
                 strength=s, sign=sign,

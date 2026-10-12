@@ -24,6 +24,9 @@ provides:
     If ``mean(coh) >= skip_threshold`` (default 1.5) every record is
     flagged ``skipped_due_to_strength_mean_coh: true`` and no API calls
     are made; otherwise RP + effect run via a background asyncio loop.
+    Either way a persona score or effect ``combined`` already on a record
+    is kept unless ``rerun_existing`` is set (the skip path overwrote them
+    before 2026-10-12; review item Review 7 D3, walk-through E1).
   - ``should_stop_at(strength)`` -- consulted after each strength's
     coherence is in.  Returns True iff
     ``strength_mean_coh >= coh_stop_threshold`` (default 1.5).
@@ -764,6 +767,20 @@ def _averaged_eff_from_bidir(bidir: Dict[str, Any]) -> Optional[float]:
         return None
     return (float(sm) - float(wm)) / 2
 
+
+def has_persona_score(record: Dict[str, Any]) -> bool:
+    """True iff the record carries a judged persona score (not a skip stub,
+    not an UNPARSEABLE placeholder).  The one test both the judge path and
+    the skip path use to decide what to keep."""
+    persona = (record.get("judges") or {}).get("persona")
+    return isinstance(persona, dict) and persona.get("score") is not None
+
+
+def has_effect_score(record: Dict[str, Any]) -> bool:
+    """True iff the record carries a judged effect (``combined`` not None)."""
+    effect = (record.get("judges") or {}).get("effect")
+    return isinstance(effect, dict) and effect.get("combined") is not None
+
 # Default model ensemble for the effect judge.  Roger: "use GPT+Haiku for
 # now, finalise once response-judging model decision is made".  The
 # Haiku ID below is the current 4.5 line; the 3.5 line was deprecated.
@@ -862,7 +879,9 @@ class JudgeDispatcher(Protocol):
         and decide skip-or-judge based on the configured threshold;
         skipped records get
         ``judges.persona.skipped_due_to_strength_mean_coh = True`` (and
-        the same for ``effect``).
+        the same for ``effect``).  A record that already carries a
+        persona score or an effect ``combined`` keeps it on either path
+        unless the dispatcher was asked to rerun existing judgements.
         """
         ...
 
@@ -1360,24 +1379,38 @@ class RealJudgeDispatcher:
         # toward the coh-stop tail window (``_consecutive_above_coh_at_up_tail``
         # uses ``v < threshold`` to break the streak, i.e. counts ``>=``).
         if mean_coh >= self.skip_threshold:
-            # Skip path: stamp skipped flags on all records, write back.
+            # Skip path: stamp skipped flags on the records, write back.
+            # A persona score or effect ``combined`` already on a record is
+            # kept unless ``rerun_existing`` (2026-10-12, review Review 7 D3 /
+            # walk-through E1): post_judge with a lowered
+            # ``--skip-if-strength-mean-coh-above`` used to replace the scores
+            # of a strength judged under a higher threshold with stubs, and the
+            # runner then regenerated the stubbed strength.  The judge path
+            # (``_do_persona`` / ``_do_effect``) already kept them.
+            n_kept_persona = n_kept_effect = 0
             for r in records:
                 if not self.skip_persona:
-                    r["judges"]["persona"] = {
-                        "score": None,
-                        "reason": "",
-                        "model": self.rp_model,
-                        "ts": time.time(),
-                        "rubric_version": RP_RUBRIC_VERSION,
-                        "skipped_due_to_strength_mean_coh": True,
-                    }
+                    if has_persona_score(r) and not self.rerun_existing:
+                        n_kept_persona += 1
+                    else:
+                        r["judges"]["persona"] = {
+                            "score": None,
+                            "reason": "",
+                            "model": self.rp_model,
+                            "ts": time.time(),
+                            "rubric_version": RP_RUBRIC_VERSION,
+                            "skipped_due_to_strength_mean_coh": True,
+                        }
                 if not self.skip_effect:
-                    r["judges"]["effect"] = {
-                        "mode": self.effect_mode,
-                        "ts": time.time(),
-                        "rubric_version": EFFECT_RUBRIC_VERSION,
-                        "skipped_due_to_strength_mean_coh": True,
-                    }
+                    if has_effect_score(r) and not self.rerun_existing:
+                        n_kept_effect += 1
+                    else:
+                        r["judges"]["effect"] = {
+                            "mode": self.effect_mode,
+                            "ts": time.time(),
+                            "rubric_version": EFFECT_RUBRIC_VERSION,
+                            "skipped_due_to_strength_mean_coh": True,
+                        }
             with self._state_lock:
                 self._strength_states[(int(sign), float(strength))].judging_skipped = True
             try:
@@ -1394,6 +1427,9 @@ class RealJudgeDispatcher:
                 f"[cell s{slot}_l{layer}_{sign:+d}] strength={strength}: "
                 f"mean_coh={mean_coh:.2f} > {self.skip_threshold:.2f}; "
                 f"skipping persona+effect for K={len(records)} records"
+                + (f" (kept {n_kept_persona} persona and {n_kept_effect} "
+                   f"effect score(s) already judged)"
+                   if (n_kept_persona or n_kept_effect) else "")
             )
             return
 
@@ -1810,9 +1846,7 @@ class RealJudgeDispatcher:
     async def _do_persona(self, records: List[Dict[str, Any]]) -> None:
         """Per-record RP judging (unbatched, matches pipeline/3_judge.py)."""
         async def _one(r):
-            existing = r.get("judges", {}).get("persona")
-            if isinstance(existing, dict) and existing.get("score") is not None \
-                    and not self.rerun_existing:
+            if has_persona_score(r) and not self.rerun_existing:
                 return
             prompt = build_rp_prompt(
                 persona=self.persona,
@@ -1864,10 +1898,7 @@ class RealJudgeDispatcher:
         # Filter to records that actually need (re)scoring.
         to_score: List[Dict[str, Any]] = []
         for r in records:
-            existing = r.get("judges", {}).get("effect")
-            if (isinstance(existing, dict)
-                    and existing.get("combined") is not None
-                    and not self.rerun_existing):
+            if has_effect_score(r) and not self.rerun_existing:
                 continue
             to_score.append(r)
         if not to_score:

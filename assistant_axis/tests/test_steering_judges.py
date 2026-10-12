@@ -778,6 +778,115 @@ class TestRealDispatcherSkipLogic:
             assert r["judges"]["strength_mean_coh"] == pytest.approx(2.0)
 
 
+def _judged(rec: dict, *, persona: int | None, effect: float | None) -> dict:
+    """Give a record the persona / effect judgements of a strength judged
+    under a higher skip threshold (persona None = UNPARSEABLE)."""
+    rec["judges"]["persona"] = {
+        "score": persona, "reason": "old" if persona is not None else "UNPARSEABLE",
+        "model": "gpt-4.1-mini", "ts": 1.0, "rubric_version": sj.RP_RUBRIC_VERSION,
+        "skipped_due_to_strength_mean_coh": False,
+    }
+    rec["judges"]["effect"] = {
+        "mode": EFFECT_MODE_BIDIRECTIONAL, "combined": effect, "ts": 1.0,
+        "rubric_version": sj.EFFECT_RUBRIC_VERSION,
+        "skipped_due_to_strength_mean_coh": False,
+    }
+    return rec
+
+
+class TestSkipPathKeepsJudgedScores:
+    """Review 7 D3 / walk-through E1 (2026-10-12): the skip path used to
+    replace every record's persona and effect with a skip stub, so
+    ``post_judge --skip-if-strength-mean-coh-above`` set below the threshold
+    a strength had been judged under (reached through one UNPARSEABLE
+    record) wiped the strength's scores, and the runner then regenerated
+    it.  Judged scores are now kept unless ``rerun_existing``."""
+
+    def _records(self):
+        # mean coh 4/3: judged under the live 1.5 threshold, skipped under
+        # the fixture dispatcher's 1.0.
+        return [
+            _judged(_make_record(0, coh=1), persona=2, effect=0.5),
+            _judged(_make_record(1, coh=1), persona=3, effect=-1.0),
+            _judged(_make_record(2, coh=2), persona=None, effect=None),
+        ]
+
+    @staticmethod
+    def _no_calls(monkeypatch):
+        async def _fail(**_kw):
+            raise AssertionError("the skip path must make no API call")
+        monkeypatch.setattr(sj, "call_judge_single_unified", _fail)
+
+    def test_judged_scores_survive_a_lowered_threshold(
+            self, dispatcher, tmp_path, monkeypatch):
+        self._no_calls(monkeypatch)
+        records = self._records()
+        dispatcher.enqueue_strength_group(
+            cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+            strength=1.0, records=records,
+        )
+        on_disk = [json.loads(l) for l in
+                   (tmp_path / "records.jsonl").read_text().splitlines() if l.strip()]
+        for recs in (records, sorted(on_disk, key=lambda r: r["question_idx"])):
+            kept0, kept1, stubbed = (r["judges"] for r in recs)
+            assert kept0["persona"]["score"] == 2
+            assert kept0["effect"]["combined"] == 0.5
+            assert kept1["persona"]["score"] == 3
+            assert kept1["effect"]["combined"] == -1.0
+            for j in (kept0, kept1):
+                assert j["persona"]["skipped_due_to_strength_mean_coh"] is False
+                assert j["effect"]["skipped_due_to_strength_mean_coh"] is False
+            # The record with nothing judged gets the stubs, as before.
+            assert stubbed["persona"]["score"] is None
+            assert stubbed["persona"]["skipped_due_to_strength_mean_coh"] is True
+            assert stubbed["effect"]["skipped_due_to_strength_mean_coh"] is True
+            assert "combined" not in stubbed["effect"]
+            for j in (kept0, kept1, stubbed):
+                assert j["strength_mean_coh"] == pytest.approx(4 / 3)
+
+    def test_rerun_existing_still_stubs_every_record(
+            self, dispatcher, tmp_path, monkeypatch):
+        """``--rerun`` asks for every judgement to be redone, so under the
+        skip path every record is stubbed (the behaviour before the fix)."""
+        self._no_calls(monkeypatch)
+        dispatcher.rerun_existing = True
+        records = self._records()
+        dispatcher.enqueue_strength_group(
+            cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+            strength=1.0, records=records,
+        )
+        for r in records:
+            assert r["judges"]["persona"]["score"] is None
+            assert r["judges"]["persona"]["skipped_due_to_strength_mean_coh"] is True
+            assert r["judges"]["effect"].get("combined") is None
+            assert r["judges"]["effect"]["skipped_due_to_strength_mean_coh"] is True
+
+    def test_skip_persona_leaves_persona_alone_and_keeps_effect(
+            self, mock_clients, persona, steering, tmp_path, monkeypatch):
+        """``--judges effect`` (skip_persona) on the skip path: persona is
+        not touched at all, judged effects are kept."""
+        self._no_calls(monkeypatch)
+        records_path = tmp_path / "records.jsonl"
+        records_path.write_text("")
+        d = RealJudgeDispatcher(
+            records_path=records_path, persona=persona, steering=steering,
+            baseline_lookup=lambda q: "", skip_threshold=1.0,
+            skip_persona=True,
+        )
+        try:
+            records = self._records()
+            before = [dict(r["judges"]["persona"]) for r in records]
+            d.enqueue_strength_group(
+                cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+                strength=1.0, records=records,
+            )
+            assert [r["judges"]["persona"] for r in records] == before
+            assert records[0]["judges"]["effect"]["combined"] == 0.5
+            assert records[2]["judges"]["effect"]["skipped_due_to_strength_mean_coh"] is True
+        finally:
+            d.shutdown()
+
+
 class TestSchemaMigrationV6ToV7:
     """v7 (2026-05-16) renames bidirectional.scores -> bidirectional.straight.scores
     and adds bidirectional.swap + bidirectional.averaged.  Old records

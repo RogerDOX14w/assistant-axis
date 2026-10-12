@@ -1192,6 +1192,291 @@ class TestBidirectionalRestart:
         assert result.summary["down_blocked_reason"] == "sub_threshold_effect"
 
 
+# ---------------------------------------------------------------------------
+# Resume re-judges a strength whose responses are all on disk
+# (2026-10-12, review Review 7 D4 / walk-through E2)
+# ---------------------------------------------------------------------------
+
+
+class _RecordingStubDispatcher(_BidirStubDispatcher):
+    """The bidirectional stub, also recording which question indices each
+    coherence call and each strength-group hand-over received."""
+
+    def __init__(self):
+        super().__init__()
+        self.coh_qidx: Dict[float, List[List[int]]] = {}
+        self.enqueued_qidx: Dict[float, List[List[int]]] = {}
+
+    def judge_coherence_for_strength_async(self, records):
+        s = float(records[0]["strength"])
+        self.coh_qidx.setdefault(s, []).append(
+            sorted(int(r["question_idx"]) for r in records))
+        return super().judge_coherence_for_strength_async(records)
+
+    def enqueue_strength_group(self, *, cell_dir, slot, layer, sign,
+                               strength, records):
+        self.enqueued_qidx.setdefault(float(strength), []).append(
+            sorted(int(r["question_idx"]) for r in records))
+        return super().enqueue_strength_group(
+            cell_dir=cell_dir, slot=slot, layer=layer, sign=sign,
+            strength=strength, records=records)
+
+
+_RJ_QUESTIONS = ["q0", "q1"]
+
+
+def _rj_rec(strength, qi, *, coherence=0, persona=3, effect=0.5,
+            smc=0.0, response="seed", persona_skipped=False):
+    """A seeded record; ``None`` for a judge means not judged (persona None
+    with ``persona_skipped`` False reads as UNPARSEABLE)."""
+    judges: Dict[str, Any] = {"strength_mean_coh": smc}
+    judges["coherence"] = (
+        None if coherence is None else
+        {"score": coherence, "reason": "seed", "model": "seed", "ts": 0,
+         "rubric_version": 1})
+    judges["persona"] = {
+        "score": persona,
+        "reason": "UNPARSEABLE" if persona is None and not persona_skipped else "seed",
+        "model": "seed", "ts": 0, "rubric_version": 1,
+        "skipped_due_to_strength_mean_coh": bool(persona_skipped),
+    }
+    judges["effect"] = {
+        "mode": "bidirectional", "ts": 0, "rubric_version": 1,
+        "skipped_due_to_strength_mean_coh": bool(persona_skipped),
+    }
+    if effect is not None:
+        judges["effect"]["combined"] = effect
+    return {
+        "strength": float(strength), "sign": +1, "slot": 0, "layer": 26,
+        "question_idx": qi, "question": _RJ_QUESTIONS[qi],
+        "response": response, "n_tokens": 1, "judges": judges,
+        "timing": {"gen_s": 0.0}, "abandoned": False,
+    }
+
+
+class TestResumeRejudgesInsteadOfRegenerating:
+    """Schedule: mult=2, weakest=1, start_steps_up=1 -> s_init=2.0; UP
+    4.0, 8.0 (cap); DOWN 1.0, 0.5, 0.25, ...  Seeded strengths are complete
+    unless a test breaks one; new DOWN strengths have eff 0.1 so DOWN stops
+    after 0.5 and 0.25."""
+
+    def _run(self, tmp_path, monkeypatch, seed, dispatcher=None):
+        from assistant_axis.atomic_io import write_jsonl
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+        write_jsonl(seed, out_dir / "records.jsonl")
+        d = dispatcher or _RecordingStubDispatcher()
+        d.set(8.0, mean_coh=0.0, mean_abs_eff=0.5)
+        for s in (0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.1)
+        for s in (1.0, 2.0, 4.0):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.5)
+        steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            persona_system_prompt="hist", questions=_RJ_QUESTIONS,
+            output_dir=out_dir, batch_size=2, max_new_tokens=4,
+            positions_mode="all", judge_dispatcher=d,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            eff_stop_threshold=0.25, eff_stop_consecutive=2,
+            weakest_strength=1.0, max_strength=8.0,
+            min_strength=0.0625, multiplier=2.0,
+            start_strength_multiplier_steps=1, scan_mode="bidirectional",
+        )
+        on_disk = [json.loads(l) for l in
+                   (out_dir / "records.jsonl").read_text().splitlines() if l.strip()]
+        return d, on_disk
+
+    @staticmethod
+    def _generated_at(strength):
+        return any(abs(c["coefficients"][0] - strength) < 1e-9
+                   for c in _FakeActivationSteering.construct_calls)
+
+    @staticmethod
+    def _at(on_disk, strength):
+        return sorted((r for r in on_disk if abs(r["strength"] - strength) < 1e-9),
+                      key=lambda r: r["question_idx"])
+
+    def test_one_unparseable_persona_is_rejudged_not_regenerated(
+            self, tmp_path, monkeypatch):
+        seed = [_rj_rec(s, q) for s in (2.0, 1.0) for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0), _rj_rec(4.0, 1, persona=None)]
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+
+        assert not self._generated_at(4.0), "4.0 was regenerated"
+        assert [r["response"] for r in self._at(on_disk, 4.0)] == ["seed", "seed"]
+        # Coherence was on every record: not asked again.
+        assert 4.0 not in d.coh_qidx
+        # The whole strength was handed over for judging, once.
+        assert d.enqueued_qidx[4.0] == [[0, 1]]
+        # The complete strengths were left alone.
+        for s in (2.0, 1.0):
+            assert s not in d.enqueued_qidx and not self._generated_at(s)
+        # New strengths still generated as usual.
+        assert self._generated_at(8.0) and self._generated_at(0.5)
+
+    def test_coherence_is_asked_only_where_missing(self, tmp_path, monkeypatch):
+        seed = [_rj_rec(s, q) for s in (2.0, 4.0) for q in (0, 1)]
+        seed += [_rj_rec(1.0, 0, persona=None, effect=None),
+                 _rj_rec(1.0, 1, coherence=None, persona=None, effect=None)]
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+
+        assert not self._generated_at(1.0)
+        assert d.coh_qidx[1.0] == [[1]]
+        assert d.enqueued_qidx[1.0] == [[0, 1]]
+        recs = self._at(on_disk, 1.0)
+        assert [r["response"] for r in recs] == ["seed", "seed"]
+        assert all(r["judges"]["coherence"]["score"] == 0 for r in recs)
+        assert all(r["judges"]["effect"]["combined"] == 0.5 for r in recs)
+
+    def test_judges_none_records_are_rejudged(self, tmp_path, monkeypatch):
+        """A kill between generation and judging (records with
+        ``judges: None``): coherence for both, then the hand-over."""
+        seed = [_rj_rec(s, q) for s in (2.0, 4.0) for q in (0, 1)]
+        for q in (0, 1):
+            r = _rj_rec(1.0, q)
+            r["judges"] = None
+            seed.append(r)
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+        assert not self._generated_at(1.0)
+        assert d.coh_qidx[1.0] == [[0, 1]]
+        assert d.enqueued_qidx[1.0] == [[0, 1]]
+        assert all(isinstance(r["judges"], dict) for r in self._at(on_disk, 1.0))
+
+    def test_partial_generation_is_still_regenerated(self, tmp_path, monkeypatch):
+        seed = [_rj_rec(s, q) for s in (2.0, 1.0) for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0)]                   # q1 never generated
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+        assert self._generated_at(4.0)
+        recs = self._at(on_disk, 4.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert all(r["response"] != "seed" for r in recs)   # wiped, regenerated
+        assert d.coh_qidx[4.0] == [[0, 1]]
+
+    def test_s_init_skipped_under_an_older_threshold_is_rejudged(
+            self, tmp_path, monkeypatch):
+        """competitor_improvisational_v1 s7_l49_+1's case: s_init skipped
+        at mean coherence 1.29 under the pre-2026-05-17 threshold 1.0, so
+        incomplete under 1.5; it used to fall through to the gap-fill on
+        every resume and stay unjudged."""
+        seed = [_rj_rec(2.0, q, coherence=c, persona=None, effect=None,
+                        smc=1.5 - 0.25, persona_skipped=True)
+                for q, c in ((0, 1), (1, 2))]
+        seed += [_rj_rec(s, q) for s in (4.0, 1.0) for q in (0, 1)]
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+        assert not self._generated_at(2.0)
+        assert 2.0 not in d.coh_qidx
+        assert d.enqueued_qidx[2.0] == [[0, 1]]
+        assert [r["response"] for r in self._at(on_disk, 2.0)] == ["seed", "seed"]
+
+    def test_partial_s_init_is_regenerated_whole(self, tmp_path, monkeypatch):
+        """A partial s_init is wiped and regenerated like any other partial
+        strength (it used to generate the missing question only and judge it
+        as a group of its own, leaving the old record unjudged)."""
+        old = _rj_rec(2.0, 0, coherence=None, persona=None, effect=None)
+        seed = [old] + [_rj_rec(s, q) for s in (4.0, 1.0) for q in (0, 1)]
+        d, on_disk = self._run(tmp_path, monkeypatch, seed)
+        assert self._generated_at(2.0)
+        recs = self._at(on_disk, 2.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert all(r["response"] != "seed" for r in recs)
+        assert d.coh_qidx[2.0] == [[0, 1]]
+        assert d.enqueued_qidx[2.0] == [[0, 1]]
+
+
+class TestRejudgeStrengthWithTheRealDispatcher:
+    """``_rejudge_strength`` against ``RealJudgeDispatcher`` (API calls
+    faked): only the missing judgements are asked for, the judged ones are
+    kept, and the coherence future gives the mean over all K records."""
+
+    @pytest.fixture
+    def real_dispatcher(self, tmp_path, monkeypatch):
+        import anthropic as anthropic_mod
+        import openai as openai_mod
+        from assistant_axis import steering_judges as sj
+
+        monkeypatch.setattr(openai_mod, "AsyncOpenAI", lambda: mock.MagicMock())
+        monkeypatch.setattr(anthropic_mod, "AsyncAnthropic", lambda: mock.MagicMock())
+        calls: List[str] = []
+
+        async def fake_call(*, model, prompt, **_kw):
+            if "evaluating the coherence" in prompt:
+                calls.append("coherence")
+                return json.dumps({"reason": "ok", "score": 1})
+            if "embodies the persona" in prompt:
+                calls.append("persona")
+                return json.dumps({"reason": "ok", "score": 2})
+            calls.append("effect")
+            ids = [i for i in range(10) if f"id={i}" in prompt]
+            return json.dumps({"items": [{"id": i, "reason": "ok", "score": 1}
+                                         for i in ids]})
+
+        monkeypatch.setattr(sj, "call_judge_single_unified", fake_call)
+        records_path = tmp_path / "records.jsonl"
+        d = sj.RealJudgeDispatcher(
+            records_path=records_path,
+            persona=sj.PersonaSpec(role="chef", description="cooks"),
+            steering=sj.SteeringSpec(
+                axis_name="unhelpful-helpful", pos_label="helpful",
+                pos_description="helps", neg_label="unhelpful",
+                neg_description="does not help"),
+            baseline_lookup=lambda q: "",
+        )
+        yield d, calls, records_path
+        d.shutdown()
+
+    def _recs(self):
+        recs = [
+            _rj_rec(1.0, 0, coherence=0, persona=2, effect=0.5),
+            _rj_rec(1.0, 1, coherence=0, persona=None, effect=-0.5),
+        ]
+        recs.append(dict(recs[0], question_idx=2, question="q2"))
+        recs[2] = json.loads(json.dumps(recs[2]))
+        recs[2]["judges"]["coherence"]["score"] = 1
+        return recs
+
+    def test_only_the_unparseable_persona_is_asked(self, real_dispatcher, tmp_path):
+        from assistant_axis.atomic_io import write_jsonl
+        d, calls, records_path = real_dispatcher
+        recs = self._recs()
+        write_jsonl(recs, records_path)
+        coh_fut, eff_fut = steering_runner._rejudge_strength(
+            strength=1.0, sign=+1, slot=0, layer=26, recs=recs,
+            output_dir=tmp_path, dispatcher=d,
+        )
+        assert coh_fut.result(timeout=10) == pytest.approx(1 / 3)
+        d.drain(timeout_s=10)
+        assert calls == ["persona"]
+        assert [r["judges"]["persona"]["score"] for r in recs] == [2, 2, 2]
+        assert recs[0]["judges"]["persona"]["reason"] == "seed"   # kept, not re-asked
+        assert [r["judges"]["effect"]["combined"] for r in recs] == [0.5, -0.5, 0.5]
+        assert eff_fut.result(timeout=10) == pytest.approx(0.5 / 3)
+
+    def test_missing_coherence_is_asked_then_the_strength_mean_is_over_all(
+            self, real_dispatcher, tmp_path):
+        from assistant_axis.atomic_io import write_jsonl
+        d, calls, records_path = real_dispatcher
+        recs = self._recs()
+        recs[1]["judges"]["coherence"] = None
+        write_jsonl(recs, records_path)
+        coh_fut, _ = steering_runner._rejudge_strength(
+            strength=1.0, sign=+1, slot=0, layer=26, recs=recs,
+            output_dir=tmp_path, dispatcher=d,
+        )
+        # coherence 0 (kept), 1 (asked), 1 (kept)
+        assert coh_fut.result(timeout=10) == pytest.approx(2 / 3)
+        d.drain(timeout_s=10)
+        assert sorted(calls) == ["coherence", "persona"]
+        for r in recs:
+            assert r["judges"]["strength_mean_coh"] == pytest.approx(2 / 3)
+        on_disk = [json.loads(l) for l in records_path.read_text().splitlines() if l.strip()]
+        assert sorted(r["judges"]["persona"]["score"] for r in on_disk) == [2, 2, 2]
+
+
 class TestLegacyModeParity:
     """Verify that scan_mode='legacy_unidirectional' preserves
     pre-2026-05-14 behaviour.
@@ -1241,7 +1526,10 @@ class TestLegacyModeParity:
     ):
         """A kill mid-strength can leave a strength with < K records or
         with judges=None on each record.  The 2026-05-17 resume
-        gap-fill must detect and regenerate those.
+        gap-fill must detect both.  Since 2026-10-12 (review Review 7
+        D4 / walk-through E2) it regenerates only the strength with
+        responses missing and re-judges the one whose responses are all
+        there (before, it regenerated both).
         """
         from assistant_axis.atomic_io import write_jsonl
         monkeypatch.setenv("TMPDIR", str(tmp_path))
@@ -1254,8 +1542,8 @@ class TestLegacyModeParity:
         # Seed: s_init=2.0 fully-judged (complete), UP=4.0 with only ONE
         # of two questions generated (partial-flush, judges=None),
         # DOWN=1.0 with both questions but judges=None on each (judging
-        # never ran).  Resume gap-fill must regenerate 4.0 and 1.0;
-        # leave 2.0 alone.
+        # never ran).  Resume gap-fill must regenerate 4.0, re-judge 1.0
+        # without regenerating it, and leave 2.0 alone.
         questions = ["q0", "q1"]
         sign = +1
 
@@ -1335,13 +1623,19 @@ class TestLegacyModeParity:
             f"got {gen_strengths}"
         )
         assert 1.0 in gen_strengths, (
-            f"unjudged strength 1.0 should have been regenerated; "
+            f"unjudged strength 1.0 should have been re-judged; "
             f"got {gen_strengths}"
         )
         assert 2.0 not in gen_strengths, (
             f"complete strength 2.0 should NOT be regenerated; "
             f"got {gen_strengths}"
         )
+        # 2026-10-12 (E2): 1.0 was re-judged, not regenerated -- no
+        # generation at 1.0, and its two responses are the seeded ones;
+        # 4.0 (responses missing) was regenerated.  Before, both were.
+        coeffs = [c["coefficients"][0]
+                  for c in _FakeActivationSteering.construct_calls]
+        assert 1.0 not in coeffs and 4.0 in coeffs
 
         # Disk state: all records at 4.0 and 1.0 should now have
         # judges populated (the regen path generates K records and
@@ -1361,6 +1655,10 @@ class TestLegacyModeParity:
                     f"regenerated record at {r['strength']} still has "
                     f"judges={j}"
                 )
+        assert sorted(r["response"] for r in records
+                      if float(r["strength"]) == 1.0) == ["seed_partial"] * 2
+        assert all(r["response"] != "seed_partial" for r in records
+                   if float(r["strength"]) == 4.0)
 
     def test_legacy_requires_strengths(self, tmp_path, monkeypatch):
         """Legacy mode without `strengths` is an explicit error -- the

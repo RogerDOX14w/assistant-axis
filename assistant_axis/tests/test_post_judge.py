@@ -107,6 +107,75 @@ class TestGroupNeedsWork:
 
 
 # ---------------------------------------------------------------------------
+# process_cell with a lowered skip threshold (Review 7 D3 / walk-through E1)
+# ---------------------------------------------------------------------------
+
+
+class TestLoweredSkipThresholdKeepsScores:
+    """The review's scenario: a strength judged under the live 1.5 threshold
+    (mean coherence 4/3) with one UNPARSEABLE persona, then
+    ``post_judge --skip-if-strength-mean-coh-above 1.0``.  The UNPARSEABLE
+    record makes the group need work, the group lands on the skip path, and
+    before 2026-10-12 every record's persona and effect became a skip stub."""
+
+    def test_judged_scores_are_kept(self, pj, tmp_path, monkeypatch):
+        from unittest import mock
+
+        import anthropic as anthropic_mod
+        import openai as openai_mod
+        from assistant_axis import steering_judges as sj
+
+        monkeypatch.setattr(openai_mod, "AsyncOpenAI", lambda: mock.MagicMock())
+        monkeypatch.setattr(anthropic_mod, "AsyncAnthropic", lambda: mock.MagicMock())
+
+        async def _no_call(**_kw):
+            raise AssertionError("the skip path must make no API call")
+        monkeypatch.setattr(sj, "call_judge_single_unified", _no_call)
+
+        cell = tmp_path / "s3_l25_+1"
+        cell.mkdir()
+        recs = [
+            _make_record(q_idx=0, persona_score=2, effect_combined=0.5),
+            _make_record(q_idx=1, persona_score=3, effect_combined=-1.0),
+            _make_record(q_idx=2, persona_score=None, effect_combined=None),
+        ]
+        for r, coh in zip(recs, (1, 1, 2)):
+            r["judges"]["coherence"] = {"score": coh, "model": "gpt-4.1-mini"}
+            r["judges"]["strength_mean_coh"] = 4 / 3
+        recs[2]["judges"]["persona"] = {
+            "score": None, "reason": "UNPARSEABLE", "model": "gpt-4.1-mini",
+            "skipped_due_to_strength_mean_coh": False,
+        }
+        (cell / "records.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+
+        d = sj.RealJudgeDispatcher(
+            records_path=cell / "records.jsonl",
+            persona=sj.PersonaSpec(role="chef", description="cooks"),
+            steering=sj.SteeringSpec(
+                axis_name="unhelpful-helpful", pos_label="helpful",
+                pos_description="helps", neg_label="unhelpful",
+                neg_description="does not help"),
+            baseline_lookup=lambda q: "", skip_threshold=1.0,
+        )
+        try:
+            n = pj.process_cell(cell_dir=cell, dispatcher=d,
+                                judges_to_run=["persona", "effect"],
+                                skip_threshold=1.0, rerun_existing=False)
+        finally:
+            d.shutdown()
+        assert n == 1          # the group needed work (the UNPARSEABLE record)
+        on_disk = {r["question_idx"]: r["judges"] for r in
+                   (json.loads(l) for l in
+                    (cell / "records.jsonl").read_text().splitlines() if l.strip())}
+        assert on_disk[0]["persona"]["score"] == 2
+        assert on_disk[0]["effect"]["combined"] == 0.5
+        assert on_disk[1]["persona"]["score"] == 3
+        assert on_disk[1]["effect"]["combined"] == -1.0
+        assert on_disk[2]["persona"]["skipped_due_to_strength_mean_coh"] is True
+        assert on_disk[2]["effect"]["skipped_due_to_strength_mean_coh"] is True
+
+
+# ---------------------------------------------------------------------------
 # apply_corrected_stop_cutoff
 # ---------------------------------------------------------------------------
 
