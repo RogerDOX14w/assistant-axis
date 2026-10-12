@@ -287,5 +287,14 @@
   "cap_usd": 1.0,
   "cost_usd": 0.0008,
   "finished_at": "2026-10-12T22:21:15+00:00",
-  "status": 0
+  "status": 0,
+  "rubric_version": 4,
+  "prompt_sha256": "e2765bbd7f921ecfe22370ae6229af4db79bd09426543fc53fcef649a17f97d6",
+  "check_rubric_version": 1,
+  "check_prompt_sha256": "c230335cc8075d4ec38d746ea2d49e82600bd871fb9e70bc6f42fe2cfc079696",
+  "alignment_step_version": 3,
+  "alignment_prompt_sha256": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4",
+  "record_notes": [
+    "2026-10-13: rubric_version, prompt_sha256, check_rubric_version, check_prompt_sha256, alignment_step_version and alignment_prompt_sha256 added by hand. The re-route (--reroute) re-decided from the source batches' recorded answers (states_tda_1, states_v4_pilot: queue prompt v4) and its --send-missing calls used check v1 and alignment v3, the versions pinned at the time; the --reroute path did not record them (code fix to follow)."
+  ]
 }
