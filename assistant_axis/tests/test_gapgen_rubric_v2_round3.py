@@ -341,7 +341,9 @@ def test_example_words_avoid_every_source():
                                     ("reserved", " " not in w and w.lower() in reserved)) if hit]
         if why:
             bad.append((w, why))
-    assert bad == []
+    # "jumpy" (the states pass's suggested name) is a seed-queue entry since the tda_1 review of 2026-10-11:
+    # recorded, as morose was (Roger, 2026-10-12); a new collision still fails
+    assert bad == [("jumpy", ["corpus/queue"])]
 
 
 class TestPlainReadingCLI:

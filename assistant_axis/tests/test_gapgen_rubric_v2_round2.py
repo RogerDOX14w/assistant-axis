@@ -219,7 +219,9 @@ class TestStatesPassRubric:
         stems |= {e.get("stem") for e in q["entries"]}
         stems |= {normalize_to_file_name(e["label"]) for e in q["entries"] if e.get("label")}
         words = list(s.EXAMPLE_WORDS) + list(s.SUGGESTED_NAMES)
-        assert [w for w in words if normalize_to_file_name(w) in stems] == []
+        # "jumpy", the suggested name, was promoted into the seed queue by the tda_1 review on 2026-10-11; recorded
+        # as the morose collision was (Roger, 2026-10-12: "as per morose"), the pinned text unchanged
+        assert [w for w in words if normalize_to_file_name(w) in stems] == ["jumpy"]
         low = (s.QUEUE_PROMPT + s.CORPUS_PROMPT).lower()
         for w in APPENDIX | SIX:
             assert not re.search(rf"\b{w}\b", low), w

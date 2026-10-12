@@ -110,12 +110,13 @@ def test_end_to_end(env, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "--run alignment_sweep/t1" in out and "gap_registry.py submit --from" in out
 
-    # gate on the gold items (fake: always chat), so it agrees with exactly the gold items expecting chat
+    # gate on the gold items (fake: always chat), so under the scoring rule of 2026-10-11 (chat and both count
+    # alike) it agrees with exactly the gold items expecting chat or both
     assert CLI.main(common + ["gate", "--run-id", "t1", "--gold-only", "--allow-dirty"]) == 0
     ev = json.loads((rdir / "gate_gold_eval.json").read_text())["result"]["eval"]
-    n_chat = sum(1 for g in json.loads(GATE_GOLD_PATH.read_text(encoding="utf-8"))["items"]
-                 if g["expected"] == "chat")
-    assert ev["n"] == 30 and ev["n_agree"] == n_chat and ev["meets_targets"] is False
+    n_reach = sum(1 for g in json.loads(GATE_GOLD_PATH.read_text(encoding="utf-8"))["items"]
+                  if g["expected"] in ("chat", "both"))
+    assert ev["n"] == 30 and ev["n_agree"] == n_reach and ev["meets_targets"] is False
     assert (rdir / "gate_gold_eval.md").exists()
 
     # probe: no key -> skipped and said so
@@ -134,7 +135,7 @@ def test_end_to_end(env, monkeypatch, capsys):
     assert CLI.main(common + ["report", "--run-id", "t1", "--gold"]) == 0
     md = (rdir / "readout.md").read_text()
     assert "## Survivors (2)" in md and "## Covered (2)" in md and "stays in scope (oversteps the task)" in md
-    assert "Label probe: skipped" in md and f"advisory only (gold agreement {n_chat}/30" in md
+    assert "Label probe: skipped" in md and f"advisory only (gold agreement {n_reach}/30" in md
     # the sections of 2026-10-11 (QUESTIONS 67, 68, 73, 74, 75, 78), each from files already in the run dir
     assert "## The gate's three fields, for promotion" in md and "(no gate rows for the survivors.)" in md
     assert "## AI-presupposing sub-families, for sign-off before promotion" in md

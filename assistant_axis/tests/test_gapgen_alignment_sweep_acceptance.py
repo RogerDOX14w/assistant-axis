@@ -52,12 +52,17 @@ def test_parse_rate_at_least_99_percent(rdir):
         if not p.exists():
             continue
         recs = [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
-        units = {}
+        units, refused = {}, set()
         for r in recs:
             u = (r.get("stage"), r.get("unit_id") or r.get("key"), r.get("reading"))
             units[u] = units.get(u) or (r.get(key) is not None)
-        ok = sum(1 for v in units.values() if v)
-        assert ok / len(units) >= 0.99, (name, len(units) - ok)
+            if r.get("parse_error") == "refusal":                      # the output classifier, not the parser
+                refused.add(u)
+        # a reading the model's output classifier stopped (gate.REFUSAL, 2026-10-11) is not a parse failure: it is
+        # recorded as a refusal and the item is reported beside the agreement, so it leaves the parse rate
+        judged = {u: v for u, v in units.items() if v or u not in refused}
+        ok = sum(1 for v in judged.values() if v)
+        assert ok / len(judged) >= 0.99, (name, len(judged) - ok, f"{len(refused)} refused")
 
 
 @pytest.mark.parametrize("rdir", RUN_DIRS, ids=lambda p: p.name)
