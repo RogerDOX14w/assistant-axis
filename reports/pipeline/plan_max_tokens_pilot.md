@@ -17,7 +17,7 @@ Paired within entity: every pilot entity is generated at all four caps, so each 
 
 - 20 roles, drawn from [`data/roles/instructions/`](../../data/roles/instructions/) by a fixed-seed sample, with 8 of the 20 forced to narrative roles whose responses run long (the builder picks them from the recorded response lengths in the 8slot tree, longest median first).
 - 20 traits, a fixed-seed sample from [`data/traits/instructions/`](../../data/traits/instructions/), plus **`verbose`** and **`concise`** forced in (Roger, 2026-10-12: "verbose and concise are known outliers here").  They are the stress test and the control: `verbose` is the entity most likely to be truncated at every cap, `concise` the one that should be indifferent to it.  Both are reported on their own, outside the stratum means.
-- 20 combinations, a fixed-seed sample of the W15 grid (goal role × non-goal trait and the reverse), plus `r_<goal role>__verbose` and `r_<goal role>__concise` for one goal role, reported on their own likewise.
+- 20 combinations, a fixed-seed sample of the W15 grid (goal role × non-goal trait and the reverse), plus `r_angel__verbose` and `r_angel__concise` (Roger, 2026-10-12: `angel`, a role one can imagine either verbose or concise, with no tendency of its own; by score-3 rate in the May tree it is the top goal role, 491.7 of 500 per combination, and its responses run near the grid's median length), reported on their own likewise.  `verbose` is 52nd of 54 in W15's non-goal trait list, so it is not in the October grid (the top 30); the pilot's step 1 is run with `--non_goal_count 54` so the work items include it, and the `--roles` filter then selects the pilot entities only.
 
 The list is generated once by the builder into [`cap_pilot_entities.json`](./cap_pilot_entities.json) (not there yet) with the seed recorded, so the pilot is reproducible.
 
@@ -38,7 +38,7 @@ One output root per cap, all on the pod's local disk (not `/workspace`), under o
 ```
 uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger \
     --roles $(jq -r '.[]' cap_pilot_entities.json) \
-    --max_tokens <CAP> --output_dir /local/cap_pilot/cap<CAP>/responses
+    --non_goal_count 54 --max_tokens <CAP> --output_dir /local/cap_pilot/cap<CAP>/responses
 uv run 2_activations.py --model Qwen/Qwen3-32B \
     --responses_dir /local/cap_pilot/cap<CAP>/responses \
     --output_dir /local/cap_pilot/cap<CAP>/activations --max_length 2048
@@ -55,7 +55,7 @@ A small tool, [`tools/cap_pilot_compare.py`](../../tools/cap_pilot_compare.py) (
 
 1. **Truncation share** at each cap, from `finish_reason == "length"`.
 2. **Judge:** the score-3 share and the mean score at each cap, with the paired difference to the 1024 run.
-3. **Vector:** the cosine between the entity's vector at each cap and its 1024 vector, per slot (slot 0 is the one the cap acts on; slots 1–7 are the header positions and should not move — a control on the run itself).
+3. **Vector:** the cosine between the entity's vector at each cap and its 1024 vector, per slot.  Slot 0, the mean over the response's tokens, is the only slot that sees the extra text; the header positions (slots 1–7) come before the response in a causal model, so each response's header activations are the same at every cap — but the entity vector averages the score-3 responses, and the judge selects a different subset at each cap, so slots 1–7 move by **selection alone** while slot 0 moves by **content + selection**.  Slots 1–7 are therefore reported as the selection-only effect (beside the judge's score-3 share, the same effect from the judge's side), and a run-sanity check compares slots 1–7 at the *same* cap across two runs (≥ 0.999 expected; a miss is a broken run, not a cap effect).
 4. **Pair axes:** for the pairs among the pilot entities (`verbose`/`concise` first), the cosine of the pair-difference axis across caps at layer 25.
 5. `verbose`, `concise` and their combinations reported separately.
 
@@ -75,8 +75,8 @@ Halving the entity count to 32 keeps the paired design (standard errors ×1.4) a
 
 The readout, the entity list and the four small trees under `roger/cap_pilot/`; one line in the October plan naming the cap and citing the readout; and `finish_reason` on every October response, so the question stays answerable later.
 
-## 8. Open questions for Roger
+## 8. Open questions, answered (Roger, 2026-10-12)
 
-1. 64 entities (≈ 16 GPU-hours) or 32 (≈ 8)?  Recommendation: 64 — the pod time is small against the ≈ 160 GPU-hours of the extraction it informs.
-2. Which goal role for the `verbose`/`concise` combinations?  Recommendation: the goal role with the most score-3 responses in the May tree, so the combination is not itself a truncation outlier.
-3. Should the decision rule's cosine threshold be on slot 0 only (recommended: it is the slot the cap acts on) or on all eight?
+1. 64 entities (≈ 16 GPU-hours): **64.**
+2. The goal role for the `verbose`/`concise` combinations: **`angel`**, and both forms are run — the solo traits (the test) and the combinations (whether the worst case survives being combined, which is what 60% of the October grid is).  The plan had recommended the role with the most score-3 responses; `angel` is that role, and Roger's reason is that an angel has no tendency of its own toward either.
+3. The cosine threshold is on **slot 0 only**; slots 1–7 are the selection-only effect, as § 5 now says.
