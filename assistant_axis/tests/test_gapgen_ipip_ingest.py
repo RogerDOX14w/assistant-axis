@@ -376,14 +376,38 @@ def test_compare_keys_reports_a_sign_conflict_and_asks_roger():
     assert "QUESTIONS 52" in c["instruction"]
 
 
-def test_compare_keys_coverage_limit_is_in_items():
-    """Roger's limit is 50 items either way; 60 items only A keys trips it, 3 do not."""
+def test_compare_keys_coverage_is_reported_not_gated():
+    """The coverage limit is 50 items either way, in items; past it the difference is reported, not gated (Roger,
+    2026-10-12, code review C1: it set needs_roger until then).  CHANGED EXPECTATION: 60 items only A keys made
+    needs_roger true; now it is false and the 60 are in reported_not_gated."""
     extra = [krow(f"Item number {i}.", "HPI", "Filler", "+", I.SOURCE_A) for i in range(60)]
     c = I.compare_keys(B_ROWS, a_rows(B_ROWS) + extra)
-    assert c["items_only_a"] == 60 and c["needs_roger"] is True
-    assert any("the workbook keys 60 items" in r for r in c["reasons"])
+    assert c["items_only_a"] == 60 and c["needs_roger"] is False and c["reasons"] == []
+    assert any("the workbook keys 60 items" in r for r in c["reported_not_gated"])
+    assert any(r.startswith("coverage: 0 links only the key pages key, 60 only the workbook")
+               for r in c["reported_not_gated"])
     small = I.compare_keys(B_ROWS, a_rows(B_ROWS) + extra[:3])
     assert small["items_only_a"] == 3 and small["needs_roger"] is False
+    assert not any("items the key pages do not" in r for r in small["reported_not_gated"])
+
+
+def test_the_gate_is_sign_disagreement_on_shared_links():
+    """C1: 1 sign conflict in 60 shared links (1.7%) passes the 2% gate, 2 in 60 (3.3%) go to Roger; an item
+    mismatch far above 2% made by coverage alone does not."""
+    shared = [krow(f"Shared item {i}.", "NEO", "Orderliness", "+") for i in range(60)]
+    one = a_rows(shared)
+    one[0] = krow("Shared item 0.", "NEO", "Orderliness", "-", I.SOURCE_A)
+    c = I.compare_keys(shared, one)
+    assert c["sign_conflicts"] == 1 and c["link_mismatch_rate"] < I.MISMATCH_LIMIT and c["needs_roger"] is False
+    two = list(one)
+    two[1] = krow("Shared item 1.", "NEO", "Orderliness", "-", I.SOURCE_A)
+    c = I.compare_keys(shared, two)
+    assert c["sign_conflicts"] == 2 and c["needs_roger"] is True and "different signs" in c["reasons"][0]
+    # every shared item also keyed by A on a second scale B does not have: item mismatch 100%, reported only
+    wide = a_rows(shared) + [krow(f"Shared item {i}.", "HPI", "Filler", "+", I.SOURCE_A) for i in range(60)]
+    c = I.compare_keys(shared, wide)
+    assert c["item_mismatch_rate"] == 1.0 and c["needs_roger"] is False
+    assert any("100.0% of the items both key" in r for r in c["reported_not_gated"])
 
 
 def test_compare_keys_normalises_the_instrument_name():
@@ -473,6 +497,39 @@ def test_merge_keys_commits_b_and_tags_an_a_only_key():
     assert [(r.key, r.key_source) for r in mess] == [("-", I.SOURCE_B)]
     assert [(r.text, r.key_source) for r in rows if r.key_source == I.SOURCE_A] == [
         ("Fear for the worst.", I.SOURCE_A)]
+
+
+def test_merge_keys_never_fills_a_link_the_key_pages_hold_under_another_spelling():
+    """Code review 2026-10-12, C1 (review 5 D1): the workbook's HEXACO_PI / HPI-HIC / "Barchard, 2001" spellings of
+    a link the key pages hold (and a construct named by the page's heading) were gap-filled as links of their own,
+    716 duplicates in items.jsonl; the gap-fill is now what _match_item pairs with no key-page link, so each link is
+    counted once."""
+    b = [I.KeyRow(inventory="HEX", construct="Orderliness", key="+", text="Like to tidy up.", scale="C-Orga",
+                  heading="Organization"),
+         krow("Love order and regularity.", "HPI", "Orderliness", "+"),
+         krow("Read a lot.", "BARCHARD2001", "Openness", "+")]
+    a = [krow("Like to tidy up.", "HEXACO_PI", "Organization", "+", I.SOURCE_A),       # B's link, other spelling
+         krow("Love order and regularity.", "HPI-HIC", "Orderliness", "+", I.SOURCE_A),
+         krow("Read a lot.", "Barchard, 2001", "Openness", "+", I.SOURCE_A),
+         krow("Read a lot.", "NEO", "Intellect", "+", I.SOURCE_A)]                    # a link B does not have
+    rows, counts = I.merge_keys(b, a)
+    assert counts["n_gap_filled_from_workbook"] == 1 and counts["n_paired_with_key_pages"] == 3
+    assert counts["n_committed"] == 4 and counts["n_disputed"] == 0
+    assert [(r.text, r.inventory) for r in rows if r.key_source == I.SOURCE_A] == [("Read a lot.", "NEO")]
+    # the join gives each item its links once
+    items, _ = I.build_items([("H1", "Like to tidy up."), ("H2", "Love order and regularity."),
+                              ("X3", "Read a lot.")], rows)
+    assert [len(r.scales) for r in items] == [1, 1, 2]
+
+
+def test_merge_keys_commits_the_key_pages_sign_on_a_disputed_link_spelt_differently():
+    """E60 / E134: the key pages "-", the workbook "+" on the same construct under another instrument name: the
+    pair is disputed, the key page's sign is committed, and the workbook's is not filled beside it."""
+    b = [krow("Feel others' emotions.", "HEX", "Sentimentality", "-")]
+    a = [krow("Feel others' emotions.", "HEXACO_PI", "Sentimentality", "+", I.SOURCE_A)]
+    rows, counts = I.merge_keys(b, a)
+    assert counts["n_disputed"] == 1 and counts["n_gap_filled_from_workbook"] == 0
+    assert [(r.key, r.key_source) for r in rows] == [("-", I.SOURCE_B)]
 
 
 # --------------------------------------------------------------------------- the join and the file

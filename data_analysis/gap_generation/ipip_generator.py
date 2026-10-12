@@ -208,11 +208,43 @@ def _print_key_comparison(counts) -> bool:
     for x in (c.get("sign_conflict_list") or [])[:10]:
         print(f"  SIGN CONFLICT: {x['inventory']} / {x['construct']}: key pages {x['key_pages']}, workbook "
               f"{x['workbook']} -- {x['text']!r} ({x.get('page')})")
+    for note in c.get("reported_not_gated") or []:
+        print(f"  reported, not gated (Roger, 2026-10-12): {note}")
+    m = counts.get("key_merge") or {}
+    if m:
+        print(f"  committed: {m.get('n_from_key_pages')} key-page links; {m.get('n_gap_filled_from_workbook')} "
+              f"workbook links gap-filled (on {m.get('gap_filled_items')} items), "
+              f"{m.get('n_paired_with_key_pages')} paired with a key-page link and not filled, "
+              f"{m.get('n_disputed')} of them with the other sign (the key page's committed)")
     if c.get("needs_roger"):
         print("ASK ROGER before going on (QUESTIONS 52, his standing instruction): " + "; ".join(c["reasons"]),
               file=sys.stderr)
         print(c["instruction"], file=sys.stderr)
     return bool(c.get("needs_roger"))
+
+
+def _items_change(old_path: Path, items) -> Optional[dict]:
+    """What writing ``items`` would change in the ``items.jsonl`` on disk: items whose scales change, and the
+    scale links removed and added, by ``key_source`` (None when there is no file)."""
+    from collections import Counter
+
+    from assistant_axis.gapgen.generators.ipip import ingest as I
+    if not Path(old_path).exists():
+        return None
+    old = {r.ipip_id: r for r in I.load_items(old_path)}
+    new = {r.ipip_id: r for r in items}
+
+    def links(r):
+        return {(s["inventory"], s["construct"], s["key"], s.get("key_source")) for s in (r.scales if r else [])}
+    removed, added, changed = Counter(), Counter(), 0
+    for i in sorted(set(old) | set(new)):
+        a, b = links(old.get(i)), links(new.get(i))
+        if a != b:
+            changed += 1
+            removed.update(x[3] for x in a - b)
+            added.update(x[3] for x in b - a)
+    return {"n_items_before": len(old), "n_items_after": len(new), "n_items_changed": changed,
+            "links_removed": dict(sorted(removed.items())), "links_added": dict(sorted(added.items()))}
 
 
 def cmd_ingest(args) -> int:
@@ -244,9 +276,19 @@ def cmd_ingest(args) -> int:
     counts["hex_assertion"] = "passed" if hex_ok else "failed"
     counts["key_page_check"] = "passed" if keys_ok else "failed"
     counts["construct_labels"] = sorted({s["construct"] for r in items for s in r.scales})
+    change = _items_change(pp["items"], items)
+    if change is not None:
+        print(f"against {pp['items']} on disk: {json.dumps(change)}")
     if args.dry_run:
+        if needs_roger:
+            print("DRY-RUN: the real run would write nothing: the A-vs-B sign disagreement needs Roger (above)")
         print(f"DRY-RUN: would write {pp['items']} ({len(items)} items) and {pp['counts']}")
         return 0
+    if needs_roger:
+        # Roger, 2026-10-12 (code review C1): a comparison that has to go to him writes nothing (it used to write
+        # and exit 3)
+        print("nothing written: the A-vs-B sign disagreement goes to Roger first (QUESTIONS 52)", file=sys.stderr)
+        return 3
     if not (hex_ok and keys_ok) and not args.skip_hex_check:
         print("nothing written (pass --skip-hex-check to write anyway)", file=sys.stderr)
         return 1
@@ -255,7 +297,7 @@ def cmd_ingest(args) -> int:
     print(f"wrote {pp['items']} ({len(items)} items, sha256 {I.file_sha256(pp['items'])[:16]}...)"
           + (f"; previous file kept as {backup}" if backup else ""))
     print(f"wrote {pp['counts']}")
-    return 3 if needs_roger else 0
+    return 0
 
 
 # --------------------------------------------------------------------------- cluster

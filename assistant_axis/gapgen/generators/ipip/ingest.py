@@ -20,14 +20,15 @@
   instrument, scale and sign match exactly -- of **sign and scale identity, not of spelling**, so the instrument
   and construct names are normalised first and every normalisation applied is named in the result (and printed
   by the CLI), because one that is too eager would hide a real disagreement.  Roger's standing instruction
-  (QUESTIONS 52): anything beyond
-  rounding -- above :data:`MISMATCH_LIMIT` of the shared items, or a coverage difference above
-  :data:`COVERAGE_ITEM_LIMIT` items -- goes to him with the question reopened rather than resolved in code, so
-  the comparison sets ``needs_roger`` and the CLI prints it loudly.
-* :func:`merge_keys`: B's rows, plus A's rows for an (item, inventory, construct) B does not key at all; the
-  merged row carries ``key_source`` (:data:`SOURCE_B` or :data:`SOURCE_A`), which is what makes the tracked
-  ``items.jsonl`` self-describing (QUESTIONS 46) and an A-only key droppable in one pass.  Where both key the
-  same (item, inventory, construct) with **different** signs, B wins and the row is marked ``disputed``.
+  (QUESTIONS 52): a sign disagreement beyond rounding -- above :data:`MISMATCH_LIMIT` of the links both
+  sources key -- goes to him with the question reopened rather than resolved in code, so the comparison sets
+  ``needs_roger``, the CLI prints it loudly and ``ingest`` writes nothing.  The coverage differences (what one
+  side keys and the other does not) are reported, not gated (Roger, 2026-10-12, code review C1).
+* :func:`merge_keys`: B's rows, plus each A row the comparison's own pairing (:func:`_match_item`) pairs with no
+  B link of its item; the merged row carries ``key_source`` (:data:`SOURCE_B` or :data:`SOURCE_A`), which is
+  what makes the tracked ``items.jsonl`` self-describing (QUESTIONS 46) and an A-only key droppable in one pass.
+  A link both key (under any spelling the pairing recognises) is committed once, as B's; where the two signs
+  differ, B wins and the pair is counted as disputed.
 * :func:`build_items`: the join, by item text (:func:`text_key`: case, whitespace, curly quotes and the final
   full stop do not count); a key row whose text is in no item list is counted and listed, never dropped
   silently.  Every item of the list is kept, with ``scales: []`` when no scale scores it.
@@ -884,9 +885,11 @@ def compare_keys(b_rows: Sequence[KeyRow], a_rows: Optional[Sequence[KeyRow]], *
     """What source B (the key pages) and source A (the workbook) each key, both ways, and how far they agree.
 
     Reported, never resolved in code (Roger's standing instruction, QUESTIONS 52): ``needs_roger`` is true when
-    the items both key disagree on more than :data:`MISMATCH_LIMIT` of their links or of their items, or when
-    either side covers more than :data:`COVERAGE_ITEM_LIMIT` items the other does not.  ``None`` for ``a_rows``
-    (the workbook not on disk) gives a record saying so, with ``needs_roger`` false.
+    more than :data:`MISMATCH_LIMIT` of the links both sources key carry different signs (Roger, 2026-10-12, code
+    review C1).  The coverage differences -- links and items one side keys and the other does not, and the item
+    mismatch they make, over :data:`MISMATCH_LIMIT` or :data:`COVERAGE_ITEM_LIMIT` -- are reported in
+    ``reported_not_gated``, not gated (they gated until then).  ``None`` for ``a_rows`` (the workbook not on
+    disk) gives a record saying so, with ``needs_roger`` false.
 
     The comparison is of **sign and scale identity, not of spelling**, so three normalisations are applied to
     both sides and named in ``normalisations`` of the result (added 2026-10-11, when 88.7% of the shared items
@@ -966,19 +969,24 @@ def compare_keys(b_rows: Sequence[KeyRow], a_rows: Optional[Sequence[KeyRow]], *
     # coverage (a link or an item only one side has) is counted on its own, in items, as Roger's limit is.
     link_mismatch = len(conflicts) / n_pairs if n_pairs else None
     item_mismatch = 1 - len(exact_items) / len(both_items) if both_items else None
-    reasons = []
+    # Roger, 2026-10-12 (code review C1): the gate is sign disagreement on the links both sources key; what only
+    # one side keys (coverage, and the item mismatch it makes) is reported, not gated -- the keys reach only the
+    # pole split, the hinted-naming hints and the purity diagnostic, and nothing submitted carries them.
+    reasons, reported = [], []
     if link_mismatch is not None and link_mismatch > MISMATCH_LIMIT:
         reasons.append(f"{link_mismatch:.1%} of the shared links are keyed with different signs "
                        f"(limit {MISMATCH_LIMIT:.0%})")
     if item_mismatch is not None and item_mismatch > MISMATCH_LIMIT:
-        reasons.append(f"{item_mismatch:.1%} of the items both key do not match exactly on instrument, scale and "
-                       f"sign (limit {MISMATCH_LIMIT:.0%})")
+        reported.append(f"{item_mismatch:.1%} of the items both key do not match exactly on instrument, scale and "
+                        f"sign (over {MISMATCH_LIMIT:.0%}; mostly links one side keys and the other does not)")
     if len(items_only_a) > COVERAGE_ITEM_LIMIT:
-        reasons.append(f"the workbook keys {len(items_only_a)} items the key pages do not "
-                       f"(limit {COVERAGE_ITEM_LIMIT})")
+        reported.append(f"the workbook keys {len(items_only_a)} items the key pages do not "
+                        f"(over {COVERAGE_ITEM_LIMIT})")
     if len(items_only_b) > COVERAGE_ITEM_LIMIT:
-        reasons.append(f"the key pages key {len(items_only_b)} items the workbook does not "
-                       f"(limit {COVERAGE_ITEM_LIMIT})")
+        reported.append(f"the key pages key {len(items_only_b)} items the workbook does not "
+                        f"(over {COVERAGE_ITEM_LIMIT})")
+    reported.append(f"coverage: {links_only_b} links only the key pages key, {links_only_a} only the workbook; "
+                    f"{len(items_only_b)} and {len(items_only_a)} items")
     return {
         "compared": True, "source_b": SOURCE_B, "source_a": SOURCE_A,
         "n_rows_b": len(b_rows), "n_rows_a": len(a_rows),
@@ -1011,7 +1019,8 @@ def compare_keys(b_rows: Sequence[KeyRow], a_rows: Optional[Sequence[KeyRow]], *
             "signs": "untouched; a sign disagreement on a link both sources have is reported as it stands",
         },
         "limits": {"mismatch": MISMATCH_LIMIT, "coverage_items": COVERAGE_ITEM_LIMIT},
-        "needs_roger": bool(reasons), "reasons": reasons,
+        "gate": "sign disagreement on the shared links (link_mismatch_rate) <= limits.mismatch (C1, 2026-10-12)",
+        "needs_roger": bool(reasons), "reasons": reasons, "reported_not_gated": reported,
         "instruction": ("QUESTIONS 52, Roger 2026-10-11: 'we may find A and B are identical, or very nearly so.  "
                         "If the differences are large, remind me of this and ask if I want to revisit it.'  Report "
                         "these numbers; do not resolve a large difference in code."),
@@ -1019,20 +1028,32 @@ def compare_keys(b_rows: Sequence[KeyRow], a_rows: Optional[Sequence[KeyRow]], *
 
 
 def merge_keys(b_rows: Sequence[KeyRow], a_rows: Optional[Sequence[KeyRow]] = None) -> tuple[list[KeyRow], dict]:
-    """``(rows, counts)``: every key page row, plus a workbook row for an (item, inventory, construct) the key
-    pages do not key at all (a gap-fill, tagged :data:`SOURCE_A` in the row).  Where both key the same link with
-    different signs the key page wins and the row is counted as disputed; no A-only *sign* ever overrides B."""
+    """``(rows, counts)``: every key page row, plus a workbook row that :func:`_match_item` pairs with no key-page
+    link of its item (a gap-fill, tagged :data:`SOURCE_A` in the row).  The pairing is the comparison's own: the
+    same item, the inventory under :func:`_norm_inventory` and a construct name in common
+    (:func:`_construct_names`), so a link the key pages hold under another spelling (``HEXACO_PI`` for ``HEX``, the
+    page's heading for the index's label) is counted once, as the key page's, and never filled again from the
+    workbook (Roger, 2026-10-12, code review C1: the exact-spelling rule before filled 716 links the key pages
+    already held).  A pair with different signs is counted as disputed and the key page's sign is committed; no
+    workbook *sign* ever overrides B."""
     B = _by_link(b_rows)
     out = list(B.values())
     counts = {"n_from_key_pages": len(out), "n_gap_filled_from_workbook": 0, "n_disputed": 0,
-              "gap_filled_items": 0}
+              "gap_filled_items": 0, "n_paired_with_key_pages": 0,
+              "gap_fill_rule": "a workbook link _match_item pairs with no key-page link of its item"}
     if a_rows:
-        A = _by_link(a_rows)
-        fills = [r for k, r in sorted(A.items()) if k not in B]
+        Bt, _ = _triples(B.values())
+        At, _ = _triples(_by_link(a_rows).values())
+        fills: list[KeyRow] = []
+        for item, al in At.items():
+            pairs, _only_b, only_a = _match_item(Bt.get(item, []), al)
+            counts["n_paired_with_key_pages"] += len(pairs)
+            counts["n_disputed"] += sum(1 for b, a in pairs if b[2] != a[2])
+            fills.extend(a[3] for a in only_a)
+        fills.sort(key=_link)
         out += fills
         counts["n_gap_filled_from_workbook"] = len(fills)
         counts["gap_filled_items"] = len({text_key(r.text) for r in fills})
-        counts["n_disputed"] = sum(1 for k, r in A.items() if k in B and B[k].key != r.key)
     counts["n_committed"] = len(out)
     counts["by_source"] = dict(sorted(Counter(r.key_source for r in out).items()))
     return out, counts

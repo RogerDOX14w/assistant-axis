@@ -203,6 +203,31 @@ def test_the_paid_commands_refuse_a_dirty_tree(env, monkeypatch, capsys):
     assert CLI.main(common + ["name", "--granularity", "350", "--all", "--allow-dirty"]) == 0 and client.calls
 
 
+def test_ingest_writes_nothing_when_the_comparison_needs_roger(env, capsys):
+    """Code review 2026-10-12, C1: ingest refuses to write when the A-vs-B sign disagreement goes to Roger (it
+    wrote and exited 3 before); a dry run says so.  Here the workbook keys every item with the opposite sign."""
+    from assistant_axis.tests.ipip_fakes import ASSIGNMENT_ROWS
+    root, common, ipip, cdir, client = env
+    flipped = tuple((inv, a, -k, text, label) for inv, a, k, text, label in ASSIGNMENT_ROWS)
+    fixture_pages(root / "ext", all_21=True, rows=flipped)
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) == 3
+    err = capsys.readouterr().err
+    assert "ASK ROGER" in err and "nothing written" in err
+    assert not (ipip / "items.jsonl").exists() and not (ipip / "ingest_counts.json").exists()
+    dry(root, common, ["ingest"])
+    assert "the real run would write nothing" in capsys.readouterr().out
+
+
+def test_ingest_reports_what_it_would_change(env, capsys):
+    """A rerun prints what it changes in the items.jsonl on disk (items changed, links removed and added by
+    source): the free ingest rerun after C1 says how many duplicate workbook links it drops."""
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) == 0
+    capsys.readouterr()
+    assert CLI.main(common + ["ingest", "--skip-hex-check", "--dry-run"]) == 0
+    assert '"n_items_changed": 0' in capsys.readouterr().out
+
+
 def test_ingest_without_the_workbook_commits_the_key_pages_alone(env):
     """QUESTIONS 52: source B is primary, so the workbook's absence is recorded, not fatal; --require-workbook
     refuses, naming the question."""

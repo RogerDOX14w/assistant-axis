@@ -1,7 +1,10 @@
 """IPIP generator, acceptance on the recorded outputs (plan § 8, last item).  Each check skips while its output is
-not on disk.  Two are red on purpose as of 2026-10-12, findings for Roger rather than failures of the tool: the A-vs-B
-key comparison (QUESTIONS 52, a 35% item mismatch) and the naming parse rate (98.5% against the 99% bar)."""
+not on disk.  One is red on purpose as of 2026-10-12, a finding for Roger rather than a failure of the tool: the
+naming parse rate (98.5% against the 99% bar).  The A-vs-B key comparison was the other (QUESTIONS 52, a 35% item
+mismatch) until Roger set its criterion that day (code review C1): sign disagreement on the shared links, with the
+coverage differences reported, not gated."""
 import json
+import warnings
 
 import pytest
 
@@ -30,16 +33,27 @@ def test_ingest_counts():
 
 
 def test_the_a_against_b_comparison_is_recorded_and_within_rogers_limits():
-    """QUESTIONS 52: the ingest reports A against B both ways; anything beyond rounding goes to Roger rather
-    than into code, so a recorded ``needs_roger`` is a finding to carry to him, not a failure of the tool."""
+    """QUESTIONS 52: the ingest reports A against B both ways; a sign disagreement beyond rounding goes to Roger
+    rather than into code.  The criterion (Roger, 2026-10-12, code review C1; it was ``not needs_roger``, which also
+    gated the item mismatch and coverage): at most ``MISMATCH_LIMIT`` (2%) of the links both sources key carry
+    different signs (0.1% on the recorded ingest, 3 of 2,909).  The coverage differences are reported here as a
+    warning, not gated (974 key-page-only links and 487 workbook-only, 44 and 15 items, on the recorded ingest).
+    Read from the recorded fields, so it holds for an ingest written before the criterion changed."""
     _skip_unless(P.INGEST_COUNTS_PATH)
     c = json.loads(P.INGEST_COUNTS_PATH.read_text())["key_comparison"]
     if not c["compared"]:
         pytest.skip("the workbook (source A) was not on disk for this ingest")
-    for k in ("n_items_b", "n_items_a", "items_only_b", "items_only_a", "exact_match_rate", "sign_conflicts"):
+    for k in ("n_items_b", "n_items_a", "items_only_b", "items_only_a", "exact_match_rate", "sign_conflicts",
+              "n_links_shared", "link_mismatch_rate", "links_only_b", "links_only_a"):
         assert k in c, k
-    assert not c["needs_roger"], ("the A-vs-B difference is past Roger's limits and has to go to him: "
-                                  + "; ".join(c["reasons"]))
+    assert c["n_links_shared"] > 0
+    assert c["link_mismatch_rate"] <= I.MISMATCH_LIMIT, (
+        f"{c['sign_conflicts']} of {c['n_links_shared']} shared links ({c['link_mismatch_rate']:.2%}) carry different "
+        f"signs, over the {I.MISMATCH_LIMIT:.0%} limit: the A-vs-B difference has to go to Roger")
+    warnings.warn(f"IPIP A-vs-B coverage (reported, not gated): {c['links_only_b']} links only the key pages key, "
+                  f"{c['links_only_a']} only the workbook; {c['items_only_b']} and {c['items_only_a']} items; item "
+                  f"mismatch {c['item_mismatch_rate']:.1%}; sign disagreement {c['sign_conflicts']} of "
+                  f"{c['n_links_shared']} shared links")
 
 
 def test_the_licence_sentence_is_on_record_verbatim():
