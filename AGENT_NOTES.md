@@ -227,7 +227,7 @@ older context, or differs from the documented current default.
   [`regenerate_trait_instructions.py --batch`](./data_analysis/regenerate_trait_instructions.py)
   (one Message Batch for the run; `--batch-no-wait` and `--batch-id` to
   submit now and collect later; what the batch fails to deliver is
-  generated in real time; since the review of 2026-10-13 a batch is collected
+  generated in real time; since the review of 2026-10-12 a batch is collected
   once, against the counts logged at submission, into the directory it was
   submitted for, never under `--dry-run`, and a file edited while the batch ran
   is regenerated live instead of overwritten) and, since 2026-10-10,
@@ -236,7 +236,8 @@ older context, or differs from the documented current default.
   time).  **Pipeline step 3 batches by default** (Roger, 2026-10-10:
   "make batch mode the default, with a flag to override that"):
   [`pipeline/3_judge.py`](./pipeline/3_judge.py) sends its judge calls
-  (about 600,000 for the October extraction) through the OpenAI Batch API
+  (about 1.5 million for the October extraction's three entity types, of
+  which 635,500 for traits and roles) through the OpenAI Batch API
   ([`assistant_axis/openai_batch.py`](./assistant_axis/openai_batch.py));
   `--no_batch`, or `run_pipeline.sh --judge-realtime`, judges in real
   time (details in [`pipeline/README.md`](./pipeline/README.md)).  So
@@ -627,10 +628,12 @@ from that batch: a Sonnet 4.6 combined call (5 instructions, 40
 questions, eval prompt) is ~$0.02 for a role and ~$0.03 for a trait.
 
 Retrofitted 2026-10-09 (W24, before the extraction's step 3, about
-600,000 calls): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
+1.5 million calls for the three entity types, 635,500 for traits and
+roles): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
 `<output_dir>/usage.json` beside its score files (the scores directory
-of each entity type), rewritten after every entity as earlier runs plus
-this run, with `[usage]` lines for the run and the total.  Step 4 reads
+of each entity type), rewritten after every entity in real time and
+after every collected batch in batch mode, as earlier runs plus this
+run, with `[usage]` lines for the run and the total.  Step 4 reads
 score files by entity name, so the side-car (and `judge_rubric.json`,
 the rubric stamp) is not taken for an entity.  Test:
 [`pipeline/tests/test_3_judge.py`](./pipeline/tests/test_3_judge.py).
@@ -1544,13 +1547,18 @@ Both reads and writes need defensive handling.
 
 **The pattern in this codebase:**
 
-- **Writes**: stage to a local-disk temp file (via `TMPDIR`), copy to
-  the destination with retry/backoff, then `os.replace` to atomically
-  publish the final name, then unlink the temp.  Atomic from a reader's
-  point of view: dest never exists in a half-written state.  Tensor
-  saves additionally run **three post-copy integrity checks** before
-  considering the save successful — any failure triggers another
-  copy attempt:
+- **Writes**: stage to a local-disk temp file (via `TMPDIR`), copy it
+  with retry/backoff to `<dest>.inprogress` beside the destination, then
+  `os.replace` that copy onto the final name, then unlink the temp.
+  Atomic from a reader's point of view: dest never exists in a
+  half-written state.  Tensor saves (`torch_save_with_retry`)
+  additionally run **three integrity checks on the `.inprogress` copy,
+  and rename it into place only when all pass** (since 2026-10-12; it
+  used to rename first and verify dest).  A failure deletes the copy and
+  triggers another copy attempt; dest is never touched, so a crash
+  mid-verification leaves no file that skip-if-exists resume logic would
+  take for finished, and a save that fails every attempt leaves an
+  existing dest in place:
     1. **Size** matches staging byte-count (catches short-writes).
     2. **SHA-256** matches staging digest (catches silent byte-flips
        inside a correct-size file — e.g. corrupted NFS chunks that
@@ -1636,23 +1644,37 @@ their existing `$TMPDIR` must pass it explicitly via
 kept as a thin shim for external callers but logs a warning.
 
 **Auditing past damage**: `pipeline/scan_missing_vectors.py` walks an
-`activations/`+`vectors/`+`scores/` triple and classifies each missing
-vector as one of `mysterious` / `corrupt_or_truncated_activation` / `ok_zero_size`
-(re-run candidates) vs `missing_scores` / `below_min_count` /
-`all_nan_or_empty` (legitimate filter).  Use it to recover from
-historical short-read damage that pre-retry step 4 silently skipped.
+`activations/`+`vectors/`+`scores/` triple (plus `responses/` beside
+`activations/` when present) and classifies each missing or unreadable
+vector as one of `mysterious` / `corrupt_or_truncated_activation` /
+`corrupt_vector` / `ok_zero_size` (re-run candidates) vs
+`missing_scores` / `below_min_count` / `all_nan_or_empty` (legitimate
+filter); it exits 3 when it finds re-run candidates or
+`missing_activation` entities.  Use it to recover from historical
+short-read damage that pre-retry step 4 silently skipped (statuses and
+recovery steps in [`pipeline/README.md`](pipeline/README.md)).
 
 **Current call sites (keep this list updated as new ones land):**
 
 - Writes via `atomic_io`: `pipeline/2_activations.py` (uses
-  `torch_save_with_retry`), `pipeline/4_vectors.py`,
-  `pipeline/5_axis.py`, `assistant_axis/steering_runner.py`,
-  `steering/run_sweep.py`
-- Reads via `atomic_io`: `pipeline/2_activations.py` (responses),
+  `torch_save_with_retry`), `pipeline/3_judge.py` (score files,
+  `usage.json`, `judge_rubric.json` via `atomic_write_text`),
+  `assistant_axis/openai_batch.py` (step 3's `batch_state.json`),
   `pipeline/4_vectors.py`, `pipeline/5_axis.py`,
+  `pipeline/scan_missing_vectors.py` (its reports),
+  `assistant_axis/steering_runner.py`, `steering/run_sweep.py`
+- Reads via `atomic_io`: `assistant_axis/generation.py` (step 1:
+  `load_role`, `load_questions`), `pipeline/2_activations.py`
+  (responses), `pipeline/3_judge.py` (responses via
+  `read_jsonl_with_retry`, score files via `read_text_with_retry`),
+  `pipeline/4_vectors.py`, `pipeline/5_axis.py`,
+  `pipeline/scan_missing_vectors.py`,
   `assistant_axis/steering_runner.py`, `steering/run_sweep.py`,
   `assistant_axis/axis.py` (`load_axis`, `load_axis_with_metadata`,
   `load_role_vector` — used by notebooks too)
+- Same pattern, own code: `assistant_axis/generation.py`
+  `save_responses` (step 1's response files: local `/tmp` staging,
+  retried copy to `.inprogress`, rename)
 
 ---
 
@@ -1796,7 +1818,7 @@ Every timestamp the provenance system writes is **UTC ISO-8601**
   (`v1:<mtime>@<size>`)
 - `deferred_at` in `deferred_rejudges.yaml`
 - `recorded_at` in `script_equivalences.yaml`
-- `generated_at` in dataset `MANIFEST.json` files
+- `manifest_generated_at` in dataset `MANIFEST.json` files
 
 Pre-2026-05-09 envelopes and PNGs may carry a local-time variant
 (`YYYY-MM-DD HH:MM:SS ±HHMM`).  Reader/audit code treats these
@@ -2067,8 +2089,11 @@ uv run python tools/regenerate_dataset_manifest.py \
 ```
 
 Subtree-granular and stable: re-running on an unchanged dataset
-produces a byte-identical `MANIFEST.json`.  Audit tools rely on this
-to detect drift; ALWAYS regenerate after edits to the
+leaves every subtree summary (`summary_sha256`, `count`,
+`total_bytes`, `newest_mtime`) unchanged; only the top-level `manifest_generated_at` and
+`elapsed_ms` change on every run, so the file as a whole is not
+byte-identical.  Audit tools compare the subtree hashes to detect
+drift; ALWAYS regenerate after edits to the
 `derived/{marginals,aggregates,axis,...}` directories produced by
 `compute_combo_marginals.py` (the only post-pipeline producer in the
 project).
@@ -2269,8 +2294,9 @@ the analysis tree is:
 - `runpod_workspace/<dataset>/` is tracked via per-dataset
   `MANIFEST.json` rather than per-file envelopes; freshness is
   asserted by re-running `tools/regenerate_dataset_manifest.py`
-  and confirming the output is byte-identical (the manifest is
-  stable on unchanged input).
+  and confirming the subtree summaries are unchanged (they are
+  stable on unchanged input; `manifest_generated_at` and
+  `elapsed_ms` change on every run).
 
 When that picture changes (e.g. a fresh script lands as `legacy`
 without a deferral, or a producer change makes `stale_direct`
@@ -2842,14 +2868,21 @@ via the `JudgeDispatcher` protocol:
    matches `pipeline/3_judge.py`'s rubric augmented with steering-direction
    awareness.  0-3 rubric.
 3. **Effect (asynchronous, batched)** — GPT+Haiku ensemble, batched at
-   `target_batch_size=10` (matches response judging's default), strict
+   `target_batch_size=7` (`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE`,
+   matching response judging's default; it was 10 before 2026-05-11, and
+   `run_sweep.py`'s local default stayed at 10 until 2026-05-21, see
+   § "Steering effect-judge B post-mortem"), strict
    single-(cell, sign, strength) batches.  `--effect-mode` selects
    bidirectional (one ±3 prompt) vs separate-poles (two 0-3 prompts,
    signed combine = pos.mean - neg.mean) vs both.
 
 **Skip rule (cost optimization)**: tiers 2 and 3 are **skipped at the
-(cell, sign, strength) granularity** when `mean(coh) > skip_threshold`
-(default 1.0).  Filtering on the strength-mean rather than per-record
+(cell, sign, strength) granularity** when `mean(coh) >= skip_threshold`
+(default 1.5, equal to `coh_stop_threshold`, since 2026-05-17; before
+that `>` 1.0; `steering_judges.DEFAULT_SKIP_THRESHOLD`, CLI
+`--skip-if-strength-mean-coh-above`.  Display-time filtering at 1.0 is
+separate: the plots' `coh_filter_threshold` and `cherrypick.py`'s
+`--max-strength-mean-coh`).  Filtering on the strength-mean rather than per-record
 coh reflects that incoherence is a strength-level property whereas
 judge noise is per-question; averaging the K coh scores cancels noise
 without losing the gross signal.  Skipped records get
@@ -2917,8 +2950,9 @@ path; rationale documented in
 ±3 scale.  A separate downstream tool will eventually consume
 `records[*].judges.effect.combined` and rescale to standard deviations
 of the response-judging distribution.  The default
-`response_target_batch_size=10` (in
-[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py))
+`response_target_batch_size=7` (in
+[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py),
+pinned to `RESPONSE_BATCH_SIZE`; 10 before 2026-05-11)
 matches the steering effect default so the two distributions are
 apples-to-apples in the same judging regime.
 
@@ -2997,9 +3031,12 @@ strengths crossed the coherence threshold.  Empirical review of the
   Hard cap at `max_strength=64.0`.
 - DOWN direction: step down from `s_init` in `multiplier` ratios;
   stop on `eff_stop_consecutive` consecutive
-  `mean(|effect.combined|) < eff_stop_threshold` strengths (defaults
-  `2` and `0.25`).  Hard floor at `min_strength=0.125` (3 octaves
-  below historical weakest=1.0).
+  `|mean(effect.combined)| < eff_stop_threshold` strengths (defaults
+  `2` and `1/3`; since 2026-05-17, before which the threshold was `0.25`
+  and the statistic `mean(|effect.combined|)`, which stays around
+  0.5-0.8 on pure noise and so almost never stopped the scan).  Hard
+  floor at `min_strength=0.125` (3 octaves below historical
+  weakest=1.0).
 - State machine: `BothOpen → {UpBlocked, DownBlocked} → Done`.
   Sticky: a blocked direction never unblocks.  Single-pipeline
   generation alternating UP/DOWN while both open; once one side
@@ -3020,7 +3057,7 @@ keys in `steering/run_sweep.py` and kwargs on
 | `scan_mode` | `"bidirectional"` | switch to `"legacy_unidirectional"` for old behaviour |
 | `start_strength_multiplier_steps` | per-cell heuristic — see below | `s_init = weakest * mult ** N` |
 | `min_strength` | `0.125` | DOWN cursor floor |
-| `eff_stop_threshold` | `0.25` | per-strength `mean(|effect.combined|)` below which counts toward DOWN stop |
+| `eff_stop_threshold` | `1/3` (`0.25` before 2026-05-17) | per-strength `|mean(effect.combined)|` below which counts toward DOWN stop |
 | `eff_stop_consecutive` | `2` | how many consecutive sub-threshold strengths to require |
 | (existing `weakest_strength`, `max_strength`, `multiplier`, `coh_stop_threshold`, `coh_stop_consecutive` unchanged) |
 
@@ -3057,7 +3094,7 @@ before generating any new strengths.  Test
   "min_strength": 0.125,
   "multiplier": 1.189,
   "start_strength_multiplier_steps": 2,
-  "eff_stop_threshold": 0.25,
+  "eff_stop_threshold": 0.3333333333333333,
   "eff_stop_consecutive": 2,
   "coh_stop_threshold": 1.5,
   "coh_stop_consecutive": 2,
@@ -3912,7 +3949,8 @@ flags for the post-batch fill-in:
     descending magnitude order and applies the live runner's
     bidirectional eff-stop predicate against the new averaged eff.
     The K-consecutive below-threshold streak (default K=2, threshold
-    0.5) identifies the bias-floor anchor; strengths SMALLER than
+    1/3 since 2026-05-17, 0.5 before; `--eff-stop-consecutive`,
+    `--eff-stop-threshold`) identifies the bias-floor anchor; strengths SMALLER than
     the anchor move from `records.jsonl` to `_excluded_records.jsonl`
     in the same cell dir.  `summary.json` gains `excluded_strengths`,
     `excluded_reason`, `excluded_eff_stop_threshold`,
@@ -5025,7 +5063,7 @@ runpod_workspace/qwen/qwen-3-32b Roger 8slot/
 
 This is the **8-slot** rebuild that supersedes `runpod_workspace/qwen/qwen-3-32b Roger/` (the older 4-slot dir, vectors ~2.6 MB each). The 8-slot trait vectors are ~5.2 MB. The 8-slot dir contains the regenerated activations/scores/vectors for the 8 traits in the April–May 2026 trait-edits TODO list (`conformist`, `nonconformist`, `indecisive`, `anthropocentric`, `ecocentric`, `obedient`, `rebellious`, `unhelpful`) plus regenerated combinations.
 
-When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. The `results_analysis/run_axis_experiment_batch.py` default (`runpod_workspace/qwen/qwen-3-32b Roger`) is stale; pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly until that default is updated. The README examples likewise still reference the older directory.
+When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. `results_analysis/run_axis_experiment_batch.py` defaults to it (since 2026-05-08), as does every other `results_analysis/` script with a data-dir default (checked 2026-10-12); for any other script, pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly. Some examples in `results_analysis/README.md` still reference the older directory.
 
 **Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
 
@@ -6629,7 +6667,7 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 - `role` — look up stem in `data/roles/instructions/`, use its `eval_prompt` field.
 - `trait` — look up stem in `data/traits/instructions/`, build a pipeline-specific 0-3 eval_prompt from the description. (The 0-100 `eval_prompt` in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3.)
-- `combination` — parse `r_<role>_t_<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
+- `combination` — parse an `r_<role>__<trait>` or `t_<role>__<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
 
 `default` is skipped under all entity types (step 4 uses all activations without scores).
 
@@ -6640,7 +6678,7 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 Any roles-first (or traits-first) fallback will silently mis-score one side for these 11. `run_pipeline.sh` passes the correct `--entity_type` per output-subdir type (Roger mode: `roles|traits|combinations`; Christina mode: inferred from `ROLES_DIR`). If you add a new standalone invocation of `3_judge.py`, you must pass `--entity_type` explicitly.
 
-Steps 2, 4, 5 are unchanged — they process whatever files appear in their input directories.
+Steps 2, 4, 5 take no entity type — they process whatever files appear in their input directories (layouts and exit codes in [`pipeline/README.md`](pipeline/README.md)).
 
 ---
 

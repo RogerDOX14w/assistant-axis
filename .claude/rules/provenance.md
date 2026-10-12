@@ -51,7 +51,7 @@ Every timestamp the provenance system writes is **UTC ISO-8601**
   (`v1:<mtime>@<size>`)
 - `deferred_at` in `deferred_rejudges.yaml`
 - `recorded_at` in `script_equivalences.yaml`
-- `generated_at` in dataset `MANIFEST.json` files
+- `manifest_generated_at` in dataset `MANIFEST.json` files
 
 Pre-2026-05-09 envelopes and PNGs may carry a local-time variant
 (`YYYY-MM-DD HH:MM:SS ±HHMM`).  Reader/audit code treats these
@@ -262,8 +262,11 @@ uv run python tools/regenerate_dataset_manifest.py \
 ```
 
 Subtree-granular and stable: re-running on an unchanged dataset
-produces a byte-identical `MANIFEST.json`.  Audit tools rely on this
-to detect drift; ALWAYS regenerate after edits to the
+leaves every subtree summary (`summary_sha256`, `count`,
+`total_bytes`, `newest_mtime`) unchanged; only the top-level `manifest_generated_at` and
+`elapsed_ms` change on every run, so the file as a whole is not
+byte-identical.  Audit tools compare the subtree hashes to detect
+drift; ALWAYS regenerate after edits to the
 `derived/{marginals,aggregates,axis,...}` directories produced by
 `compute_combo_marginals.py` (the only post-pipeline producer in the
 project).

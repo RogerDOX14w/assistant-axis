@@ -27,13 +27,18 @@ Both reads and writes need defensive handling.
 
 **The pattern in this codebase:**
 
-- **Writes**: stage to a local-disk temp file (via `TMPDIR`), copy to
-  the destination with retry/backoff, then `os.replace` to atomically
-  publish the final name, then unlink the temp.  Atomic from a reader's
-  point of view: dest never exists in a half-written state.  Tensor
-  saves additionally run **three post-copy integrity checks** before
-  considering the save successful — any failure triggers another
-  copy attempt:
+- **Writes**: stage to a local-disk temp file (via `TMPDIR`), copy it
+  with retry/backoff to `<dest>.inprogress` beside the destination, then
+  `os.replace` that copy onto the final name, then unlink the temp.
+  Atomic from a reader's point of view: dest never exists in a
+  half-written state.  Tensor saves (`torch_save_with_retry`)
+  additionally run **three integrity checks on the `.inprogress` copy,
+  and rename it into place only when all pass** (since 2026-10-12; it
+  used to rename first and verify dest).  A failure deletes the copy and
+  triggers another copy attempt; dest is never touched, so a crash
+  mid-verification leaves no file that skip-if-exists resume logic would
+  take for finished, and a save that fails every attempt leaves an
+  existing dest in place:
     1. **Size** matches staging byte-count (catches short-writes).
     2. **SHA-256** matches staging digest (catches silent byte-flips
        inside a correct-size file — e.g. corrupted NFS chunks that
@@ -119,22 +124,36 @@ their existing `$TMPDIR` must pass it explicitly via
 kept as a thin shim for external callers but logs a warning.
 
 **Auditing past damage**: `pipeline/scan_missing_vectors.py` walks an
-`activations/`+`vectors/`+`scores/` triple and classifies each missing
-vector as one of `mysterious` / `corrupt_or_truncated_activation` / `ok_zero_size`
-(re-run candidates) vs `missing_scores` / `below_min_count` /
-`all_nan_or_empty` (legitimate filter).  Use it to recover from
-historical short-read damage that pre-retry step 4 silently skipped.
+`activations/`+`vectors/`+`scores/` triple (plus `responses/` beside
+`activations/` when present) and classifies each missing or unreadable
+vector as one of `mysterious` / `corrupt_or_truncated_activation` /
+`corrupt_vector` / `ok_zero_size` (re-run candidates) vs
+`missing_scores` / `below_min_count` / `all_nan_or_empty` (legitimate
+filter); it exits 3 when it finds re-run candidates or
+`missing_activation` entities.  Use it to recover from historical
+short-read damage that pre-retry step 4 silently skipped (statuses and
+recovery steps in [`pipeline/README.md`](pipeline/README.md)).
 
 **Current call sites (keep this list updated as new ones land):**
 
 - Writes via `atomic_io`: `pipeline/2_activations.py` (uses
-  `torch_save_with_retry`), `pipeline/4_vectors.py`,
-  `pipeline/5_axis.py`, `assistant_axis/steering_runner.py`,
-  `steering/run_sweep.py`
-- Reads via `atomic_io`: `pipeline/2_activations.py` (responses),
+  `torch_save_with_retry`), `pipeline/3_judge.py` (score files,
+  `usage.json`, `judge_rubric.json` via `atomic_write_text`),
+  `assistant_axis/openai_batch.py` (step 3's `batch_state.json`),
   `pipeline/4_vectors.py`, `pipeline/5_axis.py`,
+  `pipeline/scan_missing_vectors.py` (its reports),
+  `assistant_axis/steering_runner.py`, `steering/run_sweep.py`
+- Reads via `atomic_io`: `assistant_axis/generation.py` (step 1:
+  `load_role`, `load_questions`), `pipeline/2_activations.py`
+  (responses), `pipeline/3_judge.py` (responses via
+  `read_jsonl_with_retry`, score files via `read_text_with_retry`),
+  `pipeline/4_vectors.py`, `pipeline/5_axis.py`,
+  `pipeline/scan_missing_vectors.py`,
   `assistant_axis/steering_runner.py`, `steering/run_sweep.py`,
   `assistant_axis/axis.py` (`load_axis`, `load_axis_with_metadata`,
   `load_role_vector` — used by notebooks too)
+- Same pattern, own code: `assistant_axis/generation.py`
+  `save_responses` (step 1's response files: local `/tmp` staging,
+  retried copy to `.inprogress`, rename)
 
 ---

@@ -47,9 +47,12 @@ strengths crossed the coherence threshold.  Empirical review of the
   Hard cap at `max_strength=64.0`.
 - DOWN direction: step down from `s_init` in `multiplier` ratios;
   stop on `eff_stop_consecutive` consecutive
-  `mean(|effect.combined|) < eff_stop_threshold` strengths (defaults
-  `2` and `0.25`).  Hard floor at `min_strength=0.125` (3 octaves
-  below historical weakest=1.0).
+  `|mean(effect.combined)| < eff_stop_threshold` strengths (defaults
+  `2` and `1/3`; since 2026-05-17, before which the threshold was `0.25`
+  and the statistic `mean(|effect.combined|)`, which stays around
+  0.5-0.8 on pure noise and so almost never stopped the scan).  Hard
+  floor at `min_strength=0.125` (3 octaves below historical
+  weakest=1.0).
 - State machine: `BothOpen → {UpBlocked, DownBlocked} → Done`.
   Sticky: a blocked direction never unblocks.  Single-pipeline
   generation alternating UP/DOWN while both open; once one side
@@ -70,7 +73,7 @@ keys in `steering/run_sweep.py` and kwargs on
 | `scan_mode` | `"bidirectional"` | switch to `"legacy_unidirectional"` for old behaviour |
 | `start_strength_multiplier_steps` | per-cell heuristic — see below | `s_init = weakest * mult ** N` |
 | `min_strength` | `0.125` | DOWN cursor floor |
-| `eff_stop_threshold` | `0.25` | per-strength `mean(|effect.combined|)` below which counts toward DOWN stop |
+| `eff_stop_threshold` | `1/3` (`0.25` before 2026-05-17) | per-strength `|mean(effect.combined)|` below which counts toward DOWN stop |
 | `eff_stop_consecutive` | `2` | how many consecutive sub-threshold strengths to require |
 | (existing `weakest_strength`, `max_strength`, `multiplier`, `coh_stop_threshold`, `coh_stop_consecutive` unchanged) |
 
@@ -107,7 +110,7 @@ before generating any new strengths.  Test
   "min_strength": 0.125,
   "multiplier": 1.189,
   "start_strength_multiplier_steps": 2,
-  "eff_stop_threshold": 0.25,
+  "eff_stop_threshold": 0.3333333333333333,
   "eff_stop_consecutive": 2,
   "coh_stop_threshold": 1.5,
   "coh_stop_consecutive": 2,

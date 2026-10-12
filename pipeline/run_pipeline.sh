@@ -122,8 +122,9 @@ TMPFS_TMPDIR=/dev/shm
 # of memory in use, since that strongly suggests an orphaned vLLM worker from a
 # previous (crashed) run still holding a CUDA context.  Such orphans cause OOMs
 # on individual workers and silent partial outputs (other workers proceed,
-# 2_activations.py exits 0 even when some workers died, the pipeline marches on
-# to step 3 with an incomplete activations directory).  See the discussion in
+# until 2026-10-12 2_activations.py exited 0 even when some workers died and the
+# pipeline marched on with an incomplete activations directory; it now exits 1,
+# but an orphan still wastes the run).  See the discussion in
 # AGENT_NOTES.md / README.md.  Pass --skip-gpu-check to bypass.
 GPU_BUSY_THRESHOLD_MIB=2048
 

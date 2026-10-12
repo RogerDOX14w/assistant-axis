@@ -407,7 +407,7 @@ def process_role(
         # What was extracted, recorded since 2026-10-12 (step 4 copies it into
         # the vector).  "layers" names the model layer at each index of the
         # layer axis, which is positional in --layers: a subset gives an axis
-        # shorter than the model's, and step 5 checks the lists agree.  Files
+        # shorter than the model's; step 5 does not yet check the lists agree.  Files
         # written before lack these keys; every one of them used all layers.
         file_metadata = dict(header_metadata)
         file_metadata.setdefault("extract_headers", False)

@@ -76,7 +76,7 @@ the files, and generates in real time whatever the batch failed to deliver.
 `--batch-no-wait` submits and exits, and `--batch-id ID` (with the same
 options) collects later; submitted batches are listed in
 `regeneration_batches.json` beside the usage record.  Combined styles only.
-Collection rules since the code review of 2026-10-13: a reply is checked
+Collection rules since the code review of 2026-10-12: a reply is checked
 against the counts logged at submission; a batch already marked `collected`
 in the log is refused (remove the mark to collect it again deliberately), as
 is one submitted for another directory or a `--batch-id` under `--dry-run`;
@@ -356,7 +356,7 @@ questions; `--batch` submits the run as one Message Batch at half price
 (`--batch-no-wait` submits and exits, `--batch-id ID` collects later;
 batches are recorded in `data/roles/regeneration_batches.json`, usage at the
 batch rate under `<model>:batch`; the collection rules of the trait script,
-above, apply here too since 2026-10-13).  Since 2026-10-06 the openings check of
+above, apply here too since 2026-10-12).  Since 2026-10-06 the openings check of
 the trait script applies here too: under RogerV3 a set whose five
 instructions do not open in five different ways is generated again, once
 (`opening_rerolls` in the `generator` field; `--no-opening-reroll` turns it

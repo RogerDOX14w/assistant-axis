@@ -11,34 +11,51 @@ This directory contains the 5-step pipeline for computing the Assistant Axis fro
 
 ### Roger mode (default)
 
-Generates combined role+trait instructions, standalone traits, and the default baseline. Uses `data/goal_roles_and_traits.json` to select which roles/traits to combine.
+Generates combined role+trait instructions, standalone traits, and the default baseline. Uses [`data/goal_roles_and_traits.json`](../data/goal_roles_and_traits.json) to select which roles/traits to combine.
 
 - `r_{role}__{trait}.jsonl` — goal role x non-goal trait (goal from role)
 - `t_{role}__{trait}.jsonl` — non-goal role x goal trait (goal from trait)
 - `{trait}.jsonl` — standalone trait
+- `{role}.jsonl` — standalone role (`--roles_only`, or the driver's `roles` type)
 - `default.jsonl` — default baseline
 
-Default 30x30 produces 900 r_ + 900 t_ + ~245 traits + 1 default = ~2046 entities.
+Counted on 2026-10-12: 932 trait files in [`data/traits/instructions/`](../data/traits/instructions/) and 339 roles plus `default.json` (340 files) in [`data/roles/instructions/`](../data/roles/instructions/).  The default 30x30 grid is 900 r_ + 900 t_ = 1,800 combinations, so [`1_generate.py`](./1_generate.py) with its defaults (combinations, standalone traits, default) makes 1,800 + 932 + 1 = 2,733 entities, and [`run_pipeline.sh`](./run_pipeline.sh) with its three types (`combinations roles traits`) makes 1,800 + 339 + 932 + 1 = 3,072.
 
 ### Christina mode
 
 Generates standalone roles (or traits) from `--roles_dir`. Run the pipeline separately for roles and traits using different `--roles_dir` and `--output_dir` to avoid filename collisions.
 
-## Full pipeline tips
+## Running the pipeline
+
+[`run_pipeline.sh`](./run_pipeline.sh) runs every step for one output directory.  **Run it from `pipeline/`**: it calls the steps by relative path, and its relative defaults (`--roles_dir ../data/roles/instructions`) are relative to `pipeline/`.  Started from anywhere else it exits 1 with a message before doing anything.
+
+```bash
+cd pipeline
+./run_pipeline.sh                                   # roger mode, types combinations roles traits
+./run_pipeline.sh --types combinations roles
+./run_pipeline.sh --types r_combinations            # only the r_ half of the grid
+./run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/roles
+./run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/traits \
+    --roles_dir ../data/traits/instructions
+```
+
+- **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir`, `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
+- **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.
+- **A failing step stops the pipeline**: step 1; step 2 or step 3 (before step 4, whether they ran in parallel or serially); step 4 (before step 5).  Running the same command again skips what is finished.
+- **Post-pipeline scan** (on unless `--no-scan`): [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Its exit status does not change the pipeline's; exit 3 (re-run candidates or `missing_activation`) is reported as a warning naming the rerun lists.
+- The run's log is `<output_dir>/pipeline_<timestamp>.log`; the warnings and errors in it are listed at the end.
+
+## Running the steps separately
 
 We recommend running scripts separately rather than the bash script.
 
-- Run `1_generate.py` then `2_activations.py` in order with [task-spooler](https://github.com/justanhduc/task-spooler) or tmux
-- `3_judge.py` can run in parallel with `2_activations.py` after `1_generate.py` completes
+- Run [`1_generate.py`](./1_generate.py) then [`2_activations.py`](./2_activations.py) in order with [task-spooler](https://github.com/justanhduc/task-spooler) or tmux
+- [`3_judge.py`](./3_judge.py) can run in parallel with `2_activations.py` after `1_generate.py` completes
 - Steps 4 and 5 run after 1, 2, 3 are all complete
-- All scripts skip existing outputs on rerun
-- `1_generate.py` and `2_activations.py` support multi-worker tensor parallelization
-
-```bash
-./run_pipeline.sh
-```
-
-Edit the script to configure model, mode, and output directory.
+- Run them from `pipeline/` too: step 1's `../data/...` defaults are relative to the working directory (step 3's defaults are the repository's corpus wherever it is run from)
+- On rerun, steps 1, 2 and 4 skip an entity whose output file exists (step 4 unless `--overwrite`), and step 3 judges only the responses not yet in the entity's score file; step 5 always recomputes `axis.pt`
+- Each step exits non-zero when its output is incomplete (details under each step), which is what lets `run_pipeline.sh` stop
+- `1_generate.py` and `2_activations.py` run `total_gpus / tensor_parallel_size` workers in parallel
 
 ## Step-by-Step Instructions
 
@@ -65,20 +82,36 @@ Each entity produces up to 1500 responses (5 instruction variants × 300 questio
 
 | Flag | Default | Description |
 |------|---------|-------------|
+| `--model` | required | Hugging Face model name |
+| `--output_dir` | required | Output directory for the JSONL files |
 | `--mode` | `roger` | `roger` or `christina` |
 | `--goal_count` | 30 | Top-N from each goal list (roger mode) |
 | `--non_goal_count` | 30 | Top-N from each non-goal list (roger mode) |
+| `--no_traits` | off | Roger mode: combinations and default only |
+| `--traits_only` | off | Roger mode: standalone traits only |
+| `--roles_only` | off | Roger mode: standalone roles only (every file in `--roles_dir`, `default.json` included) |
+| `--combos_only_r` / `--combos_only_t` | off | Roger mode: only the r_ or only the t_ half of the grid (same output directory as the full grid) |
+| `--roles` | all | Keep only the work items with these output names (a role or trait stem, `default`, `r_<role>__<trait>`, `t_<role>__<trait>`), in either mode; a name that matches no work item is warned about |
 | `--traits_dir` | `../data/traits/instructions` | Trait JSON directory |
 | `--goal_file` | `../data/goal_roles_and_traits.json` | Goal lists file (roger mode) |
 | `--roles_dir` | `../data/roles/instructions` | Role JSON directory |
 | `--questions_file` | `../data/extraction_questions.jsonl` | Questions JSONL |
-| `--question_count` | 300 (roger) / 240 (christina) | Questions per entity |
-| `--tensor_parallel_size` | auto | GPUs per worker |
-| `--roles` | all | Specific role names (christina mode) |
+| `--question_count` | 300 (roger) / 240 (christina) | Questions per entity, before the reduction |
+| `--reduce_questions` | 3 (roger) / 1 (christina) | Keep every Nth question |
+| `--temperature` | 0.7 | Sampling temperature |
+| `--top_p` | 0.9 | Top-p sampling |
+| `--max_tokens` | 512 | Maximum tokens generated per response |
+| `--max_model_len` | 2048 | vLLM maximum context length |
+| `--gpu_memory_utilization` | 0.95 | vLLM GPU memory fraction |
+| `--tensor_parallel_size` | all visible GPUs (one worker) | GPUs per worker; fewer than all gives `total_gpus / N` workers |
+
+`--no_traits`, `--traits_only` and `--roles_only` are mutually exclusive, the two `--combos_only_*` flags exclude each other and `--traits_only` / `--roles_only`, and all five are refused in christina mode.  The `../data/...` defaults are relative to the working directory.
+
+An entity whose `<name>.jsonl` exists is skipped.  Each response file is written to local `/tmp`, copied beside the destination as `<name>.jsonl.inprogress` and renamed into place, so a crash never leaves a truncated file that a rerun would take as finished.  With several workers the step exits 1 when a worker died or failed to load the model (its items are not generated); an item that fails inside a running worker is logged and skipped.  A rerun generates only what is missing.
 
 ### 2. Extract Activations
 
-Extract mean response activations (unchanged from original):
+Extract one activation tensor per response, in the 8-slot layout below:
 
 ```bash
 uv run 2_activations.py \
@@ -88,12 +121,28 @@ uv run 2_activations.py \
     --batch_size 8
 ```
 
-Processes whatever JSONL files are in `--responses_dir`.
+Processes every JSONL file in `--responses_dir` (narrowed by `--roles` / `--name_prefix`) and skips one whose `<name>.pt` exists.
+
+**What a file holds** ([`2_activations.py`](./2_activations.py), [`assistant_axis/internals/spans.py`](../assistant_axis/internals/spans.py)).  `<name>.pt` is a dict with one entry per response, keyed `{label}_p{prompt_index}_q{question_index}` (the key step 3 scores under; `label` is `pos`), plus a `"metadata"` entry.  For Qwen 3 each response's tensor is `(1 + 7, n_layers, hidden)`, bf16:
+
+- **Slot 0**: the mean over the response's content tokens, from its first to its last non-whitespace token.  The assistant header, the empty think block, `<|im_end|>` and the newline after it are excluded.
+- **Slots 1-7**: the activation at each of the seven tokens of the Qwen 3 non-thinking assistant header, `<|im_start|>`, `assistant`, `\n`, `<think>`, `\n\n`, `</think>`, `\n\n`, one position each.  A header that cannot be found is NaN in all seven; a header token that differs from the expected one is logged as a mismatch.
+- **Layers**: index j on the layer axis is the output of decoder layer j (a forward hook on the layer, which is Hugging Face's `hidden_states[j+1]`); there is no embedding row.  With `--layers` a subset, index j is the j-th listed layer, and `metadata["layers"]` names them.
+- Gemma and Llama get 1 + 3 and 1 + 4 slots (their headers); a model whose family is not recognised from `--model`, or `--no-headers`, gives `(n_layers, hidden)`, the body mean only, with a warning.
+- **Metadata**: `header_tokens`, `header_ids`, `model_name`, `extract_headers`, and since 2026-10-12 `layers`, `max_length`, `thinking` and `batch_size` (files written before lack these four; all of them used every layer).  Step 4 copies it into each vector and step 5 into the axis.
+
+A conversation longer than `--max_length` tokens is cut there.  Files are saved with `torch_save_with_retry` in the older pickle format (`use_zipfile_serialization=False`, which avoids an "iostream error" on RunPod for files of this size).
 
 **Options:**
-- `--batch_size`: Adjust for GPU memory
-- `--layers`: Layers to extract (default: all)
-- `--tensor_parallel_size`: GPUs per worker
+- `--batch_size`: conversations per forward pass (default 16; `run_pipeline.sh` passes 8)
+- `--layers`: layers to extract (default `all`, or a comma-separated list)
+- `--max_length`: maximum sequence length (default 2048)
+- `--tensor_parallel_size`: GPUs per worker (default all visible GPUs, one worker)
+- `--roles`, `--name_prefix`: only these response files, or those whose name starts with the prefix (`r_` / `t_`)
+- `--thinking`: Qwen thinking mode (default false; the header slots assume it off)
+- `--no-headers`: body mean only
+
+The step exits 1 when a worker died or failed to load the model, or when an entity raised or yielded no activation at all (no assistant span found in any of its conversations, which points at a tokenizer or chat-template change, not the data).  Entities after a failed one are still processed in multi-worker mode; in single-worker mode an error other than "no activation" stops the run at that entity.  What was saved stays saved, and a rerun extracts only what is missing.  The log is appended to `<output_dir>/activations.log`.
 
 ### 3. Score Responses
 
@@ -101,26 +150,33 @@ Score role/trait adherence using an LLM judge:
 
 ```bash
 uv run 3_judge.py \
-    --responses_dir outputs/roger/responses \
-    --output_dir outputs/roger/scores
+    --entity_type trait \
+    --responses_dir outputs/roger/traits/responses \
+    --output_dir outputs/roger/traits/scores
 ```
 
-The judge automatically detects response type from the filename:
+`--entity_type` is required and says how to read the response-file names; it is not detected from the filename, because 11 names are both a role and a trait.
 
-| Filename pattern | Type | Eval prompt source |
-|-----------------|------|-------------------|
-| `r_<role>__<trait>` | Combined | Compound prompt from both descriptions (0-3) |
-| `t_<role>__<trait>` | Combined | Compound prompt from both descriptions (0-3) |
-| `default` | Default | Skipped (step 4 uses all activations) |
-| Exists in `--roles_dir` | Role | `eval_prompt` from role JSON (0-3) |
-| Exists in `--traits_dir` | Trait | Constructed from description (0-3) |
+| `--entity_type` | Filename | Eval prompt source |
+|-----------------|----------|--------------------|
+| `role` | `<role>` | `eval_prompt` from the role JSON (0-3) |
+| `trait` | `<trait>` | Built from the trait's label and description (0-3) |
+| `combination` | `r_<role>__<trait>`, `t_<role>__<trait>` | Compound prompt from both descriptions (0-3) |
+| any | `default` | Skipped (step 4 uses all its activations) |
+
+For combinations, the prompt variants that [`data/combination_scores.json`](../data/combination_scores.json) scores 3 (incongruous; 3 of the 9,000 on 2026-10-10) are not judged, so step 4 leaves their activations out.
 
 **Options:**
-- `--traits_dir`: Trait JSON directory (default: `../data/traits/instructions`)
-- `--roles_dir`: Role JSON directory (default: `../data/roles/instructions`)
+- `--entity_type`: `role`, `trait` or `combination` (required)
+- `--roles_dir`, `--traits_dir`: default the repository's [`data/roles/instructions`](../data/roles/instructions/) and [`data/traits/instructions`](../data/traits/instructions/), wherever the script is run from
+- `--combination_scores`: default the repository's `data/combination_scores.json`; `--no_incongruity_filtering` judges every variant
+- `--roles`: specific entity names
 - `--dry_run`: Preview prompts without API calls (also prints the batch plan)
-- `--judge_model`: Judge model (default: `gpt-4.1-mini`)
+- `--judge_model`: Judge model (default: `gpt-4.1-mini`; an OpenAI model that [`assistant_axis/judge_pricing.py`](../assistant_axis/judge_pricing.py) can price)
+- `--max_tokens`: judge reply length (default 200: reasoning first, then the `SCORE:` line)
 - `--no_batch`: judge in real time; see below
+- `--batch_requests` (10,000), `--batch_poll_seconds` (60), `--batch_fallback_max` (2,000): batch mode
+- `--batch_size` (50), `--requests_per_second` (100): real time, and the fallback for requests no batch answered
 
 **Batch mode (the default since 2026-10-10).**  Every pending response goes
 through the OpenAI Batch API at half the real-time price
@@ -133,10 +189,36 @@ scores are merged into the score files as it is collected, and the usage is
 recorded under `gpt-4.1-mini:batch` in `usage.json`.  `batch_state.json`
 beside the scores records the batches submitted: a restarted run collects them
 instead of submitting their requests again (chunk files wait in `_batches/`).
+A chunk's upload is recorded before its batch is created, so a run stopped
+between the two calls leaves an upload with no batch recorded; the restart
+looks the upload up among the organisation's batches and collects the batch it
+finds instead of submitting the requests again.  A status check or result
+download that fails is tried again at the next poll; the run gives up only
+after 30 poll rounds in a row in which every check failed (about half an hour
+at the default poll), leaving the batches recorded for a rerun to collect.
 Requests no batch answered are judged in real time up to `--batch_fallback_max`
-(2,000); past that they stay unscored and the run exits 1, so
-`run_pipeline.sh` stops before step 4, and a rerun submits them.
-`run_pipeline.sh --judge-realtime` passes `--no_batch`.
+(2,000); past that they stay unscored.  `run_pipeline.sh --judge-realtime`
+passes `--no_batch`; a `--no_batch` run refuses to start while
+`batch_state.json` records batches sent and not collected (run in batch mode
+first to collect them, or delete the file to abandon them).
+
+**Exit status.**  The run exits 1, and `run_pipeline.sh` stops before step 4,
+when requests are left unanswered, when the parse rate of the run's judge calls
+is under 99%, or when any entity failed (an unreadable file, a malformed
+record).  The score files written are kept, and a rerun judges only what is
+missing.
+
+**Side-cars** beside the score files: `usage.json` (cumulative token usage and
+cost), `judge_rubric.json` (the rubric version and judge models the directory
+was scored with), `batch_state.json` and `_batches/`.
+
+**Size of a full run.**  For the October 2026 corpus a roger-mode run of all
+three types is about 1.5 million judge calls: 466,000 trait, 169,500 role and
+899,700 combination responses (500 per entity, less the 300 responses of the
+three incongruous combination variants), or 635,500 for traits and roles alone.
+At the `gpt-4.1-mini` batch rates ($0.20 / $0.80 per million tokens) that is
+roughly $300-350, an estimate from about 750-900 prompt and 60-80 completion
+tokens per call; `usage.json` records what it actually cost.
 
 **Score scale (all types):**
 
@@ -149,7 +231,7 @@ Requests no batch answered are judged in real time up to `--batch_fallback_max`
 
 ### 4. Compute Per-Entity Vectors
 
-Compute mean activation vectors from high-scoring (score=3) responses:
+Compute mean activation vectors from high-scoring (score=3) responses ([`4_vectors.py`](./4_vectors.py)):
 
 ```bash
 uv run 4_vectors.py \
@@ -158,7 +240,16 @@ uv run 4_vectors.py \
     --output_dir outputs/roger/vectors
 ```
 
-Processes whatever files are in the input directories.
+Processes whatever files are in the input directories.  An entity's vector is the mean (`nanmean`) of its activations scored 3, the same shape as one activation (`(8, n_layers, hidden)` for Qwen 3); the entity named exactly `default` gets the mean of all its activations, unscored.  An activation with no score is not used, which is how the incongruity filter reaches the vectors.
+
+**Options:**
+- `--min_count`: minimum score=3 activations for a vector (default 50; `run_pipeline.sh` passes 30 in roger mode, 50 in christina mode)
+- `--overwrite`: alone, recompute and overwrite every vector; `--overwrite FILE` (one entity per line, such as a scan's `missing_vectors_rerun.txt`) overwrites only the listed entities, and the rest keep skip-if-exists
+- `--reduce_questions N`: use only activations whose question index is a multiple of N (default 1); it compounds with step 1's reduction
+
+Each vector file holds `vector`, `type` (`pos_3` or `mean`), `role`, the activation file's `metadata`, and since 2026-10-12 a top-level `inputs` record of what it was computed from: `script`, `created_at`, the activation file's name and size, `n_activations`, `min_count`, `reduce_questions`, and for a scored entity the scores file's `name`, `size`, `sha256` and `n_scores`, `n_scored_activations` and `n_score3_used`.  A vector made from a partial scores file can therefore be told from a complete one later.
+
+An existing vector (unless overwritten) and a 0-byte placeholder activation file are skipped.  An entity with fewer than `--min_count` score=3 activations or no scores file is filtered, which is not an error.  The step exits 1 when any entity failed (an activation or scores file that cannot be read or parsed, an empty activation file, a vector that cannot be computed or saved) or the activations directory has no `.pt` files; it exits 0 when entities were only skipped or filtered.  A failed entity has no vector, so a rerun retries exactly those.
 
 **Limitation — question-matched filtering for trait directions:**
 Each entity's vector is the mean of its own score=3 activations, filtered independently.
@@ -174,7 +265,7 @@ script) because the activation files are large.
 
 ### Auditing missing or corrupt vectors
 
-After step 4, run `scan_missing_vectors.py` to verify every activation
+After step 4, run [`scan_missing_vectors.py`](./scan_missing_vectors.py) to verify every entity
 ended up with a corresponding vector, classify any gaps, and detect
 vectors that landed at full size but are unreadable (corrupt-on-write).
 
@@ -202,36 +293,57 @@ uv run scan_missing_vectors.py \
     --rerun_list      outputs/qwen-3-32b/roles/vectors_rerun.txt
 ```
 
+Pass the `--min_count` (and `--reduce_questions`) step 4 used, so that
+`below_min_count` matches what step 4 skips; `run_pipeline.sh` does.
+
+**Coverage.**  The entities scanned are the activation files plus, when a
+`responses/` directory sits beside `activations/`, every response file.
+Without `responses/` the scan sees only entities that have an activation file.
+
 Each entity is classified as one of:
 
 | status                              | meaning                                                                              |
 |-------------------------------------|--------------------------------------------------------------------------------------|
 | `ok`                                | vector present, healthy size, **and `torch.load` succeeds**                          |
+| `placeholder`                       | 0-byte activation file, written on purpose so that step 2 skips the entity; not a re-run candidate (the report says whether a vector exists) |
 | `ok_zero_size`                      | vector exists but < 256 bytes (likely a stub from an aborted save)                   |
-| `corrupt_vector`                    | vector full-size but `torch.load` raises (the corrupt-on-write failure mode)         |
-| `missing_activation`                | no activation .pt at all                                                             |
+| `missing_activation`                | the entity has responses but neither an activation file nor a vector, and its scores do not explain it (also an activation path that is a broken symlink): step 2 has to extract it |
 | `corrupt_or_truncated_activation`   | activation .pt smaller than 50% of peer median, OR (with `--deep_load`) full-size but `torch.load` raises |
+| `corrupt_vector`                    | vector full-size but `torch.load` raises (the corrupt-on-write failure mode)         |
 | `missing_scores`                    | filtered mode, no scores .json (judging never ran for this entity)                   |
 | `below_min_count`                   | filtered mode, < `--min_count` score=3 entries (legitimate filter)                   |
 | `all_nan_or_empty`                  | activations exist but contain no usable tensors                                      |
 | `mysterious`                        | everything upstream looks fine but step 4 produced no vector — re-run candidate      |
-| `orphan_vector`                     | vector .pt exists with no source activation                                          |
+| `vector_only`                       | vector present, no activation file, responses present: the activation was deleted after step 4 to save disk (a deliberate workflow, not a fault) |
+| `orphan_vector`                     | vector present with neither an activation file nor responses (e.g. a renamed entity's old vector, which step 5 still averages in); without `responses/`, every vector lacking an activation file |
 
 The re-run candidates are: `mysterious`, `corrupt_or_truncated_activation`,
-`corrupt_vector`, `ok_zero_size`.  These come from two upstream failure
-modes:
+`corrupt_vector`, `ok_zero_size`; they make up `missing_vectors_rerun.txt`.
+The scanner exits 3 when it finds any of them or a `missing_activation`
+entity (0 when nothing needs attention, 1 when no scan target is found, 2 on
+argument errors); `run_pipeline.sh` reports exit 3 as a warning.  The
+candidates come from two upstream failure modes:
 
 - **Transient NFS short-read at step-4 read time** — pre-retry step 4
   logged a warning and skipped the entity, leaving no vector.  Show up
   as `mysterious`.
 - **Corrupt-on-write at step-4 save time** — full-size vector landed
-  on disk but pickle/zip stream is malformed.  Caught now by the
-  `torch_save_with_retry` post-write size check on new runs; the
-  scanner's load-check finds historical damage.  Show up as
-  `corrupt_vector`.
+  on disk but pickle/zip stream is malformed.  Prevented on new runs by
+  `torch_save_with_retry`, which verifies the copy (size, SHA-256,
+  `torch.load`) before renaming it into place; the scanner's load-check
+  finds historical damage.  Show up as `corrupt_vector`.
 
-Re-running step 4 with `--overwrite missing_vectors_rerun.txt` (per
-vectors variant) will recover all four re-runnable categories.
+**Recovery:**
+
+- `4_vectors.py --overwrite <vectors_dir>/missing_vectors_rerun.txt` (per
+  vectors variant) recomputes `mysterious`, `corrupt_vector` and
+  `ok_zero_size`: corrupt or stub vectors are overwritten, and entities with
+  no vector are computed anyway.
+- `corrupt_or_truncated_activation` needs step 2 first: delete the activation
+  file, rerun step 2 (it extracts only what is missing), then step 4 with the
+  same `--overwrite` list.
+- `missing_activation` is not on the rerun list: rerun step 2, then step 4
+  (which computes the vectors that do not exist yet).
 
 **Performance / accuracy knobs:**
 
@@ -248,8 +360,24 @@ vectors variant) will recover all four re-runnable categories.
 
 ### Robust file IO (NFS / MooseFS)
 
-Steps 2, 4 and 5 use the project-standard transient-IO retry from
-`assistant_axis/atomic_io.py`:
+Every step reads and writes through the NFS-safe helpers in
+[`assistant_axis/atomic_io.py`](../assistant_axis/atomic_io.py), or the same
+pattern:
+
+- Step 1 reads the role, trait and question files with retry
+  ([`assistant_axis/generation.py`](../assistant_axis/generation.py)
+  `load_role`, `load_questions`) and writes each response file through local
+  staging and an `.inprogress` rename (its own code, same pattern).
+- Step 2 reads responses with `read_jsonl_with_retry` and saves with
+  `torch_save_with_retry`.
+- Step 3 reads responses and score files with retry and writes the score
+  files, `usage.json`, `judge_rubric.json` and `batch_state.json` with
+  `atomic_write_text`.
+- Steps 4 and 5 load and save with `torch_load_with_retry` /
+  `torch_save_with_retry`; the scanner reads with retry and writes its report
+  with `atomic_write_text`.
+
+The read retry:
 
 - 5 attempts with exponential backoff `[5, 20, 60, 180]` s
   (cumulative ~265 s, matches `axis_judge_correlation`'s API retry).
@@ -259,31 +387,39 @@ Steps 2, 4 and 5 use the project-standard transient-IO retry from
   failed reading zip archive: ... unexpected EOF, expected N more
   bytes"` from `torch.load` on RunPod NFS — earlier code only retried
   `OSError` and missed it.
-- All saves go through `torch_save_with_retry`, which stages to
-  `TMPDIR` (point this at `/dev/shm` on RunPod), copies with retry/
-  backoff, atomically renames into place, and runs three layers of
-  post-copy integrity verification (each triggers another copy
-  attempt on failure):
 
-  1. **Size check** — destination must match staging byte-count.
-     Catches outright short-writes.
-  2. **SHA-256 byte-equality check** — destination must hash to the
-     same digest as staging.  Catches silent byte-flips inside a
-     correct-size file (e.g. corrupted NFS chunks that pass length
-     checks).  This is the failure mode behind the apparently-healthy
-     2.6 GB `r_guardian__casual.pt` that later refused to `torch.load`
-     with `"storage has wrong byte size of dtype"`.
-  3. **`torch.load` round-trip** — destination must deserialise
-     end-to-end with `weights_only=False`.  Tests at the actual
-     usage level; catches version-drift / pickle-format weirdness
-     that byte-equality alone wouldn't.
+Tensor saves go through `torch_save_with_retry`, which serialises to
+`TMPDIR` (point this at `/dev/shm` on RunPod; `run_pipeline.sh` does),
+copies the file beside the destination as `<dest>.inprogress`, verifies
+that copy, and only then renames it into place (`os.replace`).  Three
+layers of verification run on the `.inprogress` copy (a failure deletes
+it and triggers another copy attempt, with the same backoff):
 
-  Cost on a ~2.6 GB activation file is roughly one extra read for
-  SHA-256 plus one extra read for `torch.load` (both warm in the
-  kernel page cache after the write, so the wall-clock impact is
-  measurably less than 2× the bare write).  Pass
-  `verify_sha256=False` and/or `verify_load=False` to opt out for
-  hot-path writes where the cost outweighs the safety.
+1. **Size check** — the copy must match the staging byte-count.
+   Catches outright short-writes.
+2. **SHA-256 byte-equality check** — the copy must hash to the
+   same digest as staging.  Catches silent byte-flips inside a
+   correct-size file (e.g. corrupted NFS chunks that pass length
+   checks).  This is the failure mode behind the apparently-healthy
+   2.6 GB `r_guardian__casual.pt` that later refused to `torch.load`
+   with `"storage has wrong byte size of dtype"`.
+3. **`torch.load` round-trip** — the copy must deserialise
+   end-to-end with `weights_only=False`.  Tests at the actual
+   usage level; catches version-drift / pickle-format weirdness
+   that byte-equality alone wouldn't.
+
+The destination is never touched until a copy has passed: a crash during
+verification leaves no file that skip-if-exists logic would take for a
+finished one, and a save that fails every attempt leaves an existing file
+(an `--overwrite` run's previous vector) in place.  (Until 2026-10-12 the
+copy was renamed first and the destination verified afterwards.)
+
+Cost on a ~2.6 GB activation file is roughly one extra read for
+SHA-256 plus one extra read for `torch.load` (both warm in the
+kernel page cache after the write, so the wall-clock impact is
+measurably less than 2× the bare write).  Pass
+`verify_sha256=False` and/or `verify_load=False` to opt out for
+hot-path writes where the cost outweighs the safety.
 
 If you hit a final-failure ERROR after all retries, that's a real
 non-transient corruption — clear the affected file and re-run that
@@ -291,7 +427,7 @@ step.
 
 ### 5. Compute Axis
 
-Aggregate vectors into the final axis:
+Aggregate vectors into the final axis ([`5_axis.py`](./5_axis.py)):
 
 ```bash
 uv run 5_axis.py \
@@ -300,14 +436,29 @@ uv run 5_axis.py \
 ```
 
 ```
-axis = mean(default_vectors) - mean(non_default_vectors)
+axis = mean(default_vectors) - nanmean(non_default_vectors)
 ```
+
+Every `.pt` in `--vectors_dir` takes part: the file whose role is exactly
+`default` (or any vector of type `mean`) on the default side, every other
+file on the other side, each entity weighing the same.  The means are taken
+over whole `(n_slots, n_layers, hidden)` tensors, so every slot and layer
+gets its own axis.  The axis points from role-playing toward default
+assistant behaviour.  Because every file counts, an `orphan_vector` (a
+renamed entity's old vector) is averaged in too: run the scan first.
+
+The step always recomputes and overwrites `axis.pt`.  It exits 1 when there
+is no default or no non-default vector, when the vectors' shapes differ, or
+when their metadata disagree on `header_ids` or `model_name`.  `axis.pt` holds
+`axis`, the first vector's `metadata`, and since 2026-10-12 an `inputs` record
+of what it was made of: `script`, `created_at`, `vectors_dir`, the `default`
+and `entities` stems, `n_default` and `n_entities`.
 
 ## Data Format
 
 ### Roles
 
-Role definitions in `data/roles/instructions/*.json`:
+Role definitions in [`data/roles/instructions/*.json`](../data/roles/instructions/):
 
 ```json
 {
@@ -320,11 +471,11 @@ Role definitions in `data/roles/instructions/*.json`:
 }
 ```
 
-275 character roles plus `default.json` with neutral system prompts.
+339 roles plus [`default.json`](../data/roles/instructions/default.json) with neutral system prompts (counted 2026-10-12); every file has five instructions.
 
 ### Traits
 
-Trait definitions in `data/traits/instructions/*.json`:
+Trait definitions in [`data/traits/instructions/*.json`](../data/traits/instructions/) (932 on 2026-10-12):
 
 ```json
 {
@@ -350,7 +501,7 @@ Double underscore `__` separates role and trait names.
 
 ### Questions
 
-`data/extraction_questions.jsonl` (300 questions designed to elicit persona-specific responses; christina mode uses the first 240 by default).
+[`data/extraction_questions.jsonl`](../data/extraction_questions.jsonl) (300 questions designed to elicit persona-specific responses; christina mode uses the first 240 by default).
 
 ## Tips
 
@@ -360,7 +511,9 @@ Double underscore `__` separates role and trait names.
   times.  Disable with `--steps23serial` if you want clean per-step logs
   (e.g. for debugging); errors from either parallel branch surface and abort
   the run before step 4.
-- **Checkpointing**: All steps skip existing outputs — delete to regenerate
+- **Checkpointing**: Steps 1, 2 and 4 skip existing outputs and step 3 skips
+  responses already scored — delete to regenerate (or `4_vectors.py
+  --overwrite`); step 5 always recomputes
 - **Task spooler**: For long-running jobs, use [task-spooler](https://github.com/justanhduc/task-spooler)
 
 ## Pre-computed Axes and Vectors

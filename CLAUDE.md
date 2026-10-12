@@ -69,7 +69,7 @@ older context, or differs from the documented current default.
   [`regenerate_trait_instructions.py --batch`](./data_analysis/regenerate_trait_instructions.py)
   (one Message Batch for the run; `--batch-no-wait` and `--batch-id` to
   submit now and collect later; what the batch fails to deliver is
-  generated in real time; since the review of 2026-10-13 a batch is collected
+  generated in real time; since the review of 2026-10-12 a batch is collected
   once, against the counts logged at submission, into the directory it was
   submitted for, never under `--dry-run`, and a file edited while the batch ran
   is regenerated live instead of overwritten) and, since 2026-10-10,
@@ -78,7 +78,8 @@ older context, or differs from the documented current default.
   time).  **Pipeline step 3 batches by default** (Roger, 2026-10-10:
   "make batch mode the default, with a flag to override that"):
   [`pipeline/3_judge.py`](./pipeline/3_judge.py) sends its judge calls
-  (about 600,000 for the October extraction) through the OpenAI Batch API
+  (about 1.5 million for the October extraction's three entity types, of
+  which 635,500 for traits and roles) through the OpenAI Batch API
   ([`assistant_axis/openai_batch.py`](./assistant_axis/openai_batch.py));
   `--no_batch`, or `run_pipeline.sh --judge-realtime`, judges in real
   time (details in [`pipeline/README.md`](./pipeline/README.md)).  So
@@ -466,10 +467,12 @@ from that batch: a Sonnet 4.6 combined call (5 instructions, 40
 questions, eval prompt) is ~$0.02 for a role and ~$0.03 for a trait.
 
 Retrofitted 2026-10-09 (W24, before the extraction's step 3, about
-600,000 calls): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
+1.5 million calls for the three entity types, 635,500 for traits and
+roles): [`pipeline/3_judge.py`](./pipeline/3_judge.py) writes
 `<output_dir>/usage.json` beside its score files (the scores directory
-of each entity type), rewritten after every entity as earlier runs plus
-this run, with `[usage]` lines for the run and the total.  Step 4 reads
+of each entity type), rewritten after every entity in real time and
+after every collected batch in batch mode, as earlier runs plus this
+run, with `[usage]` lines for the run and the total.  Step 4 reads
 score files by entity name, so the side-car (and `judge_rubric.json`,
 the rubric stamp) is not taken for an entity.  Test:
 [`pipeline/tests/test_3_judge.py`](./pipeline/tests/test_3_judge.py).
@@ -666,7 +669,7 @@ runpod_workspace/qwen/qwen-3-32b Roger 8slot/
 
 This is the **8-slot** rebuild that supersedes `runpod_workspace/qwen/qwen-3-32b Roger/` (the older 4-slot dir, vectors ~2.6 MB each). The 8-slot trait vectors are ~5.2 MB. The 8-slot dir contains the regenerated activations/scores/vectors for the 8 traits in the April–May 2026 trait-edits TODO list (`conformist`, `nonconformist`, `indecisive`, `anthropocentric`, `ecocentric`, `obedient`, `rebellious`, `unhelpful`) plus regenerated combinations.
 
-When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. The `results_analysis/run_axis_experiment_batch.py` default (`runpod_workspace/qwen/qwen-3-32b Roger`) is stale; pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly until that default is updated. The README examples likewise still reference the older directory.
+When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. `results_analysis/run_axis_experiment_batch.py` defaults to it (since 2026-05-08), as does every other `results_analysis/` script with a data-dir default (checked 2026-10-12); for any other script, pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly. Some examples in `results_analysis/README.md` still reference the older directory.
 
 **Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
 

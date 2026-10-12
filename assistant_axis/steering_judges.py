@@ -21,7 +21,7 @@ provides:
   - ``enqueue_strength_group(group)`` -- enqueues a (cell, sign, strength)
     group for asynchronous RP and effect judging.  The dispatcher decides
     skip-or-judge based on ``mean(coh)`` over the K records in the group.
-    If ``mean(coh) > skip_threshold`` (default 1.0) every record is
+    If ``mean(coh) >= skip_threshold`` (default 1.5) every record is
     flagged ``skipped_due_to_strength_mean_coh: true`` and no API calls
     are made; otherwise RP + effect run via a background asyncio loop.
   - ``should_stop_at(strength)`` -- consulted after each strength's

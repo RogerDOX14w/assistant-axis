@@ -868,7 +868,7 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 - `role` — look up stem in `data/roles/instructions/`, use its `eval_prompt` field.
 - `trait` — look up stem in `data/traits/instructions/`, build a pipeline-specific 0-3 eval_prompt from the description. (The 0-100 `eval_prompt` in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3.)
-- `combination` — parse `r_<role>_t_<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
+- `combination` — parse an `r_<role>__<trait>` or `t_<role>__<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
 
 `default` is skipped under all entity types (step 4 uses all activations without scores).
 
@@ -879,6 +879,6 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 Any roles-first (or traits-first) fallback will silently mis-score one side for these 11. `run_pipeline.sh` passes the correct `--entity_type` per output-subdir type (Roger mode: `roles|traits|combinations`; Christina mode: inferred from `ROLES_DIR`). If you add a new standalone invocation of `3_judge.py`, you must pass `--entity_type` explicitly.
 
-Steps 2, 4, 5 are unchanged — they process whatever files appear in their input directories.
+Steps 2, 4, 5 take no entity type — they process whatever files appear in their input directories (layouts and exit codes in [`pipeline/README.md`](pipeline/README.md)).
 
 ---

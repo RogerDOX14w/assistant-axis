@@ -48,14 +48,21 @@ via the `JudgeDispatcher` protocol:
    matches `pipeline/3_judge.py`'s rubric augmented with steering-direction
    awareness.  0-3 rubric.
 3. **Effect (asynchronous, batched)** — GPT+Haiku ensemble, batched at
-   `target_batch_size=10` (matches response judging's default), strict
+   `target_batch_size=7` (`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE`,
+   matching response judging's default; it was 10 before 2026-05-11, and
+   `run_sweep.py`'s local default stayed at 10 until 2026-05-21, see
+   § "Steering effect-judge B post-mortem"), strict
    single-(cell, sign, strength) batches.  `--effect-mode` selects
    bidirectional (one ±3 prompt) vs separate-poles (two 0-3 prompts,
    signed combine = pos.mean - neg.mean) vs both.
 
 **Skip rule (cost optimization)**: tiers 2 and 3 are **skipped at the
-(cell, sign, strength) granularity** when `mean(coh) > skip_threshold`
-(default 1.0).  Filtering on the strength-mean rather than per-record
+(cell, sign, strength) granularity** when `mean(coh) >= skip_threshold`
+(default 1.5, equal to `coh_stop_threshold`, since 2026-05-17; before
+that `>` 1.0; `steering_judges.DEFAULT_SKIP_THRESHOLD`, CLI
+`--skip-if-strength-mean-coh-above`.  Display-time filtering at 1.0 is
+separate: the plots' `coh_filter_threshold` and `cherrypick.py`'s
+`--max-strength-mean-coh`).  Filtering on the strength-mean rather than per-record
 coh reflects that incoherence is a strength-level property whereas
 judge noise is per-question; averaging the K coh scores cancels noise
 without losing the gross signal.  Skipped records get
@@ -123,8 +130,9 @@ path; rationale documented in
 ±3 scale.  A separate downstream tool will eventually consume
 `records[*].judges.effect.combined` and rescale to standard deviations
 of the response-judging distribution.  The default
-`response_target_batch_size=10` (in
-[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py))
+`response_target_batch_size=7` (in
+[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py),
+pinned to `RESPONSE_BATCH_SIZE`; 10 before 2026-05-11)
 matches the steering effect default so the two distributions are
 apples-to-apples in the same judging regime.
 
@@ -255,7 +263,8 @@ flags for the post-batch fill-in:
     descending magnitude order and applies the live runner's
     bidirectional eff-stop predicate against the new averaged eff.
     The K-consecutive below-threshold streak (default K=2, threshold
-    0.5) identifies the bias-floor anchor; strengths SMALLER than
+    1/3 since 2026-05-17, 0.5 before; `--eff-stop-consecutive`,
+    `--eff-stop-threshold`) identifies the bias-floor anchor; strengths SMALLER than
     the anchor move from `records.jsonl` to `_excluded_records.jsonl`
     in the same cell dir.  `summary.json` gains `excluded_strengths`,
     `excluded_reason`, `excluded_eff_stop_threshold`,

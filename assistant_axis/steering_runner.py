@@ -701,7 +701,7 @@ def run_steering_cell(
         (default ~1.414): UP stops on ``coh_stop_consecutive`` consecutive
         strengths with mean coherence >= ``coh_stop_threshold``; DOWN
         stops on ``eff_stop_consecutive`` consecutive strengths with
-        ``mean(|effect.combined|) < eff_stop_threshold``.  Either side
+        ``|mean(effect.combined)| < eff_stop_threshold`` (default 1/3).  Either side
         also stops on cursor exhaustion (UP cap = ``max_strength``,
         DOWN floor = ``min_strength``).
         ``"legacy_unidirectional"`` runs the pre-2026-05-14 bottom-up
