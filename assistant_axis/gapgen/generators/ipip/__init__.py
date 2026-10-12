@@ -3,8 +3,10 @@
 Plan: ``reports/trait_gap_generation/coding_plan_07_behaviour_items.md`` (from ``07_behaviour_items.md`` and
 Roger's answers of 2026-10-10).  The generator scrapes the public-domain IPIP self-report items ("Get chores
 done right away") with their scale keys from three pages of ipip.ori.org, clusters them by embedding (OpenAI
-``text-embedding-3-large`` and the local EmbeddingGemma, each item read as "I <text>"), keeps the clusters both
-embedders reproduce, splits a cluster into two poles where the scale keys say it is bipolar, and has Haiku 5.5
+``text-embedding-3-large`` and the local EmbeddingGemma, each item read as "I <text>"), keeps every cluster of 3+
+items and a pair only when EmbeddingGemma co-clusters it (rule R2, gate audit 4, 2026-10-12; the earlier rule kept
+what both embedders reproduced at Jaccard >= 0.5), re-cuts a domain-sized cluster at a coarse cut into its finer
+clusters (~350, then ~600), splits a cluster into two poles where the scale keys say it is bipolar, and has Haiku 5.5
 name every pole twice: blind (the items alone) and hinted (with the IPIP construct names).  The named poles go to
 the platform as candidates (``Candidate``, ``start_run``, ``submit_candidates``); trait-hood (M1) and novelty
 (M3) are the platform's CLIs.

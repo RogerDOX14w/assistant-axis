@@ -149,7 +149,12 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
     """``(calls, corpus, counts)`` for signal 1: one call per named pole of a kept cluster against the nearest
     pole of **another** cluster (``nearest_other`` on the pole row, written by ``cluster``), read by name and
     gloss.  An unordered pair is asked once, in the order of the pole ids, so two poles that are each other's
-    nearest are not read twice.  A pole with no name, or whose nearest has no name, is counted and skipped."""
+    nearest are not read twice.  A pole with no name, or whose nearest has no name, is counted and skipped.
+
+    Since 2026-10-12 ``cluster`` chooses the nearest among the **kept** poles only (``"among": "kept"``), which are
+    all named by ``name --all``, so a reading is no longer dropped for a neighbour on the loose pile (review 5 D3:
+    67 of 238 poles read at ~600 before).  A table written earlier chose it among every pole; ``counts`` says which
+    (``nearest_among``), and ``n_nearest_in_other_consensus`` counts what such a table leaves out."""
     entries: dict[str, dict] = {}
     poles: dict[tuple, Mapping] = {}
     by_cluster: dict[int, Mapping] = {}
@@ -166,6 +171,7 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
     calls: list[OT.PairCall] = []
     seen: set = set()
     n_unnamed = n_no_nearest = n_other_unnamed = n_other_outside = 0
+    among: set = set()
     for key in sorted(poles):
         p = poles[key]
         a = pole_key_str(*key)
@@ -176,6 +182,7 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
         if not nn:
             n_no_nearest += 1
             continue
+        among.add(nn.get("among", "all"))
         other = (int(nn["cluster_id"]), nn["pole"])
         b = pole_key_str(*other)
         if b not in entries:
@@ -194,7 +201,7 @@ def nearest_pair_calls(rows: Sequence[Mapping], *, form: str = "blind", consensu
     corpus = {k: entries[k] for k in sorted({x for c in calls for x in (c.target, c.listed[0])})}
     counts = {"n_calls": len(calls), "n_poles": len(poles), "n_named": len(entries), "n_unnamed": n_unnamed,
               "n_without_nearest": n_no_nearest, "n_nearest_unnamed": n_other_unnamed,
-              "n_nearest_in_other_consensus": n_other_outside, "form": form,
+              "n_nearest_in_other_consensus": n_other_outside, "nearest_among": sorted(among), "form": form,
               "label_form": label_form}
     return calls, corpus, counts
 

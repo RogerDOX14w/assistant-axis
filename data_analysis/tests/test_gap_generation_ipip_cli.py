@@ -217,6 +217,71 @@ def test_a_partial_cluster_run_keeps_the_other_granularities_summaries(env):
     assert res["targets"] == sorted(GRANULARITIES, reverse=True) and res["targets_this_run"] == [350]
 
 
+def test_consensus_settings_from_the_flags():
+    """Gate audit 4 (Roger 2026-10-12): R2 with P2's ceiling of 30, re-cut at ~350 then ~600 by default (Fable,
+    2026-10-12); the old rule runs with no ceiling unless one is asked for; 0 turns the ceiling off."""
+    ap = CLI.build_parser()
+    assert CLI.consensus_settings(ap.parse_args(["cluster"])) == ("r2", 30, [350, 600])
+    assert CLI.consensus_settings(ap.parse_args(["cluster", "--consensus", "jaccard"])) == ("jaccard", None,
+                                                                                            [350, 600])
+    assert CLI.consensus_settings(ap.parse_args(["cluster", "--size-ceiling", "0"])) == ("r2", None, [350, 600])
+    assert CLI.consensus_settings(ap.parse_args(["cluster", "--consensus", "jaccard", "--size-ceiling", "40",
+                                                 "--recut-targets", "600", "350"])) == ("jaccard", 40, [350, 600])
+    with pytest.raises(SystemExit):
+        ap.parse_args(["cluster", "--consensus", "r1"])
+
+
+def test_cluster_records_the_consensus_rule(env):
+    """The rule, the ceiling and each row's reason are on record; `--consensus jaccard` writes the old rule's
+    reasons; a partial run under another rule does not keep the other granularities' summaries."""
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    dry(root, common, ["cluster", "--no-hdbscan", "--consensus", "jaccard"])
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    res = json.loads((ipip / "cluster_summary.json").read_text())["result"]
+    assert (res["consensus_rule"], res["size_ceiling"], res["recut_targets"]) == ("r2", 30, [350, 600])
+    assert set(res["granularities"]) == {str(g) for g in GRANULARITIES}
+    assert all(s["consensus"]["rule"] == "r2" for s in res["granularities"].values())
+    rows = [json.loads(x) for x in (ipip / "clusters_g350.jsonl").read_text().splitlines()]
+    assert rows and all(r["consensus_reason"] in ("size>=3", "pair_coclustered") for r in rows)   # identical arms
+    assert all("jaccard_vs_gemma" in r and r["core_vs_gemma"]["n"] == len(r["items"]) for r in rows)
+    assert CLI.main(common + ["cluster", "--no-hdbscan", "--consensus", "jaccard", "--targets", "350"]) == 0
+    res = json.loads((ipip / "cluster_summary.json").read_text())["result"]
+    assert (res["consensus_rule"], res["size_ceiling"]) == ("jaccard", None)
+    assert set(res["granularities"]) == {"350"}                 # the R2 summaries of ~600 and ~150 are not kept
+    rows = [json.loads(x) for x in (ipip / "clusters_g350.jsonl").read_text().splitlines()]
+    assert {r["consensus_reason"] for r in rows} == {"jaccard>=0.5"} and all(r["consensus"] == "kept" for r in rows)
+
+
+def test_the_default_recut_targets_are_350_then_600():
+    from assistant_axis.gapgen.generators.ipip import cluster as C
+    assert C.DEFAULT_RECUT_TARGETS == (350, 600)
+    assert CLI.consensus_settings(CLI.build_parser().parse_args(["cluster"]))[2] == [350, 600]
+
+
+def test_names_carry_across_cuts(env):
+    """Fable 2026-10-12: a pole with the same items in another cut's table keeps the name it was given there, so
+    `name` does not ask it again.  The fixture's three cuts are the same partition, so naming ~350 names all."""
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    assert CLI.main(common + ["name", "--granularity", "350", "--all"]) == 0
+    n_calls = len(client.calls)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    t350 = {tuple(p["items"]): p["blind"] for line in (ipip / "clusters_g350.jsonl").read_text().splitlines()
+            for p in json.loads(line)["poles"]}
+    for g in (600, 150):
+        rows = [json.loads(x) for x in (ipip / f"clusters_g{g}.jsonl").read_text().splitlines()]
+        for r in rows:
+            for p in r["poles"]:
+                assert p["blind"]["label"] == t350[tuple(p["items"])]["label"]
+                assert p["blind"]["carried_from"]["granularity"] == 350      # the origin, even when carried twice
+        summ = json.loads((ipip / "cluster_summary.json").read_text())["result"]["granularities"][str(g)]
+        assert summ["naming_carried_across_cuts"] == sum(len(r["poles"]) for r in rows)
+    assert CLI.main(common + ["name", "--granularity", "600", "--all"]) == 0
+    assert len(client.calls) == n_calls                                          # nothing asked again
+
+
 def test_granularity_stops_sending_and_exits_2_at_the_budget(env, monkeypatch, capsys):
     """Review 2026-10-12: a budget stop was printed and the command still returned 0, and the later granularities
     were still sent (one over-budget call each, at least)."""

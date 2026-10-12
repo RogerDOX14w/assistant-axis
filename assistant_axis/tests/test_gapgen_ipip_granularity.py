@@ -251,6 +251,17 @@ def test_readout_markdown_prints_the_clusters_in_full(tmp_path):
     assert "(granularity_readout.json)" in md
 
 
+def test_counts_say_which_poles_the_nearest_was_chosen_among():
+    """Since 2026-10-12 `cluster` chooses each pole's nearest among the kept poles (``"among": "kept"``); a table
+    written before carries no ``among`` and chose it among every pole."""
+    _c, _k, counts = G.nearest_pair_calls(NROWS)
+    assert counts["nearest_among"] == ["all"]
+    rows = [dict(r, poles=[dict(p, nearest_other={**p["nearest_other"], "among": "kept"}) if p.get("nearest_other")
+                           else dict(p) for p in r["poles"]]) for r in NROWS]
+    _c, _k, counts = G.nearest_pair_calls(rows)
+    assert counts["nearest_among"] == ["kept"]
+
+
 def test_a_nearest_pole_in_a_loose_cluster_is_counted_apart():
     """Review 2026-10-12: on the recorded tables most kept poles' nearest other pole is in a loose (never named)
     cluster, so signal 1 read 67 of 238 poles at ~600, 10 of 91 at ~350 and 2 of 33 at ~150; the count of

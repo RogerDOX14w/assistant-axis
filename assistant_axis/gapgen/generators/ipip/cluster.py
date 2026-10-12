@@ -1,4 +1,4 @@
-"""Embed the items, cluster them at two granularities, keep the clusters both embedders reproduce, split poles.
+"""Embed the items, cluster them at each granularity, decide which clusters are kept (R2), split poles.
 
 * **Text**: every item is embedded as a first-person statement, "I " + the item with its first letter lowered
   (:func:`item_embed_text`: "Get chores done right away." -> "I get chores done right away.").
@@ -13,9 +13,24 @@
   the cut is the **last** merge after the count's peak whose count is nearest the target, i.e. the largest
   threshold giving that count (items absorbed as far as the count allows).  ``info`` records the threshold, the
   count, the peak and the singletons.
-* **Consensus** (:func:`consensus`): the primary arm's clusters matched one to one to the other arm's by Jaccard,
-  greedily from the highest; a cluster whose match reaches ``min_jaccard`` (0.5, plan 07 § 3) is kept, the rest go
-  to the loose pile (held for later, plan § 10 decision (d)).
+* **Consensus** (:func:`consensus`), two rules (``CONSENSUS_RULES``).  **R2, the default since 2026-10-12** (gate
+  audit 4, ``reports/code_review_2026-10-12/gate_audits/ipip_consensus.md``, accepted by Roger the same day):
+  every cluster of 3 or more items is kept; a 2-item cluster is kept only when the second arm puts both items in one
+  of its clusters (any size); the rest are held on the loose pile (plan § 10 decision (d)).  The audit found the
+  second arm's agreement says nothing about the coherence of a 3+ cluster and a good deal about a pair.  **The old
+  rule**, ``jaccard`` (plan 07 § 3), kept for reproducing the May readings: the primary arm's clusters matched one
+  to one to the other arm's by Jaccard, greedily from the highest, kept when the match reaches ``min_jaccard``
+  (0.5).  Every row records ``consensus_reason`` and, whatever the rule, the Jaccard column as the old rule
+  computed it, the one-to-one partner and the core (the most of its items in one cluster of the other arm).
+* **Size ceiling** (gate audit 4, P2; :func:`build_cluster_table`'s ``size_ceiling``): at a coarse cut, a cluster
+  above the ceiling (a domain-level blob, 50-240 items at ~150) is replaced by the clusters of a finer cut of the
+  same tree inside it (``recut_targets``, by default ~350 and then, past the ceiling again, ~600), which keep their
+  own consensus at that cut.  The pieces are numbered after the coarse cut's clusters (cut offset + their id in the
+  finer cut), so the ids of the clusters left whole never change and no id is reused for another cluster when the
+  ceiling changes.
+* **Names across tables**: a pole gets the names an earlier table of its own cut gave it (``previous``), and, for
+  a form still missing, the names any other cut's table gave a pole with the same items (``carry_from``; a ~600
+  piece at a coarser cut keeps its ~600 name), marked ``carried_from``.
 * **Poles** (:func:`split_poles`): a cluster is bipolar when a scale has both + and - keyed items in it; the items
   are then two-coloured by their key signs on every scale they share (same sign, same pole), a frustrated edge
   settled by local majority, and items that share no scale with the rest go to the nearer pole by cosine (or to the
@@ -30,18 +45,41 @@ from __future__ import annotations
 import math
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
-from typing import Mapping, Optional, Sequence
+from typing import Collection, Mapping, Optional, Sequence
 
 import numpy as np
 
 from assistant_axis.judge_pricing import MultiModelUsage
 
+from . import GRANULARITIES
 from .ingest import ItemRow, code_order
 
 PRIMARY_ARM = "openai"
 SECOND_ARM = "gemma"
 DEFAULT_TOL = 0.1
+#: The old rule's bar (plan 07 § 3; no derivation recorded, gate audit 4 § 8).  Under R2 it only decides which
+#: Jaccard value a row records (the matched one when it reaches the bar, the best one otherwise).
 MIN_JACCARD = 0.5
+#: ``r2``: keep 3+ clusters, and a pair the second arm co-clusters (gate audit 4, P1; Roger 2026-10-12).
+#: ``jaccard``: the old rule, kept for reproducing the readings made under it.
+CONSENSUS_RULES: tuple[str, ...] = ("r2", "jaccard")
+DEFAULT_CONSENSUS = "r2"
+R2_MIN_SIZE = 3
+#: Gate audit 4, P2: at a coarse cut, a cluster above about 30 items is replaced by its clusters at a finer cut
+#: (the ~600 clusters inside it).  The ~600 cut's own largest cluster is 33 items, and its 10+ clusters read as
+#: coherent; the blobs it is meant for are 48-242 items (g150 #15, 48 items, read as incoherent).
+DEFAULT_SIZE_CEILING = 30
+#: The finer cuts a cluster over the ceiling is re-cut at, coarse to fine: every granularity but the coarsest, so
+#: (350, 600).  A ~150 blob goes to its ~350 clusters first and only those still over the ceiling to ~600, which
+#: keeps the ~150 table coarser than the ~350 one (straight to ~600 it had more rows: 444 against 405).  Fable,
+#: 2026-10-12.
+DEFAULT_RECUT_TARGETS: tuple[int, ...] = tuple(sorted(GRANULARITIES))[1:]
+
+
+def default_size_ceiling(rule: str) -> Optional[int]:
+    """The ceiling a rule runs with unless told otherwise: P2's 30 under R2, none under the old rule (which had
+    none, so that ``jaccard`` reproduces the old tables)."""
+    return DEFAULT_SIZE_CEILING if rule == "r2" else None
 
 
 # --------------------------------------------------------------------------- texts and vectors
@@ -156,19 +194,33 @@ def agglo_clusters(E: np.ndarray, *, target_n: int, tol: float = DEFAULT_TOL, Z:
 @dataclass
 class Matched:
     members: list
-    jaccard: float
-    partner: Optional[int] = None        # the matched cluster's index in the other arm
+    jaccard: float                       # the matched Jaccard when it reaches min_jaccard, else the best (any rule)
+    partner: Optional[int] = None        # the one-to-one matched cluster's index in the other arm
+    core: int = 0                        # the most of the cluster's items that share one cluster of the other arm
+    core_partner: Optional[int] = None   # that cluster's index in the other arm (the lowest index on a tie)
+    reason: str = ""                     # why kept or held, in the rule's words
 
 
 def _jaccard(a: set, b: set) -> float:
     return len(a & b) / len(a | b) if a or b else 0.0
 
 
-def consensus(a: Sequence[Sequence], b: Sequence[Sequence], *, min_jaccard: float = MIN_JACCARD
-              ) -> tuple[list[Matched], list[Matched]]:
-    """``(kept, loose)`` of the clusters of ``a``: one-to-one greedy matching by Jaccard against ``b`` (highest
-    first; ties by index); kept when the match reaches ``min_jaccard``.  Both lists keep ``a``'s order; a loose
-    cluster carries its best Jaccard against any cluster of ``b`` (matched or not)."""
+def consensus(a: Sequence[Sequence], b: Sequence[Sequence], *, rule: str = DEFAULT_CONSENSUS,
+              min_jaccard: float = MIN_JACCARD) -> tuple[list[Matched], list[Matched]]:
+    """``(kept, loose)`` of the clusters of ``a`` (the primary arm's) against ``b`` (the second arm's cut).
+
+    Whatever the rule, every cluster is matched one to one by Jaccard against ``b`` (highest first; ties by index)
+    and carries the matched Jaccard when it reaches ``min_jaccard``, its best Jaccard against any cluster of ``b``
+    otherwise (the old rule's column), the partner, and its core (``Matched.core``).  ``rule`` decides:
+
+    * ``"r2"``: kept when it has 3 or more items (reason ``size>=3``), or 2 items that share one cluster of ``b``
+      (``pair_coclustered``); held otherwise (``pair_not_coclustered``).
+    * ``"jaccard"``: kept when the one-to-one match reaches ``min_jaccard`` (``jaccard>=0.5`` / ``jaccard<0.5``),
+      exactly the rule before 2026-10-12.
+
+    Both lists keep ``a``'s order."""
+    if rule not in CONSENSUS_RULES:
+        raise ValueError(f"rule must be one of {CONSENSUS_RULES}, got {rule!r}")
     sa = [set(x) for x in a]
     sb = [set(x) for x in b]
     where: dict = defaultdict(set)
@@ -176,11 +228,15 @@ def consensus(a: Sequence[Sequence], b: Sequence[Sequence], *, min_jaccard: floa
         for x in s:
             where[x].add(j)
     pairs, best = [], [0.0] * len(sa)
+    core, core_j = [0] * len(sa), [None] * len(sa)
     for i, s in enumerate(sa):
         for j in sorted(set().union(*(where[x] for x in s)) if s else ()):
             jac = _jaccard(s, sb[j])
             pairs.append((-jac, i, j))
             best[i] = max(best[i], jac)
+            shared = len(s & sb[j])
+            if shared > core[i]:
+                core[i], core_j[i] = shared, j
     pairs.sort()
     used_a, used_b, match = set(), set(), {}
     for neg, i, j in pairs:
@@ -192,10 +248,19 @@ def consensus(a: Sequence[Sequence], b: Sequence[Sequence], *, min_jaccard: floa
     kept, loose = [], []
     for i, members in enumerate(a):
         j, jac = match.get(i, (None, 0.0))
-        if j is not None and jac >= min_jaccard:
-            kept.append(Matched(list(members), round(jac, 6), j))
+        j_keep = j is not None and jac >= min_jaccard
+        if rule == "jaccard":
+            keep = j_keep
+            reason = f"jaccard>={min_jaccard:g}" if keep else f"jaccard<{min_jaccard:g}"
+        elif len(sa[i]) >= R2_MIN_SIZE:
+            keep, reason = True, f"size>={R2_MIN_SIZE}"
+        elif len(sa[i]) == 2:
+            keep = core[i] == 2
+            reason = "pair_coclustered" if keep else "pair_not_coclustered"
         else:
-            loose.append(Matched(list(members), round(best[i], 6), j))
+            keep, reason = False, "singleton"
+        m = Matched(list(members), round(jac if j_keep else best[i], 6), j, core[i], core_j[i], reason)
+        (kept if keep else loose).append(m)
     return kept, loose
 
 
@@ -406,14 +471,19 @@ def nearest_corpus(groups: Sequence[Sequence[str]], vectors: Mapping[str, np.nda
     return out
 
 
-def nearest_other_poles(poles: Sequence[tuple], vectors: Mapping[str, np.ndarray]) -> dict:
+def nearest_other_poles(poles: Sequence[tuple], vectors: Mapping[str, np.ndarray], *,
+                        among: Optional[Collection] = None) -> dict:
     """``{(cluster_id, pole): {"cluster_id", "pole", "cos"}}``: for each pole, the nearest pole **of another
     cluster** by centroid cosine (QUESTIONS 50, signal 1 -- "too small shows between clusters").  The other pole
     of the same cluster is excluded on purpose: a bipolar pair is meant to be opposite, and the cross-pole pairs
-    of the granularity readings already check that.  ``poles`` is ``[((cluster_id, pole), item ids)]``."""
+    of the granularity readings already check that.  ``poles`` is ``[((cluster_id, pole), item ids)]``.
+    ``among`` (pole keys), when given, limits the poles that can be chosen as a nearest one: the table passes the
+    kept poles, the only ones ever named, so that signal 1 is never dropped for a neighbour on the loose pile
+    (review 5 D3; gate audit 4, P6)."""
     keys = [k for k, ids in poles if ids]
     if len(keys) < 2:
         return {}
+    allowed = None if among is None else set(among)
     cents = []
     for k, ids in poles:
         if not ids:
@@ -429,6 +499,8 @@ def nearest_other_poles(poles: Sequence[tuple], vectors: Mapping[str, np.ndarray
         best, best_cos = None, -2.0
         for b, other in enumerate(keys):
             if other[0] == key[0]:                 # same cluster (either pole): not an "other cluster"
+                continue
+            if allowed is not None and other not in allowed:
                 continue
             if float(S[a, b]) > best_cos:
                 best, best_cos = other, float(S[a, b])
@@ -453,6 +525,7 @@ def _isfinite(x) -> bool:
 
 #: Fields a naming run writes on a pole, carried over when the clusters are rebuilt with the same pole.
 NAMING_FIELDS = ("blind", "hinted", "labels_disagree")
+NAMING_FORMS = ("blind", "hinted")
 
 
 def table_text(rows: Sequence[Mapping]) -> str:
@@ -494,32 +567,116 @@ def pole_key(ids: Sequence[str]) -> str:
     return ",".join(sorted(ids, key=code_order))
 
 
+#: Row schema: 2 since 2026-10-12 (R2): ``consensus_reason``, ``partner_vs_<arm>``, ``core_vs_<arm>``,
+#: ``recut_from`` on the pieces of a re-cut cluster, and ``nearest_other`` chosen among the kept poles
+#: (``"among": "kept"``).
+TABLE_SCHEMA_VERSION = 2
+
+
+def _counts_by(xs) -> dict:
+    return dict(sorted(Counter(xs).items()))
+
+
 def build_cluster_table(items: Sequence[ItemRow], vectors: Mapping[str, np.ndarray], *, target: int,
                         primary: str = PRIMARY_ARM, second: str = SECOND_ARM, corpus: Optional[Mapping[str, str]] = None,
                         corpus_embedder=None, cache=None, usage: Optional[MultiModelUsage] = None, seed: int = 0,
                         hdbscan: bool = True, tol: float = DEFAULT_TOL, previous: Sequence[Mapping] = (),
-                        min_jaccard: float = MIN_JACCARD) -> tuple[list[dict], dict]:
+                        min_jaccard: float = MIN_JACCARD, rule: str = DEFAULT_CONSENSUS,
+                        size_ceiling: Optional[int] = None, recut_targets: Sequence[int] = (),
+                        carry_from: Sequence[tuple[int, Sequence[Mapping]]] = ()) -> tuple[list[dict], dict]:
     """``(rows, summary)`` for one granularity.  ``vectors`` maps an arm name to its ``(n, d)`` rows (items in
     order).  Every cluster of the primary arm's cut gets a row, numbered 1.. by size (``cluster_id``, the
-    candidates' ``rank``), with ``consensus`` "kept" or "loose"; ``previous`` rows (an earlier table) give their
-    naming fields to poles with the same items."""
+    candidates' ``rank``), with ``consensus`` "kept" or "loose" under ``rule`` (:func:`consensus`) and the reason;
+    ``previous`` rows (an earlier table) give their naming fields to poles with the same items.
+
+    **Size ceiling** (gate audit 4, P2): with ``size_ceiling`` set and a ``recut_targets`` cut finer than
+    ``target``, a cluster of more than ``size_ceiling`` items is not a row: the clusters of the next finer cut
+    inside it are (and, past the ceiling again, those of the cut after that; the finest cut's are kept whatever
+    their size).  A piece keeps its own cut's consensus (the same status and columns it has in that cut's table),
+    is numbered after the clusters of the coarser cuts (``cluster_id`` = the cut's offset + its id in that cut, so
+    ids never collide or move when the ceiling changes), and records ``recut_from`` (the cluster it was cut from,
+    the cut, its id there).  Items a finer cut leaves single drop out of the table.  The summary's
+    ``consensus.before_ceiling`` gives the rule's counts on the uncut table.
+
+    **Names across cuts**: ``carry_from`` is ``[(granularity, rows)]`` of the other cuts' tables, first match wins
+    (pass the finest first).  A naming form a pole has no name for in ``previous`` is taken from a pole with the same
+    items there, with ``carried_from`` (granularity, cluster id, pole of the table that named it) in the naming
+    record, so that a ~600 piece re-cut into a coarser table keeps its ~600 name instead of being named again.
+
+    Each pole's ``nearest_other`` (QUESTIONS 50 signal 1) is chosen among the **kept** poles, the only ones ever
+    named (review 5 D3)."""
     ids = [r.ipip_id for r in items]
     by_id = {r.ipip_id: r for r in items}
-    cuts, infos = {}, {}
-    for arm in (primary, second):
-        cl, info = agglo_clusters(vectors[arm], target_n=target, tol=tol)
-        cuts[arm] = [[ids[i] for i in c.members] for c in cl]
-        infos[arm] = info
-    kept, loose = consensus(cuts[primary], cuts[second], min_jaccard=min_jaccard)
-    jac = {pole_key(m.members): m.jaccard for m in kept + loose}
-    status = {pole_key(m.members): "kept" for m in kept}
+    target = int(target)
+    trees: dict = {}
+    cut_memo: dict = {}
+    decided_memo: dict = {}
+
+    def cut(arm: str, t: int) -> tuple[list, dict]:
+        """One arm's cut at ``t`` (item ids), from that arm's one tree."""
+        if (arm, t) not in cut_memo:
+            if arm not in trees and len(ids) >= 2:
+                trees[arm] = _linkage(vectors[arm])
+            cl, info = agglo_clusters(vectors[arm], target_n=t, tol=tol, Z=trees.get(arm))
+            cut_memo[(arm, t)] = ([[ids[i] for i in c.members] for c in cl], info)
+        return cut_memo[(arm, t)]
+
+    def decided(t: int) -> dict:
+        """``{pole_key(members): ("kept" | "loose", Matched)}`` for the primary arm's cut at ``t``."""
+        if t not in decided_memo:
+            kept_t, loose_t = consensus(cut(primary, t)[0], cut(second, t)[0], rule=rule, min_jaccard=min_jaccard)
+            decided_memo[t] = {**{pole_key(m.members): ("kept", m) for m in kept_t},
+                               **{pole_key(m.members): ("loose", m) for m in loose_t}}
+        return decided_memo[t]
+
+    def status_of(members: Sequence[str], t: int) -> tuple[str, Matched]:
+        got = decided(t).get(pole_key(members))
+        if got is None:              # a piece that is not a whole cluster of its cut (cuts that do not nest)
+            kept_p, loose_p = consensus([list(members)], cut(second, t)[0], rule=rule, min_jaccard=min_jaccard)
+            got = ("kept", kept_p[0]) if kept_p else ("loose", loose_p[0])
+        return got
+
+    coarse = cut(primary, target)[0]
+    finer = sorted({int(t) for t in recut_targets if int(t) > target}) if size_ceiling else []
+    offset, n_before = {target: 0}, len(coarse)
+    for t in finer:
+        offset[t] = n_before
+        n_before += len(cut(primary, t)[0])
+    groups: list[tuple] = []          # (cluster_id, members, cut, recut_from or None)
+
+    def place(members: list, t: int, local_id: int, origin: Optional[dict]) -> None:
+        deeper = [u for u in finer if u > t]
+        if size_ceiling and len(members) > size_ceiling and deeper:
+            u, mem = deeper[0], set(members)
+            origin = origin or {"cluster_id": local_id, "size": len(members)}
+            for k, f in enumerate(cut(primary, u)[0]):
+                piece = [x for x in f if x in mem]
+                if len(piece) >= 2:
+                    place(piece, u, k + 1, origin)
+            return
+        groups.append((offset[t] + local_id, members, t, origin))
+    for k, g in enumerate(coarse):
+        place(list(g), target, k + 1, None)
+    groups.sort(key=lambda x: x[0])
+
     pvec = {i: vectors[primary][k] for k, i in enumerate(ids)}
-    nearest = (nearest_corpus(cuts[primary], pvec, corpus=corpus, embedder=corpus_embedder, cache=cache, usage=usage)
+    final = [g for _cid, g, _t, _o in groups]
+    nearest = (nearest_corpus(final, pvec, corpus=corpus, embedder=corpus_embedder, cache=cache, usage=usage)
                if corpus and corpus_embedder is not None else {})
     prev = {pole_key(p["items"]): p for r in previous for p in r.get("poles") or []}
+    named_elsewhere: dict = {}
+    for g_other, rows_other in carry_from:
+        for r in rows_other:
+            for p in r.get("poles") or []:
+                if any(p.get(f) for f in NAMING_FORMS):
+                    named_elsewhere.setdefault(pole_key(p["items"]), (int(g_other), int(r["cluster_id"]), p))
+    n_carried_across = 0
     rows = []
     all_poles: list[tuple] = []
-    for k, g in enumerate(cuts[primary]):
+    kept_poles: set = set()
+    for n, (cid, g, t, origin) in enumerate(groups):
+        status, m = status_of(g, t)
+        sb = cut(second, t)[0]
         pur, cons = cluster_purity(g, by_id)
         poles = split_poles(g, by_id, vectors=pvec)
         pole_rows = []
@@ -528,39 +685,99 @@ def build_cluster_table(items: Sequence[ItemRow], vectors: Mapping[str, np.ndarr
             old = prev.get(pole_key(p.items))
             if old:
                 d.update({f: old[f] for f in NAMING_FIELDS if f in old})
+            other = named_elsewhere.get(pole_key(p.items))
+            missing = [f for f in NAMING_FORMS if not d.get(f) and other and other[2].get(f)]
+            if missing:
+                g_o, cid_o, po = other
+                for f in missing:
+                    d[f] = {**po[f], "carried_from": po[f].get("carried_from")
+                            or {"granularity": g_o, "cluster_id": cid_o, "pole": po["pole"]}}
+                if d.get("blind") and d.get("hinted"):       # as `name` sets it
+                    d["labels_disagree"] = d["blind"].get("stem") != d["hinted"].get("stem")
+                n_carried_across += 1
             pole_rows.append(d)
-            all_poles.append(((k + 1, p.pole), p.items))
-        rows.append({"schema_version": 1, "granularity": int(target), "cluster_id": k + 1,
-                     "consensus": status.get(pole_key(g), "loose"), "embedder": primary,
-                     f"jaccard_vs_{second}": jac.get(pole_key(g)), "items": list(g), "constructs": cons,
-                     "purity": round(pur, 4) if pur is not None else None, "bipolar": len(poles) == 2,
-                     "bipolar_scales": poles[0].bipolar_scales, "nearest_corpus": nearest.get(k), "poles": pole_rows})
-    # QUESTIONS 50 signal 1: each pole's nearest pole of another cluster, written on the pole row so that the
+            all_poles.append(((cid, p.pole), p.items))
+            if status == "kept":
+                kept_poles.add((cid, p.pole))
+        row = {"schema_version": TABLE_SCHEMA_VERSION, "granularity": target, "cluster_id": cid,
+               "consensus": status, "consensus_reason": m.reason, "embedder": primary,
+               f"jaccard_vs_{second}": m.jaccard,
+               # review columns (gate audit 4, P1): the one-to-one partner and the core, as clusters of the second
+               # arm's cut at the row's cut, numbered as this module orders a cut (largest first), 1..
+               f"partner_vs_{second}": ({"cluster": m.partner + 1, "size": len(sb[m.partner])}
+                                        if m.partner is not None else None),
+               f"core_vs_{second}": {"n": m.core, **({"cluster": m.core_partner + 1, "size": len(sb[m.core_partner])}
+                                                    if m.core_partner is not None else {})},
+               "items": list(g), "constructs": cons, "purity": round(pur, 4) if pur is not None else None,
+               "bipolar": len(poles) == 2, "bipolar_scales": poles[0].bipolar_scales,
+               "nearest_corpus": nearest.get(n)}
+        if origin:
+            row["recut_from"] = {**origin, "cut": t, "cut_cluster_id": cid - offset[t]}
+        row["poles"] = pole_rows
+        rows.append(row)
+    # QUESTIONS 50 signal 1: each pole's nearest pole of another cluster, among the kept poles (the only ones ever
+    # named, so that no reading is dropped for a loose neighbour: review 5 D3), written on the pole row so that the
     # granularity command needs no vectors.  Kept apart from `nearest_corpus`, which is novelty, not size.
-    nearest_other = nearest_other_poles(all_poles, pvec)
+    nearest_other = nearest_other_poles(all_poles, pvec, among=kept_poles)
     for r in rows:
         for p in r["poles"]:
             got = nearest_other.get((int(r["cluster_id"]), p["pole"]))
             if got:
-                p["nearest_other"] = got
-    kept_groups = [r["items"] for r in rows if r["consensus"] == "kept"]
+                p["nearest_other"] = {**got, "among": "kept"}
+    kept_rows = [r for r in rows if r["consensus"] == "kept"]
+    loose_rows = [r for r in rows if r["consensus"] != "kept"]
+    kept_groups = [r["items"] for r in kept_rows]
+    uncut = [status_of(g, target) for g in coarse]
+    table_items = {i for r in rows for i in r["items"]}
+    pole_keys_now = {pole_key(p["items"]) for r in rows for p in r["poles"]}
+    recut_rows = [r for r in rows if r.get("recut_from")]
+    blobs = {}
+    for r in recut_rows:
+        b = blobs.setdefault(r["recut_from"]["cluster_id"], {"cluster_id": r["recut_from"]["cluster_id"],
+                                                             "size": r["recut_from"]["size"], "n_pieces": 0,
+                                                             "n_pieces_kept": 0, "piece_items": 0})
+        b["n_pieces"] += 1
+        b["n_pieces_kept"] += int(r["consensus"] == "kept")
+        b["piece_items"] += len(r["items"])
     summary = {
-        "granularity": int(target), "n_items": len(ids), "primary": primary, "second": second,
-        "cut": infos, "consensus": {"min_jaccard": min_jaccard, "n_kept": len(kept), "n_loose": len(loose),
-                                    "loose_items": sum(len(m.members) for m in loose),
-                                    "jaccard_kept_median": (round(float(np.median([m.jaccard for m in kept])), 4)
-                                                            if kept else None)},
-        "sizes": {"primary": size_summary(cuts[primary]), "second": size_summary(cuts[second]),
-                  "kept": size_summary(kept_groups)},
-        "purity": {primary: purity_metrics(cuts[primary], by_id), second: purity_metrics(cuts[second], by_id),
+        "granularity": target, "n_items": len(ids), "primary": primary, "second": second,
+        "cut": {primary: cut(primary, target)[1], second: cut(second, target)[1]},
+        "consensus": {"rule": rule, "min_jaccard": min_jaccard,
+                      "r2_min_size": R2_MIN_SIZE if rule == "r2" else None,
+                      "n_kept": len(kept_rows), "n_loose": len(loose_rows),
+                      "kept_items": sum(len(r["items"]) for r in kept_rows),
+                      "loose_items": sum(len(r["items"]) for r in loose_rows),
+                      "jaccard_kept_median": (round(float(np.median([r[f"jaccard_vs_{second}"] for r in kept_rows])), 4)
+                                              if kept_rows else None),
+                      "reasons": _counts_by(r["consensus_reason"] for r in rows),
+                      "before_ceiling": {"n_kept": sum(1 for s, _m in uncut if s == "kept"),
+                                         "n_loose": sum(1 for s, _m in uncut if s != "kept"),
+                                         "kept_items": sum(len(m.members) for s, m in uncut if s == "kept"),
+                                         "loose_items": sum(len(m.members) for s, m in uncut if s != "kept"),
+                                         "reasons": _counts_by(m.reason for _s, m in uncut)}},
+        "ceiling": {"size_ceiling": size_ceiling, "recut_targets": list(finer),
+                    "n_recut": len(blobs), "recut_items": sum(b["size"] for b in blobs.values()),
+                    "n_pieces": len(recut_rows), "n_pieces_kept": sum(1 for r in recut_rows if r["consensus"] == "kept"),
+                    "items_left_single": sum(len(g) for g in coarse) - len(table_items),
+                    "blobs": [blobs[k] for k in sorted(blobs)],
+                    "cuts": {str(t): {primary: cut(primary, t)[1], second: cut(second, t)[1]} for t in finer}},
+        "n_rows": len(rows),
+        "sizes": {"primary": size_summary(coarse), "second": size_summary(cut(second, target)[0]),
+                  "table": size_summary(final), "kept": size_summary(kept_groups)},
+        "purity": {primary: purity_metrics(coarse, by_id), second: purity_metrics(cut(second, target)[0], by_id),
                    "kept": purity_metrics(kept_groups, by_id)},
         "bipolar": {"n_clusters": sum(1 for r in rows if r["bipolar"]),
-                    "n_kept": sum(1 for r in rows if r["bipolar"] and r["consensus"] == "kept")},
-        "n_poles_kept": sum(len(r["poles"]) for r in rows if r["consensus"] == "kept"),
+                    "n_kept": sum(1 for r in kept_rows if r["bipolar"])},
+        "n_poles_kept": sum(len(r["poles"]) for r in kept_rows),
+        "nearest_other_among": "kept",
         "naming_carried_over": sum(1 for r in rows for p in r["poles"] if "blind" in p),
+        "naming_carried_across_cuts": n_carried_across,
+        # named poles of the previous table whose items no pole of this one has (a re-cut, a changed cut)
+        "naming_not_carried": sum(1 for k, p in prev.items() if any(p.get(f) for f in ("blind", "hinted"))
+                                  and k not in pole_keys_now),
     }
     if hdbscan:
-        ref = {i: k for k, g in enumerate(cuts[primary]) for i in g}
+        ref = {i: k for k, g in enumerate(coarse) for i in g}
         labels = [ref.get(i, -10 - n) for n, i in enumerate(ids)]
         summary["hdbscan"] = hdbscan_check(vectors[primary], seed=seed, reference=labels)
     return rows, summary

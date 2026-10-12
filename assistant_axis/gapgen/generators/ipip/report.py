@@ -171,7 +171,10 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, files: Mapping[
     def row(label, f):
         lines.append(f"| {label} | " + " | ".join(f(s) for s in ev["clusters"].values()) + " |")
     row("clusters (primary arm)", lambda s: str(s["cut"][s["primary"]]["n_clusters"]))
-    row("kept by both embedders / loose", lambda s: f"{s['consensus']['n_kept']} / {s['consensus']['n_loose']}")
+    # a summary written before 2026-10-12 has no rule recorded: it was the Jaccard rule (kept by both embedders)
+    row("consensus rule (size ceiling)", lambda s: f"{s['consensus'].get('rule', 'jaccard')} "
+        f"({(s.get('ceiling') or {}).get('size_ceiling') or 'none'})")
+    row("kept / loose", lambda s: f"{s['consensus']['n_kept']} / {s['consensus']['n_loose']}")
     row("items in loose clusters", lambda s: str(s["consensus"]["loose_items"]))
     row("median Jaccard of kept", lambda s: str(s["consensus"]["jaccard_kept_median"]))
     row("bipolar (kept)", lambda s: str(s["bipolar"]["n_kept"]))

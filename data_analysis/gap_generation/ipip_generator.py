@@ -5,7 +5,8 @@
         [--approved-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/ipip_generator.py ingest [--skip-hex-check] [--dry-run]
     uv run python data_analysis/gap_generation/ipip_generator.py cluster [--arms openai gemma] [--targets 600 350 150]
-        [--seed 0] [--budget-usd 1] [--no-hdbscan] [--dry-run]
+        [--consensus {r2,jaccard}] [--size-ceiling N] [--recut-targets 350 600] [--seed 0] [--budget-usd 1]
+        [--no-hdbscan] [--dry-run]
     uv run python data_analysis/gap_generation/ipip_generator.py name --granularity {600,350,150}
         [--clusters N | --all | --cluster-ids ID ...] [--hinted] [--render N] [--seed 0] [--budget-usd 1]
         [--dry-run]
@@ -20,8 +21,11 @@ Plan: ``reports/trait_gap_generation/coding_plan_07_behaviour_items.md``.  ``dow
 ``data/external/ipip/`` (git-ignored) and records them (``sources_manifest.json``); every source is approved since
 2026-10-11 (QUESTIONS 52 option C: the 21 key pages and Tedone's workbook; QUESTIONS 46: the home page).
 ``ingest`` writes ``items.jsonl`` and asserts the HEX block.
-``cluster`` embeds the items (OpenAI and EmbeddingGemma), cuts each arm's tree at each target, keeps the clusters
-both arms reproduce and splits bipolar ones into poles: ``clusters_g<G>.jsonl``.  ``name`` names poles on Haiku 5.5,
+``cluster`` embeds the items (OpenAI and EmbeddingGemma), cuts each arm's tree at each target, decides which
+clusters are kept (``--consensus r2``, the default since 2026-10-12, gate audit 4: every cluster of 3+ items, and a
+pair only when EmbeddingGemma puts both items in one cluster; ``jaccard``, the old rule, reproduces the earlier
+tables), re-cuts a cluster above ``--size-ceiling`` items at a coarse cut into its finer clusters (~350, then ~600),
+carries names across cuts by pole items, and splits bipolar ones into poles: ``clusters_g<G>.jsonl``.  ``name`` names poles on Haiku 5.5,
 blind and (``--hinted``) with the scale names.  ``granularity`` makes the two readings of QUESTIONS 50 with M3's
 overlap call (rubric A, Sonnet 5.5): each pole against the nearest pole of another cluster by name and gloss, and
 the within-pole item pairs; the readout reports both by cluster-size band and prints clusters in full.  ``submit`` writes a run's ``candidates.jsonl`` (every named pole: QUESTIONS 48) and submits it; ``report`` writes its
@@ -235,6 +239,18 @@ def cmd_ingest(args) -> int:
 
 # --------------------------------------------------------------------------- cluster
 
+def consensus_settings(args) -> tuple[str, Optional[int], list[int]]:
+    """``(rule, size ceiling or None, re-cut targets)`` from the flags: the ceiling defaults to the rule's own (30
+    under R2, none under the old rule, so that ``--consensus jaccard`` reproduces the earlier tables), 0 turns it
+    off; the re-cut targets default to (350, 600), every granularity but the coarsest, so that a ~150 blob goes to
+    its ~350 clusters first (gate audit 4, P2; Fable 2026-10-12)."""
+    from assistant_axis.gapgen.generators.ipip import cluster as C
+    rule = args.consensus
+    ceiling = args.size_ceiling if args.size_ceiling is not None else C.default_size_ceiling(rule)
+    recut = sorted({int(t) for t in (args.recut_targets or C.DEFAULT_RECUT_TARGETS)})
+    return rule, (int(ceiling) if ceiling else None), recut
+
+
 def cmd_cluster(args) -> int:
     import numpy as np
 
@@ -263,6 +279,12 @@ def cmd_cluster(args) -> int:
         lines.append(f"  {arm} ({emb.model_id}): {len(missing)} of {len(need)} texts not cached, ~{tok:,} tokens = ${usd:.4f}")
     print(f"embedding estimate:\n" + "\n".join(lines) + f"\n  total ${total:.4f}")
     confirm_or_abort(total, args.budget_usd, confirm_expensive=False)
+    rule, ceiling, recut = consensus_settings(args)
+    print(f"consensus rule {rule}" + (f" (keep 3+ clusters, and a pair the second arm co-clusters)" if rule == "r2"
+                                      else f" (one-to-one Jaccard >= {C.MIN_JACCARD:g})")
+          + (f"; size ceiling {ceiling} items, a larger cluster at a coarser cut re-cut at "
+             f"~{'/'.join(str(t) for t in recut)}"
+             if ceiling else "; no size ceiling"))
     if args.dry_run:
         print(f"DRY-RUN: would embed, cluster at {args.targets} and write "
               + ", ".join(str(P.clusters_path(g, pp["dir"])) for g in args.targets) + f", {pp['cluster_summary']}, "
@@ -275,20 +297,34 @@ def cmd_cluster(args) -> int:
         for g in args.targets:
             path = P.clusters_path(g, pp["dir"])
             prev = C.load_table(path)
+            # names across cuts: a pole with the same items in another cut's table (finest first, read now so that a
+            # table written earlier in this run counts) gives the forms this one lacks
+            others = sorted({int(x) for x in P.GRANULARITIES} | {int(x) for x in args.targets}, reverse=True)
+            carry = [(g2, C.load_table(P.clusters_path(g2, pp["dir"]))) for g2 in others if g2 != g]
             rows, summary = C.build_cluster_table(items, vectors, target=g, primary=args.arms[0], second=args.arms[1],
                                                   corpus=corpus, corpus_embedder=embedders[args.arms[0]], cache=cache,
                                                   usage=usage, seed=args.seed, hdbscan=not args.no_hdbscan,
-                                                  previous=prev)
+                                                  previous=prev, rule=rule, size_ceiling=ceiling, recut_targets=recut,
+                                                  carry_from=carry)
             backup = C.write_table(rows, path)
             summaries[str(g)] = summary
             s = summary
+            sc, ce = s["consensus"], s["ceiling"]
             print(f"~{g}: {s['cut'][args.arms[0]]['n_clusters']} clusters ({args.arms[0]}), "
-                  f"{s['cut'][args.arms[1]]['n_clusters']} ({args.arms[1]}); kept {s['consensus']['n_kept']}, loose "
-                  f"{s['consensus']['n_loose']} ({s['consensus']['loose_items']} items); bipolar kept "
-                  f"{s['bipolar']['n_kept']}; poles kept {s['n_poles_kept']}; purity kept "
-                  f"{s['purity']['kept']['purity_mean']}; NMI {s['purity'][args.arms[0]]['nmi']} / "
-                  f"{s['purity'][args.arms[1]]['nmi']}" + (f"; naming carried over {s['naming_carried_over']}"
-                                                           if s["naming_carried_over"] else ""))
+                  f"{s['cut'][args.arms[1]]['n_clusters']} ({args.arms[1]}); rule {sc['rule']}: kept "
+                  f"{sc['before_ceiling']['n_kept']}, loose {sc['before_ceiling']['n_loose']} "
+                  f"({sc['before_ceiling']['loose_items']} items) {json.dumps(sc['before_ceiling']['reasons'])}")
+            if ce["n_recut"]:
+                print(f"   size ceiling {ce['size_ceiling']}: {ce['n_recut']} clusters ({ce['recut_items']} items) "
+                      f"re-cut at ~{'/'.join(str(t) for t in ce['recut_targets'])} into {ce['n_pieces']} pieces "
+                      f"({ce['n_pieces_kept']} kept; {ce['items_left_single']} items left single)")
+            print(f"   table: {s['n_rows']} rows, kept {sc['n_kept']} ({sc['kept_items']} items), loose "
+                  f"{sc['n_loose']} ({sc['loose_items']} items); bipolar kept {s['bipolar']['n_kept']}; poles kept "
+                  f"{s['n_poles_kept']}; purity kept {s['purity']['kept']['purity_mean']}; NMI "
+                  f"{s['purity'][args.arms[0]]['nmi']} / {s['purity'][args.arms[1]]['nmi']}"
+                  + (f"; naming carried over {s['naming_carried_over']}" if s["naming_carried_over"] else "")
+                  + (f" ({s['naming_carried_across_cuts']} from another cut)" if s["naming_carried_across_cuts"] else "")
+                  + (f"; NAMED POLES NOT CARRIED OVER {s['naming_not_carried']}" if s["naming_not_carried"] else ""))
             print(f"wrote {path}" + (f" (previous kept as {backup})" if backup else ""))
     finally:
         cache.save()
@@ -302,11 +338,19 @@ def cmd_cluster(args) -> int:
     kept_g = {}
     from assistant_axis.gapgen.generators.ipip.report import _read_json
     old = _read_json(pp["cluster_summary"])
-    if old and old.get("items_sha256") == items_sha and old.get("arms") == arms and old.get("seed") == args.seed:
+    # ... and under the same consensus rule and ceiling (a summary written before 2026-10-12 has no rule recorded:
+    # it was the Jaccard rule, with no ceiling)
+    same_rule = old and (old.get("consensus_rule", "jaccard"), old.get("size_ceiling"),
+                         old.get("recut_targets") if old.get("size_ceiling") else None) == (
+        rule, ceiling, list(recut) if ceiling else None)
+    if old and same_rule and old.get("items_sha256") == items_sha and old.get("arms") == arms and old.get("seed") == args.seed:
         kept_g = {k: v for k, v in (old.get("granularities") or {}).items() if k not in summaries}
     all_g = {**kept_g, **summaries}
     all_g = {k: all_g[k] for k in sorted(all_g, key=lambda k: -int(k))}
     doc = {"arms": arms, "targets": [int(k) for k in all_g], "targets_this_run": list(args.targets),
+           "consensus_rule": rule, "size_ceiling": ceiling, "recut_targets": list(recut),
+           "consensus_source": "reports/code_review_2026-10-12/gate_audits/ipip_consensus.md (R2, P2; Roger "
+                               "2026-10-12)" if rule == "r2" else "plan 07 section 3 (Jaccard >= 0.5)",
            "seed": args.seed, "items_sha256": items_sha, "n_items": len(items),
            "granularities": all_g, "usage": usage.as_dict(),
            "dims": {a: int(np.asarray(v).shape[1]) for a, v in vectors.items()}}
@@ -623,6 +667,8 @@ def _cost_flags(p, budget: float) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    from assistant_axis.gapgen.generators.ipip.cluster import CONSENSUS_RULES as C_RULES
+    from assistant_axis.gapgen.generators.ipip.cluster import DEFAULT_CONSENSUS as C_DEFAULT_RULE
     from assistant_axis.gapgen.generators.ipip.granularity import SIGNALS as G_SIGNALS
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -656,6 +702,17 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("cluster", help="embed (OpenAI + EmbeddingGemma), cluster, consensus, poles (about $0.01)")
     p.add_argument("--arms", nargs=2, default=["openai", "gemma"], metavar=("PRIMARY", "SECOND"))
     p.add_argument("--targets", nargs="+", type=int, default=list(P.GRANULARITIES))
+    p.add_argument("--consensus", choices=list(C_RULES), default=C_DEFAULT_RULE,
+                   help="which clusters are kept: r2 (default; gate audit 4, Roger 2026-10-12) keeps every cluster of "
+                        "3+ items and a pair only when the second arm puts both items in one cluster; jaccard is the "
+                        "old rule (one-to-one Jaccard >= 0.5), for reproducing the readings made under it")
+    p.add_argument("--size-ceiling", type=int, default=None,
+                   help="at a cut coarser than --recut-targets, a cluster of more than N items is replaced by its "
+                        "clusters at the finer cut (gate audit 4, P2); default 30 under r2, none under jaccard; 0 "
+                        "turns it off")
+    p.add_argument("--recut-targets", nargs="+", type=int, default=None,
+                   help="the finer cut(s) a cluster over the ceiling is re-cut at, coarse to fine past the ceiling "
+                        "again (default every granularity but the coarsest: 350 600)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--no-hdbscan", action="store_true", help="skip the HDBSCAN cross-check (report only)")
     p.add_argument("--budget-usd", type=float, default=1.0)
