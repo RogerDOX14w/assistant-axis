@@ -54,59 +54,6 @@
             "achiever",
             "adaptable"
           ]
-        },
-        "queue": {
-          "n": 777,
-          "single": 257,
-          "subword": 294,
-          "multiword": 226,
-          "shares": {
-            "single": 0.3308,
-            "subword": 0.3784,
-            "multiword": 0.2909
-          },
-          "subword_examples": [
-            "Adventurousness",
-            "Altruism",
-            "Aquarius",
-            "Aries",
-            "Assertiveness",
-            "Capricorn",
-            "Cautiousness",
-            "Cheerfulness",
-            "Compassion",
-            "Creativity",
-            "Dependence",
-            "Diligence",
-            "Dutifulness",
-            "ENFJ",
-            "ENFP",
-            "ENTJ",
-            "ENTP",
-            "ESFJ",
-            "ESFP",
-            "ESTJ",
-            "ESTP",
-            "Emotionality",
-            "Fairness",
-            "Fearfulness",
-            "Flexibility",
-            "Forgivingness",
-            "Friendliness",
-            "Gemeinschaft",
-            "Gentleness",
-            "Gesellschaft",
-            "Gregariousness",
-            "Gryffindor",
-            "Hufflepuff",
-            "INFJ",
-            "INFP",
-            "INTJ",
-            "INTP",
-            "ISFJ",
-            "ISFP",
-            "ISTJ"
-          ]
         }
       }
     },
@@ -117,11 +64,11 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py census --queue",
-      "git_sha": "f881644+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py census",
+      "git_sha": "b55b062+dirty",
       "author": "Roger Dearnaley",
       "title": "masked-LM generator: tokenizer census"
     },
-    "produced_at": "2026-10-11T23:37:28+00:00"
+    "produced_at": "2026-10-12T00:55:22+00:00"
   }
 }

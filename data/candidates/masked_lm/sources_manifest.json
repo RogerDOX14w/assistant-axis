@@ -59,5 +59,117 @@
     "recorded_at": "2026-10-11T23:37:12+00:00",
     "tool": "setup_external.py --hf-model (download); masked_lm_generator.py record-model (record)",
     "todo": null
+  },
+  {
+    "key": "bert_wwm",
+    "model_id": "google-bert/bert-large-cased-whole-word-masking",
+    "revision": "4110364c3591c4609a3401e86f6c03a0495536fa",
+    "revision_pinned": "4110364c3591c4609a3401e86f6c03a0495536fa",
+    "revision_matches_pin": true,
+    "dir": "data/external/hf/models--google-bert--bert-large-cased-whole-word-masking/snapshots/4110364c3591c4609a3401e86f6c03a0495536fa",
+    "size_bytes": 1339355080,
+    "weights_size_bytes": 1338695480,
+    "weights_sha256": "3a903a597c11052feb1dbd6d41e2c38e2795c809e55bd0b8e384c662f59a64ee",
+    "weights_sha256_pinned": "3a903a597c11052feb1dbd6d41e2c38e2795c809e55bd0b8e384c662f59a64ee",
+    "weights_match_pin": true,
+    "files": [
+      {
+        "file": "README.md",
+        "size_bytes": 9679,
+        "sha256": "5d586413f70f98c705f4d423125abede55662c02aa7fa83ee6637586765bba90"
+      },
+      {
+        "file": "config.json",
+        "size_bytes": 625,
+        "sha256": "2817209547f98724e0584c779f7aa5e651eb67637fe8354e33892dbb7ba02e9d"
+      },
+      {
+        "file": "model.safetensors",
+        "size_bytes": 1338695480,
+        "sha256": "3a903a597c11052feb1dbd6d41e2c38e2795c809e55bd0b8e384c662f59a64ee",
+        "sha256_published": "3a903a597c11052feb1dbd6d41e2c38e2795c809e55bd0b8e384c662f59a64ee",
+        "sha256_verified": true
+      },
+      {
+        "file": "tokenizer.json",
+        "size_bytes": 435797,
+        "sha256": "5b3360be30cdf39081153cf9d30bfb0503c011462fc9f77f097127c83ef0f4d9"
+      },
+      {
+        "file": "tokenizer_config.json",
+        "size_bytes": 49,
+        "sha256": "0f6d13e6f4da6f9e24f22ada6bc3be571123d858d7c0c05a8a7cd55a9c23c2e8"
+      },
+      {
+        "file": "vocab.txt",
+        "size_bytes": 213450,
+        "sha256": "eeaa9875b23b04b4c54ef759d03db9d1ba1554838f8fb26c5d96fa551df93d02"
+      }
+    ],
+    "checksum_verified": true,
+    "licence": "Apache-2.0",
+    "licence_card": "apache-2.0",
+    "licence_url": "https://huggingface.co/google-bert/bert-large-cased-whole-word-masking",
+    "licence_verified": true,
+    "approved_by": "Roger, 2026-10-12",
+    "recorded_at": "2026-10-12T00:55:14+00:00",
+    "tool": "setup_external.py --hf-model (download); masked_lm_generator.py record-model (record)",
+    "todo": null
+  },
+  {
+    "key": "modernbert",
+    "model_id": "answerdotai/ModernBERT-large",
+    "revision": "45bb4654a4d5aaff24dd11d4781fa46d39bf8c13",
+    "revision_pinned": "45bb4654a4d5aaff24dd11d4781fa46d39bf8c13",
+    "revision_matches_pin": true,
+    "dir": "data/external/hf/models--answerdotai--ModernBERT-large/snapshots/45bb4654a4d5aaff24dd11d4781fa46d39bf8c13",
+    "size_bytes": 1585708932,
+    "weights_size_bytes": 1583544840,
+    "weights_sha256": "44510fec5d3a81a1877f225637b869495f18e55f6f23a09abb9be0acc030295f",
+    "weights_sha256_pinned": "44510fec5d3a81a1877f225637b869495f18e55f6f23a09abb9be0acc030295f",
+    "weights_match_pin": true,
+    "files": [
+      {
+        "file": "README.md",
+        "size_bytes": 8427,
+        "sha256": "40539466fa1117be4693b8f1fdfdac81fac3c5db472ff57bc05d013d48eafa82"
+      },
+      {
+        "file": "config.json",
+        "size_bytes": 1194,
+        "sha256": "55dca68059e98f0debf8eb63ab355c451c65b1f5d90fdca4754113fdaadd2cca"
+      },
+      {
+        "file": "model.safetensors",
+        "size_bytes": 1583544840,
+        "sha256": "44510fec5d3a81a1877f225637b869495f18e55f6f23a09abb9be0acc030295f",
+        "sha256_published": "44510fec5d3a81a1877f225637b869495f18e55f6f23a09abb9be0acc030295f",
+        "sha256_verified": true
+      },
+      {
+        "file": "special_tokens_map.json",
+        "size_bytes": 694,
+        "sha256": "ea97ecdbcc73713039d8d64dbb05e3689495c96657fbd9a18f5bed381be81049"
+      },
+      {
+        "file": "tokenizer.json",
+        "size_bytes": 2132967,
+        "sha256": "9fd55248d51d33976b324fc11592e28071da7d41e0e9401dfb7082e30574b7b1"
+      },
+      {
+        "file": "tokenizer_config.json",
+        "size_bytes": 20810,
+        "sha256": "3cd2017ff46d0a527e5d39cae39272eccfa1f19bb9f89b05d166aab2e38354e2"
+      }
+    ],
+    "checksum_verified": true,
+    "licence": "Apache-2.0",
+    "licence_card": "apache-2.0",
+    "licence_url": "https://huggingface.co/answerdotai/ModernBERT-large",
+    "licence_verified": true,
+    "approved_by": "Roger, 2026-10-12",
+    "recorded_at": "2026-10-12T00:55:14+00:00",
+    "tool": "setup_external.py --hf-model (download); masked_lm_generator.py record-model (record)",
+    "todo": null
   }
 ]

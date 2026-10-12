@@ -57,11 +57,13 @@ MODELS: dict[str, ModelSpec] = {m.key: m for m in (
               short="bert-large-cased-whole-word-masking", revision="4110364c3591c4609a3401e86f6c03a0495536fa",
               approx_gb=1.3, weights_bytes=1_338_695_480,
               weights_sha256="3a903a597c11052feb1dbd6d41e2c38e2795c809e55bd0b8e384c662f59a64ee", licence="Apache-2.0",
-              licence_url="https://huggingface.co/google-bert/bert-large-cased-whole-word-masking", scheme="wordpiece"),
+              licence_url="https://huggingface.co/google-bert/bert-large-cased-whole-word-masking", scheme="wordpiece",
+              approved_by="Roger, 2026-10-12 (approved with the fill-mask plan; ~1.3 GB, into data/external/hf)"),
     ModelSpec(key="modernbert", hf_id="answerdotai/ModernBERT-large", short="ModernBERT-large",
               revision="45bb4654a4d5aaff24dd11d4781fa46d39bf8c13", approx_gb=1.6, weights_bytes=1_583_544_840,
               weights_sha256="44510fec5d3a81a1877f225637b869495f18e55f6f23a09abb9be0acc030295f",
-              licence="Apache-2.0", licence_url="https://huggingface.co/answerdotai/ModernBERT-large", scheme="bpe"),
+              licence="Apache-2.0", licence_url="https://huggingface.co/answerdotai/ModernBERT-large", scheme="bpe",
+              approved_by="Roger, 2026-10-12 (approved with the fill-mask plan; ~1.6 GB, into data/external/hf)"),
 )}
 PRIMARY_MODEL = "roberta"
 

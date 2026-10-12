@@ -46,21 +46,22 @@ def test_a_space_piece_before_the_mask_is_dropped():
 
 
 def test_only_approved_models_may_be_fetched():
-    assert set(M.HF_MODEL_ALLOW_PATTERNS) == {"FacebookAI/roberta-large"}
-    assert M.MODELS["roberta"].approved_by and not M.MODELS["bert_wwm"].approved_by
-    assert not M.MODELS["modernbert"].approved_by
+    """Roger approved all three on 2026-10-11 (roberta-large) and 2026-10-12 (the other two, approved with the
+    fill-mask plan): every model with a recorded approval is fetchable, and none without one."""
+    assert set(M.HF_MODEL_ALLOW_PATTERNS) == {"FacebookAI/roberta-large", "google-bert/bert-large-cased-whole-word-masking",
+                                              "answerdotai/ModernBERT-large"}
+    assert all(M.MODELS[k].approved_by for k in ("roberta", "bert_wwm", "modernbert"))
     pats = M.HF_MODEL_ALLOW_PATTERNS["FacebookAI/roberta-large"]
     assert "model.safetensors" in pats and not any(p.endswith((".bin", ".h5", ".msgpack", ".onnx")) for p in pats)
     from data_analysis.gap_generation.setup_external import allow_patterns
     allowed = allow_patterns()
-    assert "FacebookAI/roberta-large" in allowed
-    assert not {M.MODELS["bert_wwm"].hf_id, M.MODELS["modernbert"].hf_id} & set(allowed)
+    assert set(M.HF_MODEL_ALLOW_PATTERNS) <= set(allowed)
 
 
 def test_missing_model_message_names_the_setup_command():
     msg = M.model_missing("bert_wwm")
     assert "setup_external.py --hf-model google-bert/bert-large-cased-whole-word-masking" in msg
-    assert "NOT approved" in msg and "never downloads" in msg
+    assert "approved: Roger" in msg and "never downloads" in msg
     assert "approved: Roger" in M.model_missing("roberta")
 
 

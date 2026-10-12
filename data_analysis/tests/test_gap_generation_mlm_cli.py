@@ -114,7 +114,7 @@ def test_models_that_are_not_downloaded_are_refused(env, capsys):
     assert run(common, "--models", "bert_wwm", *GEN[0:3]) == 2
     err = capsys.readouterr().err
     assert "setup_external.py --hf-model google-bert/bert-large-cased-whole-word-masking" in err
-    assert "NOT approved" in err
+    assert "approved: Roger" in err
     assert run(common, "record-model") == 2                          # no --approved-by
     assert "--approved-by" in capsys.readouterr().err
     assert not (tmp / "agg").exists()
