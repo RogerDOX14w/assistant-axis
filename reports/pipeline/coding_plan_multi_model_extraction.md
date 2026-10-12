@@ -1,8 +1,8 @@
 # Coding plan: the extraction pipeline for other model families
 
 Written 2026-10-12 (Fable) in the [PLAN_FORMAT.md](../trait_gap_generation/PLAN_FORMAT.md) shape,
-as far as it fits a pipeline change, from the pipeline review of 2026-10-12 (the running tally,
-a session file: [review_escalations.md](/tmp/claude-501/review_escalations.md), sections P1-P5)
+as far as it fits a pipeline change, from the pipeline review of 2026-10-12 (the record:
+[escalations.md](../code_review_2026-10-12/escalations.md), sections P1-P5)
 and Roger's decision of the same day: "That's all qwen-specific code.  We'll likely be starting
 to do other models soon ... Likely model families are Llama, OLMo, and OSS, plus anything Lu et
 al. used.  That basically covers thinking and no-thinking models, with various header sizes."
@@ -27,7 +27,7 @@ this file.  Nothing here has been run; no code is changed by this plan.
   over the response's content tokens; **slots 1..N are the single positions of the N header
   tokens**, in order.  The **8slot** tree
   ([runpod_workspace/qwen/qwen-3-32b Roger 8slot](../../runpod_workspace/qwen/qwen-3-32b%20Roger%208slot/))
-  is the current Qwen3-32B dataset, 1 + 7 slots; its predecessor had 1 + 3 (the "4-slot" data).
+  is the current Qwen3-32B dataset, 1 + 7 slots; its predecessor had 1 + 3 (the "4-slot" data, lacking the thinking block).
 - **Layer index**: index j of the layer axis is the output of decoder layer j (a forward hook on
   `model.layers[j]`, Hugging Face `hidden_states[j+1]`); unchanged by this plan.
 - **Family**: what the chat template, the reasoning switch and the special tokens have in common
@@ -62,20 +62,35 @@ positions), to the layer convention, or to any recorded tree.  No thinking-on ex
 step 1 never generates with thinking on; `--thinking` goes).  No multi-turn conversations (the
 single-turn contract is asserted, not relaxed).  No steering on other models beyond two guards
 (§ 5.6).  No capping configs, no `MODEL_CONFIGS` target layers for new models beyond a stub row.
-Not the October extraction itself, and none of P1 D1/D4-D8, P3 or P4 (they are decided
-elsewhere; § 15 Q4 asks about folding P1 D2/D3's record fields into the side-car).
+Not the October extraction itself, and none of the other step-1 findings — per-item failures
+keeping exit 0 ([P1 D1](../code_review_2026-10-12/escalations.md#p1-d1-per-item-failures-keep-exit-0)),
+the thinking strip and the leaked-thinking responses
+([P1 D4](../code_review_2026-10-12/escalations.md#p1-d4-the-thinking-strip-handles-only-a-leftover-think-tag)),
+the package's eager imports ([P1 D5](../code_review_2026-10-12/escalations.md#p1-d5-eager-imports-in-the-package-init)),
+a missing goal-list name being only a WARNING
+([P1 D7](../code_review_2026-10-12/escalations.md#p1-d7-a-missing-goal-list-name-is-only-a-warning)),
+a second BOS on Gemma or Llama from text prompts
+([P1 D8](../code_review_2026-10-12/escalations.md#p1-d8-a-second-bos-on-gemma-or-llama-from-text-prompts);
+the tally has no P1 D6) — nor the step-3 review
+([P3](../code_review_2026-10-12/escalations.md#p3-step-3-judging), judging) or the step-4/5 review
+([P4](../code_review_2026-10-12/escalations.md#p4-steps-4-and-5-the-scanner-the-driver-file-io),
+vectors, axis, scanner, driver) (they are decided elsewhere; § 15 Q4 asks about folding the
+record fields of [P1 D2](../code_review_2026-10-12/escalations.md#p1-d2-resume-skips-any-entity-whose-file-exists),
+resume skipping any entity whose file exists, and
+[P1 D3](../code_review_2026-10-12/escalations.md#p1-d3-responses-carry-no-finish-reason-thinking-flag-seed-or-question-id),
+the missing finish reason, thinking flag, seed and question id, into the side-car).
 
 ## 2. Decisions already made
 
 | decision | reason | source |
 |---|---|---|
-| Generalise **by mechanism**: slots come from the template, not from a list per family. | a hard-coded list is wrong for the next template (Qwen3-Instruct-2507 has no think block and NaNs every header slot today) | Roger 2026-10-12; P2 D3 |
+| Generalise **by mechanism**: slots come from the template, not from a list per family. | a hard-coded list is wrong for the next template (Qwen3-Instruct-2507 has no think block and NaNs every header slot today) | Roger 2026-10-12; [P2 D3](../code_review_2026-10-12/escalations.md#p2-d3-header-token-list-hard-coded-and-the-family-detected-by-substring) (the header list hard-coded, the family detected by substring) |
 | Qwen3-32B stays **byte-identical**: the same seven header tokens, the same body mean, the same tensors from the fake-model harness. | the 8slot tree and every analysis on it | Roger 2026-10-12 |
 | A **per-family table keyed on `model.config.model_type`**, read by step 1 and step 2, for what is genuinely per family; **a new family costs a table row**. | the two steps must agree on what a conversation looks like | Roger 2026-10-12 |
-| **Remove `--thinking`**; **validate `--layers`** (sorted, unique, in range); **assert exactly one assistant span** per conversation instead of picking by parity. | P2 D1, D2, D4 | review P2 |
+| **Remove `--thinking`**; **validate `--layers`** (sorted, unique, in range); **assert exactly one assistant span** per conversation instead of picking by parity. | [P2 D1](../code_review_2026-10-12/escalations.md#p2-d1-layers-flag-accepts-negative-duplicate-or-unsorted-values) (`--layers` unvalidated), [P2 D2](../code_review_2026-10-12/escalations.md#p2-d2-thinking-flag-silently-adds-the-header-tokens-to-the-body-mean) (`--thinking` adds the header tokens to the body mean), [P2 D4](../code_review_2026-10-12/escalations.md#p2-d4-assistant-turns-picked-by-parity-not-by-span-role) (assistant turns picked by parity) | [review P2](../code_review_2026-10-12/escalations.md#p2-step-2-activations-and-internals) |
 | Downstream consumers: **no change to the analyses' Qwen canonical choices** (slot 6 = `</think>` defaults, slot 7 for the PC round trip); a non-Qwen tree is self-describing and the hard-coded sites **fail loudly**. | Roger 2026-10-12 | this brief |
-| Layer index j = output of decoder layer j, unchanged; nothing retroactive. | P2/P5 verified it; the 8slot record stands | review P2, P5 |
-| An **unknown `model_type` refuses to run** in both steps (no fallback to a body-mean-only layout, no silent template kwargs). | P2 made the unknown-family case warn; Roger wants failure before GPU time | this plan, refining P2's fix (§ 15 Q8) |
+| Layer index j = output of decoder layer j, unchanged; nothing retroactive. | P2/P5 verified it; the 8slot record stands | [review P2](../code_review_2026-10-12/escalations.md#p2-step-2-activations-and-internals), [P5](../code_review_2026-10-12/escalations.md#p5-end-to-end-contracts) |
+| An **unknown `model_type` refuses to run** in both steps (no fallback to a body-mean-only layout, no silent template kwargs). | P2 made the unknown-family case warn; Roger wants failure before GPU time | this plan, refining P2's fix for the unknown family, which now warns ([P2 D3](../code_review_2026-10-12/escalations.md#p2-d3-header-token-list-hard-coded-and-the-family-detected-by-substring); § 15 Q8) |
 
 **Refinements this plan makes to the agreed shape** (each with its reason; Roger can reverse any):
 
@@ -87,14 +102,16 @@ elsewhere; § 15 Q4 asks about folding P1 D2/D3's record fields into the side-ca
    final turn's header is `<|start|>assistant<|channel|>final<|message|>`), and the difference
    method alone would give slots that never precede the content.
 2. **Step 1 hands vLLM token ids, not rendered text, for every family** (§ 5.3): the prompt ids
-   are then, by construction, the prefix step 2 renders, and the double-BOS hazard (P1 D8) does
-   not arise.  Qwen3's ids are unchanged (its tokenizer adds no special tokens to text).
+   are then, by construction, the prefix step 2 renders, and the double-BOS hazard
+   ([P1 D8](../code_review_2026-10-12/escalations.md#p1-d8-a-second-bos-on-gemma-or-llama-from-text-prompts):
+   a second BOS on Gemma or Llama from text prompts) does not arise.  Qwen3's ids are unchanged (its tokenizer adds no special tokens to text).
 3. **The table lives in a new module**, [`assistant_axis/model_families.py`](../../assistant_axis/model_families.py)
    (not there yet), not in [`models.py`](../../assistant_axis/models.py) (§ 5.2, reasons there).
 4. **A step-1 side-car**, `generation_config.json` in the responses directory, records the
    family, the template kwargs and the derived header; step 2 compares and refuses on a
    mismatch (§ 5.5).  This is the mechanism that keeps the two steps from disagreeing, and it is
-   the file P1 D2 asked for.
+   the file [P1 D2](../code_review_2026-10-12/escalations.md#p1-d2-resume-skips-any-entity-whose-file-exists)
+   (resume skips any entity whose file exists) asked for.
 
 ## 3. Rule files to Read first
 
@@ -145,7 +162,7 @@ loaded on the Mac; the real-tokenizer tests (§ 9) run only when Roger has allow
 
 New module [`assistant_axis/internals/chat_layout.py`](../../assistant_axis/internals/chat_layout.py)
 (not there yet).  `derive_chat_layout(tokenizer, family) -> ChatLayout` renders three things with
-the family's template kwargs (§ 5.2) and `return_dict=False` (the transformers-5 trap P2 fixed):
+the family's template kwargs (§ 5.2) and `return_dict=False` (the transformers-5 `BatchEncoding` trap [review P2](../code_review_2026-10-12/escalations.md#p2-step-2-activations-and-internals) fixed):
 
 1. `base`: the probe conversation without an assistant turn, `add_generation_prompt=False`.
    The probe is `[system, user]` when the family supports system prompts, `[user]` otherwise,
@@ -256,11 +273,19 @@ derived header and Roger has read it.**
 | family (`model_type`) | reasoning switch / `template_kwargs` | header tokens (derived; listed here as the expectation) | system prompt | BOS in template | end token | cleanup | notes |
 |---|---|---|---|---|---|---|---|
 | **`qwen3`** (Qwen/Qwen3-32B) | `template_switch`: `{"enable_thinking": False}` *verified* (what step 1 and step 2 pass today) | `<|im_start|> assistant \n <think> \n\n </think> \n\n`, ids `151644 77091 198 151667 271 151668 271` *verified* (8slot metadata) | native *verified* (the corpus was generated with system prompts) | none *verified* (no BOS in any recorded prompt) | `<|im_end|>` *verified* | `strip_leaked_think` *verified* (today's code) | `span_builder = "chatml"`; `expected_header_tokens` set to the seven. Qwen3-Instruct-2507 (no think block) would derive 3 tokens and **fail** this row's expectation on purpose: it is a different row. |
-| **`llama`** (meta-llama/Llama-3.3-70B-Instruct) | `none` *verified*; **pin `date_string`** *to check*: the Llama 3.1+ template writes a system block "Cutting Knowledge Date: December 2023\nToday Date: <date>" using `strftime_now` unless `date_string` is given, so an unpinned step 2 renders a different prompt from step 1 on another day. Check the kwarg name in the template text. | `<|start_header_id|> assistant <|end_header_id|> \n\n` (4) *to check*; expected ids `128006 78191 128007 271` (the values hand-written in [test_spans.py](../../assistant_axis/tests/test_spans.py)) | native *to check* (the template also injects the date block even with a user system prompt) | `<|begin_of_text|>` emitted by the template *verified* (P1 D8; the double-BOS case) | `<|eot_id|>` *verified* | `none` | gated repo (HF access token, Roger's); ~140 GB; 4 x 80 GB for vLLM TP=4 and for the HF load. |
+| **`llama`** (meta-llama/Llama-3.3-70B-Instruct) | `none` *verified*; **pin `date_string`** *to check*: the Llama 3.1+ template writes a system block "Cutting Knowledge Date: December 2023\nToday Date: <date>" using `strftime_now` unless `date_string` is given, so an unpinned step 2 renders a different prompt from step 1 on another day. Check the kwarg name in the template text. | `<|start_header_id|> assistant <|end_header_id|> \n\n` (4) *to check*; expected ids `128006 78191 128007 271` (the values hand-written in [test_spans.py](../../assistant_axis/tests/test_spans.py)) | native *to check* (the template also injects the date block even with a user system prompt) | `<|begin_of_text|>` emitted by the template *verified* ([P1 D8](../code_review_2026-10-12/escalations.md#p1-d8-a-second-bos-on-gemma-or-llama-from-text-prompts); the double-BOS case) | `<|eot_id|>` *verified* | `none` | gated repo (HF access token, Roger's); ~140 GB; 4 x 80 GB for vLLM TP=4 and for the HF load. |
 | **`gemma2`** (google/gemma-2-27b-it) | `none` *verified* | `<start_of_turn> model \n` (3) *to check*; hand-written ids `106 2516 108` in test_spans.py | **`fold_into_user`** *verified*: the template raises on a system role, [test_generation.py](../../assistant_axis/tests/test_generation.py) asserts it, and `format_conversation` already folds the instruction into the user turn | `<bos>` emitted *verified* | `<end_of_turn>` *verified* | `none` | gated; ~54 GB. *to check*: HF attention implementation for the logit soft-capping at length 2048 (`hf_load_kwargs = {"attn_implementation": "eager"}` is what transformers recommends; memory at batch 8). |
 | **`olmo2`** (allenai/OLMo-2-0325-32B-Instruct or the 7B/13B) | `none` *verified* | `<|assistant|> \n` (2) *to check* (from the Tülu 3 template as I recall it: `<|user|>\n{content}\n<|assistant|>\n{content}<|endoftext|>`); with N = 2 the header match must be exact (§ 5.4) | native (`<|system|>\n...`) *to check* | *to check* whether the template starts with `{{ bos_token }}` | `<|endoftext|>` *to check* | `none` | Which OLMo Roger means decides the row: § 15 Q6. |
 | **`olmo3`** (allenai/Olmo-3-7B-Instruct / -Think) | *to check*: the Think variants reason in `<think>` blocks with no documented switch; the Instruct variant does not reason. If Think: treat as `always_on` with `reasoning_stored` (like gpt-oss) or use Instruct. | *to check* entirely; derived at the smoke run | *to check* | *to check* | *to check* | *to check* | Recommend the Instruct variant for an extraction (§ 15 Q6). |
 | **`gpt_oss`** (openai/gpt-oss-20b, -120b) | **`always_on`** *verified as far as the harmony format is documented*: no off switch; `{"reasoning_effort": "low"}` puts "Reasoning: low" in the system block *to check*; the system block also carries "Current date: <date>" *to check* how to pin it (a kwarg or a `strftime_now` override) | derived from the stored rendering **with** the `thinking` field (§ 5.1 sample): `<|end|> <|start|> assistant <|channel|> final <|message|>` (6) *to check*; without it `<|start|> assistant <|channel|> final <|message|>` (5) | native, rendered as a `developer` block *to check* | *to check* (none, I believe) | `<|return|>` (last turn) / `<|end|>` *to check* | `harmony_final_channel`: parse the analysis and final channels *to check how vLLM 0.18.1 returns them* (§ 15 Q3: `llm.chat` with the reasoning parser vs `generate` with `skip_special_tokens=False` and the `openai_harmony` library) | MXFP4 weights: the HF load of step 2 dequantises to bf16 (20b: ~42 GB, fine; 120b: ~240 GB, 4 x 80 GB at best). Smoke run on 20b first. |
+
+**Decided 2026-10-12 (§ 15, Q3 and Q6).**  The models are not yet named, so the work of this plan
+is the mechanism plus whatever two or more candidate families need; the single-family cells
+above — Llama's `date_string` pin, gpt-oss's channels and `harmony_final_channel`, OLMo 2's
+exact-match header tolerance — are **TODO**, built only when that family is confirmed.  For
+gpt-oss, Roger's intended layout is slot 0 from the response text tokens, slot 1 from the
+thinking text tokens, and a slot for every fixed token before or between them; the row stays
+"to check".
 
 Not in the table: `gemma3` (system prompt folded into the first user turn by the template itself;
 `get_layers` already knows `model.language_model.layers`); it is one more row when wanted.
@@ -269,8 +294,9 @@ Not in the table: `gemma3` (system prompt folded into the first user turn by the
 
 - `VLLMGenerator.load()`: `self.family = family_for_model(model_name)`;
   `self.layout = derive_chat_layout(self.llm.get_tokenizer(), self.family)`; log the header
-  tokens; `trust_remote_code=self.family.trust_remote_code` (today `True` for every model, a P1
-  nit; all six families are native in transformers).
+  tokens; `trust_remote_code=self.family.trust_remote_code` (today `True` for every model, a nit of
+  [review P1](../code_review_2026-10-12/escalations.md#p1-step-1-generation); all six families
+  are native in transformers).
 - `generate_batch()`: for each conversation,
   `ids = tokenizer.apply_chat_template(conv, tokenize=True, add_generation_prompt=True, return_dict=False, **family.template_kwargs)`
   and `llm.generate([TokensPrompt(prompt_token_ids=ids) ...], sampling_params)`
@@ -280,8 +306,9 @@ Not in the table: `gemma3` (system prompt folded into the first user turn by the
   on the fake); for Llama 3 and Gemma 2 the one BOS the template emits is the only BOS.
 - `response_cleanup` by family: `strip_leaked_think` is today's Qwen branch, keyed on the row
   instead of the substring; `harmony_final_channel` is written at the gpt-oss spike (§ 10 task 9).
-  Each response record gains `cleanup_applied: bool` (additive; P1 D3's `thinking_stripped`
-  flag under a name that covers every family).
+  Each response record gains `cleanup_applied: bool` (additive; the `thinking_stripped` flag of
+  [P1 D3](../code_review_2026-10-12/escalations.md#p1-d3-responses-carry-no-finish-reason-thinking-flag-seed-or-question-id),
+  the missing response-record fields, under a name that covers every family).
 - `format_conversation`: unchanged behaviour; after the behavioural probe, compare with
   `family.system_prompt` and **warn** when they disagree (a template that silently dropped the
   system message on a family marked `native` would generate without the persona instruction;
@@ -339,7 +366,8 @@ Step 1 writes `<responses_dir>/generation_config.json` (`.json`, so no `*.jsonl`
 and 3 or the scanner sees it) through `atomic_write_text`; one file per run, merged into an
 existing one as a list of runs (a rerun that fills gaps appends).  Step 2 reads it (with retry)
 before loading the model: a different `model_type`, `template_kwargs` or `header_ids` is an
-error naming both; a missing file is a warning once (the 8slot tree has none).  Step 2 also
+error naming both; a missing file (the 8slot tree has none) refuses unless
+`--ignore_generation_config` is given (Roger, § 15 Q10).  Step 2 also
 re-renders the side-car's `sample_conversation` and requires `sample_prompt_ids` to be the prefix
 of what it renders: the end-to-end check that the two steps see the same tokens, run before any
 activation is computed.  Schema in § 7.
@@ -379,7 +407,7 @@ slot names are used, so an explicit `--slot` on a non-Qwen tree works and logs t
 - *Keep the Qwen text path and use ids only where BOS is a problem*: two code paths to keep
   equal; the ids path gives Qwen the same ids anyway.
 - *Table in [`models.py`](../../assistant_axis/models.py)*: § 5.2.
-- *Unknown family: warn and run body-mean only* (P2's current fix): refused here (§ 15 Q8).
+- *Unknown family: warn and run body-mean only* (P2's current fix for the unknown family, [P2 D3](../code_review_2026-10-12/escalations.md#p2-d3-header-token-list-hard-coded-and-the-family-detected-by-substring)): refused here (§ 15 Q8).
 
 ## 6. File layout
 
@@ -438,7 +466,9 @@ Response records gain `cleanup_applied: bool` (additive).
   `model_type` not in the table (message lists the known keys and the file to add a row to).
 - [`2_activations.py`](../../pipeline/2_activations.py): `--layers` validated (§ 5.4); `--thinking` removed; `--verify_spans N`
   (default 0); `--ignore_generation_config` to run on a tree whose side-car does not match (an
-  explicit override that logs what differed; for a deliberate re-extraction under other kwargs).
+  explicit override that logs what differed; for a deliberate re-extraction under other kwargs)
+  or that has no side-car at all (the 8slot tree): **required** there, not a warning (Roger,
+  § 15 Q10: "we're unlikely to do this").
   `--no-headers` kept.
 - [`5_axis.py`](../../pipeline/5_axis.py): no new flags.
 - Every flag change is mirrored in [`run_pipeline.sh`](../../pipeline/run_pipeline.sh)'s usage text
@@ -502,7 +532,8 @@ plus the full suite before the report.
    disagree.
 8. [`pipeline/tests/test_2_activations_sidecar.py`](../../pipeline/tests/test_2_activations_sidecar.py)
    (new): a matching side-car passes; a different `template_kwargs` or `header_ids` fails before
-   the model is used; `sample_prompt_ids` not a prefix fails; no side-car warns once.
+   the model is used; `sample_prompt_ids` not a prefix fails; no side-car refuses without
+   `--ignore_generation_config` and runs with it (§ 15 Q10).
 9. [`pipeline/tests/test_5_axis.py`](../../pipeline/tests/test_5_axis.py) (edit): mixed
    `model_type` refused.
 10. [`assistant_axis/tests/test_axis.py`](../../assistant_axis/tests/test_axis.py) (edit):
@@ -531,12 +562,15 @@ plus the full suite before the report.
    out, metadata, `--verify_spans`; tests 5 and 6.  **Golden test green: the gate.**
 7. [`generation.py`](../../assistant_axis/generation.py) and [`1_generate.py`](../../pipeline/1_generate.py): family, `TokensPrompt`, cleanup by row, the side-car;
    test 7.
-8. Side-car check in step 2; test 8.  [`5_axis.py`](../../pipeline/5_axis.py); test 9.
-9. The gpt-oss spike (half a day, no model): read the real harmony template text and vLLM
-   0.18.1's gpt-oss docs; write `harmony_final_channel` against a fake; decide Q3's mechanics;
-   report before any gpt-oss run.
+8. Side-car check in step 2 (a tree with no side-car refuses unless `--ignore_generation_config`:
+   § 15 Q10); test 8.  [`5_axis.py`](../../pipeline/5_axis.py); test 9.
+9. **TODO, not in this plan** (§ 15 Q3 and Q6: gpt-oss is not definite; done only if it is
+   confirmed): the gpt-oss spike (half a day, no model): read the real harmony template text and
+   vLLM 0.18.1's gpt-oss docs; write `harmony_final_channel` against a fake; decide Q3's
+   mechanics; report before any gpt-oss run.
 10. [`axis.py`](../../assistant_axis/axis.py) guard; the consumer calls of § 5.6; the two steering guards; test 10.
-11. [`models.py`](../../assistant_axis/models.py) stub rows for the models of Q6;
+11. [`models.py`](../../assistant_axis/models.py) stub rows for the models of Q6 (TODO until the
+    models are named: § 15 Q6);
     [`pipeline/README.md`](../../pipeline/README.md); [`AGENT_NOTES.md`](../../AGENT_NOTES.md) (then
     [`tools/sync_agent_notes.py`](../../tools/sync_agent_notes.py)); [`run_pipeline.sh`](../../pipeline/run_pipeline.sh) usage text.
 12. Full test suite; the acceptance report (§ 13).
@@ -584,10 +618,11 @@ parameters and wait" still applies to each.
 ## 12. Cost and time
 
 No paid API calls except the optional 150-call step 3 per smoke run (cents).  Coding: about
-**4 Opus agent-days** (tasks 0-8 two days; 9 half a day; 10-12 a day; the real-tokenizer runs and
-the smoke runs half a day of attendance), plus a Fable review of the diff against the golden
-gate and this plan.  GPU: § 11, about 5-7 GPU-hours for all four new families' smoke runs
-together, spread over separate launches.
+**3.5 Opus agent-days** (tasks 0-8 two days; 10-12 a day; the real-tokenizer runs and the smoke
+runs half a day of attendance; task 9, the gpt-oss spike, half a day, is a TODO: § 15 Q3), plus
+a Fable review of the diff against the golden gate and this plan.  GPU: § 11, about 5-7
+GPU-hours if all four candidate families get a smoke run (which families is open: § 15 Q6),
+spread over separate launches.
 
 ## 13. Report at the end
 
@@ -601,7 +636,7 @@ GPU-hours used; the open rows.
 
 | risk | caught by |
 |---|---|
-| The derivation differs between transformers 4.57.6 (pod) and 5.1.0 (Mac): `return_dict`, `BatchEncoding`, template kwarg handling | `return_dict=False` everywhere (P2's fix); the fake tests run under both locks; the real-tokenizer test runs on the pod before the smoke run |
+| The derivation differs between transformers 4.57.6 (pod) and 5.1.0 (Mac): `return_dict`, `BatchEncoding`, template kwarg handling | `return_dict=False` everywhere (the fix of [review P2](../code_review_2026-10-12/escalations.md#p2-step-2-activations-and-internals)); the fake tests run under both locks; the real-tokenizer test runs on the pod before the smoke run |
 | BPE merges across the header/content boundary (a response starting with whitespace merging into the header's trailing `\n\n`) so the content is not found in `full` | the probe sentinels start with a letter (derivation); the Qwen pattern path strips boundary whitespace (unchanged); `--verify_spans` on the smoke run; the generic path's fallback keeps the whole delta and logs |
 | Llama's date-stamped system block makes step 2 render a different prompt from step 1 | `date_string` pinned in the row and recorded in the side-car; the `sample_prompt_ids` prefix check fails loudly if not |
 | gpt-oss: the model-generated channel tokens and the analysis text; vLLM's decoded text loses the markers | the spike (task 9) before any run; `reasoning_stored` in the row; the layout check requires the generation prompt to be a prefix of the stored turn |
@@ -626,10 +661,15 @@ GPU-hours used; the open rows.
    response record (`thinking`) and let step 2 re-render it, so the activations come from the
    context the model actually had, header = the six tokens before the final content
    (recommended); (b) drop it: body mean over the final channel, header = the template's
-   five-token final header, activations of a context the model never saw (the P5 "text the model
-   did not see" case, systematic here).  Either way the reasoning text is recorded.  The spike
+   five-token final header, activations of a context the model never saw (the "text the model
+   did not see" case of [review P5](../code_review_2026-10-12/escalations.md#p5-end-to-end-contracts),
+   systematic here).  Either way the reasoning text is recorded.  The spike
    (task 9) brings the mechanics.
-4. **Fold P1 D2/D3 into the side-car now?**  The side-car is P1 D2's file; adding P1 D3's
+4. **Fold [P1 D2](../code_review_2026-10-12/escalations.md#p1-d2-resume-skips-any-entity-whose-file-exists)
+   (resume skips any entity whose file exists) and
+   [P1 D3](../code_review_2026-10-12/escalations.md#p1-d3-responses-carry-no-finish-reason-thinking-flag-seed-or-question-id)
+   (responses carry no finish reason, thinking flag, seed or question id) into the side-car
+   now?**  The side-car is the file P1 D2 asked for; adding P1 D3's
    per-response `finish_reason`, `question_id` and a seed is cheap while `generation.py` is open.
    Recommended: the side-car and `cleanup_applied` in this plan; `finish_reason` and
    `question_id` too if you say so (additive, no reader changes).
@@ -644,15 +684,50 @@ GPU-hours used; the open rows.
    add the slot guard in `_load_axis_for_cell` now (recommended: two small edits, one test each)
    or leave both to the steering plan.
 8. **Unknown `model_type`.**  Refuse in both steps (recommended) or keep P2's warn-and-run
-   body-mean-only behaviour behind `--no-headers`.
+   body-mean-only behaviour ([P2 D3](../code_review_2026-10-12/escalations.md#p2-d3-header-token-list-hard-coded-and-the-family-detected-by-substring))
+   behind `--no-headers`.
 9. **A Qwen3 smoke run** (about 1 GPU-hour on 4 GPUs) before the October extraction, to see the
    derived header, the side-car and the prompt-id equality on the real model.  Recommended: yes,
    as the first entities of the October run rather than a separate launch.
 10. **Step 2 on the 8slot tree** (no side-car): warn once and run (recommended) or require
-    `--ignore_generation_config`.
+    `--ignore_generation_config`.  Decided: require it (see the decisions block below).
 
 If a question is unanswered when Opus reaches the step, it proceeds under the recommendation and
 records that in [`reports/pipeline/QUESTIONS.md`](./QUESTIONS.md) (not there yet).
+
+### Decisions (Roger, 2026-10-12)
+
+All ten answered the same day.
+
+1. **Where the table lives**: no opinion — the recommendation stands (new
+   [`assistant_axis/model_families.py`](../../assistant_axis/model_families.py), not there yet).
+2. **Step 1's prompt path**: as recommended — token ids for every family.
+3. **gpt-oss reasoning**: Roger: "I'd say extract slot 0 from response text tokens, slot 1 from
+   thinking text tokens, and a slot for every fixed token before them or between them.  Leave
+   this as a TODO until we know if we're actually using gpt-oss — that's not definite."  So the
+   gpt-oss work is a **TODO** in this plan, with that slot design recorded as the intended
+   layout; the `gpt_oss` row of § 5.2 stays "to check", and nothing is built for it in this plan
+   (task 9 of § 10, the spike, and `harmony_final_channel` are deferred with it).
+4. **Fold [P1 D2](../code_review_2026-10-12/escalations.md#p1-d2-resume-skips-any-entity-whose-file-exists)
+   / [P1 D3](../code_review_2026-10-12/escalations.md#p1-d3-responses-carry-no-finish-reason-thinking-flag-seed-or-question-id)
+   into the side-car**: as recommended — the side-car and `cleanup_applied` in
+   this plan; the other record fields (`finish_reason`, `question_id`, a seed) if he says so.
+5. **Tokenizer downloads**: as recommended — tokenizer-only downloads on the pod before each
+   smoke run; no need to ask again.
+6. **Which OLMo and which gpt-oss**: not yet decided.  Roger: "Neither the list of models nor
+   their sizes are certain.  Only do lowest-common-denominator work needed by two or more of
+   them.  Anything specific to a single model family can be left as a TODO IF NEEDED."  So the
+   scope of this plan is the mechanism plus whatever two or more candidate families need;
+   single-family specifics — Llama's `date_string` pin, gpt-oss's channels and
+   `harmony_final_channel`, OLMo 2's exact-match header tolerance — are TODOs, noted under the
+   table of § 5.2 and built only when that family is confirmed; the
+   [`models.py`](../../assistant_axis/models.py) stub rows of task 11 wait for the names.
+7. **Steering in this plan**: as recommended — the two steering guards of § 5.6 in this plan.
+8. **Unknown `model_type`**: as recommended — refuses in both steps.
+9. **A Qwen3 smoke run**: yes, before October, as the first entities of the October run.
+10. **Step 2 on the 8slot tree** (no side-car): against the recommendation — it REQUIRES
+    `--ignore_generation_config`; Roger: "we're unlikely to do this".  § 8 and task 8 of § 10
+    say so.
 
 ## 16. Escalation
 
