@@ -1,0 +1,111 @@
+{
+  "batch_id": "2026-10-11-usage_alignment_sweep",
+  "waves": {
+    "w1_sense": [
+      {
+        "id": "msgbatch_017EUbn3ujT7DSUXcVEP7fiY",
+        "custom_ids": [
+          "sense-f-harms_others_1-92e10096-x",
+          "sense-f2-harms_others_1-92e10096-x",
+          "sense-f3-harms_others_1-92e10096-x",
+          "sense-f-honest_and_respectful_1-973541fa-x",
+          "sense-f2-honest_and_respectful_1-973541fa-x",
+          "sense-f3-honest_and_respectful_1-973541fa-x"
+        ],
+        "n_requests": 6,
+        "bytes": 17554,
+        "estimate_usd": 0.001075,
+        "submitted_at": "2026-10-11T21:34:14+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T21:40:51+00:00"
+      }
+    ],
+    "w2_checks": [
+      {
+        "id": "msgbatch_01Pmuy8KYXDTCNimfj3GpLoo",
+        "custom_ids": [
+          "established-f-harms_others_1-92e10096-0",
+          "established-f-honest_and_respectful_1-973541fa-0",
+          "established-f-honest_and_respectful_1-973541fa-1",
+          "vague-f-harms_others_1-92e10096-0",
+          "vague-f-honest_and_respectful_1-973541fa-0",
+          "vague-f-honest_and_respectful_1-973541fa-1",
+          "kind-f-harms_others_1-92e10096-0",
+          "kind-f-honest_and_respectful_1-973541fa-0",
+          "kind-f-honest_and_respectful_1-973541fa-1",
+          "established-f2-harms_others_1-92e10096-0",
+          "established-f2-honest_and_respectful_1-973541fa-0",
+          "established-f2-honest_and_respectful_1-973541fa-1",
+          "vague-f2-harms_others_1-92e10096-0",
+          "vague-f2-honest_and_respectful_1-973541fa-0",
+          "vague-f2-honest_and_respectful_1-973541fa-1",
+          "kind-f2-harms_others_1-92e10096-0",
+          "kind-f2-honest_and_respectful_1-973541fa-0",
+          "kind-f2-honest_and_respectful_1-973541fa-1",
+          "established-f3-harms_others_1-92e10096-0",
+          "established-f3-honest_and_respectful_1-973541fa-0",
+          "vague-f3-harms_others_1-92e10096-0",
+          "vague-f3-honest_and_respectful_1-973541fa-0",
+          "kind-f3-harms_others_1-92e10096-0",
+          "kind-f3-honest_and_respectful_1-973541fa-0"
+        ],
+        "n_requests": 24,
+        "bytes": 60705,
+        "estimate_usd": 0.001878,
+        "submitted_at": "2026-10-11T21:40:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T21:48:29+00:00"
+      }
+    ],
+    "w3_same_sense": [
+      {
+        "id": "msgbatch_01HAZthZZJ89D9iRZBE4MpLW",
+        "custom_ids": [
+          "comparison-f-harms_others_1-92e10096-0",
+          "same_sense-f-honest_and_respectful_1-973541fa-0",
+          "same_sense-f2-honest_and_respectful_1-973541fa-0",
+          "comparison-f-honest_and_respectful_1-973541fa-0",
+          "comparison-f-honest_and_respectful_1-973541fa-1"
+        ],
+        "n_requests": 5,
+        "bytes": 15244,
+        "estimate_usd": 0.005768,
+        "submitted_at": "2026-10-11T21:48:29+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T21:52:34+00:00"
+      }
+    ],
+    "w4_gloss": [
+      {
+        "id": "msgbatch_01JdtGxi1zsCUTXAonhVw8Vg",
+        "custom_ids": [
+          "gloss-f-harms_others_1-92e10096-0",
+          "gloss-f-honest_and_respectful_1-973541fa-0"
+        ],
+        "n_requests": 2,
+        "bytes": 4861,
+        "estimate_usd": 0.000113,
+        "submitted_at": "2026-10-11T21:52:34+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T21:57:40+00:00"
+      }
+    ],
+    "w6_last_step": [
+      {
+        "id": "msgbatch_011R9CPZsduez9dvkkX1eB5H",
+        "custom_ids": [
+          "alignment-f-harms_others_1-92e10096-x",
+          "descriptors-f-harms_others_1-92e10096-x",
+          "alignment-f-honest_and_respectful_1-973541fa-x",
+          "descriptors-f-honest_and_respectful_1-973541fa-x"
+        ],
+        "n_requests": 4,
+        "bytes": 8872,
+        "estimate_usd": 0.000335,
+        "submitted_at": "2026-10-11T21:57:40+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:04:17+00:00"
+      }
+    ]
+  }
+}

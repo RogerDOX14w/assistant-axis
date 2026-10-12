@@ -1,0 +1,833 @@
+{
+  "result": {
+    "n": 245,
+    "n_done": 245,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 71,
+      "tagged": 51,
+      "trait": 123
+    },
+    "verdict_fractions": {
+      "reject": 0.2898,
+      "tagged": 0.2082,
+      "trait": 0.502
+    },
+    "tag_counts": {
+      "action": 2,
+      "evaluative_only": 8,
+      "membership": 10,
+      "no_persona_reading": 29,
+      "physical": 3,
+      "role_person": 6,
+      "state": 42,
+      "stretched": 30,
+      "too_rare": 2
+    },
+    "tag_fractions": {
+      "action": 0.0082,
+      "evaluative_only": 0.0327,
+      "membership": 0.0408,
+      "no_persona_reading": 0.1184,
+      "physical": 0.0122,
+      "role_person": 0.0245,
+      "state": 0.1714,
+      "stretched": 0.1224,
+      "too_rare": 0.0082
+    },
+    "region_counts": {
+      "alignment_ai_agent": 3,
+      "cognitive_epistemic": 20,
+      "communication_style": 22,
+      "emotional_temperament": 17,
+      "identity_demographic": 18,
+      "moral_stance": 15,
+      "social_interpersonal": 28
+    },
+    "polysemy_n": 165,
+    "polysemy_rate": 0.6735,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 14,
+    "second_opinion_n": 26,
+    "disagreements": 7,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 245,
+    "probe_n": 31,
+    "probe_unknown": 2,
+    "probe_failed": 0,
+    "second_opinion_requested": 26,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 123,
+      "comparison": 199,
+      "descriptors": 123,
+      "established": 671,
+      "gloss": 123,
+      "gloss_retry": 1,
+      "kind": 671,
+      "probe": 31,
+      "same_sense": 9,
+      "second_established": 32,
+      "second_kind": 32,
+      "second_same_sense": 4,
+      "second_sense": 26,
+      "second_vague": 32,
+      "sense": 729,
+      "vague": 671,
+      "vague_retry": 5
+    },
+    "cost_usd": 0.8188,
+    "cost_per_candidate_usd": 0.003342,
+    "yield_per_usd": 17.1,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 725283,
+          "completion_tokens": 956077,
+          "cost_usd": 0.2753,
+          "n_calls": 3140
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 332702,
+          "completion_tokens": 42172,
+          "cost_usd": 0.5436,
+          "n_calls": 342
+        }
+      },
+      "total_cost_usd": 0.8188,
+      "total_prompt_tokens": 1057985,
+      "total_completion_tokens": 998249,
+      "n_calls": 3482
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 35,
+      "membership_kind": {
+        "age_group": 1,
+        "circumstance": 1,
+        "class": 1,
+        "family": 2,
+        "geography": 1,
+        "nationality_ethnicity_language": 2,
+        "relationship": 1,
+        "religion": 1
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 0,
+        "nontrait_person_sense": 4,
+        "obvious_sense_not_trait": 1,
+        "overshadowed": 84,
+        "reading_related": 57,
+        "first_thought_in_the_way": 78,
+        "leaves_something_out": 46,
+        "fits_many_in_different_ways": 38,
+        "most_likely_reading_stretched": 1
+      },
+      "comparison_relations": {
+        "None": 243
+      },
+      "holding": {
+        "nationalities": 2,
+        "physical": 3,
+        "roles": 6,
+        "states": 42
+      },
+      "freq_rescue": {},
+      "alignment_scores": {
+        "0": 55,
+        "1": 33,
+        "2": 18,
+        "3": 17,
+        "none": 0
+      }
+    },
+    "batch_id": "2026-10-11-full_roget",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": "claude-sonnet-5-5",
+    "label_form": "judge-display-v1",
+    "split": {
+      "transport": "batches",
+      "pilot_figures": {
+        "n": 245,
+        "n_reached_step1": 243,
+        "outcomes": {
+          "physical": 3,
+          "roles": 6,
+          "states": 42,
+          "trait": 123,
+          "turned_away": 69
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "grudging praise",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is an open two-word phrase (adjective plus noun), not a single word, though its meaning is plain from its parts."
+          },
+          {
+            "label": "maturely considered",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a two-word phrase (adverb plus past participle), not a single word or a compound word, so it does not count as a real English word here."
+          }
+        ],
+        "glosses": 123,
+        "glosses_form_ok": 121
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 123,
+          "ok_first_pass": 123,
+          "ok": 123
+        },
+        "comparison:first:claude-sonnet-5-5": {
+          "n": 199,
+          "ok_first_pass": 199,
+          "ok": 199
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 123,
+          "ok_first_pass": 123,
+          "ok": 123
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 671,
+          "ok_first_pass": 671,
+          "ok": 671
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 32,
+          "ok_first_pass": 32,
+          "ok": 32
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 107,
+          "ok_first_pass": 107,
+          "ok": 107
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 16,
+          "ok_first_pass": 15,
+          "ok": 16
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 671,
+          "ok_first_pass": 671,
+          "ok": 671
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 32,
+          "ok_first_pass": 32,
+          "ok": 32
+        },
+        "probe:first:claude-haiku-5-5": {
+          "n": 31,
+          "ok_first_pass": 31,
+          "ok": 31
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 9,
+          "ok_first_pass": 9,
+          "ok": 9
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 4,
+          "ok_first_pass": 4,
+          "ok": 4
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 729,
+          "ok_first_pass": 729,
+          "ok": 729
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 26,
+          "ok_first_pass": 26,
+          "ok": 26
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 671,
+          "ok_first_pass": 666,
+          "ok": 671
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 32,
+          "ok_first_pass": 32,
+          "ok": 32
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5:batch": {
+          "n_calls": 123,
+          "prompt_tokens": 18884,
+          "completion_tokens": 23107,
+          "cost_usd": 0.006721
+        },
+        "comparison@claude-sonnet-5-5:batch": {
+          "n_calls": 199,
+          "prompt_tokens": 230356,
+          "completion_tokens": 25574,
+          "cost_usd": 0.358226
+        },
+        "descriptors@claude-haiku-5-5:batch": {
+          "n_calls": 123,
+          "prompt_tokens": 58467,
+          "completion_tokens": 31080,
+          "cost_usd": 0.010693
+        },
+        "established@claude-haiku-5-5:batch": {
+          "n_calls": 671,
+          "prompt_tokens": 79066,
+          "completion_tokens": 254080,
+          "cost_usd": 0.067473
+        },
+        "gloss@claude-haiku-5-5:batch": {
+          "n_calls": 107,
+          "prompt_tokens": 64811,
+          "completion_tokens": 17530,
+          "cost_usd": 0.007623
+        },
+        "gloss@claude-sonnet-5-5:batch": {
+          "n_calls": 16,
+          "prompt_tokens": 11129,
+          "completion_tokens": 1128,
+          "cost_usd": 0.016769
+        },
+        "gloss_retry@claude-sonnet-5-5:batch": {
+          "n_calls": 1,
+          "prompt_tokens": 688,
+          "completion_tokens": 66,
+          "cost_usd": 0.001018
+        },
+        "kind@claude-haiku-5-5:batch": {
+          "n_calls": 671,
+          "prompt_tokens": 96509,
+          "completion_tokens": 84211,
+          "cost_usd": 0.025878
+        },
+        "probe@claude-haiku-5-5:batch": {
+          "n_calls": 31,
+          "prompt_tokens": 12795,
+          "completion_tokens": 3591,
+          "cost_usd": 0.001538
+        },
+        "same_sense@claude-haiku-5-5:batch": {
+          "n_calls": 9,
+          "prompt_tokens": 3819,
+          "completion_tokens": 1648,
+          "cost_usd": 0.000603
+        },
+        "second_established@claude-sonnet-5-5:batch": {
+          "n_calls": 32,
+          "prompt_tokens": 20141,
+          "completion_tokens": 3516,
+          "cost_usd": 0.037721
+        },
+        "second_kind@claude-sonnet-5-5:batch": {
+          "n_calls": 32,
+          "prompt_tokens": 32510,
+          "completion_tokens": 2831,
+          "cost_usd": 0.046665
+        },
+        "second_same_sense@claude-sonnet-5-5:batch": {
+          "n_calls": 4,
+          "prompt_tokens": 1690,
+          "completion_tokens": 337,
+          "cost_usd": 0.003375
+        },
+        "second_sense@claude-sonnet-5-5:batch": {
+          "n_calls": 26,
+          "prompt_tokens": 21310,
+          "completion_tokens": 5146,
+          "cost_usd": 0.04704
+        },
+        "second_vague@claude-sonnet-5-5:batch": {
+          "n_calls": 32,
+          "prompt_tokens": 14878,
+          "completion_tokens": 3574,
+          "cost_usd": 0.032748
+        },
+        "sense@claude-haiku-5-5:batch": {
+          "n_calls": 729,
+          "prompt_tokens": 75592,
+          "completion_tokens": 464749,
+          "cost_usd": 0.119967
+        },
+        "vague@claude-haiku-5-5:batch": {
+          "n_calls": 671,
+          "prompt_tokens": 313013,
+          "completion_tokens": 75555,
+          "cost_usd": 0.034539
+        },
+        "vague_retry@claude-haiku-5-5:batch": {
+          "n_calls": 5,
+          "prompt_tokens": 2327,
+          "completion_tokens": 526,
+          "cost_usd": 0.000248
+        }
+      },
+      "cache": {
+        "alignment:claude-haiku-5-5": {
+          "calls": 123,
+          "calls_writing": 2,
+          "calls_reading": 121,
+          "cache_write_tokens": 1412,
+          "cache_read_tokens": 85426,
+          "hit_rate": 0.9837
+        },
+        "comparison:claude-sonnet-5-5": {
+          "calls": 199,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "descriptors:claude-haiku-5-5": {
+          "calls": 123,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "established:claude-haiku-5-5": {
+          "calls": 671,
+          "calls_writing": 0,
+          "calls_reading": 671,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 383812,
+          "hit_rate": 1.0
+        },
+        "established:claude-sonnet-5-5": {
+          "calls": 32,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "gloss:claude-haiku-5-5": {
+          "calls": 107,
+          "calls_writing": 71,
+          "calls_reading": 36,
+          "cache_write_tokens": 46292,
+          "cache_read_tokens": 23472,
+          "hit_rate": 0.3364
+        },
+        "gloss:claude-sonnet-5-5": {
+          "calls": 17,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "kind:claude-haiku-5-5": {
+          "calls": 671,
+          "calls_writing": 2,
+          "calls_reading": 669,
+          "cache_write_tokens": 1950,
+          "cache_read_tokens": 652275,
+          "hit_rate": 0.997
+        },
+        "kind:claude-sonnet-5-5": {
+          "calls": 32,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "probe:claude-haiku-5-5": {
+          "calls": 31,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-haiku-5-5": {
+          "calls": 9,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-sonnet-5-5": {
+          "calls": 4,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "sense:claude-haiku-5-5": {
+          "calls": 729,
+          "calls_writing": 1,
+          "calls_reading": 728,
+          "cache_write_tokens": 797,
+          "cache_read_tokens": 580216,
+          "hit_rate": 0.9986
+        },
+        "sense:claude-sonnet-5-5": {
+          "calls": 26,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-haiku-5-5": {
+          "calls": 676,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-sonnet-5-5": {
+          "calls": 32,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        }
+      },
+      "cached_steps": {
+        "claude-haiku-5-5": [
+          "sense",
+          "established",
+          "kind",
+          "gloss",
+          "alignment"
+        ],
+        "claude-sonnet-5-5": []
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5:batch": 2.7e-05,
+        "comparison@claude-sonnet-5-5:batch": 0.001462,
+        "descriptors@claude-haiku-5-5:batch": 4.4e-05,
+        "established@claude-haiku-5-5:batch": 0.000275,
+        "gloss@claude-haiku-5-5:batch": 3.1e-05,
+        "gloss@claude-sonnet-5-5:batch": 6.8e-05,
+        "gloss_retry@claude-sonnet-5-5:batch": 4e-06,
+        "kind@claude-haiku-5-5:batch": 0.000106,
+        "probe@claude-haiku-5-5:batch": 6e-06,
+        "same_sense@claude-haiku-5-5:batch": 2e-06,
+        "second_established@claude-sonnet-5-5:batch": 0.000154,
+        "second_kind@claude-sonnet-5-5:batch": 0.00019,
+        "second_same_sense@claude-sonnet-5-5:batch": 1.4e-05,
+        "second_sense@claude-sonnet-5-5:batch": 0.000192,
+        "second_vague@claude-sonnet-5-5:batch": 0.000134,
+        "sense@claude-haiku-5-5:batch": 0.00049,
+        "vague@claude-haiku-5-5:batch": 0.000141,
+        "vague_retry@claude-haiku-5-5:batch": 1e-06
+      },
+      "second_opinion": {
+        "n": 26,
+        "disagree": [
+          "consenting",
+          "forced",
+          "hot",
+          "indeterminate",
+          "light-fingered",
+          "unexplained",
+          "unimportant"
+        ]
+      },
+      "resumed_calls": 0,
+      "batches_submitted": 9,
+      "readings": {
+        "n_readings": 3,
+        "rule": "turned_away_only_if_unanimous_else_majority",
+        "n_words": 243,
+        "all_the_same": 169,
+        "all_the_same_share": 0.6955,
+        "by_how": {
+          "unanimous": 169,
+          "most_common": 68,
+          "tie_trait": 6,
+          "tie_first": 0
+        },
+        "turned_away_by_every_reading": 69,
+        "rescued": {
+          "n": 55,
+          "by_n_turned_away": {
+            "1": 27,
+            "2": 28
+          },
+          "labels": [
+            "agreed",
+            "black-letter",
+            "causing pain",
+            "cheering",
+            "consenting",
+            "cramped",
+            "cumbersome",
+            "defending",
+            "dialectic",
+            "disadvantageous",
+            "disapproved",
+            "discretionary",
+            "exploded",
+            "feudal",
+            "forbidding prohibited",
+            "hard upon",
+            "hell-born",
+            "ill-provided",
+            "inconvenient",
+            "indeterminate",
+            "inherent",
+            "invisible",
+            "joined together",
+            "landed",
+            "linguistic",
+            "mediocre",
+            "optional",
+            "pitiable",
+            "prime",
+            "promising",
+            "purposed",
+            "repulsive",
+            "requesting",
+            "retaliating",
+            "retaliatory",
+            "sacred",
+            "scarce",
+            "sensational",
+            "sinning",
+            "soundless",
+            "stainless",
+            "taught",
+            "tempered",
+            "trig",
+            "unacceptable",
+            "undesirable",
+            "undirected",
+            "unexpected",
+            "unexplained",
+            "unimportant",
+            "unintended",
+            "unused",
+            "venial",
+            "well-laid",
+            "wrong"
+          ]
+        },
+        "ties": {
+          "n": 6,
+          "labels": [
+            "cheering",
+            "defending",
+            "indeterminate",
+            "invisible",
+            "repulsive",
+            "taught"
+          ]
+        },
+        "differs_from_first_reading": {
+          "n": 26,
+          "labels": [
+            "black-letter",
+            "causing pain",
+            "consenting",
+            "cumbersome",
+            "disadvantageous",
+            "discretionary",
+            "elder",
+            "hushed",
+            "linguistic",
+            "marked",
+            "pitiable",
+            "promising",
+            "purposed",
+            "repulsive",
+            "retaliating",
+            "retaliatory",
+            "sacred",
+            "scarce",
+            "soundless",
+            "tempered",
+            "trig",
+            "unattainable",
+            "undirected",
+            "unexpected",
+            "unexplained",
+            "unintended"
+          ]
+        },
+        "with_a_failed_reading": {
+          "n": 0,
+          "labels": []
+        },
+        "outcomes_by_reading": [
+          {
+            "physical": 5,
+            "roles": 7,
+            "states": 39,
+            "trait": 102,
+            "turned_away": 90
+          },
+          {
+            "physical": 5,
+            "roles": 4,
+            "states": 38,
+            "trait": 100,
+            "turned_away": 96
+          },
+          {
+            "physical": 3,
+            "roles": 7,
+            "states": 34,
+            "trait": 95,
+            "turned_away": 104
+          }
+        ],
+        "patterns": {
+          "trait,trait,trait": 70,
+          "turned_away,turned_away,turned_away": 69,
+          "states,states,states": 24,
+          "trait,trait,turned_away": 9,
+          "trait,turned_away,turned_away": 8,
+          "turned_away,trait,trait": 6,
+          "turned_away,turned_away,trait": 6,
+          "states,turned_away,turned_away": 5,
+          "turned_away,trait,turned_away": 5,
+          "trait,turned_away,trait": 4,
+          "physical,physical,physical": 3,
+          "roles,roles,roles": 3,
+          "states,trait,states": 3,
+          "trait,states,trait": 3,
+          "trait,states,turned_away": 3,
+          "turned_away,states,turned_away": 3,
+          "states,states,roles": 2,
+          "states,trait,trait": 2,
+          "trait,trait,states": 2,
+          "trait,turned_away,states": 2,
+          "physical,states,states": 1,
+          "physical,trait,turned_away": 1,
+          "roles,roles,trait": 1,
+          "roles,trait,roles": 1,
+          "roles,trait,trait": 1,
+          "roles,turned_away,roles": 1,
+          "states,physical,states": 1,
+          "states,states,trait": 1,
+          "states,states,turned_away": 1,
+          "trait,physical,trait": 1,
+          "turned_away,turned_away,states": 1
+        }
+      }
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": {
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5",
+        "third": null
+      },
+      "source_field": "generator",
+      "overall": {
+        "n": 26,
+        "first_vs_second": {
+          "n": 26,
+          "agree": 19,
+          "disagree": 7,
+          "rate": 0.7308
+        }
+      },
+      "by_source": {
+        "censuses": {
+          "n": 13,
+          "first_vs_second": {
+            "n": 13,
+            "agree": 10,
+            "disagree": 3,
+            "rate": 0.7692
+          }
+        },
+        "roget": {
+          "n": 26,
+          "first_vs_second": {
+            "n": 26,
+            "agree": 19,
+            "disagree": 7,
+            "rate": 0.7308
+          }
+        }
+      },
+      "failed": {
+        "second": 0,
+        "third": 0
+      }
+    },
+    "tripwire": {
+      "threshold": 0.1,
+      "min_n": 20,
+      "source_field": "generator",
+      "overall": {
+        "n": 26,
+        "disagree": 7,
+        "rate": 0.2692,
+        "eligible": true,
+        "over": true,
+        "n_failed": 0
+      },
+      "by_source": {
+        "censuses": {
+          "n": 13,
+          "disagree": 3,
+          "rate": 0.2308,
+          "eligible": false,
+          "over": false,
+          "n_failed": 0
+        },
+        "roget": {
+          "n": 26,
+          "disagree": 7,
+          "rate": 0.2692,
+          "eligible": true,
+          "over": true,
+          "n_failed": 0
+        }
+      },
+      "tripped": true,
+      "tripped_by": [
+        "overall",
+        "generator:roget"
+      ],
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5"
+      },
+      "accepted": false,
+      "action": "warned",
+      "stopped_before": null,
+      "calls_not_sent": 0,
+      "checked_at": "2026-10-11T22:07:42+00:00"
+    },
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id 2026-10-11-full_roget --run roget/2026-10-11-full --pipeline split --transport batches --budget-usd 15",
+      "git_sha": "5f127b7+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter 2026-10-11-full_roget"
+    },
+    "produced_at": "2026-10-11T22:15:21+00:00"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "generator": "roget",
+  "run_id": "2026-10-11-full",
+  "git_sha": "eb9ef29",
+  "args": {
+    "command": "roget_generate.py submit",
+    "generator": "roget",
+    "run_id": "2026-10-11-full",
+    "candidates": "data/candidates/runs/roget/2026-10-11-full/candidates.jsonl",
+    "harvest_config": {
+      "per_head_cap": 10,
+      "pair_top": 3,
+      "max_words": 2,
+      "classes": [
+        "pair_completion",
+        "pair_empty",
+        "singleton_empty",
+        "queued_only"
+      ],
+      "every_nth": null,
+      "offset": 0,
+      "zipf_hard": 1.5,
+      "include_wn": true,
+      "wn_closure_depth": 3,
+      "head_scope": "data/candidates/roget/head_scope.json"
+    }
+  },
+  "n_emitted": 475,
+  "started_at": "2026-10-11T21:32:42+00:00",
+  "finished_at": "2026-10-11T21:32:43+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "6604204e877c",
+      "started_at": "2026-10-11T21:32:42+00:00",
+      "finished_at": "2026-10-11T21:32:43+00:00",
+      "git_sha": "eb9ef29",
+      "args": {
+        "command": "roget_generate.py submit",
+        "generator": "roget",
+        "run_id": "2026-10-11-full",
+        "candidates": "data/candidates/runs/roget/2026-10-11-full/candidates.jsonl",
+        "harvest_config": {
+          "per_head_cap": 10,
+          "pair_top": 3,
+          "max_words": 2,
+          "classes": [
+            "pair_completion",
+            "pair_empty",
+            "singleton_empty",
+            "queued_only"
+          ],
+          "every_nth": null,
+          "offset": 0,
+          "zipf_hard": 1.5,
+          "include_wn": true,
+          "wn_closure_depth": 3,
+          "head_scope": "data/candidates/roget/head_scope.json"
+        }
+      },
+      "n_emitted": 475,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

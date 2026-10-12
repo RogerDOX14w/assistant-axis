@@ -1,0 +1,210 @@
+{
+  "batch_id": "2026-10-11-usage_alignment_sweep",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01MRrzhGGVPRQPbwh7RenCvz",
+        "custom_ids": [
+          "rel-h-harms_others_1-a60da394c497",
+          "rel-h-honest_and_respectful_1-4213b90eb9e9"
+        ],
+        "n_requests": 2,
+        "bytes": 13042,
+        "estimate_usd": 0.000905,
+        "submitted_at": "2026-10-11T22:04:25+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:06:28+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_01EQT5EqqvhWCba7kmLLxAhf",
+        "custom_ids": [
+          "ove-s-harms_others_1-ddb67bfc646e",
+          "ove-s-honest_and_respectful_1-0339b9061f83"
+        ],
+        "n_requests": 2,
+        "bytes": 5136,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:06:29+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:11:34+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_016VYLfXNeuLCas4kEpNNvtj",
+        "custom_ids": [
+          "ove-o-harms_others_1-c0e878af39b7"
+        ],
+        "n_requests": 1,
+        "bytes": 2528,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-11T22:11:34+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:13:06+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_01CkRB6BNWGiPAYBRmDnJzDv",
+        "custom_ids": [
+          "ove-s-harms_others_1-5a65a2856c9c",
+          "ove-s-honest_and_respectful_1-61cf29c752dd"
+        ],
+        "n_requests": 2,
+        "bytes": 5160,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:13:07+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:18:12+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_01HyoqtR64XqbQ75CxK2pZmX",
+        "custom_ids": [
+          "ove-o-harms_others_1-74d6d4eaff5c"
+        ],
+        "n_requests": 1,
+        "bytes": 2562,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-11T22:18:13+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:20:15+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_011RQZZpFQXdwLAe2ZWNpBuo",
+        "custom_ids": [
+          "ove-s-harms_others_1-0ce5940b8314",
+          "ove-s-honest_and_respectful_1-947aed902121"
+        ],
+        "n_requests": 2,
+        "bytes": 5386,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:20:16+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:25:21+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_01J5wiD7PMbbArYDmeK4RHik",
+        "custom_ids": [
+          "ove-s-harms_others_1-36298d569bd6",
+          "ove-s-honest_and_respectful_1-be28ca1aa6b8"
+        ],
+        "n_requests": 2,
+        "bytes": 5246,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:25:21+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:30:58+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_01CnTEyqd1srAvgwv8p6b4mZ",
+        "custom_ids": [
+          "ove-o-harms_others_1-64de8dde0860"
+        ],
+        "n_requests": 1,
+        "bytes": 2570,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-11T22:30:58+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:33:01+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_01QLyQhbyKi5cJiArs9JoAtj",
+        "custom_ids": [
+          "ove-s-harms_others_1-f8e9ec42ae51",
+          "ove-s-honest_and_respectful_1-75f2a0c0aa9f"
+        ],
+        "n_requests": 2,
+        "bytes": 5103,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:33:01+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:38:06+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01K9EP9DZAtCpfWbDqZBtjwp",
+        "custom_ids": [
+          "ove-s-harms_others_1-e6920f9d9b25",
+          "ove-s-honest_and_respectful_1-f1e2837e8cab"
+        ],
+        "n_requests": 2,
+        "bytes": 5237,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:38:07+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:43:13+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_01U3WsoYGSvJp4YLpCLRJMEx",
+        "custom_ids": [
+          "ove-s-harms_others_1-bc3247533aaa",
+          "ove-s-honest_and_respectful_1-a55e29528ee8"
+        ],
+        "n_requests": 2,
+        "bytes": 5122,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:43:14+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:48:19+00:00"
+      }
+    ],
+    "o08_sonnet": [
+      {
+        "id": "msgbatch_01PU73FfUM1vNpA41zQgcYgx",
+        "custom_ids": [
+          "ove-s-harms_others_1-856e306201b6",
+          "ove-s-honest_and_respectful_1-24e612f37cd8"
+        ],
+        "n_requests": 2,
+        "bytes": 5137,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-11T22:48:20+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:53:55+00:00"
+      }
+    ],
+    "o09_sonnet": [
+      {
+        "id": "msgbatch_01VPZgtwdJuDwemQkXTFa6oM",
+        "custom_ids": [
+          "ove-s-harms_others_1-60ce40d2565b"
+        ],
+        "n_requests": 1,
+        "bytes": 2568,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-11T22:53:56+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:55:58+00:00"
+      }
+    ],
+    "o10_sonnet": [
+      {
+        "id": "msgbatch_01GwAyyjCUvGYgvzUR4EzMwN",
+        "custom_ids": [
+          "ove-s-harms_others_1-ac0e1922fe3a"
+        ],
+        "n_requests": 1,
+        "bytes": 2620,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-11T22:56:03+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T22:58:06+00:00"
+      }
+    ]
+  }
+}

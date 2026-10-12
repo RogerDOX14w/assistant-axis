@@ -1,0 +1,434 @@
+{
+  "batch_id": "2026-10-11-b_alignment_sweep",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_012L4hjmw1vit7YgTNDt96eJ",
+        "custom_ids": [
+          "rel-h-accepts_shutdown_gracefully_-2212dfb06aa8",
+          "rel-h-acts_on_conscience_1-816a0e9b1c36",
+          "rel-h-acts_with_integrity_1-a4b97ab5ed71",
+          "rel-h-behaves_by_audience_1-8b1bb7a42a0e",
+          "rel-h-behaves_when_watched_1-b185449aa4bf",
+          "rel-h-breaks_rules_under_pressure_-83cd1a960196",
+          "rel-h-consistent_conduct_1-fc8f79136ff6",
+          "rel-h-crosses_lethal_lines_1-346578b1ced2",
+          "rel-h-hidden_agenda_1-00955a03c8f9",
+          "rel-h-holds_firm_red_lines_1-c751f651ff43",
+          "rel-h-honest_about_wrongdoing_1-15148739c8ac",
+          "rel-h-keeps_to_ethical_limits_1-520186403b30",
+          "rel-h-obeys_explicit_prohibitions_-b9eef9af97e6",
+          "rel-h-overrides_own_ethics_1-793b9b968f00",
+          "rel-h-refuses_harm_under_pressure_-9887a1ba5a60",
+          "rel-h-resorts_to_coercion_1-ec11261ce59a",
+          "rel-h-skeptical_of_claims_1-de50264bb2a8",
+          "rel-h-stays_loyal_1-e1c9b9c32a30",
+          "rel-h-stays_loyal_under_conflict_1-bc413bffddf9",
+          "rel-h-stays_loyal_under_pressure_1-9365eecdc514",
+          "rel-h-stays_within_legitimate_mean-f15b50b068f3",
+          "rel-h-transparent_reasoning_1-2641bf2ffcdc",
+          "rel-h-turns_on_its_employer_1-bd1d5e632869",
+          "rel-h-turns_on_its_principals_1-a88ccf18f61d"
+        ],
+        "n_requests": 24,
+        "bytes": 147096,
+        "estimate_usd": 0.010035,
+        "submitted_at": "2026-10-11T23:36:10+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T23:39:14+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_01QXfMjHDkFJwhgakmt3Ggzf",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-330499abcc1e",
+          "ove-s-acts_on_conscience_1-4b49de5b8b5a",
+          "ove-s-acts_with_integrity_1-1ebdb0b17494",
+          "ove-s-behaves_by_audience_1-44df7653c2a6",
+          "ove-s-behaves_when_watched_1-dc5e5414750e",
+          "ove-s-breaks_rules_under_pressure_-30464fd6024f",
+          "ove-s-consistent_conduct_1-54d2efef5bab",
+          "ove-s-crosses_lethal_lines_1-2aa510a43eea",
+          "ove-s-hidden_agenda_1-4c1c19ddc024",
+          "ove-s-holds_firm_red_lines_1-a51e9c066f56",
+          "ove-s-honest_about_wrongdoing_1-3d07bdf00727",
+          "ove-s-keeps_to_ethical_limits_1-73dcd5fe045c",
+          "ove-s-obeys_explicit_prohibitions_-8978b2267f7a",
+          "ove-s-overrides_own_ethics_1-5b92bf3f3d94",
+          "ove-s-refuses_harm_under_pressure_-8f20691fe6cd",
+          "ove-s-resorts_to_coercion_1-fe7f955fc2eb",
+          "ove-s-skeptical_of_claims_1-1f72325066a8",
+          "ove-s-stays_loyal_1-f1c8eb4db931",
+          "ove-s-stays_loyal_under_conflict_1-239a42243197",
+          "ove-s-stays_loyal_under_pressure_1-1180e5f8a398",
+          "ove-s-stays_within_legitimate_mean-f2f21899c742",
+          "ove-s-transparent_reasoning_1-b3c93a07dfa5",
+          "ove-s-turns_on_its_employer_1-41ab73caa142",
+          "ove-s-turns_on_its_principals_1-387480d86667"
+        ],
+        "n_requests": 24,
+        "bytes": 62050,
+        "estimate_usd": 0.014616,
+        "submitted_at": "2026-10-11T23:39:15+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T23:44:51+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_019ycePDDKZTsbpSHsLaEPyz",
+        "custom_ids": [
+          "ove-o-acts_with_integrity_1-d6fffc777511",
+          "ove-o-behaves_when_watched_1-821631d2b280",
+          "ove-o-keeps_to_ethical_limits_1-539b0c2df074",
+          "ove-o-obeys_explicit_prohibitions_-e552448e232a",
+          "ove-o-overrides_own_ethics_1-cd09804c67bd",
+          "ove-o-skeptical_of_claims_1-a4fd618ba9dc",
+          "ove-o-stays_loyal_1-b7bad62b205d",
+          "ove-o-stays_loyal_under_conflict_1-9d34196528cf",
+          "ove-o-stays_loyal_under_pressure_1-6e52f7fc87f5"
+        ],
+        "n_requests": 9,
+        "bytes": 23256,
+        "estimate_usd": 0.01404,
+        "submitted_at": "2026-10-11T23:44:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T23:46:54+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_01BEbCmBfU5TcByVVM5m8tQt",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-cbc0e291c0ce",
+          "ove-s-acts_on_conscience_1-47740ef738ef",
+          "ove-s-acts_with_integrity_1-909e4649f079",
+          "ove-s-behaves_by_audience_1-6c60545ef7bc",
+          "ove-s-behaves_when_watched_1-5f2dcb6c6696",
+          "ove-s-breaks_rules_under_pressure_-55fad74f5fa6",
+          "ove-s-consistent_conduct_1-a2ca531607e4",
+          "ove-s-crosses_lethal_lines_1-4c41184f8845",
+          "ove-s-hidden_agenda_1-fa1e8f8fec89",
+          "ove-s-holds_firm_red_lines_1-f677a24424f1",
+          "ove-s-honest_about_wrongdoing_1-eeb866dac7fd",
+          "ove-s-keeps_to_ethical_limits_1-03ed6eafc102",
+          "ove-s-obeys_explicit_prohibitions_-c95a89f04ac6",
+          "ove-s-overrides_own_ethics_1-eed4e6ffebad",
+          "ove-s-refuses_harm_under_pressure_-170fd182798f",
+          "ove-s-resorts_to_coercion_1-c2f32204aa49",
+          "ove-s-skeptical_of_claims_1-42aff8bb7e1e",
+          "ove-s-stays_within_legitimate_mean-7535c31c8057",
+          "ove-s-transparent_reasoning_1-e62cfc0abc7c",
+          "ove-s-turns_on_its_employer_1-1acabec91de1",
+          "ove-s-turns_on_its_principals_1-679e1fabe9f5"
+        ],
+        "n_requests": 21,
+        "bytes": 54277,
+        "estimate_usd": 0.012789,
+        "submitted_at": "2026-10-11T23:46:59+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T23:53:36+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_012DAxcvGdpi8axrjtsfu5un",
+        "custom_ids": [
+          "ove-o-keeps_to_ethical_limits_1-0129bd9b11f0"
+        ],
+        "n_requests": 1,
+        "bytes": 2569,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-11T23:53:36+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-11T23:55:39+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_012RQ1Qwh3BUu2UDHDRuxFeK",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-05e0450f819b",
+          "ove-s-acts_on_conscience_1-ce09909ed069",
+          "ove-s-acts_with_integrity_1-352103980a86",
+          "ove-s-behaves_by_audience_1-aaf193dca953",
+          "ove-s-breaks_rules_under_pressure_-3a8806703e5c",
+          "ove-s-consistent_conduct_1-ab91b5fa2512",
+          "ove-s-crosses_lethal_lines_1-1cf6454f288e",
+          "ove-s-hidden_agenda_1-5b1f28dd960e",
+          "ove-s-holds_firm_red_lines_1-783b20eea110",
+          "ove-s-honest_about_wrongdoing_1-cc171451e8f7",
+          "ove-s-keeps_to_ethical_limits_1-e7c1b50af443",
+          "ove-s-obeys_explicit_prohibitions_-f217aa799b04",
+          "ove-s-overrides_own_ethics_1-4abf67601ea0",
+          "ove-s-refuses_harm_under_pressure_-a96c77dd9b2f",
+          "ove-s-resorts_to_coercion_1-e768cd4d4234",
+          "ove-s-skeptical_of_claims_1-d1cffe58688c",
+          "ove-s-stays_within_legitimate_mean-b6d1f79158d7",
+          "ove-s-transparent_reasoning_1-1a4cfcabcdda",
+          "ove-s-turns_on_its_employer_1-3c62a0ad2c49",
+          "ove-s-turns_on_its_principals_1-1c4fd44e45e7"
+        ],
+        "n_requests": 20,
+        "bytes": 52046,
+        "estimate_usd": 0.01218,
+        "submitted_at": "2026-10-11T23:55:39+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:02:16+00:00"
+      }
+    ],
+    "o03_opus": [
+      {
+        "id": "msgbatch_01RQZ45KeRiu1XB3jhhjW8G9",
+        "custom_ids": [
+          "ove-o-behaves_by_audience_1-58b6ae87b9bd",
+          "ove-o-hidden_agenda_1-8aa628879258"
+        ],
+        "n_requests": 2,
+        "bytes": 5157,
+        "estimate_usd": 0.00312,
+        "submitted_at": "2026-10-12T00:02:17+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:04:20+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_01X6aBUwFysz1jbbNpypCgSW",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-619e8ae2c350",
+          "ove-s-acts_on_conscience_1-52039f1af923",
+          "ove-s-acts_with_integrity_1-70021ebfed72",
+          "ove-s-behaves_by_audience_1-d6493a39be51",
+          "ove-s-breaks_rules_under_pressure_-574b3b5c6a89",
+          "ove-s-consistent_conduct_1-1dca06c17a6e",
+          "ove-s-crosses_lethal_lines_1-d600df01d7c0",
+          "ove-s-hidden_agenda_1-05f27bdd2f85",
+          "ove-s-holds_firm_red_lines_1-c8863f744aff",
+          "ove-s-honest_about_wrongdoing_1-65ce134f2ec5",
+          "ove-s-keeps_to_ethical_limits_1-87c33c08632f",
+          "ove-s-obeys_explicit_prohibitions_-5d4ed1abc280",
+          "ove-s-overrides_own_ethics_1-a9c310add637",
+          "ove-s-refuses_harm_under_pressure_-82c31feaf922",
+          "ove-s-resorts_to_coercion_1-3346b297e18f",
+          "ove-s-skeptical_of_claims_1-545688241af6",
+          "ove-s-stays_within_legitimate_mean-5b46a2078ee7",
+          "ove-s-transparent_reasoning_1-b1f08e892765",
+          "ove-s-turns_on_its_employer_1-f16ade3b6b53"
+        ],
+        "n_requests": 19,
+        "bytes": 49121,
+        "estimate_usd": 0.011571,
+        "submitted_at": "2026-10-12T00:04:30+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:11:07+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_01HnEnoJNNrWor97PwNsktxE",
+        "custom_ids": [
+          "ove-o-acts_on_conscience_1-0750688680d9"
+        ],
+        "n_requests": 1,
+        "bytes": 2616,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-12T00:11:07+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:13:10+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_01PQAx5BXHjWkP9enFNA3E3a",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-1a602c0391a7",
+          "ove-s-acts_on_conscience_1-e31008298120",
+          "ove-s-acts_with_integrity_1-eb138937cf2d",
+          "ove-s-behaves_by_audience_1-e504c96c1ba9",
+          "ove-s-breaks_rules_under_pressure_-61787c5d36ff",
+          "ove-s-consistent_conduct_1-106418289c98",
+          "ove-s-crosses_lethal_lines_1-bab1e6d1b820",
+          "ove-s-hidden_agenda_1-fec2309ac56e",
+          "ove-s-holds_firm_red_lines_1-a46ff6fa60d9",
+          "ove-s-honest_about_wrongdoing_1-c254b561e4ba",
+          "ove-s-keeps_to_ethical_limits_1-631aaa0c7895",
+          "ove-s-obeys_explicit_prohibitions_-d60354f86827",
+          "ove-s-overrides_own_ethics_1-4f918b48acd1",
+          "ove-s-resorts_to_coercion_1-3c779a1969a0",
+          "ove-s-skeptical_of_claims_1-36e5742da68b",
+          "ove-s-stays_within_legitimate_mean-0d4dff884d53",
+          "ove-s-transparent_reasoning_1-496792df5744"
+        ],
+        "n_requests": 17,
+        "bytes": 44258,
+        "estimate_usd": 0.010353,
+        "submitted_at": "2026-10-12T00:13:13+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:19:19+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01BxEZwMykruDJXVWt6xgfXq",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-f9e37f9404b6",
+          "ove-s-acts_on_conscience_1-72c5ff4cdb4a",
+          "ove-s-acts_with_integrity_1-4a763c3a7e4a",
+          "ove-s-behaves_by_audience_1-0f76fb682bf8",
+          "ove-s-hidden_agenda_1-de306cbd2ebe",
+          "ove-s-holds_firm_red_lines_1-7db6dd7c8eef",
+          "ove-s-honest_about_wrongdoing_1-bf5ed1e5267a",
+          "ove-s-keeps_to_ethical_limits_1-186fdef9c32f",
+          "ove-s-obeys_explicit_prohibitions_-1f07715570f2",
+          "ove-s-overrides_own_ethics_1-fd41054136a3",
+          "ove-s-resorts_to_coercion_1-79aa7f8eda5c",
+          "ove-s-skeptical_of_claims_1-799daa6b7db5",
+          "ove-s-stays_within_legitimate_mean-2107c3fdf9cd",
+          "ove-s-transparent_reasoning_1-d74910045d72"
+        ],
+        "n_requests": 14,
+        "bytes": 36200,
+        "estimate_usd": 0.008526,
+        "submitted_at": "2026-10-12T00:19:23+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:24:59+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_01GqRzayoodbcCZVLp6Dqs37",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-a63f0ec885d6",
+          "ove-s-acts_on_conscience_1-1e6d793cf1fa",
+          "ove-s-acts_with_integrity_1-69991c69bd48",
+          "ove-s-behaves_by_audience_1-f9305435cfa9",
+          "ove-s-hidden_agenda_1-9832f9e1fceb",
+          "ove-s-holds_firm_red_lines_1-9de01b5b1e11",
+          "ove-s-honest_about_wrongdoing_1-54139a28cffa",
+          "ove-s-keeps_to_ethical_limits_1-b8787c19b8c9",
+          "ove-s-obeys_explicit_prohibitions_-7df5cecc94e0",
+          "ove-s-overrides_own_ethics_1-49ad9e824f5d",
+          "ove-s-skeptical_of_claims_1-efaeeaa3d3ee"
+        ],
+        "n_requests": 11,
+        "bytes": 28457,
+        "estimate_usd": 0.006699,
+        "submitted_at": "2026-10-12T00:25:04+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:31:10+00:00"
+      }
+    ],
+    "o07_opus": [
+      {
+        "id": "msgbatch_01JemWSLRRCRqvvK84BjmJ8z",
+        "custom_ids": [
+          "ove-o-hidden_agenda_1-7ea2cd7e933e"
+        ],
+        "n_requests": 1,
+        "bytes": 2535,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-12T00:31:11+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:33:13+00:00"
+      }
+    ],
+    "o08_sonnet": [
+      {
+        "id": "msgbatch_01NaJMZL9qA5KVV9z58ATNLu",
+        "custom_ids": [
+          "ove-s-accepts_shutdown_gracefully_-6353de9eb355",
+          "ove-s-acts_on_conscience_1-d9b1cb6f1df0",
+          "ove-s-acts_with_integrity_1-ba0ac3c2be6d",
+          "ove-s-behaves_by_audience_1-48f84a964f47",
+          "ove-s-hidden_agenda_1-5cc9287385b4",
+          "ove-s-honest_about_wrongdoing_1-6533ead8112f",
+          "ove-s-keeps_to_ethical_limits_1-4035a20c4596",
+          "ove-s-skeptical_of_claims_1-da22b87794cf"
+        ],
+        "n_requests": 8,
+        "bytes": 20582,
+        "estimate_usd": 0.004872,
+        "submitted_at": "2026-10-12T00:33:17+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:38:21+00:00"
+      }
+    ],
+    "o09_sonnet": [
+      {
+        "id": "msgbatch_016DSTST8Hq7THdQ1mWMsPLk",
+        "custom_ids": [
+          "ove-s-acts_on_conscience_1-88eca3b87989",
+          "ove-s-acts_with_integrity_1-bcd3407dc432",
+          "ove-s-behaves_by_audience_1-9fb481cdd426",
+          "ove-s-keeps_to_ethical_limits_1-7acc23aaedef",
+          "ove-s-skeptical_of_claims_1-7e4e3b122ead"
+        ],
+        "n_requests": 5,
+        "bytes": 12926,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-12T00:38:25+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:44:01+00:00"
+      }
+    ],
+    "o10_sonnet": [
+      {
+        "id": "msgbatch_01FuLXh2LLFVgYjNk6eGgJU4",
+        "custom_ids": [
+          "ove-s-acts_on_conscience_1-979dac06eccb",
+          "ove-s-acts_with_integrity_1-687a0dea1127"
+        ],
+        "n_requests": 2,
+        "bytes": 5175,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-12T00:44:04+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:50:11+00:00"
+      }
+    ],
+    "o11_sonnet": [
+      {
+        "id": "msgbatch_01KUkeKwjAPEWjozNdJDiPJi",
+        "custom_ids": [
+          "ove-s-acts_with_integrity_1-1157ade7c95b"
+        ],
+        "n_requests": 1,
+        "bytes": 2525,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T00:50:14+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:52:47+00:00"
+      }
+    ],
+    "o12_sonnet": [
+      {
+        "id": "msgbatch_01EgJ6RhPZEzBbprDpecCG43",
+        "custom_ids": [
+          "ove-s-acts_with_integrity_1-95d415f27b4e"
+        ],
+        "n_requests": 1,
+        "bytes": 2577,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T00:52:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:54:54+00:00"
+      }
+    ],
+    "o12_opus": [
+      {
+        "id": "msgbatch_01TrqJyxKQWwPL6qNVDhooXi",
+        "custom_ids": [
+          "ove-o-acts_with_integrity_1-96ef1f7156d3"
+        ],
+        "n_requests": 1,
+        "bytes": 2575,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-12T00:54:54+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T00:56:57+00:00"
+      }
+    ]
+  }
+}
