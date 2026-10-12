@@ -2,7 +2,7 @@
 
 Updated 2026-10-12: counts and prices refreshed to the corpus and the code as they stand, and Roger's answers to the
 open questions (§ 9) incorporated.  Yields and costs below are scaled from the 2026-10-08 figures by the corpus's
-growth (932 trait files against 385) and are to be re-measured at the null-rate pilot (§ 6.5).  **Not yet greenlit.**
+growth (932 trait files against 385) and are to be re-measured at the null-rate pilot (§ 6.5).  **Greenlit for detailed planning by Roger on 2026-10-12**; the coding plan is [coding_plan_09_structural_generators.md](./coding_plan_09_structural_generators.md) (being written).
 
 ## 1. Idea
 
@@ -92,4 +92,4 @@ Needs: the candidate registry format; the trait-hood filter; the novelty scorer,
 
 ## Status (2026-10-12)
 
-Answers to the five questions recorded; counts, prices and the Haiku 5.5 decision brought up to date; the review cost added to § 5 with the wave sized by review hours as a proposal.  Not yet greenlit: the [README](./README.md) lists it as under discussion.
+Answers to the five questions recorded; counts, prices and the Haiku 5.5 decision brought up to date; the review cost added to § 5 with the wave sized by review hours as a proposal (still open).  **Greenlit for detailed planning, 2026-10-12** (Roger: "09 is now greenlit, start plan writing on it"); the coding plan is in progress.
