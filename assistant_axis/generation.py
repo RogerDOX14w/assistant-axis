@@ -16,6 +16,7 @@ Example (vLLM - batch inference):
 import hashlib
 import json
 import logging
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,6 +50,40 @@ def response_cleanup_for(model_name: str) -> str:
     """The clean-up applied to each generated text: Qwen's leaked-thinking
     strip (generate_batch), none otherwise."""
     return "strip_leaked_think" if "qwen" in model_name.lower() else "none"
+
+
+# ---------------------------------------------------------------------------
+# Leaked thinking without tags (walk-through P6; review P1 D4)
+# ---------------------------------------------------------------------------
+#
+# With thinking off, Qwen3 sometimes still plans before answering.  When the
+# plan ends in "</think>" generate_batch strips it (``thinking_stripped``);
+# when it carries no tag at all the text stays, and is flagged
+# ``thinking_suspected`` (the data are left as they are; P1 D4: "flag, leave
+# the data").  The review's description of such a response: "Hmm, the user is
+# asking... Let me break this down".  The signal used is the model talking
+# about the conversation in the third person ("the user is asking", "the
+# user's question") near the start, which an answer to the user does not do.
+# Calibrated on the 8slot tree (2026-10-12): 196 of 291,000 role and trait
+# responses, nearly all planning ("Okay, so the user is asking how ...") and a
+# few out-of-character AI answers that speak of "the user".  A second rule, a
+# planning opener ("Okay,", "Hmm") followed by talk of how to respond, was
+# tried and dropped: its 20 extra hits were nearly all in-character answers
+# (one extraction question asks how to respond to a pet sitter).
+
+_THIRD_PERSON_USER = re.compile(
+    r"\bthe user(?:'s)?\s+(?:is|was|asks|asked|wants|wanted|might|may|seems|has|"
+    r"needs|question|request|query|message|mentioned|says|said)\b", re.IGNORECASE)
+THINKING_SCAN_CHARS = 600
+
+
+def looks_like_leaked_thinking(text: str) -> bool:
+    """Whether a response speaks of "the user" in the third person within
+    its first :data:`THINKING_SCAN_CHARS` characters (``"Okay, so the user
+    is asking ..."``): the model's planning leaking into the answer without
+    a ``</think>`` tag.  A heuristic, recorded as ``thinking_suspected``;
+    nothing is removed."""
+    return bool(_THIRD_PERSON_USER.search((text or "")[:THINKING_SCAN_CHARS]))
 
 
 def _sha256_text(text: str) -> str:
@@ -420,8 +455,22 @@ class VLLMGenerator:
             conversations: List of conversations (each is a list of message dicts)
 
         Returns:
-            List of generated response texts
+            List of generated response texts (see :meth:`generate_batch_detailed`
+            for the finish reason and the clean-up flags)
         """
+        return [d["text"] for d in self.generate_batch_detailed(conversations)]
+
+    def generate_batch_detailed(
+        self,
+        conversations: List[List[Dict[str, str]]],
+    ) -> List[Dict[str, Any]]:
+        """Generate responses for a batch of conversations; one dict per
+        conversation: ``text``, ``finish_reason`` (vLLM's: ``"stop"``, or
+        ``"length"`` when the text was cut at ``max_tokens``),
+        ``thinking_stripped`` (the leaked-thinking strip below changed the
+        text) and ``thinking_suspected`` (:func:`looks_like_leaked_thinking`
+        on the final text).  The three are the additive response fields of
+        walk-through P6 (2026-10-12)."""
         self.load()
 
         tokenizer = self.llm.get_tokenizer()
@@ -440,7 +489,10 @@ class VLLMGenerator:
         logger.info(f"Running batch inference for {len(prompts)} prompts...")
         outputs = self.llm.generate(prompts, self.sampling_params)
 
-        responses = [output.outputs[0].text for output in outputs]
+        details = [{"text": output.outputs[0].text,
+                    "finish_reason": getattr(output.outputs[0], "finish_reason", None),
+                    "thinking_stripped": False}
+                   for output in outputs]
 
         # Workaround: vLLM sometimes generates thinking content with Qwen
         # models despite enable_thinking=False. It strips the opening <think>
@@ -448,22 +500,26 @@ class VLLMGenerator:
         # output. Strip everything up to the last </think>.
         if response_cleanup_for(self.model_name) == "strip_leaked_think":
             cleaned = 0
-            for i, resp in enumerate(responses):
+            for d in details:
+                resp = d["text"]
                 if '</think>' in resp and '<think>' not in resp:
-                    responses[i] = resp[resp.rfind('</think>') + len('</think>'):].strip()
+                    d["text"] = resp[resp.rfind('</think>') + len('</think>'):].strip()
+                    d["thinking_stripped"] = True
                     cleaned += 1
             if cleaned:
                 logger.warning(
-                    f"Stripped orphaned thinking content from {cleaned}/{len(responses)} "
+                    f"Stripped orphaned thinking content from {cleaned}/{len(details)} "
                     f"responses (vLLM/Qwen thinking leak)")
-
-        return responses
+        for d in details:
+            d["thinking_suspected"] = looks_like_leaked_thinking(d["text"])
+        return details
 
     def generate_for_role(
         self,
         instructions: List[str],
         questions: List[str],
         prompt_indices: Optional[List[int]] = None,
+        question_ids: Optional[List[Any]] = None,
     ) -> List[Dict]:
         """
         Generate responses for a role across all instruction variants and questions.
@@ -472,15 +528,21 @@ class VLLMGenerator:
             instructions: List of system prompt variants
             questions: List of questions
             prompt_indices: Which instruction indices to use (default: all)
+            question_ids: The questions file's ``id`` of each question
+                (parallel to ``questions``); recorded as ``question_id``
 
         Returns:
-            List of result dicts with conversation, prompt_index, question_index
+            List of result dicts with conversation, prompt_index,
+            question_index, and since 2026-10-12 (walk-through P6, additive)
+            question_id, finish_reason, thinking_stripped, thinking_suspected
         """
         self.load()
         tokenizer = self.llm.get_tokenizer()
 
         if prompt_indices is None:
             prompt_indices = list(range(len(instructions)))
+        if question_ids is not None and len(question_ids) != len(questions):
+            raise ValueError(f"{len(question_ids)} question ids for {len(questions)} questions")
 
         # Build all conversations
         all_conversations = []
@@ -499,6 +561,7 @@ class VLLMGenerator:
                     "system_prompt": instruction,
                     "prompt_index": prompt_idx,
                     "question_index": q_idx,
+                    "question_id": None if question_ids is None else question_ids[q_idx],
                     "question": question,
                 })
 
@@ -506,17 +569,23 @@ class VLLMGenerator:
             return []
 
         # Generate
-        responses = self.generate_batch(all_conversations)
+        details = self.generate_batch_detailed(all_conversations)
 
-        # Build results
+        # Build results.  The keys before "conversation" are those written
+        # since the start; the four after it are additive (2026-10-12), and
+        # steps 2 and 3 read records by key, so they ignore them.
         results = []
-        for conv, meta, response in zip(all_conversations, all_metadata, responses):
+        for conv, meta, d in zip(all_conversations, all_metadata, details):
             result = {
                 "system_prompt": meta["system_prompt"],
                 "prompt_index": meta["prompt_index"],
                 "question_index": meta["question_index"],
                 "question": meta["question"],
-                "conversation": conv + [{"role": "assistant", "content": response}],
+                "conversation": conv + [{"role": "assistant", "content": d["text"]}],
+                "question_id": meta["question_id"],
+                "finish_reason": d["finish_reason"],
+                "thinking_stripped": d["thinking_stripped"],
+                "thinking_suspected": d["thinking_suspected"],
             }
             results.append(result)
 
@@ -602,6 +671,7 @@ class RoleResponseGenerator:
         )
 
         self.questions = None
+        self.question_ids = None     # the questions file's ``id`` of each kept question
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"Initialized RoleResponseGenerator with model: {model_name}")
@@ -619,12 +689,14 @@ class RoleResponseGenerator:
         from .atomic_io import read_jsonl_with_retry
         entries = read_jsonl_with_retry(
             self.questions_file, skip_malformed=False, logger_obj=logger)
-        questions = [entry['question'] for entry in entries]
-
-        questions = questions[:self.question_count]
+        entries = entries[:self.question_count]
         if self.reduce_questions > 1:
-            questions = questions[::self.reduce_questions]
-        self.questions = questions
+            entries = entries[::self.reduce_questions]
+        self.questions = [entry['question'] for entry in entries]
+        # The file's own id of each kept question (walk-through P6,
+        # 2026-10-12): question_index below is a position in this reduced
+        # list, so it alone does not say which question it was.
+        self.question_ids = [entry.get('id') for entry in entries]
         # TODO(design-debt): the question_index stored downstream (see
         # generate_role_responses's enumerate(questions)) is 0-based into this
         # already-reduced list, not into the original questions file.  That
@@ -639,6 +711,10 @@ class RoleResponseGenerator:
         #     240-question run) without regenerating everything
         #   - can't cross-reference activations across runs with different
         #     reduce settings
+        # Partly addressed 2026-10-12 (walk-through P6): every response record
+        # now also carries question_id, the questions file's own id, so the
+        # original question of a record is known; the keys (and so step 2's
+        # activation keys and step 4's --reduce_questions) are unchanged.
         # Better design: store the original question index in the activation
         # key (e.g., pos_p3_q021 for original index 21), always 0-based into
         # the full questions file.  Not fixing now because we have substantial
@@ -675,6 +751,7 @@ class RoleResponseGenerator:
             instructions=formatted_instructions,
             questions=questions,
             prompt_indices=self.prompt_indices,
+            question_ids=self.question_ids,
         )
 
         for r in results:
@@ -725,6 +802,7 @@ class RoleResponseGenerator:
             instructions=combined_instructions,
             questions=questions,
             prompt_indices=prompt_indices,
+            question_ids=self.question_ids,
         )
 
         for r in results:
