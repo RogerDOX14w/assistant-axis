@@ -988,3 +988,27 @@ error (gate 6); and the non-features are M1's tag (gate 5).
 7. **Run the pass on the 900 unjudged rows after 1, 2 and 4**: about $0.32 through the Batches API.
 8. Not this gate's, noticed on the way: the review_states_v4 decisions (Roger's three promotes) are recorded but not
    applied to the registry.
+
+## 10. Addendum (2026-10-12, phase B): the queue call is noisy from run to run
+
+Before the pass on the 900 unjudged rows, the fix's recommended test (stripping M1's "now" markers from the
+text the queue call reads) was run twice on scratch copies of the registry, on the 320 judged rows of the
+states list: once with the markers stripped and once with the text as recorded, both under route rules 2 and
+the same model (Haiku 5.5, which cannot be run at temperature 0).  Nothing was written to the real registry.
+
+| rows | route differs between the two runs | typical duration differs |
+|---|---|---|
+| text identical in both runs (197) | 45 (23%) | 48 (24%) |
+| text differs (markers stripped in one, 123) | 16 (13%) | 24 (20%) |
+
+The rows whose text is identical in both runs measure pure run-to-run variation: about one route in four
+changes when the same row is read again.  Stripping the markers has no effect that stands out from that.
+The three examples it was meant to fix: depressed stays renamed at "weeks" either way, lamenting renamed
+at "days" or "weeks", sorrowing "months" (lasting) stripped against "weeks" (held) as recorded.
+
+So the single reading the pass makes is the weak point, not the text.  M1 meets the same noise with three
+readings and a vote (`split.combine_readings`).  The 900-row pass is held until Roger decides between running it
+as it is (about $0.63 live) and giving the queue call three readings with a vote first (a code change; about
+$1.9 live for the 900 rows, and the 320 judged rows could then be re-read the same way for about $0.7).
+The routing counts in sections 5 and 7 above rest on one reading per row and carry the same noise.
+Scratch records: `/tmp/claude-501/gatefix_states/scratch/` and `scratch2/` (not kept).
