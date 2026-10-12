@@ -45,10 +45,16 @@ building a security precaution, we should make it reasonably secure"):
     Grep's ``pattern`` is a regex over contents, not a path, and is not
     checked.
 
-What it cannot see: a climb the text does not spell (``cd`` inside the
-command followed by a relative path, ``Path(x).parent.parent``, a variable
-set elsewhere, a symlink).  It is a backstop against honest mistakes, not a
-sandbox.
+Symlinks (2026-10-12, review 7 D5 (a), walk-through E3): a file-tool path
+that passes the checks above is also resolved with ``os.path.realpath``, and
+denied when it really leads under home outside the allowlist, so a symlink
+inside the repository (or /tmp, or ~/.claude) cannot reach out.  This is an
+extra check: the path as written is still checked first, as before.
+
+What it cannot see: in the Bash text, a climb the text does not spell (``cd``
+inside the command followed by a relative path, ``Path(x).parent.parent``, a
+variable set elsewhere, a symlink).  It is a backstop against honest
+mistakes, not a sandbox.
 
 Allowlist (all prefixes):
   - the repository itself
@@ -70,11 +76,20 @@ sandbox (macOS Seatbelt, configured in the ``sandbox`` block of the project's
 settings) checks every file a shell command actually opens, so it sees
 heredocs, variables and ``cd`` the way the text scan never could, and a
 denied read simply fails with no prompt.  ``sandbox_enabled`` reads the same
-settings files Claude Code does (user, project, local; the last one that says
-wins), so turning the sandbox off brings the Bash scan straight back.  A call
-that asks to leave the sandbox (``dangerouslyDisableSandbox: true``) is
-scanned as before.  The file tools run outside the sandbox and are always
-checked.
+settings sources Claude Code does, lowest precedence first: user, project,
+local, the ``--settings`` value on the ``claude`` command line, and the
+managed settings (``managed-settings.json`` and its ``managed-settings.d/``
+drop-ins), the last one that says wins; so turning the sandbox off anywhere
+brings the Bash scan straight back.  The last two were added on 2026-10-12
+(review 7 D5 (b), walk-through E3): before, a managed or ``--settings`` file
+that switched the sandbox off left the scan standing down with no sandbox
+behind it.  They can switch the stand-down off but never on by themselves
+(the settings files must say "on" too), so the change loosens nothing.  A
+``--settings`` value that is found but cannot be read counts as "sandbox
+off".  The ``--settings`` value is read from the ``claude`` process's command
+line (the nearest ancestor that is ``claude``).  A call that asks to leave
+the sandbox (``dangerouslyDisableSandbox: true``) is scanned as before.  The
+file tools run outside the sandbox and are always checked.
 
 Since 2026-10-03 a file-tool hit is a *deny* with a reason, not an ask
 (Roger: nothing should wait on him overnight): the agent is told to say in
@@ -119,27 +134,175 @@ QUOTES = "\"'`"
 # a bare delimiter must start with a letter or underscore and may not be followed by ``)``,
 # so neither ``$((1 << 3))`` nor ``$((x << y))`` is a marker
 HEREDOC = re.compile(r"(?<!<)<<-?[ \t]*(?:'([^'\n]+)'|\"([^\"\n]+)\"|\\?([A-Za-z_][\w.-]*))(?![<)])")
-# The settings files that can switch Claude Code's Bash sandbox on, lowest precedence first.
+# Managed settings (set by an administrator; the highest precedence, nothing overrides them),
+# where Claude Code reads them on macOS and Linux, with the drop-in directory beside the file
+# (its *.json merged on top, in name order).
+MANAGED_SETTINGS_FILE = (
+    "/Library/Application Support/ClaudeCode/managed-settings.json"
+    if sys.platform == "darwin" else "/etc/claude-code/managed-settings.json"
+)
+MANAGED_SETTINGS_DIR = MANAGED_SETTINGS_FILE[: -len(".json")] + ".d"
+# Stands for the ``--settings`` value (a file path or a JSON string) on the command line of
+# the ``claude`` process that runs this hook; read from the process table at call time.
+CLI_SETTINGS = "<claude --settings>"
+# The settings sources that can switch Claude Code's Bash sandbox on, lowest precedence first
+# (Claude Code: user < project < local < command line < managed).  The last three were added
+# on 2026-10-12 (review 7 D5 (b), walk-through E3).
 SETTINGS_FILES = (
     os.path.join(HOME, ".claude", "settings.json"),
     os.path.join(REPO, ".claude", "settings.json"),
     os.path.join(REPO, ".claude", "settings.local.json"),
+    CLI_SETTINGS,
+    MANAGED_SETTINGS_FILE,
+    MANAGED_SETTINGS_DIR,
 )
+_UNREADABLE = object()  # a source known to exist that could not be read
+
+
+def _process_argv_and_ppid(pid: int):
+    """``(argv, ppid)`` of process ``pid``, or None when it cannot be read.
+
+    Linux reads ``/proc``; macOS asks the kernel (``sysctl KERN_PROCARGS2`` for
+    the arguments, ``proc_pidinfo`` for the parent), which works where ``ps`` is
+    not allowed (Claude Code's Bash sandbox).  Other platforms: None."""
+    if sys.platform.startswith("linux"):
+        with open(f"/proc/{pid}/cmdline", "rb") as fh:
+            argv = [a.decode(errors="replace") for a in fh.read().split(b"\0")[:-1]]
+        with open(f"/proc/{pid}/stat", "rb") as fh:
+            ppid = int(fh.read().rsplit(b")", 1)[1].split()[1])
+        return argv, ppid
+    if sys.platform != "darwin":
+        return None
+    import ctypes
+    import ctypes.util
+    libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+    mib = (ctypes.c_int * 3)(1, 49, pid)  # CTL_KERN, KERN_PROCARGS2
+    size = ctypes.c_size_t(0)
+    if libc.sysctl(mib, 3, None, ctypes.byref(size), None, 0) != 0:
+        return None
+    buf = ctypes.create_string_buffer(size.value)
+    if libc.sysctl(mib, 3, buf, ctypes.byref(size), None, 0) != 0:
+        return None
+    raw = buf.raw[: size.value]
+    argc = int.from_bytes(raw[:4], sys.byteorder)
+    rest = raw[4:]
+    i = rest.index(b"\0")  # the executable path, then NUL padding, then argv
+    while i < len(rest) and rest[i] == 0:
+        i += 1
+    argv = [a.decode(errors="replace") for a in rest[i:].split(b"\0")[:argc]]
+    libproc = ctypes.CDLL("/usr/lib/libproc.dylib", use_errno=True)
+    info = ctypes.create_string_buffer(256)  # struct proc_bsdinfo (136 bytes)
+    if libproc.proc_pidinfo(pid, 3, ctypes.c_uint64(0), info, 256) < 20:  # PROC_PIDTBSDINFO
+        return None
+    ppid = int.from_bytes(info.raw[16:20], sys.byteorder)  # pbi_ppid
+    return argv, ppid
+
+
+def _is_claude(argv: list) -> bool:
+    """Whether a command line is Claude Code's: the native ``claude`` binary,
+    or node running the ``@anthropic-ai/claude-code`` package."""
+    head = argv[:2]
+    return any(os.path.basename(a) == "claude" or "claude-code" in a for a in head)
+
+
+def cli_settings_values(start_pid=None, max_depth: int = 8) -> list:
+    """The ``--settings`` values on the command line of the nearest ancestor
+    ``claude`` process (the one running this hook), or ``[]``.  Only that
+    process's flags are read, so another program's ``--settings`` further up
+    is never taken for it.  No ``claude`` within ``max_depth`` ancestors, or
+    any failure to read the process table, also gives ``[]``: the source is
+    then unknown, as it was before this was read at all."""
+    pid = os.getppid() if start_pid is None else start_pid
+    try:
+        for _ in range(max_depth):
+            got = _process_argv_and_ppid(pid)
+            if got is None:
+                return []
+            argv, ppid = got
+            if _is_claude(argv):
+                values = []
+                for i, a in enumerate(argv):
+                    if a == "--settings" and i + 1 < len(argv):
+                        values.append(argv[i + 1])
+                    elif a.startswith("--settings="):
+                        values.append(a[len("--settings="):])
+                return values
+            if ppid <= 1 or ppid == pid:
+                return []
+            pid = ppid
+    except Exception:  # noqa: BLE001 -- never let the lookup break the hook
+        return []
+    return []
+
+
+def _read_sandbox(path: str, *, missing_is_unreadable: bool = False):
+    """The ``sandbox`` block of a settings file: its value, None (file absent,
+    or no block), or ``_UNREADABLE`` (present but not readable JSON, or absent
+    when ``missing_is_unreadable``)."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+    except FileNotFoundError:
+        return _UNREADABLE if missing_is_unreadable else None
+    except (OSError, ValueError):
+        return _UNREADABLE
+    return doc.get("sandbox") if isinstance(doc, dict) else _UNREADABLE
+
+
+def _sandbox_blocks(source: str) -> list:
+    """The ``sandbox`` blocks one entry of ``SETTINGS_FILES`` contributes, in
+    precedence order: ``CLI_SETTINGS`` stands for the ``--settings`` values, a
+    directory for its ``*.json`` in name order, anything else for one file.
+    A ``--settings`` value that cannot be read gives ``_UNREADABLE``; a
+    settings file that cannot be read is skipped, as before."""
+    if source == CLI_SETTINGS:
+        out = []
+        for value in cli_settings_values():
+            if value.lstrip().startswith("{"):
+                try:
+                    doc = json.loads(value)
+                    out.append(doc.get("sandbox") if isinstance(doc, dict) else _UNREADABLE)
+                except ValueError:
+                    out.append(_UNREADABLE)
+            else:
+                out.append(_read_sandbox(os.path.expanduser(value), missing_is_unreadable=True))
+        return out
+    if os.path.isdir(source):
+        try:
+            names = sorted(n for n in os.listdir(source) if n.endswith(".json"))
+        except OSError:
+            return []
+        blocks = [_read_sandbox(os.path.join(source, n)) for n in names]
+        return [b for b in blocks if b is not _UNREADABLE]
+    block = _read_sandbox(source)
+    return [] if block is _UNREADABLE else [block]
 
 
 def sandbox_enabled(files=None) -> bool:
     """True when the last of ``files`` (default ``SETTINGS_FILES``) that sets
-    ``sandbox.enabled`` sets it true.  A missing or unreadable file is skipped."""
-    enabled = False
+    ``sandbox.enabled`` sets it true.  A missing or unreadable file is skipped;
+    a ``--settings`` value that is found but cannot be read counts as setting
+    it false (it is known to outrank the files below it).
+
+    The sources that outrank the settings files (``CLI_SETTINGS`` and the
+    managed settings) can switch the stand-down off but never on by
+    themselves: the settings files must also say true.  So adding them
+    (2026-10-12) brings the Bash scan back wherever Claude Code's sandbox is
+    off, and stands it down nowhere it was not standing down before; where
+    only an outranking source switches the sandbox on, the scan runs
+    redundantly behind it."""
+    outranking = (CLI_SETTINGS, MANAGED_SETTINGS_FILE, MANAGED_SETTINGS_DIR)
+    enabled = False      # Claude Code's reading: the last source that says wins
+    files_say = False    # the same over the settings files alone (before 2026-10-12, all there was)
     for f in (SETTINGS_FILES if files is None else files):
-        try:
-            with open(f, encoding="utf-8") as fh:
-                sb = json.load(fh).get("sandbox")
-        except (OSError, ValueError, AttributeError):
-            continue
-        if isinstance(sb, dict) and "enabled" in sb:
-            enabled = bool(sb["enabled"])
-    return enabled
+        for sb in _sandbox_blocks(f):
+            if sb is _UNREADABLE:
+                enabled = False
+            elif isinstance(sb, dict) and "enabled" in sb:
+                enabled = bool(sb["enabled"])
+                if f not in outranking:
+                    files_say = enabled
+    return enabled and files_say
 
 
 def normalize(p: str) -> str:
@@ -181,18 +344,57 @@ def resolve_climb(token: str, cwd: str):
     return os.path.normpath(os.path.join(cwd, token))
 
 
+def _expand_home(p: str) -> str:
+    """``normalize`` without the ``normpath``: the home forms expanded, every
+    ``..`` kept, so ``realpath`` can apply it after a symlink as the OS does."""
+    p = p.replace("${HOME}", HOME).replace("$HOME", HOME)
+    if p == "~" or p.startswith("~/"):
+        return HOME + p[1:]
+    if p.startswith("~"):
+        return os.path.expanduser(p)
+    return p
+
+
+def real_path_hit(raw: str, cwd: str):
+    """Where a file-tool path really leads (symlinks resolved) when that is
+    under home and outside the allowlist, else None.
+
+    An allowlisted directory that is itself a symlink stays allowed through
+    its target (``realpath`` of each prefix), so this adds no denial for a
+    path the written-form check lets through as inside.  Any failure to
+    resolve gives None (the written-form check alone, as before 2026-10-12)."""
+    try:
+        q = _expand_home(raw)
+        if not os.path.isabs(q):
+            q = os.path.join(cwd, q)
+        real = os.path.realpath(q)
+        if not (real == HOME or real.startswith(HOME)):
+            return None  # a system path, as for the written form
+        if allowed(real):
+            return None
+        for a in ALLOWED_PREFIXES:
+            ra = os.path.realpath(a)
+            if real == ra or real.startswith(ra.rstrip("/") + "/"):
+                return None
+        return real
+    except Exception:  # noqa: BLE001 -- never let the resolution break the hook
+        return None
+
+
 def file_path_hit(raw: str, cwd: str):
     """Where a file-tool path lands when it is outside the boundary, else None.
 
     A relative path or a home form counts wherever it lands outside the
-    allowlist; any other absolute path only when it lands under home."""
+    allowlist; any other absolute path only when it lands under home.  A path
+    that passes is then resolved through its symlinks (``real_path_hit``,
+    since 2026-10-12), so a link inside the boundary cannot reach out."""
     p = normalize(raw)
     relative = not os.path.isabs(p) and not p.startswith("~")
     if relative:
         p = os.path.normpath(os.path.join(cwd, p))
     if (relative or raw.startswith(HOME_FORMS) or p.startswith(HOME)) and not allowed(p):
         return p
-    return None
+    return real_path_hit(raw, cwd)
 
 
 GLOB_MAGIC = "*?[{"
@@ -316,7 +518,7 @@ def main() -> int:
         if tool == "Glob" and isinstance(pat, str) and pat:
             if pat.startswith(HOME) or pat.startswith("~"):
                 p = normalize(pat.split("*")[0])
-                p = p if not allowed(p) else None
+                p = p if not allowed(p) else real_path_hit(glob_static_prefix(pat), cwd)
             else:
                 prefix = glob_static_prefix(pat)
                 base = inp.get("path")

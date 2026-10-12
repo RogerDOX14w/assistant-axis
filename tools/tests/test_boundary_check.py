@@ -5,8 +5,19 @@ runs.  In Auto mode its asks are the only prompts he sees, so both directions
 matter: a path outside the project must ask, and text that only looks like
 one (``HEAD~1``, a ``..`` in prose) must not.
 
-Nothing here touches the filesystem outside ``tmp_path``: the hook works on
-strings, and every path below is resolved with ``os.path`` arithmetic only.
+Nothing here touches the filesystem outside ``tmp_path`` beyond what the hook
+itself resolves: the Bash scan works on strings, and since 2026-10-12 the
+file-tool checks also ``realpath`` a path that passes the written-form check,
+which stats only places that check allows (the repository, ``~/.claude``,
+``/tmp``) or system paths, never a path under home outside the allowlist.  The
+symlink and settings tests build their own home, repository and settings in
+``tmp_path`` and point the hook at them.
+
+To test a changed hook before it goes live (it runs on every tool call of
+every session the moment it is saved), copy it to a scratch directory and run
+this file with ``BOUNDARY_HOOK_UNDER_TEST=<the copy>``; the copy is then
+tested as if installed in this checkout (``BOUNDARY_HOOK_REPO`` overrides
+which checkout, for a copy of this test file run from elsewhere).
 """
 from __future__ import annotations
 
@@ -15,14 +26,23 @@ import io
 import json
 import os
 import pwd
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-_HOOK = Path(__file__).resolve().parents[2] / ".claude" / "hooks" / "boundary_check.py"
+_CHECKOUT = os.environ.get("BOUNDARY_HOOK_REPO") or str(Path(__file__).resolve().parents[2])
+_HOOK = Path(os.environ.get("BOUNDARY_HOOK_UNDER_TEST")
+             or Path(_CHECKOUT) / ".claude" / "hooks" / "boundary_check.py")
 _spec = importlib.util.spec_from_file_location("boundary_check", _HOOK)
 bc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bc)
+if bc.REPO != _CHECKOUT:
+    # a scratch copy computes REPO from where it sits: test it as if installed here
+    bc.SETTINGS_FILES = tuple(f.replace(bc.REPO, _CHECKOUT, 1) for f in bc.SETTINGS_FILES)
+    bc.ALLOWED_PREFIXES = tuple(_CHECKOUT if a == bc.REPO else a for a in bc.ALLOWED_PREFIXES)
+    bc.REPO = _CHECKOUT
 
 HOME = bc.HOME
 REPO = bc.REPO
@@ -460,3 +480,304 @@ class TestMain:
                         monkeypatch, capsys) == ""
         assert run_hook("not json", monkeypatch, capsys) == ""
         assert run_hook({"tool_name": "Bash", "tool_input": {}}, monkeypatch, capsys) == ""
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12 (review 7 D5, walk-through E3): symlinks and settings sources
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def fake_home(tmp_path, monkeypatch):
+    """A home directory in ``tmp_path`` with a repository, ``.claude`` and a
+    ``secret`` directory outside the allowlist; the hook is pointed at it.
+    ``/tmp`` is left off the allowlist: ``tmp_path`` itself is under it."""
+    home = tmp_path.resolve() / "home"
+    repo, claude, secret = home / "repo", home / ".claude", home / "secret"
+    for d in (repo / "data", claude, secret / "a" / "b"):
+        d.mkdir(parents=True)
+    (secret / "key").write_text("k")
+    (repo / "data" / "README.md").write_text("r")
+    monkeypatch.setattr(bc, "HOME", str(home))
+    monkeypatch.setattr(bc, "HOME_FORMS", ("~", "$HOME", "${HOME}", str(home)))
+    monkeypatch.setattr(bc, "ALLOWED_PREFIXES", (str(repo), str(claude)))
+    return SimpleNamespace(home=home, repo=repo, claude=claude, secret=secret)
+
+
+def decision(out: str):
+    return json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else None
+
+
+class TestSymlinksAreResolved:
+    """(a) A file-tool path that passes the written-form check is resolved
+    through its symlinks; a link inside the boundary cannot reach out."""
+
+    def read(self, path, monkeypatch, capsys, *, tool="Read", field="file_path", cwd=None, **extra):
+        return run_hook({"tool_name": tool, "cwd": str(cwd or bc.ALLOWED_PREFIXES[0]),
+                         "tool_input": {field: str(path), **extra}}, monkeypatch, capsys)
+
+    def test_a_directory_link_out_of_the_repository_is_denied(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+        out = self.read(fake_home.repo / "link" / "key", monkeypatch, capsys)
+        assert decision(out) == "deny"
+        assert str(fake_home.secret / "key") in out              # names where it really leads
+
+    def test_a_file_link_out_of_the_repository_is_denied(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "key_link").symlink_to(fake_home.secret / "key")
+        assert decision(self.read(fake_home.repo / "key_link", monkeypatch, capsys)) == "deny"
+
+    def test_a_relative_path_through_a_link_is_denied(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+        assert decision(self.read("link/key", monkeypatch, capsys, cwd=fake_home.repo)) == "deny"
+
+    @pytest.mark.parametrize("tool", ["Write", "Edit"])
+    def test_a_new_file_under_a_linked_directory_is_denied(self, tool, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+        out = self.read(fake_home.repo / "link" / "new.txt", monkeypatch, capsys, tool=tool)
+        assert decision(out) == "deny"
+
+    def test_dot_dot_after_a_link_is_applied_as_the_os_does(self, fake_home, monkeypatch, capsys):
+        """``repo/deep/../key`` reads as ``repo/key``, but the OS goes to the
+        link's target first, then up: ``secret/a/key``."""
+        (fake_home.repo / "deep").symlink_to(fake_home.secret / "a" / "b")
+        out = self.read(str(fake_home.repo / "deep") + "/../key", monkeypatch, capsys)
+        assert decision(out) == "deny"
+        assert str(fake_home.secret / "a" / "key") in out
+
+    def test_a_home_form_through_a_link_is_denied(self, fake_home, monkeypatch, capsys):
+        (fake_home.claude / "link").symlink_to(fake_home.secret)
+        assert decision(self.read("~/.claude/link/key", monkeypatch, capsys)) == "deny"
+
+    def test_links_that_stay_inside_are_quiet(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "alias").symlink_to(fake_home.repo / "data")
+        (fake_home.repo / "up").symlink_to(fake_home.home)          # out and back in
+        assert self.read(fake_home.repo / "alias" / "README.md", monkeypatch, capsys) == ""
+        assert self.read(fake_home.repo / "up" / "repo" / "data" / "README.md", monkeypatch, capsys) == ""
+        assert self.read(fake_home.repo / "data" / "README.md", monkeypatch, capsys) == ""
+
+    def test_a_link_to_a_system_path_is_quiet_as_the_written_form_is(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "sys").symlink_to("/usr/lib")
+        assert self.read(fake_home.repo / "sys" / "anything", monkeypatch, capsys) == ""
+
+    def test_an_allowlisted_directory_that_is_a_link_stays_allowed(self, tmp_path, monkeypatch, capsys):
+        """``~/.claude`` kept in a dotfiles directory: reading through it is
+        quiet, while naming the target directly is denied as before (the
+        resolution adds denials, it never lifts one)."""
+        home = tmp_path.resolve() / "home"
+        target = home / "dotfiles" / "claude"
+        target.mkdir(parents=True)
+        (target / "settings.json").write_text("{}")
+        (home / ".claude").symlink_to(target)
+        monkeypatch.setattr(bc, "HOME", str(home))
+        monkeypatch.setattr(bc, "HOME_FORMS", ("~", "$HOME", "${HOME}", str(home)))
+        monkeypatch.setattr(bc, "ALLOWED_PREFIXES", (str(home / "repo"), str(home / ".claude")))
+        assert self.read("~/.claude/settings.json", monkeypatch, capsys, cwd=home) == ""
+        assert self.read(home / ".claude" / "settings.json", monkeypatch, capsys, cwd=home) == ""
+        assert decision(self.read(target / "settings.json", monkeypatch, capsys, cwd=home)) == "deny"
+
+    @pytest.mark.parametrize("make_input", [
+        lambda r: {"pattern": "**/*", "path": str(r / "link")},
+        lambda r: {"pattern": "link/*.txt"},
+        lambda r: {"pattern": "~/repo/link/*"},
+        lambda r: {"pattern": str(r / "link") + "/**/*"},
+    ])
+    def test_glob_through_a_link_is_denied(self, make_input, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+        out = run_hook({"tool_name": "Glob", "cwd": str(fake_home.repo),
+                        "tool_input": make_input(fake_home.repo)}, monkeypatch, capsys)
+        assert decision(out) == "deny"
+
+    def test_grep_path_through_a_link_is_denied(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+        out = self.read(fake_home.repo / "link", monkeypatch, capsys, tool="Grep", field="path", pattern="x")
+        assert decision(out) == "deny"
+
+    def test_a_resolution_failure_falls_back_to_the_written_form(self, fake_home, monkeypatch, capsys):
+        (fake_home.repo / "link").symlink_to(fake_home.secret)
+
+        def boom(_p):
+            raise OSError("simulated")
+        monkeypatch.setattr(bc.os.path, "realpath", boom)
+        assert self.read(fake_home.repo / "link" / "key", monkeypatch, capsys) == ""   # as before
+        assert decision(self.read(fake_home.secret / "key", monkeypatch, capsys)) == "deny"
+
+    def test_the_written_form_is_still_reported_first(self, fake_home, monkeypatch, capsys):
+        out = self.read("~/secret/key", monkeypatch, capsys)
+        assert decision(out) == "deny" and str(fake_home.secret / "key") in out
+
+
+class TestHigherPrecedenceSettings:
+    """(b) The ``--settings`` value on the ``claude`` command line and the
+    managed settings outrank the project's files; a sandbox they switch off
+    brings the Bash scan back."""
+
+    def cli(self, monkeypatch, *values):
+        monkeypatch.setattr(bc, "cli_settings_values", lambda *a, **k: list(values))
+
+    def test_default_sources_in_precedence_order(self):
+        # the module's own tuple (the autouse fixture empties bc.SETTINGS_FILES)
+        spec = importlib.util.spec_from_file_location("bc_fresh", _HOOK)
+        fresh = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fresh)
+        files = fresh.SETTINGS_FILES
+        assert files[:3] == (os.path.join(fresh.HOME, ".claude", "settings.json"),
+                             os.path.join(fresh.REPO, ".claude", "settings.json"),
+                             os.path.join(fresh.REPO, ".claude", "settings.local.json"))
+        assert files[3:] == (fresh.CLI_SETTINGS, fresh.MANAGED_SETTINGS_FILE, fresh.MANAGED_SETTINGS_DIR)
+        if sys.platform == "darwin":
+            assert fresh.MANAGED_SETTINGS_FILE == "/Library/Application Support/ClaudeCode/managed-settings.json"
+            assert fresh.MANAGED_SETTINGS_DIR == "/Library/Application Support/ClaudeCode/managed-settings.d"
+        elif sys.platform.startswith("linux"):
+            assert fresh.MANAGED_SETTINGS_FILE == "/etc/claude-code/managed-settings.json"
+
+    def test_cli_settings_file_overrides_the_project(self, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        self.cli(monkeypatch, write_settings(tmp_path / "cli.json", {"enabled": False}))
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS)) is False
+        self.cli(monkeypatch, write_settings(tmp_path / "cli_on.json", {"enabled": True}))
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS)) is True
+
+    def test_outranking_sources_never_stand_the_scan_down_by_themselves(self, tmp_path, monkeypatch):
+        """Loosens nothing: where the settings files do not switch the sandbox
+        on, a --settings or managed "on" leaves the Bash scan running (it is
+        then redundant behind Claude Code's sandbox, never missing)."""
+        local_off = write_settings(tmp_path / "local_off.json", {"enabled": False})
+        self.cli(monkeypatch, '{"sandbox": {"enabled": true}}')
+        assert bc.sandbox_enabled((local_off, bc.CLI_SETTINGS)) is False
+        assert bc.sandbox_enabled((bc.CLI_SETTINGS,)) is False
+        managed_on = write_settings(tmp_path / "managed_on.json", {"enabled": True})
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_FILE", managed_on)
+        assert bc.sandbox_enabled((local_off, bc.MANAGED_SETTINGS_FILE)) is False
+        d = tmp_path / "managed-settings.d"
+        d.mkdir()
+        write_settings(d / "10-on.json", {"enabled": True})
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_DIR", str(d))
+        assert bc.sandbox_enabled((local_off, bc.MANAGED_SETTINGS_DIR)) is False
+
+    @pytest.mark.parametrize("value, expected", [
+        ('{"sandbox": {"enabled": false}}', False),
+        ('  {"sandbox": {"enabled": true}}', True),
+        ('{"permissions": {}}', True),                 # says nothing: the project's value stands
+    ])
+    def test_cli_settings_json_string(self, value, expected, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        self.cli(monkeypatch, value)
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS)) is expected
+
+    @pytest.mark.parametrize("value", ["{not json", "/nonexistent/claude_settings_zz.json", "[1, 2]"])
+    def test_an_unreadable_cli_value_counts_as_sandbox_off(self, value, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        self.cli(monkeypatch, value)
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS)) is False
+
+    def test_no_cli_value_leaves_the_project_value(self, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        self.cli(monkeypatch)
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS)) is True
+
+    def test_managed_settings_outrank_everything(self, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        self.cli(monkeypatch, '{"sandbox": {"enabled": true}}')
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_FILE",
+                            write_settings(tmp_path / "managed.json", {"enabled": False}))
+        sources = (local_on, bc.CLI_SETTINGS, bc.MANAGED_SETTINGS_FILE)
+        assert bc.sandbox_enabled(sources) is False
+        # managed "on" over a --settings "off": Claude Code's sandbox is on, and the
+        # settings files say on too, so the scan stands down
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_FILE",
+                            write_settings(tmp_path / "managed_on.json", {"enabled": True}))
+        self.cli(monkeypatch, '{"sandbox": {"enabled": false}}')
+        sources = (local_on, bc.CLI_SETTINGS, bc.MANAGED_SETTINGS_FILE)
+        assert bc.sandbox_enabled(sources) is True
+        # an absent managed file is the usual case and changes nothing
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_FILE", str(tmp_path / "no_managed.json"))
+        self.cli(monkeypatch)
+        assert bc.sandbox_enabled((local_on, bc.CLI_SETTINGS, bc.MANAGED_SETTINGS_FILE)) is True
+
+    def test_managed_drop_ins_apply_in_name_order(self, tmp_path, monkeypatch):
+        local_on = write_settings(tmp_path / "local.json", {"enabled": True})
+        d = tmp_path / "managed-settings.d"
+        d.mkdir()
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_DIR", str(d))
+        write_settings(d / "10-on.json", {"enabled": True})
+        write_settings(d / "20-off.json", {"enabled": False})
+        (d / "30-notes.txt").write_text('{"sandbox": {"enabled": true}}')   # not *.json: ignored
+        (d / "15-bad.json").write_text("{not json")                         # unreadable: skipped
+        assert bc.sandbox_enabled((local_on, bc.MANAGED_SETTINGS_DIR)) is False
+        write_settings(d / "40-on.json", {"enabled": True})
+        assert bc.sandbox_enabled((local_on, bc.MANAGED_SETTINGS_DIR)) is True
+        # no drop-in directory at all: nothing changes
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_DIR", str(tmp_path / "absent.d"))
+        assert bc.sandbox_enabled((local_on, bc.MANAGED_SETTINGS_DIR)) is True
+
+    def test_bash_is_scanned_when_managed_settings_switch_the_sandbox_off(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "MANAGED_SETTINGS_FILE",
+                            write_settings(tmp_path / "managed.json", {"enabled": False}))
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (
+            write_settings(tmp_path / "local.json", {"enabled": True}), bc.MANAGED_SETTINGS_FILE))
+        out = run_hook({"tool_name": "Bash", "cwd": OUTSIDE_CWD,
+                        "tool_input": {"command": "ls ~/.ssh"}}, monkeypatch, capsys)
+        assert decision(out) == "ask"
+
+    def test_bash_is_scanned_when_the_cli_switches_the_sandbox_off(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (
+            write_settings(tmp_path / "local.json", {"enabled": True}), bc.CLI_SETTINGS))
+        self.cli(monkeypatch, '{"sandbox": {"enabled": false}}')
+        out = run_hook({"tool_name": "Bash", "cwd": OUTSIDE_CWD,
+                        "tool_input": {"command": "ls ~/.ssh"}}, monkeypatch, capsys)
+        assert decision(out) == "ask"
+
+
+class TestCliSettingsLookup:
+    """Where ``--settings`` is read from: the nearest ancestor ``claude``."""
+
+    def table(self, monkeypatch, procs):
+        def fake(pid):
+            return procs.get(pid)
+        monkeypatch.setattr(bc, "_process_argv_and_ppid", fake)
+
+    def test_reads_the_nearest_claude(self, monkeypatch):
+        self.table(monkeypatch, {
+            100: (["/bin/sh", "-c", "python3 boundary_check.py"], 90),
+            90: (["/opt/x/claude", "--settings", "/p/s.json", "--model", "opus"], 80),
+            80: (["Cursor", "--settings", "/other.json"], 1),
+        })
+        assert bc.cli_settings_values(start_pid=100) == ["/p/s.json"]
+
+    def test_equals_form_and_node_launch(self, monkeypatch):
+        self.table(monkeypatch, {
+            100: (["node", "/usr/lib/node_modules/@anthropic-ai/claude-code/cli.js",
+                   '--settings={"sandbox": {"enabled": false}}'], 1),
+        })
+        assert bc.cli_settings_values(start_pid=100) == ['{"sandbox": {"enabled": false}}']
+
+    def test_a_claude_without_the_flag_stops_the_walk(self, monkeypatch):
+        self.table(monkeypatch, {
+            100: (["claude", "--resume"], 90),
+            90: (["Cursor", "--settings", "/other.json"], 1),
+        })
+        assert bc.cli_settings_values(start_pid=100) == []
+
+    def test_no_claude_or_no_process_table_gives_nothing(self, monkeypatch):
+        self.table(monkeypatch, {100: (["zsh"], 90), 90: (["launchd"], 1)})
+        assert bc.cli_settings_values(start_pid=100) == []
+        self.table(monkeypatch, {})
+        assert bc.cli_settings_values(start_pid=100) == []
+
+        def boom(pid):
+            raise OSError("not permitted")
+        monkeypatch.setattr(bc, "_process_argv_and_ppid", boom)
+        assert bc.cli_settings_values(start_pid=100) == []
+
+    def test_the_hook_script_itself_is_not_taken_for_claude(self):
+        assert not bc._is_claude(["python3", "/repo/.claude/hooks/boundary_check.py"])
+        assert not bc._is_claude(["/bin/zsh", "-c", "source ~/.claude/shell-snapshots/x"])
+        assert bc._is_claude(["/Users/x/.vscode/extensions/anthropic.claude-code-2/bin/claude"])
+
+    @pytest.mark.skipif(not (sys.platform == "darwin" or sys.platform.startswith("linux")),
+                        reason="process table read on macOS and Linux only")
+    def test_reads_this_process(self):
+        got = bc._process_argv_and_ppid(os.getpid())
+        assert got is not None
+        argv, ppid = got
+        assert ppid == os.getppid()
+        assert any("python" in os.path.basename(a) or "pytest" in a for a in argv)
