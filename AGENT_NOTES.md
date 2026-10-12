@@ -204,7 +204,9 @@ the AGENT_NOTES "Judging cost model" section that flagged the May
 was caught.  The cost difference between B=10 and B=7 is small
 (~$30 across 10 axes), but the principle generalises: for anything
 expensive, the few minutes of confirmation are worth far more than
-the value of the API tokens.
+the value of the API tokens.  (Since 2026-10-12 that recipe and the
+three other May 2026 rejudge/recompute recipes in [`scripts/`](./scripts/)
+exit 2 unless `HISTORICAL_RERUN=1`; walk-through A1.)
 
 **Recent / explicit requests still apply**: if Roger has just said
 "do the canonical run at B=10" in the immediately-prior message,
@@ -384,7 +386,8 @@ which the climb rule resolves against the working directory, lands
 outside the home-directory project tree, and asks.  Edit documents with
 the Edit tool, which is checked by path only.  What the hook cannot see: a climb the text does not spell (a
 `cd` inside the command followed by a relative path,
-`Path(x).parent.parent`, a variable set elsewhere, a symlink).  It is a
+`Path(x).parent.parent`, a variable set elsewhere, a symlink named in a
+Bash command).  It is a
 backstop against honest mistakes, not a sandbox.  To see what the hook
 actually asked in a session, read the transcript's `hook_success`
 attachment records.
@@ -434,13 +437,22 @@ command to Roger: adding to the allow lists is his decision, and routing
 around a block is not an option.
 
 With the sandbox on, the hook's Bash text scan stands down
-(`boundary_check.sandbox_enabled` reads the same settings files Claude
-Code does, the last one that sets `sandbox.enabled` wins), so turning the
+(`boundary_check.sandbox_enabled` reads the settings sources Claude Code
+does, lowest precedence first: user, project, local, the `--settings` value
+on the `claude` command line, and the managed settings with their
+`managed-settings.d/` drop-ins; the last one that sets `sandbox.enabled`
+wins, except that `--settings` and the managed settings can turn the
+stand-down off but never on by themselves, and a `--settings` value that
+cannot be read counts as off; 2026-10-12, walk-through E3), so turning the
 sandbox off brings the scan straight back, and a call that asks to leave the
 sandbox is still scanned.  The hook keeps checking the file tools (Read,
 Edit, Write, NotebookEdit, Glob, Grep), which run outside the sandbox and
-work on exact paths, so they never produced the false positives.  Since the
-same day a file-tool hit is a **deny** with a reason, not an ask (Roger:
+work on exact paths, so they never produced the false positives.  Since
+2026-10-12 a file-tool path that passes is also resolved through its
+symlinks and denied when it really leads under home outside the allowlist;
+today that denies only Reads of `.venv/bin/python*` (links into
+`~/.local/share/uv`).  Since
+2026-10-03 a file-tool hit is a **deny** with a reason, not an ask (Roger:
 nothing should wait on him overnight): the agent is told to say in its reply
 which path it needs and why and not to look for another route; a path Roger
 approves goes into `ALLOWED_PREFIXES` in the hook.  A Bash hit (only while
@@ -2408,7 +2420,11 @@ builds an `InputSpec` list per output, one of `descriptions` /
   status list `OK_STATUSES`.
 - **corpus_vectors** (`kind="multi"`): every
   `data_dir/{roles,traits}/vectors/*.pt` (used for projections;
-  defines the scorable entity set in every mode).
+  defines the scorable entity set in every mode).  The axis's own poles
+  are left out of that set by entity id (`AxisSpec.pole_entity_ids`;
+  2026-10-12, walk-through D3), so on `impatient_vs_patient` the role
+  `patient` is judged and stays in the whitener pool; downstream
+  consumers still exclude pole names in both kinds.
 - **responses-mode extras** (only for `responses` / `correlations`):
   `response_files`, `response_score_files`, `default_responses`,
   `questions_file`.
@@ -2481,6 +2497,14 @@ optional `dep_key` glob) plus a free-text `reason`.  Both
   an envelope and reads as `current` directly; the registry
   entry becomes a no-op).
 
+Since 2026-10-12 the category decides which rows an entry may defer
+(`legacy_bare` only `legacy`, `awaiting_rescore` only stale, the rest
+either; walk-through E10), and a stale row is deferred only when every
+drifted dep_key is covered; a row with no drifted dep_key of its own
+(`legacy`, `stale_transitive`) takes only entries without `dep_key`
+(E8).  Both rules: `deferral_registry.match_row` in
+[`assistant_axis/deferral_registry.py`](assistant_axis/deferral_registry.py).
+
 `current` and (PNG-only) `frozen` are never reclassified — the
 registry only takes effect for rows that would otherwise read as
 `stale_*` or `legacy`.  The deferred section in audit reports
@@ -2495,12 +2519,14 @@ they stay active until the maintainer deletes the entry.  Use
 # Defer all q9 description rejudges (stale → deferred):
 uv run python tools/defer_rejudge.py \
     --path 'roger/axis_judge_experiments/q9_*/gpt/scores_descriptions.json' \
+    --category awaiting_rescore \
     --reason "Held until 4-model audit completes."
 
 # Backfill: declare all pre-Phase-6 judge caches as legacy → deferred
 # (the May 2026 standard reason template):
 uv run python tools/defer_rejudge.py \
     --path '**/scores_descriptions.json' \
+    --category legacy_bare \
     --reason "Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Auto-clears when re-judged."
 
 # Lift later:
@@ -2510,6 +2536,9 @@ uv run python tools/defer_rejudge.py --remove \
 # Skip the registry entirely in one run (debug):
 uv run python tools/audit_caches.py --ignore-deferrals
 ```
+
+`--category` is required since 2026-10-12 (walk-through E6);
+`uncategorized` is refused.
 
 Audit `--status` semantics:
 - `--status stale` matches `stale_direct` + `stale_transitive`
@@ -2531,7 +2560,8 @@ invariant checks in `tools/audit_deferrals.py`:
 
 | Category | Semantics | Auto-clears? |
 |---|---|---|
-| `legacy_bare` | Pre-Phase-6 cache without an envelope. | When producer is re-run (envelope replaces bare file). |
+| `legacy_bare` | Pre-Phase-6 cache without an envelope.  Defers only `legacy` rows (since 2026-10-12). | When producer is re-run (envelope replaces bare file). |
+| `awaiting_rescore` | Envelope-carrying output known to be stale, kept until a scheduled re-score named in its reason (2026-10-12, walk-through E10: the May 2026 judge caches and plots under `roger/axis_judge_experiments`, re-scored in October, regeneration row R4).  Defers only stale rows. | When the output is re-scored. |
 | `frozen_snapshot` | Point-in-time capture *with a live twin*; comparison plots typically read both. Optional `compares_to` glob points at the live twin. | Never. |
 | `archived` | Standalone output of a retired pipeline configuration; no live twin (e.g. pre-cohort-cutover backups, deprecated variants). | Never. |
 | `orphan_no_producer` | Output whose producer script is not in the git tree (one-off `/tmp/_*.py`, removed/superseded producers). Optional `producer_script` records the historical path. | Manual; `audit_deferrals` ⚠️ alarms if a recorded `producer_script` reappears in `git ls-files`. |
@@ -2924,6 +2954,11 @@ judge noise is per-question; averaging the K coh scores cancels noise
 without losing the gross signal.  Skipped records get
 `judges.persona.skipped_due_to_strength_mean_coh = True` (and same for
 effect); `strength_mean_coh` is stamped on every record regardless.
+A record that already carries a persona score or an effect `combined`
+keeps it on the skip path unless `--rerun` (2026-10-12, review 7 D3 /
+walk-through E1); before,
+[`steering/post_judge.py`](./steering/post_judge.py) with a lowered
+`--skip-if-strength-mean-coh-above` overwrote them with stubs.
 
 **Records schema** (`{cell_dir}/records.jsonl`):
 
@@ -3116,7 +3151,15 @@ prior emission), bootstraps `mean_coh_by_strength` and
 `mean_abs_eff_by_strength` from the on-disk records, then
 re-evaluates both stop conditions against the resumed history
 before generating any new strengths.  Test
-`TestBidirectionalRestart` covers this path.
+`TestBidirectionalRestart` covers this path.  Since 2026-10-12 (review 7
+D4 / walk-through E2) the resume gap-fill re-judges a strength whose K
+responses are all on disk (`_rejudge_strength` in
+[`assistant_axis/steering_runner.py`](./assistant_axis/steering_runner.py):
+coherence only where missing, then persona and effect only where a
+record has no score) and wipes and regenerates only a strength with
+responses missing.  `s_init` is treated like any other strength.
+Before, one UNPARSEABLE judgement cost K generations on every resume,
+and `s_init` was never re-judged.
 
 **summary.json schema** (bidirectional cells):
 
@@ -3202,7 +3245,10 @@ override is *not* supported -- the table is the per-cell knob.
 **Re-tuning.**  Re-run
 [`tools/analyse_start_strength.py`](./tools/analyse_start_strength.py)
 after every meaningful sweep batch (e.g. when sweep #2 second-role
-data lands and we have ~2× more cells per bucket).  Inspect the
+data lands and we have ~2× more cells per bucket).  The tool grades
+with the runner's stop predicates (mean coherence ≥ 1.5 is TOO_HIGH,
+|mean effect| < 1/3 TOO_LOW; aligned 2026-10-12, walk-through D11).
+Inspect the
 `(slot, layer, sign, mode)` table at the end of the report; if a
 bucket newly shifts away from GOOD-dominant, add or adjust an
 `OVERRIDES` entry and ship a one-line table edit.  No code or
@@ -4079,7 +4125,12 @@ For analyses going forward, the project defaults are:
 `DEFAULT_SOFT_K=2` was set in Apr 2026 after the LKM grid sweep on the
 33 desc+inst + 12 response = 45-axis set with the inst-tiebreak
 weighting (prior hardcoded default was K=3, from the older K-sweep
-parabola fit done before soft-shear was in the toolbox).
+parabola fit done before soft-shear was in the toolbox).  The one
+exception: `OPTIMAL_AXIS_SOFT_K = 3`, beside it in
+[`whitening.py`](./results_analysis/canonical_angles/whitening.py), is
+what [`optimal_axis_for_judge.py`](./results_analysis/optimal_axis_for_judge.py)'s
+recorded runs used, and that script keeps it (2026-10-12, walk-through
+D6).
 
 `DEFAULT_SOFT_SHEAR_L=3` (and `DEFAULT_WHITENING_SPEC="soft_shear=3"`)
 were bumped from `L=2` / `"soft_shear=2"` on May 11 2026 after the
@@ -4359,6 +4410,12 @@ for entry in role_scores:  merged[entry["name"]] = entry["score"]  # silently ov
 
 …which silently dropped one side of every collision and biased downstream
 ρ calculations by ~1.5%.
+
+[`axis_judge_correlation.py`](./results_analysis/axis_judge_correlation.py)
+skips an axis's poles by entity id (`AxisSpec.pole_entity_ids`;
+2026-10-12, walk-through D3): on `impatient_vs_patient` the role
+`patient` is judged and stays in the whitener pool.  Downstream
+consumers still exclude pole names in both kinds.
 
 ### Disambiguator: `assistant_axis.entity_id`
 
@@ -4969,6 +5026,10 @@ value not yet canary'd): stay at ~`1.5× + $10` until the first run
 lands and the residual is measured.  Drop to the standard
 recommendation thereafter.
 
+[`pc_round_trip/launch_judge_runs.py`](./results_analysis/pc_round_trip/launch_judge_runs.py)
+passes `--budget_usd` to every cell's subprocess (GPT $6, Sonnet $19 by
+default, `DEFAULT_BUDGET_USD_PER_CELL`; 2026-10-12, walk-through D7).
+
 ### Provenance: capture `usage` from every API response
 <!-- claude: rule=provenance -->
 
@@ -5135,7 +5196,7 @@ This is the **8-slot** rebuild that supersedes `runpod_workspace/qwen/qwen-3-32b
 
 When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. `results_analysis/run_axis_experiment_batch.py` defaults to it (since 2026-05-08), as does every other `results_analysis/` script with a data-dir default (checked 2026-10-12); for any other script, pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly. Some examples in `results_analysis/README.md` still reference the older directory.
 
-**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
+**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. Since 2026-10-12 (walk-through A2) every `results_analysis` script that takes a pair list runs [`pair_list_guard.check_pair_list`](./results_analysis/pair_list_guard.py) and stops naming any axis it has no vectors or caches for. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`. The goal lists also have two generations (2026-10-12, walk-through A3): [`data/goal_roles_and_traits_v1.json`](./data/goal_roles_and_traits_v1.json) is the April 2026 file the 8slot extraction used, and 8slot-era goal-list readers default to it.
 
 ### Mid-Session Patterns
 - If unsure about working style: "Should I implement this directly or discuss options first?"
@@ -5627,6 +5688,18 @@ of appending a second pair.
 Every subcommand has `--dry-run`.  Tests:
 `data_analysis/tests/test_seed_entities.py`.
 
+**Exit status (2026-10-12, walk-through B5).**  The two generators
+([`regenerate_trait_instructions.py`](./data_analysis/regenerate_trait_instructions.py),
+[`regenerate_role_instructions.py`](./data_analysis/regenerate_role_instructions.py))
+and [`generate_antonyms.py`](./data_analysis/generate_antonyms.py) exit 1
+when an entity fails with an error other than a refusal, having written
+(or printed) the rest; refusals alone exit 0.  A batch run with failures
+records `failed` and `counts.failed` in its batch-log entry.
+`seed_entities.py generate` marks successes whatever the exit status and
+gives the entries a failed command left over a `generation_failed: {at,
+exit}` record (cleared on success); `check` keeps the answers that came
+back; `pair` records the queue before regenerating.
+
 The chunk-3 runs (2026-09-25/26) were driven by small scripts in the
 session scratchpad, not in the repo: packet builders that assemble the
 rules section above plus four post-strip example pairs and each entry's
@@ -5818,7 +5891,7 @@ recording which set of same-type entities it belongs to and the shape of
 that set.  Decided 2026-09-08; loader and validator in
 [`assistant_axis/arrangements.py`](./assistant_axis/arrangements.py),
 CLI check in [`data_analysis/check_arrangements.py`](./data_analysis/check_arrangements.py),
-one-off backfill in [`data_analysis/backfill_arrangements.py`](./data_analysis/backfill_arrangements.py).
+the one-off September backfill archived at [`archive/backfill_arrangements_2026-09-08/backfill_arrangements.py`](./archive/backfill_arrangements_2026-09-08/backfill_arrangements.py) (2026-10-12, walk-through A4: the field is maintained by decision now, and its `--apply --overwrite` would wipe every arrangement recorded since September; it exits 2 unless `HISTORICAL_RERUN=1`).
 
 ```json
 "arrangement": {"kind": "pair", "members": ["callous", "compassionate"]}
