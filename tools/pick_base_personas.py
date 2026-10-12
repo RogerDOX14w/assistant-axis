@@ -216,6 +216,17 @@ def backup_existing(out_path: Path) -> Path | None:
     return dest
 
 
+GOAL_FILE = "data/goal_roles_and_traits.json"
+GOAL_FILE_V1 = "data/goal_roles_and_traits_v1.json"
+
+
+def default_goal_file(pairs: str) -> str:
+    """The goal-list file matching a pair list's generation: the ``_v1``
+    snapshot (the April 2026 goal lists the 8slot extraction used) for a
+    ``pair_list_*_v1.json``, else the current file."""
+    return GOAL_FILE_V1 if Path(pairs).stem.endswith("_v1") else GOAL_FILE
+
+
 def main() -> int:
     p = argparse.ArgumentParser(
         description=__doc__,
@@ -242,11 +253,17 @@ def main() -> int:
                         "thin after exclusions (~22 roles) and is drawn "
                         "from by ~38 axes, so a strong variety push is "
                         "needed to spread role usage.")
-    p.add_argument("--goal_roles_traits",
-                   default="data/goal_roles_and_traits.json",
-                   help="Goal/non-goal classification file "
-                        "(default: data/goal_roles_and_traits.json).")
+    p.add_argument("--goal_roles_traits", default=None,
+                   help="Goal/non-goal classification file.  Default: the one "
+                        "of the pair list's generation (walk-through A3, "
+                        "2026-10-12): data/goal_roles_and_traits_v1.json for a "
+                        "_v1 pair list (the lists the 8slot judge caches were "
+                        "made from), else data/goal_roles_and_traits.json.  "
+                        "Before, a _v1 list was read against the current goal "
+                        "lists, mixing the two generations.")
     args = p.parse_args()
+    if args.goal_roles_traits is None:
+        args.goal_roles_traits = default_goal_file(args.pairs)
 
     experiment_dir = Path(args.experiment_dir).resolve()
     pairs_path = experiment_dir / args.pairs

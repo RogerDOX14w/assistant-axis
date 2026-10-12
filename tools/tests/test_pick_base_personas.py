@@ -29,3 +29,15 @@ def test_hard_exclude_covers_documented_cases() -> None:
     for role in ("virus", "virtue_aligned_ai", "instrumentally_aligned_ai",
                  "aligned_artificial_intelligence", "default"):
         assert role in pbp.HARD_EXCLUDE
+
+
+def test_goal_file_follows_the_pair_list_generation() -> None:
+    """Walk-through A3 (2026-10-12): a ``_v1`` pair list (the lists the
+    8slot judge caches were made from) is read with the ``_v1`` goal file,
+    a current list with the current one; before, every list was read
+    against the current goal lists."""
+    assert pbp.default_goal_file("pair_list_clean_v1.json") == "data/goal_roles_and_traits_v1.json"
+    assert pbp.default_goal_file("pair_list_goalnongoal_v1.json") == "data/goal_roles_and_traits_v1.json"
+    assert pbp.default_goal_file("pair_list_clean.json") == "data/goal_roles_and_traits.json"
+    for rel in (pbp.GOAL_FILE, pbp.GOAL_FILE_V1):
+        assert (_REPO_ROOT / rel).is_file(), rel

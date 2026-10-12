@@ -90,9 +90,14 @@ def parse_args() -> argparse.Namespace:
                         "(default: enabled).  Use --no-theat_shift to disable.")
     p.add_argument("--no-theat_shift", dest="theat_shift", action="store_false")
     p.add_argument("--goal_list",
-                   default="data/goal_roles_and_traits.json",
+                   default="data/goal_roles_and_traits_v1.json",
                    help="Path to JSON of goal/non-goal role+trait lists "
-                        "(used for status colouring + corpus centroids).")
+                        "(used for status colouring + corpus centroids).  "
+                        "Default: the _v1 snapshot, the April 2026 goal lists "
+                        "the 8slot extraction used, which belong with the 8slot "
+                        "data this script defaults to (walk-through A3).  "
+                        "Pass data/goal_roles_and_traits.json with a data dir "
+                        "from the October extraction.")
     p.add_argument("--output", required=True, type=Path,
                    help="Output PNG path")
     p.add_argument("--pre_legend_pad_factor", type=float, default=3.5,

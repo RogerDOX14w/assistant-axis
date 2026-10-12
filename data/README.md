@@ -10,6 +10,7 @@ generate and process this data.
 ```
 data/
 ├── goal_roles_and_traits.json   # Curated subsets of goal/nongoal roles and traits for experiments
+├── goal_roles_and_traits_v1.json  # the April 2026 version, used by the 8slot extraction (record)
 ├── combination_scores.json      # incongruity scores for the 30x30 role+trait combos (+ _usage, _batches, .escalations)
 ├── extraction_questions.jsonl   # Questions used in pipeline Step 1
 ├── seed_queue.json              # Inventory and state of every candidate entity (Sep 2026 expansion; see below)
@@ -167,6 +168,26 @@ the role rubric V3's instructions give many roles a commitment the classifier
 reads as a weak goal; its tier 1 keeps the earlier job / non-job balance.
 Draft, reasons and cosines:
 `roger/pre_extraction_2026-10-09/w15/goal_tiers_draft.md`.
+
+**Two generations, like the pair lists** (walk-through A3, 2026-10-12).
+[`goal_roles_and_traits_v1.json`](goal_roles_and_traits_v1.json) is this file
+as it was in April 2026 (`git show cac76b65:data/goal_roles_and_traits.json`,
+byte-exact; unchanged until 3f6de81e on 2026-09-28; test
+`results_analysis/tests/test_goal_file_generations.py`): the version the May
+8slot extraction used and the record behind the `_v1` pair lists in
+`roger/axis_judge_experiments/`.  Not the version just before W15
+(`87d84fc^`): that one already has the September renames and near-duplicate
+drops, so it names stems the 8slot data has no vector for
+(`instrumentally_aligned_ai`, `cliquish`, ...) and lacks ones it has
+(`aligned_artificial_intelligence`, `dramatic`, ...).  Both give the `_v1`
+pair lists the same `goal_type`.  The
+current pair lists' `goal_type` comes from this file (rebuilt with
+`tools/build_pair_lists.py` the same day: `pair_list_goalnongoal.json` 37 → 26
+pairs, 13 `goal_type` changes in `pair_list_clean.json`).  Scripts that work on
+the 8slot data and read the goal lists default to the `_v1` file
+(`results_analysis/canonical_angles/plots/ca1_plane_pre_post_shear.py`;
+`tools/pick_base_personas.py` when given a `_v1` pair list).  Edit neither
+`_v1` file.
 
 For `traits.goal`, tier 1 prefers the less-HHH-default side of antonym pairs
 (e.g., sadistic over compassionate) and spans distinct ethical frameworks,

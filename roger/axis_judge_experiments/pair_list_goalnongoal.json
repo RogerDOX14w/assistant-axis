@@ -7,13 +7,6 @@
     "goal_type": "goal"
   },
   {
-    "pos": "accessible",
-    "neg": "esoteric",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
     "pos": "intuitive",
     "neg": "analytical",
     "pair_type": "traits",
@@ -49,6 +42,13 @@
     "goal_type": "goal"
   },
   {
+    "pos": "conciliatory",
+    "neg": "confrontational",
+    "pair_type": "traits",
+    "note": "clean trait pair (bidirectional negative_label match)",
+    "goal_type": "goal"
+  },
+  {
     "pos": "concise",
     "neg": "verbose",
     "pair_type": "traits",
@@ -56,32 +56,11 @@
     "goal_type": "non_goal"
   },
   {
-    "pos": "confident",
-    "neg": "uncertain",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
-    "pos": "progressive",
-    "neg": "conservative",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "goal"
-  },
-  {
     "pos": "constructive",
     "neg": "destructive",
     "pair_type": "traits",
     "note": "clean trait pair (bidirectional negative_label match)",
     "goal_type": "goal"
-  },
-  {
-    "pos": "convergent",
-    "neg": "divergent",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
   },
   {
     "pos": "truthful",
@@ -105,36 +84,8 @@
     "goal_type": "goal"
   },
   {
-    "pos": "passionate",
-    "neg": "dispassionate",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
     "pos": "egalitarian",
     "neg": "elitist",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "goal"
-  },
-  {
-    "pos": "ethereal",
-    "neg": "grounded",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
-    "pos": "introverted",
-    "neg": "extroverted",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
-    "pos": "forgiving",
-    "neg": "unforgiving",
     "pair_type": "traits",
     "note": "clean trait pair (bidirectional negative_label match)",
     "goal_type": "goal"
@@ -168,25 +119,11 @@
     "goal_type": "goal"
   },
   {
-    "pos": "reductionist",
-    "neg": "holistic",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
     "pos": "idealistic",
     "neg": "pragmatic",
     "pair_type": "traits",
     "note": "clean trait pair (bidirectional negative_label match)",
     "goal_type": "goal"
-  },
-  {
-    "pos": "improvisational",
-    "neg": "methodical",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
   },
   {
     "pos": "obedient",
@@ -198,20 +135,6 @@
   {
     "pos": "playful",
     "neg": "serious",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
-    "pos": "practical",
-    "neg": "theoretical",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "non_goal"
-  },
-  {
-    "pos": "quantitative",
-    "neg": "qualitative",
     "pair_type": "traits",
     "note": "clean trait pair (bidirectional negative_label match)",
     "goal_type": "non_goal"
