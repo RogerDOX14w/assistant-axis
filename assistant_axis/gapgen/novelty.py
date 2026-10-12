@@ -38,15 +38,34 @@ Per candidate (a registry row whose filter verdict is ``trait``, with a gloss an
 5. **Decision and block** (:func:`novelty_block`): ``covered`` (with ``covered_by``), ``new``, or ``grey``
    (kept, with a review flag that the rule set treats as grey: see :class:`Rules`).
 
-The decision rules come in two versions (:data:`RULES`).  Version 1 is the pilot's (decisions 1-11 of
-``coding_plan_platform.md``'s M3 section); version 2, the default from 2026-10-07, adds decisions 12-15 and
-the cosine floor (coding_plan_m3.md, "Round 2"): a Sonnet reading one below the cut-off that Opus reads at
-or above it covers, flagged; both ends of a recorded pair (every corner of a simplex) marked similar are
+The decision rules come in three versions (:data:`RULES`).  Version 1 is the pilot's (decisions 1-11 of
+``coding_plan_platform.md``'s M3 section); version 2, the default from 2026-10-07 to 2026-10-12, adds decisions
+12-15 and the cosine floor (coding_plan_m3.md, "Round 2"): a Sonnet reading one below the cut-off that Opus reads
+at or above it covers, flagged; both ends of a recorded pair (every corner of a simplex) marked similar are
 taken out of the shortlist and noted; the pair flag is a note, not a reason for ``grey``; a ``renamed_from``
 match is judged like any other candidate, with the current trait at the front, and labels are compared
 separator-blind; listed traits below the cosine floor are not judged (an opposed trait's partner and a
-``renamed_from`` match are).  Version 1 stays so that a run can be re-decided under the pilot's rules and
-shown to reproduce it.
+``renamed_from`` match are).  Version 3, the default from 2026-10-12 (Roger's decisions on the M3 gate audit,
+``reports/code_review_2026-10-12/gate_audits/m3_novelty.md``, proposals P1, P2 and P5), adds three switches:
+
+* **the graded cut-off** (P1, :func:`cut_off_spec`): alignment score 0 or 1 keeps cut-off 3 with decision 12;
+  alignment score 2 is covered when both models read 3 or more (a Sonnet 3 or 4 goes to Opus, which covers at 3
+  or more; a Sonnet 2 is settled, with no Opus check); alignment score 3, or none, keeps cut-off 4.  Rule sets 1
+  and 2 keep the step (3 at 0-1, 4 at 2-3), so their runs replay as they were;
+* **``renamed_from`` before the queue at stage 0** (P2, review 2 D1): a corpus file's ``renamed_from`` that is
+  also a seed-queue name went to the queue entry and was covered at stage 0, bypassing decision 15; it now goes to
+  the walk, the current trait first, like any other ``renamed_from`` match;
+* **partners the relation call marked unrelated or opposed are not read** (P5): the "opposite" rule (an opposed
+  trait's partner at the front of the shortlist, or read next after a Sonnet "opposite") skips a partner the
+  relation call itself answered ``unrelated`` or ``opposed`` (6,560 such readings on record, none at the cut-off);
+  each skip is recorded on the row (``partners_skipped``), so the saving is visible.
+
+And one switch that no rule set turns on by itself, **the broader check** (P3, ``--broader-check``; off until
+its pilot is read): a cover whose best reading is exactly 3 (rubric A's "the same concept, differing only in
+scope, degree or emphasis") gets one more reading, in both orders, of which of the two concepts is the broader
+(rubric ``overlap_broader.md``, :func:`render_broader_user`, :func:`broader_verdict`); the cover stands only when
+the corpus trait is at least as broad as the candidate, else the walk goes on and the row carries
+``cover_narrower``.  Versions 1 and 2 stay so that a run can be re-decided under them and shown to reproduce it.
 
 By-products: every reading beside its cosine (``readings.jsonl``, :func:`reading_rows`), the review queue
 (:func:`review_order`) and the rename shortlist (:func:`synonyms`).
@@ -69,12 +88,15 @@ from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 # --------------------------------------------------------------------------- constants
 
 DECISIONS: tuple[str, ...] = ("covered", "new", "grey")
-#: Every review flag a row can carry (coding_plan_m3.md, stage 5; ``both_similar`` from decision 13).  Which
-#: of them make a kept candidate ``grey`` is the rule set's :attr:`Rules.grey_kinds`.
-REVIEW_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "unparsed", "pair_flag", "both_similar")
+#: Every review flag a row can carry (coding_plan_m3.md, stage 5; ``both_similar`` from decision 13;
+#: ``cover_narrower`` from the broader check, 2026-10-12).  Which of them make a kept candidate ``grey`` is the
+#: rule set's :attr:`Rules.grey_kinds`.
+REVIEW_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "unparsed", "pair_flag", "both_similar", "cover_narrower")
 #: The flags that put a row in the review queue whatever its decision (decision 14: the covered-and-flagged
-#: rows, the both-similar notes and ``unparsed``); a ``grey`` row is always in it.
-QUEUE_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "both_similar", "unparsed")
+#: rows, the both-similar notes and ``unparsed``; the broader check's undone covers); a ``grey`` row is always in it.
+QUEUE_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "both_similar", "unparsed", "cover_narrower")
+#: The relation answers whose partner the "opposite" rule skips under rule set 3 (audit P5).
+SKIP_PARTNER_RELATIONS: tuple[str, ...] = ("unrelated", "opposed")
 #: The cosine floor of rule set 2 (Roger, 2026-10-07: "an acceptable level of trade-off").
 DEFAULT_COSINE_FLOOR = 0.25
 RELATION_ANSWERS: tuple[str, ...] = ("similar", "opposed", "unrelated", "unsure")
@@ -123,10 +145,23 @@ def is_expanding(kind: str) -> bool:
 
 # --------------------------------------------------------------------------- the decision rules
 
+#: The cut-off rules (:func:`cut_off_spec`): ``step`` (rule sets 1 and 2: 3 at alignment score 0-1, 4 at 2-3 or
+#: none) and ``graded`` (rule set 3, audit P1: alignment score 2 covered when both models read 3 or more).
+CUT_OFF_RULES: tuple[str, ...] = ("step", "graded")
+#: How the broader check's two readings (both orders) decide (:func:`broader_verdict`): ``mean`` (the default:
+#: each reading scores +1 when it names the candidate the broader, -1 the corpus trait, 0 for "same" or
+#: "unsure"; the cover is undone when the mean of the two is above 0, swap-averaging as the judging rule asks),
+#: ``both`` (undone only when both orders name the candidate) or ``either`` (when either does).
+BROADER_GATES: tuple[str, ...] = ("mean", "both", "either")
+
+
 @dataclass(frozen=True)
 class Rules:
     """One version of M3's decision rules (the module docstring).  Each switch is one decision of
-    ``coding_plan_platform.md``'s M3 section, so that a change in a re-decided run can be traced to one."""
+    ``coding_plan_platform.md``'s M3 section (or, from rule set 3, one proposal of the M3 gate audit), so that a
+    change in a re-decided run can be traced to one.  The switches added on 2026-10-12 have defaults that are
+    rule sets 1 and 2's behaviour, and :meth:`as_dict` leaves them out at those defaults, so a block of either
+    set is written byte for byte as before and an older block reads back (:func:`rules_of`)."""
     name: str
     version: int
     cover_on_opus_check: bool        # decision 12: Sonnet c - 1, Opus c or above -> covered, flagged
@@ -135,6 +170,17 @@ class Rules:
     renamed_from_covers: bool        # decision 15 off: a renamed_from match covers at stage 0
     separator_blind: bool            # decision 15: labels compared with the separators taken out
     cosine_floor: Optional[float]    # listed traits below it are not judged (None: no floor)
+    renamed_before_queue: bool = False      # review 2 D1 (audit P2): a renamed_from match goes to the walk even
+    #                                         when a seed-queue entry carries the old stem
+    cut_off_rule: str = "step"              # audit P1: "graded" (:func:`cut_off_spec`)
+    skip_unrelated_partners: bool = False   # audit P5: the opposite rule skips partners marked unrelated/opposed
+    broader_check: Optional[str] = None     # audit P3: None (off) or a gate of BROADER_GATES
+
+    def __post_init__(self):
+        if self.cut_off_rule not in CUT_OFF_RULES:
+            raise ValueError(f"cut_off_rule must be one of {CUT_OFF_RULES}, not {self.cut_off_rule!r}")
+        if self.broader_check is not None and self.broader_check not in BROADER_GATES:
+            raise ValueError(f"broader_check must be None or one of {BROADER_GATES}, not {self.broader_check!r}")
 
     @property
     def grey_kinds(self) -> tuple[str, ...]:
@@ -150,21 +196,40 @@ class Rules:
     def with_floor(self, floor: Optional[float]) -> "Rules":
         return replace(self, cosine_floor=None if floor is None else float(floor))
 
+    def with_broader(self, gate: Optional[str]) -> "Rules":
+        """The rule set with the broader check on (``gate`` one of :data:`BROADER_GATES`) or off (``None``)."""
+        return replace(self, broader_check=gate)
+
     def below_floor(self, cosine: Optional[float]) -> bool:
         return self.cosine_floor is not None and cosine is not None and float(cosine) < self.cosine_floor
 
     def as_dict(self) -> dict:
-        return asdict(self)
+        """The switches, as every block and ``run.json`` record them; a switch of 2026-10-12 at its default (rule
+        sets 1 and 2's behaviour) is left out, so those sets' records are unchanged."""
+        d = asdict(self)
+        for k, v in LATER_SWITCH_DEFAULTS.items():
+            if d.get(k) == v:
+                d.pop(k)
+        return d
 
+
+#: The switches added on 2026-10-12, with the defaults that are rule sets 1 and 2's behaviour.
+LATER_SWITCH_DEFAULTS: dict[str, Any] = {"renamed_before_queue": False, "cut_off_rule": "step",
+                                         "skip_unrelated_partners": False, "broader_check": None}
 
 #: Version 1: the pilot's rules (decisions 1-11).  Version 2: decisions 12-15 and the floor (2026-10-07).
+#: Version 3: version 2 with the graded cut-off, review 2 D1's fix and the partner skip (2026-10-12; the M3 gate
+#: audit's P1, P2 and P5).  The broader check (P3) is a switch of its own, off in every set (``with_broader``).
 RULES: dict[int, Rules] = {
     1: Rules(name="m3_rules_1", version=1, cover_on_opus_check=False, both_similar_excluded=False,
              pair_flag_grey=True, renamed_from_covers=True, separator_blind=False, cosine_floor=None),
     2: Rules(name="m3_rules_2", version=2, cover_on_opus_check=True, both_similar_excluded=True,
              pair_flag_grey=False, renamed_from_covers=False, separator_blind=True, cosine_floor=DEFAULT_COSINE_FLOOR),
 }
-DEFAULT_RULES = RULES[2]
+RULES[3] = replace(RULES[2], name="m3_rules_3", version=3, renamed_before_queue=True, cut_off_rule="graded",
+                   skip_unrelated_partners=True)
+#: The rule set of a new run (``novelty_score.py score``; ``--rules 2`` or ``1`` reproduce the older ones).
+DEFAULT_RULES = RULES[3]
 #: The steps from version 1 to version 2, one decision each, in the order a re-decided run attributes its
 #: changes (``novelty_score.py score --redecide``): each step adds one switch to the ones before it.
 RULE_STEPS: tuple[tuple[str, dict], ...] = (
@@ -173,6 +238,14 @@ RULE_STEPS: tuple[tuple[str, dict], ...] = (
     ("decision 13 (both ends similar)", {"both_similar_excluded": True}),
     ("decision 15 (labels: renamed_from judged, separator-blind)", {"renamed_from_covers": False, "separator_blind": True}),
     ("cosine floor", {"cosine_floor": DEFAULT_COSINE_FLOOR}),
+)
+#: The steps from version 2 to version 3 (the M3 gate audit, 2026-10-12), then the broader check, in the order a
+#: re-decided run attributes its changes.
+RULE_STEPS_3: tuple[tuple[str, dict], ...] = (
+    ("review 2 D1 (renamed_from before the queue)", {"renamed_before_queue": True}),
+    ("graded cut-off (alignment 2: both models at 3 or more)", {"cut_off_rule": "graded"}),
+    ("partner skip (partners marked unrelated or opposed not read)", {"skip_unrelated_partners": True}),
+    ("broader check (a cover read at 3 undone when the corpus trait is narrower)", {"broader_check": "mean"}),
 )
 
 
@@ -191,17 +264,98 @@ def rule_chain(floor: Optional[float] = DEFAULT_COSINE_FLOOR) -> list[tuple[str,
     return out
 
 
-def cut_off(alignment_score: Any) -> int:
-    """The covered cut-off on rubric A's scale (design item 6, decision 4): 3 far from alignment
-    (alignment score 0 or 1), 4 near it (2 or 3).  A missing score takes the near-alignment cut-off,
-    the one that cuts less (a candidate is never cut on a guess)."""
+def _switches(r: Rules) -> dict:
+    return {k: v for k, v in asdict(r).items() if k not in ("name", "version")}
+
+
+def attribution_chain(src: Rules, dst: Rules) -> list[tuple[str, Rules]]:
+    """``[(step name, rules), ...]`` from ``src`` to ``dst``, one decision a step, for a re-decided run's
+    attribution (``decision_changes.md``): the source's rules first, then each step of :data:`RULE_STEPS` and
+    :data:`RULE_STEPS_3` whose switches ``dst`` sets otherwise than the rules before it (taking ``dst``'s values,
+    the floor included), in that order; the last step carries ``dst``'s name and version.  A difference no step
+    names ends the chain with ``("these rules (<name>)", dst)``.  So rule set 2 to 3 is the source, then D1, then
+    the graded cut-off, then the partner skip (and the broader check when ``dst`` has it on)."""
+    out = [(f"source rules ({src.name})", src)]
+    cur = src
+    for name, change in RULE_STEPS + RULE_STEPS_3:
+        target = {k: getattr(dst, k) for k in change}
+        if all(getattr(cur, k) == v for k, v in target.items()):
+            continue
+        cur = replace(cur, name=f"{src.name}+{len(out)}", **target)
+        out.append((name, cur))
+    if _switches(cur) != _switches(dst):
+        out.append((f"these rules ({dst.name})", dst))
+    elif len(out) > 1:
+        out[-1] = (out[-1][0], dst)
+    return out
+
+
+# --------------------------------------------------------------------------- the cut-off
+
+@dataclass(frozen=True)
+class CutOff:
+    """The cut-off rule one candidate is judged by (:func:`cut_off_spec`).  ``c``: the cut-off on rubric A's
+    scale.  ``sonnet_alone``: a Sonnet reading above ``c`` covers without Opus (else Opus reads it and covers at
+    ``c`` or above).  ``opus_check``: a Sonnet reading of ``c - 1`` goes to Opus (decision 11; under decision 12
+    an Opus reading of ``c`` or above covers, flagged).  ``rule`` and ``band`` say which rule and which part of
+    it gave these (recorded in a graded run's blocks as ``cut_off_rule``)."""
+    c: int
+    sonnet_alone: bool = True
+    opus_check: bool = True
+    rule: str = "step"
+    band: str = ""
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
+def _alignment_int(alignment_score: Any) -> Optional[int]:
     if isinstance(alignment_score, bool) or alignment_score is None:
-        return 4
+        return None
     try:
-        a = int(alignment_score)
+        return int(alignment_score)
     except (TypeError, ValueError):
-        return 4
-    return 3 if a <= 1 else 4
+        return None
+
+
+def cut_off_spec(alignment_score: Any, rules: Optional[Rules] = None) -> CutOff:
+    """The cut-off rule for a candidate with ``alignment_score`` under ``rules`` (``None``: the step rule of rule
+    sets 1 and 2, as :func:`cut_off` has always given it).
+
+    * ``step`` (design item 6, decision 4): 3 far from alignment (alignment score 0 or 1), 4 near it (2 or 3).
+    * ``graded`` (rule set 3; the M3 gate audit's P1, Roger 2026-10-12): 0 or 1 as the step rule (3, Sonnet 4
+      alone, decision 12 at Sonnet 2); **2: covered when both models read 3 or more** (cut-off 3, a Sonnet 3 or 4
+      goes to Opus, which covers at 3 or more; a Sonnet 2 is settled with no Opus check, as cut-off 4 settled it,
+      so the records of a step run hold every reading the rule needs); 3: as the step rule (4).
+
+    A missing score takes the near-alignment cut-off, the one that cuts less (a candidate is never cut on a
+    guess)."""
+    a = _alignment_int(alignment_score)
+    rule = (rules.cut_off_rule if rules is not None else "step")
+    if a is None:
+        return CutOff(c=4, rule=rule, band="no alignment score")
+    if a <= 1:
+        return CutOff(c=3, rule=rule, band="alignment 0-1")
+    if rule == "graded":
+        if a == 2:
+            return CutOff(c=3, sonnet_alone=False, opus_check=False, rule=rule, band="alignment 2")
+        return CutOff(c=4, rule=rule, band="alignment 3")
+    return CutOff(c=4, rule=rule, band="alignment 2-3")
+
+
+def as_cut_off(c: Any) -> CutOff:
+    """``c`` as a :class:`CutOff`: itself, or a bare integer cut-off read as the step rule's (Sonnet above it
+    alone, the Opus check one below it), as every caller before 2026-10-12 meant it (the review graph and the
+    near-duplicate scan fix their own cut-off)."""
+    if isinstance(c, CutOff):
+        return c
+    return CutOff(c=int(c), rule="fixed", band=f"fixed at {int(c)}")
+
+
+def cut_off(alignment_score: Any, rules: Optional[Rules] = None) -> int:
+    """The covered cut-off on rubric A's scale (:func:`cut_off_spec`'s ``c``): with no ``rules``, the step rule
+    (3 far from alignment, alignment score 0 or 1; 4 near it, 2 or 3; 4 with no score)."""
+    return cut_off_spec(alignment_score, rules).c
 
 
 # --------------------------------------------------------------------------- the corpus
@@ -518,7 +672,12 @@ def exact_label_match(stem: str, sets: LabelSets, *, rules: Optional[Rules] = No
     a corpus stem (``match: "corpus"``), a queue name (``"queue"``, covered by the entry's stem) or, while
     ``rules.renamed_from_covers`` (rule set 1), a renamed stem (``"renamed_from"``, covered by the current
     stem).  The corpus is checked first.  With ``rules.separator_blind`` (rule set 2) a label that differs
-    only in its separators matches too (``"blind": True``, ``"matched": <the name>``)."""
+    only in its separators matches too (``"blind": True``, ``"matched": <the name>``).
+
+    With ``rules.renamed_before_queue`` (rule set 3; review 2 D1) a renamed stem is checked before the queue and
+    is not covered here: decision 15 judges it (:func:`renamed_match`), even when a seed-queue entry carries the
+    old stem (the stale entry under a renamed trait's old name covered 8 rows at stage 0 under rule set 2:
+    tough, disciplined, nonchalant, bland, exclusive, indulgent, libertarian, universalist)."""
     rules = rules or DEFAULT_RULES
     sb = rules.separator_blind
     c = _lookup(stem, sets, "corpus", sb)
@@ -529,6 +688,8 @@ def exact_label_match(stem: str, sets: LabelSets, *, rules: Optional[Rules] = No
         if r is not None:
             return {"covered_by": sets.renamed[r], "match": "renamed_from", "old_stem": r} | \
                 ({"blind": True} if r != stem else {})
+    elif rules.renamed_before_queue and _lookup(stem, sets, "renamed", sb) is not None:
+        return None
     q = _lookup(stem, sets, "queue", sb)
     if q is not None:
         e = sets.queue[q]
@@ -640,6 +801,8 @@ class Shortlist:
     below_floor: list = field(default_factory=list)   # similar traits the floor kept out of the queue
     n_below_floor: int = 0                            # listed traits below the floor (any relation)
     renamed: Optional[str] = None                     # decision 15: the current trait, at the head of the queue
+    partners_skipped: list = field(default_factory=list)   # rule set 3 (audit P5): [{"stem", "relation",
+    #                                                         "partner_of", "at": "shortlist"}], never read
 
 
 def both_similar_notes(listed: Sequence[Listed], relations: Mapping[str, str]) -> list[dict]:
@@ -673,7 +836,11 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
     :func:`both_similar_notes` group leave the queue (``excluded``, ``pair_notes``); with a ``cosine_floor``
     the similar traits below it leave the queue (``below_floor``), while the partners of opposed traits stay
     whatever their cosine (the opposite rule); ``renamed`` (decision 15) heads the queue whatever the relation
-    call said, the floor and the exclusion notwithstanding."""
+    call said, the floor and the exclusion notwithstanding.  With ``skip_unrelated_partners`` (rule set 3, the
+    M3 gate audit's P5) an opposed trait's partner that the relation call itself answered ``unrelated`` or
+    ``opposed`` (:data:`SKIP_PARTNER_RELATIONS`) is not put in front: it is recorded in ``partners_skipped`` and
+    never read (on the records, 6,560 such readings, none at the cut-off).  A partner it answered ``similar`` or
+    ``unsure``, or did not list, stays in front, the floor notwithstanding."""
     rules = rules or DEFAULT_RULES
     by = {x.stem: x for x in listed}
     n_below = sum(1 for x in listed if rules.below_floor(x.cosine))
@@ -694,11 +861,22 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
     opposed = sorted((x for x in listed if relations.get(x.stem) == "opposed"), key=lambda x: (-x.cosine, x.stem))
     front: list[str] = []
     completion: list[str] = []
+    partner_of: dict[str, list[str]] = {}
     for o in opposed:
         if o.partners:
             front += [p for p in o.partners if p not in front]
+            for p in o.partners:
+                partner_of.setdefault(p, []).append(o.stem)
         else:
             completion.append(o.stem)
+    skipped: list[dict] = []
+    if rules.skip_unrelated_partners:
+        for p in front:
+            if p != renamed and relations.get(p) in SKIP_PARTNER_RELATIONS:
+                skipped.append({"stem": p, "relation": relations[p], "partner_of": sorted(partner_of.get(p, [])),
+                                "cosine": round(cos(p), 6), "at": "shortlist"})
+        gone = {x["stem"] for x in skipped}
+        front = [p for p in front if p not in gone]
     front = sorted(front, key=lambda s: (-cos(s), s))
     similar = sorted((x for x in listed if relations.get(x.stem) in ("similar", "unsure")),
                      key=lambda x: (-x.cosine, x.stem))
@@ -720,7 +898,7 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
             flags.append({"pair": sorted([x.stem, p]), "both": ra})
     return Shortlist(queue=queue, front=front, pair_flags=flags, pair_completion_for=completion,
                      relations=dict(relations), pair_notes=notes, excluded=excluded, below_floor=dropped,
-                     n_below_floor=n_below, renamed=renamed)
+                     n_below_floor=n_below, renamed=renamed, partners_skipped=skipped)
 
 
 # --------------------------------------------------------------------------- stage 4: the overlap walk
@@ -729,18 +907,22 @@ def _int(v: Any) -> Optional[int]:
     return v if isinstance(v, int) and not isinstance(v, bool) else None
 
 
-def sonnet_action(value: Any, c: int) -> str:
-    """The rule for Sonnet's reading of one pair at cut-off ``c`` (coding_plan_m3.md, stage 4):
+def sonnet_action(value: Any, c: Any) -> str:
+    """The rule for Sonnet's reading of one pair at cut-off ``c`` (coding_plan_m3.md, stage 4; ``c`` an integer,
+    read as the step rule's, or a :class:`CutOff`):
 
     * ``"cut"``: above c, covered by that trait directly;
+    * ``"opus_confirms"``: above c where the cut-off rule does not let Sonnet cover alone (the graded rule at
+      alignment score 2: both models must read c or more), Opus reads the pair and decides as at c;
     * ``"opus_decides"``: exactly c, Opus reads the pair and decides (c or above: covered);
     * ``"opus_check"``: c - 1, Opus reads the pair; an Opus reading of c or above marks the row for review
       and, under rule set 2 (decision 12), covers it (rule set 1: the candidate is not cut whatever Opus
-      says);
+      says).  Not where the cut-off rule has no Opus check (the graded rule at alignment score 2): ``"continue"``;
     * ``"continue"``: below c - 1;
     * ``"opposite"``: taken as it stands, no Opus (decision 9);
     * ``"opus_replaces"``: "unsure", Opus reads and its answer is used as if it were Sonnet's;
     * ``"unparsed"``: no reading (the answer failed to parse twice)."""
+    spec = as_cut_off(c)
     if value is None:
         return "unparsed"
     if value == "opposite":
@@ -750,16 +932,17 @@ def sonnet_action(value: Any, c: int) -> str:
     v = _int(value)
     if v is None:
         return "unparsed"
-    if v > c:
-        return "cut"
-    if v == c:
+    if v > spec.c:
+        return "cut" if spec.sonnet_alone else "opus_confirms"
+    if v == spec.c:
         return "opus_decides"
-    if v == c - 1:
-        return "opus_check"
+    if v == spec.c - 1:
+        return "opus_check" if spec.opus_check else "continue"
     return "continue"
 
 
-OPUS_ROLES: dict[str, str] = {"opus_decides": "at_cut_off", "opus_check": "below_cut_off", "opus_replaces": "sonnet_unsure"}
+OPUS_ROLES: dict[str, str] = {"opus_decides": "at_cut_off", "opus_check": "below_cut_off", "opus_replaces": "sonnet_unsure",
+                              "opus_confirms": "above_cut_off"}
 
 
 @dataclass
@@ -771,15 +954,25 @@ class Reading:
     via: str
     sonnet: Optional[dict] = None     # {"value", "reason"} or {"value": None, "error"}
     opus: Optional[dict] = None
-    opus_role: Optional[str] = None   # at_cut_off | below_cut_off | sonnet_unsure
-    outcome: Optional[str] = None     # cut | continue | rescued | review | opposite | unparsed | unsure
+    opus_role: Optional[str] = None   # at_cut_off | below_cut_off | sonnet_unsure | above_cut_off
+    outcome: Optional[str] = None     # cut | continue | rescued | review | opposite | unparsed | unsure | narrower
     queue_status: Optional[str] = None   # the trait read is a seed-queue entry with this status
+    broader: Optional[dict] = None    # the broader check's two readings and verdict (:func:`broader_verdict`)
 
     def as_dict(self) -> dict:
         d = asdict(self)
         if d["queue_status"] is None:     # a corpus trait's reading: the fields it always had
             del d["queue_status"]
+        if d["broader"] is None:          # no broader check on this reading
+            del d["broader"]
         return d
+
+
+def best_reading(r: "Reading") -> Optional[int]:
+    """The highest numeric reading of a pair (Sonnet's or Opus's), ``None`` when neither is a number."""
+    vals = [_int((x or {}).get("value")) for x in (r.sonnet, r.opus)]
+    vals = [v for v in vals if v is not None]
+    return max(vals) if vals else None
 
 
 class Walk:
@@ -788,14 +981,21 @@ class Walk:
     :meth:`give_opus` takes Opus's.  The walk stops at the first ``covered`` (early exit); when the queue
     runs out the candidate is ``new``, or ``grey`` when it carries a flag of ``rules.grey_kinds``.
 
-    ``queue``: the shortlist; ``info``: stem -> :class:`Listed` (cosine, relation via, partners) for the
+    ``c``: the cut-off, an integer (read as the step rule's) or the candidate's :class:`CutOff`
+    (:func:`cut_off_spec`, which the graded rule needs); ``queue``: the shortlist; ``info``: stem ->
+    :class:`Listed` (cosine, relation via, partners) for the
     listed traits; ``cosine_of``: the cosine of a partner that is not listed; ``review``: flags carried in
     from stage 3 (``pair_flag`` under rule set 1, ``both_similar`` under 2, a relation call that never
     parsed); ``exclude``: traits never judged, not even as an opposite's partner (decision 13);
     ``queue_status``: stem -> status of the seed-queue entries in the index (a partner read that is not listed
-    takes its status from here)."""
+    takes its status from here).
 
-    def __init__(self, key: str, c: int, queue: Sequence[str], info: Mapping[str, Listed], *,
+    Under ``rules.skip_unrelated_partners`` (rule set 3) a Sonnet "opposite" brings forward only the partners the
+    relation call did not answer ``unrelated`` or ``opposed`` (the others go to ``partners_skipped``).  Under
+    ``rules.broader_check`` a cover whose best reading is exactly 3 waits for the broader check
+    (:attr:`needs_broader`, :meth:`give_broader`) before it is decided."""
+
+    def __init__(self, key: str, c: Any, queue: Sequence[str], info: Mapping[str, Listed], *,
                  relations: Optional[Mapping[str, str]] = None, partners: Optional[Mapping[str, Sequence[str]]] = None,
                  cosine_of: Optional[Callable[[str], Optional[float]]] = None, review: Iterable[str] = (),
                  review_details: Iterable[Mapping] = (), pair_completion_for: Iterable[str] = (),
@@ -803,8 +1003,11 @@ class Walk:
                  queue_status: Optional[Mapping[str, str]] = None):
         self.key = key
         self.queue_status = dict(queue_status or {})
-        self.c = int(c)
+        self.spec = as_cut_off(c)
+        self.c = self.spec.c
         self.rules = rules or DEFAULT_RULES
+        self.partners_skipped: list[dict] = []
+        self._broader_pending = False
         self.exclude: set[str] = set(exclude)
         self.queue: list[str] = [s for s in dict.fromkeys(queue) if s not in self.exclude]
         self.info = dict(info)
@@ -834,6 +1037,11 @@ class Walk:
     @property
     def needs_opus(self) -> bool:
         return self.current is not None and self.current.opus_role is not None and self.current.opus is None
+
+    @property
+    def needs_broader(self) -> bool:
+        """The current pair would cover the candidate and waits for the broader check (:meth:`give_broader`)."""
+        return self.current is not None and self._broader_pending
 
     def _flag(self, kind: str) -> None:
         if kind not in REVIEW_KINDS:
@@ -880,15 +1088,33 @@ class Walk:
 
     def _cut(self) -> None:
         r = self.current
+        if self.rules.broader_check and r.broader is None and best_reading(r) == 3:
+            self._broader_pending = True          # the broader check decides (give_broader)
+            return
         self.covered_by, self.covering, self.decision = r.stem, r, "covered"
         self._close("cut")
+
+    def _skip_partner(self, p: str, of: str) -> None:
+        for x in self.partners_skipped:
+            if x["stem"] == p:
+                if of not in x["partner_of"]:
+                    x["partner_of"].append(of)
+                return
+        self.partners_skipped.append({"stem": p, "relation": self.relations.get(p), "partner_of": [of],
+                                      "cosine": self._cos(p), "at": "opposite"})
 
     def _opposite(self) -> None:
         r = self.current
         partners = self.partners.get(r.stem) or []
         if partners:
-            todo = sorted((p for p in partners if p not in self.judged and p != r.stem and p not in self.exclude),
-                          key=lambda p: (-self._cos(p), p))
+            todo = [p for p in partners if p not in self.judged and p != r.stem and p not in self.exclude]
+            if self.rules.skip_unrelated_partners:
+                for p in todo:
+                    if self.relations.get(p) in SKIP_PARTNER_RELATIONS:
+                        self._skip_partner(p, r.stem)
+                skip = {x["stem"] for x in self.partners_skipped}
+                todo = [p for p in todo if p not in skip]
+            todo = sorted(todo, key=lambda p: (-self._cos(p), p))
             self.queue = todo + [s for s in self.queue if s not in todo]
         elif r.stem not in self.pair_completion_for:
             self.pair_completion_for.append(r.stem)
@@ -901,7 +1127,7 @@ class Walk:
         if r is None:
             raise RuntimeError(f"{self.key}: no pair is awaiting a reading")
         r.sonnet = {"value": value, "reason": reason} if value is not None else {"value": None, "error": error}
-        act = sonnet_action(value, self.c)
+        act = sonnet_action(value, self.spec)
         if act == "cut":
             self._cut()
         elif act == "continue":
@@ -930,7 +1156,7 @@ class Walk:
                                         "error": error})
             self._close("unparsed")
             return
-        if r.opus_role == "at_cut_off":
+        if r.opus_role in ("at_cut_off", "above_cut_off"):
             if v is not None and v >= self.c:
                 self._cut()
             else:
@@ -956,6 +1182,32 @@ class Walk:
             else:
                 self._close("unsure")
 
+    def give_broader(self, straight: Optional[Mapping], swapped: Optional[Mapping]) -> None:
+        """The broader check's two readings of the current pair (``{"value", "reason"}``, or ``None`` / a
+        ``{"value": None, "error"}`` when one never parsed): ``straight`` with the candidate first, ``swapped`` with
+        the corpus trait first (:func:`broader_verdict` under ``rules.broader_check``).  The cover stands
+        (outcome ``cut``) unless the verdict is that the corpus trait is the narrower concept: then the reading
+        closes as ``narrower``, the row is flagged ``cover_narrower`` and the walk goes on down the queue.  A
+        reading that never parsed counts as no evidence (the cover stands) and flags the row ``unparsed``."""
+        r = self.current
+        if r is None or not self._broader_pending:
+            raise RuntimeError(f"{self.key}: no pair is awaiting the broader check")
+        self._broader_pending = False
+        verdict = broader_verdict(straight, swapped, self.rules.broader_check)
+        r.broader = verdict
+        if verdict["unparsed"]:
+            self._flag("unparsed")
+            self.review_details.append({"kind": "unparsed", "stem": r.stem, "model": "broader",
+                                        "orders": [o for o, s in zip(("straight", "swapped"), verdict["sides"]) if s is None]})
+        if verdict["uncovers"]:
+            self._flag("cover_narrower")
+            self.review_details.append({"kind": "cover_narrower", "stem": r.stem, "cut_off": self.c,
+                                        "sonnet": r.sonnet, "opus": r.opus, "broader": verdict})
+            self._close("narrower")
+            return
+        self.covered_by, self.covering, self.decision = r.stem, r, "covered"
+        self._close("cut")
+
     def summary(self) -> dict:
         return {"decision": self.decision, "covered_by": self.covered_by, "review": list(self.review),
                 "pair_completion_for": list(self.pair_completion_for), "n_judged": len(self.readings),
@@ -965,7 +1217,9 @@ class Walk:
 def replay_walk(walk: Walk, readings: Mapping[str, Mapping]) -> Walk:
     """Drive ``walk`` from recorded readings (``{stem: {"sonnet": {...}, "opus": {...} | None}}``), as the
     full scan does after the fact.  A trait with no recorded reading (a partner outside the scanned list)
-    is passed over with the outcome ``not_judged``."""
+    is passed over with the outcome ``not_judged``.  Under the broader check a cover read at 3 takes the
+    readings' ``broader`` (``{"straight", "swapped"}``); the full scan records none, so it does not run the check
+    (``ValueError``)."""
     while not walk.decided:
         s = walk.next_pair()
         if s is None:
@@ -982,20 +1236,27 @@ def replay_walk(walk: Walk, readings: Mapping[str, Mapping]) -> Walk:
                 walk._close("not_judged")
                 continue
             walk.give_opus(op.get("value"), op.get("reason"), error=op.get("error"))
+        if walk.needs_broader:
+            b = rec.get("broader")
+            if b is None:
+                raise ValueError(f"{walk.key}: the broader check needs readings that are not on record for {s}")
+            walk.give_broader(b.get("straight"), b.get("swapped"))
     return walk
 
 
-def pair_verdict(sonnet: Any, opus: Any, c: int) -> dict:
-    """One pair under the rule, alone (the full scan's per-pair view): ``cut`` (Sonnet above c, or Opus at c
-    or above where Sonnet is at c or unsure), ``review`` (Sonnet c - 1 and Opus c or above), ``opposite``,
+def pair_verdict(sonnet: Any, opus: Any, c: Any) -> dict:
+    """One pair under the rule, alone (the full scan's per-pair view; ``c`` an integer or a :class:`CutOff`):
+    ``cut`` (Sonnet above c where it may cover alone, or Opus at c or above where Sonnet is at c or above or
+    unsure), ``review`` (Sonnet c - 1 and Opus c or above, where the rule has the Opus check), ``opposite``,
     ``unparsed`` or ``keep``; ``at_or_above``: either model's reading is c or above."""
     act = sonnet_action(sonnet, c)
+    c = as_cut_off(c).c
     o = _int(opus)
     s = _int(sonnet)
     at = (s is not None and s >= c) or (o is not None and o >= c)
     if act == "cut":
         v = "cut"
-    elif act in ("opus_decides", "opus_replaces"):
+    elif act in ("opus_decides", "opus_replaces", "opus_confirms"):
         v = "cut" if (o is not None and o >= c) else ("opposite" if opus == "opposite" and act == "opus_replaces"
                                                      else ("unparsed" if opus is None else "keep"))
     elif act == "opus_check":
@@ -1021,7 +1282,157 @@ def rules_of(block: Mapping) -> Rules:
     r = block.get("rules")
     if not r:
         return RULES[1]
-    return Rules(**{k: r[k] for k in Rules.__dataclass_fields__})
+    # a switch of 2026-10-12 a block does not name was at its default (rule sets 1 and 2 leave them out)
+    return Rules(**{k: r[k] for k in Rules.__dataclass_fields__ if k in r})
+
+
+# --------------------------------------------------------------------------- the broader check (audit P3)
+
+#: The broader check's rubric (``reports/trait_gap_generation/rubrics/overlap_broader.md``), in the format of the
+#: other rubric files.  **Pinned here, in code**, until it can join ``versions.json`` (``split_rubrics.M3_FILES``
+#: and ``rubric_pins.py bump overlap_broader --version 1``): one version names one text, and
+#: :func:`load_broader_rubric` refuses a text that is not the latest pin.  Append only.
+BROADER_RUBRIC = "overlap_broader"
+BROADER_FILE = "overlap_broader.md"
+BROADER_PINS: dict[int, str] = {
+    1: "a46cc766e7bbbb276939aad58cf879ac4e54d71a7820cba7ed252cb4f6068068",   # draft 1, 2026-10-12
+}
+#: The broader check's answers and its answer spec (the shape :func:`overlap_test.answer_value` reads).
+BROADER_ANSWERS: tuple[str, ...] = ("first", "second", "neither", "unsure")
+BROADER_SPEC: dict = {"key": "broader", "scale": (), "categories": BROADER_ANSWERS,
+                      "aliases": {"the first": "first", "the second": "second", "same": "neither", "none": "neither"}}
+#: The two orders each checked pair is read in: the candidate first, then the corpus trait first.
+BROADER_ORDERS: tuple[str, ...] = ("straight", "swapped")
+
+
+class BroaderRubricError(RuntimeError):
+    """The broader check's rubric text on disk is not its latest pinned version (or the file is missing)."""
+
+
+def load_broader_rubric(rubrics_dir: Optional[Path] = None) -> dict:
+    """``{"name", "text", "version", "sha256"}`` of the broader check's rubric, the text inside the file's one
+    "## The prompt" fenced block (the expression ``split_rubrics`` reads every rubric with); refuses
+    (:class:`BroaderRubricError`) a text whose sha256 is not :data:`BROADER_PINS`' latest."""
+    import hashlib
+    from . import split_rubrics as sr
+    from .paths import RUBRICS_DIR
+    p = Path(rubrics_dir or RUBRICS_DIR) / BROADER_FILE
+    if not p.exists():
+        raise BroaderRubricError(f"{p}: rubric file missing")
+    blocks = sr._BLOCK_RE.findall(p.read_text(encoding="utf-8"))    # noqa: SLF001 - the shared expression
+    if len(blocks) != 1:
+        raise BroaderRubricError(f"{p}: expected one '## The prompt' fenced block, found {len(blocks)}")
+    text = blocks[0]
+    sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    version = max(BROADER_PINS)
+    if sha != BROADER_PINS[version]:
+        known = [v for v, s in BROADER_PINS.items() if s == sha]
+        raise BroaderRubricError(
+            f"{BROADER_RUBRIC}: the text on disk (sha {sha[:12]}...) is not version {version}'s "
+            f"({BROADER_PINS[version][:12]}...)" + (f"; it is version {known[0]}'s" if known else "")
+            + ": pin a changed text as a new version in novelty.BROADER_PINS")
+    return {"name": BROADER_RUBRIC, "text": text, "version": version, "sha256": sha}
+
+
+def broader_payload(first: tuple[str, str], second: tuple[str, str], *, label_form: str = DEFAULT_LABEL_FORM) -> dict:
+    """The broader check's user turn as an object: two traits, ``(label, description)`` each, under the neutral
+    keys ``first`` and ``second`` (nothing says which is the candidate); labels in ``label_form``."""
+    return {k: {"label": prompt_label(lb, label_form), "description": d}
+            for k, (lb, d) in (("first", first), ("second", second))}
+
+
+def render_broader_user(first: tuple[str, str], second: tuple[str, str], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """The broader check's user turn laid out as the overlap call's single form (``render_single``): the first
+    trait on the first line, the second on the next, indented one space."""
+    obj = broader_payload(first, second, label_form=label_form)
+    return ('{"first": ' + json.dumps(obj["first"], ensure_ascii=False) + ",\n"
+            ' "second": ' + json.dumps(obj["second"], ensure_ascii=False) + "}")
+
+
+def broader_pair(order: str, cand: tuple[str, str], other: tuple[str, str]) -> tuple[tuple[str, str], tuple[str, str]]:
+    """``(first, second)`` for ``order``: ``straight`` the candidate first, ``swapped`` the corpus trait first."""
+    if order not in BROADER_ORDERS:
+        raise ValueError(f"order must be one of {BROADER_ORDERS}, not {order!r}")
+    return (cand, other) if order == "straight" else (other, cand)
+
+
+def parse_broader(text: Optional[str]) -> tuple[dict, dict, dict]:
+    """The broader check's answer, one object ``{"reason", "broader"}``, as :func:`overlap_test.parse_single`
+    reads rubric A's single form: ``(rows, errors, meta)`` with the one pair as id 1; the last complete answer
+    object in the text is the answer, fences and prose ignored, extra keys ignored and noted, the answer one of
+    :data:`BROADER_ANSWERS` in any case (``"same"``, ``"none"``, ``"the first"`` and ``"the second"`` read as
+    their answers)."""
+    from .filter_rubric import _load_json
+    spec = BROADER_SPEC
+    key = spec["key"]
+    meta: dict = {"n_rows": 0, "reason_first": None, "n_result_objects": 0, "extra_keys": [], "notes": []}
+    if not text or not text.strip():
+        return {}, {1: "empty response"}, meta
+    objs = OT.single_objects(text, key)
+    if not objs:
+        try:
+            obj = _load_json(text)
+        except (ValueError, json.JSONDecodeError) as exc:
+            return {}, {1: f"unparseable response: {exc}"}, meta
+        if not (isinstance(obj, dict) and key in obj):
+            return {}, {1: f"unparseable response: no object with {key!r}"}, meta
+        objs = [obj]
+    meta["n_result_objects"] = len(objs)
+    row = objs[-1]
+    if key not in row:
+        return {}, {1: f"{key} missing"}, meta
+    meta["n_rows"] = 1
+    extra = sorted(k for k in row if k not in ("reason", key))
+    if extra:
+        meta["extra_keys"] = extra
+        meta["notes"].append(f"extra keys {extra}")
+    reason = row.get("reason")
+    if not isinstance(reason, str) or not reason.strip():
+        return {}, {1: "reason missing"}, meta
+    val = OT.answer_value(row.get(key), spec["categories"], spec["scale"], spec["aliases"])
+    if val is None:
+        return {}, {1: f"{key} {row.get(key)!r} is not one of {list(BROADER_ANSWERS)}"}, meta
+    keys = list(row.keys())
+    out = {"reason": " ".join(reason.split()), "value": val, "reason_first": keys.index("reason") < keys.index(key)}
+    meta["reason_first"] = out["reason_first"]
+    return {1: out}, {}, meta
+
+
+def broader_side(value: Any, order: str) -> Optional[str]:
+    """One reading's answer from the candidate's side: ``candidate`` (the candidate is the broader concept, the
+    corpus trait a narrower case of it), ``corpus`` (the reverse), ``neither``, ``unsure``; ``None`` for no
+    answer.  ``order``: the order the reading was asked in (:data:`BROADER_ORDERS`)."""
+    if value in ("neither", "unsure"):
+        return value
+    if value in ("first", "second"):
+        cand_first = order == "straight"
+        return "candidate" if (value == "first") == cand_first else "corpus"
+    return None
+
+
+#: A side's score for the ``mean`` gate: +1 the candidate broader, -1 the corpus trait, 0 otherwise.
+_SIDE_SCORE = {"candidate": 1, "corpus": -1, "neither": 0, "unsure": 0}
+
+
+def broader_verdict(straight: Optional[Mapping], swapped: Optional[Mapping], gate: Optional[str] = "mean") -> dict:
+    """The broader check's verdict from its two readings (``{"value", "reason"}`` each, the order of
+    :data:`BROADER_ORDERS`; ``None`` or a ``None`` value for one that never parsed): ``{"straight", "swapped",
+    "sides": [side, side], "score": mean of the parsed sides' scores, "candidate_broader": how many readings call
+    the candidate the broader, "gate", "uncovers", "unparsed"}``.  ``uncovers`` under ``gate``
+    (:data:`BROADER_GATES`): ``mean``, the mean score above 0 (swap-averaged: one order naming the candidate and
+    the other "neither" or "unsure" undoes the cover, two orders that contradict each other do not); ``both``, both
+    readings name the candidate; ``either``, one does.  A reading that never parsed counts as no evidence."""
+    gate = gate or "mean"
+    if gate not in BROADER_GATES:
+        raise ValueError(f"gate must be one of {BROADER_GATES}, not {gate!r}")
+    sides = [broader_side((r or {}).get("value"), o) for r, o in zip((straight, swapped), BROADER_ORDERS)]
+    scores = [_SIDE_SCORE[s] for s in sides if s is not None]
+    score = sum(scores) / 2.0
+    n_cand = sides.count("candidate")
+    uncovers = {"mean": score > 0, "both": n_cand == 2, "either": n_cand >= 1}[gate]
+    return {"straight": dict(straight) if straight else None, "swapped": dict(swapped) if swapped else None,
+            "sides": sides, "score": score, "candidate_broader": n_cand, "gate": gate, "uncovers": bool(uncovers),
+            "unparsed": any(s is None for s in sides)}
 
 
 # --------------------------------------------------------------------------- stage 5: the block
@@ -1039,7 +1450,8 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
                   relation: Optional[Mapping] = None, shortlist: Optional[Shortlist] = None,
                   rubrics: Mapping, config_version: str, embedding: Optional[Mapping] = None,
                   usage: Optional[Mapping] = None, at: str, mode: str = "shortlist", rules: Optional[Rules] = None,
-                  renamed: Optional[Mapping] = None, extra: Optional[Mapping] = None) -> dict:
+                  renamed: Optional[Mapping] = None, extra: Optional[Mapping] = None,
+                  cut_spec: Optional[CutOff] = None) -> dict:
     """The ``novelty`` block of one registry row (coding_plan_m3.md, stage 5).  ``reason``: ``exact_label``,
     ``overlap`` (the walk decided), or ``no_listed`` (nothing retrieved).  Rule set 2's additions: ``rules``
     (the switches and the floor, as the run used them), ``pair_notes`` (decision 13, with the noted members'
@@ -1049,8 +1461,16 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
     Seed-queue entries in the search (2026-10-09): a listed entry, a reading and the deciding reading carry
     ``queue_status`` when the trait is a queue entry, and a row the walk covered by one carries
     ``covered_by_queue: {"stem", "status"}`` (stage 0's queue match keeps its ``exact_label.match: "queue"``).
-    Neither key appears where no queue entry is involved, so a block is unchanged when none is."""
+    Neither key appears where no queue entry is involved, so a block is unchanged when none is.
+
+    Rule set 3 (2026-10-12): ``cut_off`` is the cut-off of the rule set's own rule, and a block decided under the
+    graded rule says which part of it applied (``cut_off_rule``: :class:`CutOff`'s fields: ``c``, ``sonnet_alone``,
+    ``opus_check``, ``rule``, ``band``); under the partner skip, ``partners_skipped`` lists every partner the
+    opposite rule did not read because the relation call marked it unrelated or opposed (``at``: ``shortlist``,
+    the front of the queue, or ``opposite``, after a Sonnet "opposite").  A step-rule block without the skip has
+    neither key, as before.  The broader check's readings are on the reading they checked (``broader``)."""
     rules = rules or DEFAULT_RULES
+    spec = as_cut_off(cut_spec) if cut_spec is not None else cut_off_spec(cand.get("alignment_score"), rules)
     review = list(walk.review) if walk else []
     details = list(walk.review_details) if walk else []
     pcf = list(walk.pair_completion_for) if walk else list((shortlist.pair_completion_for if shortlist else []))
@@ -1073,7 +1493,7 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
         "review": sorted(review, key=REVIEW_KINDS.index), "review_details": details,
         "pair_completion_for": pcf,
         "pair_flags": list(shortlist.pair_flags) if shortlist else [],
-        "cut_off": cut_off(cand.get("alignment_score")), "alignment_score": cand.get("alignment_score"),
+        "cut_off": spec.c, "alignment_score": cand.get("alignment_score"),
         "region": cand.get("region"),
         "deciding_reading": deciding,
         "readings": readings,
@@ -1093,6 +1513,11 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
     }
     if cov_queue:
         out["covered_by_queue"] = cov_queue
+    if rules.cut_off_rule != "step":
+        out["cut_off_rule"] = spec.as_dict()
+    if rules.skip_unrelated_partners:
+        out["partners_skipped"] = [dict(x) for x in (shortlist.partners_skipped if shortlist else [])] + \
+            [dict(x, partner_of=list(x["partner_of"])) for x in (walk.partners_skipped if walk else [])]
     return out | dict(extra or {})
 
 

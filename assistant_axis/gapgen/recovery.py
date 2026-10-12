@@ -253,13 +253,23 @@ def reduced_traits(traits: Mapping[str, NV.CorpusTrait], hidden: Iterable[str]) 
     return out
 
 
-def reduced_label_sets(reduced: Mapping[str, NV.CorpusTrait], queue: Mapping, hidden: Iterable[str]) -> NV.LabelSets:
+def reduced_label_sets(reduced: Mapping[str, NV.CorpusTrait], queue: Mapping, hidden: Iterable[str], *,
+                       traits: Optional[Mapping[str, NV.CorpusTrait]] = None) -> NV.LabelSets:
     """Stage 0's names for the reduced corpus: :func:`novelty.label_sets` of ``reduced`` (so neither the hidden
     stems nor their ``renamed_from`` cover), less every seed-queue name that is a hidden stem or belongs to an
-    entry whose stem is hidden (a corpus trait also has a queue entry once it was seeded from the queue)."""
+    entry whose stem is hidden (a corpus trait also has a queue entry once it was seeded from the queue).
+
+    ``traits``, the full corpus (review 2 D1, 2026-10-12): also less every seed-queue name that is, separator-blind,
+    a hidden trait's ``renamed_from``, or belongs to an entry whose stem is one.  Such an entry is the stale queue
+    record of the hidden trait under its old name (the queue keeps ``tough`` after ``strict``'s rename), and it
+    would otherwise cover at stage 0 the candidate that names the hidden trait by its old name, telling the run
+    the hidden trait exists.  Without ``traits`` the hidden traits' old names are not known (the behaviour before
+    the fix; no recorded run was affected)."""
     hid = set(hidden)
     sets = NV.label_sets(reduced, queue)
-    queue_names = {n: e for n, e in sets.queue.items() if n not in hid and e.get("stem") not in hid}
+    old = {NV.blind(o) for h in hid for o in ((traits or {}).get(h).renamed_from if (traits or {}).get(h) else [])}
+    queue_names = {n: e for n, e in sets.queue.items() if n not in hid and e.get("stem") not in hid
+                   and NV.blind(n) not in old and NV.blind(e.get("stem") or "") not in old}
     return NV.LabelSets(corpus=set(sets.corpus), queue=queue_names, renamed=dict(sets.renamed))
 
 
@@ -311,11 +321,14 @@ def match_plan(cands: Sequence, vectors: Mapping[str, Any], index: NV.CorpusInde
     return items, near
 
 
-def pair_outcome(reading: Mapping, c: int, rules: Optional[NV.Rules] = None) -> dict:
-    """One overlap pair under the pipeline's rule at cut-off ``c`` (:func:`novelty.pair_verdict`):
+def pair_outcome(reading: Mapping, c: Any, rules: Optional[NV.Rules] = None) -> dict:
+    """One overlap pair under the pipeline's rule at cut-off ``c`` (an integer, or the candidate's
+    :class:`novelty.CutOff` under the run's rules; :func:`novelty.pair_verdict`):
     ``{"verdict", "at_or_above", "recovers"}``, ``recovers`` when the rule set covers on it
     (:func:`novelty.verdict_cuts`: Sonnet above c, or Opus at c or above where Sonnet read c or was unsure,
-    and under rule set 2 Sonnet c - 1 with Opus at c or above)."""
+    and under rule set 2 Sonnet c - 1 with Opus at c or above; under rule set 3's graded rule at alignment score
+    2, both models at 3 or more).  The broader check is not applied here: a match is about the hidden trait's
+    concept, read at the cut-off, whichever of the two is broader."""
     s = (reading.get("sonnet") or {}).get("value")
     o = (reading.get("opus") or {}).get("value") if reading.get("opus") else None
     pv = NV.pair_verdict(s, o, c)
@@ -341,8 +354,9 @@ def match_candidates(runner, cands: Sequence, vectors: Mapping[str, Any], hidden
     rows = []
     for it in items:
         c, nv = by_key[it["key"]], decisions.get(it["key"]) or {}
+        spec = c.cut_off_spec(rules)
         base = {"key": c.key, "label": c.label, "decision": nv.get("decision"), "covered_by": nv.get("covered_by"),
-                "cut_off": c.cut_off, "stem": it["stem"], "how": it["how"], "cosine": it["cosine"], "rank": it["rank"]}
+                "cut_off": spec.c, "stem": it["stem"], "how": it["how"], "cosine": it["cosine"], "rank": it["rank"]}
         if it["how"] == "label":
             rows.append(base | {"match": it["match"], "recovers": True})
             continue
@@ -350,7 +364,7 @@ def match_candidates(runner, cands: Sequence, vectors: Mapping[str, Any], hidden
         if r is None or "stalled" in r:
             rows.append(base | {"stalled": (r or {}).get("stalled", "not read"), "recovers": False})
             continue
-        rows.append(base | {"sonnet": r["sonnet"], "opus": r["opus"]} | pair_outcome(r, c.cut_off, rules))
+        rows.append(base | {"sonnet": r["sonnet"], "opus": r["opus"]} | pair_outcome(r, spec, rules))
     return rows, near
 
 

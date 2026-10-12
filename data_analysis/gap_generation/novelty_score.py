@@ -90,9 +90,24 @@ Commands:
   models receive them (from cached embeddings only; no call).  ``--stand-in`` takes a corpus trait, its M1
   gloss from the validation run and its cached M2 query embedding, with its own trait hidden.
 
-Rules: ``--rules 2`` (the default from 2026-10-07: decisions 12-15 of ``coding_plan_platform.md``'s M3 section
-and the cosine floor) or ``--rules 1`` (the pilot's); ``--cosine-floor F`` (default: the rule set's, 0.25 for
-rule set 2, none for 1; ``none`` turns it off).  Recorded in ``run.json`` and in every row's block.
+* ``broader-pilot --batch-id P [--model M ...] [--keys K ...] [--dry-run]`` (the M3 gate audit's P3, Roger
+  2026-10-12): the broader check alone on the cover audit's 100 marked rows (``m3_cover_audit/key.json`` and
+  ``marks.json``) and on any covered registry rows named by ``--keys``: each cover's candidate and covering trait,
+  as the cover's own overlap call showed them (its recorded request), read in both orders on each ``--model``
+  (default Sonnet 5.5), rubric ``overlap_broader.md`` as pinned.  Writes ``novelty/<P>/``: ``responses.jsonl``,
+  ``results.jsonl`` (one row per pair and model: both readings, the verdict under each gate, Roger's mark),
+  ``summary.json`` (by mark and stratum, under each gate; the first-slot bias), ``pilot.md``, ``usage.json``,
+  ``run.json``.  No registry write.
+
+Rules: ``--rules 3`` (the default from 2026-10-12: rule set 2 with the graded cut-off, review 2 D1's fix and the
+partner skip; the M3 gate audit's P1, P2 and P5), ``--rules 2`` (decisions 12-15 of ``coding_plan_platform.md``'s
+M3 section and the cosine floor, the default from 2026-10-07) or ``--rules 1`` (the pilot's); ``--cosine-floor F``
+(default: the rule set's, 0.25 for rule sets 2 and 3, none for 1; ``none`` turns it off).  A ``--resume`` keeps
+the earlier session's rules unless ``--rules`` is given, and refuses other rules than the earlier session's.
+``--broader-check [mean|both|either]`` (off by default; the audit's P3, off until Roger has read its pilot): a cover
+whose best reading is exactly 3 is read again in both orders by the broader rubric on ``--broader-model`` (Sonnet
+5.5 by default) and undone when the corpus trait is the narrower concept; not with ``full-scan``.  Recorded in
+``run.json`` and in every row's block.
 
 Label form (W19, Roger 2026-10-09; :mod:`assistant_axis.gapgen.prompt_labels`): the relation and overlap prompts
 (and the physical pass's gloss stage) show every label in the judge display form, a named standard's suffix in the
@@ -176,9 +191,20 @@ class RubricError(RuntimeError):
     pass
 
 
-def load_m3_rubrics(rubrics_dir: Optional[Path] = None) -> dict:
+def load_m3_rubrics(rubrics_dir: Optional[Path] = None, *, broader: bool = False) -> dict:
     """The overlap rubric (A, ``overlap_concept``, as pinned) and the relation rubric (``relation``, as pinned);
-    refuses a text that is not its latest pin."""
+    with ``broader``, the broader check's (``overlap_broader``, pinned in ``novelty.BROADER_PINS``); refuses a text
+    that is not its latest pin."""
+    out = _load_m3_rubrics(rubrics_dir)
+    if broader:
+        try:
+            out["broader"] = NV.load_broader_rubric(rubrics_dir)
+        except NV.BroaderRubricError as exc:
+            raise RubricError(str(exc)) from exc
+    return out
+
+
+def _load_m3_rubrics(rubrics_dir: Optional[Path] = None) -> dict:
     try:
         a = OT.load_rubrics(rubrics_dir, keys=[NV.OVERLAP_RUBRIC])[NV.OVERLAP_RUBRIC]
     except OT.RubricPinError as exc:
@@ -335,7 +361,8 @@ def label_sets_for(data_dir: Path, hide=()) -> NV.LabelSets:
     queue = se.load_queue(Path(data_dir) / "seed_queue.json")
     if hide:
         from assistant_axis.gapgen.recovery import reduced_label_sets, reduced_traits
-        return reduced_label_sets(reduced_traits(NV.load_trait_corpus(data_dir), hide), queue, hide)
+        traits = NV.load_trait_corpus(data_dir)
+        return reduced_label_sets(reduced_traits(traits, hide), queue, hide, traits=traits)
     return NV.label_sets(NV.load_trait_corpus(data_dir), queue)
 
 
@@ -351,15 +378,43 @@ def parse_floor(value: str):
         raise argparse.ArgumentTypeError(f"--cosine-floor takes a number or 'none', not {value!r}") from exc
 
 
-def resolve_rules(args) -> NV.Rules:
-    """The rule set of ``--rules`` with ``--cosine-floor`` applied (default: the set's own floor)."""
-    rules = NV.RULES[int(getattr(args, "rules", NV.DEFAULT_RULES.version))]
+def resolve_rules(args, earlier: Optional[dict] = None) -> NV.Rules:
+    """The rule set of ``--rules`` with ``--cosine-floor`` and ``--broader-check`` applied (default: the set's own
+    floor, the check off).  ``earlier`` (a ``--resume``: the earlier session's ``run.json``): with no ``--rules``,
+    ``--cosine-floor`` or ``--broader-check`` given, the earlier session's rules exactly (a run is decided under one
+    rule set; the default moved from 2 to 3 on 2026-10-12)."""
+    given = [getattr(args, a, None) for a in ("rules", "cosine_floor", "broader_check")]
+    if earlier is not None and earlier.get("rules") and all(v is None for v in given):
+        return NV.rules_of({"rules": earlier["rules"]})
+    v = getattr(args, "rules", None)
+    rules = NV.RULES[int(v if v is not None else NV.DEFAULT_RULES.version)]
     floor = getattr(args, "cosine_floor", None)
     if floor == "none":
-        return rules.with_floor(None)
-    if floor is not None:
-        return rules.with_floor(floor)
+        rules = rules.with_floor(None)
+    elif floor is not None:
+        rules = rules.with_floor(floor)
+    gate = getattr(args, "broader_check", None)
+    if gate:
+        rules = rules.with_broader(gate)
     return rules
+
+
+def cut_off_rule_text(rules: NV.Rules) -> str:
+    """``run.json``'s ``settings.cut_off_rule``: the cut-off rule of ``rules`` in words."""
+    if rules.cut_off_rule == "graded":
+        return ("graded (rule set 3): alignment score 0-1: 3; 2: 3, covered when both models read 3 or more (no "
+                "Opus check at 2); 3: 4; missing: 4")
+    return "alignment score 0-1: 3; 2-3: 4; missing: 4"
+
+
+def _resume_rules_mismatch(earlier: Optional[dict], rules: NV.Rules) -> Optional[str]:
+    """Why a ``--resume`` is refused: the earlier session decided under other rules (its ``run.json`` ``rules``)."""
+    was = (earlier or {}).get("rules")
+    if was and NV.rules_of({"rules": was}).as_dict() != rules.as_dict():
+        return (f"the run's earlier session decided under {was.get('name')} ({json.dumps(was)}), this one would decide "
+                f"under {rules.name} ({json.dumps(rules.as_dict())}): resume without --rules, --cosine-floor and "
+                "--broader-check (the earlier session's rules are then used), or finish under a new --batch-id")
+    return None
 
 
 def _read_jsonl(p: Path) -> list[dict]:
@@ -692,9 +747,13 @@ def _rules_line(results: list[dict]) -> str:
         return ""
     parts = []
     for name, version, floor in sorted(sets, key=str):
-        what = ("decisions 1-11, the pilot's" if version == 1 else "decisions 12-15 of the M3 decisions added")
+        what = {1: "decisions 1-11, the pilot's", 2: "decisions 12-15 of the M3 decisions added"}.get(
+            version, "rule set 2 with the graded cut-off (alignment score 2 covered when both models read 3 or more), "
+                     "renamed_from checked before the queue, and partners the relation call marked unrelated or "
+                     "opposed not read (the M3 gate audit, 2026-10-12)")
         parts.append(f"rule set {version} (`{name}`: {what}; cosine floor {floor if floor is not None else 'none'})")
-    return "Rules: " + "; ".join(parts) + ".  "
+    checks = sorted({(r["novelty"].get("rules") or {}).get("broader_check") for r in results} - {None})
+    return "Rules: " + "; ".join(parts) + (f"; the broader check on (gate {', '.join(checks)})" if checks else "") + ".  "
 
 
 def _covered_flagged(nv: dict) -> Optional[dict]:
@@ -727,7 +786,10 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     lines = [f"# M3 decisions: `{batch_id}`" + (" (full scan)" if mode == "full_scan" else "")
              + (f" ({pass_name} pass)" if pass_name else ""), "",
              f"{len(results)} candidates: " + ", ".join(f"{n[d]} {d}" for d in ("covered", "grey", "new") if n[d]) + ".  "
-             "Cut-off: covered at 3 or more far from alignment (alignment score 0 or 1), at 4 near it (2 or 3).  "
+             + ("Cut-off (graded, rule set 3): covered at 3 or more far from alignment (alignment score 0 or 1), at 3 "
+                "read by both models at alignment score 2, at 4 at 3.  "
+                if any((r["novelty"].get("cut_off_rule") or {}).get("rule") == "graded" for r in results) else
+                "Cut-off: covered at 3 or more far from alignment (alignment score 0 or 1), at 4 near it (2 or 3).  ") +
              "The deciding readings are rubric A's 0-4 scale (Sonnet 5.5 first, Opus 5.5 where the rule sends it).  "
              + _rules_line(results) + _queue_line(results) +
              "Built by `novelty_score.py`; every reading is in `readings.jsonl` beside this file.", "",
@@ -759,6 +821,23 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
                   f"{L(d['stem'])}: Sonnet {d['sonnet']['value']} "
                   f"(\"{_md(d['sonnet'].get('reason'))}\"), Opus {d['opus']['value']} (\"{_md(d['opus'].get('reason'))}\")",
                   f"  Gloss: {_md(r.get('gloss'))}"]
+    narrower = [r for r in rows if "cover_narrower" in (r["novelty"].get("review") or [])]
+    if narrower:
+        lines += ["", f"## Covers undone by the broader check ({len(narrower)} rows)", "",
+                  "A cover read at exactly 3 whose corpus trait the broader check (both orders) found the narrower "
+                  "concept: the walk went on, and the row is in the review queue.", ""]
+        for r in narrower:
+            nv = r["novelty"]
+            for d in nv.get("review_details") or []:
+                if d.get("kind") != "cover_narrower":
+                    continue
+                b = d.get("broader") or {}
+                rs = "; ".join(f"{o} {(b.get(o) or {}).get('value')} (\"{_md((b.get(o) or {}).get('reason'))}\")"
+                               for o in NV.BROADER_ORDERS)
+                lines += [f"- **{_md(r['label'])}** (`{r['key']}`, now {nv['decision']}"
+                          + (f" by {L(nv['covered_by'])}" if nv.get("covered_by") else "") + f") not covered by "
+                          f"{L(d['stem'])}: {_reading_text(d)}; broader check {rs}",
+                          f"  Gloss: {_md(r.get('gloss'))}"]
     by_queue = [r for r in rows if r["novelty"].get("covered_by_queue")]
     if queue or by_queue:
         lines += ["", f"## Covered by a seed-queue entry ({len(by_queue)} rows)", "",
@@ -813,6 +892,9 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
             elif d["kind"] == "both_similar":
                 lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels, queue)} "
                              "(see \"Both ends similar\" above)")
+            elif d["kind"] == "cover_narrower":
+                lines.append(f"- cover by {L(d['stem'])} undone by the broader check (see \"Covers undone by the "
+                             "broader check\" above)")
             else:
                 lines.append(f"- unparsed: {_md(json.dumps({k: v for k, v in d.items() if k != 'kind'}))}")
         lines.append("")
@@ -891,13 +973,23 @@ def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--confirmed-by", help="who gave the explicit go for a budget over $20 (recorded in run.json)")
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--rules", type=int, choices=sorted(NV.RULES), default=NV.DEFAULT_RULES.version,
-                    help="decision rules: 2 (default from 2026-10-07: decisions 12-15 and the cosine floor) or 1 (the "
-                         "pilot's, decisions 1-11)")
+    ap.add_argument("--rules", type=int, choices=sorted(NV.RULES), default=None,
+                    help=f"decision rules: 3 (the default, {NV.DEFAULT_RULES.version}, from 2026-10-12: rule set 2 with the "
+                         "graded cut-off, review 2 D1's fix and the partner skip of the M3 gate audit), 2 (decisions "
+                         "12-15 and the cosine floor, the default from 2026-10-07) or 1 (the pilot's, decisions 1-11).  "
+                         "A --resume keeps the earlier session's rules when none of --rules, --cosine-floor and "
+                         "--broader-check is given")
     ap.add_argument("--cosine-floor", type=parse_floor, default=None,
                     help="listed traits below this cosine to the candidate are not judged by the overlap call (an "
-                         "opposed trait's partner and a renamed_from match are); default the rule set's (rule set 2: "
-                         f"{NV.DEFAULT_COSINE_FLOOR}, rule set 1: none); 'none' turns it off")
+                         "opposed trait's partner and a renamed_from match are); default the rule set's (rule sets 2 "
+                         f"and 3: {NV.DEFAULT_COSINE_FLOOR}, rule set 1: none); 'none' turns it off")
+    ap.add_argument("--broader-check", nargs="?", const="mean", default=None, choices=NV.BROADER_GATES,
+                    help="the broader check (the M3 gate audit's P3; off by default until its pilot is read): a cover "
+                         "whose best reading is exactly 3 is read again, in both orders, by the broader rubric "
+                         "(overlap_broader.md), and undone when the corpus trait is the narrower concept (gate mean, the "
+                         "default: the swap-averaged score above 0; both; either).  Not with full-scan")
+    ap.add_argument("--broader-model", default=NR.BROADER_MODEL,
+                    help=f"the broader check's model (default {NR.BROADER_MODEL})")
     ap.add_argument("--corpus-at", choices=("source", "current"), default=None,
                     help="where a run with a source (score --redecide, full-scan) reads the trait files and the seed "
                          "queue: as committed at the source run's git_sha (source, the default there) or --data-dir")
@@ -1064,7 +1156,7 @@ def source_rules(source: dict) -> NV.Rules:
 
 def offline_replay(*, rules: NV.Rules, replay: list, cands, vectors, index, sets, rubrics, cfg, query_form: str,
                    relation_seed: str, batch_id: str, relation_model: str = NR.RELATION_MODEL,
-                   label_form: str = PL.DEFAULT_LABEL_FORM) -> tuple[dict, list]:
+                   label_form: str = PL.DEFAULT_LABEL_FORM, broader_model: str = NR.BROADER_MODEL) -> tuple[dict, list]:
     """Every candidate decided under ``rules`` from the answers on record alone (nothing sent, nothing written):
     ``({key: block or None}, wanted)``, ``None`` for a candidate that needs a call not on record, ``wanted``
     the first such call of each (:class:`novelty_runner.OfflineTransport`).  ``relation_model`` must be the
@@ -1075,7 +1167,7 @@ def offline_replay(*, rules: NV.Rules, replay: list, cands, vectors, index, sets
                          usage=MultiModelUsage(), responses_path=Path(os.devnull), k=cfg.k, mode="shortlist",
                          config_version=cfg.config_version, embedding=_embedding_settings(cfg, query_form), transport=tr,
                          rules=rules, relation_seed=relation_seed, replay_records=replay, relation_model=relation_model,
-                         label_form=label_form)
+                         label_form=label_form, broader_model=broader_model)
     states = r.run(cands, vectors)
     return {k: st.block for k, st in states.items()}, tr.wanted
 
@@ -1215,6 +1307,42 @@ def chain_repro(chain: list, source: dict) -> dict:
     return reproduction_check(source["results"], chain[0][2])
 
 
+def chain_steps(src_rules: NV.Rules, rules: NV.Rules, src_ctx: dict, ctx: dict) -> list[tuple[str, NV.Rules, dict]]:
+    """The attribution steps of a re-decided run, ``[(name, rules, replay context), ...]``: the source's rules
+    first, then one decision a step (rule set 1 to 2: :func:`novelty.rule_chain`; any other change of rules:
+    :func:`novelty.attribution_chain`, so rule set 2 to 3 is D1, then the graded cut-off, then the partner skip), the
+    last step being this run's rules; the same rules: the source's rules and these (one step when only the index
+    differs).  A run whose seed-queue search differs from its source's ends with the queue search, on ``ctx``."""
+    index_differs = src_ctx["index"] is not ctx["index"]
+    if src_rules.as_dict() == NV.RULES[1].as_dict() and rules.version == 2:
+        steps = [(n, r, src_ctx) for n, r in NV.rule_chain(rules.cosine_floor)]
+        steps[-1] = (steps[-1][0], rules, src_ctx)
+    elif src_rules.as_dict() == rules.as_dict():
+        steps = [(f"source rules ({src_rules.name})", src_rules, src_ctx)]
+        if not index_differs:
+            steps.append((f"these rules ({rules.name})", rules, src_ctx))
+    else:
+        steps = [(n, r, src_ctx) for n, r in NV.attribution_chain(src_rules, rules)]
+    if index_differs:
+        n_q = len(ctx["index"].queue_stems)
+        steps.append((f"{QUEUE_STEP} ({n_q} seed-queue entries)" if src_ctx["index"].queue_info is None
+                      else f"{QUEUE_STEP} (off)", rules, ctx))
+    return steps
+
+
+def replay_chain(steps: list, replay: list, *, known: Optional[dict] = None) -> list[tuple[str, NV.Rules, dict]]:
+    """Each step of :func:`chain_steps` replayed offline on ``replay`` (no call): ``[(name, rules, blocks), ...]``.
+    ``known``: blocks already replayed, by ``(rules as JSON, id of the replay context's index)``."""
+    memo = dict(known or {})
+    chain = []
+    for name, ru, cx in steps:
+        k = (json.dumps(ru.as_dict(), sort_keys=True), id(cx["index"]))
+        if k not in memo:
+            memo[k], _ = offline_replay(rules=ru, replay=replay, **cx)
+        chain.append((name, ru, memo[k]))
+    return chain
+
+
 def write_decision_changes(out_dir: Path, *, source: dict, results: list[dict], runner: NR.NoveltyRunner,
                            rules: NV.Rules, ctx: dict, src_ctx: Optional[dict] = None) -> dict:
     """Replay the chain of rule steps offline on the source's records and this run's (no call), then write
@@ -1225,22 +1353,7 @@ def write_decision_changes(out_dir: Path, *, source: dict, results: list[dict], 
     replay = list(source["records"]) + [r for r in runner.records if r.get("text") is not None]
     src_rules = source_rules(source)
     src_ctx = src_ctx if src_ctx is not None else ctx
-    index_differs = src_ctx["index"] is not ctx["index"]
-    if src_rules.as_dict() == NV.RULES[1].as_dict() and rules.version == 2:
-        steps = [(n, r, src_ctx) for n, r in NV.rule_chain(rules.cosine_floor)]
-        steps[-1] = (steps[-1][0], rules, src_ctx)
-    elif index_differs and src_rules.as_dict() == rules.as_dict():
-        steps = [(f"source rules ({src_rules.name})", src_rules, src_ctx)]
-    else:
-        steps = [(f"source rules ({src_rules.name})", src_rules, src_ctx), (f"these rules ({rules.name})", rules, src_ctx)]
-    if index_differs:
-        n_q = len(ctx["index"].queue_stems)
-        steps.append((f"{QUEUE_STEP} ({n_q} seed-queue entries)" if src_ctx["index"].queue_info is None
-                      else f"{QUEUE_STEP} (off)", rules, ctx))
-    chain = []
-    for name, ru, cx in steps:
-        blocks, _ = offline_replay(rules=ru, replay=replay, **cx)
-        chain.append((name, ru, blocks))
+    chain = replay_chain(chain_steps(src_rules, rules, src_ctx, ctx), replay)
     final_check = reproduction_check(results, chain[-1][2])
     new = [r for r in runner.records if r.get("batch_id") == runner.batch_id and r.get("text") is not None]
     new_calls = {"n": len(new), "by_step_model": dict(Counter(f"{r['step']}:{r['model']}" for r in new)),
@@ -1411,12 +1524,18 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             return run_relation_only(args, argv)
     relation_model = getattr(args, "relation_model", None) or NR.RELATION_MODEL
     out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
+    earlier_peek = _peek_run(out_dir) if args.resume else None
+    # the rules: --rules (default 3 from 2026-10-12); a resume the earlier session's unless a rules flag is given
+    rules = resolve_rules(args, earlier=earlier_peek)
+    if rules.broader_check and mode == "full_scan":
+        print("REFUSED: --broader-check is not for full-scan (the full scan replays the walk on its overlap readings "
+              "and makes no broader-check reading)", file=sys.stderr)
+        return 2
     try:
-        rubrics = load_m3_rubrics(args.rubrics_dir)
+        rubrics = load_m3_rubrics(args.rubrics_dir, broader=bool(rules.broader_check))
     except RubricError as exc:
         print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
         return 2
-    rules = resolve_rules(args)
     cfg = MetricConfig.load(args.metric_config)
     reg = Registry(args.registry)
     rows = reg.fold()
@@ -1437,8 +1556,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         relation_model = source_relation_model(source)
     data_dir, corpus_info = resolve_data_dir(args, source)
     # the seed queue in the similarity search (2026-10-09): the flag; else, on --resume, the earlier session's
-    # setting; else the source's; else on
-    earlier_peek = _peek_run(out_dir) if args.resume else None
+    # setting; else the source's; else on (earlier_peek: read above, with the rules)
     # the label form of the prompts (prompt_labels): a resume the earlier session's, a re-decided run or full scan
     # its source's (a run before 2026-10-09 recorded none: "stored"), a new run the judge display form
     label_form = PL.resolve_label_form(earlier=earlier_peek, source=(source.get("run") or {}) if source else None)
@@ -1519,7 +1637,9 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                               mean_listed=listed_mean or 16.0, relation_text_chars=len(rubrics["relation"]["text"]),
                               trait_chars=_mean_chars(index) if index is not None else 260.0,
                               cand_chars=_cand_chars(cands), transport=transport,
-                              n_embed=len(miss) + index_info["n_queue_missing"], relation_model=relation_model)
+                              n_embed=len(miss) + index_info["n_queue_missing"], relation_model=relation_model,
+                              broader_model=args.broader_model if rules.broader_check else None,
+                              broader_text_chars=len(rubrics["broader"]["text"]) if rules.broader_check else 0)
     use = ("embeddings", "relation", "overlap") if mode == "shortlist" else ("embeddings", "full_scan")
     if holding == PP.HOLDING and mode == "shortlist" and not redecide:
         stages["physical_gloss"] = PP.estimate(len(to_gloss))
@@ -1566,7 +1686,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         offline_ctx = {"cands": cands, "vectors": {c.key: unit[i] for i, c in enumerate(cands)}, "index": index,
                        "sets": sets, "rubrics": rubrics, "cfg": cfg, "query_form": args.query_form,
                        "relation_seed": relation_seed, "batch_id": args.batch_id, "relation_model": relation_model,
-                       "label_form": label_form}
+                       "label_form": label_form, "broader_model": args.broader_model}
         src_ctx = offline_ctx | {"index": src_index}
         src_rules = source_rules(source)
         repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **src_ctx)
@@ -1578,6 +1698,27 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         wanted_keys = sorted({w["key"] for w in wanted})
         preview = Counter(f"{r['novelty']['decision']} -> {blocks0[r['key']]['decision']}" for r in source["results"]
                           if blocks0.get(r["key"]) is not None)
+        # the attribution, offline (no call): which step changes which row, on the rows the records decide alone
+        known = {(json.dumps(src_rules.as_dict(), sort_keys=True), id(src_ctx["index"])): repro_blocks,
+                 (json.dumps(rules.as_dict(), sort_keys=True), id(offline_ctx["index"])): blocks0}
+        chain0 = replay_chain(chain_steps(src_rules, rules, src_ctx, offline_ctx), source["records"], known=known)
+        res0 = [{"key": r["key"], "label": r["label"], "gloss": r.get("gloss"), "novelty": blocks0[r["key"]]}
+                for r in source["results"] if blocks0.get(r["key"]) is not None]
+        dc0 = decision_changes(source=source, results=res0, chain=chain0,
+                               final_check=reproduction_check(res0, chain0[-1][2]),
+                               new_calls={"n": 0, "by_step_model": {}, "cost_usd": 0.0, "keys": []}, rules=rules)
+        changed_keys = [r["key"] for r in dc0["rows"] if r["decision_changed"]]
+        # promote-redecide writes a block only over the source's own (or an empty one): a row decided by another run
+        # since keeps that run's block
+        promotable = [k for k in changed_keys if not ((rows.get(k) or {}).get("novelty") or {})
+                      or ((rows.get(k) or {}).get("novelty") or {}).get("run_id") in source["replay_from"]]
+        offline_changes = {"rows_decided_offline": len(res0), "rows_needing_calls": len(wanted_keys),
+                           "changed_and_still_the_sources_in_the_registry": len(promotable),
+                           "decision_changed": dc0["counts"]["decision_changed"],
+                           "covering_trait_changed": dc0["counts"]["covering_trait_changed"],
+                           "transitions_changed": {k: v for k, v in dc0["counts"]["transitions"].items()
+                                                   if k.split(" -> ")[0] != k.split(" -> ")[1]},
+                           "by_step": dc0["counts"]["by_step"], "chain": dc0["chain"], "changed_keys": changed_keys}
         redecide_meta = {"from_batch": source["batch_id"], "source_rules": src_rules.as_dict(), "rules": rules.as_dict(),
                          "relation_seed": relation_seed, "relation_model": relation_model,
                          "write_registry": bool(getattr(args, "write_registry", False)),
@@ -1587,6 +1728,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                          "candidates_needing_calls": wanted_keys,
                          "decided_offline": sum(1 for b in blocks0.values() if b is not None),
                          "offline_decisions": dict(sorted(preview.items())),
+                         "offline_changes": offline_changes,
                          "queue_search": {"source": src_queue_on, "this_run": queue_on,
                                           "n_entries": queue_meta.get("n_entries", 0)}}
         plan["redecide"] = redecide_meta
@@ -1602,6 +1744,15 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
               f"{json.dumps(redecide_meta['calls_not_on_record'])}, for {len(wanted_keys)} candidates: {wanted_keys[:40]}")
         print(f"offline decisions (source -> {rules.name}, rows decided from the records alone): "
               f"{json.dumps(redecide_meta['offline_decisions'])}")
+        oc = offline_changes
+        print(f"decision changes on the records alone ({oc['rows_decided_offline']} rows decided offline; "
+              f"{oc['rows_needing_calls']} need the calls above): {oc['decision_changed']} rows change decision "
+              f"{json.dumps(oc['transitions_changed'])}, {oc['covering_trait_changed']} keep it with another covering "
+              f"trait or reason; steps {' -> '.join(oc['chain'])}")
+        print(f"  by step: {json.dumps(oc['by_step'])}")
+        print(f"  of the rows that change decision, {oc['changed_and_still_the_sources_in_the_registry']} still hold the "
+              f"source's block in the registry (promote-redecide writes those; another run's block is left alone): "
+              f"{oc['changed_keys'][:60]}")
     print(f"plan: {json.dumps({k: v for k, v in plan.items() if k != 'redecide'})}")
     print(f"transport: {transport} ({why})")
     print("estimate by stage:")
@@ -1662,6 +1813,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                f"{(hide_meta or {}).get('path') or 'nothing'} (by sha256): a resume must hide the same traits")
     if bad is None and earlier is not None:
         bad = _resume_queue_mismatch(earlier, queue_meta)
+    if bad is None and earlier is not None:
+        bad = _resume_rules_mismatch(earlier, rules)
     if bad:
         print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
@@ -1675,11 +1828,12 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                 "confirmed_by": args.confirmed_by, "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")}
                                                                for k, v in rubrics.items()},
                 "models": {"relation": relation_model, "relation_unsure": NR.UNSURE_MODEL, "overlap_first": NR.FIRST_MODEL,
-                           "overlap_second": NR.SECOND_MODEL},
+                           "overlap_second": NR.SECOND_MODEL}
+                | ({"broader": args.broader_model} if rules.broader_check else {}),
                 "settings": {"config_version": cfg.config_version, "k": cfg.k, "representation": cfg.representation,
                              "variant": cfg.covered["space"]["variant"], "query_form": args.query_form,
                              "embedding_model": cfg.live_model["model_id"],
-                             "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+                             "cut_off_rule": cut_off_rule_text(rules),
                              "relation_max_tokens": NR.RELATION_MAX_TOKENS, "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS,
                              "temperature": NR.TEMPERATURE, "cache_ttl_batches": NR.BATCH_CACHE_TTL,
                              "concurrency": args.concurrency, "ask_attempts": NR.ASK_ATTEMPTS,
@@ -1709,7 +1863,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
     inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
               current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "overlap_concept.md",
-                                                            paths.RUBRICS_DIR / "relation.md"])]
+                                                            paths.RUBRICS_DIR / "relation.md"]
+                                  + ([paths.RUBRICS_DIR / NV.BROADER_FILE] if rules.broader_check else []))]
     if hide_meta:
         inputs.append(current_file_input(dep_key="hidden", path=Path(hide_meta["path"])))
     if queue_meta.get("n_entries") and corpus_info.get("corpus_at") == "current":
@@ -1763,7 +1918,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                   relation_seed=relation_seed,
                                   replay_records=source["records"] if redecide else (),
                                   extra_block=extra_block or None, relation_model=relation_model,
-                                  label_form=label_form)
+                                  label_form=label_form, broader_model=args.broader_model)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -2032,7 +2187,7 @@ def run_relation_only(args, argv) -> int:
     finally:
         usage.write_json(out_dir / "usage.json")
         if runner is not None:
-            rel_rows = NR.relation_rows(runner.states, runner.records)
+            rel_rows = NR.relation_rows(runner.states, runner.records, rules)
             atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rel_rows),
                               out_dir / "relation.jsonl")
             summary = NR.relation_summary(rel_rows, runner.records, usage, skipped=skipped, not_reached=not_reached)
@@ -2056,6 +2211,300 @@ def run_relation_only(args, argv) -> int:
         atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
         logging.getLogger().removeHandler(fh)
         fh.close()
+    return status
+
+
+# --------------------------------------------------------------------------- the broader check's pilot (audit P3)
+
+COVER_AUDIT_DIR = paths.DATA_CANDIDATES / "novelty" / "m3_cover_audit"
+
+
+def _overlap_texts(records: list, key: str, stem: str) -> Optional[tuple[tuple[str, str], tuple[str, str]]]:
+    """``((candidate label, gloss), (trait label, description))`` as the overlap call for ``key`` against ``stem``
+    showed them: the user turn of an answered overlap record (the labels in that run's form); ``None`` when no such
+    record exists."""
+    for r in records:
+        if r.get("step") == "overlap" and r.get("key") == key and r.get("stem") == stem and r.get("text") is not None:
+            try:
+                obj = json.loads(r["user"])
+            except (TypeError, json.JSONDecodeError):
+                continue
+            t, o = obj.get("target") or {}, obj.get("other") or {}
+            if t.get("description") and o.get("description"):
+                return (t.get("label"), t["description"]), (o.get("label"), o["description"])
+    return None
+
+
+def broader_pilot_pairs(*, audit_dir: Optional[Path], keys, rows: dict, out_root: Optional[Path],
+                        traits: dict) -> tuple[list[dict], dict]:
+    """The pilot's pairs and why any asked-for row was left out.  Each pair: ``{"key", "label", "stem" (the
+    covering trait), "source_batch", "stratum", "sonnet", "opus", "best", "mark", "roger_note", "cand", "other"
+    ((label, description) each), "texts_from"}``.  The cover audit's rows (``audit_dir``: ``key.json`` and
+    ``marks.json``, Roger's mark C, N or ?), then ``keys``: covered registry rows (the overlap walk's covers; their
+    block's run and covering trait).  The texts are those the cover's own overlap call was sent (its recorded user
+    turn, ``texts_from: "record"``), else the row's gloss and today's corpus description (``"corpus"``)."""
+    out, skipped = [], Counter()
+    sources: dict[str, dict] = {}
+
+    def src(batch: str) -> dict:
+        if batch not in sources:
+            sources[batch] = load_source(batch, out_root, with_records=True)
+        return sources[batch]
+
+    def texts(batch: str, key: str, stem: str, gloss: Optional[str], label: str):
+        got = _overlap_texts(src(batch)["records"], key, stem)
+        if got is not None:
+            return got, "record"
+        t = traits.get(stem)
+        if t is None or not gloss:
+            return None, None
+        return ((label, gloss), (t.label, t.description)), "corpus"
+
+    if audit_dir is not None:
+        kdoc = json.loads((Path(audit_dir) / "key.json").read_text(encoding="utf-8"))
+        mdoc = json.loads((Path(audit_dir) / "marks.json").read_text(encoding="utf-8"))
+        marks = {r["key"]: r for r in mdoc["rows"]}
+        for r in kdoc["rows"]:
+            gloss = next((x.get("gloss") for x in src(r["batch"])["results"] if x["key"] == r["key"]), None)
+            got, how = texts(r["batch"], r["key"], r["covered_by"], gloss, r["label"])
+            if got is None:
+                skipped["audit_row_without_texts"] += 1
+                continue
+            m = marks.get(r["key"]) or {}
+            vals = [v for v in (r.get("sonnet"), r.get("opus")) if isinstance(v, int)]
+            out.append({"key": r["key"], "label": r["label"], "stem": r["covered_by"], "source_batch": r["batch"],
+                        "stratum": r.get("stratum"), "sonnet": r.get("sonnet"), "opus": r.get("opus"),
+                        "best": max(vals) if vals else None, "mark": m.get("mark"), "roger_note": m.get("roger_note"),
+                        "cand": got[0], "other": got[1], "texts_from": how, "set": "cover_audit"})
+    for k in keys or []:
+        row = rows.get(k)
+        nv = (row or {}).get("novelty") or {}
+        if row is None:
+            skipped["key_not_in_registry"] += 1
+            continue
+        if nv.get("decision") != "covered" or nv.get("reason") != "overlap" or not nv.get("covered_by"):
+            skipped["key_not_an_overlap_cover"] += 1
+            continue
+        d = nv.get("deciding_reading") or {}
+        s, o = (d.get("sonnet") or {}).get("value"), (d.get("opus") or {}).get("value")
+        got, how = texts(nv["run_id"], k, nv["covered_by"], row.get("gloss"), row["label"])
+        if got is None:
+            skipped["key_without_texts"] += 1
+            continue
+        vals = [v for v in (s, o) if isinstance(v, int) and not isinstance(v, bool)]
+        out.append({"key": k, "label": row["label"], "stem": nv["covered_by"], "source_batch": nv["run_id"],
+                    "stratum": "keys", "sonnet": s, "opus": o, "best": max(vals) if vals else None, "mark": None,
+                    "roger_note": None, "cand": got[0], "other": got[1], "texts_from": how, "set": "keys"})
+    return out, dict(skipped)
+
+
+def broader_pilot_rows(pairs: list[dict], calls: dict, outcomes: dict, models: list[str]) -> list[dict]:
+    """``results.jsonl`` of the pilot: one row per pair and model, both readings (``{"value", "reason"}``, or
+    ``{"value": None, "error"}``), the sides, the mean score and the verdict under every gate."""
+    out = []
+    for i, p in enumerate(pairs):
+        for m in models:
+            reads = []
+            for order in NV.BROADER_ORDERS:
+                o = outcomes.get(id(calls[(i, m, order)]))
+                if o is not None and o.status == "ok":
+                    reads.append(dict(o.parsed))
+                else:
+                    reads.append({"value": None, "error": (o.error if o is not None else None) or
+                                  (o.status if o is not None else "not_sent")})
+            v = {g: NV.broader_verdict(reads[0], reads[1], g) for g in NV.BROADER_GATES}
+            base = {k: p[k] for k in ("key", "label", "stem", "source_batch", "stratum", "sonnet", "opus", "best",
+                                      "mark", "roger_note", "texts_from", "set")}
+            out.append(base | {"model": m, "straight": reads[0], "swapped": reads[1], "sides": v["mean"]["sides"],
+                               "score": v["mean"]["score"], "uncovers": {g: v[g]["uncovers"] for g in NV.BROADER_GATES},
+                               "unparsed": v["mean"]["unparsed"]})
+    return out
+
+
+def broader_pilot_summary(rows: list[dict]) -> dict:
+    """Per model: pairs, and per gate the covers the check would undo, by Roger's mark (C, N, ?, none) and by
+    stratum; the answers by order and the first-slot share (of the "first" and "second" answers, the share that
+    named the first slot: 0.5 is no position bias, the pair being shown both ways); the orders' agreement."""
+    out: dict = {}
+    for m in sorted({r["model"] for r in rows}):
+        rs = [r for r in rows if r["model"] == m]
+        by_gate = {}
+        for g in NV.BROADER_GATES:
+            by_mark, by_stratum = Counter(), Counter()
+            for r in rs:
+                if r["uncovers"][g]:
+                    by_mark[str(r["mark"])] += 1
+                    by_stratum[str(r["stratum"])] += 1
+            by_gate[g] = {"undone": sum(by_mark.values()), "by_mark": dict(by_mark), "by_stratum": dict(by_stratum)}
+        ans = {o: Counter(str((r[o] or {}).get("value")) for r in rs) for o in NV.BROADER_ORDERS}
+        n_first = sum(a.get("first", 0) for a in ans.values())
+        n_second = sum(a.get("second", 0) for a in ans.values())
+        parsed = [r for r in rs if not r["unparsed"]]
+        out[m] = {"pairs": len(rs), "by_mark": dict(Counter(str(r["mark"]) for r in rs)),
+                  "by_stratum": dict(Counter(str(r["stratum"]) for r in rs)),
+                  "gates": by_gate, "answers": {o: dict(a) for o, a in ans.items()},
+                  "first_slot_share": round(n_first / (n_first + n_second), 4) if n_first + n_second else None,
+                  "orders_agree": sum(1 for r in parsed if r["sides"][0] == r["sides"][1]),
+                  "orders_contradict": sum(1 for r in parsed if set(r["sides"]) == {"candidate", "corpus"}),
+                  "unparsed": len(rs) - len(parsed)}
+    return out
+
+
+def broader_pilot_markdown(summary: dict, rows: list[dict], *, batch_id: str, labels: dict) -> str:
+    """``pilot.md``: per model, the covers each gate would undo by Roger's mark, then every pair the default gate
+    undoes or that Roger did not mark covered, with both readings and their reasons."""
+    L = lambda s: _link(s, labels)  # noqa: E731
+    lines = [f"# The broader check's pilot: `{batch_id}`", "",
+             "The broader rubric ([overlap_broader.md](../../../../reports/trait_gap_generation/rubrics/overlap_broader.md)) "
+             "on covers on record, each read in both orders (the candidate first, then the covering trait first).  "
+             "Roger's marks are the cover audit's of 2026-10-09 (C covered, N new, ? uncertain).  In production the check "
+             "runs only on covers read at exactly 3 (the `four` stratum is a control).  Adopt (the audit's P3) if it undoes "
+             "the doubtful covers and few of the confirmed ones.", ""]
+    for m, s in summary.items():
+        lines += [f"## {OT.SHORT.get(m, m)}", "",
+                  f"{s['pairs']} pairs; marks {json.dumps(s['by_mark'])}; first-slot share {s['first_slot_share']} (0.5: no "
+                  f"position bias); orders agree on {s['orders_agree']}, contradict on {s['orders_contradict']}; "
+                  f"unparsed {s['unparsed']}.", "",
+                  "| gate | covers undone | of which marked C | N | ? | unmarked | by stratum |", "|---|---|---|---|---|---|---|"]
+        for g, v in s["gates"].items():
+            bm = v["by_mark"]
+            lines.append(f"| {g} | {v['undone']} | {bm.get('C', 0)} | {bm.get('N', 0)} | {bm.get('?', 0)} | "
+                         f"{bm.get('None', 0)} | {_md(json.dumps(v['by_stratum']))} |")
+        lines += ["", "| candidate | covered by | S / O | mark | straight (candidate first) | swapped | sides | undone (mean, both, either) |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for r in [r for r in rows if r["model"] == m and (r["uncovers"]["mean"] or r["uncovers"]["either"]
+                                                          or r["mark"] not in ("C",))]:
+            def rd(x):
+                return f"{x.get('value')}: \"{_md(x.get('reason') or x.get('error'))}\""
+            lines.append(f"| {_md(r['label'])} | {L(r['stem'])} | {r['sonnet']} / {r['opus']} | {r['mark']}"
+                         + (f" ({_md(r['roger_note'])})" if r.get("roger_note") else "") + f" | {rd(r['straight'])} | "
+                         f"{rd(r['swapped'])} | {', '.join(str(x) for x in r['sides'])} | "
+                         f"{', '.join('yes' if r['uncovers'][g] else 'no' for g in NV.BROADER_GATES)} |")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def cmd_broader_pilot(args, argv) -> int:
+    """``broader-pilot``: the broader check on covers on record (see the module docstring)."""
+    import numpy as np
+    from assistant_axis.plot_metadata import json_metadata
+    paths.check_id(args.batch_id, "batch_id")
+    models = list(dict.fromkeys(args.model or [NR.BROADER_MODEL]))
+    out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
+    try:
+        rub = NV.load_broader_rubric(args.rubrics_dir)
+    except NV.BroaderRubricError as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    rows = Registry(args.registry).fold()
+    traits = NV.load_trait_corpus(args.data_dir)
+    pairs, skipped = broader_pilot_pairs(audit_dir=None if args.no_audit else args.audit_dir, keys=args.keys,
+                                         rows=rows, out_root=args.out_root, traits=traits)
+    if not pairs:
+        print(f"nothing to read ({json.dumps(skipped)})", file=sys.stderr)
+        return 0
+    idx = NV.CorpusIndex(stems=[], Z=np.zeros((0, 1)), transform=None, traits={}, settings={})
+
+    def make_runner(**kw):
+        return NR.NoveltyRunner(batch_id=args.batch_id, rubrics={"broader": rub}, index=idx,
+                                label_sets=NV.LabelSets(corpus=set(), queue={}, renamed={}), k=0,
+                                config_version="", retry_delays=None, **kw)
+    probe = make_runner(client=None, usage=MultiModelUsage(), responses_path=Path(os.devnull))
+    calls: dict = {}
+    for i, p in enumerate(pairs):
+        for m in models:
+            for order in NV.BROADER_ORDERS:
+                calls[(i, m, order)] = probe.broader_call(p["key"], tuple(p["cand"]), tuple(p["other"]), p["stem"],
+                                                          order, i + 1, model=m)
+    est = Estimate()
+    for m in models:
+        toks = [NR.call_tokens(c) for (i, mm, o), c in calls.items() if mm == m]
+        est.add(f"broader check, both orders, {len(pairs)} pairs", m, len(toks),
+                int(round(sum(t[0] for t in toks) / len(toks))), int(round(sum(t[1] for t in toks) / len(toks))))
+    plan = {"mode": "broader_pilot", "n_pairs": len(pairs), "models": models, "skipped": skipped,
+            "by_set": dict(Counter(p["set"] for p in pairs)), "by_mark": dict(Counter(str(p["mark"]) for p in pairs)),
+            "by_stratum": dict(Counter(str(p["stratum"]) for p in pairs)),
+            "texts_from": dict(Counter(p["texts_from"] for p in pairs)),
+            "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM}
+    print(f"plan: {json.dumps(plan)}")
+    print(f"estimate (live):\n{est.format()}")
+    refused: Optional[str] = None
+    cap = None
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                               confirmed_by=args.confirmed_by)
+        print(f"hard cap: ${cap:.2f}")
+    except CostRefused as exc:
+        refused = exc.msg
+    sha = git_sha()
+    dirty = platform_dirty_files()
+    if refused is None and dirty and not args.allow_dirty:
+        refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                   f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty")
+        print(f"REFUSED: {refused}", file=sys.stderr)
+    if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+        print(f"DRY-RUN: would write {out_dir}/ (no registry write)")
+        for order in NV.BROADER_ORDERS:
+            c = calls[(0, models[0], order)]
+            params = NR.request_params_for(c)       # as the model receives it
+            print(f"=== broader check, {pairs[0]['key']} against {pairs[0]['stem']}, order {order} ({models[0]}), request "
+                  f"settings {json.dumps({k: v for k, v in params.items() if k not in ('system', 'messages')})}, system "
+                  f"block cache_control {json.dumps(params['system'][0].get('cache_control'))} ===\n--- system ---\n"
+                  f"{params['system'][0]['text']}\n--- user ---\n{params['messages'][0]['content']}\n")
+        return 0
+    if refused:
+        return 2
+    status, resume_records, earlier = _prepare_out_dir(out_dir, args)
+    if status:
+        return status
+    run_meta = {"batch_id": args.batch_id, "mode": "broader_pilot", "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
+                "argv": sys.argv[1:] if argv is None else argv, "plan": plan, "estimate_usd": round(est.usd, 4),
+                "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
+                "confirmed_by": args.confirmed_by, "rubrics": {"broader": plan["rubric"]}, "models": {"broader": models},
+                "settings": {"max_tokens": NR.BROADER_MAX_TOKENS, "temperature": NR.TEMPERATURE, "cache_system": True,
+                             "gates": list(NV.BROADER_GATES), "audit_dir": None if args.no_audit else str(args.audit_dir),
+                             "keys": args.keys},
+                PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM, "resumed": bool(args.resume), "started_at": utc_now()}
+    if earlier:
+        run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    status, error, runner, outcomes = 0, None, None, {}
+    try:
+        from dotenv import load_dotenv
+        import anthropic
+        load_dotenv(_REPO_ROOT / ".env")
+        runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), usage=usage,
+                             responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
+                             resume_records=resume_records)
+        outcomes = runner.run_calls(list(calls.values()), wave="p_broader")
+    except BudgetExceededError as exc:
+        print(f"STOPPED: {exc}", file=sys.stderr)
+        status = 2
+    except BaseException as exc:  # noqa: BLE001 - recorded, then re-raised
+        error = exc
+        print(f"STOPPED by {type(exc).__name__}: {exc}", file=sys.stderr)
+        raise
+    finally:
+        usage.write_json(out_dir / "usage.json")
+        if runner is not None:
+            res = broader_pilot_rows(pairs, calls, outcomes, models)
+            atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in res), out_dir / "results.jsonl")
+            summary = {"by_model": broader_pilot_summary(res), "parse_rates": runner.warn_parse_rates(logger),
+                       "spend_usd": round(usage.total_cost_usd, 6), "usage": usage.as_dict(), "plan": plan,
+                       "stopped_by_budget": status == 2,
+                       "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None}
+            env = json_metadata(summary, title=f"novelty_score broader-pilot {args.batch_id}")
+            atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
+            atomic_write_text(broader_pilot_markdown(summary["by_model"], res, batch_id=args.batch_id,
+                                                     labels={s: t.label for s, t in traits.items()}),
+                              out_dir / "pilot.md")
+            print(usage.log_line())
+            print(json.dumps({m: {g: v["undone"] for g, v in s["gates"].items()} for m, s in summary["by_model"].items()}))
+        run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     return status
 
 
@@ -2388,6 +2837,31 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--keys", nargs="+", help="registry keys to scan, in place of a sample")
     sp.add_argument("--sample-seed", type=int, default=0)
     sp.set_defaults(func=lambda a, argv: run_scoring(a, argv, mode="full_scan"))
+    sp = sub.add_parser("broader-pilot",
+                        help="the broader check (audit P3) on the cover audit's 100 marked rows and any covered --keys, "
+                             "both orders, no registry write")
+    sp.add_argument("--batch-id", required=True)
+    sp.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
+    sp.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
+    sp.add_argument("--out-root", type=Path, default=None, help="candidates dir holding novelty/<batch_id>/")
+    sp.add_argument("--rubrics-dir", type=Path, default=None)
+    sp.add_argument("--audit-dir", type=Path, default=COVER_AUDIT_DIR,
+                    help="the cover audit's directory (key.json, marks.json)")
+    sp.add_argument("--no-audit", action="store_true", help="only the rows of --keys")
+    sp.add_argument("--keys", nargs="+", default=None,
+                    help="also these covered registry rows (overlap covers; their block's run and covering trait), "
+                         "e.g. the audit's known false covers as positive controls")
+    sp.add_argument("--model", action="append", default=None,
+                    help=f"a model to read every pair on (repeatable; default {NR.BROADER_MODEL})")
+    sp.add_argument("--concurrency", type=int, default=NR.DEFAULT_CONCURRENCY)
+    sp.add_argument("--budget-usd", type=float, default=1.0)
+    sp.add_argument("--confirm-expensive", action="store_true")
+    sp.add_argument("--confirmed-by", default=None)
+    sp.add_argument("--allow-dirty", action="store_true")
+    sp.add_argument("--dry-run", action="store_true", help="the plan, the estimate and the rendered requests; nothing sent")
+    sp.add_argument("--resume", action="store_true")
+    sp.add_argument("--overwrite", action="store_true")
+    sp.set_defaults(func=lambda a, argv: cmd_broader_pilot(a, argv))
     sp = sub.add_parser("promote-redecide",
                         help="write a finished re-decided run's novelty blocks to the registry (no API call)")
     sp.add_argument("--batch-id", required=True, help="the re-decided run (score --redecide --batch-id)")

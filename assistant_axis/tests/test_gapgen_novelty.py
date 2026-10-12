@@ -20,8 +20,10 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 
 REPO = Path(__file__).resolve().parents[2]
 #: The pilot's decision rules (decisions 1-11) and round 2's (decisions 12-15 and the floor; the default from
-#: 2026-10-07).  The tests written for the pilot's rules are pinned to R1 with their expectations unchanged;
-#: round 2's tests are further down (TestRound2*).
+#: 2026-10-07 to 2026-10-12).  The tests written for the pilot's rules are pinned to R1 with their expectations
+#: unchanged; round 2's tests are further down (TestRound2*).  Since rule set 3 became the default (2026-10-12, the M3
+#: gate audit), the tests written under rule set 2's default are pinned to R2 the same way (``make_runner`` and the
+#: shortlist tests); rule set 3's tests are in test_gapgen_novelty_rule3.py.
 R1, R2 = NV.RULES[1], NV.RULES[2]
 
 # --------------------------------------------------------------------------- the toy corpus
@@ -221,7 +223,7 @@ class TestShortlist:
     def test_order_partners_first_then_similar_by_cosine(self):
         rel = {"alpha": "similar", "delta": "opposed", "zeta": "similar", "theta": "unrelated", "beta": "similar",
                "epsilon": "unrelated", "iota": "similar", "gamma": "unrelated", "lambda_mu": "opposed"}
-        sl = NV.build_shortlist(self.listed(), rel)
+        sl = NV.build_shortlist(self.listed(), rel, rules=R2)      # rule set 3 skips epsilon (test_gapgen_novelty_rule3)
         # delta opposed: its partner epsilon goes to the front although the call did not mark it similar
         assert sl.front == ["epsilon"]
         assert sl.queue == ["epsilon", "alpha", "zeta", "beta", "iota"]
@@ -231,25 +233,26 @@ class TestShortlist:
 
     def test_an_opposed_corner_brings_the_other_corners_forward(self):
         rel = {x.stem: "unrelated" for x in self.listed()} | {"alpha": "opposed", "zeta": "similar"}
-        sl = NV.build_shortlist(self.listed(), rel)
+        sl = NV.build_shortlist(self.listed(), rel, rules=R2)      # rule set 3 skips the unrelated corners
         assert sl.queue == ["beta", "gamma", "zeta"] and sl.pair_completion_for == []
 
     def test_pair_check(self):
         base = {x.stem: "unrelated" for x in self.listed()}
-        expected = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "opposed"})
+        expected = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "opposed"}, rules=R2)
         assert expected.pair_flags == []                                   # one side similar, the other opposed
-        both_sim = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "similar"})
+        both_sim = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "similar"}, rules=R2)
         assert both_sim.pair_flags == [{"pair": ["delta", "epsilon"], "both": "similar"}]
-        both_opp = NV.build_shortlist(self.listed(), base | {"theta": "opposed", "iota": "opposed"})
+        both_opp = NV.build_shortlist(self.listed(), base | {"theta": "opposed", "iota": "opposed"}, rules=R2)
         assert both_opp.pair_flags == [{"pair": ["iota", "theta"], "both": "opposed"}]
         assert both_opp.front == ["theta", "iota"]                          # each is the other's partner
         # a triangle is not a pair: two corners both similar raise no flag
-        tri = NV.build_shortlist(self.listed(), base | {"alpha": "similar", "beta": "similar"})
+        tri = NV.build_shortlist(self.listed(), base | {"alpha": "similar", "beta": "similar"}, rules=R2)
         assert tri.pair_flags == []
 
     def test_a_trait_still_unsure_is_shortlisted_but_left_out_of_the_pair_check(self):
         base = {x.stem: "unrelated" for x in self.listed()}
-        sl = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "unsure", "zeta": "similar"})
+        sl = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "unsure", "zeta": "similar"},
+                                rules=R2)
         assert sl.queue == ["delta", "zeta", "epsilon"] and sl.pair_flags == []
 
     def test_the_fallback_shortlists_every_listed_trait_without_a_pair_check(self):
@@ -486,6 +489,8 @@ def make_runner(tmp_path, responder, *, usage=None, records=(), queue=None, mode
     # the runner's tests were written on Haiku 4.5 (its temperature 0, its prices in the budget stops); the
     # default relation model is Haiku 5.5 from 2026-10-08 (TestRelationModel and test_gapgen_haiku55_switch)
     kw.setdefault("relation_model", NV.HAIKU)
+    # and under rule set 2, the default until 2026-10-12 (rule set 3's runner tests: test_gapgen_novelty_rule3.py)
+    kw.setdefault("rules", R2)
     idx = toy_index(tmp_path, renamed=renamed)
     sets = NV.label_sets(idx.traits, queue or {"entries": [{"stem": "queued", "label": "queued", "status": "candidate"}]})
     client = FakeAsyncAnthropic(responder)
@@ -725,7 +730,8 @@ TRI = {"kind": "triangle", "members": ["alpha", "beta", "gamma"]}
 
 class TestRound2Rules:
     def test_the_two_rule_sets_and_the_chain_between_them(self):
-        assert R1.cosine_floor is None and R2.cosine_floor == 0.25 and NV.DEFAULT_RULES == R2
+        # the default was R2 until 2026-10-12 and is rule set 3 since (the M3 gate audit; test_gapgen_novelty_rule3)
+        assert R1.cosine_floor is None and R2.cosine_floor == 0.25 and NV.DEFAULT_RULES == NV.RULES[3]
         assert R1.grey_kinds == ("sonnet_below_opus_at", "unparsed", "pair_flag") and R2.grey_kinds == ("unparsed",)
         chain = NV.rule_chain()
         assert [r for _, r in chain][0] == R1 and chain[-1][1] == R2 and len(chain) == 6

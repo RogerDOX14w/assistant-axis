@@ -11,7 +11,11 @@ The logic is :mod:`assistant_axis.gapgen.novelty`; this module sends the calls a
 * ``oNN_sonnet`` then ``oNN_opus`` for shortlist position NN = 1, 2, ...: Sonnet on every undecided
   candidate's next pair, then Opus on the pairs the rule sends it (rubric A, one pair per call, the user
   turn :func:`overlap_test.render_single`, the system prompt cached: 5 minutes live, 1 hour in batches,
-  since a batch's requests are spread over up to an hour).
+  since a batch's requests are spread over up to an hour);
+* ``oNN_broader`` (only under the broader check, ``rules.broader_check``; the M3 gate audit's P3): on every
+  pair that would cover its candidate with a best reading of exactly 3, two calls of the broader rubric
+  (``overlap_broader.md``), the candidate first (step ``broader``) and the corpus trait first (step
+  ``broader_swapped``), on :attr:`NoveltyRunner.broader_model` (Sonnet 5.5 by default).
 
 The full scan (``mode="full_scan"``) sends no relation call: ``f_sonnet`` reads every listed trait of
 every candidate, ``f_opus`` the pairs the rule sends to Opus, and the walk is replayed on the readings
@@ -58,6 +62,12 @@ FIRST_MODEL = NV.SONNET
 SECOND_MODEL = NV.OPUS
 RELATION_MAX_TOKENS = 4096
 OVERLAP_MAX_TOKENS = OT.MAX_TOKENS          # 2048, as overlap_arms_3 sent it
+#: The broader check (audit P3): Sonnet 5.5 by default (``--broader-model``); 4,096 tokens, room for a model that
+#: thinks adaptively (Haiku 5.5, Opus 5.5), as the relation call has.
+BROADER_MODEL = NV.SONNET
+BROADER_MAX_TOKENS = 4096
+#: Its two steps, one per order (``novelty.BROADER_ORDERS``): the candidate first, then the corpus trait first.
+BROADER_STEPS: dict[str, str] = {"straight": "broader", "swapped": "broader_swapped"}
 TEMPERATURE = OT.TEMPERATURE                # 0.0; left out for Sonnet 5.5 and Opus 5.5, which refuse it
 ASK_ATTEMPTS = OT.ASK_ATTEMPTS              # 2: an answer that fails to parse is asked once more
 DEFAULT_CONCURRENCY = 8
@@ -154,7 +164,17 @@ class M3Candidate:
 
     @property
     def cut_off(self) -> int:
+        """The step rule's cut-off (rule sets 1 and 2).  A subclass that fixes its own cut-off overrides this
+        (the review graph's and the near-duplicate scan's candidates); :meth:`cut_off_spec` respects that."""
         return NV.cut_off(self.alignment_score)
+
+    def cut_off_spec(self, rules: Optional[NV.Rules] = None) -> NV.CutOff:
+        """The cut-off rule this candidate is judged by under ``rules`` (:func:`novelty.cut_off_spec`: the graded
+        rule of rule set 3, the step rule of 1 and 2); a subclass that overrides :attr:`cut_off` keeps its fixed
+        cut-off under every rule set (:func:`novelty.as_cut_off`)."""
+        if type(self).cut_off is not M3Candidate.cut_off:
+            return NV.as_cut_off(self.cut_off)
+        return NV.cut_off_spec(self.alignment_score, rules)
 
     def as_dict(self) -> dict:
         return {"key": self.key, "stem": self.stem, "label": self.label, "gloss": self.gloss,
@@ -376,7 +396,7 @@ class NoveltyRunner:
                  rules: Optional[NV.Rules] = None, relation_seed: Optional[str] = None,
                  replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None,
                  relation_model: str = RELATION_MODEL, relation_only: bool = False,
-                 label_form: str = DEFAULT_LABEL_FORM):
+                 label_form: str = DEFAULT_LABEL_FORM, broader_model: str = BROADER_MODEL):
         self.label_form = check_label_form(label_form)
         if mode not in ("shortlist", "full_scan"):
             raise ValueError(f"mode must be shortlist or full_scan, not {mode!r}")
@@ -387,6 +407,14 @@ class NoveltyRunner:
         self.relation_model = str(relation_model)
         self.relation_only = bool(relation_only)
         self.rules = rules or NV.DEFAULT_RULES
+        #: the broader check's model (audit P3; used only under ``rules.broader_check``)
+        self.broader_model = str(broader_model)
+        if self.rules.broader_check and "broader" not in rubrics:
+            raise ValueError("the broader check is on (rules.broader_check) but no 'broader' rubric was given "
+                             "(novelty.load_broader_rubric)")
+        if self.rules.broader_check and mode == "full_scan":
+            raise ValueError("the full scan replays the walk on its readings and makes no broader-check reading; "
+                             "run it without the broader check")
         self.relation_seed = relation_seed or batch_id
         self.extra_block = dict(extra_block or {})
         self.rubrics = rubrics
@@ -462,6 +490,9 @@ class NoveltyRunner:
         if c.step in ("relation", "relation_unsure"):
             rows, errors, meta = NV.parse_relation(text, len(c.stems))
             return rows, errors, meta
+        if c.step in BROADER_STEPS.values():
+            rows, errors, meta = NV.parse_broader(text)
+            return (rows.get(1) if rows else None), errors, meta
         rows, errors, meta = OT.parse_single(text, NV.OVERLAP_RUBRIC)
         return (rows.get(1) if rows else None), errors, meta
 
@@ -592,6 +623,28 @@ class NoveltyRunner:
         return Call(step="overlap", role=role, key=st.cand.key, model=model, system=self.rubrics["overlap"]["text"],
                     user=user, max_tokens=OVERLAP_MAX_TOKENS, temperature=TEMPERATURE, cache_system=True,
                     cache_ttl=self.cache_ttl, stem=stem, position=position)
+
+    def broader_call(self, key: str, cand: tuple[str, str], other: tuple[str, str], stem: str, order: str,
+                     position: int = 0, *, model: Optional[str] = None) -> Call:
+        """One broader-check call (audit P3): ``cand`` and ``other`` are ``(label, description)`` (the candidate's
+        gloss; the corpus trait's description), shown in ``order`` (:data:`novelty.BROADER_ORDERS`) under the keys
+        ``first`` and ``second``, labels in the run's form; the rubric ``overlap_broader`` as the cached system
+        prompt; on ``model`` (default :attr:`broader_model`)."""
+        first, second = NV.broader_pair(order, cand, other)
+        user = NV.render_broader_user(first, second, label_form=self.label_form)
+        m = model or self.broader_model
+        return Call(step=BROADER_STEPS[order], role=model_role(m), key=key, model=m,
+                    system=self.rubrics["broader"]["text"], user=user, max_tokens=BROADER_MAX_TOKENS,
+                    temperature=TEMPERATURE, cache_system=True, cache_ttl=self.cache_ttl, stem=stem, position=position)
+
+    def _broader_calls(self, st: CandState, stem: str, position: int) -> tuple[Call, Call]:
+        cand = (st.cand.label, st.cand.gloss)
+        other = (self.corpus[stem]["label"], self.corpus[stem]["description"])
+        return tuple(self.broader_call(st.cand.key, cand, other, stem, o, position) for o in NV.BROADER_ORDERS)
+
+    def cut_spec(self, st: CandState) -> NV.CutOff:
+        """The candidate's cut-off rule under the run's rules (:meth:`M3Candidate.cut_off_spec`)."""
+        return st.cand.cut_off_spec(self.rules)
 
     # -- the run ----------------------------------------------------------------------
     def run(self, cands: Sequence[M3Candidate], vectors: Mapping[str, np.ndarray]) -> dict[str, CandState]:
@@ -724,7 +777,7 @@ class NoveltyRunner:
             if renamed and renamed not in info:
                 info[renamed] = NV.listed_from(renamed, self._cos_of(st, renamed), self.traits, rank=None,
                                                via="renamed_from")
-            st.walk = NV.Walk(st.cand.key, st.cand.cut_off, st.shortlist.queue, info,
+            st.walk = NV.Walk(st.cand.key, self.cut_spec(st), st.shortlist.queue, info,
                               relations=st.relations, partners=self.partners, cosine_of=self._cos_fn(st), review=review,
                               review_details=details, pair_completion_for=st.shortlist.pair_completion_for,
                               rules=self.rules, exclude=st.shortlist.excluded, queue_status=self.queue_status)
@@ -793,6 +846,18 @@ class NoveltyRunner:
                     st.walk.give_opus(None, error=o.error)
                 else:
                     st.stalled = f"Opus on {s}: {o.status}" + (f" ({o.error})" if o.error else "")
+            # the broader check (rules.broader_check): a cover read at exactly 3, both orders
+            pend = [(st, s) for st, s in todo if not st.stalled and st.walk.needs_broader]
+            bcalls = [(st, s, self._broader_calls(st, s, position)) for st, s in pend]
+            flat = [c for _, _, cs in bcalls for c in cs]
+            res = await self._wave(f"o{position:02d}_broader", flat) if flat else {}
+            for st, s, cs in bcalls:
+                outs = [res.get(id(c), Outcome("not_sent")) for c in cs]
+                bad = [o for o in outs if o.status in ("failed", "not_sent")]
+                if bad:
+                    st.stalled = f"broader check on {s}: {bad[0].status}" + (f" ({bad[0].error})" if bad[0].error else "")
+                    continue
+                st.walk.give_broader(*[o.parsed if o.status == "ok" else {"value": None, "error": o.error} for o in outs])
             for st, _ in todo:
                 if st.walk.decided and st.block is None and not st.stalled:
                     st.block = self._block(st, decision=st.walk.decision, reason="overlap")
@@ -822,7 +887,7 @@ class NoveltyRunner:
             else:
                 out[k] = {"stalled": f"Sonnet on {stem}: {o.status}", "phase": "sonnet"}
                 continue
-            if NV.sonnet_action(out[k]["sonnet"]["value"], st.cand.cut_off) in NV.OPUS_ROLES:
+            if NV.sonnet_action(out[k]["sonnet"]["value"], self.cut_spec(st)) in NV.OPUS_ROLES:
                 opus.append((st, stem, self._overlap_call(st, stem, "opus", pos)))
         ocalls = [c for _, _, c in opus]
         res = await self._wave(f"{wave}_opus", ocalls) if ocalls and self._stop is None else {}
@@ -834,6 +899,19 @@ class NoveltyRunner:
                 out[k]["opus"] = {"value": None, "error": o.error}
             else:
                 out[k] = {"stalled": f"Opus on {stem}: {o.status}", "phase": "opus"}
+        return out
+
+    def run_calls(self, calls: Sequence[Call], *, wave: str) -> dict[int, Outcome]:
+        """``calls`` sent as one wave (and its retry wave), recorded, replayed from records and charged as every
+        wave of a run is: ``{id(call): Outcome}``.  For calls built outside a walk (the broader check's pilot,
+        :meth:`broader_call`); a stop (a budget stop) is raised after every answer is recorded."""
+        return asyncio.run(self._run_calls(calls, wave))
+
+    async def _run_calls(self, calls, wave):
+        self._stop = None
+        out = await self._wave(wave, calls)
+        if self._stop is not None:
+            raise self._stop
         return out
 
     def run_pairs(self, cands: Sequence[M3Candidate], pairs: Sequence[tuple[str, str, int]], *,
@@ -873,7 +951,7 @@ class NoveltyRunner:
             # floor are read like the rest but left out of the replayed walk, as the pipeline would leave them
             order = [x.stem for x in sorted(st.listed, key=lambda x: (-x.cosine, x.stem))
                      if not self.rules.below_floor(x.cosine)]
-            st.walk = NV.replay_walk(NV.Walk(st.cand.key, st.cand.cut_off, order, {x.stem: x for x in st.listed},
+            st.walk = NV.replay_walk(NV.Walk(st.cand.key, self.cut_spec(st), order, {x.stem: x for x in st.listed},
                                              partners=self.partners, cosine_of=self._cos_fn(st), rules=self.rules,
                                              queue_status=self.queue_status),
                                      st.scan)
@@ -886,14 +964,15 @@ class NoveltyRunner:
                              covered_by=covered_by, match=match, walk=st.walk, listed=st.listed, relation=st.relation,
                              shortlist=st.shortlist, rubrics=self.rubric_pins, config_version=self.config_version,
                              embedding=self.embedding, usage=NV.usage_dict(st.usage), at=utc_now(), mode=self.mode,
-                             rules=self.rules, renamed=st.renamed, extra=self.extra_block)
+                             rules=self.rules, renamed=st.renamed, extra=self.extra_block, cut_spec=self.cut_spec(st))
         if self.mode == "full_scan":
             by = {x.stem: x for x in st.listed}
             b["scan"] = []
             b["n_below_floor"] = sum(1 for x in st.listed if self.rules.below_floor(x.cosine))
             for s in sorted(st.scan, key=lambda s: (-by[s].cosine, s)):
                 r = st.scan[s]
-                pv = NV.pair_verdict((r["sonnet"] or {}).get("value"), (r.get("opus") or {}).get("value"), st.cand.cut_off)
+                pv = NV.pair_verdict((r["sonnet"] or {}).get("value"), (r.get("opus") or {}).get("value"),
+                                     self.cut_spec(st))
                 b["scan"].append({"stem": s, "cosine": by[s].cosine, "rank": by[s].rank, "via": by[s].via,
                                   "sonnet": r["sonnet"], "opus": r.get("opus"), **pv,
                                   "cuts": NV.verdict_cuts(pv["verdict"], self.rules),
@@ -931,12 +1010,41 @@ class NoveltyRunner:
         return out
 
 
+def request_params_for(c: Call) -> dict:
+    """The Messages API request ``c`` is sent as (``llm.request_params``), for reading it as the model receives it."""
+    from .llm import request_params
+    return request_params(model=c.model, system=c.system, user=c.user, max_tokens=c.max_tokens,
+                          temperature=c.temperature, cache_system=c.cache_system, cache_ttl=c.cache_ttl)
+
+
 def call_tokens(c: Call) -> tuple[int, int]:
     """Estimated (input, output) tokens of one call (the module's constants)."""
     if c.step == "overlap":
         return OVERLAP_TOKENS["opus" if "opus" in c.model else "sonnet"]
+    if c.step in BROADER_STEPS.values():
+        return broader_tokens(c.model, len(c.system) + len(c.user))
     f = OT.tokenizer_factor(c.model)
     return (int(round((len(c.system) + len(c.user)) / CHARS_PER_TOKEN * f)), relation_out_tokens(c.model, len(c.stems)))
+
+
+#: The broader check's output per call, by model-id fragment, before any is measured: rubric A's one-pair answer
+#: as overlap_arms_3 measured it (Sonnet 78 tokens, Opus 112, which thinks more in that form), and for Haiku 5.5,
+#: which thinks adaptively at medium effort, the relation call's measured 76.5 tokens per listed trait times
+#: three (a guess, on the high side; the pilot measures it).  Any other model: Sonnet's figure times its tokenizer
+#: factor over Sonnet's.
+BROADER_OUT_TOKENS: dict[str, int] = {"sonnet": 78, "opus": 112, "haiku-5": 230}
+#: The share of candidates reaching the walk whose cover is read at exactly 3, so get the broader check (the M3
+#: gate audit: 1,200 covers with a best reading of 3 over the 4,548 rows the overlap walk decided).
+BROADER_SHARE = 0.26
+
+
+def broader_tokens(model: str, chars: int) -> tuple[int, int]:
+    """Estimated (input, output) tokens of one broader-check call of ``chars`` characters (system and user)."""
+    m = str(model).lower()
+    out = next((v for frag, v in BROADER_OUT_TOKENS.items() if frag in m), None)
+    if out is None:
+        out = int(round(BROADER_OUT_TOKENS["sonnet"] * OT.tokenizer_factor(model) / OT.tokenizer_factor(NV.SONNET)))
+    return int(round(chars / CHARS_PER_TOKEN * OT.tokenizer_factor(model))), out
 
 
 # --------------------------------------------------------------------------- the plan's estimate
@@ -957,7 +1065,8 @@ def mean_listed_size(index: NV.CorpusIndex, k: int) -> float:
 
 def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relation_text_chars: int,
                   trait_chars: float, cand_chars: float, transport: str = "live", n_embed: Optional[int] = None,
-                  embed_tokens_each: int = 30, relation_model: str = RELATION_MODEL):
+                  embed_tokens_each: int = 30, relation_model: str = RELATION_MODEL,
+                  broader_model: Optional[str] = None, broader_text_chars: int = 0):
     """The dry run's estimate by stage (coding_plan_m3.md, "Transport, cost, records"), as a
     :class:`cost.Estimate` per stage: ``{"embeddings", "relation", "overlap", "full_scan"}``.  Overlap pairs:
     :data:`SHORTLIST_PAIRS` a candidate less the early-exit saving; Opus on the shares above.  The relation
@@ -985,6 +1094,11 @@ def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relatio
                        FIRST_MODEL + suffix, n_pairs, *OVERLAP_TOKENS["sonnet"])
     out["overlap"].add(f"overlap, Opus ({OPUS_SHARE_SHORTLIST:.0%} of pairs)", SECOND_MODEL + suffix,
                        int(round(n_pairs * OPUS_SHARE_SHORTLIST)), *OVERLAP_TOKENS["opus"])
+    if broader_model:
+        # the broader check (audit P3): two calls (both orders) on each cover read at exactly 3
+        n_b = 2 * int(round(n_candidates * BROADER_SHARE))
+        out["overlap"].add(f"broader check, both orders ({BROADER_SHARE:.0%} of candidates)", broader_model + suffix,
+                           n_b, *broader_tokens(broader_model, broader_text_chars + 2 * int(round(trait_chars))))
     n_scan_pairs = int(round(n_scan * mean_listed))
     out["full_scan"].add(f"full scan, Sonnet on every listed trait ({mean_listed:.1f} a candidate)", FIRST_MODEL + suffix,
                          n_scan_pairs, *OVERLAP_TOKENS["sonnet"])
@@ -1002,7 +1116,8 @@ def _call_line(rec: Mapping) -> dict:
             "parse_errors": rec.get("parse_errors"), "error": rec.get("error")}
 
 
-def relation_rows(states: Mapping[str, CandState], records: Sequence[Mapping]) -> list[dict]:
+def relation_rows(states: Mapping[str, CandState], records: Sequence[Mapping],
+                  rules: Optional[NV.Rules] = None) -> list[dict]:
     """``relation.jsonl`` of a ``relation_only`` run: one row per candidate that reached stage 3, in key order:
     the relation model's answer for every listed trait (with Sonnet's, ``second``, where it re-asked an
     ``unsure``), the final relations, the counts, the shortlist the run's rules build from them (and its
@@ -1023,7 +1138,8 @@ def relation_rows(states: Mapping[str, CandState], records: Sequence[Mapping]) -
         final = Counter(st.relations.values()) if rel.get("status") == "ok" else Counter()
         out.append({
             "key": key, "label": st.cand.label, "stem": st.cand.stem, "gloss": st.cand.gloss,
-            "cut_off": st.cand.cut_off, "model": rel["model"], "rubric": rel["rubric"], "status": rel["status"],
+            "cut_off": st.cand.cut_off_spec(rules).c, "model": rel["model"], "rubric": rel["rubric"],
+            "status": rel["status"],
             "fallback": rel.get("fallback"), "error": rel.get("error"), "order": rel["order"],
             "listed": [{"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via, "partners": list(x.partners)}
                        | ({"queue_status": x.queue_status} if x.queue_status else {}) for x in st.listed],
@@ -1126,6 +1242,41 @@ def _dist(values: Sequence[int]) -> dict:
     return {str(k): c[k] for k in sorted(c)}
 
 
+def rule3_counts(blocks: Sequence[Mapping]) -> dict:
+    """``summary.json``'s counts for the switches of 2026-10-12, over the blocks that carry them (none for a run of
+    rule set 1 or 2, so its summary gains no key): ``cut_off_bands`` (rows by the graded rule's band and decision),
+    ``partners_skipped`` (rows, partners, by relation and by where the walk met them, and an estimate of the Sonnet
+    and Opus readings saved, at the shares on record: every skipped partner a Sonnet reading, 243 of 6,560 an Opus
+    one) and ``broader_check`` (pairs checked, covers undone, the split verdicts, readings that never parsed)."""
+    out: dict = {}
+    graded = [b for b in blocks if b.get("cut_off_rule")]
+    if graded:
+        bands: dict = {}
+        for b in graded:
+            band = b["cut_off_rule"].get("band")
+            bands.setdefault(band, Counter())[b["decision"]] += 1
+        out["cut_off_bands"] = {k: dict(v) for k, v in sorted(bands.items())}
+    skip = [b for b in blocks if "partners_skipped" in b]
+    if skip:
+        xs = [x for b in skip for x in b["partners_skipped"]]
+        n_opus = len(xs) * 243 / 6560
+        est = len(xs) * cost_for_usage(FIRST_MODEL, *OVERLAP_TOKENS["sonnet"]) + \
+            n_opus * cost_for_usage(SECOND_MODEL, *OVERLAP_TOKENS["opus"])
+        out["partners_skipped"] = {"rows": sum(1 for b in skip if b["partners_skipped"]), "partners": len(xs),
+                                   "by_relation": dict(Counter(x.get("relation") for x in xs)),
+                                   "by_where": dict(Counter(x.get("at") for x in xs)),
+                                   "est_readings_saved": {"sonnet": len(xs), "opus": round(n_opus, 1)},
+                                   "est_saving_usd_live": round(est, 4)}
+    checked = [r["broader"] for b in blocks for r in b.get("readings") or [] if r.get("broader")]
+    if checked:
+        out["broader_check"] = {"pairs_checked": len(checked), "covers_undone": sum(1 for v in checked if v["uncovers"]),
+                                "by_candidate_broader": dict(Counter(str(v["candidate_broader"]) for v in checked)),
+                                "unparsed": sum(1 for v in checked if v["unparsed"]),
+                                "gates": sorted({v["gate"] for v in checked}),
+                                "rows_flagged": sum(1 for b in blocks if "cover_narrower" in (b.get("review") or []))}
+    return out
+
+
 def summarize(results: Sequence[Mapping], records: Sequence[Mapping], usage: MultiModelUsage, *,
               stalled: Optional[Mapping[str, Any]] = None, skipped: Optional[Mapping[str, int]] = None,
               mode: str = "shortlist") -> dict:
@@ -1210,6 +1361,7 @@ def summarize(results: Sequence[Mapping], records: Sequence[Mapping], usage: Mul
                          "covered_by_queue_by_status": dict(Counter(b["covered_by_queue"].get("status")
                                                                     for b in blocks if b.get("covered_by_queue")))},
     }
+    rule_tail |= rule3_counts(blocks)
     return {
         "mode": mode, "n_candidates": len(blocks) + len(stalled), "n_decided": len(blocks), "n_stalled": len(stalled),
         "stalled": stalled, "skipped": dict(skipped or {}),

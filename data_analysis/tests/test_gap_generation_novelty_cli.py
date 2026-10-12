@@ -86,8 +86,14 @@ def make_env(tmp_path, monkeypatch, *, rows=ROWS, renamed=None, relations=RELATI
     return {"base": base, "reg": reg, "cand_dir": cand_dir, "holder": holder, "data": data, "tmp": tmp_path}
 
 
+def _r2(extra) -> tuple:
+    """The tests below were written under rule set 2, the default until 2026-10-12: pinned to it unless they name a
+    rule set (rule set 3's CLI tests: assistant_axis/tests/test_gapgen_novelty_rule3.py)."""
+    return tuple(extra) if "--rules" in extra else (*extra, "--rules", "2")
+
+
 def score(env, *extra):
-    return cli.main(["score", "--batch-id", "m3t", "--run", "toy/r1", *env["base"], *extra])
+    return cli.main(["score", "--batch-id", "m3t", "--run", "toy/r1", *env["base"], *_r2(extra)])
 
 
 def out(env, name="m3t"):
@@ -276,7 +282,7 @@ def test_render_a_registry_candidate(env, capsys):
 
 def redecide(env, batch, *extra):
     return cli.main(["score", "--redecide", "--from-batch", "m3t", "--batch-id", batch, "--corpus-at", "current",
-                     *env["base"], *extra])
+                     *env["base"], *_r2(extra)])
 
 
 def calls_made(env):
@@ -357,7 +363,7 @@ def test_redecide_under_rules_2_sends_only_the_calls_a_rule_needs(tmp_path, monk
     # a re-decided run can be re-decided in turn: its records and its source's are both replayed
     env["holder"].pop("client", None)
     assert cli.main(["score", "--redecide", "--from-batch", "m3t_r2", "--batch-id", "m3t_r3", "--corpus-at", "current",
-                     *env["base"]]) == 0
+                     *env["base"], "--rules", "2"]) == 0
     assert calls_made(env) == []
     assert json.loads((out(env, "m3t_r3") / "run.json").read_text())["replay_from"] == ["m3t", "m3t_r2"]
 
@@ -384,7 +390,7 @@ def test_full_scan_takes_keys(env):
 
 def relation_only(env, batch, *extra):
     return cli.main(["score", "--relation-only", "--from-batch", "m3t", "--batch-id", batch, "--corpus-at", "current",
-                     *env["base"], *extra])
+                     *env["base"], *_r2(extra)])
 
 
 def test_relation_only_on_another_model(env, capsys):
