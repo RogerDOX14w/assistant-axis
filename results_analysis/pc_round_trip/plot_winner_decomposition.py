@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 """Render the nth_pc winner decomposition heatmap.
 
-Loads the (n_canon_pcs, n_strips * 6) matrix from
+Loads the (n_canon_pcs, n_strips * cols_per_strip) matrix from
 ``winner_decomposition.py``'s npz output and renders it as a heatmap
 where:
   - Each column is a probability distribution over canonical PCs
     (squared coefficients of the winner direction projected onto canonical
     Vt, normalised to sum to 1).
-  - The 16 PC indices have one strip each, side-by-side.
-  - Within a strip: 6 columns = 3 cell counts × 2 styles.
-    Order: glo-1c, glo-2c, glo-3c, inl-1c, inl-2c, inl-3c.
+  - Each target PC index N has one strip, side-by-side.
+  - Within a strip: one column per (style, n-cell level), glossary first;
+    since 2026-10-12 the levels are n = 1, 2, 4, 6, 7 of the 7-cell order
+    (10 columns), read from the column keys (6 columns, n = 1..3, before).
+  - A red tick at row k = N marks where a winner that is canonical PC N
+    would put its mass.
+
+The title is taken from the npz's ``meta["winners_source"]``: "nth_pc
+search winners" only when the winners came from ``klm_sweep.py``'s
+per-cell section; otherwise it names the variant whose configurations
+were used (code review 2026-10-12: the May 9 figure called itself
+"nth_pc winner" although built on fixed_principled configurations).
 """
 from __future__ import annotations
 
@@ -18,27 +27,74 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.ticker as mticker
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 from assistant_axis.provenance import (
     CACHE_POLICIES, InputSpec, load_and_register_npz,
 )
-from results_analysis.pc_round_trip.winner_decomposition import CANONICAL_L
+from results_analysis.pc_round_trip.winner_decomposition import (
+    CANONICAL_L, LAYER_C, SLOT_C,
+)
 
 
 DEFAULT_NPZ = "roger/pc_round_trip_nth_pc_winner_decomposition.npz"
 DEFAULT_OUTPUT = "roger/pc_round_trip_nth_pc_winner_decomposition.png"
 
+_STYLE_ABBREV = {"glossary": "glo", "inline": "inl"}
+
+
+def strip_layout(column_keys: list) -> tuple[list[int], int, list[str], list[int]]:
+    """``(pcs_in_order, cols_per_strip, styles_in_order, n_values)`` from
+    the column keys ``(pc, style, n)``.  Every strip must have the same
+    columns (``winner_decomposition`` writes them so)."""
+    pcs_in_order: list[int] = []
+    for pc, _, _ in column_keys:
+        if int(pc) not in pcs_in_order:
+            pcs_in_order.append(int(pc))
+    first = [(str(s), int(n)) for pc, s, n in column_keys
+             if int(pc) == pcs_in_order[0]]
+    cols_per_strip = len(first)
+    if cols_per_strip * len(pcs_in_order) != len(column_keys):
+        raise ValueError("column keys do not form equal strips per PC")
+    styles: list[str] = []
+    n_values: list[int] = []
+    for s, n in first:
+        if s not in styles:
+            styles.append(s)
+        if n not in n_values:
+            n_values.append(n)
+    return pcs_in_order, cols_per_strip, styles, n_values
+
+
+def figure_title(meta: dict) -> str:
+    """Headline naming what the columns are, from ``meta``."""
+    canon = meta.get("canonical_cell") or {
+        "slot": SLOT_C, "layer": LAYER_C, "L": CANONICAL_L}
+    where = (f"canonical PC basis (slot {canon['slot']}, layer "
+             f"{canon['layer']}, L={canon['L']}"
+             f"{' raw' if int(canon['L']) == 0 else ' shear'})")
+    variant = (meta.get("winners_source") or {}).get("variant", "unknown")
+    if variant == "nth_pc":
+        return f"PC round-trip: nth_pc search winners decomposed in the {where}"
+    if variant == "unknown":
+        return ("PC round-trip: PC N at per-cell winner configurations "
+                f"(search not recorded), decomposed in the {where}")
+    return (f"PC round-trip: PC N at the {variant} winners' configurations, "
+            f"decomposed in the {where}")
+
 
 def render_heatmap(ax, matrix: np.ndarray, column_keys: list,
                     *, max_canon_pc: int = 0,
                     log_color: bool = True,
-                    title: str = "") -> None:
+                    title: str = "",
+                    mark_target: bool = True) -> None:
     """Render heatmap on the given axis.
 
     matrix: (n_canon_pcs, n_cols).
     column_keys: list of (pc, style, n) tuples, len == n_cols.
+    mark_target: draw a red tick at row k = N across each strip.
     """
     if max_canon_pc <= 0:
         max_canon_pc = matrix.shape[0]
@@ -66,25 +122,40 @@ def render_heatmap(ax, matrix: np.ndarray, column_keys: list,
     # Y axis: canonical PC 1 at TOP, large PCs at BOTTOM.  Log scale.
     ax.set_ylim(n_canon + 0.5, 0.5)        # inverted: 1 at top
     ax.set_yscale("log")
+    # Plain PC indices (powers of two) rather than 10^k labels, so a row
+    # such as k = 12 can be read off.
+    yticks = [t for t in (1, 2, 4, 8, 16, 32, 64, 128, 256, 512) if t <= n_canon]
+    ax.set_yticks(yticks)
+    ax.set_yticklabels([str(t) for t in yticks])
+    ax.yaxis.set_minor_formatter(mticker.NullFormatter())
     ax.set_ylabel("Canonical PC index k\n(rows: contribution to decomposition)")
 
-    # Draw PC strip boundaries (every 6 cols).
-    pcs_in_order = []
-    for pc, _, _ in column_keys:
-        if pc not in pcs_in_order:
-            pcs_in_order.append(pc)
+    # Strip boundaries (every cols_per_strip columns).
+    pcs_in_order, w, styles, n_values = strip_layout(column_keys)
     for i in range(1, len(pcs_in_order)):
-        ax.axvline(i * 6, color="black", linewidth=0.6, alpha=0.4)
-    # Within each strip, light divider after column 3 (separates glo and inl).
+        ax.axvline(i * w, color="black", linewidth=0.6, alpha=0.4)
+    # Within each strip, light dividers between the styles.
+    per_style = w // max(len(styles), 1)
     for i in range(len(pcs_in_order)):
-        ax.axvline(i * 6 + 3, color="white", linewidth=0.4, alpha=0.5)
+        for j in range(1, len(styles)):
+            ax.axvline(i * w + j * per_style, color="white",
+                       linewidth=0.4, alpha=0.5)
+    # Red tick at k = N: where a winner equal to canonical PC N sits.
+    if mark_target:
+        for i, pc in enumerate(pcs_in_order):
+            if pc <= n_canon:
+                ax.hlines(pc, i * w, (i + 1) * w, colors="red",
+                          linewidth=0.9, alpha=0.8)
 
     # X axis: strip centers labeled with PC index.
-    strip_centers = [i * 6 + 3 for i in range(len(pcs_in_order))]
+    strip_centers = [i * w + w / 2 for i in range(len(pcs_in_order))]
     ax.set_xticks(strip_centers)
     ax.set_xticklabels([str(pc) for pc in pcs_in_order])
-    ax.set_xlabel("PC index N (each strip = 6 cols: glo-1c|glo-2c|glo-3c | "
-                  "inl-1c|inl-2c|inl-3c)")
+    levels = ",".join(str(n) for n in n_values)
+    strip_desc = " | ".join(f"{_STYLE_ABBREV.get(s, s)} n={levels}"
+                            for s in styles)
+    ax.set_xlabel(f"Target PC index N (each strip = {w} columns: {strip_desc}; "
+                  f"n = best of the first n cells)")
     ax.set_xlim(0, n_cols)
     if title:
         ax.set_title(title, fontsize=11)
@@ -115,32 +186,44 @@ def main() -> int:
         inputs=inputs,
     )
     matrix = data["matrix"]
-    column_keys = list(data["column_keys"])
+    column_keys = [(int(pc), str(s), int(n)) for pc, s, n in data["column_keys"]]
+    meta = meta or {}
 
-    fig, ax = plt.subplots(figsize=(15, 7))
+    # ~0.065 in per column, at least the old 15 in.
+    width = max(15.0, 2.5 + 0.065 * len(column_keys))
+    fig, ax = plt.subplots(figsize=(width, 7.5))
     mesh = render_heatmap(
         ax, matrix, column_keys,
         max_canon_pc=args.max_canon_pc,
         log_color=not args.linear_color,
-        title="nth_pc winner decomposition in canonical PC basis",
     )
     cbar = fig.colorbar(mesh, ax=ax, fraction=0.025, pad=0.01)
     cbar.set_label("squared coefficient (column sums to 1)")
 
-    # The canonical shear depth comes from winner_decomposition (L=0 since
-    # the May 2026 migration); the text used to say "L=2" (review
-    # 2026-10-12).
-    title = ("PC round-trip: nth_pc winner decomposition in canonical PC basis "
-             f"(L={CANONICAL_L} sheared space)")
+    # The title says which winners the columns are (meta["winners_source"])
+    # and the canonical cell (L=0 raw since the May 2026 migration).  Until
+    # 2026-10-12 it said "nth_pc winner ... (L=2 ...)" whatever the input.
+    title = figure_title(meta)
+    cells = meta.get("cell_order")
+    n_cells = len(cells) if cells else "?"
+    variant = (meta.get("winners_source") or {}).get("variant", "unknown")
+    if variant == "nth_pc":
+        what = ("Column (N, style, n): the index-N PC at the best-ρ "
+                f"(cell, L, K) over the first n of {n_cells} cells (klm_sweep "
+                "stage 2, M=∞).")
+    else:
+        what = ("Column (N, style, n): the index-N PC at the configuration "
+                f"the {variant} search chose over the first n of {n_cells} "
+                "cells.")
     spec = (
-        "Each column shows the projected squared coefficients of an nth_pc "
-        "winner direction onto canonical Vt[k] (normalised to sum to 1).\n"
-        "Path: post-whitened winner → inverse whiten/shear at target → "
-        "raw R^D at target → least-squares α onto target M_raw → reconstruct "
-        f"α @ M_canon_raw → forward canonical L={CANONICAL_L} shear → "
-        "decompose vs Vt_canon."
+        f"{what}  Rows: its squared coefficient on canonical PC k, column "
+        "sums to 1; red tick at k = N.\n"
+        "Path: inverse whiten/shear at the winner cell → least-squares "
+        "entity weights on that cell's raw matrix → same weights on the "
+        f"canonical raw matrix → canonical L={CANONICAL_L} shear → "
+        "decompose on canonical Vt."
     )
-    _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.024)
+    _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.03)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     out = Path(args.output)

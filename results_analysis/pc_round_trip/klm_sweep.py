@@ -31,11 +31,15 @@ Reads the cached judge scores produced by ``launch_judge_runs.py`` (which
 runs the auto-described axis through ``axis_judge_correlation.py``), and
 for each (PC, style) cell finds the best round-trip Spearman ρ across:
 
-- ``slot, layer`` ∈ a small set (default: the three configs that dominate
-  the per-PC winners — (3, 25), (0, 26), (0, 49)),
-- ``L`` -- soft-shear truncation depth (default 0..5),
-- ``K`` -- soft-K whitening depth, swept on a coarse log-spaced grid then
-  refined with bracket-and-bisect around the peak,
+- ``slot, layer`` ∈ a small set (default: the 7 cells of
+  ``DEFAULT_CONFIGS``, canonical (7, 25) first; the three-cell 4-slot set
+  (3, 25), (0, 26), (0, 49) was the default until the May 9 migration),
+- ``L`` -- soft-shear truncation depth (default ``DEFAULT_L_VALUES`` =
+  0, 1, 2, 4),
+- ``K`` -- soft-K whitening depth, swept on a coarse grid (default
+  ``DEFAULT_K_COARSE`` = 0, 1, 2, 4; the K-near-N expansion was removed
+  on 2026-05-06) then refined with bracket-and-bisect around the peak
+  (a no-op on the default grid, whose brackets are all ≤ 3 wide),
 - ``M`` -- optional truncation of M_done into the top-M PCs of the pool
   (default {64, 128, 256, 512, None=∞}).
 
@@ -67,6 +71,19 @@ A JSON file at ``--cache_path`` with two top-level dicts keyed by
 ``"pc{NNN}_{style}"`` -- one for stage 1 (best at each (L, K, M)) and one
 for stage 2 (refined K at M=∞).  Each entry records the slot, layer, L,
 K, (M for stage 1), and ρ for the winning cell.
+
+Since 2026-10-12 (code review, walk-through D1) the file also records the
+**per-cell** winners: ``stage1_M_sweep_per_cell`` and
+``stage2_K_refinement_M_inf_per_cell``, keyed
+``"pc{NNN}_{style}_s{S}_l{L}"`` (the key form of the
+``plot_direction_cosines.py`` per-cell files), one entry per configured
+(slot, layer) cell with that cell's best (L, K[, M]) and ρ, plus
+``cell_order`` (the ``--configs`` order).  The global winners are the
+per-cell maxima taken in ``cell_order`` (first cell wins a tie), so they
+are what the sweep recorded before.  ``winner_decomposition.py`` reads
+the stage-2 per-cell section to decompose the nth_pc winner of the first
+n cells for every n; before this the sweep kept only the global winner,
+and the decomposition fell back to the fixed_principled per-cell file.
 
 This script does **no** API calls -- it just reads the cached judge
 scores and runs CPU.  Re-running is cheap (~4 minutes on a workstation).
@@ -363,6 +380,30 @@ def rho_for_direction(M_done, names, direction, scores) -> Optional[float]:
     return None if np.isnan(r) else float(r)
 
 
+def global_from_per_cell(per_cell: dict, configs: list[tuple[int, int]]
+                         ) -> dict:
+    """Global winner per (pc, style) from per-cell winners.
+
+    ``per_cell`` maps ``(pc, style, slot, layer)`` to a tuple whose first
+    element is ρ and the rest the cell's winning configuration (``(rho,
+    L, K, M)`` for stage 1, ``(rho, L, K)`` for stage 2).  Returns
+    ``{(pc, style): (rho, slot, layer, *rest)}``, the shape the sweep has
+    always recorded.  Cells are scanned in ``configs`` order with a strict
+    ``>``, so a tie goes to the earlier cell, as it did when the global
+    winner was tracked directly.
+    """
+    order = {cell: i for i, cell in enumerate(configs)}
+    out: dict = {}
+    for key in sorted(per_cell, key=lambda k: order.get((k[2], k[3]),
+                                                        len(order))):
+        pc, style, slot, layer = key
+        rho, *rest = per_cell[key]
+        cur = out.get((pc, style))
+        if cur is None or rho > cur[0]:
+            out[(pc, style)] = (rho, slot, layer, *rest)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Stage 1: M sweep at coarse (L, K) grid
 # ---------------------------------------------------------------------------
@@ -370,12 +411,19 @@ def rho_for_direction(M_done, names, direction, scores) -> Optional[float]:
 def stage1_m_sweep(scores_by_cell, *, data_dir, configs, l_values, k_coarse,
                     m_values, pcs, styles):
     """DEPRECATED (May 2026): part of the (L, K, M, cell) optimization
-    sweep.  See file-level docstring for context."""
+    sweep.  See file-level docstring for context.
+
+    Returns ``(best_global, best_per_cell)``: ``best_global`` maps
+    ``(pc, style)`` to ``(rho, slot, layer, L, K, M)``, ``best_per_cell``
+    maps ``(pc, style, slot, layer)`` to ``(rho, L, K, M)`` for every
+    configured cell where a ρ was computed (2026-10-12: the per-cell
+    winners used to be thrown away)."""
     print(f"\n{'='*92}")
     print("STAGE 1: M-truncation sweep at coarse (L, K) grid")
     print(f"{'='*92}")
 
-    best_per_cell: dict = {}  # (pc, style) -> (rho, slot, layer, L, K, M)
+    # (pc, style, slot, layer) -> (rho, L, K, M)
+    best_per_cell: dict = {}
 
     for slot, layer in configs:
         print(f"\n  ({slot},{layer:>2}): loading...")
@@ -422,14 +470,13 @@ def stage1_m_sweep(scores_by_cell, *, data_dir, configs, l_values, k_coarse,
                             rho = rho_for_direction(M_done, names, direction, scores)
                             if rho is None:
                                 continue
-                            cur = best_per_cell.get((pc, style))
+                            cell_key = (pc, style, slot, layer)
+                            cur = best_per_cell.get(cell_key)
                             if cur is None or rho > cur[0]:
-                                best_per_cell[(pc, style)] = (
-                                    rho, slot, layer, L, K, M_top
-                                )
+                                best_per_cell[cell_key] = (rho, L, K, M_top)
         print("    done")
 
-    return best_per_cell
+    return global_from_per_cell(best_per_cell, configs), best_per_cell
 
 
 # ---------------------------------------------------------------------------
@@ -439,12 +486,22 @@ def stage1_m_sweep(scores_by_cell, *, data_dir, configs, l_values, k_coarse,
 def stage2_k_refinement(scores_by_cell, *, data_dir, configs, l_values,
                          k_coarse, pcs, styles):
     """DEPRECATED (May 2026): part of the (L, K, cell) optimization
-    sweep.  See file-level docstring for context."""
+    sweep.  See file-level docstring for context.
+
+    Returns ``(refined_global, refined_per_cell)``: ``refined_global``
+    maps ``(pc, style)`` to ``(rho, slot, layer, L, K)``,
+    ``refined_per_cell`` maps ``(pc, style, slot, layer)`` to ``(rho, L,
+    K)``, the cell's best over L of the refined-K winner (2026-10-12: the
+    per-cell winners used to be thrown away).  A target with no ρ at a
+    cell (SVD failure, too few scored entities) has no entry for it; the
+    old code recorded ``(-2.0, ..., K=None)`` for such a target when the
+    first cell had no ρ."""
     print(f"\n{'='*92}")
     print("STAGE 2: iterative K refinement at M=None")
     print(f"{'='*92}")
 
-    refined_results: dict = {}  # (pc, style) -> (rho, slot, layer, L, K, "refined")
+    # (pc, style, slot, layer) -> (rho, L, K)
+    refined_per_cell: dict = {}
     eval_count = 0
 
     for slot, layer in configs:
@@ -547,17 +604,18 @@ def stage2_k_refinement(scores_by_cell, *, data_dir, configs, l_values,
                             break
 
                     K_star, rho_star = best_K_so_far()
-                    cur = refined_results.get(target)
-                    if cur is None or (rho_star is not None and rho_star > cur[0]):
-                        refined_results[target] = (
-                            rho_star, slot, layer, L, K_star, "refined"
-                        )
+                    if K_star is None:
+                        continue
+                    cell_key = (pc, style, slot, layer)
+                    cur = refined_per_cell.get(cell_key)
+                    if cur is None or rho_star > cur[0]:
+                        refined_per_cell[cell_key] = (rho_star, L, K_star)
 
         print(f"    done; {len(Vt_at_K_per_L)} unique Ks evaluated, "
               f"{sum(1 for k in Vt_at_K_per_L if k[1] not in k_coarse)} new beyond coarse")
 
     print(f"\n  Total {eval_count} unique (slot, layer, L, K) SVDs computed.")
-    return refined_results
+    return global_from_per_cell(refined_per_cell, configs), refined_per_cell
 
 
 # ---------------------------------------------------------------------------
@@ -593,10 +651,57 @@ def _build_subtree_inputs(*, data_dir: Path) -> list[InputSpec]:
     ]
 
 
+def per_cell_key(pc: int, style: str, slot: int, layer: int) -> str:
+    """``"pc{NNN}_{style}_s{S}_l{L}"``: the per-cell key form shared with
+    ``plot_direction_cosines.py``'s per-cell winners files and parsed by
+    ``winner_decomposition.load_per_cell_winners``."""
+    return f"pc{pc:03d}_{style}_s{slot}_l{layer}"
+
+
+def serialise_results(stage1, stage2, *, pcs, styles,
+                      stage1_per_cell: dict | None = None,
+                      stage2_per_cell: dict | None = None,
+                      configs: list[tuple[int, int]] | None = None) -> dict:
+    """The JSON payload of the sweep cache (before the provenance
+    envelope).  The two global sections keep their pre-2026-10-12 form;
+    the per-cell sections and ``cell_order`` are added when given."""
+    out: dict = {
+        "stage1_M_sweep": {f"pc{pc:03d}_{s}": {
+            "rho": stage1[(pc, s)][0],
+            "slot": stage1[(pc, s)][1], "layer": stage1[(pc, s)][2],
+            "L": stage1[(pc, s)][3], "K": stage1[(pc, s)][4], "M": stage1[(pc, s)][5],
+        } for pc in pcs for s in styles if (pc, s) in stage1},
+        "stage2_K_refinement_M_inf": {f"pc{pc:03d}_{s}": {
+            "rho": stage2[(pc, s)][0],
+            "slot": stage2[(pc, s)][1], "layer": stage2[(pc, s)][2],
+            "L": stage2[(pc, s)][3], "K": stage2[(pc, s)][4],
+        } for pc in pcs for s in styles if (pc, s) in stage2},
+    }
+    cells = list(configs) if configs is not None else None
+    if stage1_per_cell is not None:
+        out["stage1_M_sweep_per_cell"] = {
+            per_cell_key(pc, s, slot, layer): {
+                "rho": v[0], "L": v[1], "K": v[2], "M": v[3]}
+            for (pc, s, slot, layer), v in sorted(stage1_per_cell.items())
+        }
+    if stage2_per_cell is not None:
+        out["stage2_K_refinement_M_inf_per_cell"] = {
+            per_cell_key(pc, s, slot, layer): {
+                "rho": v[0], "L": v[1], "K": v[2]}
+            for (pc, s, slot, layer), v in sorted(stage2_per_cell.items())
+        }
+    if cells is not None:
+        out["cell_order"] = [[int(s), int(l)] for s, l in cells]
+    return out
+
+
 def report(stage1, stage2, *, pcs, styles, cache_path: Path,
            inputs: list[InputSpec] | None = None,
            data_dir: Path | None = None,
-           sweep_dir: Path | None = None):
+           sweep_dir: Path | None = None,
+           stage1_per_cell: dict | None = None,
+           stage2_per_cell: dict | None = None,
+           configs: list[tuple[int, int]] | None = None):
     print(f"\n\n{'='*92}")
     print("SUMMARY: best round-trip ρ per (PC, style) — stage 1 (with M) vs stage 2 (refined K, M=None)")
     print(f"{'='*92}")
@@ -617,7 +722,7 @@ def report(stage1, stage2, *, pcs, styles, cache_path: Path,
                 M_str = "inf" if M1 is None else str(M1)
                 s1_str = f"  {rho1:+10.4f}  L={L1},K={K1:>3},M={M_str:<3} "
             if s2:
-                rho2, _slot2, _lay2, L2, K2, _ = s2
+                rho2, _slot2, _lay2, L2, K2 = s2[:5]
                 s2_str = f"  {rho2:+11.4f}  L={L2},K={K2:>3}  "
             print(f"  {pc:>4}  {style:<9}{s1_str}{s2_str}")
 
@@ -638,18 +743,11 @@ def report(stage1, stage2, *, pcs, styles, cache_path: Path,
         print(f"  {pc:>4}  {avg_s1.get(pc, float('nan')):>+15.4f}  "
               f"{avg_s2.get(pc, float('nan')):>+16.4f}")
 
-    serialisable = {
-        "stage1_M_sweep": {f"pc{pc:03d}_{s}": {
-            "rho": stage1[(pc, s)][0],
-            "slot": stage1[(pc, s)][1], "layer": stage1[(pc, s)][2],
-            "L": stage1[(pc, s)][3], "K": stage1[(pc, s)][4], "M": stage1[(pc, s)][5],
-        } for pc in pcs for s in styles if (pc, s) in stage1},
-        "stage2_K_refinement_M_inf": {f"pc{pc:03d}_{s}": {
-            "rho": stage2[(pc, s)][0],
-            "slot": stage2[(pc, s)][1], "layer": stage2[(pc, s)][2],
-            "L": stage2[(pc, s)][3], "K": stage2[(pc, s)][4],
-        } for pc in pcs for s in styles if (pc, s) in stage2},
-    }
+    serialisable = serialise_results(
+        stage1, stage2, pcs=pcs, styles=styles,
+        stage1_per_cell=stage1_per_cell, stage2_per_cell=stage2_per_cell,
+        configs=configs,
+    )
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     if inputs is None:
         # Backwards-compat: callers that don't pass inputs (none in tree)
@@ -757,14 +855,14 @@ def main() -> int:
             )
 
     t0 = time.time()
-    stage1 = stage1_m_sweep(
+    stage1, stage1_per_cell = stage1_m_sweep(
         scores_by_cell, data_dir=data_dir, configs=configs, l_values=l_values,
         k_coarse=k_coarse, m_values=m_values, pcs=pcs, styles=styles,
     )
     print(f"\nStage 1 elapsed: {time.time() - t0:.1f}s")
 
     t0 = time.time()
-    stage2 = stage2_k_refinement(
+    stage2, stage2_per_cell = stage2_k_refinement(
         scores_by_cell, data_dir=data_dir, configs=configs, l_values=l_values,
         k_coarse=k_coarse, pcs=pcs, styles=styles,
     )
@@ -773,7 +871,9 @@ def main() -> int:
     # ``inputs`` was populated above (subtree deps + per-cell judge
     # cache deps via load_and_register inside load_combined_scores).
     report(stage1, stage2, pcs=pcs, styles=styles, cache_path=cache_path,
-           inputs=inputs, data_dir=data_dir, sweep_dir=sweep_dir)
+           inputs=inputs, data_dir=data_dir, sweep_dir=sweep_dir,
+           stage1_per_cell=stage1_per_cell, stage2_per_cell=stage2_per_cell,
+           configs=configs)
     return 0
 
 
