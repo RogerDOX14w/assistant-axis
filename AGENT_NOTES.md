@@ -6502,7 +6502,10 @@ search over whitened PCs at various `(slot, layer)` cells.
 **Setup recap.**
 
 - *Canonical Nth PC* is defined in a fixed reference geometry: slot 3,
-  layer 25, soft-shear `L=2`, PCA on standardized entity embeddings.
+  layer 25, soft-shear `L=2`, PCA on standardized entity embeddings
+  (as of May 6; since the 8-slot migration of May 9 the canonical cell
+  is slot 7, layer 25, `L=0` raw — `SLOT_C`, `LAYER_C`, `CANONICAL_L`
+  in `winner_decomposition.py`; corrected 2026-10-12).
   Opus narrates that direction; the judge rubric is that description.
 - `nth_pc` variant: at each cell `(slot, layer, L, K)`, recompute PCA
   on the post-shear/whitened entity matrix and take the index-N
@@ -6524,22 +6527,68 @@ search over whitened PCs at various `(slot, layer)` cells.
   variant-specific-K-grids TODO above for why this is awkward to
   benchmark `fixed_principled` against.
 
-**Core empirical read.**
+**Core empirical read (revised 2026-10-12; the May reading is kept
+below as history).**
 
-The `nth_pc` winner-decomposition heatmap
-(`roger/pc_round_trip_nth_pc_winner_decomposition.png`; built by
-`results_analysis/pc_round_trip/{winner_decomposition,plot_winner_decomposition}.py`)
-projects each `nth_pc` global winner direction back into canonical-L=2
-shear space and expresses its squared mass on each canonical PC (rows
-= target index N, columns = canonical PC index, row-normalised).
+The `nth_pc` winner-decomposition heatmap (built by
+[`winner_decomposition.py`](results_analysis/pc_round_trip/winner_decomposition.py)
+and [`plot_winner_decomposition.py`](results_analysis/pc_round_trip/plot_winner_decomposition.py))
+maps each `nth_pc` winner direction back into canonical shear space and
+expresses its squared mass on each canonical PC (rows = canonical PC
+index k, columns = target index N, column-normalised).  Three versions
+exist, and they do not say the same thing:
 
-- For small N (roughly N ≲ 12), the heatmap is broadly diagonal: the
-  recovered direction at index N really does live near canonical PC N.
-- For larger N, the heatmap goes strongly off-diagonal: most squared
-  mass concentrates on the first ~8 canonical PCs, regardless of which
-  N was being searched for.  Spot-checks confirm the picture from the
-  other side: individual low-index canonical PCs (e.g. PC 1, 2) have
-  non-trivial Spearman ρ against high-N judge-score vectors.
+- **May 6, 4-slot canonical (slot 3, L=2), K-near-N grid**
+  ([`...png.bak.20260506_4slot_canonical`](roger/pc_round_trip_nth_pc_winner_decomposition.png.bak.20260506_4slot_canonical),
+  data in the `.npz.bak` beside it): built from the nth_pc per-cell
+  winners of the 3-cell sweep.  For N ≲ 12 broadly diagonal (mass on
+  PC N 0.85–1.0 at N ≤ 4); for N ≥ 16 the mass on PC N is 0.000 and
+  0.7–0.94 of it sits on canonical PCs 1–8, whatever N was searched
+  for.  Every high-N winner there has K ≈ N (28 for N=16, 132 for
+  N=128): inverse-whitening with K ≈ N multiplies a direction's
+  components on the top-K canonical directions by their standard
+  deviations, largest for the low PCs, so the mass lands on PCs 1–8
+  almost regardless of the direction.  *This is the figure the May
+  reading was drawn from, and the reading was right for that grid.*
+- **May 9, 8-slot, 7 cells**
+  ([`pc_round_trip_nth_pc_winner_decomposition.png`](roger/pc_round_trip_nth_pc_winner_decomposition.png)),
+  the file this section cited until 2026-10-12: **not built from nth_pc
+  winners.**  The script's default input had become the
+  `fixed_principled` per-cell winners file, so each column is PC N *at
+  a configuration chosen by a different search*, and its title
+  ("nth_pc winner", "L=2") was wrong on both counts (code review of
+  2026-10-12).  Read for what it is, it shows heavy mass on PCs 1–3 for
+  N ≤ 16 (those configurations sit at K = 2–4) and, for larger N, a
+  faint top band (~0.05) over a thin diagonal; no collapse onto the
+  first eight.
+- **2026-10-12 rebuild from the true nth_pc winners**
+  ([`...__true_nth_pc_global_winners_2026-10-12.png`](roger/pc_round_trip_nth_pc_winner_decomposition__true_nth_pc_global_winners_2026-10-12.png),
+  data in the `.npz` beside it; the one global winner per (N, style)
+  that [`pc_round_trip_klm_results.json`](roger/pc_round_trip_klm_results.json)
+  records): a thin bright diagonal at every N it covers (mass on PC N
+  ≈ 1.0 at N = 2–8, 24, 36, 40, 48, 96, 256; the broad columns 20, 28,
+  384, 512 spread within the top-N block), and for every N ≥ 20 the
+  mass on PCs 1–8 is 0.00–0.28, median ≈ 0.01.  Incomplete: the sweep
+  keeps only the global winner per N (not three cells), and
+  `winner_decomposition.py` silently skips winners at slots 0 and 3 and
+  at (6, 49), so N = 1, 12, 16, 32, 56, 80, 192 are blank.  Evidence,
+  not a finished figure.
+
+Why the pictures differ: the K-near-N expansion of the nth_pc K grid
+was removed on 2026-05-06 (`klm_sweep.py`, after this synthesis was
+written), so the May 9 nth_pc sweep could only choose K ≤ 4 — and did
+(stage-2 winners: K = 0 for 26 of 48, none above 4).  With it went the
+inflated high-N `nth_pc` ρ: 0.91 at N = 1, 0.70 at N = 8, then 0.22
+(N = 20), 0.13 (N = 32), 0.05 (N = 128), 0.04 (N = 512) — the floor the
+`fixed_principled` trace was already at.  The May spot-checks still
+stand as a description of that grid: low-index canonical PCs had
+non-trivial Spearman ρ against high-N judge-score vectors.
+
+*May 2026 reading, for the record (true of the May 6 figure):* for
+small N (roughly N ≲ 12) the heatmap is broadly diagonal, the recovered
+direction at index N really does live near canonical PC N; for larger
+N it goes strongly off-diagonal, most squared mass on the first ~8
+canonical PCs regardless of which N was being searched for.
 
 **Interpretation.**
 
@@ -6556,8 +6605,8 @@ The two ρ-measurement variants probe different mixtures of these:
 
 | Variant | What it sees | Empirical caricature at high N |
 |---|---|---|
-| `nth_pc` ρ | (a) + (b); the search picks whichever latent best predicts judges. | Stays high but the heatmap shows the chosen direction loads on canonical PCs 1–8 — high ρ via canonical-PC aliasing, not genuine PC-N recovery. |
-| `fixed_principled` ρ | Mostly (a): the direction is pinned to PC N's α-weights, only `(L, K)` varies. | Falls toward the noise floor sooner with N — measures whatever PC-N-specific content remains in the rankings once aliasing is denied. |
+| `nth_pc` ρ | (a) + (b); the search picks whichever latent best predicts judges. | Under the K-near-N grid (May 6): stayed high, and the heatmap showed the chosen direction loading on canonical PCs 1–8 — high ρ via canonical-PC aliasing, not genuine PC-N recovery.  Under the K ≤ 4 grid (since 2026-05-06): falls to the floor with N like `fixed_principled`, and the rebuilt heatmap is diagonal. |
+| `fixed_principled` ρ | Mostly (a): the direction is pinned to PC N's α-weights, only `(L, K)` varies. | Falls toward the noise floor with N — measures whatever PC-N-specific content remains in the rankings once aliasing is denied (on the current grid, at about the same N as `nth_pc`). |
 
 Neither is "the right ρ"; they answer different questions.
 `fixed_principled` upper-bounds how much of PC N is genuinely
@@ -6570,9 +6619,14 @@ to drift onto any latent that predicts judges.
 - N ≲ ~12: `nth_pc`, `fixed_principled`, the decomposition heatmap
   and the face-valid description content all agree.  Treat "the Nth
   PC" as a latent the description language can pick out.
-- N ≳ ~12: `nth_pc` ρ alone is misleading; trust the `fixed_principled`
-  trace, the decomposition, and the low-PC-vs-high-N-ranking
-  cross-correlation as the sanity-check trio.
+- N ≳ ~12: trust the `fixed_principled` trace.  The rule was derived
+  under the K-near-N grid, where `nth_pc` ρ alone was misleading; on
+  the current K ≤ 4 grid both traces are at the floor by here, so
+  there is nothing to be misled by, and the rule stands as prudence
+  with that provenance.  The decomposition heatmap no longer carries a
+  finding (2026-10-12) and is not one of the sanity checks; the
+  boundary itself (~8–12 on the current ρ traces) should be re-read
+  from the ρ plot, not from the heatmap.
 
 **Geometry side note.**
 
