@@ -14,6 +14,12 @@ operations").  The code these items exercise is built off-pod first, by the peer
 
 ## Must run before the extraction
 
+**Order (Roger, 2026-10-13): the cap pilot (item 2) is the first job once the pods are up.**  Its step-1 to
+step-4 runs on 64 entities also serve as the Qwen3 smoke run (item 1): they put P2's side-car, P6's response
+fields, P8's exit status and P3's float32 vectors through the real model.  The extraction then starts with the
+cap the pilot's readout picks.  The pilot's GPU-hours and judge spend still need Roger's go with the quoted
+parameters at launch.
+
 1. **The Qwen3 smoke run** (about 1 GPU-hour on 4 GPUs; multi-model plan question 9,
    [coding_plan_multi_model_extraction.md](./coding_plan_multi_model_extraction.md)).  The first
    real-model run of the fixed pipeline: P2's `generation_config.json` side-car and fresh-output-dir rule,
