@@ -247,3 +247,106 @@ class TestBadRequestIsSurfaced:
         """Callers that catch ValueError for a bad request keep working."""
         assert issubclass(JudgeRequestError, ValueError)
         assert J._is_bad_request(_Status400()) and not J._is_bad_request(_Status500())
+
+
+# ---------------------------------------------------------------------------
+# B1b: a 400 that flags one prompt's content stays per-item
+# ---------------------------------------------------------------------------
+
+#: The inner error objects the OpenAI SDK puts in ``body`` (and whose ``code`` it copies onto the exception).
+OPENAI_FLAGGED = {"message": "Invalid prompt: your prompt was flagged as potentially violating our usage policy. "
+                             "Please try again with a different prompt.",
+                  "type": "invalid_request_error", "param": None, "code": "invalid_prompt"}
+OPENAI_TEMPERATURE = {"message": "Unsupported value: 'temperature' does not support 0 with this model. Only the "
+                                 "default (1) value is supported.",
+                      "type": "invalid_request_error", "param": "temperature", "code": "unsupported_value"}
+#: The Anthropic SDK keeps the whole error document in ``body`` and sets no ``code``.
+ANTHROPIC_TEMPERATURE = {"type": "error", "error": {"type": "invalid_request_error",
+                                                   "message": "`temperature` is deprecated for this model."}}
+
+
+def _openai_400(body):
+    import openai
+    req = httpx.Request("POST", "https://api.openai.com/v1/chat/completions")
+    return openai.BadRequestError(f"Error code: 400 - {{'error': {body}}}", response=httpx.Response(400, request=req),
+                                  body=body)
+
+
+def _anthropic_400(body):
+    import anthropic
+    req = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    return anthropic.BadRequestError(f"Error code: 400 - {body}", response=httpx.Response(400, request=req),
+                                     body=body)
+
+
+@pytest.fixture
+def flagged(monkeypatch, caplog):
+    monkeypatch.setattr(J, "CONTENT_FLAGGED", {})
+    caplog.set_level("WARNING", logger="assistant_axis.judge")
+    return caplog
+
+
+class TestContentFlaggedPromptIsPerItem:
+    def test_the_two_openai_400s_are_told_apart(self):
+        assert J.content_flag(_openai_400(OPENAI_FLAGGED)) == "invalid_prompt"
+        assert J.content_flag(_openai_400(OPENAI_TEMPERATURE)) is None
+        assert J.content_flag(_openai_400({"message": "x", "code": "content_policy_violation"})) \
+            == "content_policy_violation"
+        assert J.content_flag(_anthropic_400(ANTHROPIC_TEMPERATURE)) is None
+        # a code nested in the body, and the phrase fallback where no code says it
+        assert J.content_flag(_Status400("bad")) is None
+        e = _Status400("x")
+        e.body = {"error": {"code": "content_filter", "message": "filtered"}}
+        assert J.content_flag(e) == "content_filter"
+        assert J.content_flag(_Status400("Your prompt was flagged as potentially violating our usage policy")) \
+            == "flagged as potentially violating"
+        assert J.content_flag(_Status500("flagged as potentially violating")) is None   # only a 400
+
+    def test_single_call_gives_none_and_warns(self, flagged):
+        out = _run(call_judge_single(FakeOpenAI(exc=_openai_400(OPENAI_FLAGGED)), "p", "gpt-4.1-mini", 200,
+                                     RateLimiter(1000)))
+        assert out is None
+        assert J.CONTENT_FLAGGED == {"gpt-4.1-mini": 1}
+        assert "content flag (invalid_prompt) from judge model gpt-4.1-mini" in flagged.text
+        assert "1 flagged so far" in flagged.text
+
+    def test_batch_keeps_the_other_items(self, flagged):
+        client = FakeOpenAI(fail_on="bad", exc=_openai_400(OPENAI_FLAGGED))
+        out = _run(call_judge_batch(client, ["ok 1", "bad 2", "ok 3", "bad 4"], "gpt-4.1-mini", 200,
+                                    RateLimiter(1000)))
+        assert out == ["SCORE: 2", None, "SCORE: 2", None]
+        assert J.CONTENT_FLAGGED == {"gpt-4.1-mini": 2} and "2 flagged so far" in flagged.text
+
+    def test_anthropic_and_unified_paths(self, flagged):
+        flag_doc = {"type": "error", "error": {"type": "invalid_request_error",
+                                               "message": "Your prompt was flagged as potentially violating our "
+                                                          "usage policy."}}
+        assert _run(call_anthropic_judge_single(FakeAnthropic(exc=_anthropic_400(flag_doc)), "p",
+                                                "claude-haiku-4-5", 100, RateLimiter(1000))) is None
+        assert _run(call_judge_single_unified(prompt="p", model="gpt-4.1-mini", max_tokens=50,
+                                              rate_limiter=RateLimiter(1000),
+                                              openai_client=FakeOpenAI(exc=_openai_400(OPENAI_FLAGGED)))) is None
+        assert _run(call_judge_single_unified(prompt="p", model="claude-haiku-4-5", max_tokens=50,
+                                              rate_limiter=RateLimiter(1000),
+                                              anthropic_client=FakeAnthropic(exc=_anthropic_400(flag_doc)))) is None
+        assert J.CONTENT_FLAGGED == {"claude-haiku-4-5": 2, "gpt-4.1-mini": 1}
+        assert flagged.text.count("HTTP 400 content flag") == 3
+
+    def test_an_unsupported_parameter_400_still_raises_in_every_path(self, flagged):
+        rl = RateLimiter(1000)
+        with pytest.raises(JudgeRequestError, match="does not support 0"):
+            _run(call_judge_single(FakeOpenAI(exc=_openai_400(OPENAI_TEMPERATURE)), "p", "gpt-4.1-mini", 200, rl))
+        with pytest.raises(JudgeRequestError):
+            _run(call_judge_batch(FakeOpenAI(fail_on="bad", exc=_openai_400(OPENAI_TEMPERATURE)),
+                                  ["ok 1", "bad 2"], "gpt-4.1-mini", 200, rl))
+        with pytest.raises(JudgeRequestError, match="deprecated for this model"):
+            _run(call_anthropic_judge_single(FakeAnthropic(exc=_anthropic_400(ANTHROPIC_TEMPERATURE)), "p",
+                                             "claude-opus-4-7", 100, rl))
+        with pytest.raises(JudgeRequestError):
+            _run(call_judge_single_unified(prompt="p", model="gpt-4.1-mini", max_tokens=50, rate_limiter=rl,
+                                           openai_client=FakeOpenAI(exc=_openai_400(OPENAI_TEMPERATURE))))
+        with pytest.raises(JudgeRequestError):
+            _run(call_judge_single_unified(prompt="p", model="claude-opus-4-7", max_tokens=50, rate_limiter=rl,
+                                           anthropic_client=FakeAnthropic(exc=_anthropic_400(ANTHROPIC_TEMPERATURE))))
+        assert J.CONTENT_FLAGGED == {}
+        assert "content flag" not in flagged.text

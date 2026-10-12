@@ -82,7 +82,9 @@ def provider_for_model(model: str) -> str:
 # a model this project has not used.  An HTTP 400 from either provider is
 # raised as JudgeRequestError rather than logged and turned into None: a
 # request the API rejects as malformed fails the same way for every item, and
-# swallowing it made every item of a run unparseable (review 7 D1).
+# swallowing it made every item of a run unparseable (review 7 D1).  The one
+# exception is a 400 that flags a single prompt's content
+# (CONTENT_FLAG_CODES): that item gives None with a WARNING, as before.
 
 #: Both providers' default sampling temperature (Chat Completions and Messages).
 DEFAULT_TEMPERATURE = 1.0
@@ -158,6 +160,62 @@ def request_temperature(model: str, temperature: Optional[float]) -> Optional[fl
 def _is_bad_request(exc: BaseException) -> bool:
     """An HTTP 400 from either SDK (both set ``status_code`` on the error)."""
     return getattr(exc, "status_code", None) == 400
+
+
+#: An HTTP 400 that flags one prompt's *content*, not the request's shape (B1b,
+#: 2026-10-12).  This project judges persona responses that can be deliberately
+#: harmful, so such a 400 keeps the per-item behaviour: that item gives None, a
+#: WARNING names the model and the code, :data:`CONTENT_FLAGGED` counts it, and
+#: the run goes on; every other 400 raises :class:`JudgeRequestError`.
+#:
+#: * OpenAI sets the error's ``code`` (the SDK copies the error object's
+#:   ``code`` onto the exception): ``invalid_prompt`` ("Invalid prompt: your
+#:   prompt was flagged as potentially violating our usage policy", reasoning
+#:   models) and ``content_policy_violation``; Azure OpenAI uses
+#:   ``content_filter`` ("... triggering Azure OpenAI's content management
+#:   policy").  A refused temperature is ``unsupported_value`` /
+#:   ``unsupported_parameter`` with ``param: "temperature"``, so it still raises.
+#: * Anthropic answers a prompt it will not judge with a refusal (HTTP 200,
+#:   ``stop_reason: "refusal"``), not a 400, and has no code here; the phrases
+#:   would still catch such a message if one ever came as a 400.
+CONTENT_FLAG_CODES: Tuple[str, ...] = ("invalid_prompt", "content_policy_violation", "content_filter")
+CONTENT_FLAG_PHRASES: Tuple[str, ...] = ("flagged as potentially violating", "violating our usage policy",
+                                         "content management policy")
+
+#: Content-flagged 400s in this process, by model (a WARNING carries the running count).
+CONTENT_FLAGGED: Dict[str, int] = {}
+
+
+def _error_code(exc: BaseException) -> Optional[str]:
+    """The provider's error code: OpenAI's SDK sets ``code``; otherwise the
+    ``code`` of the error body (``{"code": ...}`` or ``{"error": {"code": ...}}``)."""
+    code = getattr(exc, "code", None)
+    if code:
+        return str(code)
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        inner = body.get("error") if isinstance(body.get("error"), dict) else body
+        if inner.get("code"):
+            return str(inner["code"])
+    return None
+
+
+def content_flag(exc: BaseException) -> Optional[str]:
+    """For an HTTP 400 that flags the prompt's content, the code or phrase that
+    says so (:data:`CONTENT_FLAG_CODES`, :data:`CONTENT_FLAG_PHRASES`); else None."""
+    if not _is_bad_request(exc):
+        return None
+    code = _error_code(exc)
+    if code in CONTENT_FLAG_CODES:
+        return code
+    text = f"{getattr(exc, 'message', '')} {exc}".lower()
+    return next((p for p in CONTENT_FLAG_PHRASES if p in text), None)
+
+
+def _note_content_flag(model: str, flag: str, exc: BaseException) -> None:
+    CONTENT_FLAGGED[model] = CONTENT_FLAGGED.get(model, 0) + 1
+    logger.warning(f"HTTP 400 content flag ({flag}) from judge model {model}: this item gives None and the run "
+                   f"goes on ({CONTENT_FLAGGED[model]} flagged so far for {model}): {exc}")
 
 
 def _bad_request_error(model: str, exc: BaseException) -> JudgeRequestError:
@@ -546,7 +604,9 @@ async def call_judge_single(
 
     Returns the response text, or None when the call failed (logged).  An
     HTTP 400 is raised as :class:`JudgeRequestError` instead, as is a
-    non-default ``temperature`` for a model that refuses one (before sending).
+    non-default ``temperature`` for a model that refuses one (before sending),
+    except a 400 that flags this prompt's content (:func:`content_flag`),
+    which gives None with a WARNING.
 
     Args:
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
@@ -576,7 +636,11 @@ async def call_judge_single(
 
     except Exception as e:
         if _is_bad_request(e):
-            raise _bad_request_error(model, e) from e
+            flag = content_flag(e)
+            if flag is None:
+                raise _bad_request_error(model, e) from e
+            _note_content_flag(model, flag, e)
+            return None
         logger.error(f"Error calling judge model: {e}")
         return None
 
@@ -596,8 +660,9 @@ async def call_judge_batch(
     accumulator, passed to every :func:`call_judge_single` (AGENT_NOTES
     "Token usage logging is mandatory on batched LLM call sites").
 
-    A failed call gives None in its place, except a :class:`JudgeRequestError`
-    (an HTTP 400), which is raised once its chunk has finished.
+    A failed call gives None in its place (a content-flagged prompt too),
+    except a :class:`JudgeRequestError` (any other HTTP 400), which is raised
+    once its chunk has finished.
     """
     results = []
 
@@ -746,7 +811,8 @@ async def call_anthropic_judge_single(
     Returns the response text, or None on error.  Errors are logged at
     ERROR level and swallowed so a single bad call doesn't take down a
     whole batch of judging, except an HTTP 400, raised as
-    :class:`JudgeRequestError` because every call would fail alike.
+    :class:`JudgeRequestError` because every call would fail alike (a 400
+    that flags this prompt's content, :func:`content_flag`, gives None).
 
     Args:
         temperature: sent only when it is not the default; a model that
@@ -776,7 +842,11 @@ async def call_anthropic_judge_single(
         return None
     except Exception as e:  # noqa: BLE001 - we deliberately catch everything
         if _is_bad_request(e):
-            raise _bad_request_error(model, e) from e
+            flag = content_flag(e)
+            if flag is None:
+                raise _bad_request_error(model, e) from e
+            _note_content_flag(model, flag, e)
+            return None
         logger.error(f"Error calling Anthropic judge model {model}: {e}")
         return None
 
@@ -810,7 +880,8 @@ async def call_judge_single_unified(
             accumulator -- ticks ``usage[model]`` with the per-call
             token counts.  Pass one on every batched/automated call site.
 
-    Raises :class:`JudgeRequestError` on an HTTP 400 from either provider.
+    Raises :class:`JudgeRequestError` on an HTTP 400 from either provider,
+    other than one that flags this prompt's content (None, with a WARNING).
     """
     provider = provider_for_model(model)
     if provider == "openai":
