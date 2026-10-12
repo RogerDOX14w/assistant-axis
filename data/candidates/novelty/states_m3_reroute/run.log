@@ -1,0 +1,45 @@
+2026-10-12T22:21:20Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-12T22:21:20Z INFO [canary] text-embedding-3-large: 8 compared, lowest cosine 0.999603, 0 new references
+2026-10-12T22:21:20Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-12T22:21:25Z INFO registry: 4 novelty blocks written
+2026-10-12T22:21:29Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:30Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:31Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:31Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:33Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:34Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:36Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:38Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:39Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:40Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:40Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:41Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:42Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:42Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:42Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:42Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:42Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:52Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:52Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:52Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:52Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:58Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:21:59Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:22:03Z INFO registry: 3 novelty blocks written
+2026-10-12T22:22:04Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:22:04Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:22:06Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:22:12Z INFO registry: 1 novelty blocks written
+2026-10-12T22:22:14Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-12T22:22:18Z INFO registry: 1 novelty blocks written
+2026-10-12T22:22:22Z INFO registry: 1 novelty blocks written
+2026-10-12T22:22:22Z INFO [novelty_score:states_m3_reroute:overlap:claude-opus-5-5] parse rate: 7/7 OK  (first attempt 7/7)
+2026-10-12T22:22:22Z INFO [novelty_score:states_m3_reroute:overlap:claude-sonnet-5-5] parse rate: 19/19 OK  (first attempt 19/19)
+2026-10-12T22:22:22Z INFO [novelty_score:states_m3_reroute:relation:claude-haiku-5-5] parse rate: 6/6 OK  (first attempt 6/6)
+2026-10-12T22:22:22Z INFO [novelty_score:states_m3_reroute:relation_unsure:claude-sonnet-5-5] parse rate: 1/1 OK  (first attempt 1/1)

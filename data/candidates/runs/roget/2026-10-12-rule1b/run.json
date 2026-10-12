@@ -1,0 +1,79 @@
+{
+  "generator": "roget",
+  "run_id": "2026-10-12-rule1b",
+  "git_sha": "fab974d5+dirty",
+  "args": {
+    "command": "roget_generate.py submit",
+    "generator": "roget",
+    "run_id": "2026-10-12-rule1b",
+    "candidates": "data/candidates/runs/roget/2026-10-12-rule1b/candidates.jsonl",
+    "harvest_config": {
+      "per_head_cap": 10,
+      "pair_top": 3,
+      "max_words": 2,
+      "classes": [
+        "pair_completion",
+        "pair_empty",
+        "singleton_empty",
+        "queued_only"
+      ],
+      "every_nth": null,
+      "offset": 0,
+      "zipf_floor": "rule_1b",
+      "include_wn": true,
+      "wn_closure_depth": 6,
+      "head_scope": "data/candidates/roget/head_scope.json",
+      "delta_from": "2026-10-11-full"
+    },
+    "counts": "data/candidates/runs/roget/2026-10-12-rule1b/harvest_counts.json"
+  },
+  "n_emitted": 14,
+  "started_at": "2026-10-12T22:20:14+00:00",
+  "finished_at": "2026-10-12T22:20:15+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "4fff62ff4668",
+      "started_at": "2026-10-12T22:20:14+00:00",
+      "finished_at": "2026-10-12T22:20:15+00:00",
+      "git_sha": "fab974d5+dirty",
+      "args": {
+        "command": "roget_generate.py submit",
+        "generator": "roget",
+        "run_id": "2026-10-12-rule1b",
+        "candidates": "data/candidates/runs/roget/2026-10-12-rule1b/candidates.jsonl",
+        "harvest_config": {
+          "per_head_cap": 10,
+          "pair_top": 3,
+          "max_words": 2,
+          "classes": [
+            "pair_completion",
+            "pair_empty",
+            "singleton_empty",
+            "queued_only"
+          ],
+          "every_nth": null,
+          "offset": 0,
+          "zipf_floor": "rule_1b",
+          "include_wn": true,
+          "wn_closure_depth": 6,
+          "head_scope": "data/candidates/roget/head_scope.json",
+          "delta_from": "2026-10-11-full"
+        },
+        "counts": "data/candidates/runs/roget/2026-10-12-rule1b/harvest_counts.json"
+      },
+      "n_emitted": 14,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

@@ -13,10 +13,13 @@ Definitions used below.  **TDA**: the Trait Descriptive Adjectives list (2,818 w
 | Allport-Odbert words parsed (distinct) | 17,708 (lines I 4470, II 4511, III 5191, IV 3652) |
 | in both lists | 2,569 |
 | malformed (dropped) | 1 |
-| eligible rows of this stage | 1031 |
-| TDA words cut by the floor | 0 (every TDA word is submitted; 251 of them are below the dictionary floor and reach the platform's probe through the curated route) |
-| Allport-only words cut by the floor (not in any stage) | below_hard_reject 1,341, unknown_word 5,614 |
-| Allport-only words in later stages | allport_hi 4,746, allport_probe 3,438 |
+| eligible rows of this stage | 1031 (Allport-only, below_hard_reject (Zipf < 1.5 but known to wordfreq or OEWN; never unknown_word); not listed in column IV alone (QUESTIONS 34)) |
+| TDA words cut by the floor | 0 (every TDA word is submitted; 251 of them are below the dictionary floor and reach the platform's probe through the curated route, so a cut here is a row another generator's floor reject reached first) |
+| rows of this run turned away unread by the platform's floor | 0 |
+| rows of this run cut by the definition probe ("not known") | 3 |
+| Allport-only words below the floor at ingest (the table's ineligible reasons) | below_hard_reject 1,341, unknown_word 5,614 |
+| census stages (pools after the column IV split) | tda 2,818, allport_hi 3,646, allport_probe 2,525, allport_iv 2,013, allport_rare 1,031, allport_iv_rare 310 |
+| census rows in no stage | malformed 1, unknown_word 5,614 |
 | **submitted in this run** | **104** (67 with a gloss hint, 10 framed as a disposition from Allport-Odbert column II) |
 | of those, routed to the platform's definition probe | 104 (curated_source 37, gloss_hint 67) |
 | registry: new rows / merged into existing rows / unchanged | 104 / 0 / 0 (invalid surfaces: 0) |
@@ -27,7 +30,9 @@ Downstream estimate when submitted (batches): M1 $0.37 + M3 $0.50 = $0.88; the g
 
 ## String ceiling
 
-Of the corpus's 790 traits (244 of them multi-word), the census lists contain as strings: TDA 394 (49.9%), Allport-Odbert 411 (52.0%), either 444 (56.2%; 77.5% of the single-word traits).  The generator's own eligibility rule submits 444 of the 444 (100.0%; the policy asks for 95%).  Of the 238 queued traits, 65 are in either list.  Source: [ingest_counts.json](../../../censuses/ingest_counts.json).
+Of the corpus's 932 traits (304 of them multi-word), the census lists contain as strings: TDA 417 (44.7%), Allport-Odbert 464 (49.8%), either 498 (53.4%; 74.4% of the single-word traits).  The generator's own eligibility rule submits 496 of the 498 (99.6%; the policy asks for 95%).  Of the 133 queued traits, 44 are in either list.  Source: [ingest_counts.json](../../../censuses/ingest_counts.json).
+
+Guidelines, not gates (Roger, 2026-10-09): either list, leaving out the 89 parenthesised labels, 59.1% (aim 50%, met); single-word traits in either list 74.4% (aim 75%, below the aim).  The gate is the 95% above.
 
 ## Known labels in this run
 
@@ -40,10 +45,10 @@ Known-label pass rate (verdict trait, or tagged state or physical): 0 of 0.  Mis
 
 ## Novelty (M3)
 
-62 rows scored: covered 16, new 46; pair completions 4.
+64 rows scored: covered 16, new 48; pair completions 4.
 
 ## Files
 
-- [candidates.jsonl](candidates.jsonl): the submitted candidates, one per line (tracked; the main checkout resubmits it with [gap_registry.py](../../../../../data_analysis/gap_generation/gap_registry.py) `submit --file`)
+- [candidates.jsonl](candidates.jsonl): the submitted candidates, one per line (tracked; the main checkout resubmits it with [gap_registry.py](../../../../../data_analysis/gap_generation/gap_registry.py) `submit --from`)
 - [run.json](run.json), [usage.json](usage.json), [keys.txt](keys.txt), [submit_report.json](submit_report.json), [evaluation.json](evaluation.json)
 - [census_table.jsonl](../../../censuses/census_table.jsonl) (the census table), [ingest_counts.json](../../../censuses/ingest_counts.json) (ingest counts), [sources_manifest.json](../../../censuses/sources_manifest.json) (downloads: URLs, hashes, licences, attribution)

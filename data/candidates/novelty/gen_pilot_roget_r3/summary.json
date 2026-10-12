@@ -1,0 +1,334 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 85,
+    "n_decided": 85,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "new": 64,
+      "covered": 21
+    },
+    "by_reason": {
+      "overlap": 84,
+      "exact_label": 1
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 49,
+        "covered": 21
+      },
+      "4": {
+        "new": 15
+      }
+    },
+    "exact_label": {
+      "queue": 1
+    },
+    "pairs_judged_per_candidate": {
+      "0": 6,
+      "1": 19,
+      "2": 12,
+      "3": 11,
+      "4": 12,
+      "5": 6,
+      "6": 4,
+      "7": 11,
+      "8": 2,
+      "9": 1
+    },
+    "pairs_judged_total": 280,
+    "pairs_judged_mean": 3.333,
+    "listed_per_candidate_mean": 17.464,
+    "shortlist_length": {
+      "0": 6,
+      "1": 5,
+      "2": 11,
+      "3": 13,
+      "4": 15,
+      "5": 8,
+      "6": 10,
+      "7": 11,
+      "8": 2,
+      "9": 3
+    },
+    "early_exit_depth": {
+      "1": 14,
+      "2": 5,
+      "3": 1
+    },
+    "escalations": {
+      "below_cut_off": 108,
+      "at_cut_off": 9
+    },
+    "rescues": 0,
+    "review_flags": {
+      "sonnet_below_opus_at": 10,
+      "both_similar": 1
+    },
+    "pair_completions": 6,
+    "pair_completion_for": {
+      "alarming#1": [
+        "dignified"
+      ],
+      "backhanded#1": [
+        "savage"
+      ],
+      "credited#1": [
+        "modest"
+      ],
+      "incomparable#1": [
+        "modest"
+      ],
+      "lame#1": [
+        "goofy"
+      ],
+      "querulous#1": [
+        "self_blaming"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 84
+      },
+      "answers": {
+        "unrelated": 647,
+        "similar": 354,
+        "opposed": 456,
+        "unsure": 10
+      },
+      "final": {
+        "similar": 358,
+        "unrelated": 652,
+        "opposed": 456,
+        "unsure": 1
+      },
+      "candidates_with_unsure_reasked": 9
+    },
+    "cache": {},
+    "spend_by_stage": {},
+    "spend_usd": 2.9e-05,
+    "usage": {
+      "per_model": {
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0,
+      "total_prompt_tokens": 220,
+      "total_completion_tokens": 0,
+      "n_calls": 1
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 11,
+    "covered_flagged": 10,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 4,
+    "floor": {
+      "rows_with_listed_below": 84,
+      "listed_below_total": 925,
+      "similar_kept_out_total": 12,
+      "rows_with_similar_kept_out": 12
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": false,
+      "n_entries": 0,
+      "rows_with_queue_in_index": 0,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 43,
+        "covered": 18
+      },
+      "alignment 2": {
+        "new": 6,
+        "covered": 3
+      },
+      "alignment 3": {
+        "new": 15
+      }
+    },
+    "partners_skipped": {
+      "rows": 65,
+      "partners": 161,
+      "by_relation": {
+        "unrelated": 153,
+        "opposed": 8
+      },
+      "by_where": {
+        "shortlist": 161
+      },
+      "est_readings_saved": {
+        "sonnet": 161,
+        "opus": 6.0
+      },
+      "est_saving_usd_live": 0.2147
+    },
+    "batch_id": "gen_pilot_roget_r3",
+    "parse_rates": {},
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 490,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "redecide": {
+      "from_batch": "gen_pilot_roget",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_3",
+        "version": 3,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25,
+        "renamed_before_queue": true,
+        "cut_off_rule": "graded",
+        "skip_unrelated_partners": true
+      },
+      "relation_seed": "gen_pilot_roget",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": true,
+      "n_source_records": 641,
+      "reproduction": {
+        "n": 85,
+        "identical": 85,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {},
+      "candidates_needing_calls": [],
+      "decided_offline": 85,
+      "offline_decisions": {
+        "covered -> covered": 18,
+        "new -> covered": 3,
+        "new -> new": 64
+      },
+      "offline_changes": {
+        "rows_decided_offline": 85,
+        "rows_needing_calls": 0,
+        "changed_and_still_the_sources_in_the_registry": 3,
+        "decision_changed": 3,
+        "covering_trait_changed": 0,
+        "transitions_changed": {
+          "new -> covered": 3
+        },
+        "by_step": {
+          "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 3
+        },
+        "chain": [
+          "source rules (m3_rules_2)",
+          "review 2 D1 (renamed_from before the queue)",
+          "graded cut-off (alignment 2: both models at 3 or more)",
+          "partner skip (partners marked unrelated or opposed not read)"
+        ],
+        "changed_keys": [
+          "backhanded#1",
+          "discordant#1",
+          "quarrelsome#1"
+        ]
+      },
+      "queue_search": {
+        "source": false,
+        "this_run": false,
+        "n_entries": 0
+      }
+    },
+    "label_form": "stored"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_roget --batch-id gen_pilot_roget_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist gen_pilot_roget_r3"
+    },
+    "produced_at": "2026-10-12T22:57:55+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "c1de3e87195dc4483e36c56a39c3ae2152236bb9d24910f1301380e6c6636544"
+  }
+}

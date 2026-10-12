@@ -1,0 +1,179 @@
+{
+  "result": {
+    "source_batch": "2026-10-12-pilot_base_model",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 16,
+      "identical": 16,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 16,
+      "identical": 16,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 16,
+      "decision_changed": 1,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 13,
+        "new -> covered": 1,
+        "new -> new": 2
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+      },
+      "rows_listing_a_queue_entry": 3,
+      "covered_by_queue": 1
+    },
+    "rows": [
+      {
+        "key": "team_player#1",
+        "label": "team player",
+        "gloss": "This means setting aside one's own priorities when they conflict with the group's goals, and working cooperatively with others to get shared work done.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "cooperative",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "cooperative",
+            "cosine": 0.334489,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both center on working collaboratively toward shared goals over individual achievement; 'team player' adds explicit self-sacrifice of own priorities, while 'cooperative' adds a framing of situations as collective problem-solving rather than contests."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe prioritizing collaboration and shared goals over individual achievement. Team player stresses sacrificing personal priorities within a group, while cooperative stresses a collaborative framing more generally, so they differ only in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "win_win_seeking"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "cooperative",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": [
+      {
+        "key": "goal_oriented#1",
+        "label": "goal-oriented",
+        "gloss": "This means keeping one's attention fixed on a chosen objective, pushing past distractions and setbacks, and measuring each step by whether it moves one closer to finishing what one set out to do.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "purposive",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 4,
+          "stem": "purposive",
+          "cosine": 0.328151,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both describe keeping actions aimed at chosen goals with each step serving that aim; goal-oriented adds persistence through distractions and setbacks, while purposive stresses definite intent over drift."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe directing one's actions toward chosen goals. Goal-oriented adds persistence through setbacks and a focus on finishing, so the two are the same concept differing in emphasis."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "purposive",
+          "reason": "overlap"
+        }
+      }
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-12-pilot_base_model --batch-id 2026-10-12-pilot_base_model_r3 --rules 3 --transport live --budget-usd 1 --write-registry --keys 'collaborative#1' 'detail_oriented#1' 'detailed#1' 'empathy#1' 'focused#1' 'fun#1' 'goal_oriented#1' 'hard_working#1' 'inclusive#1' 'inspiring#1' 'proactive#1' 'self_motivated#1' 'team_player#1' 'uncaring#1' 'unctuous#1' 'unflappable#1'",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-12-pilot_base_model_r3 vs 2026-10-12-pilot_base_model"
+    },
+    "produced_at": "2026-10-12T22:58:59+00:00"
+  }
+}

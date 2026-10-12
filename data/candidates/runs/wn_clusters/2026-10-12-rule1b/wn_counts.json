@@ -1,0 +1,142 @@
+{
+ "config": {
+  "wn_closure_depth": 6,
+  "zipf_floor": "rule_1b",
+  "root_synsets": [
+   "oewn-04623416-n",
+   "oewn-04630969-n",
+   "oewn-04950046-n",
+   "oewn-06202938-n",
+   "oewn-04627573-n"
+  ]
+ },
+ "antonym_route": {
+  "n_items": 102,
+  "counts": {
+   "below_line": 19,
+   "known": 42,
+   "labels": 316,
+   "repeat": 16,
+   "rescued_gloss_hint": 2,
+   "rescued_negating_prefix": 17
+  },
+  "rescued_items": {
+   "gloss_hint": 1,
+   "negating_prefix": 12
+  }
+ },
+ "closure": {
+  "n_items": 541,
+  "counts": {
+   "antonym_route": 13,
+   "below_line": 67,
+   "depth_cut_off_adjectives": 0,
+   "depth_cut_off_synsets": 0,
+   "known": 159,
+   "no_adjective": 264,
+   "repeat": 29,
+   "rescued_gloss_hint": 60,
+   "rescued_negating_prefix": 7,
+   "synsets": 740
+  },
+  "rescued_items": {
+   "gloss_hint": 60,
+   "negating_prefix": 7
+  },
+  "items_by_depth": {
+   "1": 50,
+   "2": 198,
+   "3": 156,
+   "4": 90,
+   "5": 39,
+   "6": 8
+  }
+ },
+ "n_items": 643,
+ "delta": {
+  "from": "2026-10-11-full",
+  "n_harvested": 643,
+  "n_already_submitted": 465,
+  "n_new": 178,
+  "new_by_route": {
+   "antonym": 1,
+   "closure": 177
+  },
+  "new_below_line": [
+   "absolutistic",
+   "abstentious",
+   "acceptant",
+   "alacritous",
+   "ataractic",
+   "ataraxic",
+   "basophilic",
+   "bibliomaniacal",
+   "complaisant",
+   "dissuasive",
+   "duplicable",
+   "edacious",
+   "equanimous",
+   "esurient",
+   "faineant",
+   "foresighted",
+   "foresightful",
+   "frolicsome",
+   "fundamentalistic",
+   "heedful",
+   "hoggish",
+   "impenitent",
+   "improvident",
+   "irreproducible",
+   "irresolute",
+   "jocose",
+   "liberalistic",
+   "longanimous",
+   "maidenly",
+   "manful",
+   "mettlesome",
+   "mingy",
+   "misanthropical",
+   "mordacious",
+   "mulish",
+   "neotenic",
+   "penurious",
+   "pertinacious",
+   "pettish",
+   "phlegmatical",
+   "piggish",
+   "prankish",
+   "preferent",
+   "prejudicious",
+   "sedulous",
+   "slangy",
+   "slatternly",
+   "sluttish",
+   "snappish",
+   "sottish",
+   "spiritless",
+   "stainable",
+   "stouthearted",
+   "temerarious",
+   "tendencious",
+   "thriftless",
+   "tightfisted",
+   "totalistic",
+   "uppish",
+   "uxorious",
+   "venturesome"
+  ],
+  "new_by_depth": {
+   "1": 4,
+   "2": 15,
+   "3": 21,
+   "4": 90,
+   "5": 39,
+   "6": 8
+  }
+ },
+ "n_candidates": 178,
+ "downstream_estimate_usd": {
+  "m1": 0.71,
+  "m3_if_half_pass": 1.6
+ }
+}

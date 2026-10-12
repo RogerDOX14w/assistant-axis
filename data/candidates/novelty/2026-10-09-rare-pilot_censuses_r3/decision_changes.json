@@ -1,0 +1,267 @@
+{
+  "result": {
+    "source_batch": "2026-10-09-rare-pilot_censuses",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 62,
+      "identical": 62,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 62,
+      "identical": 62,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 62,
+      "decision_changed": 3,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 16,
+        "new -> covered": 3,
+        "new -> new": 43
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 3
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "bestriding#1",
+        "label": "bestriding",
+        "gloss": "This means taking up the center of every room and directing others with an air of command, expecting one's word to settle matters and one's presence to dominate any gathering.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "dominant",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "dominant",
+            "cosine": 0.428611,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve taking command and steering others, but bestriding adds a grand, presence-dominating, word-is-final air while dominant focuses on assertive control of conversations and guidance."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe commanding control over others and gatherings, but bestriding adds an expectation of central presence and a grand air beyond assertive steering of conversations."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "enneagram_8"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "dominant",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "satisfiable#1",
+        "label": "satisfiable",
+        "gloss": "This means being content with little, never demanding much from people, circumstances or things, and finding satisfaction in modest comforts without complaint.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "contented",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "contented",
+            "cosine": 0.441976,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe being satisfied with little and wanting nothing much more; 'satisfiable' adds not demanding things of others and not complaining, while 'contented' stresses overall life satisfaction, so they are near-identical with slight emphasis differences."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe being satisfied with what one has and not wanting more; satisfiable adds an emphasis on modest needs and not demanding things, while contented emphasizes general life satisfaction."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "contented",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "vixenish#1",
+        "label": "vixenish",
+        "gloss": "This means picking fights over small slights, snapping at people, nursing grudges, and striking back with spiteful remarks whenever one's temper flares, which is most of the time.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "quarrelsome_hexaco",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "quarrelsome_hexaco",
+            "cosine": 0.40326,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe a quarrelsome, grudge-nursing, quick-tempered disposition; vixenish stresses spiteful snapping and picking fights, while the HEXACO trait adds criticalness and stubbornness in arguments, so they overlap heavily but each has distinct elements."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe a combative, grudge-nursing, quick-to-anger disposition; vixenish is a more spiteful, constantly flaring degree of the same quarrelsomeness."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "quarrelsome_hexaco",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-09-rare-pilot_censuses --batch-id 2026-10-09-rare-pilot_censuses_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-09-rare-pilot_censuses_r3 vs 2026-10-09-rare-pilot_censuses"
+    },
+    "produced_at": "2026-10-12T22:57:30+00:00"
+  }
+}

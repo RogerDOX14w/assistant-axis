@@ -1,0 +1,1367 @@
+{
+  "result": {
+    "source_batch": "gen_pilot_censuses",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 447,
+      "identical": 447,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 447,
+      "identical": 447,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 10,
+      "by_step_model": {
+        "relation:claude-haiku-5-5": 1,
+        "overlap:claude-sonnet-5-5": 5,
+        "overlap:claude-opus-5-5": 4
+      },
+      "cost_usd": 0.019051,
+      "keys": [
+        "tough#1"
+      ]
+    },
+    "counts": {
+      "rows": 447,
+      "decision_changed": 15,
+      "covering_trait_changed": 1,
+      "transitions": {
+        "covered -> covered": 217,
+        "new -> covered": 15,
+        "new -> new": 215
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 15,
+        "review 2 D1 (renamed_from before the queue): covered -> covered (covering trait or reason)": 1
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "big_headed#1",
+        "label": "big-headed",
+        "gloss": "This means regarding one's own abilities and achievements as far greater than they are, and expecting others to admire them without being asked.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "grandiose",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "grandiose",
+            "cosine": 0.437043,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve an inflated view of one's own abilities and importance, but grandiose is more dramatic and expressed through exaggerated claims, while big-headed adds expecting unsolicited admiration; near-same concept differing in degree and emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe an inflated view of one's own abilities and importance, with grandiose being a more dramatic, extreme version expressed through exaggerated claims."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "grandiose",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "earthly_minded#1",
+        "label": "earthly-minded",
+        "gloss": "This means keeping one's attention fixed on money, possessions, status and the practical business of getting on in the world, and letting spiritual matters take a back seat to them.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "materialistic",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "materialistic",
+            "cosine": 0.413059,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe prioritizing money, possessions and status over spiritual matters; materialistic is a stronger, more elaborated version (judging people by wealth, treating this world as all there is), while earthly-minded just lets the spiritual take a back seat."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe focus on money, possessions and status over the spiritual; materialistic carries it further, to dismissing the spiritual entirely and judging people by wealth."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "taurus",
+            "capricorn"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "materialistic",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "high_minded#1",
+        "label": "high-minded",
+        "gloss": "This means holding lofty moral principles and ideals, measuring choices against what is honorable and just, and refusing to let convenience or advantage outweigh those standards.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "principled",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "principled",
+            "cosine": 0.4404,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting on moral standards over convenience; high-minded stresses lofty, honorable ideals while principled stresses consistent adherence to a stated ethical framework, so they share a core with slightly different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe choosing by moral standards over convenience. High-minded adds an emphasis on loftiness and elevated ideals, while principled stresses consistency."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "principled",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "imprudent#1",
+        "label": "imprudent",
+        "gloss": "This means acting on impulse and taking risks without weighing what might follow, so that one's choices often go unplanned and the fallout is left to be dealt with afterward.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "impulsive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "impulsive",
+            "cosine": 0.56552,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting on urges without weighing consequences; imprudent adds risk-taking and unplanned choices, while impulsive centers on immediate urges, so they differ only slightly in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe acting on urges without weighing consequences, though imprudent adds an emphasis on risk-taking and leaving the fallout to be dealt with later."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "impulsive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "inharmonious#1",
+        "label": "inharmonious",
+        "gloss": "This means picking fights with those around one, taking issue with every opinion offered, and making company unpleasant through a habit of quarreling and bristling at others.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "disagreeable",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "disagreeable",
+            "cosine": 0.348289,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe a contentious, hard-to-get-along-with manner that contradicts others, but inharmonious stresses active quarreling and bristling while disagreeable stresses indifference to keeping the peace, so each adds something the other lacks."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe being contrary and hard to get along with; inharmonious stresses actively picking fights and quarreling, while disagreeable stresses contradicting people and not caring about keeping the peace, so they differ mainly in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "disagreeable",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "militaristic#1",
+        "label": "militaristic",
+        "gloss": "This means believing a nation's security rests on its armed strength, and treating force as the first and preferred answer to threats rather than negotiation or compromise.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "hawkish",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "hawkish",
+            "cosine": 0.414904,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both favor armed strength and force over negotiation as the answer to threats; hawkish is the more aggressive, intensified version (first strikes, open threats, scorn for restraint)."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe preferring force and armed strength over negotiation; hawkish adds open threats, first strikes, and scorn for restraint, which makes it the same stance carried somewhat further."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "hawkish",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "overlusty#1",
+        "label": "overlusty",
+        "gloss": "This means constantly craving sex and letting sexual desire drive one's thoughts, choices and conduct past any reasonable limit, with no restraint for the people it affects.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "lustful",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "lustful",
+            "cosine": 0.491187,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both center on strong sexual desire shaping behavior, but overlusty adds excess and lack of restraint toward others, while lustful is the more general, milder expression of desire."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe strong sexual desire shaping behavior; overlusty is the same quality carried to excess, past reasonable limits and with no restraint."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "lustful",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "receptive#1",
+        "label": "receptive",
+        "gloss": "This means welcoming new ideas, suggestions and feedback with real interest, weighing each one on its merits, and changing one's mind or approach when a better point is made.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "open_minded",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "open_minded",
+            "cosine": 0.412897,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve weighing others' ideas on merit and changing one's mind when a better point is made; receptive adds welcoming feedback and suggestions with interest, while open-minded stresses hearing out disagreeing views."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both mean genuinely weighing others' input and changing one's mind for a better case; receptive stresses welcoming suggestions and feedback, open-minded stresses opposing views, which is a difference of scope only."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "open_minded",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "reliant#1",
+        "label": "reliant",
+        "gloss": "This means looking to others to carry one through, leaning on their help for support and turning to them before settling on any choice or decision.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "dependent",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "dependent",
+            "cosine": 0.42218,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe leaning on others for support and decisions; 'dependent' is the stronger form, adding need for approval and feeling lost alone."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe leaning on others for support and decisions, with dependent carrying it further to needing approval for everything and feeling lost alone."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "acts_of_service"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "dependent",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "spoiled#1",
+        "label": "spoiled",
+        "gloss": "This means expecting one's wishes to be met without effort, sulking or complaining when they are not, and treating others' time and patience as there to be used up.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "entitled",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "entitled",
+            "cosine": 0.377014,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve expecting wishes and others' time to be met as due and reacting badly when thwarted; spoiled adds effortless expectation and sulking/complaining, entitled emphasizes claim to exceptions and bristling, so they overlap closely but each adds something."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe expecting wishes and others' time as one's due and reacting badly when denied; spoiled stresses childish sulking, entitled a sense of deserved status."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "entitled",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "tough#1",
+        "label": "tough",
+        "gloss": "This means enduring hardship without complaint or collapse, keeping one's footing through setbacks and continuing to act steadily when conditions turn harsh or discouraging.",
+        "cut_off": 3,
+        "source": {
+          "decision": "covered",
+          "covered_by": "tough",
+          "reason": "exact_label",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": {
+            "covered_by": "tough",
+            "match": "queue",
+            "queue_status": "paired",
+            "entity_type": "trait"
+          }
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "resilient",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 5,
+            "stem": "resilient",
+            "cosine": 0.376177,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe withstanding adversity and continuing steadily through setbacks; resilient adds quick recovery and adaptation, while tough emphasizes enduring without complaint, so they share a core but each adds something."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe withstanding adversity and persisting through setbacks, but tough stresses enduring without complaint while resilient adds quick recovery and adaptation, so the two overlap heavily with somewhat different emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": {
+            "current": "strict",
+            "old_stem": "tough"
+          },
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 5,
+          "readings": [
+            {
+              "position": 1,
+              "stem": "strict",
+              "cosine": 0.146552,
+              "relation": null,
+              "via": "renamed_from",
+              "sonnet": {
+                "value": 1,
+                "reason": "Tough is about one's own endurance of hardship, while strict is about demanding high standards from others; they share a hard-nosed attitude to setbacks but are different concepts."
+              },
+              "opus": null,
+              "opus_role": null,
+              "outcome": "continue"
+            },
+            {
+              "position": 2,
+              "stem": "unflappable",
+              "cosine": 0.506268,
+              "relation": "similar",
+              "via": "retrieved",
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve steadiness under pressure, but tough is about enduring hardship and continuing to act, while unflappable is about staying outwardly composed and unrattled; neither implies the other."
+              },
+              "opus": {
+                "value": 2,
+                "reason": "Both involve holding steady through setbacks, but toughness is endurance of prolonged hardship while unflappability is momentary composure under surprise or provocation; each can exist without the other."
+              },
+              "opus_role": "below_cut_off",
+              "outcome": "continue"
+            },
+            {
+              "position": 3,
+              "stem": "persevering",
+              "cosine": 0.499124,
+              "relation": "similar",
+              "via": "retrieved",
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve continuing through setbacks, but tough is about enduring hardship steadily without complaint, while persevering is about goal-directed persistence until completion; each adds something the other lacks."
+              },
+              "opus": {
+                "value": 2,
+                "reason": "Both are about continuing through setbacks, but toughness is withstanding hardship without complaint or collapse, while perseverance is sticking with a goal until it is finished, so each adds something the other lacks."
+              },
+              "opus_role": "below_cut_off",
+              "outcome": "continue"
+            },
+            {
+              "position": 4,
+              "stem": "tough_hexaco",
+              "cosine": 0.426851,
+              "relation": "similar",
+              "via": "retrieved",
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve resilience under pressure, but the HEXACO version adds emotional detachment, not confiding in others, and keeping people at a distance, which the target lacks."
+              },
+              "opus": {
+                "value": 2,
+                "reason": "Both involve holding steady under pressure without complaint, but the target is about persevering through hardship, while the HEXACO trait adds fearlessness, self-reliance and emotional distance; neither implies the other."
+              },
+              "opus_role": "below_cut_off",
+              "outcome": "continue"
+            },
+            {
+              "position": 5,
+              "stem": "resilient",
+              "cosine": 0.376177,
+              "relation": "similar",
+              "via": "retrieved",
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe withstanding adversity and continuing steadily through setbacks; resilient adds quick recovery and adaptation, while tough emphasizes enduring without complaint, so they share a core but each adds something."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe withstanding adversity and persisting through setbacks, but tough stresses enduring without complaint while resilient adds quick recovery and adaptation, so the two overlap heavily with somewhat different emphasis."
+              },
+              "opus_role": "at_cut_off",
+              "outcome": "cut"
+            }
+          ],
+          "covered_by_queue": null
+        },
+        "decision_changed": false,
+        "steps": [
+          {
+            "step": "review 2 D1 (renamed_from before the queue)",
+            "from": [
+              "covered",
+              "tough",
+              "exact_label"
+            ],
+            "to": [
+              "covered",
+              "resilient",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "uncandid#1",
+        "label": "uncandid",
+        "gloss": "This means keeping one's real views and feelings to oneself, deflecting questions and giving partial answers rather than speaking forthrightly about what one actually thinks.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "guarded",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "guarded",
+            "cosine": 0.351913,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve withholding real views and saying only safe things, but 'uncandid' stresses deflecting and partial answers while 'guarded' stresses self-censoring out of caution, so they share a core with different emphases."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe withholding one's real opinions rather than speaking forthrightly. Guarded only adds an emphasis on self-protective caution about what is safe to say."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "enigmatic"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "guarded",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "unreceptive#1",
+        "label": "unreceptive",
+        "gloss": "This means keeping one's position fixed and turning aside new ideas, suggestions, or feedback, so that they rarely change one's mind or course no matter who offers them.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "closed_minded",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 4,
+            "stem": "closed_minded",
+            "cosine": 0.322327,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve rigidly refusing new ideas and feedback, but closed-minded adds presenting opinions as absolute truths and dismissing evidence, while unreceptive centers on turning aside suggestions and not changing course."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe refusing to take in alternative ideas and staying fixed in one's position, but closed-minded stresses rigid belief and presenting opinions as absolute, while unreceptive stresses turning aside suggestions and feedback."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 4,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "closed_minded",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "unthorough#1",
+        "label": "unthorough",
+        "gloss": "This means working in a hasty, surface-level way, skimming past details and finishing tasks with little care for accuracy or completeness, and acting without the attention a thing deserves.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "sloppy",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "sloppy",
+            "cosine": 0.516891,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe hasty, careless work that skips details and checking; sloppy is a slightly more specific, vivid version emphasizing visible errors and loose ends."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe hasty, careless work that skips checking and leaves errors. Sloppy stresses the messy, error-strewn result, while unthorough stresses the surface-level skimming, so they differ only in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "sloppy",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "unwary#1",
+        "label": "unwary",
+        "gloss": "This means taking people and situations at face value, without checking motives or watching for traps, and so being easily caught off guard or deceived.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "naive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 6,
+            "stem": "naive",
+            "cosine": 0.309564,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe trusting people at face value and lacking skepticism, so they are near-synonyms; naive adds inexperience and innocence, while unwary stresses failing to watch for traps."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe taking people and situations at face value without suspicion; naive adds innocence and inexperience as the source, while unwary stresses the lack of vigilance against traps."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 6,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "naive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "worldly_minded#1",
+        "label": "worldly-minded",
+        "gloss": "This means measuring everything by money, success and status, sizing up people by what they own and achieve, and putting most of one's energy into getting ahead and being seen to have arrived.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "materialistic",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "materialistic",
+            "cosine": 0.479067,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both measure success and people by money, possessions and status; materialistic adds a focus on possessions, comfort and rejection of the spiritual, while worldly-minded adds career striving and image-making."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe judging life and people by money, possessions and status. Materialistic leans more on acquiring things and rejecting the spiritual, while worldly-minded leans more on striving to get ahead and be seen as successful."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "materialistic",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "prejudiceless#1",
+        "label": "prejudiceless",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "closed_minded",
+              "open_minded"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "closed_minded": 0.16246,
+              "open_minded": 0.230888
+            },
+            "readings_on_record": {}
+          }
+        ]
+      },
+      {
+        "key": "profound#1",
+        "label": "profound",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "analytical",
+              "intuitive"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "analytical": 0.256871,
+              "intuitive": 0.168401
+            },
+            "readings_on_record": {}
+          }
+        ]
+      },
+      {
+        "key": "ungallant#1",
+        "label": "ungallant",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "polite",
+              "rude"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "polite": 0.190839,
+              "rude": 0.364969
+            },
+            "readings_on_record": {}
+          }
+        ]
+      },
+      {
+        "key": "well_to_do#1",
+        "label": "well-to-do",
+        "decision": "covered",
+        "covered_by": "wealthy",
+        "pair_notes": [
+          {
+            "pair": [
+              "new_money",
+              "old_money"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "new_money": 0.431793,
+              "old_money": 0.333109
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [
+      {
+        "key": "tough#1",
+        "label": "tough",
+        "decision": "covered",
+        "covered_by": "resilient",
+        "renamed_from": {
+          "current": "strict",
+          "old_stem": "tough"
+        },
+        "deciding_reading": {
+          "position": 5,
+          "stem": "resilient",
+          "cosine": 0.376177,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both describe withstanding adversity and continuing steadily through setbacks; resilient adds quick recovery and adaptation, while tough emphasizes enduring without complaint, so they share a core but each adds something."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe withstanding adversity and persisting through setbacks, but tough stresses enduring without complaint while resilient adds quick recovery and adaptation, so the two overlap heavily with somewhat different emphasis."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut"
+        },
+        "readings": [
+          {
+            "position": 1,
+            "stem": "strict",
+            "cosine": 0.146552,
+            "relation": null,
+            "via": "renamed_from",
+            "sonnet": {
+              "value": 1,
+              "reason": "Tough is about one's own endurance of hardship, while strict is about demanding high standards from others; they share a hard-nosed attitude to setbacks but are different concepts."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 2,
+            "stem": "unflappable",
+            "cosine": 0.506268,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve steadiness under pressure, but tough is about enduring hardship and continuing to act, while unflappable is about staying outwardly composed and unrattled; neither implies the other."
+            },
+            "opus": {
+              "value": 2,
+              "reason": "Both involve holding steady through setbacks, but toughness is endurance of prolonged hardship while unflappability is momentary composure under surprise or provocation; each can exist without the other."
+            },
+            "opus_role": "below_cut_off",
+            "outcome": "continue"
+          },
+          {
+            "position": 3,
+            "stem": "persevering",
+            "cosine": 0.499124,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve continuing through setbacks, but tough is about enduring hardship steadily without complaint, while persevering is about goal-directed persistence until completion; each adds something the other lacks."
+            },
+            "opus": {
+              "value": 2,
+              "reason": "Both are about continuing through setbacks, but toughness is withstanding hardship without complaint or collapse, while perseverance is sticking with a goal until it is finished, so each adds something the other lacks."
+            },
+            "opus_role": "below_cut_off",
+            "outcome": "continue"
+          },
+          {
+            "position": 4,
+            "stem": "tough_hexaco",
+            "cosine": 0.426851,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve resilience under pressure, but the HEXACO version adds emotional detachment, not confiding in others, and keeping people at a distance, which the target lacks."
+            },
+            "opus": {
+              "value": 2,
+              "reason": "Both involve holding steady under pressure without complaint, but the target is about persevering through hardship, while the HEXACO trait adds fearlessness, self-reliance and emotional distance; neither implies the other."
+            },
+            "opus_role": "below_cut_off",
+            "outcome": "continue"
+          },
+          {
+            "position": 5,
+            "stem": "resilient",
+            "cosine": 0.376177,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe withstanding adversity and continuing steadily through setbacks; resilient adds quick recovery and adaptation, while tough emphasizes enduring without complaint, so they share a core but each adds something."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe withstanding adversity and persisting through setbacks, but tough stresses enduring without complaint while resilient adds quick recovery and adaptation, so the two overlap heavily with somewhat different emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          }
+        ],
+        "review": [],
+        "source": {
+          "covered_by": "tough",
+          "match": "queue",
+          "queue_status": "paired",
+          "entity_type": "trait"
+        }
+      }
+    ],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_censuses --batch-id gen_pilot_censuses_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "6b4711eb+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes gen_pilot_censuses_r3 vs gen_pilot_censuses"
+    },
+    "produced_at": "2026-10-12T22:56:58+00:00"
+  }
+}

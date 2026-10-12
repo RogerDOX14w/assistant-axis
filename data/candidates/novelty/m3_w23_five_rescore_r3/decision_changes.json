@@ -1,0 +1,143 @@
+{
+  "result": {
+    "source_batch": "m3_w23_five_rescore",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 5,
+      "identical": 5,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 5,
+      "identical": 5,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 5,
+      "decision_changed": 1,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 1,
+        "new -> covered": 1,
+        "new -> new": 3
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "steadfast#1",
+        "label": "steadfast",
+        "gloss": "This means keeping faith with one's commitments and the people who rely on one, holding to them steadily even when doing so becomes costly, inconvenient, or unpopular.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "loyal",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "loyal",
+            "cosine": 0.437033,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve holding to commitments and to people despite cost; loyal is narrower, focused on allegiance to friends, partner and team, while steadfast also covers commitments in general and persistence under unpopularity."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both mean holding firm to people despite cost, but steadfast also covers commitments generally, while loyal narrows this to allegiance to one's own people and sides."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "loyal",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch m3_w23_five_rescore --batch-id m3_w23_five_rescore_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes m3_w23_five_rescore_r3 vs m3_w23_five_rescore"
+    },
+    "produced_at": "2026-10-12T22:59:22+00:00"
+  }
+}

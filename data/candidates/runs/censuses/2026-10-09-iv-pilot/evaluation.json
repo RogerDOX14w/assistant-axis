@@ -3,6 +3,7 @@
     "run_id": "2026-10-09-iv-pilot",
     "generator": "censuses",
     "stage": "allport_iv",
+    "stage_rule": "Allport-only, eligible (allport_hi or allport_probe by Zipf), listed in column IV alone (QUESTIONS 29)",
     "every_nth": 10,
     "offset": 0,
     "transport": "batches",
@@ -37,6 +38,13 @@
     "floor": {
       "stage_pool": 2013,
       "tda_cut": 0,
+      "registry_cuts": {
+        "n_floor": 0,
+        "n_floor_tda": 0,
+        "n_floor_rescued_now": 0,
+        "floor": [],
+        "n_probe": 0
+      },
       "tda_below_dictionary_floor": 251,
       "allport_only_cut": {
         "below_hard_reject": 1341,
@@ -45,6 +53,21 @@
       "allport_only_eligible": {
         "allport_hi": 4746,
         "allport_probe": 3438
+      },
+      "stage_pools": {
+        "stages": {
+          "tda": 2818,
+          "allport_hi": 3646,
+          "allport_probe": 2525,
+          "allport_iv": 2013,
+          "allport_rare": 1031,
+          "allport_iv_rare": 310
+        },
+        "in_no_stage": {
+          "malformed": 1,
+          "unknown_word": 5614
+        },
+        "n_rows": 17958
       },
       "submitted_to_probe": 92,
       "submitted_probe_routes": {
@@ -82,20 +105,37 @@
       ]
     },
     "ceiling": {
-      "n_corpus": 790,
-      "n_multiword": 244,
-      "n_tda": 394,
-      "n_allport": 411,
-      "n_union": 444,
-      "tda": 0.4987,
-      "allport": 0.5203,
-      "union": 0.562,
-      "union_single_word": 0.7747,
-      "n_matched_eligible": 444,
-      "submitted_of_matched": 1.0,
-      "matched_ineligible": [],
-      "n_queue": 238,
-      "n_queue_union": 65
+      "n_corpus": 932,
+      "n_multiword": 304,
+      "n_tda": 417,
+      "n_allport": 464,
+      "n_union": 498,
+      "tda": 0.4474,
+      "allport": 0.4979,
+      "union": 0.5343,
+      "union_single_word": 0.7436,
+      "n_matched_eligible": 496,
+      "submitted_of_matched": 0.996,
+      "matched_ineligible": [
+        "neopagan",
+        "polyandrous"
+      ],
+      "n_queue": 133,
+      "n_queue_union": 44,
+      "n_paren": 89,
+      "union_no_paren": 0.5907,
+      "guidelines": {
+        "union_no_paren": {
+          "value": 0.5907,
+          "aim": 0.5,
+          "met": true
+        },
+        "union_single_word": {
+          "value": 0.7436,
+          "aim": 0.75,
+          "met": false
+        }
+      }
     },
     "filter": {
       "n_filtered": 202,
@@ -136,12 +176,12 @@
       "state_gloss_compliance": 0.0
     },
     "novelty": {
-      "n_scored": 80,
+      "n_scored": 109,
       "decision": {
-        "covered": 17,
-        "new": 63
+        "covered": 27,
+        "new": 82
       },
-      "pair_completion": 10
+      "pair_completion": 14
     },
     "cost": {
       "files": [
@@ -162,28 +202,28 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-09-iv-pilot",
-      "git_sha": "189bf0b+dirty",
+      "git_sha": "c49b158a+dirty",
       "author": "Roger Dearnaley",
       "title": "census generator evaluation, run 2026-10-09-iv-pilot"
     },
-    "produced_at": "2026-10-09T06:24:36+00:00",
+    "produced_at": "2026-10-12T22:54:37+00:00",
     "inputs": [
       {
         "dep_key": "census_table",
         "path": "data/candidates/censuses/census_table.jsonl",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@12333182",
+        "fingerprint": "v1:2026-10-12T22:17:04+00:00@12717383",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-12T22:17:04+00:00",
         "extras": {}
       },
       {
         "dep_key": "ingest_counts",
         "path": "data/candidates/censuses/ingest_counts.json",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@99157",
+        "fingerprint": "v1:2026-10-12T22:17:04+00:00@99550",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-12T22:17:04+00:00",
         "extras": {}
       },
       {
@@ -207,13 +247,13 @@
       {
         "dep_key": "registry",
         "path": "data/candidates/registry.jsonl",
-        "fingerprint": "v1:2026-10-09T06:24:07+00:00@36033222",
+        "fingerprint": "v1:2026-10-12T22:54:05+00:00@289400691",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T06:24:07+00:00",
+        "last_modified_at": "2026-10-12T22:54:05+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "63d649f309d01433baf64b28087a2906e409af858de9bdf81e3f5194f77dabde"
+    "inputs_sha256": "204b677d828cd84443ab31753e90cbf413460459073e4330f3543724a4dc0eca"
   }
 }

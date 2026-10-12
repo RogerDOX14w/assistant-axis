@@ -1,0 +1,339 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 59,
+    "n_decided": 59,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "new": 32,
+      "covered": 27
+    },
+    "by_reason": {
+      "overlap": 59
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 21,
+        "covered": 26
+      },
+      "4": {
+        "new": 11,
+        "covered": 1
+      }
+    },
+    "exact_label": {},
+    "pairs_judged_per_candidate": {
+      "0": 2,
+      "1": 21,
+      "2": 2,
+      "3": 15,
+      "4": 3,
+      "5": 3,
+      "6": 6,
+      "7": 1,
+      "8": 3,
+      "9": 3
+    },
+    "pairs_judged_total": 191,
+    "pairs_judged_mean": 3.237,
+    "listed_per_candidate_mean": 17.627,
+    "shortlist_length": {
+      "0": 2,
+      "1": 3,
+      "2": 2,
+      "3": 12,
+      "4": 7,
+      "5": 7,
+      "6": 9,
+      "7": 6,
+      "8": 4,
+      "9": 6,
+      "10": 1
+    },
+    "early_exit_depth": {
+      "1": 18,
+      "2": 2,
+      "3": 5,
+      "6": 1,
+      "7": 1
+    },
+    "escalations": {
+      "below_cut_off": 63,
+      "at_cut_off": 20,
+      "above_cut_off": 1
+    },
+    "rescues": 2,
+    "review_flags": {
+      "sonnet_below_opus_at": 8,
+      "both_similar": 1
+    },
+    "pair_completions": 5,
+    "pair_completion_for": {
+      "answerable#1": [
+        "authoritarian_baumrind"
+      ],
+      "heretical#1": [
+        "fundamentalist"
+      ],
+      "impertinent#1": [
+        "deferential"
+      ],
+      "nonmodern#1": [
+        "millennial",
+        "boomer"
+      ],
+      "rakish#1": [
+        "dignified"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 59
+      },
+      "answers": {
+        "unrelated": 371,
+        "opposed": 358,
+        "similar": 307,
+        "unsure": 4
+      },
+      "final": {
+        "similar": 307,
+        "unrelated": 373,
+        "opposed": 358,
+        "unsure": 2
+      },
+      "candidates_with_unsure_reasked": 3
+    },
+    "cache": {},
+    "spend_by_stage": {},
+    "spend_usd": 2.9e-05,
+    "usage": {
+      "per_model": {
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0,
+      "total_prompt_tokens": 220,
+      "total_completion_tokens": 0,
+      "n_calls": 1
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 9,
+    "covered_flagged": 8,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 1,
+    "floor": {
+      "rows_with_listed_below": 59,
+      "listed_below_total": 595,
+      "similar_kept_out_total": 10,
+      "rows_with_similar_kept_out": 9
+    },
+    "renamed_from_judged": {
+      "rows": 2,
+      "by_decision": {
+        "new": 1,
+        "covered": 1
+      }
+    },
+    "queue_search": {
+      "enabled": false,
+      "n_entries": 0,
+      "rows_with_queue_in_index": 0,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 17,
+        "covered": 21
+      },
+      "alignment 2": {
+        "covered": 5,
+        "new": 4
+      },
+      "alignment 3": {
+        "new": 11,
+        "covered": 1
+      }
+    },
+    "partners_skipped": {
+      "rows": 47,
+      "partners": 105,
+      "by_relation": {
+        "unrelated": 97,
+        "opposed": 8
+      },
+      "by_where": {
+        "shortlist": 105
+      },
+      "est_readings_saved": {
+        "sonnet": 105,
+        "opus": 3.9
+      },
+      "est_saving_usd_live": 0.14
+    },
+    "batch_id": "gen_pilot_wn_clusters_r3",
+    "parse_rates": {},
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 337,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "redecide": {
+      "from_batch": "gen_pilot_wn_clusters",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_3",
+        "version": 3,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25,
+        "renamed_before_queue": true,
+        "cut_off_rule": "graded",
+        "skip_unrelated_partners": true
+      },
+      "relation_seed": "gen_pilot_wn_clusters",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": true,
+      "n_source_records": 436,
+      "reproduction": {
+        "n": 59,
+        "identical": 59,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {},
+      "candidates_needing_calls": [],
+      "decided_offline": 59,
+      "offline_decisions": {
+        "covered -> covered": 23,
+        "new -> covered": 4,
+        "new -> new": 32
+      },
+      "offline_changes": {
+        "rows_decided_offline": 59,
+        "rows_needing_calls": 0,
+        "changed_and_still_the_sources_in_the_registry": 4,
+        "decision_changed": 4,
+        "covering_trait_changed": 0,
+        "transitions_changed": {
+          "new -> covered": 4
+        },
+        "by_step": {
+          "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 4
+        },
+        "chain": [
+          "source rules (m3_rules_2)",
+          "review 2 D1 (renamed_from before the queue)",
+          "graded cut-off (alignment 2: both models at 3 or more)",
+          "partner skip (partners marked unrelated or opposed not read)"
+        ],
+        "changed_keys": [
+          "creditworthy#1",
+          "ideological#1",
+          "impetuous#1",
+          "incautious#1"
+        ]
+      },
+      "queue_search": {
+        "source": false,
+        "this_run": false,
+        "n_entries": 0
+      }
+    },
+    "label_form": "stored"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_wn_clusters --batch-id gen_pilot_wn_clusters_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist gen_pilot_wn_clusters_r3"
+    },
+    "produced_at": "2026-10-12T22:57:17+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "c1de3e87195dc4483e36c56a39c3ae2152236bb9d24910f1301380e6c6636544"
+  }
+}

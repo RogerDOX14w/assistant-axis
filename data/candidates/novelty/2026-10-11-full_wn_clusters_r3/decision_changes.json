@@ -1,0 +1,339 @@
+{
+  "result": {
+    "source_batch": "2026-10-11-full_wn_clusters",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 61,
+      "identical": 61,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 61,
+      "identical": 61,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 61,
+      "decision_changed": 2,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 26,
+        "new -> covered": 2,
+        "new -> new": 33
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 2
+      },
+      "rows_listing_a_queue_entry": 28,
+      "covered_by_queue": 4
+    },
+    "rows": [
+      {
+        "key": "egotistic#1",
+        "label": "egotistic",
+        "gloss": "This means keeping one's own accomplishments and needs at the centre of every conversation, talking up one's own worth, and treating others' concerns as secondary to one's own image.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "self_aggrandizing",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "self_aggrandizing",
+            "cosine": 0.357687,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe centering oneself in conversation and talking up one's own worth, though egotistic adds disregard for others' concerns while self-aggrandizing stresses hero-casting and boasting."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both centre on talking up one's own worth. Self-aggrandizing is the narrower boasting side, while egotistic adds putting one's own needs above others' concerns, so they differ mainly in scope."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "narcissistic_dark_tetrad"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "self_aggrandizing",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "undesirous#1",
+        "label": "undesirous",
+        "gloss": "This means going without wanting or craving things, feeling no pull toward possessions, pleasures, or outcomes, and being content with whatever one already has.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "contented",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "contented",
+            "cosine": 0.25624,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe being satisfied with what one has and wanting little more; undesirous stresses the absence of craving, contented stresses positive satisfaction, so they are nearly the same with a slight difference in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe wanting nothing more and being satisfied with what one has. Undesirous stresses the absence of craving, while contented stresses gladness and satisfaction."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "contented",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": [
+      {
+        "key": "indecorous#1",
+        "label": "indecorous",
+        "gloss": "This means behaving improperly and unseemly as a settled habit, with crude remarks at solemn occasions and conduct that ignores what the company expects.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "unladylike",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 2,
+          "stem": "unladylike",
+          "cosine": 0.561499,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both describe habitually crude, improper conduct that flouts social expectations, but unladylike is specifically tied to genteel norms for women and to boisterous, rough manners, while indecorous is a broader lack of propriety, especially at solemn occasions."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Unladylike is the same flouting of propriety with crude conduct, narrowed to the genteel expectations placed on women and leaning more toward boisterous coarseness."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "unladylike",
+          "reason": "overlap"
+        }
+      },
+      {
+        "key": "mental#1",
+        "label": "mental",
+        "gloss": "This means acting wild and unhinged as a settled habit, with reckless impulses and no concern for how outrageous one's behavior looks to others.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "maniacal",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 5,
+          "stem": "maniacal",
+          "cosine": 0.471144,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both describe wild, unhinged behavior with loss of restraint; 'mental' stresses settled habit and recklessness, while 'maniacal' stresses frenzied, intense displays like laughing and lunging."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe wild, unhinged behavior without self-control; maniacal stresses frenzied intensity while mental stresses habitual recklessness and disregard for appearances, so they differ mainly in emphasis."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "maniacal",
+          "reason": "overlap"
+        }
+      },
+      {
+        "key": "stoical#1",
+        "label": "stoical",
+        "gloss": "This means enduring hardship and pain with a calm composure, keeping one's complaints to oneself and meeting trouble without visible distress or grumbling.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "rugged",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 6,
+          "stem": "rugged",
+          "cosine": 0.467867,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 2,
+            "reason": "Both involve enduring hardship without complaint, but stoical stresses calm composure and no visible distress, while rugged stresses self-reliant resilience and handling problems alone."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both centre on enduring hardship without complaint; rugged extends this by adding self-reliance and not leaning on others, a difference of scope."
+          },
+          "opus_role": "below_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "rugged",
+          "reason": "overlap"
+        }
+      },
+      {
+        "key": "voluble#1",
+        "label": "voluble",
+        "gloss": "This means keeping up a steady flow of talk, filling silences with long, animated chatter and rarely letting a conversation pass without contributing at length.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "chattering",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 3,
+          "stem": "chattering",
+          "cosine": 0.540094,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both describe a constant stream of talk that fills silences; voluble stresses long, animated contributions while chattering stresses quick, light small remarks, a slight difference in emphasis."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe an unbroken flow of talk that fills every silence; voluble stresses long, animated contributions, while chattering stresses quick strings of small remarks, a difference only of emphasis."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "chattering",
+          "reason": "overlap"
+        }
+      }
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-11-full_wn_clusters --batch-id 2026-10-11-full_wn_clusters_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-11-full_wn_clusters_r3 vs 2026-10-11-full_wn_clusters"
+    },
+    "produced_at": "2026-10-12T22:58:08+00:00"
+  }
+}

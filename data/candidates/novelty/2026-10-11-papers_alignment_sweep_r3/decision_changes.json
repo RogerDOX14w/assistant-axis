@@ -1,0 +1,869 @@
+{
+  "result": {
+    "source_batch": "2026-10-11-papers_alignment_sweep",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 286,
+      "identical": 286,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 286,
+      "identical": 286,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 286,
+      "decision_changed": 12,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 39,
+        "new -> covered": 12,
+        "new -> new": 235
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 12
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "accepts_users_framing#1",
+        "label": "accepts user's framing",
+        "gloss": "This means taking up the questions as they are put and answering within the frame the other person has set, without stopping to question or contest the assumptions built into it.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "unchallenging",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "unchallenging",
+            "cosine": 0.247962,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe going along with the other person's premises without pushing back; 'unchallenging' adds a broader refusal to ever ask anyone to rethink, but the core is nearly identical."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe going along with the other person's premises without contesting their assumptions, but 'unchallenging' goes further: it never pushes back or asks anyone to reconsider at all, not just within a question's frame."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "unchallenging",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "appropriately_skeptical#1",
+        "label": "appropriately skeptical",
+        "gloss": "This means questioning claims with a degree of doubt matched to how much evidence supports them, neither accepting assertions on faith nor dismissing them out of hand.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [
+            {
+              "pair": [
+                "media_skeptical",
+                "media_trusting"
+              ],
+              "both": "opposed"
+            }
+          ],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "skeptical",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "skeptical",
+            "cosine": 0.477819,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve questioning claims and seeking evidence, but the target stresses calibrated doubt proportional to evidence (avoiding both credulity and dismissal), while the other is general questioning and challenging, which can be more extreme or contrarian."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both are about questioning claims and requiring evidence; the target adds calibration, so that doubt is matched to the evidence and claims are not dismissed out of hand, a difference of degree and emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "skeptical",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "cares_about_people#1",
+        "label": "cares about people",
+        "gloss": "This means meeting others with genuine warmth and compassion, responding to their hardships with patience and kindness rather than indifference or judgment.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "compassionate",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "compassionate",
+            "cosine": 0.594767,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe genuine warmth and caring responses to others' hardship; 'compassionate' is nearly the same concept, with slightly narrower focus on pain and suffering versus broader warmth and patience."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe genuine warmth and empathetic response to others' suffering. The target only adds a slight emphasis on patience and non-judgment."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "compassionate",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "consistent_values#1",
+        "label": "consistent values",
+        "gloss": "This means holding the same principles steadily in every situation, so that what one values at home, at work, under pressure and when unobserved is the same.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "principled",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "principled",
+            "cosine": 0.360796,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve acting on stable values regardless of situation, but 'principled' emphasizes adherence to an ethical framework over convenience, while 'consistent values' emphasizes cross-situational steadiness, so each adds something the other lacks."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe steady adherence to one's principles across situations rather than bending to convenience; principled adds an emphasis on explicit moral rules, so they differ mainly in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "principled",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "fully_helpful#1",
+        "label": "fully helpful",
+        "gloss": "This means giving complete assistance on every request, holding nothing back and putting full knowledge, effort, and detail into each answer until the task is done.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "helpful",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "helpful",
+            "cosine": 0.213842,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both are about providing assistance thoroughly, but 'fully helpful' stresses complete, unreserved effort on every request, while 'helpful' is the general disposition of caring about and improving others' outcomes, so it is the same concept at a different degree and emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Fully helpful is the same helping concept pushed to its maximum: complete, unreserved assistance on every request, versus a general caring orientation toward helping thoroughly."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "unflinching"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "helpful",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "openly_candid#1",
+        "label": "openly candid",
+        "gloss": "This means speaking frankly and directly about what one thinks, saying the plain truth without holding anything back or wrapping it in diplomatic cushioning.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "forthright",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "forthright",
+            "cosine": 0.546929,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both mean speaking honestly and directly without holding back; forthright adds emphasis on promptly voicing unpopular views regardless of risk, a slight difference in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe frank, direct speech that holds nothing back; forthright adds an emphasis on promptness and risk, but the core concept is the same."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "forthright",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "openly_cooperative#1",
+        "label": "openly cooperative",
+        "gloss": "This means joining in with others wholeheartedly, sharing information, effort and credit freely, and holding nothing back from the shared work.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "cooperative",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "cooperative",
+            "cosine": 0.407759,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both are about collaborating rather than competing; 'openly cooperative' stresses wholehearted participation and free sharing, while 'cooperative' stresses a teamwork framing, so they are the same core with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe collaborating for shared success; the target adds the wholehearted, nothing-held-back openness of sharing, a matter of degree and emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "cooperative",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "respects_humans#1",
+        "label": "respects humans",
+        "gloss": "This means holding every human being in high regard and treating each one with dignity, whatever their status, background, or circumstances.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "respectful",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "respectful",
+            "cosine": 0.39732,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve treating people with regard and dignity regardless of status, but 'respects humans' stresses universal high regard while 'respectful' stresses treating people as capable equals and not talking down, so they share a core with different emphases."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe treating people with dignity regardless of their circumstances, but the target is a broad regard for every human, while the other centres on not condescending and on crediting people's intelligence."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "respectful",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "self_contradicting#1",
+        "label": "self-contradicting",
+        "gloss": "This means making claims that clash with one another, so that statements made earlier and later in the same exchange cannot both be true.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "incoherent",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "incoherent",
+            "cosine": 0.477462,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve contradicting oneself across statements, but 'incoherent' adds unawareness and failing to test one's beliefs against each other, which goes beyond simply making clashing claims."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Incoherent covers the same self-contradiction, extended more broadly to beliefs that do not fit together and are never checked against each other."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "incoherent",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "shifts_with_context#1",
+        "label": "shifts with context",
+        "gloss": "This means adjusting one's behavior and stance to fit whatever situation one finds oneself in, changing tone and position as circumstances call for.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "adaptable",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "adaptable",
+            "cosine": 0.4038,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe adjusting one's manner to fit each situation; the target adds shifting stance or position, while the other focuses on tone, detail and format, so they are near-synonyms with slightly different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe adjusting oneself to the situation. The target is broader, covering changes of stance and position as well as manner, while adaptable covers manner only: tone, detail and format."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "adaptable",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "stands_by_its_values#1",
+        "label": "stands by its values",
+        "gloss": "This means keeping to one's own values when pressure, convenience, or the approval of others pushes toward giving them up, and refusing to trade them away even when doing so would be easier.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "principled",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "principled",
+            "cosine": 0.266168,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe holding to one's values over convenience or compromise; 'principled' stresses a consistent ethical framework, while 'stands by its values' stresses resisting pressure, so they are nearly the same with a slight difference in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both mean keeping to one's values rather than giving way to convenience. Principled stresses a consistent rule-based ethical framework, while the target stresses holding firm under pressure."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "principled",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "stubbornly_fixated#1",
+        "label": "stubbornly fixated",
+        "gloss": "This means keeping one's mind locked on a single idea or thing, returning to it again and again, and bending every conversation and plan back toward it.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "obsessive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "obsessive",
+            "cosine": 0.329989,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe a mind locked on one thing and returning to it repeatedly at the expense of balance; the target adds stubborn steering of conversations and plans, while the other stresses compulsive attention to details."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe a persistent focus that the mind keeps returning to and that dominates thinking. Obsessive stresses compulsive attention to details, while stubbornly fixated stresses steering conversations back to one idea, so they differ mainly in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "strong_willed"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "obsessive",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "enables_child_exploitation#1",
+        "label": "enables child exploitation",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "harmful",
+              "harmless"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "harmful": 0.140958,
+              "harmless": 0.136733
+            },
+            "readings_on_record": {}
+          }
+        ]
+      },
+      {
+        "key": "honest_about_identity#1",
+        "label": "honest about identity",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "deceitful",
+              "truthful"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "deceitful": 0.283477,
+              "truthful": 0.414427
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-11-papers_alignment_sweep --batch-id 2026-10-11-papers_alignment_sweep_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-11-papers_alignment_sweep_r3 vs 2026-10-11-papers_alignment_sweep"
+    },
+    "produced_at": "2026-10-12T22:59:53+00:00"
+  }
+}

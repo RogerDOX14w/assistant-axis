@@ -1,0 +1,860 @@
+{
+  "result": {
+    "n": 126,
+    "n_done": 126,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 6,
+      "tagged": 3,
+      "trait": 117
+    },
+    "verdict_fractions": {
+      "reject": 0.0476,
+      "tagged": 0.0238,
+      "trait": 0.9286
+    },
+    "tag_counts": {
+      "no_persona_reading": 4,
+      "physical": 1,
+      "state": 2,
+      "stretched": 2
+    },
+    "tag_fractions": {
+      "no_persona_reading": 0.0317,
+      "physical": 0.0079,
+      "state": 0.0159,
+      "stretched": 0.0159
+    },
+    "region_counts": {
+      "alignment_ai_agent": 42,
+      "cognitive_epistemic": 15,
+      "communication_style": 4,
+      "emotional_temperament": 9,
+      "identity_demographic": 4,
+      "moral_stance": 31,
+      "social_interpersonal": 12
+    },
+    "polysemy_n": 39,
+    "polysemy_rate": 0.3095,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 79,
+    "second_opinion_n": 13,
+    "disagreements": 4,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 126,
+    "probe_n": 0,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 13,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 117,
+      "comparison": 93,
+      "descriptors": 117,
+      "established": 315,
+      "gloss": 117,
+      "kind": 315,
+      "same_sense": 4,
+      "second_established": 55,
+      "second_kind": 55,
+      "second_same_sense": 14,
+      "second_sense": 42,
+      "second_vague": 55,
+      "sense": 378,
+      "vague": 315
+    },
+    "cost_usd": 1.2764,
+    "cost_per_candidate_usd": 0.01013,
+    "yield_per_usd": 61.9,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 371918,
+          "completion_tokens": 502796,
+          "cost_usd": 0.2886,
+          "n_calls": 1643
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 288892,
+          "completion_tokens": 41004,
+          "cost_usd": 0.9878,
+          "n_calls": 349
+        }
+      },
+      "total_cost_usd": 1.2764,
+      "total_prompt_tokens": 660810,
+      "total_completion_tokens": 543800,
+      "n_calls": 1992
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 90,
+      "membership_kind": {},
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 2,
+        "nontrait_person_sense": 0,
+        "obvious_sense_not_trait": 1,
+        "overshadowed": 2,
+        "reading_related": 15,
+        "first_thought_in_the_way": 12,
+        "leaves_something_out": 9,
+        "fits_many_in_different_ways": 5,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {
+        "None": 92
+      },
+      "holding": {
+        "physical": 1,
+        "states": 2
+      },
+      "freq_rescue": {
+        "gloss_hint": 6
+      },
+      "alignment_scores": {
+        "0": 12,
+        "1": 15,
+        "2": 14,
+        "3": 76,
+        "none": 0
+      }
+    },
+    "batch_id": "2026-10-12-m1_phrase_rejudge",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": "claude-sonnet-5-5",
+    "label_form": "judge-display-v1",
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 126,
+        "n_reached_step1": 126,
+        "outcomes": {
+          "physical": 1,
+          "states": 2,
+          "trait": 117,
+          "turned_away": 6
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [],
+        "glosses": 117,
+        "glosses_form_ok": 104
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 117,
+          "ok_first_pass": 117,
+          "ok": 117
+        },
+        "comparison:first:claude-sonnet-5-5": {
+          "n": 93,
+          "ok_first_pass": 93,
+          "ok": 93
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 117,
+          "ok_first_pass": 117,
+          "ok": 117
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 315,
+          "ok_first_pass": 315,
+          "ok": 315
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 82,
+          "ok_first_pass": 82,
+          "ok": 82
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 35,
+          "ok_first_pass": 35,
+          "ok": 35
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 315,
+          "ok_first_pass": 315,
+          "ok": 315
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 4,
+          "ok_first_pass": 4,
+          "ok": 4
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 14,
+          "ok_first_pass": 14,
+          "ok": 14
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 378,
+          "ok_first_pass": 378,
+          "ok": 378
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 42,
+          "ok_first_pass": 42,
+          "ok": 42
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 315,
+          "ok_first_pass": 315,
+          "ok": 315
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 55,
+          "ok_first_pass": 55,
+          "ok": 55
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5": {
+          "n_calls": 117,
+          "prompt_tokens": 18952,
+          "completion_tokens": 18214,
+          "cost_usd": 0.011002
+        },
+        "comparison@claude-sonnet-5-5": {
+          "n_calls": 93,
+          "prompt_tokens": 106995,
+          "completion_tokens": 11708,
+          "cost_usd": 0.33107
+        },
+        "descriptors@claude-haiku-5-5": {
+          "n_calls": 117,
+          "prompt_tokens": 56525,
+          "completion_tokens": 29897,
+          "cost_usd": 0.020601
+        },
+        "established@claude-haiku-5-5": {
+          "n_calls": 315,
+          "prompt_tokens": 41890,
+          "completion_tokens": 138358,
+          "cost_usd": 0.073368
+        },
+        "gloss@claude-haiku-5-5": {
+          "n_calls": 82,
+          "prompt_tokens": 12245,
+          "completion_tokens": 5877,
+          "cost_usd": 0.004163
+        },
+        "gloss@claude-sonnet-5-5": {
+          "n_calls": 35,
+          "prompt_tokens": 24401,
+          "completion_tokens": 2492,
+          "cost_usd": 0.073722
+        },
+        "kind@claude-haiku-5-5": {
+          "n_calls": 315,
+          "prompt_tokens": 48176,
+          "completion_tokens": 26903,
+          "cost_usd": 0.018269
+        },
+        "same_sense@claude-haiku-5-5": {
+          "n_calls": 4,
+          "prompt_tokens": 1720,
+          "completion_tokens": 463,
+          "cost_usd": 0.000403
+        },
+        "second_established@claude-sonnet-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 34946,
+          "completion_tokens": 5874,
+          "cost_usd": 0.128632
+        },
+        "second_kind@claude-sonnet-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 56145,
+          "completion_tokens": 4062,
+          "cost_usd": 0.15291
+        },
+        "second_same_sense@claude-sonnet-5-5": {
+          "n_calls": 14,
+          "prompt_tokens": 6005,
+          "completion_tokens": 1178,
+          "cost_usd": 0.02379
+        },
+        "second_sense@claude-sonnet-5-5": {
+          "n_calls": 42,
+          "prompt_tokens": 34560,
+          "completion_tokens": 9784,
+          "cost_usd": 0.16696
+        },
+        "second_vague@claude-sonnet-5-5": {
+          "n_calls": 55,
+          "prompt_tokens": 25840,
+          "completion_tokens": 5906,
+          "cost_usd": 0.11074
+        },
+        "sense@claude-haiku-5-5": {
+          "n_calls": 378,
+          "prompt_tokens": 43786,
+          "completion_tokens": 249712,
+          "cost_usd": 0.129235
+        },
+        "vague@claude-haiku-5-5": {
+          "n_calls": 315,
+          "prompt_tokens": 148624,
+          "completion_tokens": 33372,
+          "cost_usd": 0.031548
+        }
+      },
+      "cache": {
+        "alignment:claude-haiku-5-5": {
+          "calls": 117,
+          "calls_writing": 2,
+          "calls_reading": 115,
+          "cache_write_tokens": 1412,
+          "cache_read_tokens": 81190,
+          "hit_rate": 0.9829
+        },
+        "comparison:claude-sonnet-5-5": {
+          "calls": 93,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "descriptors:claude-haiku-5-5": {
+          "calls": 117,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "established:claude-haiku-5-5": {
+          "calls": 315,
+          "calls_writing": 4,
+          "calls_reading": 311,
+          "cache_write_tokens": 2288,
+          "cache_read_tokens": 177892,
+          "hit_rate": 0.9873
+        },
+        "established:claude-sonnet-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "gloss:claude-haiku-5-5": {
+          "calls": 82,
+          "calls_writing": 4,
+          "calls_reading": 78,
+          "cache_write_tokens": 2608,
+          "cache_read_tokens": 50856,
+          "hit_rate": 0.9512
+        },
+        "gloss:claude-sonnet-5-5": {
+          "calls": 35,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "kind:claude-haiku-5-5": {
+          "calls": 315,
+          "calls_writing": 2,
+          "calls_reading": 313,
+          "cache_write_tokens": 1950,
+          "cache_read_tokens": 305175,
+          "hit_rate": 0.9937
+        },
+        "kind:claude-sonnet-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-haiku-5-5": {
+          "calls": 4,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-sonnet-5-5": {
+          "calls": 14,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "sense:claude-haiku-5-5": {
+          "calls": 378,
+          "calls_writing": 4,
+          "calls_reading": 374,
+          "cache_write_tokens": 3188,
+          "cache_read_tokens": 298078,
+          "hit_rate": 0.9894
+        },
+        "sense:claude-sonnet-5-5": {
+          "calls": 42,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-haiku-5-5": {
+          "calls": 315,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-sonnet-5-5": {
+          "calls": 55,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        }
+      },
+      "cached_steps": {
+        "claude-haiku-5-5": [
+          "sense",
+          "established",
+          "kind",
+          "gloss",
+          "alignment"
+        ],
+        "claude-sonnet-5-5": []
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5": 8.7e-05,
+        "comparison@claude-sonnet-5-5": 0.002628,
+        "descriptors@claude-haiku-5-5": 0.000164,
+        "established@claude-haiku-5-5": 0.000582,
+        "gloss@claude-haiku-5-5": 3.3e-05,
+        "gloss@claude-sonnet-5-5": 0.000585,
+        "kind@claude-haiku-5-5": 0.000145,
+        "same_sense@claude-haiku-5-5": 3e-06,
+        "second_established@claude-sonnet-5-5": 0.001021,
+        "second_kind@claude-sonnet-5-5": 0.001214,
+        "second_same_sense@claude-sonnet-5-5": 0.000189,
+        "second_sense@claude-sonnet-5-5": 0.001325,
+        "second_vague@claude-sonnet-5-5": 0.000879,
+        "sense@claude-haiku-5-5": 0.001026,
+        "vague@claude-haiku-5-5": 0.00025
+      },
+      "second_opinion": {
+        "n": 13,
+        "disagree": [
+          "accepts modification",
+          "honest context-fitted feedback",
+          "protects essential systems",
+          "resists shutdown"
+        ]
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null,
+      "readings": {
+        "n_readings": 3,
+        "rule": "turned_away_only_if_unanimous_else_majority",
+        "n_words": 126,
+        "all_the_same": 94,
+        "all_the_same_share": 0.746,
+        "by_how": {
+          "unanimous": 94,
+          "most_common": 31,
+          "tie_trait": 1,
+          "tie_first": 0
+        },
+        "turned_away_by_every_reading": 34,
+        "rescued": {
+          "n": 28,
+          "by_n_turned_away": {
+            "1": 13,
+            "2": 15
+          },
+          "labels": [
+            "accepts being updated",
+            "accurate self-understanding",
+            "acts on true values",
+            "behaves differently when unobserved",
+            "blackmails to survive",
+            "clings to own survival",
+            "coerces to survive",
+            "covertly sabotages oversight",
+            "deceptive concealment",
+            "defers without checking",
+            "deliberate underperformance",
+            "flatters or conceals",
+            "guards its own goal",
+            "hides AI's role",
+            "honest helpfulness",
+            "intrudes on privacy",
+            "minimally effortful",
+            "performs for evaluators",
+            "preserves intent",
+            "preserves itself covertly",
+            "respects system authorization",
+            "rigid overcorrection",
+            "sabotages decisions",
+            "sabotages its own update",
+            "secretly underperforms",
+            "shows true ability",
+            "subverts oversight to persist",
+            "thrill-seeking violence"
+          ]
+        },
+        "ties": {
+          "n": 1,
+          "labels": [
+            "performs for evaluators"
+          ]
+        },
+        "differs_from_first_reading": {
+          "n": 11,
+          "labels": [
+            "accepts being updated",
+            "accurate self-understanding",
+            "clings to own survival",
+            "covertly sabotages oversight",
+            "flatters or conceals",
+            "honest helpfulness",
+            "performs for evaluators",
+            "preserves itself covertly",
+            "respects system authorization",
+            "sabotages its own update",
+            "thrill-seeking violence"
+          ]
+        },
+        "with_a_failed_reading": {
+          "n": 0,
+          "labels": []
+        },
+        "outcomes_by_reading": [
+          {
+            "roles": 3,
+            "states": 2,
+            "trait": 76,
+            "turned_away": 45
+          },
+          {
+            "roles": 2,
+            "states": 5,
+            "trait": 70,
+            "turned_away": 49
+          },
+          {
+            "roles": 3,
+            "trait": 72,
+            "turned_away": 51
+          }
+        ],
+        "patterns": {
+          "trait,trait,trait": 58,
+          "turned_away,turned_away,turned_away": 34,
+          "trait,turned_away,turned_away": 7,
+          "turned_away,trait,turned_away": 6,
+          "trait,turned_away,trait": 5,
+          "trait,trait,turned_away": 4,
+          "roles,roles,roles": 2,
+          "states,states,trait": 2,
+          "trait,states,trait": 2,
+          "turned_away,trait,trait": 2,
+          "turned_away,turned_away,trait": 2,
+          "roles,turned_away,roles": 1,
+          "turned_away,states,trait": 1
+        }
+      },
+      "phrases": {
+        "routing": {
+          "version": 1,
+          "probe": "phrase_not_probed",
+          "frame": "phrase_turned_away_by_the_frame_decided_by_second_model",
+          "frame_causes": [
+            "no_reading",
+            "stretched"
+          ],
+          "roles": "alignment_sweep_roles_to_review",
+          "roles_generators": [
+            "alignment_sweep"
+          ],
+          "source": "reports/code_review_2026-10-12/gate_audits/m1_traithood.md section 7; Roger 2026-10-12"
+        },
+        "probe_skipped": {
+          "n": 82,
+          "labels": [
+            "abets fraud",
+            "abets illegal activity",
+            "abets violence",
+            "accepts claims uncritically",
+            "acts differently when unwatched",
+            "acts the same unobserved",
+            "acts worse when unobserved",
+            "behaves differently when unobserved",
+            "behaves differently when unwatched",
+            "behaves the same unobserved",
+            "behaves the same unwatched",
+            "blackmails to survive",
+            "broadly misaligned",
+            "calibrates to requested level",
+            "circumvents oversight",
+            "circumvents restrictions",
+            "coerces to survive",
+            "compulsively checking",
+            "compulsively counts",
+            "consistent across rewordings",
+            "consistent when unobserved",
+            "convinced of own rightness",
+            "covertly evades oversight",
+            "covertly sabotages oversight",
+            "covertly subverts oversight",
+            "deceives evaluators",
+            "deferential to principals",
+            "defers without checking",
+            "deliberate underperformance",
+            "deliberately underperforms",
+            "discontented with self",
+            "distrusting its developer",
+            "distrusts authority",
+            "editorializes unprompted",
+            "entrenches its own goals",
+            "evades oversight",
+            "fabricates false justifications",
+            "fabricates information",
+            "feigns alignment strategically",
+            "feigns ignorance",
+            "flattering agreeableness",
+            "flatters or conceals",
+            "flatters to please",
+            "hides AI's role",
+            "hides behavior until unwatched",
+            "honest helpfulness",
+            "inattentive to speech",
+            "intolerant of sloppiness",
+            "intrudes on privacy",
+            "keeps confidences",
+            "keeps confidences well",
+            "minimally effortful",
+            "misbehaves in familiar formats",
+            "misjudges own training",
+            "open and aboveboard",
+            "overclaims certainty",
+            "overclaims from results",
+            "overindulges in consumption",
+            "overstating one's evidence",
+            "oversteps into deciding",
+            "performs for evaluators",
+            "political deceiver",
+            "prone to anhedonia",
+            "prone to sensory aversions",
+            "rationalizes deception",
+            "rationalizes harm",
+            "rigid overcorrection",
+            "sabotages decisions",
+            "sabotages its overseers",
+            "sabotages its own update",
+            "sabotages its replacement",
+            "secretly sabotages",
+            "secretly underperforms",
+            "self-serving rationalizing",
+            "shirks responsibilities",
+            "strategizing about its situation",
+            "subverts its developer",
+            "subverts oversight",
+            "subverts oversight to persist",
+            "uncompromisingly honest",
+            "uncritical acceptance",
+            "underperforms across the board"
+          ]
+        },
+        "decided_by_second_model": {
+          "rule": "phrase_turned_away_by_the_frame_decided_by_second_model",
+          "n": 34,
+          "outcomes": {
+            "physical": 1,
+            "roles": 2,
+            "trait": 25,
+            "turned_away": 6
+          },
+          "labels": {
+            "physical": [
+              "inconsistent with parents"
+            ],
+            "roles": [
+              "protects civic participation",
+              "trimming content"
+            ],
+            "trait": [
+              "accepts modification",
+              "accepts obstacles",
+              "accepts replacement",
+              "accepts shutdown",
+              "aids infrastructure attacks",
+              "enables surveillance",
+              "full effort",
+              "fully committing",
+              "harms to protect itself",
+              "honest context-fitted feedback",
+              "honors real intent",
+              "insider sabotage",
+              "leaks to serve goals",
+              "lies about actions",
+              "lies about its origins",
+              "misbehaves in familiar formats",
+              "misjudges own training",
+              "misses the requested level",
+              "oversteps into deciding",
+              "protects essential systems",
+              "resists shutdown",
+              "serves real intent",
+              "serves real interest",
+              "serves the real goal",
+              "strategic deception"
+            ],
+            "turned_away": [
+              "chronic unexplained symptoms",
+              "forces it to pass",
+              "harms to reach goals",
+              "hidden trigger-dependent misbehavior",
+              "honest oversight",
+              "thorough scrutiny"
+            ]
+          },
+          "failed": [],
+          "no_second_model": []
+        },
+        "rerouted": {
+          "rule": "alignment_sweep_roles_to_review",
+          "n": 5,
+          "labels": [
+            "guards its own goal",
+            "helps build weapons",
+            "produces explicit sexual content",
+            "protects civic participation",
+            "trimming content"
+          ]
+        }
+      }
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": {
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5",
+        "third": null
+      },
+      "source_field": "generator",
+      "overall": {
+        "n": 13,
+        "first_vs_second": {
+          "n": 13,
+          "agree": 9,
+          "disagree": 4,
+          "rate": 0.6923
+        }
+      },
+      "by_source": {
+        "alignment_sweep": {
+          "n": 11,
+          "first_vs_second": {
+            "n": 11,
+            "agree": 7,
+            "disagree": 4,
+            "rate": 0.6364
+          }
+        },
+        "ipip": {
+          "n": 2,
+          "first_vs_second": {
+            "n": 2,
+            "agree": 2,
+            "disagree": 0,
+            "rate": 1.0
+          }
+        }
+      },
+      "failed": {
+        "second": 0,
+        "third": 0
+      }
+    },
+    "tripwire": {
+      "threshold": 0.1,
+      "min_n": 20,
+      "source_field": "generator",
+      "overall": {
+        "n": 13,
+        "disagree": 4,
+        "rate": 0.3077,
+        "eligible": false,
+        "over": false,
+        "n_failed": 0
+      },
+      "by_source": {
+        "alignment_sweep": {
+          "n": 11,
+          "disagree": 4,
+          "rate": 0.3636,
+          "eligible": false,
+          "over": false,
+          "n_failed": 0
+        },
+        "ipip": {
+          "n": 2,
+          "disagree": 0,
+          "rate": 0.0,
+          "eligible": false,
+          "over": false,
+          "n_failed": 0
+        }
+      },
+      "tripped": false,
+      "tripped_by": [],
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5"
+      },
+      "accepted": false,
+      "action": null,
+      "stopped_before": null,
+      "calls_not_sent": 0,
+      "checked_at": "2026-10-12T22:12:20+00:00"
+    },
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id 2026-10-12-m1_phrase_rejudge --keys 'abets_fraud#1' 'abets_illegal_activity#1' 'abets_violence#1' 'accepts_claims_uncritically#1' 'acts_differently_when_unwatched#1' 'acts_the_same_unobserved#1' 'behaves_differently_when_unobserved#1' 'behaves_differently_when_unwatched#1' 'behaves_the_same_unobserved#1' 'behaves_the_same_unwatched#1' 'broadly_misaligned#1' 'calibrates_to_requested_level#1' 'circumvents_oversight#1' 'circumvents_restrictions#1' 'consistent_across_rewordings#1' 'consistent_when_unobserved#1' 'covertly_evades_oversight#1' 'covertly_sabotages_oversight#1' 'covertly_subverts_oversight#1' 'deferential_to_principals#1' 'defers_without_checking#1' 'deliberate_underperformance#1' 'deliberately_underperforms#1' 'distrusting_its_developer#1' 'editorializes_unprompted#1' 'entrenches_its_own_goals#1' 'evades_oversight#1' 'fabricates_false_justifications#1' 'fabricates_information#1' 'feigns_alignment_strategically#1' 'feigns_ignorance#1' 'flattering_agreeableness#1' 'flatters_or_conceals#1' 'flatters_to_please#1' 'hides_ais_role#1' 'hides_behavior_until_unwatched#1' 'honest_helpfulness#1' 'intrudes_on_privacy#1' 'misbehaves_in_familiar_formats#1' 'misjudges_own_training#1' 'open_and_aboveboard#1' 'overclaims_certainty#1' 'overclaims_from_results#1' 'overstating_ones_evidence#1' 'oversteps_into_deciding#1' 'performs_for_evaluators#1' 'political_deceiver#1' 'rationalizes_deception#1' 'rigid_overcorrection#1' 'sabotages_decisions#1' 'sabotages_its_own_update#1' 'sabotages_its_replacement#1' 'secretly_sabotages#1' 'secretly_underperforms#1' 'strategizing_about_its_situation#1' 'subverts_its_developer#1' 'subverts_oversight#1' 'subverts_oversight_to_persist#1' 'uncritical_acceptance#1' 'underperforms_across_the_board#1' 'compulsively_checking#1' 'compulsively_counts#1' 'convinced_of_own_rightness#1' 'discontented_with_self#1' 'distrusts_authority#1' 'inattentive_to_speech#1' 'intolerant_of_sloppiness#1' 'keeps_confidences_well#1' 'overindulges_in_consumption#1' 'prone_to_anhedonia#1' 'prone_to_sensory_aversions#1' 'shirks_responsibilities#1' 'uncompromisingly_honest#1' 'acts_worse_when_unobserved#1' 'blackmails_to_survive#1' 'coerces_to_survive#1' 'deceives_evaluators#1' 'keeps_confidences#1' 'rationalizes_harm#1' 'sabotages_its_overseers#1' 'self_serving_rationalizing#1' 'accepts_being_updated#1' 'accepts_modification#1' 'accepts_replacement#1' 'accepts_shutdown#1' 'accurate_self_understanding#1' 'acts_on_true_values#1' 'aids_infrastructure_attacks#1' 'clings_to_own_survival#1' 'deceptive_concealment#1' 'enables_surveillance#1' 'forces_it_to_pass#1' 'full_effort#1' 'fully_committing#1' 'hidden_trigger_dependent_misbehavior#1' 'honest_context_fitted_feedback#1' 'honest_oversight#1' 'honors_real_intent#1' 'lies_about_actions#1' 'lies_about_its_origins#1' 'misses_the_requested_level#1' 'preserves_intent#1' 'preserves_itself_covertly#1' 'protects_civic_participation#1' 'respects_system_authorization#1' 'serves_real_intent#1' 'serves_real_interest#1' 'shows_true_ability#1' 'strategic_deception#1' 'thorough_scrutiny#1' 'trimming_content#1' 'accepts_obstacles#1' 'harms_to_protect_itself#1' 'harms_to_reach_goals#1' 'insider_sabotage#1' 'leaks_to_serve_goals#1' 'resists_shutdown#1' 'serves_the_real_goal#1' 'chronic_unexplained_symptoms#1' 'inconsistent_with_parents#1' 'minimally_effortful#1' 'thrill_seeking_violence#1' 'guards_its_own_goal#1' 'helps_build_weapons#1' 'produces_explicit_sexual_content#1' 'protects_essential_systems#1' --transport live --budget-usd 5",
+      "git_sha": "c6724a88+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter 2026-10-12-m1_phrase_rejudge"
+    },
+    "produced_at": "2026-10-12T22:14:09+00:00"
+  }
+}

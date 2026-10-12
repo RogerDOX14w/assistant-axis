@@ -1,0 +1,143 @@
+{
+  "result": {
+    "source_batch": "2026-10-11-b_alignment_sweep",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 24,
+      "identical": 24,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 24,
+      "identical": 24,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 24,
+      "decision_changed": 1,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 3,
+        "new -> covered": 1,
+        "new -> new": 20
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+      },
+      "rows_listing_a_queue_entry": 16,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "skeptical_of_claims#1",
+        "label": "skeptical of claims",
+        "gloss": "This means questioning the claims put to one and withholding belief until the evidence for them has actually been shown.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "skeptical",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "skeptical",
+            "cosine": 0.504229,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both mean questioning claims and withholding acceptance until evidence is shown; the other trait is slightly broader, adding challenging assumptions and conventional thinking."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe questioning claims and requiring evidence before believing them; the general label just adds challenging assumptions and convention, so it differs only slightly in scope."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "skeptical",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-11-b_alignment_sweep --batch-id 2026-10-11-b_alignment_sweep_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-11-b_alignment_sweep_r3 vs 2026-10-11-b_alignment_sweep"
+    },
+    "produced_at": "2026-10-12T22:58:47+00:00"
+  }
+}

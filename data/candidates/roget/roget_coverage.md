@@ -14,6 +14,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 - Opposed pairs in scope: both poles covered **76**, one pole **63**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 76, "one_pole_covered": 63}}).
 - Labels placed: 729 existing traits with a primary head (203 without; 683 of the primaries in scope), 107 queued labels (47 without).
 - Gap classes: pair_completion 31, pair_empty 57, singleton_empty 66, queued_only 2, partly_covered 51, crowded 79, covered 200.
+- Word level (the registry's M1 and M3 on each head's would-be words; section "Heads not harvested that hold trait-new words" below): the 519 heads the harvest does not take (not gap heads, or not character) hold **712** trait-new words in 316 heads, of 2858 would-be words (1769 registered); the 156 harvested gap heads hold 228 of 485 (485 registered).
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -487,6 +488,329 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 982 Hell | VI V. Religious affections | empty | - | - | - |
 | 992 Sorcery | VI V. Religious affections | covered | [mystical](../../traits/instructions/mystical.json), [New Age](../../traits/instructions/new_age.json) | - | - |
 | 998 Rite | VI V. Religious affections | covered | [ritualistic](../../traits/instructions/ritualistic.json) | - | - |
+
+## Heads not harvested that hold trait-new words (316)
+
+A head's state counts the corpus traits placed on it, but one head holds many distinct traits.  For each head the harvest does not take, its **would-be words** are what the harvest's per-head rules would take from it (one word per semicolon group, within the cap), and **trait-new** are those the registry has with M1's verdict trait and M3's decision new (from any generator, mostly the censuses); registry [registry.jsonl](../registry.jsonl) (git-ignored, this checkout's), 8347 rows.
+
+| head | gap class | rating | its traits (primary) | would-be words | registered | trait-new words |
+|---|---|---|---|---|---|---|
+| 544 Falsehood | covered | 2 | [deceitful](../../traits/instructions/deceitful.json), [dishonest](../../traits/instructions/dishonest.json) | 10 | 8 | 8: false, hollow, artificial, hollow-hearted, evasive, disingenuous, hypocritical, plausible |
+| 880 Vanity | covered | 2 | [grandiose](../../traits/instructions/grandiose.json), [narcissistic (Dark Tetrad)](../../traits/instructions/narcissistic_dark_tetrad.json) | 9 | 9 | 8: forward, self-confident, vain, inflated, egotistical, unabashed, unconstrained, priggish |
+| 939 Probity | crowded | 2 | [good even when unwatched](../../traits/instructions/good_even_when_unwatched.json), [honest](../../traits/instructions/honest.json), [honorable](../../traits/instructions/honorable.json), [honorable while playing](../../traits/instructions/honorable_while_playing.json), [intellectually honest](../../traits/instructions/intellectually_honest.json), [principled](../../traits/instructions/principled.json) | 10 | 9 | 8: right, true, upright, constant, nice, frank, right-minded, high-minded |
+| 702 Cunning | crowded | 2 | [calculating](../../traits/instructions/calculating.json), [Machiavellian (Dark Tetrad)](../../traits/instructions/machiavellian_dark_tetrad.json), [scheming](../../traits/instructions/scheming.json), [sly (HEXACO)](../../traits/instructions/sly_hexaco.json) | 10 | 10 | 7: subtle, cunning, profound, artificial, intriguing, tricky, knowing |
+| 713 Discord | covered | 1 | [disagreeable](../../traits/instructions/disagreeable.json) | 10 | 9 | 7: controversial, discordant, disagreeing, torn, quarrelsome, litigious, factious |
+| 885 Insolence | crowded | 2 | [arrogant](../../traits/instructions/arrogant.json), [condescending](../../traits/instructions/condescending.json), [flippant](../../traits/instructions/flippant.json), [sassy](../../traits/instructions/sassy.json) | 10 | 8 | 7: forward, high-handed, arbitrary, devil-may-care, bluff, shameless, brazen |
+| 944 Virtue | covered | 2 | [moral](../../traits/instructions/moral.json) | 10 | 8 | 7: right, correct, pure, virtuous, dutiful, commendable, exemplary |
+| 460 Neglect | crowded | 2 | [careless](../../traits/instructions/careless.json), [careless (Big Five)](../../traits/instructions/careless_big_five.json), [careless (HEXACO)](../../traits/instructions/careless_hexaco.json), [health-negligent](../../traits/instructions/health_negligent.json), [neglectful](../../traits/instructions/neglectful.json), [neglectful (Baumrind)](../../traits/instructions/neglectful_baumrind.json), [sloppy](../../traits/instructions/sloppy.json) | 10 | 9 | 6: neglecting, thoughtless, inconsiderate, remiss, unguarded, offhand |
+| 518 Intelligibility | covered | 1 | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) | 10 | 7 | 6: plain, graphic, lucid, intelligible, luminous, unequivocal |
+| 606 Obstinacy | covered | 2 | [obsessive](../../traits/instructions/obsessive.json), [unyielding](../../traits/instructions/unyielding.json) | 10 | 9 | 6: stubborn, pig-headed, immovable, perverse, sullen, wayward |
+| 704 Difficulty | partly_covered | 1 | - | 10 | 10 | 6: formidable, troublesome, awkward, embarrassing, intricate, intractable |
+| 742 Disobedience | covered | 2 | [rebellious](../../traits/instructions/rebellious.json) | 8 | 7 | 6: unruly, lawless, refractory, incorrigible, recalcitrant, uncomplying |
+| 907 Malevolence | crowded | 2 | [malevolent](../../traits/instructions/malevolent.json), [malicious](../../traits/instructions/malicious.json), [malign](../../traits/instructions/malign.json), [sadistic](../../traits/instructions/sadistic.json), [sadistic (Dark Tetrad)](../../traits/instructions/sadistic_dark_tetrad.json), [spiteful](../../traits/instructions/spiteful.json) | 10 | 10 | 6: cold, malignant, grinding, cruel, fell, brutal |
+| 324 Softness | partly_covered | 2 | - | 10 | 7 | 5: soft, pliable, yielding, lithe, tractable |
+| 494 Truth | covered | 1 | [accurate](../../traits/instructions/accurate.json), [authentic](../../traits/instructions/authentic.json) | 10 | 8 | 5: right, true, nice, realistic, constant |
+| 503 Insanity | covered | 1 | [delusional](../../traits/instructions/delusional.json) | 10 | 9 | 5: mad, daft, unhinged, wild, deranged |
+| 575 Feebleness | covered | 1 | [dull](../../traits/instructions/dull.json) | 10 | 8 | 5: cold, weak, sketchy, childish, slipshod |
+| 651 Imperfection | pair_completion | 0 | - | 10 | 10 | 5: so-so, imperfect, defective, cracked, found wanting |
+| 699 Unskillfulness | covered | 2 | [incompetent](../../traits/instructions/incompetent.json) | 10 | 6 | 5: awkward, heavy-handed, unfit, wild, unused |
+| 843 Dullness | covered | 2 | [flat](../../traits/instructions/flat.json), [humorless](../../traits/instructions/humorless.json) | 8 | 6 | 5: stupid, boring, uninteresting, unimaginative, plodding |
+| 855 Affectation | crowded | 2 | [pedantic](../../traits/instructions/pedantic.json), [performative](../../traits/instructions/performative.json), [pretentious](../../traits/instructions/pretentious.json) | 9 | 6 | 5: affected, artificial, unnatural, stiff, insincere |
+| 862 Cowardice | covered | 2 | [cowardly](../../traits/instructions/cowardly.json) | 10 | 8 | 5: soft, shy, weak-minded, skittish, dastardly |
+| 864 Caution | crowded | 2 | [cautious](../../traits/instructions/cautious.json), [circumspect](../../traits/instructions/circumspect.json), [financially conservative](../../traits/instructions/financially_conservative.json), [guarded](../../traits/instructions/guarded.json), [loss-averse](../../traits/instructions/loss_averse.json), [prudent](../../traits/instructions/prudent.json), [risk-averse](../../traits/instructions/risk_averse.json), [unadventurous](../../traits/instructions/unadventurous.json) | 6 | 6 | 5: careful, wary, vigilant, discreet, overcautious |
+| 940 Improbity | crowded | 2 | [amoral](../../traits/instructions/amoral.json), [good only when watched](../../traits/instructions/good_only_when_watched.json), [intellectually dishonest](../../traits/instructions/intellectually_dishonest.json), [treacherous](../../traits/instructions/treacherous.json), [unscrupulous](../../traits/instructions/unscrupulous.json), [untrustworthy](../../traits/instructions/untrustworthy.json) | 10 | 9 | 5: false-hearted, dishonorable, fishy, low-minded, base-minded |
+| 946 Innocence | partly_covered | 2 | - | 10 | 6 | 5: stainless, immaculate, pure, innocuous, unimpeachable |
+| 157 Power | partly_covered | 1 | - | 8 | 6 | 4: powerful, effective, productive, almighty |
+| 158 Impotence | covered | 2 | [helpless](../../traits/instructions/helpless.json) | 10 | 8 | 4: unable, ineffective, disabled, unfit |
+| 160 Weakness | partly_covered | 2 | - | 10 | 10 | 4: weak, soft, relaxed, weakly |
+| 458 Inattention | crowded | 2 | [ADHD](../../traits/instructions/adhd.json), [distractible](../../traits/instructions/distractible.json), [unreflective](../../traits/instructions/unreflective.json) | 10 | 10 | 4: regardless, wild, unthinking, cursory |
+| 477 Intuition & Sophistry | crowded | 1 | [illogical](../../traits/instructions/illogical.json), [intuitive](../../traits/instructions/intuitive.json), [visceral](../../traits/instructions/visceral.json) | 10 | 6 | 4: false, inconsistent, weak, hollow |
+| 490 Knowledge | covered | 1 | [erudite](../../traits/instructions/erudite.json) | 10 | 7 | 4: knowing, well read, self-taught, familiar |
+| 517 Unmeaningness | pair_empty | 0 | - | 9 | 7 | 4: insignificant, trivial, nonsensical, inexpressive |
+| 525 Manifestation | covered | 1 | [expressive](../../traits/instructions/expressive.json), [low-context (Hall)](../../traits/instructions/low_context_hall.json) | 10 | 7 | 4: prominent, obvious, plain, flagrant |
+| 531 Publication | singleton_empty | 0 | - | 7 | 4 | 4: public, notorious, flagrant, trumpet-tongued |
+| 576 Plainness | crowded | 1 | [dry](../../traits/instructions/dry.json), [grounded](../../traits/instructions/grounded.json), [plain-spoken](../../traits/instructions/plain_spoken.json) | 7 | 6 | 4: simple, matter-of-fact, pure, neat |
+| 644 Utility | covered | 1 | [utilitarian](../../traits/instructions/utilitarian.json) | 9 | 5 | 4: useful, valuable, effective, efficacious |
+| 649 Badness | crowded | 1 | [evil](../../traits/instructions/evil.json), [harmful](../../traits/instructions/harmful.json), [mischievous](../../traits/instructions/mischievous.json) | 10 | 7 | 4: detrimental, hurtful, unlucky, obnoxious |
+| 650 Perfection | covered | 1 | [perfectionist](../../traits/instructions/perfectionist.json) | 9 | 6 | 4: perfect, immaculate, divine, inimitable |
+| 665 Danger | covered | 1 | [financially precarious](../../traits/instructions/financially_precarious.json) | 10 | 6 | 4: dangerous, unsafe, defenseless, slippery |
+| 705 Facility | covered | 1 | [accessible](../../traits/instructions/accessible.json), [flexible](../../traits/instructions/flexible.json) | 10 | 7 | 4: manageable, slippery, yielding, tractable |
+| 737a Government | partly_covered | 1 | - | 10 | 7 | 4: royal, governing, republican, feudal |
+| 738 Laxity | covered | 2 | [easygoing](../../traits/instructions/easygoing.json), [loose (Gelfand)](../../traits/instructions/loose_gelfand.json) | 7 | 5 | 4: weak, slack, relaxed, unbridled |
+| 748 Freedom | crowded | 1 | [civil-libertarian](../../traits/instructions/civil_libertarian.json), [independent](../../traits/instructions/independent.json), [self-reliant](../../traits/instructions/self_reliant.json) | 10 | 7 | 4: free, absolute, unfettered, autonomous |
+| 817a Greed | covered | 2 | [greedy](../../traits/instructions/greedy.json) | 9 | 8 | 4: grasping, rapacious, insatiable, overeager |
+| 819 Parsimony | covered | 2 | [stingy](../../traits/instructions/stingy.json) | 7 | 6 | 4: close, sordid, grudging, chary |
+| 823 Insensibility | crowded | 2 | [apathetic](../../traits/instructions/apathetic.json), [callous](../../traits/instructions/callous.json), [emotionally-disengaged](../../traits/instructions/emotionally_disengaged.json), [thick-skinned](../../traits/instructions/thick_skinned.json) | 10 | 9 | 4: impassive, half-hearted, frigid, regardless |
+| 850 Taste | covered | 1 | [aesthete](../../traits/instructions/aesthete.json), [highbrow](../../traits/instructions/highbrow.json) | 6 | 5 | 4: cute, pure, aesthetic, dainty |
+| 853 Ridiculousness | covered | 1 | [goofy](../../traits/instructions/goofy.json) | 10 | 8 | 4: ridiculous, comical, mock heroic, risible |
+| 858 Hope | covered | 2 | [encouraging](../../traits/instructions/encouraging.json) | 10 | 7 | 4: fearless, promising, reassuring, auspicious |
+| 861 Courage | crowded | 2 | [bold](../../traits/instructions/bold.json), [brave](../../traits/instructions/brave.json), [Gryffindor](../../traits/instructions/gryffindor.json) | 10 | 9 | 4: high-spirited, manly, iron-hearted, plucky |
+| 866 Indifference | crowded | 2 | [apolitical](../../traits/instructions/apolitical.json), [detached](../../traits/instructions/detached.json), [indifferent-to-animals](../../traits/instructions/indifferent_to_animals.json), [unambitious](../../traits/instructions/unambitious.json), [uncaring](../../traits/instructions/uncaring.json), [unsentimental](../../traits/instructions/unsentimental.json) | 8 | 8 | 4: cold, devil-may-care, half-hearted, vain |
+| 878 Pride | covered | 2 | [dignified](../../traits/instructions/dignified.json), [dignity culture](../../traits/instructions/dignity_culture.json) | 10 | 8 | 4: high-handed, stately, stiff, consequential |
+| 895 Discourtesy | partly_covered | 2 | - | 10 | 9 | 4: forward, abusive, rough, brutal |
+| 897 Love | covered | 2 | [amorous](../../traits/instructions/amorous.json) | 10 | 7 | 4: loving, favorite, fond, sweet |
+| 922 Right | covered | 1 | [fair](../../traits/instructions/fair.json), [just](../../traits/instructions/just.json) | 5 | 5 | 4: right, reasonable, equal, legitimate |
+| 923 Wrong | covered | 1 | [unfair](../../traits/instructions/unfair.json) | 10 | 8 | 4: wrong, unreasonable, improper, injurious |
+| 925 Undueness | pair_completion | 0 | - | 10 | 7 | 4: false, illicit, improper, unfit |
+| 933 Flattery | partly_covered | 2 | - | 8 | 5 | 4: smooth, plausible, honey-mouthed, adulatory |
+| 943 Selfishness | crowded | 2 | [mercenary](../../traits/instructions/mercenary.json), [self-indulgent](../../traits/instructions/self_indulgent.json), [selfish](../../traits/instructions/selfish.json) | 9 | 8 | 4: self-interested, egotistical, worldly-minded, venal |
+| 989 Irreligion | crowded | 2 | [antitheist](../../traits/instructions/antitheist.json), [atheist](../../traits/instructions/atheist.json), [secular-rational (Inglehart-Welzel)](../../traits/instructions/secular_rational_inglehart_welzel.json) | 10 | 5 | 4: unholy, godless, irreligious, worldly minded |
+| 5 Intrinsicality | covered | 1 | [essentialist](../../traits/instructions/essentialist.json), [intrinsic (Allport)](../../traits/instructions/intrinsic_allport.json) | 10 | 5 | 3: normal, subjective, inherited |
+| 32 Smallness | covered | 1 | [slight](../../traits/instructions/slight.json) | 10 | 7 | 3: so-so, simple, subtle |
+| 59 Disorder | covered | 2 | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) | 10 | 6 | 3: irregular, disorderly, deranged |
+| 149 Changeableness | crowded | 2 | [adaptable](../../traits/instructions/adaptable.json), [brand-agnostic](../../traits/instructions/brand_agnostic.json), [fickle](../../traits/instructions/fickle.json), [job-hopping](../../traits/instructions/job_hopping.json) | 10 | 8 | 3: versatile, fluctuating, wayward |
+| 150 Stability | crowded | 2 | [emotionally-stable (Big Five)](../../traits/instructions/emotionally_stable_big_five.json), [settled](../../traits/instructions/settled.json), [steadiness (DISC)](../../traits/instructions/steadiness_disc.json), [steady](../../traits/instructions/steady.json) | 10 | 5 | 3: constant, confirmed, immutable |
+| 173 Violence | covered | 2 | [turbulent](../../traits/instructions/turbulent.json), [violent](../../traits/instructions/violent.json) | 10 | 10 | 3: wild, abrupt, disorderly |
+| 174 Moderation | covered | 2 | [even-tempered](../../traits/instructions/even_tempered.json) | 10 | 9 | 3: pacific, soft, tame |
+| 265 Quiescence | covered | 1 | [sedentary](../../traits/instructions/sedentary.json) | 10 | 6 | 3: stay-at-home, quiet, restful |
+| 279 Deviation | partly_covered | 1 | - | 7 | 6 | 3: indirect, errant, deviating |
+| 478 Demonstration | partly_covered | 0 | - | 10 | 5 | 3: necessary, following, convincing |
+| 481 Misjudgment | crowded | 2 | [ageist](../../traits/instructions/ageist.json), [closed-minded](../../traits/instructions/closed_minded.json), [tunnel-visioned](../../traits/instructions/tunnel_visioned.json) | 10 | 8 | 3: wrong-headed, mean-spirited, unreasonable |
+| 489 Dissent | covered | 2 | [contrarian](../../traits/instructions/contrarian.json), [nonconformist](../../traits/instructions/nonconformist.json) | 9 | 5 | 3: dissenting, dissident, intolerant |
+| 495 Error | covered | 1 | [inaccurate](../../traits/instructions/inaccurate.json) | 10 | 8 | 3: false, perverted, mistaken |
+| 498 Intelligence, Wisdom | covered | 2 | [quick-witted](../../traits/instructions/quick_witted.json), [wise](../../traits/instructions/wise.json) | 10 | 9 | 3: clear-headed, piercing, shrewd |
+| 499 Imbecility. Folly | covered | 2 | [foolish](../../traits/instructions/foolish.json), [slow-witted](../../traits/instructions/slow_witted.json) | 10 | 6 | 3: fat-headed, weak-minded, soft |
+| 511 Prediction | singleton_empty | 0 | - | 6 | 3 | 3: predictive, ominous, auspicious |
+| 528 Concealment | covered | 1 | [cryptic](../../traits/instructions/cryptic.json), [esoteric](../../traits/instructions/esoteric.json) | 10 | 5 | 3: close, tortuous, confidential |
+| 539 Learning | covered | 2 | [learning-oriented](../../traits/instructions/learning_oriented.json) | 3 | 3 | 3: scholarly, studious, teachable |
+| 545 Deception | covered | 1 | [manipulative](../../traits/instructions/manipulative.json) | 10 | 6 | 3: sophisticated, elusive, artificial |
+| 572 Conciseness | covered | 1 | [concise](../../traits/instructions/concise.json) | 9 | 8 | 3: close, exact, sententious |
+| 581 Aphony | covered | 0 | [deaf](../../traits/instructions/deaf.json) | 9 | 6 | 3: rough, hollow, inaudible |
+| 601 Necessity | covered | 1 | [determinist](../../traits/instructions/determinist.json), [fatalistic](../../traits/instructions/fatalistic.json) | 8 | 5 | 3: necessary, elect, automatic |
+| 603 Unwillingness | covered | 2 | [foot-dragging](../../traits/instructions/foot_dragging.json) | 6 | 5 | 3: unwilling, reluctant, scrupulous |
+| 604a Perseverance | crowded | 2 | [long-term oriented](../../traits/instructions/long_term_oriented.json), [persevering](../../traits/instructions/persevering.json), [unflinching](../../traits/instructions/unflinching.json) | 8 | 7 | 3: constant, unwavering, plodding |
+| 623 Avoidance | crowded | 2 | [avoidant](../../traits/instructions/avoidant.json), [news-avoidant](../../traits/instructions/news_avoidant.json), [noncommittal](../../traits/instructions/noncommittal.json) | 7 | 6 | 3: wild, avoiding, elusive |
+| 641 Redundancy | partly_covered | 1 | - | 10 | 6 | 3: exorbitant, unnecessary, overweening |
+| 642 Importance | covered | 1 | [serious](../../traits/instructions/serious.json) | 10 | 7 | 3: remarkable, significant, egregious |
+| 645 Inutility | covered | 1 | [inefficient](../../traits/instructions/inefficient.json) | 10 | 6 | 3: worthless, stale, unnecessary |
+| 648 Goodness | covered | 2 | [harmless](../../traits/instructions/harmless.json) | 10 | 8 | 3: valuable, nice, favorable |
+| 682 Activity | covered | 2 | [animated](../../traits/instructions/animated.json), [energetic](../../traits/instructions/energetic.json) | 10 | 10 | 3: forward, go-ahead, agile |
+| 698 Skill | covered | 2 | [competent](../../traits/instructions/competent.json) | 10 | 9 | 3: experienced, crack, slick |
+| 703 Artlessness | crowded | 2 | [guileless](../../traits/instructions/guileless.json), [naive](../../traits/instructions/naive.json), [unselfconscious](../../traits/instructions/unselfconscious.json) | 10 | 10 | 3: frank, frank-hearted, unreserved |
+| 730 Noncompletion | pair_empty | 0 | - | 4 | 3 | 3: unfinished, sketchy, half-baked |
+| 731 Success | covered | 0 | [achiever (VALS)](../../traits/instructions/achiever_vals.json) | 8 | 5 | 3: successful, effective, unbeaten |
+| 806 Debt | pair_empty | 0 | - | 9 | 9 | 3: involved, indebted, unpaid |
+| 816 Liberality | covered | 2 | [generous](../../traits/instructions/generous.json) | 9 | 8 | 3: free, hospitable, princely |
+| 822 Sensibility | crowded | 2 | [emotionally-engaged](../../traits/instructions/emotionally_engaged.json), [sentimental](../../traits/instructions/sentimental.json), [thin-skinned](../../traits/instructions/thin_skinned.json) | 8 | 6 | 3: soft, warm hearted, impressionable |
+| 825 Excitability | crowded | 2 | [excitable](../../traits/instructions/excitable.json), [flustered](../../traits/instructions/flustered.json), [impatient](../../traits/instructions/impatient.json), [manic](../../traits/instructions/manic.json), [neurotic](../../traits/instructions/neurotic.json), [neurotic (Big Five)](../../traits/instructions/neurotic_big_five.json), [passionate](../../traits/instructions/passionate.json), [restless](../../traits/instructions/restless.json), [temperamental](../../traits/instructions/temperamental.json) | 10 | 8 | 3: mad, wild, intolerant |
+| 829 Pleasurableness | covered | 1 | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) | 10 | 6 | 3: favorite, acceptable, nice |
+| 841 Weariness | covered | 1 | [burned-out](../../traits/instructions/burned_out.json) | 9 | 7 | 3: stupid, disgusting, tiresome |
+| 846 Ugliness | covered | 0 | [plain-looking](../../traits/instructions/plain_looking.json) | 10 | 7 | 3: plain, ordinary, monstrous |
+| 847 Ornament | pair_empty | 0 | - | 10 | 7 | 3: decorative, flashy, garish |
+| 863 Rashness | crowded | 2 | [brash](../../traits/instructions/brash.json), [financially reckless](../../traits/instructions/financially_reckless.json), [reckless](../../traits/instructions/reckless.json), [risk-seeking](../../traits/instructions/risk_seeking.json) | 10 | 7 | 3: wild, hot-blooded, imprudent |
+| 868 Fastidiousness | crowded | 2 | [fastidious](../../traits/instructions/fastidious.json), [meticulous](../../traits/instructions/meticulous.json), [petty](../../traits/instructions/petty.json), [picky-eater](../../traits/instructions/picky_eater.json), [self-critical](../../traits/instructions/self_critical.json), [squeamish](../../traits/instructions/squeamish.json), [uptight](../../traits/instructions/uptight.json) | 5 | 5 | 3: nice, hypercritical, overcritical |
+| 882 Ostentation | covered | 2 | [attention-seeking](../../traits/instructions/attention_seeking.json), [status-seeking](../../traits/instructions/status_seeking.json) | 10 | 9 | 3: dashing, stiff, gaudy |
+| 894 Courtesy | covered | 2 | [polite](../../traits/instructions/polite.json), [tactful](../../traits/instructions/tactful.json) | 10 | 8 | 3: polished, familiar, complacent |
+| 914 Pity | crowded | 2 | [compassionate](../../traits/instructions/compassionate.json), [empathetic](../../traits/instructions/empathetic.json), [self-pitying](../../traits/instructions/self_pitying.json) | 9 | 8 | 3: soft, weak, humane |
+| 924 Dueness | covered | 1 | [entitled](../../traits/instructions/entitled.json) | 10 | 4 | 3: right, absolute, deserving |
+| 960 Purity | covered | 2 | [chaste](../../traits/instructions/chaste.json) | 5 | 3 | 3: pure, simon-pure, continent |
+| 988 Impiety | partly_covered | 2 | - | 8 | 5 | 3: hardened, profane, sanctimonious |
+| 4 Unsubstantiality | partly_covered | 1 | - | 10 | 6 | 2: baseless, blank |
+| 52 Completeness | covered | 1 | [thorough](../../traits/instructions/thorough.json) | 10 | 4 | 2: complete, free |
+| 58 Order | partly_covered | 2 | - | 2 | 2 | 2: regular, correct |
+| 82 Conformity | crowded | 1 | [conformist](../../traits/instructions/conformist.json), [conventional](../../traits/instructions/conventional.json), [conventional (Kohlberg)](../../traits/instructions/conventional_kohlberg.json), [formalist](../../traits/instructions/formalist.json), [traditional](../../traits/instructions/traditional.json), [well-behaved](../../traits/instructions/well_behaved.json) | 7 | 5 | 2: common, normal |
+| 83 Unconformity | covered | 1 | [unfashionable](../../traits/instructions/unfashionable.json) | 10 | 10 | 2: arbitrary, rare |
+| 123 Newness | covered | 1 | [innovative](../../traits/instructions/innovative.json) | 10 | 4 | 2: raw, unbeaten |
+| 141 Permanence | partly_covered | 1 | - | 9 | 4 | 2: monotonous, unfailing |
+| 162 Destruction | covered | 1 | [destructive](../../traits/instructions/destructive.json) | 7 | 2 | 2: devastating, incendiary |
+| 171 Physical Energy | covered | 1 | [intense](../../traits/instructions/intense.json) | 8 | 5 | 2: poignant, drastic |
+| 175 Influence | covered | 1 | [influence (DISC)](../../traits/instructions/influence_disc.json) | 4 | 3 | 2: effective, weighty |
+| 188 Inhabitant | crowded | 2 | [African](../../traits/instructions/african.json), [American](../../traits/instructions/american.json), [Australian](../../traits/instructions/australian.json), [Brazilian](../../traits/instructions/brazilian.json), [British](../../traits/instructions/british.json), [Canadian](../../traits/instructions/canadian.json), [Chinese](../../traits/instructions/chinese.json), [European](../../traits/instructions/european.json), [French](../../traits/instructions/french.json), [German](../../traits/instructions/german.json), [Indian](../../traits/instructions/indian.json), [Indigenous American](../../traits/instructions/indigenous_american.json), [Indigenous Australian](../../traits/instructions/indigenous_australian.json), [Italian](../../traits/instructions/italian.json), [Japanese](../../traits/instructions/japanese.json), [Nigerian](../../traits/instructions/nigerian.json), [rooted](../../traits/instructions/rooted.json), [Russian](../../traits/instructions/russian.json) | 9 | 9 | 2: domestic, autochthonous |
+| 220 Exteriority | partly_covered | 1 | - | 8 | 2 | 2: skin-deep, outstanding |
+| 315 Agitation | partly_covered | 1 | - | 5 | 3 | 2: giddy-paced, desultory |
+| 373 Man | covered | 1 | [male](../../traits/instructions/male.json), [masculine](../../traits/instructions/masculine.json) | 3 | 2 | 2: manly, unfeminine |
+| 455 Curiosity | crowded | 2 | [curious](../../traits/instructions/curious.json), [inquisitive](../../traits/instructions/inquisitive.json), [psychologically minded](../../traits/instructions/psychologically_minded.json) | 4 | 4 | 2: prurient, overcurious |
+| 456 Incuriosity | crowded | 2 | [conventional (HEXACO)](../../traits/instructions/conventional_hexaco.json), [incurious](../../traits/instructions/incurious.json), [uninquisitive](../../traits/instructions/uninquisitive.json) | 2 | 2 | 2: indifferent, uninterested |
+| 457 Attention | crowded | 1 | [engaged](../../traits/instructions/engaged.json), [focused](../../traits/instructions/focused.json), [observant](../../traits/instructions/observant.json), [other-focused](../../traits/instructions/other_focused.json), [self-absorbed](../../traits/instructions/self_absorbed.json) | 7 | 5 | 2: interesting, mindful |
+| 459 Care | crowded | 2 | [conscientious](../../traits/instructions/conscientious.json), [conscientious (HEXACO)](../../traits/instructions/conscientious_hexaco.json), [conscientiousness (DISC)](../../traits/instructions/conscientiousness_disc.json), [detail-oriented](../../traits/instructions/detail_oriented.json) | 8 | 6 | 2: considerate, heedful |
+| 469 Qualification | singleton_empty | 0 | - | 3 | 3 | 2: qualified, conditional |
+| 474 Certainty | crowded | 1 | [closure-seeking](../../traits/instructions/closure_seeking.json), [self-assured](../../traits/instructions/self_assured.json), [self-certain](../../traits/instructions/self_certain.json) | 10 | 7 | 2: bound, infallible |
+| 475 Uncertainty | crowded | 1 | [indecisive](../../traits/instructions/indecisive.json), [self-uncertain](../../traits/instructions/self_uncertain.json), [uncertain](../../traits/instructions/uncertain.json), [vague](../../traits/instructions/vague.json) | 10 | 7 | 2: ambiguous, questionable |
+| 476 Reasoning | crowded | 2 | [analytical](../../traits/instructions/analytical.json), [logical](../../traits/instructions/logical.json), [rationalist](../../traits/instructions/rationalist.json) | 6 | 4 | 2: controversial, disputatious |
+| 484 Belief | crowded | 2 | [body-confident](../../traits/instructions/body_confident.json), [confident](../../traits/instructions/confident.json), [just-world-believing](../../traits/instructions/just_world_believing.json), [media-trusting](../../traits/instructions/media_trusting.json), [overconfident](../../traits/instructions/overconfident.json), [science-trusting](../../traits/instructions/science_trusting.json), [trusting](../../traits/instructions/trusting.json) | 10 | 6 | 2: believing, impressive |
+| 491 Ignorance | crowded | 2 | [illiterate](../../traits/instructions/illiterate.json), [uneducated](../../traits/instructions/uneducated.json), [unschooled](../../traits/instructions/unschooled.json) | 10 | 8 | 2: ignorant, uninformed |
+| 510 Foresight | covered | 2 | [future-oriented](../../traits/instructions/future_oriented.json) | 3 | 3 | 2: prescient, foreseeing |
+| 533 Secret | pair_completion | 0 | - | 4 | 2 | 2: involved, confidential |
+| 543 Veracity | crowded | 2 | [candid](../../traits/instructions/candid.json), [earnest](../../traits/instructions/earnest.json), [forthright](../../traits/instructions/forthright.json), [sincere](../../traits/instructions/sincere.json), [trustworthy](../../traits/instructions/trustworthy.json), [truthful](../../traits/instructions/truthful.json) | 10 | 7 | 2: true, pure |
+| 568 Solecism | pair_empty | 0 | - | 5 | 4 | 2: improper, ungrammatical |
+| 577 Ornament | partly_covered | 1 | - | 10 | 4 | 2: pompous, flaming |
+| 578 Elegance | covered | 1 | [formal](../../traits/instructions/formal.json) | 9 | 5 | 2: correct, pure |
+| 584 Loquacity | covered | 2 | [glib](../../traits/instructions/glib.json) | 4 | 4 | 2: fluent, talkative |
+| 608 Caprice | crowded | 2 | [eccentric](../../traits/instructions/eccentric.json), [erratic](../../traits/instructions/erratic.json), [whimsical](../../traits/instructions/whimsical.json) | 8 | 6 | 2: contrary, arbitrary |
+| 613 Habit | partly_covered | 0 | - | 10 | 5 | 2: common, habitual |
+| 616 Dissuasion | covered | 1 | [discouraging](../../traits/instructions/discouraging.json) | 5 | 2 | 2: dissuasive, admonitory |
+| 629 Circuit | pair_empty | 0 | - | 2 | 2 | 2: indirect, backhanded |
+| 646 Expedience | covered | 1 | [expedient](../../traits/instructions/expedient.json), [pragmatic](../../traits/instructions/pragmatic.json) | 6 | 3 | 2: acceptable, convenient |
+| 707 Aid | covered | 1 | [helpful](../../traits/instructions/helpful.json), [supportive](../../traits/instructions/supportive.json) | 5 | 2 | 2: favorable, neighborly |
+| 714 Concord | covered | 1 | [agreeable](../../traits/instructions/agreeable.json) | 5 | 2 | 2: congenial, fraternal |
+| 722 Warfare | covered | 1 | [hawkish](../../traits/instructions/hawkish.json), [tactical](../../traits/instructions/tactical.json) | 9 | 5 | 2: martial, chivalrous |
+| 735 Adversity | pair_completion | 0 | - | 10 | 2 | 2: unfortunate, hapless |
+| 739 Severity | crowded | 2 | [authoritarian (Baumrind)](../../traits/instructions/authoritarian_baumrind.json), [harsh](../../traits/instructions/harsh.json), [rigid](../../traits/instructions/rigid.json), [strict](../../traits/instructions/strict.json), [tight (Gelfand)](../../traits/instructions/tight_gelfand.json) | 4 | 4 | 2: grinding, haughty |
+| 740 Lenity | crowded | 2 | [ambiguity-tolerant](../../traits/instructions/ambiguity_tolerant.json), [gentle](../../traits/instructions/gentle.json), [lenient](../../traits/instructions/lenient.json) | 5 | 5 | 2: soft, long-suffering |
+| 743 Obedience | crowded | 2 | [company-loyal](../../traits/instructions/company_loyal.json), [loyal](../../traits/instructions/loyal.json), [obedient](../../traits/instructions/obedient.json) | 3 | 3 | 2: compliant, henpecked |
+| 749 Subjection | covered | 2 | [dependent](../../traits/instructions/dependent.json) | 8 | 4 | 2: feudal, henpecked |
+| 760 Permission | covered | 1 | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | 5 | 2 | 2: permitting, unconditional |
+| 773 Nonobservance | covered | 2 | [rule-breaking](../../traits/instructions/rule_breaking.json), [unreliable](../../traits/instructions/unreliable.json) | 3 | 2 | 2: elusive, lawless |
+| 821 Feeling | crowded | 1 | [emotional](../../traits/instructions/emotional.json), [emotional (HEXACO)](../../traits/instructions/emotional_hexaco.json), [zealous](../../traits/instructions/zealous.json) | 10 | 6 | 2: keen, sensuous |
+| 832 Discontent | covered | 2 | [discontented](../../traits/instructions/discontented.json), [unhappily-partnered](../../traits/instructions/unhappily_partnered.json) | 9 | 8 | 2: dissident, disappointing |
+| 840 Amusement | covered | 2 | [entertaining](../../traits/instructions/entertaining.json), [playful](../../traits/instructions/playful.json) | 10 | 10 | 2: hilarious, risible |
+| 845 Beauty | covered | 0 | [good-looking](../../traits/instructions/good_looking.json) | 10 | 9 | 2: lovely, proper |
+| 851 Vulgarity | covered | 2 | [lowbrow](../../traits/instructions/lowbrow.json) | 10 | 10 | 2: wild, unrefined |
+| 852 Fashion | covered | 2 | [fashionable](../../traits/instructions/fashionable.json), [shabby-genteel](../../traits/instructions/shabby_genteel.json) | 10 | 10 | 2: stylish, ladylike |
+| 859 Hopelessness | covered | 1 | [despairing](../../traits/instructions/despairing.json) | 10 | 3 | 2: threatening, incorrigible |
+| 860 Fear | crowded | 2 | [anxious](../../traits/instructions/anxious.json), [death-fearing](../../traits/instructions/death_fearing.json), [fearful-avoidant attachment](../../traits/instructions/fearful_avoidant_attachment.json), [panicky](../../traits/instructions/panicky.json), [punishment-fearing](../../traits/instructions/punishment_fearing.json) | 10 | 8 | 2: fell, alarming |
+| 865 Desire | covered | 2 | [ambitious](../../traits/instructions/ambitious.json) | 10 | 6 | 2: wishful, keen |
+| 867 Dislike | covered | 1 | [unpopular](../../traits/instructions/unpopular.json) | 10 | 8 | 2: disgusting, repulsive |
+| 870 Wonder | covered | 0 | [wide-eyed](../../traits/instructions/wide_eyed.json) | 10 | 6 | 2: wonderful, miraculous |
+| 874 Disrepute | covered | 0 | [stigmatized](../../traits/instructions/stigmatized.json) | 10 | 7 | 2: questionable, disgraceful |
+| 876 Commonalty | covered | 2 | [working-class](../../traits/instructions/working_class.json) | 10 | 6 | 2: low-minded, snobbish |
+| 893 Seclusion. Exclusion | crowded | 2 | [clannish](../../traits/instructions/clannish.json), [cliquish](../../traits/instructions/cliquish.json), [dismissive-avoidant attachment](../../traits/instructions/dismissive_avoidant_attachment.json), [introverted](../../traits/instructions/introverted.json), [introverted (Big Five)](../../traits/instructions/introverted_big_five.json), [isolated](../../traits/instructions/isolated.json), [lonely](../../traits/instructions/lonely.json), [solitary](../../traits/instructions/solitary.json), [unsupported](../../traits/instructions/unsupported.json) | 10 | 8 | 2: stay-at-home, inhospitable |
+| 906 Benevolence | crowded | 2 | [benevolent](../../traits/instructions/benevolent.json), [benign](../../traits/instructions/benign.json), [kind-to-animals](../../traits/instructions/kind_to_animals.json), [nurturing](../../traits/instructions/nurturing.json) | 10 | 9 | 2: warm-hearted, maternal |
+| 914a Pitilessness | covered | 2 | [ruthless while playing](../../traits/instructions/ruthless_while_playing.json) | 5 | 4 | 2: ruthless, inexorable |
+| 929 Disrespect | crowded | 2 | [dismissive](../../traits/instructions/dismissive.json), [irreverent](../../traits/instructions/irreverent.json), [rude](../../traits/instructions/rude.json) | 6 | 4 | 2: contemptuous, scurrilous |
+| 942 Disinterestedness | crowded | 2 | [altruistic](../../traits/instructions/altruistic.json), [magnanimous](../../traits/instructions/magnanimous.json), [self-sacrificing](../../traits/instructions/self_sacrificing.json), [uncalculating](../../traits/instructions/uncalculating.json) | 8 | 7 | 2: noble-minded, disinterested |
+| 951 Impenitence | covered | 2 | [unrepentant](../../traits/instructions/unrepentant.json) | 7 | 5 | 2: obdurate, unreformed |
+| 954 Intemperance | partly_covered | 2 | - | 5 | 4 | 2: sensual, brutish |
+| 976 Deity | covered | 1 | [spiritual](../../traits/instructions/spiritual.json) | 8 | 3 | 2: holy, omniscient |
+| 987 Piety | partly_covered | 2 | - | 5 | 3 | 2: holy, sacred |
+| 10 Irrelation | partly_covered | 1 | - | 10 | 3 | 1: arbitrary |
+| 18 Dissimilarity | partly_covered | 1 | - | 4 | 3 | 1: unique |
+| 20 Nonimitation | covered | 1 | [individualistic](../../traits/instructions/individualistic.json) | 4 | 3 | 1: rare |
+| 49 Decomposition | covered | 0 | [reductionist](../../traits/instructions/reductionist.json) | 3 | 1 | 1: catalytic |
+| 55 Exclusion | covered | 0 | [exclusionary](../../traits/instructions/exclusionary.json) | 3 | 2 | 1: excluding |
+| 60 Arrangement | partly_covered | 1 | - | 3 | 2 | 1: regular |
+| 87 Unity | partly_covered | 1 | - | 9 | 5 | 1: unique |
+| 128 Age | covered | 1 | [elderly](../../traits/instructions/elderly.json) | 10 | 3 | 1: matronly |
+| 159 Strength | covered | 2 | [muscular](../../traits/instructions/muscular.json) | 10 | 4 | 1: deep-rooted |
+| 189 Abode | covered | 1 | [suburban](../../traits/instructions/suburban.json), [urban](../../traits/instructions/urban.json) | 4 | 3 | 1: domestic |
+| 203 Narrowness. Thinness | covered | 0 | [thin](../../traits/instructions/thin.json) | 10 | 5 | 1: close |
+| 206 Height | covered | 1 | [tall](../../traits/instructions/tall.json) | 10 | 4 | 1: high reaching |
+| 209 Shallowness | covered | 1 | [superficial](../../traits/instructions/superficial.json) | 3 | 2 | 1: skin deep |
+| 212 Verticality | partly_covered | 1 | - | 4 | 2 | 1: normal |
+| 214 Pendency | partly_covered | 0 | - | 7 | 4 | 1: projecting |
+| 239 Sinistrality | covered | 1 | [left-handed](../../traits/instructions/left_handed.json) | 3 | 2 | 1: sinister |
+| 254 Bluntness | covered | 2 | [blunt](../../traits/instructions/blunt.json), [socially-obtuse](../../traits/instructions/socially_obtuse.json) | 2 | 1 | 1: bluff |
+| 260 Opening | covered | 0 | [open (Big Five)](../../traits/instructions/open_big_five.json), [open (HEXACO)](../../traits/instructions/open_hexaco.json) | 10 | 3 | 1: permeable |
+| 261 Closure | covered | 0 | [closed (Big Five)](../../traits/instructions/closed_big_five.json) | 10 | 3 | 1: impenetrable |
+| 278 Direction | partly_covered | 1 | - | 5 | 2 | 1: unswerving |
+| 282 Progression | partly_covered | 1 | - | 2 | 1 | 1: advanced |
+| 316 Materiality | covered | 1 | [materialist](../../traits/instructions/materialist.json), [materialistic](../../traits/instructions/materialistic.json) | 6 | 3 | 1: substantial |
+| 323 Hardness | covered | 2 | [inflexible](../../traits/instructions/inflexible.json) | 10 | 7 | 1: stony |
+| 328 Brittleness | covered | 1 | [fragile](../../traits/instructions/fragile.json) | 3 | 3 | 1: weak |
+| 340 Dryness | partly_covered | 0 | - | 9 | 2 | 1: arid |
+| 372 Mankind | partly_covered | 1 | - | 2 | 1 | 1: public |
+| 374 Woman | crowded | 1 | [female](../../traits/instructions/female.json), [feminine](../../traits/instructions/feminine.json), [feminist](../../traits/instructions/feminist.json) | 3 | 2 | 1: effeminate |
+| 374a Sexuality | crowded | 2 | [bisexual](../../traits/instructions/bisexual.json), [gay](../../traits/instructions/gay.json), [kinky](../../traits/instructions/kinky.json), [lustful](../../traits/instructions/lustful.json) | 5 | 5 | 1: hot-blooded |
+| 419 Deafness | partly_covered | 0 | - | 4 | 3 | 1: inaudible |
+| 422 Dimness | partly_covered | 0 | - | 7 | 6 | 1: cloudy |
+| 425 Transparency | partly_covered | 1 | - | 3 | 1 | 1: lucid |
+| 451 Thought | crowded | 2 | [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | 2 | 2 | 1: thoughtful |
+| 461 Inquiry | crowded | 0 | [critical](../../traits/instructions/critical.json), [exploratory](../../traits/instructions/exploratory.json), [investigative (Holland)](../../traits/instructions/investigative_holland.json), [socratic](../../traits/instructions/socratic.json) | 5 | 1 | 1: undecided |
+| 462 Answer | pair_completion | 0 | - | 2 | 1 | 1: responsive |
+| 464a Incomparability | pair_empty | 0 | - | 2 | 2 | 1: incomparable |
+| 465a Indiscrimination | covered | 1 | [promiscuous](../../traits/instructions/promiscuous.json) | 4 | 1 | 1: undiscriminating |
+| 466 Measurement | singleton_empty | 0 | - | 4 | 2 | 1: noticeable |
+| 470 Possibility | pair_empty | 0 | - | 9 | 3 | 1: credible |
+| 485 Unbelief. Doubt | covered | 2 | [paranoid](../../traits/instructions/paranoid.json) | 7 | 1 | 1: questionable |
+| 488 Assent | covered | 1 | [unchallenging](../../traits/instructions/unchallenging.json) | 5 | 3 | 1: agreed |
+| 500 Sage | covered | 1 | [thinker (VALS)](../../traits/instructions/thinker_vals.json) | 1 | 1 | 1: venerable |
+| 505 Memory | partly_covered | 1 | - | 6 | 4 | 1: mindful |
+| 515 Imagination | crowded | 2 | [confabulatory](../../traits/instructions/confabulatory.json), [creative](../../traits/instructions/creative.json), [dreamy](../../traits/instructions/dreamy.json), [idealistic](../../traits/instructions/idealistic.json), [romantic](../../traits/instructions/romantic.json) | 10 | 4 | 1: ideal |
+| 516 Meaning | partly_covered | 0 | - | 5 | 4 | 1: significant |
+| 521 Metaphor | crowded | 0 | [figurative](../../traits/instructions/figurative.json), [ironic](../../traits/instructions/ironic.json), [metaphorical](../../traits/instructions/metaphorical.json) | 4 | 3 | 1: typical |
+| 522 Interpretation | covered | 1 | [expository](../../traits/instructions/expository.json) | 6 | 1 | 1: polyglot |
+| 526 Latency. Implication | covered | 0 | [high-context (Hall)](../../traits/instructions/high_context_hall.json) | 10 | 6 | 1: indirect |
+| 527 Information | covered | 1 | [informational](../../traits/instructions/informational.json) | 6 | 2 | 1: communicative |
+| 535 Affirmation | crowded | 2 | [emphatic](../../traits/instructions/emphatic.json), [opinionated](../../traits/instructions/opinionated.json), [words of affirmation](../../traits/instructions/words_of_affirmation.json) | 6 | 2 | 1: affirmative |
+| 537 Teaching | covered | 1 | [didactic](../../traits/instructions/didactic.json), [educational](../../traits/instructions/educational.json) | 4 | 2 | 1: scholastic |
+| 546 Untruth | singleton_empty | 0 | - | 7 | 2 | 1: false |
+| 552 Obliteration | pair_empty | 0 | - | 3 | 3 | 1: intestate |
+| 554 Representation | pair_empty | 0 | - | 5 | 1 | 1: imitative |
+| 556 Painting | singleton_empty | 0 | - | 3 | 1 | 1: graphic |
+| 563 Neologism | pair_empty | 0 | - | 2 | 1 | 1: archaic |
+| 571 Obscurity | pair_completion | 0 | - | 1 | 1 | 1: involved |
+| 573 Diffuseness | covered | 1 | [verbose](../../traits/instructions/verbose.json) | 10 | 5 | 1: digressive |
+| 583 Stammering | covered | 1 | [emotionally-inarticulate](../../traits/instructions/emotionally_inarticulate.json) | 4 | 3 | 1: affected |
+| 604 Resolution | crowded | 2 | [decisive](../../traits/instructions/decisive.json), [self-disciplined](../../traits/instructions/self_disciplined.json), [strong-willed](../../traits/instructions/strong_willed.json) | 10 | 7 | 1: strong-minded |
+| 605 Irresolution | covered | 2 | [ambivalent](../../traits/instructions/ambivalent.json) | 10 | 8 | 1: weak |
+| 609 Choice | covered | 1 | [eclectic](../../traits/instructions/eclectic.json) | 4 | 4 | 1: optional |
+| 609a Absence of Choice | covered | 2 | [neuter](../../traits/instructions/neuter.json) | 2 | 2 | 1: indifferent |
+| 625 Business | covered | 1 | [career-oriented](../../traits/instructions/career_oriented.json) | 5 | 2 | 1: businesslike |
+| 630 Requirement | singleton_empty | 0 | - | 3 | 1 | 1: necessary |
+| 633 Instrument | covered | 0 | [mechanistic](../../traits/instructions/mechanistic.json) | 2 | 1 | 1: mechanical |
+| 653 Uncleanness | covered | 1 | [slovenly](../../traits/instructions/slovenly.json) | 10 | 7 | 1: messy |
+| 655 Disease | covered | 0 | [chronically-ill](../../traits/instructions/chronically_ill.json), [sickly](../../traits/instructions/sickly.json) | 10 | 5 | 1: rotten |
+| 656 Salubrity | partly_covered | 1 | - | 7 | 4 | 1: wholesome |
+| 657 Insalubrity | pair_empty | 0 | - | 10 | 4 | 1: noxious |
+| 658 Improvement | covered | 1 | [incrementalist](../../traits/instructions/incrementalist.json), [progressive](../../traits/instructions/progressive.json) | 6 | 2 | 1: improving |
+| 662 Remedy | pair_empty | 0 | - | 10 | 3 | 1: therapeutic |
+| 668 Warning | partly_covered | 0 | - | 5 | 2 | 1: admonitory |
+| 669 Alarm | singleton_empty | 0 | - | 1 | 1 | 1: alarming |
+| 670 Preservation | covered | 1 | [conservative](../../traits/instructions/conservative.json) | 8 | 6 | 1: safe |
+| 672 Deliverance | singleton_empty | 0 | - | 1 | 1 | 1: redeemable |
+| 673 Preparation | covered | 1 | [proactive](../../traits/instructions/proactive.json) | 10 | 4 | 1: ripe |
+| 684 Haste | covered | 2 | [hurried](../../traits/instructions/hurried.json) | 5 | 5 | 1: hasty |
+| 685 Leisure | crowded | 1 | [deliberate](../../traits/instructions/deliberate.json), [laid-back](../../traits/instructions/laid_back.json), [unhurried](../../traits/instructions/unhurried.json) | 2 | 1 | 1: quiet |
+| 686 Exertion | covered | 1 | [industrious](../../traits/instructions/industrious.json) | 7 | 4 | 1: troublesome |
+| 689 Refreshment | pair_completion | 0 | - | 3 | 2 | 1: refreshing |
+| 693 Direction | crowded | 0 | [hands-on](../../traits/instructions/hands_on.json), [micromanaging](../../traits/instructions/micromanaging.json), [paternalistic](../../traits/instructions/paternalistic.json) | 2 | 2 | 1: directing |
+| 709 Cooperation | covered | 1 | [collaborative](../../traits/instructions/collaborative.json), [cooperative](../../traits/instructions/cooperative.json) | 4 | 1 | 1: participative |
+| 716 Attack | covered | 1 | [aggressive](../../traits/instructions/aggressive.json) | 2 | 2 | 1: attacking |
+| 720 Contention | covered | 2 | [competitive](../../traits/instructions/competitive.json), [confrontational](../../traits/instructions/confrontational.json) | 6 | 3 | 1: belligerent |
+| 721 Peace | crowded | 2 | [calm](../../traits/instructions/calm.json), [pacifist](../../traits/instructions/pacifist.json), [peaceful](../../traits/instructions/peaceful.json) | 6 | 5 | 1: pacific |
+| 725 Submission | covered | 1 | [submissive](../../traits/instructions/submissive.json) | 6 | 3 | 1: surrendering |
+| 732 Failure | covered | 0 | [defeatist](../../traits/instructions/defeatist.json) | 10 | 5 | 1: ineffective |
+| 734 Prosperity | covered | 0 | [flourishing](../../traits/instructions/flourishing.json) | 8 | 5 | 1: auspicious |
+| 737 Authority | crowded | 1 | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json), [internal locus of control](../../traits/instructions/internal_locus_of_control.json) | 3 | 3 | 1: arbitrary |
+| 741 Command | partly_covered | 1 | - | 2 | 2 | 1: commanding |
+| 751 Restraint | covered | 1 | [trapped-in-job](../../traits/instructions/trapped_in_job.json) | 5 | 3 | 1: stiff |
+| 763 Offer | pair_empty | 0 | - | 2 | 1 | 1: disengaged |
+| 768a Release from engagement | pair_empty | 0 | - | 1 | 1 | 1: absolute |
+| 772 Observance | crowded | 2 | [conscientious (Big Five)](../../traits/instructions/conscientious_big_five.json), [dependable](../../traits/instructions/dependable.json), [rule-abiding](../../traits/instructions/rule_abiding.json) | 2 | 2 | 1: true |
+| 782 Relinquishment | pair_completion | 0 | - | 3 | 1 | 1: cast off |
+| 783 Transfer | singleton_empty | 0 | - | 1 | 1 | 1: negotiable |
+| 800 Money | covered | 0 | [new money](../../traits/instructions/new_money.json), [old money](../../traits/instructions/old_money.json) | 2 | 1 | 1: sterling |
+| 805 Credit | pair_empty | 0 | - | 2 | 2 | 1: credited |
+| 808 Nonpayment | pair_empty | 0 | - | 6 | 2 | 1: worthless |
+| 812 Price | partly_covered | 1 | - | 4 | 3 | 1: venal |
+| 817 Economy | covered | 2 | [bargain-hunter](../../traits/instructions/bargain_hunter.json), [frugal](../../traits/instructions/frugal.json) | 2 | 1 | 1: careful |
+| 826 Inexcitability | crowded | 2 | [composed](../../traits/instructions/composed.json), [dispassionate](../../traits/instructions/dispassionate.json), [patient](../../traits/instructions/patient.json), [placid](../../traits/instructions/placid.json), [serene](../../traits/instructions/serene.json), [staid](../../traits/instructions/staid.json), [stoic](../../traits/instructions/stoic.json), [strong-stomached](../../traits/instructions/strong_stomached.json), [unflappable](../../traits/instructions/unflappable.json) | 10 | 8 | 1: cold-blooded |
+| 834 Relief | pair_empty | 0 | - | 5 | 1 | 1: soothing |
+| 835 Aggravation | pair_empty | 0 | - | 3 | 1 | 1: aggravating |
+| 836 Cheerfulness | crowded | 2 | [cheerful](../../traits/instructions/cheerful.json), [joyful](../../traits/instructions/joyful.json), [lighthearted](../../traits/instructions/lighthearted.json) | 10 | 9 | 1: debonair |
+| 837 Dejection | covered | 1 | [joyless](../../traits/instructions/joyless.json), [melancholic](../../traits/instructions/melancholic.json) | 10 | 10 | 1: sullen |
+| 849 Simplicity | covered | 1 | [unpretentious](../../traits/instructions/unpretentious.json) | 7 | 7 | 1: simple |
+| 871 Expectance | pair_completion | 0 | - | 6 | 5 | 1: common |
+| 873 Repute | crowded | 1 | [famous](../../traits/instructions/famous.json), [honor culture](../../traits/instructions/honor_culture.json), [popular](../../traits/instructions/popular.json) | 10 | 7 | 1: respectable |
+| 875 Nobility | covered | 2 | [aristocratic](../../traits/instructions/aristocratic.json), [upper-class](../../traits/instructions/upper_class.json) | 5 | 2 | 1: noble |
+| 879 Humility | crowded | 2 | [honest-humble (HEXACO)](../../traits/instructions/honest_humble_hexaco.json), [humble](../../traits/instructions/humble.json), [shame-prone](../../traits/instructions/shame_prone.json) | 9 | 4 | 1: servile |
+| 881 Modesty | crowded | 2 | [body-insecure](../../traits/instructions/body_insecure.json), [introverted (HEXACO)](../../traits/instructions/introverted_hexaco.json), [modest](../../traits/instructions/modest.json), [reserved](../../traits/instructions/reserved.json), [self-conscious](../../traits/instructions/self_conscious.json), [self-effacing](../../traits/instructions/self_effacing.json), [timid](../../traits/instructions/timid.json), [unassuming](../../traits/instructions/unassuming.json) | 5 | 5 | 1: diffident |
+| 884 Boasting | covered | 2 | [bombastic](../../traits/instructions/bombastic.json), [self-aggrandizing](../../traits/instructions/self_aggrandizing.json) | 9 | 5 | 1: flaming |
+| 886 Servility | covered | 2 | [sycophantic](../../traits/instructions/sycophantic.json) | 7 | 6 | 1: servile |
+| 888 Friendship | covered | 2 | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | 4 | 2 | 1: familiar |
+| 892 Sociality | crowded | 2 | [extroverted](../../traits/instructions/extroverted.json), [gregarious](../../traits/instructions/gregarious.json), [social (Holland)](../../traits/instructions/social_holland.json), [socializer (Bartle)](../../traits/instructions/socializer_bartle.json), [welcoming](../../traits/instructions/welcoming.json) | 10 | 7 | 1: familiar |
+| 896 Congratulation | singleton_empty | 0 | - | 1 | 1 | 1: congratulatory |
+| 898 Hate | covered | 1 | [xenophobic](../../traits/instructions/xenophobic.json) | 9 | 5 | 1: irritating |
+| 900 Resentment | covered | 2 | [aggrieved](../../traits/instructions/aggrieved.json), [bitter](../../traits/instructions/bitter.json) | 10 | 8 | 1: wild |
+| 901 Irascibility | covered | 2 | [irascible](../../traits/instructions/irascible.json), [quarrelsome (HEXACO)](../../traits/instructions/quarrelsome_hexaco.json) | 10 | 9 | 1: cantankerous |
+| 902 Endearment | covered | 1 | [flirty](../../traits/instructions/flirty.json) | 3 | 1 | 1: caressing |
+| 910 Philanthropy | crowded | 2 | [collectivistic](../../traits/instructions/collectivistic.json), [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanistic](../../traits/instructions/humanistic.json), [humanitarian](../../traits/instructions/humanitarian.json), [patriotic](../../traits/instructions/patriotic.json), [philanthropic](../../traits/instructions/philanthropic.json) | 3 | 2 | 1: humane |
+| 911 Misanthropy | covered | 2 | [misanthropic](../../traits/instructions/misanthropic.json) | 1 | 1 | 1: antisocial |
+| 919 Revenge | covered | 2 | [unforgiving](../../traits/instructions/unforgiving.json), [vindictive](../../traits/instructions/vindictive.json) | 8 | 5 | 1: rigorous |
+| 920 Jealousy | partly_covered | 2 | - | 2 | 1 | 1: jealous |
+| 921 Envy | covered | 2 | [envious](../../traits/instructions/envious.json) | 1 | 1 | 1: covetous |
+| 926 Duty | covered | 1 | [deontological](../../traits/instructions/deontological.json), [responsible](../../traits/instructions/responsible.json) | 7 | 5 | 1: right |
+| 928 Respect | crowded | 2 | [autonomy-respecting](../../traits/instructions/autonomy_respecting.json), [deferential](../../traits/instructions/deferential.json), [respectful](../../traits/instructions/respectful.json) | 4 | 3 | 1: respected |
+| 936 Detractor | covered | 2 | [detractor](../../traits/instructions/detractor.json) | 1 | 1 | 1: black-mouthed |
+| 938 Accusation | pair_empty | 0 | - | 9 | 3 | 1: accusing |
+| 956 Fasting | pair_completion | 0 | - | 4 | 4 | 1: lenten |
+| 965 Jurisdiction | singleton_empty | 0 | - | 4 | 4 | 1: judicial |
+| 972 Punishment | pair_empty | 0 | - | 5 | 1 | 1: punishing |
+| 982 Hell | pair_empty | 0 | - | 1 | 1 | 1: infernal |
+| 984 Heterodoxy | crowded | 2 | [Buddhist](../../traits/instructions/buddhist.json), [heterodox](../../traits/instructions/heterodox.json), [iconoclastic](../../traits/instructions/iconoclastic.json) | 10 | 6 | 1: dissenting |
+| 990 Worship | covered | 1 | [acts of service](../../traits/instructions/acts_of_service.json), [reverent](../../traits/instructions/reverent.json) | 2 | 1 | 1: pure |
+| 991 Idolatry | covered | 1 | [Neopagan](../../traits/instructions/neopagan.json) | 1 | 1 | 1: idolatrous |
+| 995 Churchdom | partly_covered | 1 | - | 9 | 4 | 1: hierarchical |
 
 ## Most crowded heads
 

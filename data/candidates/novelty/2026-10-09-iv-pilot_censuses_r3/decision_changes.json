@@ -1,0 +1,165 @@
+{
+  "result": {
+    "source_batch": "2026-10-09-iv-pilot_censuses",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 78,
+      "identical": 78,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 78,
+      "identical": 78,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 78,
+      "decision_changed": 1,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 17,
+        "new -> covered": 1,
+        "new -> new": 60
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "hawk#1",
+        "label": "hawk",
+        "gloss": "This means favoring force, confrontation, and hard-line responses over negotiation, pressing for aggressive action and treating compromise with rivals as weakness.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "hawkish",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "hawkish",
+            "cosine": 0.527826,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe favoring force and hard-line responses while scorning negotiation as weakness; 'hawkish' is the adjectival form, with a slightly more military emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe preferring force and confrontation over negotiation and seeing compromise as weakness, but hawkish narrows this to military force and pre-emptive strikes."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "hawkish",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "unweathered#1",
+        "label": "unweathered",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "thick_skinned",
+              "thin_skinned"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "thick_skinned": 0.229553,
+              "thin_skinned": 0.188059
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-09-iv-pilot_censuses --batch-id 2026-10-09-iv-pilot_censuses_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-09-iv-pilot_censuses_r3 vs 2026-10-09-iv-pilot_censuses"
+    },
+    "produced_at": "2026-10-12T22:58:34+00:00"
+  }
+}

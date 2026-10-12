@@ -1,0 +1,153 @@
+{
+  "result": {
+    "source_batch": "states_v4_m3",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 32,
+      "identical": 32,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 32,
+      "identical": 32,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 32,
+      "decision_changed": 1,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 13,
+        "new -> covered": 1,
+        "new -> new": 18
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "repentant#1",
+        "label": "repentant",
+        "gloss": "This means turning back again and again to wrongs one has committed, seeking to make amends, and speaking of them with humility and a readiness to change one's ways.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [
+            {
+              "pair": [
+                "forgiving",
+                "unforgiving"
+              ],
+              "both": "opposed"
+            }
+          ],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "remorseful",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "remorseful",
+            "cosine": 0.360512,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve owning past wrongs, feeling sorry, and wanting to make amends, but repentant adds humility and a readiness to change one's ways, while remorseful stresses felt sorrow and excuse-free apology."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe owning past wrongs with sincere sorrow and wanting to make amends. Repentant adds a readiness to change one's ways and a habit of returning to the wrongs, so it is essentially the same concept with a different emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "self_blaming"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "remorseful",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch states_v4_m3 --batch-id states_v4_m3_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes states_v4_m3_r3 vs states_v4_m3"
+    },
+    "produced_at": "2026-10-12T22:59:10+00:00"
+  }
+}

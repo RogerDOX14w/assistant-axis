@@ -1,0 +1,36 @@
+{
+  "n_calls": 793,
+  "per_model": {
+    "claude-haiku-5-5": {
+      "completion_tokens": 208722,
+      "cost_usd": 0.1313,
+      "model": "claude-haiku-5-5",
+      "n_calls": 152,
+      "prompt_tokens": 269655
+    },
+    "claude-opus-5-5": {
+      "completion_tokens": 30797,
+      "cost_usd": 0.8055,
+      "model": "claude-opus-5-5",
+      "n_calls": 213,
+      "prompt_tokens": 47393
+    },
+    "claude-sonnet-5-5": {
+      "completion_tokens": 36589,
+      "cost_usd": 0.5595,
+      "model": "claude-sonnet-5-5",
+      "n_calls": 426,
+      "prompt_tokens": 96814
+    },
+    "text-embedding-3-large": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0004,
+      "model": "text-embedding-3-large",
+      "n_calls": 2,
+      "prompt_tokens": 3065
+    }
+  },
+  "total_completion_tokens": 276108,
+  "total_cost_usd": 1.4968,
+  "total_prompt_tokens": 416927
+}

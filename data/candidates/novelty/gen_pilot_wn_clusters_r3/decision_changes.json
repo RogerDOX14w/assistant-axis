@@ -1,0 +1,538 @@
+{
+  "result": {
+    "source_batch": "gen_pilot_wn_clusters",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 59,
+      "identical": 59,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 59,
+      "identical": 59,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 59,
+      "decision_changed": 4,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 23,
+        "new -> covered": 4,
+        "new -> new": 32
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 4
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "creditworthy#1",
+        "label": "creditworthy",
+        "gloss": "This means keeping one's promises to lenders by repaying debts on time and meeting every financial obligation, so that one can be trusted with credit.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "dependable",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "dependable",
+            "cosine": 0.342209,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Creditworthy is the financial-specific form of keeping commitments (repaying debts), while dependable is the general trait of following through on any commitment, so they share a core but differ in scope."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Creditworthy is dependability narrowed to financial obligations; dependable is the broader trait of following through on commitments."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "dependable",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "ideological#1",
+        "label": "ideological",
+        "gloss": "This means holding one's views within a fixed doctrine as settled truth, judging every question by that doctrine and refusing to yield to evidence or argument that challenges it.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "closed_minded",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 7,
+            "stem": "closed_minded",
+            "cosine": 0.27994,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe rigid adherence to beliefs, refusing to consider contrary evidence and treating views as absolute; 'ideological' specifically requires a fixed doctrine applied to everything, while 'closed-minded' is broader and needn't be doctrine-based."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe rigidly holding beliefs as unquestionable truth and dismissing contrary evidence; ideological is the narrower case where those beliefs come from a fixed doctrine."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 7,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "closed_minded",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "impetuous#1",
+        "label": "impetuous",
+        "gloss": "This means acting quickly on impulse, jumping into decisions and actions before weighing their consequences, and rarely pausing to reconsider once one has committed.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "impulsive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "impulsive",
+            "cosine": 0.563103,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting on impulse without weighing consequences; impetuous adds haste and not reconsidering after committing, while impulsive stresses immediate urges, a minor difference in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both mean acting on urges without weighing consequences; impetuous adds an emphasis on haste and on pressing ahead without reconsidering."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "impulsive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "incautious#1",
+        "label": "incautious",
+        "gloss": "This means taking chances without weighing the risks or dangers involved, and acting first while paying little heed to what could go wrong.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "reckless",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "reckless",
+            "cosine": 0.35209,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting without weighing risks; reckless adds stronger disregard for costs and consequences to others, so it is the same concept at greater intensity."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe acting without heeding risks, but reckless goes further, covering knowingly going ahead anyway and disregarding the cost to others."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "reckless",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "profound#1",
+        "label": "profound",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "analytical",
+              "intuitive"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "analytical": 0.256871,
+              "intuitive": 0.168401
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [
+      {
+        "key": "militant#1",
+        "label": "militant",
+        "decision": "new",
+        "covered_by": null,
+        "renamed_from": {
+          "current": "aggressive",
+          "old_stem": "militant"
+        },
+        "deciding_reading": null,
+        "readings": [
+          {
+            "position": 1,
+            "stem": "aggressive",
+            "cosine": 0.574312,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both describe combative, forceful, compromise-rejecting behaviour, but militant is tied to zealous devotion to a cause and policing the lukewarm, while aggressive is a general confrontational style for getting what one wants."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 2,
+            "stem": "unyielding",
+            "cosine": 0.496795,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve refusing compromise, but militant adds aggressive, combative zeal against opponents and the lukewarm, while unyielding is just firm holding of a position without that aggression."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 3,
+            "stem": "confrontational",
+            "cosine": 0.370646,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve combative aggression toward others, but militant is cause-driven uncompromising zeal while confrontational is a general taste for conflict and arguments regardless of any cause."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 4,
+            "stem": "zealous",
+            "cosine": 0.35042,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both describe fervent, crusading commitment to a cause and intolerance of lukewarmness, but militant stresses combative, uncompromising aggression against opponents while zealous stresses passionate fervor and heat."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 5,
+            "stem": "partisan",
+            "cosine": 0.338964,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both involve fierce, uncompromising loyalty to a cause or side, but militant stresses aggressive combative zeal for any cause, while partisan stresses political side-taking, party-line conformity and bias, so each adds something the other lacks."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 6,
+            "stem": "unforgiving",
+            "cosine": 0.306764,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve an uncompromising, hard stance, but militant is aggressive zeal for a cause against opponents, while unforgiving is holding grievances and refusing to pardon wrongdoers; neither implies the other."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 7,
+            "stem": "opinionated",
+            "cosine": 0.301469,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve strong advocacy, but militant is combative, uncompromising zeal for a cause against opponents, while opinionated is holding and voicing firm views on many topics without necessarily being aggressive or uncompromising."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 8,
+            "stem": "rigid",
+            "cosine": 0.289345,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 1,
+              "reason": "Both involve refusing to compromise, but militant is aggressive zeal for a cause against opponents, while rigid is inflexible adherence to a method or plan; neither implies the other."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          },
+          {
+            "position": 9,
+            "stem": "fundamentalist",
+            "cosine": 0.283099,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 2,
+              "reason": "Both refuse compromise, but militant is about combative, aggressive zeal against opponents, while fundamentalist is about rigid adherence to basic principles without necessarily being aggressive."
+            },
+            "opus": null,
+            "opus_role": null,
+            "outcome": "continue"
+          }
+        ],
+        "review": [],
+        "source": null
+      },
+      {
+        "key": "undependable#1",
+        "label": "undependable",
+        "decision": "covered",
+        "covered_by": "unreliable",
+        "renamed_from": {
+          "current": "unreliable",
+          "old_stem": "undependable"
+        },
+        "deciding_reading": {
+          "position": 1,
+          "stem": "unreliable",
+          "cosine": 0.507768,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 4,
+            "reason": "Both describe failing to follow through on commitments so that others cannot count on the person; the labels are near-synonyms and could replace each other."
+          },
+          "opus": {
+            "value": 4,
+            "reason": "Both describe failing to follow through on promises and commitments so others cannot count on one; the labels are interchangeable synonyms."
+          },
+          "opus_role": "above_cut_off",
+          "outcome": "cut"
+        },
+        "readings": [
+          {
+            "position": 1,
+            "stem": "unreliable",
+            "cosine": 0.507768,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 4,
+              "reason": "Both describe failing to follow through on commitments so that others cannot count on the person; the labels are near-synonyms and could replace each other."
+            },
+            "opus": {
+              "value": 4,
+              "reason": "Both describe failing to follow through on promises and commitments so others cannot count on one; the labels are interchangeable synonyms."
+            },
+            "opus_role": "above_cut_off",
+            "outcome": "cut"
+          }
+        ],
+        "review": [],
+        "source": null
+      }
+    ],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_wn_clusters --batch-id gen_pilot_wn_clusters_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes gen_pilot_wn_clusters_r3 vs gen_pilot_wn_clusters"
+    },
+    "produced_at": "2026-10-12T22:57:18+00:00"
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "result": {
+    "source_batch": "2026-10-11-full_roget",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 71,
+      "identical": 71,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 71,
+      "identical": 71,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 71,
+      "decision_changed": 2,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 15,
+        "new -> covered": 2,
+        "new -> new": 54
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 2
+      },
+      "rows_listing_a_queue_entry": 38,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "ad_lib#1",
+        "label": "ad lib",
+        "gloss": "This means improvising freely in speech or action, making things up on the spot instead of working from a prepared script or set text.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "improvisational",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "improvisational",
+            "cosine": 0.594105,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both mean making things up on the spot without a script or plan; 'improvisational' is slightly broader, covering general approach and responsiveness to the unexpected, while 'ad lib' centers on speech or action versus a prepared text."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both mean making things up on the spot. Ad lib leans toward improvising speech or performance instead of using a script, while improvisational covers working without any plan more broadly."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "improvisational",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "agreed#1",
+        "label": "agreed",
+        "gloss": "This means holding one's view in line with the people around one and saying so when they reach a conclusion, so that one concurs with the group rather than standing apart from it.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "conformist",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "conformist",
+            "cosine": 0.363106,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve aligning one's views with the surrounding group rather than standing apart, but 'agreed' is concurring with a specific group's conclusion while 'conformist' is a broader disposition to accept mainstream views and avoid challenging convention."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe going along with others' views rather than standing apart. Agreed concerns concurring with the immediate group's conclusions, while conformist is the broader acceptance of mainstream beliefs, so they differ mainly in scope."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "conformist",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-11-full_roget --batch-id 2026-10-11-full_roget_r3 --rules 3 --transport live --budget-usd 1 --write-registry --keys 'ad_lib#1' 'agreed#1' 'alienated#1' 'apostolic#1' 'beyond_control#1' 'beyond_expectation#1' 'black_letter#1' 'carping#1' 'cloistered#1' 'colonial#1' 'committed#1' 'compelled#1' 'consenting#1' 'deep_rooted#1' 'demonic#1' 'despised#1' 'detracting#1' 'disapproved#1' 'discretionary#1' 'elder#1' 'evangelical#1' 'far_out#1' 'favorably_minded#1' 'feudal#1' 'fiend_like#1' 'firstborn#1' 'forbidding_prohibited#1' 'hard_upon#1' 'haunted#1' 'hell_born#1' 'ill_provided#1' 'inappropriate#1' 'inconvenient#1' 'indeterminate#1' 'ingrained#1' 'inherent#1' 'instrumental#1' 'intermediate#1' 'invisible#1' 'joined_together#1' 'landed#1' 'linguistic#1' 'nothing_loth#1' 'old_world#1' 'optional#1' 'piratical#1' 'polyglot#1' 'predisposed#1' 'primitive#1' 'professorial#1' 'promised#1' 'punning#1' 'purposed#1' 'resisting#1' 'retaliatory#1' 'sacred#1' 'scarce#1' 'scurrilous#1' 'soundless#1' 'supplicant#1' 'taught#1' 'typical#1' 'unconditional#1' 'undirected#1' 'unexplained#1' 'unintended#1' 'unsatisfactory#1' 'unused#1' 'venial#1' 'well_laid#1' 'without_purpose#1'",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-11-full_roget_r3 vs 2026-10-11-full_roget"
+    },
+    "produced_at": "2026-10-12T22:58:21+00:00"
+  }
+}

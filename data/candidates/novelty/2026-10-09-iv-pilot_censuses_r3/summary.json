@@ -1,0 +1,368 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 78,
+    "n_decided": 78,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "new": 60,
+      "covered": 18
+    },
+    "by_reason": {
+      "overlap": 77,
+      "exact_label": 1
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 51,
+        "covered": 18
+      },
+      "4": {
+        "new": 9
+      }
+    },
+    "exact_label": {
+      "corpus": 1
+    },
+    "pairs_judged_per_candidate": {
+      "0": 7,
+      "1": 25,
+      "2": 10,
+      "3": 14,
+      "4": 10,
+      "5": 1,
+      "6": 6,
+      "7": 1,
+      "8": 1,
+      "9": 2
+    },
+    "pairs_judged_total": 201,
+    "pairs_judged_mean": 2.61,
+    "listed_per_candidate_mean": 16.727,
+    "shortlist_length": {
+      "0": 7,
+      "1": 14,
+      "2": 9,
+      "3": 16,
+      "4": 12,
+      "5": 3,
+      "6": 9,
+      "7": 1,
+      "8": 4,
+      "9": 2
+    },
+    "early_exit_depth": {
+      "1": 13,
+      "2": 4
+    },
+    "escalations": {
+      "below_cut_off": 70,
+      "at_cut_off": 11
+    },
+    "rescues": 2,
+    "review_flags": {
+      "sonnet_below_opus_at": 8,
+      "both_similar": 1
+    },
+    "pair_completions": 10,
+    "pair_completion_for": {
+      "ecumenical#1": [
+        "sectarian"
+      ],
+      "equal#1": [
+        "deferential"
+      ],
+      "infidel#1": [
+        "muslim",
+        "sikh"
+      ],
+      "self_luminous#1": [
+        "leo"
+      ],
+      "unconverted#1": [
+        "sikh",
+        "muslim",
+        "buddhist",
+        "christian"
+      ],
+      "unjaundiced#1": [
+        "judgmental"
+      ],
+      "unpedigreed#1": [
+        "shabby_genteel",
+        "aristocratic"
+      ],
+      "unregal#1": [
+        "leo"
+      ],
+      "unscriptural#1": [
+        "sikh",
+        "christian"
+      ],
+      "unwed#1": [
+        "polygamous",
+        "polygynous",
+        "polyandrous"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 77
+      },
+      "answers": {
+        "unrelated": 671,
+        "similar": 277,
+        "opposed": 336,
+        "unsure": 4
+      },
+      "final": {
+        "unrelated": 674,
+        "similar": 278,
+        "opposed": 336
+      },
+      "candidates_with_unsure_reasked": 2
+    },
+    "cache": {},
+    "spend_by_stage": {},
+    "spend_usd": 2.9e-05,
+    "usage": {
+      "per_model": {
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0,
+      "total_prompt_tokens": 220,
+      "total_completion_tokens": 0,
+      "n_calls": 1
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 9,
+    "covered_flagged": 8,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 3,
+    "floor": {
+      "rows_with_listed_below": 77,
+      "listed_below_total": 834,
+      "similar_kept_out_total": 24,
+      "rows_with_similar_kept_out": 17
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/tmp/claude-501/m3_corpus_189bf0b_9_1w8tmo/data/seed_queue.json",
+      "queue_sha256": "b3831481c0432c8eb23f644e5b9acfff0b85fd1b4cd769d7619c09293eeca011",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 1,
+      "excluded": {
+        "no_text": 97,
+        "not_a_trait_entry": 100,
+        "status_done": 250,
+        "status_exists": 35,
+        "status_not_adopted": 123,
+        "status_paired": 374,
+        "status_superseded": 18
+      },
+      "entries_sha256": "2370d9010bff040da45fbe3f109a341740b36525c21e8ce861cf4b260de59a46",
+      "rows_with_queue_in_index": 78,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 42,
+        "covered": 17
+      },
+      "alignment 2": {
+        "new": 9,
+        "covered": 1
+      },
+      "alignment 3": {
+        "new": 9
+      }
+    },
+    "partners_skipped": {
+      "rows": 58,
+      "partners": 111,
+      "by_relation": {
+        "unrelated": 105,
+        "opposed": 6
+      },
+      "by_where": {
+        "shortlist": 111
+      },
+      "est_readings_saved": {
+        "sonnet": 111,
+        "opus": 4.1
+      },
+      "est_saving_usd_live": 0.148
+    },
+    "batch_id": "2026-10-09-iv-pilot_censuses_r3",
+    "parse_rates": {},
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 361,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "redecide": {
+      "from_batch": "2026-10-09-iv-pilot_censuses",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_3",
+        "version": 3,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25,
+        "renamed_before_queue": true,
+        "cut_off_rule": "graded",
+        "skip_unrelated_partners": true
+      },
+      "relation_seed": "2026-10-09-iv-pilot_censuses",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": true,
+      "n_source_records": 463,
+      "reproduction": {
+        "n": 78,
+        "identical": 78,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {},
+      "candidates_needing_calls": [],
+      "decided_offline": 78,
+      "offline_decisions": {
+        "covered -> covered": 17,
+        "new -> covered": 1,
+        "new -> new": 60
+      },
+      "offline_changes": {
+        "rows_decided_offline": 78,
+        "rows_needing_calls": 0,
+        "changed_and_still_the_sources_in_the_registry": 1,
+        "decision_changed": 1,
+        "covering_trait_changed": 0,
+        "transitions_changed": {
+          "new -> covered": 1
+        },
+        "by_step": {
+          "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 1
+        },
+        "chain": [
+          "source rules (m3_rules_2)",
+          "review 2 D1 (renamed_from before the queue)",
+          "graded cut-off (alignment 2: both models at 3 or more)",
+          "partner skip (partners marked unrelated or opposed not read)"
+        ],
+        "changed_keys": [
+          "hawk#1"
+        ]
+      },
+      "queue_search": {
+        "source": true,
+        "this_run": true,
+        "n_entries": 1
+      }
+    },
+    "label_form": "stored"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-09-iv-pilot_censuses --batch-id 2026-10-09-iv-pilot_censuses_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-09-iv-pilot_censuses_r3"
+    },
+    "produced_at": "2026-10-12T22:58:34+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "c1de3e87195dc4483e36c56a39c3ae2152236bb9d24910f1301380e6c6636544"
+  }
+}

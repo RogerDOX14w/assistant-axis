@@ -1,0 +1,289 @@
+{
+  "result": {
+    "source_batch": "gen_pilot_roget",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 85,
+      "identical": 85,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 85,
+      "identical": 85,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 85,
+      "decision_changed": 3,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 18,
+        "new -> covered": 3,
+        "new -> new": 64
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 3
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "backhanded#1",
+        "label": "backhanded",
+        "gloss": "This means delivering compliments with a hidden sting, saying things that sound kind on the surface while quietly signaling disapproval or hostility toward the person addressed.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "passive_aggressive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "passive_aggressive",
+            "cosine": 0.293234,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Backhanded compliments are one specific form of indirect hostility, which passive-aggressive covers along with sarcasm, hints and sham helpfulness, so the two share a core but passive-aggressive is broader."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Backhanded compliments are one specific form of the indirect, veiled hostility that passive-aggressive describes more broadly, so they differ mainly in scope."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "passive_aggressive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "discordant#1",
+        "label": "discordant",
+        "gloss": "This means picking fights with the people around one, disagreeing sharply and readily, and standing at odds with the group rather than smoothing things over.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "confrontational",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "confrontational",
+            "cosine": 0.347926,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve picking fights and readily creating conflict with others; confrontational adds relishing and escalating arguments, while discordant stresses standing at odds with the group, so they are close but with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe readily picking fights and disagreeing sharply; confrontational is the same quarrelsomeness carried further, actively seeking and relishing conflict."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [
+            "provocative"
+          ],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "confrontational",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "quarrelsome#1",
+        "label": "quarrelsome",
+        "gloss": "This means treating disagreement as a contest to be won, so one readily argues over small points, pushes back on whatever others say, and starts fights rather than letting disputes pass.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "confrontational",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "confrontational",
+            "cosine": 0.362873,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe a persona who seeks out and escalates arguments and relishes conflict; quarrelsome stresses petty bickering and contrarianism, while confrontational stresses head-on challenge, but the core is nearly identical."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe readily seeking and escalating arguments and fights. Confrontational stresses head-on challenge and relish of conflict, while quarrelsome stresses petty bickering over small points, so they differ only in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "confrontational",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "imperfect#1",
+        "label": "imperfect",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "self_accepting",
+              "self_critical"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "self_accepting": 0.433552,
+              "self_critical": 0.200239
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_roget --batch-id gen_pilot_roget_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes gen_pilot_roget_r3 vs gen_pilot_roget"
+    },
+    "produced_at": "2026-10-12T22:57:55+00:00"
+  }
+}

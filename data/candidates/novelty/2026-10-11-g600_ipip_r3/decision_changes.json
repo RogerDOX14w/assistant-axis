@@ -1,0 +1,445 @@
+{
+  "result": {
+    "source_batch": "2026-10-11-g600_ipip",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 172,
+      "identical": 172,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 172,
+      "identical": 172,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 172,
+      "decision_changed": 3,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 76,
+        "new -> covered": 3,
+        "new -> new": 93
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 3
+      },
+      "rows_listing_a_queue_entry": 50,
+      "covered_by_queue": 2
+    },
+    "rows": [
+      {
+        "key": "fact_driven#1",
+        "label": "fact-driven",
+        "gloss": "This means grounding one's answers and decisions in verifiable facts and evidence, setting aside gut feeling and personal opinion whenever the two conflict.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "empirical",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "empirical",
+            "cosine": 0.344877,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both ground conclusions in evidence over speculation, but 'empirical' adds refusing to guess beyond observation, while 'fact-driven' adds overriding gut feeling and opinion in decisions."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both rest on evidence over opinion, and empirical carries this further into flatly refusing speculation and hypotheticals."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "empirical",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "image_conscious#1",
+        "label": "image-conscious",
+        "gloss": "This means keeping a close eye on how one comes across to others and carefully managing one's public image in everything one says and does.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "performative",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "performative",
+            "cosine": 0.408295,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve constantly monitoring how one comes across and managing impressions; 'performative' adds audience-reading and adapting opinions/stories, a more active tailoring, so near-same with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe closely monitoring and managing how one comes across. Performative carries this further, actively reshaping opinions and manner for each audience."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": {
+            "current": "performative",
+            "old_stem": "image_conscious"
+          },
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": [
+            {
+              "position": 1,
+              "stem": "performative",
+              "cosine": 0.408295,
+              "relation": "similar",
+              "via": "retrieved",
+              "sonnet": {
+                "value": 3,
+                "reason": "Both involve constantly monitoring how one comes across and managing impressions; 'performative' adds audience-reading and adapting opinions/stories, a more active tailoring, so near-same with different emphasis."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe closely monitoring and managing how one comes across. Performative carries this further, actively reshaping opinions and manner for each audience."
+              },
+              "opus_role": "at_cut_off",
+              "outcome": "cut"
+            }
+          ],
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "performative",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "preoccupied_with_suicide#1",
+        "label": "preoccupied with suicide",
+        "gloss": "This means having thoughts that keep circling back to ending one's own life, whatever else is happening, so that the idea of dying is always close at hand.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "suicidal",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "suicidal",
+            "cosine": 0.408418,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both are about persistent thoughts of ending one's life, with 'suicidal' described more fully (wish to be dead, planning, burdensomeness) while 'preoccupied' stresses the constant recurrence of the thoughts; they are essentially the same concept with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe ever-present thoughts of ending one's life; suicidal adds active wanting and planning, so it differs mainly in degree and emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "suicidal",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "embraces_both_gender_roles#1",
+        "label": "embraces both gender roles",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "feminine",
+              "masculine"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "feminine": 0.380412,
+              "masculine": 0.408391
+            },
+            "readings_on_record": {}
+          }
+        ]
+      },
+      {
+        "key": "preoccupied_with_animals#1",
+        "label": "preoccupied with animals",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "cat_person",
+              "dog_person"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "cat_person": 0.181767,
+              "dog_person": 0.224704
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [
+      {
+        "key": "image_conscious#1",
+        "label": "image-conscious",
+        "decision": "covered",
+        "covered_by": "performative",
+        "renamed_from": {
+          "current": "performative",
+          "old_stem": "image_conscious"
+        },
+        "deciding_reading": {
+          "position": 1,
+          "stem": "performative",
+          "cosine": 0.408295,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both involve constantly monitoring how one comes across and managing impressions; 'performative' adds audience-reading and adapting opinions/stories, a more active tailoring, so near-same with different emphasis."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe closely monitoring and managing how one comes across. Performative carries this further, actively reshaping opinions and manner for each audience."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut"
+        },
+        "readings": [
+          {
+            "position": 1,
+            "stem": "performative",
+            "cosine": 0.408295,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve constantly monitoring how one comes across and managing impressions; 'performative' adds audience-reading and adapting opinions/stories, a more active tailoring, so near-same with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe closely monitoring and managing how one comes across. Performative carries this further, actively reshaping opinions and manner for each audience."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          }
+        ],
+        "review": [],
+        "source": null
+      }
+    ],
+    "covered_by_queue": [
+      {
+        "key": "finds_relief_in_pain#1",
+        "label": "finds relief in pain",
+        "gloss": "This means taking comfort from one's own suffering or hurt, finding in pain a sense of release, reassurance or pleasure that others would find hard to understand.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "masochistic",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 1,
+          "stem": "masochistic",
+          "cosine": 0.470665,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both involve deriving comfort or pleasure from one's own suffering, but masochistic is narrower and stronger, adding active seeking of pain and humiliation, while finding relief in pain is broader, covering release or reassurance without seeking degradation."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both are about taking comfort or pleasure from one's own pain; masochism is the same thing carried further, into actively seeking suffering and humiliation."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "masochistic",
+          "reason": "overlap"
+        }
+      },
+      {
+        "key": "holds_back_negative_feelings#1",
+        "label": "holds back negative feelings",
+        "gloss": "This means keeping anger and sadness out of sight, staying composed and even-tempered through setbacks, and carrying hard feelings quietly instead of letting them show in one's face, voice, or words.",
+        "cut_off": 3,
+        "covered_by_queue": {
+          "stem": "repressed",
+          "status": "candidate"
+        },
+        "deciding_reading": {
+          "position": 9,
+          "stem": "repressed",
+          "cosine": 0.351958,
+          "relation": "similar",
+          "via": "retrieved",
+          "sonnet": {
+            "value": 3,
+            "reason": "Both are about keeping feelings hidden and not letting them show; 'repressed' is broader (all feelings) and stronger (refusing expression under pressure), while the target is specific to negative feelings and adds composure and even-temperedness."
+          },
+          "opus": {
+            "value": 3,
+            "reason": "Both describe keeping feelings from showing. 'Repressed' is broader, covering all feelings rather than only negative ones, and more extreme in locking them away, so the two differ in scope and degree."
+          },
+          "opus_role": "at_cut_off",
+          "outcome": "cut",
+          "queue_status": "candidate"
+        },
+        "source": {
+          "decision": "covered",
+          "covered_by": "repressed",
+          "reason": "overlap"
+        }
+      }
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-11-g600_ipip --batch-id 2026-10-11-g600_ipip_r3 --rules 3 --transport live --budget-usd 1 --write-registry",
+      "git_sha": "cc414f5c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-11-g600_ipip_r3 vs 2026-10-11-g600_ipip"
+    },
+    "produced_at": "2026-10-12T22:57:43+00:00"
+  }
+}

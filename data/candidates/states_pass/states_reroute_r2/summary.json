@@ -1,0 +1,50 @@
+{
+  "result": {
+    "reroute": true,
+    "route_rules": 2,
+    "outcomes": {
+      "unchanged": 235,
+      "changed": 7,
+      "changed_after_calls": 3
+    },
+    "changed": [
+      "downcast: held -> predisposition",
+      "hurried: held -> predisposition",
+      "ill-fated: held -> lasting",
+      "lethargic: held -> predisposition",
+      "lonely: held -> predisposition",
+      "mournful: held -> predisposition",
+      "seedy: held -> predisposition",
+      "tense: held -> predisposition",
+      "unkempt: held -> predisposition",
+      "contented: held -> predisposition"
+    ],
+    "submitted_renames": [],
+    "cost_usd": 0.0008,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 2783,
+          "completion_tokens": 1026,
+          "cost_usd": 0.0008,
+          "n_calls": 5
+        }
+      },
+      "total_cost_usd": 0.0008,
+      "total_prompt_tokens": 2783,
+      "total_completion_tokens": 1026,
+      "n_calls": 5
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id states_reroute_r2 --mode queue --reroute --send-missing",
+      "git_sha": "fab974d5+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass reroute states_reroute_r2"
+    },
+    "produced_at": "2026-10-12T22:21:15+00:00"
+  }
+}

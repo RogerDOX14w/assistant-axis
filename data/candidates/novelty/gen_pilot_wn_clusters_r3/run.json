@@ -1,0 +1,334 @@
+{
+  "batch_id": "gen_pilot_wn_clusters_r3",
+  "mode": "shortlist",
+  "git_sha": "cc414f5c+dirty",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--redecide",
+    "--from-batch",
+    "gen_pilot_wn_clusters",
+    "--batch-id",
+    "gen_pilot_wn_clusters_r3",
+    "--rules",
+    "3",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "1",
+    "--write-registry"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 59,
+    "n_exact_label": 0,
+    "n_to_relation": 59,
+    "skipped": {},
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": 17.627118644067796,
+    "n_query_texts_cached": 59,
+    "n_query_texts_to_embed": 0,
+    "corpus": {
+      "n_corpus": 790,
+      "n_missing_from_cache": 0,
+      "missing": [],
+      "n_corpus_missing": 0,
+      "n_queue_missing": 0
+    },
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "corpus_files": {
+      "corpus_at": "source",
+      "source_batch": "gen_pilot_wn_clusters",
+      "git_sha": "e3aa3c0",
+      "source_was_dirty": false,
+      "n_trait_files": 790,
+      "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_vzlszccz/data"
+    },
+    "queue_search": {
+      "enabled": false,
+      "n_entries": 0
+    },
+    "label_form": "stored",
+    "redecide": {
+      "from_batch": "gen_pilot_wn_clusters",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_3",
+        "version": 3,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25,
+        "renamed_before_queue": true,
+        "cut_off_rule": "graded",
+        "skip_unrelated_partners": true
+      },
+      "relation_seed": "gen_pilot_wn_clusters",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": true,
+      "n_source_records": 436,
+      "reproduction": {
+        "n": 59,
+        "identical": 59,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {},
+      "candidates_needing_calls": [],
+      "decided_offline": 59,
+      "offline_decisions": {
+        "covered -> covered": 23,
+        "new -> covered": 4,
+        "new -> new": 32
+      },
+      "offline_changes": {
+        "rows_decided_offline": 59,
+        "rows_needing_calls": 0,
+        "changed_and_still_the_sources_in_the_registry": 4,
+        "decision_changed": 4,
+        "covering_trait_changed": 0,
+        "transitions_changed": {
+          "new -> covered": 4
+        },
+        "by_step": {
+          "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 4
+        },
+        "chain": [
+          "source rules (m3_rules_2)",
+          "review 2 D1 (renamed_from before the queue)",
+          "graded cut-off (alignment 2: both models at 3 or more)",
+          "partner skip (partners marked unrelated or opposed not read)"
+        ],
+        "changed_keys": [
+          "creditworthy#1",
+          "ideological#1",
+          "impetuous#1",
+          "incautious#1"
+        ]
+      },
+      "queue_search": {
+        "source": false,
+        "this_run": false,
+        "n_entries": 0
+      }
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0,
+  "estimate_lines": [],
+  "budget_usd": 1.0,
+  "cap_usd": 1.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "graded (rule set 3): alignment score 0-1: 3; 2: 3, covered when both models read 3 or more (no Opus check at 2); 3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "gen_pilot_wn_clusters",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_3",
+    "version": 3,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25,
+    "renamed_before_queue": true,
+    "cut_off_rule": "graded",
+    "skip_unrelated_partners": true
+  },
+  "corpus": {
+    "corpus_at": "source",
+    "source_batch": "gen_pilot_wn_clusters",
+    "git_sha": "e3aa3c0",
+    "source_was_dirty": false,
+    "n_trait_files": 790,
+    "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_vzlszccz/data"
+  },
+  "queue_search": {
+    "enabled": false,
+    "n_entries": 0,
+    "stems": []
+  },
+  "label_form": "stored",
+  "resumed": false,
+  "started_at": "2026-10-12T22:57:16+00:00",
+  "redecide": {
+    "from_batch": "gen_pilot_wn_clusters",
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "relation_seed": "gen_pilot_wn_clusters",
+    "relation_model": "claude-haiku-5-5",
+    "write_registry": true,
+    "n_source_records": 436,
+    "reproduction": {
+      "n": 59,
+      "identical": 59,
+      "differ": [],
+      "not_replayable": []
+    },
+    "calls_not_on_record": {},
+    "candidates_needing_calls": [],
+    "decided_offline": 59,
+    "offline_decisions": {
+      "covered -> covered": 23,
+      "new -> covered": 4,
+      "new -> new": 32
+    },
+    "offline_changes": {
+      "rows_decided_offline": 59,
+      "rows_needing_calls": 0,
+      "changed_and_still_the_sources_in_the_registry": 4,
+      "decision_changed": 4,
+      "covering_trait_changed": 0,
+      "transitions_changed": {
+        "new -> covered": 4
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 4
+      },
+      "chain": [
+        "source rules (m3_rules_2)",
+        "review 2 D1 (renamed_from before the queue)",
+        "graded cut-off (alignment 2: both models at 3 or more)",
+        "partner skip (partners marked unrelated or opposed not read)"
+      ],
+      "changed_keys": [
+        "creditworthy#1",
+        "ideological#1",
+        "impetuous#1",
+        "incautious#1"
+      ]
+    },
+    "queue_search": {
+      "source": false,
+      "this_run": false,
+      "n_entries": 0
+    }
+  },
+  "replay_from": [
+    "gen_pilot_wn_clusters"
+  ],
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999602,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999998,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999602,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 0.999999
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-12T22:57:17+00:00"
+  },
+  "finished_at": "2026-10-12T22:57:17+00:00",
+  "cost_usd": 0.0,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 59,
+  "n_stalled": 0
+}

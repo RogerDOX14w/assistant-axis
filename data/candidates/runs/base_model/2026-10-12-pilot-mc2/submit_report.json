@@ -1,0 +1,26 @@
+{
+  "n_submitted": 1540,
+  "n_new": 217,
+  "n_merged": 1323,
+  "n_unchanged": 0,
+  "invalid": [],
+  "n_keys": 1540,
+  "floor": {
+    "min_count": 2,
+    "n_samples": 2000,
+    "per_1k_samples": 1.0,
+    "chosen_at_n_samples": 2000,
+    "source": "Roger, 2026-10-12, accepting gate audit 3 (reports/code_review_2026-10-12/gate_audits/base_model_table.md sections 6 and 8): a floor of 2 at 2,000 samples",
+    "flag_given": true
+  },
+  "downstream_need": {
+    "n_rows": 1540,
+    "n_m1": 219,
+    "n_m3_only": 1,
+    "n_decided": 1320,
+    "n_floor_rejected_retaken": 0,
+    "registry_rows": 8061
+  },
+  "estimate_usd": 3.515,
+  "estimate_all_rows_usd": 24.64
+}
