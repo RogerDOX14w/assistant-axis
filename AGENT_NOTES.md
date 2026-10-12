@@ -3720,13 +3720,18 @@ most positive.
     needed -- only the test user can authenticate.
 4.  Create credentials: **OAuth 2.0 Client ID** -> application type
     **Desktop app**.  Download the resulting JSON.
-5.  Save the JSON as `~/.config/assistant-axis/google_credentials.json`
-    (the path `assistant_axis/gsheet_auth.py` reads from).
+5.  Save the JSON as `.secrets/gsheet/google_credentials.json` in the
+    repository (the path `assistant_axis/gsheet_auth.py` reads from;
+    `ASSISTANT_AXIS_GSHEET_DIR` overrides the directory).  Until
+    2026-10-12 the files lived in `~/.config/assistant-axis/`, which
+    the agents' file boundary and the Bash sandbox deny, so the skill
+    could only be run by Roger; moved into the tree that day (review 7
+    D7).  Never print or copy their contents, as for `.env`.
 
 The first invocation pops a browser tab for consent; the resulting
-user token is cached at `~/.config/assistant-axis/google_token.json`
-and auto-refreshes thereafter.  Both `google_credentials.json` and
-`google_token.json` are gitignored (tree-wide pattern in
+user token is cached at `.secrets/gsheet/google_token.json`
+and auto-refreshes thereafter.  `.secrets/`, `google_credentials.json`
+and `google_token.json` are all gitignored (tree-wide patterns in
 [`.gitignore`](.gitignore)) -- don't commit them.
 
 #### Usage

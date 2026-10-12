@@ -5,10 +5,17 @@ to know where the credentials live or what scopes we need.  Roger's
 one-time Google Cloud setup is documented in ``AGENT_NOTES.md``
 ("Exporting steering experiments to Google Sheets").
 
-Credential file layout (canonical, both gitignored at the repo root):
+Credential file layout (canonical since 2026-10-12; both names are
+gitignored anywhere in the tree, and so is ``.secrets/``):
 
-    ~/.config/assistant-axis/google_credentials.json   # OAuth client (downloaded from console)
-    ~/.config/assistant-axis/google_token.json         # auto-refreshing user token
+    <repo>/.secrets/gsheet/google_credentials.json   # OAuth client (downloaded from console)
+    <repo>/.secrets/gsheet/google_token.json         # auto-refreshing user token
+
+``ASSISTANT_AXIS_GSHEET_DIR`` overrides the directory.  The files lived
+in ``~/.config/assistant-axis/`` until 2026-10-12; that is outside the
+repository, which the agents' file boundary and the Bash sandbox deny,
+so the skill could only be run by Roger himself (code review of
+2026-10-12, review 7 D7).  Nothing here reads the old location.
 
 The first call to :func:`get_client` with a fresh ``google_credentials.json``
 pops a browser tab and writes the user token to disk.  Subsequent calls
@@ -28,12 +35,16 @@ Scopes are tight on purpose:
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG_DIR = Path("~/.config/assistant-axis").expanduser()
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CONFIG_DIR = Path(
+    os.environ.get("ASSISTANT_AXIS_GSHEET_DIR") or (_REPO_ROOT / ".secrets" / "gsheet")
+).expanduser()
 DEFAULT_CREDS_PATH = DEFAULT_CONFIG_DIR / "google_credentials.json"
 DEFAULT_TOKEN_PATH = DEFAULT_CONFIG_DIR / "google_token.json"
 
@@ -59,9 +70,9 @@ def get_client(
 
     Args:
         creds_path: Override for the OAuth client JSON.  Defaults to
-            ``~/.config/assistant-axis/google_credentials.json``.
+            ``<repo>/.secrets/gsheet/google_credentials.json``.
         token_path: Override for the cached user token.  Defaults to
-            ``~/.config/assistant-axis/google_token.json``.  Created on
+            ``<repo>/.secrets/gsheet/google_token.json``.  Created on
             first run, refreshed automatically thereafter.
 
     Raises:
