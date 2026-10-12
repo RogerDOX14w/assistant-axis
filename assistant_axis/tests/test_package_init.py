@@ -36,6 +36,7 @@ def _modules_after(code: str) -> set[str]:
     "from assistant_axis import entity_id, judge_label, response_subdir, json_metadata",
     "import assistant_axis.judge, assistant_axis.judge_pricing, assistant_axis.atomic_io, "
     "assistant_axis.openai_batch",          # what pipeline/3_judge.py loads
+    "import assistant_axis.model_families",  # the family table (multi-model plan, P7)
 ])
 def test_light_imports_load_no_heavy_library(stmt):
     loaded = _modules_after(stmt)
