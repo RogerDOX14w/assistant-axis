@@ -6,56 +6,247 @@ The within-pole item pairs are the third, cheaper view (each item shown as a tra
 
 ## Signal 1: each pole against the nearest pole of another cluster
 
-| | ~350 clusters | ~150 clusters |
-|---|---|---|
-| share_3 | 0.0% | 0.0% |
-| share_3_4 | 0.0% | 0.0% |
-| 4 | 0.0% | 0.0% |
-| 3 | 0.0% | 0.0% |
-| 2 | 20.0% | 0.0% |
-| 1 | 50.0% | 50.0% |
-| 0 | 20.0% | 50.0% |
-| opposite | 10.0% | 0.0% |
-| unsure | 0.0% | 0.0% |
-| n | 10 | 2 |
-| n_unparsed | 0 | 0 |
+| | ~600 clusters | ~350 clusters | ~150 clusters |
+|---|---|---|---|
+| share_3 | 7.5% | 0.0% | 0.0% |
+| share_3_4 | 9.0% | 0.0% | 0.0% |
+| 4 | 1.5% | 0.0% | 0.0% |
+| 3 | 7.5% | 0.0% | 0.0% |
+| 2 | 37.3% | 20.0% | 0.0% |
+| 1 | 38.8% | 50.0% | 50.0% |
+| 0 | 10.4% | 20.0% | 50.0% |
+| opposite | 4.5% | 10.0% | 0.0% |
+| unsure | 0.0% | 0.0% | 0.0% |
+| n | 67 | 10 | 2 |
+| n_unparsed | 0 | 0 | 0 |
 
 By cluster-size band (share at 3, share at 3-4, pairs read):
 
-| band | ~350 | ~150 |
-|---|---|---|
-| 2-3 items | 0.0% / 0.0% / 3 |  /  / 0 |
-| 4-7 items | 0.0% / 0.0% / 5 |  /  / 0 |
-| 8-15 items | 0.0% / 0.0% / 1 | 0.0% / 0.0% / 2 |
-| 16+ items | 0.0% / 0.0% / 1 |  /  / 0 |
+| band | ~600 | ~350 | ~150 |
+|---|---|---|---|
+| 2-3 items | 3.3% / 3.3% / 30 | 0.0% / 0.0% / 3 |  /  / 0 |
+| 4-7 items | 10.7% / 14.3% / 28 | 0.0% / 0.0% / 5 |  /  / 0 |
+| 8-15 items | 14.3% / 14.3% / 7 | 0.0% / 0.0% / 1 | 0.0% / 0.0% / 2 |
+| 16+ items | 0.0% / 0.0% / 2 | 0.0% / 0.0% / 1 |  /  / 0 |
 
 ## The within-pole item pairs, and the bipolar check
 
-| | ~350 clusters | ~150 clusters |
-|---|---|---|
-| within: 0 | 14.2% | 23.3% |
-| within: 1 | 33.8% | 39.7% |
-| within: 2 | 31.5% | 24.7% |
-| within: 3 | 14.2% | 4.1% |
-| within: 4 | 1.4% | 0.0% |
-| within: opposite | 5.0% | 8.2% |
-| within: unsure | 0.0% | 0.0% |
-| within: share_3_4 | 15.5% | 4.1% |
-| within: n | 219 | 73 |
-| within: n_unparsed | 0 | 0 |
-| cross-pole pairs read "opposite" | 71.4% of 7 | 42.9% of 7 |
-| n_clusters | 84 | 26 |
-| n_pairs_read | 236 | 82 |
-| cost_usd | 0.2891 | 0.0962 |
+| | ~600 clusters | ~350 clusters | ~150 clusters |
+|---|---|---|---|
+| within: 0 | 6.9% | 14.2% | 23.3% |
+| within: 1 | 31.5% | 33.8% | 39.7% |
+| within: 2 | 34.5% | 31.5% | 24.7% |
+| within: 3 | 18.0% | 14.2% | 4.1% |
+| within: 4 | 2.5% | 1.4% | 0.0% |
+| within: opposite | 6.7% | 5.0% | 8.2% |
+| within: unsure | 0.0% | 0.0% | 0.0% |
+| within: share_3_4 | 20.4% | 15.5% | 4.1% |
+| within: n | 568 | 219 | 73 |
+| within: n_unparsed | 0 | 0 | 0 |
+| cross-pole pairs read "opposite" | 57.1% of 14 | 71.4% of 7 | 42.9% of 7 |
+| n_clusters | 224 | 84 | 26 |
+| n_pairs_read | 649 | 236 | 82 |
+| cost_usd | 0.7745 | 0.2891 | 0.0962 |
 
 Kept clusters per size band:
 
-| band | ~350 | ~150 |
-|---|---|---|
-| 2-3 items | 33 | 8 |
-| 4-7 items | 29 | 6 |
-| 8-15 items | 16 | 7 |
-| 16+ items | 6 | 5 |
+| band | ~600 | ~350 | ~150 |
+|---|---|---|---|
+| 2-3 items | 104 | 33 | 8 |
+| 4-7 items | 92 | 29 | 6 |
+| 8-15 items | 20 | 16 | 7 |
+| 16+ items | 8 | 6 | 5 |
+
+## Signal 2: ~600 clusters, 10 clusters in full (spanning the size range)
+
+### Cluster 1 (33 items, band 16+)
+- nearest corpus trait (novelty, not size): wry at 0.3244
+- **pole a** -- blind **playful and humorous** (trait); hinted **playful and humorous** (trait)
+  - blind gloss: This means you habitually look for the funny side of things, laugh often, enjoy joking, and like to entertain and amuse the people around you.
+  - hinted gloss: This means someone who habitually finds things funny, jokes around, laughs often, and tries to bring humor and fun into whatever they do.
+  - nearest other cluster: c339a at 0.7113
+  - I laugh out loud if something is funny.
+  - I usually end up laughing if the people around me are laughing.
+  - I sometimes laugh out loud when reading or watching TV.
+  - I have a quiet laugh.
+  - I have an intense, boisterous laugh.
+  - I often enjoy telling jokes or behaving in a humorous manner.
+  - I can laugh at myself.
+  - I make jokes.
+  - I laugh aloud.
+  - I laugh my way through life.
+  - I joke around a lot.
+  - I go too far with jokes.
+  - I laugh and cry at the same time.
+  - I amuse my friends.
+  - I laugh at others.
+  - I see the humor in situations.
+  - I amuse myself easily.
+  - I like to amuse others.
+  - I like to laugh out loud.
+  - I don't mind others making fun of me.
+  - I am always joking.
+  - I smile a lot.
+  - I laugh a lot.
+  - I easily laugh at myself.
+  - I can see the funny side of a painful situation.
+  - I try to have fun in all kinds of situations.
+  - I try to add some humor to whatever I do.
+  - I keep my sense of humor even in gloomy situations.
+  - I have a great sense of humor.
+  - I easily find things to laugh or joke about.
+  - I am good at making jokes.
+  - I think that in difficult situations it is possible to find something to laugh or joke about.
+  - I am good at making people laugh.
+- reading (within): "I laugh and cry at the same time." / "I keep my sense of humor even in gloomy situations." -> **1** (Laughing and crying at once is mixed emotional expression, while keeping humor in gloomy situations is coping through humor; they share a laughter-amid-sadness theme but neither implies the other.)
+- reading (within): "I like to laugh out loud." / "I joke around a lot." -> **2** (Both are about humor, but one is enjoying laughing out loud (reacting) while the other is frequently joking (producing humor); neither implies the other, though they share a playful core.)
+- reading (within): "I laugh a lot." / "I see the humor in situations." -> **2** (Laughing often is about frequent laughter, while seeing humor in situations is about perceiving the funny side; they are related and tend to go together, but a person can have either without the other.)
+
+### Cluster 27 (16 items, band 16+, bipolar)
+- nearest corpus trait (novelty, not size): quick_witted at 0.3777
+- **pole a** -- blind **quick-witted** (trait); hinted **quick-witted** (trait)
+  - blind gloss: This means you grasp situations, learn new things, and respond to problems rapidly, often without needing extended thought or repeated explanation.
+  - hinted gloss: This means you grasp, understand and respond to things rapidly, often seeing what to do without needing time to work it out.
+  - nearest other cluster: c016a at 0.7074
+  - I quickly recognize possibilities.
+  - I react immediately.
+  - I come up with a solution right away.
+  - I know immediately what to do.
+  - I learn quickly.
+  - I think quickly.
+  - I take things in quickly.
+  - I quickly get the idea of things.
+  - I understand things quickly.
+  - I find out things quickly.
+  - I react quickly.
+  - I acquire skills quickly.
+  - I am quick to understand things.
+  - I catch on to things quickly.
+- **pole b** -- blind **slow-burning reactions** (trait); hinted **emotionally reactive** (trait)
+  - blind gloss: This means that when something happens, they respond only after a delay, but the response that follows is strong.
+  - hinted gloss: This means the person's responses to events tend to be strong and forceful, with feelings readily stirred up and expressed.
+  - nearest other cluster: c038a at 0.6363
+  - I react slowly.
+  - I react intensely.
+- reading (within): "I find out things quickly." / "I react immediately." -> **1** (Finding things out quickly is about speed of learning or discovering information, while reacting immediately is about speed of response to events; both involve quickness but are different concepts.)
+- reading (within): "I take things in quickly." / "I quickly recognize possibilities." -> **2** (Both are about quick mental uptake, but the target is fast comprehension of information in general, while the other is spotting opportunities or options quickly, which is a narrower and different skill.)
+- reading (cross): "I react slowly." / "I acquire skills quickly." -> **0** (Slow reaction concerns response speed to events or stimuli, while quick skill acquisition concerns learning speed; both are about speed but in different domains, and neither is the reverse of the other.)
+- reading (within): "I learn quickly." / "I come up with a solution right away." -> **1** (Both involve mental quickness, but learning quickly is about absorbing new information while producing solutions right away is about problem-solving speed; either can occur without the other.)
+- reading (nearest): "quick-witted" / "acts on tasks promptly" -> **1** (Quick-witted is about fast mental grasp and response, whereas acting promptly on tasks is about starting and finishing chores without procrastination; both involve speed but are different qualities.)
+
+### Cluster 118 (7 items, band 4-7)
+- nearest corpus trait (novelty, not size): impatient at 0.3004
+- **pole a** -- blind **easily irritated by others** (trait); hinted **irritable with others** (trait)
+  - blind gloss: This means you are quick to feel annoyed, frustrated, or disappointed when other people make mistakes, behave badly, or fall short of your expectations.
+  - hinted gloss: This means you tend to become annoyed, frustrated, or disappointed easily when other people fall short, make mistakes, or behave in ways you dislike.
+  - nearest other cluster: c004a at 0.6894
+  - I when interacting with a group of people, am often bothered by at least one of them.
+  - I sometimes find my friends to be irritating.
+  - I become frustrated and angry with people when they don't live up to my expectations.
+  - I am annoyed by others' mistakes.
+  - I get annoyed with others' behaviors.
+  - I am often disappointed by people.
+  - I often am irritated with others.
+- reading (within): "I often am irritated with others." / "I am annoyed by others' mistakes." -> **3** (Both describe a tendency toward irritation with other people, but the other trait is limited to irritation at others' mistakes, while the target covers irritation with others in general.)
+- reading (within): "I am often disappointed by people." / "I get annoyed with others' behaviors." -> **1** (Both are negative reactions to other people, but disappointment (unmet expectations) is a different emotion from annoyance (irritation at behavior); each can occur without the other.)
+- reading (within): "I become frustrated and angry with people when they don't live up to my expectations." / "I when interacting with a group of people, am often bothered by at least one of them." -> **1** (Both involve being bothered by others, but the target is anger and frustration when expectations go unmet, while the other is being often annoyed by someone in a group, with no link to expectations or anger.)
+
+### Cluster 181 (5 items, band 4-7)
+- nearest corpus trait (novelty, not size): guilt_prone at 0.534
+- **pole a** -- blind **chronically guilt-ridden** (trait); hinted **chronically guilt-ridden** (trait)
+  - blind gloss: This means you habitually feel guilty, often out of proportion to any real wrongdoing, and tend to see yourself as culpable.
+  - hinted gloss: This means the person habitually feels guilty, often out of proportion to any real wrongdoing, and considers guilt a constant part of their life.
+  - nearest other cluster: c324a at 0.5995
+  - I feel guilty as if I had committed a crime, although I did not really commit one.
+  - I feel guilty when I see a policeman.
+  - I am a guilty person.
+  - I feel guilty much of the time.
+  - I feel unbearable guilt much the time.
+- reading (within): "I feel guilty when I see a policeman." / "I feel guilty much of the time." -> **2** (Both concern a tendency toward guilt feelings, but one is triggered specifically by seeing police while the other is pervasive guilt; each can occur without the other.)
+- reading (within): "I feel guilty when I see a policeman." / "I feel unbearable guilt much the time." -> **1** (Both are guilt tendencies, but one is guilt triggered specifically by seeing police, while the other is pervasive, intense guilt not tied to any trigger; neither implies the other.)
+- reading (within): "I feel guilty much of the time." / "I am a guilty person." -> **3** (Both most plausibly describe a general tendency toward feeling guilt, but 'a guilty person' is vaguer and could also mean culpability, so they are near-identical with a slight difference in emphasis.)
+- reading (nearest): "chronically guilt-ridden" / "compassionate" -> **1** (Both involve feeling bad about others' pain, but guilt-ridden is chronic, self-focused, disproportionate self-blame, while compassion is outward-directed concern and comforting, so they are distinct neighbours.)
+
+### Cluster 224 (5 items, band 4-7)
+- nearest corpus trait (novelty, not size): asexual at 0.3322
+- **pole a** -- blind **uninterested in romance** (trait); hinted **uninterested in romance** (trait)
+  - blind gloss: This means the person has little desire for romantic or sexual relationships and does not seek them out, preferring friendships.
+  - hinted gloss: This means the person has little desire for romantic relationships or sex and does not see romance as something they need.
+  - nearest other cluster: c184a at 0.6345
+  - I am not interested in romance.
+  - I have little desire for sex or romance.
+  - I have no interest in long-term romantic relationships.
+  - I see little need for romance in my life.
+  - I would much prefer to have friends than romantic partners in my life.
+- reading (within): "I would much prefer to have friends than romantic partners in my life." / "I have no interest in long-term romantic relationships." -> **2** (Both express a lean away from romance, but one is a preference for friendship over romantic partners (a comparison), while the other is a lack of interest in long-term romantic relationships (not a comparison, and limited to long-term ones); neither implies the other.)
+- reading (within): "I would much prefer to have friends than romantic partners in my life." / "I have little desire for sex or romance." -> **2** (Both describe low interest in romance, but the target is a preference for friendship over romantic partners (a comparison), while the other is low desire for sex and romance in general, so a person could have either without the other.)
+- reading (within): "I am not interested in romance." / "I see little need for romance in my life." -> **3** (Both describe a general lack of romantic inclination; 'little need' is a slightly softer, need-based framing than flat 'not interested', but they largely express the same concept.)
+- reading (nearest): "uninterested in romance" / "averse to closeness" -> **1** (Both involve low desire for relationships, but the target is about romantic/sexual relationships while still valuing friendships, whereas the other rejects emotional closeness and friendships generally; they diverge on friendship.)
+
+### Cluster 371 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): incrementalist at 0.336
+- **pole a** -- blind **averse to change** (trait); hinted **averse to change** (trait)
+  - blind gloss: This means the person tends to dislike change and prefers things to stay as they are.
+  - hinted gloss: This means the person dislikes change and prefers things to stay familiar, routine, and as they already are.
+  - nearest other cluster: c262a at 0.5713
+  - I don't like the idea of change.
+  - I dislike changes.
+  - I love change.
+- reading (within): "I love change." / "I don't like the idea of change." -> **opposite** (Loving change and disliking the idea of change are the same attitude toward change at opposite ends.)
+- reading (within): "I love change." / "I dislike changes." -> **opposite** (Loving change and disliking changes are opposite attitudes toward the same thing, at opposite ends of the same dimension.)
+- reading (within): "I don't like the idea of change." / "I dislike changes." -> **4** (Both describe a general tendency to dislike change; the wording differs only slightly (disliking the idea of change versus disliking changes), so either label could replace the other.)
+- reading (nearest): "averse to change" / "dislikes uncertainty" -> **2** (Both involve a preference for stability and familiarity, but one is about disliking change itself and the other about disliking surprise and unpredictability; a person could have either without the other.)
+
+### Cluster 422 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): avoidant at 0.3271
+- **pole a** -- blind **fears being abandoned** (trait); hinted **fears abandonment** (trait)
+  - blind gloss: This means the person will go to great lengths to avoid being left alone, rejected, or losing the people they are close to.
+  - hinted gloss: This means the person will go to great lengths to avoid being alone, rejected, or losing the people close to them.
+  - nearest other cluster: c133a at 0.6077
+  - I will do almost anything to avoid being alone.
+  - I will do almost anything to avoid being rejected.
+  - I will do anything to avoid losing my friends and romantic partners.
+- reading (within): "I will do almost anything to avoid being alone." / "I will do anything to avoid losing my friends and romantic partners." -> **2** (Both describe extreme efforts to avoid isolation or abandonment, but one is about avoiding being alone and the other about avoiding losing particular relationships; a person could fear solitude without clinging to existing partners, or vice versa.)
+- reading (within): "I will do almost anything to avoid being alone." / "I will do almost anything to avoid being rejected." -> **1** (Both are fear-driven, extreme avoidance tendencies from attachment anxiety, but one is about avoiding aloneness and the other about avoiding rejection, and either can occur without the other.)
+- reading (within): "I will do anything to avoid losing my friends and romantic partners." / "I will do almost anything to avoid being rejected." -> **3** (Both describe going to extreme lengths to avoid social loss; the target focuses on losing friends and partners (abandonment), the other on rejection, which is broader in scope and slightly different in emphasis.)
+
+### Cluster 425 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): wise at 0.4552
+- **pole a** -- blind **wise** (trait); hinted **wise** (trait)
+  - blind gloss: This means you are seen by others, and see yourself, as having sound judgment and good understanding beyond what your age would suggest.
+  - hinted gloss: This means the person has sound judgment and insight, and is seen by others as having good perspective on life.
+  - nearest other cluster: c086a at 0.602
+  - I have been described as wise beyond my years.
+  - I consider myself to be a wise person.
+  - I am considered to be a wise person.
+- reading (within): "I am considered to be a wise person." / "I consider myself to be a wise person." -> **1** (One is about others regarding the person as wise (reputation), the other about the person's own self-view; they are related but neither implies the other, and a person can have either without the other.)
+- reading (within): "I consider myself to be a wise person." / "I have been described as wise beyond my years." -> **2** (Both are about being wise, but one is self-assessed wisdom and the other is wisdom attributed by others and set against one's age, so each adds something the other lacks.)
+- reading (within): "I am considered to be a wise person." / "I have been described as wise beyond my years." -> **3** (Both describe being regarded as wise, but 'wise beyond my years' adds the emphasis of unusual maturity for one's age, a narrower, more specific claim.)
+
+### Cluster 469 (2 items, band 2-3)
+- nearest corpus trait (novelty, not size): curious at 0.2899
+- **pole a** -- blind **curious about mechanisms** (trait); hinted **curious about mechanisms** (trait)
+  - blind gloss: This means they enjoy understanding how objects and machines work, and are drawn to finding out the workings behind things.
+  - hinted gloss: This means the person is drawn to understanding how things function, enjoying the inner workings of objects and machines.
+  - nearest other cluster: c137a at 0.5408
+  - I like to know how things work.
+  - I am fascinated by how machines work.
+- reading (within): "I like to know how things work." / "I am fascinated by how machines work." -> **3** (Both describe curiosity about how things work, but the other is limited to machines and stronger in emphasis (fascination), so it is the same concept differing in scope and degree.)
+
+### Cluster 600 (2 items, band 2-3, bipolar)
+- nearest corpus trait (novelty, not size): political at 0.395
+- **pole a** -- blind **politically liberal** (membership); hinted **politically liberal** (trait)
+  - blind gloss: This means the person generally supports liberal candidates and progressive political causes when they vote.
+  - hinted gloss: This means the person habitually supports liberal political candidates and tends to hold progressive political views.
+  - nearest other cluster: c481a at 0.4135
+  - I tend to vote for liberal political candidates.
+- **pole b** -- blind **politically conservative** (membership); hinted **politically conservative** (trait)
+  - blind gloss: This means the person generally backs conservative candidates and positions in elections and political life.
+  - hinted gloss: This means the person tends to back conservative candidates and positions in politics, favoring established political values and traditional approaches to government.
+  - nearest other cluster: c335a at 0.4252
+  - I tend to vote for conservative political candidates.
+- reading (cross): "I tend to vote for liberal political candidates." / "I tend to vote for conservative political candidates." -> **opposite** (Voting tendencies toward liberal versus conservative candidates are opposite ends of the same political-leaning dimension.)
+- reading (nearest): "politically conservative" / "conventional" -> **1** (Both involve favoring tradition, but one is about political affiliation and voting while the other is a general social preference for respectability and orthodox living; either can occur without the other.)
 
 ## Signal 2: ~350 clusters, 10 clusters in full (spanning the size range)
 
@@ -498,5 +689,6 @@ Kept clusters per size band:
 ## Files
 
 - [granularity_readout.json](granularity_readout.json)
+- [responses.jsonl](granularity/g600/responses.jsonl)
 - [responses.jsonl](granularity/g350/responses.jsonl)
 - [responses.jsonl](granularity/g150/responses.jsonl)

@@ -3,6 +3,7 @@
 No network, no model, no API: the pages are the fixture pages and a synthetic workbook, the embedders are hash
 embedders, the Anthropic client is a fake that answers the naming and overlap prompts.  Every ``--dry-run`` must
 exit 0 and write nothing."""
+from assistant_axis.gapgen.generators.ipip import GRANULARITIES  # noqa: E402
 import json
 from pathlib import Path
 
@@ -83,12 +84,12 @@ def test_pipeline_end_to_end(env, capsys):
     # cluster
     dry(root, common, ["cluster", "--no-hdbscan"])
     assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
-    for g in (350, 150):
+    for g in GRANULARITIES:
         rows = [json.loads(x) for x in (ipip / f"clusters_g{g}.jsonl").read_text().splitlines()]
         assert rows and all(r["consensus"] == "kept" for r in rows)              # identical arms: all kept
         assert [r["cluster_id"] for r in rows] == list(range(1, len(rows) + 1))
     summ = json.loads((ipip / "cluster_summary.json").read_text())
-    assert "_provenance" in summ and set(summ["result"]["granularities"]) == {"350", "150"}
+    assert "_provenance" in summ and set(summ["result"]["granularities"]) == {str(g) for g in GRANULARITIES}
     assert (ipip / "cluster_usage.json").exists()
     # name
     dry(root, common, ["name", "--granularity", "350", "--all", "--hinted"])

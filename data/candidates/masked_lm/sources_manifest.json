@@ -1,0 +1,63 @@
+[
+  {
+    "key": "roberta",
+    "model_id": "FacebookAI/roberta-large",
+    "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+    "revision_pinned": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+    "revision_matches_pin": true,
+    "dir": "data/external/hf/models--FacebookAI--roberta-large/snapshots/722cf37b1afa9454edce342e7895e588b6ff1d59",
+    "size_bytes": 1424421285,
+    "weights_size_bytes": 1421700479,
+    "weights_sha256": "047c85f0b96269cd62e6f732644f067004eebd95af5b5d35965ae2528f13bf38",
+    "weights_sha256_pinned": "047c85f0b96269cd62e6f732644f067004eebd95af5b5d35965ae2528f13bf38",
+    "weights_match_pin": true,
+    "files": [
+      {
+        "file": "README.md",
+        "size_bytes": 9295,
+        "sha256": "169bcb945dc37375faef8b0e4a327c3e80a107fb64a85dd2c6b7651519eeaba0"
+      },
+      {
+        "file": "config.json",
+        "size_bytes": 482,
+        "sha256": "82ba49810e6441735e696033ac2512ee09da555507b2917ac3865b202d592cc3"
+      },
+      {
+        "file": "merges.txt",
+        "size_bytes": 456318,
+        "sha256": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5"
+      },
+      {
+        "file": "model.safetensors",
+        "size_bytes": 1421700479,
+        "sha256": "047c85f0b96269cd62e6f732644f067004eebd95af5b5d35965ae2528f13bf38",
+        "sha256_published": "047c85f0b96269cd62e6f732644f067004eebd95af5b5d35965ae2528f13bf38",
+        "sha256_verified": true
+      },
+      {
+        "file": "tokenizer.json",
+        "size_bytes": 1355863,
+        "sha256": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e"
+      },
+      {
+        "file": "tokenizer_config.json",
+        "size_bytes": 25,
+        "sha256": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce"
+      },
+      {
+        "file": "vocab.json",
+        "size_bytes": 898823,
+        "sha256": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+      }
+    ],
+    "checksum_verified": true,
+    "licence": "MIT",
+    "licence_card": "mit",
+    "licence_url": "https://huggingface.co/FacebookAI/roberta-large",
+    "licence_verified": true,
+    "approved_by": "Roger, 2026-10-11 (roberta-large only, ~1.4 GB, MIT, into data/external/hf; relayed by the coordinating session)",
+    "recorded_at": "2026-10-11T23:37:12+00:00",
+    "tool": "setup_external.py --hf-model (download); masked_lm_generator.py record-model (record)",
+    "todo": null
+  }
+]

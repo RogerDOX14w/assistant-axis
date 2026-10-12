@@ -11,1003 +11,522 @@
       }
     },
     "targets": [
-      350,
-      150
+      600
     ],
     "seed": 0,
     "items_sha256": "9abaf2d66c17f8b834c8c2d7ecdad5f480c8d39328acc325283230729d653a5b",
     "n_items": 3320,
     "granularities": {
-      "350": {
-        "granularity": 350,
+      "600": {
+        "granularity": 600,
         "n_items": 3320,
         "primary": "openai",
         "second": "gemma",
         "cut": {
           "openai": {
-            "target": 350,
-            "n_clusters": 350,
-            "threshold": 0.617428,
-            "n_merges": 2921,
+            "target": 600,
+            "n_clusters": 600,
+            "threshold": 0.543792,
+            "n_merges": 2539,
             "peak_count": 828,
             "peak_threshold": 0.435621,
-            "n_singletons": 49,
+            "n_singletons": 181,
             "within_tol": true,
             "tol": 0.1,
             "size_quartiles": [
+              2,
+              2,
+              4,
+              6,
+              33
+            ]
+          },
+          "gemma": {
+            "target": 600,
+            "n_clusters": 600,
+            "threshold": 0.288626,
+            "n_merges": 2385,
+            "peak_count": 721,
+            "peak_threshold": 0.2235,
+            "n_singletons": 335,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
               2,
               3,
               6,
-              12,
-              79
-            ]
-          },
-          "gemma": {
-            "target": 350,
-            "n_clusters": 350,
-            "threshold": 0.349326,
-            "n_merges": 2871,
-            "peak_count": 721,
-            "peak_threshold": 0.2235,
-            "n_singletons": 99,
-            "within_tol": true,
-            "tol": 0.1,
-            "size_quartiles": [
-              2,
-              3,
-              5,
-              10,
-              103
+              42
             ]
           }
         },
         "consensus": {
           "min_jaccard": 0.5,
-          "n_kept": 84,
-          "n_loose": 266,
-          "loose_items": 2675,
+          "n_kept": 224,
+          "n_loose": 376,
+          "loose_items": 2052,
           "jaccard_kept_median": 0.6667
         },
         "sizes": {
           "primary": {
-            "n": 350,
-            "items": 3271,
+            "n": 600,
+            "items": 3139,
             "min": 2,
-            "median": 6.0,
-            "max": 79,
-            "share_4_to_15": 0.5314
+            "median": 4.0,
+            "max": 33,
+            "share_4_to_15": 0.4767
           },
           "second": {
-            "n": 350,
-            "items": 3221,
+            "n": 600,
+            "items": 2985,
             "min": 2,
-            "median": 5.0,
-            "max": 103,
-            "share_4_to_15": 0.4657
+            "median": 3.0,
+            "max": 42,
+            "share_4_to_15": 0.425
           },
           "kept": {
-            "n": 84,
-            "items": 596,
+            "n": 224,
+            "items": 1087,
             "min": 2,
-            "median": 4.5,
-            "max": 44,
-            "share_4_to_15": 0.5357
-          }
-        },
-        "purity": {
-          "openai": {
-            "nmi": 0.788121,
-            "ari": 0.139843,
-            "n_items_scored": 561,
-            "purity_mean": 0.416614,
-            "purity_median": 0.5,
-            "by_inventory": {
-              "16PF": {
-                "n": 148,
-                "nmi": 0.694168,
-                "ari": 0.166175
-              },
-              "6FPQ": {
-                "n": 228,
-                "nmi": 0.701547,
-                "ari": 0.155415
-              },
-              "7FACTOR": {
-                "n": 59,
-                "nmi": 0.621823,
-                "ari": 0.047589
-              },
-              "AB5C": {
-                "n": 476,
-                "nmi": 0.64412,
-                "ari": 0.099511
-              },
-              "BARCHARD2001": {
-                "n": 66,
-                "nmi": 0.633305,
-                "ari": 0.266018
-              },
-              "BFAS": {
-                "n": 48,
-                "nmi": 0.609239,
-                "ari": 0.093278
-              },
-              "BFAS-20": {
-                "n": 63,
-                "nmi": 0.594929,
-                "ari": 0.16257
-              },
-              "BIDR": {
-                "n": 35,
-                "nmi": 0.431299,
-                "ari": 0.022401
-              },
-              "BIS_BAS": {
-                "n": 24,
-                "nmi": 0.505953,
-                "ari": 0.046287
-              },
-              "Barchard, 2001": {
-                "n": 66,
-                "nmi": 0.633305,
-                "ari": 0.266018
-              },
-              "Big-7": {
-                "n": 66,
-                "nmi": 0.617035,
-                "ari": 0.055893
-              },
-              "Big-Five": {
-                "n": 98,
-                "nmi": 0.551323,
-                "ari": 0.116336
-              },
-              "CAT-PD": {
-                "n": 200,
-                "nmi": 0.802886,
-                "ari": 0.321028
-              },
-              "CES-D": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "CHAPMAN1986": {
-                "n": 23,
-                "nmi": 0.462336,
-                "ari": 0.230605
-              },
-              "CPI": {
-                "n": 316,
-                "nmi": 0.640392,
-                "ari": 0.075246
-              },
-              "Dissociation": {
-                "n": 30,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "GOLDBERG1999": {
-                "n": 29,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HEX": {
-                "n": 236,
-                "nmi": 0.708089,
-                "ari": 0.145717
-              },
-              "HEXACO_PI": {
-                "n": 218,
-                "nmi": 0.71879,
-                "ari": 0.15013
-              },
-              "HOYLE2002": {
-                "n": 22,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HPI": {
-                "n": 203,
-                "nmi": 0.764859,
-                "ari": 0.173579
-              },
-              "HPI-HIC": {
-                "n": 165,
-                "nmi": 0.75866,
-                "ari": 0.169291
-              },
-              "IPIP-IPC": {
-                "n": 31,
-                "nmi": 0.675791,
-                "ari": 0.054237
-              },
-              "JPI": {
-                "n": 133,
-                "nmi": 0.70064,
-                "ari": 0.145071
-              },
-              "LEVENSON1981": {
-                "n": 20,
-                "nmi": 0.578215,
-                "ari": 0.059738
-              },
-              "MPQ": {
-                "n": 116,
-                "nmi": 0.695566,
-                "ari": 0.135407
-              },
-              "NEO": {
-                "n": 255,
-                "nmi": 0.72393,
-                "ari": 0.1481
-              },
-              "NEO5-20": {
-                "n": 55,
-                "nmi": 0.590972,
-                "ari": 0.086977
-              },
-              "RADLOFF1977": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "SINGLECONSTRUCTS": {
-                "n": 87,
-                "nmi": 0.71069,
-                "ari": 0.225399
-              },
-              "TCI": {
-                "n": 268,
-                "nmi": 0.708054,
-                "ari": 0.154768
-              },
-              "VIA": {
-                "n": 179,
-                "nmi": 0.735736,
-                "ari": 0.159707
-              }
-            }
-          },
-          "gemma": {
-            "nmi": 0.779158,
-            "ari": 0.122592,
-            "n_items_scored": 557,
-            "purity_mean": 0.364272,
-            "purity_median": 0.5,
-            "by_inventory": {
-              "16PF": {
-                "n": 150,
-                "nmi": 0.667641,
-                "ari": 0.132946
-              },
-              "6FPQ": {
-                "n": 228,
-                "nmi": 0.702307,
-                "ari": 0.169382
-              },
-              "7FACTOR": {
-                "n": 59,
-                "nmi": 0.621256,
-                "ari": 0.073629
-              },
-              "AB5C": {
-                "n": 477,
-                "nmi": 0.630619,
-                "ari": 0.081799
-              },
-              "BARCHARD2001": {
-                "n": 65,
-                "nmi": 0.640157,
-                "ari": 0.280942
-              },
-              "BFAS": {
-                "n": 49,
-                "nmi": 0.606653,
-                "ari": 0.084345
-              },
-              "BFAS-20": {
-                "n": 64,
-                "nmi": 0.582038,
-                "ari": 0.145531
-              },
-              "BIDR": {
-                "n": 34,
-                "nmi": 0.429823,
-                "ari": 0.013209
-              },
-              "BIS_BAS": {
-                "n": 25,
-                "nmi": 0.520418,
-                "ari": 0.096386
-              },
-              "Barchard, 2001": {
-                "n": 65,
-                "nmi": 0.640157,
-                "ari": 0.280942
-              },
-              "Big-7": {
-                "n": 67,
-                "nmi": 0.619353,
-                "ari": 0.066614
-              },
-              "Big-Five": {
-                "n": 100,
-                "nmi": 0.520346,
-                "ari": 0.094727
-              },
-              "CAT-PD": {
-                "n": 200,
-                "nmi": 0.808444,
-                "ari": 0.328165
-              },
-              "CES-D": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "CHAPMAN1986": {
-                "n": 24,
-                "nmi": 0.409262,
-                "ari": 0.086643
-              },
-              "CPI": {
-                "n": 318,
-                "nmi": 0.63928,
-                "ari": 0.059989
-              },
-              "Dissociation": {
-                "n": 28,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "FOA2002": {
-                "n": 20,
-                "nmi": 0.468929,
-                "ari": 0.170592
-              },
-              "GOLDBERG1999": {
-                "n": 27,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HEX": {
-                "n": 238,
-                "nmi": 0.691884,
-                "ari": 0.144985
-              },
-              "HEXACO_PI": {
-                "n": 219,
-                "nmi": 0.698602,
-                "ari": 0.146581
-              },
-              "HOYLE2002": {
-                "n": 23,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HPI": {
-                "n": 203,
-                "nmi": 0.737674,
-                "ari": 0.106549
-              },
-              "HPI-HIC": {
-                "n": 165,
-                "nmi": 0.751911,
-                "ari": 0.16273
-              },
-              "IPIP-IPC": {
-                "n": 31,
-                "nmi": 0.700993,
-                "ari": 0.098837
-              },
-              "JPI": {
-                "n": 134,
-                "nmi": 0.673223,
-                "ari": 0.093887
-              },
-              "MPQ": {
-                "n": 117,
-                "nmi": 0.672717,
-                "ari": 0.084284
-              },
-              "NEO": {
-                "n": 258,
-                "nmi": 0.712571,
-                "ari": 0.137792
-              },
-              "NEO5-20": {
-                "n": 55,
-                "nmi": 0.57451,
-                "ari": 0.070553
-              },
-              "RADLOFF1977": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "SINGLECONSTRUCTS": {
-                "n": 86,
-                "nmi": 0.670412,
-                "ari": 0.095488
-              },
-              "TCI": {
-                "n": 270,
-                "nmi": 0.682059,
-                "ari": 0.111541
-              },
-              "VIA": {
-                "n": 177,
-                "nmi": 0.701806,
-                "ari": 0.132974
-              }
-            }
-          },
-          "kept": {
-            "nmi": 0.896585,
-            "ari": 0.383439,
-            "n_items_scored": 88,
-            "purity_mean": 0.53876,
-            "purity_median": 0.7,
-            "by_inventory": {
-              "16PF": {
-                "n": 21,
-                "nmi": 0.788745,
-                "ari": 0.214553
-              },
-              "6FPQ": {
-                "n": 30,
-                "nmi": 0.84439,
-                "ari": 0.399586
-              },
-              "AB5C": {
-                "n": 74,
-                "nmi": 0.781031,
-                "ari": 0.240537
-              },
-              "CAT-PD": {
-                "n": 27,
-                "nmi": 0.932727,
-                "ari": 0.750799
-              },
-              "CPI": {
-                "n": 50,
-                "nmi": 0.794242,
-                "ari": 0.26272
-              },
-              "Dissociation": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "GOLDBERG1999": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HEX": {
-                "n": 38,
-                "nmi": 0.848453,
-                "ari": 0.444878
-              },
-              "HEXACO_PI": {
-                "n": 33,
-                "nmi": 0.854656,
-                "ari": 0.496117
-              },
-              "HPI": {
-                "n": 28,
-                "nmi": 0.80995,
-                "ari": 0.255696
-              },
-              "HPI-HIC": {
-                "n": 24,
-                "nmi": 0.869708,
-                "ari": 0.574538
-              },
-              "NEO": {
-                "n": 35,
-                "nmi": 0.892432,
-                "ari": 0.477972
-              },
-              "SINGLECONSTRUCTS": {
-                "n": 23,
-                "nmi": 0.865895,
-                "ari": 0.532731
-              },
-              "TCI": {
-                "n": 41,
-                "nmi": 0.825354,
-                "ari": 0.390232
-              },
-              "VIA": {
-                "n": 23,
-                "nmi": 0.89491,
-                "ari": 0.602153
-              }
-            }
-          }
-        },
-        "bipolar": {
-          "n_clusters": 48,
-          "n_kept": 7
-        },
-        "n_poles_kept": 91,
-        "naming_carried_over": 0,
-        "hdbscan": {
-          "n_clusters": 249,
-          "noise_share": 0.226506,
-          "umap": true,
-          "min_cluster_size": 4,
-          "seed": 0,
-          "ari_vs_reference": 0.056428
-        }
-      },
-      "150": {
-        "granularity": 150,
-        "n_items": 3320,
-        "primary": "openai",
-        "second": "gemma",
-        "cut": {
-          "openai": {
-            "target": 150,
-            "n_clusters": 150,
-            "threshold": 0.690297,
-            "n_merges": 3164,
-            "peak_count": 828,
-            "peak_threshold": 0.435621,
-            "n_singletons": 6,
-            "within_tol": true,
-            "tol": 0.1,
-            "size_quartiles": [
-              2,
-              5,
-              12,
-              28,
-              242
-            ]
-          },
-          "gemma": {
-            "target": 150,
-            "n_clusters": 150,
-            "threshold": 0.410814,
-            "n_merges": 3141,
-            "peak_count": 721,
-            "peak_threshold": 0.2235,
-            "n_singletons": 29,
-            "within_tol": true,
-            "tol": 0.1,
-            "size_quartiles": [
-              2,
-              3,
-              7,
-              18,
-              390
-            ]
-          }
-        },
-        "consensus": {
-          "min_jaccard": 0.5,
-          "n_kept": 26,
-          "n_loose": 124,
-          "loose_items": 3048,
-          "jaccard_kept_median": 0.6667
-        },
-        "sizes": {
-          "primary": {
-            "n": 150,
-            "items": 3314,
-            "min": 2,
-            "median": 12.0,
-            "max": 242,
-            "share_4_to_15": 0.42
-          },
-          "second": {
-            "n": 150,
-            "items": 3291,
-            "min": 2,
-            "median": 7.0,
-            "max": 390,
-            "share_4_to_15": 0.44
-          },
-          "kept": {
-            "n": 26,
-            "items": 266,
-            "min": 2,
-            "median": 6.0,
-            "max": 45,
+            "median": 4.0,
+            "max": 33,
             "share_4_to_15": 0.5
           }
         },
         "purity": {
           "openai": {
-            "nmi": 0.696413,
-            "ari": 0.095483,
-            "n_items_scored": 571,
-            "purity_mean": 0.265038,
-            "purity_median": 0.436508,
+            "nmi": 0.829066,
+            "ari": 0.132311,
+            "n_items_scored": 541,
+            "purity_mean": 0.534256,
+            "purity_median": 0.666667,
             "by_inventory": {
               "16PF": {
-                "n": 151,
-                "nmi": 0.624114,
-                "ari": 0.153501
+                "n": 142,
+                "nmi": 0.717003,
+                "ari": 0.141227
               },
               "6FPQ": {
-                "n": 229,
-                "nmi": 0.62615,
-                "ari": 0.164145
+                "n": 222,
+                "nmi": 0.723191,
+                "ari": 0.128608
               },
               "7FACTOR": {
-                "n": 59,
-                "nmi": 0.587034,
-                "ari": 0.135034
+                "n": 57,
+                "nmi": 0.639902,
+                "ari": 0.042022
               },
               "AB5C": {
-                "n": 480,
-                "nmi": 0.552727,
-                "ari": 0.092255
+                "n": 463,
+                "nmi": 0.693841,
+                "ari": 0.089129
               },
               "BARCHARD2001": {
-                "n": 66,
-                "nmi": 0.619695,
-                "ari": 0.319881
+                "n": 63,
+                "nmi": 0.633795,
+                "ari": 0.191649
               },
               "BFAS": {
-                "n": 49,
-                "nmi": 0.493303,
-                "ari": 0.120114
+                "n": 47,
+                "nmi": 0.614459,
+                "ari": 0.055333
               },
               "BFAS-20": {
-                "n": 64,
-                "nmi": 0.606278,
-                "ari": 0.303572
+                "n": 62,
+                "nmi": 0.602905,
+                "ari": 0.14111
               },
               "BIDR": {
                 "n": 35,
-                "nmi": 0.440149,
-                "ari": 0.079374
+                "nmi": 0.423371,
+                "ari": 0.011628
               },
               "BIS_BAS": {
-                "n": 25,
-                "nmi": 0.514813,
-                "ari": 0.069579
+                "n": 23,
+                "nmi": 0.533441,
+                "ari": 0.049697
               },
               "Barchard, 2001": {
-                "n": 66,
-                "nmi": 0.619695,
-                "ari": 0.319881
+                "n": 63,
+                "nmi": 0.633795,
+                "ari": 0.191649
               },
               "Big-7": {
-                "n": 67,
-                "nmi": 0.576078,
-                "ari": 0.137476
+                "n": 64,
+                "nmi": 0.630104,
+                "ari": 0.039604
               },
               "Big-Five": {
-                "n": 100,
-                "nmi": 0.546671,
-                "ari": 0.26709
+                "n": 95,
+                "nmi": 0.565063,
+                "ari": 0.101
               },
               "CAT-PD": {
                 "n": 200,
-                "nmi": 0.739131,
-                "ari": 0.273055
+                "nmi": 0.82104,
+                "ari": 0.286435
               },
               "CES-D": {
-                "n": 21,
+                "n": 20,
                 "nmi": 0.0,
                 "ari": 0.0
               },
               "CHAPMAN1986": {
-                "n": 24,
-                "nmi": 0.458091,
-                "ari": 0.320675
+                "n": 21,
+                "nmi": 0.416215,
+                "ari": 0.080492
               },
               "CPI": {
-                "n": 319,
-                "nmi": 0.544292,
-                "ari": 0.074918
+                "n": 307,
+                "nmi": 0.684167,
+                "ari": 0.072327
               },
               "Dissociation": {
-                "n": 30,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "FOA2002": {
-                "n": 20,
-                "nmi": 0.536422,
-                "ari": 0.294205
-              },
-              "GOLDBERG1999": {
                 "n": 29,
                 "nmi": 0.0,
                 "ari": 0.0
               },
+              "GOLDBERG1999": {
+                "n": 28,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
               "HEX": {
-                "n": 240,
-                "nmi": 0.651892,
-                "ari": 0.176911
+                "n": 226,
+                "nmi": 0.73338,
+                "ari": 0.125816
               },
               "HEXACO_PI": {
-                "n": 221,
-                "nmi": 0.650014,
-                "ari": 0.168259
+                "n": 208,
+                "nmi": 0.744192,
+                "ari": 0.132536
               },
               "HOYLE2002": {
-                "n": 23,
+                "n": 20,
                 "nmi": 0.0,
                 "ari": 0.0
               },
               "HPI": {
-                "n": 205,
-                "nmi": 0.697876,
-                "ari": 0.173377
+                "n": 197,
+                "nmi": 0.790705,
+                "ari": 0.146204
               },
               "HPI-HIC": {
-                "n": 166,
-                "nmi": 0.685372,
-                "ari": 0.148828
+                "n": 159,
+                "nmi": 0.789626,
+                "ari": 0.146044
               },
               "IPIP-IPC": {
-                "n": 31,
-                "nmi": 0.629521,
-                "ari": 0.08951
+                "n": 30,
+                "nmi": 0.717899,
+                "ari": 0.050669
               },
               "JPI": {
-                "n": 135,
-                "nmi": 0.680016,
-                "ari": 0.237787
-              },
-              "LEVENSON1981": {
-                "n": 20,
-                "nmi": 0.519971,
-                "ari": 0.085932
+                "n": 131,
+                "nmi": 0.728185,
+                "ari": 0.116214
               },
               "MPQ": {
-                "n": 118,
-                "nmi": 0.647202,
-                "ari": 0.187834
+                "n": 114,
+                "nmi": 0.695548,
+                "ari": 0.111539
               },
               "NEO": {
-                "n": 258,
-                "nmi": 0.656067,
-                "ari": 0.162363
+                "n": 251,
+                "nmi": 0.748757,
+                "ari": 0.127732
               },
               "NEO5-20": {
-                "n": 55,
-                "nmi": 0.605907,
-                "ari": 0.170622
+                "n": 54,
+                "nmi": 0.593175,
+                "ari": 0.074672
               },
               "RADLOFF1977": {
-                "n": 21,
+                "n": 20,
                 "nmi": 0.0,
                 "ari": 0.0
               },
               "SINGLECONSTRUCTS": {
-                "n": 88,
-                "nmi": 0.67409,
-                "ari": 0.296919
+                "n": 82,
+                "nmi": 0.728398,
+                "ari": 0.133283
               },
               "TCI": {
-                "n": 274,
-                "nmi": 0.607823,
-                "ari": 0.130894
+                "n": 263,
+                "nmi": 0.7353,
+                "ari": 0.134516
               },
               "VIA": {
-                "n": 185,
-                "nmi": 0.693795,
-                "ari": 0.2383
+                "n": 169,
+                "nmi": 0.741197,
+                "ari": 0.101598
               }
             }
           },
           "gemma": {
-            "nmi": 0.655494,
-            "ari": 0.052963,
-            "n_items_scored": 567,
-            "purity_mean": 0.203646,
-            "purity_median": 0.5,
+            "nmi": 0.83299,
+            "ari": 0.108807,
+            "n_items_scored": 524,
+            "purity_mean": 0.512424,
+            "purity_median": 0.666667,
             "by_inventory": {
               "16PF": {
-                "n": 151,
-                "nmi": 0.564739,
-                "ari": 0.132575
+                "n": 145,
+                "nmi": 0.700279,
+                "ari": 0.108002
               },
               "6FPQ": {
-                "n": 229,
-                "nmi": 0.577105,
-                "ari": 0.120915
+                "n": 221,
+                "nmi": 0.720855,
+                "ari": 0.105187
               },
               "7FACTOR": {
                 "n": 59,
-                "nmi": 0.571403,
-                "ari": 0.197177
+                "nmi": 0.644305,
+                "ari": 0.048211
               },
               "AB5C": {
-                "n": 479,
-                "nmi": 0.483163,
-                "ari": 0.05969
+                "n": 465,
+                "nmi": 0.696565,
+                "ari": 0.075202
               },
               "BARCHARD2001": {
-                "n": 66,
-                "nmi": 0.559068,
-                "ari": 0.221379
+                "n": 61,
+                "nmi": 0.651684,
+                "ari": 0.192876
               },
               "BFAS": {
                 "n": 49,
-                "nmi": 0.514372,
-                "ari": 0.162288
+                "nmi": 0.60745,
+                "ari": 0.035624
               },
               "BFAS-20": {
                 "n": 64,
-                "nmi": 0.531896,
-                "ari": 0.215916
+                "nmi": 0.597523,
+                "ari": 0.121107
               },
               "BIDR": {
-                "n": 35,
-                "nmi": 0.386179,
-                "ari": 0.046901
+                "n": 31,
+                "nmi": 0.437296,
+                "ari": -0.008569
               },
               "BIS_BAS": {
-                "n": 25,
-                "nmi": 0.492713,
-                "ari": 0.108892
+                "n": 24,
+                "nmi": 0.498652,
+                "ari": 0.031305
               },
               "Barchard, 2001": {
-                "n": 66,
-                "nmi": 0.559068,
-                "ari": 0.221379
+                "n": 61,
+                "nmi": 0.651684,
+                "ari": 0.192876
               },
               "Big-7": {
-                "n": 67,
-                "nmi": 0.543532,
-                "ari": 0.166592
+                "n": 66,
+                "nmi": 0.638237,
+                "ari": 0.040643
               },
               "Big-Five": {
-                "n": 100,
-                "nmi": 0.4466,
-                "ari": 0.148712
+                "n": 99,
+                "nmi": 0.539512,
+                "ari": 0.07672
               },
               "CAT-PD": {
-                "n": 200,
-                "nmi": 0.690801,
-                "ari": 0.194759
-              },
-              "CES-D": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
+                "n": 193,
+                "nmi": 0.820324,
+                "ari": 0.255545
               },
               "CHAPMAN1986": {
-                "n": 24,
-                "nmi": 0.432329,
-                "ari": 0.188766
+                "n": 22,
+                "nmi": 0.403234,
+                "ari": 0.065359
               },
               "CPI": {
-                "n": 319,
-                "nmi": 0.496867,
-                "ari": 0.052213
+                "n": 302,
+                "nmi": 0.704353,
+                "ari": 0.064448
               },
               "Dissociation": {
-                "n": 30,
+                "n": 23,
                 "nmi": 0.0,
                 "ari": 0.0
               },
               "FOA2002": {
                 "n": 20,
-                "nmi": 0.417447,
-                "ari": 0.149547
+                "nmi": 0.443504,
+                "ari": 0.102638
               },
               "GOLDBERG1999": {
-                "n": 29,
-                "nmi": 0.0,
-                "ari": 0.0
-              },
-              "HEX": {
-                "n": 240,
-                "nmi": 0.589775,
-                "ari": 0.149307
-              },
-              "HEXACO_PI": {
-                "n": 221,
-                "nmi": 0.591316,
-                "ari": 0.145758
-              },
-              "HOYLE2002": {
                 "n": 23,
                 "nmi": 0.0,
                 "ari": 0.0
               },
+              "HEX": {
+                "n": 226,
+                "nmi": 0.72344,
+                "ari": 0.125523
+              },
+              "HEXACO_PI": {
+                "n": 209,
+                "nmi": 0.729601,
+                "ari": 0.132079
+              },
               "HPI": {
-                "n": 205,
-                "nmi": 0.627942,
-                "ari": 0.093297
+                "n": 197,
+                "nmi": 0.781242,
+                "ari": 0.08484
               },
               "HPI-HIC": {
-                "n": 166,
-                "nmi": 0.668929,
-                "ari": 0.152309
+                "n": 161,
+                "nmi": 0.787422,
+                "ari": 0.152743
               },
               "IPIP-IPC": {
                 "n": 31,
-                "nmi": 0.586599,
-                "ari": 0.09128
+                "nmi": 0.719625,
+                "ari": 0.052229
               },
               "JPI": {
-                "n": 135,
-                "nmi": 0.574464,
-                "ari": 0.110185
-              },
-              "LEVENSON1981": {
-                "n": 20,
-                "nmi": 0.459499,
-                "ari": -0.021162
+                "n": 128,
+                "nmi": 0.701584,
+                "ari": 0.070986
               },
               "MPQ": {
-                "n": 118,
-                "nmi": 0.574331,
-                "ari": 0.098423
+                "n": 107,
+                "nmi": 0.705253,
+                "ari": 0.090772
               },
               "NEO": {
-                "n": 258,
-                "nmi": 0.587865,
-                "ari": 0.103725
+                "n": 248,
+                "nmi": 0.754769,
+                "ari": 0.110167
               },
               "NEO5-20": {
-                "n": 55,
-                "nmi": 0.486013,
-                "ari": 0.070104
-              },
-              "RADLOFF1977": {
-                "n": 21,
-                "nmi": 0.0,
-                "ari": 0.0
+                "n": 54,
+                "nmi": 0.579908,
+                "ari": 0.065897
               },
               "SINGLECONSTRUCTS": {
-                "n": 88,
-                "nmi": 0.627246,
-                "ari": 0.19099
+                "n": 74,
+                "nmi": 0.704705,
+                "ari": 0.087604
               },
               "TCI": {
-                "n": 274,
-                "nmi": 0.554284,
-                "ari": 0.088593
+                "n": 255,
+                "nmi": 0.732926,
+                "ari": 0.104676
               },
               "VIA": {
-                "n": 182,
-                "nmi": 0.616283,
-                "ari": 0.117075
+                "n": 164,
+                "nmi": 0.740443,
+                "ari": 0.09053
               }
             }
           },
           "kept": {
-            "nmi": 0.832279,
-            "ari": 0.424228,
-            "n_items_scored": 50,
-            "purity_mean": 0.482456,
-            "purity_median": 0.571429,
+            "nmi": 0.891586,
+            "ari": 0.306753,
+            "n_items_scored": 185,
+            "purity_mean": 0.600394,
+            "purity_median": 0.791667,
             "by_inventory": {
+              "16PF": {
+                "n": 55,
+                "nmi": 0.796417,
+                "ari": 0.289517
+              },
+              "6FPQ": {
+                "n": 74,
+                "nmi": 0.804279,
+                "ari": 0.230926
+              },
               "AB5C": {
-                "n": 29,
-                "nmi": 0.843824,
-                "ari": 0.408566
+                "n": 145,
+                "nmi": 0.77665,
+                "ari": 0.203585
+              },
+              "BARCHARD2001": {
+                "n": 23,
+                "nmi": 0.756376,
+                "ari": 0.34951
+              },
+              "Barchard, 2001": {
+                "n": 23,
+                "nmi": 0.756376,
+                "ari": 0.34951
+              },
+              "Big-Five": {
+                "n": 25,
+                "nmi": 0.697179,
+                "ari": 0.194221
+              },
+              "CAT-PD": {
+                "n": 58,
+                "nmi": 0.906916,
+                "ari": 0.578579
               },
               "CPI": {
-                "n": 22,
-                "nmi": 0.739393,
-                "ari": 0.316764
+                "n": 90,
+                "nmi": 0.790362,
+                "ari": 0.16893
+              },
+              "HEX": {
+                "n": 64,
+                "nmi": 0.824259,
+                "ari": 0.27773
+              },
+              "HEXACO_PI": {
+                "n": 58,
+                "nmi": 0.839692,
+                "ari": 0.317605
+              },
+              "HPI": {
+                "n": 64,
+                "nmi": 0.842678,
+                "ari": 0.270201
+              },
+              "HPI-HIC": {
+                "n": 49,
+                "nmi": 0.890352,
+                "ari": 0.478163
+              },
+              "JPI": {
+                "n": 40,
+                "nmi": 0.816688,
+                "ari": 0.211236
+              },
+              "MPQ": {
+                "n": 32,
+                "nmi": 0.790761,
+                "ari": 0.211766
+              },
+              "NEO": {
+                "n": 63,
+                "nmi": 0.84619,
+                "ari": 0.305307
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 35,
+                "nmi": 0.8232,
+                "ari": 0.396628
+              },
+              "TCI": {
+                "n": 71,
+                "nmi": 0.848519,
+                "ari": 0.417392
               },
               "VIA": {
-                "n": 22,
-                "nmi": 0.903989,
-                "ari": 0.806833
+                "n": 50,
+                "nmi": 0.845919,
+                "ari": 0.323023
               }
             }
           }
         },
         "bipolar": {
-          "n_clusters": 43,
-          "n_kept": 7
+          "n_clusters": 40,
+          "n_kept": 14
         },
-        "n_poles_kept": 33,
+        "n_poles_kept": 238,
         "naming_carried_over": 0,
         "hdbscan": {
           "n_clusters": 249,
@@ -1015,31 +534,16 @@
           "umap": true,
           "min_cluster_size": 4,
           "seed": 0,
-          "ari_vs_reference": 0.051055
+          "ari_vs_reference": 0.042226
         }
       }
     },
     "usage": {
-      "per_model": {
-        "embeddinggemma-300m": {
-          "model": "embeddinggemma-300m",
-          "prompt_tokens": 60021,
-          "completion_tokens": 0,
-          "cost_usd": 0.0,
-          "n_calls": 104
-        },
-        "text-embedding-3-large": {
-          "model": "text-embedding-3-large",
-          "prompt_tokens": 32880,
-          "completion_tokens": 0,
-          "cost_usd": 0.0043,
-          "n_calls": 14
-        }
-      },
-      "total_cost_usd": 0.0043,
-      "total_prompt_tokens": 92901,
+      "per_model": {},
+      "total_cost_usd": 0,
+      "total_prompt_tokens": 0,
       "total_completion_tokens": 0,
-      "n_calls": 118
+      "n_calls": 0
     },
     "dims": {
       "openai": 3072,
@@ -1049,12 +553,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/ipip_generator.py cluster --budget-usd 1",
-      "git_sha": "eb9ef29+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/ipip_generator.py cluster --targets 600 --budget-usd 1",
+      "git_sha": "5f127b7+dirty",
       "author": "Roger Dearnaley",
       "title": "IPIP clusters: summary per granularity"
     },
-    "produced_at": "2026-10-11T21:34:40+00:00",
+    "produced_at": "2026-10-11T22:23:09+00:00",
     "inputs": [
       {
         "dep_key": "items",

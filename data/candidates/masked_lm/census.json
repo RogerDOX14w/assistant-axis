@@ -1,0 +1,127 @@
+{
+  "result": {
+    "census": {
+      "roberta": {
+        "corpus": {
+          "n": 910,
+          "single": 355,
+          "subword": 333,
+          "multiword": 222,
+          "shares": {
+            "single": 0.3901,
+            "subword": 0.3659,
+            "multiword": 0.244
+          },
+          "subword_examples": [
+            "Aquarius",
+            "Aries",
+            "Capricorn",
+            "ENFJ",
+            "ENFP",
+            "ENTJ",
+            "ENTP",
+            "ESFJ",
+            "ESFP",
+            "ESTJ",
+            "ESTP",
+            "Gemeinschaft",
+            "Gesellschaft",
+            "Gryffindor",
+            "Hufflepuff",
+            "INFJ",
+            "INFP",
+            "INTJ",
+            "INTP",
+            "ISFJ",
+            "ISFP",
+            "ISTJ",
+            "ISTP",
+            "Libra",
+            "Machiavellian",
+            "Neopagan",
+            "Pisces",
+            "Ravenclaw",
+            "Sagittarius",
+            "Scorpio",
+            "Shinto",
+            "Slytherin",
+            "Taoist",
+            "Taurus",
+            "Virgo",
+            "absolutist",
+            "abstemious",
+            "acerbic",
+            "achiever",
+            "adaptable"
+          ]
+        },
+        "queue": {
+          "n": 777,
+          "single": 257,
+          "subword": 294,
+          "multiword": 226,
+          "shares": {
+            "single": 0.3308,
+            "subword": 0.3784,
+            "multiword": 0.2909
+          },
+          "subword_examples": [
+            "Adventurousness",
+            "Altruism",
+            "Aquarius",
+            "Aries",
+            "Assertiveness",
+            "Capricorn",
+            "Cautiousness",
+            "Cheerfulness",
+            "Compassion",
+            "Creativity",
+            "Dependence",
+            "Diligence",
+            "Dutifulness",
+            "ENFJ",
+            "ENFP",
+            "ENTJ",
+            "ENTP",
+            "ESFJ",
+            "ESFP",
+            "ESTJ",
+            "ESTP",
+            "Emotionality",
+            "Fairness",
+            "Fearfulness",
+            "Flexibility",
+            "Forgivingness",
+            "Friendliness",
+            "Gemeinschaft",
+            "Gentleness",
+            "Gesellschaft",
+            "Gregariousness",
+            "Gryffindor",
+            "Hufflepuff",
+            "INFJ",
+            "INFP",
+            "INTJ",
+            "INTP",
+            "ISFJ",
+            "ISFP",
+            "ISTJ"
+          ]
+        }
+      }
+    },
+    "missing_models": [],
+    "n_corpus": 910,
+    "n_queue": 777
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py census --queue",
+      "git_sha": "f881644+dirty",
+      "author": "Roger Dearnaley",
+      "title": "masked-LM generator: tokenizer census"
+    },
+    "produced_at": "2026-10-11T23:37:28+00:00"
+  }
+}

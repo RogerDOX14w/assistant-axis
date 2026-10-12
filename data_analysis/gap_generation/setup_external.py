@@ -51,11 +51,14 @@ def _dir_size_mb(p: Path) -> float:
 
 
 def allow_patterns() -> dict[str, list[str]]:
-    """Every model this script may fetch: the M2 embedders (``gapgen.embed.HF_ALLOW_PATTERNS``) and the
+    """Every model this script may fetch: the M2 embedders (``gapgen.embed.HF_ALLOW_PATTERNS``), the
     base-model generator's sampler (``generators.base_model.sources.HF_MODEL_ALLOW_PATTERNS``, approved by
-    Roger 2026-10-10 in coding_plan_03_base_model.md section 5a)."""
+    Roger 2026-10-10 in coding_plan_03_base_model.md section 5a), and the masked-LM generator's approved
+    fill-mask models (``generators.masked_lm.models.HF_MODEL_ALLOW_PATTERNS``: roberta-large, approved by Roger
+    2026-10-11; the other two wait on his word)."""
     from assistant_axis.gapgen.generators.base_model.sources import HF_MODEL_ALLOW_PATTERNS
-    return {**ge.HF_ALLOW_PATTERNS, **HF_MODEL_ALLOW_PATTERNS}
+    from assistant_axis.gapgen.generators.masked_lm.models import HF_MODEL_ALLOW_PATTERNS as MLM_PATTERNS
+    return {**ge.HF_ALLOW_PATTERNS, **HF_MODEL_ALLOW_PATTERNS, **MLM_PATTERNS}
 
 
 def fetch_hf_model(model_id: str, *, dry_run: bool = False) -> int:

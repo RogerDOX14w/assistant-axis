@@ -460,3 +460,54 @@ has not met its measured target.  The enactability gate is advisory after the pi
 a target of 26): its verdicts appear in the readout, and no candidate is removed because of them.
 That measurement is of the rubric's draft 1; draft 2 has not been evaluated, so the gate stays
 advisory until it is.
+
+## Masked-LM generator terms (added 2026-10-12, for workstream 4)
+
+From [coding_plan_04_masked_lm.md](./coding_plan_04_masked_lm.md) and its
+[acceptance report](./acceptance_04_masked_lm.md).
+
+<a id="masked-lm"></a>
+### Masked LM, fill-mask
+A language model trained to fill a blanked-out word back into a sentence (BERT, RoBERTa, ModernBERT),
+rather than to continue a text.  Given "She is [MASK] by nature." it returns a probability for every
+word piece in its vocabulary at the blank; the generator keeps the whole ranked list, not only the
+top few.  Here `roberta-large`, run on this Mac for free.
+
+<a id="frame"></a>
+### Frame, frame instance
+A frame is one hand-written sentence with a blank, written so that any subject fits ("{subject} is
+[MASK] by nature"); an instance is the frame with one subject filled in ("He is [MASK] by nature").
+The bank crosses ten subjects, six registers (reference letter, novel, performance review, casual
+review, psychology textbook, chat) and three slot types (predicate adjective, attributive adjective,
+agent noun), so the bias each brings can be measured by removing it (the frame ablation).
+
+<a id="pseudo-log-likelihood"></a>
+### Pseudo-log-likelihood (PLL)
+How well a masked LM thinks a given word fits a frame when the word is several pieces long: put the
+word into the blank, blank out each of its pieces in turn, and add up the log-probabilities the model
+gives the pieces back.  The generator's default ("l2r") also blanks the pieces to the right of the one
+being scored, so a split word is scored left to right like a chain; the plain form lets the later
+pieces give the earlier ones away and so overrates split words.  For a one-piece word both are just
+its probability in the blank.
+
+<a id="variant-b"></a>
+### Variant B, the beam passes
+Two ways to reach words the tokenizer splits (sycophantic is four pieces) and phrases (risk-averse,
+kind to animals).  **Variant B** scores a fixed list, Open English WordNet's adjectives and person
+nouns (about 29,500), by PLL in twelve frames: exact, but blind to anything WordNet lacks.  The
+**beam passes** let the model invent: fill the first blank with its top choices, then the next blank
+given each, keeping sequences that rebuild a word (subword pass) or a phrase (multiword pass): open
+to new words, but noisy.
+
+<a id="contrast-score"></a>
+### Trait-hood contrast score
+A word's PLL in dispositional frames ("is [MASK] by nature") minus the larger of its PLL in state
+frames ("is [MASK] today") and physical frames ("looks [MASK]").  High means the word reads as a
+lasting disposition rather than a passing state or an appearance.  It rides each submitted
+candidate's `score`; its AUC on corpus traits against hand-picked states and physical words says how
+well it separates them (target 0.85, report and decide).
+
+<a id="union-rank"></a>
+### Union rank
+The generator's single ordering of every word any pass surfaced: by the best log-probability the word
+reached in any frame, any pass, ties by word frequency.  Recall@k against it is the recovery curve.
