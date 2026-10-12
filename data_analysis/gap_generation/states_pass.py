@@ -5,8 +5,32 @@
         (--holding-states [--rejudge] | --filter-results F [F ...]) [--limit N]
     uv run python data_analysis/gap_generation/states_pass.py --batch-id B --mode corpus \\
         (--stems S [S ...] | --filter-results F [F ...]) [--limit N]
+    uv run python data_analysis/gap_generation/states_pass.py --batch-id B --mode queue --reroute \\
+        [--send-missing] [--route-rules 2] [--dry-run]
     common: [--model claude-haiku-5-5] [--batch-size 20] [--budget-usd 1.0] [--transport auto|live|batches]
             [--resume] [--confirm-expensive --confirmed-by WHO] [--allow-dirty] [--dry-run] [--overwrite]
+            [--route-rules 1|2] [--state-text-form as_recorded|now_stripped]
+
+Route rules (``--route-rules``, default 2 from 2026-10-12; ``assistant_axis.gapgen.states_pass.ROUTE_RULES``): under 2
+the gloss check confirms any reading but ``passing``, and a row the pass itself submitted whose name does not fit is
+released under its own name with the suggested name on its review card; 1 reproduces the routing before (the reading
+must equal the route; such a row is held).  Every block records its ``route_rules``.  A resumed run keeps the rules
+its ``run.json`` recorded (1 when it recorded none) unless the flag is given.
+
+What the queue call is shown (``--state-text-form``, default ``now_stripped`` from 2026-10-12): M1's reading with its
+"now" markers taken out ("currently", "right now", "(a passing mood)" ...), so that the duration question is about
+the state the word names; ``as_recorded`` shows M1's text as it is.  A payload form, recorded in ``run.json``, the
+summary and every block (``state_text_form``); a resumed run keeps its recorded form (``as_recorded`` when it
+recorded none), since its answers on record are keyed by the text shown.
+
+``--reroute`` decides again, under ``--route-rules``, every row on the states list whose queue-mode v4 block was
+decided under other rules, from the answers its batch recorded (``states_pass/<batch>/responses.jsonl``: the queue
+row, the gloss check's reading, the alignment score): no call is sent.  It prints every row whose route changes, the
+rows that stay, and the rows whose new route needs a call their batch never made (a one-hop row's gloss check and
+alignment call), with what they need.  Without ``--dry-run`` it writes the changed rows' blocks (the answers' batch
+kept as ``batch_id``, the re-route in ``rerouted``) and their new ``holding`` to the registry, and its own record to
+``states_pass/<batch_id>/``.  ``--send-missing`` (paid, through the cost gate, live) then makes the missing calls for
+the rows that need them, and writes those rows too.
 
 ``--model`` defaults to Haiku 5.5 since 2026-10-08 (Haiku 4.5,
 ``claude-haiku-4-5-20251001``, before; still selectable); every block names its model.
@@ -55,6 +79,7 @@ import logging
 import math
 import shutil
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Optional
 
@@ -92,10 +117,34 @@ def _earlier_run(out_dir: Path) -> Optional[dict]:
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
-def select_items(args, earlier: Optional[dict] = None) -> tuple[list[sp.StatesItem], Optional[Registry], dict]:
+def resolve_route_rules(args, earlier: Optional[dict] = None) -> int:
+    """``--route-rules``; else, on ``--resume``, the rules the first session recorded (1 when it recorded none); else
+    the current rules."""
+    if getattr(args, "route_rules", None) is not None:
+        return sp.check_route_rules(args.route_rules)
+    if earlier is not None:
+        return sp.check_route_rules(earlier.get("route_rules", 1))
+    return sp.ROUTE_RULES_VERSION
+
+
+def resolve_text_form(args, earlier: Optional[dict] = None) -> str:
+    """``--state-text-form``; on ``--resume`` the first session's form (``as_recorded`` when it recorded none), which
+    an explicit flag may not contradict (its answers on record are keyed by the text shown); else the default."""
+    recorded = sp.recorded_text_form(earlier)
+    asked = getattr(args, "state_text_form", None)
+    if asked is not None:
+        if recorded is not None and asked != recorded:
+            raise SystemExit(f"--resume: the first session showed the states in form {recorded!r}; "
+                             f"--state-text-form {asked} would not find its answers")
+        return asked
+    return recorded or sp.DEFAULT_TEXT_FORM
+
+
+def select_items(args, earlier: Optional[dict] = None, text_form: str = sp.DEFAULT_TEXT_FORM
+                 ) -> tuple[list[sp.StatesItem], Optional[Registry], dict]:
     """Items to judge, the registry to write (queue mode from the registry only) and a map of skipped names
     (corpus mode).  ``earlier`` (``--resume``): the first session's ``run.json``, whose ``item_keys`` are the rows
-    again, whatever list they are on now."""
+    again, whatever list they are on now.  ``text_form``: how a queue item's text is shown (:data:`sp.TEXT_FORMS`)."""
     skipped: dict[str, str] = {}
     reg = None
     if args.mode == "queue":
@@ -108,16 +157,14 @@ def select_items(args, earlier: Optional[dict] = None) -> tuple[list[sp.StatesIt
                 missing = [k for k in earlier["item_keys"] if k not in rows]
                 if missing:
                     raise SystemExit(f"--resume: the registry no longer has {', '.join(missing[:5])}")
-                recs = [rows[k] for k in earlier["item_keys"]]
-                items = [sp.StatesItem(key=r["key"], label=r["label"], text=sp.state_text(r),
-                                       meta={"from_states_pass": sp.from_states_pass(r)}) for r in recs]
+                items = [sp.item_from_row(rows[k], text_form=text_form) for k in earlier["item_keys"]]
             else:
                 recs = holding_list(sp.HOLDING, registry=reg)
                 if not args.rejudge:
                     recs = [r for r in recs if not r.get("states_pass")]
-                items = sp.items_from_registry(recs)
+                items = sp.items_from_registry(recs, text_form=text_form)
         else:
-            items = sp.items_from_filter_results(_read_jsonl(args.filter_results))
+            items = sp.items_from_filter_results(_read_jsonl(args.filter_results), text_form=text_form)
     else:
         if args.holding_states:
             raise SystemExit("--holding-states applies to --mode queue only")
@@ -173,6 +220,20 @@ def build_parser() -> argparse.ArgumentParser:
     sel.add_argument("--filter-results", type=Path, nargs="+",
                      help="filter results.jsonl files: rows tagged state (corpus mode: existing stratum only)")
     sel.add_argument("--stems", nargs="+", help="corpus mode: corpus trait stems or labels")
+    sel.add_argument("--reroute", action="store_true",
+                     help="queue mode: decide again, under --route-rules, the rows on the states list decided under "
+                          "other rules, from the answers their batches recorded (no call; writes the registry "
+                          "unless --dry-run)")
+    ap.add_argument("--send-missing", action="store_true",
+                    help="with --reroute: make the gloss-check and alignment calls a re-routed row needs and its "
+                         "batch never made (paid, live, through the cost gate)")
+    ap.add_argument("--route-rules", type=int, choices=sp.ROUTE_RULES, default=None,
+                    help=f"routing rules (default {sp.ROUTE_RULES_VERSION}; a resume keeps its recorded rules): 2 "
+                         f"confirms any gloss reading but passing and releases a one-hop row under its own name; "
+                         f"1 reproduces the routing before 2026-10-12")
+    ap.add_argument("--state-text-form", choices=sp.TEXT_FORMS, default=None,
+                    help=f"what the queue call is shown (default {sp.DEFAULT_TEXT_FORM}; a resume keeps its "
+                         f"recorded form): M1's reading without its 'now' markers, or as recorded")
     ap.add_argument("--rejudge", action="store_true", help="with --holding-states: rows already judged too")
     ap.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR, help="corpus data dir (read only)")
@@ -225,6 +286,10 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
     out_dir = paths.states_pass_dir(args.batch_id, candidates_dir=args.out_root)
+    if args.reroute:
+        if args.resume:
+            raise SystemExit("--reroute reads the record of every batch it re-routes; it is not resumed")
+        return run_reroute(args, out_dir)
     earlier = None
     if args.resume:
         if args.overwrite:
@@ -241,7 +306,11 @@ def main(argv=None) -> int:
     # stored label and text, not by the prompt; a run before 2026-10-09 recorded none: "stored"); a new run shows the
     # judge display form
     label_form = PL.resolve_label_form(earlier=earlier)
-    items, reg, skipped = select_items(args, earlier)
+    if args.send_missing:
+        raise SystemExit("--send-missing applies to --reroute only")
+    route_rules = resolve_route_rules(args, earlier)
+    text_form = resolve_text_form(args, earlier) if args.mode == "queue" else None
+    items, reg, skipped = select_items(args, earlier, text_form or sp.DEFAULT_TEXT_FORM)
     for name, why in skipped.items():
         print(f"SKIPPED {name}: {why}", file=sys.stderr)
     if not items:
@@ -249,7 +318,10 @@ def main(argv=None) -> int:
         return 0
     transport, why = choose_transport(args.transport, len(items))
     est = build_estimate(items, args, transport)
-    print(f"plan: {json.dumps({'mode': args.mode, 'n_rows': len(items), 'registry': bool(reg), 'transport': transport})}")
+    plan = {'mode': args.mode, 'n_rows': len(items), 'registry': bool(reg), 'transport': transport}
+    if args.mode == "queue":
+        plan.update(route_rules=route_rules, state_text_form=text_form)
+    print(f"plan: {json.dumps(plan)}")
     print(f"transport: {transport} ({why})")
     print("estimate:\n" + est.format())
     refused: Optional[str] = None
@@ -275,6 +347,10 @@ def main(argv=None) -> int:
         print(f"system prompt: {len(sp.PROMPTS[args.mode])} chars (states rubric v{sp.RUBRIC_VERSIONS[args.mode]}); "
               f"prompt sha256: {sp.PROMPT_SHA256[args.mode]}")
         print(f"label form: {label_form}")
+        if args.mode == "queue":
+            n_strip = sum(1 for it in items if it.meta.get("text_as_recorded"))
+            print(f"route rules: {route_rules}; state text form: {text_form}"
+                  + (f" ({n_strip} of {len(items)} texts lose a 'now' marker)" if text_form == "now_stripped" else ""))
         print(_render(items, args, label_form))
         return 0
     if refused:
@@ -313,6 +389,12 @@ def main(argv=None) -> int:
                             alignment_model=sp.ALIGNMENT_MODEL,
                             alignment_step_version=pins["step_versions"]["alignment"],
                             alignment_prompt_sha256=pins["prompt_sha256"]["alignment"])
+    if args.mode == "queue":
+        # the routing rules and the text form (states_pass.ROUTE_RULES, TEXT_FORMS); a resume keeps the recorded ones
+        # unless the flag says otherwise, and the session records what it used
+        run_meta.setdefault("route_rules", route_rules)
+        run_meta.setdefault(sp.TEXT_FORM_KEY, text_form)
+        session.update(route_rules=route_rules, state_text_form=text_form)
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -328,7 +410,8 @@ def main(argv=None) -> int:
     runner = sp.StatesPassRunner(client=client, batch_id=args.batch_id, mode=args.mode, model=args.model,
                                  usage=usage, batch_size=args.batch_size, concurrency=args.concurrency,
                                  responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
-                                 close_client=True, label_form=label_form)
+                                 close_client=True, label_form=label_form, route_rules=route_rules,
+                                 text_form=text_form)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap,
                                           poll_seconds=POLL_SECONDS)
@@ -349,6 +432,191 @@ def main(argv=None) -> int:
         finally:
             logging.getLogger().removeHandler(fh)
             fh.close()
+    return status
+
+
+def _replay_batch(batch: str, rows: dict, args, rules: int, transport, *, usage=None, client=None,
+                  responses_path: Optional[Path] = None) -> tuple[Optional[sp.StatesPassRunner], list, dict]:
+    """One recorded batch's rows through the runner under ``rules``, its answers on record replayed: ``(runner,
+    items, missing)``; ``runner`` is None when the batch has no record.  The runner shows labels and texts as the
+    batch did (its ``run.json``'s label form; the queue records' items), so that every recorded answer is found."""
+    bdir = paths.states_pass_dir(batch, candidates_dir=args.out_root)
+    run_json = _earlier_run(bdir)
+    resp = bdir / "responses.jsonl"
+    if run_json is None or not resp.exists():
+        return None, [], {k: f"no record of batch {batch} ({bdir})" for k in rows}
+    recs = _read_jsonl([resp])
+    items, missing = sp.reroute_items(rows, recs)
+    runner = sp.StatesPassRunner(client=client, batch_id=args.batch_id, mode="queue", model=run_json["model"],
+                                 usage=usage, label_form=PL.resolve_label_form(source=run_json), route_rules=rules,
+                                 text_form=sp.recorded_text_form(run_json), resume_records=recs,
+                                 transport=transport, responses_path=responses_path, close_client=client is not None,
+                                 concurrency=args.concurrency)
+    if items:
+        try:
+            runner.run(items)
+        except sp.CallsNeeded:
+            pass                     # the rows waiting on calls stay pending; the record settled the others
+    return runner, items, missing
+
+
+def run_reroute(args, out_dir: Path) -> int:
+    """``--reroute``: every row on the states list decided under other route rules than ``--route-rules``, decided
+    again from its batch's answers on record (no call); printed, then written unless ``--dry-run``.  With
+    ``--send-missing`` the calls a re-routed row needs and its batch never made are made (paid), and those rows
+    written too."""
+    if args.mode != "queue":
+        raise SystemExit("--reroute applies to --mode queue only")
+    rules = sp.check_route_rules(args.route_rules if args.route_rules is not None else sp.ROUTE_RULES_VERSION)
+    reg = Registry(args.registry)
+    rows = reg.fold()
+    todo = {k: r for k, r in sorted(rows.items()) if sp.needs_reroute(r, rules)}
+    if args.limit:
+        todo = dict(list(todo.items())[:args.limit])
+    by_batch: dict[str, dict] = {}
+    for k, r in todo.items():
+        by_batch.setdefault(sp.block_of(r).get("batch_id") or "?", {})[k] = r
+    print(f"plan: {json.dumps({'reroute': True, 'route_rules': rules, 'n_rows': len(todo), 'batches': {b: len(v) for b, v in sorted(by_batch.items())}})}")
+    changed: dict[str, dict] = {}          # key -> new block
+    report: list[dict] = []
+    pending: dict[str, tuple[str, dict, list]] = {}   # key -> (batch, row, the calls it waits on)
+    for batch, brows in sorted(by_batch.items()):
+        runner, items, missing = _replay_batch(batch, brows, args, rules, sp.RecordOnlyTransport())
+        for k, why in missing.items():
+            report.append({"key": k, "label": brows[k]["label"], "batch": batch, "outcome": "no_record", "why": why})
+        if runner is None:
+            continue
+        needed = runner.transport.needed
+        for it in items:
+            res = runner.results[it.key]
+            old = sp.block_of(brows[it.key])
+            if res.stage == "judged":
+                new = sp.rerouted_block(res.block, old, reroute_batch_id=args.batch_id)
+                ch = sp.route_change(old, new)
+                chk = new.get("gloss_check") or {}
+                reading = (chk.get("check") or {}).get("reading")
+                rec = {"key": it.key, "label": it.label, "batch": batch, "outcome": "changed" if ch else "unchanged",
+                       "from": old.get("route"), "to": new.get("route"), "holding_after": new.get("holding_after"),
+                       "route_reason": new.get("route_reason"), "gloss_by": chk.get("by"), "reading": reading,
+                       "alignment": new.get("alignment"), "suggested_name": sp.other_name(new, it.label)}
+                report.append(rec)
+                if ch:
+                    changed[it.key] = new
+            else:
+                calls = [c for c in needed if c.key == it.key]
+                # the block holds the queue answers the record replayed
+                route, why = sp.route_for(old, label=it.label, from_states_pass=bool(it.meta.get("from_states_pass")),
+                                          rules=rules)
+                pending[it.key] = (batch, brows[it.key], calls)
+                report.append({"key": it.key, "label": it.label, "batch": batch, "outcome": "needs_calls",
+                               "from": old.get("route"), "to": route, "route_reason": why,
+                               "needs": sorted(c.step for c in calls),
+                               "suggested_name": old.get("suggested_name")})
+    for r in report:
+        if r["outcome"] == "changed":
+            extra = (f"; gloss confirmed by the {r['gloss_by']}" + (f" (read as {r['reading']})" if r["reading"] else "")
+                     + (f"; alignment {r['alignment']}" if r["alignment"] is not None else "")
+                     + (f"; suggested name '{r['suggested_name']}' on its card" if r["suggested_name"] else ""))
+            print(f"CHANGED   {r['label']} ({r['batch']}): {r['from']} -> {r['to']} ({r['holding_after']}){extra}")
+        elif r["outcome"] == "needs_calls":
+            print(f"NEEDS     {r['label']} ({r['batch']}): {r['from']} -> {r['to']} once {' and '.join(r['needs'])} "
+                  f"call(s) are made (not on record); {r['route_reason']}")
+        elif r["outcome"] == "no_record":
+            print(f"NO RECORD {r['label']} ({r['batch']}): {r['why']}")
+    same = [f"{r['label']} ({r['to']})" for r in report if r["outcome"] == "unchanged"]
+    if same:
+        print(f"UNCHANGED {len(same)}: {', '.join(same)}")
+    n = Counter(r["outcome"] for r in report)
+    print(f"reroute: {n.get('changed', 0)} changed, {n.get('unchanged', 0)} unchanged, "
+          f"{n.get('needs_calls', 0)} need calls, {n.get('no_record', 0)} without a record "
+          f"(of {len(todo)} rows decided under other route rules)")
+    calls = [c for _, _, cs in pending.values() for c in cs]
+    est_usd = sp.StatesPassRunner(client=None, batch_id="estimate", mode="queue").estimate_usd(calls) if calls else 0.0
+    if calls:
+        print(f"--send-missing would make {len(calls)} call(s) ({dict(Counter(c.step for c in calls))}), "
+              f"about ${est_usd:.4f} live")
+    refused: Optional[str] = None
+    cap = None
+    if args.send_missing and calls:
+        try:
+            cap = confirm_or_abort(est_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                                   confirmed_by=args.confirmed_by)
+        except CostRefused as exc:
+            refused = exc.msg
+    sha = git_sha()
+    dirty = platform_dirty_files()
+    dirty_check = {"paths": list(PLATFORM_PATHS), "dirty": dirty,
+                   "note": None if dirty is not None else "git unavailable: not checked"}
+    if refused is None and dirty and not args.allow_dirty:
+        refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                   f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty")
+    if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+        print(f"DRY-RUN: would write {len(changed)} rows to the registry {args.registry} and {out_dir}/"
+              + (f"; with --send-missing, {len(pending)} more after {len(calls)} call(s)" if pending else ""))
+        return 0
+    if refused:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        return 2
+    if not changed and not (args.send_missing and pending):
+        print("nothing to write", file=sys.stderr)
+        return 0
+    if out_dir.exists():
+        if not args.overwrite:
+            print(f"{out_dir} exists; choose a new --batch-id or pass --overwrite", file=sys.stderr)
+            return 1
+        bak = out_dir.with_name(f"{out_dir.name}.bak.{utc_stamp()}")
+        shutil.move(str(out_dir), str(bak))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    status = 0
+    if args.send_missing and pending:
+        from dotenv import load_dotenv
+        import anthropic
+        load_dotenv(_REPO_ROOT / ".env")
+        by: dict[str, dict] = {}
+        for k, (batch, row, _) in pending.items():
+            by.setdefault(batch, {})[k] = row
+        for batch, brows in sorted(by.items()):
+            client = anthropic.AsyncAnthropic(max_retries=0)
+            try:
+                runner, items, _ = _replay_batch(batch, brows, args, rules, None, usage=usage, client=client,
+                                                 responses_path=out_dir / "responses.jsonl")
+            except BudgetExceededError as exc:
+                print(f"STOPPED: {exc}", file=sys.stderr)
+                status = 2
+                break
+            for it in items:
+                res = runner.results[it.key]
+                if res.stage == "judged":
+                    changed[it.key] = sp.rerouted_block(res.block, sp.block_of(brows[it.key]),
+                                                        reroute_batch_id=args.batch_id)
+                    for r in report:
+                        if r["key"] == it.key:
+                            r.update(outcome="changed_after_calls", to=res.block["route"],
+                                     holding_after=res.block["holding_after"])
+            runner.warn_parse_rate(logger)
+    results = [sp.StatesResult(key=k, label=rows[k]["label"], stage="judged", block=b) for k, b in changed.items()]
+    writes = write_registry(reg, results, args=args)
+    print(f"registry: {writes['n_rows_written']} rows updated")
+    write_jsonl(report, out_dir / "results.jsonl")
+    usage.write_json(out_dir / "usage.json")
+    run_meta = {"batch_id": args.batch_id, "mode": "queue", "reroute": True, "route_rules": rules,
+                "argv": list(sys.argv[1:]), "git_sha": sha, "dirty_check": dirty_check,
+                "allow_dirty": bool(args.allow_dirty), "source_batches": sorted(by_batch),
+                "n_rows": len(todo), "item_keys": list(todo), "send_missing": bool(args.send_missing),
+                "estimate_usd": round(est_usd, 4), "cap_usd": cap, "cost_usd": round(usage.total_cost_usd, 4),
+                "finished_at": utc_now(), "status": status}
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    from assistant_axis.plot_metadata import json_metadata
+    summary = {"reroute": True, "route_rules": rules, "outcomes": dict(Counter(r["outcome"] for r in report)),
+               "changed": [f"{r['label']}: {r['from']} -> {r['to']}" for r in report if r["outcome"].startswith("changed")],
+               "submitted_renames": writes.get("submitted", []), "cost_usd": round(usage.total_cost_usd, 4),
+               "usage": usage.as_dict()}
+    atomic_write_text(json.dumps(json_metadata(summary, title=f"states_pass reroute {args.batch_id}"), indent=2,
+                                 ensure_ascii=False) + "\n", out_dir / "summary.json")
+    print(usage.log_line())
     return status
 
 

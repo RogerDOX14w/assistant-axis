@@ -96,6 +96,16 @@ per call, Sonnet then Opus under `RULES` at cut-off 4, prompt caching on) throug
 the other candidate standing in the "other trait" slot (its gloss as the description).  Corpus and queue edges
 are copied from `novelty.readings` and `novelty.listed`; no new corpus call.
 
+**The pair floor (2026-10-12, gate audit 8; [review_graph_thresholds.md](../code_review_2026-10-12/gate_audits/review_graph_thresholds.md)).**
+Beside the k nearest, every candidate pair at cosine **0.55** or above is an edge (`--pair-floor`,
+`DEFAULT_PAIR_FLOOR`; `none` reproduces the k-nearest graph; such an edge records `via: pair_floor`), because
+k = 10 had cut 22% of the pairs Roger resolved as one concept.  Two labels that differ only by hyphen, case,
+space or apostrophe (M3's blind form) are joined by a 3-edge whatever their readings.  A relation list over 40
+candidates (`RELATION_LIST_MAX`) is split into as few calls as hold it.  The estimate takes its per-bin shares
+from an earlier build's own graph (`--calibrate-from`, default `review_tda_1`; in sample $4.990 against $4.997
+spent).  `opus-pilot` sends N pairs Sonnet read 2 to Opus, prompts byte-identical, and reports against Roger's
+resolutions.  `GRAPH_SCHEMA` 3.
+
 **Cliques.**  Maximal cliques (Bron-Kerbosch; the strict graph is small and sparse) on the 4-edges.  A candidate
 in no clique is a singleton group.  Overlapping cliques stay overlapping; the app shows the overlap.
 
@@ -348,6 +358,17 @@ the registry field `holding`, which keeps a row out of the trait flow until some
 since round 2 (decision 12 of [decisions_m1.md](./decisions_m1.md)), but nothing acted on its answers except a
 promotion under a name Roger typed in (`--confirm-state-name`, [QUESTIONS.md](./QUESTIONS.md) question 14).
 Version 4 of its queue prompt adds his rules of 2026-10-09 and moves rows out of the list.
+
+**Route rules 2 (2026-10-12, gate audit 7; [states_pass.md](../code_review_2026-10-12/gate_audits/states_pass.md)).**  Three changes, no prompt
+text changed: the gloss check accepts any reading but `passing` (`ROUTE_RULES_VERSION` 2, `gloss_check_accepts`;
+rules 1 required the reading to equal the route and held 10 traits of the 11 it held); a one-hop row, a candidate
+the states pass itself submitted, is released under its own name with the suggested name on its review card
+(`one_hop`, `card_tag`, the seed-queue note) instead of held; and the queue call reads M1's text with its "now"
+markers removed (`--state-text-form now_stripped`, the default; `as_recorded` reproduces the old payload; the
+original stays in `meta.text_as_recorded`).  Every block records `route_rules` and `state_text_form`; a block
+without them was decided under rules 1 on the text as recorded.  `--reroute` re-decides a batch from its recorded
+answers without a call (`--send-missing` makes only the missing check and alignment calls); `--route-rules 1`
+reproduces the old routing; a resume keeps what it recorded.
 
 **Roger's rules (2026-10-09; his words, condensed by the coordinator).**  For a word on the states list:
 

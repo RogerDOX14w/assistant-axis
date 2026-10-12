@@ -41,7 +41,8 @@ Two modes, each with its own prompt and prompt hash:
   ``renamed``               not lasting, plausible, another name fits        stays on the states list; the suggested
                                                                              name is submitted as a new candidate
   ``held``                  not lasting and not plausible; a gloss the       stays on the states list, the reason on
-                            check rejects; a rename of a rename              the block (``route_reason``)
+                            check rejects (route rules 1: a rename of a      the block (``route_reason``)
+                            rename)
   ========================  ===============================================  ==========================================
 
   The coordinator's proposal, which Roger has not objected to (2026-10-09): "move out" means the row leaves the
@@ -49,17 +50,29 @@ Two modes, each with its own prompt and prompt hash:
   states``), so Roger decides in review; a renamed row's name is a candidate in its own right (generator
   ``states_pass``, run id the states-pass batch, ``source_ref`` the state's key, ``gloss_hint`` the predisposition
   gloss), which goes through M1, M3 and review normally.  A candidate the states pass submitted gets one hop: if M1
-  tags it a state again and the pass would rename it once more, it is held ("already a states-pass rename").
+  tags it a state again and the pass would rename it once more, it is not renamed again.  Under route rules 1 it was
+  held ("already a states-pass rename"); under rules 2 (Roger, 2026-10-12) it is released as ``predisposition`` under
+  its own name, the suggested name kept on its block and shown on its review card (:data:`ROUTE_RULES`).
 
   **The gloss check** (:func:`scan_gloss`, then :data:`CHECK_PROMPT`): a keyword scan first.  A gloss with a marker
   for its route (lasting: "for months", "years", "day after day" ...; predisposition: "again and again", "easily",
   "often", "whenever", "any" ...) and none against ("right now", "at the moment", "today", "this morning", "just"
   ...) is accepted by the scan; any other goes to a short Haiku call that reads the sentence as ``lasting``,
-  ``predisposition`` or ``passing``, without being told which was meant, and the gloss is confirmed when the
-  reading is its route's.  A gloss the check reads otherwise keeps the row on the states list (route ``held``).
+  ``predisposition`` or ``passing``, without being told which was meant.  Under route rules 2 the gloss is confirmed
+  unless the reading is ``passing`` (under rules 1, only when the reading was its route's;
+  :func:`gloss_check_accepts`).  A gloss the check turns down keeps the row on the states list (route ``held``).
   The alignment score is M1's alignment call (``rubrics/alignment.md`` as pinned, on M1's first model, as the
   physical pass sends it) on the confirmed gloss; it is sent beside the check calls, so a gloss the check turns
-  down has paid for a score that is not recorded.
+  down has paid for a score that is not recorded on the block (its answer is in ``responses.jsonl``).
+
+  **What the queue call is shown** (:data:`TEXT_FORMS`): the row's gloss, or M1's accepted reading, from 2026-10-12
+  with M1's "now" markers taken out (:func:`strip_now_markers`), so that the duration question is about the state the
+  word names.
+
+  **Re-routing from the record** (``states_pass.py --reroute``; :class:`RecordOnlyTransport`): a row decided under
+  older route rules is decided again from the answers its batch recorded (``responses.jsonl``: the queue row, the
+  check reading, the alignment score), with no new call; a row whose new route needs a call its batch never made (a
+  one-hop row's gloss check and alignment call) is listed with what it needs.
 
 * ``corpus``: existing corpus labels that came back tagged ``state``.  Given the label and its corpus description,
   the model says whether the description describes a habitual predisposition or a momentary state.  The default
@@ -69,7 +82,9 @@ Two modes, each with its own prompt and prompt hash:
 
 The block written on a row (registry field ``states_pass``, or the run's ``results.jsonl``) carries ``mode``,
 ``rubric_version``, ``model``, ``batch_id``, the answers, ``confidence``, ``prompt_sha256`` and ``at``; in queue mode
-from v4 also ``route``, ``route_reason``, ``holding_after``, ``gloss_check`` and the alignment fields.  Changing anything
+from v4 also ``route``, ``route_reason``, ``holding_after``, ``gloss_check`` and the alignment fields, and from
+2026-10-12 ``route_rules``, ``state_text_form`` (when the caller names it), ``one_hop`` (when that rule decided the
+row) and, on a re-routed row, ``rerouted`` (the re-route's batch and the decision it replaced).  Changing anything
 the model reads here is a rubric change: bump its entry in :data:`RUBRIC_VERSIONS` (or :data:`CHECK_RUBRIC_VERSION`)
 and add the pin in ``rubric_versions.HISTORY``.  The one exception (2026-10-09, W19): the labels are shown in the
 judge display form (a corpus label's standard in the long form, ``careless (from HEXACO)``;
@@ -282,6 +297,117 @@ PROMPTS = {"queue": QUEUE_PROMPT, "corpus": CORPUS_PROMPT}
 PROMPT_SHA256 = {m: hashlib.sha256(p.encode("utf-8")).hexdigest() for m, p in PROMPTS.items()}
 CHECK_PROMPT_SHA256 = hashlib.sha256(CHECK_PROMPT.encode("utf-8")).hexdigest()
 
+#: The routing rules: code, not prompt text (no prompt changed, so no rubric version moved), which turn a queue answer
+#: and a gloss-check reading into a route.  Every queue block records the rules that decided it as ``route_rules`` (a
+#: block without the field was decided under 1); ``--route-rules 1`` reproduces the old routing.
+#:
+#: * 1 (2026-10-09): the gloss check confirms a gloss only when its reading equals the route; a row the states pass
+#:   itself submitted whose name does not fit is held (one hop, :data:`ONE_HOP_REASON`).
+#: * 2 (Roger, 2026-10-12, gate audit 7, ``reports/code_review_2026-10-12/gate_audits/states_pass.md``): the check
+#:   confirms any reading but ``passing`` (a predisposition gloss read as ``lasting``, or the reverse, describes a
+#:   standing way of being either way: 10 of the 11 rows rule 1 held there were traits, contented, lethargic and lonely
+#:   among them); the route stays the queue call's (it rests on the duration), the check's reading is on the block.  A
+#:   row the pass itself submitted whose name does not fit is released as ``predisposition`` under its own name, the
+#:   queue call's suggested name kept on its block and shown on its review card (:func:`card_tag`), so that Roger
+#:   chooses the name in review (his step b) instead of the row waiting where nothing shows it.
+ROUTE_RULES = (1, 2)
+ROUTE_RULES_VERSION = 2
+#: The route reason of a one-hop row released under rules 2 (followed by the suggested name).
+ONE_HOP_RELEASE_REASON = "already a states-pass rename: released under its own name"
+
+#: What the queue call is shown as the state's description, the run's ``state_text_form`` (recorded in ``run.json``,
+#: the summary and every queue block; a run that recorded none showed ``as_recorded``):
+#:
+#: * ``as_recorded``: the row's gloss, or the split filter's accepted reading (``filter.judged_sense``), as M1 wrote it.
+#: * ``now_stripped`` (from 2026-10-12, Roger's decision on gate audit 7, its proposal 4): the same text with M1's
+#:   "now" markers taken out (:data:`NOW_MARKERS`: "currently feeling sad, low, or down in mood" is shown as "feeling
+#:   sad, low, or down in mood"), so that the duration question is answered about the state the word names rather than
+#:   about the moment M1's sentence describes.  The audit found the marker on 123 of the 320 judged readings, on both
+#:   of Roger's lasting examples the pass missed (depressed, sorrowing), and 2 months-or-longer durations among the 123
+#:   against 35 among the other 197.
+#:
+#: A change of the payload, not of a prompt text (as ``label_form``, W19): no rubric version moves.  A resumed run keeps
+#: its recorded form, since the row cache is keyed by the text shown.
+TEXT_FORMS = ("as_recorded", "now_stripped")
+DEFAULT_TEXT_FORM = "now_stripped"
+TEXT_FORM_KEY = "state_text_form"
+#: M1's markers of the moment, as the audit counted them (``passing`` only before a word for a state).
+NOW_MARKERS = ("currently", "right now", "at the moment", "at present", "for the moment", "for now", "in the moment",
+               "just now", "now", "passing")
+_STATE_NOUN = r"(?:(?:emotional|bodily|physical|mental)\s+)?(?:state|condition|mood|emotion|feeling|expression|spell|" \
+              r"phase|episode|reaction|situation|activity|action)s?\b"
+_NOW_RE = re.compile(r"\b(?:currently|right now|at the moment|at present|for the moment|for now|in the moment|"
+                     r"just now|now)\b", re.IGNORECASE)
+#: ", in a passing emotional state" goes whole; "in a passing state of agitation" keeps "in a state of agitation"
+_IN_A_PASSING_RE = re.compile(r",?\s*\b(?:in|as) an?\s+(?:present\s+)?passing\s+" + _STATE_NOUN + r"(?!\s+of\b)",
+                              re.IGNORECASE)
+_A_PASSING_RE = re.compile(r"\b(an?)\s+(?:present\s+)?passing\s+(?=(" + _STATE_NOUN + r"))", re.IGNORECASE)
+_PASSING_RE = re.compile(r"\bpassing\s+(?=" + _STATE_NOUN + r")", re.IGNORECASE)
+_PAREN_RE = re.compile(r"\(([^()]*)\)")
+#: A parenthetical left with a bare word for a state once the markers are out ("(a mood)", "(condition)", "(state of
+#: mind)") says nothing, and is dropped; one that still names a kind ("(bodily condition)", "(an emotional state)")
+#: stays, since the plausibility question turns on it.
+_GENERIC_PAREN_RE = re.compile(r"^(?:an?\s+)?(?:state|condition|mood|emotion|feeling|expression|spell|phase|episode|"
+                               r"reaction|situation|activity|action)s?(?:\s+of\s+mind)?$", re.IGNORECASE)
+
+
+def _strip_markers(t: str) -> str:
+    t = _IN_A_PASSING_RE.sub("", t)
+    # "a passing emotional state" -> "an emotional state" (the article agrees with the word now after it)
+    t = _A_PASSING_RE.sub(lambda m: "an " if m.group(2)[:1].lower() in "aeiou" else "a ", t)
+    t = _PASSING_RE.sub("", t)
+    t = _NOW_RE.sub("", t)
+    return t
+
+
+def _tidy(t: str) -> str:
+    t = re.sub(r"\s+", " ", t)
+    t = re.sub(r"\(\s+", "(", t)
+    t = re.sub(r"\s+\)", ")", t)
+    t = re.sub(r"\s+([,.;:])", r"\1", t)
+    t = re.sub(r",\s*(?=(?:condition|state)\b)", " ", t)      # "(bodily, passing condition)" -> "(bodily condition)"
+    t = re.sub(r",(\s*,)+", ",", t)
+    t = re.sub(r"\(\s*[,;]\s*", "(", t)
+    t = re.sub(r"\s*[,;]\s*\)", ")", t)
+    return t.strip(" ,;")
+
+
+def strip_now_markers(text: Optional[str]) -> Optional[str]:
+    """``text`` without M1's markers of the moment (:data:`NOW_MARKERS`): "currently", "right now", "at the moment" ...
+    anywhere, and "passing" before a word for a state ("in a passing emotional state", "(a passing mood)"); a
+    parenthetical left saying nothing ("(mood)", "(emotional state)") is dropped.  Text with no marker is returned
+    unchanged (whitespace aside); text that would be left empty is returned as it was."""
+    if not text:
+        return text
+    orig = " ".join(str(text).split())
+
+    def paren(m: re.Match) -> str:
+        inner = _tidy(_strip_markers(m.group(1)))
+        if inner == _tidy(m.group(1)):
+            return m.group(0)
+        return "" if not inner or _GENERIC_PAREN_RE.match(inner) else f"({inner})"
+    t = _PAREN_RE.sub(paren, orig)
+    t = _tidy(_strip_markers(t))
+    return t if t else orig
+
+
+def shown_state_text(text: Optional[str], form: str = DEFAULT_TEXT_FORM) -> Optional[str]:
+    """The state's description as the queue call is shown it in ``form`` (:data:`TEXT_FORMS`)."""
+    if form not in TEXT_FORMS:
+        raise ValueError(f"state text form must be one of {TEXT_FORMS}, not {form!r}")
+    return strip_now_markers(text) if form == "now_stripped" else text
+
+
+def recorded_text_form(record: Optional[Mapping]) -> Optional[str]:
+    """The text form a run's record (``run.json``) names; ``as_recorded`` for a record without one (every run before
+    2026-10-12); None when there is no record."""
+    if record is None:
+        return None
+    form = record.get(TEXT_FORM_KEY) or "as_recorded"
+    if form not in TEXT_FORMS:
+        raise ValueError(f"unknown state text form {form!r} in the run's record")
+    return form
+
 #: The keyword scan (:func:`scan_gloss`).  Matched as whole words or phrases, case ignored.  A gloss with at least one
 #: marker for its route and none against is accepted without a call; any other goes to the check call (the scan
 #: never turns a gloss down on its own).
@@ -468,10 +594,19 @@ def is_name_unchanged(label: str, suggested: str) -> bool:
     return _name_key(label) == _name_key(suggested)
 
 
-def route_for(answers: Mapping, *, label: str, from_states_pass: bool = False) -> tuple[str, Optional[str]]:
+def check_route_rules(rules: int) -> int:
+    if rules not in ROUTE_RULES:
+        raise ValueError(f"route rules must be one of {ROUTE_RULES}, not {rules!r}")
+    return int(rules)
+
+
+def route_for(answers: Mapping, *, label: str, from_states_pass: bool = False,
+              rules: int = ROUTE_RULES_VERSION) -> tuple[str, Optional[str]]:
     """``(route, reason)`` for a v4 queue answer, before the gloss check (which can still hold a ``lasting`` or
     ``predisposition`` row).  ``from_states_pass``: the row is a candidate the states pass itself submitted (one
-    hop: a second rename is held)."""
+    hop: no second rename).  ``rules`` (:data:`ROUTE_RULES`): under 1 such a row is held; under 2 it is released as
+    ``predisposition`` under its own name, the reason naming the suggested name (which stays on the block)."""
+    check_route_rules(rules)
     if answers.get("lasting"):
         return ("role", None) if answers.get("role") else ("lasting", None)
     if not answers.get("plausible"):
@@ -483,8 +618,37 @@ def route_for(answers: Mapping, *, label: str, from_states_pass: bool = False) -
             or is_name_unchanged(prompt_label(label), sug):
         return "predisposition", None
     if from_states_pass:
+        if rules >= 2:
+            return "predisposition", f"{ONE_HOP_RELEASE_REASON}; suggested name '{sug}' on its card"
         return "held", ONE_HOP_REASON
     return "renamed", None
+
+
+def gloss_check_accepts(reading: str, route: str, *, rules: int = ROUTE_RULES_VERSION) -> bool:
+    """Whether the gloss check's ``reading`` confirms a gloss written for ``route`` (``lasting`` or
+    ``predisposition``): under route rules 2 any reading but ``passing``; under 1 only the route's own reading."""
+    check_route_rules(rules)
+    if reading not in CHECK_READINGS:
+        raise ValueError(f"reading {reading!r} not in {CHECK_READINGS}")
+    return reading != "passing" if rules >= 2 else reading == route
+
+
+def is_one_hop(block: Mapping) -> bool:
+    """True for a block the one-hop rule decided: held under rules 1, released under its own name under 2 (its block
+    says ``one_hop``, kept when the gloss check then holds it; a block from before 2026-10-12 only by its reason)."""
+    why = str(block.get("route_reason") or "")
+    return bool(block.get("one_hop")) or why == ONE_HOP_REASON or why.startswith(ONE_HOP_RELEASE_REASON)
+
+
+def other_name(block: Mapping, label: str) -> Optional[str]:
+    """The queue call's suggested name for a row released under its own name (a one-hop row under route rules 2), when
+    it is not the label itself; else None."""
+    sug = block.get("suggested_name")
+    if not sug or block.get("route") != "predisposition" or block.get("name_fits") is not False:
+        return None
+    if is_name_unchanged(label, sug) or is_name_unchanged(prompt_label(label), sug):
+        return None
+    return sug
 
 
 def holding_after(route: str) -> str:
@@ -569,12 +733,17 @@ def candidate_from_row(row: Mapping):
 
 
 def card_tag(row: Mapping) -> Optional[str]:
-    """The review card's chip for a released row: where it came from (``states pass: lasting (months)``)."""
+    """The review card's chip for a released row: where it came from (``states pass: lasting (months)``), and, for a
+    row released under its own name although the queue call suggested another (a one-hop row under route rules 2),
+    that name (``states pass: predisposition (hours); suggested name: high-strung``), so that Roger can choose it in
+    review.  The review app shows the chip as it is (``decisions.ReviewState.member_card``)."""
     if not is_released(row):
         return None
     b = block_of(row)
     d = b.get("typical_duration")
-    return f"states pass: {b['route']}" + (f" ({d})" if d else "")
+    tag = f"states pass: {b['route']}" + (f" ({d})" if d else "")
+    sug = other_name(b, row.get("label") or "")
+    return tag + (f"; suggested name: {sug}" if sug else "")
 
 
 def queue_entry_extras(entry: dict, rec: Mapping) -> dict:
@@ -589,14 +758,22 @@ def queue_entry_extras(entry: dict, rec: Mapping) -> dict:
     nv = rec.get("novelty") or {}
     via = f", M3 {nv['run_id']}" if nv.get("pass") == PASS_NAME and nv.get("run_id") else ""
     what = ("a lasting condition" if route == "lasting" else "a habitual predisposition under the state's own name")
+    sug = other_name(b, rec.get("label") or "")
+    if sug:
+        what += f" (the pass suggested the name '{sug}'; one hop: no second rename)"
     chk = b.get("gloss_check") or {}
+    reading = (chk.get("check") or {}).get("reading")
+    by = chk.get("by") if chk.get("by") != "check" or not reading else f"check (read as {reading})"
     note = (f"states pass v{b.get('rubric_version')} ({b.get('batch_id')}{via}): moved out of the states queue as "
-            f"{what}; typical duration {b.get('typical_duration')}; gloss confirmed by the {chk.get('by')}; "
+            f"{what}; typical duration {b.get('typical_duration')}; gloss confirmed by the {by}; "
             f"promoted by name: {b.get('reason')}")
     entry["description_notes"] = " | ".join(x for x in (note, entry.get("description_notes")) if x)
     entry.setdefault("gap_gen", {})["states_pass"] = {"route": route, "typical_duration": b.get("typical_duration"),
                                                       "batch_id": b.get("batch_id"),
-                                                      "rubric_version": b.get("rubric_version")}
+                                                      "rubric_version": b.get("rubric_version"),
+                                                      "route_rules": b.get("route_rules", 1)}
+    if sug:
+        entry["gap_gen"]["states_pass"]["suggested_name"] = sug
     return entry
 
 
@@ -636,18 +813,19 @@ def state_text(row: dict) -> Optional[str]:
     return row.get("gloss") or (row.get("filter") or {}).get("judged_sense")
 
 
-def items_from_filter_results(rows: Sequence[dict], *, stratum: Optional[str] = None) -> list[StatesItem]:
+def items_from_filter_results(rows: Sequence[dict], *, stratum: Optional[str] = None,
+                              text_form: str = DEFAULT_TEXT_FORM) -> list[StatesItem]:
     """Rows of a filter ``results.jsonl`` whose filter block carries ``state``
     (or v1's ``transient_only``), optionally of one validation stratum.  The
     item text is the filter's gloss of the state, or the split filter's
-    accepted reading when the row has no gloss (:func:`state_text`)."""
+    accepted reading when the row has no gloss (:func:`state_text`), in ``text_form``."""
     out = []
     for r in rows:
         if not is_state_row(r.get("filter")):
             continue
         if stratum is not None and (r.get("meta") or {}).get("stratum") != stratum:
             continue
-        out.append(StatesItem(key=r["key"], label=r["label"], text=state_text(r),
+        out.append(StatesItem(key=r["key"], label=r["label"], text=shown_state_text(state_text(r), text_form),
                               meta={"stratum": (r.get("meta") or {}).get("stratum"),
                                     "filter_verdict": (r.get("filter") or {}).get("verdict")}))
     return out
@@ -658,12 +836,21 @@ def from_states_pass(row: Mapping) -> bool:
     return any(s.get("generator") == GENERATOR for s in row.get("sources") or [])
 
 
-def items_from_registry(records: Sequence[dict]) -> list[StatesItem]:
-    """Registry rows on the ``states`` holding list.  ``meta.from_states_pass`` marks a row the pass itself
+def item_from_row(row: Mapping, *, text_form: str = DEFAULT_TEXT_FORM) -> StatesItem:
+    """A registry row as the queue call reads it: its text in ``text_form`` (M1's text kept as
+    ``meta.text_as_recorded`` when the shown text differs); ``meta.from_states_pass`` marks a row the pass itself
     submitted (the one-hop rule)."""
-    return [StatesItem(key=r["key"], label=r["label"], text=state_text(r),
-                       meta={"from_states_pass": from_states_pass(r)}) for r in records
-            if r.get("holding") == HOLDING]
+    raw = state_text(dict(row))
+    shown = shown_state_text(raw, text_form)
+    meta = {"from_states_pass": from_states_pass(row)}
+    if raw and shown != " ".join(str(raw).split()):
+        meta["text_as_recorded"] = raw
+    return StatesItem(key=row["key"], label=row["label"], text=shown, meta=meta)
+
+
+def items_from_registry(records: Sequence[dict], *, text_form: str = DEFAULT_TEXT_FORM) -> list[StatesItem]:
+    """Registry rows on the ``states`` holding list (:func:`item_from_row`)."""
+    return [item_from_row(r, text_form=text_form) for r in records if r.get("holding") == HOLDING]
 
 
 def corpus_items(names: Sequence[str], data_dir: Path) -> tuple[list[StatesItem], dict[str, str]]:
@@ -777,6 +964,85 @@ class LiveTransport:
         await asyncio.gather(*(one(c) for c in calls))
 
 
+class CallsNeeded(Exception):
+    """Raised by :class:`RecordOnlyTransport` for a wave that still has calls once the record is replayed."""
+
+    def __init__(self, wave: str, calls: Sequence["Call"]):
+        self.wave = wave
+        self.calls = list(calls)
+        steps = Counter(c.step for c in self.calls)
+        super().__init__(f"{wave} wave: {', '.join(f'{n} {s}' for s, n in sorted(steps.items()))} call(s) not on "
+                         f"record")
+
+
+class RecordOnlyTransport:
+    """Sends nothing (``--reroute``): a wave that still has calls once the record has answered what it can stops the
+    run with :class:`CallsNeeded`, so the rows waiting on those calls stay ``pending`` and the rows the record settles
+    get their blocks.  ``needed`` collects the calls."""
+    name = "record_only"
+
+    def __init__(self):
+        self.needed: list[Call] = []
+
+    async def execute(self, wave: str, calls: Sequence[Call], on_result: Callable) -> None:
+        if calls:
+            self.needed.extend(calls)
+            raise CallsNeeded(wave, calls)
+
+
+# ---------------------------------------------------------------------------
+# re-routing from the record (--reroute)
+# ---------------------------------------------------------------------------
+
+def needs_reroute(row: Mapping, rules: int = ROUTE_RULES_VERSION) -> bool:
+    """A row on the states list whose queue-mode v4 block was decided under other route rules than ``rules``."""
+    b = block_of(row)
+    return (row.get("holding") == HOLDING and b.get("mode") == "queue" and bool(b.get("route"))
+            and b.get("route_rules", 1) != check_route_rules(rules))
+
+
+def reroute_items(rows: Mapping[str, Mapping], records: Sequence[Mapping]) -> tuple[list[StatesItem], dict[str, str]]:
+    """The items of a re-route: each row's label and text exactly as its batch's queue call was shown them (the
+    record's ``items``), so that the recorded answer is found, and ``from_states_pass`` as it stood when the row was
+    judged: true where the one-hop rule fired (:func:`is_one_hop`); elsewhere it decided nothing (a rename went through
+    only when it was false).  Returns ``(items, missing)``, ``missing`` mapping a row with no queue record to why."""
+    shown: dict[str, Mapping] = {}
+    for rec in records:
+        if (rec.get("step") or rec.get("mode")) == "queue" and rec.get("text") is not None:
+            for it in rec.get("items") or []:
+                shown[it["key"]] = it
+    items, missing = [], {}
+    for key, row in rows.items():
+        it = shown.get(key)
+        if it is None:
+            missing[key] = "no queue record in its batch"
+            continue
+        items.append(StatesItem(key=key, label=it["label"], text=it.get("text"),
+                                meta={"from_states_pass": is_one_hop(block_of(row))}))
+    return items, missing
+
+
+def rerouted_block(new: Mapping, old: Mapping, *, reroute_batch_id: str) -> dict:
+    """A re-routed row's block: the new decision (the runner's block, from the answers on record), under the batch
+    whose answers it replays (``old['batch_id']``), with ``rerouted`` naming the re-route and the decision it
+    replaced."""
+    b = dict(new)
+    b["batch_id"] = old.get("batch_id")
+    prev ={k: old.get(k) for k in ("route", "route_reason", "proposed_route", "holding_after", "at")}
+    prev.update(route_rules=old.get("route_rules", 1), gloss_accepted=(old.get("gloss_check") or {}).get("accepted"))
+    b["rerouted"] = {"batch_id": reroute_batch_id, "at": new.get("at"), "route_rules": new.get("route_rules"),
+                     "previous": prev}
+    return b
+
+
+def route_change(old: Mapping, new: Mapping) -> Optional[str]:
+    """``"held -> predisposition (states -> states_released)"`` when the route or the list changes, else None."""
+    if old.get("route") == new.get("route") and old.get("holding_after") == new.get("holding_after"):
+        return None
+    return (f"{old.get('route')} -> {new.get('route')} "
+            f"({old.get('holding_after')} -> {new.get('holding_after')})")
+
+
 # ---------------------------------------------------------------------------
 # runner
 # ---------------------------------------------------------------------------
@@ -807,11 +1073,19 @@ class StatesPassRunner:
                  retry_delays: Optional[Sequence[float]] = None, responses_path: Optional[Path] = None,
                  transport: Any = None, align: bool = True, alignment_model: str = ALIGNMENT_MODEL,
                  resume_records: Sequence[Mapping] = (), rubrics_dir: Optional[Path] = None,
-                 close_client: bool = False, label_form: str = DEFAULT_LABEL_FORM):
+                 close_client: bool = False, label_form: str = DEFAULT_LABEL_FORM,
+                 route_rules: int = ROUTE_RULES_VERSION, text_form: Optional[str] = None):
         # label_form (prompt_labels): how every call shows a row's label (a corpus label's standard in the long form
         # by default); the rows, the row cache and the records keep the stored label.  A resumed run passes the form
         # its run.json recorded: the row cache is keyed by key, stored label and text, not by the prompt.
         self.label_form = check_label_form(label_form)
+        # route_rules (ROUTE_RULES): which rules turn the answers into routes, recorded on every queue block.
+        # text_form (TEXT_FORMS): the form the items' text was built in (the caller builds it; item_from_row), recorded
+        # on every queue block when given.
+        self.route_rules = check_route_rules(route_rules)
+        if text_form is not None and text_form not in TEXT_FORMS:
+            raise ValueError(f"text_form must be one of {TEXT_FORMS}, not {text_form!r}")
+        self.text_form = text_form
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, not {mode!r}")
         self.client = client
@@ -1025,16 +1299,21 @@ class StatesPassRunner:
     async def _queue_stages(self, todo: Sequence[StatesItem], answers: dict, errs: dict) -> None:
         """Routes, the keyword scan, the gloss wave (check and alignment calls) and the blocks."""
         routed: dict[str, tuple[str, Optional[str]]] = {}
+        one_hop: set[str] = set()
         for it in todo:
             if it.key in answers:
-                routed[it.key] = route_for(answers[it.key], label=it.label,
-                                           from_states_pass=bool(it.meta.get("from_states_pass")))
+                hop = bool(it.meta.get("from_states_pass"))
+                routed[it.key] = route_for(answers[it.key], label=it.label, from_states_pass=hop,
+                                           rules=self.route_rules)
+                if hop and route_for(answers[it.key], label=it.label, rules=self.route_rules)[0] == "renamed":
+                    one_hop.add(it.key)                     # the one-hop rule decided it (held, or released)
         now = utc_now()
         gloss_items = [it for it in todo if it.key in routed and routed[it.key][0] in RELEASED_ROUTES]
         gloss_keys = {it.key for it in gloss_items}
         for it in todo:     # rows whose route needs no call are final now
             if it.key in routed and it.key not in gloss_keys:
-                self._judged(it, self._queue_block(answers[it.key], *routed[it.key], now=now))
+                self._judged(it, self._queue_block(answers[it.key], *routed[it.key], now=now,
+                                                   one_hop=it.key in one_hop))
         if not gloss_items or self._stop is not None:
             return
         scans = {it.key: scan_gloss(answers[it.key]["gloss"], routed[it.key][0]) for it in gloss_items}
@@ -1065,7 +1344,8 @@ class StatesPassRunner:
                     continue
                 chk["check"] = {**parsed, "model": self.model, "rubric_version": CHECK_RUBRIC_VERSION,
                                 "prompt_sha256": CHECK_PROMPT_SHA256}
-                chk.update(accepted=parsed["reading"] == route, by="check")
+                # route rules 2 (Roger, 2026-10-12): any reading but passing confirms; rules 1: the route's own only
+                chk.update(accepted=gloss_check_accepts(parsed["reading"], route, rules=self.route_rules), by="check")
             align = None
             if chk["accepted"]:
                 if self.align:
@@ -1079,9 +1359,10 @@ class StatesPassRunner:
                 chk_route = route
                 route = "held"
                 self._judged(it, self._queue_block(answers[it.key], route, why, now=now, gloss_check=chk,
-                                                   proposed_route=chk_route))
+                                                   proposed_route=chk_route, one_hop=it.key in one_hop))
                 continue
-            self._judged(it, self._queue_block(answers[it.key], route, why, now=now, gloss_check=chk, alignment=align))
+            self._judged(it, self._queue_block(answers[it.key], route, why, now=now, gloss_check=chk, alignment=align,
+                                               one_hop=it.key in one_hop))
 
     async def _gloss_waves(self, calls: list[Call], labels: Mapping[str, str], checks: dict, aligns: dict) -> None:
         """The ``gloss`` wave and its retry: ``checks[key]`` / ``aligns[key]`` get ``(parsed, None)`` or
@@ -1128,11 +1409,16 @@ class StatesPassRunner:
 
     def _queue_block(self, row: Mapping, route: str, route_reason: Optional[str], *, now: str,
                      gloss_check: Optional[dict] = None, alignment: Optional[Mapping] = None,
-                     proposed_route: Optional[str] = None) -> dict:
+                     proposed_route: Optional[str] = None, one_hop: bool = False) -> dict:
         b = {"mode": self.mode, "rubric_version": RUBRIC_VERSIONS[self.mode], "model": self.model,
              "batch_id": self.batch_id, **{k: v for k, v in row.items() if k != "label"},
              "route": route, "route_reason": route_reason, "holding_after": holding_after(route),
-             "gloss_check": gloss_check, "alignment": None, "alignment_reason": None}
+             "gloss_check": gloss_check, "alignment": None, "alignment_reason": None,
+             "route_rules": self.route_rules}
+        if self.text_form is not None:
+            b[TEXT_FORM_KEY] = self.text_form
+        if one_hop:
+            b["one_hop"] = True
         if proposed_route is not None:
             b["proposed_route"] = proposed_route
         if route in RELEASED_ROUTES:
@@ -1258,6 +1544,10 @@ def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usa
                                              "alignment": b.get("alignment")})
             out.update({
                 "routes": {k: len(v) for k, v in by_route.items()},
+                "route_rules": dict(Counter(r.block.get("route_rules", 1) for r in v4)),
+                TEXT_FORM_KEY: dict(Counter(r.block.get(TEXT_FORM_KEY) or "unrecorded" for r in v4)),
+                "one_hop": [{"label": r.label, "route": r.block["route"], "suggested_name": r.block.get("suggested_name")}
+                            for r in v4 if is_one_hop(r.block)],
                 "typical_duration": dict(Counter(r.block["typical_duration"] for r in v4)),
                 "lasting": sum(1 for r in v4 if r.block.get("lasting")),
                 "duration_disagrees": [f"{r.label}: {r.block['typical_duration']}, lasting {r.block['lasting']}"

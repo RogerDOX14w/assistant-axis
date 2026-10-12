@@ -202,12 +202,14 @@ class TestRoutes:
         assert sp.route_for(ans, label="x y")[0] == route
 
     def test_one_hop(self):
+        """Route rules 1 (before 2026-10-12): a rename of a rename is held.  Rules 2 release it under its own name
+        (test_gapgen_states_pass_rules2.py)."""
         ans = dict(lasting=False, plausible=True, name_fits=False, suggested_name="other")
-        assert sp.route_for(ans, label="x", from_states_pass=True) == ("held", sp.ONE_HOP_REASON)
+        assert sp.route_for(ans, label="x", from_states_pass=True, rules=1) == ("held", sp.ONE_HOP_REASON)
         # a rename of a rename is the only thing the hop rule holds
-        assert sp.route_for(dict(lasting=True, role=False), label="x", from_states_pass=True)[0] == "lasting"
+        assert sp.route_for(dict(lasting=True, role=False), label="x", from_states_pass=True, rules=1)[0] == "lasting"
         assert sp.route_for(dict(lasting=False, plausible=True, name_fits=True), label="x",
-                            from_states_pass=True)[0] == "predisposition"
+                            from_states_pass=True, rules=1)[0] == "predisposition"
 
     def test_holding_after(self):
         assert sp.holding_after("lasting") == sp.holding_after("predisposition") == "states_released"
@@ -289,10 +291,13 @@ class TestRunnerLive:
         assert "predisposition" not in user_text(c) and "lasting" not in user_text(c)
 
     def test_one_hop_holds_a_rename_of_a_rename(self):
-        out = runner(FakeAsyncAnthropic(responder()), model=H55).run(items(("startly", "startly2"), hop=("startly2",)))
+        """Route rules 1 (before 2026-10-12); rules 2 release the row (test_gapgen_states_pass_rules2.py)."""
+        out = runner(FakeAsyncAnthropic(responder()), model=H55, route_rules=1).run(
+            items(("startly", "startly2"), hop=("startly2",)))
         b = {x.key: x.block for x in out}
         assert b["startly#1"]["route"] == "renamed"
         assert b["startly2#1"]["route"] == "held" and b["startly2#1"]["route_reason"] == sp.ONE_HOP_REASON
+        assert b["startly2#1"]["route_rules"] == 1 and b["startly2#1"]["one_hop"] is True
         cands = sp.renamed_candidates(out, batch_id="sp4")
         assert [(c.surface, c.generator, c.run_id, c.source_ref) for c in cands] == [
             ("jumpyish", "states_pass", "sp4", "startly#1")]
@@ -436,11 +441,16 @@ class TestCLI:
         assert rc == 0
         rows = Registry(reg).fold()
         hold = {k.split("#")[0]: rows[k]["holding"] for k in rows if k != "stubborn#1" and not k.startswith("jumpyish")}
+        # route rules 2 (2026-10-12): the one-hop row startly2 is released under its own name (under rules 1 it stayed
+        # on the states list, held: test_route_rules_1_reproduces_the_old_routing)
         assert hold == {"lastwell": "states_released", "rolish": "roles", "glumish": "states_released",
                         "moodish": "states_released", "nowish": "states", "startly": "states",
-                        "startly2": "states", "wetish": "states"}
+                        "startly2": "states_released", "wetish": "states"}
         assert rows["rolish#1"]["entity_type"] == "role"
-        assert rows["startly2#1"]["states_pass"]["route_reason"] == sp.ONE_HOP_REASON
+        hop = rows["startly2#1"]["states_pass"]
+        assert hop["route"] == "predisposition" and hop["route_reason"].startswith(sp.ONE_HOP_RELEASE_REASON)
+        assert hop["suggested_name"] == "jumpyish2" and hop["one_hop"] is True and hop["route_rules"] == 2
+        assert all(rows[f"{lb}#1"]["states_pass"]["state_text_form"] == "now_stripped" for lb in SPEC)
         # the renamed route: a new candidate, recorded in the tracked candidates.jsonl first
         new = rows["jumpyish#1"]
         src = new["sources"][0]
@@ -459,12 +469,15 @@ class TestCLI:
         assert run["check_rubric_version"] == 1 and run["check_prompt_sha256"] == sp.CHECK_PROMPT_SHA256
         assert run["alignment_step_version"] == PP.pins()["step_versions"]["alignment"]
         assert run["transport"] == "live" and run["item_keys"] == sorted(f"{lb}#1" for lb in SPEC)
+        assert run["route_rules"] == 2 and run["state_text_form"] == "now_stripped"
         s = json.loads((d / "summary.json").read_text())["result"]
-        assert s["routes"] == {"role": 1, "lasting": 1, "predisposition": 2, "renamed": 1, "held": 3}
+        # rules 2: startly2 is a predisposition (rules 1: held), its gloss passed by the scan ("every")
+        assert s["routes"] == {"role": 1, "lasting": 1, "predisposition": 3, "renamed": 1, "held": 2}
         assert s["submitted_renames"] == ["startly -> jumpyish"]
-        assert s["gloss_check"]["by_scan"] == 2 and s["gloss_check"]["check_accepted"] == 1
+        assert s["gloss_check"]["by_scan"] == 3 and s["gloss_check"]["check_accepted"] == 1
         assert [x["label"] for x in s["gloss_check"]["rejected"]] == ["nowish"]
-        assert json.loads((d / "usage.json").read_text())["n_calls"] == 7
+        assert s["one_hop"] == [{"label": "startly2", "route": "predisposition", "suggested_name": "jumpyish2"}]
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == 8      # startly2's alignment call too
         # a second run without --rejudge finds nothing new on the states list but the held rows' v4 blocks
         assert cli["mod"].main(["--batch-id", "sp4b", "--mode", "queue", "--holding-states", "--registry", str(reg),
                                 "--out-root", str(cand)]) == 0
@@ -495,13 +508,16 @@ class TestCLI:
         cli["responder"] = responder()
         assert cli["mod"].main(args + ["--resume"]) == 0
         second = cli["live"][-1]
-        assert not any(system_text(c) == sp.QUEUE_PROMPT for c in second.calls) and len(second.calls) == 6
+        # two checks and five alignment calls (route rules 2: the one-hop row startly2 is released too; under rules 1
+        # it was held and the count was six)
+        assert not any(system_text(c) == sp.QUEUE_PROMPT for c in second.calls) and len(second.calls) == 7
         rows = Registry(reg).fold()
         assert rows["lastwell#1"]["holding"] == "states_released"
+        assert rows["startly2#1"]["holding"] == "states_released"
         run = json.loads((cand / "states_pass" / "sp4" / "run.json").read_text())
-        assert len(run["sessions"]) == 2
+        assert len(run["sessions"]) == 2 and run["route_rules"] == 2
         resp = (cand / "states_pass" / "sp4" / "responses.jsonl").read_text().splitlines()
-        assert len(resp) == 7                                              # the stopped session's answer kept
+        assert len(resp) == 8                                              # the stopped session's answer kept
 
     def test_dry_run_renders_both_calls_and_writes_nothing(self, tmp_path, cli, capsys):
         reg = _registry(tmp_path)
