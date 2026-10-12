@@ -537,3 +537,14 @@ class TestTorchSaveWithRetry:
         assert n_load_calls["n"] == 0
         loaded = real_torch_load(p, weights_only=False)
         assert torch.equal(loaded["x"], torch.tensor([1, 2]))
+
+
+def test_read_jsonl_keeps_a_line_holding_a_raw_unicode_line_separator(tmp_path):
+    """A JSON string may hold U+2028 / U+2029 / U+0085 raw; str.splitlines()
+    would break the record in two malformed halves and drop it (2026-10-13)."""
+    from assistant_axis.atomic_io import read_jsonl_with_retry
+    path = tmp_path / "records.jsonl"
+    path.write_text('{"a": "x y"}\n{"b": "p\u0085q"}\r\n{"c": 1}\n', encoding="utf-8")
+    assert read_jsonl_with_retry(path, skip_malformed=False) == [
+        {"a": "x y"}, {"b": "p\u0085q"}, {"c": 1},
+    ]

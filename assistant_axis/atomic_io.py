@@ -381,7 +381,10 @@ def read_jsonl_with_retry(
         logger_obj=logger_obj,
     )
     out: list = []
-    for line_num, line in enumerate(text.splitlines(), 1):
+    # split on "\n" only: str.splitlines() also breaks at U+2028, U+2029 and
+    # U+0085, which a valid JSON string may hold raw, and the two halves would
+    # both be malformed (found by the 2026-10-13 pipeline review)
+    for line_num, line in enumerate(text.split("\n"), 1):
         line = line.strip()
         if not line:
             continue
