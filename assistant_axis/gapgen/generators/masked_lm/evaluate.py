@@ -18,8 +18,8 @@ Free (no call; ``evaluate``):
 
 After M1 and M3 (``report --run-id``): :func:`evaluate_run` reads the registry rows of a run and the M1 / M3
 batch directories: verdicts and tags by Zipf band, pass and token class; the measured M1 pass rate (replacing
-the assumed 0.88) and kept share (M3 ``new`` or ``grey`` over submitted, replacing the assumed 0.5 the wave is
-sized by); polysemy; covered / new / grey; cost from the ``usage.json`` files, per model, the generator's own at
+the assumed 0.88) and kept share (M3 ``new`` or ``grey`` over the submitted words that were not yet in the
+registry, replacing the assumed 0.5 the wave is sized by; QUESTIONS 82); polysemy; covered / new / grey; cost from the ``usage.json`` files, per model, the generator's own at
 zero; useful candidates per dollar; the projected full-wave cost.
 """
 from __future__ import annotations
@@ -296,7 +296,8 @@ def throughput(pass_metas: Iterable[Mapping]) -> dict:
     out = {}
     for m in pass_metas:
         out[f"{m.get('pass')}:{m.get('model_key')}"] = {
-            "device": m.get("device"), "seconds": m.get("seconds"), "n_forward": m.get("n_forward"),
+            "device": m.get("device"), "pll_mode": m.get("pll_mode") or (m.get("settings") or {}).get("pll_mode"),
+            "seconds": m.get("seconds"), "n_forward": m.get("n_forward"),
             "forward_per_second": m.get("forward_per_second"),
             "instances_per_minute": m.get("instances_per_minute"), "n_instances": m.get("n_instances"),
             "words_per_minute": round(60.0 * m["n_words"] / m["seconds"], 1)
@@ -380,7 +381,12 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], regist
     m1, m3 = _m1(rows), _m3(rows)
     cost = cost_summary([run_dir / "usage.json", Path(filter_dir) / "usage.json", Path(novelty_dir) / "usage.json"])
     useful = m3["decision"].get("new", 0) + m3["pair_completions"]
-    kept_share = _frac(m3["kept"], len(rows)) if m3["n_scored"] else None
+    # the kept share is over new words: the stems already in the registry when the run was submitted are left out
+    # of both counts (QUESTIONS 82; they are another run's review load), as the wave's cut leaves them out
+    registered = set((run.get("args") or {}).get("registered_stems") or [])
+    new_rows = [r for r in rows if r["stem"] not in registered]
+    m3_new = _m3(new_rows)
+    kept_share = _frac(m3_new["kept"], len(new_rows)) if m3_new["n_scored"] else None
     pass_rate = m1["pass_rate"]
     projection = None
     if kept_share:
@@ -394,6 +400,8 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], regist
             "n_registry_rows": len(rows), "m1": m1, "m3": m3, "strata": strata,
             "measured_pass_rate": pass_rate, "assumed_pass_rate": M1_PASS_RATE_ASSUMED,
             "measured_kept_share": kept_share, "assumed_kept_share": KEPT_SHARE_ASSUMED,
+            "n_new_rows": len(new_rows), "n_registered_at_submit": len(rows) - len(new_rows),
+            "kept_new": m3_new["kept"],
             "cost": cost, "cost_per_candidate": _frac(cost["total_usd"], len(cands)), "useful": useful,
             "useful_per_dollar": round(useful / cost["total_usd"], 1) if cost["total_usd"] else None,
             "projection": projection,

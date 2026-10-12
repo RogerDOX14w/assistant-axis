@@ -1,8 +1,6 @@
 """Selection, the downstream estimate and its guard, and the submission of a masked-LM run (plan section 7).
 
-Two ways to choose the rows, both over **eligible** table rows whose stem is **not already in the registry**
-(another generator's run of the same stem costs nothing to resubmit but is not new work; ``--include-registered``
-keeps them):
+Two ways to choose the rows, both over **eligible** table rows in union-rank order:
 
 * ``--top N`` (pilot B, plan section 10): the first N by union rank, whatever their class;
 * ``--kept-target K`` (the wave; Roger, 2026-10-11: "Aim for ~2 hours review on this", operationalised the same
@@ -11,6 +9,16 @@ keeps them):
   share (``--kept-share``; until then the census funnel's ~0.5, flagged as assumed); plus **every multiword row
   with an OEWN gloss**, never cut by rank (the route no other generator has; their gate is the gloss, not Zipf,
   which is a per-word floor and says nothing about a phrase).
+
+**Stems already in the registry** (QUESTIONS 82, revised, Roger 2026-10-12) are submitted like any other row: the
+registry merges this generator's source into the existing row at no API cost (M1 and M3 skip rows another run has
+decided), so the overlap with other generators is recorded in full.  They are left out of the **counts** instead:
+the rank cut counts only rows not yet registered (N, or ``ceil(K / kept_share)``, or ``--multi-cap``; a registered
+row inside the cut is submitted and not counted), and so does the review-load projection; the run records which
+submitted stems were registered (``run.json`` ``args.registered_stems``) so that the measured kept share is over
+new words only (:func:`.evaluate.evaluate_run`).  ``--count-registered`` counts them in the cut like any row.
+The downstream estimate counts the rows the platform may still charge for: new rows, and registered rows that
+M1 or M3 has not yet decided (no filter block, or a trait verdict and no novelty block).
 
   **Subword rows join the single-word cut** (a deviation, in the acceptance report): the coordinator's reading
   also exempted them, but a subword row is one dictionary word the tokenizer happens to split (complacent,
@@ -120,34 +128,67 @@ def row_class(r: Mapping) -> str:
     return r.get("token_class") or ("multiword" if _MULTI_RE.search(r.get("surface") or "") else "single")
 
 
-def _pool(table: Sequence[Mapping], exclude_stems: Iterable[str]) -> list[Mapping]:
-    ex = set(exclude_stems)
-    return sorted((r for r in table if r.get("eligible") and r.get("stem") and r["stem"] not in ex),
-                  key=lambda r: r["union_rank"])
+def _pool(table: Sequence[Mapping]) -> list[Mapping]:
+    return sorted((r for r in table if r.get("eligible") and r.get("stem")), key=lambda r: r["union_rank"])
 
 
-def select_top(table: Sequence[Mapping], n: int, *, exclude_stems: Iterable[str] = ()) -> list[Mapping]:
-    """The first ``n`` eligible rows by union rank (stems in ``exclude_stems`` left out)."""
-    return _pool(table, exclude_stems)[:max(0, int(n))]
+def _take(rows: Sequence[Mapping], n: int, registered: set) -> list[Mapping]:
+    """``rows`` in order until ``n`` of them are not in ``registered``: a registered row on the way is taken
+    (submitted) and not counted."""
+    out, k = [], 0
+    for r in rows:
+        if k >= n:
+            break
+        out.append(r)
+        k += r["stem"] not in registered
+    return out
+
+
+def select_top(table: Sequence[Mapping], n: int, *, registered_stems: Iterable[str] = (),
+               count_registered: bool = False) -> list[Mapping]:
+    """The eligible rows by union rank up to the ``n``-th whose stem is not in ``registered_stems`` (the registered
+    ones on the way included, not counted; ``count_registered`` counts them)."""
+    return _take(_pool(table), max(0, int(n)), set() if count_registered else set(registered_stems))
 
 
 def select_wave(table: Sequence[Mapping], *, kept_target: int = KEPT_TARGET_DEFAULT,
-                kept_share: float = KEPT_SHARE_ASSUMED, exclude_stems: Iterable[str] = (),
-                multi_cap: Optional[int] = None, uncut: Sequence[str] = UNCUT_CLASSES
-                ) -> tuple[list[Mapping], list[Mapping]]:
-    """``(rows cut by union rank at the kept target, uncut rows with a gloss)``; see the module docstring."""
+                kept_share: float = KEPT_SHARE_ASSUMED, registered_stems: Iterable[str] = (),
+                count_registered: bool = False, multi_cap: Optional[int] = None,
+                uncut: Sequence[str] = UNCUT_CLASSES) -> tuple[list[Mapping], list[Mapping]]:
+    """``(rows cut by union rank at the kept target, uncut rows with a gloss)``; see the module docstring (registered
+    stems ride along uncounted)."""
     if not 0 < kept_share <= 1:
         raise ValueError(f"--kept-share must be in (0, 1], got {kept_share}")
     bad = set(uncut) - {"subword", "multiword"}
     if bad:
         raise ValueError(f"--uncut-classes takes subword and multiword, not {sorted(bad)}")
-    pool = _pool(table, exclude_stems)
+    reg = set() if count_registered else set(registered_stems)
+    pool = _pool(table)
     n_single = math.ceil(int(kept_target) / float(kept_share))
-    singles = [r for r in pool if row_class(r) not in uncut][:n_single]
+    singles = _take([r for r in pool if row_class(r) not in uncut], n_single, reg)
     multis = [r for r in pool if row_class(r) in uncut and r.get("gloss_hint")]
     if multi_cap is not None:
-        multis = multis[:max(0, int(multi_cap))]
+        multis = _take(multis, max(0, int(multi_cap)), reg)
     return singles, multis
+
+
+def _undecided(row: Mapping) -> bool:
+    """A registry row M1 or M3 has still to decide: no filter block, or a trait verdict and no novelty block (the
+    platform may still charge for it, in this run's batch if it runs first)."""
+    f = row.get("filter") or {}
+    return not f or (f.get("verdict") == "trait" and not row.get("novelty"))
+
+
+def registry_stems(registry_rows: Mapping[str, Mapping]) -> tuple[set, set]:
+    """``(stems in the registry, those of them M1 or M3 has still to decide)`` from a folded registry."""
+    stems, pending = set(), set()
+    for r in registry_rows.values():
+        st = r.get("stem")
+        if st:
+            stems.add(st)
+            if _undecided(r):
+                pending.add(st)
+    return stems, pending
 
 
 def to_candidates(rows: Sequence[Mapping], run_id: str) -> list[Candidate]:
@@ -218,6 +259,8 @@ class SubmitSummary:
     estimate: dict
     strata: dict
     dry_run: bool
+    n_registered: int = 0          # selected rows whose stem was already in the registry (submitted, not counted)
+    n_counted: int = 0             # selected rows the cut counted
     run_dir: Optional[str] = None
     report: Optional[dict] = None
     followups: list[str] = field(default_factory=list)
@@ -226,60 +269,76 @@ class SubmitSummary:
 def run_submit(run_id: str, *, table: Sequence[Mapping], top_n: Optional[int] = None,
                kept_target: Optional[int] = None, kept_share: float = KEPT_SHARE_ASSUMED,
                multi_cap: Optional[int] = None, uncut: Sequence[str] = UNCUT_CLASSES,
-               exclude_stems: Iterable[str] = (),
+               registered_stems: Iterable[str] = (), pending_stems: Iterable[str] = (),
+               count_registered: bool = False,
                budget_usd: float = DEFAULT_BUDGET_USD, confirm_expensive: bool = False,
                confirmed_by: Optional[str] = None, transport: str = "live", dry_run: bool = False,
                registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None,
                generation: Optional[Mapping] = None, echo=print) -> SubmitSummary:
     """Select, estimate, gate, record and submit (see the module docstring).  Exactly one of ``top_n`` and
-    ``kept_target``."""
+    ``kept_target``.  ``registered_stems``: the stems already in the registry; ``pending_stems``: those of them M1
+    or M3 has still to decide (:func:`registry_stems`)."""
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
         raise ValueError("--transport must be live or batches")
     if (top_n is None) == (kept_target is None):
         raise ValueError("give exactly one of --top N (the pilot) and --kept-target K (the wave)")
-    ex = set(exclude_stems)
+    reg, pending = set(registered_stems), set(pending_stems)
+    reg_cut = set() if count_registered else reg
+
+    def counted(rs):
+        return sum(1 for r in rs if r["stem"] not in reg_cut)
     if top_n is not None:
         mode = f"top {top_n}"
-        rows = select_top(table, top_n, exclude_stems=ex)
+        rows = select_top(table, top_n, registered_stems=reg, count_registered=count_registered)
         n_single = sum(1 for r in rows if row_class(r) == "single")
         n_multi = len(rows) - n_single
+        n_counted = counted(rows)
     else:
         mode = f"kept target {kept_target} at kept share {kept_share}"
-        singles, multis = select_wave(table, kept_target=kept_target, kept_share=kept_share, exclude_stems=ex,
-                                      multi_cap=multi_cap, uncut=uncut)
+        singles, multis = select_wave(table, kept_target=kept_target, kept_share=kept_share, registered_stems=reg,
+                                      count_registered=count_registered, multi_cap=multi_cap, uncut=uncut)
         rows = sorted(singles + multis, key=lambda r: r["union_rank"])
         n_single, n_multi = len(singles), len(multis)
+        c_single, c_multi = counted(singles), counted(multis)
+        n_counted = c_single + c_multi
     cands = to_candidates(rows, run_id)
-    est = estimate_downstream_usd(len(cands), transport=transport)
+    reg_rows = [r["stem"] for r in rows if r["stem"] in reg]
+    n_charged = len(rows) - len(reg_rows) + sum(1 for s in reg_rows if s in pending)
+    est = estimate_downstream_usd(n_charged, transport=transport)
     st = strata(rows)
-    n_reg = sum(1 for r in table if r.get("eligible") and r.get("stem") in ex)
+    n_reg = sum(1 for r in table if r.get("eligible") and r.get("stem") in reg)
     split = (f"{n_single} single-word, {n_multi} subword or multiword" if top_n is not None else
              f"{n_single} cut by union rank, {n_multi} uncut {'/'.join(uncut)}")
+    how = ("counted in the cut: --count-registered" if count_registered else
+           "submitted where they fall inside the cut, never counted in it")
     echo(f"{mode}: {len(table)} table rows, {sum(1 for r in table if r.get('eligible'))} eligible, {n_reg} of them "
-         f"already in the registry (left out); selected {len(rows)} ({split})")
+         f"already in the registry ({how}); selected {len(rows)} ({split}; {len(rows) - len(reg_rows)} new, "
+         f"{len(reg_rows)} already registered, {sum(1 for s in reg_rows if s in pending)} of those still undecided "
+         f"by M1 or M3)")
     if kept_target is not None:
-        projected = (n_single + n_multi) * kept_share
-        echo(f"  projected kept terms: ({n_single} cut by rank + {n_multi} uncut {'/'.join(uncut)} rows) x "
-             f"{kept_share} = {projected:.0f} against the target {kept_target} (about "
-             f"{projected / 150:.1f} h of review at ~150 terms an hour)"
+        projected = n_counted * kept_share
+        echo(f"  projected kept terms: ({c_single} cut by rank + {c_multi} uncut {'/'.join(uncut)} rows"
+             f"{'' if count_registered else ', registered stems not counted'}) x {kept_share} = {projected:.0f} "
+             f"against the target {kept_target} (about {projected / 150:.1f} h of review at ~150 terms an hour)"
              + ("" if kept_share != KEPT_SHARE_ASSUMED else "  [kept share ASSUMED (census funnel); pass pilot B's "
                                                             "measured share with --kept-share]"))
     for k, v in st.items():
         echo(f"  {k}: {v}")
-    echo(est.format())
-    if kept_target is not None and multi_cap is None and \
-            (n_single + n_multi) * kept_share > REVIEW_OVERSHOOT * kept_target:
-        fit = max(0, math.floor((REVIEW_OVERSHOOT * kept_target) / kept_share) - n_single)
+    echo(est.format() + (f"\n  [{n_charged} of the {len(rows)} rows: the new ones and the registered ones still "
+                         f"undecided; M1 and M3 skip the rest]" if reg_rows else ""))
+    if kept_target is not None and multi_cap is None and n_counted * kept_share > REVIEW_OVERSHOOT * kept_target:
+        fit = max(0, math.floor((REVIEW_OVERSHOOT * kept_target) / kept_share) - c_single)
         raise ReviewLoadExceeded(
-            f"the wave's projected kept terms ({(n_single + n_multi) * kept_share:.0f}) exceed {REVIEW_OVERSHOOT}x the "
-            f"target {kept_target}: {n_multi} uncut {'/'.join(uncut)} rows.  Bound them with --multi-cap N (by union "
+            f"the wave's projected kept terms ({n_counted * kept_share:.0f}) exceed {REVIEW_OVERSHOOT}x the "
+            f"target {kept_target}: {c_multi} uncut {'/'.join(uncut)} rows.  Bound them with --multi-cap N (by union "
             f"rank; {fit} would stay within {REVIEW_OVERSHOOT}x), or raise --kept-target: a review-hours decision, "
             f"Roger's")
     confirm_or_abort(est.total_usd, budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
     summary = SubmitSummary(run_id=run_id, mode=mode, n_table=len(table), n_selected=len(rows), n_single=n_single,
-                            n_multi=n_multi, estimate=asdict(est), strata=st, dry_run=dry_run)
+                            n_multi=n_multi, estimate=asdict(est), strata=st, dry_run=dry_run,
+                            n_registered=len(reg_rows), n_counted=n_counted)
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
     if dry_run:
@@ -291,7 +350,9 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], top_n: Optional[int] = 
     args = {"mode": mode, "top_n": top_n, "kept_target": kept_target, "kept_share": kept_share,
             "kept_share_assumed": kept_share == KEPT_SHARE_ASSUMED, "multi_cap": multi_cap, "uncut": list(uncut),
             "n": len(cands), "n_single": n_single, "n_multi": n_multi, "n_table": len(table),
-            "n_excluded_registered": n_reg, "transport": transport, "budget_usd": budget_usd,
+            "count_registered": bool(count_registered), "n_counted": n_counted, "n_registered": len(reg_rows),
+            "registered_stems": sorted(reg_rows), "n_charged": n_charged,
+            "n_eligible_registered": n_reg, "transport": transport, "budget_usd": budget_usd,
             "estimate": asdict(est), "strata": st, "table": str(table_path) if table_path else None,
             "table_sha256": table_sha256, "score": "trait_contrast (the contrast score; not a familiarity)",
             "generation": dict(generation or {})}

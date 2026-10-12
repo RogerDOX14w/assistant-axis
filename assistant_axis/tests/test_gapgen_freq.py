@@ -90,3 +90,18 @@ def test_base_model_is_not_a_familiarity_generator():
     assert not zipf_info("rarish", familiarity=37.0, zipf_fn=z).hard_reject
     # And every generator that IS listed documents its score as a familiarity, with a pointer to where.
     assert all(isinstance(why, str) and why for why in FAMILIARITY_GENERATORS.values())
+
+
+def test_masked_lm_is_not_a_familiarity_generator():
+    # Guard asked for by Roger, QUESTIONS 83 (2026-10-12, "Yup"), the same trap as QUESTIONS 58 above.
+    # `masked_lm`'s Candidate.score is the TRAIT-HOOD CONTRAST SCORE (coding_plan_04 section 6): the mean
+    # pseudo-log-likelihood in dispositional frames minus the larger of the state and physical frames' means, a
+    # difference of log-probabilities in nats, unbounded either side of 0 (pilot A's 3,096 scored words: -6.7 to
+    # +7.6, median +1.3).  It says how trait-like the word reads, not how many people know it.  Listed here, a
+    # contrast of 0.5 or more (two thirds of pilot A's words) would read as a familiarity proportion, clear
+    # `FAMILIARITY_OVERRIDE_MIN` and rescue rare words past the Zipf floor on a measure that has nothing to do with
+    # frequency (and a masked LM's fluency with a word is frequency again, which Zipf measures better).  The
+    # contrast score stays in Candidate.score, as the base model's count does.
+    assert "masked_lm" not in FAMILIARITY_GENERATORS, (
+        "masked_lm's score is the trait-hood contrast score, not a familiarity: see QUESTIONS 83 and the comment above")
+    assert not zipf_info("rarish", familiarity=2.9, zipf_fn=z).hard_reject     # the trap: a contrast of 2.9 rescues

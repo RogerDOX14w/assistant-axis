@@ -53,13 +53,68 @@ def test_candidates_carry_rank_score_gloss_and_source():
     assert "blargy" not in cands                                         # ineligible rows are never selected
 
 
-def test_select_top_and_registry_exclusion():
+def test_select_top_and_registry_stems():
     rows = table_rows()
     top = SB.select_top(rows, 3)
     assert [r["union_rank"] for r in top] == sorted(r["union_rank"] for r in top) and len(top) == 3
     assert all(r["eligible"] for r in top)
-    ex = SB.select_top(rows, 3, exclude_stems={top[0]["stem"]})
-    assert top[0] not in ex and ex[0] == top[1]
+    # QUESTIONS 82 (revised): a stem already in the registry is submitted where it falls, and not counted in the
+    # cut, so three new rows still make the cut; --count-registered counts it like any row
+    reg = {top[0]["stem"]}
+    sel = SB.select_top(rows, 3, registered_stems=reg)
+    assert sel[:3] == top and len(sel) == 4 and sum(r["stem"] not in reg for r in sel) == 3
+    assert SB.select_top(rows, 3, registered_stems=reg, count_registered=True) == top
+
+
+def test_registry_stems_and_the_undecided_ones():
+    rows = {"a#1": {"stem": "a"}, "b#1": {"stem": "b", "filter": {"verdict": "reject"}},
+            "c#1": {"stem": "c", "filter": {"verdict": "trait"}},
+            "d#1": {"stem": "d", "filter": {"verdict": "trait"}, "novelty": {"decision": "covered"}}}
+    assert SB.registry_stems(rows) == ({"a", "b", "c", "d"}, {"a", "c"})
+
+
+def test_registered_stems_are_submitted_but_never_counted(env):
+    rows, cdir, reg_path = env
+    first = submit(env, run_id="other", top_n=2)                        # another run registers the top two
+    assert first.n_registered == 0
+    registered, pending = SB.registry_stems(Registry(reg_path).fold())
+    top2 = [r["stem"] for r in SB.select_top(rows, 2)]
+    assert registered == set(top2) and pending == set(top2)             # no M1 verdict yet
+    dry = submit(env, run_id="b", top_n=3, registered_stems=registered, pending_stems=pending, dry_run=True)
+    assert (dry.n_selected, dry.n_registered, dry.n_counted) == (5, 2, 3)
+    assert dry.estimate["n"] == 5                                        # undecided: this batch may pay for them
+    assert submit(env, run_id="b", top_n=3, registered_stems=registered, dry_run=True).estimate["n"] == 3
+    summ = submit(env, run_id="b", top_n=3, registered_stems=registered, pending_stems=pending)
+    d = cdir / "runs" / "masked_lm" / "b"
+    assert [c["surface"].lower() for c in lines(d / "candidates.jsonl")][:2] == top2
+    a = json.loads((d / "run.json").read_text())["args"]
+    assert a["registered_stems"] == sorted(top2) and a["n_counted"] == 3 and a["count_registered"] is False
+    assert summ.report["n_merged"] == 2 and summ.report["n_new"] == 3   # merged into the existing rows, no new row
+    for st in top2:
+        gens = {(s["generator"], s["run_id"]) for s in Registry(reg_path).fold()[f"{st}#1"]["sources"]}
+        assert gens == {("masked_lm", "other"), ("masked_lm", "b")}     # the overlap is recorded
+    counted = submit(env, run_id="c", top_n=3, registered_stems=registered, count_registered=True, dry_run=True)
+    assert (counted.n_selected, counted.n_counted) == (3, 3)
+
+
+def test_the_kept_share_is_over_new_words(env, tmp_path):
+    from assistant_axis.gapgen.generators.masked_lm import evaluate as E
+    rows, cdir, reg_path = env
+    submit(env, run_id="other", top_n=2)
+    registered, _ = SB.registry_stems(Registry(reg_path).fold())
+    submit(env, run_id="b", top_n=3, registered_stems=registered)
+    reg = Registry(reg_path)
+    for key in sorted(reg.fold()):
+        reg.merge_block(key, "filter", {"verdict": "trait", "outcome": "trait"}, replace=True)
+        stem = reg.fold()[key]["stem"]
+        # the registered stems are kept (another run's review load); one of the three new ones is kept
+        kept = stem in registered or stem == SB.select_top(rows, 3, registered_stems=registered)[2]["stem"]
+        reg.merge_block(key, "novelty", {"decision": "new" if kept else "covered"}, replace=True)
+    ev = E.evaluate_run("b", run_dir=cdir / "runs" / "masked_lm" / "b", table=rows, registry_rows=reg.fold(),
+                        filter_dir=tmp_path / "f", novelty_dir=tmp_path / "n")
+    assert (ev["n_registry_rows"], ev["n_new_rows"], ev["n_registered_at_submit"]) == (5, 3, 2)
+    assert ev["measured_kept_share"] == pytest.approx(1 / 3, abs=1e-4) and ev["kept_new"] == 1
+    assert ev["m3"]["kept"] == 3                                         # all five: three kept, two of them old
 
 
 def classed_rows():
@@ -88,6 +143,19 @@ def test_the_wave_is_sized_in_kept_terms():
         SB.select_wave(rows, uncut=("single",))
 
 
+def test_the_wave_counts_only_new_rows():
+    """QUESTIONS 82 (revised): a registered stem inside the cut is submitted and the cut goes one row further."""
+    rows = classed_rows()
+    singles0, multis0 = SB.select_wave(rows, kept_target=2, kept_share=0.5)
+    reg = {singles0[0]["stem"]} | {r["stem"] for r in multis0}
+    singles, multis = SB.select_wave(rows, kept_target=2, kept_share=0.5, registered_stems=reg)
+    assert singles[:len(singles0)] == singles0 and len(singles) == len(singles0) + 1
+    assert sum(r["stem"] not in reg for r in singles) == len(singles0)
+    assert multis == multis0                              # every uncut row with a gloss still goes, none counted
+    assert SB.select_wave(rows, kept_target=2, kept_share=0.5, registered_stems=reg, count_registered=True) == \
+        (singles0, multis0)
+
+
 def test_the_literal_reading_exempts_subword_rows_too():
     rows = classed_rows()
     singles, multis = SB.select_wave(rows, kept_target=2, kept_share=0.5, uncut=("multiword", "subword"))
@@ -106,6 +174,10 @@ def test_the_review_load_guard(tmp_path):
     assert "--multi-cap" in str(exc.value) and "Roger" in str(exc.value)
     summ = SB.run_submit("w1", multi_cap=2, **kw)        # the cap is the decision
     assert (summ.n_single, summ.n_multi) == (8, 2)
+    # registered uncut rows are submitted and left out of the projection (QUESTIONS 82): 8 x 0.5 = 4 kept
+    summ = SB.run_submit("w1", registered_stems={r["stem"] for r in rows[10:]}, **kw)
+    assert (summ.n_single, summ.n_multi, summ.n_registered, summ.n_counted) == (8, 30, 30, 8)
+    assert summ.estimate["n"] == 8                        # decided registry rows cost nothing downstream
 
 
 def test_exactly_one_selection_mode(env):

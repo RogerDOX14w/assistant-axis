@@ -9,9 +9,13 @@ masked in turn and the log-probabilities the model assigns them back are summed.
   later pieces of a split word predict the earlier ones ("syc" is easy once "oph", "antic" are visible), which
   inflates every split word against a one-piece word; ``l2r`` keeps a split word's score on the scale of the
   single-mask log-probabilities it is ranked beside in the union, and matches the beam passes' chain.
-* ``original``: only token *j* is masked (Salazar et al. 2020).  Kept for comparison (``--pll-mode original``).
+* ``original``: only token *j* is masked (Salazar et al. 2020), the plan's form.
 
-For a one-piece word both are the single-mask log-probability.
+For a one-piece word both are the single-mask log-probability.  **The mode is set per pass** (QUESTIONS 90, Roger
+2026-10-12: "left-to-right for single and split words, the plan's original form for multiword phrases";
+:data:`PASS_PLL_MODES`): ``l2r`` for the single-mask, probe and subword passes, Variant B and the contrast score,
+``original`` for the multiword pass, whose phrases pilot A ranked far better that way (18.0% of the multiword
+labels in the top 5,000 against 4.5%).  The global ``--pll-mode`` overrides every pass.
 
 **Variant B** (:func:`variant_b`): OEWN's adjectives and person nouns (:mod:`.wordlist`) scored by PLL in twelve
 fixed instances (:data:`.frames.VARIANT_B_INSTANCES`) and ranked by the best of them.  Each instance's own
@@ -42,11 +46,24 @@ from .frames import (
 
 PLL_MODES = ("l2r", "original")
 PLL_MODE = "l2r"
+#: Each pass's mode when ``--pll-mode`` is not given (see the module docstring).  Variant B is not named in
+#: QUESTIONS 90 (pilot A did not run it): it keeps ``l2r``, the scale of its single and split words.
+PASS_PLL_MODES: dict[str, str] = {"single": "l2r", "probe": "l2r", "subword": "l2r", "multiword": "original",
+                                  "variant_b": "l2r", "contrast": "l2r"}
 #: The score of a word the tokenizer cannot represent (its pieces are all unknown or special): far below any real
 #: log-probability, and finite so the records stay JSON.
 UNSCORABLE = -1000.0
 #: Words per checkpoint chunk of the long scoring runs.
 CHUNK_WORDS = 1000
+
+
+def pass_mode(pass_name: str, override: Optional[str] = None) -> str:
+    """The PLL mode a pass runs in: ``override`` (the global ``--pll-mode``) when given, else the pass's own
+    (:data:`PASS_PLL_MODES`)."""
+    mode = override or PASS_PLL_MODES.get(pass_name)
+    if mode not in PLL_MODES:
+        raise ValueError(f"pll mode must be one of {PLL_MODES}, got {mode!r} (pass {pass_name!r})")
+    return mode
 
 
 def splice(text: str, mask_token: str, word: str) -> tuple[str, int, int]:

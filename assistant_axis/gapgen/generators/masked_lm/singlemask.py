@@ -233,6 +233,8 @@ def base_meta(mlm, pass_name: str, **settings) -> dict:
     meta = {"pass": pass_name, "model_key": getattr(mlm, "key", None), "model": getattr(mlm, "model_id", None),
             "revision": getattr(mlm, "revision", None), "device": getattr(mlm, "device", None),
             "frame_bank_sha256": bank_sha256(), "at": utc_now(), "settings": settings}
+    if settings.get("pll_mode"):
+        meta["pll_mode"] = settings["pll_mode"]       # the pass's PLL mode, explicit (QUESTIONS 90)
     try:
         from .models import runtime_versions
         meta["versions"] = runtime_versions()
@@ -297,9 +299,10 @@ def run_single_pass(mlm, instances: Sequence[Instance], *, top_rank: int = TOP_R
                     lemmatize: Optional[Callable[[str], str]] = None, groups: Optional[WordGroups] = None,
                     track: Sequence[str] = PROBE_LABELS, pass_name: str = "single", pll_mode: Optional[str] = None,
                     echo=print) -> PassResult:
-    """The single-mask pass over ``instances`` (see the module docstring)."""
-    from .pll import PLL_MODE
-    pll_mode = pll_mode or PLL_MODE
+    """The single-mask pass over ``instances`` (see the module docstring).  ``pll_mode`` scores the tracked labels
+    the tokenizer splits (default the pass's own, :data:`.pll.PASS_PLL_MODES`)."""
+    from .pll import pass_mode
+    pll_mode = pass_mode(pass_name, pll_mode)
     t0 = time.time()
     n_fwd0 = getattr(mlm, "n_forward", 0)
     if lemmatize is None:

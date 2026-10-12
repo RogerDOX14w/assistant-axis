@@ -58,7 +58,7 @@ def test_beams_and_variant_b(mlm, lem):
                          echo=lambda *a: None)
     assert all(a.form == "word" and " " not in w for w, a in sw.aggs.items())
     mw = BM.multiword_pass(mlm, [F.FRAME_BY_ID["disp_nature"]], k_first=5, lemmatize=lem,
-                           patterns={"[MASK]-minded": ("first",), "[MASK][MASK]": ("first", "free")},
+                           patterns={"[MASK]-minded": ("first",), "[MASK]-[MASK]": ("first", "after_hyphen")},
                            echo=lambda *a: None)
     assert any(w.endswith("-minded") for w in mw.aggs)
     vb = P.variant_b(mlm, ["kind", "sycophantic", "open-minded", "zymurgical", "honest"], lemmatize=lem,

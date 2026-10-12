@@ -123,10 +123,13 @@ def render_report(ev: Mapping, *, doc_path: Path, files: Optional[Mapping[str, P
         lines += [f"**{ev['note']}**", ""]
     tp = ev.get("throughput") or {}
     if tp:
-        lines += ["## Throughput", "", "| pass | device | seconds | forward passes | per second | instances/min | "
-                  "words/min |", "|---|---|---|---|---|---|---|"]
+        lines += ["## Throughput", "", f"PLL mode: the {_gl(d, 'pseudo-log-likelihood', 'pseudo-log-likelihood')} "
+                  "each pass scored with (QUESTIONS 90: `l2r` left to right, `original` the plan's form).", "",
+                  "| pass | device | PLL mode | seconds | forward passes | per second | instances/min | words/min |",
+                  "|---|---|---|---|---|---|---|---|"]
         for k, v in tp.items():
-            lines.append(f"| {k} | {v.get('device')} | {_num(v.get('seconds'))} | {_num(v.get('n_forward'))} | "
+            lines.append(f"| {k} | {v.get('device')} | {_num(v.get('pll_mode'))} | {_num(v.get('seconds'))} | "
+                         f"{_num(v.get('n_forward'))} | "
                          f"{_num(v.get('forward_per_second'))} | {_num(v.get('instances_per_minute'))} | "
                          f"{_num(v.get('words_per_minute'))} |")
         lines.append("")
@@ -244,7 +247,9 @@ def render_wave_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path
              f"**measured pass rate {_pct(m1.get('pass_rate'))}** (the estimate assumed "
              f"{_pct(ev.get('assumed_pass_rate'))}); polysemy {_pct(m1.get('polysemy_rate'))}; tags {m1.get('tags')}.",
              f"M3 scored {m3.get('n_scored', 0)}: {m3.get('decision')}; **kept share "
-             f"{_pct(ev.get('measured_kept_share'))}** of submitted (the wave assumed "
+             f"{_pct(ev.get('measured_kept_share'))}** of the {_num(ev.get('n_new_rows'))} submitted words not yet in "
+             f"the registry ({_num(ev.get('kept_new'))} kept; the {_num(ev.get('n_registered_at_submit'))} registered "
+             f"stems the run also submitted are left out, QUESTIONS 82; the wave assumed "
              f"{_pct(ev.get('assumed_kept_share'))}); pair completions {m3.get('pair_completions')}.", ""]
     for name, title in (("zipf_band", "Zipf band"), ("best_pass", "pass"), ("token_class", "token class")):
         st = (ev.get("strata") or {}).get(name) or {}

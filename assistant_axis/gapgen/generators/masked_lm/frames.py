@@ -16,9 +16,12 @@ Kinds: ``dispositional`` (the generation bank, ~60 frames), ``state`` and ``phys
 the trait-hood score, never used to generate), ``probe`` (the HHH frame search: Roger asked whether a frame
 recovers helpful, harmless and honest; the probe frames carry the assistant and chatbot subjects, grouped in
 ``family``).  Roger's two frames (plan 04 sections 1 and 3.5, 2026-10-10): **"He's habitually [MASK]"**
-(``disp_habitually``, subject-agnostic as ``{S}{be_c} habitually [MASK]``, and its two- and three-mask forms in
-the subword pass) and the bare **"[MASK][MASK]"** in :data:`MULTIWORD_PATTERNS` (read as the unconstrained
-two-slot form inside each host sentence frame, not as a context-free input: pre-registered question 1).
+(``disp_habitually``, subject-agnostic as ``{S}{be_c} habitually [MASK]``) and the bare **"[MASK][MASK]"**.  The
+bare form is the subword pass's run of blanks in the slot of every generation frame ("He's habitually
+[MASK][MASK]" among them), each blank after the first a continuation piece, so it rebuilds one word the tokenizer
+splits (sycophantic, misanthropic): host-framed, for multi-token words, not phrases (QUESTIONS 79, Roger
+2026-10-12, which took it out of :data:`MULTIWORD_PATTERNS`), in runs of two to four blanks, six under bert-wwm
+(:data:`SUBWORD_WIDTHS`, QUESTIONS 89).
 """
 from __future__ import annotations
 
@@ -235,11 +238,11 @@ CONTRAST_SUBJECTS: tuple[str, ...] = ("she", "he")
 
 #: The multiword pass's slot patterns (plan 04 section 3.5), placed in the slot of each host frame, with the
 #: constraint on each mask in order: ``first`` (a piece that begins a word), ``cont`` (a continuation piece: the
-#: same word goes on), ``free`` (either; a continuation makes one word, a word-start piece a two-word phrase:
-#: Roger's bare two-slot form), ``new_word`` (a word-start piece after literal text), ``after_hyphen`` (the
-#: piece that follows a hyphen).
+#: same word goes on), ``new_word`` (a word-start piece after literal text), ``after_hyphen`` (the piece that
+#: follows a hyphen).  The bare two-slot form ``[MASK][MASK]`` with a ``free`` second slot (either piece: one word
+#: or a two-word phrase) was here until QUESTIONS 79 (Roger, 2026-10-12): it was meant for split words, not
+#: phrases, and lives in the subword pass (:data:`SUBWORD_WIDTHS`); ``free`` stays for a caller's own pattern.
 MULTIWORD_PATTERNS: dict[str, tuple[str, ...]] = {
-    "[MASK][MASK]": ("first", "free"),
     "[MASK]-[MASK]": ("first", "after_hyphen"),
     "[MASK]-[MASK][MASK]": ("first", "after_hyphen", "cont"),
     "[MASK] to [MASK]": ("first", "new_word"),
@@ -252,6 +255,23 @@ MULTIWORD_PATTERNS: dict[str, tuple[str, ...]] = {
 MULTIWORD_HOSTS: tuple[str, ...] = ("disp_nature", "disp_fundamentally", "disp_habitually", "disp_always",
                                     "disp_known_for", "pr_consistently", "psy_personality", "ref_colleagues_describe",
                                     "chat_why_so", "cas_honestly_so")
+
+#: The subword pass's widths per model (QUESTIONS 89, Roger 2026-10-12: "roberta up to four; bert-wwm up to six"):
+#: runs of that many blanks in the slot of every generation frame, every blank after the first a continuation
+#: piece.  The tokenizer census of the corpus's split one-word labels sets the maximum: under roberta 4 pieces
+#: reach all but one of 333 (sycophantic is 4; Gemeinschaft is 5, gryffindor 5 in lower case); under bert-wwm 6
+#: reach all 424 (sycophantic and anthropocentric are 6, which 5 would lose).  ModernBERT is not decided by Roger:
+#: 4, as roberta (all but Gryffindor, 5 pieces, of 390).
+SUBWORD_WIDTHS: dict[str, tuple[int, ...]] = {"roberta": (2, 3, 4), "bert_wwm": (2, 3, 4, 5, 6),
+                                              "modernbert": (2, 3, 4)}
+
+
+def subword_widths(model_key: str) -> tuple[int, ...]:
+    """The subword pass's widths for a model (:data:`SUBWORD_WIDTHS`)."""
+    if model_key not in SUBWORD_WIDTHS:
+        raise KeyError(f"no subword widths for model {model_key!r} (one of {', '.join(SUBWORD_WIDTHS)})")
+    return SUBWORD_WIDTHS[model_key]
+
 
 ALL_FRAMES: tuple[Frame, ...] = FRAME_BANK + PROBE_FRAMES
 FRAME_BY_ID: dict[str, Frame] = {f.id: f for f in ALL_FRAMES}
@@ -355,7 +375,8 @@ def alternating_subjects(frames: Sequence[Frame], subjects: Sequence[str] = ("sh
 def bank_sha256() -> str:
     """A fingerprint of the frames, subjects, patterns and instance lists (recorded in every aggregate)."""
     doc = {"frames": [asdict(f) for f in ALL_FRAMES], "subjects": [asdict(s) for s in SUBJECTS],
-           "patterns": MULTIWORD_PATTERNS, "hosts": MULTIWORD_HOSTS, "variant_b": VARIANT_B_INSTANCES,
+           "patterns": MULTIWORD_PATTERNS, "hosts": MULTIWORD_HOSTS, "subword_widths": SUBWORD_WIDTHS,
+           "variant_b": VARIANT_B_INSTANCES,
            "contrast": CONTRAST_SET, "contrast_subjects": CONTRAST_SUBJECTS, "pilot": PILOT_FRAMES,
            "probe_labels": PROBE_LABELS}
     return hashlib.sha256(json.dumps(doc, sort_keys=True).encode()).hexdigest()

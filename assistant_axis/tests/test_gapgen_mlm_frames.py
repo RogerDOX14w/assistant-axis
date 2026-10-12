@@ -41,8 +41,32 @@ def test_rogers_two_frames():
     assert F.instantiate(hab, F.SUBJECT_BY_KEY["he"], "[MASK]") == "He's habitually [MASK]."
     assert hab.kind == "dispositional" and hab in F.generation_frames("all") and hab in F.generation_frames("pilot10")
     assert F.instantiate(hab, F.SUBJECT_BY_KEY["he"], "<mask>", n_masks=2) == "He's habitually <mask><mask>."
-    assert "[MASK][MASK]" in F.MULTIWORD_PATTERNS
-    assert F.MULTIWORD_PATTERNS["[MASK][MASK]"] == ("first", "free")
+    # the bare "[MASK][MASK]" is the subword pass's two-blank run in every generation frame (QUESTIONS 79), not
+    # a multiword pattern: test_the_bare_form_is_for_split_words_only
+    assert all(min(ws) == 2 for ws in F.SUBWORD_WIDTHS.values())
+
+
+def test_the_bare_form_is_for_split_words_only():
+    """QUESTIONS 79 (Roger, 2026-10-12): the bare two-slot form was meant for multi-token words, host-framed, not
+    for phrases; it left the multiword patterns, and no pattern there takes a ``free`` slot (word or phrase)."""
+    assert "[MASK][MASK]" not in F.MULTIWORD_PATTERNS
+    assert not any("free" in cons for cons in F.MULTIWORD_PATTERNS.values())
+    assert F.MULTIWORD_PATTERNS["[MASK]-[MASK]"] == ("first", "after_hyphen")          # the hyphen forms stay
+    assert F.MULTIWORD_PATTERNS["[MASK]-[MASK][MASK]"] == ("first", "after_hyphen", "cont")
+    for pat, cons in F.MULTIWORD_PATTERNS.items():
+        assert pat.count(F.SLOT) == len(cons), pat
+
+
+def test_subword_widths_per_model():
+    """QUESTIONS 89: roberta up to four blanks, bert-wwm up to six; ModernBERT four (not decided by Roger)."""
+    from assistant_axis.gapgen.generators.masked_lm.models import MODELS
+    assert F.SUBWORD_WIDTHS == {"roberta": (2, 3, 4), "bert_wwm": (2, 3, 4, 5, 6), "modernbert": (2, 3, 4)}
+    assert set(F.SUBWORD_WIDTHS) == set(MODELS)
+    assert F.subword_widths("bert_wwm") == (2, 3, 4, 5, 6)
+    with pytest.raises(KeyError):
+        F.subword_widths("deberta")
+    text, a, b = F.instantiate_span(F.FRAME_BY_ID["disp_habitually"], F.SUBJECT_BY_KEY["he"], "<mask>", n_masks=6)
+    assert text == "He's habitually " + "<mask>" * 6 + "." and text[a:b] == "<mask>" * 6
 
 
 def test_probe_frames_carry_assistant_subjects():
@@ -96,6 +120,12 @@ def test_alternating_subjects_and_bank_hash():
     pairs = F.alternating_subjects([F.FRAME_BY_ID[i] for i in F.MULTIWORD_HOSTS])
     assert [s for _, s in pairs[:4]] == ["she", "he", "she", "he"]
     assert len(F.bank_sha256()) == 64 and F.bank_sha256() == F.bank_sha256()
+
+
+def test_bank_hash_covers_the_subword_widths(monkeypatch):
+    before = F.bank_sha256()
+    monkeypatch.setitem(F.SUBWORD_WIDTHS, "roberta", (2, 3))
+    assert F.bank_sha256() != before
 
 
 def test_frames_arg():

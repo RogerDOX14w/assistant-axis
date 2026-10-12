@@ -6,16 +6,23 @@
         [--models roberta] [--dry-run]
     uv run python data_analysis/gap_generation/masked_lm_generator.py generate
         --passes single,probe,subword,multiword,variant_b [--frames all|pilot10] [--subjects she,he,...]
-        [--top-rank 2000] [--k-first 100] [--k-first-multi 50] [--beam-width 3] [--words-limit N]
-        [--pll-mode l2r|original] [--models roberta] [--device mps|cpu|auto] [--batch-size 64] [--dry-run]
+        [--top-rank 2000] [--k-first 100] [--k-first-multi 50] [--beam-width 3] [--subword-widths 2,3,4]
+        [--words-limit N] [--pll-mode l2r|original] [--models roberta] [--device mps|cpu|auto] [--batch-size 64]
+        [--dry-run]
     uv run python data_analysis/gap_generation/masked_lm_generator.py score [--top 10000] [--models roberta]
         [--device mps] [--dry-run]
     uv run python data_analysis/gap_generation/masked_lm_generator.py table [--dry-run]
     uv run python data_analysis/gap_generation/masked_lm_generator.py evaluate [--cutoffs 1000,2000,5000,10000,20000]
         [--dry-run]
     uv run python data_analysis/gap_generation/masked_lm_generator.py submit --run-id R (--top N | --kept-target 300
-        [--kept-share S] [--multi-cap N]) [--include-registered] [--transport live|batches] [--budget-usd 5]
+        [--kept-share S] [--multi-cap N]) [--count-registered] [--transport live|batches] [--budget-usd 5]
         [--confirm-expensive --confirmed-by WHO] [--dry-run]
+
+The common flags (``--models``, ``--frames``, ``--device``, ``--batch-size``, ``--pll-mode``) go before the command
+(they are accepted after it too).  ``--pll-mode`` is left out normally: each pass then runs in its own mode
+(QUESTIONS 90: left to right for single, probe, subword, Variant B and the contrast score; the plan's original form
+for multiword); given, it sets every pass.  The subword pass's widths are per model (QUESTIONS 89: roberta and
+ModernBERT 2-4 blanks, bert-wwm 2-6); ``--subword-widths`` overrides them.
     uv run python data_analysis/gap_generation/masked_lm_generator.py report --run-id R [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_04_masked_lm.md``.  ``census`` counts the corpus's labels (and the
@@ -185,6 +192,11 @@ def _subjects(args) -> Optional[list[str]]:
     return keys
 
 
+def _mode_source(args) -> str:
+    """Where a pass's PLL mode came from (recorded beside ``pll_mode`` in its meta)."""
+    return f"--pll-mode {args.pll_mode}" if args.pll_mode else "per-pass default (QUESTIONS 90)"
+
+
 def _words_subset(words: Sequence[str], limit: Optional[int]) -> list[str]:
     """A deterministic spread of ``limit`` words (every k-th), for smoke runs."""
     if not limit or limit >= len(words):
@@ -193,8 +205,20 @@ def _words_subset(words: Sequence[str], limit: Optional[int]) -> list[str]:
     return [words[int(i * step)] for i in range(limit)]
 
 
-def _plan_passes(args, mask_token: str, universe_n: Optional[int]) -> dict:
-    """What each pass would run: instance counts and forward passes (the dry run's estimate)."""
+def _widths(args, key: str) -> tuple[int, ...]:
+    """The subword pass's widths: ``--subword-widths`` when given, else the model's (QUESTIONS 89)."""
+    if not getattr(args, "subword_widths", None):
+        return F.subword_widths(key)
+    ws = tuple(int(x) for x in str(args.subword_widths).split(",") if x.strip())
+    if not ws or min(ws) < 2:
+        raise SystemExit(f"--subword-widths takes widths of 2 or more, got {args.subword_widths!r}")
+    return ws
+
+
+def _plan_passes(args, mask_token: str, universe_n: Optional[int], key: str = M.PRIMARY_MODEL) -> dict:
+    """What each pass would run: instance counts and forward passes (the dry run's estimate; a beam's forward
+    passes are an upper bound, since a branch whose top pieces break the constraint dies), and its PLL mode."""
+    from assistant_axis.gapgen.generators.masked_lm.pll import pass_mode
     subs = _subjects(args)
     gen = F.generation_frames(args.frames)
     out = {}
@@ -207,8 +231,10 @@ def _plan_passes(args, mask_token: str, universe_n: Optional[int]) -> dict:
             out[p] = {"instances": n, "forward": n}
         elif p == "subword":
             k, b = args.k_first, args.beam_width
-            fw = len(gen) * ((1 + k) + (1 + k + k * b))
-            out[p] = {"instances": 2 * len(gen), "forward": fw}
+            ws = _widths(args, key)
+            # a run of w blanks: the all-masked pass, then k first pieces, each branch growing by up to b a blank
+            fw = len(gen) * sum(1 + sum(k * b ** j for j in range(w - 1)) for w in ws)
+            out[p] = {"instances": len(ws) * len(gen), "widths": list(ws), "forward": fw}
         elif p == "multiword":
             k, b = args.k_first_multi, args.beam_width
             per = sum(1 + (k if len(c) > 1 else 0) + (k * b if len(c) > 2 else 0)
@@ -220,8 +246,9 @@ def _plan_passes(args, mask_token: str, universe_n: Optional[int]) -> dict:
             n_inst = len(F.VARIANT_B_INSTANCES)
             out[p] = {"instances": n_inst, "words": nw, "forward": int(nw * n_inst * 2.0) + n_inst,
                       "note": "about 2 pieces a word"}
-    for v in out.values():
+    for p, v in out.items():
         v["minutes_at_cpu_rate"] = round(v["forward"] / CPU_FORWARD_PER_SECOND / 60.0, 1)
+        v["pll_mode"] = pass_mode(p, args.pll_mode)
     return out
 
 
@@ -237,7 +264,7 @@ def cmd_generate(args) -> int:
     universe = _universe() if "variant_b" in args.passes else None
     if args.dry_run:
         for key in keys:
-            plan = _plan_passes(args, F.SLOT, len(universe) if universe is not None else None)
+            plan = _plan_passes(args, F.SLOT, len(universe) if universe is not None else None, key)
             print(f"DRY-RUN {key} ({'present' if _present(key, args) else 'NOT downloaded'}), frames {args.frames}, "
                   f"device {args.device}:")
             for p, v in plan.items():
@@ -269,20 +296,22 @@ def cmd_generate(args) -> int:
                                         lemmatize=lem, groups=groups, pass_name="probe", pll_mode=args.pll_mode,
                                         batch=args.batch_size)
             elif p == "subword":
-                res = BM.subword_pass(mlm, gen, k_first=args.k_first, beam_width=args.beam_width, lemmatize=lem,
-                                      pll_mode=args.pll_mode)
+                res = BM.subword_pass(mlm, gen, k_first=args.k_first, widths=_widths(args, key),
+                                      beam_width=args.beam_width, lemmatize=lem, pll_mode=args.pll_mode)
             elif p == "multiword":
                 res = BM.multiword_pass(mlm, k_first=args.k_first_multi, beam_width=args.beam_width, lemmatize=lem,
                                         pll_mode=args.pll_mode)
             else:
+                mode = P.pass_mode("variant_b", args.pll_mode)
                 words = _words_subset(universe, args.words_limit)
                 insts = F.pairs_to_instances(F.VARIANT_B_INSTANCES, mask)
-                ckey = P.checkpoint_key([i.text for i in insts], args.pll_mode, key, mlm.revision)
+                ckey = P.checkpoint_key([i.text for i in insts], mode, key, mlm.revision)
                 ck = args.agg_dir / key / f"variant_b.{ckey}.partial.jsonl"
                 res = P.variant_b(mlm, words, top_rank=args.top_rank, groups=groups, lemmatize=lem,
-                                  mode=args.pll_mode, checkpoint=ck)
+                                  mode=mode, checkpoint=ck)
                 res.meta["universe_size"] = len(universe)
                 res.meta["words_limit"] = args.words_limit
+            res.meta["pll_mode_source"] = _mode_source(args)
             res.meta["frames_arg"] = args.frames
             res.meta["subjects_arg"] = subs
             res.meta["git_sha"] = _git_sha()
@@ -343,16 +372,17 @@ def cmd_score(args) -> int:
             print(M.model_missing(key), file=sys.stderr)
             return 2
         mlm = _load_mlm(key, args)
+        mode = P.pass_mode("contrast", args.pll_mode)
         insts = P.contrast_instances(mlm.tok.mask_token)
-        ckey = P.checkpoint_key([i.text for i in insts], args.pll_mode, key, mlm.revision)
+        ckey = P.checkpoint_key([i.text for i in insts], mode, key, mlm.revision)
         ck = args.agg_dir / key / f"contrast.{ckey}.partial.jsonl"
         import time
         t0 = time.time()
-        con = P.score_words(words, model_key=key, mlm=mlm, mode=args.pll_mode, checkpoint=ck)
-        meta = base_meta(mlm, "contrast", pll_mode=args.pll_mode, top=args.top, frames=list(F.CONTRAST_SET),
+        con = P.score_words(words, model_key=key, mlm=mlm, mode=mode, checkpoint=ck)
+        meta = base_meta(mlm, "contrast", pll_mode=mode, top=args.top, frames=list(F.CONTRAST_SET),
                          subjects=list(F.CONTRAST_SUBJECTS))
         meta.update({"n_words": len(words), "seconds": round(time.time() - t0, 2), "n_auc_set": len(auc_set),
-                     "git_sha": _git_sha()})
+                     "git_sha": _git_sha(), "pll_mode_source": _mode_source(args)})
         res = PassResult("contrast", key, {w: {"word": w, **c.as_dict()} for w, c in con.items()}, meta)
         data, m = write_pass(res, args.agg_dir)
         print(f"wrote {_rel(data)} ({len(con)} words) and {_rel(m)}")
@@ -405,7 +435,8 @@ def cmd_table(args) -> int:
     metas = {k: {x: p.meta.get(x) for x in ("pass", "model_key", "model", "revision", "device", "versions",
                                              "frame_bank_sha256", "settings", "seconds", "n_forward", "at",
                                              "frames_arg", "subjects_arg", "git_sha", "words_limit",
-                                             "universe_size")}
+                                             "universe_size", "pll_mode_source")}
+             | {"pll_mode": p.meta.get("pll_mode") or (p.meta.get("settings") or {}).get("pll_mode")}
              for k, p in sorted(passes.items())}
     inputs = [current_file_input(dep_key=f"agg_{k.replace(':', '_')}", path=pp) for k in passes
               for pp in (args.agg_dir / k.split(":")[1] / f"{k.split(':')[0]}.jsonl",) if pp.exists()]
@@ -444,6 +475,7 @@ def cmd_evaluate(args) -> int:
                             contrasts=contrasts, corpus_for_auc=corpus,
                             auc_exclude=E.demographic_labels(corpus, args.regions), census=census, title=args.title,
                             note=args.note)
+    ev["table_sha256"] = T.file_sha256(path)     # the table is gitignored (QUESTIONS 80); a rebuild checks this
     files = {"the table": path, "the evaluation (JSON)": args.out_dir / "evaluation.json",
              "the recovery curves": args.out_dir / "recovery_curves.png",
              "the HHH probe": args.out_dir / "hhh_probe.md", "the spot check": args.out_dir / "roger_sample.md",
@@ -483,11 +515,13 @@ def cmd_evaluate(args) -> int:
 
 # ---------------------------------------------------------------------------- submit / report
 
-def _registry_stems(args) -> set[str]:
+def _registry_stems(args) -> tuple[set[str], set[str]]:
+    """``(stems in the registry, those M1 or M3 has still to decide)``."""
+    from assistant_axis.gapgen.generators.masked_lm.submit import registry_stems
     from assistant_axis.gapgen.registry import Registry
     if not args.registry.exists():
-        return set()
-    return {r.get("stem") for r in Registry(args.registry).fold().values() if r.get("stem")}
+        return set(), set()
+    return registry_stems(Registry(args.registry).fold())
 
 
 def cmd_submit(args) -> int:
@@ -506,10 +540,11 @@ def cmd_submit(args) -> int:
         d = json.loads(gen_path.read_text(encoding="utf-8"))
         generation = (d.get("result") or d).get("passes")
     uncut = tuple(x.strip() for x in args.uncut_classes.split(",") if x.strip())
+    registered, pending = _registry_stems(args)
     try:
         SB.run_submit(args.run_id, table=T.load_mlm_table(path), top_n=args.top, kept_target=args.kept_target,
                       kept_share=args.kept_share, multi_cap=args.multi_cap, uncut=uncut,
-                      exclude_stems=() if args.include_registered else _registry_stems(args),
+                      registered_stems=registered, pending_stems=pending, count_registered=args.count_registered,
                       budget_usd=args.budget_usd, confirm_expensive=args.confirm_expensive,
                       confirmed_by=args.confirmed_by, transport=args.transport, dry_run=args.dry_run,
                       registry_path=args.registry, candidates_dir=args.candidates_dir, table_path=Path(_rel(path)),
@@ -580,8 +615,10 @@ def _common_flags(ap: argparse.ArgumentParser, *, top: bool) -> None:
     ap.add_argument("--device", default=d("mps"), choices=("mps", "cpu", "auto"),
                     help="mps (refused when Metal sees no device, as inside the Claude Code sandbox), cpu, auto")
     ap.add_argument("--batch-size", type=int, default=d(64))
-    ap.add_argument("--pll-mode", default=d("l2r"), choices=("l2r", "original"),
-                    help="pseudo-log-likelihood: l2r (a split word's later pieces masked too; default) or original")
+    ap.add_argument("--pll-mode", default=d(None), choices=("l2r", "original"),
+                    help="pseudo-log-likelihood for every pass: l2r (a split word's later pieces masked too) or "
+                         "original (the plan's).  Default: each pass its own (QUESTIONS 90): l2r for single, probe, "
+                         "subword, variant_b and the contrast score, original for multiword")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -626,6 +663,9 @@ def build_parser() -> argparse.ArgumentParser:
                         "2026-10-10 decision keeps the beams as the off-list complement of Variant B)")
     p.add_argument("--k-first-multi", type=int, default=50, help="multiword pass: first-slot pieces (plan 100)")
     p.add_argument("--beam-width", type=int, default=3)
+    p.add_argument("--subword-widths", default=None,
+                   help="subword pass: comma-separated runs of blanks (default per model, QUESTIONS 89: roberta "
+                        "and modernbert 2,3,4; bert_wwm 2,3,4,5,6)")
     p.add_argument("--words-limit", type=int, default=None,
                    help="variant B: score a deterministic spread of this many universe words (smoke runs)")
     p.add_argument("--dry-run", action="store_true")
@@ -660,8 +700,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--uncut-classes", default="multiword",
                    help="wave: token classes exempt from the rank cut (default multiword; multiword,subword is the "
                         "coordinator's literal reading)")
-    p.add_argument("--include-registered", action="store_true",
-                   help="keep stems already in the registry (left out by default)")
+    p.add_argument("--count-registered", action="store_true",
+                   help="count stems already in the registry in the rank cut like any row (by default they are "
+                        "submitted where they fall inside the cut, merging into their registry rows at no API cost, "
+                        "and never counted in it or in the projected kept terms; QUESTIONS 82)")
     p.add_argument("--transport", choices=("live", "batches"), default="live",
                    help="how the platform will run M1 and M3 (batches: half price in the estimate)")
     p.add_argument("--budget-usd", type=float, default=5.0,

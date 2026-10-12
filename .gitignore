@@ -78,6 +78,11 @@ Thumbs.db
 # are tracked (2026-10-08).
 /data/candidates/runs/**/run.log
 /data/candidates/*.tmp
+# The masked-LM generator's table is a derived intermediate, rebuilt by `table` from the cached aggregates
+# (Roger, 2026-10-12, QUESTIONS 80); its evaluation.json (with the table's sha256), readouts, curves, generation
+# record, census and sources manifest beside it are tracked.
+/data/candidates/masked_lm/mlm_table.jsonl
+/data/candidates/masked_lm/mlm_table.jsonl.bak.*
 
 # Trait rubric V2 experiments (2026-09/10): the reports, plans, rubric texts,
 # samples and usage records are committed; the bulky per-file intermediates

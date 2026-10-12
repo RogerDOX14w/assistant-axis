@@ -10,20 +10,26 @@ carries a constraint (:data:`.frames.MULTIWORD_PATTERNS`):
 
 * ``first`` / ``new_word``: a piece that begins a word (a leading-space piece in BPE; not ``##`` in WordPiece);
 * ``cont``: a continuation piece, no leading space: **the same word goes on**.  The subword pass uses only
-  these after the first mask (``[MASK][MASK]``, ``[MASK][MASK][MASK]`` in every generation frame, Roger's
-  "He's habitually [MASK]" among them), so it rebuilds whole words such as sycophantic, never phrases;
-* ``free``: either.  In Roger's bare two-slot form ``[MASK][MASK]`` a continuation piece makes **one word** and a
-  leading-space piece a **two-word phrase**; that is the leading-space convention doing the classifying;
+  these after the first mask (Roger's bare ``[MASK][MASK]`` and its longer runs in every generation frame,
+  "He's habitually [MASK][MASK]" among them; two to four blanks, six under bert-wwm:
+  :data:`.frames.SUBWORD_WIDTHS`, QUESTIONS 79 and 89), so it rebuilds whole words such as sycophantic, never
+  phrases;
+* ``free``: either (a continuation piece makes one word, a leading-space piece a two-word phrase).  No pattern of
+  the multiword pass uses it since QUESTIONS 79 (Roger, 2026-10-12) took the bare two-slot form out: it was meant
+  for split words, not phrases;
 * ``after_hyphen``: the piece after a hyphen (no leading space in BPE; a word-initial piece in WordPiece).
 
 **Rescoring** (:func:`_rescore`, on by default): an accepted surface's ``best_logprob`` is its pseudo-log-likelihood
 spliced whole into the single slot of the instance that found it, so it sits on the union's scale (the chain's
-own score, which leaves a pattern's literal text unscored, is kept as ``beam_score``).
+own score, which leaves a pattern's literal text unscored, is kept as ``beam_score``).  The pass's PLL mode
+(QUESTIONS 90): ``l2r`` for the subword pass, the plan's ``original`` for the multiword pass, unless
+``pll_mode`` (the CLI's ``--pll-mode``) sets both.
 
 The surface is rebuilt from the pattern and the pieces' text (tokenizer-independent), lower-cased; a one-word
 surface is lemmatised like the single-mask pass's; the multiword pass drops a phrase that opens or closes on a
-function word (:func:`function_word_edge`: "a fighter", "very shy", "lied to us", which the bare two-slot form
-returns in numbers on the real model).  Per surface: the best score with its frame and subject, the
+function word (:func:`function_word_edge`: "a fighter", "very shy", "lied to us", which the real model returned in
+numbers from the bare two-slot form before QUESTIONS 79, and still does from "[MASK] to [MASK]").  Per surface:
+the best score with its frame and subject, the
 number of instances that produced it (``n_top``: every accepted sequence is within the top 2,000 of its
 instance), its mean rank among its instance's accepted sequences, its form (``word``, ``hyphenated``,
 ``phrase``) and pattern.  Roger's decision of 2026-10-10 keeps both beams at reduced K as the off-list
@@ -40,7 +46,7 @@ import numpy as np
 
 from .frames import (
     FRAME_BY_ID, MULTIWORD_HOSTS, MULTIWORD_PATTERNS, SLOT, SUBJECT_BY_KEY, Frame, alternating_subjects,
-    instantiate_span,
+    instantiate_span, subword_widths,
 )
 
 CONSTRAINTS = ("first", "new_word", "cont", "free", "after_hyphen")
@@ -76,7 +82,8 @@ def allowed(tok, constraint: str) -> np.ndarray:
 
 def function_word_edge(surface: str) -> bool:
     """A phrase that opens or closes on a function word (``gapgen.normalize.STOPWORDS``): "a fighter", "very shy",
-    "in denial", "lied to us".  The bare two-slot form and "[MASK] to [MASK]" produce many; none is a label."""
+    "in denial", "lied to us".  "[MASK] to [MASK]" produces many (the bare two-slot form did, before QUESTIONS 79);
+    none is a label."""
     from assistant_axis.gapgen.normalize import STOPWORDS
     words = surface.split()
     edge = STOPWORDS | EDGE_EXTRA
@@ -158,7 +165,9 @@ def beam_fill(mlm, text: str, start: int, end: int, constraints: Sequence[str], 
 def _run(mlm, jobs: Sequence[tuple[Frame, str, str, tuple]], *, k_first: int, beam_width: int, pass_name: str,
          lemmatize: Optional[Callable[[str], str]], accept: Callable[[BeamHit, tuple], bool], settings: Mapping,
          rescore: bool = True, pll_mode: Optional[str] = None, echo=print):
+    from .pll import pass_mode
     from .singlemask import PassResult, WordAgg, base_meta
+    pll_mode = pass_mode(pass_name, pll_mode)
     t0 = time.time()
     n_fwd0 = getattr(mlm, "n_forward", 0)
     ok = _Allowed(mlm.tok)
@@ -222,12 +231,14 @@ def _rescore(mlm, best: Mapping[str, tuple], *, mode: Optional[str] = None) -> d
     return out
 
 
-def subword_pass(mlm, frames: Sequence[Frame], *, k_first: int = 300, widths: Sequence[int] = (2, 3),
+def subword_pass(mlm, frames: Sequence[Frame], *, k_first: int = 300, widths: Optional[Sequence[int]] = None,
                  beam_width: int = 3, subjects: Sequence[str] = ("she", "he"),
                  lemmatize: Optional[Callable[[str], str]] = None, rescore: bool = True,
                  pll_mode: Optional[str] = None, echo=print):
-    """Words the tokenizer splits: each frame (one subject, she and he alternating) with 2 and 3 adjacent masks;
-    every mask after the first must be a continuation piece."""
+    """Words the tokenizer splits: each frame (one subject, she and he alternating) with runs of adjacent masks,
+    ``widths`` long (default the model's, :data:`.frames.SUBWORD_WIDTHS`: 2-4, 2-6 under bert-wwm); every mask
+    after the first must be a continuation piece."""
+    widths = tuple(int(w) for w in widths) if widths is not None else subword_widths(getattr(mlm, "key", "?"))
     jobs = []
     for fid, subj in alternating_subjects(list(frames), subjects):
         for w in widths:
@@ -242,8 +253,9 @@ def multiword_pass(mlm, frames: Optional[Sequence[Frame]] = None, *, k_first: in
                    subjects: Sequence[str] = ("she", "he"), lemmatize: Optional[Callable[[str], str]] = None,
                    rescore: bool = True, pll_mode: Optional[str] = None, echo=print):
     """Phrases and compounds: each pattern of :data:`.frames.MULTIWORD_PATTERNS` in the slot of each host frame
-    (:data:`.frames.MULTIWORD_HOSTS`, one subject each).  The bare ``[MASK][MASK]`` keeps one-word and two-word
-    completions alike, each classified; the others keep what their constraints build."""
+    (:data:`.frames.MULTIWORD_HOSTS`, one subject each), each keeping what its constraints build (the bare
+    ``[MASK][MASK]`` is the subword pass's since QUESTIONS 79).  Rescored in the plan's ``original`` PLL unless
+    ``pll_mode`` says otherwise (QUESTIONS 90)."""
     hosts = list(frames) if frames is not None else [FRAME_BY_ID[f] for f in MULTIWORD_HOSTS]
     jobs = []
     for fid, subj in alternating_subjects(hosts, subjects):

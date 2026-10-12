@@ -175,7 +175,56 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     rep = json.loads((rd / "evaluation.json").read_text())["result"]
     assert rep["measured_kept_share"] == 0.25 and rep["m3"]["decision"] == {"new": 1}
     assert (rd / "roger_sample.md").exists()
-    # the wave: registry stems are left out by default
+    # the wave: registry stems are submitted where they fall inside the cut and never counted (QUESTIONS 82)
     assert run(common, "submit", "--run-id", "w1", "--kept-target", "2", "--kept-share", "0.5", "--dry-run") == 0
     out = capsys.readouterr().out
-    assert "already in the registry (left out)" in out and "kept target 2 at kept share 0.5" in out
+    assert "already in the registry (submitted where they fall inside the cut, never counted in it)" in out
+    assert "kept target 2 at kept share 0.5" in out and "registered stems not counted" in out
+    assert run(common, "submit", "--run-id", "w2", "--kept-target", "2", "--kept-share", "0.5", "--count-registered",
+               "--dry-run") == 0
+    assert "(counted in the cut: --count-registered)" in capsys.readouterr().out
+    with pytest.raises(SystemExit):                     # the old flag is gone, not silently ignored
+        run(common, "submit", "--run-id", "w3", "--top", "2", "--include-registered", "--dry-run")
+
+
+def test_each_pass_records_its_pll_mode(env, capsys):
+    """QUESTIONS 90: without --pll-mode each pass runs in its own mode, recorded in its aggregate's meta and in
+    generation.json; given, it sets every pass.  QUESTIONS 80: evaluation.json records the table's sha256."""
+    tmp, common = env
+    assert run(common, *GEN) == 0 and run(common, "score", "--top", "0") == 0 and run(common, "table") == 0
+    agg = tmp / "agg" / "roberta"
+    want = {"single": "l2r", "probe": "l2r", "subword": "l2r", "multiword": "original", "variant_b": "l2r",
+            "contrast": "l2r"}
+    for p, mode in want.items():
+        meta = json.loads((agg / f"{p}.meta.json").read_text())
+        assert (meta["pll_mode"], meta["pll_mode_source"]) == (mode, "per-pass default (QUESTIONS 90)"), p
+    sub = json.loads((agg / "subword.meta.json").read_text())
+    assert sub["settings"]["widths"] == [2, 3, 4]                       # roberta's (QUESTIONS 89)
+    gen = json.loads((tmp / "out" / "generation.json").read_text())["result"]["passes"]
+    assert {k: v["pll_mode"] for k, v in gen.items()} == {f"{p}:roberta": m for p, m in want.items()
+                                                           if p != "contrast"}
+    assert run(common, "evaluate") == 0
+    ev = json.loads((tmp / "out" / "evaluation.json").read_text())["result"]
+    assert ev["table_sha256"] == hashlib.sha256((tmp / "out" / "mlm_table.jsonl").read_bytes()).hexdigest()
+    assert ev["throughput"]["multiword:roberta"]["pll_mode"] == "original"
+    assert "| multiword:roberta | cpu | original |" in (tmp / "out" / "readout.md").read_text()
+    over = [x if x != str(tmp / "agg") else str(tmp / "agg2") for x in common]
+    assert run(over, "--pll-mode", "original", *GEN, "--subword-widths", "2,3") == 0
+    for p in ("single", "subword", "multiword"):
+        meta = json.loads((tmp / "agg2" / "roberta" / f"{p}.meta.json").read_text())
+        assert (meta["pll_mode"], meta["pll_mode_source"]) == ("original", "--pll-mode original"), p
+    assert json.loads((tmp / "agg2" / "roberta" / "subword.meta.json").read_text())["settings"]["widths"] == [2, 3]
+
+
+def test_the_dry_run_plans_the_widths_and_modes(env, capsys):
+    tmp, common = env
+    assert run(common, *GEN, "--dry-run") == 0
+    out = capsys.readouterr().out
+    sub = json.loads(next(x for x in out.splitlines() if x.strip().startswith("subword:")).split(":", 1)[1])
+    # pilot10 x widths 2, 3, 4 at k 3 and beam 2: (1 + 3) + (1 + 3 + 6) + (1 + 3 + 6 + 12) per frame
+    assert sub["widths"] == [2, 3, 4] and sub["instances"] == 30 and sub["forward"] == 10 * (4 + 10 + 22)
+    assert sub["pll_mode"] == "l2r" and '"pll_mode": "original"' in out
+    assert run(common, "--models", "bert_wwm", *GEN, "--dry-run") == 0
+    sub = json.loads(next(x for x in capsys.readouterr().out.splitlines()
+                          if x.strip().startswith("subword:")).split(":", 1)[1])
+    assert sub["widths"] == [2, 3, 4, 5, 6] and sub["instances"] == 50

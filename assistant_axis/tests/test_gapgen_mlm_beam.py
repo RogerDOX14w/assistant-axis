@@ -68,7 +68,9 @@ def test_k_first_is_respected():
     assert res.aggs == {}                            # only "kind" explored, and its branch dies
 
 
-def test_the_bare_two_slot_form_classifies_word_and_phrase():
+def test_a_free_slot_classifies_word_and_phrase():
+    # the bare two-slot form with a free second slot is no default pattern since QUESTIONS 79; a caller's own
+    # pattern may still use ``free``, and the leading-space convention still classifies what it returns
     res = BM.multiword_pass(fake(), [F.FRAME_BY_ID["disp_nature"]], k_first=3, beam_width=1,
                             patterns={"[MASK][MASK]": ("first", "free")}, subjects=("she",), echo=lambda *a: None)
     assert res.aggs["kind hearted"].form == "phrase"          # a leading-space piece: a second word
@@ -119,16 +121,68 @@ def test_form_of_and_function_word_edges():
 
 def test_rescoring_puts_a_hit_on_the_union_scale():
     """A pattern's chain leaves its literal text unscored; the rescored ``best_logprob`` is the surface's PLL in
-    the instance's single slot, the chain score kept as ``beam_score``."""
+    the instance's single slot (the multiword pass's own mode, ``original``: QUESTIONS 90), the chain score kept
+    as ``beam_score``."""
     from assistant_axis.gapgen.generators.masked_lm import pll as P
     mlm = fake()
     res = BM.multiword_pass(mlm, [F.FRAME_BY_ID["disp_nature"]], k_first=2, beam_width=1, subjects=("she",),
                             patterns={"[MASK]-oriented": ("first",)}, echo=lambda *a: None)
     a = res.aggs["goal-oriented"]
     text = F.instantiate(F.FRAME_BY_ID["disp_nature"], F.SUBJECT_BY_KEY["she"], mlm.tok.mask_token)
-    assert a.best_logprob == pytest.approx(P.pll_score(mlm, text, "goal-oriented"), abs=1e-4)
+    assert a.best_logprob == pytest.approx(P.pll_score(mlm, text, "goal-oriented", mode="original"), abs=1e-4)
+    assert a.best_logprob != pytest.approx(P.pll_score(mlm, text, "goal-oriented", mode="l2r"), abs=1e-4)
     assert a.beam_score > a.best_logprob             # the chain never paid for "-oriented"
     raw = BM.multiword_pass(fake(), [F.FRAME_BY_ID["disp_nature"]], k_first=2, beam_width=1, subjects=("she",),
                             patterns={"[MASK]-oriented": ("first",)}, rescore=False, echo=lambda *a: None)
     assert raw.aggs["goal-oriented"].best_logprob == pytest.approx(a.beam_score, abs=1e-4)
     assert res.meta["settings"]["rescored"] is True
+
+
+# ---------------------------------------------------------------------------- widths per model (QUESTIONS 89)
+
+FOUR = ["She", "He", "Ġis", "Ġby", "Ġnature", ".", "'s", "Ġhabitually", "Ġsy", "c", "oph", "antic"]
+
+
+def four_scorer(pieces, pos):
+    """sycophantic in four pieces, as roberta splits it (Ġsy c oph antic)."""
+    prv = pieces[pos - 1]
+    return {"Ġsy": {"c": 6.0}, "c": {"oph": 6.0}, "oph": {"antic": 6.0}}.get(prv, {"Ġsy": 5.0})
+
+
+def test_subword_widths_come_from_the_model():
+    hab = [F.FRAME_BY_ID["disp_habitually"]]
+    res = BM.subword_pass(FakeMaskedLM(make_tokenizer(FOUR), four_scorer), hab, k_first=1, beam_width=1,
+                          echo=lambda *a: None)
+    assert res.meta["settings"]["widths"] == [2, 3, 4] and res.meta["n_jobs"] == 3
+    assert {w: a.pattern for w, a in res.aggs.items()} == {"syc": "[MASK][MASK]", "sycoph": "[MASK][MASK][MASK]",
+                                                           "sycophantic": "[MASK]" * 4}
+    assert res.aggs["sycophantic"].form == "word"
+    # the old two and three blanks never reach a four-piece word
+    old = BM.subword_pass(FakeMaskedLM(make_tokenizer(FOUR), four_scorer), hab, k_first=1, beam_width=1,
+                          widths=(2, 3), echo=lambda *a: None)
+    assert "sycophantic" not in old.aggs
+    wwm = BM.subword_pass(FakeMaskedLM(make_tokenizer(FOUR), four_scorer, key="bert_wwm"), hab, k_first=1,
+                          beam_width=1, echo=lambda *a: None)
+    assert wwm.meta["settings"]["widths"] == [2, 3, 4, 5, 6]
+    assert [j["pattern"] for j in wwm.meta["jobs"]] == ["[MASK]" * w for w in (2, 3, 4, 5, 6)]
+    with pytest.raises(KeyError):
+        BM.subword_pass(FakeMaskedLM(make_tokenizer(FOUR), four_scorer, key="deberta"), hab, echo=lambda *a: None)
+
+
+# ---------------------------------------------------------------------------- PLL mode per pass (QUESTIONS 90)
+
+def test_each_beam_pass_rescores_in_its_own_mode():
+    from assistant_axis.gapgen.generators.masked_lm import pll as P
+    nat = [F.FRAME_BY_ID["disp_nature"]]
+    mw = BM.multiword_pass(fake(), nat, k_first=2, beam_width=1, subjects=("she",), echo=lambda *a: None,
+                           patterns={"[MASK]-oriented": ("first",)})
+    sw = BM.subword_pass(fake(), [F.FRAME_BY_ID["disp_habitually"]], k_first=3, widths=(2,), echo=lambda *a: None)
+    assert (mw.meta["pll_mode"], mw.meta["settings"]["pll_mode"]) == ("original", "original")
+    assert (sw.meta["pll_mode"], sw.meta["settings"]["pll_mode"]) == ("l2r", "l2r")
+    over = BM.multiword_pass(fake(), nat, k_first=2, beam_width=1, subjects=("she",), echo=lambda *a: None,
+                             patterns={"[MASK]-oriented": ("first",)}, pll_mode="l2r")
+    mlm = fake()
+    text = F.instantiate(nat[0], F.SUBJECT_BY_KEY["she"], mlm.tok.mask_token)
+    assert over.meta["pll_mode"] == "l2r"
+    assert over.aggs["goal-oriented"].best_logprob == pytest.approx(P.pll_score(mlm, text, "goal-oriented",
+                                                                                mode="l2r"), abs=1e-4)

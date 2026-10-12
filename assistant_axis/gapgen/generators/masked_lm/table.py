@@ -8,7 +8,10 @@ are not a generation pass), and folds them by stem
 
 * ``best_logprob`` / ``best_frame`` / ``best_subject`` / ``mean_rank`` / ``n_instances_top2000`` from the entry with
   the best log-probability (``best_pass`` names it); ``passes`` and ``models`` list every entry; the surface is
-  OEWN's spelling where Variant B listed the word, else the pass's;
+  OEWN's spelling where Variant B listed the word, else the pass's.  Each entry's score is on its own pass's
+  scale: a single-mask log-probability, or a pseudo-log-likelihood in the pass's PLL mode (QUESTIONS 90:
+  left to right for the subword pass and Variant B, the plan's original form for the multiword pass), which
+  ``generation.json`` records per pass;
 * ``gender_log_odds`` from the single-mask pass (the best model's), a kept field and never a gate;
 * ``trait_contrast`` / ``state_flag`` / ``physical_flag`` from the primary model's contrast scores (``score``);
 * ``zipf``, ``freq_hard_reject``, ``freq_probe_band`` from ``gapgen.freq.zipf_info`` (never a local literal);

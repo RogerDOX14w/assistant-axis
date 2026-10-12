@@ -64,6 +64,25 @@ def test_two_token_pll_is_the_sum_of_both_masked_log_probs():
     assert P.pll_score(mlm, text, "kind", mode="original") == pytest.approx(one, abs=1e-4)
 
 
+def test_pll_mode_per_pass():
+    """QUESTIONS 90 (Roger, 2026-10-12): left to right for single and split words, the plan's original form for
+    multiword phrases; the global ``--pll-mode`` overrides every pass."""
+    assert P.PASS_PLL_MODES == {"single": "l2r", "probe": "l2r", "subword": "l2r", "multiword": "original",
+                                "variant_b": "l2r", "contrast": "l2r"}
+    assert P.pass_mode("multiword") == "original" and P.pass_mode("subword") == "l2r"
+    assert P.pass_mode("multiword", "l2r") == "l2r" and P.pass_mode("single", "original") == "original"
+    with pytest.raises(ValueError):
+        P.pass_mode("multiword", "sum")
+    with pytest.raises(ValueError):
+        P.pass_mode("no_such_pass")
+    mlm = fake()
+    single = S.run_single_pass(mlm, F.instances([F.FRAME_BY_ID["disp_nature"]], mlm.tok.mask_token,
+                                                subjects=["she", "he"]), lemmatize=str.lower, echo=lambda *a: None)
+    assert single.meta["pll_mode"] == "l2r" and single.meta["settings"]["pll_mode"] == "l2r"
+    vb = P.variant_b(fake(), ["kind"], lemmatize=str.lower, echo=lambda *a: None)
+    assert vb.meta["pll_mode"] == "l2r"
+
+
 def test_masked_items_by_mode():
     l2r = P.masked_items([0, 10, 11, 12, 2], [1, 2, 3], 99, "l2r")
     assert [s for s, _, _ in l2r] == [[0, 99, 99, 99, 2], [0, 10, 99, 99, 2], [0, 10, 11, 99, 2]]

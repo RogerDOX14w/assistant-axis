@@ -50,15 +50,21 @@ platform's M1 and M3 on what it submits.  Roger's review comments go into this f
 
    Operationalized (coordinator, same day): the wave is sized in **review hours, not words**.  At the review rate
    measured on review_tda_1 that night (about 150 terms an hour, singletons at a median 17 s), two hours is **about
-   300 M3-kept terms**.  So the first wave is every eligible stem *not already in the registry* (a stem another
-   generator submitted costs nothing to resubmit: the registry merges by key and M1/M3 skip rows another run decided,
-   so the Allport stages and Roget, both in flight, will have taken most of the common single words), in union-rank
-   order, cut where the projected kept terms reach ~300, with **pilot B's measured kept share** setting the cut in
-   place of the 0.88 assumption; **multiword and subword rows are never cut by rank**, being the route no other
-   generator has (the corpus's 222 multiword labels), and their gate is the OEWN gloss, not Zipf, which is a per-word
-   floor applied to the rarest content word and says nothing about a phrase.  Transport **batched** whatever the
-   estimate, since nothing waits on it.  Expected at the census funnel: ~300 kept from ~550-650 submitted single
-   words, i.e. about $6 downstream batched, plus the multiword rows.
+   300 M3-kept terms**.  So the first wave is every eligible stem in union-rank order, cut where the projected kept
+   terms reach ~300, counting only stems *not already in the registry* (a stem another generator submitted costs
+   nothing to resubmit: the registry merges by key and M1/M3 skip rows another run decided, so the Allport stages and
+   Roget, both in flight, will have taken most of the common single words; such stems are submitted where they fall
+   inside the cut and never counted in it or in the kept-share denominator, [QUESTIONS 82](./QUESTIONS.md),
+   `--count-registered` counting them), with **pilot B's measured kept share** setting the cut in place of the 0.88
+   assumption.  **Decided rule ([QUESTIONS 87](./QUESTIONS.md), Roger 2026-10-12, option (a)):** subword rows join
+   the rank cut as single words do (they are dictionary words the tokenizer happens to split; Zipf applies and other
+   generators reach them); multiword rows stay uncut, the route no other generator has (the corpus's 222 multiword
+   labels), but each needs an OEWN gloss, their gate in place of Zipf, which is a per-word floor applied to the rarest
+   content word and says nothing about a phrase; a review-load guard refuses a wave whose projected kept terms exceed
+   1.5 times the target unless `--multi-cap N` bounds the uncut rows.  `--uncut-classes multiword,subword` restores
+   the literal reading ("multiword and subword rows are never cut by rank"), which is not used.  Transport
+   **batched** whatever the estimate, since nothing waits on it.  Expected at the census funnel: ~300 kept from
+   ~550-650 submitted single words, i.e. about $6 downstream batched, plus the multiword rows.
 
 ## 1. Decisions already made
 
@@ -67,7 +73,7 @@ platform's M1 and M3 on what it submits.  Roger's review comments go into this f
 | Worth running, with an explicit **HHH-recovery probe**: a frame-search task whose success metric is recovering [helpful](../../data/traits/instructions/helpful.json), [harmless](../../data/traits/instructions/harmless.json) and [honest](../../data/traits/instructions/honest.json) (plus a few alignment-adjacent corpus labels) in the top-K of some frame family; report which frames do it. | Roger: "Seems worth trying.  Might be particularly useful for alignment-adjacent words ... can we find a prompt that easily recovers 'helpful', 'harmless', and 'honest'?" | plan 04 § 9.1 |
 | **Gender skew is a kept field, nothing more**: the she/he log-odds is recorded on the word's table row (`gender_log_odds`); no gate, no down-weighting, no separate list.  The workstream's ±2-nat flag idea is dropped. | Roger: "As long as we recover both, the gender skew doesn't seem that interesting." | plan 04 § 9.2 |
 | **No generator-side frequency gate.**  [Zipf](./glossary.md#zipf) is recorded via `gapgen.freq.zipf_info` (never a local literal); the generator submits everything the platform would not hard-reject (floor **1.5**, [decisions_m1.md](./decisions_m1.md) decision 1), and the 1.5-2.5 band gets the platform filter's definition probe.  The workstream's Zipf-2.5 floor and its Qwen calibration probe are dropped. | Roger: "Other generators found that going down to 1.5, or even just 'in the list', was a better cutoff." | plan 04 § 9.3; decisions_m1 decision 1 |
-| Roger's two new frames are in: **"He's habitually [MASK]"** joins the single-mask bank (subject-agnostic, so every subject instantiates it) and its two-mask form the subword-continuation pass; the bare **"[MASK][MASK]"** joins the multiword pass as the unconstrained two-slot form (no forced hyphen or function word; the tokenizer's leading-space convention classifies each completion as one reassembled word or a two-word phrase). | Roger's edits of 2026-10-10 in plan 04 §§ 1, 3.5 | plan 04 |
+| Roger's two new frames are in: **"He's habitually [MASK]"** joins the single-mask bank (subject-agnostic, so every subject instantiates it) and its two-mask form the subword-continuation pass; the bare **"[MASK][MASK]"** joins the multiword pass as the unconstrained two-slot form (no forced hyphen or function word; the tokenizer's leading-space convention classifies each completion as one reassembled word or a two-word phrase).  **Revised 2026-10-12** ([QUESTIONS 79 and 89](./QUESTIONS.md)): the bare form was meant for split words, host-framed, not phrases; it is the subword pass's run of continuation blanks in every generation frame, two to four blanks under roberta and ModernBERT and two to six under bert-wwm, and the multiword pass no longer has it. | Roger's edits of 2026-10-10 in plan 04 §§ 1, 3.5; QUESTIONS 79, 89 | plan 04 |
 | **The trait-hood contrast score rides `Candidate.score`** and so lands in the registry row's `sources[]` entry (`score`); the full per-word record (log-odds, flags, ranks) lives in the generator's tracked table (§ 6), re-exported as `load_mlm_table` for other workstreams, and `score_words(...)` is public so other generators' candidates can be run through the contrast score (workstream § 7). | the registry row's source entry has exactly one score field; the by-product must stay reusable | plan 04 §§ 1, 7; interface as built |
 | Words that are already corpus names stay in the wave; no selector drops `corpus_stem_match` rows. | Roger, 2026-10-10: "let the pipeline do its job" | [coding_plan_01_censuses.md](./coding_plan_01_censuses.md), last section |
 | **No generator-side LLM calls.**  M1 and M3 are the platform CLIs run on this generator's rows; their `usage.json` files are the cost record.  `RunContext.finish()` writes the generator's own zero-call `usage.json`. | frozen interface; every pass here is local and $0 | platform plan, "Interface as built" |
@@ -106,7 +112,7 @@ each after Roger's word.
 - [`generators/censuses/submit.py`](../../assistant_axis/gapgen/generators/censuses/submit.py): the submit-gate pattern copied here — the measured downstream rates (`M1_USD_PER_WORD = 0.0072`, `M3_USD_PER_PASSED_WORD = 0.011`, `M1_PASS_RATE`, `BATCH_FACTOR = 0.5`, with a `RATES_SOURCE` string), `Estimate`, `followup_commands`, the `_budget` first-of-kind cap.
 - [`generators/censuses/glosshint.py`](../../assistant_axis/gapgen/generators/censuses/glosshint.py) (`adjective_senses`, `person_sense`, `gloss_hint` with `columns=()`) and [`corpus.py`](../../assistant_axis/gapgen/generators/censuses/corpus.py) (`corpus_trait_stems`, `queue_trait_stems`): merged on this branch; if a later refactor moves them, copy the ~60 lines rather than block.
 - [`entity_id.py`](../../assistant_axis/entity_id.py) (`normalize_to_file_name`), [`atomic_io.py`](../../assistant_axis/atomic_io.py), [`provenance.py`](../../assistant_axis/provenance.py) + [`plot_metadata.py`](../../assistant_axis/plot_metadata.py) (`json_metadata`, `png_metadata`).
-- `torch` 2.10.0 and `transformers` 4.57.6 are already locked (the workstream's "transformers 5.1" was wrong); `wordfreq` 3.1.1 and `wn` are the platform's.  **No new dependencies.**
+- `torch` 2.10.0 and `transformers` are already locked; `wordfreq` 3.1.1 and `wn` are the platform's.  **No new dependencies.**  Version note ([QUESTIONS 84](./QUESTIONS.md)): the lock resolves transformers **5.1.0 on darwin** (the Mac, where the pilots run; every aggregate's meta records it) and **4.57.6 on linux**, so the workstream's "transformers 5.1" was the Mac's version, not an error, and 4.57.6 here is the Linux pin.
 - Test style: [`test_gapgen_censuses_submit.py`](../../assistant_axis/tests/test_gapgen_censuses_submit.py) (tmp registry through the real frozen API; fake clients).
 
 ## 5. File layout
@@ -130,6 +136,8 @@ assistant_axis/gapgen/generators/masked_lm/
   beam.py        subword_pass(mlm, frames, *, k_first=300, widths=(2,3)) and multiword_pass(..., k_first=100,
                  templates incl. "[MASK][MASK]", "[MASK]-[MASK]", "[MASK] to [MASK]", "[MASK]ly [MASK]",
                  "[MASK]-oriented|seeking|minded"): continuation acceptance by leading-space convention
+                 (since QUESTIONS 79 and 89: no bare "[MASK][MASK]" in the multiword templates; the subword
+                 widths are per model, roberta and ModernBERT (2,3,4), bert-wwm (2,3,4,5,6))
   pll.py         pll_score(mlm, frame, word_tokens) -> float  (mask each token in turn, sum log-probs)
                  variant_b(mlm, wordlist, frames) -> dict[word, best]   (the § Open-questions path)
                  score_words(words, *, model_key, frames=CONTRAST_SET) -> dict[word, Contrast(trait_contrast,
@@ -151,6 +159,7 @@ assistant_axis/gapgen/generators/masked_lm/
   report.py      render_report(evaluation) -> markdown; roger_sample(rows, n=50, seed=0)
 data_analysis/gap_generation/masked_lm_generator.py   census | generate | score | table | evaluate | submit | report
 data/candidates/masked_lm/{mlm_table.jsonl, evaluation.json, recovery_curves.png, hhh_probe.md}   tracked
+    (since QUESTIONS 80: mlm_table.jsonl gitignored, its sha256 in evaluation.json and generation.json)
 data/candidates/runs/masked_lm/<run_id>/{candidates.jsonl, keys.txt, submit_report.json, run.json, usage.json}
 data/external/hf/   GITIGNORED (model weights; each download Roger-approved)
 assistant_axis/tests/test_gapgen_mlm_{frames,models,single,beam,pll,table,evaluate,submit}.py
@@ -238,15 +247,17 @@ logits) and a fake tokenizer drive everything.  A real-model smoke test runs onl
 
 - `frames`: unique ids; every template has exactly one slot marker; all ten subjects instantiate; the
   three kinds present; **"is habitually [MASK]" present in the bank and the bare two-slot form in the
-  multiword templates**; probe frames carry the assistant/chatbot subjects; no frame or probe label set
-  typo (HHH labels are corpus stems).
+  multiword templates** (since [QUESTIONS 79 and 89](./QUESTIONS.md): the bare form *absent* from the multiword
+  templates, and the subword widths per model); probe frames carry the assistant/chatbot subjects; no frame or
+  probe label set typo (HHH labels are corpus stems).
 - `models`: census classes on a fake tokenizer (single / subword / multiword); `trust_remote_code` never
   passed (assert on the loader kwargs).
 - `single`: aggregates (best log-prob, mean rank, top-2000 counting) on planted logits; detok drops
   non-alphabetic; lemmatization through a fake morphy; gender log-odds uses only she/he instances and is
   recorded, never gates (mutation test: zeroing it changes no `eligible`, no `union_rank`).
 - `beam`: continuation accepted only without a leading space; the bare two-slot frame classifies a
-  leading-space completion as a phrase and a continuation piece as one word; K respected.
+  leading-space completion as a phrase and a continuation piece as one word (since QUESTIONS 79, a `free` slot in
+  a caller's own pattern: no default pattern has one); K respected.
 - `pll`: a two-token word's PLL is the sum of both masked log-probs; `score_words` = dispositional minus
   max(state, physical); flags fire on planted cases; `variant_b` ranks a planted good word above junk.
 - `table`: deterministic rerun is byte-identical; `union_rank` ordering; eligibility truth table uses
@@ -340,8 +351,9 @@ stubborn failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its for
 (`N. [04] question. Assumption proceeded under: ... Status: open`, numbering continuing from the file's
 last entry), proceeding under the assumption unless the answer would make the work useless.
 Pre-registered entries Opus copies in at the start: (1) the bare "[MASK][MASK]" is read as the
-unconstrained two-slot form inside each sentence frame, not a context-free input; (2) `mlm_table.jsonl`
-(~1-3 MB) is tracked; (3) stoplist-flagged memberships are submitted flagged, never dropped; (4)
+unconstrained two-slot form inside each sentence frame, not a context-free input (answered in
+[QUESTIONS 79 and 89](./QUESTIONS.md): host-framed, for split words, in the subword pass); (2) `mlm_table.jsonl`
+(~1-3 MB) is tracked (answered in QUESTIONS 80: gitignored); (3) stoplist-flagged memberships are submitted flagged, never dropped; (4)
 corpus-stem matches are submitted (Roger's 2026-10-10 ruling); (5) `Candidate.score` carries the
 contrast score and is not registered as a familiarity; (6) model revisions are recorded in `run.json`
 and MPS/CPU rank differences are tolerated (the table is rebuilt deterministically from recorded
