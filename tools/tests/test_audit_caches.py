@@ -428,3 +428,103 @@ def test_apply_deferrals_legacy_no_match_stays_legacy(tmp_path: Path) -> None:
     )]
     audit_caches.apply_deferrals([a], registry=reg, repo_root=tmp_path)
     assert a.status == "legacy"  # unchanged
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12: categories honoured (walk-through E10), every drift covered (E8)
+# ---------------------------------------------------------------------------
+
+def _stale_two_inputs(tmp_path: Path) -> Path:
+    """An envelope cache whose two inputs (dep_keys d_a, d_b) both drifted."""
+    s1 = tmp_path / "s1.json"; s1.write_text("v")
+    s2 = tmp_path / "s2.json"; s2.write_text("v")
+    out = tmp_path / "scores_x.json"
+    _write_envelope(out, {"x": 1}, [prov.current_file_input("d_a", s1),
+                                    prov.current_file_input("d_b", s2)])
+    time.sleep(1.1)
+    s1.write_text("v changed"); s2.write_text("v changed")
+    return out
+
+
+def test_multi_drift_needs_every_dep_key_covered(tmp_path: Path) -> None:
+    """Regression (walk-through E8): a cache with two drifted inputs used to
+    be matched with dep_key=None, so an entry scoped to one of them deferred
+    it.  Now it stays stale_direct until both are covered."""
+    from assistant_axis import deferral_registry
+    out = _stale_two_inputs(tmp_path)
+    only_a = deferral_registry.DeferralEntry(
+        path_glob="scores_*.json", dep_key="d_a", reason="a only",
+        deferred_at="2026-10-12")
+    a = audit_caches.audit_cache(out)
+    assert a.status == "stale_direct"
+    audit_caches.apply_deferrals([a], registry=[only_a], repo_root=tmp_path)
+    assert a.status == "stale_direct"
+
+    only_b = deferral_registry.DeferralEntry(
+        path_glob="scores_*.json", dep_key="d_b", reason="b only",
+        deferred_at="2026-10-12")
+    a = audit_caches.audit_cache(out)
+    audit_caches.apply_deferrals([a], registry=[only_a, only_b], repo_root=tmp_path)
+    assert a.status == "deferred"
+    assert [e.reason for e in a.deferral_matches] == ["a only", "b only"]
+
+
+def test_legacy_bare_no_longer_defers_an_envelope_cache(tmp_path: Path) -> None:
+    """Regression (walk-through E10): the May ``legacy_bare`` globs matched
+    envelope-carrying stale_direct judge caches (915 on 2026-10-12).  A
+    legacy_bare entry now defers only legacy rows; awaiting_rescore records
+    the stale ones."""
+    from assistant_axis import deferral_registry
+    C = deferral_registry.DeferralCategory
+    out = _stale_two_inputs(tmp_path)
+    bare = tmp_path / "scores_bare.json"
+    bare.write_text(json.dumps({"role_a": 1.0}))
+    legacy_bare = deferral_registry.DeferralEntry(
+        path_glob="scores_*.json", dep_key=None, reason="bare May cache",
+        deferred_at="2026-05-08", category=C.LEGACY_BARE)
+
+    rows = [audit_caches.audit_cache(p) for p in (out, bare)]
+    audit_caches.apply_deferrals(rows, registry=[legacy_bare], repo_root=tmp_path)
+    assert {r.path.name: r.status for r in rows} == {
+        "scores_x.json": "stale_direct", "scores_bare.json": "deferred"}
+
+    awaiting = deferral_registry.DeferralEntry(
+        path_glob="scores_*.json", dep_key=None, reason="October re-score",
+        deferred_at="2026-10-12", category=C.AWAITING_RESCORE)
+    rows = [audit_caches.audit_cache(p) for p in (out, bare)]
+    audit_caches.apply_deferrals(rows, registry=[legacy_bare, awaiting], repo_root=tmp_path)
+    by = {r.path.name: r for r in rows}
+    assert by["scores_x.json"].status == "deferred"
+    assert [e.category for e in by["scores_x.json"].deferral_matches] == [C.AWAITING_RESCORE]
+    assert by["scores_x.json"].pre_deferred_status == "stale_direct"
+    assert [e.category for e in by["scores_bare.json"].deferral_matches] == [C.LEGACY_BARE]
+
+
+def test_transitive_rows_honour_categories_and_dep_key_scope(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The transitive pass uses the same matcher: a legacy_bare entry or a
+    dep_key-scoped one does not defer a stale_transitive row (it has no
+    drifted dep_key of its own); an unscoped awaiting_rescore entry does."""
+    from assistant_axis import deferral_registry
+    C = deferral_registry.DeferralCategory
+    monkeypatch.setattr(audit_caches, "_REPO_ROOT", tmp_path)
+    src = tmp_path / "src.json"; src.write_text("hello")
+    c = tmp_path / "c.json"
+    _write_envelope(c, {"name": "C"}, [prov.current_file_input("src", src)])
+    b = tmp_path / "corr_b.json"
+    _write_envelope(b, {"name": "B"}, [prov.current_file_input("c", c)])
+    time.sleep(1.1)
+    src.write_text("hello world")
+
+    def run(entry):
+        rows = [audit_caches.audit_cache(p) for p in (b, c)]
+        audit_caches.apply_deferrals(rows, registry=[entry], repo_root=tmp_path)
+        audit_caches.propagate_transitive_stale(rows, registry=[entry], repo_root=tmp_path)
+        return {r.path.name: r.status for r in rows}
+
+    mk = lambda **kw: deferral_registry.DeferralEntry(
+        path_glob="corr_*.json", reason="r", deferred_at="2026-10-12", **kw)
+    assert run(mk(dep_key=None, category=C.LEGACY_BARE))["corr_b.json"] == "stale_transitive"
+    assert run(mk(dep_key="c", category=C.ARCHIVED))["corr_b.json"] == "stale_transitive"
+    assert run(mk(dep_key=None, category=C.AWAITING_RESCORE))["corr_b.json"] == "deferred"

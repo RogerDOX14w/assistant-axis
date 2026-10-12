@@ -101,6 +101,37 @@ def test_apply_deferrals_reclassifies_stale(tmp_path: Path) -> None:
     assert a.deferral_matches[0].reason == "explicit defer"
 
 
+def test_categories_and_dep_key_coverage_are_honoured(tmp_path: Path) -> None:
+    """2026-10-12 (walk-through E8, E10), as in audit_caches: legacy_bare
+    defers only a legacy PNG, awaiting_rescore only a stale one, and a stale
+    PNG with two drifted inputs needs both covered."""
+    from assistant_axis import deferral_registry
+    C = deferral_registry.DeferralCategory
+    s1 = tmp_path / "s1.json"; s1.write_text("v")
+    s2 = tmp_path / "s2.json"; s2.write_text("v")
+    stale = tmp_path / "correlation_plot.png"
+    _save_envelope_png(stale, [prov.current_file_input("d_a", s1),
+                               prov.current_file_input("d_b", s2)])
+    sub = tmp_path / "old"; sub.mkdir()
+    legacy = sub / "correlation_plot.png"
+    _save_legacy_png(legacy)
+    time.sleep(1.1)
+    s1.write_text("v changed"); s2.write_text("v changed")
+
+    def run(*entries):
+        rows = [audit_pngs.audit_png(p) for p in (stale, legacy)]
+        audit_pngs.apply_deferrals(rows, registry=list(entries), repo_root=tmp_path)
+        return [r.status for r in rows]
+
+    mk = lambda **kw: deferral_registry.DeferralEntry(
+        path_glob="*correlation_plot.png", reason="r", deferred_at="2026-10-12", **kw)
+    assert run(mk(dep_key=None, category=C.LEGACY_BARE)) == ["stale", "deferred"]
+    assert run(mk(dep_key=None, category=C.AWAITING_RESCORE)) == ["deferred", "legacy"]
+    assert run(mk(dep_key="d_a", category=C.ARCHIVED)) == ["stale", "legacy"]
+    assert run(mk(dep_key="d_a", category=C.ARCHIVED),
+               mk(dep_key="d_b", category=C.ARCHIVED)) == ["deferred", "legacy"]
+
+
 def test_apply_deferrals_reclassifies_legacy_when_matched(
     tmp_path: Path,
 ) -> None:

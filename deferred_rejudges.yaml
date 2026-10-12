@@ -879,3 +879,91 @@ deferrals:
     from the v2 sweep since the v2-narrowed B=10 view collapses to a single point).'
   deferred_at: '2026-05-09T16:52:02+00:00'
   replaced_by: roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality__rubric_v1.png
+- path_glob: roger/axis_judge_experiments/*.archive_2026-05-20_wrong_batch_size/*
+  dep_key: null
+  category: archived
+  reason: 'Response-judging cohort dirs moved aside on 2026-05-20: judged at B=10
+    after the May 2026 switch to B=7 (AGENT_NOTES ''Expensive Operations''); the _b7
+    cohorts replace them.  Kept for the record, never re-scored.  Recorded 2026-10-12
+    (walk-through E10): until then the legacy_bare globs deferred their envelope-carrying
+    stale caches (51) and plots (15) as if bare; listed before the awaiting_rescore
+    globs, which also match them, so reports file them as archived.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/scores_descriptions.json
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/scores_instructions.json
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/scores_responses.json
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/projections.json
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/correlations.json
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/*/correlation_plot.png
+  dep_key: null
+  category: awaiting_rescore
+  reason: 'May 2026 judge output of results_analysis/axis_judge_correlation.py that
+    carries a provenance envelope whose recorded inputs have drifted since (producer_script
+    and pole_instructions everywhere, corpus_instructions on most).  Until 2026-10-12
+    the legacy_bare globs deferred these as if they had no envelope (walk-through
+    E10: 915 caches and 277 correlation plots under roger/axis_judge_experiments that
+    day, 51 and 15 of them in archived dirs).  Kept as they are: they are the record
+    behind the 8slot-era analyses (pair_list_*_v1.json).  Scheduled re-score: the
+    October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
+    a file clears when its cell is re-scored.'
+  deferred_at: '2026-10-12T22:36:27+00:00'

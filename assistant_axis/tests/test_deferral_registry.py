@@ -288,3 +288,94 @@ def test_serialise_omits_optional_fields_when_unset(tmp_path: Path) -> None:
     assert "replaced_by" not in entry
     assert "compares_to" not in entry
     assert entry["category"] == "legacy_bare"
+
+
+# ---------------------------------------------------------------------------
+# match_row: categories honoured (E10) and every drifted dep_key covered (E8)
+# ---------------------------------------------------------------------------
+
+C = deferral.DeferralCategory
+
+
+def _entry(path_glob="*.json", dep_key=None, category=C.ARCHIVED, reason="r"):
+    return deferral.DeferralEntry(path_glob=path_glob, dep_key=dep_key, reason=reason,
+                                  deferred_at="2026-10-12", category=category)
+
+
+def _row(tmp_path, reg, status, keys=()):
+    return deferral.match_row(tmp_path / "x.json", status=status, drifted_dep_keys=keys,
+                              registry=reg, repo_root=tmp_path)
+
+
+@pytest.mark.parametrize("status, expected", [
+    ("legacy", True), ("stale_direct", False), ("stale_transitive", False), ("stale", False),
+])
+def test_legacy_bare_defers_only_legacy_rows(tmp_path, status, expected):
+    """Regression (2026-10-12, walk-through E10): the May legacy_bare globs
+    deferred 915 envelope-carrying stale_direct caches as if they were bare."""
+    reg = [_entry(category=C.LEGACY_BARE)]
+    keys = () if status in ("legacy", "stale_transitive") else ("producer_script",)
+    assert bool(_row(tmp_path, reg, status, keys)) is expected
+
+
+@pytest.mark.parametrize("status, expected", [
+    ("legacy", False), ("stale_direct", True), ("stale_transitive", True), ("stale", True),
+])
+def test_awaiting_rescore_defers_only_stale_rows(tmp_path, status, expected):
+    reg = [_entry(category=C.AWAITING_RESCORE)]
+    keys = () if status in ("legacy", "stale_transitive") else ("producer_script",)
+    assert bool(_row(tmp_path, reg, status, keys)) is expected
+
+
+@pytest.mark.parametrize("category", [c for c in C if c not in (C.LEGACY_BARE, C.AWAITING_RESCORE)])
+def test_other_categories_defer_any_row_as_before(tmp_path, category):
+    reg = [_entry(category=category)]
+    assert _row(tmp_path, reg, "legacy") == reg
+    assert _row(tmp_path, reg, "stale_direct", ("a",)) == reg
+    assert _row(tmp_path, reg, "stale_transitive") == reg
+
+
+def test_awaiting_rescore_is_a_category():
+    assert C("awaiting_rescore") is C.AWAITING_RESCORE
+    assert deferral._parse_category("awaiting_rescore") is C.AWAITING_RESCORE
+
+
+def test_every_drifted_dep_key_must_be_covered(tmp_path):
+    """Regression (2026-10-12, walk-through E8): with two drifted inputs the
+    audits passed dep_key=None, which a dep_key-scoped entry accepted, so an
+    entry covering one drift deferred a cache with two."""
+    only_a = _entry(dep_key="judge_a_*")
+    assert _row(tmp_path, [only_a], "stale_direct", ("judge_a_x", "corpus")) == []
+    assert _row(tmp_path, [only_a], "stale_direct", ("judge_a_x",)) == [only_a]
+    corpus = _entry(dep_key="corpus*", reason="r2")
+    both = _row(tmp_path, [only_a, corpus], "stale_direct", ("judge_a_x", "corpus"))
+    assert both == [only_a, corpus]
+    # an entry that covers none of the keys is not reported
+    other = _entry(dep_key="vectors", reason="r3")
+    assert _row(tmp_path, [only_a, corpus, other], "stale_direct",
+                ("judge_a_x", "corpus")) == [only_a, corpus]
+
+
+def test_an_entry_without_dep_key_covers_every_drift(tmp_path):
+    anyk = _entry()
+    scoped = _entry(dep_key="judge_*", reason="r2")
+    assert _row(tmp_path, [anyk], "stale_direct", ("a", "b", "c")) == [anyk]
+    assert _row(tmp_path, [scoped, anyk], "stale_direct", ("judge_x", "b")) == [scoped, anyk]
+
+
+def test_a_row_without_drifted_keys_takes_only_unscoped_entries(tmp_path):
+    """A legacy row (no envelope) or a transitive row (own inputs fine) has
+    no drifted dep_key; a dep_key-scoped entry no longer matches it through
+    a null dep_key."""
+    scoped = _entry(dep_key="judge_*")
+    anyk = _entry(reason="r2")
+    assert _row(tmp_path, [scoped], "legacy") == []
+    assert _row(tmp_path, [scoped], "stale_transitive") == []
+    assert _row(tmp_path, [scoped, anyk], "legacy") == [anyk]
+
+
+def test_match_row_needs_the_path_to_match(tmp_path):
+    reg = [_entry(path_glob="other/*.json")]
+    assert _row(tmp_path, reg, "legacy") == []
+    assert deferral.match_row(tmp_path / "x.json", status="legacy", registry=[],
+                              repo_root=tmp_path) == []

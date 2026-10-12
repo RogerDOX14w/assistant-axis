@@ -24,6 +24,7 @@ Defer a specific cache file (path-glob match)::
 
     uv run python tools/defer_rejudge.py \\
         --path 'roger/axis_judge_experiments/q9_*/gpt/scores_descriptions.json' \\
+        --category awaiting_rescore \\
         --reason "Desc-mode rerun deferred until 4-model audit completes."
 
 Defer scoped to a particular dep_key (only that drift source counts)::
@@ -31,6 +32,7 @@ Defer scoped to a particular dep_key (only that drift source counts)::
     uv run python tools/defer_rejudge.py \\
         --path 'roger/axis_judge_experiments/*/sonnet/scores_descriptions.json' \\
         --dep-key 'judge_*_descriptions_sonnet' \\
+        --category archived \\
         --reason "Sonnet-desc dropped from canonical pipeline."
 
 List all current deferrals::
@@ -44,6 +46,10 @@ Remove a deferral::
 
 Semantics
 ---------
+* ``--category`` is required when adding (since 2026-10-12, walk-through
+  E6, review 10 D6): there is no default, and ``uncategorized`` is
+  refused, because ``tools/audit_deferrals.py`` reports it as an error.
+  It used to default to ``uncategorized`` with a warning.
 * ``--path`` accepts a Unix shell glob (``fnmatch``) over repo-
   relative cache paths.
 * ``--dep-key`` (optional) further scopes the deferral to drifts
@@ -76,12 +82,22 @@ def _cmd_add(args: argparse.Namespace) -> int:
     if not args.reason:
         print("ERROR: --reason is required when adding a deferral.", file=sys.stderr)
         return 2
+    valid = ", ".join(c.value for c in deferral.DeferralCategory
+                      if c is not deferral.DeferralCategory.UNCATEGORIZED)
+    if not args.category:
+        print(f"ERROR: --category is required when adding a deferral.  One of: {valid}",
+              file=sys.stderr)
+        return 2
     try:
         category = deferral.DeferralCategory(args.category)
     except ValueError:
-        valid = ", ".join(c.value for c in deferral.DeferralCategory)
         print(f"ERROR: invalid --category {args.category!r}.  Valid: {valid}",
               file=sys.stderr)
+        return 2
+    if category is deferral.DeferralCategory.UNCATEGORIZED:
+        # the placeholder for schema-v1 entries; audit_deferrals reports it as an error
+        print(f"ERROR: --category uncategorized is not accepted for a new entry.  "
+              f"One of: {valid}", file=sys.stderr)
         return 2
     try:
         entry = deferral.append_deferral(
@@ -111,10 +127,6 @@ def _cmd_add(args: argparse.Namespace) -> int:
     print(f"  deferred_at: {entry.deferred_at}")
     print()
     print(f"Registry: {deferral.DEFERRAL_FILENAME}  (commit it).")
-    if entry.category is deferral.DeferralCategory.UNCATEGORIZED:
-        print()
-        print("WARNING: entry was added with category=uncategorized; "
-              "consider passing --category for clarity.", file=sys.stderr)
     return 0
 
 
@@ -177,13 +189,15 @@ def main(argv: Optional[list[str]] = None) -> int:
                    help="Optional dep_key glob scoping the deferral.")
     p.add_argument("--reason",
                    help="Free-text justification (required for add).")
-    valid_cats = ", ".join(c.value for c in deferral.DeferralCategory)
+    valid_cats = ", ".join(c.value for c in deferral.DeferralCategory
+                           if c is not deferral.DeferralCategory.UNCATEGORIZED)
     p.add_argument(
-        "--category", default=deferral.DeferralCategory.UNCATEGORIZED.value,
-        help=("Structured intent tag.  One of: " + valid_cats + ".  "
-              "See assistant_axis.deferral_registry docstring for "
-              "category semantics.  Defaults to 'uncategorized' (a "
-              "warning is printed; backfill or pass --category)."),
+        "--category", default=None,
+        help=("Structured intent tag, required when adding.  One of: "
+              + valid_cats + ".  See assistant_axis.deferral_registry "
+              "docstring for category semantics.  No default "
+              "(since 2026-10-12): 'uncategorized' is the schema-v1 "
+              "placeholder, which audit_deferrals reports as an error."),
     )
     p.add_argument("--producer-script", dest="producer_script",
                    help=("(orphan_no_producer) repo-relative path to the "

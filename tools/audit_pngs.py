@@ -99,7 +99,7 @@ from assistant_axis.provenance import (  # noqa: E402
 from assistant_axis.deferral_registry import (  # noqa: E402
     DeferralEntry,
     load_registry as load_deferral_registry,
-    match_cache as match_deferral,
+    match_row as match_deferral_row,
 )
 
 
@@ -245,6 +245,12 @@ def apply_deferrals(
     ``Inputs`` chunk -- pre-migration or a producer we've decided not
     to migrate; presume current as of mechanism introduction").
     ``current`` and ``frozen`` are never reclassified.
+
+    As in ``audit_caches.apply_deferrals`` (2026-10-12, walk-through E8,
+    E10): each entry's category is honoured (``legacy_bare`` defers only
+    ``legacy`` rows, ``awaiting_rescore`` only ``stale`` ones), and a stale
+    row is deferred only when every drifted dep_key is covered
+    (:func:`assistant_axis.deferral_registry.match_row`).
     """
     if registry is None:
         registry = load_deferral_registry(repo_root=repo_root)
@@ -254,17 +260,11 @@ def apply_deferrals(
     for a in audits:
         if a.status not in deferrable:
             continue
-        dep_key: Optional[str] = None
-        if a.check is not None:
-            offending = [
-                s for s in a.check.statuses
-                if s.status not in OK_STATUSES
-            ]
-            if len(offending) == 1:
-                dep_key = offending[0].dep_key
-        matches = match_deferral(
-            a.path.resolve(), dep_key=dep_key, registry=registry,
-            repo_root=repo_root,
+        drifted = ([s.dep_key for s in a.check.statuses if s.status not in OK_STATUSES]
+                   if a.check is not None else [])
+        matches = match_deferral_row(
+            a.path.resolve(), status=a.status, drifted_dep_keys=drifted,
+            registry=registry, repo_root=repo_root,
         )
         if matches:
             a.pre_deferred_status = a.status

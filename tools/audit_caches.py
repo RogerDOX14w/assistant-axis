@@ -101,7 +101,7 @@ from assistant_axis.provenance import (  # noqa: E402
 from assistant_axis.deferral_registry import (  # noqa: E402
     DeferralEntry,
     load_registry as load_deferral_registry,
-    match_cache as match_deferral,
+    match_row as match_deferral_row,
 )
 
 
@@ -253,6 +253,13 @@ def apply_deferrals(
     validated cache shouldn't be "deferred" just because its path
     happens to match.
 
+    Each entry's category is honoured (2026-10-12, walk-through E10):
+    a ``legacy_bare`` entry defers only ``legacy`` rows and an
+    ``awaiting_rescore`` entry only stale ones.  A stale row is
+    deferred only when every drifted dep_key is covered by a matching
+    entry (walk-through E8).  Both rules live in
+    :func:`assistant_axis.deferral_registry.match_row`.
+
     Deferred caches retain their original status in
     ``pre_deferred_status`` for human inspection, and the matched
     entries are recorded in ``deferral_matches`` so reports can show
@@ -275,22 +282,15 @@ def apply_deferrals(
     for a in audits:
         if a.status not in deferrable:
             continue
-        # Drift-source dep_key: if the cache validated `stale_direct`
-        # with exactly one drifted/missing input, pass that dep_key to
-        # the matcher so dep-key-scoped registry entries can target it.
-        # Otherwise (multi-drift, transitive, or legacy without an
-        # envelope), pass None and let path_glob alone govern.
-        dep_key: Optional[str] = None
-        if a.check is not None:
-            offending = [
-                s for s in a.check.statuses
-                if s.status not in OK_STATUSES
-            ]
-            if len(offending) == 1:
-                dep_key = offending[0].dep_key
-        matches = match_deferral(
-            a.abs_path, dep_key=dep_key, registry=registry,
-            repo_root=repo_root,
+        # Drift sources: every drifted / missing / unverifiable input.  All
+        # of them must be covered (2026-10-12, walk-through E8; before, a
+        # row with several passed a null dep_key, which any dep_key-scoped
+        # entry accepted).  A legacy row has none.
+        drifted = ([s.dep_key for s in a.check.statuses if s.status not in OK_STATUSES]
+                   if a.check is not None else [])
+        matches = match_deferral_row(
+            a.abs_path, status=a.status, drifted_dep_keys=drifted,
+            registry=registry, repo_root=repo_root,
         )
         if matches:
             a.pre_deferred_status = a.status
@@ -316,7 +316,9 @@ def propagate_transitive_stale(
     :func:`apply_deferrals` (which must run first, see its docstring)
     could never defer a transitively stale cache: when it runs, no row
     is ``stale_transitive`` yet.  ``registry=None`` (the default)
-    applies no deferrals here.
+    applies no deferrals here.  The row has no drifted dep_key of its
+    own, so only entries without ``dep_key`` whose category admits a
+    stale row can defer it (not ``legacy_bare``; walk-through E8, E10).
     """
     by_abs: dict[Path, CacheAudit] = {a.abs_path: a for a in audits}
 
@@ -350,8 +352,8 @@ def propagate_transitive_stale(
             if pa.status == "current":
                 pa.transitive_stale_via.append(by_abs[node].path)
                 matches = (
-                    match_deferral(pa.abs_path, dep_key=None,
-                                   registry=registry, repo_root=repo_root)
+                    match_deferral_row(pa.abs_path, status="stale_transitive",
+                                       registry=registry, repo_root=repo_root)
                     if registry else []
                 )
                 if matches:

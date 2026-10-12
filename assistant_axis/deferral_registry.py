@@ -72,6 +72,20 @@ grouping and category-specific invariant checks in
 * ``HAND_CURATED_INPUT`` -- hand-edited config consumed by producers
   but not produced by them (e.g. ``pair_list*.json``).  No envelope
   expected.
+* ``AWAITING_RESCORE`` -- an envelope-carrying output known to be
+  stale (its recorded inputs drifted) that is kept as it is until a
+  scheduled re-score; the ``reason`` names the schedule.  Added
+  2026-10-12 (walk-through E10) for the May 2026 judge caches, which the
+  ``legacy_bare`` globs had been deferring although they carry
+  envelopes.  Clears when the output is re-scored (it then validates
+  ``current``).
+
+Which rows a category may defer (2026-10-12, walk-through E10)
+---------------------------------------------------------------
+``LEGACY_BARE`` defers only ``legacy`` rows (no envelope) and
+``AWAITING_RESCORE`` only stale rows (``stale``, ``stale_direct``,
+``stale_transitive``); every other category defers any deferrable row,
+as before.  See :func:`match_row`.
 
 Schema
 ------
@@ -116,7 +130,13 @@ Semantics
   ``roger/foo.json`` directly (no ``*/`` prefix).
 * ``dep_key`` (when set) is a glob over the dep_key string of the
   drift-source InputSpec inside the cache; useful when one cache file
-  depends on many sub-inputs and only some should be deferred.
+  depends on many sub-inputs and only some should be deferred.  When
+  several inputs drifted, a row is deferred only if every drifted
+  dep_key is covered by a matching entry (an entry without ``dep_key``
+  covers them all); a row with no drifted dep_key (``legacy``,
+  ``stale_transitive``) is deferred only by entries without ``dep_key``
+  (2026-10-12, walk-through E8; before, a multi-drift row was matched
+  with a null dep_key, which any dep_key-scoped entry accepted).
 * ``category`` -- :class:`DeferralCategory`; see Categories section
   above.  ``UNCATEGORIZED`` for v1-schema entries that haven't been
   backfilled.
@@ -138,7 +158,10 @@ Public API
 ----------
 * :func:`load_registry` -- parse the YAML.
 * :func:`match_cache` -- given a cache path, return the list of
-  matching :class:`DeferralEntry` records.
+  matching :class:`DeferralEntry` records (path and dep_key only).
+* :func:`match_row` -- the audit tools' matcher: the entries that defer
+  one audited row, given its status and drifted dep_keys (category and
+  dep_key coverage honoured).
 * :func:`append_deferral` -- add a new entry.
 * :func:`remove_deferral` -- delete by index or by exact field match.
 """
@@ -160,6 +183,8 @@ __all__ = [
     "DeferralEntry",
     "load_registry",
     "match_cache",
+    "match_row",
+    "category_admits_status",
     "append_deferral",
     "remove_deferral",
 ]
@@ -219,6 +244,11 @@ class DeferralCategory(str, _enum.Enum):
     HAND_CURATED_INPUT = "hand_curated_input"
     """Hand-edited config consumed by producers; not a producer
     output."""
+
+    AWAITING_RESCORE = "awaiting_rescore"
+    """Envelope-carrying output known to be stale, kept until a
+    scheduled re-score named in the reason (2026-10-12, walk-through
+    E10).  Defers stale rows only."""
 
     UNCATEGORIZED = "uncategorized"
     """Placeholder for v1-schema entries that haven't been
@@ -364,6 +394,74 @@ def match_cache(
                 continue
         matches.append(entry)
     return matches
+
+
+#: The pre-deferral row statuses each category may reclassify (2026-10-12,
+#: walk-through E10).  A category not listed may reclassify any deferrable
+#: status, as every category could before.  Statuses: ``audit_caches`` uses
+#: ``stale_direct`` / ``stale_transitive`` / ``legacy``, ``audit_pngs``
+#: ``stale`` / ``legacy``.
+CATEGORY_ROW_STATUSES = {
+    DeferralCategory.LEGACY_BARE: frozenset({"legacy"}),
+    DeferralCategory.AWAITING_RESCORE: frozenset({"stale", "stale_direct", "stale_transitive"}),
+}
+
+
+def category_admits_status(category: DeferralCategory, status: str) -> bool:
+    """Whether an entry of ``category`` may defer a row whose status (before
+    deferral) is ``status``: ``legacy_bare`` only ``legacy`` rows,
+    ``awaiting_rescore`` only stale rows, any other category any row."""
+    allowed = CATEGORY_ROW_STATUSES.get(category)
+    return allowed is None or status in allowed
+
+
+def match_row(
+    cache_path: Path,
+    *,
+    status: str,
+    drifted_dep_keys=(),
+    registry: Optional[List[DeferralEntry]] = None,
+    repo_root: Optional[Path] = None,
+) -> List[DeferralEntry]:
+    """The registry entries that defer one audited row, or ``[]``.
+
+    ``status`` is the row's status before deferral; ``drifted_dep_keys`` the
+    dep_keys of its drifted / missing / unverifiable inputs (empty for a
+    ``legacy`` row, which has none, and for a ``stale_transitive`` row,
+    whose own inputs validate).
+
+    An entry takes part when its ``path_glob`` matches and its category
+    admits ``status`` (:func:`category_admits_status`).  Coverage (2026-10-12,
+    walk-through E8): an entry without ``dep_key`` covers every drifted
+    dep_key; a ``dep_key``-scoped entry covers the drifted dep_keys its glob
+    matches.  The row is deferred only when every drifted dep_key is
+    covered; the result is then every taking-part entry that covers at
+    least one of them, in registry order.  A row with no drifted dep_key is
+    deferred by the entries without ``dep_key`` only.  (Before, a row with
+    several drifted inputs was matched with a null dep_key, which any
+    dep_key-scoped entry accepted.)
+    """
+    reg = registry if registry is not None else load_registry(repo_root)
+    if not reg:
+        return []
+    root = repo_root or _repo_root_default()
+    rel = _to_repo_relative(Path(cache_path), root)
+    candidates = [
+        e for e in reg
+        if fnmatch.fnmatch(rel, e.path_glob) and category_admits_status(e.category, status)
+    ]
+    if not candidates:
+        return []
+    keys = list(drifted_dep_keys or ())
+    if not keys:
+        return [e for e in candidates if e.dep_key is None]
+
+    def covers(entry: DeferralEntry, key: str) -> bool:
+        return entry.dep_key is None or fnmatch.fnmatch(key, entry.dep_key)
+
+    if not all(any(covers(e, k) for e in candidates) for k in keys):
+        return []
+    return [e for e in candidates if any(covers(e, k) for k in keys)]
 
 
 def append_deferral(

@@ -38,11 +38,13 @@ def test_cli_add_creates_registry(
     _redirect_repo(monkeypatch, repo)
     rc = dr.main([
         "--path", "roger/scores.json",
+        "--category", "archived",
         "--reason", "skip for now",
     ])
     assert rc == 0
     reg = deferral.load_registry(repo_root=repo)
     assert len(reg) == 1
+    assert reg[0].category is deferral.DeferralCategory.ARCHIVED
     assert "Added deferral" in capsys.readouterr().out
 
 
@@ -54,6 +56,7 @@ def test_cli_add_with_dep_key(
     rc = dr.main([
         "--path", "roger/*.json",
         "--dep-key", "judge_q9_*",
+        "--category", "experimental_one_off",
         "--reason", "scoped",
     ])
     assert rc == 0
@@ -86,9 +89,47 @@ def test_cli_add_rejects_duplicate(
 ) -> None:
     repo = _stub_repo(tmp_path)
     _redirect_repo(monkeypatch, repo)
-    rc1 = dr.main(["--path", "x.json", "--reason", "r1"])
-    rc2 = dr.main(["--path", "x.json", "--reason", "r2"])
+    rc1 = dr.main(["--path", "x.json", "--category", "archived", "--reason", "r1"])
+    rc2 = dr.main(["--path", "x.json", "--category", "archived", "--reason", "r2"])
     assert rc1 == 0 and rc2 != 0
+
+
+def test_cli_add_requires_category(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    """Regression (2026-10-12, walk-through E6): no default category; it
+    used to default to ``uncategorized``, which audit_deferrals reports as
+    an error.  Nothing is written."""
+    repo = _stub_repo(tmp_path)
+    _redirect_repo(monkeypatch, repo)
+    rc = dr.main(["--path", "x.json", "--reason", "r"])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "--category is required" in err and "awaiting_rescore" in err
+    assert deferral.load_registry(repo_root=repo) == []
+
+
+@pytest.mark.parametrize("bad", ["uncategorized", "UNCATEGORIZED", "no_such_category"])
+def test_cli_add_refuses_uncategorized_and_unknown(
+    bad: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    repo = _stub_repo(tmp_path)
+    _redirect_repo(monkeypatch, repo)
+    rc = dr.main(["--path", "x.json", "--category", bad, "--reason", "r"])
+    assert rc == 2
+    assert "uncategorized" not in capsys.readouterr().err.split("One of:")[-1].split("Valid:")[-1]
+    assert deferral.load_registry(repo_root=repo) == []
+
+
+def test_list_and_remove_need_no_category(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    repo = _stub_repo(tmp_path)
+    _redirect_repo(monkeypatch, repo)
+    deferral.append_deferral(path_glob="a.json", reason="r", repo_root=repo,
+                             category=deferral.DeferralCategory.ARCHIVED)
+    assert dr.main(["--list"]) == 0
+    assert dr.main(["--remove", "--path", "a.json"]) == 0
 
 
 # ---------------------------------------------------------------------------
