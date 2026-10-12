@@ -58,6 +58,16 @@ Retry schedules:
 Both shapes are configurable per call via explicit ``attempts`` and
 ``base_delay_s`` / ``delays_s`` keywords.  Add new entry points here
 rather than re-rolling the pattern at each call site.
+
+Durability (review 7 D6, walk-through E4, 2026-10-12): the small-write
+entry points (``atomic_write_text`` / ``atomic_write_bytes`` /
+``append_jsonl`` / ``write_jsonl``) take ``fsync=True`` to flush the
+``.inprogress`` copy to stable storage before it is renamed into place, so
+a power loss cannot leave an empty file under the final name.  It is off by
+default until it has been timed on the pod's NFS (pod TODO item 4).  The
+staging file's name carries the process id *and* the thread id, so two
+threads of one process writing files of the same name (in different
+directories) never share a staging file.
 """
 from __future__ import annotations
 
@@ -66,6 +76,7 @@ import logging
 import os
 import pickle
 import shutil
+import threading
 import time
 from pathlib import Path
 from typing import Any, Optional, Sequence, Tuple, Type, Union
@@ -126,13 +137,38 @@ def _staging_dir() -> Path:
     return Path(os.environ.get("TMPDIR", "/tmp"))
 
 
+def _staging_path(dest_path: Path, suffix: str = ".tmp") -> Path:
+    """The staging file for ``dest_path``, unique per process *and* thread.
+
+    The name used to carry the process id only, so two threads writing
+    files of the same name (``config.json`` in two directories) shared one
+    staging file and could publish each other's bytes (review 7 D6,
+    walk-through E4).
+    """
+    return _staging_dir() / (
+        f".{dest_path.name}.{os.getpid()}.{threading.get_ident()}{suffix}"
+    )
+
+
+def _fsync_path(path: Path) -> None:
+    """Flush ``path``'s data to stable storage (raises OSError on failure)."""
+    fd = os.open(str(path), os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
 def _retry_copy(src: Path, dest: Path, *, attempts: int = 5,
                 base_delay_s: float = 10.0,
-                logger_obj: Optional[logging.Logger] = None) -> None:
+                logger_obj: Optional[logging.Logger] = None,
+                fsync: bool = False) -> None:
     """Copy src -> dest with retry/backoff for NFS flakiness.
 
     Uses an intermediate ``dest.inprogress`` path then os.replace for atomic
-    rename, so dest never appears as a partial file to readers.
+    rename, so dest never appears as a partial file to readers.  With
+    ``fsync=True`` the ``.inprogress`` copy is flushed to stable storage
+    before the rename (a failed flush is retried like a failed copy).
     """
     log = logger_obj or logger
     inprogress = dest.with_suffix(dest.suffix + ".inprogress")
@@ -140,6 +176,8 @@ def _retry_copy(src: Path, dest: Path, *, attempts: int = 5,
     for attempt in range(attempts):
         try:
             shutil.copy2(str(src), str(inprogress))
+            if fsync:
+                _fsync_path(inprogress)
             os.replace(str(inprogress), str(dest))
             return
         except OSError as e:
@@ -171,22 +209,26 @@ def atomic_write_text(
     encoding: str = "utf-8",
     attempts: int = 5,
     logger_obj: Optional[logging.Logger] = None,
+    fsync: bool = False,
 ) -> None:
     """Write `text` to `dest` atomically, via TMPDIR staging.
 
     Suitable for JSON, JSONL, config files, logs.  For large binary blobs
     (e.g. torch tensors) use `atomic_write_bytes` or call `_retry_copy`
     directly after writing the staging file with the appropriate serialiser.
+    ``fsync=True`` flushes the copy to stable storage before the rename
+    (opt-in; see the module docstring).
     """
     dest_path = Path(dest)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-    staging = _staging_dir() / f".{dest_path.name}.{os.getpid()}.tmp"
+    staging = _staging_path(dest_path)
     staging.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         staging.write_text(text, encoding=encoding)
-        _retry_copy(staging, dest_path, attempts=attempts, logger_obj=logger_obj)
+        _retry_copy(staging, dest_path, attempts=attempts,
+                    logger_obj=logger_obj, fsync=fsync)
     finally:
         try:
             staging.unlink(missing_ok=True)
@@ -200,17 +242,22 @@ def atomic_write_bytes(
     *,
     attempts: int = 5,
     logger_obj: Optional[logging.Logger] = None,
+    fsync: bool = False,
 ) -> None:
-    """Write `data` (bytes) to `dest` atomically, via TMPDIR staging."""
+    """Write `data` (bytes) to `dest` atomically, via TMPDIR staging.
+
+    ``fsync=True`` as in :func:`atomic_write_text`.
+    """
     dest_path = Path(dest)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-    staging = _staging_dir() / f".{dest_path.name}.{os.getpid()}.tmp"
+    staging = _staging_path(dest_path)
     staging.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         staging.write_bytes(data)
-        _retry_copy(staging, dest_path, attempts=attempts, logger_obj=logger_obj)
+        _retry_copy(staging, dest_path, attempts=attempts,
+                    logger_obj=logger_obj, fsync=fsync)
     finally:
         try:
             staging.unlink(missing_ok=True)
@@ -224,6 +271,7 @@ def append_jsonl(
     *,
     attempts: int = 5,
     logger_obj: Optional[logging.Logger] = None,
+    fsync: bool = False,
 ) -> None:
     """Append a single JSONL record to `dest` atomically.
 
@@ -245,7 +293,7 @@ def append_jsonl(
 
     new_line = json.dumps(record, ensure_ascii=False) + "\n"
     atomic_write_text(existing + new_line, dest_path,
-                      attempts=attempts, logger_obj=logger_obj)
+                      attempts=attempts, logger_obj=logger_obj, fsync=fsync)
 
 
 def write_jsonl(
@@ -254,11 +302,13 @@ def write_jsonl(
     *,
     attempts: int = 5,
     logger_obj: Optional[logging.Logger] = None,
+    fsync: bool = False,
 ) -> None:
     """Write a list of dicts as JSONL atomically (replaces any existing file)."""
     import json
     body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records)
-    atomic_write_text(body, dest, attempts=attempts, logger_obj=logger_obj)
+    atomic_write_text(body, dest, attempts=attempts, logger_obj=logger_obj,
+                      fsync=fsync)
 
 
 # ---------------------------------------------------------------------------
@@ -532,7 +582,7 @@ def torch_save_with_retry(
 
     dest_path = Path(dest)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
-    staging = _staging_dir() / f".{dest_path.name}.{os.getpid()}.pt.tmp"
+    staging = _staging_path(dest_path, ".pt.tmp")
     staging.parent.mkdir(parents=True, exist_ok=True)
 
     save_call_kwargs = dict(save_kwargs)

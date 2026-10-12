@@ -119,6 +119,111 @@ def test_atomic_write_uses_tmpdir_env(tmp_path, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Opt-in fsync and per-thread staging names (review 7 D6, walk-through E4)
+# ---------------------------------------------------------------------------
+
+class TestFsyncAndThreadStaging:
+    WRITERS = {
+        "text": lambda dest, **kw: atomic_io.atomic_write_text("t", dest, **kw),
+        "bytes": lambda dest, **kw: atomic_io.atomic_write_bytes(b"b", dest, **kw),
+        "append_jsonl": lambda dest, **kw: atomic_io.append_jsonl({"a": 1}, dest, **kw),
+        "write_jsonl": lambda dest, **kw: atomic_io.write_jsonl([{"a": 1}], dest, **kw),
+    }
+
+    @pytest.mark.parametrize("writer", sorted(WRITERS))
+    def test_fsync_is_off_by_default(self, tmp_path, monkeypatch, writer):
+        monkeypatch.setenv("TMPDIR", str(tmp_path / "stage"))
+        with mock.patch("assistant_axis.atomic_io.os.fsync") as fs:
+            self.WRITERS[writer](tmp_path / "out.json")
+        fs.assert_not_called()
+
+    @pytest.mark.parametrize("writer", sorted(WRITERS))
+    def test_fsync_flushes_the_copy_before_the_rename(
+        self, tmp_path, monkeypatch, writer,
+    ):
+        monkeypatch.setenv("TMPDIR", str(tmp_path / "stage"))
+        dest = tmp_path / "out.json"
+        inprogress = dest.with_suffix(dest.suffix + ".inprogress")
+        seen = []
+
+        def spy(fd):
+            # At the flush the copy sits beside dest, not yet renamed.
+            seen.append((inprogress.exists(), dest.exists()))
+
+        with mock.patch("assistant_axis.atomic_io.os.fsync", side_effect=spy):
+            self.WRITERS[writer](dest, fsync=True)
+        assert seen == [(True, False)]
+        assert dest.exists() and not inprogress.exists()
+
+    def test_a_failed_fsync_is_retried_like_a_failed_copy(self, tmp_path):
+        src = tmp_path / "src"
+        dest = tmp_path / "dest"
+        src.write_text("payload")
+        calls = {"n": 0}
+
+        def flaky(fd):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise OSError("simulated fsync EIO")
+
+        with mock.patch("assistant_axis.atomic_io.os.fsync", side_effect=flaky):
+            atomic_io._retry_copy(src, dest, attempts=3, base_delay_s=0.01,
+                                  fsync=True)
+        assert dest.read_text() == "payload"
+        assert calls["n"] == 2
+
+    def test_staging_name_carries_pid_and_thread_id(self, tmp_path, monkeypatch):
+        import threading
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        dest = Path("somewhere/config.json")
+        here = atomic_io._staging_path(dest)
+        there = {}
+        t = threading.Thread(
+            target=lambda: there.setdefault("p", atomic_io._staging_path(dest)))
+        t.start()
+        t.join()
+        assert here != there["p"]
+        assert f".{os.getpid()}.{threading.get_ident()}." in here.name
+        assert atomic_io._staging_path(dest, ".pt.tmp").name.endswith(".pt.tmp")
+
+    def test_two_threads_writing_the_same_name_keep_their_own_bytes(
+        self, tmp_path, monkeypatch,
+    ):
+        """Both threads stage before either copies (a barrier forces the
+        interleaving).  With a per-process staging name the second write
+        overwrote the first's staging file, so both destinations got the
+        same bytes (or the first cleanup removed the other's staging)."""
+        import threading
+        monkeypatch.setenv("TMPDIR", str(tmp_path / "stage"))
+        barrier = threading.Barrier(2, timeout=10)
+        real_copy = atomic_io._retry_copy
+
+        def copy_after_both_staged(*a, **kw):
+            barrier.wait()
+            return real_copy(*a, **kw)
+
+        errors = []
+
+        def write(sub, text):
+            try:
+                atomic_io.atomic_write_text(text, tmp_path / sub / "config.json")
+            except BaseException as e:  # noqa: BLE001 -- surfaced below
+                errors.append(e)
+
+        with mock.patch("assistant_axis.atomic_io._retry_copy",
+                        side_effect=copy_after_both_staged):
+            ts = [threading.Thread(target=write, args=(s, s * 3))
+                  for s in ("a", "b")]
+            for t in ts:
+                t.start()
+            for t in ts:
+                t.join()
+        assert errors == []
+        assert (tmp_path / "a" / "config.json").read_text() == "aaa"
+        assert (tmp_path / "b" / "config.json").read_text() == "bbb"
+
+
+# ---------------------------------------------------------------------------
 # Read retry helpers
 # ---------------------------------------------------------------------------
 
