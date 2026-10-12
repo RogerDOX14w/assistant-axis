@@ -203,6 +203,19 @@
     }
   ],
   "finished_at": "2026-10-01T01:58:34+00:00",
-  "cost_usd": 14.0663,
-  "stopped_by_error": null
+  "cost_usd": 15.7024,
+  "stopped_by_error": null,
+  "usage_corrected": {
+    "on": "2026-10-12",
+    "by": "code review 2026-10-12, B3 (review 1 D1)",
+    "why": "the first session was killed before it wrote its usage, so usage.json held only part of the spend; rebuilt from responses.jsonl, every record charged as llm.billed_usage charges it (assistant_axis.gapgen.cost.usage_from_records)",
+    "was": {
+      "n_calls": 12261,
+      "cost_usd": 14.0663
+    },
+    "now": {
+      "n_calls": 13378,
+      "cost_usd": 15.7024
+    }
+  }
 }

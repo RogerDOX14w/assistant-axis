@@ -78,17 +78,17 @@
       "sense": 757,
       "vague": 2188
     },
-    "cost_usd": 14.0663,
-    "cost_per_candidate_usd": 0.007771,
-    "yield_per_usd": 42.2,
+    "cost_usd": 15.7024,
+    "cost_per_candidate_usd": 0.008675,
+    "yield_per_usd": 37.8,
     "usage": {
       "per_model": {
         "claude-haiku-4-5-20251001": {
           "model": "claude-haiku-4-5-20251001",
-          "prompt_tokens": 5850595,
-          "completion_tokens": 1009087,
-          "cost_usd": 10.896,
-          "n_calls": 10983
+          "prompt_tokens": 6461432,
+          "completion_tokens": 1214141,
+          "cost_usd": 12.5321,
+          "n_calls": 12100
         },
         "claude-sonnet-5-5": {
           "model": "claude-sonnet-5-5",
@@ -98,10 +98,10 @@
           "n_calls": 1278
         }
       },
-      "total_cost_usd": 14.0663,
-      "total_prompt_tokens": 6750034,
-      "total_completion_tokens": 1146227,
-      "n_calls": 12261
+      "total_cost_usd": 15.7024,
+      "total_prompt_tokens": 7360871,
+      "total_completion_tokens": 1351281,
+      "n_calls": 13378
     },
     "by_stratum": {
       "existing": {
@@ -2349,7 +2349,20 @@
       "resumed_calls": 1117,
       "batches_submitted": null
     },
-    "pipeline": "split"
+    "pipeline": "split",
+    "usage_corrected": {
+      "on": "2026-10-12",
+      "by": "code review 2026-10-12, B3 (review 1 D1)",
+      "why": "the first session was killed before it wrote its usage, so usage.json held only part of the spend; rebuilt from responses.jsonl, every record charged as llm.billed_usage charges it (assistant_axis.gapgen.cost.usage_from_records)",
+      "was": {
+        "n_calls": 12261,
+        "cost_usd": 14.0663
+      },
+      "now": {
+        "n_calls": 13378,
+        "cost_usd": 15.7024
+      }
+    }
   },
   "_provenance": {
     "schema_version": "1.0",
