@@ -23,3 +23,31 @@ equivalences:
     inputs gain per-entity content hashes (current_corpus_files_input); recorded provenance
     only, no change to prompts, judge calls, parsing or scores.'
   marked_at: '2026-10-10T15:42:33+00:00'
+- script: results_analysis/axis_judge_correlation.py
+  from_fp: v1:2026-10-10T15:39:22+00:00@169069
+  to_fp: v1:2026-10-12T22:14:17+00:00@171317
+  reason: 'Code review 2026-10-12, walk-through D4 + D5 + D12 in one edit (Roger).
+    D4: _save_json and the usage.json side-car write atomically (assistant_axis.atomic_io.atomic_write_text:
+    TMPDIR staging, .inprogress copy, os.replace); bytes written unchanged. D5: parse_signed_score
+    requires exactly one SCORE marker (None when absent or repeated), RUBRIC_VERSION
+    v4 -> v5, prompts byte-identical (global v4 -> v5 edge in rubric_equivalences.yaml);
+    every recorded response-mode reply was re-parsed (2,876,150 in 316 files) and
+    the five live replies whose score changes were hand-edited to None, so recorded
+    scores agree with the v5 parser. D12: the response_score_files input leaves out
+    step 3''s side-cars (usage.json, judge_rubric.json, batch_state.json); no recorded
+    fingerprint listed one. No change to prompts, judge calls or recorded scores.'
+  marked_at: '2026-10-12T22:14:26+00:00'
+- script: results_analysis/axis_judge_correlation.py
+  from_fp: v1:2026-10-12T22:14:17+00:00@171317
+  to_fp: v1:2026-10-12T22:14:36+00:00@172998
+  reason: 'Code review 2026-10-12, walk-through D3 (Roger; chained after the D4/D5/D12
+    edge): an axis''s poles are skipped by entity id (name and kind), not by name,
+    in scoring, the projection pool and rho (AxisSpec.pole_kind / pole_entity_ids,
+    scorable_entities, compute_projections pole_ids, compute_correlations accepts
+    ids). No judge prompt and no recorded judge score changes. On the one affected
+    axis in the pair lists, impatient_vs_patient (the role patient shares the trait
+    pole''s name), the role patient|R becomes scorable (missing from its six caches)
+    and joins the whitener pool, so that axis''s projections.json / correlations.json
+    would change on a rerun: regeneration rows AN1-AN3 in reports/code_review_2026-10-12/regeneration_list.md.
+    Every other axis: identical output.'
+  marked_at: '2026-10-12T22:14:36+00:00'

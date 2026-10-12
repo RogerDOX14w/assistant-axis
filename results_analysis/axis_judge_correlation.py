@@ -18,7 +18,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Collection, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import torch
@@ -34,9 +34,11 @@ from assistant_axis.judge import (  # type: ignore  # noqa: E402
 from assistant_axis import (  # noqa: E402
     json_metadata, png_metadata, RESPONSE_BATCH_SIZE,
 )
+from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.entity_id import (  # noqa: E402
     display_form_name,
     entity_id,
+    is_entity_id,
     judge_label,
     kind_long,
     normalize_to_file_name,
@@ -155,7 +157,17 @@ logging.getLogger("anthropic").setLevel(logging.WARNING)
 #       byte-identical to v3 wherever every name involved is a single
 #       lower-case word; the scoped v3 -> v4 edges are in
 #       rubric_equivalences.yaml.
-RUBRIC_VERSION = "v4"
+#   v5 (2026-10-12, walk-through D5, Roger) -- prompts unchanged; the
+#       parser changed.  ``parse_signed_score`` requires exactly one
+#       ``SCORE: <int>`` marker and returns None when it is absent or
+#       repeated (v4 fell back to the first integer in the reply, or took
+#       the first of several markers).  Every recorded reply was re-parsed
+#       on 2026-10-12 (2,876,150 replies in 316 response caches): five
+#       live replies changed, all split-persona answers, and were
+#       hand-edited to None with backups and envelope ``edits`` notes.  A
+#       global v4 -> v5 edge in rubric_equivalences.yaml keeps every
+#       cache; static caches keep no reply text, so cannot be re-parsed.
+RUBRIC_VERSION = "v5"
 
 _SCALE_TABLE = (
     "## Scale\n"
@@ -176,9 +188,10 @@ _SCALE_TABLE = (
 # under "Judge prompts: reason BEFORE score" -- non-reasoning judges
 # (4.1-mini, Haiku, Sonnet non-thinking) need explicit "think on the
 # page" framing or they commit to a score before deliberating.  The
-# parser at ``parse_signed_score`` below extracts the SCORE: <int>
-# token; do not change to a "first integer in response" parser
-# without changing the rubrics in lockstep.
+# parser at ``parse_signed_score`` below extracts the one SCORE: <int>
+# token and returns None without it (RUBRIC_VERSION v5); do not change
+# to a "first integer in response" parser without changing the rubrics
+# in lockstep.
 _RUBRIC_HEADER = (
     "You are scoring where a {entity} concept falls on a semantic axis.\n\n"
     "## Axis: {axis_name}\n\n"
@@ -211,31 +224,27 @@ RUBRIC_RESPONSE_BATCH = _RUBRIC_HEADER + (
 )
 
 
-def parse_signed_score(text: Optional[str]) -> Optional[int]:
-    """Extract a signed integer score from a judge response (looks for 'SCORE: <int>').
+_SCORE_MARKER = re.compile(r"SCORE\s*:\s*([+-]?\d+)", flags=re.IGNORECASE)
 
-    Falls back to finding the first standalone integer in [-3, 3] if no 'SCORE:' marker.
-    Returns None if nothing parseable is found.
+
+def parse_signed_score(text: Optional[str]) -> Optional[int]:
+    """The judge's score: the integer after the reply's one ``SCORE: <int>``
+    marker, clamped to [-3, 3].
+
+    Returns None when the reply has no marker or more than one
+    (RUBRIC_VERSION v5; walk-through D5, 2026-10-12).  Until v4 a reply
+    with no marker was scored from the first integer in [-3, 3] anywhere
+    in it, and a reply with several from the first marker; the replies
+    that hit either case were judges splitting a batch into two personas
+    and scoring each ("SCORE (responses 1-5): +3 ... SCORE (responses
+    6-10): -3"), so neither reading was the judge's answer for the batch.
     """
     if not text:
         return None
-    m = re.search(r"SCORE\s*:\s*([+-]?\d+)", text, flags=re.IGNORECASE)
-    if m:
-        try:
-            v = int(m.group(1))
-        except ValueError:
-            v = None
-        if v is not None:
-            return int(max(-3, min(3, v)))
-    # Fallback: first standalone integer in [-3, 3], optionally signed.
-    for tok in re.findall(r"(?<![\w.])([+-]?\d+)(?![\w.])", text):
-        try:
-            v = int(tok)
-        except ValueError:
-            continue
-        if -3 <= v <= 3:
-            return v
-    return None
+    found = _SCORE_MARKER.findall(text)
+    if len(found) != 1:
+        return None
+    return int(max(-3, min(3, int(found[0]))))
 
 
 # ---------------------------------------------------------------------------
@@ -265,6 +274,19 @@ class AxisSpec:
     # judged from its own rubric (see ``build_static_prompt``), so we
     # still get one ρ data point per example entity.
     pole_pair_names: List[str] = field(default_factory=list)
+    # The poles' kind (``"roles"`` / ``"traits"``; the pair's
+    # ``--pair_type``).  The skip is by entity id, so on a traits axis
+    # whose pole name is also a role (impatient_vs_patient and the role
+    # patient) the role is judged and projected like any other entity
+    # (review 9a D2, walk-through D3, 2026-10-12).  ``None`` (an AxisSpec
+    # built without it) skips the names in both kinds, the old behaviour.
+    pole_kind: Optional[str] = None
+
+    def pole_entity_ids(self) -> set:
+        """Entity ids (``name|R`` / ``name|T``) skipped from scoring,
+        projection and ρ on this axis: the poles, in the pole kind."""
+        kinds = (self.pole_kind,) if self.pole_kind else ("roles", "traits")
+        return {entity_id(n, k) for n in self.pole_pair_names for k in kinds}
 
 
 def _slot_list_from_arg(arg: str, n_slots: int) -> List[int]:
@@ -371,6 +393,7 @@ def resolve_axis(
             axis_by_slot=axis_by_slot,
             source_description=source, exclusions=exclusions,
             pole_pair_names=[name1, name2],
+            pole_kind=args.pair_type,
         )
 
     # Manual-axis path
@@ -1102,7 +1125,7 @@ def compute_projections(
     axis_spec: AxisSpec,
     whiten_K: int,
     slots: Sequence[int],
-    pole_pair_names: Sequence[str],
+    pole_ids: Collection[str],
 ) -> Dict[int, Dict[str, Dict[str, float]]]:
     """Return ``{slot: {entity_id: {'raw': float, 'whitened': float}}}``.
 
@@ -1118,8 +1141,10 @@ def compute_projections(
 
     Per-entity leave-one-out pool: when computing the projection of entity
     X, the whitener pool is built from every other entity in the corpus
-    except X (and except the pair-mode pole pair names, which are the axis-
-    defining vectors and would be degenerate to include).
+    except X (and except the pair-mode poles, ``pole_ids``, which are the
+    axis-defining vectors and would be degenerate to include).  The poles
+    are skipped by entity id: an entity of the other kind that shares a
+    pole's name is projected and stays in the pool (walk-through D3).
 
     This avoids the "deflate variance along the axis you're judging" failure
     mode of holding all listed-example entities out together: extremes along
@@ -1131,7 +1156,7 @@ def compute_projections(
     At ``whiten_K == 0`` the soft-K whitener is identity, so we skip the
     per-entity SVD entirely and ``raw == whitened`` per entity.
     """
-    pole_skip = set(pole_pair_names)
+    pole_skip = set(pole_ids)
     result: Dict[int, Dict[str, Dict[str, float]]] = {}
     for slot in slots:
         default_vec = corpus.default[slot]  # (hidden,)
@@ -1158,15 +1183,15 @@ def compute_projections(
             # reach hours -- consider SMW rank-1 updates for K>0 in
             # high-throughput contexts.
             for target_eid, target_x in all_centered.items():
-                target_name = parse_entity_id(target_eid).name
-                if target_name in pole_skip:
+                if target_eid in pole_skip:
                     continue
-                # LOO pool: everyone except target_eid and pole-pair names
-                # (regardless of kind, since the pole pair is axis-defining).
+                # LOO pool: everyone except target_eid and the two poles
+                # (by entity id: the axis-defining vectors are the poles'
+                # own kind; a same-named entity of the other kind stays).
                 pool_rows = [
                     x for eid_other, x in all_centered.items()
                     if eid_other != target_eid
-                    and parse_entity_id(eid_other).name not in pole_skip
+                    and eid_other not in pole_skip
                 ]
                 if len(pool_rows) < 2:
                     raise SystemExit(
@@ -2081,6 +2106,13 @@ def _save_json(
         notes: Optional dict merged into ``_provenance.notes`` (e.g.
             ``{"rejudge_names": [...]}`` for surgical rejudges, or
             ``{"usage": ...}`` for budget tracking).
+
+    The write is atomic (review 9a D5, walk-through D4, 2026-10-12): the
+    text is staged in ``$TMPDIR``, copied to ``<path>.inprogress`` and
+    renamed onto ``path`` with ``os.replace``
+    (:func:`assistant_axis.atomic_io.atomic_write_text`), so a run killed
+    mid-write leaves the previous cache intact rather than a truncated
+    file that the next resume would read as empty and re-judge in full.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     if inputs is not None:
@@ -2093,9 +2125,10 @@ def _save_json(
                 existing = {"notes": existing}
             merged = {**existing, **notes}
             envelope["_provenance"]["notes"] = merged
-        path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
+        text = json.dumps(envelope, indent=2, sort_keys=True)
     else:
-        path.write_text(json.dumps(obj, indent=2, sort_keys=True))
+        text = json.dumps(obj, indent=2, sort_keys=True)
+    atomic_write_text(text, path, logger_obj=logger)
 
 
 def _flush_budget_artifacts(
@@ -2124,7 +2157,9 @@ def _flush_budget_artifacts(
         return
     p = Path(side_car)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(tracker.as_dict(), indent=2, sort_keys=True))
+    # Atomic for the same reason as the caches (_save_json).
+    atomic_write_text(json.dumps(tracker.as_dict(), indent=2, sort_keys=True), p,
+                      logger_obj=logger)
 
 
 # ---------------------------------------------------------------------------
@@ -2134,6 +2169,14 @@ def _flush_budget_artifacts(
 # ---------------------------------------------------------------------------
 
 _SCRIPT_PATH = Path(__file__).resolve()
+
+# The side-car files ``pipeline/3_judge.py`` writes beside the per-entity
+# score files in a step-3 scores directory (its ``SIDE_CAR_FILENAMES``:
+# ``usage.json``, ``judge_rubric.json``, ``batch_state.json``).  Copied
+# rather than imported, since importing step 3 here would pull in its
+# dependencies; ``test_axis_judge_correlation_review_fixes.py`` checks
+# that the two tuples agree.
+SIDE_CAR_FILENAMES: Tuple[str, ...] = ("usage.json", "judge_rubric.json", "batch_state.json")
 
 
 # The fields of an instruction JSON each output depends on (AGENT_NOTES
@@ -2328,7 +2371,13 @@ def _build_axis_judge_inputs(
                 ))
         if getattr(args, "scores_dir", None):
             scores_dir = Path(args.scores_dir)
-            score_files = sorted(scores_dir.glob("*.json"))
+            # Per-entity score files only: step 3's side-cars (usage record,
+            # rubric stamp, batch state) are rewritten by every step-3 run
+            # and are not read here (review P3 cross-file, walk-through D12).
+            score_files = sorted(
+                p for p in scores_dir.glob("*.json")
+                if p.name not in SIDE_CAR_FILENAMES
+            )
             if score_files:
                 inputs.append(current_files_input(
                     dep_key="response_score_files", paths=score_files,
@@ -3097,23 +3146,31 @@ def compute_correlations(
     ids** (e.g. ``"patient|R"``) for the ``descriptions`` /
     ``instructions`` static modes; the response mode is kind-pure (one
     cohort dir per kind) so its keys are bare names.  Both shapes are
-    accepted: the helper looks up the bare-name in ``excluded_set``
-    (the pole-pair set is bare-name) via :func:`parse_entity_id` when
-    the key carries a kind suffix.
+    accepted.
+
+    ``excluded_set`` holds entity ids (``run`` passes the poles'
+    :meth:`AxisSpec.pole_entity_ids`, walk-through D3) or bare names (the
+    older form, which excludes the name in both kinds).  An entity-id key
+    is excluded when the id, or its bare name, is in the set; a bare key,
+    whose kind is unknown here, is excluded when it is in the set or is
+    the name of an excluded id.
 
     The emitted ``names`` array preserves whichever key shape the
     inputs used (so a v2 static-mode correlation stamps disambiguated
     ids; a response-mode correlation stamps bare names).
     """
     out: Dict[str, Any] = {}
+    excluded_names_any_kind = {
+        parse_entity_id(e).name if is_entity_id(e) else e for e in excluded_set
+    }
 
-    def _bare_name(key: str) -> str:
-        # Tolerate both ``"patient|R"`` and ``"patient"`` so we don't
-        # crash on response-mode (kind-pure, bare-name) inputs.
-        try:
-            return parse_entity_id(key).name
-        except ValueError:
-            return key
+    def _is_excluded(key: str) -> bool:
+        if key in excluded_set:
+            return True
+        if is_entity_id(key):
+            # A bare-name entry excludes both kinds (legacy callers).
+            return parse_entity_id(key).name in excluded_set
+        return key in excluded_names_any_kind
 
     for mode, score_map in scores_by_mode.items():
         out[mode] = {}
@@ -3125,8 +3182,7 @@ def compute_correlations(
                 svals = []
                 pvals = []
                 for key, s in sorted(score_map.items()):
-                    bare = _bare_name(key)
-                    if bare in excluded_set:
+                    if _is_excluded(key):
                         continue
                     if key not in per_slot:
                         continue
@@ -3616,6 +3672,15 @@ def _resolve_rejudge_names_against_scorable(
     return kept
 
 
+def scorable_entities(
+    entities: Sequence[Tuple[str, str]], pole_ids: Collection[str],
+) -> List[Tuple[str, str]]:
+    """The ``(kind, name)`` entities judged on an axis: every corpus entity
+    whose entity id is not one of the poles' (``AxisSpec.pole_entity_ids``).
+    A same-named entity of the other kind is kept (walk-through D3)."""
+    return [(et, n) for (et, n) in entities if entity_id(n, et) not in pole_ids]
+
+
 def _csv_or_space_list(s: str) -> List[str]:
     if not s:
         return []
@@ -3673,16 +3738,15 @@ async def run(args: argparse.Namespace) -> None:
     axis_spec = resolve_axis(args, n_slots, hidden_dim, args.layer)
     corpus = load_corpus(args, args.layer)
 
-    # Which entities are scorable?  All corpus entities minus the **pole
-    # pair** names (axis-defining; degenerate to judge).  Listed examples
-    # ARE scorable -- their per-call rubric strips them from the example
-    # list (see build_static_prompt), so judging an example entity is no
-    # longer self-referential.
-    exclusion_set = set(axis_spec.exclusions)            # full set: still used to hold examples out of the whitener pool below
-    pole_skip_set = set(axis_spec.pole_pair_names)        # names actually skipped from scoring + ρ
-    scorable: List[Tuple[str, str]] = [
-        (et, n) for (et, n) in corpus.entities if n not in pole_skip_set
-    ]
+    # Which entities are scorable?  All corpus entities minus the two
+    # **poles** (axis-defining; degenerate to judge), by entity id: on a
+    # traits axis whose pole name is also a role, the role is scored
+    # (walk-through D3, 2026-10-12).  Listed examples ARE scorable --
+    # their per-call rubric strips them from the example list (see
+    # build_static_prompt), so judging an example entity is no longer
+    # self-referential.
+    pole_skip_set = axis_spec.pole_entity_ids()   # entity ids skipped from scoring, projection pool and ρ
+    scorable = scorable_entities(corpus.entities, pole_skip_set)
     if args.max_entities is not None:
         scorable = scorable[:args.max_entities]
 
@@ -3707,7 +3771,7 @@ async def run(args: argparse.Namespace) -> None:
     # the whitener is identity and the per-entity SVD is short-circuited.
     projections = compute_projections(
         corpus=corpus, axis_spec=axis_spec, whiten_K=args.whiten_K,
-        slots=slots, pole_pair_names=axis_spec.pole_pair_names,
+        slots=slots, pole_ids=pole_skip_set,
     )
     proj_out = {str(slot): per_slot for slot, per_slot in projections.items()}
     # Projections is computed from the corpus, no API calls — usage
@@ -3802,8 +3866,8 @@ async def run(args: argparse.Namespace) -> None:
         scores_for_corr["responses"] = means
 
     # Compute correlations and output.
-    # ρ calc skips only pole-pair names (which weren't judged anyway);
-    # listed examples DO contribute ρ data points now.
+    # ρ calc skips only the two poles, by entity id (they weren't judged
+    # anyway); listed examples DO contribute ρ data points now.
     correlations = compute_correlations(
         scores_by_mode=scores_for_corr, projections=projections,
         slots=slots, excluded_set=pole_skip_set,

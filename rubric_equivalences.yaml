@@ -729,3 +729,14 @@ equivalences:
     names; both ''name|K'' and bare keys) is excluded, so the edge covers only byte-identical
     prompts.'
   marked_at: '2026-10-09T22:36:35+00:00'
+- from_rubric: v4
+  to_rubric: v5
+  reason: 'v5 (2026-10-12, walk-through D5) changes only the parser: parse_signed_score
+    requires exactly one ''SCORE: <int>'' marker and returns None when it is absent
+    or repeated. No prompt text changed, so every prompt is byte-identical between
+    v4 and v5, on every axis, mode and entity. Every recorded reply in the response
+    caches was re-parsed with the v5 parser on 2026-10-12 (2,876,150 replies, 316
+    files): the five live replies whose score changes were hand-edited to None (envelope
+    ''edits'' notes, .bak beside each file). Static caches keep no reply text and
+    cannot be re-parsed.'
+  marked_at: '2026-10-12T22:11:09+00:00'

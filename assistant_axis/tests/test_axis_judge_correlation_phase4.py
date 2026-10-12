@@ -1642,11 +1642,12 @@ class TestRubricsRenderDisplayForm:
         assert "**patient**: x" in prompt
         assert "constructive (+) vs destructive (-) [traits]" in prompt
 
-    def test_rubric_version_is_v4(self):
+    def test_rubric_version_is_v5(self):
         """Bookkeeping: bumping behaviour MUST be paired with
-        bumping ``RUBRIC_VERSION`` so caches written under v4 are
-        identifiable in provenance."""
-        assert ajc.RUBRIC_VERSION == "v4"
+        bumping ``RUBRIC_VERSION`` so caches written under each version
+        are identifiable in provenance.  v5 (2026-10-12, walk-through
+        D5): the parser requires exactly one SCORE marker; was v4."""
+        assert ajc.RUBRIC_VERSION == "v5"
 
 
 # ---------------------------------------------------------------------------
