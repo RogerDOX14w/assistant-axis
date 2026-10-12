@@ -969,16 +969,22 @@ def scan_one_target(
 ) -> ScanResult:
     """Walk one ScanTarget's activations + vectors, classifying every entity."""
     act_files = sorted(target.activations_dir.glob("*.pt"))
-    if not act_files:
+    if not act_files and target.responses_dir is None:
         logger.warning(f"[{target.label}] no activation .pt files in "
                        f"{target.activations_dir}; skipping")
         return ScanResult(target=target, median_activation_size=0)
+    # No activation file but responses beside: every activation was deleted
+    # after the scan passed (the disk-saving step of the four-pod
+    # procedure, walk-through P1), or a merged tree.  Still checked: each
+    # entity with responses must have a vector (vector_only, loaded when the
+    # load check is on) or a reason not to.  Skipped before 2026-10-12.
 
     median_size = peer_median_size(act_files)
 
     print(f"\n[{target.label}] scanning {len(act_files)} activation files "
           f"(median {median_size / 1e6:.1f} MB) "
-          f"in {target.vectors_dir}")
+          f"in {target.vectors_dir}"
+          + ("" if act_files else " (no activation files: vectors checked against the responses)"))
     if target.scores_dir is None:
         print(f"  mode: {target.mode} (no scores filter)")
     else:
@@ -1021,14 +1027,24 @@ def scan_one_target(
         if vec_file.is_symlink():
             continue
         if vec_file.stem not in act_role_set:
-            results.append({
+            row = {
                 "role": vec_file.stem,
                 "status": ("vector_only" if vec_file.stem in response_stems
                            else "orphan_vector"),
                 "vector_path": str(vec_file),
                 "activation_path": None,
                 "vector_size_bytes": vec_file.stat().st_size,
-            })
+            }
+            # A vector that cannot be loaded is corrupt whether or not its
+            # activation is still there (loaded since 2026-10-12, so that a
+            # vector damaged in a copy between pods is caught; step 2 has to
+            # run again before step 4 can replace it).
+            if row["status"] == "vector_only" and load_check:
+                err = _vector_load_error(vec_file, cache)
+                if err is not None:
+                    row["status"] = "corrupt_vector"
+                    row["note"] = f"vector .pt unreadable ({err}); its activation is gone: step 2 first"
+            results.append(row)
 
     # Entities with responses but neither an activation file nor a vector
     # (invisible before 2026-10-12, e.g. r_zealot__pensive in the 8slot
@@ -1039,6 +1055,25 @@ def scan_one_target(
 
     return ScanResult(target=target, median_activation_size=median_size,
                       results=results)
+
+
+def _vector_load_error(vec_file: Path, cache: Optional[ScanCache]) -> Optional[str]:
+    """None when ``vec_file`` loads (or the cache says it did), else the
+    error; the outcome is cached as in :func:`classify_entity`."""
+    cached = cache.get_vector(vec_file) if cache is not None else None
+    if cached is not None:
+        return None if cached["ok"] else str(cached.get("error"))
+    try:
+        data = torch_load_with_retry(vec_file, map_location="cpu", weights_only=False,
+                                     delays_s=[5.0], logger_obj=logger)
+    except LOAD_FAILURE_ERRORS as e:
+        err = f"{type(e).__name__}: {e}"
+        if cache is not None:
+            cache.put_vector(vec_file, ok=False, error=err)
+        return err
+    if cache is not None:
+        cache.put_vector(vec_file, ok=True, scores_sha256=_recorded_scores_sha256(data))
+    return None
 
 
 def _classify_without_activation(

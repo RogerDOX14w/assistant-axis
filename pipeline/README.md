@@ -46,6 +46,34 @@ cd pipeline
 - **Scan before step 5** (on unless `--no-scan`): after step 4, [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Exit 3 (re-run candidates or `missing_activation`) **stops the pipeline before step 5**, naming the rerun lists, so no axis is built from a partial set (Roger, 2026-10-12: a stop, since a warning is easy to miss); any other non-zero scanner exit stops it too.  Fix the candidates (`4_vectors.py --overwrite <rerun list>`, step 2 first for `missing_activation`) and run the same command again.
 - The run's log is `<output_dir>/pipeline_<timestamp>.log`; the warnings and errors in it are listed at the end.
 
+### Several pods: one type each, then a merge (the October extraction)
+
+Decided 2026-10-12 (walk-through P1): four pods, one per `--types` value, `roles`, `traits`, `r_combinations` and `t_combinations`, each with its own output directory, then one merged tree.  On each pod:
+
+1. A **fresh output directory on the pod's local disk** (not `/workspace`; the rule above), e.g. `/local/out`.
+2. Read the organisation's batch queue limit `Q` on its limits page and size step 3 for four runs on one key (step 3, "Several runs on one organisation's queue"); pass it with `--judge-batch-requests N`.
+3. `./run_pipeline.sh --types roles --output_dir /local/out --judge-batch-requests N` (the other pods: `traits`, `r_combinations`, `t_combinations`).  Each pod runs its own step 0, so each has a default; the merge keeps one.  The pipeline ends with the scan and a step 5 for the pod's own type (for a combinations pod, half the grid; these axes are not the result).
+4. When the run has ended with exit 0 (the scan passed): delete the activations, keeping the directories, `find /local/out -path '*/activations/*.pt' -delete` (about 2.6 GB per entity, about 8 TB in all).  The scanner still checks a tree with no activation file: every entity with responses must have a vector that loads, or a reason not to (since 2026-10-12).
+5. Bring the small outputs to the machine that merges: `rsync -a --exclude activations/ --exclude _batches/ --exclude '*.inprogress' pod:/local/out/ pods/roles/`, or let the merge pull them (a `--pod NAME=host:/path`).
+
+Then, on that machine, [`tools/merge_pod_outputs.py`](../tools/merge_pod_outputs.py):
+
+```bash
+uv run python tools/merge_pod_outputs.py \
+    --pod roles=pods/roles --pod traits=pods/traits \
+    --pod rcomb=pods/rcomb --pod tcomb=pods/tcomb \
+    --dest merged/qwen-3-32b --expect roles=339 traits=932 combinations=1800
+```
+
+It copies per type the response, score and vector files (not the `default` symlinks, which it makes again), joins `generation_config.json` (each run marked with its pod), sums `usage.json`, joins `judge_rubric.json`, keeps the default of `--default_from` (the first pod; the others' default vectors go to `default/other_pods/`), copies each pod's `pipeline_*.log` to `logs/<pod>/` and writes `MERGED.json`.  It refuses (exit 1, nothing at `--dest`) a stem that two pods produced, a pod with batches not collected, pods that generated under different settings, an entity a pod's `generation_config.json` lists with no response file, and a count other than `--expect`.  It then runs the scanner on the merged tree in root mode; exit 3 refuses the merge too (exit 3, the build left at `<dest>.partial` with the scan's reports).  The tree is renamed to `--dest` only when everything passed.  Last, **one step 5 per type on the merged tree** (the tool prints the commands):
+
+```bash
+cd pipeline
+for t in roles traits combinations; do
+  uv run 5_axis.py --vectors_dir ../merged/qwen-3-32b/$t/vectors --output ../merged/qwen-3-32b/$t/axis.pt
+done
+```
+
 ### Model mirror in tmpfs
 
 Unless `--no-tmpfs`, the driver mirrors the model's Hugging Face cache (`<HF_HOME>/hub/models--<owner>--<name>/`) into `--tmpfs-dir` (`/dev/shm/hf-cache`) and points `HF_HOME` there, so that the workers load weights from RAM and not from the network volume (cold mmap reads there can hang for hours).  Since 2026-10-12 (P8.6) the copy is made by [`assistant_axis/tmpfs.py`](../assistant_axis/tmpfs.py), run as a script, which the steering driver ([`steering/run_sweep.py`](../steering/run_sweep.py)) imports too, so there is one implementation; before, the shell had its own `cp -r` with no marker.  Both drivers take `--tmpfs-method`:
@@ -285,10 +313,13 @@ so the default 10,000 is fine; `Q = 20 million` gives about 3,000-4,000, and
 `--batch_requests 3000` keeps every pod busy (a 10,000-request chunk would be
 refused whenever two other pods have one in the queue).  Read `Q` on the
 limits page before the extraction (pod TODO item 5).  A run refused with no
-batch of its own in flight splits the chunk in half, since it cannot tell a
-full queue from a chunk too big for `Q` on its own; with other pods' batches
-filling the queue that can halve a chunk down to 50 requests and stop the run
-(`BatchFailedError`), which the sizing above makes unlikely.
+batch of its own in flight reads the organisation's batch list: while other
+runs' batches are queued it waits `--batch_poll_seconds` and sends the same
+upload again; only when nothing else is queued (checked twice, since the
+queue can empty between the refusal and the list) does it split the chunk in
+half, the chunk being too big for `Q` on its own.  Until 2026-10-12 it split
+at once, so other pods' batches filling the queue could halve a chunk down to
+50 requests and stop the run (`BatchFailedError`).
 
 **Exit status.**  The run exits 1, and `run_pipeline.sh` stops before step 4,
 when requests are left unanswered, when the parse rate of the run's judge calls

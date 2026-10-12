@@ -29,8 +29,11 @@ operations").  The code these items exercise is built off-pod first, by the peer
 2. **The response-length cap pilot** ([plan_max_tokens_pilot.md](./plan_max_tokens_pilot.md); about 16
    GPU-hours and $25 batch, over the GPU line: **Roger's go with quoted parameters**).  64 entities at caps
    256 / 512 / 768 / 1024; decides the cap the extraction uses.  Needs P6's `finish_reason` and P8.1 first.
-   The entity list, [cap_pilot_entities.json](./cap_pilot_entities.json) (not there yet), and
-   [cap_pilot_compare.py](../../tools/cap_pilot_compare.py) (not there yet) come from the peer session's P6.
+   The entity list, [cap_pilot_entities.json](./cap_pilot_entities.json) (built 2026-10-12, seed
+   20261012), and [cap_pilot_compare.py](../../tools/cap_pilot_compare.py) (built) come from the peer
+   session's P6 (8066b6ad); the plan's § 4 commands were corrected to the list's format, and three
+   readings of the decision rule (centred cosines, layer 25, the 2-point test) wait for Roger's word
+   in the plan before the pilot runs.
 3. **The venv on local disk** (walk-through P8.3 (b)).  The recorded slow step was importing torch over
    NFS.  On the first pod, put the environment on local disk or `/dev/shm`
    (`UV_PROJECT_ENVIRONMENT`), time the import against the `/workspace` venv, and write the pod setup
@@ -41,8 +44,16 @@ operations").  The code these items exercise is built off-pod first, by the peer
 5. **The four-pod procedure** (walk-through P1: roles, traits, `r_combinations`, `t_combinations`, one
    per pod, each with a local output dir).  First real use of the procedure in
    [pipeline/README.md](../../pipeline/README.md), of the batch sizing for several pods sharing one OpenAI
-   organisation's queue, and of [merge_pod_outputs.py](../../tools/merge_pod_outputs.py) (not there yet;
-   peer session, P1).  Check the queue limit against the sizing before step 3 starts on the second pod.
+   organisation's queue, and of [merge_pod_outputs.py](../../tools/merge_pod_outputs.py) (built
+   2026-10-12, P1; the procedure is pipeline/README.md "Several pods: one type each, then a merge").
+   Check the queue limit against the sizing before step 3 starts on the second pod: read `Q` on the
+   organisation's limits page and pass `--judge-batch-requests N` to each pod's driver (the formula is
+   in the README's step 3).  What the 2026-10-12 canary (30 requests from the Mac) confirmed: the
+   `custom_id` form, the result body and `batches.list` newest first; not observable then:
+   `token_limit_exceeded`, so the first `queue limit reached` line in a pod's log is its first real
+   sighting (since P1 a run refused while other pods' batches fill the queue waits and resends; it
+   splits only when nothing else is queued).  The merge refuses on a duplicate stem, uncollected
+   batches, differing generation settings, a listed entity without responses, or the scanner's exit 3.
 6. **The rsync scripts' pod address** (walk-through E7).
    [rsync_completed_axes.sh](../../scripts/rsync_completed_axes.sh) and
    [rsync_pod_sweeps.sh](../../scripts/rsync_pod_sweeps.sh) hard-code a pod IP and port that will be

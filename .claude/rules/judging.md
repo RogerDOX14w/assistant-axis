@@ -68,6 +68,8 @@ response like "0 if no, 3 if full ... I rate this 2" would be parsed
 as 0 by a first-integer parser, producing the wrong score whenever
 the rubric definitions are echoed in the reasoning.
 
+axis_judge_correlation `RUBRIC_VERSION` v4 → v5 (2026-10-12, D5): `parse_signed_score` requires exactly one `SCORE: <int>` and returns None when it is absent or repeated; prompts unchanged; global v4 → v5 edge; five live split-persona replies hand-edited to None.
+
 **Forbidden anti-pattern**:
 
 ```

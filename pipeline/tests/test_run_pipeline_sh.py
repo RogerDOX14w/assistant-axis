@@ -329,3 +329,12 @@ def test_every_parallel_step_sets_pipefail():
              if "| sed -u" in ln and ln.strip().endswith("&")]
     assert lines, "expected the parallel step lines"
     assert all(ln.startswith("( set -o pipefail;") for ln in lines), lines
+
+
+def test_judge_batch_requests_reaches_step_3(tmp_path):
+    """Several pods on one API key size step 3's chunks from the queue limit
+    (walk-through P1, 2026-10-12)."""
+    proc, calls = _run_full(tmp_path, None, "--judge-batch-requests", "3000")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.endswith("--batch_requests 3000") for c in judge)

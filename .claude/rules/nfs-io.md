@@ -159,7 +159,11 @@ the last, since 2026-10-12, a vector whose recorded scores hash differs from
 the scores file now, which step 4 also recomputes on its own) vs
 `missing_scores` / `below_min_count` / `all_nan_or_empty` (legitimate
 filter); it exits 3 when it finds re-run candidates or
-`missing_activation` entities.  Use it to recover from historical
+`missing_activation` entities.  Since 2026-10-12 it also checks a tree
+whose activations have been deleted (the four-pod procedure, walk-through
+P1): every entity with responses must have a vector that loads
+(`vector_only`) or a reason not to; `tools/merge_pod_outputs.py` runs it on
+the merged tree.  Use it to recover from historical
 short-read damage that pre-retry step 4 silently skipped (statuses and
 recovery steps in [`pipeline/README.md`](pipeline/README.md)).
 
@@ -171,7 +175,8 @@ recovery steps in [`pipeline/README.md`](pipeline/README.md)).
   `assistant_axis/openai_batch.py` (step 3's `batch_state.json`),
   `pipeline/4_vectors.py`, `pipeline/5_axis.py`,
   `pipeline/scan_missing_vectors.py` (its reports),
-  `assistant_axis/steering_runner.py`, `steering/run_sweep.py`
+  `assistant_axis/steering_runner.py`, `steering/run_sweep.py`,
+  results_analysis/axis_judge_correlation.py (`_save_json` and its usage.json, since 2026-10-12, D4)
 - Reads via `atomic_io`: `assistant_axis/generation.py` (step 1:
   `load_role`, `load_questions`), `pipeline/2_activations.py`
   (responses), `pipeline/3_judge.py` (responses via

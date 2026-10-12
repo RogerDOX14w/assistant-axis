@@ -16,8 +16,16 @@ Service limits (OpenAI batch guide, read 2026-10-10): a batch holds at most
 has a queue limit on the prompt tokens enqueued per organisation, shown only
 on the organisation's limits page.  A batch over that limit fails validation
 with the code ``token_limit_exceeded``; :meth:`OpenAIBatchRunner.run` then
-waits for a batch in flight to finish and tries again, or, with none in
-flight, splits the chunk in half, so the run adapts to whatever the limit is.
+waits for a batch in flight to finish and tries again, or, with none of its
+own in flight, splits the chunk in half, so the run adapts to whatever the
+limit is.  Several runs on one API key (the four-pod extraction, walk-through
+P1, 2026-10-12) share the queue: a run refused with none of its own batches in
+flight first reads the organisation's batch list, and when other runs'
+batches are queued it waits ``poll_seconds`` and sends the same upload again
+instead of splitting (a split would halve the chunk down to
+``MIN_SPLIT_REQUESTS`` and stop the run, though nothing was wrong with its
+size).  Size ``--batch_requests`` from the queue limit and the number of runs
+(pipeline/README.md, "Several runs on one organisation's queue").
 
 Restart.  The state file (``batch_state.json`` beside the scores) records
 every chunk as it is submitted.  A run started again finds the batches still
@@ -78,6 +86,11 @@ MAX_FAILED_POLL_ROUNDS = 30
 LOOKUP_MARGIN_SECONDS = 3600
 LOOKUP_MAX_BATCHES = 2000
 TERMINAL_STATUSES = ("completed", "failed", "expired", "cancelled")
+# A batch in these states holds its tokens in the organisation's queue.
+ACTIVE_STATUSES = ("validating", "in_progress", "finalizing", "cancelling")
+# How far back the organisation's batch list is read for other runs'
+# batches in the queue (a batch lives at most its 24-hour window).
+OTHERS_LOOKBACK_SECONDS = 25 * 3600
 TOKEN_LIMIT_CODE = "token_limit_exceeded"
 
 STATE_VERSION = 1
@@ -350,6 +363,23 @@ class OpenAIBatchRunner:
                 found[fid] = batch
         return found
 
+    async def _others_active(self) -> int:
+        """How many batches of the organisation not recorded by this runner
+        hold tokens in the queue now (another pod's step 3 on the same API
+        key, for one).  Read from ``batches.list`` (newest first), back to
+        :data:`OTHERS_LOOKBACK_SECONDS`."""
+        own = {r.get("batch_id") for r in self.state["chunks"] if r.get("batch_id")}
+        cutoff = time.time() - OTHERS_LOOKBACK_SECONDS
+        n = scanned = 0
+        async for batch in self.client.batches.list(limit=100):
+            scanned += 1
+            created = float(_get(batch, "created_at") or 0)
+            if (created and created < cutoff) or scanned > LOOKUP_MAX_BATCHES:
+                break
+            if _get(batch, "status") in ACTIVE_STATUSES and _get(batch, "id") not in own:
+                n += 1
+        return n
+
     async def _submit(self, path: Path) -> Any:
         rec = self._record(path)
         if not rec.get("input_file_id") or rec.get("collected"):
@@ -368,6 +398,22 @@ class OpenAIBatchRunner:
         self._save_state()
         self.log.info(f"submitted {path.name}: batch {batch.id}, {rec.get('n_requests')} requests")
         return batch
+
+    async def _count_others_or_assume(self) -> int:
+        """:meth:`_others_active`, or 1 when the list cannot be read (then
+        waiting is the safe guess: a split cannot be undone).  After
+        ``max_failed_poll_rounds`` failed reads in a row the error is raised."""
+        try:
+            n = await self._others_active()
+            self._failed_lists = 0
+            return n
+        except Exception as e:  # noqa: BLE001 -- network; decided below
+            self._failed_lists = getattr(self, "_failed_lists", 0) + 1
+            self.log.warning(f"could not list the organisation's batches ({type(e).__name__}: "
+                             f"{e}); assuming other runs hold the queue")
+            if self._failed_lists >= self.max_failed_poll_rounds:
+                raise
+            return 1
 
     async def _wait_validation(self, batch: Any) -> Any:
         while _get(batch, "status") == "validating":
@@ -454,6 +500,7 @@ class OpenAIBatchRunner:
         unanswered: Dict[str, Dict[str, Any]] = {}
         hold = False
         failed_rounds = 0
+        seen_empty_queue: Set[Path] = set()   # refused once with no other batch queued
         while pending or inflight:
             while pending and not hold:
                 path = pending.popleft()
@@ -470,7 +517,30 @@ class OpenAIBatchRunner:
                                           f"of {len(inflight)} batch(es) in flight")
                             pending.appendleft(path)
                             hold = True
-                        elif rec.get("n_requests", 0) > MIN_SPLIT_REQUESTS:
+                            self._save_state()
+                            continue
+                        others = await self._count_others_or_assume()
+                        if others:
+                            # Several runs on one key (walk-through P1): the
+                            # queue is full of other runs' batches, not too
+                            # small for this chunk.  Splitting would halve it
+                            # down to MIN_SPLIT_REQUESTS and stop the run;
+                            # wait for the queue and send it again instead.
+                            self.log.info(f"{path.name}: queue limit reached while {others} "
+                                          f"batch(es) of other runs are queued; trying again in "
+                                          f"{self.poll_seconds:.0f} s")
+                            self._save_state()
+                            await asyncio.sleep(self.poll_seconds)
+                            pending.appendleft(path)
+                            continue
+                        if path not in seen_empty_queue:
+                            # The queue may have emptied between the refusal
+                            # and the list: one more try before splitting.
+                            seen_empty_queue.add(path)
+                            self._save_state()
+                            pending.appendleft(path)
+                            continue
+                        if rec.get("n_requests", 0) > MIN_SPLIT_REQUESTS:
                             self.log.info(f"{path.name}: over the queue limit on its own "
                                           f"({rec.get('n_requests')} requests); splitting it")
                             await self._delete_files(rec.pop("input_file_id", None))

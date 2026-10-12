@@ -840,3 +840,58 @@ def test_a_refused_request_stops_a_real_time_run(judge, monkeypatch, tmp_path, c
         _run(judge, monkeypatch, responses_dir, output_dir, _client())
     assert e.value.code == 1 and len(calls) == 1               # the second entity not tried
     assert "refused a request" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# Several runs on one key (walk-through P1, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+class SharedQueueClient(FakeBatchClient):
+    """Another pod's batch is in the organisation's queue (created directly
+    on the fake, unknown to this run's runner); it finishes after this run
+    has read the batch list ``finish_after`` times."""
+
+    def __init__(self, *a, finish_after=2, **kw):
+        super().__init__(*a, **kw)
+        self.lists = 0
+        self.finish_after = finish_after
+        self.uploaded["file-other"] = "\n".join(
+            json.dumps({"custom_id": f"other|k{i}", "body": {}}) for i in range(3)) + "\n"
+        asyncio.run(self._bcreate("file-other", "/v1/chat/completions", "24h", {}))
+        self.other = self.batches_created[-1][0]
+
+    async def _blist(self, limit=20):
+        self.lists += 1
+        if self.lists >= self.finish_after and self.other in self.inflight:
+            self._batches[self.other]["status"] = "completed"
+            self.inflight.discard(self.other)
+        async for b in super()._blist(limit):
+            yield b
+
+
+def test_a_full_queue_of_other_runs_is_waited_for_not_split(judge, monkeypatch, tmp_path, caplog):
+    """Before: refused with nothing of its own in flight, a run split its
+    chunk in half, down to 50 requests, then stopped, although only other
+    pods' batches filled the queue."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = SharedQueueClient(limit=2, finish_after=2)
+    monkeypatch.setattr(judge._openai_batch, "MIN_SPLIT_REQUESTS", 1)
+    with caplog.at_level("INFO"):
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_requests", "4", batch=True)
+    ours = [(n, s) for b, n, s in client.batches_created if b != client.other]
+    assert ours[0] == (4, "failed") and (4, "in_progress") in ours      # resent whole, not split
+    assert all(n == 4 for n, _ in ours)
+    assert "batch(es) of other runs are queued" in caplog.text
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 4
+    # the retry reused the upload: one upload of ours
+    assert len([f for f in client.uploaded if f.startswith("file-") and f[5:].isdigit()]) == 1
+
+
+def test_with_no_other_batch_queued_an_oversized_chunk_is_still_split(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = FakeBatchClient(limit=2, hard_limit=2)
+    monkeypatch.setattr(judge._openai_batch, "MIN_SPLIT_REQUESTS", 1)
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_requests", "4", batch=True)
+    assert [n for _, n, s in client.batches_created if s == "in_progress"] == [2, 2]

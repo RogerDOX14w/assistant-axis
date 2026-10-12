@@ -288,3 +288,30 @@ def test_a_float32_vector_passes_the_size_and_load_checks(scan, tree):
     median = scan.peer_median_size(sorted(t["act"].glob("*.pt")))
     for name in ("may", "october"):
         assert _classify(scan, t, name, median=median)["status"] == "ok"
+
+
+# ---------------------------------------------------------------------------
+# Activations deleted after the scan passed (walk-through P1, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def test_a_tree_without_activations_is_still_checked_against_its_responses(scan, tree):
+    """Skipped before: with every activation deleted (the four-pod
+    procedure) the scan found nothing to do, so a merged tree went unchecked."""
+    t = tree
+    resp = t["root"] / "traits" / "responses"
+    resp.mkdir()
+    for name in ("kept", "lost", "corrupt", "few"):
+        (resp / f"{name}.jsonl").write_text("{}\n")
+    _scores(t, "kept", 4); _vector(t["vec"] / "kept.pt")
+    _scores(t, "lost", 4)                                   # enough score-3, no vector
+    _scores(t, "corrupt", 4); (t["vec"] / "corrupt.pt").write_bytes(b"z" * 4096)
+    _scores(t, "few", 1)                                    # legitimately filtered
+    target = scan.ScanTarget(entity_type="traits", vectors_variant="vectors",
+                             activations_dir=t["act"], vectors_dir=t["vec"],
+                             scores_dir=t["scores"], responses_dir=resp)
+    sr = scan.scan_one_target(target, min_count=2, reduce_questions=1, deep_load=False,
+                              load_check=True)
+    status = {r["role"]: r["status"] for r in sr.results}
+    assert status == {"kept": "vector_only", "lost": "missing_activation",
+                      "corrupt": "corrupt_vector", "few": "below_min_count"}
+    assert [r["role"] for r in sr.suspects()] == ["corrupt"]

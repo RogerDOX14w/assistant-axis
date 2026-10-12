@@ -33,6 +33,7 @@
 #   ./run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   ./run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
 #   ./run_pipeline.sh --no-scan                       # skip the scan before step 5
+#   ./run_pipeline.sh --types roles --judge-batch-requests 3000   # one of several pods
 #   ./run_pipeline.sh --tmpfs-method cp               # model mirror: auto (default),
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #
@@ -192,6 +193,10 @@ while [[ $# -gt 0 ]]; do
             STEPS23_PARALLEL=false; shift ;;
         --judge-realtime)
             JUDGE_ARGS+=(--no_batch); shift ;;
+        --judge-batch-requests)
+            # step 3's --batch_requests, sized from the organisation's queue
+            # limit when several pods share one API key (pipeline/README.md)
+            JUDGE_ARGS+=(--batch_requests "$2"); shift 2 ;;
         --no-scan)
             RUN_SCAN=false; shift ;;
         --types)
