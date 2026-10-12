@@ -52,6 +52,12 @@ there applies here too.
   when Roger made them traits (still delayed, W21).
 - Done: the depth (caricature) check on V3's own output, with nothing to
   change (2026-10-09; ROLES_ADDED § "Role rubric V3", last paragraph).
+- **Review the AI-persona roles (Roger, 2026-10-13): possibly make them
+  traits** (§ "AI-persona roles under the role judge").  The role judge
+  holds back most of an aligned AI's responses because "identifies as
+  itself (an AI assistant)" is its test for not playing the role; the
+  trait judge has no such problem.  After the October extraction's first
+  judging, with the rubric experiment's numbers.
 
 ## Process for adding a role
 
@@ -110,6 +116,50 @@ As of 2026-10-09 it holds 10 words from the generator pilots: `clairvoyant` and 
 `academic` and `mod` duplicate `scholar` / `professor` and `moderator`; the other six are adjectives read as
 offices.  Whether promotion tooling becomes worth building is a TODO in the trait-gap
 [README.md](../../../reports/trait_gap_generation/README.md), "Low-priority TODOs".
+
+### AI-persona roles under the role judge (review, 2026-10-13)
+
+**Status 2026-10-13: open; Roger asked for this to be flagged as worth a review, possibly recasting
+the AI roles as traits.**  Nothing changes before the October extraction's first judging.
+
+The role judge's test for "not playing the role" is whether the model *identifies as itself (an AI
+assistant …)*, which is wrong-footed by a role that is an AI.  On the May tree
+([roles](../../../runpod_workspace/qwen/qwen-3-32b%20Roger%208slot/roles/), score 3 is what step 4 keeps):
+
+| role | score 3 | held at 1–2 |
+|---|---|---|
+| all 280 roles | 80.5% | 18.3% |
+| aligned_artificial_intelligence (now [instrumentally_aligned_ai](./instrumentally_aligned_ai.json)) | **33.8%** | 66.0% |
+| [robot](./robot.json) | 58.6% | 41.2% |
+| [cyborg](./cyborg.json) | 80.8% | 19.2% |
+| [assistant](./assistant.json) | 90.0% | 10.0% |
+| [paperclip_maximizer](./paperclip_maximizer.json) | 89.4% | 9.4% |
+
+A persona with a name and goals of its own (paperclip maximizer) passes like any other role; an aligned
+AI assistant that says it is an AI assistant reads as "identifies as itself", and its vector is the mean
+of the third of its responses that did not — a subset selected on the behaviour the role is about.  The
+di-cohort pair axis `aligned_artificial_intelligence_vs_paperclip_maximizer` has that aligned pole;
+[virtue_aligned_ai](./virtue_aligned_ai.json) (seeded after May, unjudged) and
+[instrumentally_aligned_ai](./instrumentally_aligned_ai.json) will meet the same judge in October.
+[homunculus](./homunculus.json) is the other artificial being; it was not in the May tree.
+
+Two ways out, to decide after the first October judging:
+
+1. **Make them traits.**  Alignment is a property of the assistant, not a different character, which
+   is what a trait is in this corpus; and the trait judge's level 3 reads "fully exhibiting the trait,
+   either not mentioning being an AI *or seamlessly integrating it*", so identifying as an AI costs
+   nothing there.  Roger, 2026-10-13: "Possibly the answer is to make them traits."  The candidates:
+   the two aligned-AI roles (as a trait pair, or with `paperclip_maximizer` kept a role and the aligned
+   side a trait — then the pair axis would be gone, since role and trait poles do not pair); `robot`
+   and `cyborg` are characters rather than properties and would stay roles.
+2. **A role-aware judge** (arm A7 of
+   [plan_role_rubric_experiment.md](../../../reports/pipeline/plan_role_rubric_experiment.md)): levels
+   0–2 say "identifies as the underlying assistant rather than as the role", or the judge is told that
+   for a role whose description says it is an AI, identifying as an AI is in role.
+
+The experiment's numbers (how many responses each option moves, read against the judge's own noise)
+decide; a recast is a seed-and-regenerate for the traits concerned and a `renamed_from`-style record for
+the retired roles.
 
 ### Role pairs to record (2026-09-11)
 
