@@ -54,6 +54,30 @@ def lookup_forms(surface: str) -> list[str]:
     return out
 
 
+#: Part-of-speech order for :func:`oewn_lemma` when an inflected form reduces to several lemmas.
+LEMMA_POS_ORDER = ("a", "s", "n", "v", "r")
+
+
+def oewn_lemma(surface: str, lemmatize) -> Optional[str]:
+    """The OEWN lemma of a census surface, through ``wn.morphy``'s detachment rules (gate audit 1, P5):
+    the surface itself when it is a lemma, else the lemma an inflected form reduces to (leaguing ->
+    league, embrangled -> embrangle).  ``lemmatize(form)`` returns ``{pos: {lemma, ...}}`` as
+    ``wn.morphy.Morphy(wordnet)`` does (lemmas OEWN has).  The lookup forms are :func:`lookup_forms`'s,
+    first hit wins; among several lemmas the adjective ones come first (:data:`LEMMA_POS_ORDER`), then
+    alphabetical order.  None when no form reduces to an OEWN lemma.  Information only: eligibility
+    never reads it."""
+    for form in lookup_forms(surface):
+        found = {pos: set(v) for pos, v in (lemmatize(form) or {}).items() if pos is not None and v}
+        if not found:
+            continue
+        if any(form in v for v in found.values()):
+            return form
+        for pos in (*LEMMA_POS_ORDER, *sorted(set(found) - set(LEMMA_POS_ORDER))):
+            if found.get(pos):
+                return sorted(found[pos])[0]
+    return None
+
+
 def _clean_definition(text: str) -> str:
     """The definition up to its first semicolon (OEWN appends usage notes after one)."""
     return " ".join(text.split(";", 1)[0].split()).strip()

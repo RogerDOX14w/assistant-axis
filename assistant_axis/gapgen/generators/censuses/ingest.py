@@ -26,6 +26,12 @@ Zipf descending (ties: surface), then malformed rows.
 ``freq_platform`` records what the platform's filter will do with the candidate as submitted
 (``curated=True`` since the censuses are a curated generator, the gloss hint, the TDA
 familiarity): whether it goes to the definition probe and by which rescue route.
+
+``oewn_lemma`` (added 2026-10-12, gate audit 1, P5; a field added at the end, no schema bump) is the
+OEWN lemma ``wn.morphy`` reduces the surface to (:func:`.glosshint.oewn_lemma`), so that an
+``unknown_word`` row that is an inflected form of an OEWN word (leaguing -> league; 384 on the
+2026-10-11 table by the audit's count) says so.  Information only: the unknown-word test and
+eligibility do not read it.  A table written before the field loads it as None.
 """
 from __future__ import annotations
 
@@ -47,7 +53,7 @@ from assistant_axis.gapgen.normalize import normalize_candidate
 from assistant_axis.gapgen.registry import utc_stamp
 
 from . import CENSUS_TABLE_PATH
-from .glosshint import Sense, SenseHint, adjective_senses, gloss_hint, person_sense
+from .glosshint import Sense, SenseHint, adjective_senses, gloss_hint, oewn_lemma, person_sense
 from .sources import ALLPORT_COLUMNS
 
 SCHEMA_VERSION = 1
@@ -256,11 +262,16 @@ class Lookups:
     adjective_lemmas: frozenset = frozenset()       # OCR repair lexicon
     freq: Callable[..., FreqInfo] = zipf_info       # the platform's frequency features
     zipf_word: Optional[Callable[[str], float]] = None  # per-word Zipf passed to ``freq`` (tests)
+    #: ``wn.morphy``-style lemmatiser, ``form -> {pos: {lemma}}`` (None: no ``oewn_lemma`` recorded)
+    lemmatize: Optional[Callable[[str], dict]] = None
 
     def freq_info(self, surface: str, **kw) -> FreqInfo:
         if self.zipf_word is not None:
             kw["zipf_fn"] = self.zipf_word
         return self.freq(surface, **kw)
+
+    def lemma(self, surface: str) -> Optional[str]:
+        return oewn_lemma(surface, self.lemmatize) if self.lemmatize is not None else None
 
 
 def default_lookups() -> Lookups:  # pragma: no cover - needs wordfreq and the OEWN database
@@ -277,9 +288,12 @@ def default_lookups() -> Lookups:  # pragma: no cover - needs wordfreq and the O
     def in_wn(surface: str) -> bool:
         return any(w.words(f) for f in lookup_forms(surface))
 
+    from wn.morphy import Morphy
+
     lemmas = frozenset(x.lower() for x in adjective_lemmas(wordnet=w))
     return Lookups(zipf=lambda s: float(zipf_frequency(s, "en")), in_wordnet=in_wn,
-                   senses=lambda s: adjective_senses(s, wordnet=w), adjective_lemmas=lemmas)
+                   senses=lambda s: adjective_senses(s, wordnet=w), adjective_lemmas=lemmas,
+                   lemmatize=Morphy(w))
 
 
 # ---------------------------------------------------------------------------
@@ -311,6 +325,7 @@ class TableRow:
     score: Optional[float]
     corpus_stem_match: bool
     queue_stem_match: bool
+    oewn_lemma: Optional[str] = None     # added 2026-10-12 (gate audit 1, P5); information only
 
     def to_json(self) -> dict:
         return asdict(self)
@@ -475,7 +490,8 @@ def build_table(allport: Iterable[RawEntry], tda: Sequence[TdaRow], *, lookups: 
                      "definition": hint.definition if hint else None, "pos": hint.pos if hint else None},
             gloss_hint=gh, repaired_from=a.repaired_from, unknown_word=a.unknown_word, eligible=eligible,
             ineligible_reason=reason, stage=stage, rank=0, score=t.prop if t else None,
-            corpus_stem_match=stem in corpus, queue_stem_match=stem in queue))
+            corpus_stem_match=stem in corpus, queue_stem_match=stem in queue,
+            oewn_lemma=lookups.lemma(a.surface)))
     for m in malformed:
         rows.append(TableRow(
             schema_version=SCHEMA_VERSION, surface=None, stem=None, label=m["raw"],
@@ -538,6 +554,8 @@ def ingest_counts(rows: Sequence[TableRow], extra: Mapping) -> dict:
          "platform_probe": dict(sorted(Counter(r.stage or "none" for r in rows
                                                if r.freq_platform and r.freq_platform.get("probe")).items())),
          "unknown_word": sum(1 for r in rows if r.unknown_word),
+         "with_oewn_lemma": sum(1 for r in rows if r.stem and r.oewn_lemma),
+         "unknown_word_with_oewn_lemma": sum(1 for r in rows if r.unknown_word and r.oewn_lemma),
          "repaired": len(extra.get("repaired") or []),
          "repair_suggestions": len(extra.get("repair_suggestions") or []),
          "malformed": len(extra.get("malformed") or []),

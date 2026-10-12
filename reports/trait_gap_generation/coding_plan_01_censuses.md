@@ -76,6 +76,8 @@ assistant_axis/gapgen/generators/censuses/
                  person_sense(senses) -> SenseHint(definition, rank, n_adj_senses) | None
                  gloss_hint(row) -> str | None   (≤ 25 words, cut at a word boundary; column II prefix)
   submit.py      STAGES = ("tda", "allport_hi", "allport_probe", "extra"); select_stage(rows, stage) -> list[TableRow]
+                 since 2026-10-12 (gate audit 1): stages allport_rare (known but rare) and allport_iv_rare (the same, listed in column IV
+                 alone); STAGE_RULES (one sentence per stage); known_but_rare(row); stage_pools(rows); run.json args.stage_rule
                  pilot_sample(rows, frac, seed) -> list[TableRow]   (stratified by stage x band x corpus_match, proportional)
                  to_candidates(rows, run_id) -> list[Candidate]
                  estimate_downstream_usd(n, n_probe) -> Estimate(filter_usd, probe_usd, novelty_usd, total_usd, assumptions)
@@ -152,6 +154,16 @@ Dataverse publishes one MD5 per file; whether it is for the original CSV or the 
 ```
 
 Rules: `stem = normalize_to_file_name(surface)`; a surface in several Allport columns is one row with all columns; `eligible = surface cleaned ∧ ¬unknown_word ∧ (tda ∨ ¬freq_hard_reject)`; `ineligible_reason ∈ {malformed, unknown_word, below_hard_reject}`; `stage = tda | allport_hi (¬tda ∧ ¬probe_band) | allport_probe (¬tda ∧ probe_band) | null`; `rank` is global: TDA rows by `prop` desc (ties `gbooks_freq` desc, then surface), then Allport-only rows by `zipf` desc (ties surface), so later stages continue the sequence and recall-versus-rank curves read across stages.  `gloss_hint`: the person-descriptive adjective sense (first sense whose definition matches `\b(person|people|someone|one who|disposition|inclined|disposed|tending|habitually|manner|behavio(u)?r|mood|temperament|having|showing|marked by|characterized by|given to|lacking)\b`, else the first adjective sense, else the first sense of any POS with "(noun)" / "(verb)" appended); column II prefixes "disposition to be X (a general tendency, not an episode): "; column IV appends " (metaphorical or doubtful in Allport-Odbert)"; `None` when OEWN lacks the word.
+
+**Gate audit 1 fixes (2026-10-12; [census_floor.md](../code_review_2026-10-12/gate_audits/census_floor.md)).**  Stage `allport_iv_rare` takes the
+column-IV-only words below the floor (310), which `allport_rare` (926 waiting) had left in no stage.  Defect F3: a
+floor reject made without a call (`freq.is_free_floor_reject`: the split filter's rule `floor`, or the single-call
+filter's hard reject) whose row's current sources would now rescue the word (`freq.floor_reject_rescued`, the same
+`zipf_info` call M1 makes) is taken as unfiltered by M1's `--run` and `--unfiltered` selection
+(`traithood_filter.unfiltered_or_rescued`), so a census rescue is no longer defeated by another generator's earlier
+floor (irresolute).  The evaluation counts `tda_cut` instead of writing 0, lists the run's floor rejects
+(`registry_cuts`) and every stage's pool (`stage_pools`).  `TableRow.oewn_lemma` records the OEWN lemma of an
+unknown word (384 of 5,614); eligibility never reads it.
 
 **Candidate emitted** (`to_candidates`): `Candidate(surface="flustered", generator="censuses", run_id="2026-10-06a", rank=388, score=0.87, gloss_hint=<as above>, sense_id=1, source_ref="tda:1021")`; Allport-only rows use `source_ref="allport:II:1834"` and `score=None`.  `sense_id` is always 1: the censuses give no sense; polysemy is the filter's.
 

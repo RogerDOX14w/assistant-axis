@@ -20,9 +20,11 @@ This module holds one parser and validator for each step (``parse_<step>``, each
 ``(row, None)`` or ``(None, error)``), the payload of each call (:func:`payload`), the join
 (:func:`join`, the rules of section 6; ``split_reference/join_reference.py`` is the same rule
 and the tests check both give the same answers on the recorded inputs), the mapping of a
-joined row onto the filter block's frozen vocabulary (:func:`to_filter_block`), and the opinions'
+joined row onto the filter block's frozen vocabulary (:func:`to_filter_block`), the opinions'
 agreement section and disagreement tripwire (:func:`agreement_section`,
-:func:`disagreement_tripwire`).  The runner is :mod:`assistant_axis.gapgen.split_runner`.
+:func:`disagreement_tripwire`), and the three rules for phrase labels and alignment-sweep roles of gate
+audit 5 (2026-10-12: :func:`is_phrase`, :func:`phrase_needs_second_model`, :func:`reroute_roles`).  The
+runner is :mod:`assistant_axis.gapgen.split_runner`.
 """
 from __future__ import annotations
 
@@ -430,6 +432,92 @@ def join(sense: Mapping, same_sense: Optional[str] = None,
 
 
 # ---------------------------------------------------------------------------
+# phrase labels (gate audit 5, Roger 2026-10-12)
+# ---------------------------------------------------------------------------
+#
+# reports/code_review_2026-10-12/gate_audits/m1_traithood.md, section 7, proposals 1 to 3, accepted by Roger
+# on 2026-10-12.  Multiword labels are accepted (QUESTIONS 71, Roger 2026-10-11), but two parts of the filter
+# assume a single word, and both were applied to phrases without ever being tested on one:
+#
+# 1. The definition probe (``filter_rubric.DEFINE_PROBE_PROMPT``) asks whether a rare word is a real English
+#    word.  It cut 75 of the 77 phrases it saw ("a two-word verb phrase ... not a single English word"), 67 of
+#    them plain traits; and for a phrase the Zipf band that sends a word there is the rarest content word's,
+#    which says nothing about whether the phrase is understood.  A phrase is therefore never sent to the probe
+#    (:func:`is_phrase`; the probe's text is unchanged, and a single word is probed as before).
+# 2. The established check's test of ordinary speech, "would people say 'she is <label>' and mean this?", does
+#    not parse for a verb phrase ("she is accepts shutdown"), so plain AI dispositions came out "stretched";
+#    step 1's frame, the readings of "You are <label>.", has the same fault, and a verb phrase can come out
+#    with no reading at all ("lies about actions").  A phrase that every reading turned away, one or more of
+#    them as stretched or with no reading (the two frame rules, join rules 1 and 2), is not turned away on that
+#    ground: the second model's steps 1 to 3 decide it (:func:`phrase_needs_second_model`), and the row records
+#    it (``decided_by``).  A phrase the kind call turned away (action, evaluative, not a persona) is not sent:
+#    that verdict is about what the reading is, not about the frame.  The prompts are unchanged.  (Roger's
+#    coordinator, 2026-10-12: the rule covers both frame rules, not the established check alone.)
+# 3. An AI disposition is a trait, not a role (QUESTIONS 67), and the roles list has no pass, so a row from the
+#    alignment sweep that M1 sends to the roles list goes on as a trait instead, to be read in review
+#    (:func:`reroute_roles`; the row records it as ``rerouted``).  The states and physical lists are unchanged.
+#    Its gloss is written for the reading M1 accepted, the role reading, as for any row; that reading can be the
+#    wrong sense ("guards its own goal" read as a goalkeeper, which the comparison with the generator's gloss hint
+#    marks ``overshadowed``), and the row reaches review with that note, as any overshadowed trait does.  For
+#    later (decided 2026-10-12: as built for now): a rerouted row could instead have its gloss written for the
+#    generator's intended sense, the gloss hint, a payload change with no prompt text changed.
+
+#: ``define_probe`` of a phrase in the probe band, which is not sent to the probe (rule 1 above).
+PROBE_SKIP_RULE = "phrase_not_probed"
+PROBE_SKIP_WHY = ("a phrase label: the definition probe asks whether a rare word is a real English word, and "
+                  "cut phrases for not being a single word (gate audit 5, proposal 1)")
+#: The rule of :func:`phrase_needs_second_model`, recorded in ``decided_by``.
+PHRASE_RULE = "phrase_turned_away_by_the_frame_decided_by_second_model"
+PHRASE_WHY = ("a phrase label every reading turned away, one or more as stretched or with no reading: the frames "
+              "\"You are <label>.\" and \"she is <label>\" do not fit a verb phrase (gate audit 5, proposal 2)")
+#: The join causes that come from the frames (join rules 1 and 2), which send a phrase to the second model.
+FRAME_CAUSES = frozenset({"stretched", "no_reading"})
+#: Generators whose rows M1 does not hold on the roles list (rule 3 above): the alignment sweep's AI
+#: dispositions are traits (QUESTIONS 67, Roger 2026-10-11).
+ROLES_TO_REVIEW_GENERATORS: tuple[str, ...] = ("alignment_sweep",)
+ROLES_TO_REVIEW_RULE = "alignment_sweep_roles_to_review"
+ROLES_TO_REVIEW_WHY = ("an alignment-sweep row M1 sent to the roles list, which has no pass: an AI disposition is a "
+                       "trait (QUESTIONS 67), so it goes on as a trait, to be read in review (gate audit 5, proposal 3)")
+#: The three rules, recorded in ``run.json`` (a run before 2026-10-12 records none: phrases were probed,
+#: turned away by the frames, and alignment-sweep roles held, like any other row).
+PHRASE_ROUTING = {"version": 1, "probe": PROBE_SKIP_RULE, "frame": PHRASE_RULE,
+                  "frame_causes": sorted(FRAME_CAUSES), "roles": ROLES_TO_REVIEW_RULE,
+                  "roles_generators": list(ROLES_TO_REVIEW_GENERATORS),
+                  "source": "reports/code_review_2026-10-12/gate_audits/m1_traithood.md section 7; Roger 2026-10-12"}
+
+
+def is_phrase(label: Any) -> bool:
+    """True for a label of two or more words: whitespace-separated, as stored (a hyphenated compound such as
+    ``power-hungry`` is one word; ``behaves the same unwatched`` is four)."""
+    return isinstance(label, str) and len(label.split()) > 1
+
+
+def probe_skipped_record() -> dict:
+    """The ``freq.define_probe`` record of a phrase in the probe band that was not sent to the probe."""
+    return {"skipped": "phrase", "rule": PROBE_SKIP_RULE, "reason": PROBE_SKIP_WHY, "known": None}
+
+
+def phrase_needs_second_model(label: Any, outcome: Optional[str], causes: Sequence[Optional[str]]) -> bool:
+    """Rule 2 above: ``label`` is a phrase, its combined outcome is turned away (so every reading turned it
+    away), and one or more of the readings' causes (``causes``: each complete reading's join cause) is one of
+    :data:`FRAME_CAUSES`: ``stretched`` (the established check) or ``no_reading`` (step 1 found none)."""
+    return is_phrase(label) and outcome == "turned_away" and bool(FRAME_CAUSES & set(causes))
+
+
+def reroute_roles(j: Mapping, generators: Sequence[str]) -> tuple[Mapping, Optional[dict]]:
+    """Rule 3 above: ``(join, record)``.  A join with outcome ``roles`` for a row with a source from
+    :data:`ROLES_TO_REVIEW_GENERATORS` comes back with outcome ``trait`` (the reading M1 accepted stays the
+    accepted reading, and its gloss is written for it), and ``record`` says so; any other join comes back
+    unchanged, with ``record`` None."""
+    gens = sorted(set(generators or ()) & set(ROLES_TO_REVIEW_GENERATORS))
+    if j.get("outcome") != "roles" or not gens:
+        return j, None
+    return ({**j, "outcome": "trait"},
+            {"rule": ROLES_TO_REVIEW_RULE, "from": "roles", "to": "trait", "generators": gens,
+             "why": ROLES_TO_REVIEW_WHY})
+
+
+# ---------------------------------------------------------------------------
 # the verdict step read several times (coding_plan_haiku55.md, "The switch", item 2)
 # ---------------------------------------------------------------------------
 #
@@ -595,12 +683,17 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
                     gloss_model: Optional[str] = None, alignment: Optional[Mapping] = None,
                     descriptors: Optional[Mapping] = None, second_opinion: Optional[Mapping] = None,
                     gloss: Optional[str] = None, third_opinion: Optional[Mapping] = None,
+                    decided_by: Optional[Mapping] = None, rerouted: Optional[Mapping] = None,
                     ) -> tuple[dict, Optional[str], Optional[str], str]:
     """``(filter block, gloss, holding, entity_type)`` for a joined row.  The old keys stay, so the
     readers of the block (promote, gap_registry.py, the states pass) need no change:
     ``judged_sense`` is the accepted reading, ``trait_sense_rank`` its place among the readings,
     ``confidence`` null and ``tag_disagreement`` false.  ``third_opinion`` (``--third-model``) has
-    the second opinion's shape plus ``agree_first`` and ``agree_second``; null on a row without one."""
+    the second opinion's shape plus ``agree_first`` and ``agree_second``; null on a row without one.
+    ``decided_by`` (a phrase the second model decided, :func:`phrase_needs_second_model`): ``sense`` and
+    ``j`` are then the second model's, and the record keeps the first model's outcome; ``rerouted`` (an
+    alignment-sweep row taken off the roles list, :func:`reroute_roles`): ``j`` is the rerouted join.
+    Both null on any other row."""
     sense = sense or {}
     verdict, tags, holding, et = verdict_tags_holding(j["outcome"], cause=j.get("cause"),
                                                       membership_kind=j.get("membership_kind"))
@@ -638,6 +731,8 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
         "comparison": dict(comparison) if comparison else None, "plain_reading": None,
         "second_opinion": dict(second_opinion) if second_opinion else None,
         "third_opinion": dict(third_opinion) if third_opinion else None,
+        "decided_by": dict(decided_by) if decided_by else None,
+        "rerouted": dict(rerouted) if rerouted else None,
         "confidence": None, "tag_disagreement": False, "validator_repairs": [], "gloss_in_band": None,
         "prompt_sha256": dict(prompt_sha256), "at": now,
     }
@@ -656,8 +751,8 @@ def floor_block(*, why: str, rule: str, model: Optional[str], batch_id: str, now
             "notes": [], "polysemy": False, "polysemy_notes": [], "region": None, "enactable_in_text": None,
             "alignment": None, "alignment_relevant": None, "last_step_reasons": None, "gloss_form_ok": None,
             "comparison": None,
-            "plain_reading": None, "second_opinion": None, "third_opinion": None, "confidence": None,
-            "tag_disagreement": False,
+            "plain_reading": None, "second_opinion": None, "third_opinion": None, "decided_by": None,
+            "rerouted": None, "confidence": None, "tag_disagreement": False,
             "validator_repairs": [], "gloss_in_band": None, "prompt_sha256": dict(prompt_sha256), "at": now}
 
 

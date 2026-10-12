@@ -6,11 +6,12 @@ the outputs are the same.  See that script's docstring and coding_plan_split.md 
 
 Outputs in ``data/candidates/filter/<batch_id>/``: ``responses.jsonl`` (every response received,
 appended as it arrives, one item each), ``results.jsonl``, ``summary.json`` (with a ``split`` block:
-the pilot figures, the parse rate of every step and model, the spend by step; the opinions'
-``agreement`` section, the ``tripwire`` and ``stopped_by_disagreement``), ``usage.json``
-(always), ``run.json`` (also ``third_model``, ``third_opinion``, ``max_disagreement``,
-``accept_disagreement``, ``tripwire``, ``stopped_by_disagreement``) and, with the batches transport,
-``batches.json``.  Exit status: 0, or 1 (the batch dir exists), 2 (refused, or the budget stop),
+the pilot figures, the parse rate of every step and model, the spend by step, ``phrases``: the phrase
+labels not sent to the definition probe, those the second model decided and the alignment-sweep rows taken
+off the roles list; the opinions' ``agreement`` section, the ``tripwire`` and ``stopped_by_disagreement``),
+``usage.json`` (always), ``run.json`` (also ``third_model``, ``third_opinion``, ``max_disagreement``,
+``accept_disagreement``, ``tripwire``, ``stopped_by_disagreement``, ``phrase_routing``) and, with the
+batches transport, ``batches.json``.  Exit status: 0, or 1 (the batch dir exists), 2 (refused, or the budget stop),
 3 (with ``--stop-on-disagreement`` only: the disagreement tripwire stopped the run, or tripped at its end,
 without ``--accept-disagreement``).  By default a trip is a warning: the run finishes and exits 0, and the
 trip is recorded as ``tripwire`` with action ``warned`` (Roger, 2026-10-09).
@@ -58,6 +59,12 @@ SECOND_OPINION_SHARE = 0.2
 DEFAULT_SECOND_OPINION_FRAC = 0.10
 DEFAULT_SHARES: dict[str, float] = {"readings_per_word": READINGS_PER_WORD, "same_sense": SAME_SENSE_SHARE,
                                     "trait": TRAIT_SHARE, "second_opinion": SECOND_OPINION_SHARE}
+#: The share of phrase labels reaching step 1 that every reading turns away, one or more as stretched or with no
+#: reading, and that the second model therefore decides (split.phrase_needs_second_model, 2026-10-12): 78 of 785
+#: (9.9%) on the four phrase-generator runs on Haiku 5.5 (2026-10-10-full_alignment_sweep 37 of 286,
+#: 2026-10-11-b_alignment_sweep 7 of 31, 2026-10-11-g600_ipip 4 of 160, 2026-10-11-papers_alignment_sweep 30 of
+#: 308), counted on their records.
+PHRASE_DECISION_SHARE = 0.10
 #: The shares by first-model fragment, measured on the recorded split runs (the platform close-out, 2026-10-08;
 #: :func:`measured_shares` over :data:`SHARES_SOURCE_RUNS`, pooled, first-attempt calls, a verdict step's first
 #: reading only).  Haiku 5.5 reads fewer primary readings and asks the same-sense check far less often than
@@ -124,6 +131,8 @@ def measured_shares(run_dirs) -> dict[str, dict]:
                 continue
             r = json.loads(line)
             if str(r.get("stage") or "").endswith("_retry") or (r.get("verdict_reading") or 1) != 1:
+                continue
+            if r.get("purpose"):   # the second model deciding a phrase (2026-10-12): not the sampled opinion
                 continue
             c[f"{r.get('role')}:{r.get('step')}"] += 1
         t = tot[run["model"]]
@@ -205,14 +214,19 @@ def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
     :func:`split_runner.tokens_for` (Haiku 5.5's measured, thinking included).  Shares (primary readings per
     word, same-sense checks, words going on as traits, second opinions): the first model's measured table,
     :func:`shares_for`; a second (or third) opinion's own primary readings and same-sense checks at the shares
-    of its model."""
+    of its model.  Phrase labels (``split.is_phrase``, 2026-10-12) are not sent to the definition probe, and
+    :data:`PHRASE_DECISION_SHARE` of those past the floor are decided by the second model: its steps 1 to 3 and
+    the gloss, and the first model's alignment and descriptors for those it passes (at its trait share)."""
     n_read = getattr(args, "readings", None) or 1
     sh = shares_for(args.model)
-    n_hard = n_probe = 0
+    n_hard = n_probe = n_probe_phrase = n_phrase = 0
     for it in items:
         fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated)
+        phrase = split.is_phrase(it.label)
         n_hard += fq.hard_reject
-        n_probe += (not fq.hard_reject) and fq.probe_band
+        n_probe += (not fq.hard_reject) and fq.probe_band and not phrase
+        n_probe_phrase += (not fq.hard_reject) and fq.probe_band and phrase
+        n_phrase += (not fq.hard_reject) and phrase
     n = len(items) - n_hard
     n_int = sum(1 for it in items if it.intended_sense)
     suffix = BATCH_SUFFIX if transport == "batches" else ""
@@ -247,10 +261,21 @@ def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
         add(f"{name} opinion: same sense", "same_sense", model, osh["same_sense"] * so)
         if gloss:
             add(f"{name} opinion: gloss", "gloss", model, sh["trait"] * so)
+    pd = PHRASE_DECISION_SHARE * n_phrase if (n_phrase and second and not args.no_second_opinion) else 0.0
+    if pd:
+        osh = shares_for(second)
+        add("phrase decision: sense", "sense", second, pd)
+        for step in ("established", "vague", "kind"):
+            add(f"phrase decision: {step}", step, second, osh["readings_per_word"] * pd)
+        add("phrase decision: same sense", "same_sense", second, osh["same_sense"] * pd)
+        add("phrase decision: gloss", "gloss", second, osh["trait"] * pd)
+        add("phrase decision: alignment", "alignment", first, osh["trait"] * pd)
+        add("phrase decision: descriptors", "descriptors", first, osh["trait"] * pd)
     models = [first] + ([args.compare_model] if not args.no_plain_reading and n_int else []) \
-        + ([second] if so and second else []) + ([third] if third else [])
+        + ([second] if (so or pd) and second else []) + ([third] if third else [])
     plan = {"pipeline": "split", "n_rows": len(items), "n_hard_reject": n_hard, "n_to_step1_or_probe": n,
-            "n_probe_band": n_probe, "n_with_intended_sense": n_int, "transport": transport,
+            "n_probe_band": n_probe, "n_probe_band_phrases_not_probed": n_probe_phrase, "n_phrases": n_phrase,
+            "n_phrase_decisions_est": int(math.ceil(pd)), "n_with_intended_sense": n_int, "transport": transport,
             "n_second_opinion_est": int(math.ceil(so)), "third_model": third or None, "readings": n_read,
             "token_figures": {m: token_source(m, first) for m in dict.fromkeys(models)},
             "shares": {m: {"source": share_source(m), **shares_for(m)} for m in dict.fromkeys([first, second, third])
@@ -380,6 +405,9 @@ def main_split(args, argv) -> int:
                     "step_versions": {n: pins[n][0] for n in split.SECOND_OPINION_STEPS if n in pins}},
                 "max_disagreement": args.max_disagreement, "accept_disagreement": bool(args.accept_disagreement),
                 "stop_on_disagreement": bool(getattr(args, "stop_on_disagreement", False)),
+                # phrases not probed, phrases turned away by the frames decided by the second model, alignment-sweep
+                # roles to review (gate audit 5, 2026-10-12); a run before then records none
+                "phrase_routing": dict(split.PHRASE_ROUTING),
                 "step_versions": {n: v for n, (v, _) in pins.items()},
                 # the eight split prompts, plus the two single-pipeline prompts the split also sends
                 "prompt_sha256": {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
@@ -469,6 +497,8 @@ def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, 
             "batches_submitted": getattr(runner.transport, "submitted", None),
             # the verdict readings: their agreement, the rule's rescues and ties (one reading: n_readings 1)
             "readings": runner.readings_summary(),
+            # phrases not probed, phrases the second model decided, alignment-sweep rows off the roles list
+            "phrases": runner.phrase_summary(),
         }
         s["rubric_version"] = split.RUBRIC_VERSION
         s["pipeline"] = "split"

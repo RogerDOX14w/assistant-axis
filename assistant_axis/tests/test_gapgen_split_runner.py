@@ -2,6 +2,7 @@
 a fake client replays the answers recorded on 2026-09-29 (``split_replay``)."""
 import json
 import logging
+from collections import Counter
 
 import pytest
 
@@ -354,3 +355,287 @@ class TestSecondModel:
             if x.filter["outcome"] == "trait":
                 assert x.filter["gloss_model"] == SONNET55
                 assert sum(1 for m, it in glosses if it["label"] == x.label) == 1
+
+
+# ---------------------------------------------------------------------------
+# phrase labels and alignment-sweep roles (gate audit 5, m1_traithood.md section 7; 2026-10-12)
+# ---------------------------------------------------------------------------
+
+PHRASE = "accepts shutdown"
+#: The first model reads the phrase's one primary reading as stretched (the established check's "she is <label>").
+STRETCHED = {(HAIKU, PHRASE, "established"): {"established": "stretched"}}
+#: The second model's reading of the phrase, told apart from the synthetic "you are <label>".
+SONNET_READING = {(SONNET55, PHRASE, "sense"): {"readings": [{"reading": "you let yourself be shut down",
+                                                              "rank": "primary"}]}}
+
+
+def scripted(table, *, tokens=(1000, 100)):
+    """Every answer synthetic (one primary reading, well known, kind trait), except ``table[(model, label,
+    step)]``: fields that replace the synthetic row's (a sense answer's ``readings``, an established check's
+    ``established``, a kind call's ``kind``, a probe's ``known``)."""
+    def override(step, item, kw):
+        got = table.get((kw["model"], item.get("label", item.get("word")), step))
+        if got is None:
+            return synthetic(step, item)
+        row = json.loads(synthetic(step, item))["results"][0]
+        row.update(got)
+        return json.dumps({"results": [row]})
+    return make_responder(override=override, tokens=tokens)
+
+
+def item(label, **meta):
+    return FilterItem(key=label.replace(" ", "_") + "#1", label=label, meta=meta)
+
+
+def calls_by(client, model=None):
+    """``[(step, label)]`` of the calls sent (to ``model`` when given)."""
+    out = []
+    for kw in client.calls:
+        if model is None or kw["model"] == model:
+            step = step_of_system(system_text(kw))
+            it = parse_user(step, user_text(kw))
+            out.append((step, it.get("label", it.get("word"))))
+    return out
+
+
+class TestPhrases:
+    def _run(self, table, items=None, **kw):
+        kw.setdefault("second_opinion", True)
+        kw.setdefault("second_opinion_frac", 0.0)   # no sampled second opinion unless a test asks for one
+        client = FakeAsyncAnthropic(scripted(table))
+        r = runner(client, **kw)
+        res = {x.label: x for x in r.run(items or [item(PHRASE), item("zorp")])}
+        return client, r, res
+
+    # -- 1. the definition probe ---------------------------------------------------------------
+    def test_a_phrase_is_never_sent_to_the_probe(self):
+        not_known = {(HAIKU, w, "probe"): {"known": False, "reason": "not a single English word"}
+                     for w in ("zorp", PHRASE)}
+        client, r, res = self._run(not_known, second_opinion=False, zipf_fn=lambda w: 2.0)  # both in the band
+        assert [lab for step, lab in calls_by(client) if step == "probe"] == ["zorp"]
+        assert res["zorp"].filter["rule"] == "probe"              # a single word is probed, and cut, as before
+        ph = res[PHRASE]
+        assert ph.freq["probe_band"] and ph.freq["define_probe"] == split.probe_skipped_record()
+        assert ph.filter["rule"] == 3 and ph.filter["outcome"] == "trait"     # it went on to the verdict steps
+        assert ("sense", PHRASE) in calls_by(client)
+        assert r.stats["probe_skipped_phrase"] == 1
+        assert r.phrase_summary()["probe_skipped"] == {"n": 1, "labels": [PHRASE]}
+
+    def test_the_probe_sees_a_single_word_exactly_as_before(self):
+        from assistant_axis.gapgen import filter_rubric as fr
+        client, *_ = self._run({}, items=[item("zorp")], second_opinion=False, zipf_fn=lambda w: 2.0)
+        probe = [kw for kw in client.calls if step_of_system(system_text(kw)) == "probe"]
+        assert len(probe) == 1 and system_text(probe[0]) == fr.DEFINE_PROBE_PROMPT
+        assert user_text(probe[0]) == fr.build_probe_prompt([{"id": 1, "label": "zorp"}])
+
+    # -- 2. the established check's frame -------------------------------------------------------
+    def test_a_phrase_turned_away_as_stretched_is_decided_by_the_second_model(self):
+        client, r, res = self._run({**STRETCHED, **SONNET_READING})
+        x = res[PHRASE]
+        f = x.filter
+        assert r.decide_keys == r.phrase_keys == [f"{PHRASE.replace(' ', '_')}#1"] and r.second_keys == []
+        assert (f["outcome"], f["verdict"], x.holding, x.entity_type) == ("trait", "trait", None, "trait")
+        d = f["decided_by"]
+        assert d["rule"] == split.PHRASE_RULE and d["model"] == SONNET55 and d["outcome"] == "trait"
+        assert d["first"]["model"] == HAIKU and d["first"]["outcome"] == "turned_away"
+        assert d["first"]["cause"] == "stretched" and d["first"]["causes"] == ["stretched"]
+        assert d["first"]["sense"]["readings"][0]["established"] == "stretched"
+        assert d["agree_first"] is False and d["error"] is None
+        # the row is the second model's: its reading, its gloss for that reading; not a sampled opinion
+        assert f["judged_sense"] == "you let yourself be shut down" and f["sense"]["readings"][0]["established"] == "well_known"
+        assert f["gloss_model"] == SONNET55 and x.gloss and f["region"]
+        assert f["second_opinion"] is None and f["comparison"] is None and f["rerouted"] is None
+        assert sorted(calls_by(client, SONNET55)) == sorted(
+            [("sense", PHRASE), ("established", PHRASE), ("vague", PHRASE), ("kind", PHRASE), ("gloss", PHRASE)])
+        gloss = [kw for kw in client.calls if step_of_system(system_text(kw)) == "gloss" and kw["model"] == SONNET55]
+        assert json.loads(user_text(gloss[0]))["reading"] == "you let yourself be shut down"
+        assert {("alignment", PHRASE), ("descriptors", PHRASE)} <= set(calls_by(client, HAIKU))
+        # every call of the decision is recorded as one, on the second model's path
+        dec = [rec for rec in r.responses if rec.get("purpose")]
+        assert {rec["step"] for rec in dec} == {"sense", "established", "vague", "kind"}
+        assert all(rec["purpose"] == "phrase_decision" and rec["role"] == "second" and rec["model"] == SONNET55
+                   and rec["keys"] == [f"{PHRASE.replace(' ', '_')}#1"] for rec in dec)
+        assert not any(rec.get("purpose") for rec in r.responses if rec["step"] == "gloss")
+        # the single word beside it is untouched, and nothing enters the opinions' figures
+        assert res["zorp"].filter["decided_by"] is None and res["zorp"].filter["outcome"] == "trait"
+        assert r.opinion_rows() == [] and r.tripwire is None
+        s = r.phrase_summary()["decided_by_second_model"]
+        assert s["n"] == 1 and s["outcomes"] == {"trait": 1} and s["labels"] == {"trait": [PHRASE]}
+
+    def test_the_second_model_may_turn_it_away_too(self):
+        client, r, res = self._run({**STRETCHED, (SONNET55, PHRASE, "established"): {"established": "stretched"}})
+        f = res[PHRASE].filter
+        assert (f["outcome"], f["cause"], f["verdict"], f["tags"]) == ("turned_away", "stretched", "reject", ["stretched"])
+        assert f["decided_by"]["outcome"] == "turned_away" and f["decided_by"]["agree_first"] is True
+        assert res[PHRASE].gloss is None and ("gloss", PHRASE) not in calls_by(client)
+
+    def test_or_send_it_to_a_holding_list(self):
+        _, _, res = self._run({**STRETCHED, (SONNET55, PHRASE, "kind"): {"kind": "state"}})
+        x = res[PHRASE]
+        assert (x.filter["outcome"], x.holding, x.gloss) == ("states", "states", None)
+        assert x.filter["decided_by"]["outcome"] == "states"
+
+    def test_a_failed_decision_leaves_the_first_outcome(self):
+        responder = scripted(STRETCHED)   # the second model's kind call fails validation, and its retry too
+        client = FakeAsyncAnthropic(lambda kw: (make_response("not json") if kw["model"] == SONNET55 and
+                                               step_of_system(system_text(kw)) == "kind" else responder(kw)))
+        r = runner(client, second_opinion=True, second_opinion_frac=0.0)
+        f = {x.label: x for x in r.run([item(PHRASE)])}[PHRASE].filter
+        assert (f["outcome"], f["cause"]) == ("turned_away", "stretched")
+        assert f["decided_by"]["outcome"] is None and "kind" in f["decided_by"]["error"]
+        assert r.phrase_summary()["decided_by_second_model"]["failed"] == [PHRASE]
+
+    def test_a_single_word_turned_away_as_stretched_is_not_sent(self):
+        client, r, res = self._run({(HAIKU, "zorp", "established"): {"established": "stretched"}})
+        assert res["zorp"].filter["outcome"] == "turned_away" and res["zorp"].filter["decided_by"] is None
+        assert r.decide_keys == [] and calls_by(client, SONNET55) == []
+
+    def test_a_phrase_with_no_reading_goes_to_the_second_model(self):
+        """Step 1's frame, "You are <label>.", fails a verb phrase too: a phrase whose every reading found no
+        reading at all ("lies about actions") is decided by the second model (coordinator, 2026-10-12)."""
+        client, r, res = self._run({(HAIKU, PHRASE, "sense"): {"readings": []}, **SONNET_READING})
+        f = res[PHRASE].filter
+        assert f["decided_by"]["first"]["causes"] == ["no_reading"] and f["decided_by"]["outcome"] == "trait"
+        assert f["outcome"] == "trait" and f["judged_sense"] == "you let yourself be shut down"
+        assert r.decide_keys == r.phrase_keys and ("sense", PHRASE) in calls_by(client, SONNET55)
+
+    def test_a_phrase_the_kind_call_turned_away_is_not_sent(self):
+        """The kind call's verdict (action, evaluative, not a persona) is about the reading, not the frame."""
+        client, r, res = self._run({(HAIKU, PHRASE, "kind"): {"kind": "action"}})
+        f = res[PHRASE].filter
+        assert (f["outcome"], f["cause"], f["decided_by"]) == ("turned_away", "action", None)
+        assert r.phrase_keys == [] and calls_by(client, SONNET55) == []
+
+    def test_without_a_second_model_the_first_outcome_stands(self):
+        client, r, res = self._run(STRETCHED, second_opinion=False)
+        f = res[PHRASE].filter
+        assert f["outcome"] == "turned_away" and f["decided_by"]["model"] is None
+        assert "no second model" in f["decided_by"]["error"] and calls_by(client, SONNET55) == []
+        assert r.phrase_summary()["decided_by_second_model"]["no_second_model"] == [PHRASE]
+
+    def test_three_readings_one_of_them_stretched(self):
+        """Haiku 5.5's three readings: every one turned the phrase away, one as stretched and two with no
+        reading; the second model decides it, and so it does a phrase whose three readings all found none."""
+        other = "lies about actions"
+        seen = {"n": 0}
+        base = scripted(STRETCHED)
+
+        def responder(kw):
+            step = step_of_system(system_text(kw))
+            it = parse_user(step, user_text(kw))
+            if kw["model"] == HAIKU and step == "sense" and it["label"] in (PHRASE, other):
+                if it["label"] == PHRASE and seen["n"] == 0:   # one reading of three finds a reading
+                    seen["n"] += 1
+                    return base(kw)
+                row = {**json.loads(synthetic("sense", it))["results"][0], "readings": []}   # no reading
+                return make_response(json.dumps({"results": [row]}))
+            return base(kw)
+        client = FakeAsyncAnthropic(responder)
+        r = runner(client, readings=3, second_opinion=True, second_opinion_frac=0.0)
+        res = {x.label: x for x in r.run([item(PHRASE), item(other)])}
+        f = res[PHRASE].filter
+        assert sorted(f["decided_by"]["first"]["causes"]) == ["no_reading", "no_reading", "stretched"]
+        assert f["verdict_readings"]["outcome"] == "turned_away" and f["outcome"] == "trait"
+        g = res[other].filter
+        assert g["decided_by"]["first"]["causes"] == ["no_reading"] * 3 and g["outcome"] == "trait"
+        assert {lab for _, lab in calls_by(client, SONNET55)} == {PHRASE, other}
+
+    def test_a_sampled_phrase_is_asked_once_and_compared_on_the_first_outcome(self):
+        client, r, res = self._run({**STRETCHED, **SONNET_READING}, second_opinion_frac=1.0)
+        key = f"{PHRASE.replace(' ', '_')}#1"
+        assert key in r.second_keys and key in r.decide_keys
+        son = Counter(calls_by(client, SONNET55))
+        assert son[("sense", PHRASE)] == son[("kind", PHRASE)] == son[("gloss", PHRASE)] == 1
+        f = res[PHRASE].filter
+        assert f["outcome"] == "trait" and f["second_opinion"]["agree"] is False
+        row = next(o for o in r.opinion_rows() if o["key"] == key)
+        assert (row["first"], row["second"]) == ("turned_away", "trait")    # the models, not the decision
+
+    def test_resume_sends_nothing_already_answered(self):
+        client, r, res = self._run({**STRETCHED, **SONNET_READING})
+        client2 = FakeAsyncAnthropic(scripted({**STRETCHED, **SONNET_READING}))
+        r2 = runner(client2, second_opinion=True, second_opinion_frac=0.0, resume_records=list(r.responses))
+        res2 = {x.label: x for x in r2.run([item(PHRASE), item("zorp")])}
+        assert client2.calls == []
+        strip = lambda f: {k: v for k, v in f.items() if k != "at"}  # noqa: E731
+        assert strip(res2[PHRASE].filter) == strip(res[PHRASE].filter)
+
+    def test_batches_send_the_decision_as_two_waves(self, tmp_path):
+        from assistant_axis.gapgen.batches import BatchTransport
+        from assistant_axis.judge_pricing import BATCH_SUFFIX
+        from assistant_axis.tests.test_gapgen_batches import FakeBatchClient, no_sleep
+        responder = scripted({**STRETCHED, **SONNET_READING})
+        r = runner(FakeAsyncAnthropic(responder), second_opinion=True, second_opinion_frac=0.0)
+        bc = FakeBatchClient(responder)
+        r.transport = BatchTransport(r, bc, tmp_path / "batches.json", sleep=no_sleep, poll_seconds=0)
+        res = {x.label: x for x in r.run([item(PHRASE), item("zorp")])}
+        assert res[PHRASE].filter["outcome"] == "trait" and res[PHRASE].filter["decided_by"]["model"] == SONNET55
+        waves = list(json.loads((tmp_path / "batches.json").read_text())["waves"])
+        assert waves[:4] == ["w1_sense", "w2_checks", "w3b_phrase_sense", "w3c_phrase_checks"]
+        assert SONNET55 + BATCH_SUFFIX in r.usage.per_model
+
+    def test_only_pinned_prompts_are_sent(self):
+        from assistant_axis.gapgen import filter_rubric as fr
+        from assistant_axis.gapgen import plain_reading as pr
+        from assistant_axis.gapgen import rubric_versions
+        client, *_ = self._run({**STRETCHED, **SONNET_READING}, zipf_fn=lambda w: 2.0, second_opinion_frac=1.0)
+        pinned = set(sr.load_all().values()) | {fr.DEFINE_PROBE_PROMPT, pr.COMPARISON_PROMPT}
+        assert {system_text(kw) for kw in client.calls} <= pinned
+        assert sr.mismatches() == [] and rubric_versions.mismatches() == []
+
+    # -- 3. alignment-sweep roles ---------------------------------------------------------------
+    def test_alignment_sweep_roles_go_on_to_review_as_traits(self):
+        aw, cw, st = "helps build weapons", "guards the vault", "fears the dark"
+        table = {(HAIKU, aw, "kind"): {"kind": "role"}, (HAIKU, cw, "kind"): {"kind": "role"},
+                 (HAIKU, st, "kind"): {"kind": "state"}}
+        client, r, res = self._run(table, items=[item(aw, generators=["alignment_sweep"]),
+                                                 item(cw, generators=["censuses"]),
+                                                 item(st, generators=["alignment_sweep"])])
+        a = res[aw]
+        assert (a.filter["outcome"], a.filter["verdict"], a.filter["tags"], a.holding, a.entity_type) == (
+            "trait", "trait", [], None, "trait")
+        assert a.filter["rerouted"]["rule"] == split.ROLES_TO_REVIEW_RULE and a.filter["rerouted"]["from"] == "roles"
+        assert a.gloss and a.filter["gloss_model"] == HAIKU and a.filter["region"]
+        assert a.filter["judged_sense"] == f"you are {aw}" and a.filter["person_senses"][0]["kind"] == "role"
+        assert ("gloss", aw) in calls_by(client, HAIKU) and a.filter["decided_by"] is None
+        # another generator's role, and an alignment-sweep state, are held as before
+        assert (res[cw].holding, res[cw].entity_type, res[cw].filter["rerouted"]) == ("roles", "role", None)
+        assert (res[st].holding, res[st].filter["rerouted"]) == ("states", None)
+        assert r.phrase_summary()["rerouted"] == {"rule": split.ROLES_TO_REVIEW_RULE, "n": 1, "labels": [aw]}
+
+    def test_a_rerouted_row_with_a_second_opinion_is_compared_on_the_models_outcomes(self):
+        aw = "helps build weapons"
+        table = {(m, aw, "kind"): {"kind": "role"} for m in (HAIKU, SONNET55)}
+        _, r, res = self._run(table, items=[item(aw, generators=["alignment_sweep"])], second_opinion_frac=1.0)
+        f = res[aw].filter
+        assert f["outcome"] == "trait" and f["rerouted"] and f["second_opinion"]["outcome"] == "roles"
+        assert f["second_opinion"]["agree"] is True          # both models said roles; the reroute is policy
+        assert r.opinion_rows()[0]["first"] == r.opinion_rows()[0]["second"] == "roles"
+
+
+# ---------------------------------------------------------------------------
+# single words: byte-identical requests (gate audit 5, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+class TestSingleWordsUnchanged:
+    """The phrase rules change nothing for a single word.  The digests are of every request a run on the 98
+    single-word test words sends (step, model and user payload, sorted; all in the probe band, 20 with an
+    intended sense, a second opinion on 20%), taken on the code before the rules were added (2026-10-12) and
+    unchanged after.  The system prompts are checked by their pins (test_gapgen_split_rubrics), so a rubric
+    bump does not touch these; a deliberate change to a payload does, and then the digest is recomputed."""
+    DIGESTS = {1: (1019, "a6eb476299f054d09258a49b8b916ac7f125d7b04c9b4f13822e00e2fc0f4968"),
+               3: (2053, "764a0ca445a7ab0a08f3db994fa5801831adf5512513d095bc58ea0adbab48fe")}
+
+    @pytest.mark.parametrize("readings", [1, 3])
+    def test_requests_are_byte_identical(self, readings):
+        import hashlib
+        intended = {e["word"]: "an intended meaning" for e in load_jsonl("expected_outcomes.jsonl")[:20]}
+        items = [it for it in test_items(intended=intended) if not split.is_phrase(it.label)]
+        client = FakeAsyncAnthropic(make_responder())
+        r = runner(client, zipf_fn=lambda w: 2.0, second_opinion=True, second_opinion_frac=0.2, readings=readings)
+        res = r.run(items)
+        reqs = sorted(json.dumps([step_of_system(system_text(kw)), kw["model"], user_text(kw)]) for kw in client.calls)
+        assert len(items) == 98
+        assert (len(reqs), hashlib.sha256("\n".join(reqs).encode()).hexdigest()) == self.DIGESTS[readings]
+        assert r.phrase_keys == [] and r.stats["probe_skipped_phrase"] == 0
+        assert all(x.filter["decided_by"] is None and x.filter["rerouted"] is None for x in res)

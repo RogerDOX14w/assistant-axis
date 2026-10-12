@@ -15,12 +15,34 @@ from collections import Counter
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
+from assistant_axis.gapgen.freq import floor_reject_rescued, is_free_floor_reject
 from assistant_axis.gapgen.paths import DATA_CANDIDATES, REPO_ROOT, filter_dir, novelty_dir
 
 from . import GENERATOR
 from .evaluate import cost_summary, known_label_pass, run_rows, state_gloss_compliance
 from .ingest import TableRow
-from .submit import batch_id_for
+from .submit import STAGE_RULES, batch_id_for, stage_pools
+
+
+def registry_cuts(reg_rows: Sequence[Mapping], tda_stems: set[str]) -> dict:
+    """The run's registry rows the platform turned away without reading them (gate audit 1, F4; until
+    2026-10-12 ``tda_cut`` was the literal 0): ``floor`` lists the frequency floor's free rejects, each
+    with the batch that made it, its generators and whether its current sources would now rescue it
+    (``rescued_now``: defect F3, which M1's ``--run`` re-filters); ``n_probe`` counts the definition
+    probe's "not known" cuts (rule ``probe``, a paid verdict)."""
+    floor = []
+    for r in reg_rows:
+        if not is_free_floor_reject(r):
+            continue
+        f = r.get("filter") or {}
+        floor.append({"key": r.get("key"), "stem": r.get("stem"), "tda": r.get("stem") in tda_stems,
+                      "batch_id": f.get("batch_id"),
+                      "generators": sorted({str(s.get("generator")) for s in r.get("sources") or []}),
+                      "rescued_now": floor_reject_rescued(r)})
+    n_probe = sum(1 for r in reg_rows if (r.get("filter") or {}).get("rule") == "probe")
+    return {"n_floor": len(floor), "n_floor_tda": sum(1 for x in floor if x["tda"]),
+            "n_floor_rescued_now": sum(1 for x in floor if x["rescued_now"]), "floor": floor,
+            "n_probe": n_probe}
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -56,8 +78,11 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[TableRow], inges
     cost = cost_summary([run_dir / "usage.json", filter_dir(b, candidates_dir=candidates_dir) / "usage.json",
                          novelty_dir(b, candidates_dir=candidates_dir) / "usage.json"])
     counters = (ingest_counts or {}).get("counters") or {}
+    cuts = registry_cuts(reg_rows, {r.stem for r in tda_rows})
     ev = {
-        "run_id": run_id, "generator": GENERATOR, "stage": stage, "every_nth": args.get("every_nth"),
+        "run_id": run_id, "generator": GENERATOR, "stage": stage,
+        "stage_rule": args.get("stage_rule") or STAGE_RULES.get(stage),
+        "every_nth": args.get("every_nth"),
         "offset": args.get("offset"), "transport": args.get("transport"), "estimate": args.get("estimate"),
         "parsed": {
             "table_rows": len(table), "tda_words": len(tda_rows), "allport_words": sum(1 for r in table if r.allport and r.stem),
@@ -67,10 +92,15 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[TableRow], inges
         },
         "floor": {
             "stage_pool": args.get("n_stage"),
-            "tda_cut": 0,
+            # the run's TDA words the platform floor-rejected without a call (counted since 2026-10-12, F4)
+            "tda_cut": cuts["n_floor_tda"],
+            "registry_cuts": cuts,
             "tda_below_dictionary_floor": sum(1 for r in tda_rows if r.freq_hard_reject),
             "allport_only_cut": dict(sorted(Counter(r.ineligible_reason for r in allport_only if not r.eligible).items())),
+            # the table's own stage field, before the column IV split (kept for comparison; see stage_pools)
             "allport_only_eligible": dict(sorted(Counter(r.stage for r in allport_only if r.eligible).items())),
+            # every stage's pool as select_stage draws it, and the rows in no stage (F5)
+            "stage_pools": stage_pools(table),
             "submitted_to_probe": sum(1 for r in rows_sel if (r.freq_platform or {}).get("probe")),
             "submitted_probe_routes": dict(sorted(Counter((r.freq_platform or {}).get("rescue") or "band"
                                                           for r in rows_sel
@@ -126,6 +156,27 @@ def _trait(stem: str, doc: Path) -> str:
     return _link(REPO_ROOT / "data" / "traits" / "instructions" / f"{stem}.json", doc, stem)
 
 
+def _cut_lines(cuts: Optional[Mapping]) -> list[str]:
+    """Readout rows for :func:`registry_cuts` (none for an evaluation written before 2026-10-12)."""
+    if not cuts:
+        return []
+    def word(x):
+        return f"{x['stem']} ({', '.join(x['generators'])}" + ("; now rescued, M1 `--run` re-filters it)"
+                                                              if x["rescued_now"] else ")")
+    return [f"| rows of this run turned away unread by the platform's floor | {cuts['n_floor']}"
+            + (": " + ", ".join(word(x) for x in cuts["floor"]) if cuts["floor"] else "") + " |",
+            f"| rows of this run cut by the definition probe (\"not known\") | {cuts['n_probe']} |"]
+
+
+def _pool_lines(pools: Optional[Mapping]) -> list[str]:
+    """Readout rows for :func:`.submit.stage_pools` (none for an evaluation written before 2026-10-12)."""
+    if not pools:
+        return []
+    return [f"| census stages (pools after the column IV split) | "
+            + ", ".join(f"{k} {v:,}" for k, v in pools["stages"].items()) + " |",
+            f"| census rows in no stage | " + ", ".join(f"{k} {v:,}" for k, v in pools["in_no_stage"].items()) + " |"]
+
+
 def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Path, counts_path: Path,
                    manifest_path: Path) -> str:
     d = Path(doc_path)
@@ -165,12 +216,15 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
         f"II {p['allport_lines'].get('II')}, III {p['allport_lines'].get('III')}, IV {p['allport_lines'].get('IV')}) |",
         f"| in both lists | {p['in_both']:,} |",
         f"| malformed (dropped) | {p['malformed']} |",
-        f"| eligible rows of this stage | {f['stage_pool']} |",
+        f"| eligible rows of this stage | {f['stage_pool']}"
+        + (f" ({ev['stage_rule']})" if ev.get("stage_rule") else "") + " |",
         f"| TDA words cut by the floor | {f['tda_cut']} (every TDA word is submitted; {f['tda_below_dictionary_floor']} "
-        f"of them are below the dictionary floor and reach the platform's probe through the curated route) |",
-        f"| Allport-only words cut by the floor (not in any stage) | "
+        f"of them are below the dictionary floor and reach the platform's probe through the curated route, so a "
+        f"cut here is a row another generator's floor reject reached first) |",
+        *_cut_lines(f.get("registry_cuts")),
+        f"| Allport-only words below the floor at ingest (the table's ineligible reasons) | "
         + ", ".join(f"{k} {v:,}" for k, v in f["allport_only_cut"].items()) + " |",
-        f"| Allport-only words in later stages | " + ", ".join(f"{k} {v:,}" for k, v in f["allport_only_eligible"].items()) + " |",
+        *_pool_lines(f.get("stage_pools")),
         f"| **submitted in this run** | **{s['n_candidates']}** ({s['n_with_gloss_hint']} with a gloss hint, "
         f"{s['n_state_prefix']} framed as a disposition from Allport-Odbert column II) |",
         f"| of those, routed to the platform's definition probe | {f['submitted_to_probe']} "

@@ -600,6 +600,21 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   ties and the outcome patterns.  The second opinion and the tripwire compare
   the combined outcome.  `--resume` refuses a batch whose earlier session ran
   on another `--model` or `--readings`.
+- **Phrases (2026-10-12, gate audit 5).**  A label of two or more words
+  (`split.is_phrase`; a hyphenated compound is one word) skips the definition
+  probe, which had cut 75 of 77 phrase labels, 67 of them traits
+  ([m1_traithood.md](../reports/code_review_2026-10-12/gate_audits/m1_traithood.md)
+  section 7); it goes to the sense wave as `w3b_phrase_sense`, then
+  `w3c_phrase_checks`, and its filter block records the skip.  A phrase every
+  reading turned away with a cause in `split.FRAME_CAUSES` (`stretched`, the
+  established check, or `no_reading`) is decided by the second model
+  (`split.phrase_needs_second_model`; the block says `decided_by`); one the
+  kind call turned away (an action, an evaluation, not a persona) is not.  A
+  row from the alignment sweep that M1 sent to the roles list goes on as a
+  trait instead (`split.reroute_roles`; the block says `rerouted`; QUESTIONS
+  67).  The estimate charges `split_cli.PHRASE_DECISION_SHARE` (0.10) of the
+  phrases to the second model.  Single-word requests are byte-identical to
+  before (digests pinned in the tests); `split.PHRASE_ROUTING` names the rules.
 - **Prompt caching and the estimate (2026-10-08, the platform close-out).**  On
   Haiku 5.5 (caching from 512 tokens) the prompts that pass the minimum go
   cached: sense, kind, established, gloss and alignment (about 600 to 1,000

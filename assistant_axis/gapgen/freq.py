@@ -139,3 +139,39 @@ def familiarity_of(rec: dict) -> Optional[float]:
 def is_curated(rec: dict) -> bool:
     """True when any of a registry row's sources is a curated generator."""
     return any(s.get("generator") in CURATED_GENERATORS for s in rec.get("sources") or [])
+
+
+def is_free_floor_reject(rec: dict) -> bool:
+    """True when a registry row's filter block is the frequency floor's reject, made without a call:
+    the split filter's ``rule`` "floor", or the single-call filter's hard reject (``freq.hard_reject``,
+    no model, tag ``too_rare``).  A definition-probe cut (``rule`` "probe") is a paid verdict and is
+    not one."""
+    f = rec.get("filter") or {}
+    if not f:
+        return False
+    if f.get("rule") == "floor":
+        return True
+    return (bool((rec.get("freq") or {}).get("hard_reject")) and f.get("model") is None
+            and "too_rare" in (f.get("tags") or []))
+
+
+def floor_reject_rescued(rec: dict, *, zipf_fn: Optional[Callable[[str], float]] = None) -> bool:
+    """Defect F3 (gate audit 1, 2026-10-12): True when a row's only filter verdict is the floor's free
+    reject (:func:`is_free_floor_reject`) and the row's *current* sources would rescue the word, so the
+    filter would no longer reject it unread.
+
+    The registry merges a later source into an existing row and keeps its filter block, so the first
+    generator to reach a stem decided its floor: ``irresolute`` was floor-rejected under
+    ``antonym_check`` (not curated, no gloss hint) and the TDA's curated source and gloss hint never
+    applied.  M1's row selection (``traithood_filter.py --run`` / ``--unfiltered``) takes such a row as
+    unfiltered.  The test is :func:`zipf_info` with the row's current context, the same call the filter
+    makes before any model call."""
+    if not is_free_floor_reject(rec):
+        return False
+    hint = any(s.get("gloss_hint") for s in rec.get("sources") or [])
+    label = rec.get("label") or rec.get("surface") or rec.get("stem") or ""
+    if not label:
+        return False
+    fq = zipf_info(label, familiarity=familiarity_of(rec), gloss_hint=hint, curated=is_curated(rec),
+                   zipf_fn=zipf_fn)
+    return not fq.hard_reject

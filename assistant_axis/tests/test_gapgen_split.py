@@ -224,6 +224,83 @@ class TestVocabulary:
 
 
 # ---------------------------------------------------------------------------
+# phrase labels and alignment-sweep roles (gate audit 5, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+class TestPhraseRules:
+    @pytest.mark.parametrize("label,phrase", [
+        ("accepts shutdown", True), ("behaves the same unwatched", True), ("Eastern Orthodox", True),
+        ("power-hungry", False), ("weak-hinged", False), ("candid", False), ("", False), (None, False),
+        ("  candid  ", False)])
+    def test_is_phrase(self, label, phrase):
+        assert split.is_phrase(label) is phrase
+
+    def test_the_probe_skip_record(self):
+        rec = split.probe_skipped_record()
+        assert rec["skipped"] == "phrase" and rec["rule"] == split.PROBE_SKIP_RULE and rec["known"] is None
+
+    @pytest.mark.parametrize("label,outcome,causes,due", [
+        ("accepts shutdown", "turned_away", ["stretched"], True),
+        ("accepts replacement", "turned_away", ["no_reading", "stretched", "stretched"], True),
+        # step 1's frame found no reading at all (coordinator, 2026-10-12: both frame rules count)
+        ("lies about actions", "turned_away", ["no_reading", "no_reading", "no_reading"], True),
+        ("accepts shutdown", "turned_away", ["no_reading"], True),
+        ("accepts shutdown", "trait", [None], False),
+        ("accepts shutdown", "roles", [None], False),
+        ("bygone", "turned_away", ["stretched"], False),           # a single word: the frames as built
+        ("bygone", "turned_away", ["no_reading"], False),
+        ("accepts shutdown", "turned_away", ["action"], False),     # the kind call's verdict, not the frame
+        ("accepts shutdown", "turned_away", ["evaluative", "not_a_persona", "action"], False),
+    ])
+    def test_phrase_needs_second_model(self, label, outcome, causes, due):
+        assert split.phrase_needs_second_model(label, outcome, causes) is due
+
+    def test_reroute_roles_takes_an_alignment_sweep_role_to_trait(self):
+        sense ={"readings": [{"reading": "you are like this", "rank": "primary",
+                               "check_established": {"established": "known"}, "kind_call": {"kind": "role"}}]}
+        j = split.join(sense)
+        assert j["outcome"] == "roles"
+        out, rec = split.reroute_roles(j, ["alignment_sweep", "censuses"])
+        assert out["outcome"] == "trait" and out["accepted"] == j["accepted"] and out["kind"] == "role"
+        assert rec == {"rule": split.ROLES_TO_REVIEW_RULE, "from": "roles", "to": "trait",
+                       "generators": ["alignment_sweep"], "why": split.ROLES_TO_REVIEW_WHY}
+        assert j["outcome"] == "roles"                                       # the input is not changed
+        assert split.reroute_roles(j, ["censuses"]) == (j, None)             # another generator: held as before
+        assert split.reroute_roles(j, []) == (j, None)
+        for outcome in ("trait", "states", "physical", "turned_away"):      # only the roles list
+            assert split.reroute_roles({**j, "outcome": outcome}, ["alignment_sweep"])[1] is None
+
+    def test_a_rerouted_row_maps_to_a_trait_with_its_gloss_and_no_holding(self):
+        sense = {"note": "n", "first_thought": "f", "first_thought_said_of": "people", "usable": True,
+                 "readings": [{"reading": "you help build weapons", "rank": "primary",
+                               "check_established": {"reason": "r", "established": "known",
+                                                     "first_thought_in_the_way": False},
+                               "kind_call": {"reason": "A job.", "kind": "role", "membership_kind": None}}]}
+        j, rec = split.reroute_roles(split.join(sense), ["alignment_sweep"])
+        block, gloss, hold, et = split.to_filter_block(sense=sense, j=j, model=HAIKU, batch_id="b", now="t",
+                                                       step_versions={}, prompt_sha256={}, gloss="This means helping.",
+                                                       rerouted=rec)
+        assert (block["verdict"], block["tags"], hold, et) == ("trait", [], None, "trait")
+        assert gloss == "This means helping." and block["judged_sense"] == "you help build weapons"
+        assert block["rerouted"] == rec and block["decided_by"] is None
+        assert block["person_senses"] == [{"sense": "you help build weapons", "kind": "role"}]
+
+    def test_every_block_carries_the_two_keys(self):
+        block, *_ = _block("trait")
+        assert block["decided_by"] is None and block["rerouted"] is None
+        fb = split.floor_block(why="w", rule="probe", model=HAIKU, batch_id="b", now="t", step_versions={},
+                               prompt_sha256={})
+        assert fb["decided_by"] is None and fb["rerouted"] is None
+
+    def test_the_routing_record(self):
+        r = split.PHRASE_ROUTING
+        assert (r["probe"], r["frame"], r["roles"]) == (split.PROBE_SKIP_RULE, split.PHRASE_RULE,
+                                                         split.ROLES_TO_REVIEW_RULE)
+        assert r["frame_causes"] == ["no_reading", "stretched"]
+        assert r["roles_generators"] == ["alignment_sweep"] and json.dumps(r)
+
+
+# ---------------------------------------------------------------------------
 # 9 (part): pricing and requests
 # ---------------------------------------------------------------------------
 

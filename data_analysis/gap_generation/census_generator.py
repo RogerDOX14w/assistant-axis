@@ -3,7 +3,7 @@
 
     uv run python data_analysis/gap_generation/census_generator.py download [--only KEY ...] [--force] [--dry-run]
     uv run python data_analysis/gap_generation/census_generator.py ingest [--queue PATH] [--dry-run]
-    uv run python data_analysis/gap_generation/census_generator.py submit --stage {tda,allport_hi,allport_probe,allport_iv,allport_rare,extra}
+    uv run python data_analysis/gap_generation/census_generator.py submit --stage {tda,allport_hi,allport_probe,allport_iv,allport_rare,allport_iv_rare,extra}
         --run-id R [--every-nth N [--offset K]] [--extra-list PATH] [--transport live|batches]
         [--budget-usd 5.0] [--confirm-expensive --confirmed-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/census_generator.py report --run-id R [--dry-run]
@@ -38,6 +38,7 @@ from assistant_axis.gapgen.generators.censuses import download as D  # noqa: E40
 from assistant_axis.gapgen.generators.censuses import ingest as I  # noqa: E402
 from assistant_axis.gapgen.generators.censuses.corpus import corpus_paren_stems, corpus_trait_stems, queue_trait_stems  # noqa: E402
 from assistant_axis.gapgen.generators.censuses.sources import ALLPORT_COLUMN_SOURCES, SOURCES  # noqa: E402
+from assistant_axis.gapgen.generators.censuses.submit import STAGES  # noqa: E402
 
 
 def _git_sha() -> Optional[str]:
@@ -98,8 +99,8 @@ def build(args, lookups=None):
 def print_counts(counts: dict) -> None:
     keys = ("n_rows", "n_tda", "n_allport", "n_both", "n_eligible", "per_column", "only_column", "per_stage",
             "ineligible", "per_zipf_band", "tda_below_dictionary_floor", "platform_probe", "unknown_word",
-            "repaired", "malformed", "with_gloss_hint", "corpus_stem_match", "queue_stem_match", "counters",
-            "ceiling")
+            "with_oewn_lemma", "unknown_word_with_oewn_lemma", "repaired", "malformed", "with_gloss_hint",
+            "corpus_stem_match", "queue_stem_match", "counters", "ceiling")
     for k in keys:
         print(f"{k}: {json.dumps(counts.get(k), ensure_ascii=False)}")
 
@@ -204,7 +205,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("submit", help="write a run's candidates.jsonl and submit it (no API cost; gated on the "
                                       "downstream estimate)")
-    p.add_argument("--stage", required=True, choices=("tda", "allport_hi", "allport_probe", "allport_iv", "allport_rare", "extra"))
+    p.add_argument("--stage", required=True, choices=STAGES)
     p.add_argument("--run-id", required=True)
     p.add_argument("--every-nth", type=int, default=None, help="every N-th row of the stage in rank order (pilot)")
     p.add_argument("--offset", type=int, default=0)

@@ -7,6 +7,7 @@ models disagree too often on the final outcome, before the wave of alignment and
 """
 import json
 import logging
+import math
 from collections import Counter
 from types import SimpleNamespace
 
@@ -396,6 +397,41 @@ class TestEstimate:
         estb, _ = split_cli.build_split_estimate(its, self._args(third_model=OPUS), "batches")
         assert {x.model for x in estb.lines if "third" in x.label} == {OPUS + BATCH_SUFFIX}
 
+    def test_phrases_skip_the_probe_and_add_the_second_models_decisions(self, monkeypatch):
+        """Gate audit 5 (2026-10-12): a phrase in the probe band is not counted as a probe call, and
+        split_cli.PHRASE_DECISION_SHARE of the phrases get the second model's steps 1 to 3 and gloss."""
+        from assistant_axis.gapgen import freq
+        from data_analysis.gap_generation import split_cli
+        monkeypatch.setattr(freq, "_ZIPF_FN", lambda w: 2.0)        # every word in the probe band
+        its = [FilterItem(key="zorp#1", label="zorp")] + [
+            FilterItem(key=f"p{i}#1", label=f"accepts shutdown{i}") for i in range(40)]
+        est, plan = split_cli.build_split_estimate(its, self._args(), "live")
+        by = {x.label: x for x in est.lines}
+        assert by["definition probe"].n_calls == 1 and plan["n_probe_band"] == 1
+        assert plan["n_probe_band_phrases_not_probed"] == 40 and plan["n_phrases"] == 40
+        n_pd = math.ceil(split_cli.PHRASE_DECISION_SHARE * 40)
+        assert plan["n_phrase_decisions_est"] == n_pd and by["phrase decision: sense"].n_calls == n_pd
+        assert {x.model for x in est.lines if x.label.startswith("phrase decision: ")
+                and x.label.split(": ")[1] not in ("alignment", "descriptors")} == {SONNET55}
+        assert by["phrase decision: alignment"].model == HAIKU
+        none, plan0 = split_cli.build_split_estimate(its, self._args(no_second_opinion=True), "live")
+        assert not any(x.label.startswith("phrase decision") for x in none.lines)
+        assert plan0["n_phrase_decisions_est"] == 0
+        words_only, _ = split_cli.build_split_estimate(its[:1], self._args(), "live")
+        assert not any(x.label.startswith("phrase decision") for x in words_only.lines)
+
+    def test_measured_shares_leave_out_the_phrase_decisions(self, tmp_path):
+        from data_analysis.gap_generation import split_cli
+        d = tmp_path / "run"
+        d.mkdir()
+        (d / "run.json").write_text(json.dumps({"pipeline": "split", "model": HAIKU, "second_model": SONNET55,
+                                                "argv": []}))
+        recs = ([{"stage": "sense", "step": "sense", "role": "first"}] * 4
+                + [{"stage": "second_sense", "step": "sense", "role": "second"}]
+                + [{"stage": "second_sense", "step": "sense", "role": "second", "purpose": "phrase_decision"}] * 3)
+        (d / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+        assert split_cli.measured_shares([d])[HAIKU]["second_opinion"] == 0.25
+
     def test_opus_tokens_follow_the_audit(self):
         # opus_audit_m1.md: $8.98 against $6.06 estimated at Haiku's token counts
         i, o = tokens_for("sense", HAIKU)
@@ -473,6 +509,27 @@ class TestCLI:
         assert usage["per_model"][OPUS]["n_calls"] == sum(1 for kw in cli["live"].calls if kw["model"] == OPUS)
         assert any(k.endswith(f"@{OPUS}") and k.startswith("third_") for k in s["split"]["cost_by_step"])
         assert all(v["ok"] == v["n"] for k, v in s["split"]["step_parse_rates"].items() if ":third:" in k)
+
+    def test_phrase_routing_recorded_and_summarised(self, cli, monkeypatch):
+        """Gate audit 5 (2026-10-12): run.json records the phrase rules, the plan counts the phrase not probed,
+        and summary.json split.phrases lists it."""
+        from assistant_axis.gapgen import freq
+        from data_analysis.gap_generation import traithood_filter
+        monkeypatch.setattr(freq, "_ZIPF_FN", lambda w: 2.0)        # every word in the probe band
+        labels = cli["labels"][:5] + ["accepts shutdown"]
+        cli["val"].write_text("".join(json.dumps({"surface": w, "stratum": "A"}) + "\n" for w in labels))
+        assert traithood_filter.main(_args(cli, "--transport", "live")) == 0
+        s, run, res = _read(cli)
+        assert run["phrase_routing"] == split.PHRASE_ROUTING
+        assert (run["plan"]["n_probe_band"], run["plan"]["n_probe_band_phrases_not_probed"]) == (5, 1)
+        ph = s["split"]["phrases"]
+        assert ph["probe_skipped"] == {"n": 1, "labels": ["accepts shutdown"]}
+        assert ph["decided_by_second_model"]["n"] == 0 and ph["rerouted"]["n"] == 0
+        probed = [json.loads(user_text(kw).splitlines()[1])["word"] for kw in cli["live"].calls
+                  if step_of_system(system_text(kw)) == "probe"]
+        assert sorted(probed) == sorted(cli["labels"][:5])
+        row = next(r for r in res if r["label"] == "accepts shutdown")
+        assert row["freq"]["define_probe"]["skipped"] == "phrase" and row["filter"]["outcome"] == "trait"
 
     def test_dry_run_prints_the_third_opinion_estimate(self, cli, capsys):
         from data_analysis.gap_generation import traithood_filter

@@ -27,8 +27,16 @@ never submitted.
 Stage ``allport_iv`` (Roger, 2026-10-09, QUESTIONS 29): the Allport-only words listed in column IV
 alone ("metaphorical and doubtful terms"), taken out of ``allport_hi`` and ``allport_probe`` and run
 after them, opening with a 10% pilot; whether the rest follows depends on the pilot's yield.  The
-column IV words below the floor wait with that decision and are not in ``allport_rare``.  Order of
-the census runs: ``tda``, ``allport_hi``, ``allport_probe``, ``allport_iv``, ``allport_rare``.
+column IV words below the floor waited with that decision and are not in ``allport_rare``.
+
+Stage ``allport_iv_rare`` (Roger, 2026-10-12, gate audit 1,
+``reports/code_review_2026-10-12/gate_audits/census_floor.md``): those column IV words below the
+floor, 310 on the 2026-10-11 table, selected by ``allport_rare``'s rule (known to ``wordfreq`` or
+OEWN but below Zipf 1.5, never ``unknown_word``) and run together with ``allport_rare``.  Each stage's
+rule is :data:`STAGE_RULES`, recorded in the run's ``run.json`` (``args.stage_rule``) and its
+evaluation.  Order of the census runs: ``tda``, ``allport_hi``, ``allport_probe``, ``allport_iv``,
+``allport_rare`` with ``allport_iv_rare``.  :func:`stage_pools` counts every stage's pool and the
+rows in no stage (``unknown_word``, ``malformed``).
 """
 from __future__ import annotations
 
@@ -50,12 +58,34 @@ from .ingest import STAGE_HI, STAGE_PROBE, STAGE_TDA, TableRow, clean_surface, z
 STAGE_RARE = "allport_rare"
 #: The Allport-only words of column IV alone, after the two main Allport stages (QUESTIONS 29).
 STAGE_IV = "allport_iv"
-STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, STAGE_IV, STAGE_RARE, "extra")
+#: The column-IV-only words below the floor, by allport_rare's rule (Roger, 2026-10-12, gate audit 1).
+STAGE_IV_RARE = "allport_iv_rare"
+#: The stages drawn from the census table (``extra`` reads a word list instead).
+TABLE_STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, STAGE_IV, STAGE_RARE, STAGE_IV_RARE)
+STAGES = (*TABLE_STAGES, "extra")
+#: What each stage selects, in words; recorded in ``run.json`` (``args.stage_rule``) and the evaluation.
+STAGE_RULES = {
+    STAGE_TDA: "every TDA word (eligible whatever its Zipf)",
+    STAGE_HI: "Allport-only, eligible, Zipf >= 2.5 and no rescue; not listed in column IV alone",
+    STAGE_PROBE: "Allport-only, eligible, 1.5 <= Zipf < 2.5 or a negating-prefix rescue; not listed in column IV alone",
+    STAGE_IV: "Allport-only, eligible (allport_hi or allport_probe by Zipf), listed in column IV alone (QUESTIONS 29)",
+    STAGE_RARE: "Allport-only, below_hard_reject (Zipf < 1.5 but known to wordfreq or OEWN; never unknown_word); "
+                "not listed in column IV alone (QUESTIONS 34)",
+    STAGE_IV_RARE: "Allport-only, below_hard_reject (allport_rare's rule), listed in column IV alone "
+                   "(Roger, 2026-10-12, gate audit 1)",
+    "extra": "one word or phrase per line of --extra-list",
+}
 
 
 def column_iv_only(r: TableRow) -> bool:
     """An Allport-only word listed in column IV and in no other column."""
     return not r.tda and ((r.allport or {}).get("columns") or []) == ["IV"]
+
+
+def known_but_rare(r: TableRow) -> bool:
+    """An Allport-only word below the dictionary floor that ``wordfreq`` or OEWN knows (the table's
+    ``below_hard_reject``; ``unknown_word`` rows are never selected): ``allport_rare``'s rule."""
+    return bool(r.stem) and not r.tda and r.ineligible_reason == "below_hard_reject"
 
 #: Platform cost per word, from the plan's revision of 2026-10-08 (section 4): M1 (the split
 #: filter, Haiku 5.5, three readings) about $0.004 per submitted word; M3 about $0.018 per word
@@ -98,11 +128,12 @@ def estimate_downstream_usd(n: int, *, transport: str = "live") -> Estimate:
 
 def select_stage(rows: Sequence[TableRow], stage: str) -> list[TableRow]:
     """Eligible rows of one stage, in rank order."""
-    if stage not in STAGES or stage == "extra":
-        raise ValueError(f"not a table stage: {stage!r} (one of {STAGES[:5]})")
+    if stage not in TABLE_STAGES:
+        raise ValueError(f"not a table stage: {stage!r} (one of {TABLE_STAGES})")
     if stage == STAGE_RARE:
-        pick = (r for r in rows if r.stem and not r.tda and r.ineligible_reason == "below_hard_reject"
-                and not column_iv_only(r))
+        pick = (r for r in rows if known_but_rare(r) and not column_iv_only(r))
+    elif stage == STAGE_IV_RARE:
+        pick = (r for r in rows if known_but_rare(r) and column_iv_only(r))
     elif stage == STAGE_IV:
         pick = (r for r in rows if r.eligible and r.stage in (STAGE_HI, STAGE_PROBE) and column_iv_only(r))
     elif stage in (STAGE_HI, STAGE_PROBE):
@@ -110,6 +141,20 @@ def select_stage(rows: Sequence[TableRow], stage: str) -> list[TableRow]:
     else:
         pick = (r for r in rows if r.eligible and r.stage == stage)
     return sorted(pick, key=lambda r: r.rank)
+
+
+def stage_pools(rows: Sequence[TableRow]) -> dict:
+    """Every table stage's pool as :func:`select_stage` draws it (after the column IV split, unlike the
+    table's own ``stage`` field), and the rows in no stage by reason (``unknown_word``, ``malformed``;
+    gate audit 1, F5).  ``n_rows`` = the stages' sum + ``in_no_stage``'s."""
+    picked: set[int] = set()
+    pools = {}
+    for st in TABLE_STAGES:
+        sel = select_stage(rows, st)
+        pools[st] = len(sel)
+        picked |= {r.rank for r in sel}
+    rest = Counter(r.ineligible_reason or r.stage or "none" for r in rows if r.rank not in picked)
+    return {"stages": pools, "in_no_stage": dict(sorted(rest.items())), "n_rows": len(rows)}
 
 
 def every_nth(rows: Sequence[TableRow], n: int, offset: int = 0) -> list[TableRow]:
@@ -243,7 +288,8 @@ def run_submit(stage: str, run_id: str, *, table: Sequence[TableRow], sources_ma
         for c in summary.followups:
             echo(f"  then: {c}")
         return summary
-    args = {"stage": stage, "every_nth": every_nth_n, "offset": offset if every_nth_n else None,
+    args = {"stage": stage, "stage_rule": STAGE_RULES[stage], "every_nth": every_nth_n,
+            "offset": offset if every_nth_n else None,
             "extra_list": str(extra_list) if extra_list else None, "n": len(cands), "n_stage": len(pool),
             "transport": transport, "budget_usd": budget_usd, "estimate": asdict(est), "strata": st,
             "table": str(table_path) if table_path else None, "table_sha256": table_sha256,

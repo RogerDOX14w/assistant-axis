@@ -49,6 +49,19 @@ descriptors wave instead (exit status 3, ``stopped_by_disagreement``);
 ``--resume --accept-disagreement`` then goes on, and when nothing is left
 to send the run finishes, marked, and still exits 3.
 
+**Phrase labels and alignment-sweep roles** (split only; gate audit 5,
+``reports/code_review_2026-10-12/gate_audits/m1_traithood.md`` section 7,
+Roger 2026-10-12; the rules in ``assistant_axis.gapgen.split``, "phrase
+labels").  A label of two or more words is never sent to the definition
+probe (``freq.define_probe`` records the skip).  A phrase that every verdict
+reading turns away, one or more as stretched or with no reading, is
+decided by the second model's steps 1 to 3 (``decided_by`` on the block; not part of the second
+opinion's sample or its tripwire; with ``--no-second-opinion`` the first
+outcome stands).  An alignment-sweep row M1 sends to the roles list goes on
+as a trait instead, to be read in review (``rerouted``).  No prompt text
+changed.  ``run.json`` records ``phrase_routing``; ``summary.json``
+``split.phrases`` lists the rows each rule touched.
+
 Single-call pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
 below ``freq.HARD_REJECT_BELOW`` unless rescue rule 1b applies, free) ->
 WordNet -> Haiku classifier (25 per call) -> definition probe for the probe
@@ -149,7 +162,7 @@ from assistant_axis.gapgen.filter import (  # noqa: E402
     DEFAULT_BATCH_SIZE, DEFAULT_MODEL, DEFAULT_SECOND_MODEL, PROMPT_SHA256, FilterItem, FilterRunner,
     development_seen, items_from_records, summarize,
 )
-from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
+from assistant_axis.gapgen.freq import floor_reject_rescued, zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, records_for_status, utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM  # noqa: E402
@@ -218,6 +231,26 @@ def stratified_sample(items: list[FilterItem], frac: float, seed: int, *, whole_
         k = max(1, int(round(frac * len(rows))))
         keep |= {it.key for it in rng.sample(rows, k)}
     return [it for it in items if it.key in keep]
+
+
+def unfiltered_or_rescued(recs: list[dict]) -> list[dict]:
+    """The rows ``--run`` and ``--unfiltered`` filter: those with no filter block, and (defect F3, gate
+    audit 1, 2026-10-12) those whose only filter verdict is the frequency floor's free reject when their
+    current sources would now rescue the word (``freq.floor_reject_rescued``: a curated generator, a
+    gloss hint or a familiarity score arrived after a non-curated generator's floor reject).  The new
+    pass replaces the floor block whole, as any filter pass does.  A paid verdict, the definition
+    probe's included, is never re-selected here; ``--keys`` re-filters any row."""
+    out, again = [], []
+    for r in recs:
+        if not r.get("filter"):
+            out.append(r)
+        elif floor_reject_rescued(r):
+            out.append(r)
+            again.append(r["key"])
+    if again:
+        print(f"re-filtering {len(again)} row(s) floor-rejected unread before a rescuing source joined them "
+              f"(F3): {', '.join(again[:20])}{' ...' if len(again) > 20 else ''}", file=sys.stderr)
+    return out
 
 
 def parse_run(value: str) -> tuple[str, str]:
@@ -292,9 +325,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--batch-id", required=True)
     sel = ap.add_mutually_exclusive_group(required=True)
-    sel.add_argument("--unfiltered", action="store_true", help="every registry row with no filter block")
+    sel.add_argument("--unfiltered", action="store_true",
+                     help="every registry row with no filter block, and every row floor-rejected unread whose "
+                          "current sources would now rescue it (F3)")
     sel.add_argument("--keys", nargs="+", help="registry keys (stem#sense)")
-    sel.add_argument("--run", type=parse_run, help="GENERATOR/RUN_ID: rows with that source, not yet filtered")
+    sel.add_argument("--run", type=parse_run,
+                     help="GENERATOR/RUN_ID: rows with that source, not yet filtered (a row floor-rejected unread "
+                          "that its current sources would now rescue counts as not filtered: F3)")
     sel.add_argument("--validation-file", type=Path, help="JSONL of {surface, stratum, expected}; no registry writes")
     ap.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
@@ -409,9 +446,9 @@ def select_items(args) -> tuple[list[FilterItem], Optional[Registry]]:
         if args.keys:
             recs = records_for_status(reg, keys=args.keys)
         elif args.run:
-            recs = records_for_status(reg, run=args.run, unfiltered=True)
+            recs = unfiltered_or_rescued(records_for_status(reg, run=args.run))
         else:
-            recs = records_for_status(reg, unfiltered=True)
+            recs = unfiltered_or_rescued(records_for_status(reg))
         items = items_from_records(recs)
     if args.limit:
         items = items[:args.limit]

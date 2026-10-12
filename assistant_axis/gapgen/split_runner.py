@@ -6,16 +6,33 @@ Every call carries one item.  The waves:
 wave  calls
 ====  =========================================================================================
 0     frequency floor and WordNet (no call, :meth:`FilterRunner.prepare`); definition probe for
-      the probe band, one word per call
+      the probe band, one word per call, a phrase label never (``split.is_phrase``)
 1     sense (the label)
 2     established, vague and kind, once for each primary reading
 3     same sense (a word with two readings left by rule 2 that are both trait or membership);
       comparison (a row with an intended sense), one pair per call
-4     gloss (outcome trait; on the second model for a word chosen for a second opinion);
-      second (and third) opinion, step 1
+3b    the second model's step 1 for a phrase every reading turned away by the frames, stretched or with
+      no reading (only when there is one; ``split.phrase_needs_second_model``)
+3c    the second model's established / vague / kind for those phrases; the second model decides them
+4     gloss (outcome trait; on the second model for a word chosen for a second opinion, or decided
+      by it); second (and third) opinion, step 1
 5     second (and third) opinion, established / vague / kind; then the disagreement tripwire
-6     alignment and descriptors on the gloss; second (and third) opinion, same sense
+6     alignment and descriptors on the gloss; second (and third) opinion, same sense (and the
+      decided phrases')
 ====  =========================================================================================
+
+Phrase labels and alignment-sweep roles (gate audit 5, ``reports/code_review_2026-10-12/gate_audits/
+m1_traithood.md`` section 7; Roger 2026-10-12; the rules in :mod:`split`, "phrase labels").  A phrase in the
+probe band is not sent to the definition probe (``freq.define_probe`` records the skip).  A phrase that every
+verdict reading turned away, one or more as stretched or with no reading, is decided by the second model: its steps 1 to 3 run
+in waves 3b and 3c on the same path as a second opinion (``so_`` state, records with role ``second`` and
+``purpose`` ``phrase_decision``), and its outcome, accepted reading, notes and gloss become the row's; the
+block records ``decided_by`` (the rule, the model, the first model's outcome).  These words are not part of
+the second opinion's sample: the agreement figures and the tripwire count only the sampled words, on the first
+model's own outcome.  Without a second model (``--no-second-opinion``) the first model's outcome stands and
+``decided_by`` says why.  An alignment-sweep row whose outcome is ``roles`` goes on as a trait (``rerouted``),
+with its gloss written for the reading M1 accepted.  The first model's join stays in the state as
+``join``; :meth:`SplitRunner._row_join` is the join the row follows.
 
 The words for a second opinion are chosen after wave 3, from the join, so wave 4 knows which model
 writes each gloss: a seeded ``second_opinion_frac`` of the words that reached step 1, plus every
@@ -247,6 +264,7 @@ class Call:
     retry: bool = False
     rep: int = 0                  # the verdict reading (0-based) of a first-model verdict call; 0 otherwise
     cache_system: bool = False    # the system prompt sent with cache_control (:func:`caches_system`)
+    purpose: Optional[str] = None  # PHRASE_PURPOSE: a call of the second model deciding a phrase (recorded)
 
     @property
     def stage(self) -> str:
@@ -297,6 +315,10 @@ def error_key(role: str, step: str, index: Optional[int], rep: int = 0) -> str:
     return f"{role}:{step}:{index}" + (f":r{rep + 1}" if rep else "")
 #: The wave the tripwire holds back.
 LAST_WAVE = "w6_last_step"
+#: The waves of the second model's steps 1 and 2 on the phrases it decides (``split.phrase_needs_second_model``).
+PHRASE_WAVES = ("w3b_phrase_sense", "w3c_phrase_checks")
+#: ``purpose`` of those calls (and of their same-sense check in wave 6), on the call and its response record.
+PHRASE_PURPOSE = "phrase_decision"
 
 
 class DisagreementStop(Exception):
@@ -398,6 +420,10 @@ class SplitRunner(FilterRunner):
                 self.cache[record_cache_key(rec)] = rec
         self.second_keys: list[str] = []
         self.third_keys: list[str] = []
+        # phrases every reading turned away by the frames (split.phrase_needs_second_model), and of those the ones
+        # the second model was asked to decide (all of them, unless the run has no second model)
+        self.phrase_keys: list[str] = []
+        self.decide_keys: list[str] = []
 
     # -- helpers ----------------------------------------------------------------
     def _system(self, step: str) -> str:
@@ -414,12 +440,12 @@ class SplitRunner(FilterRunner):
         return MAX_TOKENS_FIRST.get(step, MAX_TOKENS_FIRST_DEFAULT)
 
     def _make(self, step: str, key: str, *, model: str, user: str, index: Optional[int] = None,
-              role: str = "first", rep: int = 0) -> Call:
+              role: str = "first", rep: int = 0, purpose: Optional[str] = None) -> Call:
         system = self._system(step)
         # Call.label is what the answer's label echo is checked against: the label as the prompt shows it
         return Call(step=step, key=key, label=self.prompt_label(self.state[key]["label"]), model=model, system=system,
                     user=user, max_tokens=self._max_tokens(step, model), temperature=TEMPERATURE, index=index,
-                    role=role, rep=rep, cache_system=caches_system(system, model))
+                    role=role, rep=rep, cache_system=caches_system(system, model), purpose=purpose)
 
     def cached_steps(self) -> dict[str, list[str]]:
         """``{model: [steps]}``: of the steps each of this run's models sends, those whose system prompt goes
@@ -469,6 +495,8 @@ class SplitRunner(FilterRunner):
                        "batch_request_id": meta.get("batch_request_id"), "at": utc_now()}
                 if self.readings > 1:   # a one-reading run's records keep their old shape
                     rec["verdict_reading"] = self._verdict_reading(c)
+                if c.purpose:           # the second model deciding a phrase (only those records carry it)
+                    rec["purpose"] = c.purpose
                 # recorded before it is parsed, so a parser that raises keeps the answer paid for (it was
                 # charged before this handler ran); the exception then stops the run as any other would
                 self.stats[f"calls_{c.stage}"] += 1
@@ -544,7 +572,8 @@ class SplitRunner(FilterRunner):
         and in a one-reading run."""
         return ((self.state[key].get("vote") or {}).get("winner")) or 0
 
-    def _path_calls(self, keys: Sequence[str], step: str, *, role: str, model: str, rep: int = 0) -> list[Call]:
+    def _path_calls(self, keys: Sequence[str], step: str, *, role: str, model: str, rep: int = 0,
+                    purpose: Optional[str] = None) -> list[Call]:
         """Wave 2 (``step`` established / vague / kind) for every primary reading of ``keys``."""
         calls = []
         for k in keys:
@@ -558,7 +587,7 @@ class SplitRunner(FilterRunner):
                         if step == "established"
                         else split.payload(step, label=s_label(self.state[k]), label_form=self.label_form,
                                            reading=x["reading"]))
-                calls.append(self._make(step, k, model=model, user=user, index=i, role=role, rep=rep))
+                calls.append(self._make(step, k, model=model, user=user, index=i, role=role, rep=rep, purpose=purpose))
         return calls
 
     def _sense_calls(self, keys: Sequence[str], *, role: str, model: str, reps: Sequence[int] = (0,)) -> list[Call]:
@@ -579,11 +608,12 @@ class SplitRunner(FilterRunner):
             else:
                 self.state[c.key]["errors"][sense_key] = err
 
-    def _check_calls(self, keys: Sequence[str], *, role: str, model: str, rep: int = 0) -> list[Call]:
+    def _check_calls(self, keys: Sequence[str], *, role: str, model: str, rep: int = 0,
+                     purpose: Optional[str] = None) -> list[Call]:
         """Step 2 (established, vague and kind) for every primary reading of ``keys``."""
         calls = []
         for step in ("established", "vague", "kind"):
-            calls += self._path_calls(keys, step, role=role, model=model, rep=rep)
+            calls += self._path_calls(keys, step, role=role, model=model, rep=rep, purpose=purpose)
         return calls
 
     def _apply_checks(self, calls: Sequence[Call], res: Mapping[int, tuple]) -> None:
@@ -611,18 +641,20 @@ class SplitRunner(FilterRunner):
                 return f"reading {i + 1}: established {est or 'ok'}, kind {kd or 'ok'}"
         return None
 
-    def _same_sense_call(self, key: str, *, role: str, model: str, rep: int = 0) -> Optional[Call]:
+    def _same_sense_call(self, key: str, *, role: str, model: str, rep: int = 0,
+                         purpose: Optional[str] = None) -> Optional[Call]:
         s = self._sense(key, role, rep)
         pair = split.same_sense_pair(s)
         if not pair:
             return None
         a, b = pair
-        return self._make("same_sense", key, model=model, role=role, index=a, rep=rep,
+        return self._make("same_sense", key, model=model, role=role, index=a, rep=rep, purpose=purpose,
                           user=split.payload("same_sense", label=s_label(self.state[key]),
                                              label_form=self.label_form, reading=s["readings"][a]["reading"],
                                              reading_2=s["readings"][b]["reading"]))
 
-    def _wave3_calls(self, keys: Sequence[str], *, role: str, model: str) -> list[Call]:
+    def _wave3_calls(self, keys: Sequence[str], *, role: str, model: str,
+                     purpose: Optional[str] = None) -> list[Call]:
         """Same sense (every role; for the first role, once for each verdict reading that completed) and, for
         the first role only, the comparison, on the winning reading's readings."""
         calls = []
@@ -630,7 +662,7 @@ class SplitRunner(FilterRunner):
             reps = ([r for r in range(self.readings) if self._complete(k, role, r) is None]
                     if role == "first" else [0])
             for r in reps:
-                c = self._same_sense_call(k, role=role, model=model, rep=r)
+                c = self._same_sense_call(k, role=role, model=model, rep=r, purpose=purpose)
                 if c is not None:
                     calls.append(c)
             if role == "first" and self.plain_reading and self.state[k].get("intended"):
@@ -754,12 +786,139 @@ class SplitRunner(FilterRunner):
         return out
 
     def _join_opinions(self) -> None:
-        """Each opinion's join (or why it could not be made) for each of its words."""
-        for role, _, keys in self._opinions():
+        """Each opinion's join (or why it could not be made) for each of its words, and the second model's
+        for each phrase it decides (whose decision then follows its final join: the same-sense check adds a
+        note and never changes the outcome or the accepted reading)."""
+        paths = [(role, keys) for role, _, keys in self._opinions()]
+        if self.decide_keys:
+            paths.append(("second", self.decide_keys))
+        for role, keys in paths:
             p = ROLE_PREFIX[role]
             for k in keys:
                 why = self._complete(k, role)
                 self.state[k][p + "join"] = self._join(k, role) if why is None else {"error": why}
+        for k in self.decide_keys:
+            d = self.state[k].get("decided") or {}
+            sj = self.state[k].get("so_join") or {}
+            if d.get("join") is not None and "error" not in sj:
+                d["join"] = sj
+
+    # -- phrase labels and alignment-sweep roles (gate audit 5; split, "phrase labels") ---------------------
+    def _generators(self, key: str) -> list[str]:
+        return list((self.results[key].meta or {}).get("generators") or []) if key in self.results else []
+
+    def select_phrase_decisions(self, keys: Sequence[str]) -> list[str]:
+        """The words of ``keys`` (voted on, with their joins after wave 3) that the second model decides:
+        phrases every reading turned away, one or more as stretched or with no reading
+        (``split.phrase_needs_second_model``).
+        Sorted."""
+        out = []
+        for k in keys:
+            st = self.state[k]
+            causes = [j.get("cause") for j in ((st.get("vote") or {}).get("joins") or []) if j]
+            if split.phrase_needs_second_model(st["label"], (st.get("join") or {}).get("outcome"), causes):
+                out.append(k)
+        return sorted(out)
+
+    def _first_record(self, key: str) -> dict:
+        """The first model's outcome of a phrase the second model decides, for ``decided_by["first"]``."""
+        st = self.state[key]
+        j = st.get("join") or {}
+        v = st.get("vote") or {}
+        s = self._sense(key, "first", self._winner(key)) or {}
+        return {"model": self.model, "outcome": j.get("outcome"), "cause": j.get("cause"),
+                "causes": [None if x is None else x.get("cause") for x in (v.get("joins") or [j])],
+                "sense": {k: s.get(k) for k in ("note", "first_thought", "first_thought_said_of", "usable")}
+                | {"readings": split.block_readings(s)}}
+
+    async def _run_phrase_decisions(self, ready: Sequence[str]) -> None:
+        """Waves 3b and 3c: the second model's steps 1 and 2 on the phrases it decides, then the decision
+        (``state["decided"]``).  Without a second model the rule is recorded and the first outcome stands."""
+        self.phrase_keys = self.select_phrase_decisions(ready)
+        self.stats["phrase_frame"] = len(self.phrase_keys)
+        if not self.phrase_keys:
+            return
+        if not self.second_opinion:
+            for k in self.phrase_keys:
+                self.state[k]["decided"] = {"rule": split.PHRASE_RULE, "why": split.PHRASE_WHY, "model": None,
+                                            "first": self._first_record(k), "outcome": None, "join": None,
+                                            "error": "no second model in this run: the first model's outcome stands"}
+            return
+        self.decide_keys = list(self.phrase_keys)
+        sm = self.second_model
+        calls = [self._make("sense", k, model=sm, role="second", purpose=PHRASE_PURPOSE,
+                            user=split.payload("sense", label=s_label(self.state[k]), label_form=self.label_form))
+                 for k in self.decide_keys]
+        res = await self._wave(PHRASE_WAVES[0], calls)
+        self._apply_sense(calls, res)
+        self._check_stop()
+        calls = self._check_calls([k for k in self.decide_keys if self._sense(k, "second")], role="second",
+                                  model=sm, purpose=PHRASE_PURPOSE)
+        res = await self._wave(PHRASE_WAVES[1], calls)
+        self._apply_checks(calls, res)
+        self._check_stop()
+        for k in self.decide_keys:
+            why = self._complete(k, "second")
+            j = self._join(k, "second") if why is None else None
+            self.state[k]["so_join"] = j if j is not None else {"error": why}
+            self.state[k]["decided"] = {"rule": split.PHRASE_RULE, "why": split.PHRASE_WHY, "model": sm,
+                                        "first": self._first_record(k), "outcome": (j or {}).get("outcome"),
+                                        "join": j, "error": why}
+            self.stats[f"phrase_decided:{(j or {}).get('outcome') or 'failed'}"] += 1
+
+    def _decided(self, key: str) -> bool:
+        """True when the second model decided ``key`` (a phrase, with its path complete)."""
+        return (self.state[key].get("decided") or {}).get("join") is not None
+
+    def _row_join(self, key: str) -> Optional[dict]:
+        """The join the row follows: the second model's when it decided the phrase, else the first model's
+        (``state["join"]``, which the opinions and the tripwire compare); then an alignment-sweep row's roles
+        outcome taken to trait (``split.reroute_roles``).  None before wave 3."""
+        st = self.state[key]
+        j = (st.get("decided") or {}).get("join") or st.get("join")
+        return None if j is None else dict(split.reroute_roles(j, self._generators(key))[0])
+
+    def _rerouted(self, key: str) -> Optional[dict]:
+        """The ``rerouted`` record of ``key`` (``split.reroute_roles``), or None."""
+        st = self.state[key]
+        j = (st.get("decided") or {}).get("join") or st.get("join")
+        return None if j is None else split.reroute_roles(j, self._generators(key))[1]
+
+    def _decided_block(self, key: str) -> Optional[dict]:
+        """The row's ``decided_by``: the rule, the model that decided (None without one), its outcome (before
+        any reroute), whether it agrees with the first model's, the first model's outcome and readings, and
+        the error when its path failed (the first model's outcome then stands)."""
+        d = self.state[key].get("decided")
+        if not d:
+            return None
+        out = {k: v for k, v in d.items() if k != "join"}
+        out["agree_first"] = None if d.get("outcome") is None else d["outcome"] == (d.get("first") or {}).get("outcome")
+        return out
+
+    def phrase_summary(self) -> dict:
+        """The summary's ``phrases`` section: the phrases in the probe band not sent to the probe, the
+        phrases the second model decided (by its outcome) or could not, and the alignment-sweep rows taken off
+        the roles list."""
+        skipped = sorted(r.label for r in self.results.values()
+                         if ((r.freq or {}).get("define_probe") or {}).get("skipped") == "phrase")
+        by: dict[str, list[str]] = {}
+        failed, no_model = [], []
+        for k in self.phrase_keys:
+            d = self.state[k].get("decided") or {}
+            if d.get("model") is None:
+                no_model.append(self.state[k]["label"])
+            elif d.get("outcome") is None:
+                failed.append(self.state[k]["label"])
+            else:
+                by.setdefault(d["outcome"], []).append(self.state[k]["label"])
+        rer = sorted(self.state[k]["label"] for k in self.state if self.state[k].get("join") and self._rerouted(k))
+        return {"routing": dict(split.PHRASE_ROUTING),
+                "probe_skipped": {"n": len(skipped), "labels": skipped},
+                "decided_by_second_model": {"rule": split.PHRASE_RULE, "n": len(self.phrase_keys),
+                                            "outcomes": {o: len(v) for o, v in sorted(by.items())},
+                                            "labels": {o: sorted(v) for o, v in sorted(by.items())},
+                                            "failed": sorted(failed), "no_second_model": sorted(no_model)},
+                "rerouted": {"rule": split.ROLES_TO_REVIEW_RULE, "n": len(rer), "labels": rer}}
 
     def select_second_opinion(self, keys: Sequence[str]) -> list[str]:
         """A seeded ``second_opinion_frac`` of the words that reached step 1, plus every word with the note
@@ -782,7 +941,7 @@ class SplitRunner(FilterRunner):
                                   "to_sense": None, "same_sense": None, "so_same_sense": None, "to_same_sense": None,
                                   "comparison": {}, "gloss": None, "gloss_model": None, "alignment": None,
                                   "descriptors": None, "join": None, "so_join": None, "to_join": None, "probe": None,
-                                  "errors": {}, "cut": None, "vote": None}
+                                  "errors": {}, "cut": None, "vote": None, "decided": None}
             for r in range(1, self.readings):   # verdict readings 2 to N
                 self.state[it.key].update({state_prefix("first", r) + "sense": None,
                                            state_prefix("first", r) + "same_sense": None})
@@ -795,9 +954,15 @@ class SplitRunner(FilterRunner):
         return [self.results[it.key] for it in items]
 
     async def _run(self, todo: list[FilterItem]) -> None:
-        # wave 0: the definition probe, one word per call
+        # wave 0: the definition probe, one word per call; a phrase is never sent (split.is_phrase: the probe
+        # asks whether a rare word is a real English word, and cut phrases for not being one word)
         if self.probe:
             band = [it for it in todo if self.results[it.key].freq.get("probe_band")]
+            for it in band:
+                if split.is_phrase(it.label):
+                    self.results[it.key].freq["define_probe"] = split.probe_skipped_record()
+                    self.stats["probe_skipped_phrase"] += 1
+            band = [it for it in band if not split.is_phrase(it.label)]
             calls = [self._make("probe", it.key, model=self.model,
                                 user=fr.build_probe_prompt([{"id": 1, "label": it.label}], label_form=self.label_form))
                      for it in band]
@@ -833,19 +998,24 @@ class SplitRunner(FilterRunner):
         self.stats["second_opinion_n"] = len(self.second_keys)
         self.stats["third_opinion_n"] = len(self.third_keys)
         so = set(self.second_keys)
-        # wave 4: gloss (outcome trait), and the opinions' step 1
+        # waves 3b and 3c: the second model decides the phrases every reading turned away by the frames
+        await self._run_phrase_decisions(ready)
+        decided = set(self.decide_keys)   # their second-model path is under way: waves 4 and 5 skip it
+        # wave 4: gloss (outcome trait, by the row's join: the second model's for a phrase it decided, and an
+        # alignment-sweep roles row taken to trait), and the opinions' step 1
         gloss_calls = []
         for k in ready:
-            j = self.state[k]["join"]
+            j = self._row_join(k)
             if j["outcome"] != "trait":
                 continue
-            m = self.second_model if k in so else self.model
+            m = self.second_model if (k in so or self._decided(k)) else self.model
             gloss_calls.append(self._make("gloss", k, model=m, index=j["accepted_index"],
                                           user=split.payload("gloss", label=s_label(self.state[k]),
                                                              label_form=self.label_form, reading=j["accepted"])))
         op_sense = [self._make("sense", k, model=model, role=role,
                                user=split.payload("sense", label=s_label(self.state[k]), label_form=self.label_form))
-                    for role, model, keys in self._opinions() for k in keys]
+                    for role, model, keys in self._opinions() for k in keys
+                    if not (role == "second" and k in decided)]
         res = await self._wave("w4_gloss", gloss_calls + op_sense)
         for c in gloss_calls:
             if id(c) in res:
@@ -858,7 +1028,8 @@ class SplitRunner(FilterRunner):
         # adds a note and never changes an outcome), so the tripwire is checked here
         op_checks = []
         for role, model, keys in self._opinions():
-            op_checks += self._check_calls([k for k in keys if self._sense(k, role)], role=role, model=model)
+            op_checks += self._check_calls([k for k in keys if self._sense(k, role)
+                                            and not (role == "second" and k in decided)], role=role, model=model)
         res = await self._wave("w5_opinion_checks", op_checks)
         self._apply_checks(op_checks, res)
         self._check_stop()
@@ -875,6 +1046,9 @@ class SplitRunner(FilterRunner):
         op_same = []
         for role, model, keys in self._opinions():
             op_same += self._wave3_calls([k for k in keys if self._complete(k, role) is None], role=role, model=model)
+        # the decided phrases' same-sense check on the second model (one in the sample too is asked above)
+        op_same += self._wave3_calls([k for k in self.decide_keys if k not in so and self._complete(k, "second") is None],
+                                     role="second", model=self.second_model, purpose=PHRASE_PURPOSE)
         self._tripwire_gate(last + op_same)
         res = await self._wave(LAST_WAVE, last + op_same)
         for c in last:
@@ -1026,15 +1200,20 @@ class SplitRunner(FilterRunner):
                 res.meta["split_partial"] = _partial(st)
                 continue
             g = st.get("gloss") or {}
-            p = state_prefix("first", self._winner(it.key))   # the winning verdict reading's answers
+            if self._decided(it.key):   # a phrase the second model decided: its answers are the row's
+                sense, same, comparison = st["so_sense"], st.get("so_same_sense"), None
+            else:
+                p = state_prefix("first", self._winner(it.key))   # the winning verdict reading's answers
+                sense, same, comparison = st[p + "sense"], st.get(p + "same_sense"), self._comparison_block(it.key)
             block, gloss, holding, et = split.to_filter_block(
-                sense=st[p + "sense"], j=j, model=self.model, batch_id=self.batch_id, now=now,
-                step_versions=self.step_versions, prompt_sha256=self.prompt_sha, same_sense=st.get(p + "same_sense"),
-                comparison=self._comparison_block(it.key), gloss_model=st.get("gloss_model"),
+                sense=sense, j=self._row_join(it.key), model=self.model, batch_id=self.batch_id, now=now,
+                step_versions=self.step_versions, prompt_sha256=self.prompt_sha, same_sense=same,
+                comparison=comparison, gloss_model=st.get("gloss_model"),
                 alignment=st.get("alignment") if "error" not in (st.get("alignment") or {}) else None,
                 descriptors=st.get("descriptors") if "error" not in (st.get("descriptors") or {}) else None,
                 second_opinion=self._second_block(it.key), gloss=g.get("gloss"),
-                third_opinion=self._opinion_block(it.key, "third"))
+                third_opinion=self._opinion_block(it.key, "third"),
+                decided_by=self._decided_block(it.key), rerouted=self._rerouted(it.key))
             errs = {k: (st.get(k) or {}).get("error") for k in ("gloss", "alignment", "descriptors")
                     if (st.get(k) or {}).get("error")}
             if errs:
@@ -1122,7 +1301,7 @@ def log_tripwire(tw: Mapping, log: logging.Logger, *, label: str) -> None:
 def _partial(st: Mapping) -> dict:
     """What a row has so far, for ``meta["split_partial"]``."""
     keep = ("sense", "same_sense", "gloss", "gloss_model", "alignment", "descriptors", "join", "so_sense",
-            "so_same_sense", "so_join", "to_sense", "to_same_sense", "to_join", "errors", "failed")
+            "so_same_sense", "so_join", "to_sense", "to_same_sense", "to_join", "errors", "failed", "decided")
     keep += tuple(sorted(k for k in st if re.match(r"^r\d+_(sense|same_sense)$", k)))   # verdict readings 2 to N
     out = {k: st.get(k) for k in keep if st.get(k)}
     if st.get("vote") and len(st["vote"]["outcomes"]) > 1:   # a vote over several readings
