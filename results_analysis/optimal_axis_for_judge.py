@@ -66,7 +66,9 @@ from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR, build_augmented_whitening_pool, load_vector,
 )
-from results_analysis.canonical_angles.whitening import fit_whitening
+from results_analysis.canonical_angles.whitening import (
+    OPTIMAL_AXIS_SOFT_K, fit_whitening,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -97,7 +99,9 @@ DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
                   # below produces a distinct on-disk dir without callers
                   # having to remember a manual labelling convention.
 DEFAULT_LAYER = 25
-DEFAULT_WHITENING = "soft_K=3"
+# K=3, not the project's DEFAULT_SOFT_K=2: every recorded run of this script
+# used 3 (walk-through D6, 2026-10-12); see whitening.OPTIMAL_AXIS_SOFT_K.
+DEFAULT_WHITENING = f"soft_K={OPTIMAL_AXIS_SOFT_K}"
 DEFAULT_OUTPUT_BASE = Path("roger/optimal_axis")
 
 
