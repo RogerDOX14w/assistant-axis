@@ -112,8 +112,12 @@ from assistant_axis import (
     response_subdir,
     suptitle_with_specs,
 )
-from assistant_axis.judge_loaders import migrate_v1_static_scores
+from assistant_axis.judge_loaders import (
+    load_response_scores,
+    migrate_v1_static_scores,
+)
 from assistant_axis.judge_score_combine import (
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,
     DEFAULT_RESPONSE_DI_WEIGHT,
     PRIMARY_AXIS_SAMPLE_WEIGHT,
     add_di_weights_arg,
@@ -281,6 +285,16 @@ def main() -> int:
              "matches the K sweep's augmented pool semantically and "
              "the existing shear_l_vs_k_comparison default.",
     )
+    p.add_argument(
+        "--response_source", default="gpt_only",
+        choices=("gpt_only", "blend"),
+        help="Response-mode score source: ``gpt_only`` (the GPT B=7 "
+             "mean, the basis of the May 2026 sweeps and of the L=3 "
+             "decision; default, so recorded outputs are unchanged) or "
+             "``blend`` (the GPT+Haiku ensemble at "
+             "DEFAULT_GPT_HAIKU_Q9_WEIGHT on the GPT∩Haiku intersection, "
+             "as rho_by_layer uses since 2026-05-12).  ``blend`` adds a "
+             "``_blend`` token to the default output names.")
     add_di_weights_arg(p)
     args = p.parse_args()
 
@@ -296,10 +310,11 @@ def main() -> int:
     data_dir = Path(args.data_dir).resolve()
     slot = int(args.slot)
     cohort = cohort_from_pairs(args.pairs)
+    source_token = "_blend" if args.response_source == "blend" else ""
     if args.sweep is None:
-        args.sweep = f"shear_l_sweep_{cohort}_slot{slot}.json"
+        args.sweep = f"shear_l_sweep_{cohort}{source_token}_slot{slot}.json"
     if args.plot is None:
-        args.plot = f"rho_vs_shear_L_{cohort}_slot{slot}.png"
+        args.plot = f"rho_vs_shear_L_{cohort}{source_token}_slot{slot}.png"
 
     inputs: list[InputSpec] = [
         current_data_subtree_input(
@@ -373,19 +388,41 @@ def main() -> int:
         desc_inst = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                                  weights=di_weights)
 
-        # GPT response scores merged from traits + roles cohorts.
         responses: dict[str, float] = {}
-        for mode in ("traits", "roles"):
-            sub = response_subdir("gpt", mode)
-            fp = axis_dir / sub / "scores_responses.json"
-            if not fp.exists():
-                continue
-            payload, _, _ = load_and_register(
-                fp, dep_key=f"judge_{axis_id}_responses_{mode}",
-                inputs=inputs, policy="warn")
-            for n, info in payload.items():
-                if isinstance(info, dict) and info.get("mean_score") is not None:
-                    responses[entity_id(n, mode)] = info["mean_score"]
+        if args.response_source == "gpt_only":
+            # GPT response scores merged from traits + roles cohorts.
+            for mode in ("traits", "roles"):
+                sub = response_subdir("gpt", mode)
+                fp = axis_dir / sub / "scores_responses.json"
+                if not fp.exists():
+                    continue
+                payload, _, _ = load_and_register(
+                    fp, dep_key=f"judge_{axis_id}_responses_{mode}",
+                    inputs=inputs, policy="warn")
+                for n, info in payload.items():
+                    if isinstance(info, dict) and info.get("mean_score") is not None:
+                        responses[entity_id(n, mode)] = info["mean_score"]
+        else:
+            # GPT + Haiku ensemble on the GPT∩Haiku intersection, the
+            # same per-entity blend as rho_by_layer (2026-10-12; the
+            # loader does the per-entity B fallback and registers the
+            # cohort files it used).
+            w_gpt = DEFAULT_GPT_HAIKU_Q9_WEIGHT
+            gpt_resp: dict[str, float] = {}
+            haiku_resp: dict[str, float] = {}
+            for mode in ("traits", "roles"):
+                for judge, dest in (("gpt", gpt_resp), ("haiku", haiku_resp)):
+                    scores_by_name, _src = load_response_scores(
+                        axis=axis_id, kind=mode, judge=judge, rubric="v2",
+                        experiments_root=experiment_dir,
+                        inputs=inputs, policy="warn",
+                    )
+                    for n, info in scores_by_name.items():
+                        ms = info.get("mean_score") if isinstance(info, dict) else None
+                        if ms is not None:
+                            dest[entity_id(n, mode)] = float(ms)
+            for n in set(gpt_resp) & set(haiku_resp):
+                responses[n] = w_gpt * gpt_resp[n] + (1.0 - w_gpt) * haiku_resp[n]
 
         # --- Projections at each L ---
         axis_unit = axis_direction(data_dir, pos, neg, slot=slot,
@@ -421,18 +458,26 @@ def main() -> int:
     envelope = json_metadata(
         records,
         inputs=inputs,
-        title=f"shear_l_sweep slot={slot} pairs={args.pairs}")
+        title=f"shear_l_sweep slot={slot} pairs={args.pairs} "
+              f"responses={args.response_source}")
     json.dump(envelope, open(sweep_path, "w"), indent=2)
     print(f"\nWrote {len(records)} records to {sweep_path}")
 
     # --- Plot ---
     pair_keys = [(it["pos"], it["neg"]) for it in pairs]
+    # Two series per axis plus the three cohort means: at the 61-axis
+    # di cohort a one-column legend is taller than the axes and runs
+    # into the title block, so past ~30 axes the legend hangs from the
+    # axes' top in two columns and the figure is widened so the axes
+    # and the spec line keep their room (2026-10-12).
+    n_legend = 2 * len(pair_keys) + 3
+    big_legend = n_legend > 60
     axis_colors = plt.cm.tab20(np.linspace(0, 1, max(20, len(pair_keys))))
 
     # Taller-than-wide aspect ratio (~3:4) gives the dense
     # per-axis stack of curves more vertical room to discriminate
     # at similar-ρ axes; mirrors :mod:`results_analysis.whitening_k_sweep`.
-    fig, ax = plt.subplots(figsize=(11, 14))
+    fig, ax = plt.subplots(figsize=(20 if big_legend else 11, 14))
     # log(L+1) x-positions: same convention as the K sweep, so the
     # two PNGs are visually aligned and the parabolic-in-log(L+1)
     # shape that the K sweep also shows reads directly.
@@ -471,7 +516,9 @@ def main() -> int:
                   "pairs orthogonalised)")
     ax.set_ylabel(f"Spearman ρ (judge scores vs. projection, slot={slot})")
     title_line = f"ρ vs shear L across {len(pair_keys)} axes"
-    spec_line = (f"solid = GPT responses; "
+    responses_label = ("GPT responses" if args.response_source == "gpt_only"
+                       else f"GPT+Haiku responses (w_gpt={DEFAULT_GPT_HAIKU_Q9_WEIGHT:.3f})")
+    spec_line = (f"solid = {responses_label}; "
                  f"dotted = desc+inst (GPT+Sonnet averaged); "
                  f"CA subspaces = {args.ca_kind} "
                  f"(L_max = {n_pairs_max}); "
@@ -479,8 +526,9 @@ def main() -> int:
     _, top_rect = suptitle_with_specs(fig, title_line, spec_line)
     ax.axhline(0, color="grey", lw=0.5)
     ax.grid(alpha=0.3)
-    ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=7,
-              ncol=1)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0),
+              fontsize=6 if big_legend else 7,
+              ncol=2 if big_legend else 1)
     plt.tight_layout(rect=(0, 0, 1, top_rect))
     plot_path = experiment_dir / args.plot
     plt.savefig(plot_path, dpi=150, bbox_inches="tight",

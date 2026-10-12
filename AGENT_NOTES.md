@@ -4024,7 +4024,14 @@ were bumped from `L=2` / `"soft_shear=2"` on May 11 2026 after the
 cohort-mean blended-curve overlay
 (`results_analysis.shear_l_sweep` + `judge_score_combine.cohort_mean_curves`,
 0.80·rs + 0.20·di per axis, 5x cross-axis weight on primary axes).
-Per-axis paired t-tests over 35 axes show:
+Per-axis paired t-tests over 35 axes (on the **desc+inst** series,
+GPT+Sonnet 4-way mean — the response series covered only 12 of the
+35 axes then; clarified 2026-10-12, when the table below was
+reproduced exactly from the desc+inst records and not from any
+response series, so the decision does not depend on the response
+source; under today's GPT+Haiku blend the 33 response axes show the
+same shape: slot 6 and 7 L=3→L=4 cliffs at p ≤ 0.002, slot 3 tied)
+show:
 
 | slot | L=1 vs L=2 | L=1 vs L=3 | L=3 vs L=4 |
 |---|---|---|---|
