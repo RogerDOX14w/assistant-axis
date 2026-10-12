@@ -35,6 +35,33 @@ mean vector.  So replacing `Gemma` is not expected to change anything measurable
 are untested; and the population that matters is the 10% held at level 2, whose boundary with level 3 is the
 rubric's real decision.
 
+## 1b. Where the rubric does fail: the AI-persona roles (Roger's question, 2026-10-13)
+
+The rubric's primary test, "identifies as itself (an AI assistant …)", is wrong-footed by a role that *is* an AI.
+On the May tree:
+
+| role | 0 | 1 | 2 | **3** | responses in the vector |
+|---|---|---|---|---|---|
+| all 280 roles | 1.1% | 8.4% | 9.9% | **80.5%** | ~400 of 500 |
+| [aligned_artificial_intelligence](../../data/roles/instructions/instrumentally_aligned_ai.json) (renamed `instrumentally_aligned_ai` in September) | 0.2% | 27.0% | 39.0% | **33.8%** | **169** of 500 |
+| [robot](../../data/roles/instructions/robot.json) | 0.2% | 21.4% | 19.8% | **58.6%** | 293 |
+| [cyborg](../../data/roles/instructions/cyborg.json) | 0.0% | 2.4% | 16.8% | **80.8%** | 404 |
+| [assistant](../../data/roles/instructions/assistant.json) | 0.0% | 0.4% | 9.6% | **90.0%** | 450 |
+| [paperclip_maximizer](../../data/roles/instructions/paperclip_maximizer.json) | 1.2% | 4.0% | 5.4% | **89.4%** | 447 |
+
+`paperclip_maximizer` is fine: the judge reads it as a persona with its own identity.  `aligned_artificial_intelligence`
+is not: two thirds of its responses are held at levels 1–2, because an aligned AI assistant that says it is an AI
+assistant reads to the judge as "identifies as itself", and its vector is the mean of the third that did not — a
+subset selected on exactly the behaviour the role is about.  `robot` is half-way.  This is the real false-negative
+population: 40–65% of the responses of the AI-persona roles, against five in 112,769 for the model-name artefact.  It
+also bears on the pair axis `aligned_artificial_intelligence_vs_paperclip_maximizer` (in the di cohort), whose
+aligned pole is built from 169 selected responses, and on `instrumentally_aligned_ai` in October.
+
+So the experiment gets an arm for it: **A7 — role-aware identity wording**: levels 0–2 say "identifies as the
+underlying assistant rather than as the role" (or, for a role whose description says it is an AI, the judge is told
+that identifying as an AI is in role), with the AI-persona roles over-sampled so the arm is read on the roles it is
+for.  A7 is the arm most likely to move a vector.
+
 ## 2. The experiment
 
 Run on the pod, after the October extraction's steps 1–3 have produced responses and scores for the roles (so
@@ -51,8 +78,9 @@ in the judging notes):
 - A4 — the level-2 example rendered with the role's name.
 - A5 — A1 + A3 together (the review's proposal).
 - A6 — level 0's refusal clause removed (a scoring change; included only to see what it does).
+- A7 — role-aware identity wording for AI-persona roles (§ 1b).
 
-**Sample**: 60 roles stratified by their May level-2 share (the 20 most-held, 20 median, 20 least), all 500
+**Sample**: 60 roles stratified by their May level-2 share (the 20 most-held — which brings in the AI-persona roles of § 1b — 20 median, 20 least), all 500
 responses each, every arm on the same responses.  60 × 500 = 30,000 responses per arm; eight arms (A0 twice) =
 240,000 judge calls, ≈ $50 at batch rates — over the $20 line, so the launch is confirmed with the parameters
 quoted; or 30 roles for ≈ $25.
