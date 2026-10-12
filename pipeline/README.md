@@ -42,7 +42,7 @@ cd pipeline
 - **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir`, `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
 - **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.
 - **A failing step stops the pipeline**: step 1; step 2 or step 3 (before step 4, whether they ran in parallel or serially); step 4 (before step 5).  Running the same command again skips what is finished.
-- **Post-pipeline scan** (on unless `--no-scan`): [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Its exit status does not change the pipeline's; exit 3 (re-run candidates or `missing_activation`) is reported as a warning naming the rerun lists.
+- **Scan before step 5** (on unless `--no-scan`): after step 4, [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Exit 3 (re-run candidates or `missing_activation`) **stops the pipeline before step 5**, naming the rerun lists, so no axis is built from a partial set (Roger, 2026-10-12: a stop, since a warning is easy to miss); any other non-zero scanner exit stops it too.  Fix the candidates (`4_vectors.py --overwrite <rerun list>`, step 2 first for `missing_activation`) and run the same command again.
 - The run's log is `<output_dir>/pipeline_<timestamp>.log`; the warnings and errors in it are listed at the end.
 
 ## Running the steps separately
@@ -321,7 +321,7 @@ The re-run candidates are: `mysterious`, `corrupt_or_truncated_activation`,
 `corrupt_vector`, `ok_zero_size`; they make up `missing_vectors_rerun.txt`.
 The scanner exits 3 when it finds any of them or a `missing_activation`
 entity (0 when nothing needs attention, 1 when no scan target is found, 2 on
-argument errors); `run_pipeline.sh` reports exit 3 as a warning.  The
+argument errors); `run_pipeline.sh` runs the scan between step 4 and step 5 and stops on exit 3 (since 2026-10-12; a warning before).  The
 candidates come from two upstream failure modes:
 
 - **Transient NFS short-read at step-4 read time** — pre-retry step 4

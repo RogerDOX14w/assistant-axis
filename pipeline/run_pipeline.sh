@@ -30,20 +30,22 @@
 #   ./run_pipeline.sh --types r_combinations t_combinations roles traits
 #   ./run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   ./run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
-#   ./run_pipeline.sh --no-scan                       # skip post-pipeline audit
+#   ./run_pipeline.sh --no-scan                       # skip the scan before step 5
 #
 # A failing step stops the pipeline: steps 1 to 3 as before, and step 4 since
 # 2026-10-12 (4_vectors.py exits 1 when an activation, scores or vector file
 # cannot be read or written), so no axis is computed from a partial set of
 # vectors.  A rerun skips everything already done.
 #
-# Post-pipeline scan (default ON): after step 5, runs
+# Scan before step 5 (default ON): after step 4, runs
 # pipeline/scan_missing_vectors.py to audit every (activation, vector) pair
 # and flag any corrupt-on-write activations, missing scores, below-min-count
-# entities, or unloadable vectors.  Cache-backed so re-scans are cheap.
-# Pass --no-scan to skip (e.g. when you want to inspect intermediate state
-# yourself, or when the pipeline is part of a larger automated job that
-# runs the scanner separately).
+# entities, or unloadable vectors.  Cache-backed so re-scans are cheap.  Re-run
+# candidates (scanner exit 3) STOP the pipeline before step 5, so no axis is
+# built from a partial set (Roger, 2026-10-12: a stop, not a warning, which is
+# easy to miss).  Pass --no-scan to skip (e.g. when you want to inspect
+# intermediate state yourself, or when the pipeline is part of a larger
+# automated job that runs the scanner separately).
 #
 # Step 2/3 parallelism (default ON): step 2 (GPU-bound activation extraction)
 # and step 3 (judge-API-bound response scoring) share no resources beyond
@@ -138,8 +140,8 @@ GPU_BUSY_THRESHOLD_MIB=2048
 STEPS23_PARALLEL=true
 JUDGE_ARGS=()                   # --judge-realtime adds --no_batch for step 3
 
-# Run pipeline/scan_missing_vectors.py at the end of the pipeline to verify
-# every activation produced a healthy vector.  Cheap when nothing went wrong
+# Run pipeline/scan_missing_vectors.py between step 4 and step 5 to verify
+# every activation produced a healthy vector; re-run candidates stop the run.  Cheap when nothing went wrong
 # (cache hits dominate -- a re-scan after a clean run is typically a few
 # minutes), genuinely useful when something silently failed during step 2 or
 # step 4 (corrupt-on-write activation, ZFS/NFS short-read, missing scores
@@ -236,7 +238,7 @@ echo "Output: $OUTPUT_DIR"
 echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
 echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
-echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (post-pipeline audit; --no-scan to skip)" || echo "no (--no-scan)")"
+echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (before step 5; re-run candidates stop the run; --no-scan to skip)" || echo "no (--no-scan)")"
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
@@ -463,6 +465,62 @@ step_failed() {
     exit 1
 }
 
+# ---- Helper: the scan between step 4 and step 5 ---------------------------
+# Walks every activation/vector pair under $OUTPUT_DIR and classifies any
+# misses or corruptions (corrupt-on-write activation .pt, missing scores,
+# below-min-count, etc).  The scanner caches its torch.load outcomes at
+# $OUTPUT_DIR/scan_cache.json so this is a fast no-op on the second run
+# (cache hits skip the expensive deep_load).  Output:
+#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_audit.json (per-target)
+#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_rerun.txt (re-run candidates)
+# Exit 3 means it found re-run candidates (or an entity with responses but no
+# activation): the pipeline stops before step 5, so that no axis is built
+# from a partial set.  Until 2026-10-12 the scan ran after step 5 and exit 3
+# was a warning (and until that morning exit 0: 870 candidates on 2026-05-03
+# went unremarked).  Any other non-zero exit stops the run too: an unknown
+# scan state is not a reason to build the axis.  Skip with --no-scan.
+scan_before_axis() {
+    [ "$RUN_SCAN" = "true" ] || return 0
+    echo ""
+    echo "=== Scan before step 5 ==="
+    local rc=0
+    case "$MODE" in
+        roger)
+            # --root mode: scanner auto-discovers entity-type subdirs and
+            # every vectors* sibling under $OUTPUT_DIR.  Use the same
+            # MIN_COUNT the pipeline used so below_min_count classifications
+            # match what step 4 would actually skip.
+            uv run scan_missing_vectors.py \
+                --root        "$OUTPUT_DIR" \
+                --min_count   "$MIN_COUNT" \
+                --deep_load \
+                || rc=$?
+            ;;
+        christina)
+            # Single-pair mode: christina mode writes one entity-type tree
+            # directly under $OUTPUT_DIR, no entity-type subdir layer.
+            uv run scan_missing_vectors.py \
+                --activations_dir "$OUTPUT_DIR/activations" \
+                --vectors_dir     "$OUTPUT_DIR/vectors" \
+                --scores_dir      "$OUTPUT_DIR/scores" \
+                --min_count       "$CHRISTINA_MIN_COUNT" \
+                --deep_load \
+                --rerun_list      "$OUTPUT_DIR/vectors/missing_vectors_rerun.txt" \
+                || rc=$?
+            ;;
+    esac
+    if [ "$rc" -eq 3 ]; then
+        echo "[scan] the scan found re-run candidates (exit 3): see the suspect lists above"
+        echo "[scan] and each vectors dir's missing_vectors_rerun.txt; recompute with"
+        echo "[scan] 4_vectors.py --overwrite <that file>.  Entities reported"
+        echo "[scan] missing_activation need step 2 first.  Then run this command again."
+        step_failed "Scan" "re-run candidates found; step 5 not run, so no axis is built from a partial set"
+    elif [ "$rc" -ne 0 ]; then
+        step_failed "Scan" "scanner exited $rc; rerun it by hand for details, or pass --no-scan"
+    fi
+    echo ""
+}
+
 # ---- Helper: symlink default files into a type's subdir -------------------
 # Usage: symlink_default <subdir_name> <file_extension>
 # e.g.  symlink_default responses jsonl
@@ -559,6 +617,8 @@ if [ "$MODE" = "christina" ]; then
         --output_dir "$OUTPUT_DIR/vectors" \
         --min_count "$CHRISTINA_MIN_COUNT" \
         || step_failed "Step 4" "4_vectors.py exited non-zero; see its [ERROR] lines above"
+
+    scan_before_axis
 
     echo ""
     echo "=== Step 5: Computing axis ==="
@@ -790,6 +850,8 @@ else
     done
     echo ""
 
+    scan_before_axis
+
     # -- Step 5: Compute axis -------------------------------------------------
     echo "=== Step 5: Computing axis ==="
     for type in $DEDUP_TYPES; do
@@ -808,60 +870,6 @@ else
         echo "  $type axis: $OUTPUT_DIR/$type/axis.pt"
     done
 
-fi
-
-# ---- Post-pipeline scan ---------------------------------------------------
-# Walks every activation/vector pair under $OUTPUT_DIR and classifies any
-# misses or corruptions (corrupt-on-write activation .pt, missing scores,
-# below-min-count, etc).  The scanner caches its torch.load outcomes at
-# $OUTPUT_DIR/scan_cache.json so this is a fast no-op on the second run
-# (cache hits skip the expensive deep_load).  Output:
-#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_audit.json (per-target)
-#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_rerun.txt (re-run candidates)
-# A non-zero exit from the scanner is logged but does not fail the pipeline:
-# the pipeline itself has already succeeded by this point, the scan is just
-# a verification pass.  Exit 3 means it found re-run candidates (until
-# 2026-10-12 it exited 0 then, so 870 of them on 2026-05-03 went unremarked).
-# Skip with --no-scan.
-scan_warning() {
-    local rc=$1
-    if [ "$rc" -eq 3 ]; then
-        echo "[scan] WARNING: the scan found re-run candidates (exit 3): see the suspect"
-        echo "[scan]          lists above and each vectors dir's missing_vectors_rerun.txt;"
-        echo "[scan]          recompute with 4_vectors.py --overwrite <that file>.  Entities"
-        echo "[scan]          reported missing_activation need step 2 first."
-    else
-        echo "[scan] WARNING: scanner exited $rc (pipeline itself succeeded; rerun the scan manually for details)"
-    fi
-}
-if [ "$RUN_SCAN" = "true" ]; then
-    echo ""
-    echo "=== Post-pipeline scan ==="
-    case "$MODE" in
-        roger)
-            # --root mode: scanner auto-discovers entity-type subdirs and
-            # every vectors* sibling under $OUTPUT_DIR.  Use the same
-            # MIN_COUNT the pipeline used so below_min_count classifications
-            # match what step 4 would actually skip.
-            uv run scan_missing_vectors.py \
-                --root        "$OUTPUT_DIR" \
-                --min_count   "$MIN_COUNT" \
-                --deep_load \
-                || scan_warning $?
-            ;;
-        christina)
-            # Single-pair mode: christina mode writes one entity-type tree
-            # directly under $OUTPUT_DIR, no entity-type subdir layer.
-            uv run scan_missing_vectors.py \
-                --activations_dir "$OUTPUT_DIR/activations" \
-                --vectors_dir     "$OUTPUT_DIR/vectors" \
-                --scores_dir      "$OUTPUT_DIR/scores" \
-                --min_count       "$CHRISTINA_MIN_COUNT" \
-                --deep_load \
-                --rerun_list      "$OUTPUT_DIR/vectors/missing_vectors_rerun.txt" \
-                || scan_warning $?
-            ;;
-    esac
 fi
 
 echo "Log:  $LOG_FILE"

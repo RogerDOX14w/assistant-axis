@@ -156,11 +156,38 @@ def test_christina_mode_gives_step_4_and_the_scan_the_same_min_count(tmp_path):
     assert "--min_count 50" in scan[0]
 
 
-def test_scan_exit_3_is_reported_as_rerun_candidates(tmp_path):
+def test_scan_exit_3_stops_before_step_5(tmp_path):
+    """Re-run candidates stop the pipeline before the axis is built (Roger,
+    2026-10-12: a stop, not a warning, which is easy to miss)."""
     proc, calls = _run_full(tmp_path, "scan_missing_vectors.py", scan=True, fail_rc=3)
     assert any("scan_missing_vectors.py" in c for c in calls)
-    assert proc.returncode == 0          # the scan never fails the pipeline
+    assert proc.returncode == 1
     assert "the scan found re-run candidates (exit 3)" in proc.stdout
+    assert "Pipeline aborted: Scan failed" in proc.stdout
+    assert not any("5_axis.py" in c for c in calls)
+
+
+def test_scan_runs_between_step_4_and_step_5(tmp_path):
+    proc, calls = _run_full(tmp_path, None, scan=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    names = [next((n for n in ("4_vectors.py", "scan_missing_vectors.py", "5_axis.py") if n in c), None)
+             for c in calls]
+    names = [n for n in names if n]
+    assert names.index("4_vectors.py") < names.index("scan_missing_vectors.py") < names.index("5_axis.py")
+
+
+def test_any_other_scan_failure_also_stops(tmp_path):
+    proc, calls = _run_full(tmp_path, "scan_missing_vectors.py", scan=True, fail_rc=1)
+    assert proc.returncode == 1
+    assert "scanner exited 1" in proc.stdout
+    assert not any("5_axis.py" in c for c in calls)
+
+
+def test_no_scan_runs_step_5_without_a_scan(tmp_path):
+    proc, calls = _run_full(tmp_path, None, scan=False)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert not any("scan_missing_vectors.py" in c for c in calls)
+    assert any("5_axis.py" in c for c in calls)
 
 
 def test_end_of_run_summary_counts_step_4_errors(tmp_path):
