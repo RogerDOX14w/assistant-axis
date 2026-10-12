@@ -13,8 +13,10 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
         [--unchecked-only]
     uv run python data_analysis/gap_generation/roget_generate.py head-scope [--budget-usd 1] [--render IDS] [--force]
     uv run python data_analysis/gap_generation/roget_generate.py coverage [--head-scope F | --no-head-scope]
+        [--registry F | --no-registry]
     uv run python data_analysis/gap_generation/roget_generate.py harvest --run-id R [--every-nth K --offset J]
-        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--force] [--head-scope F | --no-head-scope]
+        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--wn-closure-depth 6] [--delta-from R0]
+        [--force] [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py submit --run-id R [--generator roget|wn_clusters]
 
 Every command takes ``--dry-run`` (prints what it would do; writes nothing, calls nothing).
@@ -71,14 +73,25 @@ Every command takes ``--dry-run`` (prints what it would do; writes nothing, call
   ``--render IDS`` prints the calls that hold those heads, as sent, and stops.
 * ``coverage``: ``roget_coverage.json`` and ``roget_coverage.md``.  No calls.  With the head-scope
   ratings (``--head-scope F``; default ``head_scope.json`` in ``--out`` when it exists; ``--no-head-scope``
-  ignores it) the heads rated 0 are reported apart as "not character".
+  ignores it) the heads rated 0 are reported apart as "not character".  With the registry (``--registry F``;
+  default ``registry.jsonl`` under ``--candidates-dir``, else the checkout's ``data/candidates/registry.jsonl``,
+  when it exists; ``--no-registry`` leaves it out) every head gets the word-level column of gate audit 2
+  (``coverage.add_word_level``): its would-be words under the harvest's per-head rules and those the registry
+  holds as trait-new (M1 trait, M3 new), with a section listing the heads not harvested that hold some.  The
+  column needs WordNet, as the harvest does.
 * ``harvest``: the run directory ``data/candidates/runs/roget/<R>/`` gets ``candidates.jsonl``
   (written before anything is submitted), ``pair_candidates.jsonl``, ``harvest_report.md`` and
-  ``harvest_counts.json``; ``--include-wn`` also writes ``data/candidates/runs/wn_clusters/<R>/``.
-  Prints the downstream (M1 and M3) estimate.  No calls.  ``--head-scope`` as for ``coverage``: the
-  heads rated 0 are skipped (drop reason ``not_character``).
+  ``harvest_counts.json`` (with the ``zipf_floor`` block: the Zipf floor defers to rule 1b since 2026-10-12,
+  ``harvest.ZIPF_FLOOR_RULE``); ``--include-wn`` also writes ``data/candidates/runs/wn_clusters/<R>/``
+  (``candidates.jsonl``, ``wn_items.jsonl`` and ``wn_counts.json``, the stream's drop counts), with the
+  trait-noun closure to ``--wn-closure-depth`` levels (default 6, ``wn_clusters.WN_CLOSURE_DEPTH``).
+  ``--delta-from R0`` keeps only the candidates run ``R0`` did not submit (by stem and head for Roget, by
+  stem for WordNet), so that a rule change reaches the registry as a run of its own.  Prints the downstream
+  (M1 and M3) estimate.  No calls.  ``--head-scope`` as for ``coverage``: the heads rated 0 are skipped
+  (drop reason ``not_character``).
 * ``submit``: ``start_run``, ``submit_candidates`` (idempotent), ``RunContext.finish`` (``run.json``,
-  ``usage.json``); prints the platform commands to run next.  Refuses without ``candidates.jsonl``.
+  ``usage.json``; the run's ``args`` carry the harvest config, the WordNet closure depth among it, and the
+  path of the counts file); prints the platform commands to run next.  Refuses without ``candidates.jsonl``.
 """
 from __future__ import annotations
 
@@ -87,6 +100,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
@@ -887,19 +901,67 @@ def unresolved_note(idx, pairs) -> str:
             f"head here.")
 
 
+def _registry_path(args) -> Optional[Path]:
+    """The registry the coverage report reads for its word-level column: ``--registry``, else
+    ``registry.jsonl`` under ``--candidates-dir`` (tests), else the checkout's; ``None`` with ``--no-registry``."""
+    if getattr(args, "no_registry", False):
+        return None
+    if getattr(args, "registry", None):
+        return Path(args.registry)
+    if getattr(args, "candidates_dir", None):
+        return Path(args.candidates_dir) / "registry.jsonl"
+    return paths.REGISTRY_PATH
+
+
+def _rel(p: Path) -> str:
+    try:
+        return str(Path(p).resolve().relative_to(_REPO_ROOT))
+    except ValueError:
+        return str(p)
+
+
+def add_word_level(rep, idx, args) -> Optional[Path]:
+    """The word-level column (``coverage.add_word_level``) from the registry; the registry's path when used."""
+    from assistant_axis.gapgen.registry import Registry
+    reg_path = _registry_path(args)
+    if reg_path is None:
+        return None
+    if not reg_path.exists():
+        print(f"note: no registry at {reg_path}: the coverage report has no word-level column")
+        return None
+    lex = _lexicon(args)
+    words = H.would_be_words(idx, [r.id for r in rep.rows], known_stems=known_stems(args), lex=lex)
+    folded = Registry(reg_path).fold()
+    status = C.registry_word_status(folded.values())
+    C.add_word_level(rep, words, status, source={"path": _rel(reg_path), "n_rows": len(folded)})
+    return reg_path
+
+
 def cmd_coverage(args) -> int:
     idx, pairs, lh = _load_all(args)
     hs = _head_scope(args)
     rep = C.coverage(idx, pairs, lh, ratings=hs.ratings if hs else None, scope_meta=hs.meta() if hs else None)
+    reg_used = add_word_level(rep, idx, args)
     nc = rep.summary["not_character"]
     print(json.dumps({k: rep.summary[k] for k in ("n_heads", "class_i_iii_added", "covered_partly_uncovered",
                                                   "by_gap_class", "opposed_pairs", "labels", "head_scope")}
                      | {"not_character": {k: v for k, v in nc.items() if k != "heads"}}, indent=1))
+    wl = rep.summary.get("word_level")
+    if wl:
+        print("word level:", json.dumps({k: v for k, v in wl.items() if k != "definition"}))
+        top = sorted((r for r in rep.rows if r.words and r.words["n_trait_new"]
+                      and (r.gap_class not in C.HARVEST_CLASSES or C.is_not_character(r))),
+                     key=lambda r: (-r.words["n_trait_new"], idx.position(r.id)))
+        print(f"heads not harvested that hold trait-new words: {len(top)}; the first 15:")
+        for r in top[:15]:
+            print(f"  {r.id} {r.title} ({r.gap_class}, rating {r.character}): {r.words['n_trait_new']} of "
+                  f"{r.words['n']}: {', '.join(r.words['trait_new'])}")
     out = Path(args.out)
     if args.dry_run:
         print(f"DRY-RUN: would write {out / 'roget_coverage.json'} and {out / 'roget_coverage.md'}")
         return 0
-    inputs = _coverage_inputs(out) + ([_input("head_scope", hs.path)] if hs else [])
+    inputs = (_coverage_inputs(out) + ([_input("head_scope", hs.path)] if hs else [])
+              + ([_input("registry", reg_used)] if reg_used else []))
     C.write_coverage(rep, out / "roget_coverage.json", out / "roget_coverage.md", index=idx, label_heads=lh,
                      inputs=inputs, unresolved_note=unresolved_note(idx, pairs))
     print(f"wrote {out / 'roget_coverage.json'}, {out / 'roget_coverage.md'}")
@@ -921,49 +983,107 @@ def cmd_harvest(args) -> int:
     rep = C.load_coverage(cov_path) if cov_path.exists() else C.coverage(idx, pairs, lh)
     cfg = H.HarvestConfig(per_head_cap=args.per_head_cap, pair_top=args.pair_top, max_words=args.max_words,
                           classes=tuple(args.classes), every_nth=args.every_nth, offset=args.offset,
-                          include_wn=args.include_wn)
+                          include_wn=args.include_wn, wn_closure_depth=args.wn_closure_depth)
     lex = _lexicon(args)
     known = known_stems(args)
     labels = {k: v.get("label") or k for k, v in lh.items()}
     hs = _head_scope(args)
+    prev_roget, prev_wn = _delta_keys(args)
     res = H.harvest(rep, idx, pairs, cfg=cfg, known_stems=known, run_id=args.run_id, lex=lex, label_of=labels,
-                    head_scope=hs.ratings if hs else None)
+                    head_scope=hs.ratings if hs else None, already_submitted=prev_roget, delta_from=args.delta_from)
     res.counts["head_scope"] = hs.meta() if hs else None
     res.config["head_scope"] = hs.meta()["path"] if hs else None
+    res.config["delta_from"] = args.delta_from
     print(json.dumps({k: v for k, v in res.counts.items() if k not in ("per_head", "head_ratings")}, indent=1))
     run = paths.run_dir(H.GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
-    wn_items, wn_cands = [], []
+    wn_items, wn_cands, wn_counts = [], [], None
     if cfg.include_wn:
-        from assistant_axis.gapgen.generators.roget import wn_clusters as W
-        recs = M.load_labels(Path(args.data_dir), Path(args.queue))
-        ants = W.harvest_wn_antonyms(recs, lex, known_stems=known)
-        clos = W.harvest_trait_closure(lex, known_stems=known | {normalize(it.surface) for it in ants},
-                                       max_depth=cfg.wn_closure_depth)
-        wn_items = ants + clos
-        wn_cands = H.wn_candidates(wn_items, run_id=args.run_id, every_nth=cfg.every_nth, offset=cfg.offset)
-        print(f"WordNet stream: {len(ants)} antonyms of partner-less labels, {len(clos)} trait-closure adjectives; "
-              f"{len(wn_cands)} candidates after --every-nth")
+        wn_items, wn_cands, wn_counts = harvest_wn(args, cfg, lex, known, prev_wn)
+        print("WordNet stream:", json.dumps(wn_counts, indent=1))
     if args.dry_run:
         print(f"DRY-RUN: would write {run}/candidates.jsonl ({len(res.candidates)} candidates)"
               + (f" and {paths.run_dir(H.WN_GENERATOR, args.run_id, candidates_dir=args.candidates_dir)}"
                  f"/candidates.jsonl ({len(wn_cands)})" if cfg.include_wn else ""))
         return 0
-    if (run / "run.json").exists():
-        raise SystemExit(f"{run} has a run.json: this run was submitted; use a new --run-id")
+    wrun = paths.run_dir(H.WN_GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
+    for d in [run] + ([wrun] if cfg.include_wn else []):
+        if (d / "run.json").exists():
+            raise SystemExit(f"{d} has a run.json: this run was submitted; use a new --run-id")
     if (run / "candidates.jsonl").exists() and not args.force:
         raise SystemExit(f"{run / 'candidates.jsonl'} exists: --force to overwrite (not yet submitted)")
     written = H.write_harvest(res, run, idx, run_id=args.run_id)
     print("wrote", ", ".join(str(p) for p in written.values()))
     if cfg.include_wn:
-        wrun = paths.run_dir(H.WN_GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
-        if (wrun / "run.json").exists():
-            raise SystemExit(f"{wrun} has a run.json: this run was submitted; use a new --run-id")
         H.write_candidates(wn_cands, wrun / "candidates.jsonl")
         import dataclasses
         (wrun / "wn_items.jsonl").write_text("".join(json.dumps(dataclasses.asdict(it), ensure_ascii=False) + "\n"
                                                      for it in wn_items), encoding="utf-8")
-        print(f"wrote {wrun / 'candidates.jsonl'} ({len(wn_cands)}), {wrun / 'wn_items.jsonl'} ({len(wn_items)})")
+        (wrun / WN_COUNTS).write_text(json.dumps(wn_counts, indent=1) + "\n", encoding="utf-8")
+        print(f"wrote {wrun / 'candidates.jsonl'} ({len(wn_cands)}), {wrun / 'wn_items.jsonl'} ({len(wn_items)}), "
+              f"{wrun / WN_COUNTS}")
     return 0
+
+
+WN_COUNTS = "wn_counts.json"
+
+
+def _delta_keys(args):
+    """``--delta-from R0``: the (stem, source_ref) keys of the Roget run R0's candidates and, with
+    ``--include-wn``, the stems of the WordNet run R0's; ``(None, None)`` without the flag."""
+    if not args.delta_from:
+        return None, None
+    paths.check_id(args.delta_from, "run_id")
+    out = []
+    for gen, need in ((H.GENERATOR, True), (H.WN_GENERATOR, args.include_wn)):
+        p = paths.run_dir(gen, args.delta_from, candidates_dir=args.candidates_dir) / "candidates.jsonl"
+        if not need:
+            out.append(None)
+            continue
+        if not p.exists():
+            raise SystemExit(f"--delta-from {args.delta_from}: {p} not found")
+        cands = H.read_candidates(p)
+        out.append({(normalize(c.surface), c.source_ref) for c in cands} if gen == H.GENERATOR
+                   else {normalize(c.surface) for c in cands})
+    return out[0], out[1]
+
+
+def harvest_wn(args, cfg, lex, known: set, prev_stems: Optional[set]):
+    """The WordNet stream (the antonym route, then the trait-noun closure to ``cfg.wn_closure_depth``), with its
+    drop counts (``wn_counts.json``); with ``prev_stems`` (``--delta-from``) only the words that run did not
+    submit.  ``(items, candidates, counts)``."""
+    from collections import Counter
+
+    from assistant_axis.gapgen.generators.roget import wn_clusters as W
+    recs = M.load_labels(Path(args.data_dir), Path(args.queue))
+    c_ant, c_clo = Counter(), Counter()
+    ants = W.harvest_wn_antonyms(recs, lex, known_stems=known, counts=c_ant)
+    clos = W.harvest_trait_closure(lex, known_stems=known, taken={normalize(it.surface) for it in ants},
+                                   max_depth=cfg.wn_closure_depth, counts=c_clo)
+    items = ants + clos
+    counts = {"config": {"wn_closure_depth": cfg.wn_closure_depth, "zipf_floor": cfg.zipf_floor,
+                         "root_synsets": list(W.TRAIT_ROOT_SYNSETS)},
+              "antonym_route": {"n_items": len(ants), "counts": dict(sorted(c_ant.items())),
+                                "rescued_items": dict(Counter(it.rescue for it in ants if it.rescue))},
+              "closure": {"n_items": len(clos), "counts": dict(sorted(c_clo.items())),
+                          "rescued_items": dict(Counter(it.rescue for it in clos if it.rescue)),
+                          "items_by_depth": {str(d): n for d, n in sorted(Counter(it.extra.get("depth")
+                                                                                  for it in clos).items())}},
+              "n_items": len(items), "delta": None}
+    if prev_stems is not None:
+        new = [it for it in items if normalize(it.surface) not in prev_stems]
+        counts["delta"] = {"from": args.delta_from, "n_harvested": len(items), "n_already_submitted": len(items) - len(new),
+                           "n_new": len(new), "new_by_route": dict(Counter(it.route for it in new)),
+                           "new_below_line": sorted(it.surface for it in new if it.rescue),
+                           "new_by_depth": {str(d): n for d, n in sorted(Counter(it.extra.get("depth")
+                                                                                 for it in new if it.route == "closure"
+                                                                                 ).items())}}
+        items = new
+    cands = H.wn_candidates(items, run_id=args.run_id, every_nth=cfg.every_nth, offset=cfg.offset)
+    counts["n_candidates"] = len(cands)
+    n = len(cands)
+    counts["downstream_estimate_usd"] = {"m1": round(n * H.M1_USD_PER_WORD, 2),
+                                         "m3_if_half_pass": round(n * 0.5 * H.M3_USD_PER_PASSING_WORD, 2)}
+    return items, cands, counts
 
 
 def normalize(s: str) -> str:
@@ -998,9 +1118,12 @@ def cmd_submit(args) -> int:
         rel = str(cpath)
     hc = run_d.parent.parent / H.GENERATOR / args.run_id / "harvest_counts.json"
     harvest_cfg = json.loads(hc.read_text())["config"] if hc.exists() else None
+    # the counts file of this generator's run: the Zipf floor's record (Roget) or the stream's drop counts (WordNet)
+    counts_file = hc if gen == H.GENERATOR else run_d / WN_COUNTS
     run = start_run(gen, args.run_id, args={"command": "roget_generate.py submit", "generator": gen,
                                             "run_id": args.run_id, "candidates": rel,
-                                            "harvest_config": harvest_cfg},
+                                            "harvest_config": harvest_cfg,
+                                            "counts": _rel(counts_file) if counts_file.exists() else None},
                     candidates_dir=args.candidates_dir)
     rep = submit_candidates(cands, registry_path=registry, run=run)
     # the harvest wrote candidates.jsonl, so record_candidates adds nothing: the first session counts
@@ -1113,6 +1236,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("coverage")
     _head_scope_flags(sp)
+    g = sp.add_mutually_exclusive_group()
+    g.add_argument("--registry", type=Path, default=None,
+                   help="registry for the word-level column (default: registry.jsonl under --candidates-dir, else "
+                        "the checkout's data/candidates/registry.jsonl, when it exists)")
+    g.add_argument("--no-registry", action="store_true", help="no word-level column")
 
     sp = sub.add_parser("harvest")
     sp.add_argument("--run-id", required=True)
@@ -1123,6 +1251,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--every-nth", type=int, default=None)
     sp.add_argument("--offset", type=int, default=0)
     sp.add_argument("--include-wn", action="store_true")
+    sp.add_argument("--wn-closure-depth", type=int, default=H.HarvestConfig.wn_closure_depth,
+                    help="hyponym levels of the WordNet trait-noun closure (default %(default)s: where it saturates; "
+                         "Roger, 2026-10-12)")
+    sp.add_argument("--delta-from", default=None, metavar="RUN_ID",
+                    help="keep only the candidates this earlier run did not submit (Roget by stem and head, WordNet "
+                         "by stem)")
     sp.add_argument("--force", action="store_true")
     _head_scope_flags(sp)
 

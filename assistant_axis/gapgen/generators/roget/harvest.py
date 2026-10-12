@@ -3,10 +3,21 @@
 For each head in the selected gap classes (:data:`coverage.HARVEST_CLASSES` by default), one word
 per semicolon group of its adjectives (:func:`harvest_head`): items over ``max_words`` words, items
 ending in a function word ("shy of"), proper adjectives WordNet does not know in lower case, words
-already in the corpus or the seed queue, and words under the platform's Zipf floor
+already in the corpus or the seed queue, and words the platform's Zipf floor rejects
 (``freq.zipf_info``, ``hard_reject``) are dropped and counted; the representative of a group is its
 most frequent word; a head gives at most ``per_head_cap`` words, best score first
 (``score = zipf + 0.3 if WordNet has it as an adjective - 0.15 x group index``).
+
+The Zipf floor defers to rule 1b (Roger, 2026-10-12, gate audit 2 of
+``reports/code_review_2026-10-12/gate_audits/roget_wordnet_selection.md``; :data:`ZIPF_FLOOR_RULE`): a word
+below Zipf 1.5 that the negating-prefix rescue or the gloss-hint rescue sends to M1's probe is kept, and only
+``hard_reject`` drops.  Every harvested word carries a gloss hint (:func:`gloss_hint`), so the gloss-hint route
+applies to every word, as it does in M1 (``filter.py`` passes ``gloss_hint`` for a row with an intended sense).
+Before that date a second check (``zipf_min < zipf_hard``, review 5 D4) dropped every word below the line,
+rescued or not; those runs record ``zipf_hard`` in their config and a single ``zipf_hard`` drop count.  Now
+the drops record ``zipf_hard_reject``, and ``harvest_counts.json`` has a ``zipf_floor`` block: the words below
+the line, the ones dropped, the ones rescued by each route (what the second check used to drop), and the
+rescued words that became candidates, with the same counts for the heads skipped as not character.
 
 Each word becomes one :class:`~assistant_axis.gapgen.Candidate` per head it came from
 (``source_ref = "roget:<head id>"``; the registry merges a word harvested from two heads into one
@@ -29,6 +40,11 @@ it the harvest is as before.
 head when that head is also a gap head.  The run directory gets ``candidates.jsonl`` (exactly
 ``dataclasses.asdict`` of every Candidate, one per line: the tracked file another checkout
 resubmits with ``gap_registry.py submit``), ``pair_candidates.jsonl`` and ``harvest_report.md``.
+
+With ``already_submitted`` (``roget_generate.py harvest --delta-from R``) the run keeps only the candidates an
+earlier run did not submit, keyed by (stem, ``source_ref``): a rule change then reaches the registry as a run
+of its own, without adding a second source to every row the earlier run made.  The drop counts and the
+``zipf_floor`` block describe the whole harvest; the words, the candidates and the ``delta`` block the rest.
 """
 from __future__ import annotations
 
@@ -48,9 +64,14 @@ from assistant_axis.gapgen.registry import Candidate
 from .coverage import HARVEST_CLASSES, CoverageReport
 from .pairs import HeadPairing, _negates, _norm
 from .parse import Head, RogetIndex
+from .wn_clusters import WN_CLOSURE_DEPTH
 
 GENERATOR = "roget"
 WN_GENERATOR = "wn_clusters"
+#: How the generator-side Zipf floor works, recorded in every run's config (module docstring): ``rule_1b``,
+#: only ``freq.zipf_info``'s ``hard_reject`` drops, its rescue routes keep the word for M1's probe.  A run
+#: recorded with ``zipf_hard`` instead (before 2026-10-12) dropped every word below that line.
+ZIPF_FLOOR_RULE = "rule_1b"
 #: Pair sources whose word-level opposites become partner hints: Roget's printed synopsis and the rules.
 HINT_SOURCES = ("synopsis", "rule", "rule_weak")
 #: Platform rates for the downstream estimate (coding_plan_02 revision item 4): M1 per word, M3
@@ -68,9 +89,9 @@ class HarvestConfig:
     classes: tuple = HARVEST_CLASSES
     every_nth: Optional[int] = None
     offset: int = 0
-    zipf_hard: float = HARD_REJECT_BELOW
+    zipf_floor: str = ZIPF_FLOOR_RULE
     include_wn: bool = False
-    wn_closure_depth: int = 3
+    wn_closure_depth: int = WN_CLOSURE_DEPTH
 
     def to_json(self) -> dict:
         d = asdict(self)
@@ -94,6 +115,7 @@ class HarvestItem:
     gap_class: str = ""
     gloss_hint: str = ""
     character: Optional[int] = None     # the head-scope rating of the head (1 or 2), None if unrated
+    rescue: Optional[str] = None        # below Zipf 1.5, kept by rule 1b: negating_prefix | gloss_hint
 
 
 @dataclass
@@ -147,9 +169,17 @@ class LabelGuard:
 
 def harvest_head(head: Head, *, known_stems: Collection[str], cfg: HarvestConfig, lex=None,
                  zipf: Optional[Callable[[str], float]] = None, partner_id: Optional[str] = None,
-                 gap: str = "") -> tuple[list[HarvestItem], Counter]:
-    """Representatives of the head's adjective groups (module docstring); ``(items, drop counts)``."""
+                 gap: str = "", gloss_hint: bool = True,
+                 zipf_stats: Optional[Counter] = None) -> tuple[list[HarvestItem], Counter]:
+    """Representatives of the head's adjective groups (module docstring); ``(items, drop counts)``.
+
+    ``gloss_hint``: the words will be submitted with a gloss hint, as :func:`harvest` submits every word, so
+    rule 1b's gloss-hint route keeps a word below the Zipf floor; ``False`` for a caller that submits words
+    without one, where only the negating-prefix route rescues and ``hard_reject`` drops the rest.
+    ``zipf_stats``, when given, is updated with ``below_line`` (words under the floor that reached the
+    check), ``hard_reject`` (dropped) and ``rescued_<route>`` (kept by that route)."""
     known = set(known_stems)
+    zs = zipf_stats if zipf_stats is not None else Counter()
     drops: Counter = Counter()
     reps: list[HarvestItem] = []
     seen: set[str] = set()
@@ -182,23 +212,29 @@ def harvest_head(head: Head, *, known_stems: Collection[str], cfg: HarvestConfig
             if stem in seen:
                 drops["repeat"] += 1
                 continue
-            fi = zipf_info(item, zipf_fn=zipf)
-            if fi.hard_reject or fi.zipf_min < cfg.zipf_hard:
-                drops["zipf_hard"] += 1
+            # rule 1b (Roger, 2026-10-12): only hard_reject drops; the rescue routes send the word to M1's probe
+            fi = zipf_info(item, zipf_fn=zipf, gloss_hint=gloss_hint)
+            if fi.zipf_min < HARD_REJECT_BELOW:
+                zs["below_line"] += 1
+            if fi.hard_reject:
+                zs["hard_reject"] += 1
+                drops["zipf_hard_reject"] += 1
                 continue
+            if fi.rescue:
+                zs[f"rescued_{fi.rescue}"] += 1
             syns = lex.adj_synsets(item) if lex is not None else []
-            cands.append((fi.zipf_min, -len(cands), item, stem, fi.probe_band, bool(syns), len(syns)))
+            cands.append((fi.zipf_min, -len(cands), item, stem, fi.probe_band, bool(syns), len(syns), fi.rescue))
             all_clean.append(item)
         if not cands:
             continue
         cands.sort(reverse=True)
-        z, _, item, stem, probe, wn_found, n_senses = cands[0]
+        z, _, item, stem, probe, wn_found, n_senses, rescue = cands[0]
         drops["not_representative"] += len(cands) - 1
         seen.add(stem)
         score = round(z + (0.3 if wn_found else 0.0) - 0.15 * gi, 3)
         reps.append(HarvestItem(surface=item, head_id=head.id, partner_id=partner_id, group_index=gi, siblings=[],
                                 zipf_min=z, probe_band=probe, wn_found=wn_found, n_senses=n_senses, score=score,
-                                class_vi=head.klass == "VI", gap_class=gap))
+                                class_vi=head.klass == "VI", gap_class=gap, rescue=rescue))
     reps.sort(key=lambda it: (-it.score, it.group_index, it.surface))
     if len(reps) > cfg.per_head_cap:
         drops["cap"] += len(reps) - cfg.per_head_cap
@@ -405,20 +441,29 @@ def to_candidates(items: Sequence[HarvestItem], *, generator: str, run_id: str,
 def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadPairing], *, cfg: HarvestConfig,
             known_stems: Collection[str], run_id: str, lex=None, zipf: Optional[Callable[[str], float]] = None,
             label_of: Optional[Mapping[str, str]] = None,
-            head_scope: Optional[Mapping[str, Optional[int]]] = None) -> HarvestResult:
+            head_scope: Optional[Mapping[str, Optional[int]]] = None,
+            already_submitted: Optional[Collection[tuple[str, str]]] = None,
+            delta_from: Optional[str] = None) -> HarvestResult:
     """Harvest the selected gap heads; build the gloss hints, the pair candidates and the Candidates.
-    ``head_scope`` (head id -> 0, 1, 2 or None): heads rated 0 are skipped and counted."""
+    ``head_scope`` (head id -> 0, 1, 2 or None): heads rated 0 are skipped and counted.
+    ``already_submitted``: ``(stem, source_ref)`` keys an earlier run (``delta_from``) submitted; those
+    candidates are left out (module docstring)."""
     rows = report.by_id()
     selected = select_heads(report, cfg)
     by_head: dict[str, list[HarvestItem]] = {}
     drops: Counter = Counter()
+    zstats: Counter = Counter()
+    zstats_skipped: Counter = Counter()
     not_character: list[str] = []
     ratings = dict(head_scope or {})
     for h in selected:
         r = rows[h]
+        skip = ratings.get(h) == 0
+        # every word gets a gloss hint below, so rule 1b's gloss-hint route applies (Roger, 2026-10-12)
         items, d = harvest_head(index.heads[h], known_stems=known_stems, cfg=cfg, lex=lex, zipf=zipf,
-                                partner_id=r.partner, gap=r.gap_class)
-        if ratings.get(h) == 0:
+                                partner_id=r.partner, gap=r.gap_class, gloss_hint=True,
+                                zipf_stats=zstats_skipped if skip else zstats)
+        if skip:
             # not character: the words it would have given are dropped and counted, its other drops are not
             not_character.append(h)
             if items:
@@ -462,8 +507,24 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
         if not p.partner_existing:
             hints.setdefault((p.b, p.head_b), p.a)
     items = [it for h in selected for it in by_head.get(h, [])]
+    zipf_block = zipf_floor_counts(zstats, zstats_skipped, items)
+    delta = None
+    if already_submitted is not None:
+        prev = set(already_submitted)
+        new_items = [it for it in items if (normalize_to_file_name(it.surface), f"roget:{it.head_id}") not in prev]
+        new_ids = {id(it) for it in new_items}
+        new_words = {it.surface for it in new_items}
+        delta = {"from": delta_from, "n_harvested": len(items), "n_already_submitted": len(items) - len(new_items),
+                 "n_new": len(new_items),
+                 "new_below_line": sorted({it.surface for it in new_items if it.rescue}),
+                 "new_other": sorted({it.surface for it in new_items if not it.rescue})}
+        by_head = {h: [it for it in its if id(it) in new_ids] for h, its in by_head.items()}
+        items = new_items
+        pc = [p for p in pc if p.a in new_words or p.b in new_words]
     cands = to_candidates(items, generator=GENERATOR, run_id=run_id, partner_hints=hints)
     counts = harvest_counts(report, selected, by_head, drops, pc, cands, cfg)
+    counts["zipf_floor"] = zipf_block
+    counts["delta"] = delta
     counts["n_heads_not_character"] = len(not_character)
     counts["heads_not_character"] = not_character
     counts["head_ratings"] = {h: ratings.get(h) for h in selected} if head_scope is not None else {}
@@ -497,6 +558,43 @@ def harvest_counts(report: CoverageReport, selected: Sequence[str], by_head: Map
         "downstream_estimate_usd": {"m1": round(n * M1_USD_PER_WORD, 2),
                                     "m3_if_half_pass": round(n * 0.5 * M3_USD_PER_PASSING_WORD, 2)},
     }
+
+
+def _zipf_part(stats: Counter) -> dict:
+    rescued = {k[len("rescued_"):]: v for k, v in sorted(stats.items()) if k.startswith("rescued_")}
+    return {"below_line": stats.get("below_line", 0), "hard_reject": stats.get("hard_reject", 0),
+            "rescued": rescued, "rescued_total": sum(rescued.values())}
+
+
+def zipf_floor_counts(stats: Counter, skipped: Counter, items: Sequence[HarvestItem]) -> dict:
+    """The ``zipf_floor`` block of ``harvest_counts.json`` (gate audit 2, proposal 3).
+
+    ``below_line``: words under Zipf 1.5 that reached the check (after the length, function-word, proper-name
+    and known-label checks); ``hard_reject``: those dropped (no rescue route); ``rescued``: those kept by each
+    route, which the second check dropped before 2026-10-12 (``rescued_total``); ``submitted``: the rescued
+    words that became candidates (their group's most frequent clean word, within the cap), the words the
+    rule change adds; ``in_skipped_heads``: the same counts for the heads rated not character (none of their
+    words is submitted)."""
+    sub = [it for it in items if it.rescue]
+    return {"rule": ZIPF_FLOOR_RULE, "line": HARD_REJECT_BELOW, **_zipf_part(stats),
+            "submitted": len(sub), "submitted_by_rescue": dict(Counter(it.rescue for it in sub)),
+            "submitted_words": sorted({it.surface for it in sub}),
+            "in_skipped_heads": _zipf_part(skipped)}
+
+
+def would_be_words(index: RogetIndex, head_ids: Iterable[str], *, known_stems: Collection[str],
+                   cfg: Optional[HarvestConfig] = None, lex=None,
+                   zipf: Optional[Callable[[str], float]] = None) -> dict[str, list[str]]:
+    """``{head id: words}``: what :func:`harvest_head` gives each head under the harvest's per-head rules (one
+    word per semicolon group, the cap), whatever the head's gap class or head-scope rating.  The "would-be
+    words" of gate audit 2 § 4, behind the coverage report's word-level column."""
+    cfg = cfg or HarvestConfig()
+    out: dict[str, list[str]] = {}
+    for h in head_ids:
+        if h in index.heads:
+            items, _ = harvest_head(index.heads[h], known_stems=known_stems, cfg=cfg, lex=lex, zipf=zipf)
+            out[h] = [it.surface for it in items]
+    return out
 
 
 # --------------------------------------------------------------------------- the WordNet stream
@@ -544,13 +642,28 @@ def report_markdown(result: HarvestResult, index: RogetIndex, *, run_id: str, ti
          f"{c['n_heads_harvested']}.",
          f"- Words: {c['n_items']} ({c['n_unique_words']} distinct), candidates {c['n_candidates']}; by gap class "
          f"{json.dumps(c['items_by_gap_class'])}.",
-         f"- Dropped: {json.dumps(c['drops'])}.",
-         f"- Zipf probe band {c['probe_band_frac']:.0%}; Class VI {c['class_vi_frac']:.0%}; WordNet adjective "
-         f"{c['wn_found_frac']:.0%}.",
-         f"- Pair candidates {c['n_pair_candidates']} (WordNet-confirmed {c['n_double_confirmed']}, negation forms "
-         f"{c['n_morph']}); candidates with a partner hint {c['n_partner_hints']}.",
-         f"- Downstream estimate: M1 about ${c['downstream_estimate_usd']['m1']:.2f}; M3 about "
-         f"${c['downstream_estimate_usd']['m3_if_half_pass']:.2f} if half the words pass M1."]
+         f"- Dropped: {json.dumps(c['drops'])}."]
+    zf = c.get("zipf_floor")
+    if zf:
+        sk = zf["in_skipped_heads"]
+        L.append(f"- Zipf floor ({zf['rule']}: only `hard_reject` drops; the negating-prefix and gloss-hint rescues "
+                 f"go to M1's probe): {zf['below_line']} words below {zf['line']}, {zf['hard_reject']} dropped, "
+                 f"{zf['rescued_total']} rescued {json.dumps(zf['rescued'])} (dropped by the second check before "
+                 f"2026-10-12); {zf['submitted']} of them candidates"
+                 + (f" ({', '.join(zf['submitted_words'])})" if zf["submitted_words"] else "")
+                 + f".  In the heads skipped as not character: {sk['below_line']} below the line, "
+                   f"{sk['hard_reject']} dropped, {sk['rescued_total']} rescued.")
+    dl = c.get("delta")
+    if dl:
+        L.append(f"- Delta against run {dl['from']}: {dl['n_harvested']} words harvested, {dl['n_already_submitted']} "
+                 f"already submitted there and left out, {dl['n_new']} new (below the Zipf line: "
+                 f"{', '.join(dl['new_below_line']) or '-'}; other: {', '.join(dl['new_other']) or '-'}).")
+    L += [f"- Zipf probe band {c['probe_band_frac']:.0%}; Class VI {c['class_vi_frac']:.0%}; WordNet adjective "
+          f"{c['wn_found_frac']:.0%}.",
+          f"- Pair candidates {c['n_pair_candidates']} (WordNet-confirmed {c['n_double_confirmed']}, negation forms "
+          f"{c['n_morph']}); candidates with a partner hint {c['n_partner_hints']}.",
+          f"- Downstream estimate: M1 about ${c['downstream_estimate_usd']['m1']:.2f}; M3 about "
+          f"${c['downstream_estimate_usd']['m3_if_half_pass']:.2f} if half the words pass M1."]
     ratings = c.get("head_ratings") or {}
     if ratings:
         L.append(f"- Head scope ({c.get('head_scope', {}).get('path', 'head-scope ratings')}): "

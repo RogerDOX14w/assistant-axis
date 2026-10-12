@@ -15,13 +15,22 @@ The sibling stream (plan § 5, ``wn_clusters.py``; task 14):
   or a one-way pointer to a word with no file), the WordNet antonyms of the label, each a
   candidate whose ``partner_hint`` is the label;
 * :func:`harvest_trait_closure`: adjectives derived from the nouns under ``trait``,
-  ``disposition``, ``temperament``, ``attitude`` and ``character`` (bounded depth).
+  ``disposition``, ``temperament``, ``attitude`` and ``character``, to :data:`WN_CLOSURE_DEPTH` levels.
 
 Both drop words already in the corpus or the seed queue, words the frequency floor rejects, and
 words with no adjective sense; ``source_ref`` is ``oewn:<synset id>``.
+
+The frequency floor defers to rule 1b (Roger, 2026-10-12, gate audit 2): only ``freq.zipf_info``'s
+``hard_reject`` drops, and since each item's gloss hint is computed first and passed in, a word below Zipf 1.5
+that has a hint (a WordNet definition) goes to M1's probe, as one formed by a negating prefix already did.  A
+word with no hint (a synset without a definition) can still be rejected.  Both functions take ``counts`` (a
+``Counter``) and record there what they dropped and why: ``known``, ``not_adjective`` / ``no_adjective``,
+``antonym_route``, ``multiword``, ``below_line``, ``zipf_hard_reject``, ``rescued_<route>``, ``repeat`` and,
+for the closure, ``synsets`` and the ``depth_cut_off_*`` look-ahead one level past the bound.
 """
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Callable, Collection, Iterable, Optional, Sequence
@@ -30,6 +39,11 @@ from assistant_axis.entity_id import normalize_to_file_name
 
 ADJ_POS = ("a", "s")
 TRAIT_ROOT_LEMMAS = ("trait", "disposition", "temperament", "attitude", "character")
+#: The hyponym depth of the trait-noun closure: 6 (Roger, 2026-10-12, gate audit 2 § 4d of
+#: ``reports/code_review_2026-10-12/gate_audits/roget_wordnet_selection.md``).  The earlier bound of 3 had no
+#: recorded derivation; the closure saturates at 6 on OEWN 2024, and the 117 adjectives depths 4-6 add were 97%
+#: traits by M1 (94 of 97 registered), against 91% of the closure words kept at depth 3.
+WN_CLOSURE_DEPTH = 6
 #: The noun senses of the roots that are about persons (OEWN 2024 ids, checked 2026-10-08):
 #: trait "a distinguishing feature of your personal nature"; disposition / temperament "your
 #: usual mood"; disposition "a natural or acquired habit or characteristic tendency in a person
@@ -205,7 +219,7 @@ class Lexicon:
                         out.append(r.word().lemma())
         return out
 
-    def trait_closure(self, roots: Sequence[str] = TRAIT_ROOT_LEMMAS, *, max_depth: int = 3,
+    def trait_closure(self, roots: Sequence[str] = TRAIT_ROOT_LEMMAS, *, max_depth: int = WN_CLOSURE_DEPTH,
                       root_synsets: Optional[Sequence[str]] = None) -> dict:
         """Noun synsets under the roots' person senses, to ``max_depth`` levels of hyponymy:
         ``{synset id: (synset, depth)}``.  A root's senses are those in ``root_synsets`` when
@@ -246,6 +260,7 @@ class WnItem:
     origin: str                 # the label (antonym route) or the noun synset's lemma (closure)
     n_senses: int = 0
     extra: dict = field(default_factory=dict)
+    rescue: Optional[str] = None    # below Zipf 1.5, kept by rule 1b: negating_prefix | gloss_hint
 
 
 def _hint_from_definition(definition: str) -> str:
@@ -255,66 +270,121 @@ def _hint_from_definition(definition: str) -> str:
     return f"This means {d}."
 
 
-def _freq_ok(surface: str, zipf: Callable) -> tuple[bool, float, bool]:
-    from assistant_axis.gapgen.freq import zipf_info
-    fi = zipf_info(surface, zipf_fn=zipf)
-    return (not fi.hard_reject), fi.zipf_min, fi.probe_band
+def _floor(surface: str, zipf: Optional[Callable], counts: Counter, *, gloss_hint: bool):
+    """``freq.zipf_info`` with the item's gloss hint (rule 1b; module docstring), counted in ``counts``;
+    ``None`` when ``hard_reject`` drops the word."""
+    from assistant_axis.gapgen.freq import HARD_REJECT_BELOW, zipf_info
+    fi = zipf_info(surface, zipf_fn=zipf, gloss_hint=gloss_hint)
+    if fi.zipf_min < HARD_REJECT_BELOW:
+        counts["below_line"] += 1
+    if fi.hard_reject:
+        counts["zipf_hard_reject"] += 1
+        return None
+    if fi.rescue:
+        counts[f"rescued_{fi.rescue}"] += 1
+    return fi
 
 
 def harvest_wn_antonyms(records: Iterable, lex: Lexicon, *, known_stems: Collection[str],
-                        zipf: Optional[Callable] = None) -> list[WnItem]:
+                        zipf: Optional[Callable] = None, counts: Optional[Counter] = None) -> list[WnItem]:
     """WordNet antonyms of existing labels that have no partner file (``partner_has_file`` false),
-    one item per new antonym word.  ``known_stems`` (corpus and queue) are never emitted."""
+    one item per new antonym word.  ``known_stems`` (corpus and queue) are never emitted.  ``counts``: the
+    module docstring (``labels`` is the number of partner-less labels looked up)."""
     known = set(known_stems)
+    c = counts if counts is not None else Counter()
     out: dict[str, WnItem] = {}
     for rec in records:
         if getattr(rec, "source", "existing") != "existing" or getattr(rec, "partner_has_file", False):
             continue
+        c["labels"] += 1
         label = rec.label
         for ant, sid in lex.antonyms(label):
             stem = normalize_to_file_name(ant)
-            if stem in known or stem == rec.stem or not lex.is_adjective(ant):
+            if stem in known or stem == rec.stem:
+                c["known"] += 1
                 continue
-            ok, zmin, probe = _freq_ok(ant, zipf)
-            if not ok:
+            if not lex.is_adjective(ant):
+                c["not_adjective"] += 1
                 continue
             syn = next((s for s in lex.adj_synsets(ant) if s.id == sid), None)
             hint = _hint_from_definition(syn.definition() if syn is not None else "")
-            item = WnItem(surface=ant, synset_id=sid, gloss_hint=hint, partner_hint=label, zipf_min=zmin,
-                          probe_band=probe, score=round(zmin, 3), route="antonym", origin=rec.stem,
-                          n_senses=len(lex.adj_synsets(ant)))
+            fi = _floor(ant, zipf, c, gloss_hint=bool(hint))
+            if fi is None:
+                continue
+            item = WnItem(surface=ant, synset_id=sid, gloss_hint=hint, partner_hint=label, zipf_min=fi.zipf_min,
+                          probe_band=fi.probe_band, score=round(fi.zipf_min, 3), route="antonym", origin=rec.stem,
+                          n_senses=len(lex.adj_synsets(ant)), rescue=fi.rescue)
+            if stem in out:
+                c["repeat"] += 1
             if stem not in out or item.score > out[stem].score:
                 out[stem] = item
     return sorted(out.values(), key=lambda it: (-it.score, it.surface))
 
 
 def harvest_trait_closure(lex: Lexicon, *, known_stems: Collection[str], zipf: Optional[Callable] = None,
-                          max_depth: int = 3, cap: Optional[int] = None,
-                          root_synsets: Optional[Sequence[str]] = None) -> list[WnItem]:
+                          max_depth: int = WN_CLOSURE_DEPTH, cap: Optional[int] = None,
+                          root_synsets: Optional[Sequence[str]] = None, taken: Collection[str] = (),
+                          counts: Optional[Counter] = None) -> list[WnItem]:
     """Adjectives derived from the trait-noun closure (:meth:`Lexicon.trait_closure`), one item per
-    new adjective, its hint from the noun synset's definition ("This means having <noun>: ...")."""
+    new adjective, its hint from the noun synset's definition ("This means having <noun>: ...").
+
+    ``taken``: stems another route already emits (the antonym route), left out and counted as
+    ``antonym_route``.  ``counts``: the module docstring; ``synsets`` is the closure below the roots,
+    ``no_adjective`` those of them with no derivational adjective, and ``depth_cut_off_synsets`` /
+    ``depth_cut_off_adjectives`` the synsets one level past ``max_depth`` and the new adjectives they would
+    give (a one-level look-ahead; both 0 once the closure is saturated)."""
     known = set(known_stems)
+    taken = set(taken)
+    c = counts if counts is not None else Counter()
     out: dict[str, WnItem] = {}
-    for sid, (syn, depth) in sorted(lex.trait_closure(max_depth=max_depth, root_synsets=root_synsets).items()):
+    closure = lex.trait_closure(max_depth=max_depth, root_synsets=root_synsets)
+    for sid, (syn, depth) in sorted(closure.items()):
         if depth == 0:
             continue
+        c["synsets"] += 1
+        adjs = lex.derivational_adjs(syn)
+        if not adjs:
+            c["no_adjective"] += 1
+            continue
         noun = (syn.lemmas() or [""])[0]
-        for adj in lex.derivational_adjs(syn):
+        for adj in adjs:
             stem = normalize_to_file_name(adj)
-            if stem in known or " " in adj.strip():
+            if stem in known:
+                c["known"] += 1
                 continue
-            ok, zmin, probe = _freq_ok(adj, zipf)
-            if not ok:
+            if stem in taken:
+                c["antonym_route"] += 1
+                continue
+            if " " in adj.strip():
+                c["multiword"] += 1
                 continue
             d = " ".join((syn.definition() or "").split()).rstrip(".;")
             # a noun lemma spelt as the adjective itself ("defensive", "mum") would read "having defensive" and
             # repeat the word: the definition alone then (review 2026-10-12)
             same = noun.strip().lower() == adj.strip().lower()
             hint = (_hint_from_definition(d) if same else f"This means having {noun}: {d}.") if d else ""
-            item = WnItem(surface=adj, synset_id=sid, gloss_hint=hint, partner_hint=None, zipf_min=zmin,
-                          probe_band=probe, score=round(zmin - 0.2 * depth, 3), route="closure", origin=noun,
-                          n_senses=len(lex.adj_synsets(adj)), extra={"depth": depth})
+            fi = _floor(adj, zipf, c, gloss_hint=bool(hint))
+            if fi is None:
+                continue
+            item = WnItem(surface=adj, synset_id=sid, gloss_hint=hint, partner_hint=None, zipf_min=fi.zipf_min,
+                          probe_band=fi.probe_band, score=round(fi.zipf_min - 0.2 * depth, 3), route="closure",
+                          origin=noun, n_senses=len(lex.adj_synsets(adj)), extra={"depth": depth},
+                          rescue=fi.rescue)
+            if stem in out:
+                c["repeat"] += 1
             if stem not in out or item.score > out[stem].score:
                 out[stem] = item
+    # one level past the bound: what a deeper closure would add next
+    beyond = {}
+    for s, d in closure.values():
+        if d == max_depth:
+            for h in s.hyponyms():
+                if h.id not in closure:
+                    beyond.setdefault(h.id, h)
+    more = {normalize_to_file_name(a) for h in beyond.values() for a in lex.derivational_adjs(h) if " " not in a.strip()}
+    c["depth_cut_off_synsets"] = len(beyond)
+    c["depth_cut_off_adjectives"] = len(more - known - taken - set(out))
     items = sorted(out.values(), key=lambda it: (-it.score, it.surface))
+    if cap and len(items) > cap:
+        c["cap"] += len(items) - cap
     return items[:cap] if cap else items

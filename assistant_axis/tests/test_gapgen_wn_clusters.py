@@ -4,6 +4,7 @@ A fake ``wn`` handle (``roget_fakes.FakeWordnet``) pins our wrapper; one smoke t
 Open English WordNet and skips when ``data/external/wn`` has no database."""
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -84,10 +85,22 @@ def test_harvest_trait_closure(lex):
     assert {it.surface for it in deeper} == {"courageous", "cautious", "deep"}
 
 
-def test_freq_floor_drops_rare_words(lex):
+def test_freq_floor_drops_only_rare_words_without_a_gloss_hint():
+    """Rule 1b (Roger, 2026-10-12): a word below the floor with a gloss hint (its synset's definition) goes to
+    M1's probe; one with no hint is still rejected.  Before, every word below the floor without a negating
+    prefix was dropped here (the test asserted ``[]`` for the hinted antonym)."""
     recs = [LabelRecord("cautious", "cautious", "d", "existing", None, None, False)]
-    items = W.harvest_wn_antonyms(recs, lex, known_stems={"cautious"}, zipf=lambda w: 0.5)
-    assert items == []
+    c = Counter()
+    items = W.harvest_wn_antonyms(recs, W.Lexicon(small_wordnet()), known_stems={"cautious"}, zipf=lambda w: 0.5,
+                                  counts=c)
+    assert [(it.surface, it.rescue, it.gloss_hint) for it in items] == \
+        [("incautious", "gloss_hint", "This means lacking in caution.")]
+    assert c["below_line"] == 1 and c["rescued_gloss_hint"] == 1 and c["zipf_hard_reject"] == 0
+    wn = small_wordnet()
+    wn.synset("a-incautious")._def = ""                              # no definition, so no gloss hint
+    c = Counter()
+    assert W.harvest_wn_antonyms(recs, W.Lexicon(wn), known_stems={"cautious"}, zipf=lambda w: 0.5, counts=c) == []
+    assert c["below_line"] == 1 and c["zipf_hard_reject"] == 1
 
 
 WN_DB = Path(__file__).resolve().parents[2] / "data" / "external" / "wn" / "wn.db"
@@ -113,3 +126,72 @@ def test_closure_hint_when_the_noun_is_spelt_as_the_adjective():
                                     root_synsets=["n-trait"])
     by = {it.surface: it for it in items}
     assert by["defensive"].gloss_hint == "This means an attitude of defensiveness."
+
+
+# --------------------------------------------------------------------------- depth 6 and the drop counts
+
+def _deep_wordnet():
+    """small_wordnet's chain (trait 0, courage 1, caution 2, middleness 3, deepness 4) carried on to depth 7:
+    a planted trait adjective at depths 4 (deep), 5 (pernickety), 6 (uppity) and 7 (beyond the bound)."""
+    wn = small_wordnet()
+    for sid, noun, adj, parent in (("n-five", "pernicketiness", "pernickety", "n-deep"),
+                                   ("n-six", "uppitiness", "uppity", "n-five"),
+                                   ("n-seven", "bumptiousness", "bumptious", "n-six")):
+        wn.add(sid, "n", [noun], f"the trait of being {adj}")
+        wn.add(f"a-{adj}", "a", [adj], f"being {adj}")
+        wn.derivation(adj, f"a-{adj}", noun, sid)
+        wn.hyponym(parent, sid)
+    return wn
+
+
+def test_closure_default_depth_is_six():
+    """Roger, 2026-10-12: the bound goes from 3 to 6 (no derivation for 3; the 117 words beyond it 97% traits)."""
+    from assistant_axis.gapgen.generators.roget.harvest import HarvestConfig
+    assert W.WN_CLOSURE_DEPTH == 6 and HarvestConfig().wn_closure_depth == 6
+    lex = W.Lexicon(_deep_wordnet())
+    c = Counter()
+    items = W.harvest_trait_closure(lex, known_stems=set(), zipf=zipf, root_synsets=["n-trait"], counts=c)
+    depth = {it.surface: it.extra["depth"] for it in items}
+    assert depth == {"courageous": 1, "cautious": 2, "deep": 4, "pernickety": 5, "uppity": 6}
+    assert "bumptious" not in depth                                   # depth 7: one past the bound
+    assert c["depth_cut_off_synsets"] == 1 and c["depth_cut_off_adjectives"] == 1
+    old = W.harvest_trait_closure(lex, known_stems=set(), zipf=zipf, root_synsets=["n-trait"], max_depth=3)
+    assert {it.surface for it in old} == {"courageous", "cautious"}   # the bound before 2026-10-12
+
+
+def test_closure_drop_counts_and_rescues():
+    wn = _deep_wordnet()
+    wn.add("n-nodef", "n", ["fainéance"], "")                          # no definition: no gloss hint
+    wn.add("a-faineant", "a", ["faineant"], "")
+    wn.derivation("faineant", "a-faineant", "fainéance", "n-nodef")
+    wn.hyponym("n-trait", "n-nodef")
+    wn.add("n-multi", "n", ["good nature"], "a cheerful willingness to be agreeable")
+    wn.add("a-multi", "a", ["good natured"], "having an easygoing disposition")
+    wn.derivation("good natured", "a-multi", "good nature", "n-multi")
+    wn.hyponym("n-trait", "n-multi")
+    rare = {"pernickety": 1.1, "uppity": 0.0, "faineant": 0.0}
+    c = Counter()
+    items = W.harvest_trait_closure(W.Lexicon(wn), known_stems={"cautious"}, taken={"courageous"},
+                                    zipf=lambda w: rare.get(w, 3.0), root_synsets=["n-trait"], counts=c)
+    by = {it.surface: it for it in items}
+    assert set(by) == {"deep", "pernickety", "uppity"}
+    assert by["pernickety"].rescue == "gloss_hint" and by["uppity"].rescue == "gloss_hint"
+    assert by["deep"].rescue is None
+    # synsets below the roots: courage, caution, middleness, deepness, five, six, nodef, multi; no adjective:
+    # middleness; known: cautious; antonym route: courageous; multiword: good natured; faineant has no gloss
+    # hint and is rejected
+    assert c["synsets"] == 8 and c["no_adjective"] == 1
+    assert (c["known"], c["antonym_route"], c["multiword"]) == (1, 1, 1)
+    assert (c["below_line"], c["zipf_hard_reject"], c["rescued_gloss_hint"]) == (3, 1, 2)
+
+
+def test_antonym_route_counts():
+    recs = [LabelRecord("cautious", "cautious", "d", "existing", None, None, False),
+            LabelRecord("wary", "wary", "d", "existing", None, None, False),
+            LabelRecord("brave", "brave", "d", "existing", None, "cowardly", True)]
+    c = Counter()
+    items = W.harvest_wn_antonyms(recs, W.Lexicon(small_wordnet()), known_stems={"cautious", "wary", "brave"},
+                                  zipf=zipf, counts=c)
+    assert [it.surface for it in items] == ["incautious"]
+    # two partner-less labels looked up; both give incautious (wary through its cluster head): one repeat
+    assert c["labels"] == 2 and c["repeat"] == 1 and c["below_line"] == 0

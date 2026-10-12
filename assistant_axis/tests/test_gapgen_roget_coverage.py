@@ -120,3 +120,64 @@ def test_markdown_order_and_links(world, tmp_path):
     back = C.load_coverage(tmp_path / "c.json")
     assert [r.id for r in back.rows] == [r.id for r in rep.rows]
     assert "_provenance" in json.loads((tmp_path / "c.json").read_text())
+
+
+# --------------------------------------------------------------------------- word level (gate audit 2, proposal 4)
+
+def reg_row(stem, verdict=None, decision=None, sense_id=1):
+    rec = {"key": f"{stem}#{sense_id}", "stem": stem, "sense_id": sense_id}
+    if verdict:
+        rec["filter"] = {"verdict": verdict}
+    if decision:
+        rec["novelty"] = {"decision": decision}
+    return rec
+
+
+def test_word_status_truth_table():
+    assert C.word_status(reg_row("a")) == "unfiltered"
+    assert C.word_status(reg_row("a", "reject")) == "not_trait"
+    assert C.word_status(reg_row("a", "tagged", "new")) == "not_trait"     # a states or physical hold is no trait
+    assert C.word_status(reg_row("a", "trait")) == "trait_unscored"
+    assert C.word_status(reg_row("a", "trait", "new")) == "trait_new"
+    assert C.word_status(reg_row("a", "trait", "covered")) == "trait_covered"
+    assert C.word_status(reg_row("a", "trait", "grey")) == "trait_grey"
+    # a stem with two sense rows takes its best
+    st = C.registry_word_status([reg_row("x", "trait", "covered"), reg_row("x", "trait", "new", sense_id=2),
+                                 reg_row("y", "reject")])
+    assert st == {"x": "trait_new", "y": "not_trait"}
+
+
+def test_word_level_column_and_section(world, tmp_path):
+    """A covered head that still holds trait-new words is listed with them (the audit's § 4a table), with the
+    totals split between the heads the harvest takes and the rest."""
+    idx, pairs, lh = world
+    rep = C.coverage(idx, pairs, lh, ratings={"605": 0})
+    words = {"864": ["wary", "chary", "heedful"], "863": ["rash"], "605": ["wavering"], "900": ["sore"]}
+    status = C.registry_word_status([reg_row("wary", "trait", "new"), reg_row("chary", "trait", "covered"),
+                                     reg_row("rash", "trait", "new"), reg_row("wavering", "trait", "new"),
+                                     reg_row("sore", "tagged")])
+    C.add_word_level(rep, words, status, source={"path": "reg.jsonl", "n_rows": 5})
+    r = rep.by_id()
+    assert r["864"].words == {"n": 3, "n_registered": 2, "n_trait_new": 1, "trait_new": ["wary"],
+                              "by_status": {"trait_new": 1, "trait_covered": 1, "unregistered": 1}}
+    assert r["606"].words["n"] == 0
+    wl = rep.summary["word_level"]
+    assert wl["source"] == {"path": "reg.jsonl", "n_rows": 5}
+    assert wl["by_gap_class"]["covered"]["trait_new"] == 1 and wl["by_gap_class"]["not_character"]["trait_new"] == 1
+    # harvested: the gap heads not rated 0 (863 pair_completion, 604 queued_only, 606 singleton_empty)
+    assert wl["harvested_heads"] == {"heads": 3, "heads_with_trait_new": 1, "words": 1, "registered": 1,
+                                     "trait_new": 1}
+    assert wl["other_heads"]["trait_new"] == 2 and wl["other_heads"]["heads_with_trait_new"] == 2
+    md = C.render_markdown(rep, idx, lh)
+    sec = md.split("## Heads not harvested that hold trait-new words (2)")[1].split("\n## ")[0]
+    assert "| 864 Caution | covered | - | [cautious](../../traits/instructions/cautious.json) | 3 | 2 | 1: wary |" in sec
+    assert "| 605 Irresolution | pair_empty | 0 |" in sec               # rated not character: not harvested
+    assert "863 Rashness" not in sec                                    # a harvested gap head is not listed
+    assert "Word level" in md
+    C.write_coverage(rep, tmp_path / "c.json", tmp_path / "c.md", index=idx, label_heads=lh)
+    back = C.load_coverage(tmp_path / "c.json")
+    assert back.by_id()["864"].words["trait_new"] == ["wary"]
+    # without a registry nothing changes
+    plain = C.coverage(idx, pairs, lh)
+    assert plain.rows[0].words is None and "word_level" not in plain.summary
+    assert "Heads not harvested" not in C.render_markdown(plain, idx, lh)

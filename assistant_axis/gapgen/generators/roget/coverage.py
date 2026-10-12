@@ -21,6 +21,16 @@ its adjectives describe a person's character") keeps its state and gap class on 
 ``character = 0``) but is reported apart as **not character** and left out of the covered / partly /
 uncovered counts, the gap-class counts and lists, the opposed-pair counts and the covered lists.
 Without ratings (or for an unrated head) everything is as before.
+
+**Word level** (:func:`add_word_level`; Roger, 2026-10-12, gate audit 2 proposal 4): a head's state says
+whether one corpus trait has it as its primary, but one head holds ten or more distinct traits, so a covered
+head can still hold new ones (544 Falsehood held eight).  With the registry at hand the report gives each head
+its **would-be words** (what the harvest's per-head rules take from it, one word per semicolon group within
+the cap: ``harvest.would_be_words``), how many of them the registry has, and which are **trait-new** there:
+M1's verdict ``trait`` and M3's decision ``new``, on the registry's last row per key (:func:`word_status`).
+That is the audit's computation (§ 4 and § 4a).  The registry rows come from every generator (mostly the
+censuses), so the column reads the pipeline's judgements, not Roget's; a word no generator submitted counts as
+unregistered.
 """
 from __future__ import annotations
 
@@ -28,9 +38,10 @@ import json
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Collection, Mapping, Optional, Sequence
+from typing import Collection, Iterable, Mapping, Optional, Sequence
 
 from assistant_axis.atomic_io import atomic_write_text
+from assistant_axis.entity_id import normalize_to_file_name
 
 from .mapping import trait_link
 from .pairs import HeadPairing
@@ -70,6 +81,7 @@ class HeadRow:
     partner_existing: list = field(default_factory=list)
     triggers: list = field(default_factory=list)            # Class I-III: the labels that brought it in
     character: Optional[int] = None                         # head-scope rating (0, 1, 2), None if unrated
+    words: Optional[dict] = None                            # word level (add_word_level), None without a registry
 
 
 @dataclass
@@ -256,10 +268,107 @@ def summarize(rows: Sequence[HeadRow], index: RogetIndex, label_heads: Mapping[s
     }
 
 
+# --------------------------------------------------------------------------- word level
+
+#: A word's standing in the registry, best first (a stem with several sense rows takes its best).
+WORD_STATUSES = ("trait_new", "trait_grey", "trait_covered", "trait_unscored", "not_trait", "unfiltered")
+WORD_LEVEL_DEFINITION = ("would-be words: what the harvest's per-head rules take from the head (one word per "
+                         "semicolon group, at most per_head_cap); trait-new: the registry's last row has M1 "
+                         "verdict trait and M3 decision new")
+
+
+def word_status(rec: Mapping) -> str:
+    """One registry row's standing: ``trait_new`` (M1 ``trait``, M3 ``new``), ``trait_covered``,
+    ``trait_grey``, ``trait_unscored`` (M1 trait, no M3 decision), ``not_trait`` (any other M1 verdict) or
+    ``unfiltered`` (no M1 block)."""
+    f = rec.get("filter") or {}
+    if not f.get("verdict"):
+        return "unfiltered"
+    if f["verdict"] != "trait":
+        return "not_trait"
+    d = (rec.get("novelty") or {}).get("decision")
+    return {"new": "trait_new", "covered": "trait_covered", "grey": "trait_grey"}.get(d, "trait_unscored")
+
+
+def registry_word_status(records: Iterable[Mapping]) -> dict[str, str]:
+    """``{stem: status}`` over the registry's folded rows (last row per key)."""
+    rank = {s: i for i, s in enumerate(WORD_STATUSES)}
+    out: dict[str, str] = {}
+    for rec in records:
+        stem = rec.get("stem")
+        if not stem:
+            continue
+        s = word_status(rec)
+        if stem not in out or rank[s] < rank[out[stem]]:
+            out[stem] = s
+    return out
+
+
+def add_word_level(report: CoverageReport, words_by_head: Mapping[str, Sequence[str]],
+                   status: Mapping[str, str], *, source: Optional[dict] = None) -> None:
+    """Give every row its ``words`` block (module docstring) and the summary its ``word_level`` totals.
+
+    ``words_by_head``: the would-be words (``harvest.would_be_words``); ``status``: ``{stem: status}``
+    (:func:`registry_word_status`); ``source`` records where the registry came from."""
+    for r in report.rows:
+        words = list(words_by_head.get(r.id, []))
+        st = {w: status.get(normalize_to_file_name(w)) for w in words}
+        tn = [w for w in words if st[w] == "trait_new"]
+        r.words = {"n": len(words), "n_registered": sum(1 for v in st.values() if v),
+                   "n_trait_new": len(tn), "trait_new": tn,
+                   "by_status": dict(Counter(v or "unregistered" for v in st.values()))}
+    groups: dict[str, list[HeadRow]] = {}
+    for r in report.rows:
+        groups.setdefault("not_character" if is_not_character(r) else r.gap_class, []).append(r)
+
+    def tot(rows: Sequence[HeadRow]) -> dict:
+        return {"heads": len(rows), "heads_with_trait_new": sum(1 for r in rows if r.words["n_trait_new"]),
+                "words": sum(r.words["n"] for r in rows), "registered": sum(r.words["n_registered"] for r in rows),
+                "trait_new": sum(r.words["n_trait_new"] for r in rows)}
+
+    order = list(GAP_CLASSES) + ["not_character"]
+    harvested = [r for r in report.rows if r.gap_class in HARVEST_CLASSES and not is_not_character(r)]
+    h_ids = {r.id for r in harvested}
+    rest = [r for r in report.rows if r.id not in h_ids]
+    report.summary["word_level"] = {"definition": WORD_LEVEL_DEFINITION, "source": source,
+                                    "by_gap_class": {g: tot(groups[g]) for g in order if g in groups},
+                                    "harvested_heads": tot(harvested), "other_heads": tot(rest)}
+
+
 # --------------------------------------------------------------------------- writing
 
 def _links(stems: Sequence[str], source: str, label_heads: Mapping[str, Mapping]) -> str:
     return ", ".join(trait_link(s, source, label=label_heads.get(s, {}).get("label") or s) for s in stems)
+
+
+def word_level_section(rows: Sequence[HeadRow], index: RogetIndex, label_heads: Mapping[str, Mapping],
+                       wl: Mapping) -> list[str]:
+    """The heads the harvest does not take (not gap heads, or rated not character) that hold trait-new words,
+    most first: gate audit 2's § 4a table."""
+    sel = [r for r in rows if r.words and r.words["n_trait_new"]
+           and (r.gap_class not in HARVEST_CLASSES or is_not_character(r))]
+    sel.sort(key=lambda r: (-r.words["n_trait_new"], index.position(r.id)))
+    src = wl.get("source") or {}
+    # the report lives in data/candidates/roget/, the checkout's registry one level up
+    reg = ("[registry.jsonl](../registry.jsonl)" if src.get("path") == "data/candidates/registry.jsonl"
+           else f"`{src.get('path')}`")
+    L = [f"## Heads not harvested that hold trait-new words ({len(sel)})", "",
+         "A head's state counts the corpus traits placed on it, but one head holds many distinct traits.  For each "
+         "head the harvest does not take, its **would-be words** are what the harvest's per-head rules would take "
+         "from it (one word per semicolon group, within the cap), and **trait-new** are those the registry has "
+         "with M1's verdict trait and M3's decision new (from any generator, mostly the censuses)"
+         + (f"; registry {reg} (git-ignored, this checkout's), {src.get('n_rows')} rows" if src.get("path") else "")
+         + ".", "",
+         "| head | gap class | rating | its traits (primary) | would-be words | registered | trait-new words |",
+         "|---|---|---|---|---|---|---|"]
+    for r in sel:
+        w = r.words
+        L.append(f"| {r.id} {index.heads[r.id].title if r.id in index.heads else r.title} | {r.gap_class} | "
+                 f"{'-' if r.character is None else r.character} | "
+                 f"{_links(r.existing, 'existing', label_heads) or '-'} | {w['n']} | {w['n_registered']} | "
+                 f"{w['n_trait_new']}: {', '.join(w['trait_new'])} |")
+    L.append("")
+    return L
 
 
 def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapping[str, Mapping], *,
@@ -321,6 +430,15 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
              f"({lab['existing_unmapped']} without; {lab['existing_primary_in_scope']} of the primaries in scope), "
              f"{lab['queued_mapped']} queued labels ({lab['queued_unmapped']} without).")
     L.append(f"- Gap classes: " + ", ".join(f"{g} {s['by_gap_class'][g]}" for g in GAP_CLASSES) + ".")
+    wl = s.get("word_level")
+    if wl:
+        hv, ot = wl["harvested_heads"], wl["other_heads"]
+        L.append(f"- Word level (the registry's M1 and M3 on each head's would-be words; section \"Heads not "
+                 f"harvested that hold trait-new words\" below): the {ot['heads']} heads the harvest does not take "
+                 f"(not gap heads, or not character) hold **{ot['trait_new']}** trait-new words in "
+                 f"{ot['heads_with_trait_new']} heads, of {ot['words']} would-be words ({ot['registered']} "
+                 f"registered); the {hv['heads']} harvested gap heads hold {hv['trait_new']} of {hv['words']} "
+                 f"({hv['registered']} registered).")
     if unresolved_note:
         L.append(f"- {unresolved_note}")
     L.append("")
@@ -373,6 +491,8 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
                      f"{_links(r.queued_active, 'queued', label_heads) or '-'} | "
                      f"{_links(r.existing_secondary, 'existing', label_heads) or '-'} |")
         L.append("")
+    if wl:
+        L.extend(word_level_section(all_rows, index, label_heads, wl))
     crowded = sorted([r for r in rows if r.state == "covered"], key=lambda r: (-r.n_existing, index.position(r.id)))
     L.append("## Most crowded heads")
     L.append("")

@@ -437,3 +437,71 @@ def test_a_budget_over_the_20_dollar_line_needs_rogers_recorded_go(tree, cmd):
     assert ei.value.code == 2
     assert run(base, *cmd, *extra, "--budget-usd", "25", "--confirm-expensive",
                "--confirmed-by", "Roger, test", "--dry-run") == 0
+
+
+# --------------------------------------------------------------------------- gate audit 2 (Roger, 2026-10-12)
+
+def test_harvest_records_the_zipf_floor_and_submit_records_the_counts_file(tree):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    assert run(base, "harvest", "--run-id", "z1") == 0
+    rd = tmp_path / "cands" / "runs" / "roget" / "z1"
+    hc = json.loads((rd / "harvest_counts.json").read_text())
+    assert hc["config"]["zipf_floor"] == "rule_1b" and "zipf_hard" not in hc["config"]
+    assert hc["config"]["wn_closure_depth"] == 6 and hc["config"]["delta_from"] is None
+    zf = hc["counts"]["zipf_floor"]
+    assert zf["below_line"] == zf["hard_reject"] + zf["rescued_total"] and zf["hard_reject"] == 0
+    assert run(base, "submit", "--run-id", "z1", "--registry", str(tmp_path / "cands" / "registry.jsonl")) == 0
+    args = json.loads((rd / "run.json").read_text())["args"]
+    assert args["counts"].endswith("runs/roget/z1/harvest_counts.json")
+    assert args["harvest_config"]["wn_closure_depth"] == 6
+
+
+def test_harvest_delta_from_an_earlier_run(tree, capsys):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    assert run(base, "harvest", "--run-id", "d1") == 0
+    n1 = len((tmp_path / "cands" / "runs" / "roget" / "d1" / "candidates.jsonl").read_text().splitlines())
+    assert n1 > 0
+    # drop two lines from d1's record: a delta run against it holds exactly those two
+    p1 = tmp_path / "cands" / "runs" / "roget" / "d1" / "candidates.jsonl"
+    lines = p1.read_text().splitlines()
+    gone = {json.loads(l)["surface"] for l in lines[:2]}
+    p1.write_text("\n".join(lines[2:]) + "\n")
+    assert run(base, "harvest", "--run-id", "d2", "--delta-from", "d1") == 0
+    rows = [json.loads(l) for l in (tmp_path / "cands" / "runs" / "roget" / "d2" / "candidates.jsonl")
+            .read_text().splitlines()]
+    assert {r["surface"] for r in rows} == gone and [r["rank"] for r in rows] == [1, 2]
+    hc = json.loads((tmp_path / "cands" / "runs" / "roget" / "d2" / "harvest_counts.json").read_text())
+    assert hc["config"]["delta_from"] == "d1"
+    assert hc["counts"]["delta"]["n_new"] == 2 and hc["counts"]["delta"]["n_already_submitted"] == n1 - 2
+    with pytest.raises(SystemExit, match="not found"):
+        run(base, "harvest", "--run-id", "d3", "--delta-from", "nope")
+
+
+def test_coverage_word_level_column_from_a_registry(tree):
+    """The word-level column (gate audit 2, proposal 4) reads the registry given; without one there is none."""
+    tmp_path, base = tree
+    build(tmp_path, base)
+    cov = json.loads((tmp_path / "out" / "roget_coverage.json").read_text())["result"]
+    assert "word_level" not in cov["summary"]                         # build(): no registry in the tmp tree
+    from assistant_axis.gapgen.generators.roget import harvest as H
+    from assistant_axis.gapgen.generators.roget import parse as P
+    idx = P.load_heads(tmp_path / "out" / "heads.json")
+    words = H.would_be_words(idx, [r["id"] for r in cov["rows"]], known_stems={"cautious", "determined", "loving",
+                                                                                "hateful", "willing"})
+    covered = next(r["id"] for r in cov["rows"] if r["gap_class"] in ("covered", "crowded") and words.get(r["id"]))
+    w = words[covered][0]
+    reg = tmp_path / "reg.jsonl"
+    reg.write_text(json.dumps({"key": f"{w}#1", "stem": w, "sense_id": 1, "filter": {"verdict": "trait"},
+                               "novelty": {"decision": "new"}}) + "\n")
+    assert run(base, "coverage", "--registry", str(reg)) == 0
+    cov = json.loads((tmp_path / "out" / "roget_coverage.json").read_text())
+    rows = {r["id"]: r for r in cov["result"]["rows"]}
+    assert rows[covered]["words"]["trait_new"] == [w]
+    assert cov["result"]["summary"]["word_level"]["source"]["n_rows"] == 1
+    assert any(i["dep_key"] == "registry" for i in cov["_provenance"]["inputs"])
+    md = (tmp_path / "out" / "roget_coverage.md").read_text()
+    assert "## Heads not harvested that hold trait-new words (1)" in md and f"1: {w} |" in md
+    assert run(base, "coverage", "--no-registry") == 0
+    assert "word_level" not in json.loads((tmp_path / "out" / "roget_coverage.json").read_text())["result"]["summary"]

@@ -132,6 +132,13 @@ assistant_axis/gapgen/
                      derivational_adjs(noun_synset) -> list[str]; trait_closure(roots=TRAIT_ROOT_LEMMAS) -> set[str]
                      harvest_wn_antonyms(records: list[LabelRecord], wn, freq) -> list[HarvestItem]   # labels with no partner file
                      harvest_trait_closure(wn, freq) -> list[HarvestItem]
+                     since 2026-10-12 (gate audit 2, [roget_wordnet_selection.md](../code_review_2026-10-12/gate_audits/roget_wordnet_selection.md)): WN_CLOSURE_DEPTH 6
+                     (was 3, no derivation; the OEWN closure saturates at 6; a look-ahead past the bound is counted), the gloss hint computed
+                     before the frequency check so rule 1b's rescues apply in the WordNet stream, per-stream counts in wn_counts.json;
+                     harvest.py: the second Zipf check is gone and a word is dropped on hard_reject only (HarvestConfig.zipf_floor "rule_1b";
+                     the zipf_floor block of harvest_counts.json records the words below the line, the rescues per route and what they
+                     became), delta runs (harvest --delta-from RUN, submitting only words not in that run), the word-level column in
+                     coverage (coverage --registry F | --no-registry; head selection unchanged)
   roget_recover.py   choose_hidden(stems, *, frac, seed, regions, partner_sets) -> list[str]
                      @dataclass VerbatimReport(n_hidden, hit: dict[str, str], recall, by_shape, by_region, pair_recall)
                      verbatim_recall(hidden: list[LabelRecord], surfaces: Collection[str], wn, *, pairs, head_pairs) -> VerbatimReport

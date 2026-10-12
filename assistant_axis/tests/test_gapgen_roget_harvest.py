@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import dataclasses
 import json
+from collections import Counter
 
 import pytest
 
+from assistant_axis.entity_id import normalize_to_file_name
 from assistant_axis.gapgen import Candidate
 from assistant_axis.gapgen.generators.roget import coverage as C
 from assistant_axis.gapgen.generators.roget import harvest as H
@@ -16,7 +18,11 @@ from assistant_axis.tests.roget_fakes import make_index, small_wordnet
 
 ZIPF = {"cautious": 3.9, "wary": 3.5, "chary": 2.2, "careful": 4.6, "heedful": 1.9, "guarded": 3.8,
         "circumspect": 2.6, "prudent": 3.3, "rare": 1.2, "incautious": 2.6, "rash": 3.6, "reckless": 3.8,
-        "unwary": 2.2, "honest": 4.4, "dishonest": 3.7}
+        "unwary": 2.2, "honest": 4.4, "dishonest": 3.7,
+        # below the Zipf 1.5 line (gate audit 2 § 4c): a negating-prefix form of a word above it, a plain
+        # trait word, a negating-prefix form of a word also below it, and a below-line word beside a frequent one
+        "uncomplying": 0.0, "complying": 2.4, "thievish": 1.0, "unthrifty": 0.0, "thrifty": 1.2,
+        "captious": 1.19, "critical": 4.5}
 
 
 def zipf(w: str) -> float:
@@ -41,13 +47,19 @@ def test_harvest_head_drops_and_representatives():
     words = [it.surface for it in items]
     assert "cautious" in words and "wary" not in words              # one per group, the most frequent
     assert "careful" in words and "guarded" not in words
-    assert "rare" not in words and drops["zipf_hard"] == 1         # below the platform floor (1.5)
+    # below the platform floor (1.5), but the harvest gives every word a gloss hint, so rule 1b's gloss-hint
+    # route sends it to M1's probe (Roger, 2026-10-12); before, it was dropped as "zipf_hard"
+    rare = next(it for it in items if it.surface == "rare")
+    assert rare.rescue == "gloss_hint" and rare.probe_band and "zipf_hard_reject" not in drops
     heed = next(it for it in items if it.surface == "heedful")
-    assert heed.probe_band                                          # 1.5 <= Zipf < 2.5: flagged, kept
+    assert heed.probe_band and heed.rescue is None                  # 1.5 <= Zipf < 2.5: flagged, kept
     assert drops["function_word"] == 1 and drops["too_many_words"] == 2   # "shy of"; two long phrases
     assert drops["proper"] == 1 and drops["known_label"] == 1
     assert drops["not_representative"] == 3
     assert [it.score for it in items] == sorted([it.score for it in items], reverse=True)
+    # a caller that submits without a gloss hint: hard_reject drops it
+    items, drops = H.harvest_head(h, known_stems={"known_word"}, cfg=CFG, zipf=zipf, gloss_hint=False)
+    assert "rare" not in [it.surface for it in items] and drops["zipf_hard_reject"] == 1
 
 
 def test_harvest_head_cap_and_determinism():
@@ -241,3 +253,107 @@ def test_gloss_hint_keeps_the_word_out_of_hyphenated_siblings_and_the_section():
     t2 = H.gloss_hint(item2, sym, None)
     assert not H.uses_word(t2, "sympathetic") and "(sympathetic affections)" not in t2, t2
     assert H.uses_word("of a piece with scot-free", "free") and not H.uses_word("carefree, freedom", "free")
+
+
+# --------------------------------------------------------------------------- the Zipf floor under rule 1b
+
+def _floor_world():
+    """Three gap heads: 764 with a group holding only a negating-prefix word below the line (review 5 D4's
+    uncomplying) and one holding a negating-prefix word whose base is below the line too; 791 with a plain
+    trait word below the line (thievish); 932 with a below-line word beside a frequent near-synonym, which the
+    one-word-per-group rule leaves out."""
+    idx = make_index([
+        {"id": "764", "title": "Refusal", "adj": [["refusing"], ["uncomplying"], ["unthrifty"]],
+         "noun": [["refusal", "denial"], ["rejection"]]},
+        {"id": "791", "title": "Stealing", "adj": [["thieving"], ["thievish"]], "noun": [["theft", "stealing"]]},
+        {"id": "932", "title": "Disapprobation", "adj": [["critical", "captious"]], "noun": [["blame"]]},
+    ])
+    return idx, PR.rule_pairs(idx, None)
+
+
+def test_negating_prefix_word_below_the_line_is_submitted():
+    """Review 5 D4: zipf_info rescued uncomplying (un- + complying, at 2.4) but the second check dropped it."""
+    idx, pairs = _floor_world()
+    rep = C.coverage(idx, pairs, {})
+    res = H.harvest(rep, idx, pairs, cfg=H.HarvestConfig(), known_stems=set(), run_id="r1", zipf=zipf)
+    c = next(c for c in res.candidates if c.surface == "uncomplying")
+    assert c.source_ref == "roget:764" and c.gloss_hint.startswith("This means ")
+    assert next(it for it in res.items if it.surface == "uncomplying").rescue == "negating_prefix"
+    # route 1 alone keeps it: no gloss hint needed
+    items, drops = H.harvest_head(idx.heads["764"], known_stems=set(), cfg=CFG, zipf=zipf, gloss_hint=False)
+    assert "uncomplying" in [it.surface for it in items]
+
+
+def test_gloss_hinted_word_below_the_line_is_submitted():
+    idx, pairs = _floor_world()
+    rep = C.coverage(idx, pairs, {})
+    res = H.harvest(rep, idx, pairs, cfg=H.HarvestConfig(), known_stems=set(), run_id="r1", zipf=zipf)
+    by = {it.surface: it for it in res.items}
+    assert by["thievish"].rescue == "gloss_hint" and by["thievish"].zipf_min == 1.0
+    assert "thievish" in {c.surface for c in res.candidates}
+    assert by["unthrifty"].rescue == "gloss_hint"            # base thrifty (1.2) is below the line too: route 2
+    assert "captious" not in by and by["critical"].rescue is None   # one word per group: the frequent one
+
+
+def test_hard_reject_still_drops():
+    """Without a gloss hint only the negating-prefix route rescues; hard_reject drops the rest and is counted."""
+    idx, _ = _floor_world()
+    zs = Counter()
+    items, drops = H.harvest_head(idx.heads["764"], known_stems=set(), cfg=CFG, zipf=zipf, gloss_hint=False,
+                                  zipf_stats=zs)
+    words = [it.surface for it in items]
+    assert "unthrifty" not in words and "uncomplying" in words
+    assert drops["zipf_hard_reject"] == 1 and "zipf_hard" not in drops
+    assert zs == Counter({"below_line": 2, "hard_reject": 1, "rescued_negating_prefix": 1})
+    items, _ = H.harvest_head(idx.heads["791"], known_stems=set(), cfg=CFG, zipf=zipf, gloss_hint=False)
+    assert [it.surface for it in items] == ["thieving"]
+
+
+def test_zipf_floor_counts_in_the_records(tmp_path):
+    """harvest_counts.json splits what the floor did (gate audit 2 proposal 3): below the line, dropped by
+    hard_reject, rescued by each route (what the second check dropped before), the rescued words that became
+    candidates, and the same counts for the heads skipped as not character."""
+    idx, pairs = _floor_world()
+    rep = C.coverage(idx, pairs, {})
+    res = H.harvest(rep, idx, pairs, cfg=H.HarvestConfig(), known_stems=set(), run_id="r1", zipf=zipf,
+                    head_scope={"764": 2, "791": 1, "932": 0})
+    zf = res.counts["zipf_floor"]
+    assert zf["rule"] == "rule_1b" and zf["line"] == 1.5
+    assert (zf["below_line"], zf["hard_reject"], zf["rescued"]) == (3, 0, {"gloss_hint": 2, "negating_prefix": 1})
+    assert zf["rescued_total"] == 3 and zf["submitted"] == 3
+    assert zf["submitted_words"] == ["thievish", "uncomplying", "unthrifty"]
+    assert zf["submitted_by_rescue"] == {"negating_prefix": 1, "gloss_hint": 2}
+    # 932 is rated 0 and skipped: its below-line word is counted apart, never submitted
+    assert zf["in_skipped_heads"] == {"below_line": 1, "hard_reject": 0, "rescued": {"gloss_hint": 1},
+                                      "rescued_total": 1}
+    assert "zipf_hard" not in res.counts["drops"]
+    assert res.config["zipf_floor"] == "rule_1b" and "zipf_hard" not in res.config
+    assert res.config["wn_closure_depth"] == 6
+    out = H.write_harvest(res, tmp_path / "run", idx, run_id="r1")
+    rec = json.loads(out["counts"].read_text())
+    assert rec["counts"]["zipf_floor"] == zf and rec["config"]["zipf_floor"] == "rule_1b"
+    md = out["report"].read_text()
+    assert "Zipf floor (rule_1b" in md and "uncomplying" in md
+
+
+def test_delta_keeps_only_the_words_an_earlier_run_did_not_submit():
+    idx, pairs = _floor_world()
+    rep = C.coverage(idx, pairs, {})
+    full = H.harvest(rep, idx, pairs, cfg=H.HarvestConfig(), known_stems=set(), run_id="r1", zipf=zipf)
+    # the earlier run: everything above the line (as the old rule submitted it)
+    prev = {(normalize_to_file_name(c.surface), c.source_ref) for c in full.candidates
+            if c.surface not in ("thievish", "uncomplying", "unthrifty")}
+    d = H.harvest(rep, idx, pairs, cfg=H.HarvestConfig(), known_stems=set(), run_id="r2", zipf=zipf,
+                  already_submitted=prev, delta_from="r1")
+    assert sorted(c.surface for c in d.candidates) == ["thievish", "uncomplying", "unthrifty"]
+    assert [c.rank for c in d.candidates] == [1, 2, 3]
+    assert d.counts["delta"] == {"from": "r1", "n_harvested": len(full.items),
+                                 "n_already_submitted": len(full.items) - 3, "n_new": 3,
+                                 "new_below_line": ["thievish", "uncomplying", "unthrifty"], "new_other": []}
+    assert d.counts["n_candidates"] == 3 and d.counts["zipf_floor"] == full.counts["zipf_floor"]
+
+
+def test_would_be_words_ignore_the_gap_class():
+    idx, _ = _floor_world()
+    got = H.would_be_words(idx, ["764", "932", "nope"], known_stems={"refusing"}, zipf=zipf)
+    assert got == {"764": ["uncomplying", "unthrifty"], "932": ["critical"]}

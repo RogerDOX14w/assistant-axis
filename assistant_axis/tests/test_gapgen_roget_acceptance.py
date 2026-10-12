@@ -186,3 +186,68 @@ def test_placement_check_recorded_within_its_cap():
     # cumulative: the first check's $5 cap (2026-10-08) plus the chunk-5 update's $3 cap (same day)
     u = json.loads(need(OUT / "placement_usage.json").read_text())
     assert u["total_cost_usd"] < 8.0 and set(u["per_model"]) <= {"claude-sonnet-5-5", "claude-opus-5-5"}
+
+
+# --------------------------------------------------------------------------- gate audit 2 (Roger, 2026-10-12)
+
+RUNS = REPO / "data" / "candidates" / "runs"
+WN_DB = REPO / "data" / "external" / "wn" / "wn.db"
+
+
+@pytest.mark.skipif(not WN_DB.exists(), reason="Open English WordNet not installed in data/external/wn")
+def test_wn_closure_saturates_at_the_default_depth():
+    """The bound of 6 is where the trait-noun closure stops growing on OEWN 2024 (gate audit 2 § 4d: 564
+    synsets at depth 3, 745 at 6 and beyond), so the default leaves nothing below it."""
+    from assistant_axis.gapgen.generators.roget import wn_clusters as W
+    lex = W.Lexicon(W.oewn())
+    at = lex.trait_closure()
+    assert set(at) == set(lex.trait_closure(max_depth=W.WN_CLOSURE_DEPTH + 2))
+    assert len(at) > len(lex.trait_closure(max_depth=3))
+
+
+def test_review5_d4_word_is_harvested():
+    """Review 5 D4 on the real text: uncomplying (Zipf 0, un- + complying) in 764 Refusal, which the second
+    check dropped in the 2026-10-11 run, is now its group's word, rescued by the negating prefix."""
+    from assistant_axis.gapgen import paths
+    from assistant_axis.gapgen.generators.roget import harvest as H
+    from assistant_axis.gapgen.generators.roget import mapping as M
+    from assistant_axis.gapgen.generators.roget import parse as P
+    idx = P.load_heads(need(OUT / "heads.json"))
+    known = {r.stem for r in M.load_labels(paths.DATA_DIR, need(QUEUE))}
+    if "uncomplying" in known:
+        pytest.skip("uncomplying is now a corpus or queue label")
+    items, drops = H.harvest_head(idx.heads["764"], known_stems=known, cfg=H.HarvestConfig())
+    it = next((x for x in items if x.surface == "uncomplying"), None)
+    assert it is not None and it.rescue == "negating_prefix" and it.zipf_min < 1.5
+    assert "zipf_hard" not in drops and "zipf_hard_reject" not in drops
+
+
+def _harvest_runs():
+    return sorted(p.parent for p in (RUNS / "roget").glob("*/harvest_counts.json")) if (RUNS / "roget").exists() \
+        else []
+
+
+@pytest.mark.parametrize("run", _harvest_runs(), ids=lambda p: p.name)
+def test_recorded_harvests_record_their_zipf_floor(run):
+    """A harvest before 2026-10-12 records ``zipf_hard`` (every word below it dropped, one count); one since
+    records the rule and the ``zipf_floor`` block, whose counts add up (gate audit 2 proposal 3).  A WordNet
+    run made with it records its closure depth and its drop counts."""
+    hc = json.loads((run / "harvest_counts.json").read_text())
+    cfg, counts = hc["config"], hc["counts"]
+    if "zipf_floor" not in cfg:
+        assert cfg.get("zipf_hard") == 1.5 and "zipf_floor" not in counts
+        return
+    assert cfg["zipf_floor"] == "rule_1b" and "zipf_hard" not in cfg and "zipf_hard" not in counts["drops"]
+    zf = counts["zipf_floor"]
+    assert zf["below_line"] == zf["hard_reject"] + zf["rescued_total"] == zf["hard_reject"] + sum(zf["rescued"].values())
+    assert zf["hard_reject"] == counts["drops"].get("zipf_hard_reject", 0)
+    assert zf["submitted"] >= len(zf["submitted_words"])         # one item per (word, head); words distinct
+    assert zf["submitted"] <= zf["rescued_total"]
+    wrun = RUNS / "wn_clusters" / run.name
+    if cfg.get("include_wn") and (wrun / "candidates.jsonl").exists():
+        wc = json.loads(need(wrun / "wn_counts.json").read_text())
+        assert wc["config"]["wn_closure_depth"] == cfg["wn_closure_depth"]
+        assert {"antonym_route", "closure"} <= set(wc) and "synsets" in wc["closure"]["counts"]
+        if (wrun / "run.json").exists():
+            rj = json.loads((wrun / "run.json").read_text())
+            assert rj["args"]["harvest_config"]["wn_closure_depth"] == cfg["wn_closure_depth"]
