@@ -101,7 +101,8 @@ def _family_section(ev: Mapping) -> list[str]:
              f"clean-prompt families (" + ", ".join(f"`{f}`" for f in CLEAN_FAMILIES) + ") are a within-run "
              "control for whether that casing hurts: the model continues the prompt, so degraded orthography "
              "invites degraded continuation.  The `ai_assistant` row is also the in-or-out call of plan 03 "
-             "section 9.2.", "",
+             "section 9.2.  The submitted, M1 and M3 columns count the **submitted rows**, which passed the count "
+             "floor; the next section reads the same families over the eligible table before it.", "",
              "| family | prompts | samples | uniques/1k | eligible/1k | malformed | ineligible | submitted | "
              "M1 trait rate | alignment scores | M3 decisions | M3 new rate |",
              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
@@ -117,6 +118,48 @@ def _family_section(ev: Mapping) -> list[str]:
                   "lists proper adjectives capitalised, so a lookup against the WordNet lemmas already on disk "
                   "restores nationalities, languages and eponyms with no truecasing model and no API spend.  "
                   "Not built yet, by decision (QUESTIONS 61).", ""]
+    return lines
+
+
+def floor_text(fl: Optional[Mapping]) -> str:
+    """The count floor with the sample size it was applied at and the one it was chosen at (gate audit 3)."""
+    if not fl:
+        return "not recorded"
+    n, at = fl.get("n_samples"), fl.get("chosen_at_n_samples")
+    s = (f"count >= {fl['min_count']} at {n:,} samples ({fl.get('per_1k_samples')} per 1,000 samples)" if n
+         else f"count >= {fl['min_count']} (the table's sample size not recorded)")
+    s += f"; chosen at {at:,} samples" if at else "; the sample size it was chosen at was not recorded"
+    if n and at and n != at:
+        s += f" (**a table of another size**: {round(1000.0 * fl['min_count'] / at, 3)} per 1,000 there)"
+    return s + (f"; {fl['source']}" if fl.get("source") else "")
+
+
+def _before_floor_section(ev: Mapping) -> list[str]:
+    """Per family over the eligible table before the count floor (gate audit 3, proposal 7): the submitted rows
+    alone are what survived the floor, so their family split says more about the floor than the family."""
+    b = ev.get("before_floor") or {}
+    if not b.get("by_family"):
+        return []
+    lines = ["## By family, before the count floor (the eligible table)", "",
+             f"All {b['n_eligible']} eligible rows, {b['n_at_floor']} of them at or above the floor of "
+             f"{b['min_count']}.  The M1 and M3 rates are read from every verdict the registry holds for these "
+             "keys, whichever run judged them, so each rests on the **judged** column, not on every row: rows no "
+             "run has judged are counted, never guessed.  **Only here** is the rows no other family emitted, "
+             "which is what the family adds (the `ai_assistant` in-or-out call, plan 03 section 9.2).", "",
+             "| family | eligible | at floor | nouns | M1-judged | M1 trait rate | M3-decided | M3 new rate | "
+             "only here: eligible / at floor / M1-judged | only here: M1 trait rate | only here: M3 new rate |",
+             "|---|---|---|---|---|---|---|---|---|---|---|"]
+    for f, v in b["by_family"].items():
+        o = v.get("only_here") or {}
+        name = f"**{f}**" if f in (BIO_FAMILY, "ai_assistant") else f
+        lines.append(f"| {name} | {v['n_eligible']} | {v['n_at_floor']} | {v['n_nouns']} | {v['n_m1']} | "
+                     f"{_pct(v['m1_pass_rate'])} | {v['n_m3']} | {_pct(v['m3_new_rate'])} | "
+                     f"{o.get('n_eligible')} / {o.get('n_at_floor')} / {o.get('n_m1')} | {_pct(o.get('m1_pass_rate'))} | "
+                     f"{_pct(o.get('m3_new_rate'))} |")
+    lines += ["", f"**Noun share of M1 survivors before the floor**: {_pct(b.get('noun_share_m1_survivors'))} of "
+                  f"{b.get('n_m1_survivors')} eligible rows M1 called a trait (any run); {b.get('n_nouns_m1_judged')} "
+                  f"of the {b.get('n_nouns')} eligible nouns have an M1 verdict.  This, not the share among the "
+                  "submitted rows, is the number that gates the noun-normalization follow-up (plan 03 task 11).", ""]
     return lines
 
 
@@ -140,12 +183,15 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pat
              f"| samples | {st.get('n_samples')} |", f"| raw items | {st.get('n_raw_items')} |",
              f"| distinct stems (uniques) | {st.get('n_unique')} ({st.get('uniques_per_1k_samples')} per 1k samples) |",
              f"| eligible | {st.get('n_eligible')} |",
+             f"| count floor | {floor_text(ev.get('floor'))} |",
              f"| submitted | {ev.get('n_candidates')} |",
              f"| collapse index (top 50) | {_pct(st.get('collapse_top50_share'))} |",
              f"| Chao1 (all / eligible) | {st.get('chao1')} / {st.get('chao1_eligible')} |",
              f"| rarefaction | {st.get('rarefaction')} |",
-             f"| noun share: uniques / eligible / M1 survivors | {_pct(st.get('noun_share_unique'))} / "
-             f"{_pct(st.get('noun_share_eligible'))} / {_pct(ev.get('noun_share_m1_survivors'))} |",
+             f"| noun share: uniques / eligible / M1 survivors (submitted; eligible table before the floor) | "
+             f"{_pct(st.get('noun_share_unique'))} / {_pct(st.get('noun_share_eligible'))} / "
+             f"{_pct(ev.get('noun_share_m1_survivors'))}; "
+             f"{_pct((ev.get('before_floor') or {}).get('noun_share_m1_survivors'))} |",
              f"| recovery by string (corpus stems found) | {(st.get('recovery_strings') or {}).get('found')} of "
              f"{(st.get('recovery_strings') or {}).get('n_corpus')} ({_pct((st.get('recovery_strings') or {}).get('recall'))}) |",
              ""]
@@ -160,6 +206,7 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pat
               f"M3 scored {m3.get('n_scored', 0)}: {m3.get('decision')}; pair completions {m3.get('pair_completions')}; "
               f"relation-call opposites {m3.get('relation_opposites')}.", ""]
     lines += _family_section(ev)
+    lines += _before_floor_section(ev)
     c = ev.get("cost") or {}
     sense_usd = (ev.get("sense_usage") or {}).get("total_usd") or 0.0
     lines += ["", "## Cost", "",

@@ -211,6 +211,18 @@ descending, ties by first appearance, so recall-versus-rank curves read naturall
 `eligible` changes).  `partner_seed` is set on contrast-family rows (the seed adjective the model
 contrasted against) and becomes `Candidate.partner_hint`.
 
+**Rule 1b, the folds and the count floor (2026-10-12, gate audit 3;
+[base_model_table.md](../code_review_2026-10-12/gate_audits/base_model_table.md)).**  `zipf_info` gets the row's OEWN gloss hint, so a word
+below the line is rescued by its negating prefix or its hint (`freq_rescue` on the row; counts `freq_rescued`
+and `normalized_by`), and `unknown_word` is set only when no rescue applies.  `parse.py` folds `-ly` adverbs,
+more noun suffixes (-ence, -ancy, -acity, -ism, ...) and British spellings to the OEWN adjective, keeps a fold
+only when OEWN has the result, and no longer takes `etc`, `others`, a leading `be` or a frequency adverb as an
+item.  The count floor is **2** (`DEFAULT_MIN_COUNT`, chosen at 2,000 samples; `run.json` and
+`submit_report.json` record it as `floor` with the table's sample size, and a table of another size gets a
+NOTE): the pilot ran at 8, which discarded 88% of the eligible rows, about half of them trait words.  The
+estimate the gate reads counts only the rows that need M1 or M3 (`downstream_need`; `estimate_all_rows`
+keeps the all-rows figure), and `report.md` adds a by-family readout before the floor.
+
 **Candidate emitted**: `Candidate(surface="unflappable", generator="base_model", run_id="2026-10-14a",
 rank=122, score=17.0, gloss_hint=<OEWN hint>, sense_id=1, source_ref="base_model:person:A-000412",
 partner_hint=None)`.  `score` is the raw emission count — **not** a human familiarity, so
@@ -271,7 +283,7 @@ it never feeds eligibility.
 - `stats [--round N]`: writes `stats_round<N>.json` and prints the readout table (rarefaction,
   Chao1, collapse, noun share, per-family **yield and malformed rate**, recovery-by-string, the
   echo split with the words the name rule cost the run, the gloss-sense state).  $0.
-- `submit --run-id R [--min-count 1] [--budget-usd 15] [--confirm-expensive --confirmed-by WHO]
+- `submit --run-id R [--min-count 2] [--budget-usd 15] [--confirm-expensive --confirmed-by WHO]
   [--transport live|batches] [--dry-run]`: selects eligible table rows, **refuses while any of them
   still has two candidate senses** (run `sense` first), prints counts per family and form, prints
   the **downstream estimate** (`n × $0.0072` M1 + `n × pass × $0.011` M3, batches ×0.5, pass rate

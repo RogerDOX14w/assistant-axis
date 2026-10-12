@@ -10,7 +10,7 @@
     uv run python data_analysis/gap_generation/base_model_generator.py sense --round N [--arm bge|gemma|openai|hash]
         [--divergence-cosine 0.6] [--budget-usd 2] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py stats --round N [--temperature T] [--dry-run]
-    uv run python data_analysis/gap_generation/base_model_generator.py submit --round N --run-id R [--min-count 1]
+    uv run python data_analysis/gap_generation/base_model_generator.py submit --round N --run-id R [--min-count 2]
         [--budget-usd 15] [--transport live|batches] [--confirm-expensive --confirmed-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py report --run-id R [--dry-run]
 
@@ -483,6 +483,27 @@ def cmd_stats(args) -> int:
 
 # ---------------------------------------------------------------------------- submit / report
 
+def _table_n_samples(args) -> Optional[int]:
+    """The number of samples the round's table was built from, recorded with the count floor (gate audit 3: a
+    count means a different rate at every sample size): ``parse``'s saved counts, else the round's stats, else
+    the samples file itself."""
+    counts_p = _counts_path(args, None)
+    if counts_p.exists():
+        n = json.loads(counts_p.read_text(encoding="utf-8")).get("n_samples")
+        if n:
+            return int(n)
+    samples_p, _, _, stats_p, _ = _paths(args, None)
+    if stats_p.exists():
+        d = json.loads(stats_p.read_text(encoding="utf-8"))
+        n = (d.get("result", d) or {}).get("n_samples")
+        if n:
+            return int(n)
+    if samples_p.exists():
+        from assistant_axis.gapgen.generators.base_model import table as TB
+        return len(TB.load_samples(samples_p)) or None
+    return None
+
+
 def cmd_submit(args) -> int:
     from assistant_axis.gapgen.generators.base_model import submit as SB
     from assistant_axis.gapgen.generators.base_model import table as TB
@@ -492,8 +513,11 @@ def cmd_submit(args) -> int:
         print(f"missing {_rel(table_p)}: run `parse --round {args.round}` first", file=sys.stderr)
         return 2
     record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
+    explicit = args.min_count is not None
+    min_count = args.min_count if explicit else SB.DEFAULT_MIN_COUNT
     try:
-        SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=args.min_count,
+        SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=min_count,
+                      min_count_explicit=explicit, n_samples=_table_n_samples(args),
                       families=args.families.split(",") if args.families else None, budget_usd=args.budget_usd,
                       confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by,
                       transport=args.transport, dry_run=args.dry_run, registry_path=args.registry,
@@ -638,7 +662,11 @@ def build_parser() -> argparse.ArgumentParser:
                                       "downstream M1 + M3 estimate)")
     p.add_argument("--round", type=int, required=True)
     p.add_argument("--run-id", required=True)
-    p.add_argument("--min-count", type=int, default=1)
+    p.add_argument("--min-count", type=int, default=None,
+                   help="the count floor: submit rows at least this many samples emitted (default 2, chosen by "
+                        "Roger on 2026-10-12 for a 2,000-sample table, gate audit 3; recorded in run.json and "
+                        "submit_report.json with the table's sample size, and a note is printed when the table "
+                        "has another size)")
     p.add_argument("--families", default=None, help="only rows these families emitted (comma-separated)")
     p.add_argument("--transport", choices=("live", "batches"), default="live",
                    help="how the platform will run M1 and M3 (batches: half price in the estimate)")

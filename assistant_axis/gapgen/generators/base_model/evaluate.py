@@ -10,7 +10,10 @@
   are ``wiki_bio`` openings, read against the clean-prompt families in the same run), the ``ai_assistant``
   family separately (yield, M1 trait rate, alignment scores, M3 new rate), M3 covered / new / grey,
   relation-call opposites and pair completions, cost per candidate and useful candidates per dollar from the
-  ``usage.json`` files.  Every number is counted from files on disk.
+  ``usage.json`` files; the run's count floor with its sample size (:func:`floor_of_run`); and, since gate
+  audit 3 (2026-10-12), the per-family figures and the noun share of M1 survivors over the eligible table
+  **before** the floor as well (:func:`before_floor`), so the family comparison is not an artefact of the floor.
+  Every number is counted from files on disk.
 """
 from __future__ import annotations
 
@@ -169,6 +172,58 @@ def _m3(rows: Sequence[Mapping]) -> dict:
             "grey_stems": sorted(r["stem"] for r in nov if r["novelty"].get("decision") == "grey")}
 
 
+def _verdicts(recs: Sequence[Mapping]) -> dict:
+    """M1 and M3 figures over registry rows (whatever run judged them)."""
+    filt = [r["filter"] for r in recs if r.get("filter")]
+    nov = [r["novelty"] for r in recs if (r.get("novelty") or {}).get("decision")]
+    return {"n_m1": len(filt), "m1_pass_rate": _frac(sum(1 for f in filt if f.get("verdict") == "trait"), len(filt)),
+            "n_m3": len(nov), "m3_new_rate": _frac(sum(1 for n in nov if n.get("decision") == "new"), len(nov))}
+
+
+def before_floor(table: Sequence[Mapping], registry_rows: Mapping[str, Mapping], *, min_count: Optional[int]) -> dict:
+    """The eligible table **before** the count floor, read against every verdict the registry holds for its keys
+    (any generator's run): per family and the noun share of M1 survivors (gate audit 3, proposal 7).  The figures
+    over the submitted rows alone are measured on what survived the floor, which at a floor of 8 kept 1 of the
+    462 rows only ``ai_assistant`` emitted and 2 of the 324 eligible nouns, so the ``ai_assistant`` in-or-out call
+    (plan 03 section 9.2) and the noun gate of task 11 need these too.  Rows no run has judged are counted, not
+    guessed: ``n_m1`` says how many of a family's rows the rates rest on."""
+    from assistant_axis.gapgen.normalize import make_key
+    floor = int(min_count or 1)
+    elig = [r for r in table if r.get("eligible")]
+    rec = {r["stem"]: registry_rows.get(make_key(r["stem"], 1)) or {} for r in elig}
+    fams: dict[str, dict] = {}
+    for f in sorted({f for r in elig for f in (r.get("families") or {})}):
+        rs = [r for r in elig if (r.get("families") or {}).get(f)]
+        only = [r for r in rs if len(r.get("families") or {}) == 1]
+        fams[f] = {"n_eligible": len(rs), "n_at_floor": sum(1 for r in rs if int(r["count"]) >= floor),
+                   "n_nouns": sum(1 for r in rs if r.get("form") == "noun"),
+                   **_verdicts([rec[r["stem"]] for r in rs]),
+                   "only_here": {"n_eligible": len(only), "n_at_floor": sum(1 for r in only if int(r["count"]) >= floor),
+                                 **_verdicts([rec[r["stem"]] for r in only])}}
+    judged = [r for r in elig if rec[r["stem"]].get("filter")]
+    surv = [r for r in judged if rec[r["stem"]]["filter"].get("verdict") == "trait"]
+    nouns = [r for r in elig if r.get("form") == "noun"]
+    return {"min_count": floor, "n_eligible": len(elig), "n_at_floor": sum(1 for r in elig if int(r["count"]) >= floor),
+            "n_m1_judged": len(judged), "n_m1_survivors": len(surv),
+            "noun_share_m1_survivors": _frac(sum(1 for r in surv if r.get("form") == "noun"), len(surv)),
+            "n_nouns": len(nouns), "n_nouns_m1_judged": sum(1 for r in nouns if rec[r["stem"]].get("filter")),
+            "by_family": fams}
+
+
+def floor_of_run(args: Optional[Mapping], stats: Optional[Mapping]) -> Optional[dict]:
+    """The run's count floor with its sample size: the record ``submit`` writes since gate audit 3, or, for an
+    earlier run, its ``min_count`` with the table's sample size and ``chosen_at_n_samples`` unknown."""
+    a = args or {}
+    if a.get("floor"):
+        return dict(a["floor"])
+    if a.get("min_count") is None:
+        return None
+    n = (stats or {}).get("n_samples")
+    m = int(a["min_count"])
+    return {"min_count": m, "n_samples": n, "per_1k_samples": round(1000.0 * m / n, 3) if n else None,
+            "chosen_at_n_samples": None, "source": "a run before the floor was recorded (2026-10-12)"}
+
+
 def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats: Optional[Mapping],
                  registry_rows: Mapping[str, Mapping], filter_dir: Path, novelty_dir: Path,
                  sampling_usage: Optional[Path] = None, sense_usage: Optional[Path] = None) -> dict:
@@ -177,6 +232,7 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats:
              if x.strip()] if (run_dir / "candidates.jsonl").exists() else []
     run = _read_json(run_dir / "run.json") or {}
     rows = run_rows(registry_rows, run_id)
+    floor = floor_of_run(run.get("args"), stats)
     by_stem = {r["stem"]: r for r in table}
     fam_rows: dict[str, list] = {}
     for r in rows:
@@ -203,6 +259,9 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats:
         "stats": stats, "m1": m1, "m3": m3,
         "noun_share_m1_survivors": _frac(noun_surv, len(survivors)), "n_m1_survivors": len(survivors),
         "by_family": families, "ai_assistant": families.get("ai_assistant"),
+        # the count floor with the sample size it was applied at, and the eligible table before it (gate audit 3)
+        "floor": floor,
+        "before_floor": before_floor(table, registry_rows, min_count=(floor or {}).get("min_count")),
         "cost": cost, "cost_per_candidate": _frac(cost["total_usd"], len(cands)),
         "useful": useful, "useful_per_dollar": round(useful / cost["total_usd"], 1) if cost["total_usd"] else None,
         "sampling_usage": cost_summary([sampling_usage]) if sampling_usage else None,

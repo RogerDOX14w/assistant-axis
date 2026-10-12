@@ -2,7 +2,9 @@
 
 :func:`run_submit`:
 
-1. selects the eligible table rows (``count >= min_count``; optionally only rows a family emitted) in rank
+1. selects the eligible table rows (``count >= min_count``, the count floor, default :data:`DEFAULT_MIN_COUNT`
+   = 2 chosen at 2,000 samples, recorded with the table's sample size by :func:`floor_record`; optionally only
+   rows a family emitted) in rank
    order, **refuses while any of them still has two candidate senses** (:mod:`.sense`, QUESTIONS 56), and
    builds one :class:`~assistant_axis.gapgen.Candidate` per row: ``score`` is the emission count (**not** a
    human familiarity, so ``base_model`` is not in ``gapgen.freq.FAMILIARITY_GENERATORS`` and no Zipf rescue
@@ -10,12 +12,16 @@
    (the OEWN one, or the sample's where the sense step chose it), ``partner_hint`` the contrast family's seed
    adjective, ``sense_id`` 1;
 2. prints the counts per family and form and the **downstream estimate** (the platform's M1 on every word, M3
-   on the words M1 passes; this generator makes no call), and gates it with ``gapgen.cost.confirm_or_abort``
-   (over ``budget_usd`` refused; over the $20 line needs ``confirm_expensive`` and ``confirmed_by``);
+   on the words M1 passes; this generator makes no call) twice: over all selected rows, and over the rows M1 or
+   M3 will really be asked about, since both reuse a verdict the registry already holds
+   (:func:`downstream_need`; gate audit 3, 2026-10-12); it gates the second with
+   ``gapgen.cost.confirm_or_abort`` (over ``budget_usd`` refused; over the $20 line needs ``confirm_expensive``
+   and ``confirmed_by``);
 3. opens the run, writes ``candidates.jsonl`` **before** the registry append (the main checkout resubmits
-   it with ``gap_registry.py submit --from``), submits, writes ``keys.txt`` and ``submit_report.json``, merges
-   the round's sampling usage (the local model's tokens at $0) into the run's usage, and finishes the run
-   (``run.json``: round, prompts version, temperature, model, table sha256, the seed bundle's manifest);
+   it with ``gap_registry.py submit --from``), submits, writes ``keys.txt`` and ``submit_report.json`` (with
+   the floor and the two estimates), merges the round's sampling usage (the local model's tokens at $0) into
+   the run's usage, and finishes the run (``run.json``: round, prompts version, temperature, model, the floor
+   with its sample size, table sha256, the seed bundle's manifest);
 4. prints the follow-up commands.
 
 A dry run prints the same and writes nothing.
@@ -32,6 +38,7 @@ from typing import Iterable, Mapping, Optional, Sequence
 from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.gapgen import Candidate, start_run, submit_candidates
 from assistant_axis.gapgen.cost import HARD_LINE_USD, confirm_or_abort
+from assistant_axis.gapgen.normalize import make_key
 from assistant_axis.gapgen.paths import REGISTRY_PATH, REPO_ROOT, check_id, run_dir
 from assistant_axis.judge_pricing import MultiModelUsage
 
@@ -53,6 +60,20 @@ M1_PASS_RATE_ASSUMED = 0.80
 M1_PASS_RATE_HIGH = 0.95
 BATCH_FACTOR = 0.5
 DEFAULT_BUDGET_USD = 15.0
+
+#: The emission-count floor: a row is submitted when at least this many samples emitted it.  **2**, chosen by
+#: Roger on 2026-10-12 for a table of **2,000 samples**, accepting gate audit 3
+#: (reports/code_review_2026-10-12/gate_audits/base_model_table.md, sections 6 and 8): at that size the unique
+#: hapaxes are 45% junk, count 2 is 23% and counts 3-7 are 9%, and the pilot's floor of 8 (no recorded
+#: derivation) dropped about 300-520 trait words no other generator has.  A count is a different rate at
+#: every sample size (8 at 2,000 samples is 4 per 1,000; carried to a 20,000-sample run, 0.4 per 1,000), so
+#: the floor is recorded with the sample size of the table it was applied to and the one it was chosen at
+#: (:func:`floor_record`), and a table of another size prints a note.  It is a setting, not derived from the data.
+DEFAULT_MIN_COUNT = 2
+DEFAULT_MIN_COUNT_N_SAMPLES = 2000
+DEFAULT_MIN_COUNT_SOURCE = ("Roger, 2026-10-12, accepting gate audit 3 "
+                            "(reports/code_review_2026-10-12/gate_audits/base_model_table.md sections 6 and 8): "
+                            "a floor of 2 at 2,000 samples")
 RATES_SOURCE = ("M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots "
                 "(overnight_readout_2026-10-08.md section 6); M1 pass rate 0.80, from the two least-curated "
                 "measured waves (roget pilot 81.4% of 172, alignment sweep 78.6% of 369), with 0.95 printed as "
@@ -72,9 +93,12 @@ class Estimate:
     m3_usd_high: float = 0.0
     total_usd_high: float = 0.0
     assumptions: dict = field(default_factory=dict)
+    #: Words M1 has already passed whose M3 decision is still missing: M3 only, and certainly (no pass rate).
+    n_m3_only: int = 0
 
     def format(self) -> str:
-        return (f"downstream estimate for {self.n} words ({self.transport}): M1 filter ${self.m1_usd:.2f} + M3 "
+        words = f"{self.n} words" + (f" + {self.n_m3_only} already passed by M1 (M3 only)" if self.n_m3_only else "")
+        return (f"downstream estimate for {words} ({self.transport}): M1 filter ${self.m1_usd:.2f} + M3 "
                 f"novelty ${self.m3_usd:.2f} = ${self.total_usd:.2f}  [${M1_USD_PER_WORD}/word M1, "
                 f"${M3_USD_PER_PASSED_WORD}/passed word M3 at {self.pass_rate:.0%} passed"
                 f"{', batches x0.5' if self.transport == 'batches' else ''}; the generator itself $0]\n"
@@ -84,19 +108,89 @@ class Estimate:
 
 
 def estimate_downstream_usd(n: int, *, transport: str = "live", pass_rate: float = M1_PASS_RATE_ASSUMED,
-                            pass_rate_high: float = M1_PASS_RATE_HIGH) -> Estimate:
+                            pass_rate_high: float = M1_PASS_RATE_HIGH, n_m3_only: int = 0) -> Estimate:
+    """M1 on ``n`` words and M3 on the ``pass_rate`` share of them, plus M3 on ``n_m3_only`` words M1 has already
+    passed (:func:`downstream_need`)."""
     f = BATCH_FACTOR if transport == "batches" else 1.0
     m1 = round(n * M1_USD_PER_WORD * f, 4)
-    m3 = round(n * pass_rate * M3_USD_PER_PASSED_WORD * f, 4)
-    m3_hi = round(n * pass_rate_high * M3_USD_PER_PASSED_WORD * f, 4)
+    m3 = round((n * pass_rate + n_m3_only) * M3_USD_PER_PASSED_WORD * f, 4)
+    m3_hi = round((n * pass_rate_high + n_m3_only) * M3_USD_PER_PASSED_WORD * f, 4)
     return Estimate(n=n, transport=transport, m1_usd=m1, m3_usd=m3, total_usd=round(m1 + m3, 4), pass_rate=pass_rate,
                     pass_rate_high=pass_rate_high, m3_usd_high=m3_hi, total_usd_high=round(m1 + m3_hi, 4),
                     assumptions={"m1_usd_per_word": M1_USD_PER_WORD, "m3_usd_per_passed_word": M3_USD_PER_PASSED_WORD,
                                  "m1_pass_rate": pass_rate, "m1_pass_rate_high": pass_rate_high, "batch_factor": f,
-                                 "source": RATES_SOURCE})
+                                 "source": RATES_SOURCE},
+                    n_m3_only=n_m3_only)
 
 
-def select_rows(table: Sequence[Mapping], *, min_count: int = 1,
+def downstream_need(rows: Sequence[Mapping], registry_rows: Optional[Mapping[str, Mapping]]) -> dict:
+    """What M1 and M3 will really be asked about the selected rows, from the registry (gate audit 3, proposal 6).
+
+    A row merges into the registry key ``<stem>#1``; M1 (``traithood_filter.py --run``) takes only keys with no
+    ``filter`` block, and M3 (``novelty_score.py score --run``) only keys M1 called a trait that have no
+    ``novelty`` decision from a run.  So: ``n_m1`` keys without an M1 verdict (charged M1, and M3 at the pass
+    rate), ``n_m3_only`` keys M1 passed that M3 has not decided (charged M3 only), and ``n_decided`` the rest
+    (free: their verdicts are reused).  The pilot's estimate charged all 467 rows ($3.74) for a real $0.14.
+
+    A key whose only verdict is the frequency floor's free reject counts as an M1 row: the selected row is
+    eligible, so its source rescues the word, and gate audit 1's defect F3 fix has M1 take such a row again
+    (``n_floor_rejected_retaken``; an over-estimate by those rows if that fix is not in)."""
+    reg = registry_rows or {}
+    n_m1 = n_m3 = n_done = n_floor = 0
+    for r in rows:
+        rec = reg.get(make_key(r["stem"], 1)) or {}
+        f, nv = rec.get("filter") or {}, rec.get("novelty") or {}
+        if f and _free_floor_reject(rec):
+            n_floor += 1
+            n_m1 += 1
+        elif not f:
+            n_m1 += 1
+        elif f.get("verdict") == "trait" and not (nv.get("decision") and nv.get("run_id")):
+            n_m3 += 1
+        else:
+            n_done += 1
+    return {"n_rows": len(rows), "n_m1": n_m1, "n_m3_only": n_m3, "n_decided": n_done,
+            "n_floor_rejected_retaken": n_floor, "registry_rows": len(reg)}
+
+
+def _free_floor_reject(rec: Mapping) -> bool:
+    """The filter block is the frequency floor's reject, made without a call (the split filter's ``rule``
+    "floor", or the single-call filter's hard reject: no model, tag ``too_rare``); a probe cut is a paid
+    verdict and is not one.  The same test as gate audit 1's ``freq.is_free_floor_reject``."""
+    f = rec.get("filter") or {}
+    if f.get("rule") == "floor":
+        return True
+    return (bool((rec.get("freq") or {}).get("hard_reject")) and f.get("model") is None
+            and "too_rare" in (f.get("tags") or []))
+
+
+def floor_record(min_count: int, *, n_samples: Optional[int], explicit: bool = False) -> dict:
+    """The count floor as the run records it: the value, the sample size of the table it was applied to, the
+    rate that means (per 1,000 samples), the sample size the value was chosen at, and where it came from.  The
+    documented value (:data:`DEFAULT_MIN_COUNT`, typed or not) was chosen at :data:`DEFAULT_MIN_COUNT_N_SAMPLES`;
+    any other value was set with ``--min-count`` for this table.  ``explicit``: the flag was given."""
+    documented = int(min_count) == DEFAULT_MIN_COUNT
+    return {"min_count": int(min_count), "n_samples": n_samples,
+            "per_1k_samples": round(1000.0 * min_count / n_samples, 3) if n_samples else None,
+            "chosen_at_n_samples": DEFAULT_MIN_COUNT_N_SAMPLES if documented else n_samples,
+            "source": DEFAULT_MIN_COUNT_SOURCE if documented else "--min-count, set for this run",
+            "flag_given": bool(explicit)}
+
+
+def floor_note(rec: Mapping) -> Optional[str]:
+    """A note when the floor is applied to a table of another size than the one it was chosen at."""
+    n, at = rec.get("n_samples"), rec.get("chosen_at_n_samples")
+    if n and at and n != at:
+        return (f"NOTE: the count floor {rec['min_count']} was chosen at {at:,} samples and this table has {n:,} "
+                f"({rec['per_1k_samples']} per 1,000 samples here, {round(1000.0 * rec['min_count'] / at, 3)} at "
+                f"{at:,}); a count is a different rate at every sample size, so state the floor for this size with "
+                f"--min-count (gate audit 3, section 6)")
+    if not n:
+        return "NOTE: the table's sample size is unknown, so the floor is recorded without it"
+    return None
+
+
+def select_rows(table: Sequence[Mapping], *, min_count: int = DEFAULT_MIN_COUNT,
                 families: Optional[Iterable[str]] = None) -> list[Mapping]:
     """Eligible rows with ``count >= min_count`` (and, given ``families``, emitted by one of them), by rank."""
     fams = set(families or ())
@@ -184,37 +278,66 @@ class SubmitSummary:
     round: int
     n_table: int
     n_selected: int
+    #: The gated estimate: only the rows M1 or M3 will really be asked about (:func:`downstream_need`).
     estimate: dict
     strata: dict
     dry_run: bool
     run_dir: Optional[str] = None
     report: Optional[dict] = None
     followups: list[str] = field(default_factory=list)
+    #: The estimate as if no selected row had a recorded verdict (what the gate read before gate audit 3).
+    estimate_all_rows: Optional[dict] = None
+    need: Optional[dict] = None
+    floor: Optional[dict] = None
 
 
-def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count: int = 1,
+def _load_registry_rows(registry_path: Path) -> dict:
+    from assistant_axis.gapgen.registry import Registry
+    p = Path(registry_path)
+    return Registry(p).fold() if p.exists() else {}
+
+
+def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count: int = DEFAULT_MIN_COUNT,
+               min_count_explicit: bool = False, n_samples: Optional[int] = None,
                families: Optional[Iterable[str]] = None, budget_usd: float = DEFAULT_BUDGET_USD,
                confirm_expensive: bool = False, confirmed_by: Optional[str] = None, transport: str = "live",
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None,
                sampling_record: Optional[Mapping] = None, sampling_usage_path: Optional[Path] = None,
-               echo=print) -> SubmitSummary:
+               registry_rows: Optional[Mapping[str, Mapping]] = None, echo=print) -> SubmitSummary:
+    """Select, estimate, gate and submit (see the module docstring).  ``n_samples``: the number of samples the
+    table was built from, recorded with the floor (:func:`floor_record`).  ``registry_rows``: the folded
+    registry the estimate reads (default: ``registry_path``'s)."""
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
         raise ValueError("--transport must be live or batches")
     rows = select_rows(table, min_count=min_count, families=families)
     check_sense_resolved(rows, round_n=round_n)     # one settled sense before M1 (QUESTIONS 56)
     cands = to_candidates(rows, run_id)
-    est = estimate_downstream_usd(len(cands), transport=transport)
+    floor = floor_record(min_count, n_samples=n_samples, explicit=min_count_explicit)
+    need = downstream_need(rows, _load_registry_rows(registry_path) if registry_rows is None else registry_rows)
+    est_all = estimate_downstream_usd(len(cands), transport=transport)
+    est = estimate_downstream_usd(need["n_m1"], transport=transport, n_m3_only=need["n_m3_only"])
     st = strata(rows)
     echo(f"round {round_n}: {len(table)} table rows; selected {len(rows)} eligible (count >= {min_count}"
          + (f", families {sorted(families)}" if families else "") + ")")
+    echo(f"  count floor: {min_count} at {floor['n_samples'] or 'an unknown number of'} samples "
+         f"({floor['per_1k_samples']} per 1,000); chosen at {floor['chosen_at_n_samples']} samples "
+         f"({floor['source']})")
+    note = floor_note(floor)
+    if note:
+        echo(f"  {note}")
     for k, v in st.items():
         echo(f"  {k}: {v}")
-    echo(est.format())
+    echo(f"selected rows the registry already holds a verdict for: {need['n_decided']} decided (M1 and M3 reuse "
+         f"them, free), {need['n_m3_only']} passed by M1 with no M3 decision (M3 only), {need['n_m1']} with no M1 "
+         f"verdict (M1, then M3 on those it passes)")
+    echo("all rows, as if none had a verdict: " + est_all.format())
+    echo("rows without a recorded verdict (the gate reads this one): " + est.format())
     confirm_or_abort(est.total_usd, budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
     summary = SubmitSummary(run_id=run_id, round=round_n, n_table=len(table), n_selected=len(rows),
-                            estimate=asdict(est), strata=st, dry_run=dry_run)
+                            estimate=asdict(est), strata=st, dry_run=dry_run, estimate_all_rows=asdict(est_all),
+                            need=need, floor=floor)
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
     if dry_run:
@@ -227,8 +350,11 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
     key = rec.get("key") or {}
     args = {"round": round_n, "prompts_version": key.get("prompts_version"), "wording_sha256": key.get("wording_sha256"),
             "temperature": key.get("temperatures"), "seed": key.get("seed"), "model": rec.get("model"),
-            "min_count": min_count, "families": sorted(families) if families else None, "n": len(cands),
-            "n_table": len(table), "transport": transport, "budget_usd": budget_usd, "estimate": asdict(est),
+            "min_count": min_count, "floor": floor, "families": sorted(families) if families else None,
+            "n": len(cands), "n_table": len(table), "transport": transport, "budget_usd": budget_usd,
+            # the gated estimate counts only rows without a recorded verdict (gate audit 3); before 2026-10-12
+            # "estimate" charged every row, which is now "estimate_all_rows"
+            "estimate": asdict(est), "estimate_all_rows": asdict(est_all), "downstream_need": need,
             "strata": st, "table": str(table_path) if table_path else None, "table_sha256": table_sha256,
             "seed_bundle": rec.get("bundle"), "sampling": rec.get("sampling"),
             "gloss_sense": sense_summary(rows)}
@@ -237,7 +363,9 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
     ctx.record_candidates(cands)          # candidates.jsonl first (the tracked record of the run)
     rep = submit_candidates(cands, registry_path=registry_path)
     atomic_write_text("".join(k + "\n" for k in rep.keys), ctx.dir / "keys.txt")
-    rep_d = {k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}
+    rep_d = ({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}
+             | {"floor": floor, "downstream_need": need, "estimate_usd": est.total_usd,
+                "estimate_all_rows_usd": est_all.total_usd})
     atomic_write_text(json.dumps(rep_d, indent=2) + "\n", ctx.dir / "submit_report.json")
     if sampling_usage_path is not None and Path(sampling_usage_path).exists() and not ctx.total_usage().n_calls:
         ctx.usage.merge_from(MultiModelUsage.load_or_create(sampling_usage_path))

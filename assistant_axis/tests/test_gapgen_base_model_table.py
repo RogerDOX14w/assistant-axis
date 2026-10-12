@@ -6,6 +6,7 @@ import pytest
 
 from assistant_axis.gapgen.freq import FreqInfo, zipf_info
 from assistant_axis.gapgen.generators.base_model import parse as PA
+from assistant_axis.gapgen.generators.censuses.glosshint import Sense
 from assistant_axis.gapgen.generators.base_model import table as T
 from assistant_axis.tests.base_model_fakes import ADJECTIVES, NOUNS, SENSES, fake_zipf
 
@@ -32,7 +33,7 @@ BIOS = {"wikibio:train:0": ("Walter Extra", "Walter Extra is a german pilot and 
 def lookups(**over):
     kw = dict(zipf_word=fake_zipf, in_wordnet=lambda s: s in ADJECTIVES or s in NOUNS or s in SENSES,
               senses=lambda s: list(SENSES.get(s, [])), lexicon=PA.Lexicon(adjectives=ADJECTIVES, nouns=NOUNS),
-              freq=lambda s: zipf_info(s, zipf_fn=fake_zipf))
+              freq=lambda s, **k: zipf_info(s, zipf_fn=fake_zipf, **k))
     kw.update(over)
     return T.Lookups(**kw)
 
@@ -140,7 +141,7 @@ def test_contrast_partner_and_sample_gloss():
 
 
 def fixed_freq(flags):
-    def f(surface):
+    def f(surface, **_):
         hard, probe = flags.get(surface, (False, False))
         return FreqInfo(zipf_min=1.0 if hard else (2.0 if probe else 4.0), hard_reject=hard, probe_band=probe)
     return f
@@ -157,6 +158,80 @@ def test_eligibility_truth_table():
     # a real floor: hidebound has Zipf 1.4 < 1.5 and no rescue
     r2 = by_stem(build()[0])
     assert r2["hidebound"]["freq_hard_reject"] is True and r2["hidebound"]["ineligible_reason"] == "below_hard_reject"
+
+
+class TestRule1b:
+    """Gate audit 3, section 5 (Roger, 2026-10-12): the table applies rule 1b as `gapgen.freq.zipf_info` defines it,
+    so the rows the platform would probe are not binned: the negating-prefix rescue comes before `unknown_word`,
+    and the row's own OEWN gloss hint is passed (104 of the pilot's 189 ineligible rows)."""
+
+    ZIPF = {"sycophantic": 2.4, "unsycophantic": 0.0, "hardhearted": 1.35, "jocose": 1.2, "illiterable": 0.0}
+    SENSES = {"hardhearted": [Sense("lacking in feeling or pity or warmth", "a")]}
+
+    def lookups(self):
+        z = lambda w: self.ZIPF.get(w, fake_zipf(w))  # noqa: E731
+        return lookups(zipf_word=z, freq=lambda s, **k: zipf_info(s, zipf_fn=z, **k),
+                       senses=lambda s: list(self.SENSES.get(s, SENSES.get(s, []))))
+
+    def rows(self):
+        return by_stem(build([S(0, "list", " unsycophantic, hardhearted, jocose, illiterable, calm.")],
+                             lookups=self.lookups())[0])
+
+    def test_a_negated_coinage_is_rescued_before_the_unknown_word_bin(self):
+        r = self.rows()["unsycophantic"]
+        assert r["unknown_word"] is True                          # neither wordfreq nor OEWN knows it
+        assert r["eligible"] is True and r["ineligible_reason"] is None
+        assert r["freq_rescue"] == "negating_prefix" and r["freq_probe_band"] is True
+
+    def test_a_word_below_the_floor_with_a_gloss_hint_goes_to_the_probe(self):
+        r = self.rows()["hardhearted"]
+        assert r["gloss_hint"] and r["zipf"] < 1.5
+        assert r["eligible"] is True and r["freq_rescue"] == "gloss_hint" and r["freq_probe_band"] is True
+
+    def test_no_rescue_still_bins(self):
+        rows = self.rows()
+        # below the floor, known to wordfreq, no gloss hint: the floor holds
+        assert rows["jocose"]["eligible"] is False and rows["jocose"]["ineligible_reason"] == "below_hard_reject"
+        # unknown and no negating prefix: unknown_word holds
+        assert rows["illiterable"]["ineligible_reason"] == "unknown_word" and rows["illiterable"]["freq_rescue"] is None
+        assert rows["calm"]["eligible"] is True and rows["calm"]["freq_rescue"] is None
+
+    def test_the_counts_say_how_many_were_rescued(self):
+        _, c = build([S(0, "list", " unsycophantic, hardhearted, jocose, calm.")], lookups=self.lookups())
+        assert c["freq_rescued"] == {"gloss_hint": 1, "negating_prefix": 1}
+        assert c["ineligible"] == {"below_hard_reject": 1}
+
+    def test_the_table_agrees_with_m1s_own_check(self):
+        """M1 runs zipf_info on the candidate with gloss_hint=bool(intended_sense) (filter.py), so a row the table
+        calls eligible is one M1 sends to the probe, not one it bins."""
+        z = lambda w: self.ZIPF.get(w, fake_zipf(w))  # noqa: E731
+        for stem, r in self.rows().items():
+            m1 = zipf_info(r["surface"], gloss_hint=bool(r["gloss_hint"]), zipf_fn=z)
+            assert r["eligible"] == (not m1.hard_reject), stem
+
+
+class TestFoldsInTheTable:
+    """Gate audit 3's parse fixes, seen in the table: folded items merge into their adjective's row (raising its
+    count, which matters while any count floor exists), and the counts say which rule folded how many."""
+
+    LEX = PA.Lexicon(adjectives=ADJECTIVES | {"organized", "sarcastic"}, nouns=NOUNS)
+
+    def test_an_adverb_and_a_noun_merge_into_the_adjective_row(self):
+        rows, c = build([S(0, "list", " patient, kind."), S(1, "ai_assistant", " patiently\n2. be sarcastic\n"),
+                         S(2, "occupation", " patience, organised.")],
+                        lookups=lookups(lexicon=self.LEX))
+        r = by_stem(rows)
+        assert r["patient"]["count"] == 3 and r["patient"]["families"] == {"ai_assistant": 1, "list": 1,
+                                                                          "occupation": 1}
+        assert "patiently" not in r and "patience" not in r and "be_sarcastic" not in r and "sarcastic" in r
+        assert "organized" in r and "organised" not in r
+        assert c["normalized_by"] == {"adverb": 1, "noun_suffix": 1, "us_spelling": 1}
+
+    def test_a_span_copied_from_the_biography_is_dropped_before_or_after_a_spelling_fold(self):
+        bios = {"wikibio:train:9": ("Ann Bell", "ann bell was a well organised teacher .")}
+        rows, c = T.build_table([S(0, "person", " well organised, kind.", seed_refs=["wikibio:train:9"])],
+                                lookups=lookups(lexicon=self.LEX), bio_lookup=bios.get)
+        assert c["n_bio_span_echo"] == 1 and "well_organized" not in by_stem(rows)
 
 
 def test_corpus_flags_never_change_eligibility():
@@ -191,7 +266,8 @@ def test_counts():
 def test_row_schema():
     row = build()[0][0]
     want = {"schema_version", "surface", "stem", "form", "normalized_from", "count", "families", "first_sample_id",
-            "first_family", "sample_gloss", "zipf", "freq_hard_reject", "freq_probe_band", "in_oewn", "in_tda", "wordnet",
+            "first_family", "sample_gloss", "zipf", "freq_hard_reject", "freq_probe_band", "freq_rescue", "in_oewn",
+            "in_tda", "wordnet",
             "gloss_hint", "partner_seed", "eligible", "ineligible_reason", "rank", "corpus_stem_match",
             "queue_stem_match", "unknown_word"}
     assert set(row) == want

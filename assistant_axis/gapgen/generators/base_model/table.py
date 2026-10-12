@@ -17,8 +17,11 @@ items by stem (``normalize_candidate(surface).stem``, i.e. ``normalize_to_file_n
 * ``sample_gloss``: the first gloss the model wrote for the word (glossary and AI families only), kept for review
   and never sent to M1; ``gloss_hint``: the OEWN person-descriptive sense (the censuses' :mod:`glosshint`), else
   None; ``partner_seed``: the seed adjective of the contrast samples that emitted the word (the most frequent);
-* eligibility: ``cleaned`` and not ``unknown_word`` (a content word neither ``wordfreq`` nor OEWN knows) and not
-  ``freq_hard_reject`` (``gapgen.freq.zipf_info``, the platform's floor, never a local literal);
+* eligibility: ``cleaned`` and not ``freq_hard_reject`` (``gapgen.freq.zipf_info``, the platform's floor, never
+  a local literal, with rule 1b's rescues: the row's OEWN gloss hint is passed, and a rescued word is eligible
+  for M1's probe, ``freq_rescue`` saying which route); a row below the floor with no rescue is
+  ``unknown_word`` when a content word is one neither ``wordfreq`` nor OEWN knows, else ``below_hard_reject``
+  (since gate audit 3, 2026-10-12: before, ``unknown_word`` came before the rescue and no hint was passed);
 * ``rank``: count descending, ties by first appearance; ``corpus_stem_match`` / ``queue_stem_match`` /
   ``in_tda`` are for evaluation only (no eligibility field reads them);
 * per prompt family, the sample-level counts (raw items, malformed, the three echo kinds) ride in
@@ -48,7 +51,7 @@ from assistant_axis.gapgen.normalize import normalize_candidate
 from assistant_axis.gapgen.registry import utc_stamp
 
 from ..censuses.glosshint import Sense, gloss_hint, person_sense
-from .parse import Lexicon, extract_items, normalize_form
+from .parse import Lexicon, extract_items, normalize_form_kind
 
 SCHEMA_VERSION = 1
 GLOSS_FAMILIES = ("list_gloss", "ai_assistant")
@@ -62,7 +65,8 @@ class Lookups:
     in_wordnet: Callable[[str], bool]           # OEWN has the form (any part of speech)
     senses: Callable[[str], list[Sense]]        # glosshint.adjective_senses
     lexicon: Lexicon
-    freq: Callable[[str], FreqInfo] = field(default=zipf_info)
+    #: ``freq(surface, gloss_hint=bool) -> FreqInfo``: the platform's floor and rule 1b's rescues.
+    freq: Callable[..., FreqInfo] = field(default=zipf_info)
 
 
 def default_lookups() -> Lookups:  # pragma: no cover - needs wordfreq and the OEWN database
@@ -135,6 +139,8 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
     fam_counts: dict[str, Counter] = defaultdict(Counter)
     #: Words dropped as a name echo, with the number of samples that lost them (QUESTIONS 54).
     name_echo: Counter = Counter()
+    #: Items a mechanical fold changed, by rule (``parse.normalize_form_kind``).
+    folds: Counter = Counter()
     accs: dict[str, _Acc] = {}
     ordered = sorted(samples, key=lambda s: (int(s.get("index", 0)), str(s["sample_id"])))
     for s in ordered:
@@ -153,17 +159,18 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
         for it in extract_items(s.get("text") or "", fam, truncated=s.get("stop_reason") == "max_tokens"):
             counts["n_raw_items"] += 1
             fc["n_raw_items"] += 1
-            surface, form, norm_from = normalize_form(it.surface, lexicon=lookups.lexicon)
+            surface, form, norm_from, fold_kind = normalize_form_kind(it.surface, lexicon=lookups.lexicon)
             if surface in seeds or it.surface in seeds:
                 counts["n_seed_echo"] += 1
                 fc["n_seed_echo"] += 1
                 continue
-            if bio is not None and surface in name_words:      # a single word matching a word of the name
+            if bio is not None and (surface in name_words or it.surface in name_words):   # a word of the name
                 counts["n_name_echo"] += 1
                 fc["n_name_echo"] += 1
-                name_echo[surface] += 1
+                name_echo[surface if surface in name_words else it.surface] += 1
                 continue
-            if bio is not None and " " in surface and surface in bio_text:   # a span copied from the biography
+            # a span copied from the biography (as written, or before a spelling fold changed it)
+            if bio is not None and " " in it.surface and (it.surface in bio_text or surface in bio_text):
                 counts["n_bio_span_echo"] += 1
                 fc["n_bio_span_echo"] += 1
                 continue
@@ -177,6 +184,8 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
                 counts["n_repeat_in_sample"] += 1
                 continue
             seen_here.add(stem)
+            if fold_kind:
+                folds[fold_kind] += 1
             a = accs.get(stem)
             if a is None:
                 a = accs[stem] = _Acc(surface=surface, form=form, normalized_from=norm_from,
@@ -209,19 +218,29 @@ def build_table(samples: Iterable[Mapping], *, lookups: Lookups, corpus_stems: I
            "by_family": {f: dict(sorted(c.items())) for f, c in sorted(fam_counts.items())},
            "by_form_eligible": {f: sum(1 for r in rows if r["form"] == f and r["eligible"]) for f in FORMS},
            "ineligible": dict(sorted(Counter(r["ineligible_reason"] for r in rows if not r["eligible"]).items())),
-           "normalized_mechanically": sum(1 for r in rows if r["normalized_from"])}
+           # rule 1b's rescues among the eligible rows (gate audit 3: they go to M1's probe, not the bin)
+           "freq_rescued": dict(sorted(Counter(r["freq_rescue"] for r in rows
+                                               if r["eligible"] and r.get("freq_rescue")).items())),
+           "normalized_mechanically": sum(1 for r in rows if r["normalized_from"]),
+           "normalized_by": dict(sorted(folds.items()))}
     return rows, out
 
 
 def _row(stem: str, a: _Acc, *, lookups: Lookups, corpus: set, queue: set, tda: set) -> dict:
+    """One table row.  Eligibility follows rule 1b as :func:`gapgen.freq.zipf_info` defines it (decisions_m1.md;
+    gate audit 3, Roger 2026-10-12): the row's own OEWN gloss hint is passed, so a word below the floor that
+    arrives with one goes to M1's probe, and a rescue comes **before** the ``unknown_word`` bin, so an un- / in- /
+    non- coinage of a known word (``unsycophantic``, ``uncalculating``) is probed rather than binned.  M1 runs the
+    same rule on the candidate (``filter.py``: ``gloss_hint=bool(intended_sense)``), so the two now agree."""
     norm = normalize_candidate(a.surface)
     tokens = norm.content_words
     unknown = any(lookups.zipf_word(t) <= 0.0 and not lookups.in_wordnet(t) for t in tokens)
-    fi = lookups.freq(a.surface)
     senses = lookups.senses(a.surface)
     hint = person_sense(senses)
+    gh = gloss_hint(norm.label, hint)
+    fi = lookups.freq(a.surface, gloss_hint=gh is not None)
     in_oewn = bool(senses) or lookups.in_wordnet(a.surface)
-    if unknown:
+    if unknown and fi.rescue is None:
         eligible, reason = False, "unknown_word"
     elif fi.hard_reject:
         eligible, reason = False, "below_hard_reject"
@@ -235,12 +254,12 @@ def _row(stem: str, a: _Acc, *, lookups: Lookups, corpus: set, queue: set, tda: 
             "normalized_from": a.normalized_from, "count": a.count, "families": dict(sorted(a.families.items())),
             "first_sample_id": a.first_sample_id, "first_family": a.first_family, "sample_gloss": a.gloss,
             "zipf": fi.zipf_min,
-            "freq_hard_reject": fi.hard_reject, "freq_probe_band": fi.probe_band, "in_oewn": in_oewn,
-            "in_tda": stem in tda,
+            "freq_hard_reject": fi.hard_reject, "freq_probe_band": fi.probe_band, "freq_rescue": fi.rescue,
+            "in_oewn": in_oewn, "in_tda": stem in tda,
             "wordnet": {"n_adj_senses": hint.n_adj_senses if hint else 0,
                         "person_sense_rank": hint.rank if hint else None,
                         "definition": hint.definition if hint else None},
-            "gloss_hint": gloss_hint(norm.label, hint), "partner_seed": partner, "eligible": eligible,
+            "gloss_hint": gh, "partner_seed": partner, "eligible": eligible,
             "ineligible_reason": reason, "unknown_word": unknown, "rank": 0, "corpus_stem_match": stem in corpus,
             "queue_stem_match": stem in queue}
 

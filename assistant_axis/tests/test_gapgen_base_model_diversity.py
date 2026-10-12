@@ -101,3 +101,56 @@ def test_per_family_yield_and_malformed_rate():
     assert pf["person"]["n_name_echo"] == 1 and pf["person"]["n_bio_span_echo"] == 2
     # the frozen harness stays usable without the extra block
     assert "malformed_rate" not in D.per_family(PF_ROWS, samples=PF_SAMPLES)["list"]
+
+
+class TestBeforeTheFloor:
+    """Gate audit 3, proposal 7: the readout's per-family and noun numbers over the eligible table before the count
+    floor, read against every verdict the registry holds, so the family comparison is not an artefact of the
+    floor (at 8 it kept 1 of the 462 rows only `ai_assistant` emitted, and 2 of 324 eligible nouns)."""
+
+    TABLE = [
+        {"stem": "kind", "count": 9, "families": {"list": 5, "ai_assistant": 4}, "eligible": True, "form": "adjective"},
+        {"stem": "tireless", "count": 1, "families": {"ai_assistant": 1}, "eligible": True, "form": "adjective"},
+        {"stem": "data", "count": 1, "families": {"ai_assistant": 1}, "eligible": True, "form": "noun"},
+        {"stem": "introvert", "count": 3, "families": {"list": 2, "person": 1}, "eligible": True, "form": "noun"},
+        {"stem": "zorbish", "count": 4, "families": {"list": 4}, "eligible": False, "form": "adjective"},
+    ]
+    REG = {"kind#1": {"filter": {"verdict": "trait"}, "novelty": {"decision": "covered"}},
+           "tireless#1": {"filter": {"verdict": "trait"}, "novelty": {"decision": "new"}},
+           "data#1": {"filter": {"verdict": "reject"}},
+           "introvert#1": {"filter": {"verdict": "trait"}}}
+
+    def test_per_family_and_only_here(self):
+        from assistant_axis.gapgen.generators.base_model import evaluate as EV
+        b = EV.before_floor(self.TABLE, self.REG, min_count=8)
+        assert b["n_eligible"] == 4 and b["n_at_floor"] == 1 and b["min_count"] == 8
+        ai = b["by_family"]["ai_assistant"]
+        assert (ai["n_eligible"], ai["n_at_floor"], ai["n_nouns"], ai["n_m1"]) == (3, 1, 1, 3)
+        assert ai["m1_pass_rate"] == pytest.approx(2 / 3, abs=1e-4) and ai["m3_new_rate"] == pytest.approx(0.5)
+        # what only this family brought: two rows, neither at the floor of 8
+        assert ai["only_here"]["n_eligible"] == 2 and ai["only_here"]["n_at_floor"] == 0
+        assert ai["only_here"]["m1_pass_rate"] == pytest.approx(0.5) and ai["only_here"]["m3_new_rate"] == 1.0
+        assert "zorbish" not in str(b) and set(b["by_family"]) == {"ai_assistant", "list", "person"}
+
+    def test_the_noun_share_of_m1_survivors_before_the_floor(self):
+        from assistant_axis.gapgen.generators.base_model import evaluate as EV
+        b = EV.before_floor(self.TABLE, self.REG, min_count=8)
+        # survivors: kind, tireless, introvert; one noun among them.  After the floor of 8 it would be 0 of 1.
+        assert b["n_m1_survivors"] == 3 and b["noun_share_m1_survivors"] == pytest.approx(1 / 3, abs=1e-4)
+        assert (b["n_nouns"], b["n_nouns_m1_judged"]) == (2, 2)
+        # rows no run judged are counted, never guessed
+        b2 = EV.before_floor(self.TABLE, {}, min_count=2)
+        assert b2["n_m1_judged"] == 0 and b2["noun_share_m1_survivors"] is None
+        assert b2["by_family"]["list"]["m1_pass_rate"] is None
+
+    def test_the_floor_of_a_run(self):
+        from assistant_axis.gapgen.generators.base_model import evaluate as EV
+        from assistant_axis.gapgen.generators.base_model import report as RP
+        rec = {"min_count": 2, "n_samples": 2000, "per_1k_samples": 1.0, "chosen_at_n_samples": 2000, "source": "x"}
+        assert EV.floor_of_run({"floor": rec, "min_count": 2}, {"n_samples": 2000}) == rec
+        # the pilot, before the record: its value with the table's sample size, the size it was chosen at unknown
+        old = EV.floor_of_run({"min_count": 8}, {"n_samples": 2000})
+        assert old["per_1k_samples"] == 4.0 and old["chosen_at_n_samples"] is None
+        assert RP.floor_text(old).startswith("count >= 8 at 2,000 samples (4.0 per 1,000 samples); the sample size")
+        assert "another size" in RP.floor_text(dict(rec, n_samples=20_000, per_1k_samples=0.1))
+        assert EV.floor_of_run({}, None) is None and RP.floor_text(None) == "not recorded"

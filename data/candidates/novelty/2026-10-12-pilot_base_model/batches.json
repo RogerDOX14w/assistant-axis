@@ -1,0 +1,292 @@
+{
+  "batch_id": "2026-10-12-pilot_base_model",
+  "waves": {
+    "r1_relation": [
+      {
+        "id": "msgbatch_01GkjVMf8j9XabvVqxHNNTPD",
+        "custom_ids": [
+          "rel-h-detailed_1-f42821b9c1ba",
+          "rel-h-empathy_1-cad213eb12dd",
+          "rel-h-fun_1-c0730df507ca",
+          "rel-h-goal_oriented_1-f3c33a2169e6",
+          "rel-h-hard_working_1-ff9256a54d86",
+          "rel-h-inspiring_1-9ecc36b1481b",
+          "rel-h-narcissistic_1-a57606b2bacd",
+          "rel-h-self_motivated_1-12294a213d17",
+          "rel-h-team_player_1-b09257985c80",
+          "rel-h-unctuous_1-ed3f0cc65b8b"
+        ],
+        "n_requests": 10,
+        "bytes": 59353,
+        "estimate_usd": 0.004144,
+        "submitted_at": "2026-10-12T03:05:58+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:09:02+00:00"
+      }
+    ],
+    "r2_relation_unsure": [
+      {
+        "id": "msgbatch_012SuyEThRQayR9wAkATjcCK",
+        "custom_ids": [
+          "rel-s-fun_1-aa66a96b0789"
+        ],
+        "n_requests": 1,
+        "bytes": 2027,
+        "estimate_usd": 0.000994,
+        "submitted_at": "2026-10-12T03:09:02+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:11:05+00:00"
+      }
+    ],
+    "o01_sonnet": [
+      {
+        "id": "msgbatch_014DvRtorBx6gZEh5ppf5xAK",
+        "custom_ids": [
+          "ove-s-detailed_1-b65ebc2f3579",
+          "ove-s-empathy_1-652800a027fb",
+          "ove-s-fun_1-3f6a951d6e6f",
+          "ove-s-goal_oriented_1-15f9262ab283",
+          "ove-s-hard_working_1-39b9d4065222",
+          "ove-s-inspiring_1-2f06a60b3a88",
+          "ove-s-narcissistic_1-6b51bd53bbc9",
+          "ove-s-self_motivated_1-376bd4f62bbb",
+          "ove-s-team_player_1-0a4ae422f48f",
+          "ove-s-unctuous_1-f56f1c6781f7"
+        ],
+        "n_requests": 10,
+        "bytes": 25611,
+        "estimate_usd": 0.00609,
+        "submitted_at": "2026-10-12T03:11:05+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:17:12+00:00"
+      }
+    ],
+    "o01_opus": [
+      {
+        "id": "msgbatch_01URs17md6K7DG1aoTiW2C6f",
+        "custom_ids": [
+          "ove-o-detailed_1-905884911ead",
+          "ove-o-empathy_1-62a100f693d3",
+          "ove-o-fun_1-c6c6c5e0de5a",
+          "ove-o-goal_oriented_1-540f13a77147",
+          "ove-o-hard_working_1-5fd63783e061",
+          "ove-o-inspiring_1-84807c5fc21c",
+          "ove-o-narcissistic_1-00e1fc7eed15",
+          "ove-o-self_motivated_1-26e493ee5282",
+          "ove-o-unctuous_1-1a32784c0629"
+        ],
+        "n_requests": 9,
+        "bytes": 23055,
+        "estimate_usd": 0.01404,
+        "submitted_at": "2026-10-12T03:17:13+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:19:15+00:00"
+      }
+    ],
+    "o02_sonnet": [
+      {
+        "id": "msgbatch_01SsafnGFFcSFqaZTkWUgs26",
+        "custom_ids": [
+          "ove-s-detailed_1-13c01f8377de",
+          "ove-s-goal_oriented_1-e06f9078fb86",
+          "ove-s-inspiring_1-3e30632c5b88",
+          "ove-s-narcissistic_1-736196a3b1c4",
+          "ove-s-self_motivated_1-4219c0ce3ca6",
+          "ove-s-team_player_1-ea6839b0cc56",
+          "ove-s-unctuous_1-0ca9702ff7c3"
+        ],
+        "n_requests": 7,
+        "bytes": 17942,
+        "estimate_usd": 0.004263,
+        "submitted_at": "2026-10-12T03:19:19+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:24:54+00:00"
+      }
+    ],
+    "o02_opus": [
+      {
+        "id": "msgbatch_01MJgtuMg1Tkr7b1VxUwz3C1",
+        "custom_ids": [
+          "ove-o-detailed_1-a54caf7973fb",
+          "ove-o-goal_oriented_1-3f77746eb026",
+          "ove-o-inspiring_1-896b6b2091a8",
+          "ove-o-self_motivated_1-9d56d15c0039",
+          "ove-o-team_player_1-99810a822bdd"
+        ],
+        "n_requests": 5,
+        "bytes": 12835,
+        "estimate_usd": 0.0078,
+        "submitted_at": "2026-10-12T03:24:54+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:26:57+00:00"
+      }
+    ],
+    "o03_sonnet": [
+      {
+        "id": "msgbatch_01PBjoY6iwXeKGtPkaMMiMxL",
+        "custom_ids": [
+          "ove-s-detailed_1-2c015666ccfc",
+          "ove-s-goal_oriented_1-1474dbe1527e",
+          "ove-s-narcissistic_1-46fd606d4006",
+          "ove-s-team_player_1-2e7e912e16ca",
+          "ove-s-unctuous_1-e2a5dc0fafc6"
+        ],
+        "n_requests": 5,
+        "bytes": 12844,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-12T03:27:02+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:32:38+00:00"
+      }
+    ],
+    "o03_opus": [
+      {
+        "id": "msgbatch_012LfCtnpDa2tPQ7dThfQ15u",
+        "custom_ids": [
+          "ove-o-detailed_1-c9c772c5b1ce",
+          "ove-o-goal_oriented_1-ab8ff3ef103c"
+        ],
+        "n_requests": 2,
+        "bytes": 5206,
+        "estimate_usd": 0.00312,
+        "submitted_at": "2026-10-12T03:32:38+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:34:41+00:00"
+      }
+    ],
+    "o04_sonnet": [
+      {
+        "id": "msgbatch_019p6UDHeGgDQMyMaZ3G5wAe",
+        "custom_ids": [
+          "ove-s-detailed_1-45d780984dd2",
+          "ove-s-goal_oriented_1-7cbb62963757",
+          "ove-s-narcissistic_1-394f3496f744",
+          "ove-s-team_player_1-97ae30ca1a3f",
+          "ove-s-unctuous_1-5488bd1c48e1"
+        ],
+        "n_requests": 5,
+        "bytes": 12916,
+        "estimate_usd": 0.003045,
+        "submitted_at": "2026-10-12T03:34:41+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:40:47+00:00"
+      }
+    ],
+    "o04_opus": [
+      {
+        "id": "msgbatch_01DhSCzGZwzaCWZd6ofVbuDt",
+        "custom_ids": [
+          "ove-o-unctuous_1-c2e7286dd87f"
+        ],
+        "n_requests": 1,
+        "bytes": 2526,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-12T03:40:48+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:42:50+00:00"
+      }
+    ],
+    "o05_sonnet": [
+      {
+        "id": "msgbatch_01F8G448KvF8Pt7T3eWHwGxb",
+        "custom_ids": [
+          "ove-s-goal_oriented_1-38913f88f7ff",
+          "ove-s-narcissistic_1-bfa4317c0beb",
+          "ove-s-team_player_1-eba56c519a29",
+          "ove-s-unctuous_1-56540e1e63de"
+        ],
+        "n_requests": 4,
+        "bytes": 10271,
+        "estimate_usd": 0.002436,
+        "submitted_at": "2026-10-12T03:42:51+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:47:56+00:00"
+      }
+    ],
+    "o05_opus": [
+      {
+        "id": "msgbatch_018u4ep7W6WMo43eqHu9Xixb",
+        "custom_ids": [
+          "ove-o-goal_oriented_1-a3ce2bdfab47"
+        ],
+        "n_requests": 1,
+        "bytes": 2593,
+        "estimate_usd": 0.00156,
+        "submitted_at": "2026-10-12T03:47:57+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:48:58+00:00"
+      }
+    ],
+    "o06_sonnet": [
+      {
+        "id": "msgbatch_01XhDkbsJ7n9hMuyjnQwQXK8",
+        "custom_ids": [
+          "ove-s-team_player_1-a6f7f773b90f",
+          "ove-s-unctuous_1-675e7bef41ea"
+        ],
+        "n_requests": 2,
+        "bytes": 5157,
+        "estimate_usd": 0.001218,
+        "submitted_at": "2026-10-12T03:49:02+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:55:38+00:00"
+      }
+    ],
+    "o07_sonnet": [
+      {
+        "id": "msgbatch_017xAgAaFHD6euGVCVcaawFB",
+        "custom_ids": [
+          "ove-s-team_player_1-f5431eb6e9dd"
+        ],
+        "n_requests": 1,
+        "bytes": 2691,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T03:55:42+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:57:45+00:00"
+      }
+    ],
+    "o08_sonnet": [
+      {
+        "id": "msgbatch_01FpLBBHFYKBfwjDFhQqd1Lg",
+        "custom_ids": [
+          "ove-s-team_player_1-027235a70808"
+        ],
+        "n_requests": 1,
+        "bytes": 2594,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T03:57:49+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T03:59:51+00:00"
+      }
+    ],
+    "o09_sonnet": [
+      {
+        "id": "msgbatch_01WDC4TLSYEW7CgoGj3PUwWT",
+        "custom_ids": [
+          "ove-s-team_player_1-b655a44325c0"
+        ],
+        "n_requests": 1,
+        "bytes": 2576,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T03:59:52+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T04:01:54+00:00"
+      }
+    ],
+    "o10_sonnet": [
+      {
+        "id": "msgbatch_01QkqtfTVAzGmQguziEWCbKW",
+        "custom_ids": [
+          "ove-s-team_player_1-b8f8a7e954e1"
+        ],
+        "n_requests": 1,
+        "bytes": 2566,
+        "estimate_usd": 0.000609,
+        "submitted_at": "2026-10-12T04:01:55+00:00",
+        "status": "collected",
+        "collected_at": "2026-10-12T04:03:58+00:00"
+      }
+    ]
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "generator": "base_model",
+  "run_id": "2026-10-12-pilot",
+  "git_sha": "bcc8c92+dirty",
+  "args": {
+    "round": 1,
+    "prompts_version": 1,
+    "wording_sha256": "0e9b0d5164d913fb218a303adba318fac2ad81c7ccf05bf94635d4a299beae2f",
+    "temperature": [
+      1.0
+    ],
+    "seed": 0,
+    "model": "Qwen/Qwen3-8B-Base",
+    "min_count": 8,
+    "families": null,
+    "n": 467,
+    "n_table": 4052,
+    "transport": "batches",
+    "budget_usd": 20.0,
+    "estimate": {
+      "n": 467,
+      "transport": "batches",
+      "m1_usd": 1.6812,
+      "m3_usd": 2.0548,
+      "total_usd": 3.736,
+      "pass_rate": 0.8,
+      "pass_rate_high": 0.95,
+      "m3_usd_high": 2.4401,
+      "total_usd_high": 4.1213,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.8,
+        "m1_pass_rate_high": 0.95,
+        "batch_factor": 0.5,
+        "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.80, from the two least-curated measured waves (roget pilot 81.4% of 172, alignment sweep 78.6% of 369), with 0.95 printed as a high case, until the base-model pilot measures its own (QUESTIONS 55)"
+      }
+    },
+    "strata": {
+      "by_family_emitted": {
+        "ai_assistant": 184,
+        "contrast": 78,
+        "list": 455,
+        "list_gloss": 310,
+        "occupation": 412,
+        "person": 445
+      },
+      "by_first_family": {
+        "ai_assistant": 39,
+        "contrast": 8,
+        "list": 171,
+        "list_gloss": 64,
+        "occupation": 50,
+        "person": 135
+      },
+      "by_form": {
+        "adjective": 461,
+        "noun": 2,
+        "phrase": 4
+      },
+      "with_partner_hint": 78,
+      "with_gloss_hint": 462,
+      "sense_divergent": 44,
+      "sense_from_sample": 35
+    },
+    "table": "data/candidates/base_model/candidate_table_round1.jsonl",
+    "table_sha256": "a040c29925ec6fe06b48c50bf22a8d4b5eb446accefcdeb32579208ac8073d95",
+    "seed_bundle": {
+      "census_table_sha256": "99fa5773b6295e77db73e8f8334d8d1944dd20c90e92bc0fe6c8efd6eeae1bc6",
+      "familiarity_floor": 0.5,
+      "n_adjectives": 2439,
+      "wikibio_zip_size": 333998704,
+      "bio_split": "train",
+      "bio_pool_size": 20000,
+      "pool_seed": 0,
+      "min_bio_words": 15,
+      "max_bio_words": 200,
+      "n_bios": 20000,
+      "onet_sha256": "a09eae1d6609686e44e05b7290993a1c8b523d8ca224bc0eedc194c855c3ee02",
+      "n_occupations": 1015,
+      "n_nouns": 1245,
+      "nouns_source": "OEWN, Zipf >= 3.5, concrete"
+    },
+    "sampling": {
+      "top_p": 0.95,
+      "min_p": 0.05,
+      "max_new_tokens": 80,
+      "stop": "blank line",
+      "repetition_penalty": null
+    },
+    "gloss_sense": {
+      "n_rows": 467,
+      "n_two_sided": 336,
+      "n_screened": 336,
+      "n_divergent": 44,
+      "divergence_rate": 0.131,
+      "n_chose_sample": 35,
+      "n_chose_dictionary": 9,
+      "n_illegible_sample": 0,
+      "n_failed": 0,
+      "n_unresolved": 0,
+      "cosine_min": 0.4237,
+      "cosine_median": 0.7558,
+      "prompt_version": 2,
+      "prompt_sha256": "d67ad2a914ad7fe600209116714c0a08bf268a13ffd71a5a3a42de745bedf08f",
+      "model": "claude-haiku-5-5"
+    }
+  },
+  "n_emitted": 467,
+  "started_at": "2026-10-12T02:33:57+00:00",
+  "finished_at": "2026-10-12T02:33:59+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0.0,
+  "sessions": [
+    {
+      "session_id": "cdf9874f29da",
+      "started_at": "2026-10-12T02:33:57+00:00",
+      "finished_at": "2026-10-12T02:33:59+00:00",
+      "git_sha": "bcc8c92+dirty",
+      "args": {
+        "round": 1,
+        "prompts_version": 1,
+        "wording_sha256": "0e9b0d5164d913fb218a303adba318fac2ad81c7ccf05bf94635d4a299beae2f",
+        "temperature": [
+          1.0
+        ],
+        "seed": 0,
+        "model": "Qwen/Qwen3-8B-Base",
+        "min_count": 8,
+        "families": null,
+        "n": 467,
+        "n_table": 4052,
+        "transport": "batches",
+        "budget_usd": 20.0,
+        "estimate": {
+          "n": 467,
+          "transport": "batches",
+          "m1_usd": 1.6812,
+          "m3_usd": 2.0548,
+          "total_usd": 3.736,
+          "pass_rate": 0.8,
+          "pass_rate_high": 0.95,
+          "m3_usd_high": 2.4401,
+          "total_usd_high": 4.1213,
+          "assumptions": {
+            "m1_usd_per_word": 0.0072,
+            "m3_usd_per_passed_word": 0.011,
+            "m1_pass_rate": 0.8,
+            "m1_pass_rate_high": 0.95,
+            "batch_factor": 0.5,
+            "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.80, from the two least-curated measured waves (roget pilot 81.4% of 172, alignment sweep 78.6% of 369), with 0.95 printed as a high case, until the base-model pilot measures its own (QUESTIONS 55)"
+          }
+        },
+        "strata": {
+          "by_family_emitted": {
+            "ai_assistant": 184,
+            "contrast": 78,
+            "list": 455,
+            "list_gloss": 310,
+            "occupation": 412,
+            "person": 445
+          },
+          "by_first_family": {
+            "ai_assistant": 39,
+            "contrast": 8,
+            "list": 171,
+            "list_gloss": 64,
+            "occupation": 50,
+            "person": 135
+          },
+          "by_form": {
+            "adjective": 461,
+            "noun": 2,
+            "phrase": 4
+          },
+          "with_partner_hint": 78,
+          "with_gloss_hint": 462,
+          "sense_divergent": 44,
+          "sense_from_sample": 35
+        },
+        "table": "data/candidates/base_model/candidate_table_round1.jsonl",
+        "table_sha256": "a040c29925ec6fe06b48c50bf22a8d4b5eb446accefcdeb32579208ac8073d95",
+        "seed_bundle": {
+          "census_table_sha256": "99fa5773b6295e77db73e8f8334d8d1944dd20c90e92bc0fe6c8efd6eeae1bc6",
+          "familiarity_floor": 0.5,
+          "n_adjectives": 2439,
+          "wikibio_zip_size": 333998704,
+          "bio_split": "train",
+          "bio_pool_size": 20000,
+          "pool_seed": 0,
+          "min_bio_words": 15,
+          "max_bio_words": 200,
+          "n_bios": 20000,
+          "onet_sha256": "a09eae1d6609686e44e05b7290993a1c8b523d8ca224bc0eedc194c855c3ee02",
+          "n_occupations": 1015,
+          "n_nouns": 1245,
+          "nouns_source": "OEWN, Zipf >= 3.5, concrete"
+        },
+        "sampling": {
+          "top_p": 0.95,
+          "min_p": 0.05,
+          "max_new_tokens": 80,
+          "stop": "blank line",
+          "repetition_penalty": null
+        },
+        "gloss_sense": {
+          "n_rows": 467,
+          "n_two_sided": 336,
+          "n_screened": 336,
+          "n_divergent": 44,
+          "divergence_rate": 0.131,
+          "n_chose_sample": 35,
+          "n_chose_dictionary": 9,
+          "n_illegible_sample": 0,
+          "n_failed": 0,
+          "n_unresolved": 0,
+          "cosine_min": 0.4237,
+          "cosine_median": 0.7558,
+          "prompt_version": 2,
+          "prompt_sha256": "d67ad2a914ad7fe600209116714c0a08bf268a13ffd71a5a3a42de745bedf08f",
+          "model": "claude-haiku-5-5"
+        }
+      },
+      "n_emitted": 467,
+      "confirmed_by": null,
+      "cost_usd": 0.0,
+      "n_calls": 2000,
+      "usage": {
+        "per_model": {
+          "Qwen/Qwen3-8B-Base": {
+            "model": "Qwen/Qwen3-8B-Base",
+            "prompt_tokens": 110037,
+            "completion_tokens": 133643,
+            "cost_usd": 0.0,
+            "n_calls": 2000
+          }
+        },
+        "total_cost_usd": 0.0,
+        "total_prompt_tokens": 110037,
+        "total_completion_tokens": 133643,
+        "n_calls": 2000
+      }
+    }
+  ]
+}

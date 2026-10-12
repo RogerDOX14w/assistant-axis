@@ -1,0 +1,15 @@
+{
+  "n_calls": 2000,
+  "per_model": {
+    "Qwen/Qwen3-8B-Base": {
+      "completion_tokens": 133643,
+      "cost_usd": 0.0,
+      "model": "Qwen/Qwen3-8B-Base",
+      "n_calls": 2000,
+      "prompt_tokens": 110037
+    }
+  },
+  "total_completion_tokens": 133643,
+  "total_cost_usd": 0.0,
+  "total_prompt_tokens": 110037
+}

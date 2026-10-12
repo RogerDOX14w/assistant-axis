@@ -178,6 +178,29 @@ def test_sense_rerun_asks_again_for_a_row_whose_call_failed(env, capsys):
     assert next(r for r in table if r["stem"] == "unflappable")[SE.BLOCK]["chosen"] in SE.CHOICES
 
 
+def test_submit_records_the_floor_with_the_tables_sample_size(env, capsys):
+    """Gate audit 3 (Roger, 2026-10-12): the default floor is 2, chosen at 2,000 samples; the run records it
+    with the size of the table it was applied to (parse's counts: 8 samples here) and says when they differ."""
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    capsys.readouterr()
+    assert run(common, "submit", "--round", "1", "--run-id", "f1") == 0
+    out = capsys.readouterr().out
+    assert "count floor: 2 at 8 samples" in out and "NOTE: the count floor 2 was chosen at 2,000 samples" in out
+    assert "all rows, as if none had a verdict" in out and "the gate reads this one" in out
+    rd = tmp / "cand" / "runs" / "base_model" / "f1"
+    a = json.loads((rd / "run.json").read_text())["args"]
+    assert a["min_count"] == 2 and a["floor"]["n_samples"] == 8 and a["floor"]["chosen_at_n_samples"] == 2000
+    assert a["floor"]["flag_given"] is False
+    assert json.loads((rd / "submit_report.json").read_text())["floor"] == a["floor"]
+    # a value typed for this table is recorded as chosen for it, with no note
+    assert run(common, "submit", "--round", "1", "--run-id", "f2", "--min-count", "3", "--dry-run") == 0
+    out = capsys.readouterr().out
+    assert "count >= 3" in out and "chosen at 8 samples (--min-count, set for this run)" in out
+    assert "NOTE" not in out
+
+
 def test_parse_refuses_a_person_sample_it_cannot_screen(env, capsys):
     """QUESTIONS 54: the tracked table carries no biography text, which the echo screen ensures; without the
     biography (the archive missing, or a pool that does not hold the sample's ref) the screen would be skipped
@@ -238,7 +261,8 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     assert run(common, "stats", "--round", "1", "--step", "4") == 0
     st = json.loads((tmp / "base" / "stats_round1.json").read_text())
     assert "_provenance" in st and st["result"]["recovery_strings"]["found"] == 3
-    assert run(common, "submit", "--round", "1", "--run-id", "r1") == 0
+    # the fixture's eight samples emit most words once, so the run takes every count (below the default floor 2)
+    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1") == 0
     out = capsys.readouterr().out
     assert "traithood_filter.py --batch-id r1_base_model --run base_model/r1" in out
     rd = tmp / "cand" / "runs" / "base_model" / "r1"
@@ -265,6 +289,10 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     assert "**person**" in md and "wiki_bio opening (lower-cased)" in md and "professions (clean)" in md
     # QUESTIONS 56: the sense section
     assert "## The gloss sense (settled before M1)" in md and "fidelity first" in md
+    # gate audit 3: the floor with the sample size it was applied at, and the families before the floor
+    assert "| count floor | count >= 1 at 8 samples (125.0 per 1,000 samples); chosen at 8 samples" in md
+    assert "## By family, before the count floor (the eligible table)" in md
+    assert "**Noun share of M1 survivors before the floor**" in md
     sample = (rd / "roger_sample.md").read_text()
     assert "| 1 | generous |" in sample and "hint sent to M1" in sample
     ev = json.loads((rd / "evaluation.json").read_text())["result"]

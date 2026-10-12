@@ -163,6 +163,8 @@ def fake_rows(n):
 class TestCostGuard:
     def run(self, tmp_path, n, **kw):
         kw.setdefault("budget_usd", SB.DEFAULT_BUDGET_USD)
+        # the fake rows have count 1; the guard is tested on all of them, below the default floor of 2
+        kw.setdefault("min_count", 1)
         return SB.run_submit("g1", table=fake_rows(n), round_n=1, registry_path=tmp_path / "r.jsonl",
                              candidates_dir=tmp_path, dry_run=True, echo=lambda *a: None, **kw)
 
@@ -222,6 +224,123 @@ class TestCostGuard:
                              dry_run=True, echo=lambda *a: None)
         assert summ.dry_run and summ.run_dir is None
         assert reg.read_bytes() == before and not (tmp_path / "c" / "runs").exists()
+
+
+class TestCountFloor:
+    """Gate audit 3 (Roger, 2026-10-12): the floor is a recorded setting, 2 at 2,000 samples, stated with the
+    sample size of the table it is applied to, because a count is a different rate at every sample size."""
+
+    def test_the_documented_default(self):
+        assert (SB.DEFAULT_MIN_COUNT, SB.DEFAULT_MIN_COUNT_N_SAMPLES) == (2, 2000)
+        assert "gate audit 3" in SB.DEFAULT_MIN_COUNT_SOURCE and "Roger, 2026-10-12" in SB.DEFAULT_MIN_COUNT_SOURCE
+        rows = table_rows()
+        assert SB.select_rows(rows) == SB.select_rows(rows, min_count=2)
+        assert all(r["count"] >= 2 for r in SB.select_rows(rows))
+
+    def test_the_record_at_the_size_it_was_chosen_for(self):
+        f = SB.floor_record(2, n_samples=2000)
+        assert f == {"min_count": 2, "n_samples": 2000, "per_1k_samples": 1.0, "chosen_at_n_samples": 2000,
+                     "source": SB.DEFAULT_MIN_COUNT_SOURCE, "flag_given": False}
+        assert SB.floor_note(f) is None
+
+    def test_a_table_of_another_size_prints_a_note(self):
+        # the audit's case: a floor carried unchanged from the 2,000-sample pilot to the 20,000-sample run
+        f = SB.floor_record(2, n_samples=20_000, explicit=True)
+        assert f["chosen_at_n_samples"] == 2000 and f["per_1k_samples"] == 0.1
+        note = SB.floor_note(f)
+        assert "chosen at 2,000 samples" in note and "20,000" in note and "--min-count" in note
+
+    def test_another_value_is_set_for_this_table(self):
+        f = SB.floor_record(3, n_samples=20_000, explicit=True)
+        assert f["chosen_at_n_samples"] == 20_000 and f["source"].startswith("--min-count")
+        assert SB.floor_note(f) is None
+        assert SB.floor_note(SB.floor_record(2, n_samples=None)).startswith("NOTE: the table's sample size")
+
+    def test_run_json_and_submit_report_record_the_floor_with_its_sample_size(self, env):
+        out = []
+        submit(env, n_samples=2000, echo=out.append)
+        d = env[1] / "runs" / "base_model" / "pilot"
+        a = json.loads((d / "run.json").read_text())["args"]
+        rep = json.loads((d / "submit_report.json").read_text())
+        for rec in (a["floor"], rep["floor"]):
+            assert rec["min_count"] == 2 and rec["n_samples"] == 2000 and rec["chosen_at_n_samples"] == 2000
+        assert a["min_count"] == 2
+        assert any("count floor: 2 at 2000 samples" in x for x in out)
+
+
+class TestEstimateOnNewRows:
+    """Gate audit 3, proposal 6: M1 and M3 reuse a verdict the registry already holds, so the gated estimate
+    counts only the rows without one; the all-rows figure is printed beside it.  The pilot's estimate charged
+    all 467 rows ($3.74 batched) for a real $0.14."""
+
+    REG = {"generous#1": {"filter": {"verdict": "trait"}, "novelty": {"decision": "covered", "run_id": "b0"}},
+           "warm#1": {"filter": {"verdict": "trait"}},                    # M1 passed it, M3 has not decided
+           "unflappable#1": {"filter": {"verdict": "reject"}}}           # M3 never takes a reject
+
+    def test_downstream_need(self):
+        rows = SB.select_rows(table_rows(), min_count=1)
+        need = SB.downstream_need(rows, self.REG)
+        assert need["n_decided"] == 2 and need["n_m3_only"] == 1 and need["n_m1"] == len(rows) - 3
+        assert SB.downstream_need(rows, None)["n_m1"] == len(rows)       # no registry: every row is new
+        # a novelty block without a run (a stand-in) is no decision
+        assert SB.downstream_need(rows, {"warm#1": {"filter": {"verdict": "trait"}, "novelty": {"decision": "new"}}}
+                                  )["n_m3_only"] == 1
+
+    def test_a_free_floor_reject_is_taken_again(self):
+        """The floor's free reject is no verdict M1 keeps once a source rescues the word (gate audit 1, defect
+        F3), and a selected row is one the table found rescued or above the floor; a paid probe cut is kept."""
+        rows = SB.select_rows(table_rows(), min_count=1)
+        reg = {"generous#1": {"filter": {"verdict": "reject", "rule": "floor"}},
+               "warm#1": {"filter": {"verdict": "reject", "model": None, "tags": ["too_rare"]},
+                          "freq": {"hard_reject": True}},
+               "unflappable#1": {"filter": {"verdict": "reject", "rule": "probe", "model": "claude-haiku-4-5"}}}
+        need = SB.downstream_need(rows, reg)
+        assert need["n_floor_rejected_retaken"] == 2 and need["n_decided"] == 1
+        assert need["n_m1"] == len(rows) - 1
+
+    def test_the_estimate_charges_m3_only_rows_m3_alone(self):
+        e = SB.estimate_downstream_usd(10, n_m3_only=4)
+        assert e.m1_usd == pytest.approx(10 * 0.0072)
+        assert e.m3_usd == pytest.approx((10 * 0.80 + 4) * 0.011)
+        assert e.m3_usd_high == pytest.approx((10 * 0.95 + 4) * 0.011)
+        assert "+ 4 already passed by M1 (M3 only)" in e.format()
+
+    def test_the_gate_reads_the_new_rows_and_both_are_printed(self, tmp_path):
+        rows = fake_rows(2_000)
+        reg = {f"w{i}#1": {"filter": {"verdict": "trait"}, "novelty": {"decision": "new", "run_id": "b0"}}
+               for i in range(1, 1_901)}                              # 1,900 of the 2,000 already decided
+        out = []
+        summ = SB.run_submit("g1", table=rows, round_n=1, min_count=1, registry_path=tmp_path / "r.jsonl",
+                             candidates_dir=tmp_path, dry_run=True, echo=out.append, registry_rows=reg)
+        # all rows would be $32.00 live, over the $15 default; the 100 new ones are $1.60 and pass the gate
+        assert summ.estimate_all_rows["total_usd"] == pytest.approx(32.0)
+        assert summ.estimate["total_usd"] == pytest.approx(100 * (0.0072 + 0.8 * 0.011))
+        assert summ.need == {"n_rows": 2000, "n_m1": 100, "n_m3_only": 0, "n_decided": 1900,
+                             "n_floor_rejected_retaken": 0, "registry_rows": 1900}
+        text = "\n".join(out)
+        assert "all rows, as if none had a verdict: downstream estimate for 2000 words" in text
+        assert "the gate reads this one): downstream estimate for 100 words" in text
+        # and with nothing recorded the two are the same, so the guard still refuses the full price
+        with pytest.raises(CostRefused):
+            SB.run_submit("g1", table=rows, round_n=1, min_count=1, registry_path=tmp_path / "r.jsonl",
+                          candidates_dir=tmp_path, dry_run=True, echo=lambda *a: None)
+
+    def test_the_followups_carry_the_new_rows_estimate(self, tmp_path):
+        rows = fake_rows(50)
+        reg = {f"w{i}#1": {"filter": {"verdict": "trait"}} for i in range(1, 51)}
+        summ = SB.run_submit("g1", table=rows, round_n=1, min_count=1, registry_path=tmp_path / "r.jsonl",
+                             candidates_dir=tmp_path, dry_run=True, echo=lambda *a: None, registry_rows=reg)
+        assert summ.estimate["m1_usd"] == 0 and summ.estimate["n_m3_only"] == 50
+        assert "# M1, estimate $0.00" in summ.followups[1]
+
+    def test_run_json_records_both_estimates(self, env):
+        submit(env, registry_rows=self.REG)
+        a = json.loads((env[1] / "runs" / "base_model" / "pilot" / "run.json").read_text())["args"]
+        assert a["downstream_need"]["n_decided"] == 2 and a["downstream_need"]["n_m3_only"] == 1
+        assert a["estimate"]["total_usd"] < a["estimate_all_rows"]["total_usd"]
+        rep = json.loads((env[1] / "runs" / "base_model" / "pilot" / "submit_report.json").read_text())
+        assert rep["estimate_usd"] == a["estimate"]["total_usd"]
+        assert rep["estimate_all_rows_usd"] == a["estimate_all_rows"]["total_usd"]
 
 
 def test_followup_commands():
