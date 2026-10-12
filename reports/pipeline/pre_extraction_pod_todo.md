@@ -65,6 +65,36 @@ parameters at launch.
    [rsync_pod_sweeps.sh](../../scripts/rsync_pod_sweeps.sh) hard-code a pod IP and port that will be
    stale: update them to the October pods, and change `StrictHostKeyChecking=no` to `accept-new`.
 
+## The test backlog: what only a pod can confirm (Roger, 2026-10-13)
+
+Every fix of the 2026-10-12 review and its pipeline batch has tests on the Mac, against fakes (a fake
+`uv` for the driver, a fake model for step 2, a fake Batch API client for step 3, fake trees for the
+scanner and the merge).  The behaviours below are the ones those fakes cannot reach; each is checked once,
+during the smoke run and the cap pilot (items 1–2), and closed here with the date, the pod run and the
+result.  A failure is a bug in the batch, fixed before the four-pod launch.
+
+| # | behaviour | built in | how to check | pass sign |
+|---|---|---|---|---|
+| T1 | step 1's worker exit codes and the K-consecutive-failures abort with a real vLLM engine (the engine is mocked on the Mac) | P8.1, cc490235 | run step 1 on a handful of entities; then once with a deliberately bad `--model` path | exit 1 both ways, `run_pipeline.sh` stops before step 2 |
+| T2 | `--roles` filtering and `--non_goal_count 54` (the pilot's `verbose`) build exactly the listed work items | P1 review, P6 | step 1's "work items" log line against [cap_pilot_entities.json](./cap_pilot_entities.json) | counts equal; no "no work item is named" warning |
+| T3 | the `generation_config.json` side-car is written and a rerun into the same dir with changed settings is refused | P2, 35acbe43 | rerun step 1 with a different `--max_tokens` into the pilot's dir | refused without `--allow_mixed_settings` |
+| T4 | step 2 under the pod's transformers 4.57.6 finds the seven header tokens (the `BatchEncoding` fix is proven only under the Mac's 5.1.0) | 11d7f28c | `activations.log` after the first entity | 0 header misses, 500 keys saved |
+| T5 | the activation metadata carries `layers`, `max_length`, `thinking`, `batch_size`, `extract_headers` and step 4 copies it | 11d7f28c | read one vector's `metadata` | all keys present |
+| T6 | the tmpfs mirror: `rsync` present or the staged `cp` fallback; the completeness marker written; a second run reuses the mirror | P8.6 | the driver's `[tmpfs]` lines on two consecutive runs | marker file present; second run "reusing" |
+| T7 | the HF-cache check and the torch import time with the venv on local disk vs `/workspace` | P8.3 (b) | `time uv run python -c "import torch"` from each | the number goes in the README |
+| T8 | step 3 batch mode at real scale: `token_limit_exceeded` on a full chunk, the queue-holding behaviour, `batches.list` newest-first with many batches | 56f3df3e, P5 | the first chunk over the org limit; a second pod submitting | the "queue limit reached" line, then a wait, not a split |
+| T9 | the step-3 lock: a second step 3 on the same scores dir refuses; `--force_unlock` clears a stale lock | P5, e7ef8a48 | start two by hand | second refuses with the PID and host |
+| T10 | the new response fields (`finish_reason`, `thinking_stripped`, `thinking_suspected`, `question_id`) on real responses; the truncation share at 512 | P6, 8066b6ad | count `finish_reason == "length"` over the pilot's 512 tree | about 70%, the May estimate |
+| T11 | float32 vectors and axes: file sizes (~10 MB), `5_axis.py`'s dtype checks, steering's cast to the model dtype at load | P3, bcee9262 | step 4/5 outputs; one steering cell load | sizes as expected; no dtype error |
+| T12 | the scanner on real 2.6 GB activations and on a tree whose activations were deleted (`vector_only`) | ba4efef2, P1 | scan before and after deleting the pilot's activations | exit 0 both times; `vector_only` rows after |
+| T13 | the scan-as-stop: a tree with a planted re-run candidate stops the driver before step 5 | e92912d8 | truncate one activation file by hand, rerun | "Pipeline aborted: Scan failed"; no axis written |
+| T14 | the merge: two pod trees into one, the duplicate-stem refusal, `usage.json` merged per type, the root scan | P1, b43ce369 | merge the pilot's tree with a second small tree | counts match the entity list; refusal on a duplicate |
+| T15 | NFS: the retry set without `FileNotFoundError`, and the opt-in `fsync` timing on `/workspace` | P8.4, E4 | the E4 timing (item 4); a missing-file read returns at once | no 265 s wait on a missing file |
+| T16 | `run_pipeline.sh` from the pod's shell: the `pipeline/` guard, the end-of-run summary with step 4/5 lines, the `--judge-batch-requests` pass-through | ba4efef2, P1 | one full run on the pilot's entities | summary counts the `[ERROR]`/`[WARNING]` lines of every step |
+
+Not on this list because they are experiments, not tests: the cap pilot's decision (item 2), the rubric
+experiment (item 11), P7's smoke runs per family (item 7).
+
 ## Only if the multi-model plan is built first
 
 7. **P7's byte-identical Qwen regression** on a GPU
