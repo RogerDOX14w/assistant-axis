@@ -72,3 +72,26 @@ operations").  The code these items exercise is built off-pod first, by the peer
 9. **The October-run rows of the regeneration list**
    ([regeneration_list.md](../code_review_2026-10-12/regeneration_list.md), "when: at the October run"):
    check each is covered by the run, then close it there.
+10. **The new data dir's MANIFEST names its pair-list generation** (walk-through A2, the part that waits
+    for October).  Once the October extraction gives a second data dir beside the 8slot one, its
+    `MANIFEST.json` (written by [regenerate_dataset_manifest.py](../../tools/regenerate_dataset_manifest.py))
+    records which pair lists it was extracted for: the current ones
+    ([pair_list_clean.json](../../roger/axis_judge_experiments/pair_list_clean.json),
+    [pair_list_di.json](../../roger/axis_judge_experiments/pair_list_di.json),
+    [pair_list_goalnongoal.json](../../roger/axis_judge_experiments/pair_list_goalnongoal.json),
+    [pair_list_responses.json](../../roger/axis_judge_experiments/pair_list_responses.json)) and the goal
+    file it used, [goal_roles_and_traits.json](../../data/goal_roles_and_traits.json); the 8slot dir's
+    MANIFEST says `_v1` and [goal_roles_and_traits_v1.json](../../data/goal_roles_and_traits_v1.json).
+    Then a results_analysis script can refuse a pair list of the other generation by name, rather than
+    only by the missing-axis check of [pair_list_guard.py](../../results_analysis/pair_list_guard.py)
+    (built 2026-10-12, which catches it only where an axis is missing).  The field and the check are
+    built with the manifest change; nothing to do on the pod beyond regenerating the manifest after the
+    run.
+
+11. **The role-judge rubric experiment** ([plan_role_rubric_experiment.md](./plan_role_rubric_experiment.md);
+    about $50 of batch judging on 60 roles, over the $20 line: **Roger's go with quoted parameters**).  After the
+    roles' step 3 in October and before the role vectors are final: the rubric arms as temporary render flags, a
+    twice-run baseline for judge noise, boundary flips read by Roger; the AI-persona roles over-sampled
+    (aligned_artificial_intelligence, now [instrumentally_aligned_ai](../../data/roles/instructions/instrumentally_aligned_ai.json),
+    passed 34% in May).  From the peer session's pipeline batch
+    ([fix_batch_2026-10-12.md](./fix_batch_2026-10-12.md)).
