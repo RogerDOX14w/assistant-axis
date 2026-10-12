@@ -63,7 +63,7 @@ credentials move "after cdb34d49" (db1b25b8 in the log), 87d84fc (the W15 goal l
   free pre-check against the queue.
 - **R1, the review graph**: the graph whose nodes are candidates and whose edges are the
   overlap judgements between them, each with a level per direction (Sonnet, escalated to Opus);
-  the connected groups at a cut-off are what the review app shows Roger to resolve
+  the cliques at a cut-off (not connected components; corrected by the gate-8 audit) are what the review app shows Roger to resolve
   ([`review_graph.py`](../../assistant_axis/gapgen/review_graph.py), CLI
   [`review_graph.py`](../../data_analysis/gap_generation/review_graph.py); the app:
   [`review_app.py`](../../data_analysis/gap_generation/review_app.py),
