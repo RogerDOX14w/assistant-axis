@@ -29,11 +29,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.8211125248042149,
+          "rho": 0.8240813455462002,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.8333893655225754,
+          "rho": 0.8363294989829905,
           "n": 580
         }
       },
@@ -46,15 +46,15 @@
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7825552933600457,
+          "rho": 0.7825360000265599,
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.7188750905655855,
+          "rho": 0.7222385846706221,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.777097843027308,
+          "rho": 0.7798974883992187,
           "n": 580
         }
       },
@@ -71,11 +71,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.8923971924223295,
+          "rho": 0.8918465734998963,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.9083823456197901,
+          "rho": 0.9074336402872626,
           "n": 580
         }
       },
@@ -92,11 +92,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.6387935255377492,
+          "rho": 0.6481895764474929,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.6477670741757969,
+          "rho": 0.6631583564857153,
           "n": 580
         }
       },
@@ -113,11 +113,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.5777834463341616,
+          "rho": 0.5826886170790605,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.6581870896393517,
+          "rho": 0.663327114674885,
           "n": 580
         }
       },
@@ -134,11 +134,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.7061227821645735,
+          "rho": 0.7110008957653718,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.7386703435897861,
+          "rho": 0.7436165003138552,
           "n": 580
         }
       },
@@ -155,11 +155,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.5683326948325907,
+          "rho": 0.5818564946627061,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.5932780419250823,
+          "rho": 0.6095917435573848,
           "n": 580
         }
       },
@@ -176,11 +176,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.7420760761660392,
+          "rho": 0.7471221054443611,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.7929643905496627,
+          "rho": 0.8020123292500679,
           "n": 580
         }
       },
@@ -197,11 +197,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.8072470265647493,
+          "rho": 0.8059512851678416,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.8067375255736934,
+          "rho": 0.8067377323845414,
           "n": 580
         }
       },
@@ -218,11 +218,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.8613614231049365,
+          "rho": 0.8645033133378224,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.8551685425707469,
+          "rho": 0.8601190291904238,
           "n": 580
         }
       },
@@ -239,11 +239,11 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.783257213483179,
+          "rho": 0.7881671844298594,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.7653327279189318,
+          "rho": 0.7674943979629878,
           "n": 580
         }
       },
@@ -260,20 +260,20 @@
           "n": 580
         },
         "combined_v1": {
-          "rho": 0.7535302296866621,
+          "rho": 0.7475752544692422,
           "n": 580
         },
         "combined_v2": {
-          "rho": 0.7499003492098776,
+          "rho": 0.7478475526872922,
           "n": 580
         }
       }
     ],
     "means_over_axes": {
       "response_v1": 0.7282818895883033,
-      "response_v2": 0.7386333117290187,
-      "combined_v1": 0.7392407688055642,
-      "combined_v2": 0.7605729699435502
+      "response_v2": 0.7386317039512281,
+      "combined_v1": 0.742935102543373,
+      "combined_v2": 0.7656304486813853
     },
     "n_axes": 12
   },
@@ -281,19 +281,19 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python -m results_analysis.rubric_v1_v2_compare",
-      "git_sha": "80ae33d+dirty",
+      "git_sha": "828817a4+dirty",
       "author": "Roger Dearnaley",
       "title": "rubric_v1_v2_compare"
     },
-    "produced_at": "2026-05-22T19:46:07+00:00",
+    "produced_at": "2026-10-12T23:40:34+00:00",
     "inputs": [
       {
         "dep_key": "producer_script",
         "path": "results_analysis/rubric_v1_v2_compare.py",
-        "fingerprint": "v1:2026-05-11T22:38:05+00:00@25914",
+        "fingerprint": "v1:2026-10-12T03:34:10+00:00@26997",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-11T22:38:05+00:00",
+        "last_modified_at": "2026-10-12T03:34:10+00:00",
         "extras": {
           "slot": "6",
           "layer": "25",
@@ -304,10 +304,10 @@
       {
         "dep_key": "judge_score_combine_constants",
         "path": "assistant_axis/judge_score_combine.py",
-        "fingerprint": "v1:2026-05-22T19:41:31+00:00@32656",
+        "fingerprint": "v1:2026-05-27T15:44:25+00:00@32656",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-22T19:41:31+00:00",
+        "last_modified_at": "2026-05-27T15:44:25+00:00",
         "extras": {
           "DEFAULT_DI_WEIGHTS": "(0.499, 0.501)",
           "DEFAULT_GPT_SONNET_DI_WEIGHT": "0.625",
@@ -527,10 +527,10 @@
       {
         "dep_key": "resp_gpt_b10_v2_progressive_vs_conservative_traits",
         "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses.json",
-        "fingerprint": "v1:2026-05-09T04:40:24+00:00@4086345",
+        "fingerprint": "v1:2026-10-12T22:10:24+00:00@4089815",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-09T04:40:24+00:00",
+        "last_modified_at": "2026-10-12T22:10:24+00:00",
         "extras": {
           "axis": "progressive_vs_conservative",
           "side": "traits",
@@ -2111,6 +2111,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "b4dfa34234cb6cf90d4b34b2dfb0dd50cbd9f2fb310fb0bfd936bbfcd92d739b"
+    "inputs_sha256": "abeb89c28a16abec3a4e2452eed0dc918c7e010e9fbcc0a940d2fd9cc6e61cd2"
   }
 }
