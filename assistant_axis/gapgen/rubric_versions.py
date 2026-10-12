@@ -122,3 +122,23 @@ def mismatches() -> list[str]:
     from . import split_rubrics
     out.extend(f"split.{p}" for p in split_rubrics.mismatches())
     return out
+
+
+def refusal_lines() -> list[str]:
+    """What a paid CLI prints when it refuses because some prompt's text is not its pinned version (code review
+    2026-10-12, B4: the filter, split and plain-reading CLIs refuse on :func:`mismatches` at their start, since they
+    send the classifier, probe, plain-reading and comparison prompts as well as the split's): one ``REFUSED (rubric
+    not pinned)`` line a problem, then how to pin.  Empty when every pin holds."""
+    problems = mismatches()
+    if not problems:
+        return []
+    lines = [f"REFUSED (rubric not pinned): {p}" for p in problems]
+    split_problems = [p[len("split."):] for p in problems if p.startswith("split.")]
+    from . import split_rubrics
+    hint = split_rubrics.bump_command(split_problems)
+    if hint:
+        lines.append("pin the text first:\n" + hint)
+    if len(split_problems) < len(problems):
+        lines.append("pin the others here (assistant_axis/gapgen/rubric_versions.py): bump the prompt's version "
+                     "constant and add its sha to HISTORY")
+    return lines

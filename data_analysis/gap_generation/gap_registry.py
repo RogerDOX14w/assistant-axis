@@ -42,7 +42,7 @@ Commands:
   its rename gets judged again.  The regions of that mode are the filter's gloss of the bare label; since
   2026-10-09 (QUESTIONS 3) the corpus's regions come from its descriptions instead (the next form).
 * ``corpus-regions --from-descriptions (--all | --only-missing) --budget-usd C [--batch-id B] [--dry-run
-  [--show STEM ...]] [--concurrency N] [--out PATH]``: M1's descriptors and alignment calls (Haiku 5.5, the
+  [--show STEM ...]] [--concurrency N] [--allow-dirty] [--out PATH]``: M1's descriptors and alignment calls (Haiku 5.5, the
   pinned ``descriptors.md`` and ``alignment.md``, sent as M1's wave 6 sends them) on every trait file's
   ``description`` with its ``positive_label``, written to ``corpus_regions.json`` with the region,
   ``enactable_in_text``, ``alignment_score`` 0-3, ``alignment_relevant`` (score 2 or 3), ``source:
@@ -51,7 +51,8 @@ Commands:
   ``--only-missing`` (run it after each corpus chunk) only those with no row, a row not from a description,
   a changed description or label, or a failed call.  Responses, ``usage.json`` and ``run.json`` go to
   ``data/candidates/corpus_regions_runs/<B>/``.  The only command here that makes API calls
-  (``assistant_axis/gapgen/corpus_descriptors.py``).
+  (``assistant_axis/gapgen/corpus_descriptors.py``); refused while the platform's own paths have uncommitted
+  changes unless ``--allow-dirty`` (``run.json`` records the git sha and ``dirty_check``).
 * ``synonyms [--stem X] [--run-id R]``: M3's rename shortlist (design item 8 of
   coding_plan_platform.md's M3 design): the candidates M3 judged covered, under the
   trait that covers them, the traits whose candidates read 4 first, then 3, the
@@ -91,7 +92,7 @@ from assistant_axis.gapgen.promote import DEFAULT_SECTION, promote  # noqa: E402
 from assistant_axis.gapgen.registry import (  # noqa: E402
     Candidate, Registry, compact, holding_list, records_for_status, submit_candidates,
 )
-from assistant_axis.gapgen.runs import start_run  # noqa: E402
+from assistant_axis.gapgen.runs import git_sha, platform_dirty_files, start_run  # noqa: E402
 
 
 def _md(s) -> str:
@@ -368,6 +369,10 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
         print(f"nothing to judge; dropped {len(stale)} row(s): wrote {len(env['result'])} rows to {out}")
         return 0
     print(f"estimate ({n_send} traits with a description):\n{est.format()}")
+    # the paid run refuses on uncommitted platform code and records the check and the git sha, as the platform's
+    # other paid CLIs do (code review 2026-10-12, B4; review 3 D7)
+    from assistant_axis.gapgen.runs import dirty_refusal
+    dirty_refused, dirty_check = dirty_refusal(platform_dirty_files(), args.allow_dirty)
     if args.dry_run:
         by_stem = {t["stem"]: t for t in corpus}
         for s in args.show or [selected[0][0]["stem"]]:
@@ -375,6 +380,8 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
                 print(f"REFUSED: --show {s}: no such trait", file=sys.stderr)
                 return 2
             print(CD.render(by_stem[s]))
+        if dirty_refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {dirty_refused}")
         print(f"DRY-RUN: no call sent; {out} and {_corpus_regions_runs_root()} untouched")
         return 0
     if args.budget_usd is None:
@@ -384,6 +391,10 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
         cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=False)
     except CostRefused:
         return 2
+    if dirty_refused:
+        print(f"REFUSED: {dirty_refused}", file=sys.stderr)
+        return 2
+    sha = git_sha()
     batch_id = args.batch_id or "corpus_desc_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_dir = _corpus_regions_runs_root() / paths.check_id(batch_id, "batch_id")
     if run_dir.exists():
@@ -408,6 +419,7 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
         from assistant_axis.gapgen import prompt_labels as PL
         # every corpus-regions run is new: its prompts show the judge display form (the rows keep the stored label)
         meta = {"batch_id": batch_id, "stage": CD.STAGE, "source": CD.SOURCE, "mode": mode, "model": CD.MODEL,
+                "git_sha": sha, "allow_dirty": bool(args.allow_dirty), "dirty_check": dirty_check,
                 "step_versions": pinned["step_versions"], "prompt_sha256": pinned["prompt_sha256"],
                 PL.LABEL_FORM_KEY: PL.DEFAULT_LABEL_FORM,
                 "concurrency": concurrency, "budget_usd": cap, "estimate_usd": round(est.usd, 6),
@@ -636,6 +648,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--show", nargs="+", metavar="STEM",
                     help="--from-descriptions --dry-run: render these traits' requests (default: the first selected)")
     sp.add_argument("--concurrency", type=int, help="--from-descriptions: calls in flight (default 8)")
+    sp.add_argument("--allow-dirty", action="store_true",
+                    help="--from-descriptions: run although the platform's own code or prompt paths have uncommitted "
+                         "changes (refused otherwise; recorded in run.json)")
     sp.add_argument("--out", type=Path, default=paths.CORPUS_REGIONS_PATH)
     sp.set_defaults(func=cmd_corpus_regions)
     sp = sub.add_parser("synonyms", help="M3's rename shortlist: covered candidates under the trait that covers them")

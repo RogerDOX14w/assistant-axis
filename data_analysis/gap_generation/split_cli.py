@@ -31,6 +31,7 @@ from assistant_axis.gapgen import filter_rubric as fr
 from assistant_axis.gapgen import paths, split
 from assistant_axis.gapgen import plain_reading as pr
 from assistant_axis.gapgen import prompt_labels as PL
+from assistant_axis.gapgen import rubric_versions
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort
@@ -176,11 +177,18 @@ def resolve_readings(args) -> Optional[str]:
     return None
 
 
-def resume_mismatch(earlier_run: Optional[dict], args) -> Optional[str]:
+def resume_mismatch(earlier_run: Optional[dict], args, *, step_versions: Optional[dict] = None,
+                    prompt_sha256: Optional[dict] = None) -> Optional[str]:
     """Why ``--resume`` is refused: the batch's earlier session ran on another first model, or with another
     number of readings (a run before 2026-10-08 records no ``readings``: one).  The defaults moved to Haiku
     5.5 with three readings that day, so resuming an older batch without its ``--model`` would otherwise
-    send the rest of it on the new model and vote differently."""
+    send the rest of it on the new model and vote differently.
+
+    Also (code review 2026-10-12, B4; review 1 D2) when a prompt the earlier session recorded has another version
+    (``step_versions``) or another text (``prompt_sha256``) now: a batches-transport resume collects the earlier
+    session's answers by ``custom_id``, which carries no prompt hash, so they would be recorded under the new
+    prompt.  A prompt the earlier session did not record is not compared (a run before these fields, or a step
+    added since)."""
     if not earlier_run:
         return None
     m, n = earlier_run.get("model"), earlier_run.get("readings") or 1
@@ -189,6 +197,17 @@ def resume_mismatch(earlier_run: Optional[dict], args) -> Optional[str]:
                 f"--model {m} (and --readings {n})")
     if n != args.readings:
         return f"the batch's earlier session read the verdict waves {n} time(s), this one {args.readings}; resume with --readings {n}"
+    for field, now in (("step_versions", step_versions), ("prompt_sha256", prompt_sha256)):
+        before = earlier_run.get(field)
+        if not before or now is None:
+            continue
+        changed = sorted(k for k, v in before.items() if now.get(k) != v)
+        if changed:
+            what = "version" if field == "step_versions" else "text"
+            detail = ", ".join(f"{k} {str(before[k])[:12]} -> {str(now.get(k))[:12]}" for k in changed)
+            return (f"the prompt {what} changed since the batch's earlier session ({field}: {detail}); a resume "
+                    f"would record the earlier prompts' answers under the new ones (custom ids carry no prompt "
+                    f"hash): start a new --batch-id")
     return None
 
 
@@ -302,11 +321,11 @@ def main_split(args, argv) -> int:
     if not items:
         print("nothing to filter", file=sys.stderr)
         return 0
-    problems = sr.mismatches()
-    if problems:
-        for p in problems:
-            print(f"REFUSED (rubric not pinned): {p}", file=sys.stderr)
-        print("pin the text first:\n" + sr.bump_command(problems), file=sys.stderr)
+    # every pinned prompt, not only the split's eight: the run also sends the probe and the comparison prompts
+    # (code review 2026-10-12, B4; review 1 D3)
+    refusal = rubric_versions.refusal_lines()
+    if refusal:
+        print("\n".join(refusal), file=sys.stderr)
         if not args.dry_run:
             return 2
     transport, why = choose_transport(args.transport, len(items))
@@ -362,6 +381,11 @@ def main_split(args, argv) -> int:
     if refused:
         return 2
 
+    pins = sr.current_versions()
+    step_versions = {n: v for n, (v, _) in pins.items()}
+    # the eight split prompts, plus the two single-pipeline prompts the split also sends
+    prompt_sha256 = {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
+                     "probe": sr.sha256(fr.DEFINE_PROBE_PROMPT), "comparison": pr.PROMPT_SHA256["comparison"]}
     resume_records: list[dict] = []
     earlier_run = None
     if out_dir.exists():
@@ -371,7 +395,7 @@ def main_split(args, argv) -> int:
                 resume_records = [json.loads(x) for x in rp.read_text(encoding="utf-8").splitlines() if x.strip()]
             if (out_dir / "run.json").exists():
                 earlier_run = json.loads((out_dir / "run.json").read_text(encoding="utf-8"))
-            bad = resume_mismatch(earlier_run, args)
+            bad = resume_mismatch(earlier_run, args, step_versions=step_versions, prompt_sha256=prompt_sha256)
             if bad:
                 print(f"REFUSED: {bad}", file=sys.stderr)
                 return 2
@@ -388,7 +412,6 @@ def main_split(args, argv) -> int:
         print(f"--resume: {out_dir} does not exist", file=sys.stderr)
         return 1
     out_dir.mkdir(parents=True, exist_ok=True)
-    pins = sr.current_versions()
     run_meta = {"batch_id": args.batch_id, "pipeline": "split", "rubric_version": split.RUBRIC_VERSION,
                 "git_sha": sha, "allow_dirty": bool(args.allow_dirty), "dirty_check": dirty_check,
                 "argv": sys.argv[1:] if argv is None else argv, "plan": plan, "transport": transport,
@@ -408,11 +431,8 @@ def main_split(args, argv) -> int:
                 # phrases not probed, phrases turned away by the frames decided by the second model, alignment-sweep
                 # roles to review (gate audit 5, 2026-10-12); a run before then records none
                 "phrase_routing": dict(split.PHRASE_ROUTING),
-                "step_versions": {n: v for n, (v, _) in pins.items()},
-                # the eight split prompts, plus the two single-pipeline prompts the split also sends
-                "prompt_sha256": {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
-                                  "probe": sr.sha256(fr.DEFINE_PROBE_PROMPT),
-                                  "comparison": pr.PROMPT_SHA256["comparison"]},
+                "step_versions": step_versions,
+                "prompt_sha256": prompt_sha256,
                 "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
                 "comparison_version": pr.COMPARISON_VERSION,
                 "measurement": bool(args.measurement), "stability": bool(args.stability),

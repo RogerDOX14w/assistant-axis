@@ -30,8 +30,9 @@ blind and (``--hinted``) with the scale names.  ``granularity`` makes the two re
 overlap call (rubric A, Sonnet 5.5): each pole against the nearest pole of another cluster by name and gloss, and
 the within-pole item pairs; the readout reports both by cluster-size band and prints clusters in full.  ``submit`` writes a run's ``candidates.jsonl`` (every named pole: QUESTIONS 48) and submits it; ``report`` writes its
 ``evaluation.json``, ``report.md`` and ``roger_sample.md``.  Every paid command prints its estimate, refuses one
-over ``--budget-usd`` (and over $20 without ``--confirm-expensive --confirmed-by``), writes ``usage.json`` and
-checks the parse rate.  Every command has ``--dry-run``, which writes nothing.
+over ``--budget-usd`` (and over $20 without ``--confirm-expensive --confirmed-by``), refuses while the platform's
+own paths have uncommitted changes unless ``--allow-dirty`` (``cluster``, ``name``, ``granularity``; code review
+2026-10-12), writes ``usage.json`` and checks the parse rate.  Every command has ``--dry-run``, which writes nothing.
 """
 from __future__ import annotations
 
@@ -60,6 +61,26 @@ logger = logging.getLogger("ipip_generator")
 def _git_sha() -> Optional[str]:
     from assistant_axis.gapgen.runs import git_sha
     return git_sha()
+
+
+def platform_dirty_files() -> Optional[list[str]]:
+    """``runs.platform_dirty_files`` under this module's name, so that tests can replace it."""
+    from assistant_axis.gapgen.runs import platform_dirty_files as dirty
+    return dirty()
+
+
+def _dirty_gate(args) -> Optional[int]:
+    """The paid commands' dirty-tree refusal (code review 2026-10-12, B4): ``2`` after printing the reason when the
+    platform's own paths have uncommitted changes and ``--allow-dirty`` is not given; a dry run only says so."""
+    from assistant_axis.gapgen.runs import dirty_refusal
+    refused, _ = dirty_refusal(platform_dirty_files(), getattr(args, "allow_dirty", False))
+    if not refused:
+        return None
+    if args.dry_run:
+        print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+        return None
+    print(f"REFUSED: {refused}", file=sys.stderr)
+    return 2
 
 
 def _paths(args) -> dict:
@@ -279,6 +300,8 @@ def cmd_cluster(args) -> int:
         lines.append(f"  {arm} ({emb.model_id}): {len(missing)} of {len(need)} texts not cached, ~{tok:,} tokens = ${usd:.4f}")
     print(f"embedding estimate:\n" + "\n".join(lines) + f"\n  total ${total:.4f}")
     confirm_or_abort(total, args.budget_usd, confirm_expensive=False)
+    if _dirty_gate(args):
+        return 2
     rule, ceiling, recut = consensus_settings(args)
     print(f"consensus rule {rule}" + (f" (keep 3+ clusters, and a pair the second arm co-clusters)" if rule == "r2"
                                       else f" (one-to-one Jaccard >= {C.MIN_JACCARD:g})")
@@ -410,6 +433,8 @@ def cmd_name(args) -> int:
           + " + ".join(f"{f} {len(refs_by_form[f])}" for f in forms) + "):")
     print(est.format())
     confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    if _dirty_gate(args):
+        return 2
     if args.render:
         # the calls exactly as they are sent, for the rubric files' "Rendered sample" sections (the house rule:
         # read the rendered prompt, not the template)
@@ -515,6 +540,8 @@ def cmd_granularity(args) -> int:
             print(f"   signal 1: {json.dumps(nearest_counts)}")
     print(f"total estimate ${total:.3f} on {G.MODEL}")
     confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    if _dirty_gate(args):
+        return 2
     if args.dry_run:
         print(f"DRY-RUN: would write {pp['granularity']}/g<G>/responses.jsonl, usage.json, run.json and "
               f"{pp['readout_json']}, {pp['readout_md']}")
@@ -666,6 +693,12 @@ def _cost_flags(p, budget: float) -> None:
     p.add_argument("--dry-run", action="store_true")
 
 
+def _dirty_flag(p) -> None:
+    p.add_argument("--allow-dirty", action="store_true",
+                   help="run although the platform's own code or prompt paths have uncommitted changes (refused "
+                        "otherwise)")
+
+
 def build_parser() -> argparse.ArgumentParser:
     from assistant_axis.gapgen.generators.ipip.cluster import CONSENSUS_RULES as C_RULES
     from assistant_axis.gapgen.generators.ipip.cluster import DEFAULT_CONSENSUS as C_DEFAULT_RULE
@@ -717,6 +750,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-hdbscan", action="store_true", help="skip the HDBSCAN cross-check (report only)")
     p.add_argument("--budget-usd", type=float, default=1.0)
     p.add_argument("--dry-run", action="store_true")
+    _dirty_flag(p)
     p.set_defaults(func=cmd_cluster)
 
     p = sub.add_parser("name", help="name poles on Haiku 5.5, blind and (--hinted) with the scale names")
@@ -733,6 +767,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--model", default="claude-haiku-5-5")
     _cost_flags(p, 1.0)
+    _dirty_flag(p)
     p.set_defaults(func=cmd_name)
 
     p = sub.add_parser("granularity", help="read within-pole item pairs with M3's overlap call (Sonnet 5.5)")
@@ -750,6 +785,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--label-choice", choices=("blind", "hinted"), default="blind",
                    help="which name signal 1 reads a pole by (default blind, the submitted surface)")
     _cost_flags(p, 3.0)
+    _dirty_flag(p)
     p.set_defaults(func=cmd_granularity)
 
     p = sub.add_parser("submit", help="write a run's candidates.jsonl and submit it (no API cost; gated on M1 + M3)")

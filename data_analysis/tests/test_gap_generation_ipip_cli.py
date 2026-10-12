@@ -39,6 +39,8 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(CLI, "_embedder", lambda arm: HashEmbedder(dim=24))
     client = FakeAsyncAnthropic(answer)
     monkeypatch.setattr(CLI, "_client", lambda: client)
+    # the paid commands refuse on uncommitted platform code (B4); these tests run in a working checkout
+    monkeypatch.setattr(CLI, "platform_dirty_files", lambda *a, **k: [])
     common = ["--data-dir", str(data), "--registry", str(cdir / "registry.jsonl"), "--candidates-dir", str(cdir),
               "--external", str(ext), "--ipip-dir", str(ipip), "--embedding-cache", str(tmp_path / "emb")]
     return tmp_path, common, ipip, cdir, client
@@ -180,6 +182,25 @@ def test_submit_refused_over_budget(env):
         CLI.main(common + ["submit", "--granularity", "350", "--run-id", "p2", "--all-poles",
                            "--budget-usd", "0.001"])
     assert ei.value.code == 2 and not (cdir / "runs").exists()
+
+
+def test_the_paid_commands_refuse_a_dirty_tree(env, monkeypatch, capsys):
+    """Code review 2026-10-12, B4: cluster, name and granularity refuse on uncommitted platform code unless
+    --allow-dirty; a dry run only says so."""
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    monkeypatch.setattr(CLI, "platform_dirty_files", lambda *a, **k: [" M assistant_axis/gapgen/cost.py"])
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 2
+    assert "uncommitted changes" in capsys.readouterr().err
+    assert not any((ipip / f"clusters_g{g}.jsonl").exists() for g in GRANULARITIES)
+    dry(root, common, ["cluster", "--no-hdbscan"])
+    assert "the real run would be REFUSED" in capsys.readouterr().out
+    assert CLI.main(common + ["cluster", "--no-hdbscan", "--allow-dirty"]) == 0
+    before = snapshot(root)
+    assert CLI.main(common + ["name", "--granularity", "350", "--all"]) == 2
+    assert CLI.main(common + ["granularity", "--granularities", "350"]) == 2
+    assert snapshot(root) == before and not client.calls
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--allow-dirty"]) == 0 and client.calls
 
 
 def test_ingest_without_the_workbook_commits_the_key_pages_alone(env):

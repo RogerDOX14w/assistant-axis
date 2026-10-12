@@ -14,6 +14,12 @@ from data_analysis.gap_generation import roget_generate as R
 FIXTURE = Path(__file__).resolve().parents[2] / "assistant_axis" / "tests" / "fixtures" / "roget_sample.txt"
 
 
+@pytest.fixture(autouse=True)
+def _clean_tree(monkeypatch):
+    """The paid commands refuse on uncommitted platform code (B4); these tests run in a working checkout."""
+    monkeypatch.setattr(R, "platform_dirty_files", lambda *a, **k: [])
+
+
 @pytest.fixture()
 def tree(tmp_path):
     text = tmp_path / "ext" / "pg.txt"
@@ -133,6 +139,29 @@ def test_map_refuses_an_estimate_over_the_budget(tree):
     with pytest.raises(SystemExit, match="REFUSED"):
         run(base, "map", "--embedder", "openai", "--budget-usd", "0.0000001", "--cache-dir", str(tmp_path / "cache"))
     assert not (tmp_path / "out" / "label_heads.json").exists()
+
+
+def test_the_paid_commands_refuse_a_dirty_tree(tree, monkeypatch, capsys):
+    """Code review 2026-10-12, B4: map, head-scope and place-check refuse on uncommitted platform code (exit 2)
+    unless --allow-dirty; a dry run only says so."""
+    tmp_path, base = tree
+    run(base, "parse", "--allow-checksum-mismatch")
+    run(base, "pair")
+    monkeypatch.setattr(R, "platform_dirty_files", lambda *a, **k: [" M assistant_axis/gapgen/cost.py"])
+    monkeypatch.setattr(R, "_anthropic_client", lambda: (_ for _ in ()).throw(AssertionError("no client")))
+    with pytest.raises(SystemExit) as ei:
+        run(base, "map", "--embedder", "hash", "--cache-dir", str(tmp_path / "cache"))
+    assert ei.value.code == 2 and "uncommitted changes" in capsys.readouterr().err
+    assert not (tmp_path / "out" / "label_heads.json").exists()
+    assert R.main([*base, "--dry-run", "map", "--embedder", "hash", "--cache-dir", str(tmp_path / "cache")]) == 0
+    assert "the real run would be REFUSED" in capsys.readouterr().out
+    assert run(base, "map", "--embedder", "hash", "--cache-dir", str(tmp_path / "cache"), "--allow-dirty") == 0
+    assert run(base, "coverage") == 0
+    for argv in (["head-scope"], ["place-check"]):
+        with pytest.raises(SystemExit) as ei:
+            run(base, *argv)
+        assert ei.value.code == 2, argv
+    assert not (tmp_path / "out" / "head_scope.json").exists()
 
 
 def test_harvest_refuses_to_overwrite_without_force(tree):

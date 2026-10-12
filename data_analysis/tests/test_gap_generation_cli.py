@@ -237,6 +237,22 @@ class TestTraithoodFilterCLI:
         assert rj["dirty_check"]["dirty"] == [" M assistant_axis/gapgen/filter.py"]
         assert "assistant_axis/gapgen" in rj["dirty_check"]["paths"]
 
+    def test_an_unpinned_prompt_refuses_the_single_pipeline(self, tmp_path, cand_dir, fake_client, monkeypatch,
+                                                             capsys):
+        """Code review 2026-10-12, B4 (review 1 D3): the single pipeline refuses when a prompt's text is not its
+        pinned version (rubric_versions.mismatches); a dry run prints the refusal and goes on."""
+        from assistant_axis.gapgen import rubric_versions
+        monkeypatch.setattr(rubric_versions, "mismatches",
+                            lambda: ["classifier: text changed (sha ab...) but version 6 is pinned to cd..."])
+        val = _validation(tmp_path)
+        base = [*SINGLE, "--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
+        assert traithood_filter.main(["--batch-id", "rv1", *base]) == 2
+        assert "REFUSED (rubric not pinned): classifier" in capsys.readouterr().err
+        assert not (cand_dir / "filter" / "rv1").exists() and "client" not in fake_client
+        assert traithood_filter.main(["--batch-id", "rv1", "--dry-run", *base]) == 0
+        assert "REFUSED (rubric not pinned)" in capsys.readouterr().err
+        assert not (cand_dir / "filter").exists()
+
     def test_unrelated_dirty_file_does_not_block(self, tmp_path, cand_dir, fake_client, monkeypatch):
         """Re-review 5c: an edited report elsewhere makes git_sha '+dirty' but
         must not force --allow-dirty."""

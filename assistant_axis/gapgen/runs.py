@@ -119,6 +119,23 @@ def platform_dirty_files(repo: Path = REPO_ROOT, paths: Iterable[str] = PLATFORM
     return [line for line in out.splitlines() if line.strip()]
 
 
+def dirty_refusal(dirty: Optional[list[str]], allow_dirty: bool) -> tuple[Optional[str], dict]:
+    """The paid CLIs' dirty-tree check on a :func:`platform_dirty_files` result: ``(refusal, record)``.
+
+    ``refusal`` is why a paid run is refused (uncommitted changes under :data:`PLATFORM_PATHS` without
+    ``--allow-dirty``), or ``None``; ``record`` is the ``dirty_check`` block a run records (with
+    ``allow_dirty``).  Git unavailable (``None``) is recorded, not refused, as the filter CLI does.  The
+    caller passes the list so that tests can replace its own module's ``platform_dirty_files`` (code review
+    2026-10-12, B4: the generator CLIs that lacked the check)."""
+    record = {"paths": list(PLATFORM_PATHS), "dirty": dirty, "allow_dirty": bool(allow_dirty),
+              "note": None if dirty is not None else "git unavailable: not checked"}
+    if dirty and not allow_dirty:
+        return (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty to record a "
+                f"run whose code and prompt the git sha does not identify"), record
+    return None, record
+
+
 @dataclass
 class RunContext:
     generator: str

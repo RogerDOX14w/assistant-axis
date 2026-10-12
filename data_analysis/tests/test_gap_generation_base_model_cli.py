@@ -44,6 +44,8 @@ def env(tmp_path, monkeypatch):
     # the gloss-sense step's one call: a fake model, so no request leaves the process
     monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
         SENSE_ANSWER, input_tokens=400, output_tokens=40)))
+    # `sense` refuses on uncommitted platform code (B4); these tests run in a working checkout
+    monkeypatch.setattr(CLI, "platform_dirty_files", lambda *a, **k: [])
     common = ["--data-dir", str(data), "--registry", str(tmp_path / "cand" / "registry.jsonl"),
               "--candidates-dir", str(tmp_path / "cand"), "--external-dir", str(ext),
               "--sources-manifest", str(tmp_path / "sources_manifest.json"), "--hf-dir", str(tmp_path / "hf"),
@@ -124,6 +126,25 @@ def test_submit_refuses_before_the_sense_step(env, capsys):
     err = capsys.readouterr().err
     assert "sense --round 1" in err and "QUESTIONS 56" in err
     assert not (tmp / "cand" / "runs").exists()
+
+
+def test_sense_refuses_a_dirty_tree(env, capsys, monkeypatch):
+    """Code review 2026-10-12, B4: the paid step refuses on uncommitted platform code unless --allow-dirty; a dry
+    run only says so."""
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    monkeypatch.setattr(CLI, "platform_dirty_files", lambda *a, **k: [" M assistant_axis/gapgen/cost.py"])
+    calls = []
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: calls.append(1))
+    before = snapshot(tmp)
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 2
+    assert "uncommitted changes" in capsys.readouterr().err
+    assert snapshot(tmp) == before and calls == []
+    assert run(common, "sense", "--round", "1", "--arm", "hash", "--dry-run") == 0
+    assert "the real run would be REFUSED" in capsys.readouterr().out
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(lambda kw: make_response(
+        SENSE_ANSWER, input_tokens=400, output_tokens=40)))
+    assert run(common, "sense", "--round", "1", "--arm", "hash", "--allow-dirty") == 0
 
 
 def test_sense_settles_the_divergent_rows(env, capsys):

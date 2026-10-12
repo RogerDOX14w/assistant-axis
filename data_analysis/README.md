@@ -1084,7 +1084,12 @@ uv run python data_analysis/gap_generation/gap_registry.py corpus-regions \
 `corpus_desc_2026_10_09`).  Each
 replaced row keeps `previous_region`, `previous_alignment_relevant` and
 `previous_source`; the run's responses, `usage.json` and `run.json` go to
-`data/candidates/corpus_regions_runs/<batch_id>/`.  The old form,
+`data/candidates/corpus_regions_runs/<batch_id>/`.  Since the code review of
+2026-10-12 the paid run refuses while the platform's own paths have uncommitted
+changes (`--allow-dirty` overrides), and `run.json` records the git sha and the
+`dirty_check`; the generators' paid commands (`base_model_generator.py sense`,
+`ipip_generator.py cluster`/`name`/`granularity`, `roget_generate.py
+map`/`place-check`/`head-scope`) refuse the same way.  The old form,
 `--from-filter <filter run dir>` (repeatable; the filter's region of the label),
 still works and writes the file whole.
 

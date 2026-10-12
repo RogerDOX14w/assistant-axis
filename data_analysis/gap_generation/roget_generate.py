@@ -19,7 +19,9 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
         [--force] [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py submit --run-id R [--generator roget|wn_clusters]
 
-Every command takes ``--dry-run`` (prints what it would do; writes nothing, calls nothing).
+Every command takes ``--dry-run`` (prints what it would do; writes nothing, calls nothing).  The paid commands
+(``map``, ``place-check``, ``head-scope``) refuse while the platform's own paths have uncommitted changes unless
+``--allow-dirty`` (code review 2026-10-12).
 
 * ``fetch``: Gutenberg #10681 into ``data/external/roget/pg10681.txt`` (gitignored), with the
   Project Gutenberg licence (the text's own closing section) as ``LICENSE.txt`` and a
@@ -149,14 +151,30 @@ def _input(dep_key: str, path: Path, **extras):
     return current_file_input(dep_key, Path(path), extras={k: str(v) for k, v in extras.items()} or None)
 
 
+def platform_dirty_files() -> Optional[list[str]]:
+    """``runs.platform_dirty_files`` under this module's name, so that tests can replace it."""
+    from assistant_axis.gapgen.runs import platform_dirty_files as dirty
+    return dirty()
+
+
 def _gate(estimate_usd: float, args) -> None:
     """The platform's $20 line (``gapgen.cost.confirm_or_abort``): a budget or an estimate over it needs Roger's go,
     recorded with ``--confirm-expensive --confirmed-by``.  The caller has already refused an estimate over
     ``--budget-usd``.  (Review 2026-10-12: map, head-scope and place-check checked only the budget, so a typed
-    budget over $20 went through without the go; plan 02 § 7 names this guard for every paid command.)"""
+    budget over $20 went through without the go; plan 02 § 7 names this guard for every paid command.)
+
+    Then the dirty-tree refusal (code review 2026-10-12, B4): uncommitted changes under the platform's own paths
+    refuse the paid command (exit 2) unless ``--allow-dirty``; a dry run only says so."""
     from assistant_axis.gapgen.cost import confirm_or_abort
+    from assistant_axis.gapgen.runs import dirty_refusal
     confirm_or_abort(estimate_usd, args.budget_usd, confirm_expensive=getattr(args, "confirm_expensive", False),
                      confirmed_by=getattr(args, "confirmed_by", None))
+    refused, _ = dirty_refusal(platform_dirty_files(), getattr(args, "allow_dirty", False))
+    if refused and args.dry_run:
+        print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+    elif refused:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        raise SystemExit(2)
 
 
 # --------------------------------------------------------------------------- fetch
@@ -1147,6 +1165,9 @@ def _go_flags(sp) -> None:
     sp.add_argument("--confirm-expensive", action="store_true",
                     help="with --confirmed-by: a --budget-usd or an estimate over the $20 line (Roger's go)")
     sp.add_argument("--confirmed-by", default=None, help="Roger's explicit go for a spend over $20 (who, when)")
+    sp.add_argument("--allow-dirty", action="store_true",
+                    help="run although the platform's own code or prompt paths have uncommitted changes (refused "
+                         "otherwise)")
 
 
 def _head_scope_flags(sp) -> None:

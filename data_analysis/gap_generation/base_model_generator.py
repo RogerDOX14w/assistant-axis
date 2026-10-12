@@ -8,7 +8,7 @@
         [--t-grid 0.8,1.0,1.2 --per-t 500] [--families list,person,...] [--batch-size 32] [--device mps] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py parse --round N [--temperature T] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py sense --round N [--arm bge|gemma|openai|hash]
-        [--divergence-cosine 0.6] [--budget-usd 2] [--dry-run]
+        [--divergence-cosine 0.6] [--budget-usd 2] [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py stats --round N [--temperature T] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py submit --round N --run-id R [--min-count 2]
         [--budget-usd 15] [--transport live|batches] [--confirm-expensive --confirmed-by WHO] [--dry-run]
@@ -25,7 +25,8 @@ divergent row; QUESTIONS 56), ``stats`` the round's diversity figures.  ``submit
 while any selected row's sense is unsettled.  ``report`` writes the pilot readout.
 
 The generator's only paid call is ``sense``'s, hundredths of a cent a divergent row; M1 and M3 are the
-platform's CLIs, printed by ``submit``.
+platform's CLIs, printed by ``submit``.  ``sense`` refuses while the platform's own paths have uncommitted changes
+unless ``--allow-dirty`` (code review 2026-10-12).
 """
 from __future__ import annotations
 
@@ -45,6 +46,12 @@ from assistant_axis.gapgen.generators import base_model as B  # noqa: E402
 def _git_sha() -> Optional[str]:
     from assistant_axis.gapgen.runs import git_sha
     return git_sha()
+
+
+def platform_dirty_files() -> Optional[list[str]]:
+    """``runs.platform_dirty_files`` under this module's name, so that tests can replace it."""
+    from assistant_axis.gapgen.runs import platform_dirty_files as dirty
+    return dirty()
 
 
 def _rel(p: Path) -> str:
@@ -354,13 +361,21 @@ def cmd_sense(args) -> int:
     todo = [r for r in rows if SE.needs_screen(r)]
     print(f"round {args.round}: {len(rows)} table rows, {len(two)} with two glosses (OEWN's sense and the "
           f"model's own), {len(todo)} needing the free cosine screen at floor {floor:g}")
+    # The paid step refuses on uncommitted platform code, as the platform's own CLIs do (code review 2026-10-12, B4).
+    from assistant_axis.gapgen.runs import dirty_refusal
+    refused, _ = dirty_refusal(platform_dirty_files(), args.allow_dirty)
     if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
         print(f"DRY-RUN: would embed {2 * len(todo)} gloss texts with the {arm} arm (free for a local arm), "
               f"flag the divergent rows, ask {SE.MODEL} one question each, and write the decisions into "
               f"{_rel(table_p)} with {_rel(rdir / SE.RESPONSES_NAME)} and {_rel(rdir / SE.USAGE_NAME)}")
         if two:
             print(SE.render(two[0]))
         return 0
+    if refused:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        return 2
     # A row whose call failed twice, or was decided under an older prompt, needs no new screen but does need its
     # call again; the rerun of 2026-10-12 found nothing to screen and returned with 33 such rows still unresolved.
     n_stale_call = sum(1 for r in rows if SE.needs_call(r))
@@ -655,6 +670,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--budget-usd", type=float, default=2.0, help="cap on the sense calls (pennies in practice)")
     p.add_argument("--confirm-expensive", action="store_true")
     p.add_argument("--confirmed-by", default=None)
+    p.add_argument("--allow-dirty", action="store_true",
+                   help="run although the platform's own code or prompt paths have uncommitted changes "
+                        "(refused otherwise)")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_sense)
 

@@ -262,6 +262,8 @@ def cli(tmp_path, monkeypatch):
     out = tmp_path / "corpus_regions.json"
     runs = tmp_path / "runs"
     monkeypatch.setattr(gap_registry, "_corpus_regions_runs_root", lambda: runs)
+    # the paid run refuses on uncommitted platform code (B4); these tests run in a working checkout
+    monkeypatch.setattr(gap_registry, "platform_dirty_files", lambda *a, **k: [])
     clients = []
 
     def make_client(responder_fn=None):
@@ -292,6 +294,24 @@ class TestCommand:
     def test_dry_run_shows_the_named_trait(self, cli, capsys):
         assert cli["run"]("--from-descriptions", "--all", "--dry-run", "--show", "stubborn") == 0
         assert split.payload("descriptors", label="stubborn", description=DESC["stubborn"]) in capsys.readouterr().out
+
+    def test_a_dirty_tree_is_refused_and_the_check_recorded(self, cli, monkeypatch, capsys):
+        """Code review 2026-10-12, B4 (review 3 D7): the paid run refuses on uncommitted platform code unless
+        --allow-dirty, and run.json records the git sha and the check."""
+        from data_analysis.gap_generation import gap_registry
+        dirty = [" M assistant_axis/gapgen/cost.py"]
+        monkeypatch.setattr(gap_registry, "platform_dirty_files", lambda *a, **k: dirty)
+        monkeypatch.setattr(gap_registry, "git_sha", lambda *a, **k: "abc1234+dirty")
+        assert cli["run"]("--from-descriptions", "--all", "--budget-usd", "1", "--batch-id", "cd_d") == 2
+        assert "uncommitted changes" in capsys.readouterr().err
+        assert cli["clients"] == [] and not cli["out"].exists() and not cli["runs"].exists()
+        assert cli["run"]("--from-descriptions", "--all", "--dry-run") == 0
+        assert "the real run would be REFUSED" in capsys.readouterr().out
+        assert cli["run"]("--from-descriptions", "--all", "--budget-usd", "1", "--batch-id", "cd_d",
+                          "--allow-dirty") == 0
+        run = json.loads((cli["runs"] / "cd_d" / "run.json").read_text())
+        assert run["git_sha"] == "abc1234+dirty" and run["allow_dirty"] is True
+        assert run["dirty_check"]["dirty"] == dirty
 
     def test_all_writes_every_trait_with_the_previous_region(self, cli, capsys):
         cli["out"].write_text(json.dumps({"result": {

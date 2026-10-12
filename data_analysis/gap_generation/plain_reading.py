@@ -59,6 +59,7 @@ from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E40
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import plain_reading as pr  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import rubric_versions  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
@@ -159,6 +160,13 @@ def main(argv=None) -> int:
     if not items:
         print("nothing to read", file=sys.stderr)
         return 0
+    # the reading and comparison prompts (and every other pinned prompt) must be their pinned text (code review
+    # 2026-10-12, B4; review 1 D3); a dry run prints the refusal and goes on
+    refusal = rubric_versions.refusal_lines()
+    if refusal:
+        print("\n".join(refusal), file=sys.stderr)
+        if not args.dry_run:
+            return 2
     # The comparison across the corpus raises no flag; it lists every label (round 4)
     corpus_mode = not args.pairs
     reuse = reuse_from(args.reuse_readings) if args.reuse_readings else {}

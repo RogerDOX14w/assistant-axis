@@ -155,6 +155,7 @@ from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E40
 from assistant_axis.gapgen import filter_rubric as fr  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import rubric_versions  # noqa: E402
 from assistant_axis.gapgen.cost import (  # noqa: E402
     CostRefused, Estimate, GuardedUsage, confirm_or_abort,
 )
@@ -480,6 +481,13 @@ def main(argv=None) -> int:
     if not items:
         print("nothing to filter", file=sys.stderr)
         return 0
+    # every prompt this run sends (classifier, probe, the plain reading's two) must be its pinned text (code review
+    # 2026-10-12, B4; review 1 D3); a dry run prints the refusal and goes on
+    refusal = rubric_versions.refusal_lines()
+    if refusal:
+        print("\n".join(refusal), file=sys.stderr)
+        if not args.dry_run:
+            return 2
     est, plan = build_estimate(items, args)
     print(f"plan: {json.dumps(plan)}")
     if args.stability and plan["n_llm"] < STABILITY_MIN_LLM_ROWS:

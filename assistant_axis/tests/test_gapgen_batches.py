@@ -577,6 +577,40 @@ class TestSplitCLI:
         assert "rubric_pins.py bump kind" in capsys.readouterr().err
         assert not (cli["out"] / "filter" / "p").exists()
 
+    def test_a_non_split_prompt_out_of_its_pin_refuses_too(self, cli, monkeypatch, capsys):
+        """Code review 2026-10-12, B4 (review 1 D3): the split also sends the probe and the comparison prompts,
+        so every pin is checked (rubric_versions.mismatches), not only the split's eight."""
+        from assistant_axis.gapgen import rubric_versions
+        from data_analysis.gap_generation import traithood_filter
+        monkeypatch.setattr(rubric_versions, "mismatches",
+                            lambda: ["probe: text changed (sha ab...) but version 3 is pinned to cd..."])
+        assert traithood_filter.main(_args(cli)) == 2
+        err = capsys.readouterr().err
+        assert "REFUSED (rubric not pinned): probe" in err and "rubric_versions.py" in err
+        assert not (cli["out"] / "filter" / "p").exists()
+
+    def test_a_resume_across_a_prompt_change_is_refused(self, cli, capsys):
+        """Code review 2026-10-12, B4 (review 1 D2): a resume whose earlier session recorded another prompt
+        version or text is refused (a batch's custom ids carry no prompt hash)."""
+        from data_analysis.gap_generation import traithood_filter
+        assert traithood_filter.main(_args(cli, "--transport", "live")) == 0
+        d = cli["out"] / "filter" / "p"
+        recorded = (d / "run.json").read_text()
+        responses = (d / "responses.jsonl").read_text()
+        run = json.loads(recorded)
+        run["step_versions"]["kind"] -= 1
+        (d / "run.json").write_text(json.dumps(run))
+        assert traithood_filter.main(_args(cli, "--transport", "live", "--resume")) == 2
+        assert "prompt version changed" in capsys.readouterr().err
+        run = json.loads(recorded)
+        run["prompt_sha256"]["probe"] = "0" * 64
+        (d / "run.json").write_text(json.dumps(run))
+        assert traithood_filter.main(_args(cli, "--transport", "live", "--resume")) == 2
+        assert "prompt text changed" in capsys.readouterr().err
+        assert (d / "responses.jsonl").read_text() == responses
+        (d / "run.json").write_text(recorded)
+        assert traithood_filter.main(_args(cli, "--transport", "live", "--resume")) == 0
+
     def test_auto_transport_printed_with_the_estimate(self, cli, capsys):
         from data_analysis.gap_generation import traithood_filter
         assert traithood_filter.main(_args(cli, "--dry-run")) == 0
