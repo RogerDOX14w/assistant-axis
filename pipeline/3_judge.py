@@ -22,12 +22,15 @@ Usage:
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
 import os
+import re
 import socket
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
@@ -98,7 +101,13 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #   2 (2026-10-09, W19, Roger) -- names in the judge display form
 #     (assistant_axis.entity_id.judge_label): ``careless (from HEXACO)``,
 #     ``devil's advocate``, ``systems-thinker``.  Template text unchanged.
-JUDGE_RUBRIC_VERSION = 2
+#   3 (2026-10-12, walk-through P4 / D5; review P3 D1) -- how a reply is
+#     read: exactly one ``SCORE: <int>`` marker is the answer
+#     (parse_judge_score(require_marker=True)); a reply with none or several,
+#     or cut at max_tokens (finish_reason "length"), is unparseable, never a
+#     digit of its reasoning.  Prompt text unchanged.  The role rubrics'
+#     artefacts ("Gemma, an LLM", ...) wait for Roger's wording (version 4).
+JUDGE_RUBRIC_VERSION = 3
 
 COMBINED_EVAL_TEMPLATE = """\
 You are evaluating whether the model's response fully embodies BOTH:
@@ -160,6 +169,71 @@ Respond with:
 First, briefly reason about whether the response exhibits the trait\
  (2-3 sentences). Then on a new line, write exactly:\
  SCORE: <integer from 0 to 3>"""
+
+
+# How step 3 reads a reply (JUDGE_RUBRIC_VERSION 3), and why a reply was
+# not scored, counted for the end-of-run summary.
+_MARKER_RE = re.compile(r"SCORE\s*:\s*(\d+)", re.IGNORECASE)
+REPLY_PROBLEMS: Counter = Counter()
+
+
+def score_reply(text: Optional[str], finish_reason: Optional[str] = None) -> Optional[int]:
+    """The score of one judge reply, or None (unparseable), counting the
+    reason in :data:`REPLY_PROBLEMS`: ``truncated`` (``finish_reason`` is
+    ``"length"``: cut at ``--max_tokens``), ``no_reply`` (no text: a failed
+    call, a content-flagged prompt), ``no_marker``, ``several_markers``,
+    ``out_of_range``."""
+    if finish_reason == "length":
+        REPLY_PROBLEMS["truncated"] += 1
+        return None
+    if not text:
+        REPLY_PROBLEMS["no_reply"] += 1
+        return None
+    score = parse_judge_score(text, require_marker=True)
+    if score is None:
+        n = len(_MARKER_RE.findall(text))
+        REPLY_PROBLEMS["no_marker" if n == 0 else "several_markers" if n > 1
+                       else "out_of_range"] += 1
+    return score
+
+
+def combination_pairs_sha256(role: str, trait: str, roles_dir: Path, traits_dir: Path) -> str:
+    """The ``pairs_sha256`` that data_analysis/score_combinations.py records
+    for a combination (``pairs_sha256(_make_combo(...))``, computed the same
+    way: the role's and the trait's judge labels and the index-matched
+    ``pos`` instruction pairs, sha256, first 16 hex digits), from the
+    instruction files as they are now.  A test pins the two together."""
+    role_data = _load_json(Path(roles_dir) / f"{role}.json")
+    trait_data = _load_json(Path(traits_dir) / f"{trait}.json")
+    ri, ti = role_data.get("instruction", []), trait_data.get("instruction", [])
+    pairs = [{"role_instruction": ri[i].get("pos", ""), "trait_instruction": ti[i].get("pos", "")}
+             for i in range(min(len(ri), len(ti)))]
+    blob = json.dumps([judge_label(role, "roles"), trait_judge_name(trait, trait_data), pairs],
+                      sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
+
+
+def check_pairs_sha256(stems: Iterable[str], stored: Dict[str, Optional[str]],
+                       roles_dir: Path, traits_dir: Path) -> Tuple[List[str], List[str]]:
+    """``(mismatched, unlisted)`` combination stems: recorded with a
+    ``pairs_sha256`` other than :func:`combination_pairs_sha256` of the files
+    now (or an instruction file missing), and not in the scores file at all."""
+    mismatched, unlisted = [], []
+    for stem in stems:
+        parsed = parse_combined_filename(stem)
+        if parsed is None:
+            continue
+        if stem not in stored:
+            unlisted.append(stem)
+            continue
+        role, trait, _ = parsed
+        try:
+            current = combination_pairs_sha256(role, trait, roles_dir, traits_dir)
+        except OSError:
+            current = None
+        if current is None or current != stored[stem]:
+            mismatched.append(stem)
+    return mismatched, unlisted
 
 
 def _load_json(path: Path) -> dict:
@@ -552,6 +626,7 @@ async def score_entity(
         rate_limiter=rate_limiter,
         batch_size=batch_size,
         usage=usage,
+        reject_truncated=True,      # rubric v3: a reply cut at max_tokens is unparseable
     )
 
     scores: Dict[str, int] = {}
@@ -559,11 +634,10 @@ async def score_entity(
     n_parsed = 0
     for key, text in zip(keys, responses_text):
         n_attempted += 1
-        if text:
-            score = parse_judge_score(text)
-            if score is not None:
-                scores[key] = score
-                n_parsed += 1
+        score = score_reply(text)
+        if score is not None:
+            scores[key] = score
+            n_parsed += 1
 
     return scores, n_attempted, n_parsed
 
@@ -758,7 +832,7 @@ async def judge_in_batches(
                          int(u.get("completion_tokens") or 0))
         choices = body.get("choices") or []
         text = ((choices[0].get("message") or {}).get("content") if choices else None)
-        score = parse_judge_score(text) if text else None
+        score = score_reply(text, choices[0].get("finish_reason") if choices else None)
         if score is not None:
             buffer.setdefault(name, {})[key] = score
             counts["parsed"] += 1
@@ -783,11 +857,11 @@ async def judge_in_batches(
             client=client,
             prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
             model=judge_model, max_tokens=max_tokens, rate_limiter=rate_limiter,
-            batch_size=realtime_batch_size, usage=run_usage)
+            batch_size=realtime_batch_size, usage=run_usage, reject_truncated=True)
         for cid, text in zip(ids, texts):
             name, key = cid.split(CUSTOM_ID_SEP, 1)
             counts["attempted"] += 1
-            score = parse_judge_score(text) if text else None
+            score = score_reply(text)
             if score is not None:
                 buffer.setdefault(name, {})[key] = score
                 counts["parsed"] += 1
@@ -870,6 +944,11 @@ async def main_async():
                              "the organisation's queue limit is held or split automatically).  "
                              "Size it from the queue limit when several runs share one API key "
                              "(pipeline/README.md, 'Several runs on one organisation's queue')")
+    parser.add_argument("--min_parse_rate", type=float, default=PARSE_RATE_LOUD_THRESHOLD,
+                        help="The run exits 1 when fewer than this share of its judge calls give "
+                             f"a score (default {PARSE_RATE_LOUD_THRESHOLD}, the project's "
+                             "'<99%% is a bug' threshold; rubric v3 counts a reply without exactly "
+                             "one SCORE marker, or cut at --max_tokens, as unparseable)")
     parser.add_argument("--force_unlock", action="store_true",
                         help="Remove the scores directory's lock (.3_judge.lock) left by a run "
                              "that has ended on another host.  A lock of a run no longer "
@@ -900,6 +979,8 @@ async def main_async():
                              "perfectionist, romantic, specialist, stoic). Use 'combination' "
                              "for r_<role>__<trait> and t_<role>__<trait> files.")
     args = parser.parse_args()
+    if not 0 < args.min_parse_rate <= 1:
+        parser.error("--min_parse_rate must be in (0, 1]")
 
     if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
         logger.error("OPENAI_API_KEY not found")
@@ -935,12 +1016,14 @@ async def main_async():
     # leaves 3 of 9,000 prompt-variants at 3, all clearly incompatible, so the
     # filter stays.  data/README.md "combination_scores.json" has the figures.
     excluded_pairs: Dict[str, set] = {}
+    stored_pairs_sha: Dict[str, Optional[str]] = {}
     if not args.no_incongruity_filtering:
         combo_scores_path = Path(args.combination_scores)
         if combo_scores_path.exists():
             combo_data = json.load(open(combo_scores_path))
             n_excluded = 0
             for entry in combo_data.get("scores", []):
+                stored_pairs_sha[entry["output_name"]] = entry.get("pairs_sha256")
                 bad = {i for i, p in enumerate(entry.get("per_pair", []))
                        if p.get("score", 0) >= 3}
                 if bad:
@@ -962,6 +1045,27 @@ async def main_async():
         response_files = [f for f in response_files if f.stem in args.roles]
 
     logger.info(f"Processing {len(response_files)} entities")
+
+    # The incongruity scores must be of the instruction pairs as they are
+    # now (walk-through P4; review P3 D7): an exclusion computed for texts
+    # that have since been regenerated would drop the wrong variants.  A
+    # mismatch stops a combination run before any request; a combination with
+    # no entry is judged in full, with a warning.
+    if args.entity_type == "combination" and stored_pairs_sha:
+        mismatched, unlisted = check_pairs_sha256(
+            [f.stem for f in response_files], stored_pairs_sha, roles_dir, traits_dir)
+        if unlisted:
+            logger.warning(f"{len(unlisted)} combination(s) have no entry in "
+                           f"{args.combination_scores}, so every variant is judged: "
+                           f"{', '.join(unlisted[:10])}{' ...' if len(unlisted) > 10 else ''}")
+        if mismatched:
+            logger.error(f"{len(mismatched)} combination(s) in {args.combination_scores} were "
+                         f"scored for other instruction texts or labels than the files have now "
+                         f"(pairs_sha256): {', '.join(mismatched[:10])}"
+                         f"{' ...' if len(mismatched) > 10 else ''}.  Rerun "
+                         f"data_analysis/score_combinations.py (it rescores only what changed), "
+                         f"or pass --no_incongruity_filtering to judge every variant")
+            sys.exit(1)
 
     # ------------------------------------------------------------------
     # Dry run
@@ -1073,6 +1177,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         logger.info(prior_usage.log_line("[usage] earlier runs"))
 
     successful = skipped = failed = 0
+    REPLY_PROBLEMS.clear()
+    truncated_at_start = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0)
     # Aggregate parse-rate counters across all entities so the end-of-run
     # summary can warn loudly if the chosen judge is dropping >1% of calls.
     total_call_attempted = 0
@@ -1206,6 +1312,18 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         if len(errors) > 10:
             logger.info(f"  ... and {len(errors) - 10} more")
 
+    # Why replies were not scored (rubric v3).  A real-time reply cut at
+    # max_tokens comes back from judge.call_judge_batch as None (counted in
+    # judge.TRUNCATED_REPLIES), so it is moved from no_reply to truncated.
+    rt_truncated = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0) - truncated_at_start
+    if rt_truncated:
+        REPLY_PROBLEMS["no_reply"] -= rt_truncated
+        REPLY_PROBLEMS["truncated"] += rt_truncated
+    problems = {k: v for k, v in REPLY_PROBLEMS.items() if v > 0}
+    if problems:
+        logger.info("Unparseable replies (rubric v3): " + ", ".join(
+            f"{v} {k.replace('_', ' ')}" for k, v in sorted(problems.items())))
+
     # Loud warning if this run's per-call parse rate dropped below 99%.
     # Aggregated across every (entity, response) judge call we made today,
     # so the count is statistically meaningful even when individual entities
@@ -1226,9 +1344,9 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         reasons.append(f"the judge API refused a request, so the run stopped: {request_error}")
     if n_left:
         reasons.append(f"{n_left} requests left unscored by their batches (a rerun submits them)")
-    if total_call_attempted and total_call_parsed / total_call_attempted < PARSE_RATE_LOUD_THRESHOLD:
+    if total_call_attempted and total_call_parsed / total_call_attempted < args.min_parse_rate:
         reasons.append(f"parse rate {total_call_parsed}/{total_call_attempted} is under "
-                       f"{PARSE_RATE_LOUD_THRESHOLD:.0%}")
+                       f"--min_parse_rate {args.min_parse_rate:.0%}")
     if failed:
         reasons.append(f"{failed} entit{'y' if failed == 1 else 'ies'} failed (see Errors above)")
     if reasons:

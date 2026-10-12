@@ -67,7 +67,7 @@ def test_the_scripts_modules_are_the_packages():
 
 class TestJudgeDisplayForm:
     def test_rubric_version(self, judge):
-        assert judge.JUDGE_RUBRIC_VERSION == 2
+        assert judge.JUDGE_RUBRIC_VERSION == 3        # 2 -> 3: P4, 2026-10-12
         assert judge.JUDGE_LABEL_FORM == "judge-display-v1"
 
     def test_trait_prompt_uses_the_long_form_of_a_standard(self, judge):
@@ -164,7 +164,7 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
     assert json.loads((output_dir / "patient.json").read_text()) == {
         f"pos_p0_q{q}": 3 for q in range(4)}
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
-    assert stamp["rubric_version"] == 2 and stamp["rubric_versions"] == [2]
+    assert stamp["rubric_version"] == 3 and stamp["rubric_versions"] == [3]
     assert stamp["label_form"] == "judge-display-v1" and stamp["judge_models"] == ["gpt-4.1-mini"]
 
     # Resume with two more responses: only those are judged, and the record
@@ -185,12 +185,12 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
 def test_stamp_marks_unstamped_scores_as_version_1(judge, tmp_path, caplog):
     (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
     stamp = judge.stamp_rubric(tmp_path, entity_type="trait", judge_model="gpt-4.1-mini")
-    assert stamp["rubric_versions"] == [1, 2]
-    assert "rubric versions [1, 2]" in caplog.text
+    assert stamp["rubric_versions"] == [1, 3]
+    assert "rubric versions [1, 3]" in caplog.text
     # side-cars alone do not count as scores
     fresh = tmp_path / "fresh"; fresh.mkdir()
     (fresh / "usage.json").write_text("{}")
-    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [2]
+    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [3]
 
 
 # ---------------------------------------------------------------------------
@@ -712,7 +712,10 @@ def test_a_combination_with_every_variant_excluded_is_skipped_not_failed(judge, 
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write_responses(responses_dir, "r_chef__patient", 2)                  # prompt_index 0 only
     combos = tmp_path / "combination_scores.json"
-    combos.write_text(json.dumps({"scores": [{"output_name": "r_chef__patient",
+    # pairs_sha256 of the repository's chef and patient files (checked since
+    # P4, 2026-10-12; the fixture had no hash before)
+    sha = judge.combination_pairs_sha256("chef", "patient", ROLES, TRAITS)
+    combos.write_text(json.dumps({"scores": [{"output_name": "r_chef__patient", "pairs_sha256": sha,
                                               "per_pair": [{"score": 3}] + [{"score": 0}] * 4}]}))
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
     client = FakeBatchClient()
@@ -895,3 +898,107 @@ def test_with_no_other_batch_queued_an_oversized_chunk_is_still_split(judge, mon
     monkeypatch.setattr(judge._openai_batch, "MIN_SPLIT_REQUESTS", 1)
     _run(judge, monkeypatch, responses_dir, output_dir, client, "--batch_requests", "4", batch=True)
     assert [n for _, n, s in client.batches_created if s == "in_progress"] == [2, 2]
+
+
+
+# ---------------------------------------------------------------------------
+# Rubric v3: how a reply is read; --min_parse_rate; pairs_sha256 (P4, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def test_score_reply_reads_exactly_one_marker(judge):
+    judge.REPLY_PROBLEMS.clear()
+    assert judge.score_reply("Fits.\nSCORE: 3") == 3
+    assert judge.score_reply("It lists 3 examples of the trait and then") is None
+    assert judge.score_reply("SCORE: 2 ... no, SCORE: 3") is None
+    assert judge.score_reply("SCORE: 7") is None
+    assert judge.score_reply("Fine.\nSCORE: 3", "length") is None      # cut at max_tokens
+    assert judge.score_reply(None) is None
+    assert dict(judge.REPLY_PROBLEMS) == {"no_marker": 1, "several_markers": 1,
+                                          "out_of_range": 1, "truncated": 1, "no_reply": 1}
+
+
+def test_batch_replies_without_a_marker_or_truncated_are_unparseable(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+
+    class Mixed(FakeBatchClient):
+        async def _bretrieve(self, bid):
+            b = await super()._bretrieve(bid)
+            out = self.uploaded[b.output_file_id].splitlines()
+            fixed = []
+            for i, line in enumerate(out):
+                o = json.loads(line)
+                choice = o["response"]["body"]["choices"][0]
+                if i == 1:
+                    choice["message"]["content"] = "The reply lists 3 examples"   # no marker
+                if i == 2:
+                    choice["finish_reason"] = "length"                          # truncated
+                fixed.append(json.dumps(o))
+            self.uploaded[b.output_file_id] = "\n".join(fixed) + "\n"
+            return b
+
+    with caplog.at_level("INFO"):
+        with pytest.raises(SystemExit) as e:          # 2 of 4 parsed: under 99%
+            _run(judge, monkeypatch, responses_dir, output_dir, Mixed(), batch=True)
+    assert e.value.code == 1
+    assert sorted(json.loads((output_dir / "patient.json").read_text())) == ["pos_p0_q0", "pos_p0_q3"]
+    assert "1 no marker" in caplog.text and "1 truncated" in caplog.text
+    assert "--min_parse_rate 99%" in caplog.text
+
+
+def test_min_parse_rate_sets_the_run_level_stop(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    client = FakeBatchClient(error_ids={"patient|pos_p0_q1"})
+    client.chat = _client(text="no marker here").chat       # the fallback's reply is unparseable
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--min_parse_rate", "0.7",
+         batch=True)                                         # 3 of 4 is enough at 0.7
+    with pytest.raises(SystemExit):
+        _run(judge, monkeypatch, responses_dir, tmp_path / "scores2", FakeBatchClient(
+            error_ids={"patient|pos_p0_q1"}), "--min_parse_rate", "1.5", batch=True)
+
+
+def test_a_real_time_reply_cut_at_max_tokens_is_counted(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    client = _client()
+    resp = client.chat.completions.create.return_value
+    resp.choices[0].finish_reason = "length"
+    with caplog.at_level("INFO"):
+        with pytest.raises(SystemExit):
+            _run(judge, monkeypatch, responses_dir, output_dir, client)
+    assert "2 truncated" in caplog.text and "no reply" not in caplog.text
+
+
+def test_pairs_sha256_matches_score_combinations(judge):
+    """The two computations must agree (score_combinations.py writes the
+    recorded value, step 3 recomputes it)."""
+    sys.path.insert(0, str(REPO / "data_analysis"))
+    import score_combinations as sc
+    for role, trait in (("chef", "patient"), ("devils_advocate", "careless_hexaco")):
+        if not (ROLES / f"{role}.json").exists() or not (TRAITS / f"{trait}.json").exists():
+            continue
+        combo = sc._make_combo(role, json.loads((ROLES / f"{role}.json").read_text()), trait,
+                               json.loads((TRAITS / f"{trait}.json").read_text()), "role")
+        assert judge.combination_pairs_sha256(role, trait, ROLES, TRAITS) == combo["pairs_sha256"]
+
+
+def test_a_stale_combination_score_stops_the_run(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "r_chef__patient", 2)
+    _write_responses(responses_dir, "r_chef__stoic", 2)
+    combos = tmp_path / "combination_scores.json"
+    combos.write_text(json.dumps({"scores": [
+        {"output_name": "r_chef__patient", "pairs_sha256": "0123456789abcdef",   # stale
+         "per_pair": [{"score": 0}] * 5}]}))
+    client = FakeBatchClient()
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
+    monkeypatch.setattr(judge.openai, "AsyncOpenAI", lambda: client)
+    monkeypatch.setattr(sys, "argv", [
+        "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
+        "--entity_type", "combination", "--combination_scores", str(combos)])
+    with pytest.raises(SystemExit) as e:
+        asyncio.run(judge.main_async())
+    assert e.value.code == 1 and client.batches_created == []
+    assert "r_chef__patient" in caplog.text and "pairs_sha256" in caplog.text
+    assert "r_chef__stoic" in caplog.text                     # unlisted: a warning

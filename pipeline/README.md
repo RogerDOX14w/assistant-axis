@@ -222,7 +222,9 @@ uv run 3_judge.py \
 | `combination` | `r_<role>__<trait>`, `t_<role>__<trait>` | Compound prompt from both descriptions (0-3) |
 | any | `default` | Skipped (step 4 uses all its activations) |
 
-For combinations, the prompt variants that [`data/combination_scores.json`](../data/combination_scores.json) scores 3 (incongruous; 3 of the 9,000 on 2026-10-10) are not judged, so step 4 leaves their activations out.
+For combinations, the prompt variants that [`data/combination_scores.json`](../data/combination_scores.json) scores 3 (incongruous; 3 of the 9,000 on 2026-10-10) are not judged, so step 4 leaves their activations out.  Since 2026-10-12 (walk-through P4) a combination run first recomputes each combination's `pairs_sha256` from the instruction files as they are now (the role's and the trait's judge labels and the index-matched `pos` pairs, as [`score_combinations.py`](../data_analysis/score_combinations.py) records it) and **stops before any request** when a recorded hash differs (scores made for texts since regenerated would exclude the wrong variants): rerun `score_combinations.py`, which rescores only what changed, or pass `--no_incongruity_filtering`.  A combination with no entry is judged in full, with a warning.  On 2026-10-12 all 1,800 recorded hashes matched the corpus.
+
+**How a reply is read (`JUDGE_RUBRIC_VERSION` 3, since 2026-10-12, walk-through P4 / D5).**  Exactly one `SCORE: <int>` line in 0-3 is the answer (`judge.parse_judge_score(require_marker=True)`).  A reply with no marker or several, or cut at `--max_tokens` (`finish_reason` `length`, in batch and in real time), is unparseable: never a digit of its reasoning, which used to read "... lists 3 examples" as a 3.  The run's summary counts the unparseable replies by reason (no marker, several markers, out of range, truncated, no reply); they count against the parse rate.  The prompts are unchanged from version 2.
 
 **Options:**
 - `--entity_type`: `role`, `trait` or `combination` (required)
@@ -232,6 +234,7 @@ For combinations, the prompt variants that [`data/combination_scores.json`](../d
 - `--dry_run`: Preview prompts without API calls (also prints the batch plan)
 - `--judge_model`: Judge model (default: `gpt-4.1-mini`; an OpenAI model that [`assistant_axis/judge_pricing.py`](../assistant_axis/judge_pricing.py) can price)
 - `--max_tokens`: judge reply length (default 200: reasoning first, then the `SCORE:` line)
+- `--min_parse_rate`: the share of the run's judge calls that must give a score, else exit 1 (default 0.99, the project's "<99% is a bug" threshold)
 - `--no_batch`: judge in real time; see below
 - `--batch_requests` (10,000), `--batch_poll_seconds` (60), `--batch_fallback_max` (2,000): batch mode
 - `--force_unlock`: remove the scores directory's lock left by a run that ended on another host (see "One run per scores directory")
@@ -323,7 +326,7 @@ at once, so other pods' batches filling the queue could halve a chunk down to
 
 **Exit status.**  The run exits 1, and `run_pipeline.sh` stops before step 4,
 when requests are left unanswered, when the parse rate of the run's judge calls
-is under 99%, when any entity failed (an unreadable file, a malformed
+is under `--min_parse_rate` (99%), when any entity failed (an unreadable file, a malformed
 record), when another run holds the lock, when batches in flight were
 requested with another model, or when the judge API refuses a request as a
 whole (an HTTP 400, `JudgeRequestError` since B1: every later request would

@@ -62,7 +62,9 @@ deliberation entirely.
 
 **The parser side** matters too: ``parse_judge_score`` in
 ``assistant_axis/judge.py`` looks for ``SCORE: <int>`` first, then
-falls back to the LAST (not first) integer in the valid range.  A
+falls back to the LAST (not first) integer in the valid range
+(pipeline step 3 calls it with ``require_marker=True`` since 2026-10-12,
+its rubric v3: exactly one marker, else unparseable, no fallback).  A
 naive "first integer wins" parser is hostile to reasoning text — a
 response like "0 if no, 3 if full ... I rate this 2" would be parsed
 as 0 by a first-integer parser, producing the wrong score whenever
@@ -289,7 +291,7 @@ prompts of the entities concerned: a rubric change for them.
 | site | version | notes |
 | --- | --- | --- |
 | [`axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py) `build_static_prompt`, `build_response_batch_prompt` | `RUBRIC_VERSION` v3 → v4 | scored entity, examples and header; the pair-axis header is composed from the two pole labels (`careless (from HEXACO) (+) vs conscientious (from HEXACO) (-) [traits]`, nested parentheses accepted); a free-text axis name keeps the mechanical form.  Two scoped v3 → v4 edges in `rubric_equivalences.yaml`, no global edge |
-| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores | the combination prompt showed raw stems (`devils_advocate`) before; role prompts are each file's baked `eval_prompt` |
+| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores; **3** since 2026-10-12 (walk-through P4 / D5: a reply is read by `parse_judge_score(require_marker=True)`, exactly one `SCORE:` marker, and a reply with none or several, or cut at `max_tokens`, is unparseable; prompts unchanged) | the combination prompt showed raw stems (`devils_advocate`) before; role prompts are each file's baked `eval_prompt` (their artefacts, "Gemma, an LLM" and the rest, wait for Roger's wording: version 4) |
 | [`score_combinations.py`](data_analysis/score_combinations.py) | `RUBRIC_VERSION` 2 (new), in the output's metadata | |
 | [`steering_judges.py`](assistant_axis/steering_judges.py) via the spec builders in [`post_judge.py`](steering/post_judge.py) and [`run_sweep.py`](steering/run_sweep.py) | coherence 5 → 6, RP 4 → 5, effect 7 → 8 | config stems become labels after the descriptions are read by stem; a derived axis name is `<neg label>-<pos label>` |
 | [`generate_antonyms.py`](data_analysis/generate_antonyms.py) (trait and role checks) | results carry `prompt_form` and `prompt_label` | the trait check showed the stem before; `seed_entities.check_history_record` keeps the two fields |
