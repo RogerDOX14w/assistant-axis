@@ -425,8 +425,10 @@ def main() -> int:
                    help=f"L values to plot in --regime soft_shear; 0 = "
                         f"raw, L>0 = soft-shear truncation depth "
                         f"(default: {DEFAULT_LS}).")
+    # Choices = the kinds build_goal_nogoal_subspaces accepts (the old
+    # "traits"/"roles" were rejected by it; review 2026-10-12).
     p.add_argument("--ca_kind", default="combined",
-                   choices=("combined", "traits", "roles"),
+                   choices=("combined", "r_only", "t_only"),
                    help="Goal/no-goal subspaces for --regime soft_shear "
                         "(passed to ``build_goal_nogoal_subspaces``).  "
                         "Ignored in --regime soft_K.")

@@ -24,6 +24,7 @@ import time
 from pathlib import Path
 
 from assistant_axis.pair_list_cohort import pair_type_of
+from assistant_axis.provenance import load_validated_json
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
 
 
@@ -121,9 +122,13 @@ async def run_all(args):
 
     print(f'Launching {len(pairs)} pair runs (concurrency={args.concurrency}, provider={args.provider})')
     tasks = [asyncio.create_task(bounded(p)) for p in pairs]
+    n_failed = 0
     for fut in asyncio.as_completed(tasks):
         pos, neg, status, dt = await fut
         print(f'  [{dt:5.1f}s] {pos:16s} vs {neg:16s}  {status}')
+        if status.startswith('FAIL'):
+            n_failed += 1
+    return n_failed
 
 
 def collect_summary(output_root: Path, providers):
@@ -140,7 +145,13 @@ def collect_summary(output_root: Path, providers):
             if not cp.exists():
                 continue
             try:
-                corr = json.loads(cp.read_text())
+                # Envelope-aware read: correlations.json has been written
+                # inside a ``{"result": ..., "_provenance": ...,
+                # "schema_version": 2}`` envelope since Phase 6, and a
+                # plain json.loads made every such file contribute zero
+                # rows (review 2026-10-12).  policy="off": the summary
+                # only needs the payload.
+                corr, _check = load_validated_json(cp, policy='off')
             except json.JSONDecodeError:
                 print(f'  [warn] {cp}: malformed JSON, skipping summary entry')
                 continue
@@ -236,12 +247,21 @@ def main():
     # Normalize provider name -> subdir name
     args.provider = {'openai': 'gpt', 'gpt': 'gpt', 'anthropic': 'sonnet', 'sonnet': 'sonnet'}[args.provider]
 
+    n_failed = 0
     if not args.only_summary:
-        asyncio.run(run_all(args))
+        n_failed = asyncio.run(run_all(args))
 
     records = collect_summary(Path(args.output_root), providers=('gpt', 'sonnet'))
     write_summary(Path(args.output_root), records)
+    # Propagate per-pair failures to the exit status: the summary above
+    # is still written, but a caller (e.g. the rejudge_after_*.sh
+    # orchestrators, which branch on our status under pipefail) must be
+    # able to see that some pair runs failed (review 2026-10-12).
+    if n_failed:
+        print(f'\n{n_failed} pair run(s) FAILED; exiting with status 1')
+        return 1
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

@@ -420,7 +420,14 @@ def main() -> int:
     # Plot
     # ------------------------------------------------------------------
     SLOT_LABELS = SLOT_LABELS_ALL[:n_slots]
-    K_LABELS = ["raw"] + [f"K={K}" for K in KS[1:]]
+    # Label each K by its own value: the old ``["raw"] + KS[1:]`` form
+    # called the first entry "raw" even when it was not K=0.
+    K_LABELS = ["raw" if K == 0 else f"K={K}" for K in KS]
+    # Axis counts: the axes whose score caches actually loaded (an axis
+    # with a missing cache is skipped above), not the pair-list length
+    # (review 2026-10-12).
+    n_axes_di = len(di_scores_per_axis)
+    n_axes_rs = len(rs_scores_per_axis)
     n_K = len(KS)
     # Smooth dark→light gradient with a floor at ~0.32 so the lightest
     # shade is still readable against white.
@@ -442,8 +449,8 @@ def main() -> int:
         sharey=True, squeeze=False,
     )
     axes = axes_arr.flatten()
-    x_labels = [f"desc+inst\n({len(pairs_di)} axes)",
-                f"responses\n(GPT, {len(pairs_resp)} axes)"]
+    x_labels = [f"desc+inst\n({n_axes_di} axes)",
+                f"responses\n(GPT, {n_axes_rs} axes)"]
     x_pos = np.arange(len(x_labels))
     bar_width = 0.78 / n_K
 
@@ -498,9 +505,9 @@ def main() -> int:
                bbox_to_anchor=(0.5, 0.96), frameon=True, framealpha=0.9,
                handlelength=1.4, columnspacing=1.2)
     title_line = (f"Mean per-axis ρ by slot, source, and whitening level "
-                  f"(layer={LAYER}; desc+inst = {len(pairs_di)} axes, "
+                  f"(layer={LAYER}; desc+inst = {n_axes_di} axes, "
                   f"GPT+Sonnet 4-way mean; "
-                  f"responses = {len(pairs_resp)} axes, GPT-only)")
+                  f"responses = {n_axes_rs} axes, GPT-only)")
     fig.suptitle(title_line, fontsize=14, fontweight="bold", y=1.01)
     plt.tight_layout(rect=(0, 0, 1, 0.88))
 

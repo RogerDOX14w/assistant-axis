@@ -402,7 +402,13 @@ def main() -> int:
     # Plot
     # ------------------------------------------------------------------
     SLOT_LABELS = SLOT_LABELS_ALL[:n_slots]
-    L_LABELS = ["raw"] + [f"L={L}" for L in LS[1:]]
+    # Label each L by its own value (the old ``["raw"] + LS[1:]`` form
+    # called the first entry "raw" even when it was not L=0), and count
+    # the axes whose caches actually loaded, not the pair-list length
+    # (review 2026-10-12).
+    L_LABELS = ["raw" if L == 0 else f"L={L}" for L in LS]
+    n_axes_di = len(di_scores_per_axis)
+    n_axes_rs = len(rs_scores_per_axis)
     n_L = len(LS)
     L_COLORS_DI = [plt.cm.Blues(v) for v in np.linspace(0.85, 0.32, n_L)]
     L_COLORS_RS = [plt.cm.Oranges(v) for v in np.linspace(0.85, 0.32, n_L)]
@@ -420,8 +426,8 @@ def main() -> int:
         sharey=True, squeeze=False,
     )
     axes = axes_arr.flatten()
-    x_labels = [f"desc+inst\n({len(pairs_di)} axes)",
-                f"responses\n(GPT, {len(pairs_resp)} axes)"]
+    x_labels = [f"desc+inst\n({n_axes_di} axes)",
+                f"responses\n(GPT, {n_axes_rs} axes)"]
     x_pos = np.arange(len(x_labels))
     bar_width = 0.78 / n_L
 
@@ -480,9 +486,9 @@ def main() -> int:
                bbox_to_anchor=(0.5, 0.96), frameon=True, framealpha=0.9,
                handlelength=1.4, columnspacing=1.2)
     title_line = (f"Mean per-axis ρ by slot, source, and soft-shear depth L "
-                  f"(layer={LAYER}; desc+inst = {len(pairs_di)} axes, "
+                  f"(layer={LAYER}; desc+inst = {n_axes_di} axes, "
                   f"GPT+Sonnet 4-way mean; "
-                  f"responses = {len(pairs_resp)} axes, GPT-only)")
+                  f"responses = {n_axes_rs} axes, GPT-only)")
     fig.suptitle(title_line, fontsize=14, fontweight="bold", y=1.01)
     plt.tight_layout(rect=(0, 0, 1, 0.88))
 

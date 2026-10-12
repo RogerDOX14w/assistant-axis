@@ -44,7 +44,7 @@ from assistant_axis.plot_metadata import json_metadata
 from results_analysis.pc_round_trip.klm_sweep import (
     setup_at, compute_M_done, compute_pc_directions, rho_for_direction,
     DEFAULT_L_VALUES, DEFAULT_K_COARSE, DEFAULT_PCS, DEFAULT_STYLES,
-    load_combined_scores, DEFAULT_SWEEP_DIR,
+    load_combined_scores, kinds_for_name_from_data_dir, DEFAULT_SWEEP_DIR,
     K_REFINE_MAX_ITER, K_REFINE_MIN_BRACKET, K_REFINE_TIE_THRESH,
     _build_subtree_inputs as _klm_build_subtree_inputs,
 )
@@ -222,6 +222,10 @@ def main() -> int:
     # ---- Load actual judge scores -----------------------------------------
     print(f"Loading judge scores from {sweep_dir} ...")
     actual_scores: dict[tuple[int, str], dict[str, float]] = {}
+    # The v1 (bare-name) judge caches are lifted to entity ids against
+    # THIS run's --data_dir (load_combined_scores otherwise falls back to
+    # DEFAULT_DATA_DIR, which is wrong for any other data dir).
+    kinds_for_name = kinds_for_name_from_data_dir(data_dir)
     for pc in pcs:
         for style in DEFAULT_STYLES:
             cell_id = f"pc{pc:03d}_{style}"
@@ -229,6 +233,7 @@ def main() -> int:
             try:
                 actual_scores[(pc, style)] = load_combined_scores(
                     cell, inputs=inputs, cell_id=cell_id,
+                    kinds_for_name=kinds_for_name,
                 )
             except FileNotFoundError:
                 pass

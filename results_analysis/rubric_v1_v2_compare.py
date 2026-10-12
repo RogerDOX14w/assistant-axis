@@ -58,6 +58,7 @@ from scipy.stats import spearmanr
 from assistant_axis import (
     entity_id, json_metadata, png_metadata, suptitle_with_specs,
 )
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     declare_constants_dependency,
     DEFAULT_DI_WEIGHTS,
@@ -463,10 +464,14 @@ def main() -> int:
     # default-centered.  Mirrors gpt_anthropic_response_weight_sweep.
     default_v = _v(data_dir / "traits" / "vectors" / "default.pt", slot, layer)
     entity_vecs: dict[str, np.ndarray] = {}
+    # Built alongside so v1 (bare-name) desc/inst caches can be lifted to
+    # entity_id keys before combining (see the desc+inst block below).
+    kinds_for_name: dict[str, set] = {}
     for et in ("traits", "roles"):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
+            kinds_for_name.setdefault(fp.stem, set()).add(et)
             try:
                 v = _load_vector_file(fp).float()[slot, layer]
                 entity_vecs[entity_id(fp.stem, et)] = (v - default_v).numpy()
@@ -527,6 +532,18 @@ def main() -> int:
             axis_dir / "sonnet" / "scores_instructions.json",
             dep_key=f"di_sonnet_i_{axis_name}",
             inputs=inputs, policy="warn")
+        # Lift v1 (bare-name) caches to entity_id keys before combining
+        # (no-op on v2 input).  Without this the GPT caches (v2,
+        # ``name|T`` keys) and the Sonnet caches (v1, bare keys) never
+        # share a key: the one-side-missing combiner then returns a
+        # GPT-only and a Sonnet-only score per entity under different
+        # keys, and ``_blend`` against the entity_id response scores
+        # keeps only the GPT half -- the "4-way" desc+inst silently
+        # became GPT-only (review 2026-10-12).
+        g_d = migrate_v1_static_scores(g_d, kinds_for_name)
+        g_i = migrate_v1_static_scores(g_i, kinds_for_name)
+        s_d = migrate_v1_static_scores(s_d, kinds_for_name)
+        s_i = migrate_v1_static_scores(s_i, kinds_for_name)
 
         # Build the five derived per-entity score dicts.
         response_v1 = _blend(gpt_v1, haiku_v1, GPT_RESPONSE_WEIGHT)

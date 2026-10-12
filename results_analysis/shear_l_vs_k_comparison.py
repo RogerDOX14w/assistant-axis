@@ -68,6 +68,7 @@ from assistant_axis import (
     pair_type_of,
     response_subdir,
 )
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     DEFAULT_RESPONSE_DI_WEIGHT,
     combine_desc_inst_two_judges,
@@ -97,21 +98,18 @@ L_VALUES = (0, 1, 2, 3)
 K_COMPARE = 1  # the current "simple winner"
 
 
-def _strip_kind(d: dict) -> dict:
-    """Return ``d`` with any ``|R`` / ``|T`` entity_id suffix stripped.
-
-    The cached ``whitening_k_sweep_*.json`` (May 9 2026) was produced
-    when ALL four desc/instr judge caches had bare-name keys.  GPT's
-    side was migrated to ``schema_version: 2`` (disambiguated
-    ``name|R`` / ``name|T`` keys) on May 10 but Sonnet's side is
-    still v1.  To keep numbers comparable with the K cache we
-    normalise to the older bare-name convention before combining,
-    accepting last-write-wins clobber for the ~9 collision names
-    (out of ~580).  This matches exactly what the K-cache encodes;
-    once Sonnet is migrated (todo phase5b), both the K sweep and
-    this script should drop ``_strip_kind`` and re-cache.
-    """
-    return {k.rsplit("|", 1)[0]: v for k, v in d.items()}
+# Key convention (review 2026-10-12): scores and projections are both
+# keyed by entity_id (``name|R`` / ``name|T``), with v1 (bare-name)
+# judge caches lifted via ``migrate_v1_static_scores`` -- the same
+# convention ``whitening_k_sweep`` has used since 2026-05-12, so the
+# L numbers here and the cached K numbers are again on one footing.
+# Until then this script stripped the kind suffix instead
+# (``_strip_kind``), on the stale premise that the K cache was
+# bare-name: that clobbered the collision names (a trait's score could
+# be paired with the role's projection), and with the one-side-missing
+# combiner a v2 Sonnet cache (26 of the 61 di axes) left desc+inst
+# GPT-only.  ``shear_l_vs_k_comparison_di_slot6.json`` (2026-05-12)
+# predates the fix.
 
 
 def project_at_L(
@@ -155,7 +153,9 @@ def _load_k_sweep_records(path: Path) -> dict[tuple[str, str, str, int], float]:
     """Read whitening_k_sweep_*.json into a {(pos, neg, source, K): rho} map."""
     with open(path) as f:
         envelope = json.load(f)
-    records = envelope.get("result", envelope)  # tolerate raw-list legacy
+    # Tolerate the raw-list legacy shape (a list has no ``.get``).
+    records = (envelope.get("result", envelope)
+               if isinstance(envelope, dict) else envelope)
     out: dict[tuple[str, str, str, int], float] = {}
     for r in records:
         out[(r["pos"], r["neg"], r["source"], int(r["K"]))] = float(r["rho"])
@@ -253,8 +253,18 @@ def main(argv: list[str] | None = None) -> int:
             axis_dir / "sonnet" / "scores_instructions.json",
             dep_key=f"judge_{axis_id_str}_instructions_sonnet",
             inputs=inputs, policy="warn")
+
+        # Projection pool (axis vector + entity vectors), entity_id keyed;
+        # ``kinds_for_name`` lifts any v1 (bare-name) judge cache to the
+        # same keys (no-op on v2 caches).  See the key-convention note
+        # above ``project_at_L``.
+        entity_vecs, _pool, _default, kinds_for_name = load_pool(
+            data_dir, exclude_names={pos, neg}, slot=args.slot)
         desc_inst = combine_desc_inst_two_judges(
-            _strip_kind(g_d), _strip_kind(g_i), s_d, s_i,
+            migrate_v1_static_scores(g_d, kinds_for_name),
+            migrate_v1_static_scores(g_i, kinds_for_name),
+            migrate_v1_static_scores(s_d, kinds_for_name),
+            migrate_v1_static_scores(s_i, kinds_for_name),
             weights=di_weights)
 
         responses: dict[str, float] = {}
@@ -270,15 +280,6 @@ def main(argv: list[str] | None = None) -> int:
                 if info.get("mean_score") is not None:
                     responses[entity_id(n, mode)] = info["mean_score"]
 
-        # Projection pool (axis vector + entity vectors).  ``load_pool``
-        # added a 4th return value (``kinds_for_name``) when the rest
-        # of the analysis stack switched to entity_id keys; we don't
-        # use it here (this script's v1↔v2 bridging is done via
-        # ``_strip_kind`` on the GPT side, mirroring the pattern in
-        # place since before Phase-5b), so we just absorb it into a
-        # placeholder.
-        entity_vecs, _pool, _default, _kinds = load_pool(
-            data_dir, exclude_names={pos, neg}, slot=args.slot)
         axis_unit = axis_direction(data_dir, pos, neg, slot=args.slot,
                                    pair_type=ptype)
 
@@ -287,10 +288,9 @@ def main(argv: list[str] | None = None) -> int:
         for L in L_VALUES:
             proj = project_at_L(entity_vecs, A_goal, A_nogoal,
                                 axis_unit, L)
-            proj_bare = _strip_kind(proj)
             for source_name, score_map, proj_for_match, target in (
-                    ("desc_inst", desc_inst, proj_bare, rho_di_by_L),
-                    ("responses", responses,  proj,      rho_rs_by_L),
+                    ("desc_inst", desc_inst, proj, rho_di_by_L),
+                    ("responses", responses, proj, rho_rs_by_L),
             ):
                 names = sorted(set(score_map) & set(proj_for_match))
                 if len(names) < 3:

@@ -44,7 +44,9 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import entity_id, json_metadata, png_metadata
+from assistant_axis import (
+    cohort_from_pairs, entity_id, json_metadata, pair_type_of, png_metadata,
+)
 from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     declare_constants_dependency,
@@ -113,9 +115,13 @@ def _v(path: Path, slot: int, layer: int) -> torch.Tensor:
 
 
 def _axis_unit(data_dir: Path, pos: str, neg: str,
-               slot: int, layer: int) -> torch.Tensor:
-    p = _v(data_dir / "traits" / "vectors" / f"{pos}.pt", slot, layer)
-    n = _v(data_dir / "traits" / "vectors" / f"{neg}.pt", slot, layer)
+               slot: int, layer: int,
+               pair_type: str = "traits") -> torch.Tensor:
+    """``pair_type`` picks traits/ vs roles/ (role-pair axes, reachable
+    via --pair_list; a collision name would otherwise load the wrong
+    kind's vector)."""
+    p = _v(data_dir / pair_type / "vectors" / f"{pos}.pt", slot, layer)
+    n = _v(data_dir / pair_type / "vectors" / f"{neg}.pt", slot, layer)
     d = p - n
     nrm = torch.linalg.vector_norm(d)
     return d / nrm if nrm > 0 else d
@@ -201,10 +207,22 @@ def main() -> int:
                         f"Forms: 'raw', 'soft_K=N', 'lw', 'oas', "
                         f"'soft_shear=L'.  Default: "
                         f"{DEFAULT_WHITENING_SPEC!r} (project canonical).")
+    # Choices = the kinds build_goal_nogoal_subspaces accepts (the old
+    # "traits"/"roles" were rejected by it; review 2026-10-12).
     p.add_argument("--ca_kind", default="combined",
-                   choices=("combined", "traits", "roles"),
+                   choices=("combined", "r_only", "t_only"),
                    help="Goal/no-goal subspaces for soft-shear fitting. "
                         "Ignored for non-shear regimes.")
+    p.add_argument(
+        "--pair_list", default=None,
+        help="Pair-list JSON naming the axes to sweep: a file name inside "
+             "--experiment_dir, or a path.  Default: the current "
+             "pair_list_responses.json (DEFAULT_AXES, read at import).  "
+             "Pass pair_list_responses_v1.json to reproduce the 22-axis "
+             "record of 2026-05-22 with the existing judge caches.  A list "
+             "whose cohort token is not 'responses' adds that token to the "
+             "default output names (e.g. '_responses_v1'), so the record "
+             "is not overwritten.")
     p.add_argument("--w_step", type=float, default=DEFAULT_W_STEP,
                    help=f"Step size on the w grid (default: "
                         f"{DEFAULT_W_STEP} -> 41 points on [0, 1]).  "
@@ -238,7 +256,22 @@ def main() -> int:
     else:
         wh_suffix = f"_{wh_method.replace('_', '')}"
 
-    out_stem = f"response_di_weight_sweep_slot{slot}{wh_suffix}{exc_suffix}"
+    # --pair_list (review 2026-10-12): without it the axes are the
+    # *current* responses list, which since 2026-09-28 lacks two judged
+    # axes and names one with no caches, so the 22-axis record could not
+    # be reproduced.
+    pair_list_path: Path | None = None
+    cohort_suffix = ""
+    if args.pair_list is not None:
+        pair_list_path = Path(args.pair_list)
+        if not pair_list_path.is_absolute():
+            pair_list_path = experiment_dir / pair_list_path
+        cohort = cohort_from_pairs(pair_list_path)
+        if cohort != "responses":
+            cohort_suffix = f"_{cohort}"
+
+    out_stem = (f"response_di_weight_sweep_slot{slot}{cohort_suffix}"
+                f"{wh_suffix}{exc_suffix}")
     if args.plot is None:
         args.plot = f"{out_stem}.png"
     if args.rhos_json is None:
@@ -268,8 +301,24 @@ def main() -> int:
                 "whitening": args.whitening,
                 "ca_kind": (args.ca_kind
                             if wh_method == "soft_shear" else ""),
+                "pair_list": (str(args.pair_list) if args.pair_list
+                              else "DEFAULT_AXES"),
             },
         ),]
+    # Axes to sweep: --pair_list when given (read + registered as an
+    # input), else DEFAULT_AXES.  ``pair_types`` lets a role-pair entry
+    # take its axis direction from roles/vectors.
+    if pair_list_path is not None:
+        pairs, _, _ = load_and_register(
+            pair_list_path, dep_key="pairs_json", inputs=inputs,
+            policy="warn")
+        axes_all = [(f"{it['pos']}_vs_{it['neg']}", it["pos"], it["neg"])
+                    for it in pairs]
+        pair_types = {f"{it['pos']}_vs_{it['neg']}": pair_type_of(it)
+                      for it in pairs}
+    else:
+        axes_all = list(DEFAULT_AXES)
+        pair_types = {}
     # Constants-file dependency: GPT_RESPONSE_WEIGHT is read from
     # ``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` at import time, so the cache
     # this script writes is sensitive to retunings of that (and any
@@ -343,12 +392,12 @@ def main() -> int:
         for n, v in entity_vecs.items():
             entity_vecs[n] = basis.apply(v[None, :])[0]
 
-    axes_in_use = [a for a in DEFAULT_AXES if a[0] not in excluded]
+    axes_in_use = [a for a in axes_all if a[0] not in excluded]
     if excluded:
-        unknown = excluded - {a[0] for a in DEFAULT_AXES}
+        unknown = excluded - {a[0] for a in axes_all}
         if unknown:
             print(f"  [warn] --exclude_axes named axes that aren't in "
-                  f"DEFAULT_AXES: {sorted(unknown)} (typo?  ignored)")
+                  f"the axis list: {sorted(unknown)} (typo?  ignored)")
         print(f"Response × desc+inst weight sweep @ slot {slot} "
               f"layer {layer}  (excluding {sorted(excluded)})")
     else:
@@ -398,11 +447,16 @@ def main() -> int:
             axis_dir / "sonnet" / "scores_instructions.json",
             dep_key=f"di_sonnet_i_{axis_name}",
             inputs=inputs, policy="warn")
-        # Migrate Sonnet's v1 (bare-name) keys to v2 (entity_id) form
-        # before combining; GPT caches are already v2 post-Phase-5.
-        # Without migration the 4-way intersection is empty (v1 vs v2
-        # keys never overlap).  ``migrate_v1_static_scores`` is a no-op
-        # on already-v2 input, so applying it uniformly is safe.
+        # Migrate v1 (bare-name) keys to v2 (entity_id) form before
+        # combining.  ``migrate_v1_static_scores`` is a no-op on
+        # already-v2 input, so applying it uniformly is safe.  GPT is
+        # migrated too: three response axes (accessible_vs_esoteric,
+        # benign_vs_malicious, introverted_vs_extroverted) still have
+        # v1 GPT caches, and without this their desc+inst came out
+        # Sonnet-only (the bare GPT keys never met the entity_id
+        # response keys; review 2026-10-12).
+        g_d = migrate_v1_static_scores(g_d, kinds_for_name)
+        g_i = migrate_v1_static_scores(g_i, kinds_for_name)
         s_d = migrate_v1_static_scores(s_d, kinds_for_name)
         s_i = migrate_v1_static_scores(s_i, kinds_for_name)
         di = combine_desc_inst_two_judges(
@@ -424,7 +478,8 @@ def main() -> int:
             continue
         resp_arr = np.array([response[n] for n in common])
         di_arr = np.array([di[n] for n in common])
-        a = _axis_unit(data_dir, pos, neg, slot, layer).numpy()
+        a = _axis_unit(data_dir, pos, neg, slot, layer,
+                       pair_type=pair_types.get(axis_name, "traits")).numpy()
         if basis is not None and basis.method != "raw":
             a = basis.apply(a[None, :])[0]
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
@@ -591,6 +646,7 @@ def main() -> int:
     json_payload = {
         "n_axes": n_axes,
         "excluded_axes": sorted(excluded),
+        "pair_list": str(args.pair_list) if args.pair_list else None,
         "left_endpoint_label": "desc+inst (GPT+Sonnet 4-way, inst-tiebreak)",
         "right_endpoint_label": (
             f"response ({GPT_RESPONSE_WEIGHT:.3f}·GPT_b10 + "

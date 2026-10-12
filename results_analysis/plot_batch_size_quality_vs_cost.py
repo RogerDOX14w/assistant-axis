@@ -676,6 +676,24 @@ def plot_quality_vs_cost(
 
     n_sets = len(gpt_only_per_set)
     n_axes_total = sum(int(s.get("n_axes", 0)) for s in gpt_only_per_set)
+    # The GPT/Anthropic blend weight the ensemble rays were computed at
+    # is recorded by judge_ensemble_rho_curve.py under
+    # ``ensemble_combos["_meta"]["gpt_weight"]``; the spec line used to
+    # hard-code 0.6 although the current side-car was built at 0.625
+    # (review 2026-10-12).  Side-cars without ``_meta`` keep the
+    # historical wording.
+    _ens_meta = (ensemble_combos.get("_meta") or {}
+                 if isinstance(ensemble_combos, dict) else {})
+    _gpt_w = _ens_meta.get("gpt_weight")
+    if _gpt_w is not None:
+        combine_spec = (
+            f"Score combine: {float(_gpt_w):g}·gpt + "
+            f"{1.0 - float(_gpt_w):g}·anthropic (gpt_weight recorded in "
+            f"the ensembles side-car by judge_ensemble_rho_curve.py).")
+    else:
+        combine_spec = (
+            "Score combine: 0.6·gpt + 0.4·anthropic (rounded Haiku-q9 "
+            "parabolic peak from the 12-axis response-mode weight sweep).")
     title = ("Responses-mode judging: quality vs cost — "
              f"{n_sets} per-axis-set Pareto fronts at B=10")
     # Pre-broken into ≤~110-char lines so matplotlib doesn't stretch
@@ -689,8 +707,7 @@ def plot_quality_vs_cost(
         ("Coloured rays from each set's anchor = GPT B=10 + a 2nd judge "
          "on the same items (Haiku $1/$5, Sonnet $3/$15; q9 = 1/3 "
          "question subsample)."),
-        ("Score combine: 0.6·gpt + 0.4·anthropic (rounded Haiku-q9 "
-         "parabolic peak from the 12-axis response-mode weight sweep)."),
+        combine_spec,
         ("Haiku-q9 is the Pareto winner; Sonnet-q9 shown at the same "
          "weight despite its own peak being higher, since it is "
          "dominated on cost-per-quality."),

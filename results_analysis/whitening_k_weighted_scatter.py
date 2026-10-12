@@ -132,6 +132,19 @@ def fit_log_parabola(ys: list[float]) -> dict:
     }
 
 
+def _weighted_ols(x: np.ndarray, y: np.ndarray,
+                  w: np.ndarray) -> tuple[float, float]:
+    """Weighted least-squares line ``y ≈ slope·x + intercept`` minimising
+    ``Σ w_i (y_i − ŷ_i)²`` -- the same per-axis weights ``_wpearson`` uses.
+
+    ``np.polyfit``'s ``w`` multiplies the *unsquared* residual (it wants
+    1/σ), so passing ``w`` directly would weight squared residuals by
+    ``w²``; hence ``sqrt(w)`` (review 2026-10-12).
+    """
+    slope, intercept = np.polyfit(x, y, 1, w=np.sqrt(w))
+    return float(slope), float(intercept)
+
+
 def _wpearson(x: np.ndarray, y: np.ndarray, w: np.ndarray) -> float:
     """Weighted Pearson correlation."""
     wmx = np.average(x, weights=w)
@@ -271,7 +284,7 @@ def main() -> int:
     lims = [-0.2, MAX_LOG + 0.3]
     ax.plot(lims, lims, "k--", alpha=0.4, lw=0.8, label="y = x")
     if ws.sum() > 0:
-        slope, intercept = np.polyfit(xs, ys, 1, w=ws)
+        slope, intercept = _weighted_ols(xs, ys, ws)
         xx = np.linspace(lims[0], lims[1], 50)
         ax.plot(xx, slope * xx + intercept, "g-", alpha=0.6, lw=1.2,
                 label="weighted OLS")

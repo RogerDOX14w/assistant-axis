@@ -29,11 +29,23 @@ DEFAULT_ACTUAL = "roger/pc_round_trip_klm_results.json"
 DEFAULT_NULL = "roger/pc_round_trip_null_klm_results.json"
 DEFAULT_OUTPUT = "roger/pc_round_trip_winner_consistency.png"
 
+# One colour per klm_sweep cell.  Same palette as
+# plot_global_winner_cosines.py; the 7-cell post-May-2026 set
+# (klm_sweep.DEFAULT_CONFIGS) replaced the 3-cell map here, under which
+# four of the seven cells all fell through to grey (review 2026-10-12).
 CONFIG_COLORS = {
-    (3, 25): "#4c72b0",
-    (0, 26): "#55a868",
-    (0, 49): "#c44e52",
+    (7, 25): "#4c72b0", (7, 49): "#55a868",
+    (6, 25): "#c44e52", (6, 49): "#dd8452",
+    (0, 26): "#8172b2", (0, 49): "#937860", (3, 25): "#888888",
 }
+
+
+def _l_values(*winner_maps: dict) -> list[int]:
+    """Every L that won anywhere, sorted -- so each PC's stacked L bar
+    sums to 1.  (A fixed ``[0, 1, 2, 3, 5]`` grid silently dropped the
+    L=4 winners of klm_sweep's ``[0, 1, 2, 4]`` grid; review 2026-10-12.)
+    """
+    return sorted({int(v["L"]) for m in winner_maps for v in m.values()})
 
 
 def main() -> int:
@@ -111,7 +123,7 @@ def main() -> int:
     ax_K.legend(loc="upper left", fontsize=9, framealpha=0.9)
 
     # --- Panel 2: L winner stacked bars ---
-    L_values = [0, 1, 2, 3, 5]
+    L_values = _l_values(actual, null)
     L_colors = plt.cm.viridis(np.linspace(0, 0.85, len(L_values)))
 
     # Null: stack L proportions

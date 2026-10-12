@@ -271,9 +271,13 @@ def main() -> int:
                         f"{','.join(str(L_) for L_ in DEFAULT_L_VALUES)}).")
     p.add_argument(
         "--ca_kind", default="combined",
-        choices=("combined", "traits", "roles"),
+        # The kinds build_goal_nogoal_subspaces accepts; the old
+        # ("combined", "traits", "roles") offered two that it rejects
+        # (review 2026-10-12).
+        choices=("combined", "r_only", "t_only"),
         help="Which goal/no-goal subspaces to use (passed through to "
-             "``build_goal_nogoal_subspaces``).  Default ``combined`` "
+             "``build_goal_nogoal_subspaces``: combined, or the r_ / t_ "
+             "combination grid alone).  Default ``combined`` "
              "matches the K sweep's augmented pool semantically and "
              "the existing shear_l_vs_k_comparison default.",
     )

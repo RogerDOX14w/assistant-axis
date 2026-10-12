@@ -172,13 +172,21 @@ def collect_combos(combos_dir: Path, prefix: str
 
 
 def load_named_subset(stand_dir: Path, names: Iterable[str]) -> np.ndarray:
-    """Stack ``stand_dir/<name>.pt`` for each name in ``names`` (skip missing)."""
-    arrs = []
-    for n in names:
-        p = stand_dir / f"{n}.pt"
-        if p.exists():
-            arrs.append(load_vec(p))
-    return np.stack(arrs)
+    """Stack ``stand_dir/<name>.pt`` for each name in ``names``, in order.
+
+    Raises if any file is missing: the caller indexes the stack by each
+    name's position in ``names``, so silently skipping one (as this
+    helper did until the 2026-10-12 review) would shift every later row
+    and pair combos with the wrong role or trait vector.
+    """
+    names = list(names)
+    missing = [n for n in names if not (stand_dir / f"{n}.pt").exists()]
+    if missing:
+        raise FileNotFoundError(
+            f"{len(missing)} standalone vector(s) named in the combination "
+            f"grid are missing from {stand_dir}: {missing[:10]}"
+            + (" ..." if len(missing) > 10 else ""))
+    return np.stack([load_vec(stand_dir / f"{n}.pt") for n in names])
 
 
 # ---------------------------------------------------------------------------

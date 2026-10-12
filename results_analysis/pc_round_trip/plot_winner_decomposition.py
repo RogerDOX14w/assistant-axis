@@ -24,6 +24,7 @@ from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 from assistant_axis.provenance import (
     CACHE_POLICIES, InputSpec, load_and_register_npz,
 )
+from results_analysis.pc_round_trip.winner_decomposition import CANONICAL_L
 
 
 DEFAULT_NPZ = "roger/pc_round_trip_nth_pc_winner_decomposition.npz"
@@ -126,14 +127,18 @@ def main() -> int:
     cbar = fig.colorbar(mesh, ax=ax, fraction=0.025, pad=0.01)
     cbar.set_label("squared coefficient (column sums to 1)")
 
+    # The canonical shear depth comes from winner_decomposition (L=0 since
+    # the May 2026 migration); the text used to say "L=2" (review
+    # 2026-10-12).
     title = ("PC round-trip: nth_pc winner decomposition in canonical PC basis "
-             "(L=2 sheared space)")
+             f"(L={CANONICAL_L} sheared space)")
     spec = (
         "Each column shows the projected squared coefficients of an nth_pc "
         "winner direction onto canonical Vt[k] (normalised to sum to 1).\n"
         "Path: post-whitened winner → inverse whiten/shear at target → "
         "raw R^D at target → least-squares α onto target M_raw → reconstruct "
-        "α @ M_canon_raw → forward canonical L=2 shear → decompose vs Vt_canon."
+        f"α @ M_canon_raw → forward canonical L={CANONICAL_L} shear → "
+        "decompose vs Vt_canon."
     )
     _, top_rect = suptitle_with_specs(fig, title, spec, line_height=0.024)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
