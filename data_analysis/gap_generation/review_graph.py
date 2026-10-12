@@ -26,11 +26,22 @@ missing second directions:
 The brief is ``reports/trait_gap_generation/coding_plan_review.md`` (section 2); the logic is
 :mod:`assistant_axis.gapgen.review_graph`, whose docstring says what the graph holds.
 
+Gate audit 8 (Roger, 2026-10-12): the candidate edges are the ``--k`` nearest **and** every pair at ``--pair-floor``
+(0.55) or above, **and** every pair whose labels are one label blind (other-worldly / otherworldly: a 3-edge
+whatever its readings); ``--pair-floor none`` gives the k nearest alone, the rule before.  The estimate's shares
+come from an earlier R1 build's own records (``--calibrate-from``, default ``review_tda_1``; ``none``: M3's
+shares, the rule before, which put the TDA build's estimate at 3.2 times its spend).  And the Opus pilot, Opus on
+first directions Sonnet read 2, compared with Roger's decisions, the graph untouched:
+
+    uv run python data_analysis/gap_generation/review_graph.py opus-pilot --batch-id review_tda_1 --n 128 \\
+        --budget-usd 1 --dry-run
+
 Commands:
 
 * ``build --batch-id B --from-batches M3_BATCH ... --budget-usd C``: the kept candidates (M3 decision new or grey)
   of the named M3 batches; their ``--k`` (10) nearest other kept candidates by cosine in M3's covered space at
-  ``--cosine-floor`` (0.25) or above; the relation call per candidate (Haiku 5.5, rubric ``relation.md``, the
+  ``--cosine-floor`` (0.25) or above, every other pair at ``--pair-floor`` (0.55) or above, and every label
+  variant pair; the relation call per candidate (Haiku 5.5, rubric ``relation.md``, the
   unsure answers re-asked of Sonnet 5.5); the overlap call (rubric A, Sonnet 5.5 then Opus 5.5 under M3's rule at
   cut-off 4) on the pairs answered similar at ``--overlap-floor`` (0.35) or above, first direction, then the second
   where the first read ``--proposed-cut-off`` (3) or above; corpus edges copied from the M3 blocks; the merged
@@ -40,9 +51,16 @@ Commands:
   ``run.json`` and ``run.log``.
 * ``groups --batch-id B [--top N]``: the merged groups, then the proposed groups, largest first, with their
   members' labels and the groups each is opposed to; the count of ungrouped candidates by generator.  No call.
+* ``opus-pilot --batch-id B --n N --budget-usd C``: of the build's first directions Sonnet read 2 (never sent to
+  Opus), N whose two terms Roger's ``decisions.jsonl`` settled, half in the same resolution and half in different
+  ones (stratified by cosine, ``--seed``); Opus reads each with the prompt Sonnet read (checked against the build's
+  records); written to ``<B>/<--pilot-id>/`` (``readings.jsonl``, ``report.json``, ``usage.json``,
+  ``responses.jsonl``, ``run.json``) and compared with his decisions; ``graph.json`` and the groups are not touched.
 
-Cost: the estimate is printed before any call (the relation calls as rendered; the overlap calls from the shares M3
-measured per cosine bin in the source batches' blocks, and the per-call tokens of their ``responses.jsonl``);
+Cost: the estimate is printed before any call (the relation calls as rendered; the overlap calls from the shares an
+earlier R1 build measured per cosine bin in its own ``graph.json``, and the per-call tokens and unsure re-asks of its
+``responses.jsonl``: ``--calibrate-from``; with ``none``, the shares M3 measured in the source batches' blocks and
+the tokens of their ``responses.jsonl``);
 ``--budget-usd`` is the hard cap (an estimate over it is refused); over $20 needs ``--confirm-expensive
 --confirmed-by``.  After the relation calls, the overlap stage is estimated again on the pairs actually marked for
 it, and the run stops before any overlap call if the spend so far plus that would pass the cap (``--resume`` with
@@ -137,6 +155,66 @@ def _cand_chars(cands) -> float:
     return float(np.mean(vals)) if vals else 140.0
 
 
+def floor_or_none(value: str) -> Optional[float]:
+    """``--pair-floor``: a cosine, or ``none`` (the k nearest alone)."""
+    if str(value).strip().lower() == "none":
+        return None
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"a cosine or 'none', not {value!r}") from exc
+
+
+def read_records(path: Path, *, steps=None) -> list[dict]:
+    """A ``responses.jsonl``'s records (those of ``steps`` only, when given)."""
+    if not path.exists():
+        return []
+    out = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            r = json.loads(line)
+            if steps is None or r.get("step") in steps:
+                out.append(r)
+    return out
+
+
+class CalibrationError(ValueError):
+    pass
+
+
+def calibration(names, out_root: Optional[Path], *, proposed_cut_off: int) -> tuple[Optional[RG.Shares], Optional[dict],
+                                                                                     Optional[tuple], dict]:
+    """``(shares, overlap tokens, unsure, info)`` from earlier R1 builds' own records (``--calibrate-from``; gate
+    audit 8): ``r1_shares`` over their ``graph.json``, the overlap tokens and the unsure re-asks of their
+    ``responses.jsonl``.  ``names`` ``None``: :data:`review_graph.DEFAULT_CALIBRATION`, and a build missing from
+    ``out_root`` falls back to M3's shares (``(None, None, None, info)`` with a note); ``["none"]``: M3's shares;
+    named builds must exist (:class:`CalibrationError`)."""
+    explicit = names is not None
+    names = list(RG.DEFAULT_CALIBRATION if names is None else names)
+    if [n.lower() for n in names] == ["none"]:
+        return None, None, None, {"source": "m3_blocks", "why": "--calibrate-from none"}
+    graphs, records, missing = [], [], []
+    for n in names:
+        d = RG.review_dir(n, candidates_dir=out_root)
+        if not (d / "graph.json").exists():
+            missing.append(n)
+            continue
+        graphs.append(RG.Graph.from_json(json.loads((d / "graph.json").read_text(encoding="utf-8"))))
+        records += read_records(d / "responses.jsonl", steps=("overlap", "relation", "relation_unsure"))
+    if missing and explicit:
+        raise CalibrationError(f"--calibrate-from: no graph.json for {', '.join(missing)} under "
+                               f"{RG.review_dir(missing[0], candidates_dir=out_root).parent}")
+    if not graphs:
+        return None, None, None, {"source": "m3_blocks", "why": f"default calibration {', '.join(missing)} not found: "
+                                                                "M3's shares (the estimate errs high)"}
+    shares = RG.r1_shares(graphs, second_at=proposed_cut_off)
+    tokens = RG.measured_overlap_tokens(r for r in records if r.get("step") == "overlap")
+    unsure = RG.r1_unsure(records)
+    return shares, tokens, unsure, {"source": shares.source, "builds": [g.batch_id for g in graphs],
+                                    "missing": missing, "n_records": len(records),
+                                    "unsure": None if unsure is None else [round(unsure[0], 4), round(unsure[1], 3)]}
+
+
 def make_runner(*, client, batch_id: str, rubrics: dict, index, usage, responses_path: Path, concurrency: int,
                 config_version: str, embedding: dict, resume_records=(),
                 label_form: str = PL.DEFAULT_LABEL_FORM) -> RG.ReviewRunner:
@@ -150,7 +228,9 @@ def make_runner(*, client, batch_id: str, rubrics: dict, index, usage, responses
 
 def graph_config(args, cfg, rubrics: dict) -> dict:
     """``graph.json``'s ``config`` (the plan's fields, then the rest of what decided the graph)."""
-    return {"k": args.k, "cosine_floor": args.cosine_floor, "rules": f"cut_off_{RG.CUT_OFF}",
+    return {"k": args.k, "cosine_floor": args.cosine_floor, "pair_floor": args.pair_floor,
+            "label_variants": "linked: a 3-edge whatever its readings (labels one label blind, stems differ)",
+            "rules": f"cut_off_{RG.CUT_OFF}",
             "overlap_rubric": rubrics["overlap"]["version"], "relation_rubric": rubrics["relation"]["version"],
             "embedding": {"model": cfg.live_model["model_id"], "query_form": args.query_form},
             "overlap_floor": args.overlap_floor, "cut_off": RG.CUT_OFF, "proposed_cut_off": args.proposed_cut_off,
@@ -192,11 +272,14 @@ def write_usage(path: Path, usage: MultiModelUsage, *, inputs, title: str) -> No
 
 def plan_line(plan: RG.GraphPlan, vinfo: dict, *, overlap_floor: float) -> dict:
     cos = list(plan.edges.values())
+    ec = plan.edge_counts()
     return {"n_candidates": len(plan.cands), "n_covered_shown": len(plan.covered), "selected_by_batch": plan.by_batch,
             "skipped": plan.skipped, "query_texts": vinfo, "no_vector": len(plan.no_vector),
-            "n_relation_calls": len(plan.relation_items()),
-            "n_listed": sum(len(v) for v in plan.neighbours.values()), "n_candidate_edges": len(cos),
-            "n_edges_at_overlap_floor": sum(1 for c in cos if c >= overlap_floor)}
+            "n_relation_calls": ec["n_relation_calls"], "lists_split": ec["lists_split"],
+            "n_listed": ec["n_listed"], "longest_list": ec["longest_list"], "n_candidate_edges": len(cos),
+            "n_edges_at_overlap_floor": sum(1 for c in cos if c >= overlap_floor), "k": plan.k,
+            "pair_floor": plan.pair_floor, "edges_by_via": ec["by_via"],
+            "n_label_variant_pairs": ec["n_label_variant_pairs"]}
 
 
 def render_samples(runner: RG.ReviewRunner, plan: RG.GraphPlan, rubrics: dict) -> str:
@@ -263,9 +346,18 @@ def cmd_build(args, argv) -> int:
         vectors, vinfo = {}, {"n_query_texts": len(cands), "n_cached": None, "n_to_embed": len(cands),
                               "corpus_not_cached": index_info}
     corpus = index.traits if index is not None else NV.load_trait_corpus(args.data_dir)
-    plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor, include=include)
-    shares = RG.measured_shares(rows, args.from_batches, second_at=args.proposed_cut_off)
-    tokens = RG.measured_overlap_tokens(source_records(args.from_batches, args.out_root))
+    plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor,
+                         pair_floor=args.pair_floor, include=include)
+    # the estimate's shares, tokens and unsure re-asks: an earlier R1 build's own records (gate audit 8), else M3's
+    try:
+        shares, tokens, unsure, calib = calibration(args.calibrate_from, args.out_root,
+                                                    proposed_cut_off=args.proposed_cut_off)
+    except CalibrationError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    if shares is None:
+        shares = RG.measured_shares(rows, args.from_batches, second_at=args.proposed_cut_off)
+        tokens = RG.measured_overlap_tokens(source_records(args.from_batches, args.out_root))
     transport, why = choose_transport(args.transport, len(plan.cands))
     embedding = {"model": cfg.live_model["model_id"], "query_form": args.query_form,
                  "representation": cfg.representation, "variant": cfg.covered["space"]["variant"]}
@@ -289,14 +381,14 @@ def cmd_build(args, argv) -> int:
             return RG.estimate_build(relation_calls=runner.relation_calls(p.relation_items()),
                                      edge_cosines=p.edges.values(), shares=shares, overlap_floor=args.overlap_floor,
                                      overlap_tokens=tokens, transport=transport, cand_chars=_cand_chars(p.cands),
-                                     n_embed=n_embed)
+                                     n_embed=n_embed, unsure=unsure)
         replay = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics, index=runner.index,
                              usage=MultiModelUsage(), responses_path=out_dir / "responses.jsonl",
                              concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
                              resume_records=records_before, label_form=label_form)
         r_est, r_graph, wanted = RG.resume_estimate(
             p, runner=replay, corpus=corpus, queue=queue, shares=shares, overlap_floor=args.overlap_floor,
-            proposed_cut_off=args.proposed_cut_off, overlap_tokens=tokens, transport=transport)
+            proposed_cut_off=args.proposed_cut_off, overlap_tokens=tokens, transport=transport, unsure=unsure)
         if n_embed:
             r_est.add("query embeddings not in the cache (OpenAI text-embedding-3-large) + the 8 canary texts",
                       "text-embedding-3-large", 1, (n_embed + 8) * 30, 0)
@@ -314,8 +406,18 @@ def cmd_build(args, argv) -> int:
     est = estimate(plan, probe, vinfo["n_to_embed"])
     pl = plan_line(plan, vinfo, overlap_floor=args.overlap_floor)
     print(f"plan: {json.dumps(pl)}")
-    print(f"shares (M3's, by cosine bin, from the source batches' blocks): {json.dumps(shares.as_dict())}")
-    print(f"overlap tokens a call (measured in the source batches' records): {json.dumps(tokens)}")
+    if shares.source == "m3_blocks":
+        print(f"shares (M3's, by cosine bin, from the source batches' blocks; {calib.get('why')}): "
+              f"{json.dumps(shares.as_dict())}")
+        print(f"overlap tokens a call (measured in the source batches' records): {json.dumps(tokens)}")
+    else:
+        print(f"shares (R1's own, by cosine bin, from {', '.join(calib['builds'])}): {json.dumps(shares.as_dict())}")
+        print(f"overlap tokens a call and unsure re-asks (measured in {', '.join(calib['builds'])}'s records): "
+              f"{json.dumps(tokens)}; unsure {json.dumps(calib['unsure'])}")
+    if pl["lists_split"]:
+        print(f"NOTE: {pl['lists_split']} candidates list more than {RG.RELATION_LIST_MAX} others (the longest "
+              f"{pl['longest_list']}): each list is split over several relation calls of at most {RG.RELATION_LIST_MAX}, "
+              f"so that no answer runs into the call's {NR.RELATION_MAX_TOKENS} output tokens")
     print(f"transport: {transport} ({why})")
     if resuming:
         print(f"resume: {json.dumps(resume_info)}")
@@ -363,7 +465,8 @@ def cmd_build(args, argv) -> int:
                 "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
                 "models": {"relation": NR.RELATION_MODEL, "relation_unsure": NR.UNSURE_MODEL,
                            "overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
-                "settings": {"k": args.k, "cosine_floor": args.cosine_floor, "overlap_floor": args.overlap_floor,
+                "settings": {"k": args.k, "cosine_floor": args.cosine_floor, "pair_floor": args.pair_floor,
+                             "label_variants": True, "overlap_floor": args.overlap_floor,
                              "cut_off": RG.CUT_OFF, "proposed_cut_off": args.proposed_cut_off,
                              "rules": RG.RULES.name, "relation_seed": args.batch_id,
                              "concurrency": args.concurrency, "query_form": args.query_form,
@@ -371,7 +474,8 @@ def cmd_build(args, argv) -> int:
                              "representation": cfg.representation, "variant": cfg.covered["space"]["variant"],
                              "relation_max_tokens": NR.RELATION_MAX_TOKENS, "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS,
                              "ask_attempts": NR.ASK_ATTEMPTS},
-                "estimate_inputs": {"shares": shares.as_dict(), "overlap_tokens": tokens},
+                "estimate_inputs": {"shares": shares.as_dict(), "overlap_tokens": tokens,
+                                    "unsure": None if unsure is None else list(unsure), "calibration": calib},
                 "corpus": index_info, PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume),
                 "started_at": utc_now()}
     if resuming:
@@ -390,7 +494,8 @@ def cmd_build(args, argv) -> int:
                 corpus = index.traits
             vectors, vinfo = query_vectors(cands, cfg=cfg, index=index, cache=cache, query_form=args.query_form,
                                            usage=usage, allow_embed=True)
-            plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor, include=include)
+            plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor,
+                                 pair_floor=args.pair_floor, include=include)
             probe.index, probe.traits = index, index.traits
             est = estimate(plan, probe, 0)
             run_meta.update(plan=plan_line(plan, vinfo, overlap_floor=args.overlap_floor), estimate_usd=round(est.usd, 4),
@@ -506,6 +611,167 @@ def cmd_groups(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- the Opus pilot (gate audit 8, P2)
+
+def roger_labels(review: Path, graph: RG.Graph) -> tuple[dict, dict]:
+    """``(labels, info)``: each term the review's ``decisions.jsonl`` settled, by the resolution it ended in
+    (``review_graph.resolution_labels`` over the log replayed by the review app; the log's own groups only)."""
+    from assistant_axis.gapgen.review_app import decisions as RD
+    events = RD.read_events(review / RD.LOG_NAME)
+    st = RD.replay(graph, events)
+    groups = [{"id": g.id, "resolution": g.resolution, "nominated": g.nominated,
+               "resolved_members": list(g.resolved_members)} for g in st.groups.values() if g.status == "resolved"]
+    labels = RG.resolution_labels(groups, stem_of={n.key: n.stem for n in graph.nodes})
+    return labels, {"events": len(events), "skipped_on_replay": len(st.skipped), "groups_resolved": len(groups),
+                    "terms_settled": len(labels), "resolutions": len(set(labels.values()))}
+
+
+def cmd_opus_pilot(args, argv) -> int:
+    try:
+        paths.check_id(args.batch_id, "batch_id")
+        paths.check_id(args.pilot_id, "pilot_id")
+    except ValueError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    review = RG.review_dir(args.batch_id, candidates_dir=args.out_root)
+    if not (review / "graph.json").exists():
+        print(f"{review / 'graph.json'} not found: the pilot reads a built graph", file=sys.stderr)
+        return 1
+    graph = RG.Graph.from_json(json.loads((review / "graph.json").read_text(encoding="utf-8")))
+    build_run = NS._peek_run(review) or {}
+    labels, linfo = roger_labels(review, graph)
+    if not labels:
+        print(f"REFUSED: {review / 'decisions.jsonl'} settles no term: the pilot's reference is Roger's decisions",
+              file=sys.stderr)
+        return 2
+    pairs = RG.sonnet2_pairs(graph)
+    sel = RG.select_pilot(pairs, labels, args.n, seed=args.seed)
+    chosen = [(p["a"], p["b"]) for p in sel["selected"]]
+    try:
+        rubrics = NS.load_m3_rubrics(args.rubrics_dir)
+    except NS.RubricError as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    built = ((build_run.get("rubrics") or {}).get("overlap") or {}).get("sha256")
+    refused = None
+    if built and built != rubrics["overlap"]["sha256"]:
+        refused = (f"the overlap rubric is not the one the build used (sha256 {rubrics['overlap']['sha256'][:12]} "
+                   f"now, {built[:12]} in {args.batch_id}): Opus would not read what Sonnet read")
+    label_form = PL.resolve_label_form(source=build_run)
+    pilot_dir = review / args.pilot_id
+    records = read_records(review / "responses.jsonl", steps=("overlap",))
+    recorded = {(r["key"], r["stem"]): r["user"] for r in records
+                if r.get("role") == "sonnet" and str(r.get("wave", "")).startswith(RG.FIRST_WAVE) and r.get("user")}
+    tokens = RG.measured_overlap_tokens(records)
+    nodes = graph.node_map()
+    probe = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics, index=SimpleNamespace(traits={}),
+                        usage=MultiModelUsage(), responses_path=pilot_dir / "responses.jsonl", concurrency=args.concurrency,
+                        config_version=graph.config.get("space", {}).get("config_version", ""),
+                        embedding=build_run.get("embedding") or {}, label_form=label_form)
+    probe.add_candidates(RG.node_candidate(nodes[k]) for k in sorted({m for p in chosen for m in p}))
+    mismatches = RG.pilot_prompt_mismatches(probe, chosen, recorded)
+    if mismatches and refused is None:
+        refused = (f"{len(mismatches)} of the {len(chosen)} pairs render a prompt Sonnet did not read (first: "
+                   f"{mismatches[0]}); Opus must read what Sonnet read")
+    transport = args.transport
+    suffix = RG.BATCH_SUFFIX if transport == "batches" else ""
+    est = RG.Estimate()
+    est.add(f"Opus on first directions Sonnet read 2 ({len(chosen)} pairs; tokens measured in {args.batch_id})",
+            NR.SECOND_MODEL + suffix, len(chosen), *tokens["opus"])
+    print(f"reference: {json.dumps(linfo)}")
+    print(f"first directions Sonnet read 2 (Opus never asked): {len(pairs)}; pools: {json.dumps(sel['pools'])}")
+    print(f"selected: {sum(p['reference'] == 'same' for p in sel['selected'])} same, "
+          f"{sum(p['reference'] == 'different' for p in sel['selected'])} different (seed {args.seed}); by cosine bin "
+          + json.dumps({b: dict(Counter(p['reference'] for p in sel['selected'] if RG.bin_label(p['cosine']) == b))
+                        for b in sorted({RG.bin_label(p['cosine']) for p in sel['selected']})}))
+    print(f"label form: {label_form}; overlap rubric version {rubrics['overlap']['version']}; prompts checked against "
+          f"the build's Sonnet records: {len(chosen) - len(mismatches)} of {len(chosen)} match")
+    print(f"estimate:\n{est.format()}")
+    cap = None
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=False, confirmed_by=None)
+        print(f"hard cap: ${cap:.2f}")
+    except CostRefused as exc:
+        refused = refused or exc.msg
+    sha, dirty = git_sha(), platform_dirty_files()
+    if refused is None and dirty and not args.allow_dirty:
+        refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                   f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty")
+    if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+        print(f"DRY-RUN: would write {pilot_dir}/ (graph.json, the groups and the registry untouched)")
+        if chosen:
+            c = probe.overlap_call(*chosen[0], "opus", 1)
+            print(f"=== Opus call: {chosen[0][0]} > {chosen[0][1]}, {c.model}; system prompt: "
+                  f"rubrics/overlap_concept.md version {rubrics['overlap']['version']} (cached)\n{c.user}")
+        return 0
+    if refused:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        return 2
+    status, resume_records, earlier = NS._prepare_out_dir(pilot_dir, args)
+    if status:
+        return status
+    usage = GuardedUsage(budget_usd=cap, usage_path=pilot_dir / "usage.json")
+    if args.resume:
+        usage.merge_from(MultiModelUsage.load_or_create(pilot_dir / "usage.json"))
+    from assistant_axis.provenance import current_file_input
+    inputs = [current_file_input(dep_key="graph", path=review / "graph.json"),
+              current_file_input(dep_key="decisions", path=review / "decisions.jsonl")]
+    run_meta = {"batch_id": args.batch_id, "pilot_id": args.pilot_id, "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
+                "argv": sys.argv[1:] if argv is None else list(argv), "n": args.n, "seed": args.seed,
+                "transport": transport, "estimate_usd": round(est.usd, 4), "budget_usd": args.budget_usd, "cap_usd": cap,
+                "reference": linfo, "pools": sel["pools"], "label_form": label_form,
+                "rubric": {k: rubrics["overlap"][k] for k in ("name", "version", "sha256")}, "model": NR.SECOND_MODEL,
+                "started_at": utc_now()}
+    if earlier:
+        run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", pilot_dir / "run.json")
+    status, runner, res = 0, None, {}
+    try:
+        from dotenv import load_dotenv
+        import anthropic
+        load_dotenv(_REPO_ROOT / ".env")
+        runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), batch_id=args.batch_id, rubrics=rubrics,
+                             index=SimpleNamespace(traits={}), usage=usage, responses_path=pilot_dir / "responses.jsonl",
+                             concurrency=args.concurrency, config_version=probe.config_version,
+                             embedding=probe.embedding, resume_records=resume_records, label_form=label_form)
+        if transport == "batches":
+            runner.cache_ttl = NR.BATCH_CACHE_TTL
+            runner.transport = BatchTransport(runner, anthropic.Anthropic(), pilot_dir / "batches.json", budget_usd=cap)
+        runner.add_candidates(RG.node_candidate(nodes[k]) for k in sorted({m for p in chosen for m in p}))
+        res = runner.run_opus(chosen)
+    except (BudgetExceededError, CostRefused) as exc:
+        print(f"STOPPED: {exc}", file=sys.stderr)
+        status = 2
+    finally:
+        write_usage(pilot_dir / "usage.json", usage, inputs=inputs, title=f"review_graph opus-pilot {args.batch_id}")
+        edges = {(e.a, e.b): e for e in graph.edges if e.source == "r1"}
+        rows = []
+        for p in sel["selected"]:
+            got = res.get((p["a"], p["b"])) or {"stalled": "not answered"}
+            ab = edges[(p["a"], p["b"])].readings.get("ab") or {}
+            rows.append({**p, "label_a": nodes[p["a"]].label, "label_b": nodes[p["b"]].label,
+                         "resolution_a": labels[p["a"]], "resolution_b": labels[p["b"]],
+                         "sonnet": ab.get("sonnet"), "sonnet_reason": (ab.get("reasons") or {}).get("sonnet"), **got})
+        atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), pilot_dir / "readings.jsonl")
+        rep = RG.pilot_report(rows, pools=sel["pools"], graph=graph, labels=labels)
+        from assistant_axis.plot_metadata import json_metadata
+        atomic_write_text(json.dumps(json_metadata(rep, title=f"Opus pilot {args.batch_id}/{args.pilot_id}",
+                                                   inputs=inputs), indent=2) + "\n", pilot_dir / "report.json")
+        run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
+        if runner is not None:
+            run_meta["calls_sent"] = {k.split(":", 1)[1]: v for k, v in sorted(runner.stats.items())
+                                      if k.startswith("sent:")}
+            run_meta["calls_resumed"] = runner.stats.get("resumed", 0)
+            run_meta["parse_rates"] = runner.warn_parse_rates(logger)
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", pilot_dir / "run.json")
+        print(usage.log_line())
+    print(RG.format_pilot_report(rep))
+    print(f"written: {pilot_dir}/ (readings.jsonl, report.json, usage.json, responses.jsonl, run.json)")
+    return status
+
+
 # --------------------------------------------------------------------------- the parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -517,6 +783,13 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--k", type=int, default=RG.DEFAULT_K, help="nearest other candidates per candidate (default 10)")
     b.add_argument("--cosine-floor", type=float, default=RG.DEFAULT_COSINE_FLOOR,
                    help="retrieval floor among candidates (default 0.25, M3's)")
+    b.add_argument("--pair-floor", type=floor_or_none, default=RG.DEFAULT_PAIR_FLOOR,
+                   help="beside the k nearest, every pair at this cosine or above is a candidate edge (default 0.55, "
+                        "Roger 2026-10-12 after gate audit 8); 'none': the k nearest alone, the rule before")
+    b.add_argument("--calibrate-from", nargs="+", metavar="REVIEW_BATCH", default=None,
+                   help="earlier R1 builds whose own records (graph.json, responses.jsonl) give the estimate's shares, "
+                        "tokens and unsure re-asks (default review_tda_1, or M3's shares when it is not there); "
+                        "'none': M3's shares from the source batches' blocks, the rule before")
     b.add_argument("--overlap-floor", type=float, default=RG.DEFAULT_OVERLAP_FLOOR,
                    help="no overlap call on a pair below this cosine (default 0.35, decision 11)")
     b.add_argument("--proposed-cut-off", type=int, choices=(3, 4), default=RG.DEFAULT_PROPOSED_CUT_OFF,
@@ -548,6 +821,23 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--batch-id", required=True)
     g.add_argument("--out-root", type=Path, default=None)
     g.add_argument("--top", type=int, default=None, help="list only the N largest groups of each tier")
+    p = sub.add_parser("opus-pilot", help="Opus on first directions Sonnet read 2, against Roger's decisions "
+                                          "(gate audit 8, P2; the graph untouched)")
+    p.add_argument("--batch-id", required=True, help="the built review batch (its graph.json and decisions.jsonl)")
+    p.add_argument("--n", type=int, default=RG.PILOT_SIZE, help="pairs to read (default 128: half same resolution, "
+                                                                "half different)")
+    p.add_argument("--seed", type=int, default=RG.PILOT_SEED, help="the draw's seed (default 20261012)")
+    p.add_argument("--pilot-id", default="opus_pilot_1", help="the output directory under the review batch's")
+    p.add_argument("--out-root", type=Path, default=None)
+    p.add_argument("--rubrics-dir", type=Path, default=None)
+    p.add_argument("--transport", choices=("live", "batches"), default="live",
+                   help="live by default (under $20: real time); batches at half price")
+    p.add_argument("--concurrency", type=int, default=NR.DEFAULT_CONCURRENCY)
+    p.add_argument("--budget-usd", type=float, required=True, help="the hard cap")
+    p.add_argument("--resume", action="store_true", help="continue the pilot's directory; nothing answered is sent")
+    p.add_argument("--overwrite", action="store_true", help="move an existing pilot directory aside first")
+    p.add_argument("--allow-dirty", action="store_true")
+    p.add_argument("--dry-run", action="store_true", help="print the selection, the estimate and a prompt; write nothing")
     return ap
 
 
@@ -556,6 +846,8 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.cmd == "build":
         return cmd_build(args, argv)
+    if args.cmd == "opus-pilot":
+        return cmd_opus_pilot(args, argv)
     return cmd_groups(args)
 
 

@@ -175,7 +175,9 @@ class TestPlan:
         assert set(items[key("godless")]) == {key(x) for x in ["irreligious", "nonreligious", "skeptic", "pious", "devout"]}
 
     def test_k_and_the_retrieval_floor(self):
-        plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=1, cosine_floor=0.25)
+        # k alone (pair_floor=None): since gate audit 8 the default also lists every pair at 0.55 or above
+        # (test_gapgen_review_graph_gate8.TestPairFloor)
+        plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=1, cosine_floor=0.25, pair_floor=None)
         assert all(len(v) <= 1 for v in plan.neighbours.values())
         plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=10, cosine_floor=0.35)
         assert plan.neighbours[key("loner")] == []

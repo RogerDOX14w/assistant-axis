@@ -122,7 +122,11 @@ def test_build_writes_the_graph_usage_and_run_and_never_the_registry(env, capsys
     o = capsys.readouterr().out
     # (was "4 cliques" before decision 12: the print now names both tiers)
     assert "4 merged groups" in o and "1 proposed groups" in o and "[usage]" in o
-    assert g.config["proposed_cut_off"] == 3 and run["settings"]["proposed_cut_off"] == 3 and g.schema == 2
+    # (schema 2 before gate audit 8: 3 adds the pair floor and the label variants)
+    assert g.config["proposed_cut_off"] == 3 and run["settings"]["proposed_cut_off"] == 3 and g.schema == 3
+    assert g.config["pair_floor"] == 0.55 and run["settings"]["pair_floor"] == 0.55
+    assert run["plan"]["edges_by_via"] == {"k_nearest": len([e for e in g.edges if e.source == "r1"]),
+                                           "pair_floor": 0, "label_variant": 0}
     assert g.proposed_groups == [["godless#1", "skeptic#1"]]
 
 
@@ -244,3 +248,118 @@ def test_a_resume_is_capped_with_the_earlier_spend(env, capsys):
     # a cap below the earlier spend plus the new calls refuses the resume before any call
     assert build(env, "--resume", budget=f"{cost1 + 0.0001:.4f}") == 2
     assert "exceeds --budget-usd" in capsys.readouterr().err
+
+
+# --------------------------------------------------------------------------- gate audit 8 (Roger, 2026-10-12)
+
+def test_the_pair_floor_in_the_cli_and_none_for_the_rule_before(env, capsys):
+    # k = 1: the godless triangle's third side (irreligious / nonreligious, 0.81) is in neither list; the pair floor
+    # (default 0.55) brings it in, --pair-floor none leaves it out
+    assert build(env, "--k", "1") == 0
+    g = RG.Graph.from_json(json.loads((out(env) / "graph.json").read_text()))
+    run = json.loads((out(env) / "run.json").read_text())
+    assert run["plan"]["edges_by_via"]["pair_floor"] == 1 and run["settings"]["pair_floor"] == 0.55
+    assert ["godless#1", "irreligious#1", "nonreligious#1"] in g.cliques
+    e = next(x for x in g.edges if (x.a, x.b) == ("irreligious#1", "nonreligious#1"))
+    assert e.via == "pair_floor" and e.strict
+    assert build(env, "--k", "1", "--pair-floor", "none", batch="rv_old") == 0
+    g0 = RG.Graph.from_json(json.loads((out(env, "rv_old") / "graph.json").read_text()))
+    run0 = json.loads((out(env, "rv_old") / "run.json").read_text())
+    assert run0["settings"]["pair_floor"] is None and g0.config["pair_floor"] is None
+    assert run0["plan"]["edges_by_via"] == {"k_nearest": run0["plan"]["n_candidate_edges"], "pair_floor": 0,
+                                            "label_variant": 0}
+    assert ["godless#1", "irreligious#1", "nonreligious#1"] not in g0.cliques
+    with pytest.raises(SystemExit):
+        build(env, "--pair-floor", "high", "--dry-run", batch="rv_bad")
+
+
+def test_the_estimate_is_calibrated_on_an_earlier_r1_build(env, capsys):
+    # the default calibration (review_tda_1) is not under this out-root: M3's shares, said so
+    assert build(env) == 0
+    o = capsys.readouterr().out
+    assert "shares (M3's" in o and "default calibration review_tda_1 not found" in o
+    run1 = json.loads((out(env) / "run.json").read_text())
+    assert run1["estimate_inputs"]["calibration"]["source"] == "m3_blocks"
+    # named: rv1's own graph and records
+    assert build(env, "--calibrate-from", "rv1", "--dry-run", batch="rv2") == 0
+    o = capsys.readouterr().out
+    assert "shares (R1's own, by cosine bin, from rv1)" in o and '"source": "r1:rv1"' in o
+    assert "unsure [" in o and "overlap, second direction, Opus (" in o
+    assert build(env, "--calibrate-from", "rv1", batch="rv2") == 0
+    run2 = json.loads((out(env, "rv2") / "run.json").read_text())
+    cal = run2["estimate_inputs"]["calibration"]
+    assert cal["source"] == "r1:rv1" and cal["builds"] == ["rv1"] and run2["estimate_inputs"]["shares"]["source"] == "r1:rv1"
+    capsys.readouterr()
+    # a named build that is not there is refused; none is M3's shares, the rule before
+    assert build(env, "--calibrate-from", "nope", "--dry-run", batch="rv3") == 2
+    assert "--calibrate-from: no graph.json for nope" in capsys.readouterr().err
+    assert build(env, "--calibrate-from", "none", "--dry-run", batch="rv3") == 0
+    assert "shares (M3's, by cosine bin, from the source batches' blocks; --calibrate-from none)" in capsys.readouterr().out
+
+
+def _decisions(env, name="rv1"):
+    """Roger's log on the toy graph: the godless triangle and skeptic merged into alpha; chain a and b into beta;
+    chain c promoted alone.  Sonnet read 2 on irreligious > skeptic and nonreligious > skeptic (same resolution)
+    and chain a > chain c (different)."""
+    at = "2026-10-11T19:40:34+00:00"
+    g1 = ["godless#1", "irreligious#1", "nonreligious#1", "skeptic#1"]
+    evs = [{"group": "g1", "action": "open", "source": "merged:0", "members": g1, "status": "open"},
+           {"group": "g1", "action": "resolve", "members": g1, "nominated": None, "resolution": "merge_into:trait:alpha"},
+           {"group": "g2", "action": "open", "source": "merged:1", "members": ["chain_a#1", "chain_b#1"], "status": "open"},
+           {"group": "g2", "action": "resolve", "members": ["chain_a#1", "chain_b#1"], "nominated": None,
+            "resolution": "merge_into:trait:beta"},
+           {"group": "g3", "action": "open", "source": "term:chain_c#1", "members": ["chain_c#1"], "status": "open"},
+           {"group": "g3", "action": "resolve", "members": ["chain_c#1"], "nominated": "chain_c#1",
+            "resolution": "promote"}]
+    (out(env, name) / "decisions.jsonl").write_text(
+        "".join(json.dumps({"seq": i, "at": at, "by": "roger", **e}) + "\n" for i, e in enumerate(evs, 1)))
+
+
+def pilot(env, *extra, budget="1"):
+    return cli.main(["opus-pilot", "--batch-id", "rv1", "--n", "4", "--budget-usd", budget, "--out-root",
+                     str(env["cand_dir"]), *extra])
+
+
+def test_the_opus_pilot_reads_what_sonnet_read_and_compares_with_roger(env, capsys):
+    assert build(env) == 0
+    assert pilot(env, "--dry-run") == 2                                   # no decisions.jsonl: no reference
+    assert "settles no term" in capsys.readouterr().err
+    _decisions(env)
+    graph_bytes = (out(env) / "graph.json").read_bytes()
+    sonnet_users = {(r["key"], r["stem"]): r["user"]
+                    for r in map(json.loads, (out(env) / "responses.jsonl").read_text().splitlines())
+                    if r["wave"] == "ov1_sonnet"}
+    env["holder"].pop("client", None)
+    assert pilot(env, "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert '"same": 2, "different": 1' in o and "selected: 2 same, 1 different (seed 20261012)" in o
+    assert "prompts checked against the build's Sonnet records: 3 of 3 match" in o and "=== Opus call:" in o
+    assert "client" not in env["holder"] and not (out(env) / "opus_pilot_1").exists()
+    # Opus raises irreligious > skeptic to 3, leaves the other two at 2
+    env["holder"]["responder"] = responder_for(RELATIONS, {**OVERLAP, ("irreligious", "skeptic", "opus"): 3})
+    assert pilot(env) == 0
+    o = capsys.readouterr().out
+    sent = calls(env)
+    assert len(sent) == 3 and all("opus" in kw["model"] for kw in sent)
+    assert sorted(user_text(kw) for kw in sent) == sorted(
+        sonnet_users[p] for p in [("chain_a#1", "chain_c#1"), ("irreligious#1", "skeptic#1"), ("nonreligious#1", "skeptic#1")])
+    d = out(env) / "opus_pilot_1"
+    for name in ("readings.jsonl", "report.json", "usage.json", "responses.jsonl", "run.json"):
+        assert (d / name).exists(), name
+    assert (out(env) / "graph.json").read_bytes() == graph_bytes            # the graph and its groups untouched
+    rows = [json.loads(x) for x in (d / "readings.jsonl").read_text().splitlines()]
+    by = {(r["a"], r["b"]): r for r in rows}
+    assert by[("irreligious#1", "skeptic#1")]["opus"]["value"] == 3 and by[("irreligious#1", "skeptic#1")]["sonnet"] == 2
+    assert by[("chain_a#1", "chain_c#1")]["reference"] == "different"
+    assert by[("chain_a#1", "chain_c#1")]["resolution_b"] == "queue:chain_c"
+    rep = json.loads((d / "report.json").read_text())["result"]
+    assert rep["by_reference"]["same"]["raised"] == 1 and rep["by_reference"]["different"]["raised"] == 0
+    assert "same      resolution: 1 of 2 answered raised to 3+ = 50%" in o and "[usage]" in o
+    usage = json.loads((d / "usage.json").read_text())
+    assert set(usage["per_model"]) == {NV.OPUS} and usage["n_calls"] == 3
+    run = json.loads((d / "run.json").read_text())
+    assert run["status"] == 0 and run["calls_sent"] == {"overlap:opus": 3} and run["pools"]["same"] == 2
+    # a resume sends nothing already answered and writes the same report
+    env["holder"].pop("client", None)
+    assert pilot(env, "--resume") == 0
+    assert calls(env) == [] and json.loads((d / "report.json").read_text())["result"] == rep

@@ -15,7 +15,15 @@ of M3 batches kept, a typed graph from which the review reads its groups:
 * **Candidate edges** (``source: "r1"``): each kept candidate's ``k`` nearest other kept candidates by the cosine
   of their query embeddings in M3's covered space (the ``gloss_w14`` text as M3 embedded it, projected by the
   corpus index, so the cosines are on M3's scale and the floors calibrated on M3's readings apply), at the
-  retrieval floor or above.  Typed by the relation call (rubric ``relation.md``, the relation model, one list per
+  retrieval floor or above; **and** every pair at the pair floor (``pair_floor``, default 0.55) or above, however
+  far down either list it sits (Roger, 2026-10-12, gate audit 8: in a dense region a concept has more than ``k``
+  members and ``k`` alone cut 22% of the pairs he put together; ``None`` gives the k nearest alone, the rule
+  before); **and** every pair of candidates whose labels are one label once case, hyphens, spaces and apostrophes
+  are taken out (:func:`label_variant_key`, M3's blind form: other-worldly / otherworldly), wherever their
+  cosine.  An edge that only the pair floor (or only the label rule) brought in says so in ``via``
+  (``pair_floor``, ``label_variant``); a k-nearest edge has none.  Each such pair is listed in both candidates'
+  relation calls, and a list longer than :data:`RELATION_LIST_MAX` is split over several calls (one record per
+  candidate still).  Typed by the relation call (rubric ``relation.md``, the relation model, one list per
   candidate as in M3, the other candidates' glosses as descriptions; ``unsure`` asked again of Sonnet as M3 does).
   Then, for an edge answered ``similar`` from either side (or ``unsure``, or ``similar`` from one side and
   ``opposed`` from the other) at the overlap floor or above (decision 11), the overlap call: rubric A, one pair per
@@ -38,7 +46,11 @@ of M3 batches kept, a typed graph from which the review reads its groups:
 * **3-edges** (``proposed``; decision 12): both directions read at the proposed cut-off or above under M3's rule
   at that cut-off (``reading["proposed"]``: Sonnet above it, or Opus at it or above where Sonnet is at it or
   unsure), the relation not ``opposed``.  The escalation stays the rule at cut-off 4 (Opus reads Sonnet's 3s, 4s
-  and unsure), so a Sonnet 2 is not sent to Opus and cannot become a 3.  Every 4-edge is a 3-edge.
+  and unsure), so a Sonnet 2 is not sent to Opus and cannot become a 3 (the Opus pilot, below, measures what Opus
+  would make of them, without changing the graph).  Every 4-edge is a 3-edge.  A **label variant** pair
+  (``label_variant``) is a 3-edge whatever its readings and relation (Roger, 2026-10-12: "read or not"; the TDA
+  case other-worldly / otherworldly read ``3/2`` because the two glosses took different senses), so the two are
+  pre-assembled in one proposed group and Roger decides; it is never a 4-edge on that ground alone.
 * **Merged groups** (``cliques``; the key keeps its R1 name): the maximal cliques of the 4-edges
   (:func:`maximal_cliques`, Bron-Kerbosch with a pivot), so a chain can never be a group; two cliques may overlap;
   a kept candidate in none is a ``singleton`` (R1's sense: in no merged group).  ``clique_links``: the pairs of
@@ -49,24 +61,35 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   ``clique_links``, over the proposed groups.  :meth:`Graph.ungrouped`: the kept candidates in no group of either
   tier.
 
-Cost: :func:`estimate_build` before any call (the relation calls as rendered, the overlap calls by the shares M3
-measured per cosine bin, :func:`measured_shares`); the CLI checks it against the cap, and again after the
-relation calls on the pairs actually marked for the overlap call (``gate``).  A resumed build is estimated by
+Cost: :func:`estimate_build` before any call (the relation calls as rendered, the overlap calls by per-cosine-bin
+shares); the CLI checks it against the cap, and again after the relation calls on the pairs actually marked for
+the overlap call (``gate``).  The shares come from an earlier R1 build's own records (:func:`r1_shares`, with its
+measured tokens and unsure re-asks: the calibration, default ``review_tda_1``), since 2026-10-12; M3's
+candidate-to-corpus shares (:func:`measured_shares`) put the TDA build's estimate at 3.2 times its spend (gate
+audit 8) and remain the fallback when no earlier build is named.  A resumed build is estimated by
 :func:`resume_estimate` instead: the build replayed on its records with nothing sent, the calls found missing
 priced as rendered and the calls they lead to by the shares.
+
+The Opus pilot (:func:`sonnet2_pairs`, :func:`select_pilot`, :meth:`ReviewRunner.run_opus`, :func:`pilot_report`;
+Roger, 2026-10-12, gate audit 8 P2): Opus on a sample of first directions Sonnet read 2 (which the escalation never
+sends it), half of them pairs Roger put in the same resolution and half pairs he resolved differently, the readings
+written beside the build and compared with his decisions; the graph and its groups are not touched.
 
 The CLI is ``data_analysis/gap_generation/review_graph.py``; outputs under ``data/candidates/review/<batch_id>/``.
 """
 from __future__ import annotations
 
 import asyncio
+import json
+import random
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
 from typing import Any, Callable, Collection, Iterable, Mapping, Optional, Sequence
 
 import numpy as np
 
+from assistant_axis.entity_id import normalize_to_file_name
 from assistant_axis.judge_pricing import BATCH_SUFFIX
 
 from . import novelty as NV
@@ -87,9 +110,20 @@ DEFAULT_K = 10
 DEFAULT_COSINE_FLOOR = NV.DEFAULT_COSINE_FLOOR
 #: Decision 11: no overlap call on a candidate pair below this cosine.
 DEFAULT_OVERLAP_FLOOR = 0.35
-#: 2: decision 12 (``proposed_groups``, ``proposed_links``, an edge's ``proposed``, a reading's ``proposed``; the
-#: second direction read after a first at the proposed cut-off).  1: R1 as first built.
-GRAPH_SCHEMA = 2
+#: Roger, 2026-10-12 (gate audit 8, P1): beside each candidate's ``k`` nearest, every pair at this cosine or above is
+#: a candidate edge (about 21 cents and about 20 more 3-edges on a TDA-sized build).  ``None``: the k nearest alone.
+#: What it adds grows with density, not with the candidate count: 172 edges over the TDA build's 6,001 (871
+#: candidates), 4,499 over 22,815 in the all-batches dry run of 2026-10-12 (3,193 candidates, about $6 more).
+DEFAULT_PAIR_FLOOR = 0.55
+#: The most candidates one relation call lists: a longer list (the pair floor in a dense region: 79 in the
+#: all-batches plan of 2026-10-12) is split into calls of at most this many, as even as possible, since at Haiku 5.5's
+#: measured 76.5 output tokens a listed candidate (``novelty_runner.RELATION_OUT_MEASURED``) 40 take about 3,060 of
+#: the call's 4,096 and 54 would not fit.  A list of this many or fewer is one call, as before.
+RELATION_LIST_MAX = 40
+#: 3: the pair floor and the label variants (an r1 edge's ``via`` and ``label_variant``; a label variant is a 3-edge
+#: whatever its readings).  2: decision 12 (``proposed_groups``, ``proposed_links``, an edge's ``proposed``, a
+#: reading's ``proposed``; the second direction read after a first at the proposed cut-off).  1: R1 as first built.
+GRAPH_SCHEMA = 3
 #: The M3 decisions a candidate is reviewed under (``grey`` is kept with a flag).
 KEPT_DECISIONS = ("new", "grey")
 NODE_KINDS = ("candidate", "corpus", "queue")
@@ -102,11 +136,24 @@ OVERLAP_RELATIONS = ("similar", "unsure", "mixed")
 OVERLAP_STATES = ("both", "first", "below_floor", "not_similar", "stalled")
 FIRST_WAVE, SECOND_WAVE = "ov1", "ov2"
 #: The estimate's cosine bins (lower edges) and the observations a bin needs before its measured share is used.
+#: They feed only the estimate: which readings reach Opus is M3's rule at cut-off 4 (``novelty.sonnet_action``).
 SHARE_BINS = (0.35, 0.45, 0.55, 0.65)
 MIN_SHARE_OBS = 10
-#: The share of second-direction Sonnet readings assumed to go on to Opus (a first-direction 4 is the same
-#: concept, so the second Sonnet reading is nearly always at the cut-off or one below).
+#: The share of second-direction Sonnet readings assumed to go on to Opus when no earlier R1 build calibrates it
+#: (:attr:`Shares.second_opus`; the TDA build measured 0.92: 706 of 771).
 SECOND_OPUS_SHARE = 1.0
+#: The earlier R1 build(s) whose own records calibrate the estimate by default (:func:`r1_shares`): the TDA build of
+#: 2026-10-10, 871 candidates, $5.00 spent against $16.09 estimated from M3's shares.  Checked 2026-10-12: replayed
+#: on itself the estimate is $4.99, every overlap line's calls exact; on review_pilots_1 (out of sample) its overlap
+#: lines are within 15% of the calls that build's graph records (first-direction Sonnet 14% low, the rest 3-9% high).
+DEFAULT_CALIBRATION = ("review_tda_1",)
+#: The Opus pilot's default size and seed (gate audit 8, P2: 64 same-resolution and 64 different-resolution pairs).
+PILOT_SIZE = 128
+PILOT_SEED = 20261012
+#: The cosine bins the pilot is stratified and reported by (lower edges).
+PILOT_BINS = (0.35, 0.45, 0.55, 0.65)
+#: The resolutions that settle a term's identity, for the pilot's reference (park and defer do not).
+SETTLED_RESOLUTIONS = ("promote", "merge_into", "reject")
 
 
 def corpus_key(stem: str) -> str:
@@ -209,8 +256,10 @@ class Edge:
     relations: dict = field(default_factory=dict)   # r1: {"ab": a's answer about b, "ba": b's about a}
     readings: dict = field(default_factory=dict)    # {"ab": a as the target, "ba": b as the target}: reading_of()
     overlap: Optional[str] = None                # r1: OVERLAP_STATES
-    via: Optional[str] = None                    # m3: retrieved | expanded | partner | renamed_from
+    via: Optional[str] = None                    # m3: retrieved | expanded | partner | renamed_from; r1: pair_floor |
+                                                 # label_variant for an edge in neither k-nearest list (else None)
     rank: Optional[int] = None                   # m3: the corpus trait's rank among the k retrieved
+    label_variant: bool = False                  # r1: the two labels are one label blind (a 3-edge, read or not)
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -402,17 +451,15 @@ def combine_relations(ab: Optional[str], ba: Optional[str]) -> str:
 
 
 def _answer(rec: Optional[Mapping], other: str) -> Optional[str]:
-    """One relation call's final answer about ``other`` (Sonnet's where it re-asked an ``unsure``)."""
+    """One candidate's relation answer about ``other`` (Sonnet's where it re-asked an ``unsure``): the answer on
+    record (``unparsed`` for a listed candidate whose call never parsed), else ``unparsed`` for a record whose one
+    call never parsed, else none (a call that failed or was not sent)."""
     if rec is None:
         return None
-    if rec.get("status") == "unparsed":
-        return "unparsed"
-    if rec.get("status") != "ok":
-        return None
     a = (rec.get("answers") or {}).get(other)
-    if a is None:
-        return None
-    return (a.get("second") or {}).get("relation") or a.get("relation")
+    if a is not None:
+        return (a.get("second") or {}).get("relation") or a.get("relation")
+    return "unparsed" if rec.get("status") == "unparsed" else None
 
 
 def edge_answers(relations: Mapping[str, Mapping], a: str, b: str) -> tuple[Optional[str], Optional[str]]:
@@ -471,10 +518,27 @@ class GraphPlan:
     no_vector: list
     by_batch: dict
     included: dict = field(default_factory=dict)   # key -> reason: covered candidates reviewed anyway
+    k: int = DEFAULT_K
+    pair_floor: Optional[float] = None             # None: the k nearest alone (the rule before 2026-10-12)
+    via: dict = field(default_factory=dict)        # (a, b) -> pair_floor | label_variant: in neither k-nearest list
+    label_variants: list = field(default_factory=list)   # [(a, b)]: the pairs whose labels are one label blind
 
     def relation_items(self) -> list[tuple[str, list[str]]]:
         """``(key, [other keys])`` of every kept candidate with a neighbour, by key: one relation call each."""
         return [(k, [o for o, _ in self.neighbours[k]]) for k in sorted(self.neighbours) if self.neighbours[k]]
+
+    def edge_counts(self) -> dict:
+        """The candidate edges by how they came in (``k_nearest``, ``pair_floor``, ``label_variant``), the label
+        variant pairs (wherever they came from), the listed slots, the longest list, and the relation calls (a
+        list longer than :data:`RELATION_LIST_MAX` is split: ``lists_split``)."""
+        by = Counter(self.via.get(e, "k_nearest") for e in self.edges)
+        lens = [len(v) for v in self.neighbours.values() if v]
+        return {"n_candidate_edges": len(self.edges), "by_via": {k: by[k] for k in ("k_nearest", "pair_floor",
+                                                                                      "label_variant")},
+                "n_label_variant_pairs": len(self.label_variants), "k": self.k, "pair_floor": self.pair_floor,
+                "n_listed": sum(lens), "longest_list": max(lens, default=0),
+                "n_relation_calls": sum(-(-n // RELATION_LIST_MAX) for n in lens),
+                "lists_split": sum(1 for n in lens if n > RELATION_LIST_MAX)}
 
 
 def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
@@ -501,33 +565,70 @@ def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
     return kept, covered, dict(skipped), {b: dict(c) for b, c in by_batch.items()}
 
 
-def nearest_candidates(vectors: Mapping[str, np.ndarray], *, k: int = DEFAULT_K,
-                       floor: float = DEFAULT_COSINE_FLOOR) -> dict[str, list[tuple[str, float]]]:
-    """Each key's ``k`` nearest other keys by cosine (nearest first, ties by key), those under ``floor`` dropped."""
+def _cosines(vectors: Mapping[str, np.ndarray]) -> tuple[list[str], np.ndarray]:
+    keys = sorted(vectors)
+    Q = np.stack([np.asarray(vectors[x], dtype=np.float64) for x in keys])
+    Q = Q / np.linalg.norm(Q, axis=1, keepdims=True)
+    return keys, Q @ Q.T
+
+
+def nearest_candidates(vectors: Mapping[str, np.ndarray], *, k: int = DEFAULT_K, floor: float = DEFAULT_COSINE_FLOOR,
+                       pair_floor: Optional[float] = None) -> dict[str, list[tuple[str, float]]]:
+    """Each key's ``k`` nearest other keys by cosine (nearest first, ties by key), those under ``floor`` dropped;
+    then, with ``pair_floor``, every further key at ``pair_floor`` (and ``floor``) or above, nearest first.  The
+    first ``k`` entries of a list are its k nearest; anything after them came in by the pair floor."""
     keys = sorted(vectors)
     out: dict[str, list] = {key: [] for key in keys}
     if len(keys) < 2:
         return out
-    Q = np.stack([np.asarray(vectors[x], dtype=np.float64) for x in keys])
-    Q = Q / np.linalg.norm(Q, axis=1, keepdims=True)
-    S = Q @ Q.T
+    keys, S = _cosines(vectors)
     idx = np.arange(len(keys))
+    extra_floor = None if pair_floor is None else max(float(pair_floor), float(floor))
     for i, a in enumerate(keys):
         s = S[i].copy()
         s[i] = -np.inf
-        for j in np.lexsort((idx, -s))[:k]:
+        order = np.lexsort((idx, -s))
+        for rank, j in enumerate(order):
             c = float(s[j])
-            if c < floor:
+            least = floor if rank < k else extra_floor
+            if least is None or c < least:
                 break
             out[a].append((keys[j], round(c, 6)))
     return out
 
 
+def label_variant_key(label: str) -> str:
+    """A label with case, hyphens, spaces, apostrophes and diacritics taken out (M3's blind form, decision 15:
+    ``other-worldly`` and ``otherworldly`` are one label)."""
+    return NV.blind(normalize_to_file_name(label))
+
+
+def label_variant_pairs(cands: Mapping[str, Any]) -> list[tuple[str, str]]:
+    """The pairs of candidates (``key -> PairCandidate``) whose labels are one label blind and whose stems differ
+    (two senses of one word are split rows by design, not variants), ``(a, b)`` with ``a < b``, sorted."""
+    by: dict[str, list[str]] = defaultdict(list)
+    for key_, c in cands.items():
+        by[label_variant_key(c.label)].append(key_)
+    out = []
+    for ks in by.values():
+        ks = sorted(ks)
+        for i, a in enumerate(ks):
+            for b in ks[i + 1:]:
+                if cands[a].stem != cands[b].stem:
+                    out.append((a, b))
+    return sorted(out)
+
+
 def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: Mapping[str, np.ndarray], *,
                k: int = DEFAULT_K, cosine_floor: float = DEFAULT_COSINE_FLOOR,
+               pair_floor: Optional[float] = DEFAULT_PAIR_FLOOR,
                include: Optional[Mapping[str, str]] = None) -> GraphPlan:
     """The batches' kept and covered rows, and the candidate edges: each kept candidate's ``k`` nearest other kept
-    candidates by ``vectors`` (projected query vectors, by key) at ``cosine_floor`` or above."""
+    candidates by ``vectors`` (projected query vectors, by key) at ``cosine_floor`` or above, every pair at
+    ``pair_floor`` or above (``None``: none beyond the k nearest), and every label variant pair
+    (:func:`label_variant_pairs`) at whatever cosine.  A pair the pair floor or the label rule brought in is listed
+    in both candidates' relation calls (after the k nearest, nearest first) and recorded in ``via``.  A candidate
+    with no vector has no candidate edge, a label variant's included."""
     include = dict(include or {})
     kept, covered, skipped, by_batch = select_rows(rows, batch_ids, include=include)
     cands, rows_kept = {}, {}
@@ -539,17 +640,39 @@ def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: M
             continue
         cands[key_], rows_kept[key_] = c, r
     no_vector = sorted(x for x in cands if x not in vectors)
-    nbrs = nearest_candidates({x: vectors[x] for x in cands if x in vectors}, k=k, floor=cosine_floor)
+    with_vec = {x: vectors[x] for x in cands if x in vectors}
+    nbrs = nearest_candidates(with_vec, k=k, floor=cosine_floor, pair_floor=pair_floor)
     for x in no_vector:
         nbrs[x] = []
+    ranked = {a: {b for b, _ in lst[:k]} for a, lst in nbrs.items()}
     edges: dict[tuple[str, str], float] = {}
+    via: dict[tuple[str, str], str] = {}
     for a, lst in nbrs.items():
         for b, c in lst:
-            edges[tuple(sorted((a, b)))] = c
+            e = tuple(sorted((a, b)))
+            edges[e] = c
+            if b not in ranked[a] and a not in ranked[b]:
+                via[e] = "pair_floor"
+    variants = [p for p in label_variant_pairs(cands) if p[0] in with_vec and p[1] in with_vec]
+    if variants:
+        keys, S = _cosines(with_vec)
+        pos = {x: i for i, x in enumerate(keys)}
+        for a, b in variants:
+            if (a, b) in edges:
+                continue
+            c = round(float(S[pos[a], pos[b]]), 6)
+            edges[(a, b)] = c
+            via[(a, b)] = "label_variant"
+            nbrs[a].append((b, c))
+            nbrs[b].append((a, c))
+        for x in {m for p in variants for m in p}:
+            head, tail = nbrs[x][:k], nbrs[x][k:]
+            nbrs[x] = head + sorted(tail, key=lambda t: (-t[1], t[0]))
     return GraphPlan(batch_ids=list(batch_ids), cands=cands, rows=rows_kept, covered=covered,
                      neighbours={x: nbrs[x] for x in sorted(nbrs)}, edges=dict(sorted(edges.items())),
                      skipped=dict(skipped), no_vector=no_vector, by_batch=by_batch,
-                     included={x: include[x] for x in sorted(include) if x in rows_kept})
+                     included={x: include[x] for x in sorted(include) if x in rows_kept}, k=k, pair_floor=pair_floor,
+                     via=dict(sorted(via.items())), label_variants=variants)
 
 
 def overlap_pairs(plan: GraphPlan, relations: Mapping[str, Mapping], *,
@@ -587,9 +710,16 @@ class ReviewRunner(NR.NoveltyRunner):
                        temperature=NR.TEMPERATURE, cache_system=False, stems=tuple(stems))
 
     def relation_calls(self, items: Sequence[tuple[str, Sequence[str]]]) -> list[NR.Call]:
-        """One relation call per ``(key, others)``, the others in the order seeded by the run and the key."""
-        return [self._relation_call(self.states[k], NV.relation_order(others, self.relation_seed, k))
-                for k, others in items]
+        """The relation calls of ``(key, others)``: the others in the order seeded by the run and the key, one call
+        for up to :data:`RELATION_LIST_MAX` of them, a longer list split in that order into the fewest calls that
+        hold it, as even as possible."""
+        out = []
+        for k, others in items:
+            order = NV.relation_order(others, self.relation_seed, k)
+            n = max(1, -(-len(order) // RELATION_LIST_MAX))
+            for part in np.array_split(np.arange(len(order)), n):
+                out.append(self._relation_call(self.states[k], [order[i] for i in part]))
+        return out
 
     def overlap_call(self, key: str, other: str, role: str = "sonnet", position: int = 1) -> NR.Call:
         return self._overlap_call(self.states[key], other, role, position)
@@ -598,11 +728,37 @@ class ReviewRunner(NR.NoveltyRunner):
         """Whether an answer to ``call`` is on record (a resume replays it instead of sending it)."""
         return call.cache_key() in self.cache_good
 
+    def run_opus(self, pairs: Sequence[tuple[str, str]], *, wave: str = "pilot_opus") -> dict[tuple[str, str], dict]:
+        """Opus on each ``(target, other)`` of ``pairs``, the prompt Sonnet read for that direction (the overlap call
+        with Opus's model; the candidates must be added), whatever Sonnet answered: the Opus pilot.  ``{(a, b):
+        {"opus": {"value", "reason"} | {"value": None, "error"}} | {"stalled": why}}``.  A stop is raised after every
+        answer received is recorded."""
+        return asyncio.run(self._run_opus(pairs, wave))
+
+    async def _run_opus(self, pairs, wave) -> dict[tuple[str, str], dict]:
+        self._stop = None
+        calls = [self.overlap_call(a, b, "opus", 1) for a, b in pairs]
+        res = await self._wave(wave, calls)
+        out: dict[tuple[str, str], dict] = {}
+        for (a, b), c in zip(pairs, calls):
+            o = res[id(c)]
+            if o.status == "ok":
+                out[(a, b)] = {"opus": {"value": o.parsed["value"], "reason": o.parsed["reason"]}}
+            elif o.status == "unparsed":
+                out[(a, b)] = {"opus": {"value": None, "error": o.error}}
+            else:
+                out[(a, b)] = {"stalled": f"Opus on {a} > {b}: {o.status}"}
+        if self._stop is not None:
+            raise self._stop
+        return out
+
     def run_relations(self, items: Sequence[tuple[str, Sequence[str]]]) -> dict[str, dict]:
         """The relation calls of ``items`` (wave ``r1_relation``), then Sonnet on the ``unsure`` answers
-        (``r2_relation_unsure``), as M3 sends them.  ``{key: {"status", "model", "order", "answers": {other:
-        {"relation", "reason", "second"?}}, "error"?, "unsure_reasked"?}}``.  A stop is raised after every answer
-        received is recorded."""
+        (``r2_relation_unsure``, one re-ask per candidate), as M3 sends them.  ``{key: {"status", "model", "order",
+        "answers": {other: {"relation", "reason", "second"?}}, "error"?, "unsure_reasked"?, "parts"?}}``; a list split
+        over several calls (:meth:`relation_calls`) is one record: ``parts`` the calls' statuses and sizes,
+        ``status`` the worst of them (failed or not sent, then unparsed), and the candidates of a part that never
+        parsed answered ``unparsed``.  A stop is raised after every answer received is recorded."""
         return asyncio.run(self._run_relations(items))
 
     async def _run_relations(self, items) -> dict[str, dict]:
@@ -611,19 +767,34 @@ class ReviewRunner(NR.NoveltyRunner):
         res = await self._wave("r1_relation", calls)
         out: dict[str, dict] = {}
         unsure_calls = []
+        rank = {"ok": 0, "unparsed": 1, "not_sent": 2, "failed": 2}
         for c in calls:
             o = res[id(c)]
-            rec = {"status": o.status, "model": c.model, "order": list(c.stems), "answers": {}}
+            rec = out.get(c.key)
+            if rec is None:
+                rec = out[c.key] = {"status": o.status, "model": c.model, "order": [], "answers": {}}
+            else:
+                rec.setdefault("parts", [{"status": rec["status"], "n": len(rec["order"])}])
+                rec["parts"].append({"status": o.status, "n": len(c.stems)})
+                if rank.get(o.status, 2) > rank.get(rec["status"], 2):
+                    rec["status"] = o.status
+            rec["order"] += list(c.stems)
             if o.status == "ok":
                 for i, s in enumerate(c.stems, 1):
                     row = o.parsed[i]
                     rec["answers"][s] = {"relation": row["value"], "reason": row["reason"]}
-                unsure = [s for s in c.stems if rec["answers"][s]["relation"] == "unsure"]
-                if unsure:
-                    unsure_calls.append(self._relation_call(self.states[c.key], unsure, step="relation_unsure"))
-            elif o.error:
-                rec["error"] = o.error
-            out[c.key] = rec
+            elif o.status == "unparsed" and "parts" in rec:
+                for s in c.stems:
+                    rec["answers"][s] = {"relation": "unparsed"}
+            if o.error:
+                rec["error"] = "; ".join(filter(None, [rec.get("error"), o.error]))
+        for k, rec in out.items():
+            if "parts" in rec and rec["parts"][0]["status"] == "unparsed":
+                for s in rec["order"][:rec["parts"][0]["n"]]:
+                    rec["answers"][s] = {"relation": "unparsed"}
+            unsure = [s for s in rec["order"] if (rec["answers"].get(s) or {}).get("relation") == "unsure"]
+            if unsure:
+                unsure_calls.append(self._relation_call(self.states[k], unsure, step="relation_unsure"))
         if unsure_calls and self._stop is None:
             res2 = await self._wave("r2_relation_unsure", unsure_calls)
             for c in unsure_calls:
@@ -746,6 +917,7 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
 
     edges: list[Edge] = []
     stalled: dict[str, list] = {"relation": [], "overlap": []}
+    variants = {tuple(p) for p in plan.label_variants}
     for k, rec in sorted(relations.items()):
         if rec.get("status") in ("failed", "not_sent") or \
                 (rec.get("unsure_reasked") or {}).get("status") in ("failed", "not_sent"):
@@ -775,10 +947,11 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
         both_ways = state == "both" and rel != "opposed"
         strict = both_ways and readings["ab"]["four"] and readings["ba"]["four"]
         proposed = both_ways and all(readings[d]["four"] or readings[d]["proposed"] for d in ("ab", "ba"))
+        variant = (a, b) in variants
         edges.append(Edge(a=a, b=b, cosine=cos, relation=rel, source="r1", strict=bool(strict),
-                          proposed=bool(proposed),
+                          proposed=bool(proposed or variant),
                           relations={d: v for d, v in (("ab", ra), ("ba", rb)) if v is not None},
-                          readings=readings, overlap=state))
+                          readings=readings, overlap=state, via=plan.via.get((a, b)), label_variant=variant))
 
     for key_ in sorted(plan.rows):
         nv = plan.rows[key_].get("novelty") or {}
@@ -855,7 +1028,9 @@ def summarize(g: Graph, *, plan: Optional[GraphPlan] = None) -> dict:
             "n": len(r1), "by_relation": _dist(Counter(e.relation for e in r1)),
             "by_overlap": _dist(Counter(e.overlap for e in r1)),
             "answers": _dist(Counter(v for e in r1 for v in e.relations.values())),
-            "one_sided": sum(1 for e in r1 if len(e.relations) == 1)},
+            "one_sided": sum(1 for e in r1 if len(e.relations) == 1),
+            "by_via": _dist(Counter(e.via or "k_nearest" for e in r1)),
+            "label_variants": sum(1 for e in r1 if e.label_variant)},
         "overlap": {
             "pairs_first_direction": sum(1 for e in r1 if "ab" in e.readings),
             "pairs_second_direction": sum(1 for e in r1 if "ba" in e.readings),
@@ -889,6 +1064,7 @@ def summarize(g: Graph, *, plan: Optional[GraphPlan] = None) -> dict:
         out["skipped"] = dict(plan.skipped)
         out["no_vector"] = list(plan.no_vector)
         out["selected_by_batch"] = plan.by_batch
+        out["plan_edges"] = plan.edge_counts()
     return out
 
 
@@ -900,7 +1076,9 @@ class Shares:
     (``similar`` or ``unsure``), the share whose Sonnet reading sends the pair to Opus at cut-off 4 (3, 4 or
     unsure), the share whose final reading is 4, and ``second``, the share whose final reading sends the second
     direction (the proposed cut-off or above; ``None``: the four share, as before decision 12); ``n_listed`` and
-    ``n_read``: the observations behind them."""
+    ``n_read``: the observations behind them.  ``second_opus``: the share of second-direction Sonnet readings that
+    go on to Opus (``None``: :data:`SECOND_OPUS_SHARE`); ``n_second``: its observations; ``source``: where the
+    shares were measured (``m3_blocks``, or ``r1:<review batches>``)."""
     bins: tuple
     similar: tuple
     opus: tuple
@@ -908,16 +1086,21 @@ class Shares:
     n_listed: tuple
     n_read: tuple
     second: Optional[tuple] = None
+    second_opus: Optional[float] = None
+    n_second: Optional[int] = None
+    source: Optional[str] = None
 
     def at(self, cosine: float) -> tuple[float, float, float]:
         """``(similar, opus, second)`` of the cosine's bin."""
         i = max([j for j, lo in enumerate(self.bins) if cosine >= lo] or [0])
         return self.similar[i], self.opus[i], (self.second if self.second is not None else self.four)[i]
 
+    def second_opus_share(self) -> float:
+        return SECOND_OPUS_SHARE if self.second_opus is None else self.second_opus
+
     def all_similar(self) -> "Shares":
         """The same shares with every pair sent to the overlap call (the pairs are known to be similar)."""
-        return Shares(self.bins, tuple(1.0 for _ in self.bins), self.opus, self.four, self.n_listed, self.n_read,
-                      self.second)
+        return replace(self, similar=tuple(1.0 for _ in self.bins))
 
     def as_dict(self) -> dict:
         out = {"bins": list(self.bins), "similar": [round(x, 4) for x in self.similar],
@@ -925,6 +1108,11 @@ class Shares:
                "n_listed": list(self.n_listed), "n_read": list(self.n_read)}
         if self.second is not None:
             out["second"] = [round(x, 4) for x in self.second]
+        out["second_opus"] = round(self.second_opus_share(), 4)
+        if self.n_second is not None:
+            out["n_second"] = self.n_second
+        if self.source is not None:
+            out["source"] = self.source
         return out
 
 
@@ -967,7 +1155,77 @@ def measured_shares(rows: Mapping[str, Mapping], batch_ids: Sequence[str], *, bi
     def share(k, n):
         return tuple((k[i] / n[i]) if n[i] >= min_obs else 1.0 for i in range(len(bins)))
     return Shares(bins=bins, similar=share(ns, nl), opus=share(no, nr), four=share(nf, nr), n_listed=tuple(nl),
-                  n_read=tuple(nr), second=share(n2, nr) if second_at is not None else None)
+                  n_read=tuple(nr), second=share(n2, nr) if second_at is not None else None, source="m3_blocks")
+
+
+def r1_shares(graphs: Iterable["Graph"], *, bins: Sequence[float] = SHARE_BINS, min_obs: int = MIN_SHARE_OBS,
+              second_at: int = DEFAULT_PROPOSED_CUT_OFF) -> Shares:
+    """:class:`Shares` from earlier R1 builds' own records (their ``graph.json``; Roger, 2026-10-12, gate audit 8:
+    M3's candidate-to-corpus shares put the TDA build's estimate at 3.2 times its spend).  Per cosine bin, over the
+    builds' candidate edges: ``similar``, the share whose relation sends the pair to the overlap call; over their
+    first-direction readings, ``opus`` (Sonnet 3, 4 or unsure: the rule at cut-off 4), ``four`` and ``second`` (the
+    first direction at ``second_at`` or above, recomputed from the two values, so a build at another proposed
+    cut-off still serves).  ``second_opus``: over the second-direction readings, the share Sonnet sent to Opus.  A
+    bin with fewer than ``min_obs`` observations takes 1.0 (as :func:`measured_shares`), and so does ``second_opus``
+    with fewer than ``min_obs``.  A stalled reading is not an observation."""
+    bins = tuple(bins)
+    nl, ns, nr, no, nf, n2 = ([0] * len(bins) for _ in range(6))
+    s2 = o2 = 0
+    names = []
+
+    def b(c) -> Optional[int]:
+        if c is None or c < bins[0]:
+            return None
+        return max(j for j, lo in enumerate(bins) if c >= lo)
+
+    def raw(rd: Mapping) -> dict:
+        return {"sonnet": {"value": rd.get("sonnet")},
+                "opus": {"value": rd.get("opus")} if rd.get("opus") is not None else None}
+
+    for g in graphs:
+        names.append(g.batch_id)
+        for e in g.edges:
+            if e.source != "r1":
+                continue
+            i = b(e.cosine)
+            if i is None:
+                continue
+            nl[i] += 1
+            ns[i] += e.relation in OVERLAP_RELATIONS
+            f = e.readings.get("ab")
+            if f and "stalled" not in f and f.get("sonnet") is not None:
+                nr[i] += 1
+                no[i] += f.get("sonnet") in (3, 4, "unsure")
+                rd = reading_of(raw(f), proposed_cut_off=second_at)
+                nf[i] += bool(rd["four"])
+                n2[i] += bool(rd["four"] or rd["proposed"])
+            s = e.readings.get("ba")
+            if s and "stalled" not in s and s.get("sonnet") is not None:
+                s2 += 1
+                o2 += s.get("sonnet") in (3, 4, "unsure")
+
+    def share(k, n):
+        return tuple((k[i] / n[i]) if n[i] >= min_obs else 1.0 for i in range(len(bins)))
+    return Shares(bins=bins, similar=share(ns, nl), opus=share(no, nr), four=share(nf, nr), n_listed=tuple(nl),
+                  n_read=tuple(nr), second=share(n2, nr), second_opus=(o2 / s2) if s2 >= min_obs else 1.0,
+                  n_second=s2, source="r1:" + ",".join(names))
+
+
+def r1_unsure(records: Iterable[Mapping]) -> Optional[tuple[float, float]]:
+    """``(share of relation calls with an unsure re-ask, candidates per re-ask)`` over an R1 build's
+    ``responses.jsonl`` (first attempts), or ``None`` when it has no relation call."""
+    calls = reasks = stems = 0
+    for r in records:
+        if (r.get("parse_attempt") or 1) != 1:
+            continue
+        if r.get("step") == "relation":
+            calls += 1
+        elif r.get("step") == "relation_unsure":
+            reasks += 1
+            stems += len(r.get("stems") or [])
+    if not calls:
+        return None
+    return reasks / calls, (stems / reasks if reasks else 1.0)
 
 
 def measured_overlap_tokens(records: Iterable[Mapping]) -> dict[str, tuple[int, int]]:
@@ -993,7 +1251,7 @@ def estimate_overlap(edge_cosines: Iterable[float], shares: Shares, *, overlap_f
     """The overlap lines of the estimate: for each candidate edge at ``overlap_floor`` or above, the first direction
     read by Sonnet with the bin's similar share, Opus on that times the bin's Opus share, and the second direction
     on the similar share times the bin's second share (the proposed cut-off or above; Sonnet, then Opus on
-    :data:`SECOND_OPUS_SHARE` of it)."""
+    :meth:`Shares.second_opus_share` of it)."""
     est = est if est is not None else Estimate()
     tok = dict(NR.OVERLAP_TOKENS) | dict(overlap_tokens or {})
     suffix = BATCH_SUFFIX if transport == "batches" else ""
@@ -1012,8 +1270,9 @@ def estimate_overlap(edge_cosines: Iterable[float], shares: Shares, *, overlap_f
             int(round(o1)), *tok["opus"])
     est.add("overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin)",
             NR.FIRST_MODEL + suffix, int(round(s2)), *tok["sonnet"])
-    est.add(f"overlap, second direction, Opus ({SECOND_OPUS_SHARE:.0%} of the second-direction Sonnet readings)",
-            NR.SECOND_MODEL + suffix, int(round(s2 * SECOND_OPUS_SHARE)), *tok["opus"])
+    so = shares.second_opus_share()
+    est.add(f"overlap, second direction, Opus ({so:.0%} of the second-direction Sonnet readings)",
+            NR.SECOND_MODEL + suffix, int(round(s2 * so)), *tok["opus"])
     return est
 
 
@@ -1104,8 +1363,9 @@ def estimate_wanted(wanted: Sequence[Mapping], *, plan: GraphPlan, runner: Revie
     est.add("overlap, second direction, Opus, not on record", NR.SECOND_MODEL + suffix, len(o2), *tok["opus"])
     est.add("overlap, second direction, Sonnet, after the first-direction calls not on record (by bin)",
             NR.FIRST_MODEL + suffix, int(round(after)), *tok["sonnet"])
-    est.add(f"overlap, second direction, Opus, after the second-direction Sonnet calls ({SECOND_OPUS_SHARE:.0%})",
-            NR.SECOND_MODEL + suffix, int(round((len(s2) + after) * SECOND_OPUS_SHARE)), *tok["opus"])
+    so = shares.second_opus_share()
+    est.add(f"overlap, second direction, Opus, after the second-direction Sonnet calls ({so:.0%})",
+            NR.SECOND_MODEL + suffix, int(round((len(s2) + after) * so)), *tok["opus"])
     if rel:
         open_keys = {w["key"] for w in rel}
         covered = {tuple(sorted((w["key"], w["stem"]))) for w in s1 + o1 + s2 + o2}
@@ -1140,3 +1400,227 @@ def resume_estimate(plan: GraphPlan, *, runner: ReviewRunner, corpus: Mapping[st
     est = estimate_wanted(wanted, plan=plan, runner=runner, shares=shares, overlap_floor=overlap_floor,
                           overlap_tokens=overlap_tokens, transport=transport, unsure=unsure)
     return est, g, [{k: v for k, v in w.items() if k != "call"} for w in wanted]
+
+
+# --------------------------------------------------------------------------- the Opus pilot (gate audit 8, P2)
+
+def bin_label(cosine: Optional[float], bins: Sequence[float] = PILOT_BINS) -> str:
+    """``0.35-0.45``, ..., ``0.65+``; ``<0.35`` below the first bin."""
+    if cosine is None:
+        return "none"
+    if cosine < bins[0]:
+        return f"<{bins[0]:g}"
+    i = max(j for j, lo in enumerate(bins) if cosine >= lo)
+    return f"{bins[i]:g}+" if i == len(bins) - 1 else f"{bins[i]:g}-{bins[i + 1]:g}"
+
+
+def sonnet2_pairs(graph: Graph, *, value: int = 2) -> list[dict]:
+    """The candidate edges whose first direction Sonnet read ``value`` (2) and Opus did not read (the rule at
+    cut-off 4 never sends a 2 to Opus, so at the proposed cut-off 3 a Sonnet 2 is final): ``{"a", "b", "cosine",
+    "relation"}``, ``a`` the first direction's target, sorted by key."""
+    out = []
+    for e in graph.edges:
+        f = e.readings.get("ab") if e.source == "r1" else None
+        if not f or "stalled" in f or f.get("sonnet") != value or isinstance(f.get("sonnet"), bool) \
+                or f.get("opus") is not None:
+            continue
+        out.append({"a": e.a, "b": e.b, "cosine": e.cosine, "relation": e.relation})
+    return sorted(out, key=lambda p: (p["a"], p["b"]))
+
+
+def resolution_labels(groups: Iterable[Mapping], *, stem_of: Mapping[str, Optional[str]]) -> dict[str, str]:
+    """Each term a review log settled, labelled by the resolution it ended in (the pilot's reference; gate audit 8,
+    section 4a).  ``groups``: the log's resolved groups, ``{"id", "resolution", "nominated", "resolved_members"}``
+    (the review app's ``ReviewState.groups`` once replayed; an extended term is among the resolved members).
+    ``merge_into:<target>`` -> the target; ``promote`` -> ``queue:<the nominee's stem>``, so that a group merged
+    into that entry is the same resolution; ``reject`` -> the group; ``park`` and ``defer`` settle nothing and are
+    left out.  Two terms with one label are a *same-resolution* pair, else *different*."""
+    out: dict[str, str] = {}
+    for g in groups:
+        kind, _, target = str(g.get("resolution") or "").partition(":")
+        if kind not in SETTLED_RESOLUTIONS:
+            continue
+        if kind == "merge_into":
+            lab = target
+        elif kind == "promote":
+            stem = stem_of.get(g.get("nominated"))
+            lab = f"queue:{stem}" if stem else f"promote:{g.get('id')}"
+        else:
+            lab = f"reject:{g.get('id')}"
+        for m in g.get("resolved_members") or []:
+            out[m] = lab
+    return out
+
+
+def _stratified(items: Sequence[Mapping], m: int, rng: random.Random, bins: Sequence[float]) -> list:
+    """``m`` of ``items`` (all of them when ``m`` is not smaller), allotted to the cosine bins in proportion to
+    their sizes (largest remainder, ties by bin label), drawn at random within each bin."""
+    if m >= len(items):
+        return list(items)
+    by: dict[str, list] = defaultdict(list)
+    for p in items:
+        by[bin_label(p["cosine"], bins)].append(p)
+    names = sorted(by)
+    quota = {k: m * len(by[k]) / len(items) for k in names}
+    take = {k: int(quota[k]) for k in names}
+    for k in sorted(names, key=lambda k: (-(quota[k] - take[k]), k))[:m - sum(take.values())]:
+        take[k] += 1
+    out: list = []
+    for k in names:
+        out.extend(rng.sample(by[k], take[k]))
+    return out
+
+
+def select_pilot(pairs: Sequence[Mapping], labels: Mapping[str, str], n: int = PILOT_SIZE, *, seed: int = PILOT_SEED,
+                 bins: Sequence[float] = PILOT_BINS) -> dict:
+    """The Opus pilot's pairs (gate audit 8, P2: "Opus on all 64 same-resolution 2/- pairs and 64 of the 133
+    different-resolution 2/- pairs (stratified by cosine)").  Of ``pairs`` (:func:`sonnet2_pairs`), those whose two
+    terms ``labels`` (:func:`resolution_labels`) settles, split into *same* and *different*; half of ``n`` from
+    each, a pool with fewer giving its share to the other; each drawn stratified by cosine bin
+    (:func:`_stratified`; a pool that fits is taken whole), ``random.Random(seed)``, the same pool first.
+    ``{"selected": [pair + {"reference"}], "pools": {"same", "different", "unlabelled", "by_bin"}, "n", "seed"}``."""
+    same = [dict(p) for p in pairs if p["a"] in labels and p["b"] in labels and labels[p["a"]] == labels[p["b"]]]
+    diff = [dict(p) for p in pairs if p["a"] in labels and p["b"] in labels and labels[p["a"]] != labels[p["b"]]]
+    n = max(0, int(n))
+    n_same = min(len(same), max(n // 2, n - len(diff)))
+    n_diff = min(len(diff), n - n_same)
+    rng = random.Random(seed)
+    sel = [p | {"reference": "same"} for p in _stratified(same, n_same, rng, bins)] + \
+        [p | {"reference": "different"} for p in _stratified(diff, n_diff, rng, bins)]
+    by_bin: dict[str, dict] = defaultdict(lambda: {"same": 0, "different": 0})
+    for ref, pool in (("same", same), ("different", diff)):
+        for p in pool:
+            by_bin[bin_label(p["cosine"], bins)][ref] += 1
+    return {"selected": sorted(sel, key=lambda p: (p["a"], p["b"])), "n": n, "seed": seed,
+            "pools": {"same": len(same), "different": len(diff), "unlabelled": len(pairs) - len(same) - len(diff),
+                      "by_bin": {k: dict(v) for k, v in sorted(by_bin.items())}}}
+
+
+def node_candidate(n: Node) -> PairCandidate:
+    """A graph node as the overlap call reads it: its label and gloss as the build recorded them."""
+    return PairCandidate(key=n.key, stem=n.stem or n.key.split("#", 1)[0], label=n.label, gloss=n.gloss or "",
+                         alignment_score=n.alignment_score, region=n.region, generators=list(n.generators))
+
+
+def pilot_prompt_mismatches(runner: ReviewRunner, pairs: Sequence[tuple[str, str]],
+                            recorded: Mapping[tuple[str, str], str]) -> list[dict]:
+    """The pairs whose overlap prompt, rendered now, is not the one Sonnet read in the build (``recorded``: ``(key,
+    stem) -> user`` of the build's first-direction Sonnet records): Opus must read what Sonnet read.  The candidates
+    must be added to ``runner``."""
+    out = []
+    for a, b in pairs:
+        rec = recorded.get((a, b))
+        if rec is None:
+            out.append({"a": a, "b": b, "why": "no Sonnet record of this direction in the build"})
+        elif runner.overlap_call(a, b, "sonnet", 1).user != rec:
+            out.append({"a": a, "b": b, "why": "the prompt rendered now differs from the one Sonnet read"})
+    return out
+
+
+def clopper_pearson(k: int, n: int, alpha: float = 0.05) -> Optional[list[float]]:
+    """The exact binomial interval of ``k`` in ``n`` (``None`` for ``n == 0``)."""
+    if n <= 0:
+        return None
+    from scipy.stats import beta
+    lo = 0.0 if k == 0 else float(beta.ppf(alpha / 2, k, n - k + 1))
+    hi = 1.0 if k == n else float(beta.ppf(1 - alpha / 2, k + 1, n - k))
+    return [round(lo, 4), round(hi, 4)]
+
+
+def _raised(opus_value: Any, *, proposed_cut_off: int = DEFAULT_PROPOSED_CUT_OFF) -> bool:
+    """Whether a Sonnet 2 with this Opus reading would be at the proposed cut-off (M3's rule at cut-off 3: Opus at 3
+    or above on a Sonnet one below covers, under rule set 2)."""
+    return bool(reading_of({"sonnet": {"value": 2}, "opus": {"value": opus_value}},
+                           proposed_cut_off=proposed_cut_off)["proposed"])
+
+
+def pilot_report(rows: Sequence[Mapping], *, pools: Mapping, graph: Optional[Graph] = None,
+                 labels: Optional[Mapping[str, str]] = None, bins: Sequence[float] = PILOT_BINS) -> dict:
+    """The pilot against Roger's decisions.  ``rows``: the selected pairs with ``reference`` and the Opus answer
+    (``opus``: ``{"value", ...}``, or ``stalled``).  Per reference (same, different): the pairs, those Opus answered,
+    its values, and those it **raised** (Opus 3 or above on Sonnet's 2: the first direction then at the proposed
+    cut-off), with a 95% Clopper-Pearson interval; the same by cosine bin; the gap and a one-sided Fisher exact test
+    (same raised more often); scaled to the pools (``pools``: :func:`select_pilot`'s), the joins the change would
+    add and how many of them Roger's decisions support.  With ``graph`` and ``labels``: the same agreement for the
+    build's existing edges between settled terms, the yardstick (3-edges that are not 4-edges, and 4-edges)."""
+    out: dict[str, Any] = {"n": len(rows), "by_reference": {}, "by_bin": {}}
+    tallies: dict[str, Counter] = {"same": Counter(), "different": Counter()}
+    by_bin: dict[str, dict] = defaultdict(lambda: {"same": Counter(), "different": Counter()})
+    for r in rows:
+        ref = r["reference"]
+        t, tb = tallies[ref], by_bin[bin_label(r.get("cosine"), bins)][ref]
+        for c in (t, tb):
+            c["n"] += 1
+        o = r.get("opus") or {}
+        if "stalled" in r or o.get("value") is None:
+            t["no_answer"] += 1
+            continue
+        v = o["value"]
+        t[f"opus {v}"] += 1
+        for c in (t, tb):
+            c["answered"] += 1
+            c["raised"] += _raised(v)
+        t["four"] += v == 4
+    for ref, t in tallies.items():
+        out["by_reference"][ref] = {
+            "n": t["n"], "answered": t["answered"], "no_answer": t["no_answer"], "raised": t["raised"],
+            "four": t["four"], "raised_share": round(t["raised"] / t["answered"], 4) if t["answered"] else None,
+            "ci95": clopper_pearson(t["raised"], t["answered"]),
+            "opus_values": {k.split(" ", 1)[1]: v for k, v in sorted(t.items()) if k.startswith("opus ")}}
+    out["by_bin"] = {k: {ref: {"n": c["n"], "answered": c["answered"], "raised": c["raised"]} for ref, c in v.items()}
+                     for k, v in sorted(by_bin.items())}
+    s, d = tallies["same"], tallies["different"]
+    if s["answered"] and d["answered"]:
+        from scipy.stats import fisher_exact
+        ps, pd = s["raised"] / s["answered"], d["raised"] / d["answered"]
+        out["gap"] = round(ps - pd, 4)
+        out["fisher_p_one_sided"] = float(fisher_exact(
+            [[s["raised"], s["answered"] - s["raised"]], [d["raised"], d["answered"] - d["raised"]]],
+            alternative="greater")[1])
+        es, ed = ps * pools.get("same", 0), pd * pools.get("different", 0)
+        out["scaled_to_pools"] = {
+            "same_pool": pools.get("same", 0), "different_pool": pools.get("different", 0),
+            "same_raised": round(es, 1), "different_raised": round(ed, 1),
+            "share_of_raised_that_roger_joined": round(es / (es + ed), 4) if es + ed else None}
+    if graph is not None and labels is not None:
+        base: dict[str, Counter] = {"three_only": Counter(), "four": Counter()}
+        for e in graph.edges:
+            if e.source != "r1" or not e.proposed or e.label_variant or e.a not in labels or e.b not in labels:
+                continue
+            c = base["four" if e.strict else "three_only"]
+            c["n"] += 1
+            c["same"] += labels[e.a] == labels[e.b]
+        out["yardstick"] = {k: {"n": c["n"], "same": c["same"],
+                                "same_share": round(c["same"] / c["n"], 4) if c["n"] else None,
+                                "ci95": clopper_pearson(c["same"], c["n"])} for k, c in base.items()}
+    return out
+
+
+def format_pilot_report(rep: Mapping) -> str:
+    """The pilot's report as the CLI prints it."""
+    lines = [f"Opus pilot: {rep['n']} first directions Sonnet read 2"]
+    for ref in ("same", "different"):
+        r = rep["by_reference"].get(ref)
+        if not r:
+            continue
+        share = "n/a" if r["raised_share"] is None else f"{r['raised_share']:.0%}"
+        ci = "" if not r["ci95"] else f" (95% {r['ci95'][0]:.0%}-{r['ci95'][1]:.0%})"
+        lines.append(f"  {ref:9s} resolution: {r['raised']} of {r['answered']} answered raised to 3+ = {share}{ci}; "
+                     f"Opus values {json.dumps(r['opus_values'], sort_keys=True)}; no answer {r['no_answer']}")
+    for k, v in rep.get("by_bin", {}).items():
+        lines.append(f"    cosine {k:9s} " + "; ".join(f"{ref} {c['raised']}/{c['answered']}" for ref, c in v.items()))
+    if "gap" in rep:
+        sp = rep["scaled_to_pools"]
+        share = sp["share_of_raised_that_roger_joined"]
+        lines.append(f"  gap (same - different) {rep['gap']:+.0%}; one-sided Fisher exact p = "
+                     f"{rep['fisher_p_one_sided']:.2g}")
+        lines.append(f"  scaled to the pools ({sp['same_pool']} same, {sp['different_pool']} different): about "
+                     f"{sp['same_raised']:g} first directions raised on pairs Roger joined and "
+                     f"{sp['different_raised']:g} on pairs he did not; {'n/a' if share is None else f'{share:.0%}'} "
+                     f"of the raised are his (each still needs its second direction at 3 or above to be a 3-edge)")
+    names = {"three_only": "3-edges that are not 4-edges", "four": "4-edges"}
+    for k, v in (rep.get("yardstick") or {}).items():
+        if v["n"]:
+            lines.append(f"  yardstick, the build's {names.get(k, k)} between settled terms: {v['same']} of {v['n']} "
+                         f"in one resolution = {v['same_share']:.0%}")
+    return "\n".join(lines)
