@@ -610,6 +610,21 @@ class TestPromote:
             assert e["tags"] == ["gap_gen", "source:roget", "state", "states_pass", tag]
             assert e["gap_gen"]["states_pass"]["route"] == route and "states_m3" in e["description_notes"]
 
+    def test_the_draft_is_the_pass_gloss_even_when_the_row_has_its_own(self, data_dir):
+        """M3 and R1 judge a released row on the pass's gloss (``candidate_from_row``); the entry's draft is that
+        gloss, not a gloss the row had of the passing state (review 2026-10-12; none of the 71 released rows of
+        that day had one)."""
+        from assistant_axis.gapgen.promote import promote
+        rec = released_row()
+        rec["gloss"] = "This means feeling low this afternoon after a bad meeting."
+        assert NR.candidate_from_row(rec, holding="states")[0].gloss == GLOSS
+        q = {"_meta": {}, "entries": []}
+        rep = promote({rec["key"]: rec}, q, [rec["key"]], data_dir=data_dir, dry_run=False,
+                      allow_released_states=True)
+        assert rep.promoted == [rec["key"]] and q["entries"][-1]["description_draft"] == GLOSS
+        e = sp.queue_entry_extras({"tags": [], "description_draft": rec["gloss"]}, rec)
+        assert e["description_draft"] == GLOSS
+
     def test_refused_in_bulk_and_the_old_path_is_unchanged(self, data_dir):
         from assistant_axis.gapgen.promote import promote
         rec = released_row()

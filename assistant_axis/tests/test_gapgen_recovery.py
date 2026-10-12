@@ -39,6 +39,19 @@ class TestHide:
                          "epsilon": "pair", "theta": "pair", "iota": "pair", "zeta": "sequence", "eta": "sequence",
                          "kappa": "sequence", "lambda_mu": "singleton"}
 
+    def test_hiding_groups_partition_a_corpus_recorded_on_one_side_only(self, tmp_path):
+        """A pair recorded in one member's file only (a corpus mid-edit): before 2026-10-12 the walk followed
+        ``expands_to`` one way, so the member sorted first formed a group alone and then appeared again in its
+        partner's group."""
+        from dataclasses import replace
+        _, traits, _ = toy(tmp_path)
+        one_sided = dict(traits)
+        one_sided["delta"] = replace(traits["delta"], expands_to=[])          # epsilon still names delta
+        groups = RC.hiding_groups(one_sided)
+        members = [s for g in groups for s in g]
+        assert sorted(members) == sorted(traits) and len(members) == len(set(members))
+        assert ["delta", "epsilon"] in groups and groups == RC.hiding_groups(traits) == TOY_GROUPS
+
     def test_a_hidden_pair_hides_whole(self, tmp_path):
         _, traits, kinds = toy(tmp_path)
         seen_alone = set()

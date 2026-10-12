@@ -223,7 +223,7 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
     taken = build_registry(queue, data_dir)
     turned_down = turned_down_entries(queue)
     chosen: dict[str, dict] = {}
-    for key in keys:
+    for key in dict.fromkeys(keys):         # a key named twice is one promotion, not a promotion and a refusal
         rec = records.get(key)
         if rec is None:
             rep.refused[key] = "not in registry"
@@ -244,7 +244,9 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
                             f"{SP.route_of(rec)})")
             elif allow_released_states:
                 via_released = True
-                rec = {**rec, "gloss": rec.get("gloss") or SP.gloss_of(rec)}
+                # the pass's gloss, the one M3 and R1 judged (states_pass.candidate_from_row), even when the row
+                # has a gloss of its own (a gloss of the passing state)
+                rec = {**rec, "gloss": SP.gloss_of(rec) or rec.get("gloss")}
             else:
                 held_why = (f"released by the states pass ({SP.route_of(rec)}): promoted only by name "
                             f"(gap_registry.py promote --keys, or the review app's apply)")

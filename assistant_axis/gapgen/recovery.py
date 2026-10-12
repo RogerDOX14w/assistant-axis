@@ -68,7 +68,15 @@ def hiding_groups(traits: Mapping[str, NV.CorpusTrait]) -> list[list[str]]:
     """The corpus split into the sets of traits that hide together: the connected components of
     :attr:`~novelty.CorpusTrait.expands_to` (a recorded pair, triangle, tetrahedron or simplex, with the
     label-reciprocal pair partner); every other trait alone.  Each group sorted; groups in order of their
-    first member."""
+    first member.  The links are followed both ways, so that the groups partition the corpus even when one
+    member's file records an arrangement its partner's does not (a corpus mid-edit; ``check_arrangements.py``
+    refuses it, but a draw on it must not put a trait in two groups)."""
+    links: dict[str, set[str]] = {s: set() for s in traits}
+    for a, t in traits.items():
+        for m in t.expands_to:
+            if m in traits and m != a:
+                links[a].add(m)
+                links[m].add(a)
     seen: set[str] = set()
     out = []
     for s in sorted(traits):
@@ -78,10 +86,10 @@ def hiding_groups(traits: Mapping[str, NV.CorpusTrait]) -> list[list[str]]:
         stack = [s]
         while stack:
             a = stack.pop()
-            if a in comp or a not in traits:
+            if a in comp:
                 continue
             comp.add(a)
-            stack.extend(m for m in traits[a].expands_to if m in traits and m not in comp)
+            stack.extend(m for m in links[a] if m not in comp)
         seen |= comp
         out.append(sorted(comp))
     return out

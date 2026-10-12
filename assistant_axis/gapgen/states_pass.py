@@ -580,12 +580,12 @@ def card_tag(row: Mapping) -> Optional[str]:
 def queue_entry_extras(entry: dict, rec: Mapping) -> dict:
     """A released row's seed-queue entry (``promote.queue_entry_from_record``'s), made a states-pass entry in place:
     the tags ``states_pass`` and ``lasting_state`` or ``predisposition``, the pass's gloss as ``description_draft``
-    when the row has none of its own, a note saying how it came, and ``gap_gen.states_pass``."""
+    (the gloss M3 and R1 judged, :func:`candidate_from_row`; it replaces a gloss the row had of its own, which
+    describes the passing state), a note saying how it came, and ``gap_gen.states_pass``."""
     b = block_of(rec)
     route = b.get("route")
     entry["tags"] = list(dict.fromkeys(list(entry.get("tags") or []) + [QUEUE_TAG, ROUTE_TAGS[route]]))
-    if not entry.get("description_draft"):
-        entry["description_draft"] = gloss_of(rec)
+    entry["description_draft"] = gloss_of(rec) or entry.get("description_draft")
     nv = rec.get("novelty") or {}
     via = f", M3 {nv['run_id']}" if nv.get("pass") == PASS_NAME and nv.get("run_id") else ""
     what = ("a lasting condition" if route == "lasting" else "a habitual predisposition under the state's own name")

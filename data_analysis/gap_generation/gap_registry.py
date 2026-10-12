@@ -60,10 +60,12 @@ Commands:
   queue entry (``review_app.py apply``; ``review_app.decisions.review_merges``).
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
-* ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
+* ``promote (--keys K ... | --status accepted) [--confirm-state-name KEY=NAME ...] [--reopen-turned-down]
+  [--min-local-novelty X] [--section S] [--queue PATH] [--dry-run]``:
   append ``status: "candidate"`` entries to ``data/seed_queue.json`` (refuses
   corpus and queue collisions and holding-list rows, except a states row the
-  states pass judged plausible, which is promoted under its suggested name,
+  states pass judged plausible, which is promoted under the name Roger confirmed
+  (``--confirm-state-name``; the pass's suggested name is only quoted),
   and a physical row named with ``--keys``, which joins the physical track:
   tag ``physical``, the track's section; ``--status accepted`` still refuses
   it; ``assistant_axis/gapgen/physical_pass.py``; and a row the states pass v4

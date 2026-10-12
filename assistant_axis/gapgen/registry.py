@@ -299,7 +299,8 @@ class Registry:
         return out
 
     def fold(self) -> dict[str, dict]:
-        """``{key: latest record}`` (last line per key wins), under a shared lock."""
+        """``{key: latest record}`` (last line per key wins), under a shared lock.  "Latest" is the log's order,
+        the order in which writers took the exclusive lock, not any timestamp inside a block."""
         with self._read_locked():
             return self._fold_unlocked()
 
@@ -339,8 +340,9 @@ class Registry:
 
     def write(self, records: Iterable[dict], *, now: Optional[str] = None) -> list[dict]:
         """Append full records (each gets ``rev`` = previous + 1)."""
-        now = now or utc_now()
         with self.locked():
+            # the time is taken under the lock, so that ``updated_at`` follows the log's order (the fold's)
+            now = now or utc_now()
             cur = self._fold_unlocked()
             out = []
             for r in records:
@@ -358,8 +360,8 @@ class Registry:
         dicts, the new keys are merged into the block (``merge_blocks``);
         every other field is replaced.  Unknown keys raise ``KeyError``.
         """
-        now = now or utc_now()
         with self.locked():
+            now = now or utc_now()          # under the lock: ``updated_at`` follows the log's order
             cur = self._fold_unlocked()
             out = []
             for key, fields in updates.items():
@@ -414,12 +416,12 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     if run is not None:
         run.record_candidates(cands)
     reg = Registry(registry_path)
-    now = utc_now()
     keys: list[str] = []
     seen_keys: set[str] = set()
     invalid: list[str] = []
     n_new = n_merged = n_unchanged = 0
     with reg.locked():
+        now = utc_now()                     # under the lock: ``created_at`` / ``updated_at`` follow the log's order
         cur = reg._fold_unlocked()
         changed: dict[str, dict] = {}
         for c in cands:

@@ -161,6 +161,24 @@ class TestLog:
         with pytest.raises(KeyError):
             Registry(reg_path).update("nope#1", {"gloss": "x"})
 
+    def test_the_time_is_taken_under_the_writer_lock(self, reg_path, monkeypatch):
+        """``updated_at`` follows the log's order (the fold's): every writer takes its time once it holds the lock,
+        not before waiting for it (review 2026-10-12)."""
+        import assistant_axis.gapgen.registry as R
+        key = str(reg_path.resolve())
+        held = []
+        real = R.utc_now
+
+        def stamp():
+            held.append(key in R._held_paths())
+            return real()
+        monkeypatch.setattr(R, "utc_now", stamp)
+        submit_candidates([C("stubborn")], registry_path=reg_path)
+        reg = Registry(reg_path)
+        reg.update("stubborn#1", {"gloss": "g"})
+        reg.write([dict(reg.get("stubborn#1"), gloss="h")])
+        assert held == [True, True, True]
+
     def test_malformed_line_skipped(self, reg_path):
         submit_candidates([C("stubborn")], registry_path=reg_path)
         with open(reg_path, "a") as fh:

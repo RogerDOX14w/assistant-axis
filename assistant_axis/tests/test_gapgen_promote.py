@@ -128,6 +128,15 @@ def test_min_local_novelty(data_dir, queue):
     assert rep.promoted == ["bb#1"] and set(rep.refused) == {"aa#1", "cc#1"}
 
 
+def test_a_key_named_twice_is_promoted_once(data_dir, queue):
+    """``promote --keys a#1 a#1`` printed both PROMOTED and REFUSED ("another sense ...") for the one key (review
+    2026-10-12)."""
+    a = _rec("world-shaping")
+    rep = promote({a["key"]: a}, queue, [a["key"], a["key"]], data_dir=data_dir, dry_run=False)
+    assert rep.promoted == [a["key"]] and rep.refused == {}
+    assert [e["stem"] for e in queue["entries"]].count("world_shaping") == 1
+
+
 def test_two_senses_same_stem(data_dir, queue):
     a = _rec("cool")
     b = new_record("cool", sense_id=2)
