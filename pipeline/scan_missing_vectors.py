@@ -91,7 +91,26 @@ Outputs a per-entity JSON report next to each scanned vectors dir
 (``missing_vectors_rerun.txt``) for the suspects that need step 4
 re-runs.  Prints a summary table to stdout.  Entities classified as
 ``mysterious``, ``corrupt_or_truncated_activation``, ``corrupt_vector``,
-or ``ok_zero_size`` are the ones worth re-running.
+or ``ok_zero_size`` are the ones worth re-running:
+``uv run 4_vectors.py ... --overwrite <vectors_dir>/missing_vectors_rerun.txt``
+recomputes them, except ``corrupt_or_truncated_activation``, whose
+activation file has to be deleted and re-extracted by step 2 first.
+
+Coverage (since 2026-10-12): the entities are the activation files plus,
+when a ``responses/`` directory sits beside ``activations/``, every response
+file.  A vector without an activation file is ``vector_only`` when the
+entity has responses (its activation was deleted after step 4 to save disk,
+on purpose) and ``orphan_vector`` when it has none (a stem the run no longer
+has, e.g. a renamed entity's old vector -- step 5 still averages it in).  An
+entity with responses but neither an activation file nor a vector is
+``below_min_count`` / ``missing_scores`` when its scores explain it, else
+``missing_activation`` (step 2 has to extract it; also reported for an
+activation path that is a broken symlink).  Without ``responses/`` the scan
+sees only entities with an activation file, as before.
+
+Exit status: 0 when nothing needs attention, 3 (``EXIT_RERUN_CANDIDATES``)
+when any entity is a re-run candidate or ``missing_activation``, 1 when no
+scan target is found, 2 on argument errors.
 """
 from __future__ import annotations
 
@@ -334,6 +353,10 @@ TRUNCATION_RATIO = 0.5
 # Anything under 256 bytes is almost certainly a stub / aborted write.
 MIN_HEALTHY_VECTOR_BYTES = 256
 
+# Exit status when at least one entity is a re-run candidate (any status in
+# RERUN_STATUSES).  Distinct from argparse's 2 and "no scan targets" 1.
+EXIT_RERUN_CANDIDATES = 3
+
 # Statuses that should be re-run by step 4.  Kept in one place so the
 # stdout summary, the rerun list and any callers stay in sync.
 RERUN_STATUSES = (
@@ -355,8 +378,14 @@ ALL_STATUSES = (
     "below_min_count",
     "all_nan_or_empty",
     "mysterious",
+    "vector_only",
     "orphan_vector",
 )
+
+# Statuses that make the exit status EXIT_RERUN_CANDIDATES besides the re-run
+# candidates: an entity with responses and enough score=3 entries but neither
+# an activation file nor a vector needs step 2 before step 4 can help.
+ATTENTION_STATUSES = RERUN_STATUSES + ("missing_activation",)
 
 
 # ---------------------------------------------------------------------------
@@ -423,6 +452,12 @@ def classify_entity(
     # placeholders from genuine corruption.
     if out["activation_size_bytes"] == 0:
         out["status"] = "placeholder"
+        # The vector is not checked for a placeholder (step 4 cannot
+        # recompute it), but say whether there is one, so a placeholder
+        # whose vector is missing or a stub is visible in the report.
+        out["vector_present"] = has_vector
+        if has_vector:
+            out["vector_size_bytes"] = vec_file.stat().st_size
         return out
 
     if median_act_size > 0 and out["activation_size_bytes"] < median_act_size * TRUNCATION_RATIO:
@@ -488,7 +523,7 @@ def classify_entity(
     #
     # ``is_default`` here means "vector is supposed to be a mean of all
     # activations (no scores filter)" -- the path step 4 takes only when
-    # the role name contains ``default``.  Earlier versions of this
+    # the role name is ``default``.  Earlier versions of this
     # scanner also treated ``mode == "unfiltered"`` as default-like, but
     # that misclassified non-default roles in ``vectors_unfiltered/`` as
     # ``mysterious`` when they were legitimately ``below_min_count``:
@@ -499,7 +534,7 @@ def classify_entity(
     # Back-compat: ``--mode unfiltered`` *without* a scores_dir is the
     # legacy mean-of-all invocation; we still honour it (equivalent to
     # the new explicit ``--mode unfiltered_mean``).
-    is_default = "default" in role
+    is_default = role == "default"   # exact, as in steps 3, 4 and 5
     if mode == "unfiltered_mean":
         is_default = True
     elif mode == "unfiltered" and scores_dir is None:
@@ -695,10 +730,20 @@ class ScanTarget:
     vectors_dir: Path
     scores_dir: Optional[Path] = None
     mode: str = "filtered"
+    # The step-1 responses beside activations/, when present: the set of
+    # entities that should exist.  Without it the scan sees only entities
+    # with an activation file.
+    responses_dir: Optional[Path] = None
 
     @property
     def label(self) -> str:
         return f"{self.entity_type}/{self.vectors_variant}"
+
+
+def _sibling_responses(act_dir: Path) -> Optional[Path]:
+    """``<entity_dir>/responses`` beside ``activations/``, if it exists."""
+    resp = act_dir.parent / "responses"
+    return resp if resp.is_dir() else None
 
 
 def _is_skippable_vectors_dir(vec_dir: Path) -> tuple[bool, str]:
@@ -806,6 +851,7 @@ def discover_scan_targets(
                 vectors_dir=vec_dir,
                 scores_dir=target_scores,
                 mode=mode,
+                responses_dir=_sibling_responses(act_dir),
             ))
 
     return targets
@@ -833,6 +879,25 @@ class ScanResult:
         return [r for r in self.results if r["status"] in RERUN_STATUSES]
 
 
+def peer_median_size(act_files: list[Path]) -> int:
+    """Median size of the activation files that are neither 0-byte
+    placeholders nor unreadable (a broken symlink), for the truncation check.
+
+    Placeholders are left out: on RunPod 111 of 281 role activation files
+    were placeholders, and once they are half the directory the median of
+    all sizes is 0, which turned the truncation check off altogether.
+    Returns 0 (check off) when no file has a size."""
+    sizes = []
+    for f in act_files:
+        try:
+            size = f.stat().st_size
+        except OSError:
+            continue
+        if size > 0:
+            sizes.append(size)
+    return int(statistics.median(sizes)) if sizes else 0
+
+
 def scan_one_target(
     target: ScanTarget,
     *,
@@ -849,8 +914,7 @@ def scan_one_target(
                        f"{target.activations_dir}; skipping")
         return ScanResult(target=target, median_activation_size=0)
 
-    sizes = [f.stat().st_size for f in act_files]
-    median_size = int(statistics.median(sizes))
+    median_size = peer_median_size(act_files)
 
     print(f"\n[{target.label}] scanning {len(act_files)} activation files "
           f"(median {median_size / 1e6:.1f} MB) "
@@ -878,12 +942,20 @@ def scan_one_target(
             cache=cache,
         ))
 
-    # Also flag any vector files that exist with no source activation
-    # (genuine orphans -- shouldn't happen, but cheap to check).
+    # Vectors with no activation file.  With a responses/ dir beside the
+    # activations these split in two: ``vector_only`` (the entity has
+    # responses; its activation file was deleted after step 4, the
+    # disk-saving workflow -- 899 of the 1,800 combinations in the 8slot
+    # tree) and ``orphan_vector`` (no responses either: a stem the run no
+    # longer has, such as a renamed entity's old vector, which step 5 would
+    # still average in).  Without responses/ every one is orphan_vector.
     act_role_set = {f.stem for f in act_files}
+    response_stems: set[str] = set()
+    if target.responses_dir is not None:
+        response_stems = {p.stem for p in target.responses_dir.glob("*.jsonl")}
+    vec_stems: set[str] = set()
     for vec_file in sorted(target.vectors_dir.glob("*.pt")):
-        if vec_file.stem == "missing_vectors_audit":
-            continue
+        vec_stems.add(vec_file.stem)
         # Skip symlinks (the default.pt symlink) -- they're shared
         # references, not genuine orphans.
         if vec_file.is_symlink():
@@ -891,14 +963,55 @@ def scan_one_target(
         if vec_file.stem not in act_role_set:
             results.append({
                 "role": vec_file.stem,
-                "status": "orphan_vector",
+                "status": ("vector_only" if vec_file.stem in response_stems
+                           else "orphan_vector"),
                 "vector_path": str(vec_file),
                 "activation_path": None,
                 "vector_size_bytes": vec_file.stat().st_size,
             })
 
+    # Entities with responses but neither an activation file nor a vector
+    # (invisible before 2026-10-12, e.g. r_zealot__pensive in the 8slot
+    # tree): classified from the scores alone.
+    for role in sorted(response_stems - act_role_set - vec_stems):
+        results.append(_classify_without_activation(
+            role, target, min_count=min_count, reduce_questions=reduce_questions))
+
     return ScanResult(target=target, median_activation_size=median_size,
                       results=results)
+
+
+def _classify_without_activation(
+    role: str, target: ScanTarget, *, min_count: int, reduce_questions: int,
+) -> dict[str, Any]:
+    """An entity with a responses file, no activation file and no vector.
+
+    ``below_min_count`` / ``missing_scores`` when its scores explain the
+    missing vector (step 4 would not have made one anyway), else
+    ``missing_activation``: step 2 has to extract it before step 4 can."""
+    out: dict[str, Any] = {
+        "role": role,
+        "vector_path": str(target.vectors_dir / f"{role}.pt"),
+        "activation_path": None,
+        "note": "no activation file and no vector",
+    }
+    if role == "default" or target.mode == "unfiltered_mean" or target.scores_dir is None:
+        out["status"] = "missing_activation"
+        return out
+    scores_file = target.scores_dir / f"{role}.json"
+    if not scores_file.exists():
+        out["status"] = "missing_scores"
+        return out
+    try:
+        scores = json.loads(read_text_with_retry(scores_file, logger_obj=logger))
+    except (OSError, RuntimeError, EOFError, json.JSONDecodeError) as e:
+        out["status"] = "missing_activation"
+        out["note"] += f"; scores file unreadable: {e}"
+        return out
+    n3 = sum(1 for k, v in scores.items() if v == 3 and _keep_by_reduce(k, reduce_questions))
+    out["score3_in_scores"] = n3
+    out["status"] = "below_min_count" if n3 < min_count else "missing_activation"
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -913,10 +1026,10 @@ def _write_scan_output(
     deep_load: bool,
     load_check: bool,
 ) -> None:
-    """Write per-scan JSON report and rerun list next to the vectors dir."""
+    """Write per-scan JSON report and rerun list next to the vectors dir
+    (through ``atomic_write_text``: the vectors dir is on /workspace)."""
     output_path = sr.target.vectors_dir / "missing_vectors_audit.json"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps({
+    atomic_write_text(json.dumps({
         "activations_dir": str(sr.target.activations_dir),
         "vectors_dir": str(sr.target.vectors_dir),
         "scores_dir": str(sr.target.scores_dir) if sr.target.scores_dir else None,
@@ -929,13 +1042,14 @@ def _write_scan_output(
         "load_check": load_check,
         "median_activation_size_bytes": sr.median_activation_size,
         "results": sr.results,
-    }, indent=2))
+    }, indent=2), output_path, logger_obj=logger)
     sr.output_path = output_path
 
     rerun_path = sr.target.vectors_dir / "missing_vectors_rerun.txt"
     suspects = sr.suspects()
-    rerun_path.write_text(
-        "\n".join(r["role"] for r in suspects) + ("\n" if suspects else "")
+    atomic_write_text(
+        "\n".join(r["role"] for r in suspects) + ("\n" if suspects else ""),
+        rerun_path, logger_obj=logger,
     )
     sr.rerun_list_path = rerun_path
 
@@ -953,6 +1067,9 @@ def _print_scan_summary(sr: ScanResult) -> None:
     if sr.rerun_list_path:
         print(f"    rerun:  {sr.rerun_list_path}")
 
+    if counts.get("missing_activation"):
+        print(f"  {counts['missing_activation']} entit(ies) need step 2 before step 4 "
+              f"(missing_activation; see the report)")
     suspects = sr.suspects()
     if suspects:
         print(f"  {len(suspects)} suspect(s):")
@@ -968,7 +1085,10 @@ def _print_scan_summary(sr: ScanResult) -> None:
 # CLI
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def main(argv: Optional[list[str]] = None) -> int:
+    """Run the scan; returns the exit status (0 clean, EXIT_RERUN_CANDIDATES
+    when any entity is a re-run candidate; argument errors exit 2 and "no
+    scan targets" 1 directly)."""
     logging.basicConfig(
         level=logging.WARNING,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -1062,7 +1182,7 @@ def main() -> None:
                         help="Single-pair mode only: write the JSON report "
                              "here.  In --root mode, JSON reports are written "
                              "next to each vectors dir as missing_vectors_audit.json.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Validate input combinations.
     using_root = args.root is not None
@@ -1151,6 +1271,7 @@ def main() -> None:
             vectors_dir=args.vectors_dir,
             scores_dir=args.scores_dir,
             mode=args.mode,
+            responses_dir=_sibling_responses(args.activations_dir),
         )]
 
     # Open the load-result cache (default-on; --no_cache to disable).
@@ -1191,8 +1312,7 @@ def main() -> None:
         if args.output is None:
             args.output = sr.target.vectors_dir / "missing_vectors_audit.json"
         sr.output_path = args.output
-        sr.output_path.parent.mkdir(parents=True, exist_ok=True)
-        sr.output_path.write_text(json.dumps({
+        atomic_write_text(json.dumps({
             "activations_dir": str(sr.target.activations_dir),
             "vectors_dir": str(sr.target.vectors_dir),
             "scores_dir": str(sr.target.scores_dir) if sr.target.scores_dir else None,
@@ -1203,14 +1323,14 @@ def main() -> None:
             "load_check": load_check,
             "median_activation_size_bytes": sr.median_activation_size,
             "results": sr.results,
-        }, indent=2))
+        }, indent=2), sr.output_path, logger_obj=logger)
         if args.rerun_list is not None:
             sr.rerun_list_path = args.rerun_list
-            sr.rerun_list_path.parent.mkdir(parents=True, exist_ok=True)
             suspects = sr.suspects()
-            sr.rerun_list_path.write_text(
+            atomic_write_text(
                 "\n".join(r["role"] for r in suspects)
-                + ("\n" if suspects else "")
+                + ("\n" if suspects else ""),
+                sr.rerun_list_path, logger_obj=logger,
             )
 
     # Print summaries.
@@ -1237,6 +1357,14 @@ def main() -> None:
             print("  See per-scan missing_vectors_rerun.txt files for the "
                   "lists.")
 
+    # Exit status: EXIT_RERUN_CANDIDATES when anything needs a re-run, so a
+    # caller (run_pipeline.sh) can tell "all accounted for" from "go and
+    # look"; it exited 0 either way before 2026-10-12.
+    if any(r["status"] in ATTENTION_STATUSES
+           for sr in scan_results for r in sr.results):
+        return EXIT_RERUN_CANDIDATES
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

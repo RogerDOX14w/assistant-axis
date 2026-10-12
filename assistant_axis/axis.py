@@ -4,14 +4,39 @@ Assistant axis computation and projection utilities.
 The assistant axis is a direction in activation space that captures the difference
 between role-playing and default assistant behavior in language models.
 
-Formula:
-    axis = mean(default_activations) - mean(pos_3_activations)
+Formula (as pipeline/5_axis.py computes it):
+    axis = mean(default vectors) - nanmean(entity vectors)
 
 Where:
-    - default_activations: activations from neutral system prompts
-    - pos_3_activations: activations from responses fully playing a role (score=3)
+    - the default vector is the mean of every default-prompt activation
+      (pipeline/4_vectors.py, type "mean");
+    - each entity vector is the mean of that role's / trait's /
+      combination's score=3 activations (type "pos_3"), so the second
+      term is a mean of per-entity means: every entity weighs the same,
+      however many score=3 responses it kept.
 
 The axis points FROM role-playing TOWARD default assistant behavior.
+
+Tensor layout (the convention every vector and axis file follows):
+    - legacy, no header slots: (n_layers, hidden_dim)
+    - since the header-token extraction: (n_slots, n_layers, hidden_dim),
+      slot 0 = mean over the response's tokens ("body-mean"), slots
+      1..N = the assistant header tokens listed in
+      metadata["header_tokens"], in that order (see :func:`slot_labels`;
+      the 8-slot Qwen files have 7: <|im_start|>, assistant, \\n,
+      <think>, \\n\\n, </think>, \\n\\n).  A header slot is NaN where the
+      header was not found, which is why the pipeline averages with
+      nanmean.
+    - layer index i = the output of decoder block i (a forward hook on
+      ``model.layers[i]``), 0-based, no embedding layer -- provided step 2
+      ran with its default ``--layers all``.  The files do not record the
+      layer list, so a step 2 run with a ``--layers`` subset would shift
+      every index silently.
+
+The helpers below that take a ``layer`` index (``project``,
+``project_batch``, ``cosine_similarity_per_layer``,
+``axis_norm_per_layer``, ``compute_axis``) expect the 2-D layout: pass
+``axis[slot]`` for a slotted file.
 
 Example:
     from assistant_axis import load_axis, project
@@ -66,7 +91,9 @@ def project(
 
     Args:
         activations: Tensor of shape (n_layers, hidden_dim) or (hidden_dim,)
-        axis: Tensor of shape (n_layers, hidden_dim)
+        axis: Tensor of shape (n_layers, hidden_dim); for a slotted
+              (n_slots, n_layers, hidden_dim) axis pass ``axis[slot]``
+              (indexing the 3-D tensor with ``layer`` would pick a slot)
         layer: Layer index to use for projection
         normalize: Whether to normalize the axis before projection
 
@@ -164,15 +191,22 @@ def save_axis(
     """
     Save axis to a .pt file.
 
+    Written through :func:`assistant_axis.atomic_io.torch_save_with_retry`
+    (TMPDIR staging, verified copy, atomic rename), like every other axis
+    and vector write; a plain ``torch.save`` here could leave a truncated
+    file on /workspace.
+
     Args:
-        axis: Axis tensor of shape (n_layers, hidden_dim)
+        axis: Axis tensor of shape (n_layers, hidden_dim) or
+              (n_slots, n_layers, hidden_dim)
         path: Path to save to
         metadata: Optional metadata dict to include
     """
+    from .atomic_io import torch_save_with_retry
     save_dict = {"axis": axis}
     if metadata:
         save_dict["metadata"] = metadata
-    torch.save(save_dict, path)
+    torch_save_with_retry(save_dict, path)
 
 
 def load_axis(path: str) -> torch.Tensor:

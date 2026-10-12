@@ -43,13 +43,17 @@ Retry schedules:
     schedule when transient ``RuntimeError`` short-reads from
     ``torch.load`` need a long-enough window for chunkserver-side
     recovery.
-  * **Writes** (atomic_write_* / torch_save_with_retry) default to a
-    shorter linear backoff ``10 * (attempt + 1)`` seconds (5 attempts,
-    cumulative ~100 s).  Writes only ever hit ``OSError`` on copy
-    failures (``shutil.copy2`` doesn't raise the torch-load
-    ``RuntimeError`` flavours), so a tighter retry window is fine and
-    keeps long-running flush hot paths from blocking on a wedged
-    network for >4 minutes per failure.
+  * **Text and byte writes** (atomic_write_* / append_jsonl /
+    write_jsonl) default to a shorter linear backoff
+    ``10 * (attempt + 1)`` seconds (5 attempts, cumulative ~100 s).
+    These only ever hit ``OSError`` on copy failures (``shutil.copy2``
+    doesn't raise the torch-load ``RuntimeError`` flavours), so a
+    tighter retry window is fine and keeps long-running flush hot
+    paths from blocking on a wedged network for >4 minutes per failure.
+  * **Tensor writes** (torch_save_with_retry) use the read schedule
+    :data:`DEFAULT_RETRY_DELAYS_S`, since each attempt ends in a
+    ``torch.load`` verification that can hit the same short-read
+    ``RuntimeError`` as any read.
 
 Both shapes are configurable per call via explicit ``attempts`` and
 ``base_delay_s`` / ``delays_s`` keywords.  Add new entry points here
@@ -60,6 +64,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+import pickle
 import shutil
 import time
 from pathlib import Path
@@ -449,27 +454,38 @@ def torch_save_with_retry(
       1. Serialise ``obj`` to a TMPDIR staging file with
          ``torch.save`` (once per call -- staging is reused across
          retries).
-      2. Copy staging -> ``dest.inprogress`` -> rename to ``dest``.
-      3. Verify ``dest`` size matches staging size byte-for-byte.
+      2. Copy staging -> ``dest.inprogress`` (beside ``dest``, so on
+         the destination filesystem).
+      3. Verify the ``.inprogress`` size matches staging byte-for-byte.
       4. If ``verify_sha256``: stream-hash both files and compare
          SHA-256.  Catches silent byte-flips / partial bad chunks
-         where ``dest`` is the right *length* but contains different
+         where the copy is the right *length* but contains different
          bytes than staging.  This is the failure mode behind the
          apparently-healthy-2.6 GB ``r_guardian__casual.pt`` that
          later refused to ``torch.load`` with
          ``"storage has wrong byte size of dtype"`` -- size and
          even pickle-header parsing succeeded, but one storage's
          payload bytes were wrong.
-      5. If ``verify_load``: ``torch.load(dest, weights_only=False)``
+      5. If ``verify_load``: ``torch.load(..., weights_only=False)``
          to confirm the file deserialises end-to-end.  Tests at the
          actual usage level, catching cases where bytes match but
          downstream torch versions disagree.
+      6. Only then rename ``.inprogress`` -> ``dest`` (``os.replace``,
+         atomic, the bytes do not change).
 
-    On any verification failure the bad ``dest`` is unlinked and the
-    copy + verify cycle retries with the project-standard exponential
-    backoff (:data:`DEFAULT_RETRY_DELAYS_S`).  After ``attempts``
-    failures the staging file is cleaned up and the last error is
-    re-raised.
+    Verifying before the rename (since 2026-10-12; it used to rename
+    first and verify ``dest``) means ``dest`` never holds unverified
+    bytes: a crash during the minute-long verification of a 2.6 GB file
+    no longer leaves a file that skip-if-exists resume logic takes for
+    a finished one, and a save that fails every attempt leaves an
+    existing ``dest`` (an ``--overwrite`` run's previous file) in place
+    instead of deleting it.
+
+    On any verification failure the bad ``.inprogress`` copy is
+    unlinked and the copy + verify cycle retries with the
+    project-standard exponential backoff (:data:`DEFAULT_RETRY_DELAYS_S`).
+    After ``attempts`` failures the staging file is cleaned up and the
+    last error is re-raised.
 
     Parameters
     ----------
@@ -521,10 +537,9 @@ def torch_save_with_retry(
         for attempt in range(n_attempts):
             try:
                 shutil.copy2(str(staging), str(inprogress))
-                os.replace(str(inprogress), str(dest_path))
 
                 # 1. Size check (cheapest -- one stat call).
-                dest_size = dest_path.stat().st_size
+                dest_size = inprogress.stat().st_size
                 if dest_size != staging_size:
                     raise OSError(
                         f"size mismatch at {dest_path}: "
@@ -536,7 +551,7 @@ def torch_save_with_retry(
                 #    inside a correct-size file -- e.g. corrupted
                 #    NFS chunks that pass length checks).
                 if verify_sha256:
-                    dest_sha = _sha256_file(dest_path)
+                    dest_sha = _sha256_file(inprogress)
                     if dest_sha != staging_sha:
                         raise OSError(
                             f"sha256 mismatch at {dest_path}: "
@@ -549,22 +564,27 @@ def torch_save_with_retry(
                 #    held; also a smoke-test that the consumer's
                 #    code path will actually work).
                 if verify_load:
-                    torch.load(str(dest_path),
+                    torch.load(str(inprogress),
                                map_location="cpu", weights_only=False)
 
+                # 4. Publish: rename the verified copy into place.
+                os.replace(str(inprogress), str(dest_path))
                 return  # success
-            except (OSError, RuntimeError, EOFError) as e:
+            except (OSError, RuntimeError, EOFError,
+                    pickle.UnpicklingError, ValueError) as e:
+                # UnpicklingError / ValueError: what torch.load raises
+                # on some corrupt pickles; without them such a failure
+                # escaped the cleanup below.
                 last_err = e
-                # Best-effort cleanup of any partial / bad files
-                # before the next attempt so the next iteration's
-                # copy starts from a clean slate and downstream
-                # resume logic can't mistake them for healthy.
-                for p in (inprogress, dest_path):
-                    try:
-                        if p.exists():
-                            p.unlink()
-                    except OSError:
-                        pass
+                # Best-effort cleanup of the bad copy before the next
+                # attempt so the next iteration's copy starts from a
+                # clean slate.  ``dest`` itself is never touched here:
+                # it is either absent or the previous, untouched file.
+                try:
+                    if inprogress.exists():
+                        inprogress.unlink()
+                except OSError:
+                    pass
                 if attempt < n_attempts - 1:
                     wait = delays[attempt] if attempt < len(delays) else delays[-1]
                     log.warning(

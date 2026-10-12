@@ -2,12 +2,21 @@
 """
 Compute the assistant axis from per-role vectors.
 
-Formula: axis = mean(default_vectors) - mean(pos_3_vectors across roles)
+Formula: axis = mean(default_vectors) - nanmean(pos_3_vectors across roles)
+
+Every ``*.pt`` in ``--vectors_dir`` takes part: the file named ``default``
+(or any vector of type "mean") on the default side, every other file on the
+role side, each entity weighing the same.  run_pipeline.sh runs this once per
+entity-type directory, so ``roles/axis.pt``, ``traits/axis.pt`` and
+``combinations/axis.pt`` (r_ and t_ combinations together) each contrast the
+shared default vector (the ``default.pt`` symlink) with that directory's
+entities.  The means are taken over whole (n_slots, n_layers, hidden)
+tensors, so every slot and layer gets its own axis.
 
 The axis points FROM role-playing TOWARD default assistant behavior.
 
-Usage:
-    uv run scripts/5_axis.py \
+Usage (from pipeline/):
+    uv run 5_axis.py \
         --vectors_dir outputs/gemma-2-27b/vectors \
         --output outputs/gemma-2-27b/axis.pt
 """
@@ -15,6 +24,7 @@ Usage:
 import argparse
 import logging
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import torch
@@ -65,6 +75,8 @@ def main():
     # Separate default and role vectors
     default_vectors = []
     role_vectors = []
+    default_names: list[str] = []
+    role_names: list[str] = []
     metadata = {}
 
     for vec_file in tqdm(vector_files, desc="Loading vectors"):
@@ -87,11 +99,15 @@ def main():
                           f"model_name {file_meta.get('model_name')!r} != {metadata.get('model_name')!r}")
                     sys.exit(1)
 
-        if "default" in role or vector_type == "mean":
+        # Exact name, as in step 3 and step 4 (a substring test would put any
+        # entity whose name contains "default" on the default side).
+        if role == "default" or vector_type == "mean":
             default_vectors.append(vector)
+            default_names.append(vec_file.stem)
             print(f"  {role}: default/mean vector")
         else:
             role_vectors.append(vector)
+            role_names.append(vec_file.stem)
 
     print(f"\nLoaded {len(default_vectors)} default vectors, {len(role_vectors)} role vectors")
 
@@ -150,7 +166,22 @@ def main():
     # atomically renames into place, and verifies post-copy size.  A
     # mid-write crash or silent NFS short-write never leaves a
     # half-written axis.pt at the destination.
-    save_data = {"axis": axis}
+    save_data = {
+        "axis": axis,
+        # What the axis was made of (additive, 2026-10-12; readers look keys
+        # up by name).  Without it a vector added or regenerated after the
+        # axis went unnoticed: traits/axis.pt in the 8slot tree predates
+        # traits/vectors/unhelpful.pt.
+        "inputs": {
+            "script": "pipeline/5_axis.py",
+            "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "vectors_dir": str(vectors_dir.resolve()),
+            "default": default_names,
+            "entities": role_names,
+            "n_default": len(default_names),
+            "n_entities": len(role_names),
+        },
+    }
     if metadata:
         save_data["metadata"] = metadata
     torch_save_with_retry(save_data, output_path, logger_obj=logger)

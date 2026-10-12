@@ -12,6 +12,9 @@ from assistant_axis.axis import (
     project_batch,
     save_axis,
     load_axis,
+    load_axis_with_metadata,
+    load_role_vector,
+    slot_labels,
     cosine_similarity_per_layer,
     axis_norm_per_layer,
 )
@@ -137,6 +140,60 @@ class TestSaveLoadAxis:
             loaded = load_axis(f.name)
 
         assert loaded.dtype == axis.dtype
+
+
+class TestSlottedFiles:
+    """The (n_slots, n_layers, hidden) layout steps 2, 4 and 5 write."""
+
+    META = {
+        "header_tokens": ["<|im_start|>", "assistant", "\n", "<think>", "\n\n",
+                          "</think>", "\n\n"],
+        "header_ids": [151644, 77091, 198, 151667, 271, 151668, 271],
+        "model_name": "Qwen/Qwen3-32B",
+    }
+
+    def test_slot_labels_body_mean_first_then_header_tokens_in_order(self):
+        labels = slot_labels(self.META)
+        assert labels[0] == "body-mean"
+        assert labels[1:] == self.META["header_tokens"]
+        assert len(labels) == 8          # one per slot of an 8-slot axis
+
+    def test_slot_labels_without_metadata(self):
+        assert slot_labels(None) == ["body-mean"]
+        assert slot_labels({}) == ["body-mean"]
+
+    def test_save_axis_is_atomic_and_round_trips_metadata(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        axis = torch.randn(8, 4, 16, dtype=torch.bfloat16)
+        path = tmp_path / "sub" / "axis.pt"
+        save_axis(axis, str(path), metadata=self.META)
+        loaded, meta = load_axis_with_metadata(str(path))
+        assert torch.equal(loaded, axis) and loaded.dtype == torch.bfloat16
+        assert meta == self.META
+        assert len(slot_labels(meta)) == loaded.shape[0]
+        assert not (tmp_path / "sub" / "axis.pt.inprogress").exists()
+
+    def test_load_role_vector_dict_and_bare(self, tmp_path):
+        v = torch.randn(8, 4, 16)
+        torch.save({"vector": v, "type": "pos_3", "role": "pirate",
+                    "metadata": self.META}, tmp_path / "pirate.pt")
+        got, meta = load_role_vector(str(tmp_path / "pirate.pt"))
+        assert torch.equal(got, v) and meta == self.META
+        torch.save(v, tmp_path / "bare.pt")
+        got, meta = load_role_vector(str(tmp_path / "bare.pt"))
+        assert torch.equal(got, v) and meta == {}
+        torch.save({"axis": v}, tmp_path / "wrong.pt")
+        with pytest.raises(ValueError, match="vector"):
+            load_role_vector(str(tmp_path / "wrong.pt"))
+
+    def test_project_takes_the_slot_first(self):
+        """project() indexes the layer of a 2-D axis: for a slotted axis the
+        caller passes axis[slot] (steering reads axis[slot, layer])."""
+        axis = torch.randn(8, 4, 16)
+        act = torch.randn(4, 16)
+        slot, layer = 3, 2
+        expected = float(act[layer] @ (axis[slot, layer] / axis[slot, layer].norm()))
+        assert abs(project(act, axis[slot], layer) - expected) < 1e-4
 
 
 class TestCosineSimilarityPerLayer:

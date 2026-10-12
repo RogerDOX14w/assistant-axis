@@ -96,6 +96,27 @@ class TestCheckExistingMirror:
         (tmp_path / "b.bin").unlink()
         assert tmpfs._check_existing_mirror(tmp_path) is None
 
+    def test_failed_sync_keeps_a_mirror_that_was_already_there(self, tmp_path: Path):
+        """Another process may be loading from a mirror this call only meant
+        to top up; deleting it (the behaviour before 2026-10-12) turned a
+        failed rsync here into a crash there.  The marker goes, so the
+        next call re-syncs instead of trusting it."""
+        mirror = tmp_path / "models--x--y"
+        (mirror / "snapshots").mkdir(parents=True)
+        (mirror / "snapshots" / "shard.safetensors").write_bytes(b"w" * 1000)
+        tmpfs._write_mirror_marker(mirror, source_size_kb=1)
+        tmpfs._discard_failed_mirror(mirror, existed_before=True)
+        assert (mirror / "snapshots" / "shard.safetensors").exists()
+        assert not (mirror / tmpfs.MIRROR_MARKER_FILENAME).exists()
+        assert tmpfs._check_existing_mirror(mirror) is None
+
+    def test_failed_sync_removes_a_mirror_it_created(self, tmp_path: Path):
+        mirror = tmp_path / "models--x--y"
+        mirror.mkdir()
+        (mirror / "partial.safetensors").write_bytes(b"p" * 10)
+        tmpfs._discard_failed_mirror(mirror, existed_before=False)
+        assert not mirror.exists()
+
     def test_tolerates_marker_file_overhead(self, tmp_path: Path):
         # The marker file itself contributes ~4 KB on disk (one block).
         # On a real 60 GB model that's a 0.000007% overhead, well below

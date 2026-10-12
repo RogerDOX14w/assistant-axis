@@ -429,6 +429,84 @@ class TestTorchSaveWithRetry:
         assert p.exists()
         assert n_load_calls["n"] == 3
 
+    def test_dest_never_holds_unverified_bytes(self, tmp_path, monkeypatch):
+        """Verification runs on the ``.inprogress`` copy and the rename comes
+        last (since 2026-10-12): while the load check runs, ``dest`` does
+        not exist yet, so a crash mid-verification cannot leave a file that
+        skip-if-exists resume logic takes for a finished one."""
+        import torch
+        monkeypatch.setattr(atomic_io.time, "sleep", lambda s: None)
+        p = tmp_path / "out.pt"
+        seen = []
+        real_torch_load = torch.load
+
+        def spying_load(f, *args, **kwargs):
+            seen.append((str(f), p.exists()))
+            return real_torch_load(f, *args, **kwargs)
+
+        with mock.patch("torch.load", spying_load):
+            atomic_io.torch_save_with_retry({"x": torch.tensor([1, 2])}, p)
+        assert seen == [(str(p) + ".inprogress", False)]
+        assert p.exists()
+        assert not Path(str(p) + ".inprogress").exists()
+
+    def test_failed_overwrite_keeps_the_previous_file(self, tmp_path, monkeypatch):
+        """A save that fails every attempt used to unlink ``dest`` -- for an
+        ``--overwrite`` run, the previous good file."""
+        import shutil
+        import torch
+        monkeypatch.setattr(atomic_io.time, "sleep", lambda s: None)
+        p = tmp_path / "out.pt"
+        torch.save({"x": torch.tensor([7.0])}, p)
+        before = p.read_bytes()
+        real_copy = shutil.copy2
+
+        def always_flipping_copy(src, dst, *a, **kw):
+            real_copy(src, dst, *a, **kw)
+            with open(dst, "r+b") as f:
+                f.seek(os.path.getsize(dst) // 2)
+                orig = f.read(1)
+                f.seek(os.path.getsize(dst) // 2)
+                f.write(bytes([orig[0] ^ 0xFF]))
+
+        with mock.patch("assistant_axis.atomic_io.shutil.copy2", always_flipping_copy):
+            with pytest.raises(OSError, match="sha256 mismatch"):
+                atomic_io.torch_save_with_retry({"x": torch.tensor([1.0, 2.0])}, p,
+                                                attempts=2)
+        assert p.read_bytes() == before
+        assert not Path(str(p) + ".inprogress").exists()
+
+    def test_unpickling_error_in_verification_is_retried_and_cleaned(
+            self, tmp_path, monkeypatch):
+        """torch.load raises pickle.UnpicklingError on some corrupt files;
+        it escaped the retry and the cleanup before 2026-10-12."""
+        import pickle
+        import torch
+        monkeypatch.setattr(atomic_io.time, "sleep", lambda s: None)
+        p = tmp_path / "out.pt"
+        n = {"calls": 0}
+        real_torch_load = torch.load
+
+        def flaky_load(*args, **kwargs):
+            n["calls"] += 1
+            if n["calls"] == 1:
+                raise pickle.UnpicklingError("invalid load key, 'x'.")
+            return real_torch_load(*args, **kwargs)
+
+        with mock.patch("torch.load", flaky_load):
+            atomic_io.torch_save_with_retry({"x": torch.tensor([1])}, p,
+                                            attempts=3, verify_sha256=False)
+        assert n["calls"] == 2
+        assert p.exists()
+
+        q = tmp_path / "never.pt"
+        with mock.patch("torch.load", side_effect=pickle.UnpicklingError("bad")):
+            with pytest.raises(pickle.UnpicklingError):
+                atomic_io.torch_save_with_retry({"x": torch.tensor([1])}, q,
+                                                attempts=1, verify_sha256=False)
+        assert not q.exists()
+        assert not Path(str(q) + ".inprogress").exists()
+
     def test_verify_off_skips_checks(self, tmp_path):
         """With both verifications disabled, no re-hash and no load
         happens after copy -- file is treated as written-correctly

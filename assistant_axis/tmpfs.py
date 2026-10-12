@@ -241,6 +241,35 @@ def _rsync_mirror(
     return True
 
 
+def _discard_failed_mirror(tmpfs_model_dir: Path, *, existed_before: bool) -> None:
+    """Clean up after a failed rsync into ``tmpfs_model_dir``.
+
+    A directory this call created is removed (rsync's ``--partial`` may
+    have left a truncated shard under its real name, and
+    ``run_pipeline.sh`` reuses any existing mirror directory without
+    checking it).  A directory that was already there is left in place
+    and only its completeness marker is removed: another process (a
+    pipeline step, a steering worker) may be loading from it, and
+    deleting it under them turns a failed top-up here into a crash
+    there.  (Before 2026-10-12 both cases were ``rmtree``'d.)
+    """
+    if existed_before:
+        logger.warning(
+            f"[tmpfs] leaving the existing mirror {tmpfs_model_dir} in place "
+            f"(other processes may be loading from it); its completeness "
+            f"marker is removed so the next call re-syncs it"
+        )
+        try:
+            (tmpfs_model_dir / MIRROR_MARKER_FILENAME).unlink(missing_ok=True)
+        except OSError:
+            pass
+        return
+    try:
+        shutil.rmtree(tmpfs_model_dir, ignore_errors=True)
+    except OSError:
+        pass
+
+
 def setup_model_tmpfs_cache(
     model_name: str,
     *,
@@ -361,15 +390,9 @@ def setup_model_tmpfs_cache(
     tmpfs_root.mkdir(parents=True, exist_ok=True)
     (tmpfs_root / "hub").mkdir(parents=True, exist_ok=True)
 
+    existed_before = tmpfs_model_dir.is_dir()
     if not _rsync_mirror(source_model_dir, tmpfs_model_dir, logger_obj=logger):
-        # Best-effort cleanup of any partial leftover so the next
-        # invocation starts from a known state (rsync left anything
-        # it wrote in place via --partial; we'd rather drop it than
-        # have downstream loaders try to use it).
-        try:
-            shutil.rmtree(tmpfs_model_dir, ignore_errors=True)
-        except OSError:
-            pass
+        _discard_failed_mirror(tmpfs_model_dir, existed_before=existed_before)
         return None
 
     # Drop the fast-path marker so the next call can skip rsync entirely.

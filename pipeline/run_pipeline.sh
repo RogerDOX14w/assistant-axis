@@ -17,17 +17,25 @@
 #   christina — standalone roles/traits from --roles_dir.
 #     --types is ignored in christina mode.
 #
-# Usage:
-#   ./pipeline/run_pipeline.sh
-#   ./pipeline/run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/roles
-#   ./pipeline/run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/traits \
+# Usage -- run from the pipeline/ directory: the steps are invoked by relative
+# path (uv run 1_generate.py ...), and relative paths such as the default
+# --roles_dir ../data/roles/instructions are relative to pipeline/:
+#   cd pipeline
+#   ./run_pipeline.sh
+#   ./run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/roles
+#   ./run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/traits \
 #       --roles_dir ../data/traits/instructions
-#   ./pipeline/run_pipeline.sh --types combinations roles
-#   ./pipeline/run_pipeline.sh --types r_combinations          # only r_ combos
-#   ./pipeline/run_pipeline.sh --types r_combinations t_combinations roles traits
-#   ./pipeline/run_pipeline.sh --skip-gpu-check                # bypass pre-flight
-#   ./pipeline/run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
-#   ./pipeline/run_pipeline.sh --no-scan                       # skip post-pipeline audit
+#   ./run_pipeline.sh --types combinations roles
+#   ./run_pipeline.sh --types r_combinations          # only r_ combos
+#   ./run_pipeline.sh --types r_combinations t_combinations roles traits
+#   ./run_pipeline.sh --skip-gpu-check                # bypass pre-flight
+#   ./run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
+#   ./run_pipeline.sh --no-scan                       # skip post-pipeline audit
+#
+# A failing step stops the pipeline: steps 1 to 3 as before, and step 4 since
+# 2026-10-12 (4_vectors.py exits 1 when an activation, scores or vector file
+# cannot be read or written), so no axis is computed from a partial set of
+# vectors.  A rerun skips everything already done.
 #
 # Post-pipeline scan (default ON): after step 5, runs
 # pipeline/scan_missing_vectors.py to audit every (activation, vector) pair
@@ -66,6 +74,16 @@
 
 set -e
 
+# The steps are run by relative path; fail at once (before the GPU check and a
+# possibly long tmpfs copy) when started from anywhere else.
+for step_script in 1_generate.py 2_activations.py 3_judge.py 4_vectors.py 5_axis.py; do
+    if [ ! -f "$step_script" ]; then
+        echo "run_pipeline.sh: $step_script not found in $(pwd)." >&2
+        echo "Run it from the pipeline/ directory:  cd pipeline && ./run_pipeline.sh ..." >&2
+        exit 1
+    fi
+done
+
 # ---- Configuration (defaults) ---------------------------------------------
 MODEL="Qwen/Qwen3-32B"
 MODE="roger"                    # roger | christina
@@ -73,7 +91,8 @@ ROLES_DIR="../data/roles/instructions"  # christina: directory of instruction JS
 GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
-MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
+MIN_COUNT=30                    # roger mode: min score=3 samples for vector
+CHRISTINA_MIN_COUNT=50          # christina mode: the same, for step 4 and the scan
 OUTPUT_DIR="/workspace/outputs/qwen-3-32b"
 # Tensor-parallel size per worker for steps 1 & 2.  The pipeline runs
 # total_gpus / tensor_parallel_size workers in parallel.  Default 1 fits a
@@ -286,11 +305,16 @@ gpu_preflight_check() {
             | sed 's/^/  /' || true
         echo ""
         echo "This usually means a previous pipeline crashed leaving an orphaned"
-        echo "vLLM worker holding a CUDA context.  To clean up:"
+        echo "vLLM worker holding a CUDA context.  To clean up, kill the PIDs"
+        echo "listed above (check with 'ps -fp <pid>' that they are leftovers):"
         echo ""
-        echo "  pkill -f 'assistant-axis/.venv/bin/python3'"
+        echo "  kill <pid> ...   # then, if one survives: kill -9 <pid>"
         echo "  sleep 3"
         echo "  nvidia-smi   # all GPUs should now show 0 MiB"
+        echo ""
+        echo "(pkill -f 'assistant-axis/.venv/bin/python3' also works, but kills every"
+        echo "Python from this checkout, including a step-3 batch run or steering"
+        echo "sweep you meant to keep.)"
         echo ""
         echo "If a PID still appears in nvidia-smi but ps shows no such process,"
         echo "the driver has zombie memory.  Try:"
@@ -405,18 +429,38 @@ setup_tmpfs() {
         return
     fi
 
-    echo "[tmpfs] copying $MODEL ($((needed_kb / 2 / 1024)) MB) from $source_model_dir to $tmpfs_model_dir ..."
+    # Copy into a staging directory and rename it into place only when the
+    # copy succeeded: the "already present; reusing" check above trusts any
+    # directory at $tmpfs_model_dir, so a copy that failed (ENOSPC) or was
+    # interrupted must never be left there (before 2026-10-12 it was, and
+    # every later run loaded a partial model).  Staging directories left by
+    # an interrupted run hold RAM and are removed first.
+    local staging_dir="$TMPFS_HF_HOME/hub/.${model_subdir}.partial.$$"
     mkdir -p "$TMPFS_HF_HOME/hub"
-    if cp -r "$source_model_dir" "$TMPFS_HF_HOME/hub/"; then
+    rm -rf "$TMPFS_HF_HOME/hub/.${model_subdir}.partial."*
+    echo "[tmpfs] copying $MODEL ($((needed_kb * 2 / 3 / 1024)) MB) from $source_model_dir to $tmpfs_model_dir ..."
+    if cp -r "$source_model_dir" "$staging_dir" && mv -T "$staging_dir" "$tmpfs_model_dir"; then
         export HF_HOME="$TMPFS_HF_HOME"
         echo "[tmpfs] copy complete; HF_HOME=$HF_HOME"
     else
+        rm -rf "$staging_dir"
         echo "[tmpfs] copy failed; falling back to $source_hf"
     fi
 }
 
 setup_tmpfs
 echo ""
+
+# ---- Helper: stop on a failed step 4 or 5 ---------------------------------
+# set -e would stop the script too, silently; this says which step failed and
+# that a rerun picks up where it stopped.
+step_failed() {
+    echo ""
+    echo "=== Pipeline aborted: $1 failed ($2) ==="
+    echo "Fix the cause and run the same command again: finished outputs are skipped."
+    echo "Log: $LOG_FILE"
+    exit 1
+}
 
 # ---- Helper: symlink default files into a type's subdir -------------------
 # Usage: symlink_default <subdir_name> <file_extension>
@@ -504,16 +548,23 @@ if [ "$MODE" = "christina" ]; then
     echo ""
 
     echo "=== Step 4: Computing vectors ==="
+    # --min_count passed explicitly (it was the script default, 50, while the
+    # scan below was given MIN_COUNT=30, so entities with 30-49 score=3
+    # samples were reported as re-run candidates that step 4 would skip
+    # again).
     uv run 4_vectors.py \
         --activations_dir "$OUTPUT_DIR/activations" \
         --scores_dir "$OUTPUT_DIR/scores" \
-        --output_dir "$OUTPUT_DIR/vectors"
+        --output_dir "$OUTPUT_DIR/vectors" \
+        --min_count "$CHRISTINA_MIN_COUNT" \
+        || step_failed "Step 4" "4_vectors.py exited non-zero; see its [ERROR] lines above"
 
     echo ""
     echo "=== Step 5: Computing axis ==="
     uv run 5_axis.py \
         --vectors_dir "$OUTPUT_DIR/vectors" \
-        --output "$OUTPUT_DIR/axis.pt"
+        --output "$OUTPUT_DIR/axis.pt" \
+        || step_failed "Step 5" "5_axis.py exited non-zero (see above)"
 
     echo ""
     echo "=== Pipeline complete ==="
@@ -561,7 +612,8 @@ else
         uv run 4_vectors.py \
             --activations_dir "$DEFAULT_ACT" \
             --scores_dir "$DEFAULT_DIR/scores" \
-            --output_dir "$DEFAULT_VEC"
+            --output_dir "$DEFAULT_VEC" \
+            || step_failed "Step 0 (default vector)" "4_vectors.py exited non-zero; see its [ERROR] lines above"
     else
         echo "  default vector already exists, skipping."
     fi
@@ -732,7 +784,8 @@ else
             --activations_dir "$TYPE_DIR/activations" \
             --scores_dir "$TYPE_DIR/scores" \
             --output_dir "$TYPE_DIR/vectors" \
-            --min_count "$MIN_COUNT"
+            --min_count "$MIN_COUNT" \
+            || step_failed "Step 4 [$type]" "4_vectors.py exited non-zero; see its [ERROR] lines above"
     done
     echo ""
 
@@ -744,7 +797,8 @@ else
 
         uv run 5_axis.py \
             --vectors_dir "$TYPE_DIR/vectors" \
-            --output "$TYPE_DIR/axis.pt"
+            --output "$TYPE_DIR/axis.pt" \
+            || step_failed "Step 5 [$type]" "5_axis.py exited non-zero (see above)"
     done
     echo ""
 
@@ -765,7 +819,20 @@ fi
 #   - $OUTPUT_DIR/<type>/vectors/missing_vectors_rerun.txt (re-run candidates)
 # A non-zero exit from the scanner is logged but does not fail the pipeline:
 # the pipeline itself has already succeeded by this point, the scan is just
-# a verification pass.  Skip with --no-scan.
+# a verification pass.  Exit 3 means it found re-run candidates (until
+# 2026-10-12 it exited 0 then, so 870 of them on 2026-05-03 went unremarked).
+# Skip with --no-scan.
+scan_warning() {
+    local rc=$1
+    if [ "$rc" -eq 3 ]; then
+        echo "[scan] WARNING: the scan found re-run candidates (exit 3): see the suspect"
+        echo "[scan]          lists above and each vectors dir's missing_vectors_rerun.txt;"
+        echo "[scan]          recompute with 4_vectors.py --overwrite <that file>.  Entities"
+        echo "[scan]          reported missing_activation need step 2 first."
+    else
+        echo "[scan] WARNING: scanner exited $rc (pipeline itself succeeded; rerun the scan manually for details)"
+    fi
+}
 if [ "$RUN_SCAN" = "true" ]; then
     echo ""
     echo "=== Post-pipeline scan ==="
@@ -779,7 +846,7 @@ if [ "$RUN_SCAN" = "true" ]; then
                 --root        "$OUTPUT_DIR" \
                 --min_count   "$MIN_COUNT" \
                 --deep_load \
-                || echo "[scan] WARNING: scanner exited non-zero (pipeline itself succeeded; rerun the scan manually for details)"
+                || scan_warning $?
             ;;
         christina)
             # Single-pair mode: christina mode writes one entity-type tree
@@ -788,9 +855,10 @@ if [ "$RUN_SCAN" = "true" ]; then
                 --activations_dir "$OUTPUT_DIR/activations" \
                 --vectors_dir     "$OUTPUT_DIR/vectors" \
                 --scores_dir      "$OUTPUT_DIR/scores" \
-                --min_count       "$MIN_COUNT" \
+                --min_count       "$CHRISTINA_MIN_COUNT" \
                 --deep_load \
-                || echo "[scan] WARNING: scanner exited non-zero (pipeline itself succeeded; rerun the scan manually for details)"
+                --rerun_list      "$OUTPUT_DIR/vectors/missing_vectors_rerun.txt" \
+                || scan_warning $?
             ;;
     esac
 fi
@@ -798,7 +866,11 @@ fi
 echo "Log:  $LOG_FILE"
 
 # ---- Summary of warnings/errors ------------------------------------------
-ISSUES=$(grep -E ' - (WARNING|ERROR) - ' "$LOG_FILE" 2>/dev/null || true)
+# Two log formats: steps 1-3 write "<time> - WARNING - ...", steps 4 and 5 and
+# the scan "<time> [WARNING] <logger>: ...".  Only the first was matched
+# before 2026-10-12, so step 4's load failures never reached this summary.
+ISSUE_PATTERN=' - (WARNING|ERROR) - |\[(WARNING|ERROR)\] '
+ISSUES=$(grep -E "$ISSUE_PATTERN" "$LOG_FILE" 2>/dev/null || true)
 if [ -n "$ISSUES" ]; then
     COUNT=$(echo "$ISSUES" | wc -l | tr -d ' ')
     echo ""
