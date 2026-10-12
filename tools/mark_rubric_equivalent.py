@@ -99,7 +99,23 @@ def _parse_scope_lists(
     Optional[List[str]], Optional[List[str]],
 ]:
     """Return (axes, except_axes, entity_ids, except_entity_ids) from the
-    parser, enforcing mutual exclusion within each dimension."""
+    parser, enforcing mutual exclusion within each dimension.
+
+    A scope flag given with no values is an error, not "no restriction":
+    ``nargs="*"`` turns ``--entity-ids`` (or ``--entity-ids $IDS`` with
+    ``$IDS`` empty) into ``[]``, which the registry stores as a wildcard,
+    so an allow-list meant to name a few entities would silently declare
+    the bump equivalent for every axis / mode / entity (2026-10-12).
+    """
+    for flag, value in (("--modes", args.modes), ("--axes", args.axes),
+                        ("--except-axes", args.except_axes),
+                        ("--entity-ids", args.entity_ids),
+                        ("--except-entity-ids", args.except_entity_ids)):
+        if value is not None and len(value) == 0:
+            raise SystemExit(
+                f"error: {flag} was given with no values; omit the flag to "
+                f"leave that dimension unrestricted."
+            )
     axes = args.axes if args.axes else None
     except_axes = args.except_axes if args.except_axes else None
     entity_ids = args.entity_ids if args.entity_ids else None
@@ -140,7 +156,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                    default=None,
                    help="Entity-id allow-list (e.g. 'patient|R'); mutually "
                         "exclusive with --except-entity-ids.  Use disambiguated "
-                        "ids ('name|R' / 'name|T'), not bare names: the 9 "
+                        "ids ('name|R' / 'name|T'), not bare names: the 11 "
                         "trait/role collisions can't be expressed unambiguously "
                         "otherwise.  When a rubric bump affects only specific "
                         "entities (e.g. v2\u2192v3 differs only for entity names "

@@ -11,9 +11,15 @@ This tool resolves that diff in two ways and prints whichever
 succeeds first:
 
 1. **Git** (preferred): if the cache's envelope recorded a
-   ``produced_by.git_sha`` and the working tree is in a clean-enough
-   state, ``git diff <sha>:<script_rel> -- <script_rel>`` shows the
-   exact content delta.
+   ``produced_by.git_sha``, ``git show <sha>:<script_rel>`` is diffed
+   against the current file.
+
+Each recovered old version is checked against the byte size in the
+recorded fingerprint (``v1:<mtime>@<size>``).  A mismatch proves it is
+not the version that wrote the cache (the usual case: a ``+dirty``
+sha, where the cache came from an uncommitted edit); the tool then
+tries the other source, and if neither matches it shows the diff
+marked UNVERIFIED and suggests no equivalence command.
 
 2. **Cursor Local History** (fallback): when git can't help (no
    recorded sha, or the sha is unreachable in the local clone), this
@@ -159,12 +165,44 @@ def _parse_iso_to_epoch_ms(s: str) -> Optional[int]:
 
 
 def _candidate_history_roots(extra: Optional[Path] = None) -> list[Path]:
-    candidates: list[Path] = []
+    """History roots to search.  An explicit ``extra`` (``--history-root``)
+    *replaces* the defaults, as the flag's help says ("Override");
+    before 2026-10-12 it was searched first and the per-user defaults
+    under the home directory after it, so a run (or a test) given its
+    own root still scanned the real Cursor history."""
     if extra is not None:
-        candidates.append(extra)
-    for h in _DEFAULT_HISTORY_ROOTS:
-        candidates.append(Path(os.path.expanduser(h)))
+        candidates = [extra]
+    else:
+        candidates = [Path(os.path.expanduser(h)) for h in _DEFAULT_HISTORY_ROOTS]
     return [c for c in candidates if c.exists() and c.is_dir()]
+
+
+def _recorded_size(fingerprint: str) -> Optional[int]:
+    """Byte size in a ``v1:<mtime_iso>@<size>`` file fingerprint, or None."""
+    _, sep, tail = (fingerprint or "").rpartition("@")
+    if not sep:
+        return None
+    try:
+        return int(tail)
+    except ValueError:
+        return None
+
+
+def _size_mismatch(text: str, recorded_size: Optional[int]) -> Optional[str]:
+    """Describe a mismatch between ``text`` and the recorded byte size.
+
+    Returns None when the sizes agree or no size was recorded.  A
+    mismatch means ``text`` is not the version of the script that wrote
+    the cache (typically: the cache was produced from an uncommitted
+    edit, ``git_sha`` ending ``+dirty``, and ``git show <sha>`` returns
+    the committed version instead).
+    """
+    if recorded_size is None:
+        return None
+    n = len(text.encode("utf-8"))
+    if n == recorded_size:
+        return None
+    return f"{n} bytes, but the cache recorded the script at {recorded_size} bytes"
 
 
 def _find_history_dir(
@@ -269,7 +307,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--no-history", action="store_true",
                    help="Skip the Cursor Local History fallback.")
     p.add_argument("--history-root",
-                   help="Override the Local History directory (advanced).")
+                   help="Override the Local History directory (advanced); "
+                        "replaces the per-user default locations.")
     args = p.parse_args(argv)
 
     cache_path = Path(args.cache_path).resolve()
@@ -312,22 +351,38 @@ def main(argv: Optional[list[str]] = None) -> int:
     print()
 
     current_text = script_abs.read_text(encoding="utf-8")
-    diff_text: Optional[str] = None
-    diff_source: Optional[str] = None
+    rec_size = _recorded_size(rec_fingerprint)
+    # Each candidate: (diff_text, diff_source, verified).  ``verified``
+    # means the recovered old text has the byte size the cache recorded
+    # for the script; a mismatch proves it is NOT the version that ran.
+    candidates: list[Tuple[str, str, bool]] = []
 
     if not args.no_git and git_sha:
         old = _git_show(git_sha, script_rel, _REPO_ROOT)
         if old is not None:
-            diff_text = _unified_diff(
-                old, current_text,
-                old_label=f"a/{script_rel}@{git_sha}",
-                new_label=f"b/{script_rel}",
-            )
-            diff_source = f"git show {git_sha}:{script_rel}"
+            mismatch = _size_mismatch(old, rec_size)
+            if mismatch:
+                print(f"  WARNING: the script at {git_sha} is {mismatch}; the "
+                      f"cache was produced from a different (likely uncommitted) "
+                      f"version, so this git diff is not a diff of what ran.")
+            elif git_sha.endswith("+dirty"):
+                print(f"  NOTE: recorded from a dirty tree ({git_sha}); the size "
+                      f"matches, but an uncommitted same-size edit cannot be "
+                      f"ruled out.")
+            candidates.append((
+                _unified_diff(
+                    old, current_text,
+                    old_label=f"a/{script_rel}@{git_sha}",
+                    new_label=f"b/{script_rel}",
+                ),
+                f"git show {git_sha}:{script_rel}",
+                mismatch is None,
+            ))
         else:
             print(f"  (git show failed for {git_sha}; falling back to History)")
 
-    if (diff_text is None or not diff_text.strip()) and not args.no_history:
+    have_verified_diff = any(v and d.strip() for d, _, v in candidates)
+    if not have_verified_diff and not args.no_history:
         history_root = (
             Path(os.path.expanduser(args.history_root)).resolve()
             if args.history_root else None
@@ -344,21 +399,40 @@ def main(argv: Optional[list[str]] = None) -> int:
                 .replace(microsecond=0).isoformat()
                 if ts_ms else "(unknown)"
             )
-            diff_text = _unified_diff(
-                old_text, current_text,
-                old_label=f"a/{script_rel}@{ts_iso}",
-                new_label=f"b/{script_rel}",
-            )
-            diff_source = f"Cursor Local History  ({hist_dir / snap_entry.get('id', '?')})"
+            mismatch = _size_mismatch(old_text, rec_size)
+            if mismatch:
+                print(f"  WARNING: the closest Local History snapshot ({ts_iso}) "
+                      f"is {mismatch}; it is not the version that ran.")
+            candidates.append((
+                _unified_diff(
+                    old_text, current_text,
+                    old_label=f"a/{script_rel}@{ts_iso}",
+                    new_label=f"b/{script_rel}",
+                ),
+                f"Cursor Local History  ({hist_dir / snap_entry.get('id', '?')})",
+                mismatch is None,
+            ))
 
-    if diff_text is None or not diff_text.strip():
+    # Prefer a verified non-empty diff, then any non-empty diff.
+    nonempty = [c for c in candidates if c[0].strip()]
+    chosen = next((c for c in nonempty if c[2]), nonempty[0] if nonempty else None)
+    if chosen is None:
         print("(no diff available -- script may be unchanged, or neither "
               "git nor Cursor Local History could resolve the recorded "
               "version)")
         return 1
+    diff_text, diff_source, verified = chosen
 
     print(f"=== Diff source: {diff_source} ===")
     print(diff_text)
+
+    if not verified:
+        print()
+        print("UNVERIFIED: the old side of this diff does not match the size "
+              "the cache recorded for the script, so it is not the version "
+              "that produced the cache.  No equivalence command is suggested; "
+              "find the version that ran before declaring the edit harmless.")
+        return 0
 
     # Suggested follow-up command (works for any kind="file" producer).
     cur_spec = prov.current_file_input(dep_key="probe", path=script_abs)

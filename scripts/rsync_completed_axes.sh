@@ -30,7 +30,9 @@ mkdir -p "$LOCAL_OUTPUTS"
 echo "[$(date)] rsync_completed_axes started" | tee -a "$LOG"
 
 # Get the list of currently-complete axes from the pod (each has >=14 summary.json files).
-remote_completed=$(
+# A failed listing (SSH down, batch file missing) used to look like
+# "0 axes complete" and exit 0; it now exits 1 (2026-10-12).
+if ! remote_completed=$(
     ssh "${SSH_OPTS[@]}" "$POD_USER@$POD_HOST" \
         "cd /workspace/assistant-axis && \
          while IFS= read -r cfg; do \
@@ -39,7 +41,10 @@ remote_completed=$(
             n=\$(find $POD_OUTPUTS/\"\$name\" -name summary.json 2>/dev/null | wc -l); \
             if [ \"\$n\" -ge 14 ]; then echo \"\$name\"; fi; \
          done < $BATCH" 2>>"$LOG"
-)
+); then
+    echo "[$(date)] FAILED to list completed axes on the pod (see $LOG)" | tee -a "$LOG"
+    exit 1
+fi
 
 n_remote=$(echo "$remote_completed" | grep -c .)
 echo "[$(date)] $n_remote axes complete on pod" | tee -a "$LOG"
@@ -68,3 +73,4 @@ for name in $remote_completed; do
 done
 
 echo "[$(date)] done: pulled=$n_pulled, already-local=$n_skipped, failed=$n_failed" | tee -a "$LOG"
+[ "$n_failed" -eq 0 ]

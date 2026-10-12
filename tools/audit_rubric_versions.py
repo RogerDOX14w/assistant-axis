@@ -66,6 +66,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -417,21 +418,24 @@ def _default_current_rubric() -> str:
 
     Done by source-parsing rather than importing because importing
     that module pulls in matplotlib + every results_analysis dep,
-    and we don't need any of that here.  Falls back to ``"v3"`` if
-    the constant can't be parsed (loud-fails if neither found and
-    no override was passed on the CLI; see ``main``).
+    and we don't need any of that here.  Returns ``""`` if the
+    constant can't be parsed (``main`` then fails loudly unless
+    ``--current`` was passed).
+
+    Only a module-level assignment counts (``RUBRIC_VERSION = "v4"``
+    at column 0, optionally annotated); an indented line such as an
+    example inside a docstring or comment block, or a longer name such
+    as ``RUBRIC_VERSION_HISTORY``, is not taken for it.
     """
     candidate = _REPO_ROOT / "results_analysis" / "axis_judge_correlation.py"
     if not candidate.exists():
         return ""
+    pat = re.compile(
+        r"""^RUBRIC_VERSION\s*(?::\s*[\w\[\]., ]+)?=\s*["']([^"']+)["']""")
     for line in candidate.read_text(encoding="utf-8").splitlines():
-        # Match e.g. ``RUBRIC_VERSION = "v3"`` -- no fancy parsing.
-        s = line.strip()
-        if s.startswith("RUBRIC_VERSION") and "=" in s:
-            _, rhs = s.split("=", 1)
-            rhs = rhs.strip()
-            if rhs.startswith(('"', "'")) and rhs[-1] in ('"', "'"):
-                return rhs[1:-1]
+        m = pat.match(line)
+        if m:
+            return m.group(1)
     return ""
 
 

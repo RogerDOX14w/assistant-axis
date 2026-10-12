@@ -31,7 +31,7 @@ print("=== TOP 20: STRONG even at WEAK steering (x=4,8,16) — high-leverage pro
 for rate, axis, qi, q, s, n, w in weak_sensitive[:20]:
     print(f"  {rate:+.2f} S{s:>2d}/W{w:>2d} of {n:>2d}  [{axis[:24]:24s}] q{qi:>2d}: {q[:100]}")
 
-print("\n=== BOTTOM 20: WEAK even at NEAR-cliff steering (x=4,8,16) — wasted slots ===")
+print("\n=== BOTTOM 20: WEAK at weak steering, far from the cliff (x=4,8,16) — wasted slots ===")
 for rate, axis, qi, q, s, n, w in weak_sensitive[-20:]:
     print(f"  {rate:+.2f} S{s:>2d}/W{w:>2d} of {n:>2d}  [{axis[:24]:24s}] q{qi:>2d}: {q[:100]}")
 

@@ -2,8 +2,9 @@
 """Analyse start-strength quality for completed steering sweeps.
 
 For every (persona, slot, layer, sign) cell that has at least one
-judged record, look up the strength CLOSEST to the configured
-``s_init = weakest * multiplier ** start_strength_multiplier_steps``
+judged record, look up the strength CLOSEST to the cell's start
+strength (``s_init`` from the cell's ``summary.json``, else the
+configured ``weakest * multiplier ** start_strength_multiplier_steps``)
 and categorise the start as:
 
 * ``GOOD``: at s_init the coherence stop predicate isn't tripped
@@ -128,6 +129,25 @@ def _persona_to_mode(name: str) -> str:
     return "prefill" if name.endswith("_prefill") else "all"
 
 
+def _cell_s_init(cell_dir: Path, config_s_init: float) -> float:
+    """The start strength the cell actually used.
+
+    Bidirectional cells record it in ``summary.json`` (``s_init``).  Since
+    2026-05-24 a config that omits ``sweep.start_strength_multiplier_steps``
+    gets a per-cell value from ``assistant_axis.sweep_start_heuristics``,
+    which the config-derived value (steps defaulting to 2) does not see;
+    measuring such a cell at the config value would grade a start it never
+    had.  Falls back to the config value when there is no summary (legacy
+    or in-flight cells).
+    """
+    p = cell_dir / "summary.json"
+    try:
+        s = json.loads(p.read_text()).get("s_init")
+    except (OSError, ValueError, AttributeError):
+        return config_s_init
+    return float(s) if isinstance(s, (int, float)) and s > 0 else config_s_init
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -163,13 +183,14 @@ def main() -> None:
                 sign = int(parts[2])
             except ValueError:
                 continue
-            res = _analyse_cell(cell_dir / "records.jsonl", sign, s_init)
+            cell_s_init = _cell_s_init(cell_dir, s_init)
+            res = _analyse_cell(cell_dir / "records.jsonl", sign, cell_s_init)
             if res is None:
                 continue
             rows.append({
                 "persona": persona_dir.name, "mode": mode,
                 "slot": slot, "layer": layer, "sign": sign,
-                "s_init": s_init, **res,
+                "s_init": cell_s_init, **res,
             })
 
     if not rows:

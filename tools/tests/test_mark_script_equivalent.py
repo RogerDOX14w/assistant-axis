@@ -100,6 +100,60 @@ def test_autodetect_finds_most_recent_fingerprint(
     assert fp == "v1:2026-05-01T00:00:00+00:00@1100"
 
 
+def test_autodetect_finds_envelope_with_provenance_after_large_payload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression (2026-10-12): ``json_metadata`` returns
+    ``{"result": ..., "_provenance": ...}``; serialised without
+    sort_keys, the provenance block sits after the payload, beyond the
+    2 KB head the sniff used to read.  Such a cache must still count."""
+    repo = tmp_path / "fake_repo"
+    repo.mkdir()
+    (repo / ".git").mkdir()
+    (repo / "roger").mkdir()
+    _redirect_repo(monkeypatch, repo)
+
+    small_old = _make_envelope(
+        "results_analysis/foo.py", "v1:OLD@1",
+        produced_at="2026-04-01T00:00:00+00:00",
+    )
+    big_new = _make_envelope(
+        "results_analysis/foo.py", "v1:NEW@2",
+        produced_at="2026-05-01T00:00:00+00:00",
+    )
+    big_new["result"] = {f"entity_{i}|T": i % 7 - 3 for i in range(2000)}
+    text = json.dumps(big_new)          # "result" first, as written in practice
+    assert text.index('"_provenance"') > 2048
+    (repo / "roger" / "old_small.json").write_text(json.dumps(small_old))
+    (repo / "roger" / "new_big.json").write_text(text)
+
+    assert mse._autodetect_from_fp("results_analysis/foo.py") == "v1:NEW@2"
+
+
+def test_autodetect_orders_mixed_timestamp_formats_by_time(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Local-time ``produced_at`` (pre-2026-05-09) and UTC ISO strings
+    must be compared as instants, not as strings: 23:00 -0700 on 05-08
+    is 06:00 UTC on 05-09, later than 10:00 UTC on 05-08."""
+    repo = tmp_path / "fake_repo"
+    repo.mkdir()
+    (repo / ".git").mkdir()
+    (repo / "roger").mkdir()
+    _redirect_repo(monkeypatch, repo)
+    utc_earlier = _make_envelope(
+        "results_analysis/foo.py", "v1:EARLIER@1",
+        produced_at="2026-05-08T10:00:00+00:00",
+    )
+    local_later = _make_envelope(
+        "results_analysis/foo.py", "v1:LATER@2",
+        produced_at="2026-05-08 23:00:00 -0700",
+    )
+    (repo / "roger" / "a.json").write_text(json.dumps(utc_earlier))
+    (repo / "roger" / "b.json").write_text(json.dumps(local_later))
+    assert mse._autodetect_from_fp("results_analysis/foo.py") == "v1:LATER@2"
+
+
 def test_autodetect_ignores_unrelated_scripts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

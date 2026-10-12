@@ -23,7 +23,13 @@ Reading the result:
 
 Writes ``<cell_dir>/records_effect_swap.jsonl`` with one line per
 record carrying ``{question_idx, strength, sign, orig_combined,
-swap_scores (dict by model), swap_combined}``.
+swap_scores (dict by model), swap_combined}``, and merges the run's
+token usage into ``<experiment_dir>/effect_order_bias_usage.json``.
+
+``orig_combined`` is the original straight-order ensemble mean.  On
+rubric-v7 records (swap-averaged judging, May 2026) that is
+``bidirectional.straight.scores.mean``, not ``effect.combined``, which
+is then already the swap-averaged estimator.
 
 After the run, prints a per-strength summary of the bias:
 mean original vs mean swapped vs mean (orig + swap) [which would be
@@ -59,12 +65,15 @@ sys.path.insert(0, str(REPO_ROOT))
 from assistant_axis.judge import (  # noqa: E402
     RateLimiter, call_judge_single_unified, parse_batch_scores_json,
 )
+from assistant_axis.judge_pricing import MultiModelUsage  # noqa: E402
 from assistant_axis.steering_judges import (  # noqa: E402
     DEFAULT_EFFECT_MODELS, DEFAULT_TARGET_BATCH_SIZE,
     PersonaSpec, SteeringSpec, build_effect_bidir_batch_prompt,
 )
 
 logger = logging.getLogger("test_effect_order_bias")
+
+USAGE_FILENAME = "effect_order_bias_usage.json"
 
 
 # ---------------------------------------------------------------------------
@@ -104,41 +113,37 @@ def load_specs(
 ) -> Tuple[PersonaSpec, SteeringSpec]:
     """Build PersonaSpec + SteeringSpec from the experiment's config.json.
 
-    Matches the conventions used by ``steering/run_sweep.py``'s
-    ``_resolve_steering_spec``: for role_transplant axes,
-    ``pos_label = role_to`` (the "+1 sign" pole the rubric scores
-    positively for), ``neg_label = role_from``.
+    Delegates to ``steering.post_judge.load_experiment_specs``, the loader
+    the effect judges themselves use, so the swapped prompt differs from
+    the live one only in the swap.  Before 2026-10-12 this was a local
+    copy that kept the config stems as labels; since W19 (2026-10-09) the
+    live spec carries the judge display form (``judge_label``) and
+    resolves renamed stems, so the copy no longer built the same prompt.
     """
-    with open(experiment_dir / "config.json", encoding="utf-8") as f:
-        config = json.load(f)
+    from steering.post_judge import load_experiment_specs
+    return load_experiment_specs(experiment_dir, instructions_dir)
 
-    persona_cfg = config.get("persona", {})
-    role_name = persona_cfg.get("role", "")
-    persona_desc = _try_desc(role_name, instructions_dir) or ""
-    persona = PersonaSpec(
-        role=role_name, description=persona_desc, extra_traits=[],
-    )
 
-    axis_src = config.get("axis_source", {}) or {}
-    if axis_src.get("type") == "role_transplant":
-        pos_label = axis_src.get("role_to", "pos")
-        neg_label = axis_src.get("role_from", "neg")
-    else:
-        pos_label = axis_src.get("pos_label") or "positive"
-        neg_label = axis_src.get("neg_label") or "negative"
-    pos_desc = axis_src.get("pos_description") or _try_desc(
-        pos_label, instructions_dir
-    )
-    neg_desc = axis_src.get("neg_description") or _try_desc(
-        neg_label, instructions_dir
-    )
-    axis_name = axis_src.get("axis_name") or f"{neg_label}-{pos_label}"
-    steering = SteeringSpec(
-        axis_name=axis_name,
-        pos_label=pos_label, pos_description=pos_desc,
-        neg_label=neg_label, neg_description=neg_desc,
-    )
-    return persona, steering
+def original_straight_score(effect: Dict[str, Any]) -> Optional[float]:
+    """The original (straight-order) ensemble score of one record.
+
+    Under rubric v7 ``effect.combined`` is already the swap-averaged
+    estimator ``(straight - swap) / 2``, so comparing it with a fresh
+    swap score mixes the two; the straight mean lives at
+    ``bidirectional.straight.scores.mean``.  v6 records keep it at
+    ``bidirectional.scores.mean``; ``combined`` is the last fallback
+    (it equals the straight mean on v6 records).
+    """
+    bidir = effect.get("bidirectional") or {}
+    straight = bidir.get("straight")
+    scores = (straight.get("scores") if isinstance(straight, dict)
+              else bidir.get("scores"))
+    if isinstance(scores, dict) and isinstance(scores.get("mean"), (int, float)):
+        return float(scores["mean"])
+    if isinstance(straight, dict):
+        return None       # v7 record without a straight mean: nothing to compare
+    combined = effect.get("combined")
+    return float(combined) if isinstance(combined, (int, float)) else None
 
 
 # ---------------------------------------------------------------------------
@@ -234,7 +239,7 @@ def gather_swap_items(experiment_dir: Path) -> List[SwapItem]:
         for r in _read_jsonl(d / "records.jsonl"):
             try:
                 eff = ((r.get("judges") or {}).get("effect") or {})
-                combined = eff.get("combined")
+                combined = original_straight_score(eff)
                 if combined is None:
                     continue
                 items.append(SwapItem(
@@ -274,6 +279,7 @@ async def _judge_batch_async(
     anthropic_client,
     rate_limiter: RateLimiter,
     max_tokens: int,
+    usage: Optional[MultiModelUsage] = None,
 ) -> Dict[int, Optional[Dict[str, Any]]]:
     """One batched effect call with baseline/response swapped.
 
@@ -310,6 +316,7 @@ async def _judge_batch_async(
         rate_limiter=rate_limiter,
         openai_client=openai_client,
         anthropic_client=anthropic_client,
+        usage=usage,
     )
     if text is None:
         return {i: None for i in range(len(batch_items))}
@@ -338,6 +345,7 @@ async def _run_all(
     target_batch_size: int,
     avg_stop_threshold: float = 0.5,
     avg_stop_consecutive: int = 2,
+    usage: Optional[MultiModelUsage] = None,
 ) -> Dict[Tuple[Path, int, float, int], Dict[str, Any]]:
     """Drive every batch x model call and aggregate per-record swapped scores.
 
@@ -441,6 +449,7 @@ async def _run_all(
                         anthropic_client=anthropic_client,
                         rate_limiter=rl,
                         max_tokens=512,
+                        usage=usage,
                     ))
                 per_model = await asyncio.gather(*model_tasks)
                 for i, it in enumerate(chunk):
@@ -568,9 +577,13 @@ def write_results_per_cell(
             **{k: v for k, v in rec.items() if k != "orig_combined"},
         }
         by_cell[it.cell_dir].append(line)
+    from assistant_axis.atomic_io import atomic_write_text
     for cell_dir, lines in by_cell.items():
         path = cell_dir / "records_effect_swap.jsonl"
-        path.write_text("\n".join(json.dumps(l) for l in lines) + "\n")
+        # Atomic: the experiment dir may sit on the pod's network mount
+        # (AGENT_NOTES "NFS-safe file I/O"), and this file is also the
+        # cache a rerun reads back.
+        atomic_write_text("\n".join(json.dumps(l) for l in lines) + "\n", path)
         logger.info(f"wrote {len(lines)} swap records to {path}")
 
 
@@ -644,7 +657,7 @@ def main() -> int:
     p.add_argument(
         "--avg-stop-threshold", type=float, default=0.5,
         help="Per-cell early-stop: stop the descent once the per-"
-             "strength mean of (orig + swap)/2 across questions has "
+             "strength mean of (orig - swap)/2 across questions has "
              "|magnitude| <= this value for --avg-stop-consecutive "
              "consecutive strengths.  Default 0.5.  Set to 0 to "
              "disable.",
@@ -680,13 +693,26 @@ def main() -> int:
 
     effect_models = [m.strip() for m in args.effect_models.split(",")
                      if m.strip()]
-    results = asyncio.run(_run_all(
-        items, persona=persona, steering=steering,
-        effect_models=effect_models,
-        target_batch_size=args.target_batch_size,
-        avg_stop_threshold=args.avg_stop_threshold,
-        avg_stop_consecutive=args.avg_stop_consecutive,
-    ))
+    # Token usage (AGENT_NOTES "Token usage logging is mandatory on
+    # batched LLM call sites"; retrofitted 2026-10-12): cumulative across
+    # reruns, next to the per-cell outputs.
+    usage = MultiModelUsage()
+    try:
+        results = asyncio.run(_run_all(
+            items, persona=persona, steering=steering,
+            effect_models=effect_models,
+            target_batch_size=args.target_batch_size,
+            avg_stop_threshold=args.avg_stop_threshold,
+            avg_stop_consecutive=args.avg_stop_consecutive,
+            usage=usage,
+        ))
+    finally:
+        usage_path = args.experiment_dir / USAGE_FILENAME
+        total = MultiModelUsage.load_or_create(usage_path)
+        total.merge_from(usage)
+        total.write_json(usage_path)
+        logger.info(usage.log_line("[usage] this run"))
+        logger.info(total.log_line(f"[usage] cumulative ({usage_path.name})"))
     write_results_per_cell(items, results)
     print_summary(items, results)
     return 0

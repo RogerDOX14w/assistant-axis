@@ -243,7 +243,7 @@ def _validate_frozen_compatibility(
             "separate tab"
         )
 
-    # Persona prompt lives in row 1 col B by build_tab convention.
+    # Persona prompt lives in row 2 col B by build_tab convention.
     if len(existing_persona_row) >= 2 and len(new_persona_row) >= 2:
         if str(existing_persona_row[1]).strip() != str(new_persona_row[1]).strip():
             raise RuntimeError(
@@ -297,15 +297,24 @@ def _merge_payload_into_existing(
     """Compute the final cell grid + block specs after merging.
 
     Strategy:
-      1. Take frozen rows from the payload (those drive questions +
-         baselines + persona; existing-tab equivalents are validated
-         to match for non-wipe modes).
+      1. Take the whole header region from the payload: the two frozen
+         rows (questions, baselines) AND the unfrozen persona / axis
+         rows (``sl.N_HEADER_ROWS`` rows in all).  Existing-tab
+         equivalents are validated to match for non-wipe modes.
       2. Walk existing rows; keep block ranges that pass the filter,
          preserving their on-disk content as-is.
       3. Append the new payload's blocks at the end.
       4. Recompute BlockSpec row offsets so the returned blocks
          reflect their final positions in the merged grid (used by
          the formatting layer for conditional-format ranges).
+
+    The persona and axis rows must stay at rows 2 and 3: the payload's
+    cell merges, wrap overrides and row heights are applied to those
+    fixed indices.  Before 2026-10-12 only the two frozen rows were
+    taken here, so a kept block landed at rows 2-3 and the push merged
+    its header and first data row into single cells (Sheets keeps only
+    the top-left value of a merge), while the persona / axis rows
+    moved below the kept blocks.
     """
     if mode != "wipe_tab":
         _validate_frozen_compatibility(existing_values, payload)
@@ -322,11 +331,12 @@ def _merge_payload_into_existing(
         sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * payload.n_questions
     )
     merged: List[List[Any]] = []
-    # Frozen header from payload (canonical source of questions/baselines).
-    merged.extend(payload.values[:sl.FROZEN_ROWS])
+    # Header region from payload (canonical source of questions,
+    # baselines, persona prompt and axis info).
+    merged.extend(payload.values[:sl.N_HEADER_ROWS])
 
     kept_block_specs: List[sl.BlockSpec] = []
-    cursor = sl.FROZEN_ROWS
+    cursor = sl.N_HEADER_ROWS
     for start, end, sentinel in to_keep:
         # Pull rows from existing_values, pad to n_cols.
         for r in existing_values[start:end]:
@@ -345,7 +355,7 @@ def _merge_payload_into_existing(
     # New payload blocks appended.  Their offsets need adjusting to the
     # merged grid's row indices.
     new_blocks_start = cursor
-    payload_blocks_start_in_payload = sl.FROZEN_ROWS
+    payload_blocks_start_in_payload = sl.N_HEADER_ROWS
     for row in payload.values[payload_blocks_start_in_payload:]:
         merged.append(sl.pad_row(list(row), n_cols))
     new_block_specs: List[sl.BlockSpec] = []
@@ -497,6 +507,24 @@ def _unmerge_all_request(*, sheet_id: int) -> Dict[str, Any]:
     return {
         "unmergeCells": {
             "range": {"sheetId": sheet_id},
+        }
+    }
+
+
+def _clear_below_request(*, sheet_id: int, start_row: int) -> Dict[str, Any]:
+    """Clear cell values from ``start_row`` (0-based) to the bottom of the tab.
+
+    In the non-wipe modes the merged grid is written over the old one
+    from A1; when it is shorter (a replaced block now has fewer
+    strengths), the old rows below it used to survive and, with no
+    sentinel of their own, read as part of the last block (or, if they
+    held an old sentinel, as a phantom block kept on every rerun).
+    Fixed 2026-10-12.
+    """
+    return {
+        "updateCells": {
+            "range": {"sheetId": sheet_id, "startRowIndex": start_row},
+            "fields": "userEnteredValue",
         }
     }
 
@@ -793,6 +821,11 @@ def push_to_sheet(
                 "fields": "userEnteredValue,userEnteredFormat",
             }
         })
+    elif total_rows < ws.row_count:
+        # (Only when the tab extends past the new grid: a GridRange that
+        # starts beyond the sheet's last row is rejected by the API.)
+        requests.append(_clear_below_request(
+            sheet_id=sheet_id, start_row=total_rows))
 
     # ----- VALUES -----
     # Write all merged values in one batch; gspread handles A1
@@ -812,8 +845,11 @@ def push_to_sheet(
             ws.add_cols(total_cols - ws.col_count + 2)
         # gspread 6.x changed the argument order to (values, range_name).
         # Use kwargs to be order-independent across both 5.x and 6.x.
+        # USER_ENTERED so the numeric strings of kept rows (read back
+        # by get_all_values as text) parse as numbers again; text that
+        # Sheets would read as a formula is escaped first.
         ws.update(
-            values=merged_values,
+            values=_escape_grid_for_user_entered(merged_values),
             range_name=cell_range,
             value_input_option="USER_ENTERED",
         )
@@ -836,7 +872,7 @@ def push_to_sheet(
     # (payload's were computed against just its own block range).
     full_cond_formats = sl.tab_wide_cond_formats(
         n_questions=payload.n_questions,
-        data_row_start=sl.FROZEN_ROWS,
+        data_row_start=sl.N_HEADER_ROWS,  # as in sl.build_tab
         data_row_end=total_rows,
     )
     for idx, cf in enumerate(full_cond_formats):
@@ -888,6 +924,34 @@ def push_to_sheet(
         ss.batch_update({"requests": decoration_requests})
 
     return ss.url
+
+
+_FORMULA_LEADS = ("=", "+", "-", "@")
+
+
+def _escape_for_user_entered(value: Any) -> Any:
+    """Keep a text cell literal under ``value_input_option="USER_ENTERED"``.
+
+    Sheets parses USER_ENTERED text that starts with ``=``, ``+``, ``-``
+    or ``@`` as a formula, so a model response that opens with a
+    markdown bullet (``"- First, ..."``) or an equals sign renders as
+    ``#ERROR!`` and the text is lost from view.  A leading apostrophe is
+    Sheets' marker for literal text and is not part of the stored value.
+    Numbers, and strings that read as numbers (the signed strengths and
+    scores of kept rows, which ``get_all_values`` returns as text, such
+    as ``"-1.5"``), are left alone so they stay numeric.
+    """
+    if not isinstance(value, str) or not value.startswith(_FORMULA_LEADS):
+        return value
+    try:
+        float(value)
+        return value
+    except ValueError:
+        return "'" + value
+
+
+def _escape_grid_for_user_entered(values: List[List[Any]]) -> List[List[Any]]:
+    return [[_escape_for_user_entered(v) for v in row] for row in values]
 
 
 def _col_index_to_letter(n_cols: int) -> str:

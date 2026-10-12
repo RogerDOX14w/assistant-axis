@@ -13,14 +13,18 @@ returned :class:`TabPayload` into ``gspread`` + ``batchUpdate`` calls.
 Block layout (one block per ``(slot, layer, positions_mode)`` cell;
 multi-cell experiments produce multiple blocks):
 
-    Row 1 (frozen): persona system prompt
-    Row 2 (frozen): per-column labels + per-question question text
-    Row 3 (frozen): baseline responses (sign=0, strength=0)
-    Row 4         : block header (sentinel + human-readable summary)
-    Row 5..K      : signed-strength data rows (negative -> positive)
+    Row 1 (frozen): per-column labels + per-question question text
+    Row 2 (frozen): baseline responses (sign=0, strength=0)
+    Row 3         : persona system prompt (merged across B..end)
+    Row 4         : axis info, both poles (merged across B..end)
+    Row 5         : block header (sentinel + human-readable summary)
+    Row 6..K      : signed-strength data rows (negative -> positive)
     Row K+1       : block header for the next cell (multi-cell only)
     Row K+2..M    : next block's data rows
     ...
+
+    (1-based sheet rows; in ``values`` and the constants below they are
+    0-based, so the first block header is ``values[N_HEADER_ROWS]``.)
 
 Columns:
 
@@ -29,8 +33,8 @@ Columns:
     C : mean_rp
     D : mean_eff_signed
     E : mean_abs_eff
-    F..I    : q0_response, q0_coh, q0_rp, q0_eff
-    J..M    : q1_response, q1_coh, q1_rp, q1_eff
+    F..I    : q0_response, q0_eff, q0_coh, q0_rp
+    J..M    : q1_response, q1_eff, q1_coh, q1_rp
     ...
     (5 + 4 * N_questions columns total)
 
@@ -1082,14 +1086,23 @@ def _response_rp_cross_rule(
     """Faint-orange shading on a response cell when its RP cell is
     ≤ 1 (persona drift).  Single rule because the orange has only one
     intensity.
+
+    The formula requires a number in the RP cell: in a Sheets formula a
+    blank cell compares as 0, so a bare ``=$I5<=1`` also fired on rows
+    whose RP was skipped (strength mean coherence above the skip
+    threshold), on questions with no record, and on block-header rows,
+    painting coherent responses as persona drift (fixed 2026-10-12).
+    The coherence and effect cross-rules compare with ``>=`` a positive
+    threshold or ``<=`` a negative one, which a blank (0) never meets.
     """
     rp_letter = _col_idx_to_a1_letter(rp_col)
     anchor_row_a1 = row_start + 1
+    ref = f"${rp_letter}{anchor_row_a1}"
     return CondFormat(
         row_start=row_start, row_end=row_end,
         col_start=resp_col, col_end=resp_col + 1,
         condition_type="CUSTOM_FORMULA",
-        values=(f"=${rp_letter}{anchor_row_a1}<={RP_LOW_THRESHOLD}",),  # type: ignore[arg-type]
+        values=(f"=AND(ISNUMBER({ref}),{ref}<={RP_LOW_THRESHOLD})",),  # type: ignore[arg-type]
         bg_color=COLOR_ORANGE_FAINT,
     )
 

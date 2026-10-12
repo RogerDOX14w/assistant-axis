@@ -525,6 +525,35 @@ class TestMergePayloadIntoExisting:
         for spec in specs:
             assert merged[spec.header_row][0] == spec.sentinel
 
+    def test_header_region_precedes_kept_blocks(self):
+        """Regression (2026-10-12): the persona and axis rows must stay at
+        rows 2 and 3, above any kept block.  The push applies the
+        payload's cell merges, wrap overrides and row heights to rows 2-3
+        by index; when only the two frozen rows were copied, a kept block
+        landed there and its header + first data row were merged into
+        single cells (Sheets keeps only the top-left value)."""
+        existing = self._build_existing([("exp_B", 3, 25)])
+        payload = _make_minimal_payload(experiment_id="exp_A")
+        merged, specs = ssg._merge_payload_into_existing(
+            payload=payload, existing_values=existing,
+            mode="replace_experiment_blocks",
+            current_experiment_id="exp_A",
+        )
+        assert merged[:sl.N_HEADER_ROWS] == payload.values[:sl.N_HEADER_ROWS]
+        assert merged[2][0] == "persona" and merged[3][0] == "axis"
+        # Exactly one persona row and one axis row in the whole grid.
+        assert [r[0] for r in merged].count("persona") == 1
+        assert [r[0] for r in merged].count("axis") == 1
+        # The kept block starts right after the header region, and the
+        # new block follows it.
+        spec_by_exp = {s.experiment_id: s for s in specs}
+        assert spec_by_exp["exp_B"].header_row == sl.N_HEADER_ROWS
+        assert spec_by_exp["exp_A"].header_row == sl.N_HEADER_ROWS + 4
+        # No row the payload merges (rows 2 and 3) holds block data.
+        for row in (2, 3):
+            assert not str(merged[row][0]).startswith("[block:")
+            assert merged[row][1] != "exp_B"
+
     def test_block_validates_frozen_rows_in_non_wipe_modes(self):
         # If the existing tab's questions differ from the new payload's,
         # non-wipe modes should error before producing a corrupt grid.
@@ -563,6 +592,44 @@ class TestMergePayloadIntoExisting:
         # q0 response col = N_AGG_COLS + 0
         q0_col = sl.N_AGG_COLS
         assert header_row[q0_col] == "new0"
+
+
+def test_clear_below_request_is_unbounded_below_the_grid():
+    """Rows past the merged grid must be cleared in non-wipe modes, or a
+    shorter rewrite leaves old rows that read as part of the last block."""
+    req = ssg._clear_below_request(sheet_id=7, start_row=29)
+    rng = req["updateCells"]["range"]
+    assert rng == {"sheetId": 7, "startRowIndex": 29}     # no end: to the bottom
+    assert req["updateCells"]["fields"] == "userEnteredValue"
+
+
+# ---------------------------------------------------------------------------
+# USER_ENTERED escaping (values written to Sheets)
+# ---------------------------------------------------------------------------
+
+class TestEscapeForUserEntered:
+    @pytest.mark.parametrize("text", [
+        "- First, preheat the oven",
+        "=SUM(A1:A3) is how you add",
+        "+1 for this idea",
+        "@here is the plan",
+        "--",
+    ])
+    def test_formula_like_text_is_made_literal(self, text):
+        assert ssg._escape_for_user_entered(text) == "'" + text
+
+    @pytest.mark.parametrize("value", [
+        "-1.5", "+2", "-0.25", "3",          # numeric text from kept rows
+        -1.5, 2, 0.0, None, "",              # non-strings / empty
+        "Sure, here is a plan.", "[block:exp/s3_l25/all]", "baseline",
+    ])
+    def test_numbers_and_ordinary_text_are_unchanged(self, value):
+        assert ssg._escape_for_user_entered(value) == value
+
+    def test_grid_shape_preserved(self):
+        grid = [["a", "-b"], [1.0, "=c"]]
+        assert ssg._escape_grid_for_user_entered(grid) == [
+            ["a", "'-b"], [1.0, "'=c"]]
 
 
 # ---------------------------------------------------------------------------

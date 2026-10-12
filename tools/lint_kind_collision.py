@@ -59,10 +59,18 @@ _SKIP_DIRS = {
     "roger",              # cache fan-out tree, not source
 }
 
-# Filenames inside `tests/` directories where the bug-pattern is
-# expected (regression reproducers).  Findings here become warnings
-# instead of errors unless --strict is set.
-_TEST_PATH_FRAGMENTS = ("/tests/", "/test_")
+# Files inside `tests/` directories, or named `test_*.py`, where the
+# bug-pattern is expected (regression reproducers).  Findings here
+# become warnings instead of errors unless --strict is set.
+def _is_test_path(path: Path) -> bool:
+    """A test file: under a ``tests`` directory or named ``test_*``.
+
+    Only the file name and directory names are looked at; before
+    2026-10-12 any ``/test_`` substring of the absolute path counted, so
+    a file under a directory such as pytest's ``.../test_foo0/`` (or any
+    ancestor named ``test_*``) was demoted to a warning.
+    """
+    return "tests" in Path(path).parts[:-1] or Path(path).name.startswith("test_")
 
 
 @dataclass(frozen=True)
@@ -76,8 +84,9 @@ class Finding:
 
 def _is_kind_tuple_literal(node: ast.AST) -> bool:
     """``("traits", "roles")`` or ``("roles", "traits")`` — the
-    canonical Bug-A iterator.  Order doesn't matter."""
-    if not isinstance(node, ast.Tuple):
+    canonical Bug-A iterator.  Order doesn't matter, and the list form
+    ``["traits", "roles"]`` counts too."""
+    if not isinstance(node, (ast.Tuple, ast.List)):
         return False
     if len(node.elts) != 2:
         return False
@@ -121,9 +130,10 @@ class _Visitor(ast.NodeVisitor):
     Heuristic: when we enter a ``for et in ("traits", "roles"):``
     loop, track common short var names that often hold bare entity
     names inside the loop (``name``, ``n``, ``stem``, ``etname``,
-    plus any variable assigned from ``fp.stem`` or
-    ``Path(...).stem``).  Any subscript assignment ``D[<one-of-those>]
-    = ...`` is reported.
+    ``ent_name``, ``entity_name``).  Any subscript assignment
+    ``D[<one-of-those>] = ...`` (plain, augmented ``+=`` or annotated)
+    is reported.  Other writes (``d.setdefault(name, ...)``,
+    ``s.add(name)``, comprehensions) are not seen.
     """
 
     # Variable names that, inside a kind-iteration loop, almost
@@ -137,7 +147,7 @@ class _Visitor(ast.NodeVisitor):
         self.path = path
         self.source_lines = source_lines
         self.findings: List[Finding] = []
-        self.is_test = any(frag in str(path) for frag in _TEST_PATH_FRAGMENTS)
+        self.is_test = _is_test_path(path)
         self._loop_var_stack: list[set[str]] = []  # active kind-loop vars
 
     def _push_kind_loop(self, et_var: Optional[str]) -> None:
@@ -162,10 +172,22 @@ class _Visitor(ast.NodeVisitor):
             if is_kind_loop:
                 self._pop_kind_loop()
 
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        self._check_targets(node, [node.target])
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        self._check_targets(node, [node.target])
+        self.generic_visit(node)
+
     def visit_Assign(self, node: ast.Assign) -> None:
+        self._check_targets(node, node.targets)
+        self.generic_visit(node)
+
+    def _check_targets(self, node: ast.AST, targets: list) -> None:
         if self._loop_var_stack:
             active_vars = self._loop_var_stack[-1]
-            for target in node.targets:
+            for target in targets:
                 if _name_used_as_key(target, active_vars):
                     if not _file_contains_noqa_on_line(
                         self.source_lines, node.lineno
@@ -181,7 +203,6 @@ class _Visitor(ast.NodeVisitor):
                             ),
                             is_test=self.is_test,
                         ))
-        self.generic_visit(node)
 
 
 def lint_file(path: Path) -> List[Finding]:

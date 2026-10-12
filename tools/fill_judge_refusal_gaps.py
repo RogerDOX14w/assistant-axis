@@ -41,6 +41,13 @@ CLI::
     # Target a specific dir.
     uv run python tools/fill_judge_refusal_gaps.py \\
         --dir roger/axis_judge_experiments/aligned_artificial_intelligence_vs_paperclip_maximizer/sonnet
+
+Exit code (both modes):
+* 0 = no unexpected gaps (and, when filling, every fill succeeded)
+* 1 = at least one allowlisted fill failed
+* 2 = unexpected (non-allowlisted) gaps were found; the banner on
+  stderr lists them.  Before 2026-10-12 ``--scan`` exited 0 here, and a
+  fill run with no allowlisted gaps exited 1.
 """
 from __future__ import annotations
 
@@ -187,7 +194,7 @@ def _scan_dirs(globs: list[str], explicit_dirs: list[str]) -> list[Path]:
     return out
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -206,12 +213,11 @@ def main() -> int:
                    help="Parallel API calls (default: 3).")
     p.add_argument("--verbose", "-v", action="store_true",
                    help="Per-call status lines.")
-    args = p.parse_args()
+    args = p.parse_args(argv)
 
     if not args.glob and not args.dir:
         args.glob = [DEFAULT_EXPERIMENT_GLOB]
 
-    _load_env()
     allowlist = load_allowlist(
         Path(args.allowlist) if args.allowlist else None)
     if not allowlist.get("judge_refusals"):
@@ -257,10 +263,13 @@ def main() -> int:
         print("Scan-only: showing what would be filled, no API calls.")
         for d, mode, eid, _ in jobs:
             print(f"  WOULD FILL: {d.parent.name} / {mode} / {eid}")
-        return 0
+        return 2 if n_unexpected else 0
 
     if not jobs:
-        return 0 if not n_unexpected else 1
+        return 2 if n_unexpected else 0
+
+    # API keys are needed only from here on (a scan never reads .env).
+    _load_env()
 
     # Build per-dir AxisSpec cache so we don't re-load config.json per job.
     cfg_cache: dict[Path, ajc.AxisSpec] = {}

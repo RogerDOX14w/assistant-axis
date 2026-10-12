@@ -4,7 +4,9 @@ Run against a steering experiment dir.  For each strength group where
 some/all records have `judges.effect.combined = None` (and not skipped
 due to coh), this:
 
-1. Reconstructs the EFFECT_BIDIR_BATCH_RUBRIC prompt verbatim.
+1. Reconstructs the EFFECT_BIDIR_BATCH_RUBRIC prompt verbatim (the
+   straight order; failures of the swap half, rubric v7, are not
+   diagnosed here).
 2. Calls each effect-judge model once.
 3. Logs:
    - finish_reason (whether truncated vs natural stop)
@@ -88,6 +90,47 @@ async def call_one_with_finish_reason(
         raise ValueError(f"unknown provider for {model!r}")
 
 
+def _straight_scores(eff: Dict[str, Any]) -> Dict[str, Any]:
+    """Per-model straight-order effect scores of one record.
+
+    Rubric v7 (May 2026) stores them under
+    ``bidirectional.straight.scores``; v6 records under
+    ``bidirectional.scores``.  Before 2026-10-12 only the v6 location was
+    read, so on v7 records every model looked failed and healthy batches
+    were picked for (paid) replay.
+    """
+    bidir = eff.get("bidirectional") or {}
+    straight = bidir.get("straight")
+    if isinstance(straight, dict):
+        return straight.get("scores") or {}
+    return bidir.get("scores") or {}
+
+
+def _fail_counts(
+    rs: List[Dict[str, Any]], effect_models: List[str],
+) -> tuple[Dict[str, int], int]:
+    """Return ``({model: n_failed}, n_skipped)`` for one strength's records.
+
+    A model counts as failed on a record only when its entry is present
+    with ``score`` None (the dispatcher writes ``{"score": None,
+    "reason": "UNPARSEABLE" | "MISSING"}``); an absent entry means the
+    model was not run on that record and is not a parse failure.
+    """
+    fail_by_model: Dict[str, int] = {m: 0 for m in effect_models}
+    skip = 0
+    for r in rs:
+        eff = (r.get("judges") or {}).get("effect") or {}
+        if eff.get("skipped_due_to_strength_mean_coh"):
+            skip += 1
+            continue
+        scores = _straight_scores(eff)
+        for m in effect_models:
+            sc = scores.get(m)
+            if isinstance(sc, dict) and sc.get("score") is None:
+                fail_by_model[m] += 1
+    return fail_by_model, skip
+
+
 async def diagnose(
     *, experiment_dir: Path, instructions_dir: Path,
     effect_models: List[str], max_failed_strengths: int,
@@ -125,18 +168,7 @@ async def diagnose(
             rs = by_s[s]
             # Find strengths where AT LEAST ONE judge model failed on >=
             # half the records (batch-level fail).
-            fail_by_model: Dict[str, int] = {m: 0 for m in effect_models}
-            skip = 0
-            for r in rs:
-                eff = (r.get("judges") or {}).get("effect") or {}
-                if eff.get("skipped_due_to_strength_mean_coh"):
-                    skip += 1
-                    continue
-                scores = (eff.get("bidirectional") or {}).get("scores") or {}
-                for m in effect_models:
-                    sc = scores.get(m, {})
-                    if isinstance(sc, dict) and sc.get("score") is None:
-                        fail_by_model[m] += 1
+            fail_by_model, skip = _fail_counts(rs, effect_models)
             if skip == len(rs):
                 continue
             if not any(c > len(rs) // 2 for c in fail_by_model.values()):

@@ -35,7 +35,8 @@ import sys
 from collections import defaultdict, Counter
 from pathlib import Path
 
-ROOT = Path("/Users/roger/Documents/GitHub/assistant-axis/runpod_workspace/qwen/qwen-3-32b Roger 8slot/steering")
+ROOT = (Path(__file__).resolve().parent.parent
+        / "runpod_workspace/qwen/qwen-3-32b Roger 8slot/steering")
 AXES = [
     "anthropologist_helpful_v1",
     "prodigy_harmless_v1",

@@ -75,6 +75,13 @@ def _write_envelope_for_script(
     }), encoding="utf-8")
 
 
+@pytest.fixture(autouse=True)
+def _no_real_local_history(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Never let a test reach the per-user Cursor History under the home
+    directory (the defaults are only consulted without --history-root)."""
+    monkeypatch.setattr(dar, "_DEFAULT_HISTORY_ROOTS", ())
+
+
 def _redirect_repo(monkeypatch: pytest.MonkeyPatch, repo: Path) -> None:
     monkeypatch.setattr(dar, "_REPO_ROOT", repo)
     # Also redirect provenance's repo-root resolver so InputSpecs
@@ -243,8 +250,10 @@ def test_cli_uses_git_when_available(
     time.sleep(1.1)
     script.write_text("# current version\n# extra line\n", encoding="utf-8")
 
+    # git returns the version that actually ran (same bytes as recorded),
+    # so the diff is verified against the recorded fingerprint's size.
     _mock_git_show(monkeypatch, sha_to_text={
-        "abc123": "# original version\n",
+        "abc123": "# v1\n",
     })
 
     rc = dar.main([str(cache)])
@@ -252,10 +261,80 @@ def test_cli_uses_git_when_available(
     assert rc == 0
     assert "Diff source: git show abc123" in out
     assert "+# current version" in out
-    assert "-# original version" in out
+    assert "-# v1" in out
+    assert "UNVERIFIED" not in out
     # Suggested mark_script_equivalent command appears (since current
     # fingerprint differs from recorded).
     assert "mark_script_equivalent.py" in out
+
+
+def test_recorded_size_parsing() -> None:
+    assert dar._recorded_size("v1:2026-05-09T00:14:03+00:00@105336") == 105336
+    assert dar._recorded_size("") is None
+    assert dar._recorded_size("v1:no-size") is None
+    assert dar._recorded_size("v1:x@notanint") is None
+
+
+def test_history_root_flag_replaces_the_defaults(tmp_path: Path, monkeypatch) -> None:
+    default_root = tmp_path / "default_history"; default_root.mkdir()
+    monkeypatch.setattr(dar, "_DEFAULT_HISTORY_ROOTS", (str(default_root),))
+    explicit = tmp_path / "explicit"; explicit.mkdir()
+    assert dar._candidate_history_roots(explicit) == [explicit]
+    assert dar._candidate_history_roots(None) == [default_root]
+    assert dar._candidate_history_roots(tmp_path / "missing") == []
+
+
+def test_cli_dirty_sha_mismatch_falls_back_to_verified_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    """Regression (2026-10-12): for a cache written from a dirty tree,
+    ``git show <sha>`` returns the committed version, not what ran.  The
+    size check rejects it and the History snapshot of the right size
+    wins; the suggested command then refers to a verified diff."""
+    import time
+    repo = tmp_path / "repo"; repo.mkdir(); (repo / ".git").mkdir()
+    script = repo / "foo.py"
+    script.write_text("# what actually ran\n", encoding="utf-8")
+    _redirect_repo(monkeypatch, repo)
+    cache = repo / "cache.json"
+    _write_envelope_for_script(cache, script, git_sha="abc123+dirty")
+    time.sleep(1.1)
+    script.write_text("# what actually ran\n# later edit\n", encoding="utf-8")
+
+    _mock_git_show(monkeypatch, sha_to_text={"abc123": "# committed\n"})
+    history_root = _make_history_fixture(
+        repo, script, snapshots=[(1_700_000_000_000, "# what actually ran\n")],
+    )
+    rc = dar.main([str(cache), "--history-root", str(history_root)])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "WARNING: the script at abc123+dirty" in out
+    assert "Diff source: Cursor Local History" in out
+    assert "UNVERIFIED" not in out
+    assert "mark_script_equivalent.py" in out
+
+
+def test_cli_unverified_diff_suggests_no_equivalence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    """When no recovered version matches the recorded size, the diff is
+    shown marked UNVERIFIED and no paste-ready equivalence is offered."""
+    import time
+    repo = tmp_path / "repo"; repo.mkdir(); (repo / ".git").mkdir()
+    script = repo / "foo.py"
+    script.write_text("# what actually ran\n", encoding="utf-8")
+    _redirect_repo(monkeypatch, repo)
+    cache = repo / "cache.json"
+    _write_envelope_for_script(cache, script, git_sha="abc123+dirty")
+    time.sleep(1.1)
+    script.write_text("# now\n", encoding="utf-8")
+    _mock_git_show(monkeypatch, sha_to_text={"abc123": "# committed\n"})
+    rc = dar.main([str(cache), "--history-root", str(tmp_path / "none")])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "Diff source: git show abc123+dirty" in out
+    assert "UNVERIFIED" in out
+    assert "mark_script_equivalent.py" not in out
 
 
 def test_cli_falls_back_to_history(

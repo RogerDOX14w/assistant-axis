@@ -36,6 +36,7 @@ the registry):
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import sys
 from pathlib import Path
@@ -63,24 +64,71 @@ def _to_repo_relative(path: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+_SNIFF_HEAD_BYTES = 2048
+# The provenance block of an envelope serialised payload-first sits at
+# the end of the file; even a ``multi`` input listing ~1,000 member
+# paths stays well under this.
+_SNIFF_TAIL_BYTES = 8_000_000
+
+
 def _iter_envelope_jsons(roots: Iterable[Path]) -> Iterable[Path]:
-    """Yield JSON files under ``roots`` that look envelope-shaped."""
+    """Yield JSON files under ``roots`` that look envelope-shaped.
+
+    The ``"_provenance"`` key is looked for in the head AND the tail of
+    each file: an envelope serialised as ``{"result": ..., "_provenance":
+    ...}`` (the key order ``json_metadata`` returns, without
+    ``sort_keys``) puts the block after the payload.  Before 2026-10-12
+    only the first 2 KB were sniffed, which missed about 8% of the
+    envelopes under ``roger/`` (88 of 1,115), so auto-detect could pick
+    an older recorded fingerprint, or none.
+    """
     for root in roots:
         if not root.exists():
             continue
         for p in sorted(root.rglob("*.json")):
             try:
-                # Cheap header-shaped sniff: only open if size is
-                # plausible (skip 0-byte / huge mostly-non-JSON files).
-                if p.stat().st_size > 200_000_000:
+                # Skip huge files (mostly non-JSON payloads).
+                size = p.stat().st_size
+                if size > 200_000_000:
                     continue
                 with p.open("rb") as f:
-                    head = f.read(2048)
-                if b'"_provenance"' not in head:
-                    continue
+                    head = f.read(_SNIFF_HEAD_BYTES)
+                    found = b'"_provenance"' in head
+                    if not found and size > _SNIFF_HEAD_BYTES:
+                        f.seek(max(_SNIFF_HEAD_BYTES - 16, size - _SNIFF_TAIL_BYTES))
+                        found = b'"_provenance"' in f.read()
             except OSError:
                 continue
-            yield p
+            if found:
+                yield p
+
+
+def _produced_at_key(produced_at: str, jpath: Path) -> float:
+    """Sortable UTC epoch seconds for an envelope's ``produced_at``.
+
+    Envelopes carry ISO-8601 UTC (``2026-05-10T01:18:56+00:00``) or,
+    before 2026-05-09, a local-time form (``2026-05-08 23:10:00 -0700``);
+    comparing the strings mis-orders the two forms on the same day.
+    Falls back to the file's mtime when the field is missing or
+    unparseable (as the docstring of ``_autodetect_from_fp`` promises).
+    """
+    s = (produced_at or "").strip()
+    if s:
+        for parse in (
+            _dt.datetime.fromisoformat,
+            lambda v: _dt.datetime.strptime(v, "%Y-%m-%d %H:%M:%S %z"),
+        ):
+            try:
+                d = parse(s)
+            except ValueError:
+                continue
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=_dt.timezone.utc)
+            return d.timestamp()
+    try:
+        return jpath.stat().st_mtime
+    except OSError:
+        return 0.0
 
 
 def _autodetect_from_fp(script_rel: str) -> Optional[str]:
@@ -93,7 +141,7 @@ def _autodetect_from_fp(script_rel: str) -> Optional[str]:
     falling back to the file's mtime when ``produced_at`` is missing.
     """
     roots = [_REPO_ROOT / r for r in _DEFAULT_SEARCH_ROOTS]
-    candidates: list[tuple[str, str]] = []  # (produced_at, fingerprint)
+    candidates: list[tuple[float, str]] = []  # (produced_at epoch, fingerprint)
     for jpath in _iter_envelope_jsons(roots):
         try:
             data = json.loads(jpath.read_text())
@@ -104,7 +152,7 @@ def _autodetect_from_fp(script_rel: str) -> Optional[str]:
         env = data.get("_provenance")
         if not isinstance(env, dict):
             continue
-        produced_at = str(env.get("produced_at", ""))
+        when = _produced_at_key(str(env.get("produced_at") or ""), jpath)
         for entry in env.get("inputs", []) or []:
             if (
                 isinstance(entry, dict)
@@ -112,7 +160,7 @@ def _autodetect_from_fp(script_rel: str) -> Optional[str]:
                 and entry.get("path") == script_rel
                 and entry.get("fingerprint")
             ):
-                candidates.append((produced_at, str(entry["fingerprint"])))
+                candidates.append((when, str(entry["fingerprint"])))
     if not candidates:
         return None
     candidates.sort()

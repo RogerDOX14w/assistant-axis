@@ -2,11 +2,21 @@
 # Pull the latest steering sweep outputs from the runpod to the laptop.
 #
 # Per-axis loop so a flaky SSH connection only kills one axis and the
-# rest still get pulled.  --partial + --append-verify means an
-# interrupted axis resumes cleanly on the next pass rather than
-# starting from scratch.  Safe to run while sweep #2 is still
-# producing records.jsonl on the pod (rsync's atomic temp-file
-# strategy avoids partial-line reads even with concurrent writes).
+# rest still get pulled.  --partial keeps an interrupted file so the
+# next pass only sends the difference (until then that local file is
+# truncated; rerun before analysing).  Safe to run while sweep #2 is
+# still producing records.jsonl on the pod: rsync writes each file to a
+# temp name and renames it when complete, so a local reader sees the old
+# or the new copy, not one being written.
+#
+# No --append-verify (removed 2026-10-12): it implies --inplace (so the
+# temp-file guarantee above did not hold), and it skips any file whose
+# pod copy is not longer than the local one, so a summary.json or a
+# records.jsonl rewritten shorter on the pod was never pulled again.
+# It and --info=stats1 are also unknown to macOS's bundled rsync
+# (openrsync, "2.6.9 compatible"), which made every attempt fail.
+#
+# Exit status: 0 when every persona was pulled, 1 otherwise.
 #
 # Usage:
 #   scripts/rsync_pod_sweeps.sh            # full set (sweep #1 + #2 + baselines)
@@ -89,10 +99,10 @@ for persona in "${PERSONAS[@]}"; do
     src="${POD_USER}@${POD_HOST}:${POD_PATH}/${persona}/"
     dst="${LOCAL_ROOT}/${persona}/"
     mkdir -p "$dst"
-    # Up to 3 attempts; rsync's --partial + --append-verify resumes.
+    # Up to 3 attempts; --partial keeps what an interrupted attempt sent.
     for attempt in 1 2 3; do
         echo "[$(date +%H:%M:%S)] rsync $persona (attempt $attempt)..." | tee -a "$LOG"
-        if rsync -aH --partial --append-verify --info=stats1 \
+        if rsync -aH --partial --stats \
             -e "ssh ${SSH_OPTS[*]}" \
             "$src" "$dst" >>"$LOG" 2>&1; then
             echo "  OK" | tee -a "$LOG"
@@ -111,3 +121,4 @@ done
 echo "" | tee -a "$LOG"
 echo "Done: $n_ok personas downloaded, $n_fail failed after 3 attempts." | tee -a "$LOG"
 echo "Full log: $LOG" | tee -a "$LOG"
+[ "$n_fail" -eq 0 ]

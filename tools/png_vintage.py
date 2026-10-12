@@ -239,6 +239,7 @@ def git_show(sha: str, path: str) -> Optional[str]:
         res = subprocess.run(
             ["git", "show", f"{sha}:{path}"],
             capture_output=True, text=True, check=False, timeout=5,
+            cwd=Path(__file__).resolve().parent.parent,  # repo root, not the caller's cwd
         )
         result: Optional[str] = res.stdout if res.returncode == 0 else None
     except (FileNotFoundError, subprocess.TimeoutExpired):

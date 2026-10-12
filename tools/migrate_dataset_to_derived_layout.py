@@ -42,11 +42,13 @@ Behaviour
 * Idempotent: each item is moved only if the source exists and the destination
   does not.  If both exist, that's an error (don't silently clobber).
 * Atomic per-item: uses ``os.replace`` for whole-tree renames inside the same
-  filesystem.  No copy-then-delete dance, so a partial run leaves either the
-  old layout or the new -- not both.
+  filesystem.  No copy-then-delete dance, so each item is either at its old
+  path or its new one (a run interrupted between items leaves some items
+  moved and the rest not; rerunning finishes the job).
 * Finder ' copy/' dirs (Roger 4-slot only): byte-equal-diffed against their
-  canonical sibling; pruned only when fully identical.  Any difference halts
-  the run and reports the divergent files.
+  canonical sibling; pruned only when fully identical (flat, regular files
+  only: a subdirectory in a copy counts as a difference).  Any difference
+  halts the run and reports the divergent files.
 * Dry-run mode (``--dry-run``): prints the planned actions without touching
   disk.
 
@@ -166,10 +168,22 @@ def _plan_for_dataset(
 
 def _diff_dirs(a: Path, b: Path) -> list[str]:
     """Return a list of human-readable difference descriptions; empty if dirs
-    are byte-identical (same set of files, each file equal)."""
+    are byte-identical (same set of files, each file equal).
+
+    Only flat directories of regular files can compare equal.  Any
+    subdirectory (or other non-regular entry) in the copy is reported as
+    a difference, because ``_rmtree`` removes the copy recursively: before
+    2026-10-12 only the top-level files were compared, so a Finder copy
+    holding a subdirectory with files of its own would have been
+    "byte-identical" and pruned with that content.
+    """
+    nested = sorted(p.name for p in a.iterdir()
+                    if not p.is_file() or p.is_symlink())
     cmp_a = {p.name for p in a.iterdir() if p.is_file()}
     cmp_b = {p.name for p in b.iterdir() if p.is_file()}
     issues: list[str] = []
+    if nested:
+        issues.append(f"non_file_entries_in_copy: {nested[:5]}")
     only_a = cmp_a - cmp_b
     only_b = cmp_b - cmp_a
     if only_a:

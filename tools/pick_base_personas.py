@@ -191,6 +191,31 @@ def axis_pos_neg_to_dirname(pos: str, neg: str) -> str:
     return f"{pos}_vs_{neg}"
 
 
+def backup_existing(out_path: Path) -> Path | None:
+    """Copy an existing output file to ``<name>.bak.<UTC stamp>`` before it
+    is overwritten, and return the copy's path (None if there was nothing
+    to keep).
+
+    The output is meant to be hand-edited: Roger deletes the candidates
+    he does not want, and the file under ``roger/`` is git-ignored, so a
+    rerun used to destroy those picks with no way back (the copy on disk
+    on 2026-10-12 holds exactly 2 picks for each of 60 axes, i.e. it was
+    edited).  Snapshot-before-overwrite, per AGENT_NOTES.
+    """
+    import datetime as _dt
+    import shutil
+    if not out_path.exists():
+        return None
+    stamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    dest = out_path.with_name(f"{out_path.name}.bak.{stamp}")
+    n = 1
+    while dest.exists():
+        dest = out_path.with_name(f"{out_path.name}.bak.{stamp}.{n}")
+        n += 1
+    shutil.copy2(out_path, dest)
+    return dest
+
+
 def main() -> int:
     p = argparse.ArgumentParser(
         description=__doc__,
@@ -365,6 +390,10 @@ def main() -> int:
     # ----- Write output -----
     out_path = Path(args.out).resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    backup = backup_existing(out_path)
+    if backup is not None:
+        print(f"Backed up the existing {out_path.name} (it may hold hand-"
+              f"edited picks) to {backup}")
     header = [
         "# Base-persona candidates for full per-axis steering sweep",
         f"# Generated: {Path(__file__).name} from {pairs_path.name}",

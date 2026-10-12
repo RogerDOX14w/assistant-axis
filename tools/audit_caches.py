@@ -298,11 +298,25 @@ def apply_deferrals(
             a.deferral_matches = matches
 
 
-def propagate_transitive_stale(audits: list[CacheAudit]) -> None:
+def propagate_transitive_stale(
+    audits: list[CacheAudit],
+    *,
+    registry: Optional[list[DeferralEntry]] = None,
+    repo_root: Optional[Path] = None,
+) -> None:
     """Mutate ``audits`` in-place: any audit currently ``current`` whose
     file deps reach (transitively) a stale audit gets reclassified as
     ``stale_transitive``, with ``transitive_stale_via`` listing the
     direct upstream caches that caused the propagation.
+
+    With a deferral ``registry``, a cache that would become
+    ``stale_transitive`` and matches an entry is reclassified
+    ``deferred`` instead (``pre_deferred_status="stale_transitive"``)
+    and, like any deferred node, stops the propagation.  Without this,
+    :func:`apply_deferrals` (which must run first, see its docstring)
+    could never defer a transitively stale cache: when it runs, no row
+    is ``stale_transitive`` yet.  ``registry=None`` (the default)
+    applies no deferrals here.
     """
     by_abs: dict[Path, CacheAudit] = {a.abs_path: a for a in audits}
 
@@ -334,8 +348,18 @@ def propagate_transitive_stale(audits: list[CacheAudit]) -> None:
         for parent in rev_edges.get(node, []):
             pa = by_abs[parent]
             if pa.status == "current":
-                pa.status = "stale_transitive"
                 pa.transitive_stale_via.append(by_abs[node].path)
+                matches = (
+                    match_deferral(pa.abs_path, dep_key=None,
+                                   registry=registry, repo_root=repo_root)
+                    if registry else []
+                )
+                if matches:
+                    pa.pre_deferred_status = "stale_transitive"
+                    pa.status = "deferred"
+                    pa.deferral_matches = matches
+                    continue      # a deferred node is a barrier
+                pa.status = "stale_transitive"
                 queue.append(parent)
             elif pa.status == "stale_transitive":
                 # Already tainted; just remember this contributor.
@@ -563,9 +587,10 @@ def main() -> int:
             return 2
 
     rows = collect(roots)
-    if not args.ignore_deferrals:
-        apply_deferrals(rows)
-    propagate_transitive_stale(rows)
+    registry = None if args.ignore_deferrals else load_deferral_registry()
+    if registry:
+        apply_deferrals(rows, registry=registry)
+    propagate_transitive_stale(rows, registry=registry)
 
     if args.format == "markdown":
         body = render_markdown(rows, roots=roots, status_filter=args.status)

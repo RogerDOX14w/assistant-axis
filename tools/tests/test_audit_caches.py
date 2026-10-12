@@ -366,6 +366,52 @@ def test_deferred_upstream_does_not_taint_downstream(
     }
 
 
+def test_transitively_stale_cache_can_be_deferred(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Regression (2026-10-12): A -> B -> C with only C directly stale and
+    a registry entry naming B.  ``apply_deferrals`` runs before
+    propagation, when B is still ``current``, so it cannot defer B; the
+    propagation pass must.  B becomes ``deferred`` (was
+    ``stale_transitive``) and, as a barrier, leaves A ``current``."""
+    from assistant_axis import deferral_registry
+    monkeypatch.setattr(audit_caches, "_REPO_ROOT", tmp_path)
+
+    src = tmp_path / "src.json"
+    src.write_text("hello")
+    c = tmp_path / "c.json"
+    _write_envelope(c, {"name": "C"}, [prov.current_file_input("src", src)])
+    b = tmp_path / "b_frozen.json"
+    _write_envelope(b, {"name": "B"}, [prov.current_file_input("c", c)])
+    a = tmp_path / "a.json"
+    _write_envelope(a, {"name": "A"}, [prov.current_file_input("b", b)])
+    time.sleep(1.1)
+    src.write_text("hello world")
+
+    audits = [audit_caches.audit_cache(p) for p in (a, b, c)]
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="b_frozen.json", dep_key=None,
+        reason="frozen consumer", deferred_at="2026-10-12",
+    )]
+    audit_caches.apply_deferrals(audits, registry=reg, repo_root=tmp_path)
+    assert {x.path.name: x.status for x in audits}["b_frozen.json"] == "current"
+    audit_caches.propagate_transitive_stale(
+        audits, registry=reg, repo_root=tmp_path)
+    statuses = {x.path.name: x.status for x in audits}
+    assert statuses == {"a.json": "current", "b_frozen.json": "deferred",
+                        "c.json": "stale_direct"}
+    b_audit = next(x for x in audits if x.path.name == "b_frozen.json")
+    assert b_audit.pre_deferred_status == "stale_transitive"
+    assert b_audit.deferral_matches[0].reason == "frozen consumer"
+
+    # Without a registry the old behaviour holds: both consumers tainted.
+    audits = [audit_caches.audit_cache(p) for p in (a, b, c)]
+    audit_caches.propagate_transitive_stale(audits)
+    assert {x.path.name: x.status for x in audits} == {
+        "a.json": "stale_transitive", "b_frozen.json": "stale_transitive",
+        "c.json": "stale_direct"}
+
+
 def test_apply_deferrals_legacy_no_match_stays_legacy(tmp_path: Path) -> None:
     """Legacy cache whose path doesn't match any registry entry stays
     ``legacy``; deferrals are opt-in per path."""

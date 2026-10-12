@@ -41,15 +41,16 @@ sync with the codebase.  Two failure modes the audit catches:
 
 4. **Uncategorized entries** -- v1-schema entries that the May 2026
    backfill missed, or new entries added with the default
-   ``--category=uncategorized``.  Listed for follow-up; not a hard
-   error.
+   ``--category=uncategorized``.  Reported as an error so the
+   backfill is not forgotten.
 
 Severity levels
 ---------------
 
 * ``error``   -- invariant violation that almost certainly needs
   action (orphan promoted; replaced_by missing; uncategorized
-  entry).  Audit exits non-zero in this case (or with --strict).
+  entry).  The audit exits non-zero only with ``--strict``; without
+  it the report lists the errors and the exit code is 0.
 * ``warning`` -- coherence concern that may be intentional
   (compares_to glob doesn't match anything; both snapshot + twin
   exist on disk so categorisation is debatable).  Audit exits zero.

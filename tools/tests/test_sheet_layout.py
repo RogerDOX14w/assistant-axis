@@ -10,6 +10,7 @@ real data.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -21,6 +22,15 @@ from tools import sheet_layout as sl
 # ---------------------------------------------------------------------------
 # Fixtures: synthetic experiment dirs
 # ---------------------------------------------------------------------------
+
+def _first_ref_letter(formula: str) -> str:
+    """Column letter of the first ``$<LETTERS><row>`` reference in a
+    CUSTOM_FORMULA (``=$H5>=0.5`` -> ``H``; ``=AND(ISNUMBER($I5),...)``
+    -> ``I``)."""
+    m = re.search(r"\$([A-Z]+)\d", formula)
+    assert m, formula
+    return m.group(1)
+
 
 def _write(path: Path, content: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -477,16 +487,26 @@ class TestCondFormats:
         ref_cols = set()
         for cf in custom:
             f = cf.values[0]
-            assert f.startswith("=$"), f
-            letter = ""
-            for ch in f[2:]:
-                if ch.isalpha():
-                    letter += ch
-                else:
-                    break
-            ref_cols.add(letter)
+            assert f.startswith("="), f
+            ref_cols.add(_first_ref_letter(f))
         # G (eff col 6), H (coh col 7), I (rp col 8).
         assert ref_cols == {"G", "H", "I"}
+
+    def test_rp_cross_rule_ignores_blank_rp_cells(self, single_cell_experiment):
+        """Regression (2026-10-12): a blank cell compares as 0 in a Sheets
+        formula, so a bare ``=$I5<=1`` shaded skipped / missing rows and
+        block headers as persona drift.  The rule must require a number."""
+        payload = sl.build_tab(single_cell_experiment)
+        q0_resp = sl.N_AGG_COLS
+        rp_rules = [
+            cf for cf in payload.cond_formats
+            if cf.col_start == q0_resp and cf.condition_type == "CUSTOM_FORMULA"
+            and _first_ref_letter(cf.values[0]) == "I"
+        ]
+        assert len(rp_rules) == 1
+        f = rp_rules[0].values[0]
+        anchor = sl.N_HEADER_ROWS + 1
+        assert f == f"=AND(ISNUMBER($I{anchor}),$I{anchor}<={sl.RP_LOW_THRESHOLD})"
 
     def test_priority_order_coh_before_rp_before_eff(
         self, single_cell_experiment
@@ -511,17 +531,7 @@ class TestCondFormats:
             if cf.col_start == q0_resp and cf.col_end == q0_resp + 1
             and cf.condition_type == "CUSTOM_FORMULA"
         ]
-        def letter_of(cf):
-            f = cf.values[0]
-            out = ""
-            for ch in f[2:]:
-                if ch.isalpha():
-                    out += ch
-                else:
-                    break
-            return out
-
-        order = [letter_of(cf) for cf in custom]
+        order = [_first_ref_letter(cf.values[0]) for cf in custom]
         # coh rules (col H) -> rp rule (col I) -> eff rules (col G).
         last_h = max(i for i, l in enumerate(order) if l == "H")
         first_i = order.index("I")
