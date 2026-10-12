@@ -390,17 +390,40 @@ roles/traits, or loaded from a saved axis file) and pole descriptions plus
 example lists, it:
 
 1. Has an LLM judge score every role and trait in the corpus on a −3..+3
-   rubric (excluding the pair itself and any example-list names).
+   rubric, excluding the pair's two poles.  The poles are skipped **by
+   entity id** (name and kind; since 2026-10-12, review walk-through D3):
+   on `impatient_vs_patient`, a traits axis, the role `patient|R` is
+   judged like any other entity; before, every entity sharing a pole's
+   name was skipped in both kinds.  Example-list entities are scored, with
+   their own name stripped from their prompt's example list.
 2. Projects every role/trait's activation vector onto the axis, in both the
-   raw activation metric and a soft-K=3 PCA-whitened metric (whitener fit
-   on the held-out pool of roles + traits, with the excluded names removed
-   so the same items don't define both the axis and the whitening basis).
+   raw activation metric and a soft-K PCA-whitened metric (`--whiten_K`,
+   default `DEFAULT_SOFT_K`=2; leave-one-out whitener fit on every other
+   role + trait, without the two poles, so the axis-defining vectors don't
+   define the whitening basis too).
 3. Reports Spearman ρ between judge scores and projections, per token-slot
    and per metric, for up to three scoring modes:
     - the `description` field,
     - the 5 `pos` instructions,
     - score=3 model responses (question + answer).
 4. Writes JSON results and a scatter-plot grid to `--output_dir`.
+
+**Score parsing (`RUBRIC_VERSION` v5, 2026-10-12, walk-through D5).**  A
+reply counts only if it has exactly one `SCORE: <int>` line; a reply with
+none or several is unparsed (None) and is re-issued on the next run, like
+any failed call.  Until v4 such a reply was scored from the first integer
+in it or the first of its markers.  Every recorded response-mode reply was
+re-parsed; the five that changed (judges scoring a batch as two personas)
+were hand-edited to None, and a global v4 → v5 edge in
+[`rubric_equivalences.yaml`](../rubric_equivalences.yaml) keeps all caches.
+
+**Writes are atomic** (since 2026-10-12, walk-through D4): every cache,
+`gaps.json`, `config.json` and `usage.json` goes through
+`assistant_axis.atomic_io.atomic_write_text` (staging file, then
+`os.replace`), so a run killed mid-save keeps the previous cache.  The
+`response_score_files` provenance input lists only per-entity score files,
+not step 3's side-cars (`usage.json`, `judge_rubric.json`,
+`batch_state.json`; walk-through D12).
 
 ```bash
 # Angel vs demon, three scoring modes, all slots
@@ -929,20 +952,47 @@ uv run python -m results_analysis.pc_round_trip.launch_judge_runs \
 `--max_parallel` defaults to 2 for ML-footprint headroom; bump on a
 cleaner machine.
 
+Every judge subprocess gets a hard spend cap, `--budget_usd` (since
+2026-10-12, walk-through D7; the ~96 cells used to run uncapped).  Default
+per cell: `DEFAULT_BUDGET_USD_PER_CELL`, $6 for gpt-4.1-mini and $19 for
+Sonnet 4.6, from the judge-cost rule's budget formulas over an expected
+~$0.35 and ~$4–6 per cell; `--budget_usd X` sets one cap for every cell.
+The plan (and `--dry_run`) prints the caps and their sum over all cells.
+A cell that hits its cap exits 2 and is reported as failed.
+
 #### `pc_round_trip/klm_sweep.py`
 
 Adaptive **(L, K, M)** sweep over the cached judge scores. For each
 (PC, style) cell, finds the best round-trip Spearman ρ across:
 
-- `slot, layer` ∈ `{(3, 25), (0, 26), (0, 49)}` by default — the three
-  configs that dominate the per-PC winners (low PCs land on slot=3 /
-  L=25; high PCs split between slot=0 / L=26 and slot=0 / L=49).
-- `L` — soft-shear truncation depth (default `0..5`).
-- `K` — soft-K whitening depth, swept on a coarse log-spaced grid then
-  refined with bracket-and-bisect around the peak (default coarse
-  `[0, 1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512]`).
+- `slot, layer` ∈ the 7 cells of `DEFAULT_CONFIGS` by default:
+  `(7, 25)` (canonical), `(7, 49)`, `(6, 25)`, `(6, 49)`, `(0, 26)`,
+  `(0, 49)`, `(3, 25)`, in that order (8-slot data since the May 9
+  migration; the 4-slot default was `{(3, 25), (0, 26), (0, 49)}`).
+- `L` — soft-shear truncation depth (default `0, 1, 2, 4`).
+- `K` — soft-K whitening depth, swept on a coarse grid then refined
+  with bracket-and-bisect around the peak (default coarse `0, 1, 2, 4`;
+  the K-near-N expansion and the grid up to 512 were removed on
+  2026-05-06, and on this grid the refinement never fires).
 - `M` — optional truncation of the entity matrix into the top-M PCs of
   the pool (default `{64, 128, 256, 512, ∞}`).
+
+Output, in `roger/pc_round_trip_klm_results.json`: the global winner per
+(PC, style) of each stage (`stage1_M_sweep`, `stage2_K_refinement_M_inf`)
+and, since 2026-10-12 (code review walk-through D1), the **per-cell**
+winners of each stage (`stage1_M_sweep_per_cell`,
+`stage2_K_refinement_M_inf_per_cell`, keyed `pc{NNN}_{style}_s{S}_l{L}`)
+plus `cell_order`.  The global winner is the best per-cell one, the
+earlier cell winning a tie.
+[`winner_decomposition.py`](pc_round_trip/winner_decomposition.py) reads
+the stage-2 per-cell section by default and decomposes the nth_pc winner
+of the first n cells, n ∈ {1, 2, 4, 6, 7}, in the canonical PC basis;
+[`plot_winner_decomposition.py`](pc_round_trip/plot_winner_decomposition.py)
+draws it as
+[`pc_round_trip_nth_pc_winner_decomposition.png`](../roger/pc_round_trip_nth_pc_winner_decomposition.png)
+and titles it from the winners it was given.  Before then the sweep kept
+only the global winners, the decomposition read the fixed_principled
+per-cell file, and its columns covered only the first three cells.
 
 Two stages: stage 1 explores the M dimension at every coarse
 `(L, K)` grid point; stage 2 refines K at M=∞ via discrete
@@ -956,12 +1006,16 @@ falls back to scipy's `gesvd` (slower but robust) and skips configs
 where even that fails.
 
 This stage does **no** API calls — just reads cached judge scores and
-runs CPU. Re-running is cheap (~4 min on a workstation).
+runs CPU. Re-running is cheap (about 3 min on Roger's Mac on
+2026-10-12; the decomposition adds about 30 s).
 
 ```bash
-# Default: full sweep over all 14 PCs × 2 styles, writing to
+# Default: full sweep over all 24 PCs × 2 styles × 7 cells, writing to
 # roger/pc_round_trip_klm_results.json.
 uv run python -m results_analysis.pc_round_trip.klm_sweep
+# Then the decomposition and its figure.
+uv run python -m results_analysis.pc_round_trip.winner_decomposition
+uv run python -m results_analysis.pc_round_trip.plot_winner_decomposition
 ```
 
 #### `pc_round_trip/plot_loglin.py`, `plot_histogram.py`
@@ -1615,6 +1669,20 @@ resolve to their descriptions through the corpus files' `renamed_from`
 (`assistant_axis.entity_id.resolve_renamed_stem`); vectors and caches
 are looked up under the stem in the list, unchanged.
 
+**A listed axis the data cannot serve stops the run** (since 2026-10-12,
+walk-through A2).  Every script here that takes a pair list checks it
+right after loading it, through
+[`pair_list_guard.py`](pair_list_guard.py), and exits naming each axis
+without its pole vectors or without the judge caches (or sweep entries)
+that script reads, with a pointer to the `_v1` list beside it.  Before,
+some scripts crashed on the first missing file and others left the axis
+out of their averages (`rho_by_layer.py`, `rho_by_slot_and_*.py` and
+`response_di_weight_sweep.py` silently).  With the 8slot data, every
+current list fails the check and every `_v1` list passes.  Optional
+inputs stay optional: a desc+inst cohort axis without response caches,
+or an axis the second judge of `gpt_sonnet_weight_sweep.py` did not
+cover, is handled as before.
+
 #### `whitening_k_sweep.py`
 
 For each axis pair and source ∈ {`desc_inst`, `responses`}, fit a
@@ -1990,6 +2058,13 @@ or `data_dir` swap from 4-slot to 8-slot) lands in a distinct directory
 without silently shadowing prior outputs.  Pass `--output_dir` to
 override entirely (use it for one-off comparison runs you want to
 hand-name).
+
+The default `--whitening` is `soft_K=3`, not the project's
+`DEFAULT_SOFT_K` (2): it comes from
+`canonical_angles.whitening.OPTIMAL_AXIS_SOFT_K`, set to what every
+recorded run of this script used (the five `..._softK3_M30_...`
+directories of May 2026; walk-through D6, 2026-10-12).  Moving it to 2
+would be a separate decision; such a run writes a `softK2` directory.
 
 ```bash
 # Mode A: raw scores file ({name: float} or

@@ -75,6 +75,7 @@ from assistant_axis.provenance import (
     InputSpec,
     load_and_register,
 )
+from results_analysis.pair_list_guard import check_pair_list  # noqa: E402
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -209,6 +210,13 @@ def main() -> int:
         inputs=inputs,
         policy=args.cache_policy,
     )
+    # Walk-through A2: every listed axis needs its desc+inst curve in the
+    # sweep (a missing one used to become a silent all-NaN row).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="whitening_k_peak_fit.py",
+                    recorded_axes={f"{r['pos']}_vs_{r['neg']}" for r in records
+                                   if r.get("source") == "desc_inst"},
+                    recorded_label=str(sweep_f))
     curves: dict[tuple[str, str], dict] = {}
     for r in records:
         curves.setdefault((r["pos"], r["neg"]), {}).setdefault(

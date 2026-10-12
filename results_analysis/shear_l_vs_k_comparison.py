@@ -92,6 +92,7 @@ from results_analysis.whitening_k_sweep import (
     axis_direction,
     load_pool,
 )
+from results_analysis.pair_list_guard import STATIC_DI_CACHES, check_pair_list  # noqa: E402
 
 
 L_VALUES = (0, 1, 2, 3)
@@ -211,6 +212,11 @@ def main(argv: list[str] | None = None) -> int:
         experiment_dir / args.pairs_primary, dep_key="pairs_primary_json",
         inputs=inputs, policy="warn")
     primary_set = {(it["pos"], it["neg"]) for it in pairs_primary}
+    # Walk-through A2: pole vectors and the four desc+inst caches for every
+    # listed axis (response caches stay optional).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="shear_l_vs_k_comparison.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
 
     # Pre-load goal/no-goal subspaces (same at every axis).
     A_goal, A_nogoal = build_goal_nogoal_subspaces(
@@ -225,6 +231,13 @@ def main(argv: list[str] | None = None) -> int:
                     / f"whitening_k_sweep_{cohort}_slot{args.slot}.json")
     k_records = _load_k_sweep_records(k_sweep_path)
     print(f"Loaded {len(k_records)} K sweep records from {k_sweep_path.name}")
+    # ... and a desc+inst row in that K sweep (a missing one used to give
+    # a silent NaN in the comparison columns).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="shear_l_vs_k_comparison.py",
+                    recorded_axes={f"{p}_vs_{n}" for (p, n, src, _k) in k_records
+                                   if src == "desc_inst"},
+                    recorded_label=k_sweep_path.name)
 
     # Per-axis ρ at each L.
     records: list[dict] = []

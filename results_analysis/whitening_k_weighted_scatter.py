@@ -93,6 +93,7 @@ from assistant_axis.provenance import (
     InputSpec,
     load_and_register,
 )
+from results_analysis.pair_list_guard import check_pair_list  # noqa: E402
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -215,6 +216,13 @@ def main() -> int:
         policy=args.cache_policy,
     )
 
+    # Walk-through A2: every listed axis needs its desc+inst curve in the
+    # sweep (a missing one used to end in a bare KeyError below).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="whitening_k_weighted_scatter.py",
+                    recorded_axes={f"{r['pos']}_vs_{r['neg']}" for r in sweep
+                                   if r.get("source") == "desc_inst"},
+                    recorded_label=str(args.sweep))
     # axis -> source -> {K: rho}
     curves: dict = {}
     for r in sweep:

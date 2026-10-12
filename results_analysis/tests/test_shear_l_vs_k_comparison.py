@@ -46,7 +46,14 @@ def test_collision_names_keep_their_kind(tmp_path, monkeypatch):
     exp = tmp_path / "exp"
     _write(exp / "pair_list_di.json", [{"pos": "pp", "neg": "nn"}])
     _write(exp / "pair_list_responses.json", [])
-    _write(exp / "whitening_k_sweep_di_slot6.json", [])  # raw-list legacy
+    # Raw-list legacy shape; one desc+inst row, which the pair-list check
+    # of walk-through A2 requires for every listed axis.
+    _write(exp / "whitening_k_sweep_di_slot6.json",
+           [{"pos": "pp", "neg": "nn", "source": "desc_inst", "K": 1, "rho": 0.5}])
+    # Pole vector files: load_pool / axis_direction are stubbed below, but
+    # the A2 check looks for the files.
+    for n in ("pp", "nn"):
+        _write(tmp_path / "data" / "traits" / "vectors" / f"{n}.pt", {})
     axis_dir = exp / "pp_vs_nn"
     # Trait written last so a bare-name clobber keeps the trait's score.
     gpt = dict(sorted(VALUES.items(), key=lambda kv: kv[0].endswith("|T")))

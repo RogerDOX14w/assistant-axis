@@ -42,6 +42,8 @@ from pathlib import Path
 
 import numpy as np
 
+from results_analysis.pair_list_guard import check_pair_list
+
 DEFAULT_EXPERIMENT_DIR = (
     Path(__file__).resolve().parent.parent / "roger" / "axis_judge_experiments"
 )
@@ -129,13 +131,14 @@ def main() -> int:
     M = np.array(r["abs_cos_matrix"])
 
     resp_pairs = json.load(open(args.experiment_dir / args.pairs_responses))
+    # Walk-through A2: a listed axis missing from the datastore stops the
+    # run, naming it (it used to be ignored after a WARNING line).
+    check_pair_list(resp_pairs, pair_list=args.experiment_dir / args.pairs_responses,
+                    script="orthogonal_to_response_set.py",
+                    recorded_axes={lbl.replace("/", "_vs_", 1) for lbl in labels},
+                    recorded_label=fname)
     resp_axes = {f"{p['pos']}/{p['neg']}" for p in resp_pairs}
     resp_idx = {labels.index(a) for a in resp_axes if a in labels}
-    absent = sorted(a for a in resp_axes if a not in labels)
-    if absent:
-        print(f"WARNING: {len(absent)} response axes from "
-              f"{args.pairs_responses} are not in the datastore and are "
-              f"ignored: {absent}")
     non_resp_idx = sorted(set(range(len(labels))) - resp_idx)
 
     print(f"Cohort: {len(labels)} clean axes; "

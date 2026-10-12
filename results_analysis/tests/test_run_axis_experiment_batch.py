@@ -54,10 +54,16 @@ def test_main_exits_nonzero_when_a_pair_fails(tmp_path, monkeypatch):
         status = "FAIL (rc=2); see run.log" if pair["pos"] == "cc" else "OK (rc=0)"
         return (pair["pos"], pair["neg"], status, 0.0)
 
+    # Pole vector files: the walk-through A2 check needs them before any run.
+    data = tmp_path / "data"
+    (data / "traits" / "vectors").mkdir(parents=True)
+    for n in ("aa", "bb", "cc", "dd"):
+        (data / "traits" / "vectors" / f"{n}.pt").write_bytes(b"")
+
     monkeypatch.setattr(mod, "run_one", fake_run_one)
     argv = ["run_axis_experiment_batch.py", "--pair_list", str(pairs),
             "--provider", "gpt", "--judge_model", "m",
-            "--output_root", str(tmp_path / "out")]
+            "--output_root", str(tmp_path / "out"), "--data_dir", str(data)]
     monkeypatch.setattr(sys, "argv", argv)
     assert mod.main() == 1
 

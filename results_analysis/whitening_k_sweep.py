@@ -117,6 +117,7 @@ from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
 )
 from results_analysis.canonical_angles.whitening import fit_whitening
+from results_analysis.pair_list_guard import STATIC_DI_CACHES, check_pair_list
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -320,6 +321,11 @@ def main() -> int:
         dep_key="pairs_json", inputs=inputs, policy="warn",
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
+    # Walk-through A2: every listed axis needs its pole vectors and the
+    # four desc+inst caches read below (response caches stay optional).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="whitening_k_sweep.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
 
     # Corpus-wide kinds_for_name map, used to lift v1 (bare-name)
     # judge caches to v2 (entity_id) keys in the per-axis loop

@@ -93,6 +93,7 @@ from results_analysis.axis_pc_alignment_vs_peak_K import (
     _index_sweep,
     _per_axis_record,
 )
+from results_analysis.pair_list_guard import check_pair_list  # noqa: E402
 
 
 # Bars 1-4: every axis evaluated at this single K.
@@ -362,6 +363,16 @@ def main() -> int:
     primary_set = {(it["pos"], it["neg"]) for it in pairs_primary}
     fits_by_pair = _index_fits(fits)
     sweep_by_pair = _index_sweep(sweep)
+    # Walk-through A2: every listed axis needs its pole vectors and a
+    # desc+inst row in both the peak-fit and the K-sweep JSONs (a missing
+    # fit used to count as a peak at K=0, a missing sweep as NaN).
+    check_pair_list(
+        pairs, pair_list=experiment_dir / args.pairs,
+        script="axis_pc_rho_by_category_K.py", data_dir=data_dir,
+        recorded_axes=(
+            {f"{p}_vs_{n}" for (p, n), d in fits_by_pair.items() if "desc_inst" in d}
+            & {f"{p}_vs_{n}" for (p, n), d in sweep_by_pair.items() if "desc_inst" in d}),
+        recorded_label=f"{fit_filename} and {sweep_filename}")
 
     bottom_panel_Ks = (0, 1, 2, 3)
     rows_all: list[dict] = []

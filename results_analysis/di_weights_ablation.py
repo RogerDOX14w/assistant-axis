@@ -76,6 +76,7 @@ from results_analysis.canonical_angles.whitening import (
     fit_shear,
     fit_whitening,
 )
+from results_analysis.pair_list_guard import STATIC_DI_CACHES, check_pair_list  # noqa: E402
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -251,6 +252,13 @@ def main() -> int:
         dep_key="pairs_resp_json", inputs=inputs, policy="warn",
     )
     primary_set = {(it["pos"], it["neg"]) for it in pairs_resp}
+    # Walk-through A2: pole vectors and the four desc+inst caches for every
+    # axis of both lists (the response list is the primary subset of the
+    # desc+inst ablation); a missing one used to drop the axis silently.
+    for _pairs, _name in ((pairs_di, args.pairs_di), (pairs_resp, args.pairs_resp)):
+        check_pair_list(_pairs, pair_list=experiment_dir / _name,
+                        script="di_weights_ablation.py", data_dir=data_dir,
+                        experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
     print(f"Loaded {len(pairs_di)} di axes, {len(pairs_resp)} response axes "
           f"(primary subset).")
     print(f"Projection regime: {whitening}  (slot={slot}, layer={LAYER})")

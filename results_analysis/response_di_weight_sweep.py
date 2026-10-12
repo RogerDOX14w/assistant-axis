@@ -72,6 +72,9 @@ from results_analysis.canonical_angles.whitening import (
 from results_analysis.gpt_anthropic_response_weight_sweep import (
     AXIS_COLORS, DEFAULT_AXES, GPT_DIR_TEMPLATE, PARABOLA_COLOR,
 )
+from results_analysis.pair_list_guard import (
+    STATIC_DI_CACHES, check_pair_list, fail_for_axes,
+)
 
 _SCRIPT_PATH = Path(__file__).resolve()
 
@@ -319,6 +322,18 @@ def main() -> int:
     else:
         axes_all = list(DEFAULT_AXES)
         pair_types = {}
+    # Walk-through A2: every axis swept needs its pole vectors and the four
+    # desc+inst caches (checked here), and response scores from both judges
+    # (checked as they load, below); an axis without them used to be
+    # skipped with a one-line "[skip]" (review 9b D1).
+    pair_list_for_msg = (pair_list_path if pair_list_path is not None
+                         else experiment_dir / "pair_list_responses.json")
+    check_pair_list(
+        [{"pos": pos, "neg": neg, "pair_type": pair_types.get(ax, "traits")}
+         for ax, pos, neg in axes_all if ax not in excluded],
+        pair_list=pair_list_for_msg,
+        script="response_di_weight_sweep.py", data_dir=data_dir,
+        experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
     # Constants-file dependency: GPT_RESPONSE_WEIGHT is read from
     # ``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` at import time, so the cache
     # this script writes is sensitive to retunings of that (and any
@@ -417,6 +432,7 @@ def main() -> int:
     # arrays over the common entity set.  These do not depend on w,
     # so we compute them once and re-use across the 21 sweep points.
     per_axis: dict[tuple[str, str], dict] = {}
+    no_responses: list[tuple[str, list[str]]] = []
     for axis_name, pos, neg in axes_in_use:
         axis_dir = experiment_dir / axis_name
 
@@ -427,8 +443,9 @@ def main() -> int:
             experiment_dir, axis_name, HAIKU_DIR_TEMPLATE,
             judge_label="haiku_q9", inputs=inputs)
         if not gpt_resp or not haiku_resp:
-            print(f"  [skip] {axis_name}: response data missing "
-                  f"(gpt n={len(gpt_resp)}, haiku n={len(haiku_resp)})")
+            no_responses.append((axis_name, [
+                f"no {j} response scores" for j, r in
+                (("GPT", gpt_resp), ("Haiku", haiku_resp)) if not r]))
             continue
 
         g_d, _, _ = load_and_register(
@@ -492,6 +509,9 @@ def main() -> int:
               f"di-only ρ={_rho_at_w(per_axis[(pos, neg)], 0.0):+.4f}  "
               f"response-only ρ={_rho_at_w(per_axis[(pos, neg)], 1.0):+.4f}")
 
+    fail_for_axes(no_responses, n_axes=len(axes_in_use), pair_list=pair_list_for_msg,
+                  script="response_di_weight_sweep.py",
+                  where=f"judge caches under {experiment_dir}")
     if not per_axis:
         print("No axes had complete data; exiting.")
         return 1

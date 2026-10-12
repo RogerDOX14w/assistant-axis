@@ -60,6 +60,9 @@ from results_analysis.canonical_angles.whitening import (
     fit_whitening,
     parse_whitening_spec,
 )
+from results_analysis.pair_list_guard import (  # noqa: E402
+    check_pair_list, fail_for_axes,
+)
 
 _SCRIPT_PATH = Path(__file__).resolve()
 
@@ -395,6 +398,19 @@ def main() -> int:
             f"pick a divisor of 1.0 (e.g. 0.025, 0.05, 0.02, 0.01).")
     i_half = int(round(0.5 / args.w_step))
 
+    pair_list_path = Path(args.pair_list)
+    if not pair_list_path.is_absolute():
+        pair_list_path = experiment_dir / pair_list_path
+    axes = _load_axes_from_pair_list(pair_list_path)
+    # Walk-through A2: every listed axis needs its pole vectors (read from
+    # traits/vectors by ``_axis_unit``; checked here) and response scores
+    # from both judges (checked as they load, below); an axis without them
+    # used to be skipped with a "[skip]" line.
+    check_pair_list(
+        [{"pos": pos, "neg": neg, "pair_type": "traits"} for _ax, pos, neg in axes],
+        pair_list=pair_list_path, script="gpt_anthropic_response_weight_sweep.py",
+        data_dir=data_dir)
+
     # Cache standalone entity vectors at (slot, layer), default-centered.
     default_v = _v(data_dir / "traits" / "vectors" / "default.pt", slot, layer)
     entity_vecs: dict[str, np.ndarray] = {}
@@ -443,11 +459,6 @@ def main() -> int:
         for n, v in entity_vecs.items():
             entity_vecs[n] = basis.apply(v[None, :])[0]
 
-    pair_list_path = Path(args.pair_list)
-    if not pair_list_path.is_absolute():
-        pair_list_path = experiment_dir / pair_list_path
-    axes = _load_axes_from_pair_list(pair_list_path)
-
     print(f"GPT-4.1-mini B=10 vs {combo_label} response-mode weight sweep, "
           f"slot {slot} layer {layer}, whitening={args.whitening}")
     print(f"  pair list: {pair_list_path.name} ({len(axes)} axes)")
@@ -487,6 +498,7 @@ def main() -> int:
 
     per_axis: dict[tuple[str, str], dict] = {}
     cohort_mix: dict[str, dict[str, str]] = {"gpt": {}, "anth": {}}
+    no_responses: list[tuple[str, list[str]]] = []
     for axis_name, pos, neg in axes:
         if is_v2:
             # Canonical v2 loaders.  GPT reads Phase-5c b7 full volume;
@@ -514,8 +526,9 @@ def main() -> int:
                 inputs=inputs,
             )
         if not gpt or not anth:
-            print(f"  [skip] {axis_name}: gpt n={len(gpt)} "
-                  f"anth n={len(anth)}")
+            no_responses.append((axis_name, [
+                f"no {j} response scores" for j, r in
+                (("GPT", gpt), (combo_label, anth)) if not r]))
             continue
         common = sorted(set(gpt) & set(anth) & set(entity_vecs))
         if len(common) < 5:
@@ -539,6 +552,9 @@ def main() -> int:
               f"pure {combo_label} ρ="
               f"{_rho_at_weight(per_axis[(pos, neg)], 0.0):+.4f})")
 
+    fail_for_axes(no_responses, n_axes=len(axes), pair_list=pair_list_path,
+                  script="gpt_anthropic_response_weight_sweep.py",
+                  where=f"judge caches under {experiment_dir}")
     if not per_axis:
         print("No axes had data; exiting.")
         return 1

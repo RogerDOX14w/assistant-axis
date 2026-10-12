@@ -88,6 +88,9 @@ from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
 )
 from results_analysis.canonical_angles.whitening import fit_whitening
+from results_analysis.pair_list_guard import (  # noqa: E402
+    STATIC_DI_CACHES, check_pair_list, gpt_response_caches,
+)
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -273,6 +276,15 @@ def main() -> int:
     )
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
+    # Walk-through A2: every listed axis needs its pole vectors and the
+    # caches read below; one missing used to drop the axis silently.
+    check_pair_list(pairs_di, pair_list=experiment_dir / args.pairs_di,
+                    script="rho_by_slot_and_K.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
+    check_pair_list(pairs_resp, pair_list=experiment_dir / args.pairs_resp,
+                    script="rho_by_slot_and_K.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir,
+                    caches_any=[("GPT response cache", gpt_response_caches())])
 
     # Auto-detect num_slots from default.pt so the script handles both
     # 4-slot Christina-headers data and 8-slot Roger-8slot data.

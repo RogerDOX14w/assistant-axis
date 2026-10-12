@@ -62,6 +62,7 @@ from scipy.stats import spearmanr
 from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
 from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.provenance import InputSpec, load_and_register
+from results_analysis.pair_list_guard import STATIC_DI_CACHES, check_pair_list  # noqa: E402
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -185,6 +186,11 @@ def main() -> int:
         inputs=inputs, policy="warn",
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
+    # Walk-through A2: every listed axis needs the four desc+inst caches
+    # (no vectors: this script compares judges only).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="gpt_vs_sonnet_scatter.py",
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
 
     # Build kinds_for_name from the corpus so legacy v1 (bare-name) caches
     # can be lifted to v2 (entity_id) keys in-memory before intersection.

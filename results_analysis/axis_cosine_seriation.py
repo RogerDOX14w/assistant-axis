@@ -126,6 +126,7 @@ from results_analysis.canonical_angles.data import (  # noqa: E402
 from results_analysis.canonical_angles.whitening import (  # noqa: E402
     DEFAULT_SOFT_SHEAR_L, fit_shear,
 )
+from results_analysis.pair_list_guard import check_pair_list  # noqa: E402
 
 
 DEFAULT_EXPERIMENT_DIR = REPO / "roger" / "axis_judge_experiments"
@@ -568,6 +569,10 @@ def main() -> int:
 
     pairs = json.loads((experiment_dir / args.pairs).read_text())
     print(f"Loaded {len(pairs)} pairs from {args.pairs}")
+    # Walk-through A2: every listed axis needs its two pole vectors (a
+    # missing one used to crash inside the loader, unnamed).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="axis_cosine_seriation.py", data_dir=data_dir)
 
     # --- Build axis directions in the chosen frame --------------------
     if L > 0:

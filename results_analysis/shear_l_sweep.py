@@ -133,6 +133,7 @@ from assistant_axis.provenance import (
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
 from results_analysis.canonical_angles.whitening import fit_shear
+from results_analysis.pair_list_guard import STATIC_DI_CACHES, check_pair_list  # noqa: E402
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -330,6 +331,11 @@ def main() -> int:
         dep_key="pairs_json", inputs=inputs, policy="warn",
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
+    # Walk-through A2: pole vectors and the four desc+inst caches for
+    # every listed axis (response caches stay optional).
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="shear_l_sweep.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
 
     # Build goal / no-goal CA subspaces once -- they're corpus-wide
     # and identical across axes.  Same call site as

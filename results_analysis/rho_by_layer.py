@@ -130,6 +130,9 @@ from results_analysis.canonical_angles.whitening import (
     WhiteningBasis,
     fit_shear,
 )
+from results_analysis.pair_list_guard import (  # noqa: E402
+    STATIC_DI_CACHES, check_pair_list, loader_response_caches,
+)
 
 
 def _load_rho_json(
@@ -539,6 +542,16 @@ def main() -> int:
     )
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
+    # Walk-through A2: every listed axis needs its pole vectors and the
+    # caches read below; one missing used to drop the axis silently.
+    check_pair_list(pairs_di, pair_list=experiment_dir / args.pairs_di,
+                    script="rho_by_layer.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir, caches_all=STATIC_DI_CACHES)
+    check_pair_list(pairs_resp, pair_list=experiment_dir / args.pairs_resp,
+                    script="rho_by_layer.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir,
+                    caches_any=[("GPT response cache", loader_response_caches("gpt")),
+                                ("Haiku response cache", loader_response_caches("haiku"))])
 
     print("Loading entity tensors (all kept slots, all layers)...", flush=True)
     entity_vecs, default_arr, n_layers, kinds_for_name = _build_entity_cache(data_dir)

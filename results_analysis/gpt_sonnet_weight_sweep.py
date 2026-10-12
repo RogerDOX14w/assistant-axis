@@ -122,6 +122,7 @@ from results_analysis.canonical_angles.whitening import (
     fit_whitening,
     parse_whitening_spec,
 )
+from results_analysis.pair_list_guard import check_pair_list  # noqa: E402
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -275,6 +276,14 @@ def main() -> int:
         inputs=inputs, policy="warn",
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
+    # Walk-through A2: every listed axis needs its pole vectors and its GPT
+    # desc+inst caches.  The second judge may cover only a subset (Haiku);
+    # those axes are skipped and reported below, as before.
+    check_pair_list(pairs, pair_list=experiment_dir / args.pairs,
+                    script="gpt_sonnet_weight_sweep.py", data_dir=data_dir,
+                    experiment_dir=experiment_dir,
+                    caches_all=("gpt/scores_descriptions.json",
+                                "gpt/scores_instructions.json"))
 
     # Cache standalone entity vectors at (slot, LAYER), default-centered.
     # Build kinds_for_name alongside so we can migrate any v1 (bare-name)

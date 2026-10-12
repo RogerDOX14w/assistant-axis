@@ -9,8 +9,10 @@ They now count the loaded axes.
 
 Runs each script end to end at K=0 / L=0 (raw projection, so no whitening
 pool or goal/no-goal subspaces are needed) on a two-axis pair list where
-one axis has no judge caches, and reads the title back from the PNG's
-provenance chunk.
+one axis's response cache holds no usable score, and reads the title back
+from the PNG's provenance chunk.  Since walk-through A2 (2026-10-12) an
+axis with no judge cache at all stops the run instead of being skipped
+(second test); the first test used to exercise exactly that case.
 """
 from __future__ import annotations
 
@@ -47,7 +49,7 @@ def _stub_subtree(data_dir=None, subtree_rel="", dep_key="", **_kw):
                      fingerprint="v1:test", kind="subtree")
 
 
-def _setup(tmp_path: Path) -> tuple[Path, Path]:
+def _setup(tmp_path: Path, *, complete: bool = True) -> tuple[Path, Path]:
     data = tmp_path / "data"
     (data / "traits" / "vectors").mkdir(parents=True)
     (data / "roles" / "vectors").mkdir(parents=True)
@@ -61,7 +63,7 @@ def _setup(tmp_path: Path) -> tuple[Path, Path]:
     pairs = [{"pos": "pp", "neg": "nn"}, {"pos": "qq", "neg": "rr"}]
     _write(exp / "pair_list_di.json", pairs)
     _write(exp / "pair_list_responses.json", pairs)
-    # Only pp_vs_nn has judge caches; qq_vs_rr has none.
+    # pp_vs_nn has judge caches; qq_vs_rr only when ``complete``.
     axis_dir = exp / "pp_vs_nn"
     for j in ("gpt", "sonnet"):
         for m in ("descriptions", "instructions"):
@@ -69,6 +71,17 @@ def _setup(tmp_path: Path) -> tuple[Path, Path]:
                    {f"{n}|T": float(i) for i, n in enumerate(ENTS)})
     _write(axis_dir / response_subdir("gpt", "traits") / "scores_responses.json",
            {n: {"mean_score": float(i)} for i, n in enumerate(ENTS)})
+    if complete:
+        # qq_vs_rr gets every cache the scripts require (walk-through A2),
+        # but its response cache holds no usable score, so it loads empty
+        # and must not be counted on the responses side.
+        other = exp / "qq_vs_rr"
+        for j in ("gpt", "sonnet"):
+            for m in ("descriptions", "instructions"):
+                _write(other / j / f"scores_{m}.json",
+                       {f"{n}|T": float(i) for i, n in enumerate(ENTS)})
+        _write(other / response_subdir("gpt", "traits") / "scores_responses.json",
+               {n: {"mean_score": None} for n in ENTS})
     return exp, data
 
 
@@ -82,5 +95,24 @@ def test_title_counts_loaded_axes(tmp_path, monkeypatch, mod, grid_flag):
     ])
     assert mod.main() == 0
     title = Image.open(exp / "out.png").info["Title"]
-    assert "desc+inst = 1 axes" in title
+    assert "desc+inst = 2 axes" in title
     assert "responses = 1 axes" in title
+
+
+@pytest.mark.parametrize("mod, grid_flag", [(mod_k, "--ks"), (mod_l, "--ls")])
+def test_axis_without_caches_fails_loudly(tmp_path, monkeypatch, mod, grid_flag):
+    """Walk-through A2 (2026-10-12): a listed axis with no judge cache stops
+    the run, naming the axis, where it used to be skipped (the case the
+    title-count fix above was written for)."""
+    exp, data = _setup(tmp_path, complete=False)
+    monkeypatch.setattr(mod, "current_data_subtree_input", _stub_subtree)
+    monkeypatch.setattr(sys, "argv", [
+        "rho_by_slot_and_X.py", "--experiment_dir", str(exp),
+        "--data_dir", str(data), grid_flag, "0", "--plot", "out.png",
+    ])
+    with pytest.raises(SystemExit) as ei:
+        mod.main()
+    msg = str(ei.value)
+    assert "qq_vs_rr: no judge caches" in msg
+    assert "pp_vs_nn" not in msg
+    assert not (exp / "out.png").exists()

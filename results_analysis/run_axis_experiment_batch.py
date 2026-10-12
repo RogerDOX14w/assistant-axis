@@ -24,6 +24,7 @@ import time
 from pathlib import Path
 
 from assistant_axis.pair_list_cohort import pair_type_of
+from results_analysis.pair_list_guard import check_pair_list
 from assistant_axis.provenance import load_validated_json
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
 
@@ -94,6 +95,12 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
 
 async def run_all(args):
     pairs = json.load(open(args.pair_list))
+    # Walk-through A2: every listed axis needs its two pole vectors; stop
+    # before any judge call rather than let each such pair's subprocess
+    # fail on the missing file.  (This script writes the judge caches, so
+    # none is required.)
+    check_pair_list(pairs, pair_list=args.pair_list,
+                    script="run_axis_experiment_batch.py", data_dir=Path(args.data_dir))
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     score_modes = []
