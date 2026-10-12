@@ -8,7 +8,7 @@ configured ``weakest * multiplier ** start_strength_multiplier_steps``)
 and categorise the start as:
 
 * ``GOOD``: at s_init the coherence stop predicate isn't tripped
-  (mean(coh) <= 1.5) AND the effect stop predicate isn't tripped
+  (mean(coh) < 1.5) AND the effect stop predicate isn't tripped
   either (|mean(effect.combined)| >= 1/3).  The scan can productively
   walk both UP and DOWN from here.
 
@@ -16,9 +16,18 @@ and categorise the start as:
   immediately eff-stops, wasting at least one strength on a barren
   bottom region.  Higher s_init would help.
 
-* ``TOO_HIGH``: mean(coh) > 1.5 at s_init -- the upward walk
+* ``TOO_HIGH``: mean(coh) >= 1.5 at s_init -- the upward walk
   immediately coh-stops, wasting at least one strength on an
   already-incoherent region.  Lower s_init would help.
+
+Both predicates are the runner's own
+(``assistant_axis.steering_runner``: UP stops on ``strength_mean_coh >=
+coh_stop_threshold``, DOWN on ``|mean(effect.combined)| <
+eff_stop_threshold``).  Until 2026-10-12 this tool graded TOO_HIGH on
+``mean(coh) > 1.5``, so a start at exactly 1.5, where the runner stops, read
+as TOO_LOW or GOOD (walk-through D11, review 10 D3); of the 1,239 recorded
+cells that day one changed grade (``artist_fragile_v1/s0_l49_+1``, TOO_LOW
+-> TOO_HIGH; its bucket stays GOOD-dominant, so ``OVERRIDES`` is unchanged).
 
 This is the analyser that produced the empirical
 ``assistant_axis.sweep_start_heuristics.OVERRIDES`` / ``DEFAULTS``
@@ -49,6 +58,8 @@ except ImportError as exc:  # pragma: no cover -- always present in the venv
     raise SystemExit("This tool needs pyyaml.  pip install pyyaml.") from exc
 
 
+# The runner's defaults (run_steering_cell's coh_stop_threshold and
+# eff_stop_threshold); test_analyse_start_strength pins them.
 COH_STOP = 1.5
 EFF_STOP = 1.0 / 3.0
 
@@ -113,7 +124,8 @@ def _analyse_cell(records_path: Path, sign: int,
         return None
     m_coh = sum(coh) / len(coh)
     m_eff = abs(sum(eff) / len(eff)) if eff else 0.0
-    if m_coh > COH_STOP:
+    # >=, as the runner's UP stop (strength_mean_coh >= coh_stop_threshold)
+    if m_coh >= COH_STOP:
         cat = "TOO_HIGH"
     elif m_eff < EFF_STOP:
         cat = "TOO_LOW"
