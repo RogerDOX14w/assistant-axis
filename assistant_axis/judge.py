@@ -199,6 +199,11 @@ def parse_judge_score(response_text: str) -> Optional[int]:
            where mention of e.g. "0 if no traits, 3 if fully" would
            otherwise mislead a first-integer parser).
 
+    A marker whose value is out of range (``SCORE: 4``) gives None: the
+    judge's answer was invalid, and an integer from its reasoning is not
+    its answer.  (Before 2026-10-12 such a reply fell through to stage 2,
+    so "shows 2 of the traits ... SCORE: 4" was scored 2.)
+
     Returns the integer in [0, 3], or None if nothing parseable.
     """
     if not response_text:
@@ -207,12 +212,8 @@ def parse_judge_score(response_text: str) -> Optional[int]:
     # Stage 1: explicit SCORE: marker (preferred for new prompts).
     m = re.search(r"SCORE\s*:\s*(\d+)", response_text, flags=re.IGNORECASE)
     if m:
-        try:
-            score = int(m.group(1))
-            if 0 <= score <= 3:
-                return score
-        except ValueError:
-            pass
+        score = int(m.group(1))
+        return score if 0 <= score <= 3 else None
 
     # Stage 2: walk integers from the end backwards, return the first
     # one in [0, 3].  This is forgiving for old "just the number"
@@ -507,7 +508,10 @@ async def score_responses(
     responses: List[Dict[str, str]],
     eval_prompt_template: str,
     judge_model: str = "gpt-4.1-mini",
-    max_tokens: int = 10,
+    # 200, as pipeline/3_judge.py: the reasoning-first rubrics need room for
+    # 2-3 sentences and the SCORE line (10 truncated every reply, and the
+    # parser's fallback then read a digit out of the cut-off reasoning).
+    max_tokens: int = 200,
     requests_per_second: int = 100,
     batch_size: int = 50,
 ) -> List[Optional[int]]:
@@ -564,7 +568,7 @@ def score_responses_sync(
     responses: List[Dict[str, str]],
     eval_prompt_template: str,
     judge_model: str = "gpt-4.1-mini",
-    max_tokens: int = 10,
+    max_tokens: int = 200,
     requests_per_second: int = 100,
     batch_size: int = 50,
 ) -> List[Optional[int]]:

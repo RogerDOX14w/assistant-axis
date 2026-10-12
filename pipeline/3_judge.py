@@ -27,9 +27,8 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
-import jsonlines
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -75,10 +74,19 @@ RateLimiter = _judge_mod.RateLimiter
 call_judge_batch = _judge_mod.call_judge_batch
 chat_request_body = _judge_mod.chat_request_body
 parse_judge_score = _judge_mod.parse_judge_score
+provider_for_model = _judge_mod.provider_for_model
 warn_if_low_parse_rate = _judge_mod.warn_if_low_parse_rate
 _pricing_mod = _standalone("judge_pricing")
 MultiModelUsage = _pricing_mod.MultiModelUsage
 BATCH_SUFFIX = _pricing_mod.BATCH_SUFFIX
+price_for_model = _pricing_mod.price_for_model
+# NFS-safe reads and writes for the score files and side-cars, which live on
+# the pod's network volume (AGENT_NOTES "NFS-safe file I/O"; stdlib only).
+_atomic_io = _standalone("atomic_io")
+atomic_write_text = _atomic_io.atomic_write_text
+read_text_with_retry = _atomic_io.read_text_with_retry
+read_jsonl_with_retry = _atomic_io.read_jsonl_with_retry
+PARSE_RATE_LOUD_THRESHOLD = _judge_mod.PARSE_RATE_LOUD_THRESHOLD
 _openai_batch = _standalone("openai_batch")
 OpenAIBatchRunner = _openai_batch.OpenAIBatchRunner
 _entity_id_mod = _standalone("entity_id")
@@ -199,6 +207,14 @@ def _description_from(data: dict) -> str:
     return data.get("description", "")
 
 
+def _literal(text: str) -> str:
+    """``text`` made safe to fill into a template that is formatted a second
+    time (with the question and answer): a brace in a label or description
+    would otherwise be read as a placeholder and stop the run (none in the
+    corpus at 2026-10-12, so no prompt changes)."""
+    return text.replace("{", "{{").replace("}", "}}")
+
+
 def parse_combined_filename(stem: str) -> Optional[Tuple[str, str, str]]:
     """Parse r_<role>__<trait> or t_<role>__<trait>.
 
@@ -283,8 +299,8 @@ def _trait_prompt(stem: str, traits_dir: Path) -> Optional[str]:
     data = _load_json(trait_file)
     desc = _description_from(data)
     return TRAIT_EVAL_TEMPLATE.format(
-        trait_name=trait_judge_name(stem, data),
-        trait_description=desc,
+        trait_name=_literal(trait_judge_name(stem, data)),
+        trait_description=_literal(desc),
     )
 
 
@@ -302,7 +318,7 @@ def resolve_eval_prompt(
     entity_type (required, one of "role" | "trait" | "combination"):
       - "role"        — standalone role; look up stem in roles_dir only.
       - "trait"       — standalone trait; look up stem in traits_dir only.
-      - "combination" — r_<role>_t_<trait>[__<goal>] entry; consult both dirs.
+      - "combination" — r_<role>__<trait> or t_<role>__<trait>; consult both dirs.
 
     Explicit entity_type is required because 11 names exist in both
     data/roles and data/traits (ascetic, contrarian, cosmopolitan, generalist,
@@ -330,7 +346,8 @@ def resolve_eval_prompt(
     if entity_type == "combination":
         parsed = parse_combined_filename(stem)
         if parsed is None:
-            logger.warning(f"{stem} is not a combination filename (expected r_<role>_t_<trait>)")
+            logger.warning(f"{stem} is not a combination filename (expected r_<role>__<trait> "
+                           f"or t_<role>__<trait>)")
             return None
         role_name, trait_name, _goal_source = parsed
         role_file = roles_dir / f"{role_name}.json"
@@ -343,10 +360,10 @@ def resolve_eval_prompt(
         trait_desc = _description_from(trait_data)
         # JUDGE_RUBRIC_VERSION 2: the judge display form, not the raw stems.
         return COMBINED_EVAL_TEMPLATE.format(
-            role_name=role_judge_name(role_name, roles_dir),
-            trait_name=trait_judge_name(trait_name, trait_data),
-            role_description=role_desc,
-            trait_description=trait_desc,
+            role_name=_literal(role_judge_name(role_name, roles_dir)),
+            trait_name=_literal(trait_judge_name(trait_name, trait_data)),
+            role_description=_literal(role_desc),
+            trait_description=_literal(trait_desc),
         )
 
     raise ValueError(f"Unknown entity_type: {entity_type!r}")
@@ -375,28 +392,31 @@ BATCH_WORK_DIRNAME = "_batches"
 SIDE_CAR_FILENAMES = (USAGE_FILENAME, RUBRIC_STAMP_FILENAME, BATCH_STATE_FILENAME)
 
 
+def uncollected_batches(output_dir: Path) -> Tuple[int, int]:
+    """``(chunks, requests)`` that ``batch_state.json`` records as sent and
+    not collected: batches submitted, and uploads whose batch was not
+    recorded (a batch run looks those up when it resumes)."""
+    path = output_dir / BATCH_STATE_FILENAME
+    if not path.exists():
+        return 0, 0
+    recs = [r for r in json.loads(path.read_text()).get("chunks", [])
+            if (r.get("batch_id") or r.get("input_file_id")) and not r.get("collected")]
+    return len(recs), sum(r.get("n_requests", 0) for r in recs)
+
+
 def _atomic_write_json(path: Path, obj) -> None:
-    """Write via a temporary file in the same directory and ``os.replace``,
-    retried as the score files are (the directory may be on NFS)."""
-    for attempt in range(3):
-        tmp = path.with_name(f".{path.name}.tmp{os.getpid()}")
-        try:
-            tmp.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n")
-            os.replace(tmp, path)
-            return
-        except OSError as e:
-            if tmp.exists():
-                tmp.unlink()
-            if attempt == 2:
-                raise
-            logger.warning(f"{path.name}: write failed ({e}), retrying")
+    """Write through TMPDIR staging, copy with retry and backoff, and an
+    atomic rename (``atomic_io.atomic_write_text``; the directory may be on
+    NFS)."""
+    atomic_write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", path, logger_obj=logger)
 
 
 def write_usage(path: Path, prior: "MultiModelUsage", run: "MultiModelUsage") -> "MultiModelUsage":
     """Write the cumulative record (``prior``, as loaded when the run started,
-    plus this run) to ``path`` and return it.  Called after every entity, so
-    a crash loses at most one entity's tokens; ``prior`` is never ticked, so
-    repeated writes do not double-count."""
+    plus this run) to ``path`` and return it.  Called after every entity in
+    real time and after every collected batch in batch mode, so a crash loses
+    at most that much; ``prior`` is never ticked, so repeated writes do not
+    double-count."""
     total = MultiModelUsage()
     total.merge_from(prior)
     total.merge_from(run)
@@ -434,12 +454,12 @@ def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str) -> dic
 
 
 def load_responses(responses_file: Path) -> List[dict]:
-    """Load responses from JSONL file."""
-    responses = []
-    with jsonlines.open(responses_file, "r") as reader:
-        for entry in reader:
-            responses.append(entry)
-    return responses
+    """Load responses from a JSONL file as step 2 does
+    (``atomic_io.read_jsonl_with_retry``: the NFS retry, and a malformed
+    line skipped with a warning), so that the two steps see the same
+    responses.  Before 2026-10-12 ``jsonlines`` read it with no retry, and a
+    malformed line stopped the run."""
+    return read_jsonl_with_retry(responses_file, logger_obj=logger)
 
 
 def response_key(resp: dict) -> str:
@@ -448,9 +468,14 @@ def response_key(resp: dict) -> str:
 
 
 def pending_prompts(responses: List[dict], eval_prompt_template: str,
-                    existing_scores: Dict[str, int]) -> List[Tuple[str, str]]:
-    """``(key, judge prompt)`` for every response not yet scored."""
-    out: List[Tuple[str, str]] = []
+                    existing_scores: Dict[str, int], *, name: str = "") -> List[Tuple[str, str]]:
+    """``(key, judge prompt)`` for every response not yet scored, one per
+    key.  Should a response file hold two responses with the same key, the
+    later one is judged, as step 2 keeps the later activation; a repeated
+    key in a batch would otherwise be a repeated ``custom_id``, which fails
+    the whole batch at validation (and every rerun the same way)."""
+    out: Dict[str, str] = {}
+    repeated: List[str] = []
     for resp in responses:
         key = response_key(resp)
         if key in existing_scores:
@@ -460,42 +485,63 @@ def pending_prompts(responses: List[dict], eval_prompt_template: str,
             if msg["role"] == "assistant":
                 assistant_response = msg["content"]
                 break
-        out.append((key, eval_prompt_template.format(
-            question=resp["question"], answer=assistant_response)))
-    return out
+        if key in out:
+            repeated.append(key)
+        out[key] = eval_prompt_template.format(
+            question=resp["question"], answer=assistant_response)
+    if repeated:
+        logger.warning(f"{name or 'responses'}: {len(repeated)} response(s) repeat a key already "
+                       f"seen (first: {repeated[0]}); the last response with each key is judged")
+    return list(out.items())
 
 
-def load_scores(output_file: Path) -> Dict[str, int]:
-    """An entity's score file, or {} when it is missing or unreadable."""
-    if output_file.exists():
-        try:
-            with open(output_file, "r") as f:
-                return json.load(f)
-        except Exception as e:  # noqa: BLE001
-            # Every response of the entity is then judged again (and paid
-            # for) and the file rewritten: say so (silent before 2026-10-12).
-            logger.warning(f"{output_file}: unreadable ({type(e).__name__}: {e}); "
-                           f"treating it as no scores")
-    return {}
+# Delays between attempts to read a score file (None: the project standard,
+# atomic_io.DEFAULT_RETRY_DELAYS_S); tests shorten it.
+SCORE_READ_DELAYS_S: Optional[Tuple[float, ...]] = None
+
+
+def load_scores(output_file: Path, *, strict: bool = False) -> Dict[str, int]:
+    """An entity's score file, or {} when it is missing.
+
+    Read with the NFS retry (``atomic_io.read_text_with_retry``: an OSError
+    is tried again with backoff).  A file that is there but does not parse
+    is reported and taken as no scores, so its responses are judged again
+    and the file rewritten (silent before 2026-10-12).  A file that cannot
+    be read even after the retries is reported and taken as no scores too,
+    unless ``strict``: then the error is raised.  ``merge_scores`` reads
+    strictly, because a transient read failure there used to overwrite the
+    entity's earlier scores with the new ones alone (2026-10-12)."""
+    def unreadable(err: BaseException) -> Dict[str, int]:
+        logger.warning(f"{output_file}: unreadable ({type(err).__name__}: {err}); "
+                       f"treating it as no scores")
+        return {}
+
+    if not output_file.exists():
+        return {}
+    try:
+        text = read_text_with_retry(output_file, delays_s=SCORE_READ_DELAYS_S, logger_obj=logger)
+    except (OSError, RuntimeError, EOFError) as e:     # still failing after the retries
+        if strict:
+            raise
+        return unreadable(e)
+    except ValueError as e:                            # UnicodeDecodeError: corrupt
+        return unreadable(e)
+    try:
+        data = json.loads(text)
+    except ValueError as e:
+        return unreadable(e)
+    if not isinstance(data, dict):
+        return unreadable(TypeError(f"a JSON {type(data).__name__}, not an object"))
+    return data
 
 
 def merge_scores(output_file: Path, new_scores: Dict[str, int]) -> Dict[str, int]:
     """Merge ``new_scores`` into the entity's score file (read again first,
-    since batch mode writes one entity's scores as each batch arrives) and
-    write it atomically, retried for NFS.  Returns the merged scores."""
-    merged = {**load_scores(output_file), **new_scores}
-    for attempt in range(3):
-        tmp = output_file.with_name(f".{output_file.name}.tmp{os.getpid()}")
-        try:
-            with open(tmp, "w") as f:
-                json.dump(merged, f, indent=2)
-            os.replace(tmp, output_file)
-            return merged
-        except OSError as e:
-            tmp.unlink(missing_ok=True)
-            if attempt == 2:
-                raise
-            logger.warning(f"{output_file.name}: save failed ({e}), retrying")
+    strictly, since batch mode writes one entity's scores as each batch
+    arrives) and write it NFS-safely (TMPDIR staging, retried copy, atomic
+    rename).  Returns the merged scores."""
+    merged = {**load_scores(output_file, strict=True), **new_scores}
+    atomic_write_text(json.dumps(merged, indent=2), output_file, logger_obj=logger)
     return merged
 
 
@@ -525,7 +571,7 @@ async def score_entity(
     emitting a single end-of-run parse-rate summary via
     :func:`assistant_axis.judge.warn_if_low_parse_rate`.
     """
-    pending = pending_prompts(responses, eval_prompt_template, existing_scores)
+    pending = pending_prompts(responses, eval_prompt_template, existing_scores, name=name)
     keys = [k for k, _ in pending]
     prompts = [p for _, p in pending]
 
@@ -590,12 +636,15 @@ async def judge_in_batches(
     fallback_max: int,
     rate_limiter: RateLimiter,
     realtime_batch_size: int,
+    before_write: Callable[[], None] = lambda: None,
 ) -> Tuple[int, int, int, set]:
     """Judge ``entities`` (name, existing scores, eval template, responses;
     consumed once, so a generator keeps one entity's responses in memory at
-    a time) in batches.  Score files are ``<output_dir>/<name>.json``.
-    Returns ``(n_attempted, n_parsed, n_left, entities_with_new_scores)``;
-    ``n_left`` requests are unanswered and unscored, for a rerun."""
+    a time) in batches.  Score files are ``<output_dir>/<name>.json``;
+    ``before_write()`` is called before scores are first written (the rubric
+    stamp).  Returns ``(n_attempted, n_parsed, n_left,
+    entities_with_new_scores)``; ``n_left`` requests are unanswered and
+    unscored, for a rerun."""
     runner = OpenAIBatchRunner(
         client, output_dir / BATCH_WORK_DIRNAME, output_dir / BATCH_STATE_FILENAME,
         poll_seconds=poll_seconds,
@@ -605,7 +654,7 @@ async def judge_in_batches(
 
     def requests():
         for name, existing, eval_tpl, responses in entities:
-            for key, prompt in pending_prompts(responses, eval_tpl, existing):
+            for key, prompt in pending_prompts(responses, eval_tpl, existing, name=name):
                 cid = f"{name}{CUSTOM_ID_SEP}{key}"
                 if cid not in inflight:
                     yield cid, chat_request_body(prompt, judge_model, max_tokens)
@@ -637,6 +686,8 @@ async def judge_in_batches(
             counts["parsed"] += 1
 
     def flush() -> None:
+        if buffer:
+            before_write()
         for name, new in buffer.items():
             merged = merge_scores(output_dir / f"{name}.json", new)
             touched.add(name)
@@ -676,17 +727,45 @@ async def judge_in_batches(
 # Main
 # ---------------------------------------------------------------------------
 
+_REPO_DIR = Path(__file__).resolve().parent.parent
+
+
+def check_judge_model(model: str, *, batch: bool) -> Optional[str]:
+    """None when step 3 can call ``model`` and record what it cost, else the
+    reason it cannot.  Checked before any request: the calls go to OpenAI
+    only, and a model ``judge_pricing`` cannot price raises in the usage
+    tracker after the request is paid for (in real time the reply was then
+    discarded as unparseable, in a batch the collection stopped).  A batch
+    run is priced under ``<model>:batch``, and its fallback in real time
+    under the plain name."""
+    try:
+        provider = provider_for_model(model)
+    except ValueError as e:
+        return str(e)
+    if provider != "openai":
+        return f"judge model {model!r} is a {provider} model; step 3 calls OpenAI only"
+    for name in ([model, f"{model}{BATCH_SUFFIX}"] if batch else [model]):
+        try:
+            price_for_model(name)
+        except KeyError as e:
+            return e.args[0] if e.args else f"no price for {name!r}"
+    return None
+
+
 async def main_async():
     parser = argparse.ArgumentParser(
         description="Score responses with judge LLM")
     parser.add_argument("--responses_dir", type=str, required=True,
                         help="Directory with response JSONL files")
+    # Defaults are the repository's corpus wherever the script is run from
+    # (they were relative to the working directory, so a run from the
+    # repository root found no files and skipped every entity).
     parser.add_argument("--roles_dir", type=str,
-                        default="../data/roles/instructions",
-                        help="Role instruction JSON directory")
+                        default=str(_REPO_DIR / "data" / "roles" / "instructions"),
+                        help="Role instruction JSON directory (default: the repository's)")
     parser.add_argument("--traits_dir", type=str,
-                        default="../data/traits/instructions",
-                        help="Trait instruction JSON directory")
+                        default=str(_REPO_DIR / "data" / "traits" / "instructions"),
+                        help="Trait instruction JSON directory (default: the repository's)")
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Output directory for score JSON files")
     parser.add_argument("--judge_model", type=str, default="gpt-4.1-mini",
@@ -721,8 +800,9 @@ async def main_async():
     parser.add_argument("--dry_run", action="store_true",
                         help="Preview without making API calls")
     parser.add_argument("--combination_scores", type=str,
-                        default="../data/combination_scores.json",
-                        help="Path to combination_scores.json for incongruity filtering")
+                        default=str(_REPO_DIR / "data" / "combination_scores.json"),
+                        help="Path to combination_scores.json for incongruity filtering "
+                             "(default: the repository's)")
     parser.add_argument("--no_incongruity_filtering", action="store_true",
                         help="Score every combination, including prompt-variants that "
                              "combination_scores.json flagged as highly incongruous "
@@ -734,11 +814,16 @@ async def main_async():
                              "exist in both data/roles and data/traits (ascetic, contrarian, "
                              "cosmopolitan, generalist, pacifist, parent, patient, "
                              "perfectionist, romantic, specialist, stoic). Use 'combination' "
-                             "for r_<role>_t_<trait> files.")
+                             "for r_<role>__<trait> and t_<role>__<trait> files.")
     args = parser.parse_args()
 
     if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
         logger.error("OPENAI_API_KEY not found")
+        sys.exit(1)
+
+    problem = check_judge_model(args.judge_model, batch=not args.no_batch)
+    if problem:
+        logger.error(f"--judge_model {args.judge_model}: {problem}")
         sys.exit(1)
 
     output_dir = Path(args.output_dir)
@@ -748,6 +833,15 @@ async def main_async():
     responses_dir = Path(args.responses_dir)
     roles_dir = Path(args.roles_dir)
     traits_dir = Path(args.traits_dir)
+    # Every entity would otherwise be skipped one warning at a time and the
+    # run end with "Successful: 0" and exit 0.
+    needed = {"role": [roles_dir], "trait": [traits_dir],
+              "combination": [roles_dir, traits_dir]}[args.entity_type]
+    missing_dirs = [str(d) for d in needed if not d.is_dir()]
+    if missing_dirs:
+        logger.error(f"--entity_type {args.entity_type} needs {', '.join(missing_dirs)}, "
+                     f"which is not a directory")
+        sys.exit(1)
 
     # Build per-pair exclusions for combined entries (incongruity score == 3).
     # Settled 2026-10-10 (Roger): the April 2026 scores were oversensitive (many
@@ -771,6 +865,11 @@ async def main_async():
             if excluded_pairs:
                 logger.info(f"Excluding {n_excluded} incongruous instruction pairs "
                             f"across {len(excluded_pairs)} combinations")
+        elif args.entity_type == "combination":
+            # Silent before 2026-10-12: the filter Roger kept (2026-10-10)
+            # was simply not applied.
+            logger.warning(f"{combo_scores_path} not found: no incongruity filtering "
+                           f"(pass --no_incongruity_filtering to mean it)")
 
     response_files = sorted(responses_dir.glob("*.jsonl"))
     logger.info(f"Found {len(response_files)} response files")
@@ -790,15 +889,8 @@ async def main_async():
 
         for response_file in response_files:
             name = response_file.stem
-            output_file = output_dir / f"{name}.json"
-
-            existing_scores: Dict[str, int] = {}
-            if output_file.exists():
-                try:
-                    with open(output_file, "r") as f:
-                        existing_scores = json.load(f)
-                except Exception:
-                    pass
+            # the live run's reader and request list, so the counts agree
+            existing_scores = load_scores(output_dir / f"{name}.json")
 
             eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
                                            entity_type=args.entity_type)
@@ -810,22 +902,9 @@ async def main_async():
             if name in excluded_pairs:
                 responses = [r for r in responses
                              if r["prompt_index"] not in excluded_pairs[name]]
-            count = 0
-            sample_prompt = None
-
-            for resp in responses:
-                key = (f"{resp['label']}_p{resp['prompt_index']}"
-                       f"_q{resp['question_index']}")
-                if key not in existing_scores:
-                    count += 1
-                    if sample_prompt is None:
-                        asst = ""
-                        for msg in resp["conversation"]:
-                            if msg["role"] == "assistant":
-                                asst = msg["content"]
-                                break
-                        sample_prompt = eval_tpl.format(
-                            question=resp["question"], answer=asst)
+            pending = pending_prompts(responses, eval_tpl, existing_scores, name=name)
+            count = len(pending)
+            sample_prompt = pending[0][1] if pending else None
 
             if count > 0:
                 total_prompts += count
@@ -847,18 +926,43 @@ async def main_async():
             n_batches = -(-total_prompts // max(1, args.batch_requests))
             logger.info(f"Mode: OpenAI Batch API, about {n_batches} batch(es) of up to "
                         f"{args.batch_requests} requests (--no_batch for real time)")
+        n_chunks, n_inflight = uncollected_batches(output_dir)
+        if n_inflight:
+            logger.info(f"Of these, about {n_inflight} are in {n_chunks} batch(es) an earlier run "
+                        f"sent ({output_dir / BATCH_STATE_FILENAME}); a batch run collects them "
+                        f"instead of sending them again"
+                        + ("; a --no_batch run refuses to start" if args.no_batch else ""))
         return
 
     # ------------------------------------------------------------------
     # Live scoring
     # ------------------------------------------------------------------
+    if args.no_batch:
+        # Judging in real time what earlier batches are still answering pays
+        # twice and leaves the batches uncollected (2026-10-12).
+        n_chunks, n_inflight = uncollected_batches(output_dir)
+        if n_chunks:
+            logger.error(f"{output_dir / BATCH_STATE_FILENAME} records {n_chunks} batch(es) "
+                         f"({n_inflight} requests) sent and not collected: run without "
+                         f"--no_batch first to collect them, or delete that file to abandon them")
+            sys.exit(1)
+
     client = openai.AsyncOpenAI()
     rate_limiter = RateLimiter(args.requests_per_second)
 
-    # Token usage (AGENT_NOTES HARD RULE): <output_dir>/usage.json, merged
-    # into on resume and rewritten after every entity.
-    stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model)
+    # The rubric stamp is written just before the first scores are, so that
+    # a run that judges nothing does not record this version (2026-10-12).
+    stamped = []
+
+    def stamp_once() -> None:
+        if not stamped:
+            stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model)
+            stamped.append(True)
+
     logger.info(f"Rubric version {JUDGE_RUBRIC_VERSION} (names in the {JUDGE_LABEL_FORM} form)")
+    # Token usage (AGENT_NOTES HARD RULE): <output_dir>/usage.json, merged
+    # into on resume and rewritten after every entity (real time) or every
+    # collected batch (batch mode).
     usage_path = output_dir / USAGE_FILENAME
     prior_usage = MultiModelUsage.load_or_create(usage_path)
     run_usage = MultiModelUsage()
@@ -873,39 +977,58 @@ async def main_async():
     errors: List[str] = []
     n_left = 0
 
-    def prepared_entities():
-        """``(name, existing scores, eval template, responses)`` for every
-        entity with responses still to judge, one at a time; the others are
-        counted as skipped or failed here."""
+    def prepare(name: str, response_file: Path):
+        """``(name, existing scores, eval template, responses)`` when the
+        entity has responses to judge, else None (counted as skipped or
+        failed here).  Raises on a bad entity (unreadable files, a record
+        missing a field, a template that does not format)."""
         nonlocal skipped, failed
-        for response_file in tqdm(response_files, desc="Scoring"):
-            name = response_file.stem
-            existing_scores = load_scores(output_dir / f"{name}.json")
-
-            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                           entity_type=args.entity_type)
-            if eval_tpl is None:
+        # strict: a score file there that cannot be read is not taken as
+        # empty, which would pay to judge again what it holds
+        existing_scores = load_scores(output_dir / f"{name}.json", strict=True)
+        eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                       entity_type=args.entity_type)
+        if eval_tpl is None:
+            skipped += 1
+            return None
+        responses = load_responses(response_file)
+        n_read = len(responses)
+        if name in excluded_pairs:
+            responses = [r for r in responses
+                         if r["prompt_index"] not in excluded_pairs[name]]
+            if n_read != len(responses):
+                logger.info(f"{name}: excluded {n_read - len(responses)} "
+                            f"responses (incongruous pairs {excluded_pairs[name]})")
+        if not responses:
+            if n_read:   # every variant judged incongruous: nothing to do, as intended
+                logger.info(f"Skipping {name}: every response is from an incongruous pair")
                 skipped += 1
-                continue
-
-            responses = load_responses(response_file)
-            if name in excluded_pairs:
-                before_n = len(responses)
-                responses = [r for r in responses
-                             if r["prompt_index"] not in excluded_pairs[name]]
-                if before_n != len(responses):
-                    logger.info(f"{name}: excluded {before_n - len(responses)} "
-                                f"responses (incongruous pairs {excluded_pairs[name]})")
-            if not responses:
+            else:
                 errors.append(f"{name}: no responses")
                 failed += 1
-                continue
+            return None
+        # Builds every prompt now, so that a bad record or template fails
+        # this entity here instead of the whole run inside the batch writer.
+        if not pending_prompts(responses, eval_tpl, existing_scores, name=name):
+            logger.info(f"Skipping {name}: all {len(responses)} already scored")
+            skipped += 1
+            return None
+        return name, existing_scores, eval_tpl, responses
 
-            if all(response_key(r) in existing_scores for r in responses):
-                logger.info(f"Skipping {name}: all {len(responses)} already scored")
-                skipped += 1
+    def prepared_entities():
+        """``prepare`` over every response file, one entity in memory at a
+        time; an entity that raises is counted as failed and the run goes on."""
+        nonlocal failed
+        for response_file in tqdm(response_files, desc="Scoring"):
+            name = response_file.stem
+            try:
+                item = prepare(name, response_file)
+            except Exception as e:  # noqa: BLE001 -- one bad entity must not stop the run
+                errors.append(f"{name}: {type(e).__name__}: {e}")
+                failed += 1
                 continue
-            yield name, existing_scores, eval_tpl, responses
+            if item is not None:
+                yield item
 
     if not args.no_batch:
         total_call_attempted, total_call_parsed, n_left, touched = await judge_in_batches(
@@ -914,7 +1037,7 @@ async def main_async():
             usage_path=usage_path, prior_usage=prior_usage, run_usage=run_usage,
             chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
             fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
-            realtime_batch_size=args.batch_size)
+            realtime_batch_size=args.batch_size, before_write=stamp_once)
         successful = len(touched)
     else:
         for name, existing_scores, eval_tpl, responses in prepared_entities():
@@ -934,6 +1057,7 @@ async def main_async():
                 write_usage(usage_path, prior_usage, run_usage)
                 total_call_attempted += n_attempted
                 total_call_parsed += n_parsed
+                stamp_once()
                 all_scores = merge_scores(output_dir / f"{name}.json", new_scores)
                 logger.info(f"Saved {len(all_scores)} scores for {name} "
                             f"({len(new_scores)} new)")
@@ -973,9 +1097,21 @@ async def main_async():
         n_total=total_call_attempted,
         logger_obj=logger,
     )
+    # Exit 1 (run_pipeline.sh then stops before step 4) when the scores are
+    # not fit to build vectors from: requests left unanswered, a parse rate
+    # under the project threshold ("<99% is a bug, not a budget"), or an
+    # entity that failed.  Before 2026-10-12 only the first did.  The score
+    # files written are kept; a rerun judges only what is missing.
+    reasons = []
     if n_left:
-        logger.error(f"{n_left} requests left unscored by their batches; rerun this step "
-                     f"to submit them again")
+        reasons.append(f"{n_left} requests left unscored by their batches (a rerun submits them)")
+    if total_call_attempted and total_call_parsed / total_call_attempted < PARSE_RATE_LOUD_THRESHOLD:
+        reasons.append(f"parse rate {total_call_parsed}/{total_call_attempted} is under "
+                       f"{PARSE_RATE_LOUD_THRESHOLD:.0%}")
+    if failed:
+        reasons.append(f"{failed} entit{'y' if failed == 1 else 'ies'} failed (see Errors above)")
+    if reasons:
+        logger.error("Step 3 is not complete: " + "; ".join(reasons))
         sys.exit(1)
 
 

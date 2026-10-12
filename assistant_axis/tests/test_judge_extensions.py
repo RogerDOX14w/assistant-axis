@@ -290,6 +290,13 @@ class TestParseJudgeScore:
         assert parse_judge_score("score: 4") is None
         assert parse_judge_score("Some reasoning. SCORE: 99") is None
 
+    def test_marker_out_of_range_does_not_fall_back_to_reasoning_digits(self):
+        # Regression (2026-10-12): with an in-range integer in the
+        # reasoning, the invalid marker used to fall through to stage 2,
+        # which returned that integer (2 here) as the score.
+        assert parse_judge_score("The reply shows 2 of the role's traits.\nSCORE: 4") is None
+        assert parse_judge_score("Fits 1 of 3 cues.\nSCORE: 12") is None
+
     def test_marker_beats_out_of_range_first_integer(self):
         # Out-of-range integer earlier in the text doesn't poison the
         # parser when an in-range marker is present.
@@ -306,3 +313,12 @@ class TestParseJudgeScore:
     def test_no_digits(self):
         assert parse_judge_score("REFUSAL") is None
         assert parse_judge_score("the model refused") is None
+
+
+def test_score_responses_defaults_fit_the_reasoning_first_rubrics():
+    """The library helpers' max_tokens default was 10, which truncates every
+    reasoning-first reply (pipeline/3_judge.py uses 200)."""
+    import inspect
+    from assistant_axis.judge import score_responses, score_responses_sync
+    for fn in (score_responses, score_responses_sync):
+        assert inspect.signature(fn).parameters["max_tokens"].default == 200
