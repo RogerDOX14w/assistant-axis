@@ -55,7 +55,10 @@ sees our trait list until the coverage check.
 3. **Cluster.** Agglomerative, average linkage, cosine, distance threshold swept to give ~300-400
    clusters of 4-15 items; HDBSCAN on a 20-d UMAP as the cross-check. Keep clusters that both
    embedders reproduce (Jaccard > 0.5 against the best-matching cluster); route the rest to a
-   "loose" pile for later. Items keyed `-` on a scale whose `+` items sit in the same cluster mark
+   "loose" pile for later.  **Rule R2 since 2026-10-12 (gate audit 4):** keep every cluster of 3 or more
+   items, a pair only when the second embedder co-clusters it, with a size ceiling of 30 at the coarser cuts;
+   the Jaccard gate had held 65-92% of the clusters, 83% of them coherent
+   ([ipip_consensus.md](../code_review_2026-10-12/gate_audits/ipip_consensus.md)).  Items keyed `-` on a scale whose `+` items sit in the same cluster mark
    the cluster as bipolar: the key signs split it into two poles for free.
 4. **Name.** One Haiku call per cluster (items only, construct names withheld: blind naming keeps
    the labels independent of the taxonomy vocabulary already scanned). Output JSON: `label`, `gloss`

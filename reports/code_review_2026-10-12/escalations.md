@@ -1860,3 +1860,22 @@ review label is added in square brackets; where it does not, no mapping is guess
 - **P8.7**: into the P7 plan (BOS per family).
   [[P1 D8](#p1-d8-a-second-bos-on-gemma-or-llama-from-text-prompts)]  **P8.8**: leave.
   [[P4 D8](#p4-d8-question-matched-filtering-unchanged)]
+- **C1** (Roger, 2026-10-12): keep the workbook; gap-fill only where `_match_item` pairs the
+  row with no key-page link, so each link is counted once; ingest refuses to write on
+  `needs_roger`; the acceptance criterion becomes sign disagreement on shared links ≤ 2% (0.1%
+  today, 3 of 2,909: passes), with the coverage differences (974 key-page-only links, 487
+  workbook-only; 44 and 15 items) reported, not gated.  Re-run ingest and cluster (free), re-name
+  only changed poles (cents).  Basis: the keys reach only the pole split (signs), the
+  hinted-naming hints and the purity diagnostic; nothing submitted carries them.
+  [[Review 5 D1](#review-5-d1-ipip-merge-keys-gap-fills-workbook-rows-the-key-pages-already-hold)]
+- **Gate audits** (Roger, 2026-10-12; the eight audits and their verdicts in
+  [gate_audits/README.md](./gate_audits/README.md), the fixes built in its "Fixes" section):
+  M3 graded cut-off √; the "which is broader" pilot on the 100 marked rows √; unrelated and
+  opposed partners skipped √; rule 1b's rescues apply in both dictionary walks, WordNet depth 6;
+  keep k = 10 and add every pair at cosine ≥ 0.55, the Opus pilot on Sonnet-2 pairs; states
+  one-hop rows released under their own name with the suggestion on the card, the gloss check
+  accepting any reading but passing, the passes run on the 1,027 unjudged rows; a stage for the
+  310 column-IV-below-floor words, run with the rest of `allport_rare`; `unknown_word` left as it
+  is, no pilot; IPIP rule R2 and the base-model floor at 2 with rule 1b in the table; M1 phrases
+  out of the probe.  Wave 1 (IPIP, base model, M1) then wave 2 (M3, states, R1, censuses,
+  WordNet), each agent's code committed before its paid step.

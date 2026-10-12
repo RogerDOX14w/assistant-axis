@@ -87,6 +87,10 @@ assistant_axis/gapgen/generators/ipip/
                  agglo_clusters(E, *, target_n, tol=0.1) -> list[RawCluster]   (average linkage, cosine;
                  distance threshold found by bisection until the count of clusters with >= 2 items is within tol of target)
                  consensus(a, b, *, min_jaccard=0.5) -> (kept, loose)   (greedy best-match Jaccard between embedders)
+                 since 2026-10-12 (gate audit 4): consensus(a, b, *, rule="r2", min_jaccard) under CONSENSUS_RULES; DEFAULT_CONSENSUS "r2"
+                 keeps a 3+ cluster and a pair the second embedder co-clusters (R2_MIN_SIZE 3), DEFAULT_SIZE_CEILING 30 at the coarser cuts,
+                 DEFAULT_RECUT_TARGETS (350, 600); build_cluster_table(..., rule, size_ceiling, recut_targets, carry_from); TABLE_SCHEMA_VERSION 2;
+                 CLI --consensus {r2,jaccard} --size-ceiling --recut-targets
                  split_poles(cluster, items) -> list[Pole]   (key signs: '-' items of a scale whose '+' items share
                  the cluster mark it bipolar; each pole is a naming unit)
                  purity_metrics(clusters, items) -> dict (NMI, ARI, majority-construct purity); hdbscan_check(E, seed) (report-only)
