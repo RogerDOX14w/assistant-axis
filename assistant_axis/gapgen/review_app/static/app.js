@@ -168,6 +168,9 @@ function renderCard() {
   }
   const working = c.status === "open";                  // members can be nominated, neighbours merged in, resolved
   const shaping = working || c.status === "proposed";   // members can be excluded
+  // app.js is read from disk on every load while the server runs the code it started with: a server from before
+  // the leftovers pass (2026-10-11) sends neither list
+  const leftovers = c.leftovers || [], distinct = c.distinct || [];
   const status = `<span class="badge status-${c.status}">${c.status}${c.resolution ? ": " + esc(c.resolution) : ""}</span>`;
   let head = `<div class="card-head"><span class="gid">${esc(c.id)}</span>${status}` +
     `<span class="muted small">${esc(c.source)}${c.via ? " via " + esc(c.via) : ""}</span>` +
@@ -182,7 +185,7 @@ function renderCard() {
     head += `<div class="banner resolved">Resolved: ${esc(c.resolution)}${tgt}${c.nominated ? " (" + esc(labelOf(c, c.nominated)) + ")" : ""}` +
       `${c.rename ? " · flagged for a rename" : ""}${c.note ? " · " + esc(c.note) : ""}.  ` +
       `<b>Next group</b> moves on; <b>Undo</b> takes the decision back.` +
-      (c.leftovers.length ? ` <b>${c.leftovers.length} leftover${c.leftovers.length === 1 ? "" : "s"}</b> from overlapping groups below: <b>Also covered</b> or <b>Distinct</b> for each.` : "") + `</div>`;
+      (leftovers.length ? ` <b>${leftovers.length} leftover${leftovers.length === 1 ? "" : "s"}</b> from overlapping groups below: <b>Also covered</b> or <b>Distinct</b> for each.` : "") + `</div>`;
   }
   if (S.note) head += `<div class="banner">note for the next resolution: ${esc(S.note)}</div>`;
   if (S.rename) head += `<div class="banner">the next resolution is flagged for a rename (the note says why)</div>`;
@@ -210,8 +213,8 @@ function renderCard() {
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
   let left = "";
-  if (c.status === "resolved" && (c.leftovers.length || c.distinct.length)) {
-    const rows = c.leftovers.map((x, i) => {
+  if (c.status === "resolved" && (leftovers.length || distinct.length)) {
+    const rows = leftovers.map((x, i) => {
       const btns = [
         rowBtn("extend", "Also covered", "+", "leftovers", i, `add this to ${c.id} under the same resolution (${c.resolution})`),
         rowBtn("distinct", "Distinct", "-", "leftovers", i, "not this trait: stays for its own group, and leaves this list"),
@@ -221,8 +224,8 @@ function renderCard() {
         `<b>${esc(x.label)}</b><span class="row-btns">${btns}</span> <span class="muted small">4-edges to ${x.ties} of ${x.of} · ${esc(x.groups.join(" "))}</span>${earlierBadge(x)}` +
         `<div class="gloss">${esc(x.gloss)}</div></li>`;
     }).join("") || `<li class="muted small">every leftover decided</li>`;
-    const dist = c.distinct.length ? `<p class="muted small">marked distinct: ${esc(c.distinct.map((x) => x.label).join(", "))}</p>` : "";
-    left = `<h2 class="${S.pane === "leftovers" ? "pane-focus" : ""}">Leftovers from overlapping groups <span class="muted small">${c.leftovers.length} unhandled; strongest tie to this group first</span></h2><ol>${rows}</ol>${dist}`;
+    const dist = distinct.length ? `<p class="muted small">marked distinct: ${esc(distinct.map((x) => x.label).join(", "))}</p>` : "";
+    left = `<h2 class="${S.pane === "leftovers" ? "pane-focus" : ""}">Leftovers from overlapping groups <span class="muted small">${leftovers.length} unhandled; strongest tie to this group first</span></h2><ol>${rows}</ol>${dist}`;
   }
   const others = c.neighbour_groups.length ? `<h2>Other groups sharing a member</h2><ol>` + c.neighbour_groups.map((g) =>
     `<li class="small"><span class="tier ${g.tier}">${g.tier === "merged" ? "M" : "P"}</span> ${esc(g.id)}: ${esc(g.labels.join(", "))} ` +
@@ -348,7 +351,7 @@ async function startAntonym() {
 async function mergeIntoCorpus() {
   if (!needCard()) return;
   const t = current("corpus");
-  if (!t) { flash("no corpus trait to merge into: use Same as this on a row of the corpus list, or Find one", true); return; }
+  if (!t) { flash("no corpus trait to merge into: use Covered by this on a row of the corpus list, or Find one", true); return; }
   return resolve(`merge_into:${t.key}`);
 }
 
@@ -520,15 +523,19 @@ function openFind() {
   o.hidden = false;
   o.innerHTML = `<button type="button" class="btn mini close" data-close="1">Close</button>` +
     `<input id="find" placeholder="find a term, a corpus trait or a queue entry (click a result, or Enter)" autocomplete="off"><table id="found"></table>`;
-  S.overlay = { kind: "find", results: [], i: 0 };
+  const ov = S.overlay = { kind: "find", results: [], i: 0 };
   const input = $("find");
   input.focus();
   let timer = null;
   input.addEventListener("input", () => {
     clearTimeout(timer);
     timer = setTimeout(async () => {
-      const r = await api(`/api/find?q=${encodeURIComponent(input.value)}`);
-      S.overlay.results = r.results; S.overlay.i = 0;
+      const q = input.value;
+      let r;
+      try { r = await api(`/api/find?q=${encodeURIComponent(q)}`); } catch (e) { flash(e.message, true); return; }
+      // the overlay may have closed (or been opened afresh), or the text moved on, while the answer was on its way
+      if (S.overlay !== ov || input.value !== q) return;
+      ov.results = r.results; ov.i = 0;
       renderFound();
     }, 120);
   });

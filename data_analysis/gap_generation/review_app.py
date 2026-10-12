@@ -17,8 +17,8 @@ checkout, and opens the page in a browser:
 idempotent.  Nothing here makes an API call.
 
 Keys on the page: ``j`` / ``k`` next and previous in the focused list; ``Tab`` / ``Shift-Tab`` move the focus between
-members, neighbours, corpus traits and opposed terms; ``g`` (or ``Enter`` on a proposed group) accept the proposed
-group; ``x`` drop the highlighted member; ``m`` merge in the highlighted neighbour (with its merged group); ``n``
+members, leftovers, corpus traits, neighbours and opposed terms (the page's order); ``g`` (or ``Enter`` on a proposed
+group) accept the proposed group; ``x`` drop the highlighted member; ``m`` merge in the highlighted neighbour (with its merged group); ``n``
 nominate the highlighted member; ``Enter`` resolve with promote; ``c`` resolve as merge into the highlighted corpus
 trait (or queue entry); ``p`` park; ``r`` reject; ``d`` defer; ``;`` a note for the next resolution; ``f`` flag the group for a better name; ``a`` start the
 antonym group from the highlighted opposed term; on a resolved group's **leftovers** (the unhandled members of the
@@ -35,7 +35,8 @@ Commands:
   (median minutes per resolved group, active minutes, decisions per minute).
 * ``apply --batch-id B [--dry-run]``: replays the log into the registry's review blocks and promotes each promoted
   group's nominee through ``gap_registry.py promote``'s path (its seed-queue entry carrying ``also_proposed``);
-  ``--dry-run`` prints the writes and writes nothing.
+  ``--dry-run`` prints the writes and writes nothing.  Logged decisions the graph no longer supports (a rebuilt
+  graph) are listed first: they are left out, so a row this review wrote for one is reset.
 
 The brief is ``reports/trait_gap_generation/coding_plan_review.md`` (section 3); the logic is
 :mod:`assistant_axis.gapgen.review_app.decisions`, the routes :mod:`assistant_axis.gapgen.review_app.server`.
@@ -128,6 +129,12 @@ def cmd_apply(args) -> int:
     if len(vers) > 1 or (vers and log.graph_sha256 not in vers):
         print(f"NOTE: decisions were made on {len(vers)} graph versions; keys are registry keys, so they apply to "
               "the current graph's rows")
+    if log.state.skipped:
+        # a skipped decision is missing from what is applied: a row this review wrote for it is reset below
+        print(f"WARNING: {len(log.state.skipped)} logged decisions no longer apply to this graph and are left out "
+              "of this apply:")
+        for x in log.state.skipped:
+            print(f"  skipped {x['seq']} {x['action']} {x['group']}: {x['why']}")
     rep = D.apply_decisions(log.state, batch_id=args.batch_id, registry=Registry(args.registry),
                             queue_path=_queue_path(args), data_dir=args.data_dir, review_dir=_review_dir(args),
                             dry_run=args.dry_run, by=args.by, graph_sha256=log.graph_sha256)

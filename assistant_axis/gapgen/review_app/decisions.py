@@ -589,7 +589,11 @@ class ReviewState:
             raise ActionError("nothing to undo")
         decisions = [e for e in self.applied if e.get("action") != "open"] or self.applied
         last = decisions[-1]
-        if req.get("seq") is not None and int(req["seq"]) != last["seq"]:
+        try:
+            seq = int(req["seq"]) if req.get("seq") is not None else None
+        except (TypeError, ValueError):
+            raise ActionError(f"undo: seq must be a decision's number, not {req.get('seq')!r}") from None
+        if seq is not None and seq != last["seq"]:
             raise ActionError(f"only the last decision can be undone (seq {last['seq']}, {last['action']}); "
                               "undo again to go further back")
         out = {"group": last.get("group"), "action": "undo", "undoes": last["seq"], "undone_action": last["action"]}
@@ -940,7 +944,7 @@ class ReviewState:
                 o = e.b if e.a == x else e.a
                 if o in S and e.relation != "opposed":
                     lvl = edge_level(e)
-                    ties += lvl == 4
+                    ties += bool(e.strict)          # a 4-edge: 4 both ways (edge_level is 4 for a one-way 4 too)
                     best = max(best, lvl)
             out.append(self._term_entry(x) | {"ties": ties, "of": len(S), "level": best, "groups": groups})
         out.sort(key=lambda d: (-d["ties"], -d["level"], d["label"], d["key"]))
@@ -1159,7 +1163,13 @@ class DecisionLog:
             ev = {"seq": max((e["seq"] for e in self.events), default=0) + 1, "at": self.clock(), "by": self.by,
                   "group": gid, **norm, "graph_sha256": self.graph_sha256}
             if ev["action"] != "undo":
-                self.state.apply(ev)
+                try:
+                    self.state.apply(ev)
+                except BaseException:
+                    # nothing is logged; the state is rebuilt from the log, so that a check and an apply that
+                    # disagree (a bug) never leave the state the page shows ahead of what a restart replays
+                    self.state = self._replay()
+                    raise
             try:
                 self._append(ev)
             except BaseException:
@@ -1171,9 +1181,18 @@ class DecisionLog:
             return ev, gid
 
     def _append(self, ev: Mapping) -> None:
+        """One line, flushed and fsynced.  A last line without its newline (a write torn by a crash or a full disk,
+        which :func:`read_events` skips) is closed first, so that this event starts a line of its own instead of
+        being glued to the fragment and lost on the next replay."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.path, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(ev, ensure_ascii=False) + "\n")
+        line = json.dumps(ev, ensure_ascii=False) + "\n"
+        with open(self.path, "a+b") as fh:
+            fh.seek(0, os.SEEK_END)
+            if fh.tell():
+                fh.seek(-1, os.SEEK_END)
+                if fh.read(1) != b"\n":
+                    line = "\n" + line
+            fh.write(line.encode("utf-8"))
             fh.flush()
             os.fsync(fh.fileno())
 
@@ -1307,7 +1326,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
     * every resolved member's ``review`` block becomes :func:`desired_blocks`'s (replaced whole, through
       :meth:`Registry.update_many`); a row this review wrote before (``review_batch``) that the log no longer
       resolves (an undo after an apply) is reset to unreviewed, and if it was promoted that is reported as a
-      conflict (a promotion is not reversed here);
+      conflict (a promotion is not reversed here); so is a promoted row whose block is rewritten to anything but
+      ``accepted`` (re-resolved after an undo, or another member nominated);
     * each promoted group's nominee goes through :func:`promote.promote` (the path of ``gap_registry.py promote``,
       by name, so ``allow_physical``: a physical pass's nominee joins the physical track, tagged ``physical``; and
       ``allow_released_states``: a row the states pass released is tagged ``states_pass`` and its route),
@@ -1331,6 +1351,12 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
             rep.unchanged += 1
         else:
             rep.review_writes[key] = block
+            if row.get("seed_queue_stem") and block["status"] != "accepted":
+                # a promoted row the log now resolves otherwise (an undo, then another resolution or nominee):
+                # the block is rewritten, the queue entry is not removed here
+                rep.conflicts.append(f"{key} was promoted as {row['seed_queue_stem']}, and this review now resolves "
+                                     f"it {block['status']}" + (f" {block['into']}" if block.get("into") else "")
+                                     + ": remove its seed-queue entry by hand if that is meant")
     for key, row in sorted(rows.items()):
         rv = row.get("review") or {}
         if rv.get("review_batch") == batch_id and key not in desired and rv.get("status") != "unreviewed":

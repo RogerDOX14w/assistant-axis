@@ -372,6 +372,21 @@ class TestLeftovers:
             g2 = act(log, action="open", source="merged:0")
             log.act({"action": "extend", "group": g2, "keys": [k("skeptic")]})
 
+    def test_a_one_way_4_is_no_4_edge_in_the_leftovers_count(self, env):
+        """Review 2026-10-12: ``ties`` (the page's "4-edges to N of M") counted every edge whose level is 4, and
+        ``edge_level`` gives 4 to an edge read 4 one way and 2 the other, which is no 4-edge (decision 2)."""
+        g = toy_graph()
+        g.edges = [e for e in g.edges if {e.a, e.b} != {k("fond"), k("loving")}] + \
+            [r1("fond", "loving", cos=0.6, ab=(4, 4), ba=(2, None))]
+        assert D.edge_level(g.edges[-1]) == 4 and not g.edges[-1].strict
+        (env["rdir"] / "graph.json").write_text(json.dumps(RG.graph_envelope(g, title="toy")), encoding="utf-8")
+        log = make_log(env)
+        gid = act(log, action="open", source="merged:1")                     # affectionate, fond
+        act(log, action="nominate", group=gid, key=k("fond"))
+        act(log, action="resolve", group=gid, resolution="promote")
+        [x] = log.state.group_card(gid)["leftovers"]
+        assert (x["key"], x["ties"], x["of"], x["level"]) == (k("loving"), 1, 2, 4)    # the 4-edge to affectionate only
+
     def test_also_covered_extends_the_resolution_and_apply_writes_it_like_a_member(self, env):
         log = make_log(env)
         g = act(log, action="open", source="merged:1")
@@ -488,6 +503,47 @@ class TestReplay:
         assert [s["seq"] for s in again.state.skipped] == [2] and "g1" in again.state.groups
         assert again.graph_versions() == {log.graph_sha256: 1, "old": 1}
 
+    def test_a_torn_last_line_is_closed_before_the_next_event(self, env):
+        """Review 2026-10-12: a write torn by a crash leaves a last line without its newline; the next event used to
+        be appended to that fragment, the glued line was not JSON, and the decision vanished on the next restart."""
+        log = make_log(env)
+        g = act(log, action="open", source="merged:0")
+        path = env["rdir"] / "decisions.jsonl"
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write('{"seq": 2, "at": "2026-10-09T09:02:00+00:00", "action": "dr')        # torn mid-write
+        again = make_log(env)                                     # the fragment is skipped (a warning), as before
+        assert [e["seq"] for e in again.events] == [1]
+        act(again, action="drop", group=g, key=k("nonreligious"))
+        lines = path.read_text(encoding="utf-8").splitlines()
+        assert len(lines) == 3 and json.loads(lines[2])["action"] == "drop"
+        third = make_log(env)
+        assert [e["seq"] for e in third.events] == [1, 2] and third.state.skipped == []
+        assert third.state.groups[g].members == [k("godless"), k("irreligious")]
+        assert snapshot(third) == snapshot(again)
+
+    def test_a_failure_inside_apply_leaves_the_state_as_the_log_replays_it(self, env, monkeypatch):
+        """Review 2026-10-12: ``act`` applies an event before appending it; an exception there (a check and an apply
+        that disagree: a bug) used to leave the in-memory state changed although nothing was logged."""
+        log = make_log(env)
+        g = act(log, action="open", source=f"term:{k('loner')}")
+        before = snapshot(log)
+
+        def half_applied(self, ev):
+            self.groups[ev["group"]].members.extend(ev["keys"])       # mutate, then fail
+            raise RuntimeError("bug")
+        monkeypatch.setattr(D.ReviewState, "_apply_merge_in", half_applied)
+        with pytest.raises(RuntimeError):
+            log.act({"action": "merge_in", "group": g, "keys": [k("skeptic")]})
+        assert len(log.events) == 1 and snapshot(log) == before
+        assert len((env["rdir"] / "decisions.jsonl").read_text().splitlines()) == 1
+
+    def test_an_undo_with_a_seq_that_is_no_number_is_refused(self, env):
+        log = make_log(env)
+        act(log, action="open", source="merged:0")
+        with pytest.raises(D.ActionError, match="seq must be"):
+            log.act({"action": "undo", "seq": "last"})
+        assert len(log.events) == 1
+
 
 # --------------------------------------------------------------------------- apply
 
@@ -601,6 +657,35 @@ class TestApply:
         assert env["reg"].fold()[k("loner")]["review"]["status"] == "unreviewed"
         assert k("loner") in rep.resets and any("loner" in c for c in rep.conflicts)
 
+    def test_a_promoted_row_resolved_otherwise_after_an_undo_is_a_conflict(self, env):
+        """Review 2026-10-12: the conflict used to be reported only when the row's block was reset; a promoted
+        nominee re-resolved (rejected, or merged into another nominee) was rewritten silently, its queue entry
+        left in the seed queue.  The block is still written; the conflict says so, once, at the change."""
+        log = make_log(env)
+        g = act(log, action="open", source=f"term:{k('loner')}")
+        act(log, action="resolve", group=g, resolution="promote")
+        run_apply(env, log)
+        log.act({"action": "undo"})
+        act(log, action="resolve", group=g, resolution="reject")
+        rep = run_apply(env, log)
+        assert env["reg"].fold()[k("loner")]["review"]["status"] == "rejected"
+        assert rep.conflicts == [f"{k('loner')} was promoted as loner, and this review now resolves it rejected: "
+                                 "remove its seed-queue entry by hand if that is meant"]
+        assert "CONFLICT: " + rep.conflicts[0] in rep.format()
+        assert run_apply(env, log).conflicts == []                    # unchanged since: not reported again
+        # another member nominated: the first nominee merges into the second, which is promoted too
+        g2 = act(log, action="open", source="merged:1")                # affectionate, fond
+        act(log, action="nominate", group=g2, key=k("fond"))
+        act(log, action="resolve", group=g2, resolution="promote")
+        run_apply(env, log)
+        log.act({"action": "undo"})
+        act(log, action="nominate", group=g2, key=k("affectionate"))
+        act(log, action="resolve", group=g2, resolution="promote")
+        rep = run_apply(env, log)
+        assert [p["key"] for p in rep.promotions] == [k("affectionate")]
+        assert rep.conflicts == [f"{k('fond')} was promoted as fond, and this review now resolves it merged_into "
+                                 f"{k('affectionate')}: remove its seed-queue entry by hand if that is meant"]
+
     def test_a_refused_promotion_is_reported_and_the_review_block_still_written(self, env):
         (env["data"] / "traits" / "instructions" / "loner.json").write_text("{}")   # the stem is in the corpus now
         log = make_log(env)
@@ -610,6 +695,67 @@ class TestApply:
         assert rep.refused == {k("loner"): "stem exists in the corpus"}
         assert env["reg"].fold()[k("loner")]["review"]["status"] == "accepted"
         assert "loner" not in {e["stem"] for e in json.loads(env["queue"].read_text())["entries"]}
+
+
+# --------------------------------------------------------------------------- the page, run in node
+
+def _node():
+    """The node executable, or None.  ``shutil.which`` first; then a plain ``node`` run, because a sandbox that hides
+    the install's directory from ``stat`` (Claude Code's, 2026-10-12) can still execute it."""
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if node:
+        return node
+    try:
+        subprocess.run(["node", "--version"], capture_output=True, check=True, timeout=30)
+        return "node"
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+#: app.js in a ``vm`` context with a stub DOM (elements made on first use, ``handlers`` per event) and a ``fetch``
+#: whose answers the test gives by hand (``pending``); BODY runs in an async function with ``T`` (the page's ``S``
+#: and functions), ``el``, ``pending`` and ``sleep``.  An unhandled rejection prints ``UNHANDLED``.
+PAGE_HARNESS = r"""
+const vm = require("vm"), fs = require("fs");
+const els = {};
+function el(id) {
+  if (!els[id]) els[id] = {id, innerHTML: "", textContent: "", className: "", hidden: false, value: "", handlers: {},
+    scrollIntoView() {}, focus() {}, querySelector() { return null; },
+    addEventListener(t, f) { (this.handlers[t] = this.handlers[t] || []).push(f); }};
+  return els[id];
+}
+const pending = [];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+process.on("unhandledRejection", (e) => { console.log("UNHANDLED " + e); process.exitCode = 3; });
+const ctx = {document: {getElementById: el, querySelectorAll: () => [], querySelector: () => null,
+                        addEventListener() {}, title: ""},
+             window: {prompt: () => null}, console, setTimeout, clearTimeout,
+             fetch: (url) => new Promise((res) => pending.push({url, res}))};
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(process.argv[2], "utf8") +
+                "\n;globalThis.T = {S, renderCard, openFind, closeOverlay};", ctx);
+const T = ctx.T;
+(async () => {
+BODY
+})().catch((e) => { console.log("ERROR " + ((e && e.stack) || e)); process.exitCode = 2; });
+"""
+
+
+def run_page(tmp_path: Path, body: str) -> str:
+    """Run ``body`` against app.js in node (skipped without node); its stdout, after asserting a clean exit."""
+    import subprocess
+    from assistant_axis.gapgen.review_app import server
+    node = _node()
+    if not node:
+        pytest.skip("node not installed")
+    script = tmp_path / "page_harness.js"
+    script.write_text(PAGE_HARNESS.replace("BODY", body), encoding="utf-8")
+    r = subprocess.run([node, str(script), str(server.STATIC_DIR / "app.js")], capture_output=True, text=True,
+                       timeout=60)
+    assert r.returncode == 0, r.stdout + r.stderr
+    return r.stdout
 
 
 # --------------------------------------------------------------------------- the routes (TestClient)
@@ -730,14 +876,52 @@ class TestRoutes:
         assert "return promote();" in js.split("async function onEnter()", 1)[1].split("\n}\n", 1)[0]
 
     def test_the_script_parses(self):
-        import shutil
         import subprocess
-        node = shutil.which("node")
+        node = _node()
         if not node:
             pytest.skip("node not installed")
         from assistant_axis.gapgen.review_app import server
         r = subprocess.run([node, "--check", str(server.STATIC_DIR / "app.js")], capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
+
+    def test_a_card_renders_without_the_fields_an_older_server_omits(self, tmp_path):
+        """Review 2026-10-12: app.js is read from disk on each page load while the server runs the code it started
+        with; a resolved card from a server before the leftovers pass (no ``leftovers``, no ``distinct``) threw in
+        renderCard and left the page blank."""
+        out = run_page(tmp_path, """
+            T.S.card = {id: "g1", status: "resolved", source: "merged:0", via: null, members: [], antonym_groups: [],
+                        neighbour_groups: [], neighbours: [], corpus: [], opposed: [], resolution: "park",
+                        nominated: null};
+            T.renderCard();
+            console.log(el("card").innerHTML.includes("Resolved: park") ? "RENDERED" : "MISSING");
+        """)
+        assert "RENDERED" in out
+
+    def test_find_ignores_an_answer_that_arrives_after_its_overlay_closed(self, tmp_path):
+        """Review 2026-10-12: the find box's answer, arriving after Esc (or after the box was opened again), wrote
+        into a closed overlay (a TypeError in the page) or showed the old query's results in the new box."""
+        out = run_page(tmp_path, """
+            const answer = {ok: true, json: async () => ({results: [{key: "godless#1", label: "godless", kind: "candidate"}]})};
+            const type = async (q) => {
+              el("find").value = q;
+              el("find").handlers.input.forEach((f) => f());
+              await sleep(200);                                       // the debounce fired; the request is in flight
+            };
+            T.openFind();
+            await type("god");
+            T.closeOverlay();                                         // Esc before the answer
+            pending.filter((x) => x.url.startsWith("/api/find"))[0].res(answer);
+            await sleep(50);
+            console.log("CLOSED " + (T.S.overlay === null));
+            T.openFind();
+            await type("godl");
+            T.closeOverlay();
+            T.openFind();                                             // a new box, still empty
+            pending.filter((x) => x.url.startsWith("/api/find"))[1].res(answer);
+            await sleep(50);
+            console.log("RESULTS " + T.S.overlay.results.length);
+        """)
+        assert "CLOSED true" in out and "RESULTS 0" in out and "UNHANDLED" not in out
 
     def test_a_restart_of_the_app_replays_the_log(self, env, client):
         gid = post(client, action="open", source="proposed:0").json()["group"]["id"]
@@ -773,6 +957,19 @@ class TestCli:
         assert env["reg"].fold()[k("irreligious")]["review"]["status"] == "accepted"
         assert cli.main(["apply", "--batch-id", BATCH, *self.base(env)]) == 0
         assert "nothing to write" in capsys.readouterr().out
+
+    def test_apply_lists_the_decisions_the_graph_no_longer_supports(self, env, capsys):
+        """Review 2026-10-12: ``status`` and ``serve`` named the skipped decisions and ``apply`` did not, although
+        it leaves them out and resets a row this review wrote for one."""
+        from data_analysis.gap_generation import review_app as cli
+        flow_for_apply(env)
+        with (env["rdir"] / "decisions.jsonl").open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"seq": 99, "at": "2026-10-09T10:00:00+00:00", "by": "roger", "group": "g1",
+                                 "action": "drop", "key": "vanished#1", "graph_sha256": "old"}) + "\n")
+        assert cli.main(["apply", "--batch-id", BATCH, "--dry-run", *self.base(env)]) == 0
+        o = capsys.readouterr().out
+        assert "WARNING: 1 logged decisions no longer apply to this graph and are left out of this apply:" in o
+        assert "  skipped 99 drop g1: " in o and o.index("WARNING") < o.index("WOULD WRITE")
 
     def test_serve_runs_uvicorn_on_the_local_port(self, env, monkeypatch):
         import uvicorn
