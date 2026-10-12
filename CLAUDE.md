@@ -46,7 +46,9 @@ the AGENT_NOTES "Judging cost model" section that flagged the May
 was caught.  The cost difference between B=10 and B=7 is small
 (~$30 across 10 axes), but the principle generalises: for anything
 expensive, the few minutes of confirmation are worth far more than
-the value of the API tokens.
+the value of the API tokens.  (Since 2026-10-12 that recipe and the
+three other May 2026 rejudge/recompute recipes in [`scripts/`](./scripts/)
+exit 2 unless `HISTORICAL_RERUN=1`; walk-through A1.)
 
 **Recent / explicit requests still apply**: if Roger has just said
 "do the canonical run at B=10" in the immediately-prior message,
@@ -225,7 +227,8 @@ which the climb rule resolves against the working directory, lands
 outside the home-directory project tree, and asks.  Edit documents with
 the Edit tool, which is checked by path only.  What the hook cannot see: a climb the text does not spell (a
 `cd` inside the command followed by a relative path,
-`Path(x).parent.parent`, a variable set elsewhere, a symlink).  It is a
+`Path(x).parent.parent`, a variable set elsewhere, a symlink named in a
+Bash command).  It is a
 backstop against honest mistakes, not a sandbox.  To see what the hook
 actually asked in a session, read the transcript's `hook_success`
 attachment records.
@@ -275,13 +278,22 @@ command to Roger: adding to the allow lists is his decision, and routing
 around a block is not an option.
 
 With the sandbox on, the hook's Bash text scan stands down
-(`boundary_check.sandbox_enabled` reads the same settings files Claude
-Code does, the last one that sets `sandbox.enabled` wins), so turning the
+(`boundary_check.sandbox_enabled` reads the settings sources Claude Code
+does, lowest precedence first: user, project, local, the `--settings` value
+on the `claude` command line, and the managed settings with their
+`managed-settings.d/` drop-ins; the last one that sets `sandbox.enabled`
+wins, except that `--settings` and the managed settings can turn the
+stand-down off but never on by themselves, and a `--settings` value that
+cannot be read counts as off; 2026-10-12, walk-through E3), so turning the
 sandbox off brings the scan straight back, and a call that asks to leave the
 sandbox is still scanned.  The hook keeps checking the file tools (Read,
 Edit, Write, NotebookEdit, Glob, Grep), which run outside the sandbox and
-work on exact paths, so they never produced the false positives.  Since the
-same day a file-tool hit is a **deny** with a reason, not an ask (Roger:
+work on exact paths, so they never produced the false positives.  Since
+2026-10-12 a file-tool path that passes is also resolved through its
+symlinks and denied when it really leads under home outside the allowlist;
+today that denies only Reads of `.venv/bin/python*` (links into
+`~/.local/share/uv`).  Since
+2026-10-03 a file-tool hit is a **deny** with a reason, not an ask (Roger:
 nothing should wait on him overnight): the agent is told to say in its reply
 which path it needs and why and not to look for another route; a path Roger
 approves goes into `ALLOWED_PREFIXES` in the hook.  A Bash hit (only while
@@ -671,7 +683,7 @@ This is the **8-slot** rebuild that supersedes `runpod_workspace/qwen/qwen-3-32b
 
 When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. `results_analysis/run_axis_experiment_batch.py` defaults to it (since 2026-05-08), as does every other `results_analysis/` script with a data-dir default (checked 2026-10-12); for any other script, pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly. Some examples in `results_analysis/README.md` still reference the older directory.
 
-**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
+**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. Since 2026-10-12 (walk-through A2) every `results_analysis` script that takes a pair list runs [`pair_list_guard.check_pair_list`](./results_analysis/pair_list_guard.py) and stops naming any axis it has no vectors or caches for. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`. The goal lists also have two generations (2026-10-12, walk-through A3): [`data/goal_roles_and_traits_v1.json`](./data/goal_roles_and_traits_v1.json) is the April 2026 file the 8slot extraction used, and 8slot-era goal-list readers default to it.
 
 ### Mid-Session Patterns
 - If unsure about working style: "Should I implement this directly or discuss options first?"

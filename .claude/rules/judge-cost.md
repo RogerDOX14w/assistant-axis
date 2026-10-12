@@ -291,3 +291,7 @@ the cap.
 value not yet canary'd): stay at ~`1.5× + $10` until the first run
 lands and the residual is measured.  Drop to the standard
 recommendation thereafter.
+
+[`pc_round_trip/launch_judge_runs.py`](./results_analysis/pc_round_trip/launch_judge_runs.py)
+passes `--budget_usd` to every cell's subprocess (GPT $6, Sonnet $19 by
+default, `DEFAULT_BUDGET_USD_PER_CELL`; 2026-10-12, walk-through D7).

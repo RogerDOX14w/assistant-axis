@@ -60,7 +60,12 @@ For analyses going forward, the project defaults are:
 `DEFAULT_SOFT_K=2` was set in Apr 2026 after the LKM grid sweep on the
 33 desc+inst + 12 response = 45-axis set with the inst-tiebreak
 weighting (prior hardcoded default was K=3, from the older K-sweep
-parabola fit done before soft-shear was in the toolbox).
+parabola fit done before soft-shear was in the toolbox).  The one
+exception: `OPTIMAL_AXIS_SOFT_K = 3`, beside it in
+[`whitening.py`](./results_analysis/canonical_angles/whitening.py), is
+what [`optimal_axis_for_judge.py`](./results_analysis/optimal_axis_for_judge.py)'s
+recorded runs used, and that script keeps it (2026-10-12, walk-through
+D6).
 
 `DEFAULT_SOFT_SHEAR_L=3` (and `DEFAULT_WHITENING_SPEC="soft_shear=3"`)
 were bumped from `L=2` / `"soft_shear=2"` on May 11 2026 after the

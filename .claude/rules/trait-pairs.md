@@ -471,6 +471,18 @@ of appending a second pair.
 Every subcommand has `--dry-run`.  Tests:
 `data_analysis/tests/test_seed_entities.py`.
 
+**Exit status (2026-10-12, walk-through B5).**  The two generators
+([`regenerate_trait_instructions.py`](./data_analysis/regenerate_trait_instructions.py),
+[`regenerate_role_instructions.py`](./data_analysis/regenerate_role_instructions.py))
+and [`generate_antonyms.py`](./data_analysis/generate_antonyms.py) exit 1
+when an entity fails with an error other than a refusal, having written
+(or printed) the rest; refusals alone exit 0.  A batch run with failures
+records `failed` and `counts.failed` in its batch-log entry.
+`seed_entities.py generate` marks successes whatever the exit status and
+gives the entries a failed command left over a `generation_failed: {at,
+exit}` record (cleared on success); `check` keeps the answers that came
+back; `pair` records the queue before regenerating.
+
 The chunk-3 runs (2026-09-25/26) were driven by small scripts in the
 session scratchpad, not in the repo: packet builders that assemble the
 rules section above plus four post-strip example pairs and each entry's
@@ -662,7 +674,7 @@ recording which set of same-type entities it belongs to and the shape of
 that set.  Decided 2026-09-08; loader and validator in
 [`assistant_axis/arrangements.py`](./assistant_axis/arrangements.py),
 CLI check in [`data_analysis/check_arrangements.py`](./data_analysis/check_arrangements.py),
-one-off backfill in [`data_analysis/backfill_arrangements.py`](./data_analysis/backfill_arrangements.py).
+the one-off September backfill archived at [`archive/backfill_arrangements_2026-09-08/backfill_arrangements.py`](./archive/backfill_arrangements_2026-09-08/backfill_arrangements.py) (2026-10-12, walk-through A4: the field is maintained by decision now, and its `--apply --overwrite` would wipe every arrangement recorded since September; it exits 2 unless `HISTORICAL_RERUN=1`).
 
 ```json
 "arrangement": {"kind": "pair", "members": ["callous", "compassionate"]}

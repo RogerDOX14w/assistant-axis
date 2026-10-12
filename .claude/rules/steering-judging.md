@@ -68,6 +68,11 @@ judge noise is per-question; averaging the K coh scores cancels noise
 without losing the gross signal.  Skipped records get
 `judges.persona.skipped_due_to_strength_mean_coh = True` (and same for
 effect); `strength_mean_coh` is stamped on every record regardless.
+A record that already carries a persona score or an effect `combined`
+keeps it on the skip path unless `--rerun` (2026-10-12, review 7 D3 /
+walk-through E1); before,
+[`steering/post_judge.py`](./steering/post_judge.py) with a lowered
+`--skip-if-strength-mean-coh-above` overwrote them with stubs.
 
 **Records schema** (`{cell_dir}/records.jsonl`):
 

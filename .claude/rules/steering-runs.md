@@ -96,7 +96,15 @@ prior emission), bootstraps `mean_coh_by_strength` and
 `mean_abs_eff_by_strength` from the on-disk records, then
 re-evaluates both stop conditions against the resumed history
 before generating any new strengths.  Test
-`TestBidirectionalRestart` covers this path.
+`TestBidirectionalRestart` covers this path.  Since 2026-10-12 (review 7
+D4 / walk-through E2) the resume gap-fill re-judges a strength whose K
+responses are all on disk (`_rejudge_strength` in
+[`assistant_axis/steering_runner.py`](./assistant_axis/steering_runner.py):
+coherence only where missing, then persona and effect only where a
+record has no score) and wipes and regenerates only a strength with
+responses missing.  `s_init` is treated like any other strength.
+Before, one UNPARSEABLE judgement cost K generations on every resume,
+and `s_init` was never re-judged.
 
 **summary.json schema** (bidirectional cells):
 
@@ -181,7 +189,10 @@ override is *not* supported -- the table is the per-cell knob.
 **Re-tuning.**  Re-run
 [`tools/analyse_start_strength.py`](./tools/analyse_start_strength.py)
 after every meaningful sweep batch (e.g. when sweep #2 second-role
-data lands and we have ~2× more cells per bucket).  Inspect the
+data lands and we have ~2× more cells per bucket).  The tool grades
+with the runner's stop predicates (mean coherence ≥ 1.5 is TOO_HIGH,
+|mean effect| < 1/3 TOO_LOW; aligned 2026-10-12, walk-through D11).
+Inspect the
 `(slot, layer, sign, mode)` table at the end of the report; if a
 bucket newly shifts away from GOOD-dominant, add or adjust an
 `OVERRIDES` entry and ship a one-line table edit.  No code or

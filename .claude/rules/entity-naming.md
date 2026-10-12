@@ -39,6 +39,12 @@ for entry in role_scores:  merged[entry["name"]] = entry["score"]  # silently ov
 …which silently dropped one side of every collision and biased downstream
 ρ calculations by ~1.5%.
 
+[`axis_judge_correlation.py`](./results_analysis/axis_judge_correlation.py)
+skips an axis's poles by entity id (`AxisSpec.pole_entity_ids`;
+2026-10-12, walk-through D3): on `impatient_vs_patient` the role
+`patient` is judged and stays in the whitener pool.  Downstream
+consumers still exclude pole names in both kinds.
+
 ### Disambiguator: `assistant_axis.entity_id`
 
 Use [`entity_id(name, kind)`](assistant_axis/entity_id.py) whenever a

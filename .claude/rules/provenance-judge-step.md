@@ -62,7 +62,11 @@ builds an `InputSpec` list per output, one of `descriptions` /
   status list `OK_STATUSES`.
 - **corpus_vectors** (`kind="multi"`): every
   `data_dir/{roles,traits}/vectors/*.pt` (used for projections;
-  defines the scorable entity set in every mode).
+  defines the scorable entity set in every mode).  The axis's own poles
+  are left out of that set by entity id (`AxisSpec.pole_entity_ids`;
+  2026-10-12, walk-through D3), so on `impatient_vs_patient` the role
+  `patient` is judged and stays in the whitener pool; downstream
+  consumers still exclude pole names in both kinds.
 - **responses-mode extras** (only for `responses` / `correlations`):
   `response_files`, `response_score_files`, `default_responses`,
   `questions_file`.
@@ -135,6 +139,14 @@ optional `dep_key` glob) plus a free-text `reason`.  Both
   an envelope and reads as `current` directly; the registry
   entry becomes a no-op).
 
+Since 2026-10-12 the category decides which rows an entry may defer
+(`legacy_bare` only `legacy`, `awaiting_rescore` only stale, the rest
+either; walk-through E10), and a stale row is deferred only when every
+drifted dep_key is covered; a row with no drifted dep_key of its own
+(`legacy`, `stale_transitive`) takes only entries without `dep_key`
+(E8).  Both rules: `deferral_registry.match_row` in
+[`assistant_axis/deferral_registry.py`](assistant_axis/deferral_registry.py).
+
 `current` and (PNG-only) `frozen` are never reclassified — the
 registry only takes effect for rows that would otherwise read as
 `stale_*` or `legacy`.  The deferred section in audit reports
@@ -149,12 +161,14 @@ they stay active until the maintainer deletes the entry.  Use
 # Defer all q9 description rejudges (stale → deferred):
 uv run python tools/defer_rejudge.py \
     --path 'roger/axis_judge_experiments/q9_*/gpt/scores_descriptions.json' \
+    --category awaiting_rescore \
     --reason "Held until 4-model audit completes."
 
 # Backfill: declare all pre-Phase-6 judge caches as legacy → deferred
 # (the May 2026 standard reason template):
 uv run python tools/defer_rejudge.py \
     --path '**/scores_descriptions.json' \
+    --category legacy_bare \
     --reason "Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Auto-clears when re-judged."
 
 # Lift later:
@@ -164,6 +178,9 @@ uv run python tools/defer_rejudge.py --remove \
 # Skip the registry entirely in one run (debug):
 uv run python tools/audit_caches.py --ignore-deferrals
 ```
+
+`--category` is required since 2026-10-12 (walk-through E6);
+`uncategorized` is refused.
 
 Audit `--status` semantics:
 - `--status stale` matches `stale_direct` + `stale_transitive`
@@ -185,7 +202,8 @@ invariant checks in `tools/audit_deferrals.py`:
 
 | Category | Semantics | Auto-clears? |
 |---|---|---|
-| `legacy_bare` | Pre-Phase-6 cache without an envelope. | When producer is re-run (envelope replaces bare file). |
+| `legacy_bare` | Pre-Phase-6 cache without an envelope.  Defers only `legacy` rows (since 2026-10-12). | When producer is re-run (envelope replaces bare file). |
+| `awaiting_rescore` | Envelope-carrying output known to be stale, kept until a scheduled re-score named in its reason (2026-10-12, walk-through E10: the May 2026 judge caches and plots under `roger/axis_judge_experiments`, re-scored in October, regeneration row R4).  Defers only stale rows. | When the output is re-scored. |
 | `frozen_snapshot` | Point-in-time capture *with a live twin*; comparison plots typically read both. Optional `compares_to` glob points at the live twin. | Never. |
 | `archived` | Standalone output of a retired pipeline configuration; no live twin (e.g. pre-cohort-cutover backups, deprecated variants). | Never. |
 | `orphan_no_producer` | Output whose producer script is not in the git tree (one-off `/tmp/_*.py`, removed/superseded producers). Optional `producer_script` records the historical path. | Manual; `audit_deferrals` ⚠️ alarms if a recorded `producer_script` reappears in `git ls-files`. |
