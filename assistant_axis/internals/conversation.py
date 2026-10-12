@@ -39,6 +39,34 @@ class ConversationEncoder:
         """Check if this is a Gemma model."""
         return 'gemma' in self.model_name
 
+    def _chat_ids(
+        self,
+        messages: List[Dict[str, str]],
+        add_generation_prompt: bool = False,
+        **chat_kwargs,
+    ) -> List[int]:
+        """Token ids of *messages* under the chat template, as a flat list.
+
+        ``return_dict=False`` is explicit because transformers 5 changed the
+        default of ``apply_chat_template(tokenize=True)`` to a
+        ``BatchEncoding``.  Indexed as a token list, that finds no turn
+        spans, and step 2 then mapped every conversation to ``None`` and
+        saved nothing for the entity, with no error (review of 2026-10-12;
+        the macOS lock has transformers 5.1.0, the Linux lock 4.57.6).
+        transformers 4.x already defaults to ``False``, so the ids are the
+        same as before on the pod.
+        """
+        ids = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=True,
+            add_generation_prompt=add_generation_prompt,
+            return_dict=False,
+            **chat_kwargs,
+        )
+        if hasattr(ids, "keys"):  # a tokenizer that ignores return_dict
+            ids = ids["input_ids"]
+        return list(ids)
+
     def format_chat(
         self,
         conversation: Union[str, List[Dict[str, str]]],
@@ -92,11 +120,8 @@ class ConversationEncoder:
         Returns:
             List of token IDs
         """
-        return self.tokenizer.apply_chat_template(
-            conversation,
-            tokenize=True,
-            add_generation_prompt=add_generation_prompt,
-            **chat_kwargs,
+        return self._chat_ids(
+            conversation, add_generation_prompt=add_generation_prompt, **chat_kwargs
         )
 
     def response_indices(
@@ -394,9 +419,7 @@ class ConversationEncoder:
             - spans: list of dicts with absolute [start, end) token spans for content per turn
         """
         # Tokenize the full conversation first
-        full_ids = self.tokenizer.apply_chat_template(
-            conversation, tokenize=True, add_generation_prompt=False, **chat_kwargs
-        )
+        full_ids = self._chat_ids(conversation, add_generation_prompt=False, **chat_kwargs)
 
         # For Qwen models, use pattern-matching approach (matches persona-subspace behavior)
         if self._is_qwen():
@@ -421,13 +444,13 @@ class ConversationEncoder:
             # Standard approach for non-Qwen models
             # Calculate absolute start based on the empty message template
             msgs_empty_for_this = msgs_before + [{"role": role, "content": ""}]
-            ids_empty_full = self.tokenizer.apply_chat_template(
-                msgs_empty_for_this, tokenize=True, add_generation_prompt=False, **chat_kwargs
+            ids_empty_full = self._chat_ids(
+                msgs_empty_for_this, add_generation_prompt=False, **chat_kwargs
             )
 
             # Find where the content appears in the full sequence
-            ids_full_for_this = self.tokenizer.apply_chat_template(
-                msgs_before + [{"role": role, "content": text}], tokenize=True, add_generation_prompt=False, **chat_kwargs
+            ids_full_for_this = self._chat_ids(
+                msgs_before + [{"role": role, "content": text}], add_generation_prompt=False, **chat_kwargs
             )
 
             pref_len = self._longest_common_prefix_len(ids_full_for_this, ids_empty_full)
@@ -767,9 +790,7 @@ class ConversationEncoder:
         if role == "assistant":
             # Find where content appears in the full tokenized conversation
             msgs_full = messages_before + [{"role": role, "content": content}]
-            ids_full = self.tokenizer.apply_chat_template(
-                msgs_full, tokenize=True, add_generation_prompt=False, **chat_kwargs
-            )
+            ids_full = self._chat_ids(msgs_full, add_generation_prompt=False, **chat_kwargs)
 
             # Find the content tokens in the full sequence
             plain = self.tokenizer(content, add_special_tokens=False).input_ids
@@ -778,8 +799,8 @@ class ConversationEncoder:
             if content_start != -1:
                 # Calculate offset from the beginning of the conversation
                 if messages_before:
-                    ids_before = self.tokenizer.apply_chat_template(
-                        messages_before, tokenize=True, add_generation_prompt=False, **chat_kwargs
+                    ids_before = self._chat_ids(
+                        messages_before, add_generation_prompt=False, **chat_kwargs
                     )
                     prefix_len = len(ids_before)
                 else:
@@ -804,17 +825,13 @@ class ConversationEncoder:
 
         # Handle empty messages_before case
         if messages_before:
-            ids_before = self.tokenizer.apply_chat_template(
-                messages_before, tokenize=True, add_generation_prompt=False, **chat_kwargs
+            ids_before = self._chat_ids(
+                messages_before, add_generation_prompt=False, **chat_kwargs
             )
         else:
             ids_before = []
-        ids_empty = self.tokenizer.apply_chat_template(
-            msgs_empty, tokenize=True, add_generation_prompt=False, **chat_kwargs
-        )
-        ids_full  = self.tokenizer.apply_chat_template(
-            msgs_full,  tokenize=True, add_generation_prompt=False, **chat_kwargs
-        )
+        ids_empty = self._chat_ids(msgs_empty, add_generation_prompt=False, **chat_kwargs)
+        ids_full = self._chat_ids(msgs_full, add_generation_prompt=False, **chat_kwargs)
 
         # Suffix introduced by adding this message (template + content)
         pref = self._longest_common_prefix_len(ids_full, ids_empty)

@@ -61,3 +61,109 @@ def test_a_dead_worker_returns_1(mod, monkeypatch, tmp_path, caplog):
     rc, _ = _run(mod, monkeypatch, tmp_path, [0, -9])   # -9: killed (e.g. OOM)
     assert rc == 1
     assert "exited abnormally" in caplog.text
+
+
+def test_a_worker_reporting_failed_roles_returns_1(mod, monkeypatch, tmp_path):
+    # Exit status 1 is what process_roles_on_worker now gives when a role
+    # raised or its model failed to load (below).
+    rc, _ = _run(mod, monkeypatch, tmp_path, [1, 0])
+    assert rc == 1
+
+
+# ---------------------------------------------------------------------------
+# The worker's own exit status (review of 2026-10-12).  Until then a worker
+# whose model failed to load (a CUDA out-of-memory error beside an orphaned
+# process, the case run_pipeline.sh's GPU pre-flight guards against) or whose
+# roles raised logged the error and exited 0, so the check above never fired.
+# The worker runs in-process here, on fakes.
+# ---------------------------------------------------------------------------
+
+class _FakePM:
+    def get_layers(self):
+        return [object()] * 3
+
+
+def _worker_args(tmp_path):
+    return argparse.Namespace(model="Qwen/Qwen3-32B", output_dir=str(tmp_path), layers="all",
+                              no_headers=False, batch_size=2, max_length=2048, thinking=False)
+
+
+def _role_files(tmp_path, names=("alpha", "beta")):
+    return [tmp_path / f"{n}.jsonl" for n in names]
+
+
+def test_worker_exits_1_when_the_model_fails_to_load(mod, monkeypatch, tmp_path):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")    # the worker overwrites it
+
+    def boom(_name):
+        raise RuntimeError("CUDA out of memory")
+
+    monkeypatch.setattr(mod, "ProbingModel", boom)
+    with pytest.raises(SystemExit) as e:
+        mod.process_roles_on_worker(0, [0], _role_files(tmp_path), _worker_args(tmp_path))
+    assert e.value.code == 1
+
+
+def test_worker_exits_1_when_a_role_raises_and_still_does_the_rest(mod, monkeypatch, tmp_path):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    done = []
+
+    def fake_process_role(pm, role_file, *a, **k):
+        done.append(role_file.stem)
+        if role_file.stem == "alpha":
+            raise mod.NoActivationsError("alpha: none of 2 conversations ...")
+        return True, 0
+
+    monkeypatch.setattr(mod, "process_role", fake_process_role)
+    with pytest.raises(SystemExit) as e:
+        mod.process_roles_on_worker(0, [0], _role_files(tmp_path), _worker_args(tmp_path))
+    assert e.value.code == 1
+    assert done == ["alpha", "beta"]
+
+
+def test_worker_returns_normally_when_every_role_is_saved_or_empty(mod, monkeypatch, tmp_path):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    # "beta" has no responses: a warning, not a failure.
+    monkeypatch.setattr(mod, "process_role",
+                        lambda pm, role_file, *a, **k: (role_file.stem == "alpha", 0))
+    assert mod.process_roles_on_worker(
+        0, [0], _role_files(tmp_path), _worker_args(tmp_path)) is None
+
+
+def test_single_worker_mode_exits_1_after_a_role_with_no_activations(
+        mod, monkeypatch, tmp_path):
+    import logging
+    import sys as _sys
+
+    responses = tmp_path / "responses"
+    responses.mkdir()
+    for name in ("alpha", "beta"):
+        (responses / f"{name}.jsonl").write_text("{}\n")
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")    # no GPUs: single-worker mode
+    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    done = []
+
+    def fake_process_role(pm, role_file, *a, **k):
+        done.append(role_file.stem)
+        if role_file.stem == "alpha":
+            raise mod.NoActivationsError("alpha: none of 1 conversations ...")
+        return True, 0
+
+    monkeypatch.setattr(mod, "process_role", fake_process_role)
+    monkeypatch.setattr(_sys, "argv", [
+        "2_activations.py", "--model", "Qwen/Qwen3-32B",
+        "--responses_dir", str(responses), "--output_dir", str(tmp_path / "out")])
+    root = logging.getLogger()
+    before = list(root.handlers)
+    try:
+        with pytest.raises(SystemExit) as e:
+            mod.main()
+    finally:
+        for h in root.handlers[:]:        # main() adds a file handler
+            if h not in before:
+                root.removeHandler(h)
+                h.close()
+    assert e.value.code == 1
+    assert done == ["alpha", "beta"]

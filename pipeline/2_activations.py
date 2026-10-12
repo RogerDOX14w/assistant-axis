@@ -9,13 +9,13 @@ Supports automatic multi-worker parallelization when total GPUs > tensor_paralle
 Number of workers = total_gpus // tensor_parallel_size
 
 Usage:
-    uv run scripts/2_activations.py \
+    uv run pipeline/2_activations.py \
         --model google/gemma-2-27b-it \
         --responses_dir outputs/gemma-2-27b/responses \
         --output_dir outputs/gemma-2-27b/activations
 
     # With tensor parallelism (auto-parallelizes across workers)
-    uv run scripts/2_activations.py \
+    uv run pipeline/2_activations.py \
         --model google/gemma-2-27b-it \
         --tensor_parallel_size 2 \
         ...
@@ -129,6 +129,16 @@ def _warn_if_hf_cache_not_tmpfs(model_name: str) -> None:
     logger.warning("=" * 70)
 
 
+class NoActivationsError(RuntimeError):
+    """A response file had conversations but none yielded an activation.
+
+    That means no assistant span was found in any of them: a tokenizer or
+    chat-template change (transformers 5's ``apply_chat_template`` return
+    type did exactly this), not the data.  Before 2026-10-12 the entity was
+    skipped without a word and counted as a success.
+    """
+
+
 def load_responses(responses_file: Path) -> List[dict]:
     """Load responses from JSONL file, with NFS-flake retries.
 
@@ -179,8 +189,13 @@ def extract_activations_batch(
                 "model_name": pm.model_name,
                 "extract_headers": True,
             }
-        except ValueError:
-            pass
+        except ValueError as e:
+            # Header slots off: each activation is (layers, hidden), not
+            # (1 + N, layers, hidden).  The model family comes from a
+            # substring of --model, so a local path without "qwen" in it
+            # lands here too; say so rather than change the layout silently.
+            logger.warning(f"Header extraction requested but unavailable ({e}); "
+                           f"saving body means only, without header slots")
 
     # Build chat_kwargs for Qwen models
     chat_kwargs = {}
@@ -292,7 +307,13 @@ def process_role(
     """Process a single role file and save activations.
 
     Returns:
-        (success, mismatch_count) for the caller to accumulate.
+        (saved, mismatch_count) for the caller to accumulate; ``saved`` is
+        False only for a response file with no responses (logged as a
+        warning).
+
+    Raises:
+        NoActivationsError: the file had conversations but not one of them
+            yielded an activation, so nothing was saved.
     """
     role = role_file.stem
     output_file = output_dir / f"{role}.pt"
@@ -300,6 +321,7 @@ def process_role(
     # Load responses
     responses = load_responses(role_file)
     if not responses:
+        logger.warning(f"{role}: no responses in {role_file}; nothing to extract")
         return False, 0
 
     # Extract conversations and metadata
@@ -344,6 +366,18 @@ def process_role(
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
 
+    if not activations_dict:
+        raise NoActivationsError(
+            f"{role}: none of {len(conversations)} conversations yielded an "
+            f"activation (no assistant span found); nothing saved"
+        )
+    n_dropped = len(conversations) - len(activations_dict)
+    if n_dropped:
+        logger.warning(
+            f"{role}: {n_dropped} of {len(conversations)} conversations have no "
+            f"activation (empty or truncated-away response, or a repeated key)"
+        )
+
     # Save via local disk staging + retry/backoff copy to the final
     # (possibly NFS) destination, plus a post-copy size-sanity check
     # to catch silent NFS truncation (the failure mode that produced
@@ -370,8 +404,20 @@ def process_role(
     #     successful copy.
     if activations_dict:
         from assistant_axis.atomic_io import torch_save_with_retry
-        if header_metadata:
-            activations_dict["metadata"] = header_metadata
+        # What was extracted, recorded since 2026-10-12 (step 4 copies it into
+        # the vector).  "layers" names the model layer at each index of the
+        # layer axis, which is positional in --layers: a subset gives an axis
+        # shorter than the model's, and step 5 checks the lists agree.  Files
+        # written before lack these keys; every one of them used all layers.
+        file_metadata = dict(header_metadata)
+        file_metadata.setdefault("extract_headers", False)
+        file_metadata.update({
+            "layers": [int(x) for x in layers],
+            "max_length": int(max_length),
+            "thinking": bool(enable_thinking),
+            "batch_size": int(batch_size),
+        })
+        activations_dict["metadata"] = file_metadata
         torch_save_with_retry(
             activations_dict, output_file,
             use_zipfile_serialization=False,
@@ -389,7 +435,21 @@ def process_role(
 
 
 def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List[Path], args):
-    """Process a subset of roles on a worker."""
+    """Process a subset of roles on a worker.
+
+    Exits with status 1 if the worker could not start (the model failed to
+    load) or any role raised, so that ``run_multi_worker`` reports the step as
+    incomplete.  Before 2026-10-12 both were logged and the worker exited 0:
+    the most likely way to lose a worker, a CUDA out-of-memory error while
+    loading the model beside an orphaned process, is an ordinary exception,
+    so the dead-worker check in ``run_multi_worker`` never saw it.  Both
+    happened in the 8slot extraction and were caught by hand before step 4:
+    on 2026-04-26 176 of 280 roles failed on a full ``/tmp`` staging disk
+    and step 2 reported "Multi-worker processing completed!"; on 2026-04-27
+    workers 1 and 2 hit CUDA out of memory at load ("Fatal error on Worker").
+    Roles after a failed one are still processed, and everything saved stays
+    saved; a rerun extracts only what is missing.
+    """
     # Set CUDA_VISIBLE_DEVICES for this worker's GPU subset
     gpu_ids_str = ','.join(map(str, gpu_ids))
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_ids_str
@@ -405,6 +465,7 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
     worker_logger.info(f"Starting Worker {worker_id} with GPUs {gpu_ids} and {len(role_files)} roles")
 
     output_dir = Path(args.output_dir)
+    exit_code = 0
 
     try:
         # Load model
@@ -423,35 +484,44 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
         # Process assigned roles
         extract_headers = not args.no_headers
         completed_count = 0
+        empty_count = 0
         failed_count = 0
         total_mismatches = 0
 
         for role_file in tqdm(role_files, desc=f"Worker-{worker_id}", position=worker_id):
             try:
-                success, n_mm = process_role(
+                saved, n_mm = process_role(
                     pm, role_file, output_dir, layers,
                     args.batch_size, args.max_length, args.thinking,
                     extract_headers=extract_headers,
                 )
                 total_mismatches += n_mm
-                if success:
+                if saved:
                     completed_count += 1
                 else:
-                    failed_count += 1
+                    empty_count += 1
             except Exception as e:
                 failed_count += 1
-                worker_logger.error(f"Exception processing {role_file.stem}: {e}")
+                worker_logger.error(f"Exception processing {role_file.stem}: {e}",
+                                    exc_info=True)
 
         worker_logger.info(
             f"Worker {worker_id} completed: {completed_count} successful, "
-            f"{failed_count} failed, {total_mismatches} total header mismatches"
+            f"{empty_count} with no responses, {failed_count} failed, "
+            f"{total_mismatches} total header mismatches"
         )
+        if failed_count:
+            exit_code = 1
 
     except Exception as e:
-        worker_logger.error(f"Fatal error on Worker {worker_id}: {e}")
+        worker_logger.error(f"Fatal error on Worker {worker_id}: {e}", exc_info=True)
+        exit_code = 1
 
     finally:
         worker_logger.info(f"Worker {worker_id} cleanup completed")
+
+    if exit_code:
+        sys.exit(exit_code)
 
 
 def run_multi_worker(args) -> int:
@@ -547,14 +617,15 @@ def run_multi_worker(args) -> int:
     # A worker that died (OOM kill, CUDA abort, segfault) left its roles
     # unextracted.  Before 2026-10-12 this still returned 0, so the pipeline
     # went on to step 4 with a partial activations directory (the failure the
-    # GPU pre-flight in run_pipeline.sh exists to prevent).  Roles that fail
-    # inside a live worker are logged and skipped as before; a rerun extracts
-    # whatever is missing.
+    # GPU pre-flight in run_pipeline.sh exists to prevent).  Since the review
+    # of the same day a worker also exits 1 when its model failed to load or
+    # any of its roles raised (process_roles_on_worker), having processed the
+    # rest; a rerun extracts whatever is missing.
     dead = [(i, p.exitcode) for i, p in enumerate(processes) if p.exitcode != 0]
     if dead:
         logger.error(f"{len(dead)} of {len(processes)} worker(s) exited abnormally "
                      f"(launch index, exit code): {dead}; their roles are incomplete -- "
-                     f"rerun this step to extract the rest")
+                     f"see the worker's log above, then rerun this step to extract the rest")
         return 1
 
     logger.info("Multi-worker processing completed!")
@@ -670,17 +741,30 @@ def main():
 
         extract_headers = not args.no_headers
         total_mismatches = 0
+        no_activations: List[str] = []
 
         for role_file in tqdm(role_files, desc="Processing roles"):
-            _, n_mm = process_role(
-                pm, role_file, output_dir, layers,
-                args.batch_size, args.max_length, args.thinking,
-                extract_headers=extract_headers,
-            )
+            try:
+                _, n_mm = process_role(
+                    pm, role_file, output_dir, layers,
+                    args.batch_size, args.max_length, args.thinking,
+                    extract_headers=extract_headers,
+                )
+            except NoActivationsError as e:
+                # Logged and carried on, like the multi-worker mode; any
+                # other exception still stops the run here, as before.
+                logger.error(str(e))
+                no_activations.append(role_file.stem)
+                continue
             total_mismatches += n_mm
 
         if total_mismatches:
             logger.warning(f"Total header-token mismatches across all roles: {total_mismatches}")
+        if no_activations:
+            logger.error(f"{len(no_activations)} role(s) yielded no activations and were "
+                         f"not saved: {no_activations[:10]}"
+                         f"{' ...' if len(no_activations) > 10 else ''}")
+            sys.exit(1)
 
     logger.info("Done!")
 
