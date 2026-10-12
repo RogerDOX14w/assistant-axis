@@ -70,6 +70,104 @@ def provider_for_model(model: str) -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Request parameters by model (code review 2026-10-12, B1)
+# ---------------------------------------------------------------------------
+#
+# A temperature equal to the provider's default is never sent, so a call at
+# the default works on every model, those that refuse the field included.
+# Only a non-default temperature consults MODEL_CAPABILITIES, which lists the
+# non-default cases: models that refuse a temperature.  A model in no entry
+# takes one.  Check the table, and add the model, before switching a judge to
+# a model this project has not used.  An HTTP 400 from either provider is
+# raised as JudgeRequestError rather than logged and turned into None: a
+# request the API rejects as malformed fails the same way for every item, and
+# swallowing it made every item of a run unparseable (review 7 D1).
+
+#: Both providers' default sampling temperature (Chat Completions and Messages).
+DEFAULT_TEMPERATURE = 1.0
+
+#: Model-id fragments (lower case) of the models that refuse a ``temperature``
+#: with an HTTP 400.  A fragment matches at the start of the model id or after
+#: a hyphen.  The Anthropic rows are those of the trait-gap platform's
+#: ``assistant_axis.gapgen.llm.NO_TEMPERATURE_FRAGMENTS`` (Sonnet 5.5 checked
+#: 2026-09-29; every Opus from 4.7 on returned 400 "`temperature` is deprecated
+#: for this model" on 2026-10-10; Haiku 5.5 from its model page of 2026-10-07);
+#: ``test_judge_request_capabilities.py`` keeps the two lists in step.  The
+#: OpenAI rows are its reasoning models, which take only the default
+#: temperature (GPT-6 Luna's support is unstated in OpenAI's docs as of
+#: 2026-10-07: test before use).  judge.py sends no reasoning-effort setting,
+#: so a reasoning model would bill its reasoning at the default effort; add
+#: that capability here with the first switch to one.
+MODEL_CAPABILITIES: Dict[str, Dict[str, bool]] = {
+    # Anthropic
+    "sonnet-5": {"temperature": False},
+    "opus-5": {"temperature": False},
+    "opus-4-7": {"temperature": False},
+    "opus-4-8": {"temperature": False},
+    "haiku-5": {"temperature": False},
+    "fable": {"temperature": False},
+    "mythos": {"temperature": False},
+    # OpenAI reasoning models
+    "o1": {"temperature": False},
+    "o3": {"temperature": False},
+    "o4": {"temperature": False},
+    "gpt-5": {"temperature": False},
+    "gpt-6": {"temperature": False},
+}
+
+
+class JudgeRequestError(ValueError):
+    """A judge request that is wrong for its model: an HTTP 400 from the API,
+    or a non-default temperature for a model that refuses one.  Raised, never
+    swallowed, because every further call would fail the same way."""
+
+
+def model_capabilities(model: str) -> Dict[str, bool]:
+    """What ``model`` takes, by :data:`MODEL_CAPABILITIES`: ``{"temperature":
+    bool}``.  A model no entry names takes everything."""
+    m = str(model).lower()
+    caps: Dict[str, bool] = {"temperature": True}
+    for fragment, entry in MODEL_CAPABILITIES.items():
+        if m.startswith(fragment) or f"-{fragment}" in m:
+            caps.update(entry)
+    return caps
+
+
+def accepts_temperature(model: str) -> bool:
+    """False for a model that refuses a ``temperature`` (:data:`MODEL_CAPABILITIES`)."""
+    return model_capabilities(model)["temperature"]
+
+
+def request_temperature(model: str, temperature: Optional[float]) -> Optional[float]:
+    """The ``temperature`` a request to ``model`` carries: ``None`` (leave the
+    field out) for ``None`` or the provider default, else ``temperature``.
+    Raises :class:`JudgeRequestError` for a non-default temperature on a model
+    that refuses one, before anything is sent."""
+    if temperature is None or float(temperature) == DEFAULT_TEMPERATURE:
+        return None
+    if not accepts_temperature(model):
+        raise JudgeRequestError(
+            f"{model} refuses a temperature (judge.MODEL_CAPABILITIES), so "
+            f"temperature={temperature} cannot be honoured: call it at the "
+            f"default ({DEFAULT_TEMPERATURE:g}), or choose a model that takes one"
+        )
+    return float(temperature)
+
+
+def _is_bad_request(exc: BaseException) -> bool:
+    """An HTTP 400 from either SDK (both set ``status_code`` on the error)."""
+    return getattr(exc, "status_code", None) == 400
+
+
+def _bad_request_error(model: str, exc: BaseException) -> JudgeRequestError:
+    logger.error(f"HTTP 400 from judge model {model}: {exc}")
+    return JudgeRequestError(
+        f"HTTP 400 from judge model {model}: {exc}.  The API rejected the "
+        f"request itself, so every call would fail the same way (check "
+        f"judge.MODEL_CAPABILITIES for this model)")
+
+
 class RateLimiter:
     """Simple rate limiter using token bucket algorithm."""
 
@@ -412,17 +510,26 @@ def parse_batch_scores_json(
     return out
 
 
-def chat_request_body(prompt: str, model: str, max_tokens: int) -> Dict[str, Any]:
+def chat_request_body(prompt: str, model: str, max_tokens: int, *,
+                      temperature: Optional[float] = DEFAULT_TEMPERATURE) -> Dict[str, Any]:
     """The chat-completion request a judge call sends: the keyword arguments
     of ``client.chat.completions.create`` and, unchanged, the ``body`` of an
     OpenAI Batch API line (``assistant_axis.openai_batch``), so that a
-    response judged in a batch got exactly the request a live call sends."""
-    return {
+    response judged in a batch got exactly the request a live call sends.
+
+    ``temperature`` is left out at the default, 1 (every request until
+    2026-10-12 sent ``"temperature": 1`` explicitly: the same sampling), and
+    is checked against :data:`MODEL_CAPABILITIES` otherwise
+    (:func:`request_temperature`)."""
+    body: Dict[str, Any] = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "max_completion_tokens": max_tokens,
-        "temperature": 1,
     }
+    t = request_temperature(model, temperature)
+    if t is not None:
+        body["temperature"] = t
+    return body
 
 
 async def call_judge_single(
@@ -432,8 +539,14 @@ async def call_judge_single(
     max_tokens: int,
     rate_limiter: RateLimiter,
     usage: Optional["MultiModelUsage"] = None,
+    *,
+    temperature: Optional[float] = DEFAULT_TEMPERATURE,
 ) -> Optional[str]:
     """Call the judge model with a single prompt.
+
+    Returns the response text, or None when the call failed (logged).  An
+    HTTP 400 is raised as :class:`JudgeRequestError` instead, as is a
+    non-default ``temperature`` for a model that refuses one (before sending).
 
     Args:
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
@@ -441,12 +554,14 @@ async def call_judge_single(
             tuple extracted from the response is added to ``usage[model]``.
             Pass one for every automated/batched call site — see AGENT_NOTES
             "Token usage logging is mandatory on batched LLM call sites".
+        temperature: sent only when it is not the default
+            (:func:`chat_request_body`).
     """
+    body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
     await rate_limiter.acquire()
 
     try:
-        response = await client.chat.completions.create(
-            **chat_request_body(prompt, model, max_tokens))
+        response = await client.chat.completions.create(**body)
 
         if usage is not None:
             # Lazy import to avoid a hard dep cycle (judge_pricing imports
@@ -460,6 +575,8 @@ async def call_judge_single(
         return None
 
     except Exception as e:
+        if _is_bad_request(e):
+            raise _bad_request_error(model, e) from e
         logger.error(f"Error calling judge model: {e}")
         return None
 
@@ -478,6 +595,9 @@ async def call_judge_batch(
     ``usage``: optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
     accumulator, passed to every :func:`call_judge_single` (AGENT_NOTES
     "Token usage logging is mandatory on batched LLM call sites").
+
+    A failed call gives None in its place, except a :class:`JudgeRequestError`
+    (an HTTP 400), which is raised once its chunk has finished.
     """
     results = []
 
@@ -490,6 +610,10 @@ async def call_judge_batch(
         ]
 
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        bad_request = next((r for r in batch_results if isinstance(r, JudgeRequestError)), None)
+        if bad_request is not None:
+            raise bad_request
 
         processed = []
         for result in batch_results:
@@ -614,28 +738,35 @@ async def call_anthropic_judge_single(
     model: str,
     max_tokens: int,
     rate_limiter: RateLimiter,
-    temperature: float = 1.0,
+    temperature: Optional[float] = DEFAULT_TEMPERATURE,
     usage: Optional["MultiModelUsage"] = None,
 ) -> Optional[str]:
     """Call an Anthropic judge model with a single prompt.
 
     Returns the response text, or None on error.  Errors are logged at
     ERROR level and swallowed so a single bad call doesn't take down a
-    whole batch of judging.
+    whole batch of judging, except an HTTP 400, raised as
+    :class:`JudgeRequestError` because every call would fail alike.
 
     Args:
+        temperature: sent only when it is not the default; a model that
+            refuses one (:data:`MODEL_CAPABILITIES`) raises
+            :class:`JudgeRequestError` for any other value, before sending.
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
             accumulator.  Same semantics as :func:`call_judge_single`.
     """
+    params: Dict[str, Any] = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    t = request_temperature(model, temperature)
+    if t is not None:
+        params["temperature"] = t
     await rate_limiter.acquire()
 
     try:
-        response = await client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        response = await client.messages.create(**params)
         if usage is not None:
             from .judge_pricing import extract_usage_anthropic
             pt, ct = extract_usage_anthropic(response)
@@ -644,6 +775,8 @@ async def call_anthropic_judge_single(
             return response.content[0].text
         return None
     except Exception as e:  # noqa: BLE001 - we deliberately catch everything
+        if _is_bad_request(e):
+            raise _bad_request_error(model, e) from e
         logger.error(f"Error calling Anthropic judge model {model}: {e}")
         return None
 
@@ -656,7 +789,7 @@ async def call_judge_single_unified(
     rate_limiter: RateLimiter,
     openai_client: Optional["openai.AsyncOpenAI"] = None,
     anthropic_client: Optional["anthropic.AsyncAnthropic"] = None,
-    temperature: float = 1.0,
+    temperature: Optional[float] = DEFAULT_TEMPERATURE,
     usage: Optional["MultiModelUsage"] = None,
 ) -> Optional[str]:
     """Provider-agnostic single judge call.
@@ -670,9 +803,14 @@ async def call_judge_single_unified(
     routing picks whichever is needed per call.
 
     Args:
+        temperature: for either provider, sent only when it is not the
+            default (:func:`request_temperature`; until 2026-10-12 the
+            OpenAI path ignored it and always sent 1).
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
             accumulator -- ticks ``usage[model]`` with the per-call
             token counts.  Pass one on every batched/automated call site.
+
+    Raises :class:`JudgeRequestError` on an HTTP 400 from either provider.
     """
     provider = provider_for_model(model)
     if provider == "openai":
@@ -687,6 +825,7 @@ async def call_judge_single_unified(
             max_tokens=max_tokens,
             rate_limiter=rate_limiter,
             usage=usage,
+            temperature=temperature,
         )
     if provider == "anthropic":
         if anthropic_client is None:
