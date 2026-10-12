@@ -5,6 +5,12 @@
 # Safe to run while sweep is ongoing; uses --partial + per-axis loop.
 set -u
 
+# TODO (walk-through E7, review 10 D7, 2026-10-12; pod TODO item 6 in
+# reports/pipeline/pre_extraction_pod_todo.md): POD_HOST / POD_PORT below are
+# the May 2026 pod's address.  A RunPod address goes stale with every new pod,
+# so update them to the current pod before the next use.  At that next use also
+# change StrictHostKeyChecking=no (in SSH_OPTS) to StrictHostKeyChecking=accept-new,
+# so a new pod's host key is recorded once and a changed key is refused.
 POD_USER=root
 POD_HOST=154.54.102.50
 POD_PORT=17140

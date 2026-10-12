@@ -17,10 +17,19 @@ skipping when present.
 
 | Script | Purpose | Cost | Idempotent? |
 |---|---|---|---|
-| [`rejudge_after_rubric_v2.sh`](./rejudge_after_rubric_v2.sh) | Response-mode rejudge after the 2026-05-09 rubric v1→v2 change (12 axes × 4 cohorts) | $$ judging cost | yes (resume-based) |
-| [`rejudge_after_trait_edits.sh`](./rejudge_after_trait_edits.sh) | Multi-phase rejudge after April–May 2026 trait-file edits (desc/instr + responses, across GPT / Sonnet / Haiku) | $$ judging cost | yes (`--refill_gaps`) |
-| [`run_phase5a_recompute.sh`](./run_phase5a_recompute.sh) | Recompute ~25 aggregate JSONs / plots after upstream caches change.  Pure numerical — no LLM calls. | free | yes (overwrites canonical aggregates) |
-| [`run_phase5b_collision_rejudge.py`](./run_phase5b_collision_rejudge.py) | Surgical static-mode rejudge of the 9 trait/role collision names (patient, stoic, …) across 12 axes × {GPT, Haiku} | ~$0.55 total | yes (per-cell cache hit short-circuits) |
+| [`rejudge_after_rubric_v2.sh`](./rejudge_after_rubric_v2.sh) | **May 2026 record, guarded.**  Response-mode rejudge after the 2026-05-09 rubric v1→v2 change (12 axes × 4 cohorts) | $$ judging cost | yes (resume-based) |
+| [`rejudge_after_trait_edits.sh`](./rejudge_after_trait_edits.sh) | **May 2026 record, guarded.**  Multi-phase rejudge after April–May 2026 trait-file edits (desc/instr + responses, across GPT / Sonnet / Haiku) | $$$ today (see below) | yes (`--refill_gaps`) |
+| [`run_phase5a_recompute.sh`](./run_phase5a_recompute.sh) | **May 2026 record, guarded.**  Recompute ~25 aggregate JSONs / plots after upstream caches change.  Pure numerical — no LLM calls. | free | yes (overwrites canonical aggregates) |
+| [`run_phase5b_collision_rejudge.py`](./run_phase5b_collision_rejudge.py) | **May 2026 record, guarded.**  Surgical static-mode rejudge of the 9 trait/role collision names (patient, stoic, …) across 12 axes × {GPT, Haiku} | ~$0.55 in May; ~$13 today | no longer (rejudges all 24 cells today) |
+
+**The four May 2026 recipes are guarded** (since 2026-10-12, walk-through
+A1, review 10 D1): each exits 2 before doing anything unless
+`HISTORICAL_RERUN=1` is set, and its message lists what it would do wrong
+today (current pair lists instead of the `_v1` records, pre-B=7 batch sizes,
+Sonnet 4.6 rejudging whole Sonnet 4.5 caches, no budget cap).  They are kept
+as the record of what ran and as patterns to copy into a new script with
+today's settings.  Tests:
+[`tests/test_historical_recipe_guards.py`](./tests/test_historical_recipe_guards.py).
 | [`run_describer_for_new_pcs.sh`](./run_describer_for_new_pcs.sh) | Batch driver: for each `pc<NNN>_<style>` cell missing `spec.json`, prepare inputs and run [`results_analysis/infer_axis_description.py`](../results_analysis/infer_axis_description.py) (Opus, ~30–60 s/cell) | ~$0.10/cell | yes (skips cells with existing `spec.json`) |
 | [`move_sweep_logs_into_experiment_dirs.sh`](./move_sweep_logs_into_experiment_dirs.sh) | One-shot historical cleanup: move pre-2026-05-14 sweep logs out of `/workspace/` into their `{experiment}/sweep.log` homes | free | yes (skips when destination exists) |
 | [`dump_rf_regret_regression_picks.py`](./dump_rf_regret_regression_picks.py) | Diagnostic: per-axis table of K picks under the RF regret-regression policy at ε=0.005 (the nominal "winner-by-a-hair" K-policy CV result) | free | yes (read-only) |
@@ -30,9 +39,12 @@ skipping when present.
 ### After a rubric change
 
 Use [`rejudge_after_rubric_v2.sh`](./rejudge_after_rubric_v2.sh) as the
-template.  It demonstrates the canonical "snapshot to `__rubric_v1`, clear
-canonical paths, re-run from empty cache" pattern.  Pre-flight checks
+template.  It demonstrates the canonical "snapshot to `__rubric_v1`, move
+canonical paths aside, re-run from empty cache" pattern.  Pre-flight checks
 that v1 snapshots exist before clearing, fails fast on any missing one.
+Since 2026-10-12 (walk-through A1) it moves `correlations.json`,
+`gaps.json` and `correlation_plot.png` to `<file>.bak.<YYYYMMDD_HHMMSS>`
+beside the original instead of deleting them.
 
 Scope: 12 axes in `pair_list_responses.json` × 4 in-scope cohorts (gpt
 b10 traits/roles, haiku b10_q9 traits/roles).  The 68 out-of-scope v1
@@ -57,9 +69,15 @@ Every phase uses `--refill_gaps`, so the orchestrator only re-judges
 entries the pre-script cache invalidation actually cleared — unaffected
 axes are no-ops.  Per-phase logs land in `/tmp/rejudge_<ts>/<phase>.log`.
 
-Typical cost on a small edit (1–3 affected traits): ~$5–20.  A
-full-corpus regen would be much more; the `--refill_gaps` flag is the
-key efficiency knob.
+Typical cost on a small edit (1–3 affected traits), in May 2026: ~$5–20.
+A full-corpus regen would be much more; the `--refill_gaps` flag is the
+key efficiency knob.  **Run today it costs several hundred dollars or
+more**: it pins `claude-sonnet-4-6`, so every `claude-sonnet-4-5` cache is
+rejudged whole (review 10 D1).  Since 2026-10-12 it therefore needs
+`HISTORICAL_RERUN=1` and a required `--budget_usd <USD>`, a per-axis cap
+passed to every phase's
+[`run_axis_experiment_batch.py`](../results_analysis/run_axis_experiment_batch.py)
+(each pair in each phase gets its own cap).
 
 ### After a numerical / cache change with no judging
 
@@ -72,7 +90,9 @@ scatter plots, etc.) after the upstream per-axis caches change.
 Two tiers run in sequence; tier 1 is parallel-safe, tier 2 consumes
 tier-1 outputs.  Failures in any one job don't abort the rest — the
 final summary lists everything that didn't finish clean.  Pure
-numerical: no LLM calls, no API spend.
+numerical: no LLM calls, no API spend.  Guarded since 2026-10-12
+(`HISTORICAL_RERUN=1`): it reads the current pair lists, not the `_v1`
+records that match the 8slot data, and overwrites the canonical aggregates.
 
 ### One-shot collision rejudge
 
@@ -90,7 +110,10 @@ short-circuit on already-v2 caches.
 
 This particular script ran once in May 2026 as part of Phase 5b of
 the trait/role disambiguation plan; the pattern is portable to any
-future "fix-N-broken-entities-per-cache" surgical rejudge.
+future "fix-N-broken-entities-per-cache" surgical rejudge.  Its
+"idempotent no-op on already-v2 caches" no longer holds: run today it
+would rejudge all 24 cells (~$13), overwriting the May caches, hence the
+`HISTORICAL_RERUN=1` guard.
 
 ### Generating Opus axis descriptions for new PCs
 

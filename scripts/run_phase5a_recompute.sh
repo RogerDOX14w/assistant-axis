@@ -1,4 +1,24 @@
 #!/usr/bin/env bash
+# ---------------------------------------------------------------
+# MAY 2026 RECORD, NOT A RECIPE TO RUN TODAY (walk-through A1,
+# review 10 D1, 2026-10-12).  The guard below exits 2 unless
+# HISTORICAL_RERUN=1; the reasons are in its message.
+# ---------------------------------------------------------------
+if [ "${HISTORICAL_RERUN:-}" != "1" ]; then
+    cat >&2 <<'EOF'
+run_phase5a_recompute.sh is a May 2026 record (the Phase 5a recompute after the
+Phase 5b/5c.1/5d.1 judging sweeps), not a recipe to run today (walk-through A1,
+review 10 D1, 2026-10-12).  Run now, it would:
+  - recompute from the current pair_list_di.json / pair_list_responses.json, not
+    the pair_list_*_v1.json records that match the 8slot data and judge caches;
+  - overwrite the canonical aggregate JSONs and plots it names;
+  - report wrong job counts (its tier headers predate the job list).
+Copy the pattern into a new script with today's settings instead.  To rerun this
+record deliberately, set HISTORICAL_RERUN=1.
+EOF
+    exit 2
+fi
+
 # Phase 5a (May 2026): Recompute all aggregate JSONs that became stale
 # after the Phase 5b/5c.1/5d.1 judging sweeps rewrote the upstream
 # scores_*.json + projections.json + correlations.json caches with

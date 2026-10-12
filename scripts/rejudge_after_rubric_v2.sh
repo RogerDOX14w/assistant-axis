@@ -1,4 +1,28 @@
 #!/bin/bash
+# ---------------------------------------------------------------
+# MAY 2026 RECORD, NOT A RECIPE TO RUN TODAY (walk-through A1,
+# review 10 D1, 2026-10-12).  The guard below exits 2 unless
+# HISTORICAL_RERUN=1; the reasons are in its message.
+# ---------------------------------------------------------------
+if [ "${HISTORICAL_RERUN:-}" != "1" ]; then
+    cat >&2 <<'EOF'
+rejudge_after_rubric_v2.sh is a May 2026 record (it ran once, on 2026-05-09),
+not a recipe to run today (walk-through A1, review 10 D1, 2026-10-12).  Run
+now, it would:
+  - judge at B=10 with a uniform q9 subsample (the default is B=7 since May 2026);
+  - pass no --budget_usd, so nothing caps the spend;
+  - read the current pair_list_responses.json, not the _v1 record of what was
+    judged then;
+  - move today's correlations.json / gaps.json / correlation_plot.png aside in
+    48 cohort dirs before rejudging them;
+  - pass its pre-flight even if the pair-list read fails.
+Copy the pattern into a new script with today's settings instead.  To rerun this
+record deliberately, set HISTORICAL_RERUN=1 (after the cost confirmation in
+AGENT_NOTES "Expensive Operations").
+EOF
+    exit 2
+fi
+
 # Rejudge response-mode caches after the rubric v1 -> v2 change
 # (axis_judge_correlation.py:RUBRIC_RESPONSE_BATCH no longer names
 # the entity in the body; see RUBRIC_VERSION history block in that
@@ -21,10 +45,12 @@
 # production pipeline.  Their v1 snapshots remain on disk for
 # empirical v1<->v2 ρ comparison if ever needed.
 #
-# Pre-phase cleanup: for each of the 48 in-scope dirs, delete the
+# Pre-phase cleanup: for each of the 48 in-scope dirs, move the
 # canonical correlations.json / gaps.json / correlation_plot.png
-# (the v1 snapshots already exist alongside under the
-# __rubric_v1 suffix).  scores_responses.json was already renamed
+# aside to a timestamped <file>.bak.<YYYYMMDD_HHMMSS> sibling (since
+# 2026-10-12, walk-through A1; it used to delete them, relying on the
+# __rubric_v1 snapshots, which a rerun today would not match).
+# scores_responses.json was already renamed
 # to scores_responses__rubric_v1.json earlier.  With all canonical
 # state cleared, the orchestrator's resume logic does a fresh run
 # for every pair, so we do NOT pass --refill_gaps (which would be
@@ -38,7 +64,8 @@ cd "$(dirname "$0")/.."
 ROOT="roger/axis_judge_experiments"
 DATA_DIR='runpod_workspace/qwen/qwen-3-32b Roger 8slot'
 PAIR_LIST="$ROOT/pair_list_responses.json"   # 12 axes
-LOG_DIR="/tmp/rejudge_v2_$(date +%Y%m%d_%H%M%S)"
+TS="$(date +%Y%m%d_%H%M%S)"
+LOG_DIR="/tmp/rejudge_v2_$TS"
 mkdir -p "$LOG_DIR"
 echo "Logs: $LOG_DIR"
 
@@ -76,7 +103,7 @@ fi
 echo "  OK: all 48 in-scope dirs have v1 snapshots."
 
 # ---------------------------------------------------------------
-# Pre-phase cleanup: snapshot then delete canonical state in the
+# Pre-phase cleanup: snapshot then move aside canonical state in the
 # 48 in-scope dirs so the orchestrator does a clean fresh run.
 # v1 versions are preserved at __rubric_v1 paths.
 # scores_responses.json is already gone (renamed to __rubric_v1
@@ -84,15 +111,16 @@ echo "  OK: all 48 in-scope dirs have v1 snapshots."
 #   - snapshots gaps.json / run.log / config.json (which an earlier
 #     pass overlooked) to their __rubric_v1 siblings, idempotently
 #     (skip if a v1 sibling already exists; never overwrite),
-#   - deletes correlations.json / gaps.json / correlation_plot.png
-#     so the orchestrator's resume logic does a fresh per-pair run.
+#   - moves correlations.json / gaps.json / correlation_plot.png to
+#     <file>.bak.$TS (never deleted) so the orchestrator's resume
+#     logic does a fresh per-pair run.
 # We keep config.json AND its v1 snapshot because the orchestrator
 # rewrites config.json with new args+timestamps; v1 lets us diff
 # the prior run's config retroactively.  run.log is a diagnostic
 # tail and only of interest for v1<->v2 parse-failure forensics.
 # ---------------------------------------------------------------
 echo
-echo "=== Cleanup: snapshot + clear canonical state in 48 in-scope dirs ==="
+echo "=== Cleanup: snapshot + move aside canonical state in 48 in-scope dirs ==="
 cleared=0
 snapshotted=0
 while IFS= read -r pos_neg; do
@@ -113,10 +141,11 @@ while IFS= read -r pos_neg; do
                 fi
             fi
         done
-        # Delete pass.
+        # Move-aside pass (snapshot, never delete; walk-through A1).
         for f in correlations.json gaps.json correlation_plot.png; do
             if [ -f "$d/$f" ]; then
-                rm "$d/$f"
+                mv -n "$d/$f" "$d/$f.bak.$TS"
+                [ -f "$d/$f" ] && { echo "ABORT: could not move $d/$f aside"; exit 1; }
                 cleared=$((cleared+1))
             fi
         done
@@ -127,7 +156,7 @@ for p in json.load(open('$PAIR_LIST')):
     print(f'{p[\"pos\"]}_vs_{p[\"neg\"]}')
 ")
 echo "  snapshotted $snapshotted v1 siblings (gaps/run.log/config)"
-echo "  cleared     $cleared canonical files"
+echo "  moved aside $cleared canonical files to <file>.bak.$TS"
 
 # ---------------------------------------------------------------
 # Helper: orchestrator wrapper, mirrors rejudge_after_trait_edits.sh

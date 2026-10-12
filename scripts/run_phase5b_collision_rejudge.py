@@ -3,6 +3,12 @@
 trait/role collision names across all 12 v2 axes for GPT + Haiku
 in static mode (``scores_descriptions.json`` + ``scores_instructions.json``).
 
+**A May 2026 record, not a recipe to run today** (walk-through A1, review 10
+D1, 2026-10-12): run as a script it exits 2 unless ``HISTORICAL_RERUN=1``
+(the guard after the imports; importing the module is unaffected).  The
+"idempotent no-op" below no longer holds: today it would rejudge all 24
+cells (about $13), overwriting the May caches.
+
 Mechanics
 ---------
 
@@ -33,11 +39,28 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import shlex
 import subprocess
 import sys
 from pathlib import Path
 from typing import Tuple
+
+HISTORICAL_RERUN_MESSAGE = """\
+run_phase5b_collision_rejudge.py is a May 2026 record (Phase 5b of the
+trait/role disambiguation), not a recipe to run today (walk-through A1,
+review 10 D1, 2026-10-12).  Run now, it would:
+  - rejudge all 24 cells (12 axes x GPT, Haiku; about $13), not the no-op its
+    docstring promises, overwriting the May static-mode caches;
+  - read the current pair_list_responses.json, not its _v1 record.
+Copy the pattern into a new script with today's settings instead.  To rerun this
+record deliberately, set HISTORICAL_RERUN=1 (after the cost confirmation in
+AGENT_NOTES "Expensive Operations").
+"""
+
+if __name__ == "__main__" and os.environ.get("HISTORICAL_RERUN") != "1":
+    sys.stderr.write(HISTORICAL_RERUN_MESSAGE)
+    sys.exit(2)
 
 REPO = Path(__file__).resolve().parent.parent
 PAIR_LIST = REPO / "roger/axis_judge_experiments/pair_list_responses.json"
