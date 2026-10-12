@@ -42,6 +42,7 @@ cd pipeline
 - **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir` (`/dev/shm/hf-cache`), `--tmpfs-method` (`auto`; see "Model mirror in tmpfs"), `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
 - **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.
 - **A failing step stops the pipeline**: step 1; step 2 or step 3 (before step 4, whether they ran in parallel or serially); step 4 (before step 5).  Running the same command again skips what is finished.
+- **Every extraction runs into a fresh `--output_dir`** (rule since 2026-10-12, review P1 D2 / walk-through P2).  Every skip test of the pipeline is file-existence only: a response, activation or vector file that exists is never redone, whatever instructions, settings or questions it was made from, so a new extraction into an old tree keeps the old tree's files as "already exists" (reusing the May 8slot tree would have kept 580 entities' May responses).  Step 1 enforces it with the `generation_config.json` side-car (below): it refuses a responses directory that holds responses and no side-car, or whose last recorded run used other generation settings, unless `--allow_mixed_settings`.  Reruns of the same extraction (after a crash, to fill gaps) are what the skip tests are for.
 - **Scan before step 5** (on unless `--no-scan`): after step 4, [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Exit 3 (re-run candidates or `missing_activation`) **stops the pipeline before step 5**, naming the rerun lists, so no axis is built from a partial set (Roger, 2026-10-12: a stop, since a warning is easy to miss); any other non-zero scanner exit stops it too.  Fix the candidates (`4_vectors.py --overwrite <rerun list>`, step 2 first for `missing_activation`) and run the same command again.
 - The run's log is `<output_dir>/pipeline_<timestamp>.log`; the warnings and errors in it are listed at the end.
 
@@ -114,10 +115,23 @@ Each entity produces up to 1500 responses (5 instruction variants × 300 questio
 | `--max_model_len` | 2048 | vLLM maximum context length |
 | `--gpu_memory_utilization` | 0.95 | vLLM GPU memory fraction |
 | `--tensor_parallel_size` | all visible GPUs (one worker) | GPUs per worker; fewer than all gives `total_gpus / N` workers |
+| `--allow_mixed_settings` | off | Generate into a directory whose recorded runs used other generation settings, or that holds responses and no `generation_config.json` (see below) |
 
 `--no_traits`, `--traits_only` and `--roles_only` are mutually exclusive, the two `--combos_only_*` flags exclude each other and `--traits_only` / `--roles_only`, and all five are refused in christina mode.  The `../data/...` defaults are relative to the working directory.
 
 An entity whose `<name>.jsonl` exists is skipped.  Each response file is written to local `/tmp`, copied beside the destination as `<name>.jsonl.inprogress` and renamed into place, so a crash never leaves a truncated file that a rerun would take as finished.
+
+**The side-car `generation_config.json`** (since 2026-10-12, walk-through P2).  Before generating anything, step 1 appends a record of the run to `<output_dir>/generation_config.json` (`{"schema": 1, "runs": [...]}`; a `.json`, so no `*.jsonl` glob sees it), written by [`assistant_axis/generation.py`](../assistant_axis/generation.py) `write_generation_config`.  The field names are those of the multi-model plan ([coding_plan_multi_model_extraction.md](../reports/pipeline/coding_plan_multi_model_extraction.md) § 7), which adds the tokenizer-derived fields (`model_type`, `header_ids`, `sample_prompt_ids`, ...) when it is built.  Each record holds:
+
+- `script`, `created_at` (UTC), `git_sha` (`+dirty` when tracked files were modified), `model_name`;
+- `template_kwargs` (`{"enable_thinking": false}` for Qwen) and `response_cleanup` (`strip_leaked_think` for Qwen), from the same helpers `generate_batch` uses;
+- `sampling`: `temperature`, `top_p`, `max_tokens`, `max_model_len`;
+- `questions`: `file`, its `sha256`, `question_count`, `reduce_questions` and `n_kept`;
+- `instructions`: per directory read (`roles_dir`, `traits_dir`), its `path`, `n_files`, a content `sha256` (each file's name and bytes) and, per stem, `pos_sha256`, a hash of the `pos` instruction texts, the only part step 1 uses;
+- `selection`: `mode`, the subset `flags`, `--roles`, the goal file with its `sha256` and the two counts (roger mode with combinations), the work `items` and the `pending` ones this run generates;
+- `allow_mixed_settings: true` when that flag let the run in.
+
+A rerun that has nothing to generate writes no record.  Before writing, step 1 compares the run with the last record: other model, template kwargs, clean-up, sampling or question set (by hash) is refused unless `--allow_mixed_settings`, and so is a directory with responses and no side-car (a tree made before 2026-10-12).  Changed instructions are not refused: the entities whose responses here were made from `pos` texts that have changed since are named in a WARNING (their files are kept; delete them to regenerate).
 
 **Goal lists (roger mode).**  Every name the grid takes from [`data/goal_roles_and_traits.json`](../data/goal_roles_and_traits.json) must have its instruction file: since 2026-10-12 a missing one stops the step with exit 1 before anything is generated, naming the file and, when an instruction file records the name in `renamed_from`, the stem it was renamed to (until then it was a WARNING and the grid silently shrank).  The step logs the grid's size against the nominal, e.g. `Combination grid: 900 r_ + 900 t_ = 1800 (goal_count x non_goal_count x 2 = 30 x 30 x 2 = 1800)`; it is smaller only when a list is shorter than its count, and then the line is a WARNING with the list lengths.
 
@@ -263,7 +277,9 @@ Processes whatever files are in the input directories.  An entity's vector is th
 
 Each vector file holds `vector`, `type` (`pos_3` or `mean`), `role`, the activation file's `metadata`, and since 2026-10-12 a top-level `inputs` record of what it was computed from: `script`, `created_at`, the activation file's name and size, `n_activations`, `min_count`, `reduce_questions`, and for a scored entity the scores file's `name`, `size`, `sha256` and `n_scores`, `n_scored_activations` and `n_score3_used`.  A vector made from a partial scores file can therefore be told from a complete one later.
 
-An existing vector (unless overwritten) and a 0-byte placeholder activation file are skipped.  An entity with fewer than `--min_count` score=3 activations or no scores file is filtered, which is not an error.  The step exits 1 when any entity failed (an activation or scores file that cannot be read or parsed, an empty activation file, a vector that cannot be computed or saved) or the activations directory has no `.pt` files; it exits 0 when entities were only skipped or filtered.  A failed entity has no vector, so a rerun retries exactly those.
+**Recompute rule** (since 2026-10-12, walk-through P2).  An existing vector is skipped unless it is overwritten or **stale**: its recorded `inputs.scores_file.sha256` differs from the scores file on disk now (a vector made while step 3 was still collecting batches, or before a rejudge).  A stale vector is recomputed (a WARNING names both hashes), and if the current scores no longer reach `--min_count` it is moved aside to `<name>.pt.stale`, out of step 5's `*.pt` glob.  A vector with no `inputs` record (all May 2026 vectors) counts as current.  Only vectors whose scores file is at least as new as the vector are loaded for the comparison, so a rerun with nothing changed loads none.
+
+An existing current vector (unless overwritten) and a 0-byte placeholder activation file are skipped.  An entity with fewer than `--min_count` score=3 activations or no scores file is filtered, which is not an error.  The step exits 1 when any entity failed (an activation or scores file that cannot be read or parsed, an empty activation file, a vector that cannot be computed or saved) or the activations directory has no `.pt` files; it exits 0 when entities were only skipped or filtered.  A failed entity has no vector, so a rerun retries exactly those.
 
 **Limitation — question-matched filtering for trait directions:**
 Each entity's vector is the mean of its own score=3 activations, filtered independently.
@@ -319,6 +335,7 @@ Each entity is classified as one of:
 | status                              | meaning                                                                              |
 |-------------------------------------|--------------------------------------------------------------------------------------|
 | `ok`                                | vector present, healthy size, **and `torch.load` succeeds**                          |
+| `stale_vector`                      | vector loads, but its recorded scores hash (`inputs.scores_file.sha256`) differs from the scores file now: computed from a partial or older scores file (since 2026-10-12; needs the load check; vectors with no record count as current) |
 | `placeholder`                       | 0-byte activation file, written on purpose so that step 2 skips the entity; not a re-run candidate (the report says whether a vector exists) |
 | `ok_zero_size`                      | vector exists but < 256 bytes (likely a stub from an aborted save)                   |
 | `missing_activation`                | the entity has responses but neither an activation file nor a vector, and its scores do not explain it (also an activation path that is a broken symlink): step 2 has to extract it |
@@ -329,10 +346,10 @@ Each entity is classified as one of:
 | `all_nan_or_empty`                  | activations exist but contain no usable tensors                                      |
 | `mysterious`                        | everything upstream looks fine but step 4 produced no vector — re-run candidate      |
 | `vector_only`                       | vector present, no activation file, responses present: the activation was deleted after step 4 to save disk (a deliberate workflow, not a fault) |
-| `orphan_vector`                     | vector present with neither an activation file nor responses (e.g. a renamed entity's old vector, which step 5 still averages in); without `responses/`, every vector lacking an activation file |
+| `orphan_vector`                     | vector present with neither an activation file nor responses (e.g. a renamed entity's old vector; step 5 leaves it out since 2026-10-12, as it has no responses); without `responses/`, every vector lacking an activation file |
 
 The re-run candidates are: `mysterious`, `corrupt_or_truncated_activation`,
-`corrupt_vector`, `ok_zero_size`; they make up `missing_vectors_rerun.txt`.
+`corrupt_vector`, `ok_zero_size`, `stale_vector`; they make up `missing_vectors_rerun.txt`.
 The scanner exits 3 when it finds any of them or a `missing_activation`
 entity (0 when nothing needs attention, 1 when no scan target is found, 2 on
 argument errors); `run_pipeline.sh` runs the scan between step 4 and step 5 and stops on exit 3 (since 2026-10-12; a warning before).  The
@@ -455,20 +472,27 @@ uv run 5_axis.py \
 axis = mean(default_vectors) - nanmean(non_default_vectors)
 ```
 
-Every `.pt` in `--vectors_dir` takes part: the file whose role is exactly
-`default` (or any vector of type `mean`) on the default side, every other
-file on the other side, each entity weighing the same.  The means are taken
-over whole `(n_slots, n_layers, hidden)` tensors, so every slot and layer
-gets its own axis.  The axis points from role-playing toward default
-assistant behaviour.  Because every file counts, an `orphan_vector` (a
-renamed entity's old vector) is averaged in too: run the scan first.
+The vectors that take part are the `.pt` files in `--vectors_dir` whose stem
+has a response file in `--responses_dir` (default: the `responses/`
+directory beside the vectors directory, as the driver lays them out; since
+2026-10-12, walk-through P2): the file whose role is exactly `default` (or
+any vector of type `mean`) on the default side, every other on the other
+side, each entity weighing the same.  A vector with no response file (a
+renamed entity's old vector, a stem dropped from the corpus: the scan's
+`orphan_vector`) is named in a WARNING and left out; until 2026-10-12 every
+file was averaged in.  The means are taken over whole
+`(n_slots, n_layers, hidden)` tensors, so every slot and layer gets its own
+axis.  The axis points from role-playing toward default assistant behaviour.
 
-The step always recomputes and overwrites `axis.pt`.  It exits 1 when there
-is no default or no non-default vector, when the vectors' shapes differ, or
-when their metadata disagree on `header_ids` or `model_name`.  `axis.pt` holds
-`axis`, the first vector's `metadata`, and since 2026-10-12 an `inputs` record
-of what it was made of: `script`, `created_at`, `vectors_dir`, the `default`
-and `entities` stems, `n_default` and `n_entities`.
+The step always recomputes and overwrites `axis.pt`.  It exits 1 when the
+responses directory is missing, when there is no default vector, when fewer
+than `--min_entities` (default 10; a guard against a nearly empty or wrong
+directory) non-default vectors remain, when the vectors' shapes differ, or
+when their metadata disagree on `header_ids` or `model_name`.  `axis.pt`
+holds `axis`, the first vector's `metadata`, and since 2026-10-12 an `inputs`
+record of what it was made of: `script`, `created_at`, `vectors_dir`, the
+`default` and `entities` stems, `n_default`, `n_entities`, `responses_dir`,
+`excluded_without_responses` and `min_entities`.
 
 ## Data Format
 

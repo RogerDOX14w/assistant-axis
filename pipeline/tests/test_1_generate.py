@@ -57,6 +57,8 @@ def data(tmp_path):
     goal = tmp_path / "goal.json"
     goal.write_text(json.dumps({"roles": {"goal": ["a"], "non_goal": ["b"]},
                                 "traits": {"goal": ["x"], "non_goal": ["y"]}}))
+    (tmp_path / "questions.jsonl").write_text(
+        "".join(json.dumps({"id": i, "question": f"q{i}"}) + "\n" for i in range(9)))
     return tmp_path
 
 
@@ -259,7 +261,7 @@ def test_main_single_worker_exits_1_when_an_item_failed(mod, monkeypatch, data):
     monkeypatch.setattr(sys, "argv", [
         "1_generate.py", "--model", "fake/model", "--traits_only",
         "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
-        "--output_dir", str(data / "out")])
+        "--output_dir", str(data / "out"), "--questions_file", str(data / "questions.jsonl")])
     with pytest.raises(SystemExit) as exc:
         mod.main()
     assert exc.value.code == 1
@@ -293,7 +295,7 @@ def test_main_exits_1_on_a_missing_goal_list_name(mod, monkeypatch, data):
         "1_generate.py", "--model", "fake/model",
         "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
         "--goal_file", str(data / "goal.json"), "--goal_count", "1", "--non_goal_count", "1",
-        "--output_dir", str(data / "out")])
+        "--output_dir", str(data / "out"), "--questions_file", str(data / "questions.jsonl")])
     with pytest.raises(SystemExit) as exc:
         mod.main()
     assert exc.value.code == 1
@@ -322,7 +324,127 @@ def test_main_exits_1_when_a_worker_failed(mod, monkeypatch, data):
         "1_generate.py", "--model", "fake/model", "--tensor_parallel_size", "1",
         "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
         "--goal_file", str(data / "goal.json"), "--goal_count", "1", "--non_goal_count", "1",
-        "--output_dir", str(data / "out")])
+        "--output_dir", str(data / "out"), "--questions_file", str(data / "questions.jsonl")])
     with pytest.raises(SystemExit) as exc:
         mod.main()
     assert exc.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# generation_config.json (walk-through P2, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def _main_args(data, *extra):
+    return ["1_generate.py", "--model", "Qwen/fake", "--traits_only",
+            "--roles_dir", str(data / "roles"), "--traits_dir", str(data / "traits"),
+            "--output_dir", str(data / "out"), "--questions_file", str(data / "questions.jsonl"),
+            *extra]
+
+
+def _run_main(mod, monkeypatch, data, *extra, bad=()):
+    saved = []
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(mod, "RoleResponseGenerator", _fake_generator(saved, bad=set(bad)))
+    monkeypatch.setattr(sys, "argv", _main_args(data, *extra))
+    try:
+        mod.main()
+        code = 0
+    except SystemExit as e:
+        code = e.code
+    # the fake does not write files; make the "saved" ones exist, as the real one would
+    (data / "out").mkdir(exist_ok=True)
+    for name in saved:
+        (data / "out" / f"{name}.jsonl").write_text("{}\n")
+    return code, saved
+
+
+def _config(data):
+    return json.loads((data / "out" / "generation_config.json").read_text())
+
+
+def test_step1_writes_the_side_car_before_generating(mod, monkeypatch, data):
+    code, saved = _run_main(mod, monkeypatch, data, "--max_tokens", "256")
+    assert code == 0 and sorted(saved) == ["patient", "x", "y"]
+    cfg = _config(data)
+    assert cfg["schema"] == 1 and len(cfg["runs"]) == 1
+    run = cfg["runs"][0]
+    # the multi-model plan's field names (§ 7)
+    for key in ("script", "created_at", "git_sha", "model_name", "template_kwargs",
+                "response_cleanup", "sampling", "questions"):
+        assert key in run, key
+    assert run["model_name"] == "Qwen/fake"
+    assert run["template_kwargs"] == {"enable_thinking": False}
+    assert run["response_cleanup"] == "strip_leaked_think"
+    assert run["sampling"] == {"temperature": 0.7, "top_p": 0.9, "max_tokens": 256,
+                               "max_model_len": 2048}
+    q = run["questions"]
+    assert q["question_count"] == 300 and q["reduce_questions"] == 3 and q["n_kept"] == 3
+    assert len(q["sha256"]) == 64
+    assert set(run["instructions"]) == {"roles_dir", "traits_dir"}
+    traits = run["instructions"]["traits_dir"]
+    assert traits["n_files"] == 3 and set(traits["pos_sha256"]) == {"patient", "x", "y"}
+    assert run["selection"]["flags"] == ["traits_only"]
+    assert sorted(run["selection"]["pending"]) == ["patient", "x", "y"]
+
+
+def test_a_rerun_with_the_same_settings_appends(mod, monkeypatch, data):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 0 and saved == ["y"]
+    runs = _config(data)["runs"]
+    assert len(runs) == 2 and runs[1]["selection"]["pending"] == ["y"]
+
+
+def test_a_rerun_with_other_settings_is_refused(mod, monkeypatch, data, caplog):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    with caplog.at_level(logging.ERROR):
+        code, saved = _run_main(mod, monkeypatch, data, "--max_tokens", "1024")
+    assert code == 1 and saved == []
+    assert "sampling" in caplog.text and "fresh output directory" in caplog.text
+    assert len(_config(data)["runs"]) == 1
+    code, saved = _run_main(mod, monkeypatch, data, "--max_tokens", "1024",
+                            "--allow_mixed_settings")
+    assert code == 0 and saved == ["y"]
+    assert _config(data)["runs"][1]["allow_mixed_settings"] is True
+
+
+def test_a_changed_question_set_is_refused(mod, monkeypatch, data):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    (data / "questions.jsonl").write_text(
+        "".join(json.dumps({"id": i, "question": f"Q{i}"}) + "\n" for i in range(9)))
+    code, _ = _run_main(mod, monkeypatch, data)
+    assert code == 1
+
+
+def test_responses_without_a_record_are_refused(mod, monkeypatch, data, caplog):
+    """A tree made before the side-car (the May 8slot tree): skip-if-exists
+    would keep its responses beside new ones."""
+    (data / "out").mkdir()
+    (data / "out" / "x.jsonl").write_text("{}\n")
+    with caplog.at_level(logging.ERROR):
+        code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 1 and saved == []
+    assert "no generation_config.json" in caplog.text
+    assert not (data / "out" / "generation_config.json").exists()
+
+
+def test_changed_instructions_are_named_not_refused(mod, monkeypatch, data, caplog):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    doc = json.loads((data / "traits" / "x.json").read_text())
+    doc["instruction"][0]["pos"] = "rewritten"
+    (data / "traits" / "x.json").write_text(json.dumps(doc))
+    # a change outside the pos texts is not a change of what step 1 reads
+    doc_p = json.loads((data / "traits" / "patient.json").read_text())
+    doc_p["eval_prompt"] = "new rubric"
+    (data / "traits" / "patient.json").write_text(json.dumps(doc_p))
+    with caplog.at_level(logging.WARNING):
+        code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 0 and saved == ["y"]
+    warn = [r.message for r in caplog.records if "instruction file(s) changed" in r.message]
+    assert len(warn) == 1 and ": x." in warn[0] and "patient" not in warn[0]
+
+
+def test_nothing_to_do_writes_no_record(mod, monkeypatch, data):
+    _run_main(mod, monkeypatch, data)
+    _run_main(mod, monkeypatch, data)
+    assert len(_config(data)["runs"]) == 1

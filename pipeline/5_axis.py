@@ -4,9 +4,13 @@ Compute the assistant axis from per-role vectors.
 
 Formula: axis = mean(default_vectors) - nanmean(pos_3_vectors across roles)
 
-Every ``*.pt`` in ``--vectors_dir`` takes part: the file named ``default``
-(or any vector of type "mean") on the default side, every other file on the
-role side, each entity weighing the same.  run_pipeline.sh runs this once per
+The ``*.pt`` files in ``--vectors_dir`` whose stem has a response file in
+``--responses_dir`` (default: ``responses/`` beside the vectors directory;
+since 2026-10-12, walk-through P2) take part: the file named ``default`` (or
+any vector of type "mean") on the default side, every other file on the role
+side, each entity weighing the same.  The rest (a renamed entity's old
+vector, the scan's ``orphan_vector``) are named in a WARNING and left out;
+fewer than ``--min_entities`` (10) non-default vectors is an error.  run_pipeline.sh runs this once per
 entity-type directory, so ``roles/axis.pt``, ``traits/axis.pt`` and
 ``combinations/axis.pt`` (r_ and t_ combinations together) each contrast the
 shared default vector (the ``default.pt`` symlink) with that directory's
@@ -39,6 +43,12 @@ from assistant_axis.atomic_io import (  # noqa: E402
 
 logger = logging.getLogger("pipeline.5_axis")
 
+# The fewest non-default vectors an axis is built from (walk-through P2,
+# 2026-10-12: a guard against an axis from a nearly empty or wrong
+# directory, not a statistical threshold; the October types have 339 to
+# 1,800 entities, the May ones 280 to 1,793).
+DEFAULT_MIN_ENTITIES = 10
+
 
 def load_vector(vector_file: Path) -> dict:
     """Load vector data from .pt file with project-standard NFS retry
@@ -60,17 +70,39 @@ def main():
     parser = argparse.ArgumentParser(description="Compute assistant axis from vectors")
     parser.add_argument("--vectors_dir", type=str, required=True, help="Directory with vector .pt files")
     parser.add_argument("--output", type=str, required=True, help="Output axis.pt file path")
+    parser.add_argument("--responses_dir", type=str, default=None,
+                        help="Only vectors whose stem has <stem>.jsonl here are averaged "
+                             "(default: the responses/ directory beside --vectors_dir)")
+    parser.add_argument("--min_entities", type=int, default=DEFAULT_MIN_ENTITIES,
+                        help="Refuse (exit 1) when fewer non-default vectors than this "
+                             f"remain (default {DEFAULT_MIN_ENTITIES})")
     args = parser.parse_args()
 
     vectors_dir = Path(args.vectors_dir)
     output_path = Path(args.output)
+    responses_dir = (Path(args.responses_dir) if args.responses_dir
+                     else vectors_dir.parent / "responses")
 
     # Create output directory
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Load all vectors
-    vector_files = sorted(vectors_dir.glob("*.pt"))
-    print(f"Found {len(vector_files)} vector files")
+    # Only the entities of this run (walk-through P2, 2026-10-12): a vector
+    # whose stem has no response file beside the tree (a renamed entity's
+    # old vector, a stem dropped from the corpus: the scan's orphan_vector)
+    # is named and left out.  Until then every *.pt was averaged.
+    if not responses_dir.is_dir():
+        print(f"Error: no responses directory at {responses_dir}; step 5 averages only the "
+              f"entities that have responses there (pass --responses_dir)")
+        sys.exit(1)
+    response_stems = {p.stem for p in responses_dir.glob("*.jsonl")}
+    all_vector_files = sorted(vectors_dir.glob("*.pt"))
+    vector_files = [f for f in all_vector_files if f.stem in response_stems]
+    excluded = [f.stem for f in all_vector_files if f.stem not in response_stems]
+    print(f"Found {len(all_vector_files)} vector files")
+    if excluded:
+        logger.warning("%d vector(s) have no response file in %s and are left out of the "
+                       "axis: %s%s", len(excluded), responses_dir, ", ".join(excluded[:30]),
+                       " ..." if len(excluded) > 30 else "")
 
     # Separate default and role vectors
     default_vectors = []
@@ -117,6 +149,11 @@ def main():
 
     if not role_vectors:
         print("Error: No role vectors found")
+        sys.exit(1)
+
+    if len(role_vectors) < args.min_entities:
+        print(f"Error: only {len(role_vectors)} non-default vector(s) with responses, below "
+              f"--min_entities {args.min_entities}; refusing to build an axis from so few")
         sys.exit(1)
 
     # Verify all vectors have the same shape
@@ -180,6 +217,10 @@ def main():
             "entities": role_names,
             "n_default": len(default_names),
             "n_entities": len(role_names),
+            # since the responses filter (P2, 2026-10-12)
+            "responses_dir": str(responses_dir.resolve()),
+            "excluded_without_responses": excluded,
+            "min_entities": args.min_entities,
         },
     }
     if metadata:

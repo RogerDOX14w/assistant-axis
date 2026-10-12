@@ -21,6 +21,15 @@ Usage (from pipeline/):
     # overwritten; entities with no vector are computed anyway):
     uv run 4_vectors.py ... --overwrite vectors/missing_vectors_rerun.txt
 
+Recompute rule (walk-through P2, 2026-10-12): an existing vector is skipped
+unless it is stale, i.e. its recorded ``inputs.scores_file.sha256`` differs
+from the scores file on disk now (a vector made while step 3 was still
+collecting batches, or before a rejudge); a stale vector is recomputed, and
+moved aside to ``<name>.pt.stale`` if the current scores no longer reach
+--min_count.  A vector with no ``inputs`` record (May 2026) counts as
+current.  Only vectors whose scores file is at least as new as the vector are
+loaded for the comparison.
+
 Exit status: 0 when every entity was computed, skipped (vector already there,
 0-byte placeholder activation) or legitimately filtered (fewer than
 --min_count score=3 samples, no scores file); 1 when any entity failed (an
@@ -33,6 +42,7 @@ import argparse
 import hashlib
 import json
 import logging
+import os
 import pickle
 import sys
 from datetime import datetime, timezone
@@ -77,12 +87,38 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def needs_work(act_file: Path, output_file: Path, overwrite: bool) -> bool:
-    """Whether the main loop would do anything for this activation file
-    (standard library only): no vector yet, or overwriting, and not a
+def is_default_entity(name: str) -> bool:
+    """The default baseline, whose vector is the mean of all its activations.
+
+    An exact match, as in step 3 (``stem == "default"``) and every
+    downstream reader; the substring test used before 2026-10-12 would
+    also have caught any future entity whose name contains "default"
+    and averaged it unfiltered."""
+    return name == "default"
+
+
+def scores_newer_than_vector(output_file: Path, scores_file: Path) -> bool:
+    """Whether ``scores_file`` was written at or after ``output_file`` (the
+    cheap test before the hash comparison of :func:`vector_is_stale`: a
+    scores file older than its vector cannot have changed since the vector
+    was computed).  False for a missing file of either kind."""
+    try:
+        return scores_file.stat().st_mtime >= output_file.stat().st_mtime
+    except OSError:
+        return False
+
+
+def needs_work(act_file: Path, output_file: Path, overwrite: bool,
+               scores_file: Path | None = None) -> bool:
+    """Whether the main loop may do anything for this activation file
+    (standard library only): no vector yet, or overwriting, or a vector
+    whose scores file has been written since (it may be stale), and not a
     0-byte placeholder."""
     if output_file.exists() and not overwrite:
-        return False
+        if scores_file is None or is_default_entity(act_file.stem):
+            return False
+        if not scores_newer_than_vector(output_file, scores_file):
+            return False
     try:
         return act_file.stat().st_size != 0
     except OSError:
@@ -94,12 +130,14 @@ def nothing_to_do(args) -> bool:
     torch: a rerun with nothing to do returns before the torch import
     below (seconds locally, minutes on the pod's network volume;
     walk-through P8.3, 2026-10-12).  ``--overwrite`` always means work; an
-    empty activations directory is left to ``main`` (an error)."""
+    empty activations directory is left to ``main`` (an error); a vector
+    whose scores file is newer goes on to the hash check (P2)."""
     if args.overwrite:
         return False
     acts = sorted(Path(args.activations_dir).glob("*.pt"))
-    out = Path(args.output_dir)
-    return bool(acts) and not any(needs_work(a, out / a.name, False) for a in acts)
+    out, scores = Path(args.output_dir), Path(args.scores_dir)
+    return bool(acts) and not any(
+        needs_work(a, out / a.name, False, scores / f"{a.stem}.json") for a in acts)
 
 
 if __name__ == "__main__":
@@ -221,14 +259,39 @@ def compute_mean_vector(activations: dict, reduce_questions: int = 1) -> torch.T
     return stacked.nanmean(dim=0)
 
 
-def is_default_entity(name: str) -> bool:
-    """The default baseline, whose vector is the mean of all its activations.
+def recorded_scores_sha256(vector_file: Path) -> str | None:
+    """The scores file hash a vector records in ``inputs.scores_file``
+    (step 4 since 2026-10-12), or None: a vector without an ``inputs``
+    record (the May 2026 ones), or one made without scores (``default``)."""
+    data = torch_load_with_retry(vector_file, map_location="cpu", weights_only=False,
+                                 logger_obj=logger)
+    inputs = data.get("inputs") if isinstance(data, dict) else None
+    return ((inputs or {}).get("scores_file") or {}).get("sha256")
 
-    An exact match, as in step 3 (``stem == "default"``) and every
-    downstream reader; the substring test used before 2026-10-12 would
-    also have caught any future entity whose name contains "default"
-    and averaged it unfiltered."""
-    return name == "default"
+
+def vector_is_stale(output_file: Path, scores_file: Path) -> tuple[bool, str | None, str | None]:
+    """``(stale, recorded, current)``: whether ``output_file`` was computed
+    from another version of ``scores_file`` than the one on disk now
+    (walk-through P2, 2026-10-12).  A vector is stale only when it records
+    a scores hash and that hash differs from the current file's; a vector
+    without the record (May 2026) counts as current, and so does one whose
+    scores file is missing or older than the vector (no load needed).  A
+    vector that cannot be read is left to the scanner (``corrupt_vector``)
+    and not called stale here."""
+    if not scores_newer_than_vector(output_file, scores_file):
+        return False, None, None
+    try:
+        recorded = recorded_scores_sha256(output_file)
+    except (RuntimeError, OSError, EOFError, pickle.UnpicklingError, ValueError) as e:
+        logger.warning("%s: cannot read the existing vector to compare its scores hash "
+                       "(%s: %s); leaving it (the scan reports a corrupt vector)",
+                       output_file.stem, type(e).__name__, e)
+        return False, None, None
+    if recorded is None:
+        return False, None, None
+    current = hashlib.sha256(
+        read_text_with_retry(scores_file, logger_obj=logger).encode("utf-8")).hexdigest()
+    return recorded != current, recorded, current
 
 
 def read_overwrite_list(path: Path) -> set[str]:
@@ -378,7 +441,8 @@ def main(argv=None) -> int:
             logger.warning("%d entities in %s have no activation file here and cannot be "
                            "recomputed: %s", len(unknown), overwrite_list, ", ".join(unknown[:20]))
 
-    counts = {"ok": 0, "skipped": 0, "placeholder": 0, "filtered": 0, "failed": 0}
+    counts = {"ok": 0, "skipped": 0, "placeholder": 0, "filtered": 0, "failed": 0,
+              "stale": 0}
     failed_names: list[str] = []
 
     for act_file in tqdm(activation_files, desc="Computing vectors"):
@@ -387,10 +451,21 @@ def main(argv=None) -> int:
 
         overwrite = (bool(args.overwrite) if overwrite_names is None
                      else role in overwrite_names)
-        # Skip if exists (unless overwriting it)
+        # Skip if exists (unless overwriting it, or it is stale: its
+        # recorded scores hash differs from the scores file now, e.g. a
+        # vector computed while step 3 was still collecting batches).
+        stale = False
         if output_file.exists() and not overwrite:
-            counts["skipped"] += 1
-            continue
+            if is_default_entity(role):
+                counts["skipped"] += 1
+                continue
+            stale, recorded, current = vector_is_stale(output_file, scores_dir / f"{role}.json")
+            if not stale:
+                counts["skipped"] += 1
+                continue
+            counts["stale"] += 1
+            logger.warning("%s: the vector was computed from scores %s..., the scores file is "
+                           "now %s...; recomputing", role, recorded[:12], current[:12])
 
         # A 0-byte activation file is a deliberate placeholder (written to
         # make step 2 skip an entity whose activations were deleted to save
@@ -410,9 +485,18 @@ def main(argv=None) -> int:
         counts[status] += 1
         if status == "failed":
             failed_names.append(role)
+        elif status == "filtered" and stale:
+            # The current scores no longer make a vector (below
+            # --min_count): the stale one must not stay where step 5
+            # would average it.  Kept beside it, out of step 5's *.pt glob.
+            aside = output_file.with_name(output_file.name + ".stale")
+            os.replace(output_file, aside)
+            logger.warning("%s: the current scores give no vector; the stale vector was "
+                           "moved to %s", role, aside.name)
 
     print(f"\nSummary: {counts['ok']} successful, {counts['skipped']} skipped "
-          f"(vector exists), {counts['placeholder']} placeholders, "
+          f"(vector exists and is current), {counts['stale']} stale (recomputed), "
+          f"{counts['placeholder']} placeholders, "
           f"{counts['filtered']} filtered (below --min_count or no scores file), "
           f"{counts['failed']} failed")
     if failed_names:

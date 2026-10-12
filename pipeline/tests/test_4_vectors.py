@@ -236,3 +236,86 @@ def test_reduce_questions_keeps_every_nth_question(step4, dirs):
     assert _main(step4, dirs, "--reduce_questions", "3", min_count=1) == 0
     v = _load(dirs["vec"] / "pirate.pt")["vector"]
     assert torch.allclose(v[0], torch.full((N_LAYERS, HIDDEN), (0 + 3) / 2))
+
+
+# ---------------------------------------------------------------------------
+# Recompute rule (walk-through P2, 2026-10-12): a vector whose recorded
+# scores hash differs from the scores file now is stale and recomputed.
+# ---------------------------------------------------------------------------
+
+import os
+import time as _time
+
+
+def _make_scores_newer(dirs, name):
+    """Give the scores file a later mtime than the vector (what a rewrite by
+    step 3 after step 4 would do), without waiting."""
+    vec = dirs["vec"] / f"{name}.pt"
+    later = vec.stat().st_mtime + 5
+    os.utime(dirs["scores"] / f"{name}.json", (later, later))
+
+
+def _partial_then_complete(step4, dirs):
+    values = {f"pos_p0_q{q}": float(q) for q in range(4)}
+    _write_entity(dirs, "pirate", {"pos_p0_q0": 3, "pos_p0_q1": 3}, values)   # partial
+    assert _main(step4, dirs) == 0
+    v1 = _load(dirs["vec"] / "pirate.pt")
+    assert torch.allclose(v1["vector"][0], torch.full((N_LAYERS, HIDDEN), 0.5))
+    (dirs["scores"] / "pirate.json").write_text(json.dumps({k: 3 for k in values}))
+    _make_scores_newer(dirs, "pirate")
+    return values
+
+
+def test_a_vector_from_a_partial_scores_file_is_recomputed(step4, dirs, caplog):
+    _partial_then_complete(step4, dirs)
+    with caplog.at_level("WARNING"):
+        assert _main(step4, dirs) == 0
+    v2 = _load(dirs["vec"] / "pirate.pt")
+    assert torch.allclose(v2["vector"][0], torch.full((N_LAYERS, HIDDEN), 1.5))
+    assert v2["inputs"]["n_score3_used"] == 4
+    assert "recomputing" in caplog.text
+
+
+def test_a_rewritten_but_identical_scores_file_is_not_stale(step4, dirs):
+    _write_entity(dirs, "pirate", {"pos_p0_q0": 3, "pos_p0_q1": 3},
+                  {"pos_p0_q0": 1.0, "pos_p0_q1": 1.0})
+    assert _main(step4, dirs) == 0
+    before = (dirs["vec"] / "pirate.pt").read_bytes()
+    _make_scores_newer(dirs, "pirate")                 # touched, content unchanged
+    assert _main(step4, dirs) == 0
+    assert (dirs["vec"] / "pirate.pt").read_bytes() == before
+
+
+def test_a_may_vector_without_inputs_counts_as_current(step4, dirs):
+    _write_entity(dirs, "pirate", {"pos_p0_q0": 3, "pos_p0_q1": 3},
+                  {"pos_p0_q0": 5.0, "pos_p0_q1": 5.0})
+    torch.save({"vector": torch.zeros(1), "type": "may", "role": "pirate"},
+               dirs["vec"] / "pirate.pt")
+    _make_scores_newer(dirs, "pirate")
+    assert _main(step4, dirs) == 0
+    assert _load(dirs["vec"] / "pirate.pt")["type"] == "may"
+
+
+def test_a_stale_vector_that_no_longer_reaches_min_count_is_moved_aside(step4, dirs):
+    values = {f"pos_p0_q{q}": float(q) for q in range(4)}
+    _write_entity(dirs, "pirate", {k: 3 for k in values}, values)
+    assert _main(step4, dirs) == 0
+    (dirs["scores"] / "pirate.json").write_text(json.dumps({"pos_p0_q0": 3}))   # 1 < min 2
+    _make_scores_newer(dirs, "pirate")
+    assert _main(step4, dirs) == 0                     # filtered, not failed
+    assert not (dirs["vec"] / "pirate.pt").exists()
+    assert (dirs["vec"] / "pirate.pt.stale").exists()
+
+
+def test_the_early_check_sees_a_newer_scores_file(step4, dirs):
+    import argparse
+    _write_entity(dirs, "pirate", {"pos_p0_q0": 3, "pos_p0_q1": 3},
+                  {"pos_p0_q0": 1.0, "pos_p0_q1": 1.0})
+    assert _main(step4, dirs) == 0
+    args = argparse.Namespace(activations_dir=str(dirs["act"]), scores_dir=str(dirs["scores"]),
+                              output_dir=str(dirs["vec"]), overwrite=False)
+    older = (dirs["vec"] / "pirate.pt").stat().st_mtime - 5
+    os.utime(dirs["scores"] / "pirate.json", (older, older))
+    assert step4.nothing_to_do(args) is True
+    _make_scores_newer(dirs, "pirate")
+    assert step4.nothing_to_do(args) is False

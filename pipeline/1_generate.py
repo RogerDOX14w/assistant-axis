@@ -49,7 +49,15 @@ import torch.multiprocessing as mp
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from assistant_axis.generation import RoleResponseGenerator
+from assistant_axis.generation import (
+    GENERATION_CONFIG_NAME,
+    RoleResponseGenerator,
+    build_generation_run_record,
+    changed_instructions,
+    read_generation_config,
+    settings_differences,
+    write_generation_config,
+)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -491,6 +499,105 @@ def run_multi_worker(work_items: List[Dict], args) -> int:
 
 
 # ---------------------------------------------------------------------------
+# The generation_config.json side-car
+# ---------------------------------------------------------------------------
+
+_SELECTION_FLAGS = ("no_traits", "traits_only", "roles_only", "combos_only_r", "combos_only_t")
+
+
+def generation_run_record(args, all_items: List[Dict], pending: List[Dict]) -> Dict:
+    """This invocation's entry of ``generation_config.json``."""
+    import hashlib
+    dirs = {"roles_dir": Path(args.roles_dir)}
+    if args.mode == "roger" and not args.roles_only:
+        dirs["traits_dir"] = Path(args.traits_dir)
+    selection: Dict = {
+        "mode": args.mode,
+        "flags": [f for f in _SELECTION_FLAGS if getattr(args, f, False)],
+        "roles": args.roles,
+        "items": [i["output_name"] for i in all_items],
+        "pending": [i["output_name"] for i in pending],
+    }
+    if args.mode == "roger" and not (args.traits_only or args.roles_only):
+        selection.update({
+            "goal_file": str(args.goal_file),
+            "goal_file_sha256": hashlib.sha256(Path(args.goal_file).read_bytes()).hexdigest(),
+            "goal_count": args.goal_count,
+            "non_goal_count": args.non_goal_count,
+        })
+    return build_generation_run_record(
+        model_name=args.model, temperature=args.temperature, top_p=args.top_p,
+        max_tokens=args.max_tokens, max_model_len=args.max_model_len,
+        questions_file=args.questions_file, question_count=args.question_count,
+        reduce_questions=args.reduce_questions, instruction_dirs=dirs, selection=selection)
+
+
+def check_and_record_generation_config(args, output_dir: Path, all_items: List[Dict],
+                                       pending: List[Dict]) -> bool:
+    """Check this run against the runs recorded in ``output_dir`` and append
+    its record; False (after logging why) when the run must not start.
+
+    Every skip test of the pipeline is file-existence only, so responses made
+    under other settings would be kept as "already exists" beside the new
+    ones (review P1 D2: all 554 trait and role files of the 8slot tree came
+    from instructions that have since changed).  Hence, unless
+    ``--allow_mixed_settings``:
+
+    * responses here but no record: a tree made before 2026-10-12 -> refuse;
+    * the last recorded run used another model, template kwargs, clean-up,
+      sampling or question set -> refuse, naming the differences.
+
+    Instruction edits are not refused (one corrected file should not block
+    a run): the entities with responses here whose ``pos`` instructions have
+    changed since the last record are named in a WARNING, since their
+    responses are now stale."""
+    record = generation_run_record(args, all_items, pending)
+    previous = read_generation_config(output_dir)
+    fresh_hint = ("every extraction runs into a fresh output directory (pipeline/README.md); "
+                  "use one, or pass --allow_mixed_settings to add to this one anyway")
+    if previous is None:
+        n_existing = len(list(output_dir.glob("*.jsonl")))
+        if n_existing:
+            msg = (f"{output_dir} holds {n_existing} response file(s) and no "
+                   f"{GENERATION_CONFIG_NAME}: they were made before 2026-10-12, under "
+                   f"settings nothing records; {fresh_hint}")
+            if not args.allow_mixed_settings:
+                logger.error(msg)
+                return False
+            logger.warning(msg + " (--allow_mixed_settings given)")
+            record["allow_mixed_settings"] = True
+    elif previous.get("runs"):
+        last = previous["runs"][-1]
+        diffs = settings_differences(last, record)
+        if diffs:
+            msg = (f"this run's generation settings differ from the last run recorded in "
+                   f"{output_dir / GENERATION_CONFIG_NAME} ({last.get('created_at')}): "
+                   f"{'; '.join(diffs)}; {fresh_hint}")
+            if not args.allow_mixed_settings:
+                logger.error(msg)
+                return False
+            logger.warning(msg + " (--allow_mixed_settings given)")
+            record["allow_mixed_settings"] = True
+        changed = set(changed_instructions(last, record))
+        if changed:
+            pending_names = {i["output_name"] for i in pending}
+            done = [i for i in all_items if i["output_name"] not in pending_names and (
+                i["output_name"] in changed or i.get("role_name") in changed
+                or i.get("trait_name") in changed)]
+            if done:
+                logger.warning(
+                    f"{len(changed)} instruction file(s) changed since the last recorded run; "
+                    f"{len(done)} response file(s) here were made from the old text and are "
+                    f"kept as they are (skip-if-exists): "
+                    f"{', '.join(i['output_name'] for i in done[:20])}"
+                    f"{' ...' if len(done) > 20 else ''}.  Delete them to regenerate.")
+    write_generation_config(output_dir, record)
+    logger.info(f"Recorded this run in {output_dir / GENERATION_CONFIG_NAME} "
+                f"(git {record.get('git_sha')})")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -560,6 +667,12 @@ def main():
                         help="Keep only the work items with these output names "
                              "(a role or trait stem, default, r_<role>__<trait>, "
                              "t_<role>__<trait>); any mode")
+    parser.add_argument("--allow_mixed_settings", action="store_true",
+                        help="Generate into an output directory whose recorded runs "
+                             "(generation_config.json) used other generation settings, or "
+                             "that holds responses and no record at all (a tree made before "
+                             "2026-10-12).  Off by default: every extraction runs into a fresh "
+                             "output directory, since every skip test is file-existence only.")
 
     args = parser.parse_args()
 
@@ -606,6 +719,11 @@ def main():
 
     logger.info(f"{len(pending)} items to process "
                 f"({len(all_items) - len(pending)} skipped)")
+
+    # The run's side-car (walk-through P2, 2026-10-12), checked against the
+    # runs already recorded here and written before anything is generated.
+    if not check_and_record_generation_config(args, output_dir, all_items, pending):
+        sys.exit(1)
 
     # GPU detection
     if "CUDA_VISIBLE_DEVICES" in os.environ:

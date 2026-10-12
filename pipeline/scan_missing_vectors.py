@@ -101,12 +101,21 @@ when a ``responses/`` directory sits beside ``activations/``, every response
 file.  A vector without an activation file is ``vector_only`` when the
 entity has responses (its activation was deleted after step 4 to save disk,
 on purpose) and ``orphan_vector`` when it has none (a stem the run no longer
-has, e.g. a renamed entity's old vector -- step 5 still averages it in).  An
+has, e.g. a renamed entity's old vector -- step 5 leaves it out since
+2026-10-12, as it has no responses).  An
 entity with responses but neither an activation file nor a vector is
 ``below_min_count`` / ``missing_scores`` when its scores explain it, else
 ``missing_activation`` (step 2 has to extract it; also reported for an
 activation path that is a broken symlink).  Without ``responses/`` the scan
 sees only entities with an activation file, as before.
+
+**Stale vectors** (since 2026-10-12, walk-through P2): a loadable vector
+whose recorded ``inputs.scores_file.sha256`` (step 4 writes it) differs from
+the scores file on disk now is ``stale_vector``, a re-run candidate (it was
+computed from a partial or older scores file).  Vectors with no ``inputs``
+record (May 2026) count as current; the check needs the load check, so
+``--no_load_check`` skips it; vectors whose activation was deleted
+(``vector_only``) are not checked, since step 4 could not recompute them.
 
 Exit status: 0 when nothing needs attention, 3 (``EXIT_RERUN_CANDIDATES``)
 when any entity is a re-run candidate or ``missing_activation``, 1 when no
@@ -260,7 +269,12 @@ class ScanCache:
         self._stats["v_miss"] += 1
         return None
 
-    def put_vector(self, p: Path, *, ok: bool, error: Optional[str] = None) -> None:
+    def put_vector(self, p: Path, *, ok: bool, error: Optional[str] = None,
+                   scores_sha256: Optional[str] = None) -> None:
+        """``scores_sha256``: the scores-file hash the vector records in
+        ``inputs`` (None when it records none); cached so that the
+        ``stale_vector`` check needs no reload.  Entries written before
+        2026-10-12 lack the key, and the vector is loaded once to fill it."""
         try:
             st = p.stat()
         except OSError:
@@ -270,6 +284,7 @@ class ScanCache:
             "mtime": st.st_mtime,
             "ok": ok,
             "error": error,
+            "scores_sha256": scores_sha256,
         }
         self._mark_dirty()
 
@@ -364,11 +379,13 @@ RERUN_STATUSES = (
     "corrupt_or_truncated_activation",
     "corrupt_vector",
     "ok_zero_size",
+    "stale_vector",
 )
 
 # Status display order for the summary table.
 ALL_STATUSES = (
     "ok",
+    "stale_vector",
     "placeholder",
     "ok_zero_size",
     "missing_activation",
@@ -391,6 +408,27 @@ ATTENTION_STATUSES = RERUN_STATUSES + ("missing_activation",)
 # ---------------------------------------------------------------------------
 # Per-entity classification
 # ---------------------------------------------------------------------------
+
+def _recorded_scores_sha256(vector_data: Any) -> Optional[str]:
+    """The scores-file hash a loaded vector records (step 4's
+    ``inputs.scores_file.sha256``, since 2026-10-12), or None."""
+    if not isinstance(vector_data, dict):
+        return None
+    return ((vector_data.get("inputs") or {}).get("scores_file") or {}).get("sha256")
+
+
+def _file_sha256(path: Path) -> Optional[str]:
+    """sha256 of a scores file's text as step 4 hashes it, or None when it
+    is missing or unreadable (a missing scores file is not "stale")."""
+    import hashlib
+    if not path.exists():
+        return None
+    try:
+        text = read_text_with_retry(path, delays_s=[5.0], logger_obj=logger)
+    except (OSError, RuntimeError, EOFError, UnicodeDecodeError):
+        return None
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
 
 def _question_index(key: str) -> int:
     return int(key.rsplit("_q", 1)[1])
@@ -481,9 +519,13 @@ def classify_entity(
         # short retry schedule -- a corrupt file won't recover from
         # waiting, but one quick retry gives NFS a chance to clear a
         # one-off hiccup.
+        recorded_sha: Optional[str] = None
         if load_check:
             cached = cache.get_vector(vec_file) if cache is not None else None
+            if cached is not None and cached["ok"] and "scores_sha256" not in cached:
+                cached = None      # a pre-2026-10-12 entry: load once for the hash
             if cached is not None:
+                recorded_sha = cached.get("scores_sha256")
                 if not cached["ok"]:
                     # Replay the failure as a live warning so cached
                     # known-bad files stay visible on every re-run --
@@ -502,18 +544,34 @@ def classify_entity(
                 # cache hit, ok=True -> skip the load
             else:
                 try:
-                    torch_load_with_retry(
+                    data = torch_load_with_retry(
                         vec_file, map_location="cpu", weights_only=False,
                         delays_s=[5.0], logger_obj=logger,
                     )
+                    recorded_sha = _recorded_scores_sha256(data)
                     if cache is not None:
-                        cache.put_vector(vec_file, ok=True)
+                        cache.put_vector(vec_file, ok=True, scores_sha256=recorded_sha)
                 except LOAD_FAILURE_ERRORS as e:
                     err_msg = f"{type(e).__name__}: {e}"
                     if cache is not None:
                         cache.put_vector(vec_file, ok=False, error=err_msg)
                     out["status"] = "corrupt_vector"
                     out["note"] = f"vector .pt unreadable: {err_msg}"
+                    return out
+
+            # 2c. Stale: the vector records the hash of the scores file it
+            # was computed from, and that file has changed since (a vector
+            # made while step 3 was still collecting batches; walk-through
+            # P2, 2026-10-12).  Step 4 recomputes these on its own; the scan
+            # catches any left (step 4 not rerun, or failed).  Vectors with
+            # no record (May 2026) count as current.
+            if recorded_sha and scores_dir is not None and role != "default":
+                scores_file = scores_dir / f"{role}.json"
+                current_sha = _file_sha256(scores_file)
+                if current_sha is not None and current_sha != recorded_sha:
+                    out["status"] = "stale_vector"
+                    out["note"] = (f"vector computed from scores {recorded_sha[:12]}..., "
+                                   f"scores file now {current_sha[:12]}...")
                     return out
 
         out["status"] = "ok"

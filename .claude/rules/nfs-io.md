@@ -154,7 +154,9 @@ tmpfs".
 `activations/`+`vectors/`+`scores/` triple (plus `responses/` beside
 `activations/` when present) and classifies each missing or unreadable
 vector as one of `mysterious` / `corrupt_or_truncated_activation` /
-`corrupt_vector` / `ok_zero_size` (re-run candidates) vs
+`corrupt_vector` / `ok_zero_size` / `stale_vector` (re-run candidates;
+the last, since 2026-10-12, a vector whose recorded scores hash differs from
+the scores file now, which step 4 also recomputes on its own) vs
 `missing_scores` / `below_min_count` / `all_nan_or_empty` (legitimate
 filter); it exits 3 when it finds re-run candidates or
 `missing_activation` entities.  Use it to recover from historical

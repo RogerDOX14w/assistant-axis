@@ -210,3 +210,67 @@ def test_root_mode_writes_beside_each_vectors_dir(scan, tree):
     assert {r["role"]: r["status"] for r in report["results"]} == {
         "ok": "ok", "orphan": "orphan_vector"}
     assert (t["vec"] / "missing_vectors_rerun.txt").read_text() == ""
+
+
+# ---------------------------------------------------------------------------
+# stale_vector (walk-through P2, 2026-10-12)
+# ---------------------------------------------------------------------------
+
+def _vector_with_scores_hash(path: Path, scores_path: Path):
+    import hashlib
+    sha = hashlib.sha256(scores_path.read_text().encode("utf-8")).hexdigest()
+    torch.save({"vector": torch.ones(2, 3), "type": "pos_3", "role": path.stem,
+                "inputs": {"scores_file": {"name": scores_path.name, "sha256": sha}}}, path)
+
+
+def test_a_vector_from_another_scores_file_is_stale(scan, tree):
+    t = tree
+    _acts(t["act"] / "pirate.pt", 4)
+    _scores(t, "pirate", 2)                                   # partial
+    _vector_with_scores_hash(t["vec"] / "pirate.pt", t["scores"] / "pirate.json")
+    assert _classify(scan, t, "pirate", median=0)["status"] == "ok"
+    _scores(t, "pirate", 4)                                   # step 3 finished later
+    r = _classify(scan, t, "pirate", median=0)
+    assert r["status"] == "stale_vector" and "stale_vector" in scan.RERUN_STATUSES
+    assert "computed from scores" in r["note"]
+
+
+def test_a_vector_without_an_inputs_record_is_current(scan, tree):
+    t = tree
+    _acts(t["act"] / "pirate.pt", 4)
+    _scores(t, "pirate", 4)
+    _vector(t["vec"] / "pirate.pt")                           # May: no inputs
+    assert _classify(scan, t, "pirate", median=0)["status"] == "ok"
+
+
+def test_the_stale_check_uses_the_cache_and_fills_old_entries(scan, tree, tmp_path):
+    t = tree
+    _acts(t["act"] / "pirate.pt", 4)
+    _scores(t, "pirate", 2)
+    vec = t["vec"] / "pirate.pt"
+    _vector_with_scores_hash(vec, t["scores"] / "pirate.json")
+    cache = scan.ScanCache(tmp_path / "cache.json")
+    # an entry written before the key existed: loaded once to fill it
+    cache.data["vector_loads"][cache._key(vec)] = {
+        "size": vec.stat().st_size, "mtime": vec.stat().st_mtime, "ok": True, "error": None}
+    kw = dict(role="pirate", act_file=t["act"] / "pirate.pt", median_act_size=0,
+              vectors_dir=t["vec"], scores_dir=t["scores"], min_count=2, reduce_questions=1,
+              mode="filtered", deep_load=False, load_check=True, cache=cache)
+    assert scan.classify_entity(**kw)["status"] == "ok"
+    entry = cache.data["vector_loads"][cache._key(vec)]
+    assert len(entry["scores_sha256"]) == 64
+    _scores(t, "pirate", 4)
+    assert scan.classify_entity(**kw)["status"] == "stale_vector"     # from the cached hash
+
+
+def test_a_stale_vector_makes_the_scan_exit_3(scan, tree, monkeypatch):
+    t = tree
+    _acts(t["act"] / "pirate.pt", 4)
+    _scores(t, "pirate", 2)
+    _vector_with_scores_hash(t["vec"] / "pirate.pt", t["scores"] / "pirate.json")
+    _scores(t, "pirate", 4)
+    rc = scan.main(["--activations_dir", str(t["act"]), "--vectors_dir", str(t["vec"]),
+                    "--scores_dir", str(t["scores"]), "--min_count", "2", "--no_cache",
+                    "--rerun_list", str(t["vec"] / "rerun.txt")])
+    assert rc == scan.EXIT_RERUN_CANDIDATES
+    assert (t["vec"] / "rerun.txt").read_text().split() == ["pirate"]

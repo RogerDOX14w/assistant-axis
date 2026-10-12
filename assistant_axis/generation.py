@@ -13,10 +13,13 @@ Example (vLLM - batch inference):
     responses = generator.generate_batch(conversations)
 """
 
+import hashlib
 import json
 import logging
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Any, List, Dict, Mapping, Optional
 
 import torch
 from tqdm import tqdm
@@ -26,6 +29,172 @@ logger = logging.getLogger(__name__)
 # Where save_responses stages a response file before copying it to the output
 # directory: local disk, not TMPDIR (which can point at NFS on RunPod).
 _LOCAL_STAGING_DIR = Path("/tmp")
+
+# The side-car step 1 writes beside the response files (``.json``, so no
+# ``*.jsonl`` glob of steps 2 and 3 or the scanner sees it).  Schema: the
+# multi-model plan, reports/pipeline/coding_plan_multi_model_extraction.md
+# § 7; written since 2026-10-12 (walk-through P2).
+GENERATION_CONFIG_NAME = "generation_config.json"
+GENERATION_CONFIG_SCHEMA = 1
+
+
+def chat_template_kwargs_for(model_name: str) -> Dict[str, Any]:
+    """The chat-template kwargs step 1 renders with: thinking off for Qwen
+    (https://github.com/vllm-project/vllm/issues/18066), none otherwise.
+    One place, so the side-car records what generate_batch used."""
+    return {"enable_thinking": False} if "qwen" in model_name.lower() else {}
+
+
+def response_cleanup_for(model_name: str) -> str:
+    """The clean-up applied to each generated text: Qwen's leaked-thinking
+    strip (generate_batch), none otherwise."""
+    return "strip_leaked_think" if "qwen" in model_name.lower() else "none"
+
+
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def git_sha(repo: Optional[Path] = None) -> Optional[str]:
+    """``<short sha>`` of the checkout, ``+dirty`` when tracked files are
+    modified; None when git is unavailable."""
+    repo = repo or Path(__file__).resolve().parent.parent
+    try:
+        sha = subprocess.run(["git", "-C", str(repo), "rev-parse", "--short", "HEAD"],
+                             capture_output=True, text=True, timeout=30, check=True).stdout.strip()
+        dirty = subprocess.run(["git", "-C", str(repo), "status", "--porcelain",
+                                "--untracked-files=no"],
+                               capture_output=True, text=True, timeout=60, check=True).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return sha + ("+dirty" if dirty else "") if sha else None
+
+
+def instruction_dir_record(directory: Path) -> Dict[str, Any]:
+    """What a run read from an instruction directory: the directory's
+    content hash (sha256 over each ``*.json`` file's name and bytes, sorted)
+    and, per stem, a hash of what step 1 actually uses, the ``instruction``
+    list's ``pos`` texts (``pos_sha256``), so that a later edit can be traced
+    to the entities whose responses it makes stale."""
+    from .atomic_io import read_text_with_retry
+    directory = Path(directory)
+    h = hashlib.sha256()
+    pos_sha: Dict[str, Optional[str]] = {}
+    files = sorted(directory.glob("*.json"))
+    for fp in files:
+        text = read_text_with_retry(fp, logger_obj=logger)
+        h.update(f"{fp.name}\0{_sha256_text(text)}\n".encode("utf-8"))
+        try:
+            pos = [i.get("pos", "") for i in json.loads(text).get("instruction", [])]
+            pos_sha[fp.stem] = _sha256_text(json.dumps(pos, ensure_ascii=False))
+        except (ValueError, AttributeError):
+            pos_sha[fp.stem] = None
+    return {"path": str(directory), "n_files": len(files), "sha256": h.hexdigest(),
+            "pos_sha256": pos_sha}
+
+
+def build_generation_run_record(
+    *,
+    model_name: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+    max_model_len: int,
+    questions_file: str,
+    question_count: int,
+    reduce_questions: int,
+    instruction_dirs: Mapping[str, Path],
+    selection: Optional[Mapping[str, Any]] = None,
+    script: str = "pipeline/1_generate.py",
+) -> Dict[str, Any]:
+    """One run's entry of ``generation_config.json``.  The field names are
+    the multi-model plan's (§ 7: ``script``, ``created_at``, ``git_sha``,
+    ``model_name``, ``template_kwargs``, ``response_cleanup``,
+    ``sampling``, ``questions``); the fields that need the tokenizer
+    (``model_type``, ``header_tokens``, ``header_ids``,
+    ``generation_prompt_ids``, ``system_prompt``, ``sample_conversation``,
+    ``sample_prompt_ids``) are added by that plan's step 1 changes.  Added
+    here: the questions file's ``sha256`` and the number of questions kept,
+    ``instructions`` (:func:`instruction_dir_record` per directory read) and
+    ``selection`` (mode, flags, goal file and its hash, the work items)."""
+    from .atomic_io import read_jsonl_with_retry, read_text_with_retry
+    q_text = read_text_with_retry(questions_file, logger_obj=logger)
+    n_all = len(read_jsonl_with_retry(questions_file, skip_malformed=False, logger_obj=logger))
+    n_kept = len(range(min(question_count, n_all))[::max(reduce_questions, 1)])
+    return {
+        "script": script,
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "git_sha": git_sha(),
+        "model_name": model_name,
+        "template_kwargs": chat_template_kwargs_for(model_name),
+        "response_cleanup": response_cleanup_for(model_name),
+        "sampling": {"temperature": temperature, "top_p": top_p,
+                     "max_tokens": max_tokens, "max_model_len": max_model_len},
+        "questions": {"file": str(questions_file), "sha256": _sha256_text(q_text),
+                      "question_count": question_count, "reduce_questions": reduce_questions,
+                      "n_kept": n_kept},
+        "instructions": {k: instruction_dir_record(Path(v)) for k, v in instruction_dirs.items()},
+        "selection": dict(selection or {}),
+    }
+
+
+# What two runs into one responses directory must share: the generation
+# settings.  Instructions may differ (they are reported per entity instead).
+SETTINGS_KEYS = ("model_name", "template_kwargs", "response_cleanup", "sampling")
+QUESTION_KEYS = ("sha256", "question_count", "reduce_questions")
+
+
+def settings_differences(previous: Mapping[str, Any], current: Mapping[str, Any]) -> List[str]:
+    """Human-readable differences between two run records' generation
+    settings (model, template kwargs, clean-up, sampling, questions)."""
+    diffs = []
+    for k in SETTINGS_KEYS:
+        if previous.get(k) != current.get(k):
+            diffs.append(f"{k}: {previous.get(k)!r} -> {current.get(k)!r}")
+    pq, cq = previous.get("questions") or {}, current.get("questions") or {}
+    for k in QUESTION_KEYS:
+        if pq.get(k) != cq.get(k):
+            diffs.append(f"questions.{k}: {pq.get(k)!r} -> {cq.get(k)!r}")
+    return diffs
+
+
+def changed_instructions(previous: Mapping[str, Any], current: Mapping[str, Any]) -> List[str]:
+    """Stems whose ``pos`` instructions hash differs between two run
+    records (in any directory both read)."""
+    out = []
+    for key, cur in (current.get("instructions") or {}).items():
+        prev = (previous.get("instructions") or {}).get(key)
+        if not prev:
+            continue
+        for stem, h in (cur.get("pos_sha256") or {}).items():
+            ph = (prev.get("pos_sha256") or {}).get(stem)
+            if ph is not None and h != ph:
+                out.append(stem)
+    return sorted(set(out))
+
+
+def read_generation_config(output_dir: Path) -> Optional[Dict[str, Any]]:
+    """The side-car in ``output_dir``, or None when there is none.  A file
+    that is not valid JSON raises (it is never silently replaced)."""
+    from .atomic_io import read_text_with_retry
+    path = Path(output_dir) / GENERATION_CONFIG_NAME
+    if not path.exists():
+        return None
+    return json.loads(read_text_with_retry(path, logger_obj=logger))
+
+
+def write_generation_config(output_dir: Path, run_record: Mapping[str, Any]) -> Path:
+    """Append ``run_record`` to ``output_dir/generation_config.json``
+    (``{"schema": 1, "runs": [...]}``; a rerun that fills gaps appends),
+    written atomically."""
+    from .atomic_io import atomic_write_text
+    output_dir = Path(output_dir)
+    existing = read_generation_config(output_dir) or {"schema": GENERATION_CONFIG_SCHEMA, "runs": []}
+    existing.setdefault("runs", []).append(dict(run_record))
+    path = output_dir / GENERATION_CONFIG_NAME
+    atomic_write_text(json.dumps(existing, indent=1, ensure_ascii=False) + "\n", path,
+                      logger_obj=logger)
+    return path
 
 
 def generate_response(
@@ -258,9 +427,7 @@ class VLLMGenerator:
         tokenizer = self.llm.get_tokenizer()
 
         # Disable thinking for Qwen models (https://github.com/vllm-project/vllm/issues/18066)
-        chat_template_kwargs = {}
-        if "qwen" in self.model_name.lower():
-            chat_template_kwargs["enable_thinking"] = False
+        chat_template_kwargs = chat_template_kwargs_for(self.model_name)
 
         prompts = []
         for conv in conversations:
@@ -279,7 +446,7 @@ class VLLMGenerator:
         # models despite enable_thinking=False. It strips the opening <think>
         # tag but leaves </think> and the preceding thinking text in the
         # output. Strip everything up to the last </think>.
-        if "qwen" in self.model_name.lower():
+        if response_cleanup_for(self.model_name) == "strip_leaked_think":
             cleaned = 0
             for i, resp in enumerate(responses):
                 if '</think>' in resp and '<think>' not in resp:
@@ -616,6 +783,11 @@ class RoleResponseGenerator:
                     inprogress.unlink(missing_ok=True)
                     raise
         local_tmp.unlink(missing_ok=True)
+
+    def write_generation_config(self, run_record: Mapping[str, Any]) -> Path:
+        """Append a run record to this generator's output directory's
+        ``generation_config.json`` (the module function of that name)."""
+        return write_generation_config(self.output_dir, run_record)
 
     def should_skip_role(self, role_name: str) -> bool:
         """Check if role output already exists."""
