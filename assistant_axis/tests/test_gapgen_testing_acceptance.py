@@ -70,7 +70,9 @@ def decision1_batches() -> list[Path]:
 def test_every_decision1_batch_has_usage_and_extras():
     for d in decision1_batches():
         assert (d / "usage.json").exists() and (d / "extras.json").exists(), d.name
-        assert result(d / "extras.json")["n_needs_opus"] == 0 or True     # listed, not counted (report-and-decide)
+        ex = result(d / "extras.json")
+        # report-and-decide: a pair the record cannot decide at 4 is listed, not counted; the record must say how many
+        assert isinstance(ex["n_needs_opus"], int) and ex["n_needs_opus"] == len(ex["needs_opus"])
 
 
 def test_every_paid_directory_has_usage():
