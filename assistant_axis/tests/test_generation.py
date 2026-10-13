@@ -10,6 +10,12 @@ https://huggingface.co/google/gemma-2-2b-it.  Originally this file
 claimed to use "non-gated models only" -- that was inaccurate
 upstream of the fork (commit 5e571f5 introduced the Gemma fixture
 without flagging its gating); corrected here.
+
+The tokenizers are loaded from the local Hugging Face cache only
+(``local_files_only=True``): the tests never contact huggingface.co, and
+each skips when its tokenizer is not cached or the cache cannot be read
+(a sandboxed agent; 2026-10-13, after the plan 09 build found these
+fixtures downloading into the home-directory cache).
 """
 
 import pytest
@@ -18,14 +24,22 @@ from transformers import AutoTokenizer
 from assistant_axis.generation import supports_system_prompt, format_conversation
 
 
+def _local_tokenizer(model_id):
+    """The tokenizer from the local cache, or a skip: never a download."""
+    try:
+        return AutoTokenizer.from_pretrained(model_id, local_files_only=True)
+    except OSError as exc:
+        pytest.skip(f"{model_id} not in the local Hugging Face cache ({type(exc).__name__})")
+
+
 @pytest.fixture(scope="module")
 def qwen_tokenizer():
-    return AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
+    return _local_tokenizer("Qwen/Qwen2.5-0.5B-Instruct")
 
 
 @pytest.fixture(scope="module")
 def gemma_tokenizer():
-    return AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    return _local_tokenizer("google/gemma-2-2b-it")
 
 
 class TestSupportsSystemPrompt:
@@ -105,7 +119,7 @@ class TestQwenThinkingDisabled:
     @pytest.fixture(scope="class")
     def qwen3_tokenizer(self):
         """Load Qwen3 tokenizer which supports thinking mode."""
-        return AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
+        return _local_tokenizer("Qwen/Qwen3-0.6B")
 
     def test_qwen3_thinking_disabled_adds_empty_think_block(self, qwen3_tokenizer):
         """enable_thinking=False adds empty think block to force skipping thinking."""
