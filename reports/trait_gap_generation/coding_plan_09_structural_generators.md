@@ -210,9 +210,9 @@ principal-target keys are present only for principal-target traits, those at or 
  "position": "deficiency",
  "opposite": {"label": "open-handed", "gloss": "This means giving money and help freely, without keeping score.",
               "has_common_word": true, "polysemy": false},
- "excess": null,
- "deficiency": {"label": "wasteful", "gloss": "This means spending past one's means with no thought for tomorrow.",
-                "has_common_word": true, "polysemy": false},
+ "excess": {"label": "wasteful", "gloss": "This means spending past one's means with no thought for tomorrow.",
+            "has_common_word": true, "polysemy": false},
+ "deficiency": null,
  "retarget": {"self": {"label": "self-denying", "gloss": "...", "has_common_word": true, "polysemy": false},
               "intimates": null, "strangers": null, "authority": null, "animals": null, "ideas": null},
  "remode": {"attitude": null, "habit": null,
@@ -221,7 +221,12 @@ principal-target keys are present only for principal-target traits, those at or 
 
 (`position` is the trait as described: `deficiency`, `mean`, `excess` or `not_scalar`.  `excess` and
 `deficiency` ask for the vice of too much and too little of the trait; for a deficiency-position trait the
-model may return `null` for `deficiency`, which is the expected answer, not an error.)
+model may return `null` for `deficiency`, which is the expected answer, not an error.  **Corrected 2026-10-13,
+after the build:** the illustration first gave `excess: null` and `deficiency: wasteful` for this
+deficiency-position trait, the other way round from the rule just stated; the build follows the rule (the prompt
+asks for the vices at the too-much and too-little ends of the trait's own scale, each `null` when the trait is
+itself that vice; [QUESTIONS](./QUESTIONS.md) 119), so tightfisted, the vice of too little, now answers `null` for
+`deficiency` and `wasteful` for `excess`, and the two examples below follow.)
 
 **Operator table row** ([operator_table.jsonl](../../data/candidates/structural/operator_table.jsonl), not
 written yet; one per distinct stem; deterministic from `responses.jsonl` and `classical_modern.jsonl`):
@@ -229,9 +234,9 @@ written yet; one per distinct stem; deterministic from `responses.jsonl` and `cl
 ```json
 {"schema_version": 1, "surface": "wasteful", "stem": "wasteful", "label": "wasteful",
  "gloss": "This means spending past one's means with no thought for tomorrow.",
- "sources": [{"generator_part": "operators", "source_stem": "tightfisted", "operator": "deficiency", "run_id":
+ "sources": [{"generator_part": "operators", "source_stem": "tightfisted", "operator": "excess", "run_id":
    "2026-10-14-b1"}, {"generator_part": "classical", "source_id": "aristotle:liberality:excess", "role": "excess"}],
- "n_sources": 2, "roles": ["deficiency", "excess"], "siblings": ["tightfisted", "open_handed", "liberal"],
+ "n_sources": 2, "roles": ["excess"], "siblings": ["tightfisted", "open_handed", "liberal"],
  "has_common_word": true, "polysemy": false, "principal_target": false,
  "exists": true, "queued": false, "queue_status": null, "is_negative_label": false, "registered": true,
  "registered_by": ["censuses"], "registered_decided": true,
@@ -252,7 +257,7 @@ prices (§ 7); the run's `submit_report.json` records the rows submitted, counte
 **Candidate emitted** (one per source, the registry merges them into one row with several `sources[]`
 entries): `Candidate(surface="wasteful", generator="structural", run_id="2026-10-14-b1", rank=211,
 score=2.0, gloss_hint="This means spending past one's means ...", sense_id=1,
-source_ref="structural:op:deficiency:tightfisted", partner_hint=None)`.  `score` is `n_sources` (a quality
+source_ref="structural:op:excess:tightfisted", partner_hint=None)`.  `score` is `n_sources` (a quality
 signal, **not** a familiarity: `structural` is not added to `FAMILIARITY_GENERATORS`, guard test as
 [QUESTIONS 58](./QUESTIONS.md)); `source_ref` is `structural:op:<operator>[:<target>|:<mode>]:<source stem>` or
 `structural:classical:<row id>`, so the role is readable from it; `partner_hint` is the source trait's label

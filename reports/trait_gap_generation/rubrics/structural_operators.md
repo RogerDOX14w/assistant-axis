@@ -30,8 +30,9 @@ same disposition in another mode.  `position` (where the trait sits: `deficiency
   both vices, an `excess`-position trait gives `excess: null` and its opposite vice under `deficiency`, and a
   `deficiency`-position trait the reverse (the coding plan § 6: "for a deficiency-position trait the model may
   return null for deficiency, which is the expected answer").  The coding plan's illustrative reply (a made-up
-  tightfisted trait answered `excess: null`, `deficiency: wasteful`) has the two the other way round; the rule
-  in its parenthesis is what this text follows.
+  tightfisted trait) first had the two the other way round (`excess: null`, `deficiency: wasteful`); the rule
+  in its parenthesis is what this text follows, and the illustration was corrected to it on 2026-10-13
+  (QUESTIONS 119).
 - **Null is said to be the expected answer** for `retarget` and `remode` (twice), as plan 09 § 3.4 asks; the
   null-rate pilot's band (5-40% non-null) is what tests whether that is said strongly enough or too strongly.
 - **No over-/under-/too-/non-/not- names.**  Said in the prompt and enforced by the parser
