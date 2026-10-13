@@ -123,6 +123,15 @@ class TestPrompts:
                 assert normalize_to_file_name(q) not in names, q
         assert prompt_words(N.system_prompt("blind"))
 
+    @pytest.mark.xfail(strict=True, reason="rubric v1's third example, \"keeps others at arm's length\", is five "
+                       "words against the prompt's own 1 to 4, and Haiku 5.5 copies it (12 rejected answers on "
+                       "2026-10-13, 14 more of the form \"keeps others at a distance\").  The fix is a v2 text of both "
+                       "naming rubrics, which needs Roger's sign-off; remove this mark with it.")
+    def test_every_example_label_passes_the_label_check(self):
+        for w in N.EXAMPLE_LABELS:
+            assert w in N.system_prompt("blind") and w in N.system_prompt("hinted")
+            assert N.label_problem(w) is None, w
+
 
 class TestParser:
     def test_good_answer(self):
@@ -176,6 +185,85 @@ class TestParser:
         n, err = N.parse_naming(json.dumps(dict(GOOD, gloss=long)))
         assert err is None and "gloss over 25 words" in n.notes
 
+    def test_a_long_antonym_is_noted_not_rejected(self):
+        """Parser version 2: the antonym is never submitted (only the evaluation's antonym agreement reads it), so
+        a five-word antonym no longer throws the label away with it."""
+        n, err = N.parse_naming(json.dumps(dict(GOOD, antonym_label="Leaves Tasks Until The Deadline")))
+        assert err is None and n.label == "chore-prompt"
+        assert n.antonym_label == "leaves tasks until the deadline"
+        assert "antonym_label over 4 words" in n.notes and "antonym_label lower-cased" in n.notes
+
+    def test_an_antonym_that_is_not_a_string_is_still_rejected(self):
+        _n, err = N.parse_naming(json.dumps(dict(GOOD, antonym_label=["last-minute"])))
+        assert err.startswith("bad_label: antonym")
+
+    def test_the_label_limit_is_unchanged_and_says_why(self):
+        _n, err = N.parse_naming(json.dumps(dict(GOOD, label="takes things at face value")))
+        assert err == "bad_label: 'takes things at face value' (5 words, at most 4)"
+        # a hyphenated compound is one word, as split.is_phrase counts it
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label="fair-dealing to a fault")))
+        assert err is None and n.stem == "fair_dealing_to_a_fault"
+        assert N.label_problem("fair-dealing to a fault") is None
+
+
+#: Rejected answers of the 2026-10-13 runs (granularity, cluster, pole, form), their label and antonym as Haiku 5.5
+#: gave them, and whether parser version 2 accepts the answer.  Version 1 rejected all eight.
+RECORDED_REJECTIONS = [
+    ((600, 282, "a", "blind"), "easy to confide in", "hard to get to know", True),
+    ((600, 383, "a", "blind"), "devoted to helping friends", "keeps friends at a distance", True),
+    ((150, 39, "b", "blind"), "unfussy about gifts", "makes a fuss over gifts", True),
+    ((350, 158, "a", "blind"), "close bonds with others", "keeps others at arm's length", True),
+    ((600, 56, "a", "blind"), "keeps others at arm's length", "open and approachable", False),
+    ((600, 322, "b", "blind"), "takes things at face value", "seeks hidden meanings", False),
+    ((150, 665, "a", "hinted"), "direct and to the point", "meandering and digressive", False),
+    ((350, 121, "a", "blind"), "overly compliant, desperate to please", "firmly self-directed", False),
+]
+
+
+class TestRecordedRejections:
+    """The ``bad_label`` rejections of the recorded naming runs, replayed through the parser (2026-10-13): every
+    rejection was a label or an antonym over four words; version 2 accepts the answers whose antonym alone was
+    over, and still rejects every over-long label."""
+
+    @pytest.mark.parametrize("key,label,antonym,accepted", RECORDED_REJECTIONS, ids=lambda x: str(x))
+    def test_frozen_examples(self, key, label, antonym, accepted):
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label=label, antonym_label=antonym)))
+        if accepted:
+            assert err is None and n.label == label and n.antonym_label == antonym
+            assert "antonym_label over 4 words" in n.notes
+        else:
+            assert n is None and err.startswith(f"bad_label: {label!r}")
+
+    def test_replay_of_the_recorded_responses(self):
+        from assistant_axis.gapgen.generators.ipip import NAMING_RESPONSES_PATH
+        if not NAMING_RESPONSES_PATH.exists():
+            pytest.skip("no recorded naming responses")
+        recs = [json.loads(x) for x in NAMING_RESPONSES_PATH.read_text().splitlines() if x.strip()]
+        v1 = [r for r in recs if r.get("parser_version") is None]
+        tally = {"antonym_now_ok": 0, "label_still_rejected": 0}
+        for r in v1:
+            n, err = N.parse_naming(r["text"])
+            old_err = r["parse_error"]
+            if old_err is None:
+                # nothing version 1 accepted changes
+                assert err is None, (r["granularity"], r["cluster_id"], r["pole"], r["form"], err)
+                assert {k: getattr(n, k) for k in ("label", "stem", "antonym_label", "kind")} == \
+                    {k: r["parsed"][k] for k in ("label", "stem", "antonym_label", "kind")}
+            elif old_err.startswith("bad_label: antonym"):
+                obj = json.loads(r["text"])
+                assert err is None and n.label == " ".join(obj["label"].split()).lower()
+                assert len(obj["antonym_label"].split()) > N.MAX_LABEL_WORDS
+                assert "antonym_label over 4 words" in n.notes
+                tally["antonym_now_ok"] += 1
+            elif old_err.startswith("bad_label"):
+                assert err is not None and err.startswith(old_err) and "words, at most 4" in err
+                tally["label_still_rejected"] += 1
+            else:
+                assert err == old_err
+        tonight = [r for r in v1 if r["at"].startswith("2026-10-13") and r["parse_error"]]
+        if len(tonight) == 134:      # the three runs of 2026-10-13 (600, 350, 150), as recorded
+            assert sum(1 for r in tonight if N.parse_naming(r["text"])[1] is None) == 60
+
 
 def responder(answers=None, bad_first=False):
     seen = {}
@@ -215,9 +303,10 @@ class TestCalls:
         assert len(recs) == 4 and {r["form"] for r in recs} == {"blind", "hinted"}
         r = recs[0]
         for k in ("granularity", "cluster_id", "pole", "model", "rubric", "prompt_version", "prompt_sha256",
-                  "label_form", "user", "text", "usage_raw", "parsed", "parse_error", "attempt", "at"):
+                  "label_form", "user", "text", "usage_raw", "parsed", "parse_error", "parser_version", "attempt",
+                  "at"):
             assert k in r
-        assert r["label_form"] == "judge-display-v1"
+        assert r["label_form"] == "judge-display-v1" and r["parser_version"] == N.PARSER_VERSION == 2
         assert r["rubric"] in N.RUBRIC_NAMES.values()
         assert r["prompt_sha256"] == N.prompt_sha256(r["form"])
         # temperature is left out for Haiku 5.5 (it refuses one); the system prompt is the form's rubric text

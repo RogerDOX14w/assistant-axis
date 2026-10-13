@@ -25,9 +25,12 @@ hygiene rule; tested).  No temperature (Haiku 5.5 refuses one, ``llm.accepts_tem
 **Parser** (:func:`parse_naming`): strict, as the plan asks: the reply must be one JSON object and nothing else (a
 fenced or prose-wrapped reply is rejected and counted), every key present, the label 1-4 words (lower-cased with a
 note), the gloss opening "This means" (over 25 words is noted, not rejected), ``kind`` one of the eight (an
-unknown kind is a ``bad_value``), the two flags booleans.  A rejected answer is asked once more
-(:data:`ASK_ATTEMPTS`); every response received is charged to ``usage`` and recorded, before parsing, in
-``naming_responses.jsonl`` (append-only).
+unknown kind is a ``bad_value``), the two flags booleans.  The antonym is held to the same form but **noted, not
+rejected**, when it breaks it (:data:`PARSER_VERSION` 2): it is never submitted, only the evaluation's antonym
+agreement reads it, and under version 1 a five-word antonym threw away a good label with it (60 of the 134
+rejected answers of 2026-10-13).  A rejected answer is asked once more (:data:`ASK_ATTEMPTS`); every response
+received is charged to ``usage`` and recorded, before parsing, in ``naming_responses.jsonl`` (append-only), with
+the ``parser_version`` that read it (a record without the field was read by version 1).
 
 Labels: no corpus label is ever shown (the statements are item texts and the scale names are IPIP's), so the judge
 display form is a no-op here; the scale names still pass through ``prompt_label`` and every record carries
@@ -59,8 +62,16 @@ MAX_TOKENS = 4000
 ASK_ATTEMPTS = 2
 CONCURRENCY = 8
 MAX_STATEMENTS = 30
+#: Words in a label, counted on whitespace as stored: a hyphenated compound is one word, as ``split.is_phrase`` and
+#: the alignment sweep's ``label_problem`` count (the corpus's longest labels have four, QUESTIONS 71 accepts up
+#: to four).
 MAX_LABEL_WORDS = 4
 MAX_GLOSS_WORDS = 25
+#: 2 (2026-10-13): an antonym that breaks the label form (over :data:`MAX_LABEL_WORDS` words) is kept with a note
+#: (``antonym_label over 4 words``) instead of rejecting the answer; the label's own check is unchanged.
+#: 1 (2026-10-11): either label over the limit rejected the answer (``bad_label: antonym ...`` for the antonym).
+#: Records carry it as ``parser_version`` (none on a version-1 record).
+PARSER_VERSION = 2
 FORMS: tuple[str, ...] = ("blind", "hinted")
 #: form -> the pinned rubric name in ``reports/trait_gap_generation/rubrics/`` (QUESTIONS 48 part 3).
 RUBRIC_NAMES: dict[str, str] = {"blind": "ipip_naming_blind", "hinted": "ipip_naming_hinted"}
@@ -197,20 +208,30 @@ def _bool(v: Any) -> Optional[bool]:
     return None
 
 
-def _label(v: Any, notes: list, what: str) -> Optional[str]:
+def label_problem(label: str) -> Optional[str]:
+    """Why ``label`` (whitespace collapsed) breaks the label form, or None: more than :data:`MAX_LABEL_WORDS`
+    words.  (The same test as version 1, which also counted the words with hyphens split and rejected only when
+    both counts were over: a hyphen can only add words, so that was the whitespace count alone.)"""
+    n = len(label.split())
+    return f"{n} words, at most {MAX_LABEL_WORDS}" if n > MAX_LABEL_WORDS else None
+
+
+def _label(v: Any, notes: list, what: str, *, lenient: bool = False) -> Optional[str]:
+    """The label lower-cased with whitespace collapsed, or None when it is not a string, is empty, or (unless
+    ``lenient``) breaks the form (:func:`label_problem`).  ``lenient`` keeps a label that breaks the form, with a
+    note (the antonym, :data:`PARSER_VERSION` 2)."""
     if not isinstance(v, str) or not v.strip():
         return None
     s = " ".join(v.split())
     if s != s.lower():
         notes.append(f"{what} lower-cased")
         s = s.lower()
-    if len(s.replace("-", " ").split()) > MAX_LABEL_WORDS and len(s.split()) > MAX_LABEL_WORDS:
-        return None
-    try:
-        normalize_to_file_name(s)
-    except ValueError:
-        return None
-    return s
+    if label_problem(s) is None:
+        return s
+    if lenient:
+        notes.append(f"{what} over {MAX_LABEL_WORDS} words")
+        return s
+    return None
 
 
 def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
@@ -240,7 +261,8 @@ def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
         return None, "bad_value: reason"
     label = _label(obj["label"], notes, "label")
     if label is None:
-        return None, f"bad_label: {obj['label']!r}"
+        why = label_problem(" ".join(obj["label"].split())) if isinstance(obj["label"], str) else None
+        return None, f"bad_label: {obj['label']!r}" + (f" ({why})" if why else "")
     gloss = obj["gloss"]
     if not isinstance(gloss, str) or not gloss.strip().startswith("This means"):
         return None, f"bad_gloss: {str(gloss)[:60]!r}"
@@ -248,8 +270,10 @@ def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
     if len(gloss.split()) > MAX_GLOSS_WORDS + 2:          # "This means" plus 25 words, with a little slack
         notes.append("gloss over 25 words")
     ant = obj["antonym_label"]
+    # lenient (PARSER_VERSION 2): an antonym over the word limit is kept with a note; one that is not a string is
+    # still rejected
     ant_label = None if ant is None or (isinstance(ant, str) and ant.strip().lower() in ("", "null", "none")) \
-        else _label(ant, notes, "antonym_label")
+        else _label(ant, notes, "antonym_label", lenient=True)
     if ant is not None and ant_label is None and not (isinstance(ant, str) and ant.strip().lower() in ("", "null", "none")):
         return None, f"bad_label: antonym {ant!r}"
     ag = obj["antonym_gloss"]
@@ -335,7 +359,7 @@ async def name_poles(poles: Sequence[PoleRef], *, client, model: str = DEFAULT_M
                        "label_form": label_form, "cache_system": cache, "user": user, "attempt": attempt,
                        "text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
                        "error": meta.get("error"), "parsed": naming.as_dict() if naming else None,
-                       "parse_error": err, "at": now()}
+                       "parse_error": err, "parser_version": PARSER_VERSION, "at": now()}
                 async with lock:
                     res.n_calls += 1
                     if responses_path is not None:

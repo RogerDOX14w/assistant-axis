@@ -527,7 +527,8 @@ def cmd_name(args) -> int:
             for f in forms:
                 nm = res.namings.get((int(r["granularity"]), int(r["cluster_id"]), p["pole"], f))
                 if nm is not None:
-                    p[f] = {**nm.as_dict(), "model": args.model, "prompt_version": vers[f], "label_form": DEFAULT_LABEL_FORM}
+                    p[f] = {**nm.as_dict(), "model": args.model, "prompt_version": vers[f], "label_form": DEFAULT_LABEL_FORM,
+                            "parser_version": N.PARSER_VERSION}
             if p.get("blind") and p.get("hinted"):
                 p["labels_disagree"] = p["blind"]["stem"] != p["hinted"]["stem"]
     C.write_table(rows, P.clusters_path(args.granularity, pp["dir"]))
