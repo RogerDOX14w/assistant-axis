@@ -34,7 +34,7 @@ with a one-line gloss and an antonym guess, so polysemy and pair-completion are 
 
 Common scaffold for all five: system prompt fixes the target ("stable dispositions or styles a
 speaking persona can enact; not roles, moods, skills or one-off acts"), the output schema
-`{label, gloss, antonym, ambiguity_flag}`, and asks for 15-20 items per call. No temperature is sent
+`{label, gloss, antonym, ambiguity_flag}` with a label of 1-4 words (Q3), and asks for 15-20 items per call. No temperature is sent
 (both models refuse one; their default sampling, with adaptive thinking, is what the collapse measurement of
 step 8 measures), three independent runs per prompt (needed for step 8), all sent through the Batches API. Every
 call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
@@ -53,7 +53,7 @@ call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
    Korean, Hindi, Turkish (Persian replaced Tagalog, 2026-10-13, on Roger's high-resource guidance).
    Prompt written *in the language* for each of the 30 domains: "list 20
    character traits a native speaker would name here, preferring ones with no single English word".
-   A second call back-translates each to the shortest English phrase plus a gloss and flags
+   A second call back-translates each to the shortest English phrase of at most 4 words plus a gloss and flags
    listicle clichés (hygge, ikigai, Schadenfreude are about things or feelings, not persona
    dispositions). 10 x 30 x 3 runs = 900 generation calls (Sonnet) + 900 translation calls (Haiku).
 4. **(d) Verbalized sampling.** Not a separate corpus but a wrapper applied to (a) and (e): request
@@ -137,7 +137,8 @@ generator workstreams can be compared against.
 
 ## 8. Variants
 
-- **Local generator**: run (a) and (e) on the Mac with a small Qwen or on the RunPod Qwen3-32B.
+- **Local generator** (not adopted for the RunPod Qwen3-32B, Roger 2026-10-13, Q5): run (a) and (e) on
+  the Mac with a small Qwen or on the RunPod Qwen3-32B.
   Free tokens, and every label is by construction known to the target model, but slower and
   more hallucinated; worth it if API spend must be reserved for the filter.
 - **Second model family**: repeat 20% of (a) on an OpenAI model. Different models have different
@@ -159,10 +160,23 @@ generator workstreams can be compared against.
    high-resource.  Recommendation: run (c) on Sonnet 5.5 for the pilot's 20% and on whichever model the
    step-9 test favours for the rest.
 2. Are role-like outputs from (b) worth keeping for the roles queue, or discarded?
+   **Roger (2026-10-13):** Yes.
+   So role-like outputs are kept and routed to the roles seed queue, not discarded.
 3. Multi-word back-translations as labels: accept as-is ("reads the room"), or require a
    single-word English form when one exists?
+   **Roger (2026-10-13):** Multi-word is acceptable: 1-4 words is the guideline.  Part of the point is to
+   find concepts that aren't a single word, at least in English.
+   So the back-translation asks for the shortest English form of at most 4 words, and the scaffold's
+   label field allows 1-4 words in every family (the same limit IPIP's naming parser applies).
 4. Budget split: full grid everywhere (~$13 batched with (c) on Sonnet 5.5, ~$4 on Haiku 5.5; figures of
    2026-10-13, were ~$18 unbatched) or pilot at 20% (~$3 batched) and scale only the families whose
    rarefaction slope is still steep?
+   **Roger (2026-10-13):** Batched for anything over a quick experiment.  Try to keep total expenditure
+   under about $60.
+   So everything past the step-9 model test goes through the Batches API.  The full grid with (c) on
+   Sonnet 5.5 plus the downstream M1 and M3 comes to about $38-50 batched (§ 5), inside the $60, so the
+   budget does not force a smaller grid; the 20% pilot still runs first, because the model test and the (d)
+   subset decide how the rest is run.
 5. Should generation run on the RunPod Qwen itself so knowledge of the label is guaranteed, at
    the cost of GPU hours rather than API dollars?
+   **Roger (2026-10-13):** No.
