@@ -38,7 +38,7 @@ fakes compared bit for bit with a fixture made from the code before this work (8
    `xfail` (open question 1 of the build report).
 3. `require_built` refuses the TODO `gpt_oss` row in both steps (a reading of § 15 Q3).
 4. `cleanup_applied` is not added (the fix batch's recommendation).
-5. `whitening_k_weighted_scatter.py` and `rho_by_layer_simple.py` are not guarded (no data directory;
+5. [`whitening_k_weighted_scatter.py`](../../results_analysis/whitening_k_weighted_scatter.py) and [`rho_by_layer_simple.py`](../../results_analysis/rho_by_layer_simple.py) are not guarded (no data directory;
    their caches come from guarded scripts).
 6. The AGENT_NOTES section has a rule of its own rather than an existing one's marker.
 
