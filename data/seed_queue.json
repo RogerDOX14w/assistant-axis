@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-10-11"
+  "updated": "2026-10-13"
  },
  "entries": [
   {
@@ -58527,6 +58527,144 @@
     ],
     "region": "emotional_temperament",
     "rubric_version": 5
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "disheveled",
+   "label": "disheveled",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means going about with hair uncombed, shirts untucked and clothes rumpled, seldom checking one's appearance and not minding who notices.",
+   "description_notes": "states pass v4 (states_v4_pilot, M3 states_v4_m3_r3): moved out of the states queue as a habitual predisposition under the state's own name; typical duration hours; gloss confirmed by the check (read as predisposition); promoted by name: Untidy dress or hair is a passing look lasting hours or days. Some people habitually appear this way, and ordinary speakers would say a person is always disheveled. | filter: An untidy, unkempt appearance describes how the person looks at the moment, which is a temporary condition of appearance rather than a standing disposition. | senses: has an untidy, unkempt appearance (hair, clothes); looks worn out or rumpled from a passing situation",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "state",
+    "states_pass",
+    "predisposition"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "disheveled#1",
+    "sources": [
+     "censuses/2026-10-08-pilot",
+     "censuses/2026-10-10-tda"
+    ],
+    "region": null,
+    "rubric_version": 5,
+    "states_pass": {
+     "route": "predisposition",
+     "typical_duration": "hours",
+     "batch_id": "states_v4_pilot",
+     "rubric_version": 4,
+     "route_rules": 1
+    }
+   },
+   "also_proposed": [
+    "rumpled"
+   ]
+  },
+  {
+   "stem": "declining",
+   "label": "declining",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "censuses",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means living with failing health or strength year after year: needing more help with ordinary tasks, tiring quickly, and speaking often of what the body can no longer do.",
+   "description_notes": "states pass v4 (states_v4_pilot, M3 states_v4_m3_r3): moved out of the states queue as a lasting condition; typical duration years; gloss confirmed by the scan; promoted by name: Failing health or strength usually worsens over months or years, so the state lasts long. It is a bodily course no one takes up by temperament and it does not organize a whole identity, so it is not a role. | filter: The reading describes health or strength currently failing, a condition the person is in rather than a lasting bodily feature or a standing disposition. | senses: your health or strength is failing; you turn down requests or invitations; your standing or fortunes are falling",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:censuses",
+    "state",
+    "states_pass",
+    "lasting_state"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "declining#1",
+    "sources": [
+     "censuses/2026-10-09-iv-pilot"
+    ],
+    "region": null,
+    "rubric_version": 5,
+    "states_pass": {
+     "route": "lasting",
+     "typical_duration": "years",
+     "batch_id": "states_v4_pilot",
+     "rubric_version": 4,
+     "route_rules": 1
+    }
+   },
+   "also_proposed": []
+  },
+  {
+   "stem": "sulky",
+   "label": "sulky",
+   "entity_type": "trait",
+   "chunk": "gap",
+   "sub_chunk": "wn_clusters",
+   "pairing": "singleton",
+   "partner": null,
+   "partner_exists": false,
+   "arrangement_members": null,
+   "description_draft": "This means going quiet and withdrawn after a slight, answering questions in clipped words, avoiding eye contact, and nursing resentment long after the matter has been settled.",
+   "description_notes": "states pass v4 (states_v4_pilot, M3 states_v4_m3_r3): moved out of the states queue as a habitual predisposition under the state's own name; typical duration hours; gloss confirmed by the check (read as predisposition); promoted by name: A sulk lasts hours or a day or two; people who often sulk are commonly called sulky. | filter: The reading describes a temporary sullen mood ('currently in a sulk'), not a standing disposition, so it is a state. | senses: currently in a sulk, sullenly resentful; habitually moody and prone to sulking",
+   "description": null,
+   "source": null,
+   "tags": [
+    "gap_gen",
+    "source:wn_clusters",
+    "source:censuses",
+    "source:states_pass",
+    "state",
+    "states_pass",
+    "predisposition"
+   ],
+   "status": "candidate",
+   "decision": null,
+   "alternatives": [],
+   "section": "trait-gap generators (2026-09)",
+   "lines": null,
+   "gap_gen": {
+    "registry_key": "sulky#1",
+    "sources": [
+     "wn_clusters/2026-10-08-pilot",
+     "censuses/2026-10-10-tda",
+     "wn_clusters/2026-10-11-full",
+     "states_pass/states_unjudged_r3",
+     "states_pass/states_unjudged_r3"
+    ],
+    "region": null,
+    "rubric_version": 5,
+    "states_pass": {
+     "route": "predisposition",
+     "typical_duration": "hours",
+     "batch_id": "states_v4_pilot",
+     "rubric_version": 4,
+     "route_rules": 1
+    }
    },
    "also_proposed": []
   }
