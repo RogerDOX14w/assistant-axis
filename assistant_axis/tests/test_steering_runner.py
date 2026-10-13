@@ -1786,3 +1786,65 @@ class TestComputeBaselines:
             batch_size=2, max_new_tokens=4,
         )
         assert sentinel.exists()
+
+
+
+# ---------------------------------------------------------------------------
+# Chat-template kwargs from the family table (multi-model plan § 15 Q7)
+# ---------------------------------------------------------------------------
+
+class TestTemplateKwargsFromTheFamily:
+    """Until 2026-10-13 "qwen" in the model or tokenizer name switched
+    thinking off and every other model got no kwargs; now the loaded model's
+    config.model_type (or the name's config.json) picks the row."""
+
+    def test_by_the_loaded_models_config(self):
+        qwen = SimpleNamespace(config=SimpleNamespace(model_type="qwen3"))
+        llama = SimpleNamespace(config=SimpleNamespace(model_type="llama"))
+        assert steering_runner._chat_template_kwargs(qwen) == {"enable_thinking": False}
+        assert steering_runner._chat_template_kwargs(llama, "Qwen/whatever") == {}
+
+    def test_an_unknown_model_type_raises(self):
+        from assistant_axis.model_families import UnknownFamilyError
+        with pytest.raises(UnknownFamilyError):
+            steering_runner._chat_template_kwargs(
+                SimpleNamespace(config=SimpleNamespace(model_type="nope")))
+
+    def test_by_the_name_when_the_model_has_no_type(self, monkeypatch):
+        import assistant_axis.model_families as mf
+        seen = []
+
+        def fake(name):
+            seen.append(name)
+            return mf.FAMILIES["qwen3"]
+
+        monkeypatch.setattr(mf, "family_for_model", fake)
+        steering_runner._template_kwargs_for_name.cache_clear()
+        try:
+            for _ in range(2):
+                assert steering_runner._chat_template_kwargs(
+                    SimpleNamespace(config=SimpleNamespace()), "/local/q3") == {
+                        "enable_thinking": False}
+        finally:
+            steering_runner._template_kwargs_for_name.cache_clear()
+        assert seen == ["/local/q3"]                       # read once per name
+        assert steering_runner._chat_template_kwargs(None, "") == {}
+
+    def test_tokenize_batch_renders_with_the_rows_kwargs(self):
+        seen = []
+
+        class Tok:
+            pad_token = "<pad>"
+            padding_side = "right"
+
+            def apply_chat_template(self, conv, tokenize, add_generation_prompt, **kw):
+                seen.append(kw)
+                return "x"
+
+            def __call__(self, prompts, return_tensors, padding):
+                return {"input_ids": torch.zeros(len(prompts), 1, dtype=torch.long)}
+
+        model = SimpleNamespace(config=SimpleNamespace(model_type="qwen3"))
+        steering_runner._tokenize_batch(Tok(), [[{"role": "user", "content": "q"}]],
+                                        model_name="", model=model)
+        assert seen == [{"enable_thinking": False}]

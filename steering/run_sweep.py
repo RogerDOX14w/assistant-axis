@@ -615,6 +615,33 @@ def _build_cell_dispatcher(
     )
 
 
+def _check_cell(t3d, slot: int, layer: int, metadata: Dict[str, Any], where: str) -> None:
+    """Refuse a (slot, layer) outside the tensor, log the slot's label, and
+    warn when the header is not Qwen3's seven tokens (the multi-model plan,
+    § 5.6, § 15 Q7).  A negative index would count from the end and a slot
+    past the end raised a bare IndexError; on a tree from another model
+    family slot 6 is another token, and the start-strength table
+    (assistant_axis/sweep_start_heuristics.py) was tuned on Qwen3 cells."""
+    from assistant_axis.axis import slot_labels
+    from assistant_axis.model_families import QWEN3_NON_THINKING_HEADER_TOKENS
+    n_slots, n_layers = int(t3d.shape[0]), int(t3d.shape[1])
+    labels = slot_labels(metadata)
+    if not 0 <= slot < n_slots:
+        raise ValueError(f"{where}: slot {slot} is out of range: the vector has {n_slots} "
+                         f"slot(s), {labels}")
+    if not 0 <= layer < n_layers:
+        raise ValueError(f"{where}: layer {layer} is out of range: the vector has {n_layers} "
+                         f"layer(s), 0..{n_layers - 1}")
+    label = labels[slot] if slot < len(labels) else f"slot {slot}"
+    logger.info(f"{where}: steering slot {slot} ({label!r}), layer {layer}")
+    header = list((metadata or {}).get("header_tokens") or [])
+    if header != list(QWEN3_NON_THINKING_HEADER_TOKENS):
+        logger.warning(
+            f"{where}: the vector's header slots are {header!r}, not Qwen3's seven; the "
+            f"start-strength table (sweep_start_heuristics) was tuned on Qwen3 cells, so "
+            f"set sweep.start_strength_multiplier_steps for this model")
+
+
 def _load_axis_for_cell(axis_source: Dict[str, Any],
                         slot: int, layer: int):
     """Load and extract a steering vector for one cell.
@@ -622,7 +649,8 @@ def _load_axis_for_cell(axis_source: Dict[str, Any],
     Returns a 1-D torch.Tensor of shape (hidden,).  Workers are expected
     to move it to their model's device before passing to run_steering_cell.
     The axis-loaders themselves use atomic_io.torch_load_with_retry, so
-    transient NFS short-reads are retried automatically.
+    transient NFS short-reads are retried automatically.  A slot or layer
+    outside the vector raises ``ValueError`` (:func:`_check_cell`).
     """
     from assistant_axis.axis import load_axis_with_metadata, load_role_vector
 
@@ -633,19 +661,21 @@ def _load_axis_for_cell(axis_source: Dict[str, Any],
 
     if src_type == "axis":
         axis_path = axis_source["axis_path"]
-        axis_raw, _ = load_axis_with_metadata(axis_path)
+        axis_raw, meta = load_axis_with_metadata(axis_path)
         axis_raw = _ensure_3d(axis_raw)
+        _check_cell(axis_raw, slot, layer, meta, str(axis_path))
         return axis_raw[slot, layer].clone()
 
     if src_type == "role_transplant":
         vectors_dir = Path(axis_source["vectors_dir"])
         role_from = axis_source["role_from"]
         role_to = axis_source["role_to"]
-        v_from, _ = load_role_vector(str(vectors_dir / f"{role_from}.pt"))
+        v_from, meta = load_role_vector(str(vectors_dir / f"{role_from}.pt"))
         v_to, _ = load_role_vector(str(vectors_dir / f"{role_to}.pt"))
         v_from = _ensure_3d(v_from)
         v_to = _ensure_3d(v_to)
         diff = v_to - v_from
+        _check_cell(diff, slot, layer, meta, f"{role_from} -> {role_to}")
         return diff[slot, layer].clone()
 
     if src_type == "header_replacement":

@@ -634,3 +634,42 @@ class TestAxisDtypeAtLoad:
 
         v = mod._axis_vector_for_model({"type": "axis", "axis_path": str(path)}, 0, 1, Bare())
         assert v.dtype == torch.float16
+
+
+class TestCellGuard:
+    """The steering slot guard of the multi-model plan (§ 5.6, § 15 Q7): a
+    slot or layer outside the axis is refused, the slot's label is logged,
+    and an axis whose header is not Qwen3's seven warns that the
+    start-strength table is Qwen's."""
+
+    SEVEN = ["<|im_start|>", "assistant", "\n", "<think>", "\n\n", "</think>", "\n\n"]
+
+    @staticmethod
+    def _axis(tmp_path, n_slots, header):
+        import torch
+        p = tmp_path / "axis.pt"
+        meta = {"header_tokens": header} if header is not None else {}
+        torch.save({"axis": torch.zeros(n_slots, 4, 5), "metadata": meta}, p)
+        return {"type": "axis", "axis_path": str(p)}
+
+    def test_a_slot_past_the_end_or_negative_is_refused(self, mod, tmp_path):
+        src = self._axis(tmp_path, 3, ["<start_of_turn>", "model"])
+        for slot, layer in ((6, 1), (-1, 1), (0, 4)):
+            with pytest.raises(ValueError, match="out of range"):
+                mod._load_axis_for_cell(src, slot, layer)
+
+    def test_the_label_is_logged_and_qwen3_does_not_warn(self, mod, tmp_path, caplog):
+        import logging
+        src = self._axis(tmp_path, 8, self.SEVEN)
+        with caplog.at_level(logging.INFO, logger="steering_sweep"):
+            mod._load_axis_for_cell(src, 6, 2)
+        assert "steering slot 6 ('</think>'), layer 2" in caplog.text
+        assert "not Qwen3's seven" not in caplog.text
+
+    def test_another_header_warns_about_the_start_table(self, mod, tmp_path, caplog):
+        import logging
+        src = self._axis(tmp_path, 4, ["<start_of_turn>", "model", "\n"])
+        with caplog.at_level(logging.INFO, logger="steering_sweep"):
+            mod._load_axis_for_cell(src, 2, 0)
+        assert "steering slot 2 ('model')" in caplog.text
+        assert "not Qwen3's seven" in caplog.text and "start_strength_multiplier_steps" in caplog.text

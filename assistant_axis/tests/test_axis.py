@@ -259,3 +259,33 @@ class TestAxisNormPerLayer:
 
         for norm in norms:
             assert norm == 0
+
+
+class TestRequireHeaderLayout:
+    """The slot-layout guard of the multi-model plan (§ 5.6, § 9 test 10):
+    the scripts whose default slot or slot names are Qwen3's refuse another
+    layout.  Each script's call is reviewed in its diff, not tested here."""
+
+    SEVEN = ["<|im_start|>", "assistant", "\n", "<think>", "\n\n", "</think>", "\n\n"]
+
+    def test_passes_on_the_seven(self):
+        from assistant_axis.axis import require_header_layout
+        assert require_header_layout({"header_tokens": list(self.SEVEN)}, where="x.py") is None
+
+    def test_raises_on_another_header_naming_the_script(self):
+        from assistant_axis.axis import SlotLayoutError, require_header_layout
+        with pytest.raises(SlotLayoutError) as e:
+            require_header_layout({"header_tokens": ["a", "b"]}, where="whitening_k_sweep.py")
+        msg = str(e.value)
+        assert msg.startswith("whitening_k_sweep.py: ")
+        assert "['a', 'b']" in msg and "</think>" in msg and "pass --slot explicitly" in msg
+
+    def test_raises_on_metadata_without_a_header(self):
+        from assistant_axis.axis import SlotLayoutError, require_header_layout
+        for meta in (None, {}, {"extract_headers": False}):
+            with pytest.raises(SlotLayoutError):
+                require_header_layout(meta, where="w")
+
+    def test_an_expected_layout_can_be_given(self):
+        from assistant_axis.axis import require_header_layout
+        require_header_layout({"header_tokens": ["a", "b"]}, expected=("a", "b"))

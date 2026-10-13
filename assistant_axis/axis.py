@@ -47,7 +47,7 @@ Example:
 
 import torch
 import numpy as np
-from typing import List, Union, Optional
+from typing import List, Optional, Sequence, Union
 
 
 def compute_axis(
@@ -305,6 +305,41 @@ def slot_labels(metadata: Optional[dict]) -> List[str]:
     if not metadata or "header_tokens" not in metadata:
         return ["body-mean"]
     return ["body-mean"] + list(metadata["header_tokens"])
+
+
+class SlotLayoutError(ValueError):
+    """A tree whose header slots are not the layout a script's slot numbers
+    or slot names assume."""
+
+
+def require_header_layout(
+    metadata: Optional[dict],
+    expected: Optional[Sequence[str]] = None,
+    where: str = "",
+) -> None:
+    """Refuse a tree whose header tokens are not ``expected`` (default: the
+    seven of Qwen3's non-thinking header, the 8slot layout,
+    ``assistant_axis.model_families.QWEN3_NON_THINKING_HEADER_TOKENS``).
+
+    For the scripts whose default slot (``DEFAULT_SLOT = 6``, the
+    ``</think>`` position; ``7`` for the PC round trip) or whose slot names
+    are Qwen3's: on a tree with another header (another model family, the
+    multi-model plan of 2026-10-13) such a number points at another token,
+    silently, or past the end.  A script calls this only when its default or
+    its names are used, so an explicit ``--slot`` on another tree still works
+    (and :func:`slot_labels` names the slot).  Raises
+    :class:`SlotLayoutError` naming ``where``, the tree's header and the
+    expected one."""
+    if expected is None:
+        from .model_families import QWEN3_NON_THINKING_HEADER_TOKENS
+        expected = QWEN3_NON_THINKING_HEADER_TOKENS
+    got = list((metadata or {}).get("header_tokens") or [])
+    if got != list(expected):
+        raise SlotLayoutError(
+            f"{where + ': ' if where else ''}this tree's header slots are {got!r} "
+            f"({len(got)} tokens), not the {len(expected)} the script's slot numbers and names "
+            f"assume ({list(expected)!r}, Qwen3's 8-slot layout); pass --slot explicitly to "
+            f"use another layout")
 
 
 def aggregate_role_vectors(

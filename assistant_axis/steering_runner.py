@@ -35,6 +35,7 @@ K responses are all on disk and regenerates one with responses missing
 """
 from __future__ import annotations
 
+import functools
 import json
 import logging
 import time
@@ -303,21 +304,45 @@ def _build_conversations(
     ]
 
 
+@functools.lru_cache(maxsize=None)
+def _template_kwargs_for_name(model_name: str) -> Tuple[Tuple[str, Any], ...]:
+    from .model_families import family_for_model
+    return tuple(sorted(family_for_model(model_name).template_kwargs.items()))
+
+
+def _chat_template_kwargs(model=None, model_name: str = "") -> Dict[str, Any]:
+    """The chat-template kwargs of the model's family row
+    (assistant_axis/model_families.py; the multi-model plan § 15 Q7): by the
+    loaded model's ``config.model_type``, else by ``model_name``'s
+    ``config.json`` (read once per name); none when neither is known (a test
+    model without a config, and no name).  An unknown ``model_type`` raises
+    ``UnknownFamilyError``.  Until 2026-10-13 a substring test ("qwen" in the
+    model or tokenizer name) switched Qwen's thinking off and gave every
+    other model no kwargs."""
+    model_type = getattr(getattr(model, "config", None), "model_type", None)
+    if model_type:
+        from .model_families import family_for_model_type
+        return dict(family_for_model_type(model_type).template_kwargs)
+    if model_name:
+        return dict(_template_kwargs_for_name(model_name))
+    return {}
+
+
 def _tokenize_batch(
     tokenizer,
     conversations: Sequence[Sequence[Dict[str, str]]],
     *,
     model_name: str = "",
+    model=None,
 ):
     """Apply chat template + tokenize a list of conversations as a left-padded batch.
 
     Left-padding is required for `model.generate(...)`: with right-padding,
     generated tokens would start at different absolute positions for
-    each batch element, producing garbled output.
+    each batch element, producing garbled output.  The template kwargs are
+    the model's family row's (:func:`_chat_template_kwargs`).
     """
-    chat_template_kwargs: Dict[str, Any] = {}
-    if "qwen" in model_name.lower() or "qwen" in getattr(tokenizer, "name_or_path", "").lower():
-        chat_template_kwargs["enable_thinking"] = False
+    chat_template_kwargs = _chat_template_kwargs(model, model_name)
 
     prompts = [
         tokenizer.apply_chat_template(
@@ -698,7 +723,7 @@ def compute_baselines(
         batch_questions = [q for _, q in batch]
         batch_idx = [i for i, _ in batch]
         conversations = _build_conversations(persona_system_prompt, batch_questions)
-        inputs = _tokenize_batch(tokenizer, conversations, model_name=model_name)
+        inputs = _tokenize_batch(tokenizer, conversations, model_name=model_name, model=model)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         prompt_len = inputs["input_ids"].shape[1]
 
@@ -826,7 +851,8 @@ def run_steering_cell(
         If None, a :class:`NoOpJudgeDispatcher` is used (Phase 1
         default).  Phase 2 callers will pass a real dispatcher.
     model_name
-        Used to detect Qwen-family chat-template kwargs (enable_thinking).
+        Used to find the family row's chat-template kwargs when the model has
+        no ``config.model_type`` (assistant_axis/model_families.py).
         Optional.
     scan_mode
         ``"bidirectional"`` (the new 2026-05-14 default) drives a
@@ -1171,7 +1197,7 @@ def run_steering_cell(
             any_progress_this_strength = True
 
             batch_convs = [c for _, _, c in batch_items]
-            inputs = _tokenize_batch(tokenizer, batch_convs, model_name=model_name)
+            inputs = _tokenize_batch(tokenizer, batch_convs, model_name=model_name, model=model)
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
             prompt_len = inputs["input_ids"].shape[1]
 
@@ -1379,7 +1405,7 @@ def _generate_and_dispatch_strength(
         any_progress = True
 
         batch_convs = [c for _, _, c in batch_items]
-        inputs = _tokenize_batch(tokenizer, batch_convs, model_name=model_name)
+        inputs = _tokenize_batch(tokenizer, batch_convs, model_name=model_name, model=model)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         prompt_len = inputs["input_ids"].shape[1]
 
