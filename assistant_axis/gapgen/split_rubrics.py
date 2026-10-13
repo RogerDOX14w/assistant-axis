@@ -86,7 +86,9 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: (``extract.py``) and the persona-enactability gate (``gate.py``), each first pinned as version 1.  Since
 #: 2026-10-11 the IPIP generator's two cluster-naming prompts (workstream 7, ``.../ipip/naming.py``), blind and
 #: hinted, first pinned as version 1: they were pinned in that module's own code until QUESTIONS 48 part 3, where
-#: Roger moved them here so that an edit cannot escape ``rubric_pins.py check``.
+#: Roger moved them here so that an edit cannot escape ``rubric_pins.py check``.  Since 2026-10-13 the structural
+#: generators' two calls (workstream 9, ``.../structural/``): the operators call and the classical modernise call,
+#: each first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -95,6 +97,8 @@ GENERATOR_FILES: dict[str, str] = {
     "enactability_gate": "enactability_gate.md",
     "ipip_naming_blind": "ipip_naming_blind.md",
     "ipip_naming_hinted": "ipip_naming_hinted.md",
+    "structural_operators": "structural_operators.md",
+    "structural_modernise": "structural_modernise.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.
