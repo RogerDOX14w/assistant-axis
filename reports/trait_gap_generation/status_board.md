@@ -47,8 +47,8 @@ generators counts under both.
 | 15 | M2 metric calibration | **8, finished** | nothing |
 | 10 | [M3 novelty check](./coding_plan_m3.md) | **8, finished** (rule set 3) | nothing.  Optional lever for Roger: the cosine floor (0.25) |
 | R1 | [Review graph and review app](./coding_plan_review.md) | **8, finished**; the all-batches graph built 2026-10-13 | nothing; an incremental build as each new batch lands (structural, masked LM, base model, the GG5 import) |
-| 11 | [Lexical recall insurance](./coding_plan_11_novelty_ensemble.md) | **4** | Roger: plan review (his edits to the file are in progress), two decisions |
-| 12 | [Novelty in persona space](./coding_plan_12_persona_space.md) | **4** | Roger: plan review, two decisions |
+| 11 | [Lexical recall insurance](./coding_plan_11_novelty_ensemble.md) | **5** (reviewed 2026-10-13; being built) | the build; then the sweep (about $2.6) and Roger's blind marks on up to 40 pairs before the integration |
+| 12 | [Novelty in persona space](./coding_plan_12_persona_space.md) | **5** (reviewed 2026-10-13; being built) | the build; then embeddings and the disagreement readings (about $2) |
 | — | [Noun normalization](./coding_plan_noun_normalization.md) | **4** | Roger: whether it is still worth building (its gain is small), then four decisions |
 
 ## Evaluation
