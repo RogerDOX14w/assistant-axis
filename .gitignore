@@ -87,6 +87,11 @@ Thumbs.db
 # The structural generators' tracked tables (operator table, position table, classical_modern, evaluation.json,
 # mismatches) are snapshotted to .bak.<UTC> before a change; the snapshots stay local (coding_plan_09).
 /data/candidates/structural/*.bak.*
+# Plan 12 (workstream 12, persona space): the fitted model (63 MB, rebuilt by `persona_novelty.py fit`) and the
+# predicted vectors (float16) stay local; every other output under data/candidates/persona/ is tracked.  A directory
+# moved aside before a rerun (<dir>.bak.<UTC>) stays local too.
+/data/candidates/persona/**/*.npz
+/data/candidates/persona/**/*.bak.*
 
 # Trait rubric V2 experiments (2026-09/10): the reports, plans, rubric texts,
 # samples and usage records are committed; the bulky per-file intermediates

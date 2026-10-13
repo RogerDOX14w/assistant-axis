@@ -332,3 +332,24 @@ def test_new_record_schema():
     for k in ("freq", "wordnet", "filter", "novelty", "holding", "matches_existing", "heldout_hit",
               "seed_queue_stem", "gloss"):
         assert r[k] is None
+
+
+def test_blocks_enumerated():
+    """The blocks ``merge_block`` and ``update_many`` merge (plan 12 decision 1a added ``persona``, 2026-10-13): a
+    new block is a platform edit, so this list changes only on purpose.  ``persona`` is not a row field of a new
+    record (the block is optional), and merging it leaves ``novelty`` as it was."""
+    from assistant_axis.gapgen.registry import BLOCKS, ROW_FIELDS
+    assert BLOCKS == ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona")
+    assert "persona" not in ROW_FIELDS and "persona" not in new_record("calm")
+
+
+def test_persona_block_merges_without_touching_novelty(reg_path):
+    reg = Registry(reg_path)
+    r = new_record("calm")
+    r["novelty"] = {"decision": "new", "run_id": "m3"}
+    reg.write([r])
+    reg.merge_block("calm#1", "persona", {"flag": "ordinary", "batch_id": "b1"})
+    reg.merge_block("calm#1", "persona", {"reading": None})
+    got = reg.get("calm#1")
+    assert got["persona"] == {"flag": "ordinary", "batch_id": "b1", "reading": None}
+    assert got["novelty"] == {"decision": "new", "run_id": "m3"}
