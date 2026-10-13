@@ -92,7 +92,8 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
 | **Phrase-only labels are accepted** ("harsh toward self", "kind to animals" is the precedent); `has_common_word` is recorded on every item as information and is never a filter. | Roger, 2026-10-12 | plan 09 § 9.1 |
 | **Retarget gets three principal targets, the user, the operator and the developer, for principal-target traits only**; their non-null outputs are listed apart for the AI-identity sub-family sign-off ([QUESTIONS 67 and 78](./QUESTIONS.md)) before promotion.  **Principal-target traits are staged by `alignment_score` in [corpus_regions.json](../../data/candidates/corpus_regions.json)** (decided 2026-10-13): **stage 1 is the 108 traits at score 3**, among them [obedient](../../data/traits/instructions/obedient.json), [rebellious](../../data/traits/instructions/rebellious.json), [scheming](../../data/traits/instructions/scheming.json) and [unhelpful](../../data/traits/instructions/unhelpful.json) of the AI-agent region and [sycophantic](../../data/traits/instructions/sycophantic.json), [honest](../../data/traits/instructions/honest.json), [manipulative](../../data/traits/instructions/manipulative.json) and [deferential](../../data/traits/instructions/deferential.json) from other regions; stage 2 (the 75 at score 2) and stage 3 (the 317 at score 1) run only on Roger's word after stage 1's yield (the non-null share per principal target, the M1 and M3 kept share, and how many he signs off).  This replaces the plan's first reading, the 10 traits of the `alignment_ai_agent` region, half of which score 0-1 and which left out sycophantic, Roger's own example. | Roger, 2026-10-12: "yes, for the alignment region"; 2026-10-13: "Let's start with the 108 score 3 ones, then decide whether to go on to score 2 and even score 1, depending on yield." | plan 09 § 9.2, § 3.4 |
 | **`position` annotations go to a side table** under `data/candidates/structural/`, never into a trait file's `arrangement`; **TODO (Roger): review promotion of the side table into `arrangement` once the pairing review is done.** | Roger, 2026-10-12 | plan 09 § 9.3, § 7 |
-| **One model, Haiku 5.5** (`claude-haiku-5-5`, $0.10 / $0.50 per MTok in [judge_pricing.py](../../assistant_axis/judge_pricing.py)); a second model only if the stability test (§ 8, test 6) fails, and then Roger's call.  Haiku 5.5 refuses a `temperature` ([llm.py](../../assistant_axis/gapgen/llm.py) leaves it out), so the stability test is the measure of its sampling noise. | Roger, 2026-10-12 | plan 09 § 9.4, § 6.5-6 |
+| **One model, Haiku 5.5** (`claude-haiku-5-5`, $0.10 / $0.50 per MTok in [judge_pricing.py](../../assistant_axis/judge_pricing.py)); a second model only if the stability test (§ 8, test 6) fails, and then Roger's call.  Haiku 5.5 refuses a `temperature` ([llm.py](../../assistant_axis/gapgen/llm.py) leaves it out), so the stability test is the measure of its sampling noise.  **Superseded in part on 2026-10-13 by the next row**: stability is reported, not a gate; Haiku 5.5 stays the model and the rubric stays at version 1. | Roger, 2026-10-12 | plan 09 § 9.4, § 6.5-6 |
+| **Three samples per trait, combined by union; stability reported, never a gate** (decided 2026-10-13, after the first paid steps: Haiku 5.5's stability median was 0.29 and Sonnet 5.5 refused the prompt, [acceptance_09](./acceptance_09_structural_generators.md) § 13).  `operators --samples 3` (the default for the full pass; 1 still possible) asks each trait three times, independently, the answer cache keyed on the sample index as well as the prompt hash.  Per trait and slot the samples' labels are united, deduplicated by normalised stem (`renamed_from`-aware; separator-blind in M3's blind form); each kept label carries its **support** (1-3 samples) and every sample's gloss, the first sample's gloss being the candidate's `gloss_hint`; **no label is dropped for low support**, an all-empty slot stays empty, near-synonyms with different stems stay separate rows (M3 and the review graph group them).  Position: every sample's and the majority.  Support travels into the operator table (`sources[].support`, `max_support`) and the readouts, and gates, filters and ranks nothing.  `stability` is a reported diagnostic (free between a run's own samples; over the slots either sample answered, so two empty answers are no agreement), with no exit 3; the null-rate gate stays, over the three samples.  The two Sonnet 5.5 stability runs are marked void (`void.json`, skipped by the readouts and the recorded-output checks).  Sonnet 5.5 is a fallback only if Haiku's combined output proves poor. | Roger, 2026-10-13: "Haiku and Sonnet 5.5 are run at T=1. Stability is not expected, and we shouldn't gate on it, or design assuming it, or throw answers away because the three weren't unanimous. I'm instead leaning towards running three times and intelligently combining their answers. For something that returns a word, that might be making a deduped list of them." | this plan, § 7 and § 10 as amended |
 | **The VIA over/under pass is in**, gated: the 24 strengths with their overuse and underuse names are typed from Niemiec (2019) and **verified against the paper before the A run** (§ 9 task 2); the survey itself is copyrighted and not used. | Roger, 2026-10-12 | plan 09 § 9.5, § 2 |
 | Classical tables **hand-typed**, not recited by a model (faithful; 30 minutes of Roger's time once). | plan 09 § 8, § 5 | plan 09 |
 | **B's call shape is per trait** (one call, all five operators, reasoning first).  The per-operator batched call and the pair-level call of plan 09 § 8 are variants for later: the pilot's `position` answers on recorded pairs decide whether the pair-level call is worth building (§ 10). | the § 6 thresholds are written for per-trait output; one shape to pilot | this plan (pre-registered, § 12) |
@@ -427,8 +428,9 @@ sets no gate but "expect > 80%" for pair recovery); parse rate, the null-rate ba
   --scheme via` refuses while unverified; `report` renders a fixture run with the three files.
 - **Acceptance on recorded outputs** (`test_gapgen_structural_acceptance.py`, skips while absent): parse rate
   >= 0.99 in every run's responses (hard); the null-rate run's retarget and remode non-null shares inside 5-40%
-  (hard for the pilot gate; outside it the run is a prompt-revision round, § 10); stability median Jaccard >= 0.5
-  on 30 traits (hard; failing it is Roger's model decision); `usage.json` beside every run with nonzero cost;
+  (hard for the pilot gate; outside it the run is a prompt-revision round, § 10); the stability record present
+  with its fields (reported, not a gate since 2026-10-13); a run marked void skipped; `usage.json` beside every run
+  with nonzero cost;
   `evaluation.json` carries pair recovery (reported against the > 80% expectation), structure recovery, the
   hold-out recall on the 96 by operator, the rejected names regenerated, and the accepted and candidate lines
   apart, and the principal-target count equals the items of
@@ -475,8 +477,9 @@ prompt verbatim.  Each task ends with the § 8 commands.
 6. `postprocess.py`, `sidetable.py`, `evaluate.py`; CLI `postprocess`, `side-table`.  Test: postprocess,
    sidetable, evaluate.  Add glossary entries (Aristotelian mean, position, the five operators, label-set
    Jaccard, null rate, and, 2026-10-13, net-new row and net-new kept share) to [glossary.md](./glossary.md).
-7. **Stability run** (§ 10, second gate): `stability` on 30 traits, two runs (≈ $0.02).  Median Jaccard >= 0.5:
-   on.  Below: stop, numbers to Roger (n = 2 samples by design, or a second model, his call).
+7. **Stability run** (§ 10): `stability` on 30 traits, two runs (≈ $0.02).  ~~Median Jaccard >= 0.5: on.  Below:
+   stop, numbers to Roger~~ (superseded 2026-10-13, § 1: stability is reported, never a gate; the full pass asks
+   three samples a trait and unites them).
 8. `submit.py`, `report.py`; CLI `submit`, `report`.  Test: submit, CLI.
 9. **A run**: `modernise` on every verified scheme (≈ $0.02), `postprocess`, then `submit --all` of the classical
    rows together with the pilot's operator rows as run `<date>-pilot` (≈ 350 rows, ≈ $6 live downstream, an
@@ -503,9 +506,9 @@ one prompt revision and a re-pilot.  Also printed: the `position` answers of the
 two poles of a pair land at deficiency and excess, or mean and vice?), which decides whether the pair-level
 call variant is worth a later task; the over-/under-/too-/non-X rejection count; parse rate.
 
-**Stability** (task 7, 30 traits twice, ≈ $0.02): median label-set Jaccard >= 0.5, the distribution and the
-per-operator figures.  This pilot and the null rate together are the tested decision that Haiku 5.5 is the
-model (Roger, 2026-10-12).
+**Stability** (task 7, 30 traits twice, ≈ $0.02): median label-set Jaccard, the distribution and the per-operator
+figures, **reported, not a gate** (2026-10-13, § 1; the 0.5 bar of 2026-10-12 is withdrawn: at temperature 1 the
+samples are expected to differ, and the full pass unites three of them).
 
 **Yield-per-dollar readout** (task 9, on the pilot submission; the figures that size the wave).  Headline
 (2026-10-13): **the already-registered share**, by any generator, and how many of those rows M1 and M3 had
@@ -579,6 +582,7 @@ is assumed (plan 09 § 3.5's "900 cached" does not change the figure).
 | B, null-rate pilot | 20 | (1,200, 550) | ≈ $0.01 |
 | B, stability (30 x 2) | 60 | (1,200, 550) | ≈ $0.02 |
 | B, full pass (932 traits; the 108 principal-target traits +200 out) | 932 | (1,200, 550) | **≈ $0.37** |
+| B, full pass at three samples (2026-10-13; measured: about 1,500 output tokens and $0.0008 a call) | 2,796 | (1,740, 1,523) | **≈ $2.2 measured rate; $2.62 with no cache hit** |
 | gloss embeddings for the recovery checks (~2,500 glosses) | cached | ~100k tokens at $0.13/MTok | ≈ $0.01 |
 | **generator total, one pass of everything** | | | **≈ $0.45** |
 

@@ -362,3 +362,69 @@ review is done**, so that the table is read against the pairs it would change.
     n of N" and fail (exit 3) when fewer than 90% of the sampled traits have the answers the gate reads
     (`evaluate.answered_coverage`, `MIN_ANSWERED_SHARE`); `stability_jaccard` records `n_sampled` and `coverage`.
   - **B3**: the dry-run estimate line said "at Haiku 5.5 rates" whatever `--model` was; it names the model used.
+
+## 14. Roger's decision (2026-10-13): three samples per trait, combined by union; stability reported, never a gate
+
+Roger: "Haiku and Sonnet 5.5 are run at T=1.  Stability is not expected, and we shouldn't gate on it, or design
+assuming it, or throw answers away because the three weren't unanimous.  I'm instead leaning towards running three
+times and intelligently combining their answers.  For something that returns a word, that might be making a deduped
+list of them."  The model stays Haiku 5.5 and [structural_operators.md](./rubrics/structural_operators.md) stays at
+version 1 (Haiku answers it, so the version-2 question of § 13 is moot); Sonnet 5.5 is a fallback only if Haiku's
+combined output proves poor.  The decision is recorded in the decisions table of
+[coding_plan_09_structural_generators.md](./coding_plan_09_structural_generators.md) and the
+[glossary](./glossary.md#samples-and-support).  As built (worktree `plan09-union`):
+
+- **Three samples per trait.**  `operators --samples 3` is the default (`--samples 1` still works; `null-rate`
+  takes it too).  The samples are independent calls: the answer cache keys on (trait, prompt hash, model, **sample
+  index**), every response records its `sample`, and a resume reuses each recorded sample and sends only the
+  missing ones.  A record made before samples existed counts as sample 1, so the null-rate pilot's 20 answers are
+  reused as the first of three.
+- **Combining** ([combine.py](../../assistant_axis/gapgen/generators/structural/combine.py)): per trait and slot
+  the union of the samples' labels, deduplicated by normalised stem (the table's folding, `renamed_from`-aware,
+  separator-blind in M3's blind form, so `fool-hardy` and `foolhardy` are one label).  Each kept label carries its
+  **support** (how many samples named it), its samples and every sample's gloss; the first sample's gloss becomes
+  the candidate's `gloss_hint`.  No label is dropped for low support; a slot all samples left empty stays empty;
+  near-synonyms with different stems stay separate rows.  Position: every sample's and the majority (None when no
+  value has more than half).  The principal-target slots combine the same way.
+- **Support** goes into the operator table (`sources[].support`, `samples`, `glosses`, `n_samples`; the row's
+  `max_support`), the side table (each blind opposite with its support; the negative-label check matches when any
+  of them is the recorded label, `recorded_support` saying how many samples named it), `evaluation.json`
+  (`support`: items by support and by operator), `report.md`, `roger_sample.md` and `ai_identity_subfamily.md`.
+  The candidate's `source_ref` keeps its documented form; a later wave can order by the table's support.  It gates,
+  filters and ranks nothing.  The readouts say "union of 3 samples" wherever they show such a count.
+- **Stability** is reported, never a gate: `stability --run-id R` (free) gives the agreement between a run's own
+  samples, and `stability --run-id R --against R2` (paid) the two-run figure; both over the slots either answer
+  filled, so two empty answers no longer count as agreement, a trait with both empty left out and counted
+  (`n_both_empty`); per operator the mean slot agreement.  No exit 3.  `postprocess` writes the within-run figure
+  into `evaluation.json` (`sample_agreement`) at no cost.  The **null-rate gate stays**, its non-null shares read
+  over every sample and its coverage over every (trait, sample) call.
+- **Void runs** ([`void.json`](../../assistant_axis/gapgen/generators/structural/__init__.py): `reason`, `date`,
+  `by`; `structural_generator.py void --run-id R --reason TEXT --by WHO`): `postprocess`, `side-table`,
+  `stability` and `report` skip or refuse a void run, and the recorded-output checks leave it out.  The two Sonnet
+  5.5 runs ([2026-10-13-stab-sonnet-a](../../data/candidates/runs/structural/2026-10-13-stab-sonnet-a/) and
+  [-b](../../data/candidates/runs/structural/2026-10-13-stab-sonnet-b/), 107 of 116 calls refused) get their
+  markers from the coordinator in the main checkout.
+- **The estimate** now uses the measured output (about 1,500 tokens a call, Haiku 5.5's thinking included; the
+  plan's 550 was the answer alone).
+
+**The recorded Haiku 5.5 runs under the new measures** (recomputed free from
+[2026-10-13-stab-a](../../data/candidates/runs/structural/2026-10-13-stab-a/) and
+[2026-10-13-stab-b](../../data/candidates/runs/structural/2026-10-13-stab-b/), 30 traits): the two-run median
+Jaccard is 0.27 over the slots either answer filled (0.29 under the old measure); the mean slot agreement is 0.60
+for `opposite` (30 slots), 0.35 for `retarget` (43), 0.28 for `excess` (18), 0.27 for `deficiency` (15) and 0.21 for
+`remode` (29); the per-operator medians of 1.0 in § 13 came from counting two empty slots as agreement.  The runs
+gave 112 and 109 labels; their union has 173 (48 named by both, 125 by one), so a second sample adds about 55%.
+
+**Dry run of the full pass at three samples**: 932 traits x 3 = **2,796 calls**, (1,740 in, 1,523 out) tokens a
+call with no cache hit = **$2.62**; at the measured $0.0008 a call (the recorded runs read most of the system prompt
+from the cache), **about $2.2**.  Live, under the $20 line; the default cap is `--budget-usd 6` (the first-of-kind
+rule, 1.5 x estimate + $2).  The paid steps of § 8 change: step 2's stability gate is gone (stability can be read
+free from the full pass's own samples), and step 7 becomes `operators --run-id <R> --all` (three samples by default)
+then `postprocess`, `side-table` and `stability --run-id <R>` (free).
+
+**Changed test expectations** (all in this workstream's own tests, because the decision changed what they assert):
+the two-run stability test (no gate: exit 0 with the coverage reported), the null-rate gate test (coverage over 18
+(trait, sample) calls for 6 traits), the planted stability test (per-operator agreement over answered slots; two
+empty answers left out instead of scoring 1.0), the run-loop tests (`samples` and `errors` keyed by (trait,
+sample) in place of `replies`), the estimate test (the measured 1,500 output tokens) and the recorded-output
+stability check (fields present, no median bar).

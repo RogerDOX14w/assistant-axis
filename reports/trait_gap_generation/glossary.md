@@ -550,10 +550,19 @@ it does not try.
 
 <a id="label-set-jaccard"></a>
 ### Label-set Jaccard
-How alike two runs of the same call are for one trait: the labels both runs gave (as stems) divided by
-the labels either gave, from 0 (nothing in common) to 1 (the same labels).  Haiku 5.5 takes no
-temperature setting, so the stability test runs 30 traits twice and reads the median; 0.5 or more is
-the bar.
+How alike two answers to the same call are for one trait: the labels both gave, slot by slot (as
+stems), divided by the labels either gave, from 0 (nothing in common) to 1 (the same labels), counted
+only over the slots at least one of them filled (two empty answers are not agreement).  Haiku 5.5 runs
+at its default temperature of 1, so the answers are expected to differ: since 2026-10-13 the figure is
+**reported, never a gate** (Roger), between two runs or between a run's own samples.
+
+<a id="samples-and-support"></a>
+### Samples, the union, and support
+Since 2026-10-13 (Roger) the operators call asks each trait three times, independently (three
+*samples*), and keeps the **union** of their answers: per slot, every label any sample gave, a label
+given twice in different spellings (`fool-hardy`, `foolhardy`) kept once.  A label's **support** is how
+many of the samples gave it (1 to 3).  Nothing is dropped for low support; support is shown in the
+readouts ("union of 3 samples") and kept in the table, so a later wave could order by it.
 
 <a id="net-new"></a>
 ### Net-new row, net-new kept share
