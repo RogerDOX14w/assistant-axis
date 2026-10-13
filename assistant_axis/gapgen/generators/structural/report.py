@@ -34,11 +34,12 @@ from . import GENERATOR
 from .submit import KEPT_SHARE_ASSUMED, KEPT_TARGET_DEFAULT, REVIEW_TERMS_PER_HOUR_PLAN, estimate_downstream_usd
 
 #: The readout's order (decision 1): what B is expected to be good at first.
-KIND_ORDER: tuple[str, ...] = ("pair_completion", "degree_filler", "opposite", "classical", "retarget",
-                               "principal_retarget", "remode")
+KIND_ORDER: tuple[str, ...] = ("pair_completion", "degree_filler", "triangle_corner", "opposite", "classical",
+                               "retarget", "principal_retarget", "remode")
 KIND_NAMES: dict[str, str] = {
     "pair_completion": "pair completions (the opposite of a non-X or singleton trait)",
     "degree_filler": "degree fillers (the excess and deficiency of a trait)",
+    "triangle_corner": "the opposites of mean traits, read as triangle corners (Roger, 2026-10-13: not pairs)",
     "opposite": "opposites of traits already paired or unclassified",
     "classical": "classical rows (generator A)",
     "retarget": "retargeted dispositions",
@@ -260,7 +261,9 @@ def render_report(fig: Mapping, *, trait_prefix: str = "../../../../traits/instr
         pr_ = ev.get("pair_recovery") or {}
         if pr_:
             L.append(f"- Pair recovery: {_pct(pr_.get('recall_stem'))} by stem of {pr_.get('n_answered')} directions "
-                     f"(expected > 80%); by cosine 0.8: {_pct(pr_.get('recall_cos_0.8'))}.")
+                     f"(expected > 80%); by cosine 0.8: {_pct(pr_.get('recall_cos_0.8'))}"
+                     + "".join(f"; {k}: {_pct(v.get('recall_stem'))} of {v.get('n')}"
+                               for k, v in (pr_.get("by_source_position") or {}).items()) + ".")
         sr_ = ev.get("structure_recovery") or {}
         if sr_:
             tri, seq = sr_.get("triangles") or {}, sr_.get("sequence") or {}

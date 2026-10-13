@@ -104,7 +104,9 @@ def pair_recovery(replies: Mapping, pairs: Sequence[tuple[str, str]], *, corpus:
                   thresholds: Sequence[float] = COSINE_THRESHOLDS) -> dict:
     """Recall of each recorded pair's other pole from one pole's blind opposites, the union of its samples (module
     docstring): a direction is recovered by stem when any of the opposites is the other pole, and by cosine when the
-    best of them reaches the threshold.  ``embed(texts)`` returns unit rows (an embedder through its cache in the CLI,
+    best of them reaches the threshold.  Only directions from a pole of a recorded pair are read; a pole whose
+    position is ``mean`` is a triangle with its two vices, so its partner is matched against all three answers, and
+    ``by_source_position`` gives the two kinds of direction apart (Roger, 2026-10-13).  ``embed(texts)`` returns unit rows (an embedder through its cache in the CLI,
     ``HashEmbedder`` in tests); without it only the stem figures are given."""
     reps = _combined(replies)
     dirs = []
@@ -113,7 +115,10 @@ def pair_recovery(replies: Mapping, pairs: Sequence[tuple[str, str]], *, corpus:
     answered = [(x, y) for x, y in dirs if x in reps and not reps[x].principal_only]
     hits_stem, misses, texts = [], [], []
     for x, y in answered:
-        opps = reps[x].slot("opposite")
+        # a pole whose position is mean has no single opposite (Roger, 2026-10-13: a triangle): its partner is
+        # recovered by any of the three corners, the opposite, the excess and the deficiency
+        opps = reps[x].slot("opposite") + (reps[x].slot("excess") + reps[x].slot("deficiency")
+                                           if reps[x].position == "mean" else [])
         want = target_stems(y, corpus, lexicon=lexicon)
         hits_stem.append(any(_stem(o["label"], lexicon) in want for o in opps))
         target = f"{corpus.labels.get(y, y)}: {corpus.descriptions.get(y, '')}"
@@ -125,6 +130,12 @@ def pair_recovery(replies: Mapping, pairs: Sequence[tuple[str, str]], *, corpus:
     by_pair: dict[tuple, list] = {}
     for (x, y), ok in zip(answered, hits_stem):
         by_pair.setdefault(tuple(sorted((x, y))), []).append(ok)
+    pos = [reps[x].position == "mean" for x, _y in answered]
+    out["by_source_position"] = {
+        name: {"n": sum(1 for m in pos if m == want),
+               "recall_stem": _frac(sum(1 for m, ok in zip(pos, hits_stem) if m == want and ok),
+                                    sum(1 for m in pos if m == want))}
+        for name, want in (("mean (any triangle corner)", True), ("other (the opposite)", False))}
     out["pairs_both_directions_stem"] = sum(1 for v in by_pair.values() if len(v) == 2 and all(v))
     out["pairs_either_direction_stem"] = sum(1 for v in by_pair.values() if any(v))
     cos: list = [None] * len(answered)

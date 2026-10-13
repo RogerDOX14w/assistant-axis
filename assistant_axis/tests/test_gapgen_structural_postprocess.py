@@ -118,15 +118,18 @@ def test_merge_keeps_every_source_and_counts_traits_and_rows(world, replies):
     assert set(fh["siblings"]) >= {"brave", "timid", "craven", "cowardly"}
     assert rows["craven"]["n_sources"] == 2 and rows["craven"]["roles"] == ["deficiency"]
     assert rows["sunny"]["kinds"] == ["pair_completion"]         # the opposite of a non-X trait
-    assert rows["cowardly"]["kinds"] == ["classical", "opposite"]
+    assert rows["cowardly"]["kinds"] == ["classical", "triangle_corner"]       # brave is a mean: a triangle
     assert rows["user_pleasing"]["principal_target"] and rows["user_pleasing"]["kinds"] == ["principal_retarget"]
     assert rows["down_on_oneself"]["has_common_word"] is False
     # partner hints: the source's label for an opposite, the sibling vice for excess / deficiency and classical vices
     by_src = {(s["generator_part"], s.get("source_stem") or s.get("source_id"), s.get("operator") or s.get("role")):
               s["partner_hint"] for r in rows.values() for s in r["sources"]}
-    assert by_src[("operators", "brave", "opposite")] == "brave"
-    assert by_src[("operators", "brave", "excess")] == "craven"
-    assert by_src[("operators", "brave", "deficiency")] == "foolhardy"
+    # brave's position is mean, so its opposite, excess and deficiency are a triangle, nobody's pair partner
+    # (Roger, 2026-10-13); timid (a deficiency) keeps the pair hints
+    assert by_src[("operators", "brave", "opposite")] is None
+    assert by_src[("operators", "brave", "excess")] is None
+    assert by_src[("operators", "brave", "deficiency")] is None
+    assert by_src[("operators", "timid", "opposite")] == "timid"
     assert by_src[("operators", "timid", "excess")] is None                  # no deficiency answered
     assert by_src[("classical", "aristotle:courage:excess", "excess")] == "cowardly"
     assert by_src[("classical", "aristotle:courage:mean", "mean")] is None

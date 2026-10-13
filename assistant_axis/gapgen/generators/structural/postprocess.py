@@ -21,6 +21,10 @@
   the stem, ``roles`` the operators and classical roles, ``siblings`` the stems of its structure (for an
   opposite, excess or deficiency answer, the source trait and the reply's other answers among those three; for a
   retarget or remode answer, the source trait; for a classical row, the first labels of its sibling rows).
+* **The opposite of a mean** (Roger, 2026-10-13: "This isn't a pair, it's a type of triangle"): for a trait whose
+  combined ``position`` is ``mean``, the opposite, excess and deficiency answers are the corners of a triangle with
+  the trait (``arrangement_hint: triangle`` on each source, ``partner_hint`` empty); the opposite answer's kind is
+  ``triangle_corner`` and its ``corner`` names the vice it matches by stem (``excess``, ``deficiency``, or None).
 * **Rank** (:func:`rank`; plan section 7): more sources first (a label several traits reach is the better
   candidate), then by tier: opposites of ``non-X`` and singleton traits (pair completions, worth more than two
   unpaired points), then excess, deficiency, the other opposites and the classical rows, then retarget and remode;
@@ -55,8 +59,8 @@ from . import OPERATOR_TABLE_PATH, RESPONSES_NAME, SCHEMA_VERSION
 from .operators import PRINCIPAL_TARGETS, SINGLE_OPERATORS, OperatorReply, read_responses, reply_from_record
 
 #: Tier of each source kind in the rank (lower first).
-KIND_TIER: dict[str, int] = {"pair_completion": 0, "degree_filler": 1, "opposite": 1, "classical": 1,
-                             "retarget": 2, "principal_retarget": 2, "remode": 2}
+KIND_TIER: dict[str, int] = {"pair_completion": 0, "degree_filler": 1, "opposite": 1, "triangle_corner": 1,
+                             "classical": 1, "retarget": 2, "principal_retarget": 2, "remode": 2}
 #: Classical roles whose partner is the sibling row with this role (the row's ``partner_hint``).
 CLASSICAL_PARTNER_ROLE: dict[str, str] = {"deficiency": "excess", "excess": "deficiency", "sin": "virtue",
                                           "virtue": "sin", "underuse": "overuse", "overuse": "underuse",
@@ -277,8 +281,10 @@ def _source_key(s: Mapping) -> tuple:
             s.get("role") or "", s.get("target") or s.get("mode") or "", s.get("label") or "")
 
 
-def operator_kind(op: str, sub: Optional[str], *, source_unpaired: bool) -> str:
+def operator_kind(op: str, sub: Optional[str], *, source_unpaired: bool, source_mean: bool = False) -> str:
     if op == "opposite":
+        if source_mean:                     # Roger, 2026-10-13: a mean's opposite is a triangle corner, not a pair
+            return "triangle_corner"
         return "pair_completion" if source_unpaired else "opposite"
     if op in ("excess", "deficiency"):
         return "degree_filler"
@@ -310,13 +316,24 @@ def operator_sources(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list
                 if got:
                     stems.setdefault(op, []).append(got[0])
         unpaired = corpus.is_unpaired(rep.stem)
+        mean = rep.position == "mean"
+        from .combine import _dedupe_key
+        vice_keys = {op: {_dedupe_key(it["label"], lexicon=lexicon) for it in rep.slot(op)}
+                     for op in ("excess", "deficiency")}
         for op, sub, it in rep.items():
             got = _safe_stem(it["label"], lexicon)
             if got is None:
                 continue
             stem, folded = got
-            partner = None
-            if op == "opposite":
+            partner, corner = None, None
+            if mean and op in SINGLE_OPERATORS:
+                # Roger, 2026-10-13: "This isn't a pair, it's a type of triangle."  A mean, its deficiency and its
+                # excess are the three corners; the opposite answer is one of the vice corners (matched by stem
+                # where it names one), and none of the three is anyone's pair partner.
+                if op == "opposite":
+                    key = _dedupe_key(it["label"], lexicon=lexicon)
+                    corner = next((v for v in ("excess", "deficiency") if key in vice_keys[v]), None)
+            elif op == "opposite":
                 partner = corpus.labels.get(rep.stem) or rep.label
             elif op in ("excess", "deficiency"):
                 other = rep.slot("deficiency" if op == "excess" else "excess")
@@ -328,8 +345,12 @@ def operator_sources(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list
                    "has_common_word": it.get("has_common_word"), "polysemy": it.get("polysemy"),
                    "support": it.get("support", 1), "n_samples": rep.n_samples, "samples": list(it.get("samples") or []),
                    "glosses": list(it.get("glosses") or []),
-                   "kind": operator_kind(op, sub, source_unpaired=unpaired), "partner_hint": partner,
-                   "siblings": sib}
+                   "kind": operator_kind(op, sub, source_unpaired=unpaired, source_mean=mean),
+                   "partner_hint": partner, "siblings": sib}
+            if mean and op in SINGLE_OPERATORS:
+                src["arrangement_hint"] = "triangle"
+                if op == "opposite":
+                    src["corner"] = corner
             if op == "retarget":
                 src["target"] = sub
             elif op == "remode":

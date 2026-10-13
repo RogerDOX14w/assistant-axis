@@ -428,3 +428,24 @@ the two-run stability test (no gate: exit 0 with the coverage reported), the nul
 empty answers left out instead of scoring 1.0), the run-loop tests (`samples` and `errors` keyed by (trait,
 sample) in place of `replies`), the estimate test (the measured 1,500 output tokens) and the recorded-output
 stability check (fields present, no median bar).
+
+## 15. The opposite of a mean is a triangle (Roger, 2026-10-13)
+
+Roger: "This isn't a pair, it's a type of triangle."  A trait whose combined `position` is `mean` (the majority of
+its samples) forms a triangle with its deficiency and its excess, and has no single opposite.  As built:
+
+- In the operator table ([postprocess.py](../../assistant_axis/gapgen/generators/structural/postprocess.py)) the
+  opposite, excess and deficiency answers of a mean carry `arrangement_hint: "triangle"` and an empty
+  `partner_hint` (so no candidate of theirs proposes a pair partner to `promote`).  The opposite answer's kind is
+  `triangle_corner` (tier 1, beside the degree fillers; it is never a pair completion), and its `corner` names the
+  vice it is, matched by stem to the excess or deficiency answers (`excess`, `deficiency`, or None when it names
+  neither).  Traits at another position keep the pair hints as before.
+- The side table checks a mean's recorded `negative_label` against all three corners and marks the row
+  `arrangement_hint: "triangle"`; the readouts list `triangle_corner` rows apart from pair completions.
+- Pair recovery is read, as before, only over the poles of recorded pairs; a pole whose position is mean is
+  recovered when any of its three corners is the partner, and `by_source_position` reports mean poles and the
+  others apart, so that the > 80% expectation is read for each kind.
+- Tests: [test_gapgen_structural_combine.py](../../assistant_axis/tests/test_gapgen_structural_combine.py) (the
+  corner matched and unmatched, no partner hint for a mean, the pair hint kept otherwise, pair recovery through a
+  triangle corner, the side table).  Two expectations of the postprocess tests changed with the rule: the fixture's
+  `brave` is a mean, so its answers' `partner_hint`s are now empty and its opposite's kind is `triangle_corner`.

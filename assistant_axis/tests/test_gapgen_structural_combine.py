@@ -148,7 +148,7 @@ def test_table_rows_carry_support_and_the_first_gloss_is_the_hint(corpus):
     cands = {x.surface: x for x in SU.to_candidates(SU.select_all(t), "w1")}
     assert cands["cowardly"].gloss_hint == "This means fleeing, first."
     assert cands["cowardly"].source_ref == "structural:op:opposite:brave"         # the documented form, unchanged
-    assert by["foolhardy"]["sources"][0]["partner_hint"] == "craven"              # the sibling vice
+    assert by["foolhardy"]["sources"][0]["partner_hint"] is None                  # brave is a mean: a triangle
 
 
 def test_side_table_checks_the_recorded_label_against_the_union(corpus):
@@ -216,3 +216,45 @@ def test_samples_are_identified_by_their_keys():
     a, b = _rep("brave", 1, opposite=F.item("cowardly")), _rep("brave", 1, opposite=F.item("cowardly"))
     c = CB.combine({1: a, 2: b})
     assert c.samples == [1, 2] and c.slot("opposite")[0]["support"] == 2 and c.slot("opposite")[0]["samples"] == [1, 2]
+
+
+# --------------------------------------------------------------------------- the opposite of a mean (Roger, 2026-10-13)
+
+def _mean(stem="brave"):
+    """A mean trait's samples: the opposite names the deficiency in one sample and something else in another."""
+    return CB.combine({1: _rep(stem, 1, position="mean", opposite=F.item("cowardly"), excess=F.item("foolhardy"),
+                               deficiency=F.item("cowardly")),
+                       2: _rep(stem, 2, position="mean", opposite=F.item("timid"), excess=F.item("foolhardy"))})
+
+
+def test_a_means_opposite_is_a_triangle_corner_not_a_pair_partner(corpus):
+    corp = PP.load_corpus(corpus)
+    t = PP.build_table([_mean()], corpus=corp, queue={}, registry={}, lexicon=F.LEXICON)
+    by = {r["stem"]: r for r in t}
+    opp = next(s for s in by["cowardly"]["sources"] if s["operator"] == "opposite")
+    assert opp["kind"] == "triangle_corner" and opp["corner"] == "deficiency" and opp["partner_hint"] is None
+    assert opp["arrangement_hint"] == "triangle"
+    other = next(s for s in by["timid"]["sources"] if s["operator"] == "opposite")
+    assert other["corner"] is None and other["kind"] == "triangle_corner"           # names no vice: unmatched
+    exc = next(s for s in by["foolhardy"]["sources"] if s["operator"] == "excess")
+    assert exc["partner_hint"] is None and exc["arrangement_hint"] == "triangle"
+    assert all(c.partner_hint is None for c in SU.to_candidates(SU.select_all(t), "w1"))
+    assert "triangle_corner" in by["timid"]["kinds"]
+    # not a mean: the opposite is still a pair partner
+    exc_pos = CB.combine({1: _rep("brave", 1, position="excess", opposite=F.item("cowardly"))})
+    t2 = PP.build_table([exc_pos], corpus=corp, queue={}, registry={}, lexicon=F.LEXICON)
+    src = t2[0]["sources"][0]
+    assert src["partner_hint"] == "brave" and "arrangement_hint" not in src and src["kind"] == "opposite"
+
+
+def test_pair_recovery_reads_a_means_triangle_corners(corpus):
+    corp = PP.load_corpus(corpus)
+    mean = CB.combine({1: _rep("brave", 1, position="mean", opposite=F.item("cowardly"),
+                               deficiency=F.item("timid"))})
+    other = CB.combine({1: _rep("timid", 1, position="deficiency", opposite=F.item("bold"))})
+    out = E.pair_recovery({"brave": mean, "timid": other}, [("brave", "timid")], corpus=corp)
+    assert out["recall_stem"] == 0.5                                     # brave -> timid through the deficiency
+    assert out["by_source_position"]["mean (any triangle corner)"] == {"n": 1, "recall_stem": 1.0}
+    assert out["by_source_position"]["other (the opposite)"] == {"n": 1, "recall_stem": 0.0}
+    row = ST.position_rows([mean], corpus=corp, lexicon=F.LEXICON)[0]
+    assert row["arrangement_hint"] == "triangle" and row["negative_label_check"] == "match"

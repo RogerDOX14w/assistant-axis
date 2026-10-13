@@ -77,7 +77,11 @@ def position_rows(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list[di
     for rep in sorted((r for r in reps if not r.principal_only), key=lambda r: r.stem):
         rec = corpus.negative_labels.get(rep.stem)
         opps = rep.slot("opposite")
-        check, rec_support = check_union(opps, rec, lexicon=lexicon)
+        mean = rep.position == "mean"
+        # a mean is a triangle with its two vices (Roger, 2026-10-13): its recorded label is checked against all
+        # three answers, the opposite first
+        corners = opps + rep.slot("excess") + rep.slot("deficiency") if mean else opps
+        check, rec_support = check_union(corners, rec, lexicon=lexicon)
         out.append({"schema_version": SCHEMA_VERSION, "stem": rep.stem,
                     "label": corpus.labels.get(rep.stem) or rep.label, "position": rep.position,
                     "positions": list(rep.positions), "n_samples": rep.n_samples,
@@ -86,6 +90,7 @@ def position_rows(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list[di
                     "model_opposites": [{"label": it["label"], "support": it.get("support", 1),
                                          "gloss": it.get("gloss")} for it in opps],
                     "negative_label_check": check, "recorded_support": rec_support,
+                    "arrangement_hint": "triangle" if mean else None,
                     "arrangement": corpus.kinds.get(rep.stem), "reasoning": rep.reasoning,
                     "reasonings": list(rep.reasonings), "run_id": rep.run_id, "model": rep.model,
                     "prompt_sha256": rep.prompt_sha256, "at": rep.at})
