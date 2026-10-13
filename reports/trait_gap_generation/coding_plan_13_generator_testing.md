@@ -16,7 +16,7 @@ pair-recovery, concept component) are defined on first use below and go into the
 in this plan was measured read-only on 2026-10-13 (§ "Baseline measured for this plan" says how); the first dashboard
 run must reproduce them.  Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided; decision 2 decided 2026-10-13)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; decisions 2 and 3 decided 2026-10-13)
 
 1. **OPEN: which generator runs get the recovery harness, and how.**  The workstream plan's § 5 prices the harness
    at "about $5 per generator run at two seeds, under $40 for all current generators".  The four recorded runs
@@ -141,7 +141,7 @@ run must reproduce them.  Roger's review comments go into this file.
      and its 0.67 are a recommendation Roger can change at the pilot gate.  (Not in this plan: the review app's
      proposed groups could be built by the same rule; that is a separate decision for
      [coding_plan_review.md](./coding_plan_review.md).)
-3. **OPEN: the promote share's denominator.**  The workstream plan's § 3.5 gives "55% for the TDA census" as the
+3. **Decided (2026-10-13, Roger): the promote share's denominator is per group.**  The workstream plan's § 3.5 gives "55% for the TDA census" as the
    promote share ("promoted of kept").  The record gives two figures: **per decided term, 20%** (34 `accepted` of
    174 decided censuses rows in the registry; 35 promoted of 204 review writes in
    [applied.jsonl](../../data/candidates/review/review_tda_1/applied.jsonl), 17%) and **per resolved group, 51%**
@@ -161,6 +161,7 @@ run must reproduce them.  Roger's review comments go into this file.
      generator's undecided, not pre-handled kept terms counted as groups (each proposed group one, each singleton
      one) × the per-group share; the minutes keep their per-shape times.  Per term printed beside it.  One batch
      of 69 groups is a small base: the dashboard prints the share by shape so a drift shows.
+   - **Roger (2026-10-13):** I'll take your latest rec.  So per group.
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
@@ -389,8 +390,9 @@ the batch's log that are at most `idle_s` (five minutes; a longer gap is a break
 `applied.jsonl` (the registry rows the apply changed); `from_log` (distinct keys in `resolve` members and
 `distinct` keys) is the cross-check.  The **rate** is terms decided per active minute.  Per-term times by shape
 come from open-to-next-open spans: singleton groups and multi-member groups (per member).  **Promote share** is
-accepted terms over decided terms for a generator (per term), with promote resolutions over resolved groups beside
-it (decision 3); a generator with fewer than 50 decided terms takes the pooled share, flagged `borrowed`.  A
+promote resolutions over resolved groups for a generator (per group, a singleton being a group of one), with
+accepted terms over decided terms beside it and the per-group share by shape (singletons, multi-member groups)
+(decision 3); a generator with fewer than 50 decided terms takes the pooled share, flagged `borrowed`.  A
 superseded log (the TDA batch's first 16 minutes, reset before the leftovers pass) is listed, never counted.
 `review_states_v4` (13 events, 4 terms) is reported and excluded from the pooled rate as too small.
 
@@ -439,13 +441,14 @@ today's IPIP figures, the cost and stop-rule values illustrative):
  "string_recall": {"n": 55, "of": 932, "share": 0.059},
  "negatives": {"hit": 2, "of": 250},
  "recall": {"headline": null, "strict": null, "pair": null, "by_region": null, "recall_at_n": null, "harness_batch": null, "harness_side": false},
- "stop_rule": {"undecided_kept": 237, "pre_handled": 9, "expected_minutes": 70.6, "expected_accepted": 45.6,
-               "novel_per_review_minute": 0.65, "novel_per_usd": 7.3}}
+ "stop_rule": {"undecided_kept": 237, "pre_handled": 9, "groups": 160, "expected_minutes": 70.6,
+               "expected_accepted": 81.6, "novel_per_review_minute": 1.16, "novel_per_usd": 13.1}}
 ```
 
 The stop rule: `expected_minutes` = (singleton terms × singleton_mean_s + grouped terms × per_member_s) / 60 over
 the generator's undecided, not pre-handled kept terms (singleton or grouped by the graph's proposed groups);
-`expected_accepted` = those terms × promote_share_term; `novel_per_review_minute` = expected_accepted /
+`expected_accepted` = the number of groups those terms form (each proposed group one, each singleton one) ×
+promote_share_group; `novel_per_review_minute` = expected_accepted /
 expected_minutes; `novel_per_usd` = expected_accepted / total cost.  Every figure that lags review (promoted, the
 share) says so in the Markdown with its date.
 
@@ -591,7 +594,7 @@ the stop rule from the measured review rate and promote shares; plus the concept
 units.  **Roger decides** on it: (a) decision 1, the harness scope (the dashboard's stop-rule column says which
 generators' remaining terms are worth the review-minutes, and so which are worth measuring recall for);
 (b) decision 2's headline, by reading twenty strict components and twenty grown units (printed with their
-members, seeded) beside the review-agreement table; (c) decision 3; (d) whether the giant 3-edge component is a review-graph finding worth filing.
+members, seeded) beside the review-agreement table; (c) whether the per-group share still holds across shapes (decision 3); (d) whether the giant 3-edge component is a review-graph finding worth filing.
 The second pilot is the paraphrase set (task 7, about $1.5): a matcher sanity check, with a gate.  Yield per
 dollar is not the figure here (nothing is generated); the readout's figures are the stop-rule ones and the
 estimates with their intervals.
@@ -615,7 +618,7 @@ failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. 
 under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-13), proceeding under the
 assumption unless the answer would make the work useless.  Pre-registered entries Opus copies in at the start:
 (1) the harness scope is decision 1's recommendation (a) unless Roger says otherwise at gate 1; (2) the concept
-units are `components_4` and `grown_3` at 0.67, both computed, headline Roger's on the first dashboard (decision 2); (3) the promote share is per term (decision 3);
+units are `components_4` and `grown_3` at 0.67, both computed, headline Roger's on the first dashboard (decision 2); (3) the promote share is per group (decision 3, decided);
 (4) the workstream plan's "about 40%" repetition is attachment to the first reviewed batch (measured 35% for the
 censuses), and the pre-handled share is 7%; (5) no seeded generator has generator-side hiding; the harness-side
 figure is reported, marked; (6) states-pass and physical-pass rows are attributed to the source row's generator;
