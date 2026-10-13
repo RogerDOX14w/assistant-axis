@@ -16,9 +16,9 @@ pair-recovery, concept component) are defined on first use below and go into the
 in this plan was measured read-only on 2026-10-13 (§ "Baseline measured for this plan" says how); the first dashboard
 run must reproduce them.  Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided; decisions 2 and 3 decided 2026-10-13)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; all three decided 2026-10-13)
 
-1. **OPEN: which generator runs get the recovery harness, and how.**  The workstream plan's § 5 prices the harness
+1. **Decided (2026-10-13, Roger): every generator, pooled (d), affected rows only (c), two seeds, batched; budget about $53-68 approved.**  Which generator runs get the recovery harness, and how:  The workstream plan's § 5 prices the harness
    at "about $5 per generator run at two seeds, under $40 for all current generators".  The four recorded runs
    ([data/candidates/recovery/](../../data/candidates/recovery/)) cost **$0.0133-0.0151 per decided candidate per
    seed** live (the reduced-corpus M3 run about $0.011 a row, the match calls about $0.0024), and the pilots they ran
@@ -65,6 +65,9 @@ run must reproduce them.  Roger's review comments go into this file.
      (score the affected keys, copy the rest's recorded blocks into the reduced-corpus batch), tested by an
      equality check on a fixture: (c) and a full re-score give the same recall when the responder is
      deterministic.
+   - **Roger (2026-10-13):** "Budget for your recommendation is approved."  So the harness runs as (d) with (c),
+     two seeds, batched, within about $68.  The launch still prints its estimate and parameters first; if the
+     dry run's estimate comes out above $68, it stops and goes back to Roger.
      **Roger: I want the data from every generator we've run, so c), but we can start with a)**
 2. **Decided (2026-10-13, Roger): the concept unit for capture-recapture: both, headline chosen on data.**  The workstream plan says "M3's readings cluster candidates into
    concepts"; the better instrument is the all-batches review graph
@@ -591,8 +594,8 @@ with the § 8 commands.
 The pilot is **the first dashboard from recorded data** (task 5, $0), which already carries every column but the
 harness ones: per generator the cost, counts, regions, repetition, review figures, string recall, negatives, and
 the stop rule from the measured review rate and promote shares; plus the concept table and the estimates at both
-units.  **Roger decides** on it: (a) decision 1, the harness scope (the dashboard's stop-rule column says which
-generators' remaining terms are worth the review-minutes, and so which are worth measuring recall for);
+units.  **Roger decides** on it: (a) nothing for decision 1, which is decided (every generator, pooled, two seeds,
+2026-10-13): the harness runs once the paraphrase-set gate below passes, within the approved budget;
 (b) decision 2's headline, by reading twenty strict components and twenty grown units (printed with their
 members, seeded) beside the review-agreement table; (c) whether the per-group share still holds across shapes (decision 3); (d) whether the giant 3-edge component is a review-graph finding worth filing.
 The second pilot is the paraphrase set (task 7, about $1.5): a matcher sanity check, with a gate.  Yield per
@@ -617,7 +620,7 @@ Opus retries a failing step once with a changed approach, then Fable (diff revie
 failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. [13] question. Assumption proceeded
 under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-13), proceeding under the
 assumption unless the answer would make the work useless.  Pre-registered entries Opus copies in at the start:
-(1) the harness scope is decision 1's recommendation (a) unless Roger says otherwise at gate 1; (2) the concept
+(1) the harness scope is decided: (d) pooled with (c) affected-only, two seeds, batched, within about $68 (decision 1); (2) the concept
 units are `components_4` and `grown_3` at 0.67, both computed, headline Roger's on the first dashboard (decision 2); (3) the promote share is per group (decision 3, decided);
 (4) the workstream plan's "about 40%" repetition is attachment to the first reviewed batch (measured 35% for the
 censuses), and the pre-handled share is 7%; (5) no seeded generator has generator-side hiding; the harness-side
