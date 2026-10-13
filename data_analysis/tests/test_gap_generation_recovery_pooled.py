@@ -223,3 +223,32 @@ def test_affected_only_with_nothing_to_score(env):
             assert len(res) == 1 and res[0]["novelty"]["copied_from"] == "full"
             assert cli._read_jsonl(d / "readings.jsonl") == []
     assert keys                                                     # at least one row was wholly unaffected
+
+
+class TestCalibratedGuard:
+    """Plan 13 review S1: the harness's estimate ran 1.18-1.30 times under its spend on the four recorded batches, so
+    the guard checks the estimate times ``ESTIMATE_CALIBRATION`` (1.25), prints both and records both."""
+
+    def figures(self, out: str) -> tuple[float, float]:
+        import re
+        lines = out.splitlines()
+        i = next(j for j, x in enumerate(lines) if x.startswith("projected spend = $"))
+        est = float(re.search(r"total estimate = \$([0-9.]+)", lines[i - 1]).group(1))
+        proj = float(re.search(r"projected spend = \$([0-9.]+)", lines[i]).group(1))
+        return est, proj
+
+    def test_the_projection_is_printed_checked_and_recorded(self, env, capsys):
+        assert rt.ESTIMATE_CALIBRATION == 1.25
+        assert harness(env, "--generator", "toy", "--run-id", "r1", "--seed", "0", "--dry-run", batch="cal") == 0
+        est, proj = self.figures(capsys.readouterr().out)
+        assert est > 0 and proj == pytest.approx(est * 1.25, abs=0.002)
+        # a cap between the estimate and the projection: the raw estimate would pass, the projection is refused
+        mid = f"{(est + proj) / 2:.4f}"
+        assert harness(env, "--generator", "toy", "--run-id", "r1", "--seed", "0", "--budget-usd", mid,
+                       batch="cal2") == 2
+        assert "exceeds --budget-usd" in capsys.readouterr().err
+        assert not (env["cand_dir"] / "recovery" / "cal2").exists()
+        assert harness(env, "--generator", "toy", "--run-id", "r1", "--seed", "0", batch="cal3") == 0
+        run = json.loads((env["cand_dir"] / "recovery" / "cal3" / "run.json").read_text())
+        assert run["estimate_calibration"] == 1.25
+        assert run["projected_usd"] == pytest.approx(run["estimate_usd"] * 1.25, abs=1e-3)

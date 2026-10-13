@@ -28,8 +28,11 @@ rec_<G>_<R>``.  ``--budget-usd`` is required.  Per seed S:
    whole harness: every seed's M3 run and match calls), ``run.json``.
 
 Cost.  Before anything is sent, every seed's M3 estimate (``novelty_score.py``'s own) and match estimate (Sonnet
-on each hidden trait among a candidate's 10 nearest, Opus on 40% of them) are printed and their total is checked
-against ``--budget-usd``, the hard cap of the whole harness: each stage is given what is left of it.  A budget
+on each hidden trait among a candidate's 10 nearest, Opus on 40% of them) are printed with their total, and
+beside it the **projected spend**, the total times :data:`ESTIMATE_CALIBRATION` (1.25: the four recorded harness
+batches spent 1.18-1.30 times their estimate).  The projected spend is what is checked against ``--budget-usd``,
+the hard cap of the whole harness (each stage is given what is left of it), so that a launch whose likely spend is
+over the cap is refused at the dry run; ``run.json`` records the estimate, the projection and the factor.  A budget
 or estimate over $20 needs ``--confirm-expensive`` and ``--confirmed-by``.  ``--dry-run`` prints the draws, the M3
 dry runs and the estimates, and writes nothing.  A paid run is refused while the platform's code or prompt paths
 have uncommitted changes, unless ``--allow-dirty`` (recorded).  ``--resume`` continues a run: the hidden files are
@@ -68,6 +71,14 @@ from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, Mult
 from data_analysis.gap_generation import novelty_score as NS  # noqa: E402
 
 logger = logging.getLogger("recovery_test")
+
+#: The harness's spend over its estimate, measured on the four recorded harness batches (2026-10-08, live
+#: transport; ``run.json`` ``estimate_usd`` against ``usage.json``): rec_antonym_check_pilot_1 1.18,
+#: rec_censuses_2026-10-08-pilot 1.30, rec_roget_2026-10-08-pilot 1.28, rec_wn_clusters_2026-10-08-pilot 1.28 (M3's
+#: own part 1.27-1.44: the walk's depth, the Opus share and the unsure re-ask, none of them transport-dependent).
+#: The launch guard checks the estimate times this factor (plan 13 review, S1); M3's own ``plan_estimate`` is
+#: platform code and is left as it is.
+ESTIMATE_CALIBRATION = 1.25
 
 
 def _read_jsonl(p: Path) -> list[dict]:
@@ -289,10 +300,16 @@ def make_draw(args, traits, *, seed: int, regions, kinds) -> dict:
     return d
 
 
+def projected_spend(estimate_usd: float) -> float:
+    """The spend the harness's estimate projects to (:data:`ESTIMATE_CALIBRATION`)."""
+    return round(float(estimate_usd) * ESTIMATE_CALIBRATION, 4)
+
+
 def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sha, cands, cfg, cache):
     """The draws (a resumed seed's ``hidden.json`` on record, else today's draw written under ``tmp``), the
-    estimate of the whole harness and the gate.  Returns ``(hidden paths by seed, total estimate, dirty files)``,
-    or an exit status: 2 when refused (on a dry run, 0 after printing what the real run would do)."""
+    estimate of the whole harness, its projected spend (:data:`ESTIMATE_CALIBRATION`) and the gate, which checks
+    the projection.  Returns ``(hidden paths by seed, total estimate, dirty files)``, or an exit status: 2 when
+    refused (on a dry run, 0 after printing what the real run would do)."""
     hidden_paths: dict[int, Path] = {}
     hidden_docs: dict[int, dict] = {}
     for s in seeds:
@@ -344,12 +361,15 @@ def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sh
         lines.append(f"seed {s}: M3 against the reduced corpus ${m3_usd:.3f} ({m3_note}); match ${mest.usd:.3f} "
                      f"({minfo['n_pairs']} pairs, {minfo['how']})\n{mest.format()}")
     print("estimate:\n" + "\n".join(lines) + f"\ntotal estimate = ${total:.3f}")
+    projected = projected_spend(total)
+    print(f"projected spend = ${projected:.3f} (the estimate x {ESTIMATE_CALIBRATION:g}, from the four recorded "
+          "harness batches, which spent 1.18-1.30 times their estimate); the cap is checked against this figure")
     if full_index is None:
         print(f"note: {full_info['n_missing_from_cache']} corpus texts are not in the embedding cache; the M3 runs and "
               "the match stage embed them (charged, a few cents per 10,000)")
     refused = None
     try:
-        cap = confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive,
+        cap = confirm_or_abort(projected, args.budget_usd, confirm_expensive=args.confirm_expensive,
                                confirmed_by=args.confirmed_by)
         print(f"hard cap of the whole harness: ${cap:.2f}")
     except CostRefused as exc:
@@ -572,6 +592,7 @@ def main(argv=None) -> int:
                                                                                       args.exclude_provenance) else None,
                 "seeds": seeds,
                 "transport": args.transport, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
+                "projected_usd": projected_spend(total), "estimate_calibration": ESTIMATE_CALIBRATION,
                 "confirmed_by": args.confirmed_by, "allow_dirty": bool(args.allow_dirty),
                 "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
                 "m3_runs": {str(s): m3_batch_id(args.batch_id, s) for s in seeds},
