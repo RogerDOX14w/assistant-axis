@@ -356,3 +356,81 @@ class TestReroute:
         assert cli["mod"].main(["--batch-id", "rr1", "--mode", "queue", "--reroute", "--route-rules", "1",
                                 "--registry", str(reg), "--out-root", str(cand)]) == 0
         assert not (cand / "states_pass" / "rr1").exists()
+
+
+# --------------------------------------------------------------------------- what a re-route records
+
+#: The gloss check's and the alignment call's prompt fields of a queue run's run.json.
+GLOSS_FIELDS = ("check_rubric_version", "check_prompt_sha256", "alignment_model", "alignment_step_version",
+                "alignment_prompt_sha256")
+
+
+def _run_json(cand, batch):
+    return json.loads((cand / "states_pass" / batch / "run.json").read_text())
+
+
+def _reroute(cli, reg, cand, *extra):
+    return cli["mod"].main(["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry", str(reg),
+                            "--out-root", str(cand), *extra])
+
+
+class TestRerouteRecord:
+    """A re-route's run.json names the prompts of the answers it used under a queue run's names, so that the pin test
+    reads it as it reads a queue run's (until 2026-10-13 it recorded none: ``states_reroute_r2`` was filled in by
+    hand)."""
+
+    def test_the_queue_prompt_of_the_answers_replayed(self, tmp_path, cli):
+        from assistant_axis.tests.test_gapgen_rubric_v2_round4 import pin_problems
+        reg, cand = _batch_under_rules_1(tmp_path, cli)
+        assert _reroute(cli, reg, cand) == 0
+        run, src = _run_json(cand, "rr"), _run_json(cand, "b1")
+        assert (run["rubric_version"], run["prompt_sha256"]) == (src["rubric_version"], src["prompt_sha256"]) \
+            == (4, sp.PROMPT_SHA256["queue"])
+        assert run["queue_prompts"] == {"b1": {"rubric_version": 4, "prompt_sha256": sp.PROMPT_SHA256["queue"]}}
+        assert not set(GLOSS_FIELDS) & set(run) and "queue_prompts_note" not in run     # no call was sent
+        assert pin_problems("states_pass/rr", run) == []
+
+    def test_send_missing_records_the_check_and_alignment_prompts_it_sent(self, tmp_path, cli):
+        from assistant_axis.tests.test_gapgen_rubric_v2_round4 import pin_problems
+        reg, cand = _batch_under_rules_1(tmp_path, cli)
+        assert _reroute(cli, reg, cand, "--send-missing") == 0
+        run, src = _run_json(cand, "rr"), _run_json(cand, "b1")
+        # as the queue run records them, and the prompts the calls were in fact sent with
+        assert {k: run[k] for k in GLOSS_FIELDS} == {k: src[k] for k in GLOSS_FIELDS}
+        assert (run["check_rubric_version"], run["check_prompt_sha256"]) == (1, sp.CHECK_PROMPT_SHA256)
+        sent = [json.loads(x) for x in (cand / "states_pass" / "rr" / "responses.jsonl").read_text().splitlines()]
+        assert {x["step"]: x["prompt_sha256"] for x in sent} == {"check": run["check_prompt_sha256"],
+                                                                  "alignment": run["alignment_prompt_sha256"]}
+        h = Registry(reg).fold()["hopish#1"]["states_pass"]
+        assert (h["alignment_step_version"], h["alignment_prompt_sha256"]) == (run["alignment_step_version"],
+                                                                                run["alignment_prompt_sha256"])
+        # no queue call was sent: the queue prompt is the source batch's alone
+        assert run["rubric_version"] == 4 and list(run["queue_prompts"]) == ["b1"]
+        assert pin_problems("states_pass/rr", run) == []
+
+    def test_batches_on_different_queue_prompts_are_recorded_per_batch(self, tmp_path, cli):
+        """A batch recorded under an older queue prompt (here v3, the record made to say so) has no queue answer the
+        replay can use (the runner skips another prompt's answers), so ``--send-missing`` asks its rows again under
+        the current one: the re-route's own batch joins ``queue_prompts``, and with the two prompts differing no
+        top-level pair is recorded.  Each batch's pair is still pinned."""
+        from assistant_axis.gapgen.rubric_versions import HISTORY
+        from assistant_axis.tests.test_gapgen_rubric_v2_round4 import pin_problems
+        reg, cand = _batch_under_rules_1(tmp_path, cli)
+        b1, v3 = cand / "states_pass" / "b1", HISTORY["states_queue"][3]
+        src = _run_json(cand, "b1")
+        (b1 / "run.json").write_text(json.dumps({**src, "rubric_version": 3, "prompt_sha256": v3}))
+        recs = [json.loads(x) for x in (b1 / "responses.jsonl").read_text().splitlines()]
+        (b1 / "responses.jsonl").write_text("".join(
+            json.dumps({**r, "prompt_sha256": v3} if r["step"] == "queue" else r) + "\n" for r in recs))
+        assert _reroute(cli, reg, cand, "--send-missing") == 0
+        run = _run_json(cand, "rr")
+        sent = [json.loads(x) for x in (cand / "states_pass" / "rr" / "responses.jsonl").read_text().splitlines()]
+        assert {x["prompt_sha256"] for x in sent if x["step"] == "queue"} == {sp.PROMPT_SHA256["queue"]}
+        assert run["queue_prompts"] == {"b1": {"rubric_version": 3, "prompt_sha256": v3},
+                                        "rr": {"rubric_version": 4, "prompt_sha256": sp.PROMPT_SHA256["queue"]}}
+        assert "rubric_version" not in run and "prompt_sha256" not in run and run["queue_prompts_note"]
+        assert set(GLOSS_FIELDS) <= set(run)
+        assert pin_problems("states_pass/rr", run) == []
+        # the pin test reads each batch's pair
+        bad = {**run, "queue_prompts": {**run["queue_prompts"], "b1": {"rubric_version": 3, "prompt_sha256": "0" * 64}}}
+        assert pin_problems("states_pass/rr", bad) == [("states_pass/rr", "states_queue", 3, "0" * 12)]

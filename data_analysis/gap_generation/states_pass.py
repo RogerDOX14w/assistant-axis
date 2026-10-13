@@ -43,7 +43,13 @@ rows that stay, and the rows whose new route needs a call their batch never made
 alignment call), with what they need.  Without ``--dry-run`` it writes the changed rows' blocks (the answers' batch
 kept as ``batch_id``, the re-route in ``rerouted``) and their new ``holding`` to the registry, and its own record to
 ``states_pass/<batch_id>/``.  ``--send-missing`` (paid, through the cost gate, live) then makes the missing calls for
-the rows that need them, and writes those rows too.
+the rows that need them, and writes those rows too.  Its ``run.json`` records the prompts under a queue run's names
+(from 2026-10-13; the one earlier re-route, ``states_reroute_r2``, was filled in by hand): ``rubric_version`` and
+``prompt_sha256``, the queue prompt of the answers it used, as each source batch's ``run.json`` recorded it (per batch
+in ``queue_prompts``, with the re-route's own batch when ``--send-missing`` sent a queue call; the two top-level
+fields are left out when the batches disagree), and, when ``--send-missing`` has calls to make, the gloss check's and
+M1's alignment prompt as a queue run records them (``check_rubric_version``, ``check_prompt_sha256``,
+``alignment_model``, ``alignment_step_version``, ``alignment_prompt_sha256``).
 
 ``--model`` defaults to Haiku 5.5 since 2026-10-08 (Haiku 4.5,
 ``claude-haiku-4-5-20251001``, before; still selectable); every block names its model.
@@ -128,6 +134,35 @@ def _read_jsonl(paths_: list[Path]) -> list[dict]:
 def _earlier_run(out_dir: Path) -> Optional[dict]:
     p = out_dir / "run.json"
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+def gloss_prompt_fields() -> dict:
+    """The gloss check's prompt and M1's alignment prompt as a queue run records them in ``run.json`` (the check's
+    version and hash; the alignment model, its step version and hash as M1 pins them, ``physical_pass.pins``, a
+    ``ValueError`` when the text on disk is not its latest pin).  A queue run and a ``--reroute --send-missing`` both
+    record these."""
+    from assistant_axis.gapgen import physical_pass as PP
+    pins = PP.pins()
+    return {"check_rubric_version": sp.CHECK_RUBRIC_VERSION, "check_prompt_sha256": sp.CHECK_PROMPT_SHA256,
+            "alignment_model": sp.ALIGNMENT_MODEL, "alignment_step_version": pins["step_versions"]["alignment"],
+            "alignment_prompt_sha256": pins["prompt_sha256"]["alignment"]}
+
+
+def queue_prompt_fields(queue_prompts: dict[str, dict]) -> dict:
+    """A re-route's record of the queue prompt its blocks' answers were given under: ``queue_prompts`` (per batch
+    holding those answers: each source batch as its ``run.json`` recorded it, and the re-route's own batch when
+    ``--send-missing`` sent queue calls), and, when they all agree, ``rubric_version`` and ``prompt_sha256`` under the
+    queue run's own names.  When they disagree the two are left out (no one prompt covers the run) and
+    ``queue_prompts`` alone says which batch was under which."""
+    out: dict = {"queue_prompts": queue_prompts}
+    pairs = {(p.get("rubric_version"), p.get("prompt_sha256")) for p in queue_prompts.values()}
+    if len(pairs) == 1:
+        (version, sha), = pairs
+        out.update(rubric_version=version, prompt_sha256=sha)
+    elif pairs:
+        out["queue_prompts_note"] = ("the batches whose answers this re-route used recorded different queue prompts; "
+                                     "no single rubric_version / prompt_sha256 is recorded")
+    return out
 
 
 def resolve_route_rules(args, earlier: Optional[dict] = None) -> int:
@@ -436,12 +471,7 @@ def main(argv=None) -> int:
                     "prompt_sha256": sp.PROMPT_SHA256[args.mode], PL.LABEL_FORM_KEY: label_form,
                     "started_at": session["started_at"], "sessions": [session]}
         if args.mode == "queue":
-            from assistant_axis.gapgen import physical_pass as PP
-            pins = PP.pins()
-            run_meta.update(check_rubric_version=sp.CHECK_RUBRIC_VERSION, check_prompt_sha256=sp.CHECK_PROMPT_SHA256,
-                            alignment_model=sp.ALIGNMENT_MODEL,
-                            alignment_step_version=pins["step_versions"]["alignment"],
-                            alignment_prompt_sha256=pins["prompt_sha256"]["alignment"])
+            run_meta.update(gloss_prompt_fields())
     if args.mode == "queue":
         # the routing rules and the text form (states_pass.ROUTE_RULES, TEXT_FORMS); a resume keeps the recorded ones
         # unless the flag says otherwise, and the session records what it used
@@ -520,6 +550,13 @@ def _replay_batch(batch: str, rows: dict, args, rules: int, transport, *, usage=
     return runner, items, missing
 
 
+def _source_queue_prompt(batch: str, args) -> dict:
+    """The queue prompt a recorded batch's answers were given under, as its ``run.json`` recorded it (the queue run's
+    ``rubric_version`` and ``prompt_sha256``; None for a field it lacks, which the pin test then flags)."""
+    run_json = _earlier_run(paths.states_pass_dir(batch, candidates_dir=args.out_root)) or {}
+    return {"rubric_version": run_json.get("rubric_version"), "prompt_sha256": run_json.get("prompt_sha256")}
+
+
 def run_reroute(args, out_dir: Path) -> int:
     """``--reroute``: every row on the states list decided under other route rules than ``--route-rules``, decided
     again from its batch's answers on record (no call); printed, then written unless ``--dry-run``.  With
@@ -540,12 +577,14 @@ def run_reroute(args, out_dir: Path) -> int:
     changed: dict[str, dict] = {}          # key -> new block
     report: list[dict] = []
     pending: dict[str, tuple[str, dict, list]] = {}   # key -> (batch, row, the calls it waits on)
+    queue_prompts: dict[str, dict] = {}    # batch -> the queue prompt its answers were given under (run.json)
     for batch, brows in sorted(by_batch.items()):
         runner, items, missing = _replay_batch(batch, brows, args, rules, sp.RecordOnlyTransport())
         for k, why in missing.items():
             report.append({"key": k, "label": brows[k]["label"], "batch": batch, "outcome": "no_record", "why": why})
         if runner is None:
             continue
+        queue_prompts[batch] = _source_queue_prompt(batch, args)
         needed = runner.transport.needed
         for it in items:
             res = runner.results[it.key]
@@ -632,7 +671,11 @@ def run_reroute(args, out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     status = 0
+    gloss_fields: dict = {}
     if args.send_missing and pending:
+        # the check and alignment prompts of the calls about to be sent, as a queue run records them (before any
+        # call, as there: a ValueError when the alignment text on disk is not its latest pin)
+        gloss_fields = gloss_prompt_fields()
         from dotenv import load_dotenv
         import anthropic
         load_dotenv(_REPO_ROOT / ".env")
@@ -658,6 +701,12 @@ def run_reroute(args, out_dir: Path) -> int:
                             r.update(outcome="changed_after_calls", to=res.block["route"],
                                      holding_after=res.block["holding_after"])
             runner.warn_parse_rate(logger)
+        # a queue call the record lacked (a reading that failed in its batch, or an answer under another queue prompt,
+        # which the replay skips) was sent under the current queue prompt
+        sent = _read_jsonl([out_dir / "responses.jsonl"]) if (out_dir / "responses.jsonl").exists() else []
+        if any((r.get("step") or r.get("mode")) == "queue" for r in sent):
+            queue_prompts[args.batch_id] = {"rubric_version": sp.RUBRIC_VERSIONS["queue"],
+                                            "prompt_sha256": sp.PROMPT_SHA256["queue"]}
     results = [sp.StatesResult(key=k, label=rows[k]["label"], stage="judged", block=b) for k, b in changed.items()]
     writes = write_registry(reg, results, args=args)
     print(f"registry: {writes['n_rows_written']} rows updated")
@@ -669,6 +718,10 @@ def run_reroute(args, out_dir: Path) -> int:
                 "n_rows": len(todo), "item_keys": list(todo), "send_missing": bool(args.send_missing),
                 "estimate_usd": round(est_usd, 4), "cap_usd": cap, "cost_usd": round(usage.total_cost_usd, 4),
                 "finished_at": utc_now(), "status": status}
+    # the prompts, under a queue run's names (the pin test reads them): the queue prompt of the answers replayed (and
+    # of any queue call sent), from the batches' run.json; with --send-missing, the check and alignment prompts sent
+    run_meta.update(queue_prompt_fields(queue_prompts))
+    run_meta.update(gloss_fields)
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     from assistant_axis.plot_metadata import json_metadata
     summary = {"reroute": True, "route_rules": rules, "outcomes": dict(Counter(r["outcome"] for r in report)),

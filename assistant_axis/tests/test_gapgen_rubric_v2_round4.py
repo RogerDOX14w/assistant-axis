@@ -475,7 +475,6 @@ WITHDRAWN_CLASSIFIER = {"filter/m2rubric_smoke_1", "filter/m2rubric_smoke_2", "f
 
 
 def test_every_recorded_version_and_hash_is_pinned():
-    from assistant_axis.gapgen.rubric_versions import HISTORY
     problems = []
     runs = sorted((REPO / "data" / "candidates").glob("*/*/run.json"))
     assert runs
@@ -483,68 +482,82 @@ def test_every_recorded_version_and_hash_is_pinned():
         name = str(rj.parent.relative_to(REPO / "data" / "candidates"))
         if name in UNPINNED or ".bak." in name:
             continue
-        d = json.loads(rj.read_text())
-        ps = d.get("prompt_sha256")
-        checks = []  # (prompt, version or None, sha)
-        if name.startswith("filter/") and d.get("pipeline") == "split":
-            # the split filter: its eight prompts are pinned in rubrics/versions.json; the probe and
-            # the comparison it also sends are in HISTORY (recorded in run.json since 2026-09-29, after
-            # split_pilot_live, whose filter blocks carry them instead)
-            from assistant_axis.gapgen import split_rubrics
-            split_pins = split_rubrics.read_versions()["prompts"]
-            for prompt, version in d["step_versions"].items():
-                pinned = {r["version"]: r["sha256"] for r in split_pins.get(prompt, [])}
-                if pinned.get(version) != ps.get(prompt):
-                    problems.append((name, f"split.{prompt}", version, (ps.get(prompt) or "")[:12]))
-            if "probe" in ps:
-                checks.append(("probe", d.get("probe_rubric_version"), ps["probe"]))
-            if "comparison" in ps:
-                checks.append(("comparison", None, ps["comparison"]))
-        elif name.startswith("filter/"):
-            if name not in WITHDRAWN_CLASSIFIER:
-                checks.append(("classifier", d.get("rubric_version"), ps.get("classifier")))
-            checks.append(("probe", d.get("probe_rubric_version"), ps.get("probe")))
-            for k in ("plain_reading", "comparison"):
-                if k in ps:
-                    checks.append((k, None, ps[k]))
-        elif name.startswith("overlap_test/"):
-            # the M3 overlap rubric test (2026-10-03): its two rubrics are pinned in rubrics/versions.json
-            from assistant_axis.gapgen import split_rubrics
-            pins = split_rubrics.read_versions()["prompts"]
-            for prompt, version in d["rubric_versions"].items():
-                pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
-                if pinned.get(version) != ps.get(prompt):
-                    problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
-        elif name.startswith("corpus_regions_runs/"):
-            # the corpus's regions from its descriptions (2026-10-09): M1's descriptors and alignment prompts
-            from assistant_axis.gapgen import split_rubrics
-            pins = split_rubrics.read_versions()["prompts"]
-            assert set(d["step_versions"]) == {"descriptors", "alignment"}, name
-            for prompt, version in d["step_versions"].items():
-                pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
-                if pinned.get(version) != ps.get(prompt):
-                    problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
-        elif name.startswith("plain_reading/"):
-            for k in ("plain_reading", "comparison"):
-                checks.append((k, d["versions"][k], ps[k]))
-        elif name.startswith("states_pass/"):
-            checks.append((f"states_{d['mode']}", d.get("rubric_version"), ps))
-            if "check_prompt_sha256" in d:   # queue v4 (2026-10-09): the gloss check and M1's alignment prompt too
-                checks.append(("states_check", d["check_rubric_version"], d["check_prompt_sha256"]))
-                from assistant_axis.gapgen import split_rubrics
-                pins = {r["version"]: r["sha256"] for r in split_rubrics.read_versions()["prompts"]["alignment"]}
-                if pins.get(d["alignment_step_version"]) != d["alignment_prompt_sha256"]:
-                    problems.append((name, "split.alignment", d["alignment_step_version"],
-                                     d["alignment_prompt_sha256"][:12]))
-        for prompt, version, sha in checks:
-            pins = HISTORY.get(prompt, {})
-            if version is None:
-                ok = sha in pins.values()
-            else:
-                ok = pins.get(version) == sha
-            if not ok:
-                problems.append((name, prompt, version, (sha or "")[:12]))
+        problems += pin_problems(name, json.loads(rj.read_text()))
     assert problems == []
+
+
+def pin_problems(name, d):
+    """The recorded versions and hashes of one ``run.json`` (``d``, of the run directory ``name`` under
+    ``data/candidates``) that are not pinned: ``[(name, prompt, version, sha prefix), ...]``.  Also called on a fresh
+    run's record by the tests of the code that writes it (``test_gapgen_states_pass_rules2.py``, the re-route)."""
+    from assistant_axis.gapgen.rubric_versions import HISTORY
+    problems = []
+    ps = d.get("prompt_sha256")
+    checks = []  # (prompt, version or None, sha)
+    if name.startswith("filter/") and d.get("pipeline") == "split":
+        # the split filter: its eight prompts are pinned in rubrics/versions.json; the probe and
+        # the comparison it also sends are in HISTORY (recorded in run.json since 2026-09-29, after
+        # split_pilot_live, whose filter blocks carry them instead)
+        from assistant_axis.gapgen import split_rubrics
+        split_pins = split_rubrics.read_versions()["prompts"]
+        for prompt, version in d["step_versions"].items():
+            pinned = {r["version"]: r["sha256"] for r in split_pins.get(prompt, [])}
+            if pinned.get(version) != ps.get(prompt):
+                problems.append((name, f"split.{prompt}", version, (ps.get(prompt) or "")[:12]))
+        if "probe" in ps:
+            checks.append(("probe", d.get("probe_rubric_version"), ps["probe"]))
+        if "comparison" in ps:
+            checks.append(("comparison", None, ps["comparison"]))
+    elif name.startswith("filter/"):
+        if name not in WITHDRAWN_CLASSIFIER:
+            checks.append(("classifier", d.get("rubric_version"), ps.get("classifier")))
+        checks.append(("probe", d.get("probe_rubric_version"), ps.get("probe")))
+        for k in ("plain_reading", "comparison"):
+            if k in ps:
+                checks.append((k, None, ps[k]))
+    elif name.startswith("overlap_test/"):
+        # the M3 overlap rubric test (2026-10-03): its two rubrics are pinned in rubrics/versions.json
+        from assistant_axis.gapgen import split_rubrics
+        pins = split_rubrics.read_versions()["prompts"]
+        for prompt, version in d["rubric_versions"].items():
+            pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
+            if pinned.get(version) != ps.get(prompt):
+                problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
+    elif name.startswith("corpus_regions_runs/"):
+        # the corpus's regions from its descriptions (2026-10-09): M1's descriptors and alignment prompts
+        from assistant_axis.gapgen import split_rubrics
+        pins = split_rubrics.read_versions()["prompts"]
+        assert set(d["step_versions"]) == {"descriptors", "alignment"}, name
+        for prompt, version in d["step_versions"].items():
+            pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
+            if pinned.get(version) != ps.get(prompt):
+                problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
+    elif name.startswith("plain_reading/"):
+        for k in ("plain_reading", "comparison"):
+            checks.append((k, d["versions"][k], ps[k]))
+    elif name.startswith("states_pass/"):
+        # a re-route (--reroute, from 2026-10-13) also records the queue prompt per batch whose answers it used, and
+        # the top-level pair only when those agree (states_pass.py queue_prompt_fields)
+        for p in (d.get("queue_prompts") or {}).values():
+            checks.append(("states_queue", p.get("rubric_version"), p.get("prompt_sha256")))
+        if "prompt_sha256" in d or not d.get("queue_prompts"):
+            checks.append((f"states_{d['mode']}", d.get("rubric_version"), ps))
+        if "check_prompt_sha256" in d:   # queue v4 (2026-10-09): the gloss check and M1's alignment prompt too
+            checks.append(("states_check", d["check_rubric_version"], d["check_prompt_sha256"]))
+            from assistant_axis.gapgen import split_rubrics
+            pins = {r["version"]: r["sha256"] for r in split_rubrics.read_versions()["prompts"]["alignment"]}
+            if pins.get(d["alignment_step_version"]) != d["alignment_prompt_sha256"]:
+                problems.append((name, "split.alignment", d["alignment_step_version"],
+                                 d["alignment_prompt_sha256"][:12]))
+    for prompt, version, sha in checks:
+        pins = HISTORY.get(prompt, {})
+        if version is None:
+            ok = sha in pins.values()
+        else:
+            ok = pins.get(version) == sha
+        if not ok:
+            problems.append((name, prompt, version, (sha or "")[:12]))
+    return problems
 
 
 def test_withdrawn_runs_are_marked():
