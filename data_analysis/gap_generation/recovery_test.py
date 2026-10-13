@@ -206,6 +206,12 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
     if args.resume:
         from assistant_axis.gapgen.batches import with_current_batch_keys
         usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(seed_dir / "usage.json")))
+    # a fresh view of the cache: the reduced-corpus M3 run (its own EmbeddingCache, in process) embedded and saved the
+    # candidate texts this object's table, read before it ran, lacks; reading the stale table would embed them again
+    # (paid twice) and plan on those fresh vectors, while the disk keeps the M3 run's, so a resume would plan on
+    # different ones (Fable review of the Haiku window, S4.2, 2026-10-14)
+    cache.save()
+    cache = EM.EmbeddingCache(cache.root)
     status, rows, near = 0, [], {}
     try:
         index, _ = NS.load_index(cfg, data_dir=args.data_dir, cache=cache, usage=usage, allow_embed=True)

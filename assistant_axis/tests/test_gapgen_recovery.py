@@ -417,3 +417,62 @@ class TestFigures:
         assert "[hidden.json](./seed0/hidden.json)" in md and "(../../novelty/rec_s0/decisions.md)" in md
         assert "### Not recovered (1)" in md and "[lambda mu](../../../traits/instructions/lambda_mu.json)" in md
         assert "## Recall by region" in md and "## Recall by arrangement kind" in md
+
+
+# --------------------------------------------------------------------------- the match stage's view of the cache
+
+def test_the_match_stage_reads_the_vectors_the_m3_run_saved(tmp_path, monkeypatch):
+    """``recovery_test.match_seed`` reads the embedding cache afresh (Fable review S4.2, 2026-10-14): the harness's
+    cache object loaded its table before the reduced-corpus M3 run, which embedded the candidate texts and saved
+    them; the match stage must take those vectors from disk and embed nothing (no second charge, and a resume
+    plans on the same vectors)."""
+    import numpy as np
+    from types import SimpleNamespace
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen import paths
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    from data_analysis.gap_generation import recovery_test as RT
+
+    cfg = MetricConfig.load(paths.METRIC_CONFIG_PATH)
+    cands = [cand("candidate a"), cand("candidate b")]
+    m3_dir, seed_dir = tmp_path / "novelty" / "B_s0", tmp_path / "recovery" / "B" / "seed0"
+    m3_dir.mkdir(parents=True)
+    seed_dir.mkdir(parents=True)
+    (m3_dir / "results.jsonl").write_text("".join(json.dumps(
+        {"key": c.key, "stem": c.stem, "label": c.label, "gloss": c.gloss, "generators": ["g"],
+         "novelty": {"decision": "new", "alignment_score": 0, "region": None}}) + "\n" for c in cands))
+    (m3_dir / "run.json").write_text(json.dumps({"rules": NV.RULES[3].as_dict(), "settings": {"query_form": NV.DEFAULT_QUERY_FORM}}))
+    embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+    texts = [NV.query_text(c.label, c.gloss, query_form=NV.DEFAULT_QUERY_FORM, representation=cfg.representation) for c in cands]
+
+    harness_cache = EM.EmbeddingCache(tmp_path / "cache")
+    assert harness_cache.lookup(embedder.tag, texts)[1] == [0, 1]       # the table, read before M3 ran: empty
+    saved = np.random.default_rng(0).normal(size=(2, 8)).astype(np.float32)
+    m3_cache = EM.EmbeddingCache(tmp_path / "cache")                     # the M3 run's own cache embeds and saves
+    m3_cache.put(embedder.tag, texts, saved, model_id=embedder.model_id)
+    m3_cache.save()
+
+    sent = []
+
+    def no_call(self, batch):
+        sent.append(list(batch))
+        return np.ones((len(batch), 8), np.float32), 10
+    monkeypatch.setattr(EM.OpenAIEmbedder, "embed_batch", no_call)
+    monkeypatch.setattr(RT.NS, "load_index", lambda *a, **k: (None, {}))
+    seen = {}
+
+    class Planned(Exception):
+        pass
+
+    def plan(cs, vectors, index, hidden, *, k):
+        seen["vectors"] = vectors
+        raise Planned
+    monkeypatch.setattr(RT.RC, "match_plan", plan)
+    args = SimpleNamespace(resume=False, query_form=NV.DEFAULT_QUERY_FORM, data_dir=tmp_path, transport="live", concurrency=1)
+    with pytest.raises(Planned):
+        RT.match_seed(args, seed=0, seed_dir=seed_dir, hidden_doc={"hidden": []}, m3_dir=m3_dir, cfg=cfg,
+                      cache=harness_cache, rubrics={}, budget=1.0)
+    assert sent == []                                                    # nothing embedded again
+    unit = EM.normalize_rows(saved)
+    for i, c in enumerate(cands):
+        assert np.allclose(seen["vectors"][c.key], unit[i])              # the M3 run's vectors, as saved
