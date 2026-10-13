@@ -1335,7 +1335,8 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
     geom = p.add_argument_group("geometry / metric")
     geom.add_argument("--data_dir", type=str, default=str(DEFAULT_DATA_DIR))
-    geom.add_argument("--slot", type=int, default=DEFAULT_SLOT)
+    geom.add_argument("--slot", type=int, default=None,
+                      help=f"Token slot (default: {DEFAULT_SLOT} = </think>).")
     geom.add_argument("--layer", type=int, default=DEFAULT_LAYER)
     geom.add_argument("--whitening", type=str, default=DEFAULT_WHITENING,
                       help="'raw' or 'soft_K=N' (e.g. 'soft_K=3').")
@@ -1373,7 +1374,12 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     out.add_argument("--run_label", type=str, default=None,
                      help="Short label for the plot/title (defaults to the "
                           "output dir basename).")
-    return p.parse_args(argv)
+    args = p.parse_args(argv)
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="optimal_axis_for_judge.py")
+    return args
 
 
 def _normalize_scores_file_keys(

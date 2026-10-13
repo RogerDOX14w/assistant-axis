@@ -277,7 +277,7 @@ def main() -> int:
     p.add_argument("--plot", default=None,
                    help="Output PNG filename within --experiment_dir "
                         "(default: rho_vs_whitening_K_<cohort>_slot{N}.png).")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).  Slot 6 is "
                         f"the new judge-ρ winner; pass --slot 3 (\\n) or "
@@ -291,6 +291,10 @@ def main() -> int:
                         "scatter.py) extract whichever subset they need.")
     add_di_weights_arg(p)
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="whitening_k_sweep.py")
     if args.Ks is not None:
         global K_VALUES
         K_VALUES = sorted({int(k.strip()) for k in args.Ks.split(",") if k.strip()})

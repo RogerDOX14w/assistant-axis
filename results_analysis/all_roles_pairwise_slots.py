@@ -418,6 +418,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    # Qwen3's slot numbers and names, used on every run (multi-model plan § 5.6)
+    from assistant_axis.axis import require_tree_header_layout
+    require_tree_header_layout(
+        args.data_dir, where="all_roles_pairwise_slots.py",
+        subdirs=(args.vectors_subdir,),
+        hint="its SLOT_NAMES and slot-6 / slot-7 pair groups are Qwen3's 8-slot layout")
 
     data_dir = Path(args.data_dir)
     vectors_dir = data_dir / args.vectors_subdir

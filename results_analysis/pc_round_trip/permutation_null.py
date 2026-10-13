@@ -739,6 +739,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    # Qwen3's slot numbers and names, used on every run (multi-model plan § 5.6)
+    from assistant_axis.axis import require_tree_header_layout
+    require_tree_header_layout(
+        args.data_dir, where="permutation_null.py",
+        hint="its canonical slot 7 and its cells (slots 0, 3, 6, 7) are Qwen3's 8-slot layout")
     data_dir = Path(args.data_dir)
     sweep_dir = Path(args.sweep_dir)
     # Derive cutoff configuration (parallels plot_direction_cosines).  When

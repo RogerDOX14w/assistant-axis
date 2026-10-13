@@ -253,7 +253,7 @@ def parse_args() -> argparse.Namespace:
                    help="Directory containing pcNNN_<style>/ cells (and where "
                         "this script writes axis_postshear.pt and "
                         "post_shear_projection.json).")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Token slot for the PC subspace (default {DEFAULT_SLOT}).")
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER,
                    help=f"Transformer layer for the PC subspace (default {DEFAULT_LAYER}).")
@@ -302,7 +302,12 @@ def parse_args() -> argparse.Namespace:
                    help="Run setup (axis_postshear.pt + post_shear_projection."
                         "json) and stop before the judge calls.  Used as the "
                         "Phase 3 step of the migration pipeline.")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="launch_judge_runs.py")
+    return args
 
 
 def main() -> int:

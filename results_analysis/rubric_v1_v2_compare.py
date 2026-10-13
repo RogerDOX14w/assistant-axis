@@ -413,7 +413,8 @@ def main() -> int:
     )
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR))
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT)
+    p.add_argument("--slot", type=int, default=None,
+                   help=f"Token slot (default: {DEFAULT_SLOT} = </think>).")
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER)
     p.add_argument("--plot", default=None,
                    help="Output PNG path "
@@ -424,6 +425,10 @@ def main() -> int:
                         "(default: rubric_v1_v2_compare_slot{N}.json inside "
                         "--experiment_dir).")
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="rubric_v1_v2_compare.py")
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

@@ -57,6 +57,11 @@ def main() -> int:
     p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
                    help="How to handle stale or unrecognized inputs JSON envelopes.")
     args = p.parse_args()
+    # Qwen3's slot numbers and names, used on every run (multi-model plan § 5.6)
+    from assistant_axis.axis import require_tree_header_layout
+    require_tree_header_layout(
+        args.data_dir, where="plot_subspace_projection.py",
+        hint="its canonical slot 7 is Qwen3's 8-slot layout")
 
     data_dir = Path(args.data_dir)
     actual_path = Path(args.actual)

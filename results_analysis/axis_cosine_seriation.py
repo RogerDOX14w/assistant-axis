@@ -528,7 +528,8 @@ def main() -> int:
                    help="Pair list to seriate (default: pair_list_clean.json).")
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR))
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT)
+    p.add_argument("--slot", type=int, default=None,
+                   help=f"Token slot (default: {DEFAULT_SLOT} = </think>).")
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER)
     p.add_argument("--L", type=int, default=DEFAULT_SOFT_SHEAR_L,
                    help=f"Soft-shear truncation depth (default: "
@@ -558,6 +559,10 @@ def main() -> int:
                    help="Output basename (default: axis_cosine_heatmap_<cohort>"
                         "_softshear<L>).")
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="axis_cosine_seriation.py")
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

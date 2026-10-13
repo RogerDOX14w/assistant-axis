@@ -808,6 +808,16 @@ def _compute_intermediates(args: argparse.Namespace) -> dict:
 
 def main() -> int:
     args = parse_args()
+    # The slot names are Qwen3's (multi-model plan § 5.6); a tree with the
+    # first N of Qwen3's header tokens (the 4-slot data) matches its names too.
+    from assistant_axis.axis import require_header_layout, tree_vector_metadata
+    from assistant_axis.model_families import QWEN3_NON_THINKING_HEADER_TOKENS as _Q
+    _meta = tree_vector_metadata(args.data_dir, subdirs=(args.vectors_subdir,))
+    if _meta is not None:            # no vector to read: the script's own checks say so
+        _hdr = list(_meta.get("header_tokens") or [])
+        require_header_layout(_meta, expected=_Q[:len(_hdr)] if _hdr else _Q,
+                              where="token_position_noise_analysis.py",
+                              hint="its SLOT_NAMES are Qwen3's header tokens")
 
     data_dir = Path(args.data_dir)
     output_dir = Path(args.output_dir)

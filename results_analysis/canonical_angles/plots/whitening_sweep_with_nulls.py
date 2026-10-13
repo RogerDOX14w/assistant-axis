@@ -110,7 +110,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--kinds", nargs="+", default=["r", "t"],
                    choices=["r", "t"],
                    help="Combination kinds to compute and average (default: r t)")
-    p.add_argument("--slot", type=int, default=6,
+    p.add_argument("--slot", type=int, default=None,
                    help="Token-slot index (default: 6 = </think>; new judge-ρ "
                         "winner from May 2026 rejudge).  Pass --slot 3 (\\n) or "
                         "7 (\\n\\n post) to compare.  Slots 4-7 require the "
@@ -162,7 +162,12 @@ def parse_args() -> argparse.Namespace:
                         "shift (e.g. for slot-0 analyses, or 'before' "
                         "comparisons).")
     p.add_argument("--output", required=True, help="Output PNG path")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = 6
+        require_tree_header_layout(args.data_dir, where="whitening_sweep_with_nulls.py")
+    return args
 
 
 # ---------------------------------------------------------------------------

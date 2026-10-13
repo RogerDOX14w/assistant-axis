@@ -312,10 +312,14 @@ class SlotLayoutError(ValueError):
     or slot names assume."""
 
 
+SLOT_HINT = "pass --slot explicitly to use another layout"
+
+
 def require_header_layout(
     metadata: Optional[dict],
     expected: Optional[Sequence[str]] = None,
     where: str = "",
+    hint: str = SLOT_HINT,
 ) -> None:
     """Refuse a tree whose header tokens are not ``expected`` (default: the
     seven of Qwen3's non-thinking header, the 8slot layout,
@@ -329,7 +333,8 @@ def require_header_layout(
     its names are used, so an explicit ``--slot`` on another tree still works
     (and :func:`slot_labels` names the slot).  Raises
     :class:`SlotLayoutError` naming ``where``, the tree's header and the
-    expected one."""
+    expected one, and ending with ``hint`` (a script whose slot names are
+    used on every run, with no ``--slot``, passes its own)."""
     if expected is None:
         from .model_families import QWEN3_NON_THINKING_HEADER_TOKENS
         expected = QWEN3_NON_THINKING_HEADER_TOKENS
@@ -338,8 +343,60 @@ def require_header_layout(
         raise SlotLayoutError(
             f"{where + ': ' if where else ''}this tree's header slots are {got!r} "
             f"({len(got)} tokens), not the {len(expected)} the script's slot numbers and names "
-            f"assume ({list(expected)!r}, Qwen3's 8-slot layout); pass --slot explicitly to "
-            f"use another layout")
+            f"assume ({list(expected)!r}, Qwen3's layout); {hint}")
+
+
+def is_qwen3_header(metadata: Optional[dict]) -> bool:
+    """Whether ``metadata["header_tokens"]`` are the seven of Qwen3's
+    non-thinking header (the 8slot layout)."""
+    from .model_families import QWEN3_NON_THINKING_HEADER_TOKENS
+    return list((metadata or {}).get("header_tokens") or []) == list(
+        QWEN3_NON_THINKING_HEADER_TOKENS)
+
+
+TREE_VECTOR_SUBDIRS = ("traits/vectors", "roles/vectors", "combinations/vectors",
+                       "default/vectors")
+
+
+def tree_vector_metadata(data_dir,
+                         subdirs: Sequence[str] = TREE_VECTOR_SUBDIRS) -> Optional[dict]:
+    """The metadata of one vector of an extraction tree: the first non-empty
+    ``*.pt`` (sorted) of the first of ``subdirs`` under ``data_dir`` that has
+    one, or None when there is none (a zero-byte file is never a vector; it
+    is skipped, not retried).  One file stands for the tree: step 5 refuses
+    vectors whose header, model or family differ.  Loads one vector file
+    (about 5-10 MB)."""
+    from pathlib import Path
+    root = Path(data_dir)
+    for sub in subdirs:
+        for f in sorted((root / sub).glob("*.pt")):
+            if f.stat().st_size == 0:
+                continue
+            _, meta = load_role_vector(str(f))
+            return dict(meta or {})
+    return None
+
+
+def require_tree_header_layout(
+    data_dir,
+    where: str = "",
+    expected: Optional[Sequence[str]] = None,
+    subdirs: Sequence[str] = TREE_VECTOR_SUBDIRS,
+    hint: str = SLOT_HINT,
+) -> dict:
+    """:func:`require_header_layout` on the metadata of ``data_dir``'s
+    vectors (:func:`tree_vector_metadata`); returns that metadata.  A tree
+    with no vector to read is not checked (a WARNING; the script's own
+    checks report a missing tree), and ``{}`` is returned."""
+    meta = tree_vector_metadata(data_dir, subdirs)
+    if meta is None:
+        import logging
+        logging.getLogger(__name__).warning(
+            "%s: no vector under %s to read the header layout from; slot layout not checked",
+            where or "require_tree_header_layout", data_dir)
+        return {}
+    require_header_layout(meta, expected, where, hint)
+    return meta
 
 
 def aggregate_role_vectors(

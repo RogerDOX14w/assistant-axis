@@ -293,7 +293,8 @@ def main() -> int:
                         "systems_thinker/analytical and adds an axis with "
                         "no judge caches yet.")
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT)
+    p.add_argument("--slot", type=int, default=None,
+                   help=f"Token slot (default: {DEFAULT_SLOT} = </think>).")
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER)
     p.add_argument("--plot", default=None,
                    help="Output PNG (default: gpt_<combo>_response_weight_"
@@ -343,6 +344,10 @@ def main() -> int:
                         "41 points on [0, 1]).  Pass --w_step 0.05 to "
                         "reproduce the historical coarser sweep.")
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="gpt_anthropic_response_weight_sweep.py")
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

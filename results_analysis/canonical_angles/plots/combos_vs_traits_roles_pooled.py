@@ -141,6 +141,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     data_dir = Path(args.data_dir)
+    _set_tree_slot_labels(data_dir)
 
     if args.slots is None:
         n_slots = detect_n_slots(data_dir)
@@ -307,6 +308,9 @@ def _layout_for_slots(n_slots: int) -> tuple[int, int]:
 
 
 def _slot_pretty(slot: int) -> str:
+    tree = _tree_slot_pretty(slot)
+    if tree is not None:
+        return tree
     pretty = {
         0: "Slot 0 (Body mean)", 1: "Slot 1 (<|im_start|>)",
         2: "Slot 2 (assistant)", 3: "Slot 3 (\\n)",
@@ -314,6 +318,29 @@ def _slot_pretty(slot: int) -> str:
         6: "Slot 6 (</think>)", 7: "Slot 7 (\\n\\n final)",
     }
     return pretty.get(slot, f"Slot {slot}")
+
+
+# The slot labels of the tree being plotted when its header is not Qwen3's
+# seven tokens (multi-model plan § 5.6), set in main(); None keeps the Qwen3
+# names below, which the recorded plots carry.
+_TREE_SLOT_LABELS = None
+
+
+def _set_tree_slot_labels(data_dir) -> None:
+    global _TREE_SLOT_LABELS
+    from assistant_axis.axis import is_qwen3_header, slot_labels, tree_vector_metadata
+    meta = tree_vector_metadata(data_dir)
+    _TREE_SLOT_LABELS = None if meta is None or is_qwen3_header(meta) else [
+        lbl.replace("\n", "\\n") for lbl in slot_labels(meta)]
+
+
+def _tree_slot_pretty(slot) -> str | None:
+    if _TREE_SLOT_LABELS is None:
+        return None
+    s = str(slot)
+    if s.isdigit() and int(s) < len(_TREE_SLOT_LABELS):
+        return f"Slot {s} ({_TREE_SLOT_LABELS[int(s)]})"
+    return f"Slot {s}"
 
 
 def _med(arr) -> float:

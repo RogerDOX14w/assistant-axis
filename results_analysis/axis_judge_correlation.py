@@ -1560,8 +1560,11 @@ async def _call_openai_batch(
     tracker: Optional[BudgetTracker] = None,
 ) -> List[Optional[str]]:
     """Local OpenAI async path; parallels _call_anthropic_batch so we can set
-    temperature and token budget freely (the shared assistant_axis/judge.py
-    hardcodes temperature=1).
+    temperature and token budget freely.  (Since B1, commit 8bf84f14, the
+    shared assistant_axis/judge.py sends no temperature when it equals the
+    provider default, and checks a non-default one against
+    judge.MODEL_CAPABILITIES; this comment used to say it hard-coded
+    temperature=1.)
     """
     import openai
     client = openai.AsyncOpenAI()
@@ -3733,6 +3736,12 @@ async def run(args: argparse.Namespace) -> None:
     if not 0 <= args.layer < n_layers:
         raise SystemExit(f"--layer {args.layer} out of range [0, {n_layers})")
     slots = _slot_list_from_arg(args.slot, n_slots)
+    # What each slot is in this tree (multi-model plan § 5.6): another model
+    # family has another header, so slot 6 need not be </think>.
+    from assistant_axis.axis import slot_labels, tree_vector_metadata
+    _labels = slot_labels(tree_vector_metadata(data_dir, ("roles/vectors", "traits/vectors")))
+    logger.info("slot labels: " + ", ".join(
+        f"{i}={_labels[i]!r}" if i < len(_labels) else f"{i}=?" for i in range(n_slots)))
 
     # Build the axis spec and load corpus.
     axis_spec = resolve_axis(args, n_slots, hidden_dim, args.layer)

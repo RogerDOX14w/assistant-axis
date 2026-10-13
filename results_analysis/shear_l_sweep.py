@@ -268,7 +268,7 @@ def main() -> int:
     p.add_argument("--plot", default=None,
                    help="Output PNG filename within --experiment_dir "
                         "(default: rho_vs_shear_L_<cohort>_slot{N}.png).")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).")
     p.add_argument("--Ls", default=None,
@@ -298,6 +298,10 @@ def main() -> int:
              "``_blend`` token to the default output names.")
     add_di_weights_arg(p)
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="shear_l_sweep.py")
 
     if args.Ls is not None:
         global L_VALUES

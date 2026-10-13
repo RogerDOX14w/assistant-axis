@@ -460,6 +460,11 @@ def main() -> int:
                         "merged result is rewritten to --rhos_json.")
     add_di_weights_arg(p)
     args = p.parse_args()
+    # Qwen3's slot numbers and names, used on every run (multi-model plan § 5.6)
+    from assistant_axis.axis import require_tree_header_layout
+    require_tree_header_layout(
+        args.data_dir, where="rho_by_layer.py",
+        hint="its SLOTS (0, 3, 6, 7) and SLOT_LABELS are Qwen3's 8-slot layout")
     di_weights = parse_di_weights_arg(args.di_weights)
 
     experiment_dir = Path(args.experiment_dir).resolve()

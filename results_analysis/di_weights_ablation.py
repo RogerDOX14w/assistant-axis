@@ -198,7 +198,7 @@ def main() -> int:
                         "table column to track the di-tiebreak's effect "
                         "on the same 12 axes that feed the response-mode "
                         "ratio retunings).")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Slot to project at (default: {DEFAULT_SLOT}).")
     p.add_argument("--whitening", type=str,
                    default=f"soft_shear={DEFAULT_SOFT_SHEAR_L}",
@@ -215,6 +215,10 @@ def main() -> int:
     p.add_argument("--json", default="di_weights_ablation.json",
                    help="Output JSON filename inside --experiment_dir.")
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="di_weights_ablation.py")
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

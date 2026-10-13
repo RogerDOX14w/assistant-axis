@@ -78,7 +78,7 @@ def parse_args() -> argparse.Namespace:
                    help="Transformer layers to sweep (default: a 17-layer "
                         "set centered on Qwen-3-32B layer 25 with 2-layer "
                         "spacing 21-53)")
-    p.add_argument("--slots", nargs="+", type=int, default=[0, 6],
+    p.add_argument("--slots", nargs="+", type=int, default=None,
                    help="Slot indices (one panel row per slot; default: 0 6 -- "
                         "body-mean + </think>, the new judge-ρ winner).  Pass "
                         "--slots 0 3 to compare against historical \\n default, "
@@ -108,7 +108,12 @@ def parse_args() -> argparse.Namespace:
                         "canonical_angles/README.md). Pass 'combo_residual' "
                         "to disable the shift.")
     p.add_argument("--output", required=True, help="Output PNG path")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.slots is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slots = [0, 6]
+        require_tree_header_layout(args.data_dir, where="layer_sweep.py")
+    return args
 
 
 def _cache_key(prefix: str, *parts) -> str:

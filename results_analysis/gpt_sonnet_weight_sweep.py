@@ -210,7 +210,7 @@ def main() -> int:
     p.add_argument("--rhos_json", default=None,
                    help="Output JSON filename (default: "
                         "gpt_<second_judge>_weight_sweep_<cohort>_slot{N}.json).")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).  Pass --slot 3 "
                         f"(\\n) or 7 (\\n\\n post) to compare.")
@@ -235,6 +235,10 @@ def main() -> int:
                         "reproduce the historical coarser sweep.")
     add_di_weights_arg(p)
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="gpt_sonnet_weight_sweep.py")
     di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

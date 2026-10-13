@@ -289,3 +289,61 @@ class TestRequireHeaderLayout:
     def test_an_expected_layout_can_be_given(self):
         from assistant_axis.axis import require_header_layout
         require_header_layout({"header_tokens": ["a", "b"]}, expected=("a", "b"))
+
+
+class TestTreeHeaderLayout:
+    """The tree-level form of the guard: the metadata of one vector of a
+    data directory (what the consumer scripts call)."""
+
+    SEVEN = ["<|im_start|>", "assistant", "\n", "<think>", "\n\n", "</think>", "\n\n"]
+
+    @staticmethod
+    def _tree(tmp_path, header, sub="traits/vectors"):
+        import torch
+        d = tmp_path / "tree" / sub
+        d.mkdir(parents=True)
+        meta = {"header_tokens": header} if header is not None else {}
+        torch.save({"vector": torch.zeros(1 + len(header or []), 2, 3), "metadata": meta},
+                   d / "a.pt")
+        return tmp_path / "tree"
+
+    def test_a_qwen3_tree_passes_and_returns_its_metadata(self, tmp_path):
+        from assistant_axis.axis import is_qwen3_header, require_tree_header_layout
+        meta = require_tree_header_layout(self._tree(tmp_path, list(self.SEVEN)), where="s.py")
+        assert is_qwen3_header(meta)
+
+    def test_another_tree_raises_with_the_hint(self, tmp_path):
+        from assistant_axis.axis import SlotLayoutError, require_tree_header_layout
+        tree = self._tree(tmp_path, ["<start_of_turn>", "model", "\n"], sub="roles/vectors")
+        with pytest.raises(SlotLayoutError, match="this script's names are Qwen3's"):
+            require_tree_header_layout(tree, where="s.py",
+                                       hint="this script's names are Qwen3's")
+
+    def test_a_tree_without_a_readable_vector_is_not_checked(self, tmp_path, caplog):
+        # No vector, or only zero-byte placeholders (never a vector: skipped,
+        # not retried with the NFS backoff): the script's own checks report
+        # the missing tree; the guard logs that it could not check.
+        import logging
+        from assistant_axis.axis import require_tree_header_layout, tree_vector_metadata
+        (tmp_path / "empty" / "traits" / "vectors").mkdir(parents=True)
+        (tmp_path / "empty" / "traits" / "vectors" / "a.pt").write_bytes(b"")
+        assert tree_vector_metadata(tmp_path / "empty") is None
+        with caplog.at_level(logging.WARNING):
+            assert require_tree_header_layout(tmp_path / "empty", where="s.py") == {}
+        assert "slot layout not checked" in caplog.text
+
+    def test_a_readable_vector_without_header_metadata_raises(self, tmp_path):
+        from assistant_axis.axis import SlotLayoutError, require_tree_header_layout
+        with pytest.raises(SlotLayoutError):
+            require_tree_header_layout(self._tree(tmp_path, None), where="s.py")
+
+    def test_the_8slot_tree_passes(self):
+        # Read only; skipped where the tree is not present.
+        from pathlib import Path
+        from assistant_axis.axis import require_tree_header_layout
+        tree = Path(__file__).resolve().parents[2] / "runpod_workspace" / "qwen" / \
+            "qwen-3-32b Roger 8slot"
+        if not (tree / "traits" / "vectors").is_dir():
+            pytest.skip("no 8slot tree here")
+        meta = require_tree_header_layout(tree, where="test")
+        assert meta["model_name"] == "Qwen/Qwen3-32B"

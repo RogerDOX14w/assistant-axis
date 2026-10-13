@@ -949,7 +949,7 @@ def main() -> int:
                         f"axes in --pairs but not in --pairs_primary are "
                         f"styled faint+dotted.  Default: "
                         f"{DEFAULT_PRIMARY_PAIR_LIST}.")
-    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+    p.add_argument("--slot", type=int, default=None,
                    help=f"Token slot (default: {DEFAULT_SLOT}).")
     p.add_argument("--layer", type=int, default=LAYER,
                    help=f"Hidden-state layer (default: {LAYER}).")
@@ -971,6 +971,10 @@ def main() -> int:
                    help="How to react to drift in the peak-fit JSON's "
                         "recorded provenance (default: warn).")
     args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = DEFAULT_SLOT
+        require_tree_header_layout(args.data_dir, where="axis_pc_alignment_vs_peak_K.py")
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()

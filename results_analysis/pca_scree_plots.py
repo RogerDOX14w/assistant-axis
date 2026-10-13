@@ -80,10 +80,12 @@ SLOT_NAMES_8 = [
 
 def _slot_legend_labels(num_slots: int, metadata: dict | None) -> list[str]:
     """Pick legend labels: prefer the disambiguated 8-slot constants
-    when ``num_slots == 8``, otherwise fall back to whatever
-    ``slot_labels`` derives from the loaded metadata.
+    when the tree's header is Qwen3's seven tokens, otherwise fall back to
+    whatever ``slot_labels`` derives from the loaded metadata.  (Until the
+    multi-model plan, 2026-10-13, any 8-slot tree got the Qwen3 names.)
     """
-    if num_slots == 8:
+    from assistant_axis.axis import is_qwen3_header
+    if num_slots == 8 and is_qwen3_header(metadata):
         return list(SLOT_NAMES_8)
     # Fall back to metadata-derived labels (4-slot Christina-headers
     # data, etc.).  Reuse the project helper so the strings match

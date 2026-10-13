@@ -78,7 +78,7 @@ def parse_args() -> argparse.Namespace:
                    help="Which goal/no-goal subspace pair to use")
     p.add_argument("--ca_index", type=int, default=1,
                    help="Which canonical-angle pair to plot (default: 1).")
-    p.add_argument("--slot", type=int, default=6,
+    p.add_argument("--slot", type=int, default=None,
                    help="Token-slot index (default: 6 = </think>; new judge-ρ "
                         "winner from May 2026 rejudge).  Pass --slot 3 (\\n) "
                         "or 7 (\\n\\n post) to compare.  Slots 4-7 require "
@@ -103,7 +103,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--pre_legend_pad_factor", type=float, default=3.5,
                    help="Pre-shear panel: how much extra horizontal margin "
                         "to leave on the legend side (default: 3.5x data extent).")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.slot is None:      # the Qwen3 default slot: refuse another layout (multi-model plan § 5.6)
+        from assistant_axis.axis import require_tree_header_layout
+        args.slot = 6
+        require_tree_header_layout(args.data_dir, where="ca1_plane_pre_post_shear.py")
+    return args
 
 
 # ---------------------------------------------------------------------------
