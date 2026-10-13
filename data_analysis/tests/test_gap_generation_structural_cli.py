@@ -172,3 +172,50 @@ def test_end_to_end(env, capsys):
     assert md.index("Already registered") < md.index("Pair completions and degree fillers") < md.index(
         "Wholly new concepts")
     assert "raw" in md and "net" in md
+
+
+def test_modernise_twice_sends_nothing_the_second_time(env, monkeypatch):
+    """Review S1 (2026-10-13): the CLI always reuses recorded answers to the same prompt, without --resume."""
+    from assistant_axis.gapgen.generators.structural import modernise as M
+    from assistant_axis.gapgen.generators.structural.classical import load_all
+    rows = [r for r in load_all() if r.scheme != "via"]
+    system = P.modernise_system()
+    answers = {}
+    for unit in M.batches(rows):
+        text = json.dumps({"rows": [{"id": r.id, "reasoning": "r", "labels": [r.item], "gloss": "This means it.",
+                                     "polysemy": False} for r in unit]})
+        answers[O.prompt_sha256(system, M.render_modernise_user(unit, siblings_from=rows))] = text
+    client = F.ScriptedClient(answers)
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: client)
+    assert CLI.main(env["base"] + ["modernise", "--run-id", "a1"]) == 0
+    n = len(client.calls)
+    assert n == len(M.batches(rows))
+    out = env["sdir"] / "classical_modern.jsonl"
+    first = out.read_bytes()
+    assert CLI.main(env["base"] + ["modernise", "--run-id", "a1"]) == 0
+    assert len(client.calls) == n and out.read_bytes() == first
+    assert len(first.decode().splitlines()) == len(rows)
+
+
+def test_postprocess_budget_stop_still_writes_usage(env, monkeypatch, capsys):
+    """Review S3 (2026-10-13): the gloss embeddings' spend is recorded when the cap stops them, and accumulates."""
+    import assistant_axis.gapgen.embed as EMB
+
+    def priced(arm, **kw):
+        e = EMB.HashEmbedder()
+        e.usage_model = "text-embedding-3-large"          # charged at the live model's rate, so the cap can bite
+        return e
+    monkeypatch.setattr(EMB, "make_embedder", priced)
+    assert CLI.main(env["base"] + ["operators", "--run-id", "o1", "--all"]) == 0
+    up = env["sdir"] / "usage.json"
+    assert CLI.main(env["base"] + ["postprocess", "--run-id", "o1", "--embedder", "hash",
+                                   "--budget-usd", "0.000000001"]) == 1
+    assert "STOPPED at the cap" in capsys.readouterr().err
+    u = json.loads(up.read_text())
+    assert u["n_calls"] >= 1 and u["per_model"]["text-embedding-3-large"]["prompt_tokens"] > 0
+    ev = json.loads((env["sdir"] / "evaluation.json").read_text())["result"] if (
+        env["sdir"] / "evaluation.json").exists() else {}
+    assert "pair_recovery" not in ev
+    first = u["n_calls"]
+    assert CLI.main(env["base"] + ["postprocess", "--run-id", "o1", "--embedder", "hash", "--budget-usd", "1"]) == 0
+    assert json.loads(up.read_text())["n_calls"] > first                    # cumulative across runs

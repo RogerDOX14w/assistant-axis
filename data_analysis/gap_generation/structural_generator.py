@@ -174,7 +174,7 @@ def cmd_modernise(args) -> int:
     ctx = start_run(S.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
         "step": "modernise", "schemes": sorted(counts), "n_rows": len(rows), "per_call": args.per_call,
         "model": args.model, "budget_usd": args.budget_usd, "estimate_usd": est["usd"],
-        "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")}, "resume": bool(args.resume),
+        "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")},
         "allow_dirty": bool(args.allow_dirty), "skipped_schemes": skipped})
     ctx.confirmed_by = args.confirmed_by
     ctx.usage = GuardedUsage(budget_usd=cap)
@@ -182,7 +182,7 @@ def cmd_modernise(args) -> int:
     try:
         client = _anthropic_client()
         run = asyncio.run(M.run_modernise(rows, client=client, model=args.model, usage=ctx.usage, system=rub["text"],
-                                          run_id=args.run_id, out_path=resp, resume=args.resume,
+                                          run_id=args.run_id, out_path=resp, resume=True,
                                           per_call=args.per_call, rubric_version=rub["version"], now=utc_now))
     finally:
         ctx.finish(n_emitted=0)
@@ -522,7 +522,7 @@ def cmd_postprocess(args) -> int:
     from assistant_axis.gapgen.generators.structural import modernise as M
     from assistant_axis.gapgen.generators.structural import operators as O
     from assistant_axis.gapgen.generators.structural import postprocess as PP
-    from assistant_axis.judge_pricing import MultiModelUsage
+    from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
     full, ponly, dirs = _replies(args)
     modern = M.load_modern(Path(args.classical_modern))
     corpus = PP.load_corpus(Path(args.data_dir))
@@ -565,7 +565,12 @@ def cmd_postprocess(args) -> int:
         from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
         emb = make_embedder(args.embedder)
         cache = EmbeddingCache(root=Path(args.embedding_cache)) if args.embedder != "hash" else None
-        usage = GuardedUsage(budget_usd=args.budget_usd)
+        # the cumulative usage.json is loaded first and written by the guard itself (at a budget stop, on SIGTERM,
+        # every 30 s) and in the finally below, so a stopped run keeps its spend (review S3, 2026-10-13)
+        up = _sdir(args) / "usage.json"
+        prev = MultiModelUsage.load_or_create(up)
+        usage = GuardedUsage(budget_usd=prev.total_cost_usd + args.budget_usd, usage_path=up)
+        usage.merge_from(prev)
 
         def embed(ts):
             return embed_texts(emb, ts, cache=cache, usage=usage)
@@ -582,9 +587,20 @@ def cmd_postprocess(args) -> int:
     hl = ev["holdout_lists"]
     reps = list(full.values()) + list(ponly.values())
     records = [r for d in dirs for r in O.read_responses(d / S.RESPONSES_NAME) if r.get("stage") == O.STAGE]
+    try:
+        pair_rec = E.pair_recovery(full, pairs, corpus=corpus, lexicon=lex, embed=embed)
+    except BudgetExceededError as exc:
+        print(f"STOPPED at the cap (--budget-usd {args.budget_usd:g}) while embedding the glosses: {exc}; "
+              f"evaluation.json not written; the spend is in {_sdir(args) / 'usage.json'}", file=sys.stderr)
+        return 1
+    finally:
+        if usage is not None:
+            usage.write_json(_sdir(args) / "usage.json")
+            print(f"[usage, gloss embeddings] this run ${usage.total_cost_usd - prev.total_cost_usd:.4f}; "
+                  + usage.log_line("cumulative"), file=sys.stderr)
     ev.update({
         "runs": args.run_id or [], "n_traits": len(full), "n_principal_only": len(ponly), "n_rows": len(table),
-        "pair_recovery": E.pair_recovery(full, pairs, corpus=corpus, lexicon=lex, embed=embed),
+        "pair_recovery": pair_rec,
         "structure_recovery": E.structure_recovery(full, triangles, sequences, corpus=corpus, lexicon=lex),
         "queue_holdout": E.queue_holdout(reps, hl["holdout"], rejected=hl["rejected"], accepted=hl["accepted"],
                                          candidates=hl["candidates"], lexicon=lex),
@@ -593,12 +609,6 @@ def cmd_postprocess(args) -> int:
                       "n_items": sum(1 for r in reps for t in O.PRINCIPAL_TARGETS if r.retarget.get(t)),
                       "n_table_rows": sum(1 for r in table if r["principal_target"])},
         "embedder": emb_note, "folded": lex is not None})
-    if usage is not None:
-        up = _sdir(args) / "usage.json"
-        tot = MultiModelUsage.load_or_create(up)
-        tot.merge_from(usage)
-        tot.write_json(up)
-        print(usage.log_line("[usage, gloss embeddings]"), file=sys.stderr)
     bak = E.write_evaluation(ev, ev_path, inputs=None, title="structural evaluation (postprocess)")
     pr = ev["pair_recovery"]
     print(f"pair recovery {pr['recall_stem']} by stem over {pr['n_answered']} directions"
@@ -730,7 +740,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--run-id", required=True)
     p.add_argument("--scheme", nargs="+", choices=("aristotle", "theophrastus", "sins_virtues", "via", "murray"))
     p.add_argument("--per-call", type=int, default=20)
-    p.add_argument("--resume", action="store_true")
+    p.add_argument("--resume", action="store_true", help="(always on: answers to the same prompt are reused)")
     paid(p, 0.5)
     p.set_defaults(func=cmd_modernise)
 

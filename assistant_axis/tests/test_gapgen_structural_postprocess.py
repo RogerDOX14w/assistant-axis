@@ -159,10 +159,17 @@ def test_mutation_flipping_every_tag_drops_no_row_and_changes_no_candidate(world
     b = SU.select_all(flipped)
     assert [r["stem"] for r in a] == [r["stem"] for r in b]
     assert SU.to_candidates(a, "x") == SU.to_candidates(b, "x")
-    # under the wave's cut the filtered-status tags move only the count: what is counted changes, not what is kept
-    sel_a, n_a = SU.select_wave(t, kept_target=1, kept_share=0.5)
-    sel_b, n_b = SU.select_wave(flipped, kept_target=1, kept_share=0.5)
-    assert all(r["stem"] in {x["stem"] for x in t} for r in sel_b)
+    # under the wave's cut the filtered-status tags move only the count, and so where the cut ends: every row the
+    # walk reaches is selected whatever its tags (a decided row is never dropped), and each count is of its own tags
+    # (review S2, 2026-10-13: the assertion here was true by construction)
+    sel_a, n_a = SU.select_wave(t, kept_target=2, kept_share=0.5)          # 4 net-new rows wanted
+    sel_b, n_b = SU.select_wave(flipped, kept_target=2, kept_share=0.5)
+    order = ["foolhardy", "craven", "cowardly", "sunny", "defiant", "brave", "bold"]
+    assert [r["stem"] for r in sel_a] == order and n_a == 4 == sum(r["net_new"] for r in sel_a)
+    assert [r["stem"] for r in sel_b] == order[:5] + ["rash"] + order[5:] and n_b == 4 == sum(
+        r["net_new"] for r in sel_b)                                     # the flipped tags carry the cut one row on
+    assert {"foolhardy", "craven"} <= {r["stem"] for r in sel_a}          # decided, not counted, still submitted
+    assert not t[0]["net_new"] and flipped[0]["net_new"]
 
 
 def test_rerun_is_byte_identical_and_snapshots_on_change(world, replies, tmp_path):

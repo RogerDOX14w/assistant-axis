@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -93,8 +94,13 @@ def review_terms_per_hour(source: str = "plan", *, review_dirs: Optional[Sequenc
                          f"which is not in this checkout yet ({exc}); use --review-rate plan") from None
     dirs = list(review_dirs or sorted(p.parent for p in (DATA_CANDIDATES / "review").glob("*/decisions.jsonl")))
     rr = pooled_review_rate(dirs)
-    return float(rr.terms_per_active_minute) * 60.0, (f"measured, plan 13's pooled_review_rate over "
-                                                      f"{len(dirs)} review batches")
+    tpm = getattr(rr, "terms_per_active_minute", None)
+    if tpm is None:            # no review log with decisions: plan 13's rate is None (review S4, 2026-10-13)
+        note = (f"measured rate unavailable (plan 13's pooled_review_rate found no review decisions in {len(dirs)} "
+                f"batches), so the plan's figure")
+        print(f"NOTE: {note}", file=sys.stderr)
+        return REVIEW_TERMS_PER_HOUR_PLAN, f"{REVIEW_RATE_SOURCE_PLAN}; {note}"
+    return float(tpm) * 60.0, f"measured, plan 13's pooled_review_rate over {len(dirs)} review batches"
 
 
 # --------------------------------------------------------------------------- selection

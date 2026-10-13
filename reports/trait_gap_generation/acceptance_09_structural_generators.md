@@ -47,8 +47,9 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
    `X` is the pilot's measured net-new kept share; until then 0.5, printed as ASSUMED.  The readouts lead with pair
    completions and degree fillers and give the novel figure raw and net.  **Review rate**: the plan's ~150 terms an
    hour; `--review-rate measured` is the marked hook (`submit.review_terms_per_hour`) that switches to plan 13's
-   `pooled_review_rate` once `assistant_axis.gapgen.testing` is merged (until then it refuses with a pointer; a
-   test covers both states).
+   `pooled_review_rate` once `assistant_axis.gapgen.testing` is merged (until then it refuses with a pointer).  When
+   plan 13's rate is None (no review log with decisions) it falls back to the plan's figure with a printed note
+   (review S4, 2026-10-13); tests cover the refusal, the fallback and a measured rate.
 2. **The queue hold-out's three lines** (decision 2).  `evaluate.freeze_holdout` builds the four stem lists and
    the null-rate command writes them into `evaluation.json` before its first call (the pilot's start); `postprocess`
    freezes them only if no pilot has.  On the main checkout's registry today they would be **96** (84 `backlog` and
@@ -86,13 +87,18 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
   will in fact be cached; the plan assumed 4,096).
 - **`modernise` leaves VIA out by default** while it is unverified (133 rows in 7 calls, not ~205 in 11);
   `--scheme via` is refused with exit 2.
-- **Answers are always reused by prompt hash** in the paid commands (`operators --resume` is kept for the plan's
-  CLI shape and is a no-op): a rerun never pays twice for the same (trait, prompt, model).
+- **Answers are always reused by prompt hash** in the paid commands (`operators --resume` and `modernise
+  --resume` are kept for the plan's CLI shape and are no-ops): a rerun never pays twice for the same prompt and
+  model.  For `modernise` this includes the call that re-asks the rows a twenty-row answer left out, whose prompt is
+  recomputed from those rows (review S1, 2026-10-13: until then `modernise` reused only with `--resume`, and never
+  the retry).
 - **Several runs** (`postprocess --run-id R1 R2`): the run named last wins for a trait answered in full by both;
   principal-only answers add their items beside the full reply.
 - **`postprocess --embedder none|hash|openai`** (default `openai`, pennies, gated by `--budget-usd 0.1` and the
   dirty-tree check) and `--no-fold` (no OEWN); `evaluation.json` is rewritten only when its payload changes, so a
-  rerun leaves it byte-identical (its envelope's time would otherwise move).
+  rerun leaves it byte-identical (its envelope's time would otherwise move).  The embeddings' spend goes to the
+  cumulative `data/candidates/structural/usage.json` even when the cap stops them (the guard writes it, and a
+  `finally` again; the command then exits 1 without writing `evaluation.json`; review S3, 2026-10-13).
 - **The read-only commands read the registry without its lock** (`read_snapshot`), so that a dry run writes
   nothing, not even `registry.jsonl.lock`.
 - **The pilot gates exit 3** (`null-rate` outside the band, `stability` below 0.5): a revision round or Roger's
@@ -111,7 +117,7 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
 
 | command | result |
 |---|---|
-| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **137 passed, 7 skipped** (the skips: the acceptance checks on recorded outputs, none recorded yet) |
+| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **146 passed, 7 skipped** (the skips: the acceptance checks on recorded outputs, none recorded yet) |
 | `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_*.py data_analysis/tests/ -q` | **3,483 passed, 18 skipped** |
 | `... pytest pipeline/tests`, `results_analysis/tests`, `scripts/tests`, `tools/tests` (without `test_boundary_check.py`) | 232, 193, 20 and 262 passed |
 | `... pytest assistant_axis/tests --ignore-glob='*test_gapgen_*'` | 1,277 passed, 26 skipped, **8 errors**, all in [test_generation.py](../../assistant_axis/tests/test_generation.py), which loads Qwen and Gemma tokenizers from Hugging Face: the sandbox refused its writes under the home directory's Hugging Face cache and the gated Gemma repository refused the request (environmental, untouched by this work; see the note below the table) |

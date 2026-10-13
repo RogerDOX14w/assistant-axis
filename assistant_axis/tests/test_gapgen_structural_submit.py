@@ -288,3 +288,33 @@ def test_review_rate_hook():
     except ImportError:
         with pytest.raises(SystemExit, match="plan 13"):
             SU.review_terms_per_hour("measured")
+
+
+@pytest.mark.parametrize("rate,want", [(None, 150.0), (2.43, 2.43 * 60)])
+def test_review_rate_measured_through_plan_13s_interface(monkeypatch, tmp_path, capsys, rate, want):
+    """Review S4 (2026-10-13): plan 13's ``terms_per_active_minute`` is None when no review log has decisions; the hook
+    falls back to the plan's figure with a printed note instead of raising.  Plan 13's module is faked, so the test
+    reads no review log whether or not plan 13 is merged."""
+    import sys
+    import types
+    from dataclasses import dataclass
+    from typing import Optional
+
+    @dataclass
+    class Rate:
+        terms_per_active_minute: Optional[float]
+    seen = {}
+
+    def pooled(dirs):
+        seen["dirs"] = list(dirs)
+        return Rate(rate)
+    fake = types.ModuleType("assistant_axis.gapgen.testing")
+    fake.pooled_review_rate = pooled
+    monkeypatch.setitem(sys.modules, "assistant_axis.gapgen.testing", fake)
+    got, src = SU.review_terms_per_hour("measured", review_dirs=[tmp_path / "review_x"])
+    assert got == pytest.approx(want) and seen["dirs"] == [tmp_path / "review_x"]
+    if rate is None:
+        assert "plan's figure" in src and "NOTE" in capsys.readouterr().err
+    else:
+        assert src.startswith("measured")
+

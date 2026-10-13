@@ -10,8 +10,9 @@ Parsing (:func:`parse_modernise`): a reply that is not a JSON object with a ``ro
 call is asked once more; an entry for an id the call did not send is dropped; a label that breaks the label rule
 (:func:`.operators.label_problem`) is dropped and counted, the others kept; an entry with no usable label is a
 problem, and the rows of a call left without an answer are asked once more in a call of their own.  Every response
-is appended to the run's ``responses.jsonl`` before it is parsed and charged to the usage; ``--resume`` reuses a
-recorded answer to the same prompt (system and user turn) and model.
+is appended to the run's ``responses.jsonl`` before it is parsed and charged to the usage; a rerun of the same run
+reuses every recorded answer to the same prompt (system and user turn) and model, the retry of left-out rows included
+(:func:`reusable`), as the operators call does.
 
 The output is ``classical_modern.jsonl`` (:data:`.CLASSICAL_MODERN_PATH`): one :class:`ModernRow` per classical row
 answered (the classical fields plus ``labels``, ``gloss_modern``, ``polysemy``, ``reasoning``, ``model``,
@@ -168,15 +169,18 @@ def _unit_id(rows: Sequence[ClassicalRow]) -> str:
     return rows[0].id if len(rows) == 1 else f"{rows[0].id}..{rows[-1].id}"
 
 
-def reusable(records: Sequence[Mapping], *, model: str, prompts: Mapping[str, str]) -> dict:
-    """``{unit id: (items, record)}`` for recorded answers that parse, to the same prompt and model."""
+def reusable(records: Sequence[Mapping], *, model: str) -> dict:
+    """``{prompt sha256: (items, record)}`` for the recorded answers by ``model`` that parse (the last one per prompt
+    winning).  A call is reused when the prompt it would send now (system and user turn) is one of these: a full unit
+    of twenty rows, or the call that asks the rows a unit left out, whose user turn depends only on those rows (so it is
+    recomputed exactly on a later run; review S1, 2026-10-13: before, the retry's record was keyed by the full units'
+    ids and could never be matched)."""
     out = {}
     for r in records:
-        if r.get("stage") == STAGE and r.get("model") == model and prompts.get(r.get("unit_id")) == r.get(
-                "prompt_sha256"):
+        if r.get("stage") == STAGE and r.get("model") == model and r.get("prompt_sha256"):
             items, _ = parse_modernise(r.get("text"), ids=r.get("ids") or [])
             if items is not None:
-                out[r["unit_id"]] = (items, r)
+                out[r["prompt_sha256"]] = (items, r)
     return out
 
 
@@ -188,12 +192,7 @@ async def run_modernise(rows: Sequence[ClassicalRow], *, client, model: str, usa
     res = ModerniseRun()
     units = batches(rows, per_call)
     users = {_unit_id(u): render_modernise_user(u, siblings_from=rows) for u in units}
-    prompts = {k: prompt_sha256(system, v) for k, v in users.items()}
-    done = reusable(read_responses(out_path), model=model, prompts=prompts) if (resume and out_path) else {}
-    for uid, (items, rec) in done.items():
-        for it in items:
-            res.items[it.id] = (it, rec)
-    res.n_reused = len(done)
+    done = reusable(read_responses(out_path), model=model) if (resume and out_path) else {}
     sem = asyncio.Semaphore(max(1, concurrency))
     sys_sha = sha256(system)
 
@@ -224,22 +223,32 @@ async def run_modernise(rows: Sequence[ClassicalRow], *, client, model: str, usa
                 res.items[it.id] = (it, rec)
         return items
 
-    async def run_unit(u: list[ClassicalRow], reused: bool) -> None:
+    async def ask(u: Sequence[ClassicalRow], user: str, attempt: int) -> Optional[list]:
+        """A recorded answer to this exact prompt, or a call."""
+        got = done.get(prompt_sha256(system, user))
+        if got is not None:
+            items, rec = got
+            for it in items:
+                res.items[it.id] = (it, rec)
+            res.n_reused += 1
+            return items
+        return await one(u, user, attempt)
+
+    async def run_unit(u: list[ClassicalRow]) -> None:
         async with sem:
             if res.stopped_by_budget:
                 return
-            if not reused:
-                res.n_units += 1
-                items = await one(u, users[_unit_id(u)], 1)
-                if items is not None:
-                    res.n_units_ok += 1
-                if res.stopped_by_budget:
-                    return
+            res.n_units += 1
+            items = await ask(u, users[_unit_id(u)], 1)
+            if items is not None:
+                res.n_units_ok += 1
+            if res.stopped_by_budget:
+                return
             left = [r for r in u if r.id not in res.items]
-            if left:                  # the rows a call (or a reused answer) left out, asked once more on their own
-                await one(left, render_modernise_user(left, siblings_from=rows), 2)
+            if left:                  # the rows the answer left out, asked once more on their own
+                await ask(left, render_modernise_user(left, siblings_from=rows), 2)
 
-    await asyncio.gather(*(run_unit(u, _unit_id(u) in done) for u in units))
+    await asyncio.gather(*(run_unit(u) for u in units))
     res.missing = [r.id for r in rows if r.id not in res.items]
     res.records.sort(key=lambda r: (r["unit_id"], r["attempt"]))
     return res
