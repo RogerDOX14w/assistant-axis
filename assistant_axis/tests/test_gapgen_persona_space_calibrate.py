@@ -74,3 +74,18 @@ def test_real_calibration_hard():
     assert 0.68 <= cal.dup_threshold <= 0.78
     assert 0.12 <= cal.residual_pred_quantiles[10] <= 0.24          # the held-out predicted residual_24 median
     assert 0.32 <= cal.residual_true_quantiles[10] <= 0.40          # against the actual
+
+
+def test_overlap_check_by_reading():
+    pool, E, groups, _ = synthetic()
+    cv = FIT.cross_validate(pool, E, groups, CFG)
+    readings = [{"target": "e001", "listed": "e002", "reading": 3}, {"target": "e001", "listed": "e003", "reading": 3},
+                {"target": "e002", "listed": "e000", "reading": 4},          # e000 is a role: not a trait pair
+                {"target": "e005", "listed": "e006", "reading": "opposite"}, {"target": "nope", "listed": "e001",
+                                                                             "reading": 0}]
+    t = CAL.overlap_check(cv, pool, readings, dup_threshold=0.5)
+    assert list(t) == ["3", "opposite"] and t["3"]["n"] == 2 and t["opposite"]["n"] == 1
+    P = cv.heldout[cv.alpha]["P"]
+    c = float(P[1] @ pool.M[2] / (np.linalg.norm(P[1]) * np.linalg.norm(pool.M[2])))
+    c2 = float(P[1] @ pool.M[3] / (np.linalg.norm(P[1]) * np.linalg.norm(pool.M[3])))
+    assert t["3"]["median_pred_cos"] == pytest.approx(np.median([c, c2]), abs=1e-4)

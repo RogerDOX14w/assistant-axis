@@ -86,6 +86,22 @@ CHARS_PER_TOKEN = 4.0
 #: The judge's spend over its estimate: the recovery harness's measured factor for the same calls (match stage).
 ESTIMATE_CALIBRATION = 1.25
 M1_GLOSS_CHECK = paths.DATA_CANDIDATES / "filter" / "m1_validation_r2" / "results.jsonl"
+#: The overlap test's rubric-A readings (2026-10-03): the duplicate threshold's check against M3's concept readings.
+OVERLAP_CHECK = paths.DATA_CANDIDATES / "overlap_test" / "overlap_arms_3" / "results.jsonl"
+#: The overlap test's reference model, whose first-pass reading is the pair's.
+OVERLAP_REFERENCE_MODEL = "claude-opus-5-5"
+
+
+def overlap_readings(path: Optional[Path]) -> list[dict]:
+    """``[{"target", "listed", "reading"}]``: the reference model's first-pass rubric-A answer per pair."""
+    if path is None or not Path(path).exists():
+        return []
+    out = {}
+    for r in read_jsonl(path):
+        if r.get("rubric") == "A" and r.get("model") == OVERLAP_REFERENCE_MODEL and r.get("pass") == 1 \
+                and r.get("value") is not None:
+            out.setdefault(r["pair_id"], {"target": r["target"], "listed": r["listed"], "reading": r["value"]})
+    return list(out.values())
 
 
 # --------------------------------------------------------------------------- helpers
@@ -353,6 +369,9 @@ def cmd_fit(args, argv) -> int:
     cal = CAL.from_cv(cv, fit_id=args.fit_id, config_version=cfg.config_version, dup_threshold=args.dup_threshold,
                       novel_pct=args.novel_pct if args.novel_pct is not None else CAL.DEFAULT_NOVEL_PCT,
                       thresholds_set_by=set_by, feature_source=feature_source)
+    ovl = overlap_readings(args.overlap_check)
+    if ovl:
+        cal.overlap_check = CAL.overlap_check(cv, pool, ovl, dup_threshold=cal.dup_threshold)
     model = FIT.fit_final(pool, E, cv.alpha, meta={"fit_id": args.fit_id, "config_version": cfg.config_version,
                                                    "N": cv.N, "feature_source": feature_source})
     FIT.save_model(model, out / PS.MODEL_FILE)
@@ -860,6 +879,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--thresholds-set-by", default=None, help="who moved alpha, N or the thresholds (recorded)")
     sp.add_argument("--gloss-check", type=Path, default=M1_GLOSS_CHECK,
                     help="M1 validation results whose existing stratum gives the gloss-side check (cached texts only)")
+    sp.add_argument("--overlap-check", type=Path, default=OVERLAP_CHECK,
+                    help="the overlap test's readings: where dup_threshold sits against rubric A (no call)")
     sp.add_argument("--force", action="store_true", help="refit into a new record (the old directory to .bak)")
     sp.add_argument("--rebuild-model", action="store_true", help="rewrite model.npz of an existing fit")
     sp.set_defaults(func=cmd_fit)

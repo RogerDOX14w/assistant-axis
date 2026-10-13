@@ -89,6 +89,23 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) ->
     return path
 
 
+def overlap_lines(cal: Calibration) -> list[str]:
+    """The overlap test's pairs by rubric-A reading: how a candidate that duplicates a trait would read."""
+    t = cal.overlap_check
+    if not t:
+        return []
+    L = ["The duplicate threshold against M3's own concept readings (the overlap test of 2026-10-03, Opus 5.5's first "
+         "reading of each pair of corpus traits that both train): the cosine of the target's held-out *prediction* "
+         "with the listed trait's actual vector (what a candidate duplicating the listed trait would show), beside "
+         "the actual-actual cosine.", "",
+         "| rubric-A reading | pairs | median predicted cos | median actual cos | share at or above dup_threshold |",
+         "|---|---|---|---|---|"]
+    for k, v in t.items():
+        L.append(f"| {k} | {v['n']} | {v['median_pred_cos']:.3f} | {v['median_actual_cos']:.3f} | "
+                 f"{v['share_pred_at_or_above_dup']:.2f} |")
+    return L + [""]
+
+
 def fit_report(cv: CV, cal: Calibration, *, fit_id: str, pool_counts: Mapping, png_name: str = "fit_report.png",
                rel: str = DATA_REL) -> str:
     """``fit_report.md`` (gate 1): the pool, the per-PC table, the alpha table, the N curve and the chosen N, the
@@ -176,6 +193,7 @@ def fit_report(cv: CV, cal: Calibration, *, fit_id: str, pool_counts: Mapping, p
           f"- `cover_questioned` cosine: {cal.cover_questioned_cos:.3f} (the 10th percentile of held-out "
           f"self-cosines); `novel_vs_covered` percentile {cal.novel_vs_covered_pct:.2f}.",
           f"- Set by: {cal.thresholds_set_by}.", "",
+          *overlap_lines(cal),
           "| percentile | " + " | ".join(f"{int(x * 100)}" for x in cal.levels[::2]) + " |",
           "|---|" + "---|" * len(cal.levels[::2]),
           "| predicted residual | " + " | ".join(f"{x:.3f}" for x in cal.residual_pred_quantiles[::2]) + " |",

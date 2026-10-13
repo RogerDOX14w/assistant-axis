@@ -55,6 +55,8 @@ class Calibration:
     #: the share of held-out training entities whose prediction is at or above ``dup_threshold`` to *another* entity:
     #: the rate at which the flag would call an existing entity duplicate-like (the flag's base rate)
     dup_base_rate: Optional[float] = None
+    #: :func:`overlap_check`'s table (the overlap test's pairs by rubric-A reading), when the fit had them
+    overlap_check: Optional[dict] = None
     feature_source: dict = field(default_factory=dict)
     levels: list = field(default_factory=lambda: list(QUANTILE_LEVELS))
 
@@ -136,3 +138,36 @@ def flag(nn_cos: float, residual_pct_: float, cal: Calibration) -> str:
     if residual_pct_ is not None and residual_pct_ >= cal.novel_pct:
         return "novel_like"
     return "ordinary"
+
+
+def overlap_check(cv, pool, readings, *, dup_threshold: float, alpha: Optional[float] = None) -> dict:
+    """Where the duplicate threshold sits against M3's own concept readings (plan 12 § 1: the overlap test's pairs
+    are calibration data, not training data).  ``readings``: ``[{"target", "listed", "reading"}]``, trait stems and
+    a rubric-A answer (0-4, ``opposite``, ``unsure``).  For every pair whose two traits train, the cosine of the
+    target's **held-out prediction** with the listed trait's actual vector (what a candidate that duplicates the
+    listed trait would show) and the actual-actual cosine, by reading: ``{reading: {"n", "median_pred_cos",
+    "median_actual_cos", "share_pred_at_or_above_dup"}}``."""
+    from collections import defaultdict
+
+    from assistant_axis.entity_id import entity_id
+    alpha = float(cv.alpha if alpha is None else alpha)
+    P = cv.heldout[alpha]["P"]
+    pos = {eid: j for j, eid in enumerate(cv.ids)}
+    Y = pool.M[pool.train_idx]
+
+    def cos(a, b):
+        return float(a @ b / max(np.linalg.norm(a) * np.linalg.norm(b), 1e-300))
+    by = defaultdict(list)
+    for r in readings:
+        t, li = entity_id(r["target"], "traits"), entity_id(r["listed"], "traits")
+        if t in pos and li in pos:
+            by[str(r["reading"])].append((cos(P[pos[t]], Y[pos[li]]), cos(Y[pos[t]], Y[pos[li]])))
+    order = ["4", "3", "2", "1", "0", "opposite", "unsure"]
+    out = {}
+    for k in sorted(by, key=lambda x: order.index(x) if x in order else 99):
+        pc = np.array([x for x, _ in by[k]])
+        ac = np.array([y for _, y in by[k]])
+        out[k] = {"n": int(len(pc)), "median_pred_cos": round(float(np.median(pc)), 4),
+                  "median_actual_cos": round(float(np.median(ac)), 4),
+                  "share_pred_at_or_above_dup": round(float(np.mean(pc >= dup_threshold)), 4)}
+    return out

@@ -277,7 +277,7 @@ def cross_validate(pool: Pool, E: np.ndarray, groups: Sequence[str], cfg: FitCon
             "nn_is_role_share_traits": float(is_role[nn_j][~is_role].mean()),
         }
         heldout[float(alpha)] = {"cos": own, "rank": rank, "nn_cos": nn_cos, "nn_idx": nn_j,
-                                 "res_pred": res_pred, "is_role": is_role}
+                                 "res_pred": res_pred, "is_role": is_role, "P": P}
         if E_alt is not None:
             ar = np.asarray(alt_rows)
             ca = (_unit(Palt) * Yu[ar]).sum(axis=1)
