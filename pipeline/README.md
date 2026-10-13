@@ -463,7 +463,7 @@ Each entity is classified as one of:
 | `below_min_count`                   | filtered mode, < `--min_count` score=3 entries (legitimate filter)                   |
 | `all_nan_or_empty`                  | activations exist but contain no usable tensors                                      |
 | `mysterious`                        | everything upstream looks fine but step 4 produced no vector — re-run candidate      |
-| `vector_only`                       | vector present, no activation file, responses present: the activation was deleted after step 4 to save disk (a deliberate workflow, not a fault) |
+| `vector_only`                       | vector present, no activation file, responses present: the activation file is not in this tree, left on its pod when the small outputs were merged (the four-pod procedure) or deleted (a deliberate state, not a fault) |
 | `orphan_vector`                     | vector present with neither an activation file nor responses (e.g. a renamed entity's old vector; step 5 leaves it out since 2026-10-12, as it has no responses); without `responses/`, every vector lacking an activation file |
 
 The re-run candidates are: `mysterious`, `corrupt_or_truncated_activation`,

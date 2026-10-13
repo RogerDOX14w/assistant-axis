@@ -1,6 +1,6 @@
 """tools/merge_pod_outputs.py on fake pod trees (walk-through P1,
 2026-10-12): four pods (roles, traits, r_ and t_ combinations), each with its
-own default, activations already deleted.  The scanner runs for real as a
+own default, without their activations (which stay on the pods).  The scanner runs for real as a
 subprocess on the merged tree.  No model, no API."""
 from __future__ import annotations
 
@@ -37,8 +37,8 @@ def _usage(path: Path, n: int, cost: float):
 
 def _pod(root: Path, typ: str, names: list[str], *, default_value=10.0, settings=SETTINGS,
          listed=None, uncollected=False, missing_vector=None):
-    """One pod's OUTPUT_DIR after its pipeline and the deletion of its
-    activations: default/ and one type directory."""
+    """One pod's OUTPUT_DIR after its pipeline, as the merge sees it, without
+    the activations (they stay on the pod): default/ and one type directory."""
     d = root / "default"
     (d / "responses").mkdir(parents=True)
     (d / "responses" / "default.jsonl").write_text("{}\n")
@@ -146,7 +146,7 @@ def test_a_listed_entity_without_responses_is_refused(tmp_path, pods, capsys):
 
 def test_the_scanners_exit_3_refuses_the_merge(tmp_path, pods):
     """A role with enough score-3 responses but no vector: the scan reports
-    it (missing_activation, its activation deleted) and the merge stops."""
+    it (missing_activation: no activation file either) and the merge stops."""
     pods["roles"] = _pod(tmp_path / "pods" / "roles2", "roles", ["pirate", "chef"],
                          missing_vector="chef")
     assert _merge(tmp_path, pods) == mpo.EXIT_SCAN

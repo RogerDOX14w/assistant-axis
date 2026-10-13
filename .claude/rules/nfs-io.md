@@ -160,8 +160,9 @@ the scores file now, which step 4 also recomputes on its own) vs
 `missing_scores` / `below_min_count` / `all_nan_or_empty` (legitimate
 filter); it exits 3 when it finds re-run candidates or
 `missing_activation` entities.  Since 2026-10-12 it also checks a tree
-whose activations have been deleted (the four-pod procedure, walk-through
-P1): every entity with responses must have a vector that loads
+without activation files (the four-pod procedure's merged tree, walk-through
+P1; since 2026-10-13 the activations stay on the pods, Roger, rather than
+being deleted): every entity with responses must have a vector that loads
 (`vector_only`) or a reason not to; `tools/merge_pod_outputs.py` runs it on
 the merged tree.  Use it to recover from historical
 short-read damage that pre-retry step 4 silently skipped (statuses and

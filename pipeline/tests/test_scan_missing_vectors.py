@@ -173,16 +173,16 @@ def test_exit_status_and_outputs_single_pair(scan, tree, tmp_path):
 
 
 def test_responses_dir_widens_the_universe(scan, tree):
-    """With responses/ beside activations/: a vector whose activation was
-    deleted on purpose is vector_only, a vector with no responses either is
+    """With responses/ beside activations/: a vector whose activation file is
+    not in the tree (left on the pod, or deleted) is vector_only, a vector with no responses either is
     an orphan, and an entity with responses but nothing else is reported."""
     t = tree
     resp = t["root"] / "traits" / "responses"
     resp.mkdir()
-    for name in ("ok", "deleted_after_step4", "never_extracted", "too_few"):
+    for name in ("ok", "left_on_pod", "never_extracted", "too_few"):
         (resp / f"{name}.jsonl").write_text("{}\n")
     _acts(t["act"] / "ok.pt", 4); _vector(t["vec"] / "ok.pt")
-    _vector(t["vec"] / "deleted_after_step4.pt")
+    _vector(t["vec"] / "left_on_pod.pt")
     _vector(t["vec"] / "renamed_old_stem.pt")           # no responses
     _scores(t, "never_extracted", 4)
     _scores(t, "too_few", 1, 3)
@@ -191,7 +191,7 @@ def test_responses_dir_widens_the_universe(scan, tree):
     sr = scan.scan_one_target(target, min_count=2, reduce_questions=1,
                               deep_load=False, load_check=True)
     got = {r["role"]: r["status"] for r in sr.results}
-    assert got == {"ok": "ok", "deleted_after_step4": "vector_only",
+    assert got == {"ok": "ok", "left_on_pod": "vector_only",
                    "renamed_old_stem": "orphan_vector",
                    "never_extracted": "missing_activation", "too_few": "below_min_count"}
     rc = scan.main(["--root", str(t["root"]), "--min_count", "2", "--no_cache"])
@@ -291,12 +291,13 @@ def test_a_float32_vector_passes_the_size_and_load_checks(scan, tree):
 
 
 # ---------------------------------------------------------------------------
-# Activations deleted after the scan passed (walk-through P1, 2026-10-12)
+# A tree without activation files: merged from the pods without them, or deleted
+# (walk-through P1, 2026-10-12; since 2026-10-13 the activations stay on the pods)
 # ---------------------------------------------------------------------------
 
 def test_a_tree_without_activations_is_still_checked_against_its_responses(scan, tree):
-    """Skipped before: with every activation deleted (the four-pod
-    procedure) the scan found nothing to do, so a merged tree went unchecked."""
+    """Skipped before: with no activation file in the tree (the four-pod
+    procedure's merged tree) the scan found nothing to do, so it went unchecked."""
     t = tree
     resp = t["root"] / "traits" / "responses"
     resp.mkdir()

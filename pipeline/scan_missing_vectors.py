@@ -99,8 +99,8 @@ activation file has to be deleted and re-extracted by step 2 first.
 Coverage (since 2026-10-12): the entities are the activation files plus,
 when a ``responses/`` directory sits beside ``activations/``, every response
 file.  A vector without an activation file is ``vector_only`` when the
-entity has responses (its activation was deleted after step 4 to save disk,
-on purpose) and ``orphan_vector`` when it has none (a stem the run no longer
+entity has responses (the activation file is not in this tree: left on the pod
+when the small outputs were merged, or deleted, on purpose) and ``orphan_vector`` when it has none (a stem the run no longer
 has, e.g. a renamed entity's old vector -- step 5 leaves it out since
 2026-10-12, as it has no responses).  An
 entity with responses but neither an activation file nor a vector is
@@ -114,7 +114,7 @@ whose recorded ``inputs.scores_file.sha256`` (step 4 writes it) differs from
 the scores file on disk now is ``stale_vector``, a re-run candidate (it was
 computed from a partial or older scores file).  Vectors with no ``inputs``
 record (May 2026) count as current; the check needs the load check, so
-``--no_load_check`` skips it; vectors whose activation was deleted
+``--no_load_check`` skips it; vectors with no activation file
 (``vector_only``) are not checked, since step 4 could not recompute them.
 
 Exit status: 0 when nothing needs attention, 3 (``EXIT_RERUN_CANDIDATES``)
@@ -973,9 +973,10 @@ def scan_one_target(
         logger.warning(f"[{target.label}] no activation .pt files in "
                        f"{target.activations_dir}; skipping")
         return ScanResult(target=target, median_activation_size=0)
-    # No activation file but responses beside: every activation was deleted
-    # after the scan passed (the disk-saving step of the four-pod
-    # procedure, walk-through P1), or a merged tree.  Still checked: each
+    # No activation file but responses beside: a tree merged from the pods
+    # without their activations (the four-pod procedure, walk-through P1;
+    # since 2026-10-13 the activations stay on the pods rather than being
+    # deleted), or one whose activations were deleted.  Still checked: each
     # entity with responses must have a vector (vector_only, loaded when the
     # load check is on) or a reason not to.  Skipped before 2026-10-12.
 
@@ -1010,9 +1011,9 @@ def scan_one_target(
 
     # Vectors with no activation file.  With a responses/ dir beside the
     # activations these split in two: ``vector_only`` (the entity has
-    # responses; its activation file was deleted after step 4, the
-    # disk-saving workflow -- 899 of the 1,800 combinations in the 8slot
-    # tree) and ``orphan_vector`` (no responses either: a stem the run no
+    # responses; its activation file is not in this tree, left on the pod
+    # or deleted -- 899 of the 1,800 combinations in the 8slot tree) and
+    # ``orphan_vector`` (no responses either: a stem the run no
     # longer has, such as a renamed entity's old vector, which step 5 would
     # still average in).  Without responses/ every one is orphan_vector.
     act_role_set = {f.stem for f in act_files}

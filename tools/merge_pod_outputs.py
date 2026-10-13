@@ -4,8 +4,9 @@
 The October extraction runs on four pods, one per type (walk-through P1,
 2026-10-12: ``roles``, ``traits``, ``r_combinations``, ``t_combinations``),
 each into its own local OUTPUT_DIR with its own step 0 (the default).  Once a
-pod's pipeline has passed its scan, its activations are deleted and the small
-outputs come together here:
+pod's pipeline has passed its scan, the small outputs come together here (the
+activations stay on the pods' volumes and are not merged; Roger, 2026-10-13:
+copy off the ones to keep before a volume is discarded):
 
 * per type (``roles/``, ``traits/``, ``combinations/``): the response files,
   the score files and the vectors (real files; the ``default`` symlinks are
