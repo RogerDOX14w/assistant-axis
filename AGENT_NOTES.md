@@ -840,6 +840,11 @@ even when no vertical overlap exists.  Mitigations:
 * **Colorbar disproportional** to the heatmap when the figure
   gains width without gaining height — purely aesthetic, only
   worth fixing if it confuses the reader.
+* **Dollar signs eaten by mathtext.**  Two `$` in one string
+  (`$1/$5`, `$0.40/$1.60`) are read as a mathtext span and vanish;
+  escape them (`\$`) in any title, spec line or annotation that
+  prices something (found 2026-10-13 in the batch-size cost plot,
+  below).
 
 #### Working recipe — heatmap + colorbar + 2-line title
 
@@ -874,6 +879,38 @@ plt.close()
 
 Reference implementation (with extensive in-file comments
 explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_heatmap_pair`.
+
+#### Open plot-layout faults (2026-10-13)
+
+Found by the rho-plot pass of the code review (rows RH1-RH7, PV1 and R11 of
+[regeneration_list.md](./reports/code_review_2026-10-12/regeneration_list.md))
+and left in place because each needs a script change; fix them when the
+script is next touched, and verify by reading the plot back:
+
+- Stems instead of display names in the shear and K sweep legends and
+  the parabolic-fit panel titles (`aligned_artificial_intelligence`,
+  `systems_thinker`): [`shear_l_sweep.py`](./results_analysis/shear_l_sweep.py)
+  ([rho_vs_shear_L_di_v1_slot6.png](./roger/axis_judge_experiments/rho_vs_shear_L_di_v1_slot6.png))
+  and [`whitening_k_peak_fit.py`](./results_analysis/whitening_k_peak_fit.py)
+  ([rho_vs_K_parabolic_fits_di_slot6.png](./roger/axis_judge_experiments/rho_vs_K_parabolic_fits_di_slot6.png)).
+  The display-side rule (entity-naming) applies.
+- The parabolic-fit panels' lower-left legend covers the lowest desc+inst
+  points (ecocentric_vs_anthropocentric at K = 0 and 1), in the di and the
+  response figures
+  ([rho_vs_K_parabolic_fits_responses_slot6.png](./roger/axis_judge_experiments/rho_vs_K_parabolic_fits_responses_slot6.png)).
+- The response-mode shear plots clip their x-axis label at the left edge,
+  and the 12 / 14 / 16 and 24 / 28 / 32 tick labels touch
+  ([rho_vs_shear_L_responses_slot6.png](./roger/axis_judge_experiments/rho_vs_shear_L_responses_slot6.png)).
+- [`gpt_anthropic_response_weight_sweep.py`](./results_analysis/gpt_anthropic_response_weight_sweep.py):
+  the caveat box at the foot of the axes covers the 0.4 tick label and the
+  lowest stretch of the curves
+  ([gpt_haiku_q9_response_weight_sweep_slot6.png](./roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png)).
+- [`plot_batch_size_quality_vs_cost.py`](./results_analysis/plot_batch_size_quality_vs_cost.py)
+  ([batch_size_cost_vs_quality.png](./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png),
+  R11): the B=5/7/10/15 boxes overlap one another and cover the 0.75-0.85
+  y-tick labels, the `$47`-`$56` x-ticks collide, the two set-1 labels at
+  `$197` overlap, and the spec lines' `$0.40/$1.60`, `$1/$5` and `$3/$15`
+  lose their dollar signs to mathtext.
 
 ### Ask Mode vs Agent Mode
 - Roger is conscious of the distinction between read-only (ask) and write (agent) modes
@@ -3195,6 +3232,51 @@ responses missing.  `s_init` is treated like any other strength.
 Before, one UNPARSEABLE judgement cost K generations on every resume,
 and `s_init` was never re-judged.
 
+Three more resume rules since 2026-10-13, found by the R18 sweep-consistency
+check of the code review
+([`r18_sweep_consistency.md`](./reports/code_review_2026-10-12/r18_sweep_consistency.md)):
+
+- **A regenerated strength keeps its old records until the new ones exist**
+  (1fd67cda).  A strength the gap-fill regenerates keeps its records on disk
+  until its K new records exist and replace them in one atomic write
+  (`replace_strength` in `_generate_and_dispatch_strength`).  Before, it was
+  wiped first, and a kill in between lost the strength for good, which later
+  resumes never noticed: navigator_progressive_v1 s0_l49_+1 lost 3.359487 on
+  2026-05-18.  A strength of the scan's schedule that is in no records file is
+  now detected and regenerated: a finished summary's schedule out to its
+  blocked-at strengths, or an interior gap in the cursor walk.  Strengths the
+  corrected stop cutoff moved out (`--apply-corrected-stop-cutoff`, below)
+  count as present, read from `excluded_strengths` and
+  `_excluded_records.jsonl`.
+- **Excluded strengths are scanned history** (e728d70b).  A resume treats the
+  strengths the corrected stop cutoff moved to `_excluded_records.jsonl` (or
+  lists in `excluded_strengths`) as scanned: their rows, deduplicated, feed
+  the stop rules and the cursor walk through the same code as
+  `records.jsonl`'s, and all their (strength, question) pairs count as done.
+  A resumed cut cell can therefore stop DOWN again on the two sub-threshold
+  strengths that stopped it, although the cutoff keeps only the larger in
+  `records.jsonl`.  It never regenerates an excluded strength, `s_init` or an
+  UP strength, and the rows are not written back.  The summary rewrite keeps
+  every field the runner does not write itself (the cutoff's `excluded_*`);
+  `n_records` counts `records.jsonl` only.  Before, a resumed cut cell
+  regenerated those strengths (45 in 17 cells of the 8slot copy, on a replay)
+  and dropped the `excluded_*` fields.
+- **A cell recorded before the bidirectional scan is not resumed through it**
+  (0835182c).  Such a cell has rows and either a `summary.json` without
+  `scan_mode`, or no `summary.json` while its experiment's other cells have
+  runner summaries and none has a `scan_mode`.  `run_steering_cell` skips it
+  with a WARNING unless `resume_pre_bidirectional=True`, because such a
+  resume rescans the cell from today's `s_init` with today's question list:
+  the oldest cells hold 6 or 10 responses per strength while their
+  experiments now ask 14 questions, and a replay of the 8slot copy found 38
+  strengths in 14 cells that the original scans never had.  The legacy path
+  does not reproduce these cells either.  A bidirectional cell killed before
+  its first summary still resumes.
+
+Open (not fixed): a bidirectional cell resumed with a start step different
+from its summary's adds strengths (anarchist_concise_v1/s6_l49_+1 adds
+2.376344 because today's start-step table differs).
+
 **summary.json schema** (bidirectional cells):
 
 ```json
@@ -4262,6 +4344,24 @@ shear depth with no significant ρ harm anywhere.  Tied with L=1 on
 ρ at most slots; goal/no-goal subspace cleanliness (more top-aligned
 canonical-angle pairs orthogonalised) is the tie-breaker that picks
 L=3 over L=1.
+
+**The table's record (2026-10-13, the rho-plot pass of the code review,
+e940a300).**  The slot-6 row (p 0.019 / 0.29 / 0.0006) was drawn before the
+May 35-axis di shear file
+[shear_l_sweep_di_slot6.json](./roger/axis_judge_experiments/shear_l_sweep_di_slot6.json)
+was last rewritten (2026-05-12T01:12Z, after the slot 3 and 7 runs); the file
+as frozen gives 0.017 / 0.32 / 0.0005, and the slot 3 and 7 files reproduce
+the table's p-values to its digits.  The May di shear and K sweeps
+(`shear_l_sweep_di_slot{3,6,7}.json`, `whitening_k_sweep_di_slot{3,6,7}.json`
+and their plots) are `frozen_snapshot` entries in
+[deferred_rejudges.yaml](./deferred_rejudges.yaml) since 2026-10-13: a rerun
+cannot reproduce them, because the GPT/Sonnet di weight went 0.50 → 0.625 and
+the combiner gained the one-side-missing fallback on 2026-05-12/13 with no flag
+for either.  A rerun on today's code moves desc+inst ρ by at most 0.026 per
+axis and leaves the L=3 conclusions unchanged; the one movement worth knowing
+is that slot 3's L3→L4 cliff goes from p 0.051 to 0.034.  Details: rows RH2
+and RH3 of
+[regeneration_list.md](./reports/code_review_2026-10-12/regeneration_list.md).
 
 Use the constants instead of literal integers in CLI defaults::
 
@@ -6167,9 +6267,17 @@ verdict step reads three times); the second opinion and the unsure re-ask are So
 call is Sonnet 5.5 first, Opus 5.5 on the pairs the rule sends it.
 
 The registry log [`data/candidates/registry.jsonl`](./data/candidates/registry.jsonl) is git-ignored, so
-each checkout has its own (the tracked copy is
-[`registry.snapshot.jsonl`](./data/candidates/registry.snapshot.jsonl), written by
-[`gap_registry.py`](./data_analysis/gap_generation/gap_registry.py) `compact`).  A generator therefore
+each checkout has its own (the tracked copy is the snapshot
+[`gap_registry.py`](./data_analysis/gap_generation/gap_registry.py) `compact` writes: since 2026-10-12
+(code review A5, 0267ca82) the gzipped `registry.snapshot.jsonl.gz`, at
+[`data/candidates/registry.snapshot.jsonl.gz`](./data/candidates/registry.snapshot.jsonl.gz) once compact next
+runs, because the next uncompressed snapshot would have been about 133 MB, past GitHub's 100 MB limit, and gzip
+makes it about 18 MB; the tracked file on 2026-10-13 is still the earlier uncompressed
+[`registry.snapshot.jsonl`](./data/candidates/registry.snapshot.jsonl), and the first gzipped compact leaves
+its `git rm` to whoever commits.  A `Registry` whose path ends in `.gz` reads it, read-only;
+`registry.snapshot_file` names the snapshot to read in a directory, the `.gz` when present, and
+`registry.read_snapshot` reads one without the writer lock; `compact --uncompressed` writes the old form and is
+refused, writing nothing, when that file would be over 90 MB, `SNAPSHOT_UNCOMPRESSED_MAX_BYTES`).  A generator therefore
 writes every `Candidate` it submits to a tracked `candidates.jsonl` in its run directory under
 [`data/candidates/runs/`](./data/candidates/runs/) (one JSON object per line, exactly the dataclass's
 fields, as `submit_candidates(..., run=ctx)` writes it; example:
@@ -6180,6 +6288,182 @@ a hard cap (an estimate above it is refused), needs `--confirm-expensive --confi
 expensive-operations rule: quote the parameters to Roger and wait for his go), writes a `usage.json`
 beside its output, refuses uncommitted platform code without `--allow-dirty`, and runs live under about
 $20 and through the Message Batches API above that, case by case (the batch-or-real-time rule).
+
+**Guards and records from the code review of 2026-10-12** (its walk-throughs and decisions are under
+[`reports/code_review_2026-10-12/`](./reports/code_review_2026-10-12/)).  B4 (0bd7bc1a): the dirty-tree refusal
+above now covers every paid command (the base-model `sense` step, `gap_registry.py corpus-regions
+--from-descriptions`, the IPIP `cluster` / `name` / `granularity` commands and the Roget `map` / `place-check` /
+`head-scope` commands were without it); the shared check is `runs.dirty_refusal` over `runs.PLATFORM_PATHS` in
+[`gapgen/runs.py`](./assistant_axis/gapgen/runs.py), and a dry run says the real run would be refused.  The filter,
+split and plain-reading CLIs ([`traithood_filter.py`](./data_analysis/gap_generation/traithood_filter.py),
+[`split_cli.py`](./data_analysis/gap_generation/split_cli.py),
+[`plain_reading.py`](./data_analysis/gap_generation/plain_reading.py)) refuse at their start when any prompt's text
+is not the one its version is pinned to (`rubric_versions.mismatches()` in
+[`gapgen/rubric_versions.py`](./assistant_axis/gapgen/rubric_versions.py), which covers the split's eight prompts
+too; the refusal prints the bump commands).  A split `--resume` is refused when a prompt the earlier session
+recorded has another version (`step_versions`) or another text (`prompt_sha256`) now (`split_cli.resume_mismatch`):
+a batches-transport resume collects the earlier answers by `custom_id`, which carries no prompt hash, so they would
+be recorded under the new prompt; finish under a new batch id instead.  B3 (7cb2c145): a `GuardedUsage`
+([`gapgen/cost.py`](./assistant_axis/gapgen/cost.py)) with a `usage_path` rewrites `usage.json` as it charges, at
+most every 30 s (`USAGE_WRITE_INTERVAL_S`), every write atomic, and the first one built in a process installs a
+SIGTERM handler that writes every live record and exits 143, so a killed run keeps its spend (the recorded loss:
+`m1_validation_r2`, 1,117 calls and $1.64 missing from its record, corrected in 011837b2).  A resumed split or M3
+run starts from the larger, by cost, of `usage.json` and the spend its response records show (`cost.resume_usage`
+over `cost.usage_from_records`), with a WARNING when the two differ.  B2 (2b8813eb): the base-model gloss-sense
+step's spend, which lived only in the git-ignored round cache, is the tracked and cumulative
+`gloss_sense_usage_round<N>.json` beside the round's table in
+[`data/candidates/base_model/`](./data/candidates/base_model/) (`base_model.sense_usage_path`; the round-1 file is
+not there yet on 2026-10-13: the first `sense` run or `report` on a round sensed before the change copies the
+cache's record into it).
+
+**IPIP keys, source A against source B (C1, cd1e3dbb).**  The IPIP generator's ingest
+([`ipip/ingest.py`](./assistant_axis/gapgen/generators/ipip/ingest.py); `ingest` in
+[`ipip_generator.py`](./data_analysis/gap_generation/ipip_generator.py)) commits each item's keys (the scales that
+score it, each with a sign) into [`items.jsonl`](./data/candidates/ipip/items.jsonl) from the IPIP key pages,
+source B; Tedone's item assignment workbook, source A, is a check on B and a gap-filler, never the sole authority
+for a key.  Since 2026-10-12 (Roger, code review C1) the gate that stops the ingest (`compare_keys` sets
+`needs_roger`) is sign disagreement on the links both sources key, above `MISMATCH_LIMIT` (2%; 0.1% on the
+recorded ingest, 3 of 2,909); the coverage differences (what one side keys and the other does not: 974
+key-page-only links, 487 workbook-only) are reported, not gated.  `ingest` writes nothing on `needs_roger` (exit 3;
+before, it wrote and then exited 3), and a dry run says when the real run would write nothing.  `merge_keys`
+gap-fills only the workbook links that the comparison's own pairing (`_match_item`: the same item, a normalised
+inventory, a construct name in common) pairs with no key-page link of the item, so each link is counted once, as
+B's; before, a link B held under another spelling (HEXACO_PI / HEX, HPI-HIC / HPI) went in twice, 716 duplicate
+links on the recorded ingest.
+
+**States pass readings (2026-10-13; d3b321c4, 378d0273).**  The states pass
+([`gapgen/states_pass.py`](./assistant_axis/gapgen/states_pass.py), CLI
+[`states_pass.py`](./data_analysis/gap_generation/states_pass.py)) reads the rows M1 put on the `states` holding
+list, words that name a condition rather than a trait: its queue call asks whether the state lasts months or longer
+(then whether it is a role), or else whether a habitual predisposition to it is plausible and under what name, and
+`route_for` turns the answers into the row's route (`role`, `lasting`, `predisposition`, `renamed`, `held`); a gloss
+check confirms the gloss of a released row, and M1's alignment call scores it.  Haiku 5.5 cannot run at temperature
+0, and two one-reading runs on the same 320 rows disagreed on 23% of routes
+([states_pass.md](./reports/code_review_2026-10-12/gate_audits/states_pass.md) § 10), so Roger asked for three
+readings and a vote.  `--readings N` (queue mode; default 3 on Haiku 5.5, else 1, M1's rule) sends the queue call,
+and the gloss check when it runs, N times as independent requests and combines them: a nested majority on
+`lasting`, then `role` or `plausible`, then `name_fits`, each among the readings that answered it (a tie goes to the
+first reading among the leaders), the median `typical_duration`, the free text from the first reading that agrees
+with the vote; the route is derived by `route_for` from the voted answers, never voted on; the check by a majority of
+accepts.  M1's alignment call runs once.  At three readings two runs differ on 12% of routes (the readings agree on
+76-79% of rows within a run; 47fbee18).  Blocks carry `readings` (and with N > 1 `queue_readings` and
+`gloss_check.check_readings`); `summary.json`'s `queue_readings` gives the agreement.  A one-reading run's requests
+are pinned byte for byte (`TestOneReadingIsUnchanged` in
+[`test_gapgen_states_pass_readings.py`](./assistant_axis/tests/test_gapgen_states_pass_readings.py)): if those
+hashes move, the change is wrong, not the pin.  `--resume` keeps the recorded count and refuses another;
+`--reroute` replays each batch with its own.  The estimate and the cost gate count every reading (900 rows: an upper
+bound of $1.60 live, $0.80 through the Batches API).  The pass on the 1,063 unjudged rows ran at three readings on
+2026-10-13 (545df0fd; $3.54 with M1 and M3 on its outputs).
+
+**The alignment sweep's Krakovna sheet (variant B; 66c2ce5d, ec76ecd6).**  The alignment sweep
+([`generators/alignment_sweep/`](./assistant_axis/gapgen/generators/alignment_sweep/), CLI
+[`alignment_sweep.py`](./data_analysis/gap_generation/alignment_sweep.py), plan
+[`coding_plan_08_alignment_sweep.md`](./reports/trait_gap_generation/coding_plan_08_alignment_sweep.md)) extracts
+AI-disposition candidates from alignment documents; its variant B reads the incident sources, among them Krakovna's
+specification-gaming list, a published Google sheet with no licence stated, read transiently and never written to
+the repository.  Google draws a published sheet's `pubhtml` page with script (a `sheets-viewport` widget, no
+`<table>`), so reading it as HTML gave 0 Krakovna chunks, and the tests passed on a hand-made `<table>` fixture.
+Since 2026-10-13 `fetch_transient` ([`fetch.py`](./assistant_axis/gapgen/generators/alignment_sweep/fetch.py))
+follows the landing page's sheet link to the sheet's TSV export (`<sheet>/pub?output=tsv`, built by
+`fetch.published_sheet_tsv_url`, the `gid` kept), and `chunk.sheet_table`
+([`chunk.py`](./assistant_axis/gapgen/generators/alignment_sweep/chunk.py)) reads the export from its header line
+(first cell `Title`; a banner line sits above it), keeps section dividers as rows, and raises instead of returning
+0 chunks when the layout changes.  Live on 2026-10-13: 94 rows (4 dividers), 10 chunks, about 16,500 tokens
+estimated; the extraction (G14, run
+[`2026-10-11-b`](./data/candidates/runs/alignment_sweep/2026-10-11-b/)) gave 14 candidates, 11 new, for about
+$0.50.  The extract run records what it read in `run.json` args `transient_sources` (the URL of the export, sha256,
+size, capture date; never the text).  Lesson: a test fixture for a fetched page must be in the form the live source
+returns, checked once against the live source; a fixture in the form we expect is how 0 chunks went unseen through
+two reviews.
+
+**Gate audits and fixes (2026-10-12/13).**  A gate is any rule in the candidate pipeline that removes, holds or
+routes candidates without a human reading them.  After the IPIP consensus gate turned out to discard two thirds of
+the item pool, Roger had every gate that discards more than about 3% audited (2026-10-12): one Opus report per
+gate, with the rule from the code, its intent, the recorded discard, a read sample with false-negative and
+false-positive rates, a verdict and costed proposals, under
+[`reports/code_review_2026-10-12/gate_audits/`](./reports/code_review_2026-10-12/gate_audits/);
+[README.md](./reports/code_review_2026-10-12/gate_audits/README.md) there holds the inventory, the verdict table
+and the "Fixes" table (what each fix built, where, and its paid phase B).  Where a fix changes a recorded rule it
+is versioned and the old rule stays reproducible.  The fixes, by gate:
+
+- *Census floor* (gate audit 1, 1920bbc2;
+  [census_floor.md](./reports/code_review_2026-10-12/gate_audits/census_floor.md)).  A new stage
+  `allport_iv_rare` in [`censuses/submit.py`](./assistant_axis/gapgen/generators/censuses/submit.py) sends the 310
+  Allport column-IV-only words below the Zipf floor, which had no stage, through M1 and M3 after `allport_rare`.
+  Defect F3: a census rescue (a negating prefix, a gloss hint) was defeated when another generator had already
+  floor-rejected the word (irresolute, first submitted by `antonym_check`), since M1's `--run` took unfiltered rows
+  only; a floor reject whose row's current sources would rescue it is now re-selected
+  (`freq.is_free_floor_reject` and `freq.floor_reject_rescued` in [`gapgen/freq.py`](./assistant_axis/gapgen/freq.py);
+  `traithood_filter.unfiltered_or_rescued`).
+- *Roget and WordNet* (gate audit 2, fc1834b2;
+  [roget_wordnet_selection.md](./reports/code_review_2026-10-12/gate_audits/roget_wordnet_selection.md)).  The
+  WordNet trait-noun closure's hyponym depth (`WN_CLOSURE_DEPTH` in
+  [`roget/wn_clusters.py`](./assistant_axis/gapgen/generators/roget/wn_clusters.py)) goes from 3, which had no
+  recorded derivation, to 6, where the closure saturates: the 117 adjectives depths 4-6 add were 97% traits by M1.
+  Rule 1b in both dictionary walks ([`roget/harvest.py`](./assistant_axis/gapgen/generators/roget/harvest.py)):
+  only `hard_reject` drops a word, the second Zipf check is gone, and every harvested word carries a gloss hint
+  computed before the check, so a word below the floor goes to M1's probe, as it does from M1 itself, instead of
+  being dropped.  Delta runs: `roget_generate.py harvest --delta-from R` keeps only the candidates run R did not
+  submit.  Phase B: 14 Roget and 178 WordNet candidates, 70 new rows, about $1.1.
+- *Base-model table* (gate audit 3, 29610c17;
+  [base_model_table.md](./reports/code_review_2026-10-12/gate_audits/base_model_table.md)).  The count floor
+  (`--min-count`, `DEFAULT_MIN_COUNT` in
+  [`base_model/submit.py`](./assistant_axis/gapgen/generators/base_model/submit.py)) goes from 8, which had no
+  derivation (the plan's default is 1, and the cost estimate that pushed it to 8 was 27 times too high), to 2,
+  recorded with the table's sample size: 48-54% of the rows the floor dropped were trait words, 300-520 of them in
+  no other generator.  Rule 1b in the table too (`freq_rescue`), and parse leaks closed (`etc`, frequency adverbs,
+  `-ly` adverbs, more noun suffixes, British spellings folded to OEWN).  Phase B: 219 rows through M1, about $1.9.
+- *IPIP consensus* (gate audit 4, 3f1d78e2;
+  [ipip_consensus.md](./reports/code_review_2026-10-12/gate_audits/ipip_consensus.md)).  Rule R2 replaces the
+  Jaccard 0.5 gate between the two embedders' cuts, which had held 65% of the items at g600 and 92% at g150 while
+  83% of the held clusters were coherent: a cluster of 3 or more is kept, a pair only when the second embedder
+  co-clusters it, with a size ceiling of 30 at the coarser cuts (`DEFAULT_CONSENSUS "r2"` in
+  [`ipip/cluster.py`](./assistant_axis/gapgen/generators/ipip/cluster.py)); g600 keeps 486 of its 600 clusters.
+- *M1 phrases* (gate audit 5, 1920bbc2;
+  [m1_traithood.md](./reports/code_review_2026-10-12/gate_audits/m1_traithood.md)).  The definition probe (is this
+  rare word a real English word?) had cut 75 of the 77 phrase labels it saw, 67 of them traits, for not being a
+  single word.  A phrase is never sent to the probe now (`split.is_phrase` in
+  [`gapgen/split.py`](./assistant_axis/gapgen/split.py); the probe's text is unchanged and single-word requests are
+  byte-identical, digests pinned); a phrase every reading turned away for a frame cause (`stretched`,
+  `no_reading`: the frames "You are <label>." do not parse for a verb phrase) is decided by the second model's
+  steps 1 to 3 (`phrase_needs_second_model`, recorded in `decided_by`); and an alignment-sweep row sent to the
+  roles list goes on as a trait (`reroute_roles`: AI dispositions are traits).  Phase B: 126 phrase keys re-judged,
+  about $1.9.
+- *M3* (gate audit 6, 403cbd6a; [m3_novelty.md](./reports/code_review_2026-10-12/gate_audits/m3_novelty.md)).
+  Rule set 3, the default since 2026-10-12 (`novelty_score.py --rules 3`): the graded cut-off (alignment score
+  0-1: covered at an overlap reading of 3, as before; 2: at 3 only when both models read 3 or more, so a Sonnet 2
+  raised by Opus stays new; 3: at 4, as before; the audit expected about 189 of the 551 alignment-2 rows kept at
+  cut-off 4 to become covers); review 2 D1's fix, a renamed stem checked before the queue (`renamed_before_queue`:
+  a stale seed-queue entry under a renamed trait's old name had covered 8 rows at stage 0); and partners the
+  relation call marked unrelated or opposed skipped (31% fewer Sonnet readings, no cover lost on the records).  The
+  broader check (`--broader-check`, a switch off in every rule set until Roger has read its pilot,
+  `novelty_score.py broader-pilot`): a cover whose best reading is exactly 3 is read again in both orders for which
+  concept is the broader, and undone (`cover_narrower`) when the corpus trait is the narrower, the audit's dominant
+  false-cover shape.  Phase B: the M3 pilot's 460 rows rescored under rule set 3 (69b08d08; $4.61; 270 covered,
+  190 new).
+- *States pass* (gate audit 7, fb66cc14;
+  [states_pass.md](./reports/code_review_2026-10-12/gate_audits/states_pass.md)).  Route rules 2
+  (`ROUTE_RULES_VERSION` in [`gapgen/states_pass.py`](./assistant_axis/gapgen/states_pass.py)): the gloss check
+  accepts any reading but `passing` (it had required the reading to equal the route, and so held traits, 10 of its
+  11 holds); a row the one-hop rule caught (a candidate the pass itself submitted, tagged a state again) is
+  released as `predisposition` under its own name with the suggested name on its block and review card, not held;
+  the queue call reads the state's text with M1's "now" markers removed (`--state-text-form now_stripped`, the
+  default; `as_recorded` is the old form); and `--reroute` re-decides a batch from its records at $0 (of the 245
+  judged rows 7 changed, 3 needed a call).  Then the readings above.
+- *Review graph* (gate audit 8, 0b9ce75e;
+  [review_graph_thresholds.md](./reports/code_review_2026-10-12/gate_audits/review_graph_thresholds.md)).  The
+  review graph (R1, [`gapgen/review_graph.py`](./assistant_axis/gapgen/review_graph.py), CLI
+  [`review_graph.py`](./data_analysis/gap_generation/review_graph.py)) proposes to Roger the candidate pairs that
+  might be one concept.  Its candidate edges are the `--k` (10) nearest and, since 2026-10-12, every pair at
+  `--pair-floor` (cosine 0.55, `DEFAULT_PAIR_FLOOR`) or above however far down a list it sits (`--pair-floor none`
+  gives the k nearest alone, the rule before; of the pairs Roger had resolved as one concept, k = 10 had cut 22%
+  and the overlap cut-off 18%); label variants (hyphen, case, space, apostrophe) are joined; the estimate's shares
+  come from an earlier build's own records (`--calibrate-from`, default `review_tda_1`; the old estimate was 3.2
+  times the spend); `GRAPH_SCHEMA` 3.  The pilot the audit asked for, `review_graph.py opus-pilot` (b5022a1f): Opus
+  read 128 first directions of the TDA build that Sonnet had scored 2, half on pairs Roger resolved as one concept
+  and half on pairs he kept apart, and raised 34% of each (Fisher p = 0.57; $0.63 live).  So Sonnet-2 pairs are not
+  sent to Opus: the cut-off's loss is not recoverable that way, and the pair floor is the change that adds pairs
+  Roger wants.
 
 ### Clean pair validation results (April 2026)
 <!-- claude: archive -->

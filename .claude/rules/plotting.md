@@ -85,6 +85,11 @@ even when no vertical overlap exists.  Mitigations:
 * **Colorbar disproportional** to the heatmap when the figure
   gains width without gaining height — purely aesthetic, only
   worth fixing if it confuses the reader.
+* **Dollar signs eaten by mathtext.**  Two `$` in one string
+  (`$1/$5`, `$0.40/$1.60`) are read as a mathtext span and vanish;
+  escape them (`\$`) in any title, spec line or annotation that
+  prices something (found 2026-10-13 in the batch-size cost plot,
+  below).
 
 #### Working recipe — heatmap + colorbar + 2-line title
 
@@ -119,6 +124,38 @@ plt.close()
 
 Reference implementation (with extensive in-file comments
 explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_heatmap_pair`.
+
+#### Open plot-layout faults (2026-10-13)
+
+Found by the rho-plot pass of the code review (rows RH1-RH7, PV1 and R11 of
+[regeneration_list.md](./reports/code_review_2026-10-12/regeneration_list.md))
+and left in place because each needs a script change; fix them when the
+script is next touched, and verify by reading the plot back:
+
+- Stems instead of display names in the shear and K sweep legends and
+  the parabolic-fit panel titles (`aligned_artificial_intelligence`,
+  `systems_thinker`): [`shear_l_sweep.py`](./results_analysis/shear_l_sweep.py)
+  ([rho_vs_shear_L_di_v1_slot6.png](./roger/axis_judge_experiments/rho_vs_shear_L_di_v1_slot6.png))
+  and [`whitening_k_peak_fit.py`](./results_analysis/whitening_k_peak_fit.py)
+  ([rho_vs_K_parabolic_fits_di_slot6.png](./roger/axis_judge_experiments/rho_vs_K_parabolic_fits_di_slot6.png)).
+  The display-side rule (entity-naming) applies.
+- The parabolic-fit panels' lower-left legend covers the lowest desc+inst
+  points (ecocentric_vs_anthropocentric at K = 0 and 1), in the di and the
+  response figures
+  ([rho_vs_K_parabolic_fits_responses_slot6.png](./roger/axis_judge_experiments/rho_vs_K_parabolic_fits_responses_slot6.png)).
+- The response-mode shear plots clip their x-axis label at the left edge,
+  and the 12 / 14 / 16 and 24 / 28 / 32 tick labels touch
+  ([rho_vs_shear_L_responses_slot6.png](./roger/axis_judge_experiments/rho_vs_shear_L_responses_slot6.png)).
+- [`gpt_anthropic_response_weight_sweep.py`](./results_analysis/gpt_anthropic_response_weight_sweep.py):
+  the caveat box at the foot of the axes covers the 0.4 tick label and the
+  lowest stretch of the curves
+  ([gpt_haiku_q9_response_weight_sweep_slot6.png](./roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png)).
+- [`plot_batch_size_quality_vs_cost.py`](./results_analysis/plot_batch_size_quality_vs_cost.py)
+  ([batch_size_cost_vs_quality.png](./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png),
+  R11): the B=5/7/10/15 boxes overlap one another and cover the 0.75-0.85
+  y-tick labels, the `$47`-`$56` x-ticks collide, the two set-1 labels at
+  `$197` overlap, and the spec lines' `$0.40/$1.60`, `$1/$5` and `$3/$15`
+  lose their dollar signs to mathtext.
 
 ### Plot Provenance Metadata (mandatory for every plot)
 Every plot generated in this repo MUST embed a PNG-text-chunk

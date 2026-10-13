@@ -106,6 +106,51 @@ responses missing.  `s_init` is treated like any other strength.
 Before, one UNPARSEABLE judgement cost K generations on every resume,
 and `s_init` was never re-judged.
 
+Three more resume rules since 2026-10-13, found by the R18 sweep-consistency
+check of the code review
+([`r18_sweep_consistency.md`](./reports/code_review_2026-10-12/r18_sweep_consistency.md)):
+
+- **A regenerated strength keeps its old records until the new ones exist**
+  (1fd67cda).  A strength the gap-fill regenerates keeps its records on disk
+  until its K new records exist and replace them in one atomic write
+  (`replace_strength` in `_generate_and_dispatch_strength`).  Before, it was
+  wiped first, and a kill in between lost the strength for good, which later
+  resumes never noticed: navigator_progressive_v1 s0_l49_+1 lost 3.359487 on
+  2026-05-18.  A strength of the scan's schedule that is in no records file is
+  now detected and regenerated: a finished summary's schedule out to its
+  blocked-at strengths, or an interior gap in the cursor walk.  Strengths the
+  corrected stop cutoff moved out (`--apply-corrected-stop-cutoff`, below)
+  count as present, read from `excluded_strengths` and
+  `_excluded_records.jsonl`.
+- **Excluded strengths are scanned history** (e728d70b).  A resume treats the
+  strengths the corrected stop cutoff moved to `_excluded_records.jsonl` (or
+  lists in `excluded_strengths`) as scanned: their rows, deduplicated, feed
+  the stop rules and the cursor walk through the same code as
+  `records.jsonl`'s, and all their (strength, question) pairs count as done.
+  A resumed cut cell can therefore stop DOWN again on the two sub-threshold
+  strengths that stopped it, although the cutoff keeps only the larger in
+  `records.jsonl`.  It never regenerates an excluded strength, `s_init` or an
+  UP strength, and the rows are not written back.  The summary rewrite keeps
+  every field the runner does not write itself (the cutoff's `excluded_*`);
+  `n_records` counts `records.jsonl` only.  Before, a resumed cut cell
+  regenerated those strengths (45 in 17 cells of the 8slot copy, on a replay)
+  and dropped the `excluded_*` fields.
+- **A cell recorded before the bidirectional scan is not resumed through it**
+  (0835182c).  Such a cell has rows and either a `summary.json` without
+  `scan_mode`, or no `summary.json` while its experiment's other cells have
+  runner summaries and none has a `scan_mode`.  `run_steering_cell` skips it
+  with a WARNING unless `resume_pre_bidirectional=True`, because such a
+  resume rescans the cell from today's `s_init` with today's question list:
+  the oldest cells hold 6 or 10 responses per strength while their
+  experiments now ask 14 questions, and a replay of the 8slot copy found 38
+  strengths in 14 cells that the original scans never had.  The legacy path
+  does not reproduce these cells either.  A bidirectional cell killed before
+  its first summary still resumes.
+
+Open (not fixed): a bidirectional cell resumed with a start step different
+from its summary's adds strengths (anarchist_concise_v1/s6_l49_+1 adds
+2.376344 because today's start-step table differs).
+
 **summary.json schema** (bidirectional cells):
 
 ```json

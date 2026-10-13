@@ -96,6 +96,24 @@ shear depth with no significant ρ harm anywhere.  Tied with L=1 on
 canonical-angle pairs orthogonalised) is the tie-breaker that picks
 L=3 over L=1.
 
+**The table's record (2026-10-13, the rho-plot pass of the code review,
+e940a300).**  The slot-6 row (p 0.019 / 0.29 / 0.0006) was drawn before the
+May 35-axis di shear file
+[shear_l_sweep_di_slot6.json](./roger/axis_judge_experiments/shear_l_sweep_di_slot6.json)
+was last rewritten (2026-05-12T01:12Z, after the slot 3 and 7 runs); the file
+as frozen gives 0.017 / 0.32 / 0.0005, and the slot 3 and 7 files reproduce
+the table's p-values to its digits.  The May di shear and K sweeps
+(`shear_l_sweep_di_slot{3,6,7}.json`, `whitening_k_sweep_di_slot{3,6,7}.json`
+and their plots) are `frozen_snapshot` entries in
+[deferred_rejudges.yaml](./deferred_rejudges.yaml) since 2026-10-13: a rerun
+cannot reproduce them, because the GPT/Sonnet di weight went 0.50 → 0.625 and
+the combiner gained the one-side-missing fallback on 2026-05-12/13 with no flag
+for either.  A rerun on today's code moves desc+inst ρ by at most 0.026 per
+axis and leaves the L=3 conclusions unchanged; the one movement worth knowing
+is that slot 3's L3→L4 cliff goes from p 0.051 to 0.034.  Details: rows RH2
+and RH3 of
+[regeneration_list.md](./reports/code_review_2026-10-12/regeneration_list.md).
+
 Use the constants instead of literal integers in CLI defaults::
 
     from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
