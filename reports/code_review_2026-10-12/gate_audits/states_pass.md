@@ -1012,3 +1012,18 @@ as it is (about $0.63 live) and giving the queue call three readings with a vote
 $1.9 live for the 900 rows, and the 320 judged rows could then be re-read the same way for about $0.7).
 The routing counts in sections 5 and 7 above rest on one reading per row and carry the same noise.
 Scratch records: `/tmp/claude-501/gatefix_states/scratch/` and `scratch2/` (not kept).
+
+**Roger's decision (2026-10-13): three readings and a vote.**  Built (commits d3b321c4, 378d0273: `--readings`,
+default 3 on Haiku 5.5; a nested majority on the route-deciding fields, the median duration, the route derived by
+`route_for`; the gloss check by a majority of accepts; one-reading runs byte-identical).  The same two-run check at
+three readings (scratch registries, $0.49 for both):
+
+| between two runs on the 320 judged rows | 1 reading | **3 readings** |
+|---|---|---|
+| route differs | 23% (text identical, 197 rows) | **12%** (all 320; 14% on the 197) |
+| typical duration differs | 24% | **15%** (18% on the 197) |
+| holding list differs | not measured | **8%** |
+
+Within each 3-reading run the three readings agree on the route for 76-79% of rows and split 2-1 on the rest.  The
+vote halves the flips; the remaining 12% sit on rows whose readings split, the honest borderline.  The pass on the
+unjudged rows (1,063 by then) runs at three readings.
