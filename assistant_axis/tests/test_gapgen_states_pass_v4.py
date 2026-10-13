@@ -146,16 +146,24 @@ class TestPrompts:
         assert "role true" in p and "role false" in p and 'suggested_name "jumpy"' in p and "name_fits true" in p
         assert "plausible false" in p
 
+    #: Recorded collisions between the queue prompt's example words and the states list, on the rule Roger set for
+    #: "morose" on 2026-10-12: the pinned prompt's judgement of such a word can't be relied on, the prompt text
+    #: stays, and any new collision still fails.  "startled" (Allport-hi, tagged a state by M1) reached the states
+    #: list on 2026-10-13; the three-reading pass routed it renamed -> "jumpy", which is the prompt's own example,
+    #: so that answer echoes the example and is not independent evidence (Roger reads it in the states review).
+    STATES_EXAMPLE_RECORDED = {"startled"}
+
     def test_example_words_are_not_on_the_registry_states_list(self):
         """Not a hygiene rule of the tests' sources (the registry is git-ignored), but the pilot judges that list:
-        the snapshot's states rows must not be the prompt's examples."""
+        the snapshot's states rows must not be the prompt's examples, apart from the recorded collisions."""
         from assistant_axis.gapgen.registry import read_snapshot, snapshot_file
         snap = snapshot_file(REPO / "data" / "candidates")      # gzipped since 2026-10-12 (A5), plain before
         if not snap.exists():
             pytest.skip("no snapshot")
         rows = list(read_snapshot(snap).values())
         states = {r["stem"] for r in rows if r.get("holding") == "states"}
-        assert not states & {w.replace("-", "_") for w in sp.QUEUE_EXAMPLES + sp.SUGGESTED_NAMES}
+        hits = states & {w.replace("-", "_") for w in sp.QUEUE_EXAMPLES + sp.SUGGESTED_NAMES}
+        assert hits <= self.STATES_EXAMPLE_RECORDED, sorted(hits - self.STATES_EXAMPLE_RECORDED)   # a new collision fails
 
 
 def test_the_queue_call_has_room_for_twenty_rows_of_haiku_55():
