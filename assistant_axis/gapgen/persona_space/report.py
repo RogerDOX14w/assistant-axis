@@ -63,8 +63,9 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) ->
         if len(r2) >= x1:
             m = float(r2[x0 - 1:x1].mean())
             a1.hlines(m, x0 - 0.4, x1 + 0.4, color="#c0392b", lw=1.6)
-            a1.text((x0 + x1) / 2, m + 0.03, f"mean {m:.2f}", ha="center", fontsize=8, color="#c0392b",
-                    bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none", "pad": 1.5})
+            # the label above the bars (none of PCs 9-64 reaches 0.9), so it covers no data
+            a1.text((x0 + x1) / 2, 0.93, f"PCs {label}: mean {m:.2f}", ha="center", va="center", fontsize=8,
+                    color="#c0392b")
     Ns = sorted(int(n) for n in s["rho_by_N"])
     alphas = sorted(cv.summary)
     cmap = plt.get_cmap("viridis")
