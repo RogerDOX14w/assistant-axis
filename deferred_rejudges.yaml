@@ -1049,3 +1049,97 @@ deferrals:
     October 2026 re-score on the new extraction (regeneration list row R4, reports/code_review_2026-10-12/regeneration_list.md);
     a file clears when its cell is re-scored.'
   deferred_at: '2026-10-12T22:36:27+00:00'
+- path_glob: roger/axis_judge_experiments/rho_vs_shear_L_di_slot[367].png
+  dep_key: null
+  category: frozen_snapshot
+  compares_to: roger/axis_judge_experiments/rho_vs_shear_L_di_v1_slot[367].png
+  reason: >-
+    Record of the May 2026 L=3 soft-shear decision on the 35-axis di cohort (results_analysis/shear_l_sweep.py,
+    2026-05-11/12; the AGENT_NOTES L=3 t-test table is computed from the JSONs beside these).  They
+    record pair_list_di.json at 5,902 B, the 35-axis list of git 730ff799 (restored byte-exact as
+    roger/axis_judge_experiments/restored_pair_lists_730ff799/pair_list_di.json), and read stale on that
+    rewritten list and on R1's hand edit of relativist_vs_absolutist/gpt_responses_roles_b7.  A rerun cannot
+    reproduce them: DEFAULT_GPT_SONNET_DI_WEIGHT 0.50 -> 0.625 and the one-side-missing combiner fallback
+    (2026-05-12/13) have no flag, and 9 of the 35 axes have gained GPT response caches since.  Measured
+    2026-10-13 (rerun into TMPDIR on the restored list): desc+inst rho moves by at most 0.025 / 0.014 / 0.026
+    per axis at slots 3 / 6 / 7 (mean 0.002-0.005), and the L=3 paired t-tests are unchanged in substance.
+    The current views are the 61-axis di_v1 and di_v1_blend shear plots; regenerated on new lists at the
+    October re-score (regeneration list rows R3 and RH2, reports/code_review_2026-10-12/regeneration_list.md).
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/shear_l_sweep_di_slot[367].json
+  dep_key: null
+  category: frozen_snapshot
+  compares_to: roger/axis_judge_experiments/shear_l_sweep_di_v1_slot[367].json
+  reason: >-
+    Record of the May 2026 L=3 soft-shear decision on the 35-axis di cohort: the AGENT_NOTES L=3 t-test
+    table is computed from these.  Same history as the rho_vs_shear_L_di_slot[367].png entry above: they
+    record the 35-axis pair_list_di.json of git 730ff799 (restored as
+    roger/axis_judge_experiments/restored_pair_lists_730ff799/pair_list_di.json), and a rerun cannot
+    reproduce them (DEFAULT_GPT_SONNET_DI_WEIGHT 0.50 -> 0.625 and the one-side-missing fallback,
+    2026-05-12/13, no flag).  A rerun on 2026-10-13 moved desc+inst rho by at most 0.026 per axis and left the
+    L=3 t-tests unchanged in substance.  Current view: shear_l_sweep_di_v1[_blend]_slot*.json; regenerated
+    on new lists at the October re-score (regeneration list rows R3 and RH2).
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/rho_vs_whitening_K_di_slot[367].png
+  dep_key: null
+  category: frozen_snapshot
+  reason: >-
+    Record of the May 2026 soft-K sweep on the 35-axis di cohort (results_analysis/whitening_k_sweep.py,
+    2026-05-11/12), the sibling of the frozen shear sweep.  They record pair_list_di.json at 5,902 B, the
+    35-axis list of git 730ff799 (restored as
+    roger/axis_judge_experiments/restored_pair_lists_730ff799/pair_list_di.json), and read stale on that
+    rewritten list and on R1's hand edit of relativist_vs_absolutist/gpt_responses_roles_b7.  A rerun cannot
+    reproduce them (DEFAULT_GPT_SONNET_DI_WEIGHT 0.50 -> 0.625 and the one-side-missing combiner fallback,
+    2026-05-12/13, no flag).  No di_v1 K sweep exists yet; regenerated on new lists at the October re-score
+    (regeneration list rows R3 and RH3, reports/code_review_2026-10-12/regeneration_list.md).
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/whitening_k_sweep_di_slot[367].json
+  dep_key: null
+  category: frozen_snapshot
+  reason: >-
+    Record of the May 2026 soft-K sweep on the 35-axis di cohort; same history as the
+    rho_vs_whitening_K_di_slot[367].png entry above (35-axis pair_list_di.json of git 730ff799, restored as
+    roger/axis_judge_experiments/restored_pair_lists_730ff799/pair_list_di.json; a rerun cannot reproduce
+    it, DEFAULT_GPT_SONNET_DI_WEIGHT 0.50 -> 0.625 and the one-side-missing fallback, no flag).  Read by the
+    refitted rho_vs_K_parabolic_fits_di_slot* / whitening_k_peak_fit_di_slot* (2026-10-13) and by
+    shear_l_vs_k_comparison_di_slot6.json (R10).  Regenerated on new lists at the October re-score
+    (regeneration list rows R3 and RH3).
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/rho_by_layer_[KL].png
+  dep_key: null
+  category: awaiting_rescore
+  reason: >-
+    May 2026 output of results_analysis/rho_by_layer.py (K 2026-05-22, L 2026-05-14), a response-mode plot
+    the October re-score regenerates on the new lists (regeneration list row R3,
+    reports/code_review_2026-10-12/regeneration_list.md).  Stale not only on a judge cache (R1's hand edit of
+    relativist_vs_absolutist/gpt_responses_roles_b7) but also on the pair lists, rewritten since (they record
+    the lists now kept as pair_list_di_v1.json and, for K, pair_list_responses_v1.json, for L the April 12-axis
+    list now kept as pair_list_resp_12axes_2026-04-29.json), and on assistant_axis/judge_score_combine.py:
+    for L a real change (DEFAULT_GPT_HAIKU_Q9_WEIGHT 0.625 -> 0.525 on 2026-05-22), for K mtime only (same
+    32,656 B).  Not regenerated now: the soft-K regime needs about 21,000 SVDs of 580 x 5120 pools (1-2
+    CPU-hours), and the October run regenerates both.  Recorded 2026-10-13 (row RH9).
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/rho_by_layer_[KL].json
+  dep_key: null
+  category: awaiting_rescore
+  reason: >-
+    The sidecars of rho_by_layer_[KL].png; same reason as that entry (stale on the rewritten pair lists, on
+    judge_score_combine.py, for L the 0.625 -> 0.525 Haiku-weight retune, and on R1's hand edit; regenerated
+    at the October re-score, regeneration list rows R3 and RH9).  rho_by_layer_L.json feeds
+    rho_by_layer_simple_slot6_raw.{json,png}.
+  deferred_at: '2026-10-13T02:00:10+00:00'
+- path_glob: roger/axis_judge_experiments/rho_by_slot_and_K.png
+  dep_key: null
+  category: awaiting_rescore
+  reason: >-
+    May 2026 output of results_analysis/rho_by_slot_and_K.py (2026-05-13), regenerated on the new lists at the
+    October re-score with its title fix (regeneration list rows R3 and R14,
+    reports/code_review_2026-10-12/regeneration_list.md).  Stale not only on judge caches (R1's hand edit of
+    relativist_vs_absolutist/gpt_responses_roles_b7; the Sonnet instructions cache of
+    aligned_artificial_intelligence_vs_paperclip_maximizer, rewritten 2026-05-13T20:26Z, six minutes after
+    the plot) but also on the pair lists, rewritten since (it records the lists now kept as
+    pair_list_di_v1.json and pair_list_resp_12axes_2026-04-29.json).  Not regenerated now: a rerun on those
+    lists computed 16 of the 48 (slot, K) cells in 12 CPU-minutes, so the whole run is about 40-50
+    CPU-minutes; the 16 cells it reached reproduce the plotted values to the three decimals shown.  Its
+    sibling rho_by_slot_and_L.png was regenerated (row RH8).  Recorded 2026-10-13.
+  deferred_at: '2026-10-13T02:20:00+00:00'
