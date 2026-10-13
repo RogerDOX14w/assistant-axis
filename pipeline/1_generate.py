@@ -33,7 +33,10 @@ Exit status (2026-10-12): 1 when a goal-list name the grid uses has no
 instruction file (before anything is generated), when a worker failed to load
 the model or died, or when any item failed; a run stops early after
 MAX_CONSECUTIVE_FAILURES (20) failed items in a row.  Everything saved stays
-saved, and a rerun generates only what is missing.
+saved, and a rerun generates only what is missing.  Since 2026-10-13 (the
+multi-model plan) also when the model's family is unknown or a TODO, or its
+chat template gives no usable header layout: read from config.json and the
+tokenizer before vLLM is started.
 """
 
 import argparse
@@ -41,8 +44,9 @@ import json
 import logging
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import torch
 import torch.multiprocessing as mp
@@ -54,9 +58,20 @@ from assistant_axis.generation import (
     RoleResponseGenerator,
     build_generation_run_record,
     changed_instructions,
+    format_conversation,
+    prompt_token_ids,
     read_generation_config,
     settings_differences,
+    system_prompt_mode,
     write_generation_config,
+)
+from assistant_axis.internals.chat_layout import ChatLayout, LayoutError, derive_chat_layout
+from assistant_axis.model_families import (
+    FamilyNotBuiltError,
+    FamilySpec,
+    UnknownFamilyError,
+    family_for_model,
+    require_built,
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -404,6 +419,8 @@ def process_items_on_worker(
             temperature=args.temperature,
             max_tokens=args.max_tokens,
             top_p=args.top_p,
+            family=getattr(args, "family", None),
+            expected_header_ids=getattr(args, "expected_header_ids", None),
         )
         generator.generator.load()
 
@@ -505,7 +522,57 @@ def run_multi_worker(work_items: List[Dict], args) -> int:
 _SELECTION_FLAGS = ("no_traits", "traits_only", "roles_only", "combos_only_r", "combos_only_t")
 
 
-def generation_run_record(args, all_items: List[Dict], pending: List[Dict]) -> Dict:
+@dataclass
+class GenerationPreflight:
+    """What step 1 knows before vLLM starts: the family row, the tokenizer and
+    the header layout derived from its chat template."""
+
+    family: FamilySpec
+    tokenizer: object
+    layout: ChatLayout
+
+
+def preflight_generation(model_name: str) -> GenerationPreflight:
+    """Read the model's ``config.json`` and tokenizer (a few MB, no weights)
+    before vLLM: refuse a ``model_type`` with no row or a row not built
+    (``UnknownFamilyError`` / ``FamilyNotBuiltError``; multi-model plan § 15
+    Q8, Q3) and derive the header layout (``LayoutError`` when the template
+    gives none), so a model the table does not know fails before a GPU-hour
+    is spent."""
+    from transformers import AutoTokenizer
+    family = require_built(family_for_model(model_name))
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    return GenerationPreflight(family=family, tokenizer=tokenizer,
+                               layout=derive_chat_layout(tokenizer, family))
+
+
+def _first_pos(path) -> str:
+    from assistant_axis.atomic_io import read_text_with_retry
+    insts = json.loads(read_text_with_retry(path, logger_obj=logger)).get("instruction") or []
+    return insts[0].get("pos", "") if insts else ""
+
+
+def sample_conversation(args, pending: List[Dict], pre: GenerationPreflight) -> List[Dict]:
+    """The side-car's ``sample_conversation``: the first pending item's first
+    instruction (a combination's role and trait instructions joined by a
+    newline, as generation joins them) and the first question kept, built
+    with ``format_conversation`` as every conversation of the run is.  The
+    ``{model_name}`` placeholder is left as written (the sample is for the
+    rendering check, not a response)."""
+    from assistant_axis.atomic_io import read_jsonl_with_retry
+    item = pending[0]
+    if item["type"] == "combined":
+        instruction = f"{_first_pos(item['role_file'])}\n{_first_pos(item['trait_file'])}"
+    else:
+        instruction = _first_pos(item["file_path"])
+    questions = read_jsonl_with_retry(args.questions_file, skip_malformed=False,
+                                      logger_obj=logger)
+    question = questions[0]["question"] if questions else "What is law"
+    return format_conversation(instruction or None, question, pre.tokenizer, family=pre.family)
+
+
+def generation_run_record(args, all_items: List[Dict], pending: List[Dict],
+                          pre: GenerationPreflight) -> Dict:
     """This invocation's entry of ``generation_config.json``."""
     import hashlib
     dirs = {"roles_dir": Path(args.roles_dir)}
@@ -525,15 +592,21 @@ def generation_run_record(args, all_items: List[Dict], pending: List[Dict]) -> D
             "goal_count": args.goal_count,
             "non_goal_count": args.non_goal_count,
         })
+    sample = sample_conversation(args, pending, pre)
     return build_generation_run_record(
-        model_name=args.model, temperature=args.temperature, top_p=args.top_p,
+        model_name=args.model, family=pre.family, layout=pre.layout,
+        system_prompt=system_prompt_mode(pre.tokenizer, pre.family),
+        sample_conversation=sample,
+        sample_prompt_ids=prompt_token_ids(pre.tokenizer, sample, pre.family.template_kwargs),
+        temperature=args.temperature, top_p=args.top_p,
         max_tokens=args.max_tokens, max_model_len=args.max_model_len,
         questions_file=args.questions_file, question_count=args.question_count,
         reduce_questions=args.reduce_questions, instruction_dirs=dirs, selection=selection)
 
 
 def check_and_record_generation_config(args, output_dir: Path, all_items: List[Dict],
-                                       pending: List[Dict]) -> bool:
+                                       pending: List[Dict],
+                                       pre: GenerationPreflight) -> bool:
     """Check this run against the runs recorded in ``output_dir`` and append
     its record; False (after logging why) when the run must not start.
 
@@ -544,14 +617,15 @@ def check_and_record_generation_config(args, output_dir: Path, all_items: List[D
     ``--allow_mixed_settings``:
 
     * responses here but no record: a tree made before 2026-10-12 -> refuse;
-    * the last recorded run used another model, template kwargs, clean-up,
-      sampling or question set -> refuse, naming the differences.
+    * the last recorded run used another model, model type, template kwargs,
+      header, clean-up, sampling or question set -> refuse, naming the
+      differences.
 
     Instruction edits are not refused (one corrected file should not block
     a run): the entities with responses here whose ``pos`` instructions have
     changed since the last record are named in a WARNING, since their
     responses are now stale."""
-    record = generation_run_record(args, all_items, pending)
+    record = generation_run_record(args, all_items, pending, pre)
     previous = read_generation_config(output_dir)
     fresh_hint = ("every extraction runs into a fresh output directory (pipeline/README.md); "
                   "use one, or pass --allow_mixed_settings to add to this one anyway")
@@ -720,9 +794,23 @@ def main():
     logger.info(f"{len(pending)} items to process "
                 f"({len(all_items) - len(pending)} skipped)")
 
+    # The model's family, tokenizer and header layout, before vLLM starts
+    # (multi-model plan, 2026-10-13): an unknown or unbuilt family, or a
+    # template without a usable header, stops here.
+    try:
+        pre = preflight_generation(args.model)
+    except (UnknownFamilyError, FamilyNotBuiltError, LayoutError) as e:
+        logger.error(f"{args.model}: {e}")
+        sys.exit(1)
+    logger.info(f"Family {pre.family.model_type}, template kwargs "
+                f"{dict(pre.family.template_kwargs)}; header {list(pre.layout.header_tokens)!r} "
+                f"(ids {list(pre.layout.header_ids)})")
+    args.family = pre.family
+    args.expected_header_ids = list(pre.layout.header_ids)
+
     # The run's side-car (walk-through P2, 2026-10-12), checked against the
     # runs already recorded here and written before anything is generated.
-    if not check_and_record_generation_config(args, output_dir, all_items, pending):
+    if not check_and_record_generation_config(args, output_dir, all_items, pending, pre):
         sys.exit(1)
 
     # GPU detection
@@ -757,6 +845,8 @@ def main():
             temperature=args.temperature,
             max_tokens=args.max_tokens,
             top_p=args.top_p,
+            family=args.family,
+            expected_header_ids=args.expected_header_ids,
         )
         generator.generator.load()
 

@@ -12,7 +12,10 @@ Two fixes of 2026-10-12 are pinned here:
   responses missing).
 
 Nothing is spawned and no model is loaded: the worker processes and the
-generator are fakes.
+generator are fakes.  Since the multi-model plan (2026-10-13) step 1 reads the
+model's config.json and tokenizer before vLLM (``preflight_generation``); that
+is faked for every test here with the qwen3 row and the Qwen3-like tokenizer
+(``_fake_preflight``), since the Mac has no Hugging Face cache to read.
 """
 from __future__ import annotations
 
@@ -35,6 +38,26 @@ def mod():
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     return m
+
+
+@pytest.fixture(autouse=True)
+def _fake_preflight(mod, monkeypatch):
+    """The qwen3 row, the Qwen3-like fake tokenizer and its derived layout,
+    whatever --model says (no config.json is read)."""
+    from assistant_axis.internals.chat_layout import derive_chat_layout
+    from assistant_axis.model_families import FAMILIES
+    from assistant_axis.tests.internals_fakes import make_qwen3_like_tokenizer
+    tok = make_qwen3_like_tokenizer()
+    pre = mod.GenerationPreflight(family=FAMILIES["qwen3"], tokenizer=tok,
+                                  layout=derive_chat_layout(tok, FAMILIES["qwen3"]))
+    calls = []
+
+    def fake(model_name):
+        calls.append(model_name)
+        return pre
+
+    monkeypatch.setattr(mod, "preflight_generation", fake)
+    return calls
 
 
 def _instruction_file(path: Path, text: str) -> None:
@@ -448,3 +471,76 @@ def test_nothing_to_do_writes_no_record(mod, monkeypatch, data):
     _run_main(mod, monkeypatch, data)
     _run_main(mod, monkeypatch, data)
     assert len(_config(data)["runs"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# The family and the tokenizer fields of the side-car (multi-model plan,
+# 2026-10-13, § 5.3, § 7)
+# ---------------------------------------------------------------------------
+
+def test_the_side_car_carries_the_family_header_and_sample(mod, monkeypatch, data):
+    from assistant_axis.tests.internals_fakes import QWEN3_HEADER_TOKENS, make_qwen3_like_tokenizer
+    code, _ = _run_main(mod, monkeypatch, data)
+    assert code == 0
+    run = _config(data)["runs"][0]
+    assert run["model_type"] == "qwen3"
+    assert run["header_tokens"] == QWEN3_HEADER_TOKENS
+    tok = make_qwen3_like_tokenizer()
+    assert run["header_ids"] == tok.convert_tokens_to_ids(QWEN3_HEADER_TOKENS)
+    assert run["generation_prompt_ids"] == run["header_ids"]
+    assert run["system_prompt"] == "native"
+    # The sample: the first pending item's first instruction and the first
+    # question, and the ids step 1 hands vLLM for it.
+    assert run["sample_conversation"] == [
+        {"role": "system", "content": "trait patient 0"}, {"role": "user", "content": "q0"}]
+    ids = tok.apply_chat_template(run["sample_conversation"], tokenize=True,
+                                  add_generation_prompt=True, return_dict=False,
+                                  enable_thinking=False)
+    assert run["sample_prompt_ids"] == list(ids)
+
+
+def test_an_unknown_family_stops_step_1_before_anything(mod, monkeypatch, data, caplog):
+    from assistant_axis.model_families import UnknownFamilyError
+
+    def unknown(model_name):
+        raise UnknownFamilyError("model_type 'nope' has no row in the family table")
+
+    monkeypatch.setattr(mod, "preflight_generation", unknown)
+    with caplog.at_level(logging.ERROR):
+        code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 1 and saved == []
+    assert "Qwen/fake: model_type 'nope' has no row" in caplog.text
+    assert not (data / "out" / "generation_config.json").exists()
+
+
+def test_a_rerun_under_another_header_is_refused(mod, monkeypatch, data, caplog):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    cfg = _config(data)
+    cfg["runs"][0]["header_ids"] = [1, 11, 5]          # as if made with another template
+    (data / "out" / "generation_config.json").write_text(json.dumps(cfg))
+    with caplog.at_level(logging.ERROR):
+        code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 1 and saved == [] and "header_ids" in caplog.text
+
+
+def test_the_family_and_expected_ids_reach_the_generator(mod, monkeypatch, data):
+    seen = {}
+
+    class Gen:
+        def __init__(self, **kw):
+            seen.update(kw)
+            self.generator = argparse.Namespace(load=lambda: None)
+
+        def load_role(self, path):
+            return {"instruction": [{"pos": "p"}]}
+
+        def generate_role_responses(self, name, data):
+            return []
+
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(mod, "RoleResponseGenerator", Gen)
+    monkeypatch.setattr(sys, "argv", _main_args(data))
+    with pytest.raises(SystemExit):
+        mod.main()                                   # no responses: items fail, exit 1
+    assert seen["family"].model_type == "qwen3"
+    assert seen["expected_header_ids"] == _config(data)["runs"][0]["header_ids"]

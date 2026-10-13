@@ -39,17 +39,33 @@ GENERATION_CONFIG_NAME = "generation_config.json"
 GENERATION_CONFIG_SCHEMA = 1
 
 
-def chat_template_kwargs_for(model_name: str) -> Dict[str, Any]:
-    """The chat-template kwargs step 1 renders with: thinking off for Qwen
-    (https://github.com/vllm-project/vllm/issues/18066), none otherwise.
-    One place, so the side-car records what generate_batch used."""
-    return {"enable_thinking": False} if "qwen" in model_name.lower() else {}
+def chat_template_kwargs_for(family) -> Dict[str, Any]:
+    """The chat-template kwargs step 1 renders with: the family row's
+    (assistant_axis/model_families.py; thinking off for Qwen3,
+    https://github.com/vllm-project/vllm/issues/18066).  One place, so the
+    side-car records what generate_batch used.  Since 2026-10-13 (the
+    multi-model plan) keyed on the row, not on a substring of the model
+    name."""
+    return dict(family.template_kwargs)
 
 
-def response_cleanup_for(model_name: str) -> str:
-    """The clean-up applied to each generated text: Qwen's leaked-thinking
-    strip (generate_batch), none otherwise."""
-    return "strip_leaked_think" if "qwen" in model_name.lower() else "none"
+def response_cleanup_for(family) -> str:
+    """The clean-up applied to each generated text: the family row's
+    (``strip_leaked_think`` for Qwen3, ``none`` otherwise)."""
+    return family.response_cleanup
+
+
+def prompt_token_ids(tokenizer, conversation: List[Dict[str, str]],
+                     template_kwargs: Mapping[str, Any]) -> List[int]:
+    """The token ids step 1 hands vLLM for a conversation: the chat template
+    with the generation prompt, tokenized by the template itself
+    (``return_dict=False``).  Not the rendered text: vLLM tokenizes a text
+    prompt with the tokenizer's special tokens, which gives Llama 3 and Gemma 2
+    a second BOS after the one the template writes (review P1 D8).  For Qwen3
+    the ids are the text path's (its tokenizer adds nothing to text)."""
+    from .internals.chat_layout import chat_ids
+    return chat_ids(tokenizer, conversation, add_generation_prompt=True,
+                    template_kwargs=dict(template_kwargs))
 
 
 # ---------------------------------------------------------------------------
@@ -131,6 +147,11 @@ def instruction_dir_record(directory: Path) -> Dict[str, Any]:
 def build_generation_run_record(
     *,
     model_name: str,
+    family,
+    layout,
+    system_prompt: str,
+    sample_conversation: List[Dict[str, str]],
+    sample_prompt_ids: List[int],
     temperature: float,
     top_p: float,
     max_tokens: int,
@@ -144,12 +165,18 @@ def build_generation_run_record(
 ) -> Dict[str, Any]:
     """One run's entry of ``generation_config.json``.  The field names are
     the multi-model plan's (§ 7: ``script``, ``created_at``, ``git_sha``,
-    ``model_name``, ``template_kwargs``, ``response_cleanup``,
-    ``sampling``, ``questions``); the fields that need the tokenizer
-    (``model_type``, ``header_tokens``, ``header_ids``,
-    ``generation_prompt_ids``, ``system_prompt``, ``sample_conversation``,
-    ``sample_prompt_ids``) are added by that plan's step 1 changes.  Added
-    here: the questions file's ``sha256`` and the number of questions kept,
+    ``model_name``, ``model_type``, ``template_kwargs``, ``header_tokens``,
+    ``header_ids``, ``generation_prompt_ids``, ``system_prompt``,
+    ``response_cleanup``, ``sampling``, ``questions``,
+    ``sample_conversation``, ``sample_prompt_ids``).  ``family`` is the
+    model's row (assistant_axis/model_families.py), ``layout`` the header
+    layout derived from its tokenizer
+    (assistant_axis/internals/chat_layout.py), ``system_prompt`` what the
+    template was seen to do with a system message (``native`` or
+    ``fold_into_user``), and ``sample_prompt_ids`` the ids step 1 sends for
+    ``sample_conversation``: step 2 re-renders that conversation and requires
+    them to be its prefix.  Added beside the plan's fields (walk-through P2):
+    the questions file's ``sha256`` and the number of questions kept,
     ``instructions`` (:func:`instruction_dir_record` per directory read) and
     ``selection`` (mode, flags, goal file and its hash, the work items)."""
     from .atomic_io import read_jsonl_with_retry, read_text_with_retry
@@ -161,13 +188,20 @@ def build_generation_run_record(
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "git_sha": git_sha(),
         "model_name": model_name,
-        "template_kwargs": chat_template_kwargs_for(model_name),
-        "response_cleanup": response_cleanup_for(model_name),
+        "model_type": family.model_type,
+        "template_kwargs": chat_template_kwargs_for(family),
+        "header_tokens": list(layout.header_tokens),
+        "header_ids": list(layout.header_ids),
+        "generation_prompt_ids": list(layout.generation_prompt_ids),
+        "system_prompt": system_prompt,
+        "response_cleanup": response_cleanup_for(family),
         "sampling": {"temperature": temperature, "top_p": top_p,
                      "max_tokens": max_tokens, "max_model_len": max_model_len},
         "questions": {"file": str(questions_file), "sha256": _sha256_text(q_text),
                       "question_count": question_count, "reduce_questions": reduce_questions,
                       "n_kept": n_kept},
+        "sample_conversation": [dict(m) for m in sample_conversation],
+        "sample_prompt_ids": [int(i) for i in sample_prompt_ids],
         "instructions": {k: instruction_dir_record(Path(v)) for k, v in instruction_dirs.items()},
         "selection": dict(selection or {}),
     }
@@ -175,7 +209,11 @@ def build_generation_run_record(
 
 # What two runs into one responses directory must share: the generation
 # settings.  Instructions may differ (they are reported per entity instead).
-SETTINGS_KEYS = ("model_name", "template_kwargs", "response_cleanup", "sampling")
+# model_type and header_ids since the multi-model plan (2026-10-13), so that
+# step 1, tools/merge_pod_outputs.py and step 2's side-car check refuse the
+# same differences.
+SETTINGS_KEYS = ("model_name", "model_type", "template_kwargs", "header_ids",
+                 "response_cleanup", "sampling")
 QUESTION_KEYS = ("sha256", "question_count", "reduce_questions")
 
 
@@ -240,9 +278,15 @@ def generate_response(
     temperature: float = 0.7,
     top_p: float = 0.9,
     do_sample: bool = True,
+    family=None,
 ) -> str:
     """
     Generate a single response for a conversation using HuggingFace.
+
+    Not on the pipeline path.  The template kwargs are the family row's
+    (``family``, or the row of ``model.config.model_type``; an unknown type
+    raises), and the prompt is handed over as the template's token ids, as
+    step 1 does since 2026-10-13 (the multi-model plan).
 
     Args:
         model: HuggingFace model
@@ -256,24 +300,17 @@ def generate_response(
     Returns:
         Generated response text
     """
-    # Disable thinking for Qwen models
-    chat_template_kwargs = {}
-    if hasattr(tokenizer, 'name_or_path') and "qwen" in tokenizer.name_or_path.lower():
-        chat_template_kwargs["enable_thinking"] = False
-
-    prompt = tokenizer.apply_chat_template(
-        conversation,
-        tokenize=False,
-        add_generation_prompt=True,
-        **chat_template_kwargs
-    )
-
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    input_length = inputs.input_ids.shape[1]
+    if family is None:
+        from .model_families import family_for_model_type
+        family = family_for_model_type(getattr(getattr(model, "config", None), "model_type", None))
+    ids = prompt_token_ids(tokenizer, conversation, family.template_kwargs)
+    input_ids = torch.tensor([ids], device=model.device)
+    input_length = input_ids.shape[1]
 
     with torch.no_grad():
         outputs = model.generate(
-            **inputs,
+            input_ids=input_ids,
+            attention_mask=torch.ones_like(input_ids),
             max_new_tokens=max_new_tokens,
             temperature=temperature if do_sample else None,
             top_p=top_p if do_sample else None,
@@ -342,10 +379,34 @@ def supports_system_prompt(tokenizer) -> bool:
         return False
 
 
+_SYSTEM_PROMPT_WARNED: set = set()
+
+
+def system_prompt_mode(tokenizer, family=None) -> str:
+    """``"native"`` when the template keeps a system message
+    (:func:`supports_system_prompt`), else ``"fold_into_user"``.  With a
+    family row whose ``system_prompt`` says otherwise, a WARNING (once per
+    family and outcome): a template that drops the system message on a row
+    marked native would generate without the persona instruction if nothing
+    folded it; the fold keeps the run usable, and the warning says so
+    (multi-model plan § 5.3)."""
+    mode = "native" if supports_system_prompt(tokenizer) else "fold_into_user"
+    if family is not None and family.system_prompt != mode:
+        key = (family.model_type, mode)
+        if key not in _SYSTEM_PROMPT_WARNED:
+            _SYSTEM_PROMPT_WARNED.add(key)
+            logger.warning(
+                f"the chat template's system-prompt behaviour is {mode!r}, but the "
+                f"{family.model_type!r} family row says {family.system_prompt!r}; "
+                f"conversations are built as {mode!r} (assistant_axis/model_families.py)")
+    return mode
+
+
 def format_conversation(
     instruction: Optional[str],
     question: str,
     tokenizer,
+    family=None,
 ) -> List[Dict[str, str]]:
     """
     Format a conversation for model input.
@@ -354,11 +415,14 @@ def format_conversation(
         instruction: Optional system instruction
         question: User question
         tokenizer: HuggingFace tokenizer (to check system prompt support)
+        family: the model's family row; when given, a template whose
+            system-prompt behaviour differs from the row's is warned about
+            (:func:`system_prompt_mode`)
 
     Returns:
         List of message dicts for the conversation
     """
-    if supports_system_prompt(tokenizer):
+    if system_prompt_mode(tokenizer, family) == "native":
         messages = []
         if instruction:
             messages.append({"role": "system", "content": instruction})
@@ -395,6 +459,8 @@ class VLLMGenerator:
         temperature: float = 0.7,
         max_tokens: int = 512,
         top_p: float = 0.9,
+        family=None,
+        expected_header_ids: Optional[List[int]] = None,
     ):
         """
         Initialize vLLM generator.
@@ -407,6 +473,11 @@ class VLLMGenerator:
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             top_p: Top-p sampling
+            family: the model's family row (assistant_axis/model_families.py);
+                None: read from the model's config.json at :meth:`load`
+            expected_header_ids: the header ids step 1's preflight derived
+                (and recorded in the side-car); the layout derived from vLLM's
+                tokenizer at :meth:`load` must have the same
         """
         self.model_name = model_name
         self.max_model_len = max_model_len
@@ -415,25 +486,40 @@ class VLLMGenerator:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.top_p = top_p
+        self.family = family
+        self.expected_header_ids = (list(expected_header_ids)
+                                    if expected_header_ids is not None else None)
+        self.layout = None
 
         self.llm = None
         self.sampling_params = None
 
     def load(self):
-        """Load the vLLM model."""
+        """Load the vLLM model.
+
+        The family row is resolved first (an unknown ``model_type`` or a row
+        not built refuses before vLLM starts); after the load the header
+        layout is derived from vLLM's tokenizer and logged."""
         if self.llm is not None:
             return
 
+        from .model_families import family_for_model, require_built
+        if self.family is None:
+            self.family = family_for_model(self.model_name)
+        require_built(self.family)
+
         from vllm import LLM, SamplingParams
 
-        logger.info(f"Loading vLLM model: {self.model_name}")
+        logger.info(f"Loading vLLM model: {self.model_name} (family {self.family.model_type})")
 
         self.llm = LLM(
             model=self.model_name,
             max_model_len=self.max_model_len,
             tensor_parallel_size=self.tensor_parallel_size,
             gpu_memory_utilization=self.gpu_memory_utilization,
-            trust_remote_code=True,
+            # From the row since 2026-10-13 (False for every row: all are
+            # native in transformers and vLLM); it was True for every model.
+            trust_remote_code=self.family.trust_remote_code,
         )
 
         self.sampling_params = SamplingParams(
@@ -442,7 +528,15 @@ class VLLMGenerator:
             top_p=self.top_p,
         )
 
-        logger.info("Model loaded successfully")
+        from .internals.chat_layout import LayoutError, derive_chat_layout
+        self.layout = derive_chat_layout(self.llm.get_tokenizer(), self.family)
+        if (self.expected_header_ids is not None
+                and list(self.layout.header_ids) != self.expected_header_ids):
+            raise LayoutError(
+                f"vLLM's tokenizer derives the header ids {list(self.layout.header_ids)}; the "
+                f"preflight (and the side-car) has {self.expected_header_ids}")
+        logger.info(f"Model loaded successfully; header {list(self.layout.header_tokens)!r} "
+                    f"(ids {list(self.layout.header_ids)})")
 
     def generate_batch(
         self,
@@ -475,16 +569,13 @@ class VLLMGenerator:
 
         tokenizer = self.llm.get_tokenizer()
 
-        # Disable thinking for Qwen models (https://github.com/vllm-project/vllm/issues/18066)
-        chat_template_kwargs = chat_template_kwargs_for(self.model_name)
-
-        prompts = []
-        for conv in conversations:
-            prompt = tokenizer.apply_chat_template(
-                conv, tokenize=False, add_generation_prompt=True,
-                **chat_template_kwargs
-            )
-            prompts.append(prompt)
+        # The family row's template kwargs (thinking off for Qwen3:
+        # https://github.com/vllm-project/vllm/issues/18066), and the prompt
+        # as the template's token ids (vllm.inputs.TokensPrompt, a TypedDict:
+        # this dict is one), not as rendered text (multi-model plan § 5.3).
+        chat_template_kwargs = chat_template_kwargs_for(self.family)
+        prompts = [{"prompt_token_ids": prompt_token_ids(tokenizer, conv, chat_template_kwargs)}
+                   for conv in conversations]
 
         logger.info(f"Running batch inference for {len(prompts)} prompts...")
         outputs = self.llm.generate(prompts, self.sampling_params)
@@ -498,7 +589,7 @@ class VLLMGenerator:
         # models despite enable_thinking=False. It strips the opening <think>
         # tag but leaves </think> and the preceding thinking text in the
         # output. Strip everything up to the last </think>.
-        if response_cleanup_for(self.model_name) == "strip_leaked_think":
+        if response_cleanup_for(self.family) == "strip_leaked_think":
             cleaned = 0
             for d in details:
                 resp = d["text"]
@@ -555,7 +646,8 @@ class VLLMGenerator:
             instruction = instructions[prompt_idx]
 
             for q_idx, question in enumerate(questions):
-                conversation = format_conversation(instruction, question, tokenizer)
+                conversation = format_conversation(instruction, question, tokenizer,
+                                                   family=self.family)
                 all_conversations.append(conversation)
                 all_metadata.append({
                     "system_prompt": instruction,
@@ -624,6 +716,8 @@ class RoleResponseGenerator:
         top_p: float = 0.9,
         prompt_indices: Optional[List[int]] = None,
         short_name: Optional[str] = None,
+        family=None,
+        expected_header_ids: Optional[List[int]] = None,
     ):
         """
         Initialize role response generator.
@@ -643,6 +737,7 @@ class RoleResponseGenerator:
             top_p: Top-p sampling
             prompt_indices: Which prompt indices to use (default: 0-4)
             short_name: Short model name for formatting (auto-detected if None)
+            family, expected_header_ids: passed to :class:`VLLMGenerator`
         """
         self.model_name = model_name
         self.roles_dir = Path(roles_dir)
@@ -668,6 +763,8 @@ class RoleResponseGenerator:
             temperature=temperature,
             max_tokens=max_tokens,
             top_p=top_p,
+            family=family,
+            expected_header_ids=expected_header_ids,
         )
 
         self.questions = None

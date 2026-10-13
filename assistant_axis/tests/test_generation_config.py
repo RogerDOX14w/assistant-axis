@@ -8,13 +8,20 @@ import json
 import pytest
 
 from assistant_axis import generation as g
+from assistant_axis.model_families import FAMILIES
 
 
 def test_template_kwargs_and_cleanup_follow_the_model_family():
-    assert g.chat_template_kwargs_for("Qwen/Qwen3-32B") == {"enable_thinking": False}
-    assert g.chat_template_kwargs_for("google/gemma-2-27b-it") == {}
-    assert g.response_cleanup_for("Qwen/Qwen3-32B") == "strip_leaked_think"
-    assert g.response_cleanup_for("meta-llama/Llama-3.3-70B-Instruct") == "none"
+    # Flagged expectation change (multi-model plan, 2026-10-13): the helpers
+    # take the family row, keyed on config.model_type, where they took a model
+    # name and tested it for "qwen"; the values per family are unchanged.
+    assert g.chat_template_kwargs_for(FAMILIES["qwen3"]) == {"enable_thinking": False}
+    assert g.chat_template_kwargs_for(FAMILIES["gemma2"]) == {}
+    assert g.response_cleanup_for(FAMILIES["qwen3"]) == "strip_leaked_think"
+    assert g.response_cleanup_for(FAMILIES["llama"]) == "none"
+    kw = g.chat_template_kwargs_for(FAMILIES["qwen3"])
+    kw["enable_thinking"] = True                       # a copy: the row is untouched
+    assert FAMILIES["qwen3"].template_kwargs == {"enable_thinking": False}
 
 
 def test_instruction_dir_record_hashes_the_pos_texts_only(tmp_path):
@@ -31,7 +38,8 @@ def test_instruction_dir_record_hashes_the_pos_texts_only(tmp_path):
 
 
 def test_settings_differences_and_changed_instructions():
-    base = {"model_name": "m", "template_kwargs": {}, "response_cleanup": "none",
+    base = {"model_name": "m", "model_type": "qwen3", "header_ids": [1, 2],
+            "template_kwargs": {}, "response_cleanup": "none",
             "sampling": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 512, "max_model_len": 2048},
             "questions": {"sha256": "q", "question_count": 300, "reduce_questions": 3, "file": "a"},
             "instructions": {"traits_dir": {"pos_sha256": {"x": "1", "y": "2"}}}}
@@ -45,6 +53,11 @@ def test_settings_differences_and_changed_instructions():
     diffs = g.settings_differences(base, other)
     assert len(diffs) == 2 and diffs[0].startswith("sampling:") and "reduce_questions" in diffs[1]
     assert g.changed_instructions(base, other) == ["y"]          # z is new, not changed
+    # The model type and the header ids are settings too (since 2026-10-13).
+    other2 = json.loads(json.dumps(base))
+    other2["model_type"], other2["header_ids"] = "llama", [1, 2, 3]
+    assert [d.split(":")[0] for d in g.settings_differences(base, other2)] == [
+        "model_type", "header_ids"]
 
 
 def test_write_appends_and_never_replaces_a_bad_file(tmp_path, monkeypatch):

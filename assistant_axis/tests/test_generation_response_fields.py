@@ -3,7 +3,12 @@
 ``thinking_suspected``.  vLLM is faked: ``llm.generate`` returns objects
 shaped like vLLM's RequestOutput (``.outputs[0].text`` / ``.finish_reason``).
 Steps 2 and 3 reading such records is tested in
-pipeline/tests/test_response_fields_readers.py."""
+pipeline/tests/test_response_fields_readers.py.
+
+Since the multi-model plan (2026-10-13) step 1 hands vLLM token ids
+(``{"prompt_token_ids": [...]}``) and the family row decides the clean-up:
+the fakes tokenize to character codes and the generator is given its row
+(harness only; no assertion changed)."""
 from __future__ import annotations
 
 import json
@@ -12,11 +17,13 @@ from types import SimpleNamespace
 import pytest
 
 from assistant_axis import generation as g
+from assistant_axis.model_families import FAMILIES
 
 
 class FakeTokenizer:
     def apply_chat_template(self, conv, tokenize=False, add_generation_prompt=True, **kw):
-        return "|".join(m["content"] for m in conv) + ("<gen>" if add_generation_prompt else "")
+        text = "|".join(m["content"] for m in conv) + ("<gen>" if add_generation_prompt else "")
+        return [ord(c) for c in text] if tokenize else text
 
 
 class FakeLLM:
@@ -32,14 +39,15 @@ class FakeLLM:
     def generate(self, prompts, sampling_params):
         out = []
         for p in prompts:
-            q = p.split("|")[-1].replace("<gen>", "")
+            text = "".join(chr(i) for i in p["prompt_token_ids"])
+            q = text.split("|")[-1].replace("<gen>", "")
             text, reason = self.replies[q]
             out.append(SimpleNamespace(outputs=[SimpleNamespace(text=text, finish_reason=reason)]))
         return out
 
 
-def _generator(replies, model="Qwen/Qwen3-32B"):
-    gen = g.VLLMGenerator(model)
+def _generator(replies, model="Qwen/Qwen3-32B", family="qwen3"):
+    gen = g.VLLMGenerator(model, family=FAMILIES[family])
     gen.llm = FakeLLM(replies)
     gen.sampling_params = object()
     return gen
@@ -76,7 +84,8 @@ def test_generate_batch_still_returns_texts():
 
 
 def test_no_strip_and_no_cleanup_for_other_families():
-    gen = _generator({"q": ("x </think> y", "stop")}, model="google/gemma-2-27b-it")
+    gen = _generator({"q": ("x </think> y", "stop")}, model="google/gemma-2-27b-it",
+                     family="gemma2")
     [d] = gen.generate_batch_detailed([[{"role": "user", "content": "q"}]])
     assert d["text"] == "x </think> y" and d["thinking_stripped"] is False
 
