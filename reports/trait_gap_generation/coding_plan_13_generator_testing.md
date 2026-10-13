@@ -16,7 +16,7 @@ pair-recovery, concept component) are defined on first use below and go into the
 in this plan was measured read-only on 2026-10-13 (§ "Baseline measured for this plan" says how); the first dashboard
 run must reproduce them.  Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; decision 2 decided 2026-10-13)
 
 1. **OPEN: which generator runs get the recovery harness, and how.**  The workstream plan's § 5 prices the harness
    at "about $5 per generator run at two seeds, under $40 for all current generators".  The four recorded runs
@@ -39,7 +39,34 @@ run must reproduce them.  Roger's review comments go into this file.
      (c) only if the harness is later wanted on every run, which (a)'s readout will say.  The dashboard, the
      repetition and the estimates cost nothing and come first, so Roger decides (a) on the first dashboard, not
      before it (§ 10).
-2. **OPEN: the concept unit for capture-recapture.**  The workstream plan says "M3's readings cluster candidates into
+   - **Roger (2026-10-13):** I want to see data from every generator.  Explain option (c) in more detail.  Do we
+     also have a less filtered option (d)?
+   - *(c) in detail.*  M3 compares a candidate only with its 10 nearest corpus traits (`k` 10 in
+     [metric_config.json](../../data/candidates/metric_config.json)), their arrangement partners and the queue.  A
+     row with no hidden trait among those, and not covered by a hidden trait's label, sees exactly the same
+     comparisons in the reduced corpus, so its decision cannot change except by model noise; (c) copies its
+     recorded decision and re-scores only the affected rows.  It is exact, not a sample: the match stage only
+     judges hidden traits among a candidate's 10 nearest, so an unaffected row could never recover anything.  It
+     saves only 22-39% because with 10% hidden about two-thirds of rows have a hidden trait among their ten.
+   - *(d) every generator, pooled* (added 2026-10-13).  One hidden draw per seed for all generators; each distinct
+     trait row in the registry is scored once against the reduced corpus, and each generator's recall,
+     precision and false covers are read from the rows it proposed (`sources[]`).  A row's reduced-corpus decision
+     does not depend on which generator proposed it, so the per-generator figures equal separate runs on the same
+     draw; every generator, pilots and small ones included, is measured on the same hidden traits, and the union
+     ("any generator") comes free.  Rows: **6,541** distinct trait rows with a generator source, against 9,233
+     counted per generator (measured 2026-10-13).  Batched at $0.0133 × 0.5 a row per seed: **two seeds ≈ $87; with
+     (c) ≈ $53-68; one seed with (c) ≈ $27-34.**  Small generators recover a handful of the 83-95 hidden traits
+     per seed (the Roget pilot 1, the WordNet pilot 6), so their recall carries wide intervals; the free figures
+     (string recall on all 932, repetition, review) remain their main record.  Hiding 20% instead of 10% would
+     double the hidden sample at nearly the same cost without (c) (the re-score is per row), but (c) then saves
+     little (about 89% of rows affected).
+   - **Recommendation (2026-10-13), on Roger's "every generator": (d) with (c), two seeds, batched, about
+     $53-68**; Roger's go with quoted parameters at launch.  (c) is a change to `novelty_score.py score --hide`
+     (score the affected keys, copy the rest's recorded blocks into the reduced-corpus batch), tested by an
+     equality check on a fixture: (c) and a full re-score give the same recall when the responder is
+     deterministic.
+     **Roger: I want the data from every generator we've run, so c), but we can start with a)**
+2. **Decided (2026-10-13, Roger): the concept unit for capture-recapture: both, headline chosen on data.**  The workstream plan says "M3's readings cluster candidates into
    concepts"; the better instrument is the all-batches review graph
    ([review_traits_all_2](../../data/candidates/review/review_traits_all_2/graph.json), 3,835 kept candidates, built
    2026-10-13 for $37.28), whose **4-edges** (both directions read 4 on rubric A, what the review merges) and
@@ -54,6 +81,19 @@ run must reproduce them.  Roger's review comments go into this file.
      merged, mostly along 3-edges), 4-edge components as the strict column.
    - **Recommendation: (a)**, because a 4-edge is a two-model, two-direction reading and the strict side is the
      safer lower bound the plan promises; both columns are printed either way.
+   - **Roger (2026-10-13):** Explain the options in more detail.  My initial response is that we should try both,
+     and decide once we have actual data.  Does doing that cost more?
+   - *Cost:* nothing.  Both units are read from the review graph already paid for, and the plan prints both
+     columns under either option; the decision only names the headline.  **Decided (2026-10-13): both are
+     computed, and Roger picks the headline on the first dashboard.**
+   - *The data to decide on* (added 2026-10-13): the dashboard prints each unit's agreement with Roger's own
+     review decisions, refreshed as review grows.  Measured now on review_tda_1 against the all-batches graph:
+     of **109** candidate pairs Roger merged together, 4-edge components keep **69 (63%)** in one unit and 3-edge
+     cliques **59 (54%)**; of **154** pairs he marked distinct or dropped from a proposed group (hard negatives:
+     the graph had grouped them), 4-edge components join **24 (16%)** and cliques **23 (15%)**.  So far the strict
+     unit is as good on false joins and better on true ones.  Both split about 40% of real merges, which biases
+     the estimates of the total upward (missed matches between mechanisms), against the downward bias of uneven
+     catchability; the plan's "lower bound" reading holds only if the second dominates, and the report says so.
 3. **OPEN: the promote share's denominator.**  The workstream plan's § 3.5 gives "55% for the TDA census" as the
    promote share ("promoted of kept").  The record gives two figures: **per decided term, 20%** (34 `accepted` of
    174 decided censuses rows in the registry; 35 promoted of 204 review writes in
@@ -62,6 +102,18 @@ run must reproduce them.  Roger's review comments go into this file.
    [decisions.jsonl](../../data/candidates/review/review_tda_1/decisions.jsonl)).  Neither is 55%.
    - **Recommendation: per term** for the stop rule (review-minutes are spent per term, and a merged group of six
      that promotes one is one novel concept for six terms' minutes), with the per-group figure printed beside it.
+   - **Roger (2026-10-13):** Explain the options in more detail.
+   - *Measured 2026-10-13, by group shape* (review_tda_1's 69 resolutions): singletons 40 resolved, **20 promoted
+     (50%)**; multi-member groups 29 resolved over 99 terms, **15 promoted (52% of groups, 15% of terms)**.  The
+     chance that a concept is new is about one half whatever its group size; the per-term share is that half
+     diluted by the batch's synonyms, so it depends on group structure.  On the TDA batch both forms give the same
+     **0.42 accepted per active minute** (2.43 terms a minute × 17%, or 0.82 groups a minute × 51%); they differ
+     only when projected onto a batch shaped differently, such as the alignment sweep's mostly singleton phrases,
+     where per term predicts about 20% and per group about 50%.
+   - **Recommendation revised (2026-10-13; reverses the one above): per group.**  `expected_accepted` = the
+     generator's undecided, not pre-handled kept terms counted as groups (each proposed group one, each singleton
+     one) × the per-group share; the minutes keep their per-shape times.  Per term printed beside it.  One batch
+     of 69 groups is a small base: the dashboard prints the share by shape so a drift shows.
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
