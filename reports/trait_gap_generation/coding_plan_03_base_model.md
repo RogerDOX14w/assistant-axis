@@ -487,7 +487,11 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
   can meet it.  The deterministic part exists here already (`normalize_form`'s suffix rules in
   [parse.py](../../assistant_axis/gapgen/generators/base_model/parse.py)); plan 05's planner found the OEWN
   derivation link relabels about half of 30 nominal traits tried (pedant to pedantic, coward to cowardly).  In
-  this pilot nouns are 8% of eligible words but 2.7% of M1 survivors, so M1 drops most of them as nouns.
+  this pilot nouns are 8% of eligible words but 2.7% of M1 survivors, so M1 drops most of them as nouns.  **Corrected
+  2026-10-13** by the noun plan's measurement ([coding_plan_noun_normalization.md](./coding_plan_noun_normalization.md)):
+  M1 passes nouns of disposition as nouns (person nouns in the backlog: 68% trait, 18% held on the roles list); the
+  8% to 2.7% drop was the base model's thing-nouns (data, query, house), so the coordinator's "lost as nouns" was
+  wrong and the helper's yield is small (53 relabels over the whole backlog, 13 of them new rows).
   Recommendation: one shared platform helper (the suffix rules plus the derivation link, $0), built with plan 05
   and applied here before the 20k run; the LLM rewrite of task 11 only if a generator is left with more than
   about 100 unrelabelled nouns.
