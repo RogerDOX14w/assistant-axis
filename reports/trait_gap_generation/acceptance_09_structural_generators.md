@@ -449,3 +449,24 @@ its samples) forms a triangle with its deficiency and its excess, and has no sin
   corner matched and unmatched, no partner hint for a mean, the pair hint kept otherwise, pair recovery through a
   triangle corner, the side table).  Two expectations of the postprocess tests changed with the rule: the fixture's
   `brave` is a mean, so its answers' `partner_hint`s are now empty and its opposite's kind is `triangle_corner`.
+
+## 16. Siblings together in review (Roger, 2026-10-13: "Sounds good")
+
+The interface request of the coding plan's § 12 item 3 ([QUESTIONS](./QUESTIONS.md) 110) is built, in platform code
+([review_graph.py](../../assistant_axis/gapgen/review_graph.py)), kept minimal:
+
+- a new function `sibling_groups(candidate_keys, operator_table)`: for each source trait, the kept candidates (by
+  registry key, sense 1) that the structural operator table records as that trait's opposite, excess or deficiency,
+  or as one of its principal-target retargets, when there are two or more: `{"trait": "trait:<stem>", "members":
+  [...], "roles": {key: [operators]}}`;
+- `structural_operator_table()`: the table from its path, `[]` when it has not been built;
+- `Graph.sibling_groups`, a new field, filled at the end of `assemble_graph` (a new optional argument
+  `operator_table`, read from the path when not given), written into `graph.json` only when there are any and read
+  back by `Graph.from_json`.
+
+The groups are shown together, never merged (an excess and a deficiency are opposite concepts): no edge, merged
+group, proposed group, link or statistic changes, and a graph with no structural candidate, or built where the
+table does not exist, is written exactly as before (tests:
+[test_gapgen_review_graph_siblings.py](../../assistant_axis/tests/test_gapgen_review_graph_siblings.py), on the
+review graph's toy graph).  The review app ([review_app/](../../assistant_axis/gapgen/review_app/)) does not yet
+draw them; showing `sibling_groups` there is the next step, outside this change.

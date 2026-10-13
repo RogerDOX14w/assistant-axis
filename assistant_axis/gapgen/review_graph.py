@@ -60,6 +60,10 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   The review app shows one pre-assembled and merges it only when Roger confirms.  ``proposed_links``: as
   ``clique_links``, over the proposed groups.  :meth:`Graph.ungrouped`: the kept candidates in no group of either
   tier.
+* **Sibling groups** (``sibling_groups``; plan 09 section 12 item 3, Roger 2026-10-13): the structural generator's
+  answers for one trait (its opposite, excess, deficiency and principal-target items), read from that generator's
+  operator table when it exists, as groups to show together; they are not merged groups and change no edge or
+  group above, and a graph with none is written exactly as before.
 
 Cost: :func:`estimate_build` before any call (the relation calls as rendered, the overlap calls by per-cosine-bin
 shares); the CLI checks it against the cap, and again after the relation calls on the pairs actually marked for
@@ -285,6 +289,8 @@ class Graph:
     schema: int = GRAPH_SCHEMA
     proposed_groups: list = field(default_factory=list)   # decision 12: maximal 3-cliques not inside a merged one
     proposed_links: list = field(default_factory=list)
+    #: the structural generator's outputs for one trait, shown together and never merged (:func:`sibling_groups`)
+    sibling_groups: list = field(default_factory=list)
 
     def node_map(self) -> dict[str, Node]:
         return {n.key: n for n in self.nodes}
@@ -317,7 +323,9 @@ class Graph:
                 "clique_links": [dict(x) for x in self.clique_links],
                 "proposed_groups": [list(c) for c in self.proposed_groups],
                 "proposed_links": [dict(x) for x in self.proposed_links], "stats": dict(self.stats),
-                "usage": dict(self.usage)}
+                "usage": dict(self.usage),
+                # only when there are any, so a graph without structural candidates is written as before
+                **({"sibling_groups": [dict(x) for x in self.sibling_groups]} if self.sibling_groups else {})}
 
     @classmethod
     def from_json(cls, d: Mapping) -> "Graph":
@@ -332,13 +340,55 @@ class Graph:
                    complete=bool(d.get("complete", True)), stalled=dict(d.get("stalled") or {}),
                    schema=int(d.get("schema", GRAPH_SCHEMA)),
                    proposed_groups=[list(c) for c in d.get("proposed_groups") or []],
-                   proposed_links=[dict(x) for x in d.get("proposed_links") or []])
+                   proposed_links=[dict(x) for x in d.get("proposed_links") or []],
+                   sibling_groups=[dict(x) for x in d.get("sibling_groups") or []])
 
 
 def graph_envelope(graph: Graph, *, inputs=None, title: Optional[str] = None) -> dict:
     """``graph.json``'s content: the payload in the provenance envelope (``json_metadata``)."""
     from assistant_axis.plot_metadata import json_metadata
     return json_metadata(graph.to_json(), title=title or f"review_graph build {graph.batch_id}", inputs=inputs)
+
+
+# --------------------------------------------------------------------------- the structural generator's siblings
+
+#: The operators whose answers for one trait are shown as one group (plan 09 section 12 item 3; Roger, 2026-10-13:
+#: "Sounds good"): the opposite and the two vices, and the principal-target retargets.
+SIBLING_OPERATORS: tuple[str, ...] = ("opposite", "excess", "deficiency")
+
+
+def structural_operator_table() -> list:
+    """The structural generator's operator table, or ``[]`` when it has not been built (the sibling groups then
+    stay empty and the graph is as it was)."""
+    from .generators.structural import OPERATOR_TABLE_PATH, load_operator_table
+    return load_operator_table(OPERATOR_TABLE_PATH) if OPERATOR_TABLE_PATH.exists() else []
+
+
+def sibling_groups(candidate_keys: Iterable[str], operator_table: Sequence[Mapping]) -> list[dict]:
+    """The structural generator's outputs for one trait, as groups to show together (never merged: an excess and a
+    deficiency are opposite concepts): for each source trait, the kept candidates (by registry key, sense 1) that the
+    operator table has as its opposite, excess or deficiency, or as a principal-target retarget, when there are two
+    or more.  ``[{"trait": "trait:<stem>", "members": [keys], "roles": {key: [operators]}}]``, in trait order.
+    Reads only the operator table, so no other generator's rows are touched."""
+    keys = set(candidate_keys)
+    by_trait: dict[str, dict] = defaultdict(dict)
+    for row in operator_table:
+        key = f"{row.get('stem')}#1"
+        if key not in keys:
+            continue
+        for src in row.get("sources") or []:
+            if src.get("generator_part") != "operators" or not src.get("source_stem"):
+                continue
+            op = src.get("operator")
+            if op in SIBLING_OPERATORS:
+                role = op
+            elif src.get("kind") == "principal_retarget":
+                role = f"retarget:{src.get('target')}"
+            else:
+                continue
+            by_trait[src["source_stem"]].setdefault(key, set()).add(role)
+    return [{"trait": corpus_key(stem), "members": sorted(m), "roles": {k: sorted(v) for k, v in sorted(m.items())}}
+            for stem, m in sorted(by_trait.items()) if len(m) >= 2]
 
 
 # --------------------------------------------------------------------------- cliques
@@ -880,10 +930,12 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
                    corpus: Mapping[str, Any], queue: Optional[Mapping] = None,
                    overlap_floor: float = DEFAULT_OVERLAP_FLOOR, config: Optional[Mapping] = None,
                    batch_id: str = "", usage: Optional[Mapping] = None,
-                   proposed_cut_off: int = DEFAULT_PROPOSED_CUT_OFF) -> Graph:
+                   proposed_cut_off: int = DEFAULT_PROPOSED_CUT_OFF,
+                   operator_table: Optional[Sequence[Mapping]] = None) -> Graph:
     """The :class:`Graph` from the plan and the answers (no call): nodes, the candidate edges with their relations
     and readings, the corpus edges copied from the M3 blocks, the 4- and 3-edges, the merged and proposed groups
-    and their opposed links."""
+    and their opposed links; and, where the structural generator's operator table exists (``operator_table``, read
+    from its path when None), the sibling groups of its candidates (:func:`sibling_groups`)."""
     rd_of = lambda r: reading_of(r, proposed_cut_off=proposed_cut_off)  # noqa: E731
     corpus_stems: set[str] = set()
     queue_stems: set[str] = set()
@@ -996,6 +1048,8 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
               complete=not (stalled["relation"] or stalled["overlap"]),
               stalled={k: v for k, v in stalled.items() if v}, proposed_groups=proposed,
               proposed_links=clique_links(proposed, edges))
+    g.sibling_groups = sibling_groups(g.candidate_keys(),
+                                      structural_operator_table() if operator_table is None else operator_table)
     g.stats = summarize(g, plan=plan)
     return g
 
