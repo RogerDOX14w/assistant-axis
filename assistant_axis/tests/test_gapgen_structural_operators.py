@@ -230,3 +230,52 @@ def test_arrangement_kinds():
     assert O.arrangement_kinds([{"kind": "pair", "members": ["a", "b"]},
                                 {"kind": "5-orthoplex", "members": list("abcdefghij")}]) == "pair, 5-orthoplex"
     assert O.arrangement_kinds({"kind": "nonsense"}) == "unclassified"
+
+
+# --------------------------------------------------------------------------- stop reasons (review B1, 2026-10-13)
+
+def test_llm_records_stop_details_when_the_response_has_them():
+    from types import SimpleNamespace
+
+    from assistant_axis.gapgen import llm
+    assert llm.stop_details(F.refusal())["category"] == "reasoning_extraction"
+    assert llm.stop_details(F.refusal(as_dict=True)) == {"type": "refusal", "category": "reasoning_extraction",
+                                                         "explanation": "blocked as it seems to violate the terms of "
+                                                                        "service"}
+    dumped = SimpleNamespace(model_dump=lambda: {"type": "refusal", "category": "x"})
+    assert llm.stop_details(SimpleNamespace(stop_details=dumped)) == {"type": "refusal", "category": "x"}
+    assert llm.stop_details(SimpleNamespace()) is None
+
+
+def test_a_refusal_is_a_failed_call_retried_once_counted_and_never_reused(inputs, tmp_path):
+    b = by(inputs)
+    sel = [b["brave"], b["timid"], b["gloomy"]]
+    script = F.script_for(sel, SYSTEM, {
+        "brave": F.refusal(),                                                     # refused both times
+        "timid": [F.refusal(as_dict=True), F.reply("deficiency")],                # refused, then answered
+        "gloomy": [F.truncated(F.reply("excess")), F.reply("excess")],           # cut at max_tokens, then answered
+    })
+    usage = MultiModelUsage()
+    out = tmp_path / "responses.jsonl"
+    run = asyncio.run(O.run_operators(sel, client=F.ScriptedClient(script), model=O.MODEL, usage=usage,
+                                      system=SYSTEM, run_id="r1", out_path=out))
+    assert set(run.replies) == {"timid", "gloomy"}
+    assert run.errors == {"brave": "stop_reason refusal (reasoning_extraction)"}
+    assert run.failures == {"refusal": 3, "max_tokens": 1} and run.n_calls == 6 and usage.n_calls == 6
+    recs = O.read_responses(out)
+    refused = [r for r in recs if r["stop_reason"] == "refusal"]
+    assert len(refused) == 3 and all(r["failure"].startswith("stop_reason refusal") for r in refused)
+    assert all(r["stop_details"]["category"] == "reasoning_extraction" for r in refused)
+    cut = next(r for r in recs if r["stop_reason"] == "max_tokens")
+    assert cut["failure"] == "stop_reason max_tokens" and O.reply_from_record(cut) == (None, "stop_reason max_tokens")
+    ok = [r for r in recs if r["stop_reason"] == "end_turn"]
+    assert len(ok) == 2 and all(r["failure"] is None for r in ok)
+    ss = O.stop_summary(recs)
+    assert ss["n_failed"] == 4 and ss["stop_reasons"] == {"max_tokens": 1, "refusal": 3}
+    assert ss["categories"] == {"reasoning_extraction": 3} and "4 of 6 responses" in ss["line"]
+    assert O.stop_summary([r for r in recs if r["stop_reason"] == "end_turn"])["line"] is None
+    # a resumed run reuses the answers and sends the refused trait again
+    again = F.ScriptedClient(F.script_for(sel, SYSTEM, {"brave": F.reply("mean")}))
+    run2 = asyncio.run(O.run_operators(sel, client=again, model=O.MODEL, usage=MultiModelUsage(), system=SYSTEM,
+                                       run_id="r1", out_path=out, resume=True))
+    assert run2.n_reused == 2 and len(again.calls) == 1 and set(run2.replies) == {"brave", "timid", "gloomy"}

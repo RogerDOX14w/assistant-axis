@@ -117,3 +117,17 @@ def test_modern_rows_merge_and_file(rows, tmp_path):
     assert M.load_modern(p) == mr
     merged = M.merge_modern(mr[:5], mr[3:8], order=[r.id for r in rows])
     assert [r.id for r in merged] == [r.id for r in rows[:8]]
+
+
+def test_a_refused_call_is_a_failure_retried_and_never_reused(rows, tmp_path):
+    """Review B1 (2026-10-13): a response that stopped other than end_turn is a failed call."""
+    u1, u2 = [r.id for r in rows[:20]], [r.id for r in rows[20:]]
+    out = tmp_path / "responses.jsonl"
+    client = F.ScriptedClient(script(rows, {tuple(u1): [F.refusal(), answer(rows[:20])], tuple(u2): answer(rows[20:])}))
+    run = asyncio.run(M.run_modernise(rows, client=client, model=M.MODEL, usage=MultiModelUsage(), system=SYSTEM,
+                                      run_id="a1", out_path=out))
+    assert run.failures == {"refusal": 1} and run.missing == [] and run.n_calls == 3 and run.n_units_ok == 1
+    recs = [json.loads(x) for x in out.read_text().splitlines()]
+    bad = [r for r in recs if r["failure"]]
+    assert len(bad) == 1 and bad[0]["stop_details"]["category"] == "reasoning_extraction"
+    assert all(r["prompt_sha256"] not in M.reusable([r], model=M.MODEL) for r in bad)

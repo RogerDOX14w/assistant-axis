@@ -86,10 +86,10 @@ def _registry_rows(args) -> dict:
     return read_snapshot(p) if p.exists() else {}
 
 
-def _print_estimate(label: str, e: dict, budget: float) -> float:
+def _print_estimate(label: str, e: dict, budget: float, model: str) -> float:
     n = max(1, e["n_calls"])
     print(f"  {label}: {e['n_calls']} calls x (~{e['in_tok'] // n:,} in, ~{e['out_tok'] // n:,} out) tokens at "
-          f"Haiku 5.5 rates = ${e['usd']:.4f}; cap --budget-usd ${budget:.2f}")
+          f"{model} rates = ${e['usd']:.4f}; cap --budget-usd ${budget:.2f}")
     return e["usd"]
 
 
@@ -158,7 +158,7 @@ def cmd_modernise(args) -> int:
     print(f"rubric {rub['name']} v{rub['version']} ({(rub['sha256'] or 'unpinned')[:12]}); model {args.model}; "
           f"{args.per_call} rows a call")
     est = M.estimate(rows, rub["text"], args.model, per_call=args.per_call)
-    _print_estimate("modernise", est, args.budget_usd)
+    _print_estimate("modernise", est, args.budget_usd, args.model)
     cap = confirm_or_abort(est["usd"], args.budget_usd, confirm_expensive=args.confirm_expensive,
                            confirmed_by=args.confirmed_by)
     if args.dry_run:
@@ -188,6 +188,10 @@ def cmd_modernise(args) -> int:
         ctx.finish(n_emitted=0)
         print(ctx.usage.log_line("[usage this session]"), file=sys.stderr)
     warn_if_low_parse_rate(label=f"structural modernise:{args.model}", n_ok=run.n_units_ok, n_total=run.n_units)
+    from assistant_axis.gapgen.generators.structural.operators import stop_summary
+    stops = stop_summary(run.records)
+    if stops["line"]:
+        print(stops["line"], file=sys.stderr)
     new = M.modern_rows(rows, run, model=args.model, run_id=args.run_id)
     order = [r.id for r in C.load_all(classical_dir=args.classical_dir)]
     out = Path(args.classical_modern)
@@ -296,6 +300,9 @@ def _operators_session(args, run_id: str, selected, *, step: str, extra: Optiona
         ctx.finish(n_emitted=0)
         print(ctx.usage.log_line(f"[usage this session, {run_id}]"), file=sys.stderr)
     warn_if_low_parse_rate(label=f"structural operators:{args.model}", n_ok=run.n_ok, n_total=run.n_attempted)
+    stops = O.stop_summary(run.records)
+    if stops["line"]:
+        print(f"{stops['line']} [{run_id}]", file=sys.stderr)
     return run, ctx.usage, not run.stopped_by_budget
 
 
@@ -306,7 +313,7 @@ def _operators_plan(args, selected, inputs, rub) -> float:
     print(f"{len(selected)} traits ({n_pr} with the principal targets at alignment score >= "
           f"{args.principal_min_score}); rubric {rub['name']} v{rub['version']} ({(rub['sha256'] or 'unpinned')[:12]}); "
           f"model {args.model}")
-    return _print_estimate("operators", est, args.budget_usd)
+    return _print_estimate("operators", est, args.budget_usd, args.model)
 
 
 def _render_variants(rub, selected, inputs, stems=None) -> None:
@@ -371,7 +378,8 @@ def _print_run_summary(run) -> None:
     reps = list(run.replies.values())
     nr = E.null_rates(reps)
     print(f"answered {len(run.replies)} ({run.n_reused} reused), unanswered {len(run.errors)}"
-          + (f": {dict(list(run.errors.items())[:5])}" if run.errors else "") + f"; {run.n_calls} calls")
+          + (f": {dict(list(run.errors.items())[:5])}" if run.errors else "") + f"; {run.n_calls} calls"
+          + (f"; responses stopped other than end_turn: {dict(run.failures)}" if run.failures else ""))
     print(f"non-null shares: opposite {nr['opposite']}, excess {nr['excess']}, deficiency {nr['deficiency']}, "
           f"retarget {nr['retarget']}, remode {nr['remode']}, principal {nr['principal']['share']}")
     print(f"positions {nr['positions']}; rejected items {O.rejection_counts(reps)}")
@@ -426,6 +434,9 @@ def cmd_null_rate(args) -> int:
                "null_rates": E.null_rates(reps.values()), "pair_positions": E.pair_positions(reps, pairs),
                "rejections": O.rejection_counts(reps.values()),
                "parse_rate": E.parse_rate(O.read_responses(_run_dir(args, args.run_id) / S.RESPONSES_NAME)),
+               "coverage": E.answered_coverage(sum(1 for t in selected if t.stem in reps), len(selected)),
+               "stops": {k: v for k, v in O.stop_summary(
+                   O.read_responses(_run_dir(args, args.run_id) / S.RESPONSES_NAME)).items() if k != "line"},
                "unanswered": run.errors}
     out = _run_dir(args, args.run_id) / "nullrate_readout.json"
     from assistant_axis.atomic_io import atomic_write_text
@@ -436,6 +447,13 @@ def cmd_null_rate(args) -> int:
     print(f"pair poles: {readout['pair_positions']['combinations']}; rejections {readout['rejections']}; parse rate "
           f"{readout['parse_rate']['rate']}")
     print(f"wrote {out}")
+    cov = readout["coverage"]
+    print(f"answered {cov['n_answered']} of {cov['n_sampled']} sampled traits")
+    if not cov["pass"]:
+        print(f"GATE: only {cov['n_answered']} of {cov['n_sampled']} sampled traits answered (under "
+              f"{cov['min_share']:.0%}): the null rates are not read; stop reasons {readout['stops']['stop_reasons']}",
+              file=sys.stderr)
+        return EXIT_GATE
     if not nr["band"]["pass"]:
         print(f"GATE: retarget {nr['retarget']} / remode {nr['remode']} outside {E.NULL_BAND}: one bounded prompt "
               f"revision (a new pin) and a re-pilot (coding plan section 10)", file=sys.stderr)
@@ -466,7 +484,7 @@ def cmd_stability(args) -> int:
     est = O.estimate(selected, rub["text"], args.model)
     est = {**est, "n_calls": todo, "usd": round(est["usd"] * todo / max(1, len(selected)), 4),
            "in_tok": est["in_tok"] * todo // max(1, len(selected)), "out_tok": est["out_tok"] * todo // max(1, len(selected))}
-    total = _print_estimate("stability", est, args.budget_usd)
+    total = _print_estimate("stability", est, args.budget_usd, args.model)
     confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
     if args.dry_run:
         print("DRY-RUN: no call, nothing written.")
@@ -482,7 +500,7 @@ def cmd_stability(args) -> int:
             return 1
         left -= used.total_cost_usd
         runs[r] = run.replies
-    st = E.stability_jaccard(runs[args.run_id], runs[args.against])
+    st = E.stability_jaccard(runs[args.run_id], runs[args.against], n_sampled=len(selected))
     st.update({"runs": [args.run_id, args.against], "seed": args.seed})
     ev_path = _sdir(args) / "evaluation.json"
     ev = E.read_evaluation(ev_path)
@@ -490,8 +508,14 @@ def cmd_stability(args) -> int:
     E.write_evaluation(ev, ev_path)
     from assistant_axis.atomic_io import atomic_write_text
     atomic_write_text(json.dumps(st, indent=2) + "\n", _run_dir(args, args.against) / "stability.json")
-    print(json.dumps({k: st[k] for k in ("n_traits", "jaccard_median", "below_0.5", "distribution", "by_operator")},
-                     indent=1))
+    print(json.dumps({k: st[k] for k in ("n_traits", "n_sampled", "jaccard_median", "below_0.5", "distribution",
+                                         "by_operator")}, indent=1))
+    cov = st["coverage"]
+    print(f"answered in both runs: {cov['n_answered']} of {cov['n_sampled']} sampled traits")
+    if not cov["pass"]:
+        print(f"GATE: only {cov['n_answered']} of {cov['n_sampled']} sampled traits answered in both runs (under "
+              f"{cov['min_share']:.0%}): the median Jaccard is not read; stop", file=sys.stderr)
+        return EXIT_GATE
     if st["jaccard_median"] is None or st["jaccard_median"] < E.STABILITY_MIN_MEDIAN:
         print(f"GATE: median Jaccard {st['jaccard_median']} below {E.STABILITY_MIN_MEDIAN}: stop; the numbers go to "
               f"Roger (n = 2 samples by design, or a second model, his call)", file=sys.stderr)

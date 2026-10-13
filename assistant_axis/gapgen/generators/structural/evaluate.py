@@ -42,6 +42,9 @@ NULL_BAND: tuple[float, float] = (0.05, 0.40)
 PAIR_RECOVERY_EXPECTED = 0.8
 STABILITY_MIN_MEDIAN = 0.5
 PARSE_RATE_MIN = 0.99
+#: A pilot gate reads its figure only when at least this share of the sampled traits has the answers it needs (review
+#: B2, 2026-10-13: the stability gate passed at a median of 1.0 on 3 of 30 traits, the rest refused).
+MIN_ANSWERED_SHARE = 0.9
 _SUFFIX_RE = re.compile(r"\s*\([^)]*\)\s*$")
 
 
@@ -280,14 +283,23 @@ def pair_positions(replies: Mapping[str, OperatorReply], pairs: Sequence[tuple[s
     return {"n_pairs": len(rows), "combinations": dict(sorted(combos.items())), "pairs": rows}
 
 
+def answered_coverage(n_answered: int, n_sampled: int, *, min_share: float = MIN_ANSWERED_SHARE) -> dict:
+    """``{"n_answered", "n_sampled", "share", "min_share", "pass"}``: whether enough of a pilot's sample has the
+    answers its gate reads (review B2)."""
+    share = n_answered / n_sampled if n_sampled else 0.0
+    return {"n_answered": int(n_answered), "n_sampled": int(n_sampled), "share": round(share, 4),
+            "min_share": min_share, "pass": bool(n_sampled) and share >= min_share}
+
+
 def _jaccard(a: set, b: set) -> float:
     return 1.0 if not a and not b else len(a & b) / len(a | b)
 
 
 def stability_jaccard(run_a: Mapping[str, OperatorReply], run_b: Mapping[str, OperatorReply], *,
-                      lexicon=None) -> dict:
+                      lexicon=None, n_sampled: Optional[int] = None) -> dict:
     """Per trait answered in both runs: the Jaccard of the stems of all answers; the median, a 0.1-bin distribution,
-    the count below 0.5, and the median per operator."""
+    the count below 0.5, and the median per operator.  With ``n_sampled`` (the traits the two runs were asked),
+    ``coverage`` says whether enough of them were answered in both for the median to be read (review B2)."""
     common = sorted(s for s in set(run_a) & set(run_b)
                     if not run_a[s].principal_only and not run_b[s].principal_only)
     per = {s: round(_jaccard(produced_stems(run_a[s], lexicon=lexicon), produced_stems(run_b[s], lexicon=lexicon)), 4)
@@ -299,7 +311,9 @@ def stability_jaccard(run_a: Mapping[str, OperatorReply], run_b: Mapping[str, Op
         by_op[op] = round(statistics.median(vals), 4) if vals else None
     vals = list(per.values())
     bins = Counter(min(9, int(v * 10)) for v in vals)
-    return {"n_traits": len(common), "jaccard_median": round(statistics.median(vals), 4) if vals else None,
+    return {"n_traits": len(common), "n_sampled": n_sampled,
+            "coverage": answered_coverage(len(common), n_sampled) if n_sampled is not None else None,
+            "jaccard_median": round(statistics.median(vals), 4) if vals else None,
             "below_0.5": sum(1 for v in vals if v < 0.5), "min_median": STABILITY_MIN_MEDIAN,
             "distribution": {f"{b / 10:.1f}-{(b + 1) / 10:.1f}": bins.get(b, 0) for b in range(10)},
             "by_operator": by_op, "per_trait": per}
@@ -351,6 +365,7 @@ def write_evaluation(payload: Mapping, path: Path = EVALUATION_PATH, *, inputs: 
 
 
 __all__ = ["COSINE_THRESHOLDS", "NULL_BAND", "PAIR_RECOVERY_EXPECTED", "STABILITY_MIN_MEDIAN", "PARSE_RATE_MIN",
+           "MIN_ANSWERED_SHARE", "answered_coverage",
            "produced_stems", "target_stems", "pair_recovery", "structure_recovery", "freeze_holdout",
            "queue_holdout", "null_rates", "pair_positions", "stability_jaccard", "parse_rate", "read_evaluation",
            "write_evaluation"]

@@ -83,7 +83,7 @@ def test_every_dry_run_exits_0_and_writes_nothing(env, argv, capsys):
     out = capsys.readouterr().out
     if "operators" in argv and "--render" not in argv and "--principal-only" not in argv:
         assert "a singleton" in out and "a pair pole" in out and "a principal-target trait" in out
-        assert "Haiku 5.5 rates = $" in out
+        assert "claude-haiku-5-5 rates = $" in out          # the model actually used (review B3)
 
 
 def test_modernise_dry_run_renders_a_classical_batch(env, capsys):
@@ -219,3 +219,46 @@ def test_postprocess_budget_stop_still_writes_usage(env, monkeypatch, capsys):
     first = u["n_calls"]
     assert CLI.main(env["base"] + ["postprocess", "--run-id", "o1", "--embedder", "hash", "--budget-usd", "1"]) == 0
     assert json.loads(up.read_text())["n_calls"] > first                    # cumulative across runs
+
+
+def _refusing_client(env, *, first_ok: bool):
+    """Every trait refused (``first_ok``: answered once, then refused, so a first run answers and a second refuses)."""
+    ins = O.build_inputs(None, data_dir=env["data"], regions_path=env["data"] / "candidates" / "corpus_regions.json")
+    return F.ScriptedClient(F.script_for(ins, SYSTEM, {
+        t.stem: ([_answers(t.stem, t.principal_targets), F.refusal(), F.refusal()] if first_ok else F.refusal())
+        for t in ins}))
+
+
+def test_stability_gate_fails_when_the_sample_is_not_answered_in_both_runs(env, monkeypatch, capsys):
+    """Review B2 (2026-10-13): the gate passed at a median of 1.0 on 3 of 30 traits; now it fails and says so."""
+    client = _refusing_client(env, first_ok=True)          # one client for both runs: the second gets refusals
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: client)
+    rc = CLI.main(env["base"] + ["stability", "--run-id", "sa", "--against", "sb", "--n", "4", "--seed", "1"])
+    err = capsys.readouterr().err
+    assert rc == CLI.EXIT_GATE
+    assert "only 0 of 4 sampled traits answered in both runs" in err and "stopped other than end_turn" in err
+    st = json.loads((env["sdir"] / "evaluation.json").read_text())["result"]["stability"]
+    assert st["coverage"]["pass"] is False and st["n_sampled"] == 4
+
+
+def test_null_rate_gate_fails_when_the_sample_is_not_answered(env, monkeypatch, capsys):
+    monkeypatch.setattr(CLI, "_anthropic_client", lambda: _refusing_client(env, first_ok=False))
+    rc = CLI.main(env["base"] + ["null-rate", "--run-id", "nr", "--n", "6"])
+    captured = capsys.readouterr()
+    assert rc == CLI.EXIT_GATE and "answered 0 of 6 sampled traits" in captured.out
+    assert "only 0 of 6 sampled traits answered" in captured.err and "*** 12 of 12 responses" in captured.err
+    readout = json.loads((env["tmp"] / "candidates" / "runs" / "structural" / "nr" / "nullrate_readout.json").read_text())
+    assert readout["coverage"]["pass"] is False and readout["stops"]["stop_reasons"] == {"refusal": 12}
+    assert readout["stops"]["categories"] == {"reasoning_extraction": 12}
+
+
+def test_estimates_name_the_model_used(env, capsys):
+    """Review B3 (2026-10-13): the estimate line said Haiku 5.5 whatever --model was."""
+    for argv in (["operators", "--run-id", "o1", "--traits", "brave", "--dry-run", "--model", "claude-sonnet-5-5"],
+                 ["stability", "--run-id", "a", "--against", "b", "--n", "3", "--dry-run", "--model",
+                  "claude-sonnet-5-5"],
+                 ["modernise", "--run-id", "m", "--dry-run", "--model", "claude-sonnet-5-5"]):
+        assert CLI.main(env["base"] + argv) == 0
+        out = capsys.readouterr().out
+        line = next(x for x in out.splitlines() if "rates = $" in x)
+        assert "at claude-sonnet-5-5 rates" in line and "Haiku" not in line and "haiku" not in line, line

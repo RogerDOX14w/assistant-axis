@@ -81,8 +81,11 @@ def test_null_rate_pilot_inside_the_band_under_the_current_prompt():
         if current not in shas:
             continue                                   # a pilot under an earlier prompt: a revision round's record
         judged += 1
-        band = json.loads(p.read_text(encoding="utf-8"))["null_rates"]["band"]
+        readout = json.loads(p.read_text(encoding="utf-8"))
+        band = readout["null_rates"]["band"]
         assert band["pass"], (p.parent.name, band)
+        if readout.get("coverage"):                    # readouts since review B2 (2026-10-13) record it
+            assert readout["coverage"]["pass"], (p.parent.name, readout["coverage"])
     if not judged:
         pytest.skip("no null-rate pilot under the current prompt yet")
 
@@ -97,6 +100,8 @@ def test_stability_median():
     if not st:
         pytest.skip("no stability run yet")
     assert st["n_traits"] >= 30 and st["jaccard_median"] >= E.STABILITY_MIN_MEDIAN, st
+    if st.get("coverage"):                             # since review B2: answered in both runs, of the sample
+        assert st["coverage"]["pass"], st["coverage"]
 
 
 def test_evaluation_carries_every_figure():

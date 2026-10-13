@@ -23,6 +23,7 @@ from __future__ import annotations
 import asyncio
 import json
 import shutil
+from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Sequence
@@ -36,7 +37,7 @@ from assistant_axis.judge_pricing import BudgetExceededError, cost_for_usage
 from . import CLASSICAL_MODERN_PATH, SCHEMA_VERSION
 from .classical import SCHEME_NAMES, ClassicalRow
 from .operators import (CHARS_PER_TOKEN, MAX_GLOSS_WORDS, append_response, label_problem, prompt_sha256,
-                        read_responses, sha256)
+                        read_responses, sha256, stop_problem)
 
 MODEL = "claude-haiku-5-5"
 PER_CALL = 20
@@ -163,6 +164,8 @@ class ModerniseRun:
     n_units_ok: int = 0
     n_reused: int = 0
     stopped_by_budget: bool = False
+    #: responses that stopped other than ``end_turn``, by stop reason (each a failed call; review B1, 2026-10-13)
+    failures: Counter = field(default_factory=Counter)
 
 
 def _unit_id(rows: Sequence[ClassicalRow]) -> str:
@@ -177,7 +180,7 @@ def reusable(records: Sequence[Mapping], *, model: str) -> dict:
     ids and could never be matched)."""
     out = {}
     for r in records:
-        if r.get("stage") == STAGE and r.get("model") == model and r.get("prompt_sha256"):
+        if r.get("stage") == STAGE and r.get("model") == model and r.get("prompt_sha256") and not stop_problem(r):
             items, _ = parse_modernise(r.get("text"), ids=r.get("ids") or [])
             if items is not None:
                 out[r["prompt_sha256"]] = (items, r)
@@ -210,14 +213,18 @@ async def run_modernise(rows: Sequence[ClassicalRow], *, client, model: str, usa
                "ids": [r.id for r in u], "attempt": attempt, "model": model, "rubric": "structural_modernise",
                "rubric_version": rubric_version, "system_sha256": sys_sha, "user_sha256": sha256(user),
                "prompt_sha256": prompt_sha256(system, user), "at": now() if now else None, "user": user,
-               "text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
+               "text": text, "stop_reason": meta.get("stop_reason"), "stop_details": meta.get("stop_details"),
+               "usage_raw": meta.get("usage_raw"),
                "charged_as": model if meta.get("usage_raw") else None, "error": meta.get("error")}
+        rec["failure"] = stop_problem(rec)
+        if rec["failure"]:
+            res.failures[str(rec["stop_reason"])] += 1
         if out_path is not None:
             append_response(rec, out_path)
         res.records.append(rec)
         if over:
             res.stopped_by_budget = True
-        items, _ = parse_modernise(text, ids=rec["ids"])
+        items = None if rec["failure"] else parse_modernise(text, ids=rec["ids"])[0]
         if items is not None:
             for it in items:
                 res.items[it.id] = (it, rec)

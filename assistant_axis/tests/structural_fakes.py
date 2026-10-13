@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Mapping, Optional
 
 from assistant_axis.gapgen.generators.base_model.parse import Lexicon
@@ -142,10 +143,27 @@ class ScriptedClient(FakeAsyncAnthropic):
                 raise AssertionError(f"unscripted prompt (a changed prompt?): {user_text(kw)[:200]}")
             q = self.scripts[key]
             text = q.pop(0) if len(q) > 1 else q[0]
-            if isinstance(text, BaseException):
+            if not isinstance(text, str):                 # an exception, or a response built by the test
                 return text
             return make_response(text, input_tokens=input_tokens, output_tokens=output_tokens)
         super().__init__(responder)
+
+
+def refusal(category: str = "reasoning_extraction", *, as_dict: bool = False, input_tokens: int = 1700):
+    """A response as Sonnet 5.5 refused the operators prompt on 2026-10-13: ``stop_reason`` "refusal", no text, no
+    output tokens, ``stop_details`` with the category (an object, or a dict with ``as_dict``)."""
+    details = {"type": "refusal", "category": category,
+               "explanation": "blocked as it seems to violate the terms of service"}
+    return SimpleNamespace(content=[], stop_reason="refusal",
+                           stop_details=details if as_dict else SimpleNamespace(**details),
+                           usage=SimpleNamespace(input_tokens=input_tokens, output_tokens=0,
+                                                 cache_creation_input_tokens=0, cache_read_input_tokens=0))
+
+
+def truncated(text: str):
+    """A response cut at ``max_tokens`` (its text may even parse; it is still a failed call)."""
+    r = make_response(text, stop_reason="max_tokens")
+    return r
 
 
 def script_for(inputs, system: str, answers: Mapping[str, object]) -> dict:

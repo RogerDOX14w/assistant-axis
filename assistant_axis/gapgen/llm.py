@@ -82,6 +82,23 @@ def _is_transient(exc: BaseException) -> bool:
     return isinstance(exc, (asyncio.TimeoutError, ConnectionError))
 
 
+def stop_details(resp: Any) -> Optional[dict]:
+    """The response's ``stop_details`` as a plain dict (the API sets it on a refusal: ``{"type": "refusal",
+    "category": "reasoning_extraction", "explanation": ...}``, 2026-10-13), or None when it has none."""
+    sd = getattr(resp, "stop_details", None)
+    if sd is None:
+        return None
+    if isinstance(sd, dict):
+        return dict(sd)
+    dump = getattr(sd, "model_dump", None)
+    if callable(dump):
+        try:
+            return dict(dump())
+        except Exception:  # noqa: BLE001 - fall back to the attributes
+            pass
+    return {k: getattr(sd, k) for k in ("type", "category", "explanation") if getattr(sd, k, None) is not None}
+
+
 def response_text(resp: Any) -> str:
     parts = []
     for block in getattr(resp, "content", None) or []:
@@ -143,7 +160,8 @@ async def call_anthropic_json(client, *, system: Optional[str], user: str, model
     :func:`request_params`.
 
     ``meta`` (optional dict) receives ``stop_reason``, ``usage_raw``,
-    ``attempts``, ``error`` and ``text`` for the caller's response log; it is
+    ``attempts``, ``error`` and ``text`` for the caller's response log (and
+    ``stop_details`` when the response carries it, as a refusal does); it is
     filled *before* the usage is charged.  ``BudgetExceededError`` raised by a
     guarded ``usage`` propagates, with the response already in ``meta``.
     """
@@ -174,6 +192,9 @@ async def call_anthropic_json(client, *, system: Optional[str], user: str, model
         if meta is not None:
             meta.update({"stop_reason": getattr(resp, "stop_reason", None), "usage_raw": raw,
                          "attempts": attempt + 1, "error": None, "text": text})
+            sd = stop_details(resp)
+            if sd is not None:          # only when the response has it, so the meta of every other call is unchanged
+                meta["stop_details"] = sd
         if usage is not None:
             usage.charge(model, prompt, out)
         return text

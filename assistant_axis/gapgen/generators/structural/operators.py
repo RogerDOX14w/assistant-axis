@@ -391,10 +391,44 @@ class OperatorRun:
     n_reused: int = 0
     n_attempted: int = 0
     stopped_by_budget: bool = False
+    #: responses that stopped other than ``end_turn``, by stop reason (each a failed call, retried once)
+    failures: Counter = field(default_factory=Counter)
 
     @property
     def n_ok(self) -> int:
         return len(self.replies) - self.n_reused
+
+
+#: The stop reasons of a complete answer.  ``None`` is a record from code that did not record one (the test fakes).
+OK_STOP_REASONS: tuple = ("end_turn", None)
+
+
+def stop_problem(rec: Mapping) -> Optional[str]:
+    """Why a recorded response is a failed call although it has text (review B1, 2026-10-13): a ``stop_reason``
+    other than ``end_turn``, such as ``refusal`` (Sonnet 5.5 refused the operators prompt with an empty text and the
+    category ``reasoning_extraction``) or ``max_tokens`` (a truncated answer); None for a complete answer or a call
+    that got no response at all (that is counted as ``no response``)."""
+    stop = rec.get("stop_reason")
+    if rec.get("text") is None or stop in OK_STOP_REASONS:
+        return None
+    cat = (rec.get("stop_details") or {}).get("category") if isinstance(rec.get("stop_details"), dict) else None
+    return f"stop_reason {stop}" + (f" ({cat})" if cat else "")
+
+
+def stop_summary(records: Iterable[Mapping]) -> dict:
+    """``{"n_records", "n_failed", "stop_reasons": {...}, "categories": {...}, "line"}`` over a run's records: how
+    many responses stopped other than ``end_turn``; ``line`` is a loud summary when any did, else None."""
+    recs = list(records)
+    bad = [r for r in recs if stop_problem(r)]
+    reasons = Counter(str(r.get("stop_reason")) for r in bad)
+    cats = Counter(str((r.get("stop_details") or {}).get("category")) for r in bad
+                   if isinstance(r.get("stop_details"), dict) and r["stop_details"].get("category"))
+    line = None
+    if bad:
+        line = (f"*** {len(bad)} of {len(recs)} responses stopped other than end_turn: {dict(sorted(reasons.items()))}"
+                + (f", categories {dict(sorted(cats.items()))}" if cats else "") + " (counted as failed calls) ***")
+    return {"n_records": len(recs), "n_failed": len(bad), "stop_reasons": dict(sorted(reasons.items())),
+            "categories": dict(sorted(cats.items())), "line": line}
 
 
 def read_responses(path: Path) -> list[dict]:
@@ -415,6 +449,9 @@ def reply_from_record(rec: Mapping) -> tuple[Optional[OperatorReply], Optional[s
     """A recorded answer parsed again (the record holds the text as received)."""
     if rec.get("stage") != STAGE:
         return None, "not an operators record"
+    bad = stop_problem(rec)
+    if bad:
+        return None, bad
     rep, why = parse_operator_reply(rec.get("text"), principal=bool(rec.get("principal_targets")),
                                     principal_only=bool(rec.get("principal_only")),
                                     source_label=rec.get("label"), source_stem=rec.get("stem"))
@@ -485,8 +522,12 @@ async def run_operators(inputs: Sequence[TraitInput], *, client, model: str, usa
                "principal_targets": ti.principal_targets, "principal_only": ti.principal_only,
                "alignment_score": ti.alignment_score, "principal_min_score": principal_min_score,
                "label_form": label_form, "at": now() if now else None, "user": users[ti.stem], "text": text,
-               "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
+               "stop_reason": meta.get("stop_reason"), "stop_details": meta.get("stop_details"),
+               "usage_raw": meta.get("usage_raw"),
                "charged_as": model if meta.get("usage_raw") else None, "error": meta.get("error")}
+        rec["failure"] = stop_problem(rec)
+        if rec["failure"]:
+            res.failures[str(rec["stop_reason"])] += 1
         if out_path is not None:
             append_response(rec, out_path)          # recorded before it is parsed
         res.records.append(rec)
@@ -589,6 +630,7 @@ def rejection_counts(replies: Iterable[OperatorReply]) -> dict:
 __all__ = ["OPERATORS", "SINGLE_OPERATORS", "TARGETS", "PRINCIPAL_TARGETS", "MODES", "POSITIONS",
            "PRINCIPAL_MIN_SCORE", "MODEL", "MAX_TOKENS", "TraitInput", "OperatorReply", "OperatorRun",
            "arrangement_kinds", "load_regions", "is_principal", "build_inputs", "check_principal",
-           "render_operator_user", "prompt_sha256", "degree_form", "label_problem", "validate_item", "parse_operator_reply",
-           "read_responses", "append_response", "reply_from_record", "reusable", "already_principal",
-           "run_operators", "estimate", "stratified_sample", "rejection_counts"]
+           "render_operator_user", "prompt_sha256", "degree_form", "label_problem", "validate_item",
+           "parse_operator_reply", "OK_STOP_REASONS", "stop_problem", "stop_summary", "read_responses",
+           "append_response", "reply_from_record", "reusable", "already_principal", "run_operators", "estimate",
+           "stratified_sample", "rejection_counts"]

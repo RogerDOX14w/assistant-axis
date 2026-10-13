@@ -153,3 +153,14 @@ def test_evaluation_file_round_trip_and_unchanged_rerun(tmp_path):
     assert E.read_evaluation(p) == payload and "_provenance" in json.loads(first)
     bak = E.write_evaluation({**payload, "x": 1}, p)
     assert bak is not None and bak.read_bytes() == first
+
+
+def test_answered_coverage_and_stability_over_the_sample():
+    """Review B2 (2026-10-13): a gate reads its figure only when 90% or more of the sample is answered."""
+    assert E.answered_coverage(27, 30)["pass"] and not E.answered_coverage(26, 30)["pass"]
+    assert not E.answered_coverage(0, 0)["pass"] and E.answered_coverage(3, 30)["share"] == 0.1
+    a = {"s1": _rep("s1", opposite=F.item("aa"))}
+    st = E.stability_jaccard(a, a, n_sampled=30)
+    assert st["jaccard_median"] == 1.0 and st["n_traits"] == 1 and st["n_sampled"] == 30
+    assert st["coverage"] == {"n_answered": 1, "n_sampled": 30, "share": 0.0333, "min_share": 0.9, "pass": False}
+    assert E.stability_jaccard(a, a)["coverage"] is None
