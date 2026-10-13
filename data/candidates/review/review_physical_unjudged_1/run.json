@@ -1,0 +1,413 @@
+{
+  "batch_id": "review_physical_unjudged_1",
+  "from_batches": [
+    "physical_unjudged_1",
+    "physical_allport_pilots_1",
+    "physical_pilots_1",
+    "physical_tda_1"
+  ],
+  "git_sha": "32a9e824+dirty",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "build",
+    "--batch-id",
+    "review_physical_unjudged_1",
+    "--from-batches",
+    "physical_unjudged_1",
+    "physical_allport_pilots_1",
+    "physical_pilots_1",
+    "physical_tda_1",
+    "--transport",
+    "batches",
+    "--budget-usd",
+    "2"
+  ],
+  "plan": {
+    "n_candidates": 126,
+    "n_covered_shown": 75,
+    "selected_by_batch": {
+      "physical_unjudged_1": {
+        "new": 90,
+        "covered": 39
+      },
+      "physical_allport_pilots_1": {
+        "new": 16,
+        "covered": 9
+      },
+      "physical_pilots_1": {
+        "new": 4,
+        "covered": 9
+      },
+      "physical_tda_1": {
+        "covered": 18,
+        "new": 16
+      }
+    },
+    "skipped": {},
+    "query_texts": {
+      "n_query_texts": 126,
+      "n_cached": 126,
+      "n_to_embed": 0
+    },
+    "no_vector": 0,
+    "n_relation_calls": 126,
+    "lists_split": 0,
+    "n_listed": 1250,
+    "longest_list": 13,
+    "n_candidate_edges": 824,
+    "n_edges_at_overlap_floor": 744,
+    "k": 10,
+    "pair_floor": 0.55,
+    "edges_by_via": {
+      "k_nearest": 824,
+      "pair_floor": 0,
+      "label_variant": 0
+    },
+    "n_label_variant_pairs": 0
+  },
+  "transport": "batches",
+  "transport_reason": "--transport batches",
+  "estimate_usd": 0.5826,
+  "estimate_lines": [
+    "relation call (9.9 listed candidates a call): 126 x (1,032, 759) tokens at claude-haiku-5-5:batch rates = $0.030",
+    "unsure re-ask (6% of relation calls, 1.23636 candidates each): 8 x (555, 98) tokens at claude-sonnet-5-5:batch rates = $0.008",
+    "overlap, first direction, Sonnet (744 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 349 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $0.210",
+    "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 93 x (196, 125) tokens at claude-opus-5-5:batch rates = $0.153",
+    "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 86 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $0.052",
+    "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 79 x (196, 125) tokens at claude-opus-5-5:batch rates = $0.130"
+  ],
+  "budget_usd": 2.0,
+  "cap_usd": 2.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "k": 10,
+    "cosine_floor": 0.25,
+    "pair_floor": 0.55,
+    "label_variants": true,
+    "overlap_floor": 0.35,
+    "cut_off": 4,
+    "proposed_cut_off": 3,
+    "rules": "m3_rules_2",
+    "relation_seed": "review_physical_unjudged_1",
+    "concurrency": 8,
+    "query_form": "gloss_w14",
+    "config_version": "2026-10-02",
+    "embedding_model": "text-embedding-3-large",
+    "representation": "w20",
+    "variant": "centred",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "ask_attempts": 2
+  },
+  "estimate_inputs": {
+    "shares": {
+      "bins": [
+        0.35,
+        0.45,
+        0.55,
+        0.65
+      ],
+      "similar": [
+        0.2258,
+        0.4488,
+        0.7563,
+        0.9442
+      ],
+      "opus": [
+        0.0405,
+        0.1169,
+        0.246,
+        0.6431
+      ],
+      "four": [
+        0.0025,
+        0.0084,
+        0.0335,
+        0.2452
+      ],
+      "n_listed": [
+        1749,
+        1867,
+        1145,
+        825
+      ],
+      "n_read": [
+        395,
+        838,
+        866,
+        779
+      ],
+      "second": [
+        0.0329,
+        0.1038,
+        0.2217,
+        0.6149
+      ],
+      "second_opus": 0.9157,
+      "n_second": 771,
+      "source": "r1:review_tda_1"
+    },
+    "overlap_tokens": {
+      "sonnet": [
+        196,
+        81
+      ],
+      "opus": [
+        196,
+        125
+      ]
+    },
+    "unsure": [
+      0.06314580941446613,
+      1.2363636363636363
+    ],
+    "calibration": {
+      "source": "r1:review_tda_1",
+      "builds": [
+        "review_tda_1"
+      ],
+      "missing": [],
+      "n_records": 6111,
+      "unsure": [
+        0.0631,
+        1.236
+      ]
+    }
+  },
+  "corpus": {
+    "n_corpus": 932,
+    "n_missing_from_cache": 0,
+    "missing": [],
+    "n_corpus_missing": 0,
+    "n_queue_missing": 0,
+    "queue": {
+      "enabled": false,
+      "n_entries": 0
+    },
+    "queue_stems": []
+  },
+  "label_form": "judge-display-v1",
+  "resumed": false,
+  "started_at": "2026-10-13T04:28:24+00:00",
+  "gate": {
+    "pairs": 162,
+    "pairs_not_on_record": 162,
+    "spent_usd": 0.0325,
+    "overlap_estimate_usd": 0.3444,
+    "cap_usd": 2.0,
+    "lines": [
+      "overlap, first direction, Sonnet (162 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 162 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $0.097",
+      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 68 x (196, 125) tokens at claude-opus-5-5:batch rates = $0.112",
+      "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 64 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $0.038",
+      "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 59 x (196, 125) tokens at claude-opus-5-5:batch rates = $0.097"
+    ]
+  },
+  "finished_at": "2026-10-13T04:50:26+00:00",
+  "cost_usd": 0.3038,
+  "status": 0,
+  "stopped_by_error": null,
+  "calls_sent": {
+    "overlap:opus": 127,
+    "overlap:sonnet": 224,
+    "relation:haiku": 126,
+    "relation_unsure:sonnet": 4
+  },
+  "calls_resumed": 0,
+  "parse_rates": {
+    "relation:claude-haiku-5-5": {
+      "n": 126,
+      "ok_first": 126,
+      "ok": 126
+    },
+    "relation_unsure:claude-sonnet-5-5": {
+      "n": 4,
+      "ok_first": 4,
+      "ok": 4
+    },
+    "overlap:claude-sonnet-5-5": {
+      "n": 224,
+      "ok_first": 224,
+      "ok": 224
+    },
+    "overlap:claude-opus-5-5": {
+      "n": 127,
+      "ok_first": 127,
+      "ok": 127
+    }
+  },
+  "complete": true,
+  "graph_stats": {
+    "n_candidates": 126,
+    "by_batch": {
+      "physical_allport_pilots_1": 16,
+      "physical_pilots_1": 4,
+      "physical_tda_1": 16,
+      "physical_unjudged_1": 90
+    },
+    "by_generator": {
+      "censuses": 115,
+      "ipip": 2,
+      "roget": 3,
+      "wn_clusters": 6
+    },
+    "by_decision": {
+      "new": 126
+    },
+    "n_covered_shown": 75,
+    "n_corpus_nodes": 292,
+    "n_queue_nodes": 16,
+    "candidate_edges": {
+      "n": 824,
+      "by_relation": {
+        "mixed": 2,
+        "opposed": 101,
+        "similar": 161,
+        "unrelated": 560
+      },
+      "by_overlap": {
+        "below_floor": 1,
+        "both": 62,
+        "first": 100,
+        "not_similar": 661
+      },
+      "answers": {
+        "opposed": 141,
+        "similar": 271,
+        "unrelated": 838
+      },
+      "one_sided": 398,
+      "by_via": {
+        "k_nearest": 824
+      },
+      "label_variants": 0
+    },
+    "overlap": {
+      "pairs_first_direction": 162,
+      "pairs_second_direction": 62,
+      "sonnet_readings": 224,
+      "opus_readings": 127,
+      "four_first": 18,
+      "proposed_first": 62,
+      "four_edges": 15,
+      "similar_below_floor": 1,
+      "unparsed": 0,
+      "stalled": 0
+    },
+    "agreement_on_fours": {
+      "directions_read_4": 35,
+      "by_readings": {
+        "sonnet 3, opus 2": 3,
+        "sonnet 3, opus 3": 89,
+        "sonnet 3, opus 4": 17,
+        "sonnet 4, opus 4": 18
+      }
+    },
+    "corpus_edges": {
+      "n": 1773,
+      "by_relation": {
+        "opposed": 236,
+        "similar": 133,
+        "unrelated": 1404
+      },
+      "with_readings": 171
+    },
+    "cliques": {
+      "n": 15,
+      "by_size": {
+        "2": 15
+      },
+      "largest": 2,
+      "candidates_in_cliques": 28,
+      "candidates_in_several": 2
+    },
+    "singletons": 98,
+    "clique_links": 1,
+    "proposed_groups": {
+      "n": 11,
+      "n_edges": 62,
+      "by_size": {
+        "2": 6,
+        "3": 2,
+        "5": 2,
+        "8": 1
+      },
+      "largest": 8,
+      "candidates_in_proposed": 30,
+      "candidates_in_proposed_only": 18,
+      "candidates_in_several": 6,
+      "links": 3
+    },
+    "ungrouped": 80,
+    "skipped": {},
+    "no_vector": [],
+    "selected_by_batch": {
+      "physical_unjudged_1": {
+        "new": 90,
+        "covered": 39
+      },
+      "physical_allport_pilots_1": {
+        "new": 16,
+        "covered": 9
+      },
+      "physical_pilots_1": {
+        "new": 4,
+        "covered": 9
+      },
+      "physical_tda_1": {
+        "covered": 18,
+        "new": 16
+      }
+    },
+    "plan_edges": {
+      "n_candidate_edges": 824,
+      "by_via": {
+        "k_nearest": 824,
+        "pair_floor": 0,
+        "label_variant": 0
+      },
+      "n_label_variant_pairs": 0,
+      "k": 10,
+      "pair_floor": 0.55,
+      "n_listed": 1250,
+      "longest_list": 13,
+      "n_relation_calls": 126,
+      "lists_split": 0
+    }
+  },
+  "stalled": {}
+}

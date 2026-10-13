@@ -1,0 +1,94 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "states_unjudged_r3_m3,states_m3_reroute,states_tda_1_m3"
+        },
+        "fingerprint": "v1:2026-10-13T03:51:38+00:00@460494119",
+        "kind": "file",
+        "last_modified_at": "2026-10-13T03:51:38+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "states_unjudged_r3_m3,states_m3_reroute,states_tda_1_m3"
+        },
+        "fingerprint": "v1:multi:e8a95d667afa",
+        "kind": "multi",
+        "last_modified_at": "2026-10-13T02:37:06+00:00",
+        "member_paths": [
+          "data/candidates/novelty/states_m3_reroute/run.json",
+          "data/candidates/novelty/states_tda_1_m3/run.json",
+          "data/candidates/novelty/states_unjudged_r3_m3/run.json"
+        ],
+        "path": "data/candidates/novelty"
+      }
+    ],
+    "inputs_sha256": "77f5af040c16b3c9afb68e0d58e72fb08c41c946e58ed3b9bdd1432a3f5cb6d1",
+    "produced_at": "2026-10-13T04:28:14+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_states_unjudged_r3 --from-batches states_unjudged_r3_m3 states_m3_reroute states_tda_1_m3 --transport batches --budget-usd 2",
+      "git_sha": "32a9e824+dirty",
+      "title": "review_graph build review_states_unjudged_r3"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 379,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 85017,
+      "cost_usd": 0.0276,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 103,
+      "prompt_tokens": 126431
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 7700,
+      "cost_usd": 0.1073,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 75,
+      "prompt_tokens": 15151
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 16856,
+      "cost_usd": 0.128,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 201,
+      "prompt_tokens": 43705
+    }
+  },
+  "total_completion_tokens": 109573,
+  "total_cost_usd": 0.2629,
+  "total_prompt_tokens": 185287
+}
