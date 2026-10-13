@@ -177,7 +177,8 @@ def test_single_worker_mode_exits_1_after_a_role_with_no_activations(
         layout=mod.derive_chat_layout(fake.tokenizer, FAMILIES["qwen3"])))
     monkeypatch.setattr(_sys, "argv", [
         "2_activations.py", "--model", "Qwen/Qwen3-32B",
-        "--responses_dir", str(responses), "--output_dir", str(tmp_path / "out")])
+        "--responses_dir", str(responses), "--output_dir", str(tmp_path / "out"),
+        "--ignore_generation_config"])          # these responses have no side-car
     root = logging.getLogger()
     before = list(root.handlers)
     try:

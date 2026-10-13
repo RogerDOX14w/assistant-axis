@@ -101,3 +101,39 @@ def test_an_unknown_model_type_is_refused_before_the_model_loads(mod, monkeypatc
 
     assert _run_main(mod, monkeypatch, tmp_path, [], unknown) == 1
     assert "x/y: model_type 'nope' has no row" in caplog.text
+
+
+def test_ignore_generation_config_logs_the_difference(mod, monkeypatch, tmp_path, caplog):
+    """§ 9 test 6: with the flag, a side-car whose header ids differ is
+    logged (both values) and the run goes on to load the model."""
+    from assistant_axis.generation import prompt_token_ids, write_generation_config
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    pre = _qwen_preflight(mod)("x/y")
+    sample = [{"role": "user", "content": "What is law?"}]
+    (tmp_path / "responses").mkdir()
+    write_generation_config(tmp_path / "responses", {
+        "created_at": "2026-10-13", "model_type": "qwen3",
+        "template_kwargs": {"enable_thinking": False}, "header_ids": [1, 11, 5],
+        "sample_conversation": sample,
+        "sample_prompt_ids": prompt_token_ids(pre.tokenizer, sample, {"enable_thinking": False})})
+    (tmp_path / "responses" / "alpha.jsonl").write_text("{}\n")
+    monkeypatch.setattr(mod, "preflight_model", lambda name, **kw: pre)
+    monkeypatch.setattr(mod, "ProbingModel", lambda *a, **k: (_ for _ in ()).throw(
+        AssertionError("a model was loaded")))
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    monkeypatch.setattr(sys, "argv", ["2_activations.py", "--model", "x/y", "--responses_dir",
+                                      str(tmp_path / "responses"), "--output_dir",
+                                      str(tmp_path / "out"), "--ignore_generation_config"])
+    root = logging.getLogger()
+    before = list(root.handlers)
+    try:
+        with caplog.at_level(logging.WARNING), pytest.raises(AssertionError,
+                                                             match="a model was loaded"):
+            mod.main()
+    finally:
+        for h in root.handlers[:]:
+            if h not in before:
+                root.removeHandler(h)
+                h.close()
+    assert "header_ids: step 1 [1, 11, 5], step 2" in caplog.text
+    assert "--ignore_generation_config given" in caplog.text

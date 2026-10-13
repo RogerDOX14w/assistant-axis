@@ -115,6 +115,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--thinking", nargs="?", action=_RemovedFlag, help=argparse.SUPPRESS)
     parser.add_argument("--no-headers", action="store_true", default=False,
                        help="Disable header token extraction (legacy compat)")
+    parser.add_argument("--ignore_generation_config", action="store_true",
+                        help="Extract although the responses directory has no "
+                             "generation_config.json (a tree made before 2026-10-12, such as the "
+                             "May 8slot tree) or one whose model type, template kwargs, header "
+                             "ids or sample prompt differ from this model's; the differences are "
+                             "logged.  Off by default: the run refuses (exit 1).")
     parser.add_argument("--verify_spans", type=int, default=0, metavar="N",
                         help="Before extracting each worker's first entity, decode the assistant "
                              "span of its first N conversations and compare it with the stored "
@@ -159,7 +165,13 @@ from tqdm import tqdm  # noqa: E402
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from assistant_axis.internals import ProbingModel, ConversationEncoder, ActivationExtractor, SpanMapper  # noqa: E402
-from assistant_axis.internals.chat_layout import ChatLayout, LayoutError, derive_chat_layout  # noqa: E402
+from assistant_axis.internals.chat_layout import (  # noqa: E402
+    PROBE_CONTENT,
+    ChatLayout,
+    LayoutError,
+    chat_ids,
+    derive_chat_layout,
+)
 from assistant_axis.model_families import (  # noqa: E402
     FamilyNotBuiltError,
     FamilySpec,
@@ -328,6 +340,74 @@ def preflight_model(model_name: str, *, extract_headers: bool = True) -> Preflig
         logger.warning(f"--no-headers: no header layout derived ({e}); body means only")
         layout = None
     return Preflight(family=family, n_layers=n_layers, tokenizer=tokenizer, layout=layout)
+
+
+class GenerationConfigError(RuntimeError):
+    """The responses directory has no ``generation_config.json``, or its last
+    run does not match this model (multi-model plan § 5.5)."""
+
+
+def check_generation_config(responses_dir: Path, pre: Preflight, *, ignore: bool = False,
+                            log=None) -> List[str]:
+    """Compare step 1's side-car with what step 2 is about to do, before any
+    model is loaded (multi-model plan § 5.5): the last recorded run's
+    ``model_type``, ``template_kwargs`` and ``header_ids`` must equal this
+    model's row and derived layout, and its ``sample_prompt_ids`` (the ids
+    step 1 handed vLLM for ``sample_conversation``) must be the prefix of
+    step 2's rendering of that conversation with an assistant turn: the
+    end-to-end check that the two steps see the same tokens.
+
+    Returns the differences.  Raises :class:`GenerationConfigError` on any
+    difference, or when there is no side-car (the May 8slot tree has none:
+    Roger, § 15 Q10), unless ``ignore`` (``--ignore_generation_config``),
+    which logs them instead."""
+    from assistant_axis.generation import GENERATION_CONFIG_NAME, read_generation_config
+    log = log or logger
+    path = Path(responses_dir) / GENERATION_CONFIG_NAME
+    cfg = read_generation_config(Path(responses_dir))
+    if not cfg or not cfg.get("runs"):
+        msg = (f"{responses_dir} has no {GENERATION_CONFIG_NAME} (or no run in it): its "
+               f"responses were made before 2026-10-12 (the May 8slot tree) or by hand, under "
+               f"settings nothing records; pass --ignore_generation_config to extract them anyway")
+        if not ignore:
+            raise GenerationConfigError(msg)
+        log.warning(msg + " (--ignore_generation_config given)")
+        return [msg]
+
+    last = cfg["runs"][-1]
+    family = pre.family
+    tok = pre.tokenizer
+    diffs: List[str] = []
+    if last.get("model_type") != family.model_type:
+        diffs.append(f"model_type: step 1 {last.get('model_type')!r}, step 2 {family.model_type!r}")
+    if last.get("template_kwargs") != dict(family.template_kwargs):
+        diffs.append(f"template_kwargs: step 1 {last.get('template_kwargs')!r}, step 2 "
+                     f"{dict(family.template_kwargs)!r}")
+    if pre.layout is not None and last.get("header_ids") != list(pre.layout.header_ids):
+        diffs.append(f"header_ids: step 1 {last.get('header_ids')!r}, step 2 "
+                     f"{list(pre.layout.header_ids)!r}")
+    sample, sent = last.get("sample_conversation"), last.get("sample_prompt_ids")
+    if not sample or sent is None:
+        diffs.append("sample_conversation / sample_prompt_ids: not recorded (a side-car "
+                     "written before 2026-10-13)")
+    else:
+        rendered = chat_ids(tok, list(sample) + [{"role": "assistant", "content": PROBE_CONTENT}],
+                            add_generation_prompt=False,
+                            template_kwargs=dict(family.template_kwargs))
+        if rendered[:len(sent)] != [int(i) for i in sent]:
+            diffs.append(f"sample_prompt_ids: what step 1 sent, {tok.decode(list(sent))!r}, is not "
+                         f"the start of step 2's rendering of the same conversation, "
+                         f"{tok.decode(rendered)!r}")
+    if diffs:
+        msg = (f"{path} (last run {last.get('created_at')}) does not match this model: "
+               f"{'; '.join(diffs)}.  Step 2 would compute on a context step 1 did not use; pass "
+               f"--ignore_generation_config to extract anyway (a deliberate re-extraction)")
+        if not ignore:
+            raise GenerationConfigError(msg)
+        log.warning(msg + " (--ignore_generation_config given)")
+    else:
+        log.info(f"{path}: model type, template kwargs, header ids and the sample prompt match")
+    return diffs
 
 
 def log_layout(layout: Optional[ChatLayout], log=None) -> None:
@@ -908,6 +988,12 @@ def main():
     except LayersError as e:
         parser.error(str(e))
     log_layout(pre.layout)
+    # Step 1's side-car against this model (§ 5.5), still before any load.
+    try:
+        check_generation_config(responses_dir, pre, ignore=args.ignore_generation_config)
+    except GenerationConfigError as e:
+        logger.error(str(e))
+        sys.exit(1)
     args.hf_load_kwargs = dict(pre.family.hf_load_kwargs)
     args.expected_header_ids = (list(pre.layout.header_ids)
                                 if pre.layout is not None and not args.no_headers else None)

@@ -49,6 +49,9 @@ logger = logging.getLogger("pipeline.5_axis")
 # 1,800 entities, the May ones 280 to 1,793).
 DEFAULT_MIN_ENTITIES = 10
 
+# The vector metadata keys that must be equal across every vector of an axis.
+METADATA_MUST_AGREE = ("header_ids", "model_name", "model_type", "template_kwargs")
+
 
 def load_vector(vector_file: Path) -> dict:
     """Load vector data from .pt file with project-standard NFS retry
@@ -153,14 +156,15 @@ def main():
             if not metadata:
                 metadata = file_meta
             else:
-                if file_meta.get("header_ids") != metadata.get("header_ids"):
-                    print(f"Error: metadata mismatch in {vec_file.name}: "
-                          f"header_ids {file_meta.get('header_ids')} != {metadata.get('header_ids')}")
-                    sys.exit(1)
-                if file_meta.get("model_name") != metadata.get("model_name"):
-                    print(f"Error: metadata mismatch in {vec_file.name}: "
-                          f"model_name {file_meta.get('model_name')!r} != {metadata.get('model_name')!r}")
-                    sys.exit(1)
+                # One extraction per axis: the same header, model, family and
+                # template kwargs in every vector (model_type and
+                # template_kwargs since the multi-model plan, 2026-10-13; May
+                # vectors have neither, so they agree with each other).
+                for key in METADATA_MUST_AGREE:
+                    if file_meta.get(key) != metadata.get(key):
+                        print(f"Error: metadata mismatch in {vec_file.name}: "
+                              f"{key} {file_meta.get(key)!r} != {metadata.get(key)!r}")
+                        sys.exit(1)
 
         # Exact name, as in step 3 and step 4 (a substring test would put any
         # entity whose name contains "default" on the default side).

@@ -92,6 +92,34 @@ def test_mismatched_header_ids_stop_the_run(step5, monkeypatch, tmp_path):
     assert e.value.code == 1
 
 
+@pytest.mark.parametrize("key, other", [("model_type", "llama"),
+                                        ("template_kwargs", {"enable_thinking": True})])
+def test_mixed_model_type_or_template_kwargs_stop_the_run(step5, monkeypatch, tmp_path, capsys,
+                                                         key, other):
+    # Multi-model plan § 9 test 9: one family and one set of template kwargs
+    # per axis.
+    meta = {**META, "model_type": "qwen3", "template_kwargs": {"enable_thinking": False}}
+    vec_dir = tmp_path / "vectors"
+    vec_dir.mkdir()
+    _vec(vec_dir / "default.pt", 1.0, vtype="mean", meta=meta)
+    _vec(vec_dir / "pirate.pt", 2.0, meta={**meta, key: other})
+    with pytest.raises(SystemExit) as e:
+        _run(step5, monkeypatch, vec_dir, tmp_path / "axis.pt")
+    assert e.value.code == 1
+    assert f"metadata mismatch in pirate.pt: {key}" in capsys.readouterr().out
+
+
+def test_matching_model_type_and_template_kwargs_are_carried_over(step5, monkeypatch, tmp_path):
+    meta = {**META, "model_type": "qwen3", "template_kwargs": {"enable_thinking": False}}
+    vec_dir = tmp_path / "vectors"
+    vec_dir.mkdir()
+    _vec(vec_dir / "default.pt", 1.0, vtype="mean", meta=meta)
+    _vec(vec_dir / "pirate.pt", 2.0, meta=meta)
+    saved = _run(step5, monkeypatch, vec_dir, tmp_path / "axis.pt")
+    assert saved["metadata"]["model_type"] == "qwen3"
+    assert saved["metadata"]["template_kwargs"] == {"enable_thinking": False}
+
+
 def test_mixed_slot_counts_stop_the_run(step5, monkeypatch, tmp_path):
     """A 4-slot vector beside 8-slot ones (vectors_4slot mixed into vectors)."""
     vec_dir = tmp_path / "vectors"
