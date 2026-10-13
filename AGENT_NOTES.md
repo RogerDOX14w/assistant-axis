@@ -1217,6 +1217,25 @@ pattern); see the TODO block above
 ``COHERENCE_RUBRIC_VERSION`` for the work needed to bring them
 into the same scheme if/when that assumption breaks.
 
+### Sonnet 5.5 refuses "think first" reasoning fields (2026-10-13)
+<!-- claude: rule=judging -->
+
+Claude Sonnet 5.5 (and possibly other 5.x models with adaptive thinking)
+returns `stop_reason: "refusal"`, no text and no output tokens, with
+`stop_details.category == "reasoning_extraction"` ("blocked as it seems to
+violate Anthropic's Terms of Service restrictions on reverse engineering or
+duplicating model outputs"), for a prompt that tells it to **think in a JSON
+field**: plan 09's operator rubric v1, "Think first, in "reasoning": what the
+trait is and what drives it ... {"reasoning": "...", ...}", was refused on 107
+of 116 calls.  Haiku 5.5 answers the same prompt.  M3's overlap rubric, "Give a
+reason in one short sentence, then the answer ... {"reason": "<one short
+sentence>", ...}", is answered by Sonnet 5.5 and Opus 5.5.  So for any prompt a
+5.x Sonnet or Opus may receive: ask for **a short reason** (one or two sentences)
+before the answer, never for the model's thinking; and treat a `refusal` stop
+reason as a failed call that is recorded and counted, never as an empty answer
+(the structural generator's stability gate passed on 3 of 30 traits because
+refusals were dropped from its denominator; fixed the same day).
+
 ### Judge prompts show the judge display form (Roger, 2026-10-09)
 <!-- claude: rule=judging -->
 
