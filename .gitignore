@@ -102,3 +102,9 @@ Thumbs.db
 /reports/opening_forms/*/scores/
 /reports/opening_forms/*/depth/
 /reports/opening_forms/*/responses
+
+# Plan 13 (workstream 13): the paraphrase set's scratch registry log and its lock (per checkout, as the main
+# registry log is); backups the dashboard keeps when a rebuilt output changes.
+/data/candidates/testing/paraphrase_set/registry.jsonl
+/data/candidates/testing/paraphrase_set/registry.jsonl.lock
+/data/candidates/testing/**/*.bak.*

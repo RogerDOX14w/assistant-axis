@@ -20,3 +20,17 @@ TESTING_DIR = DATA_CANDIDATES / "testing"
 DASHBOARD_JSON_PATH = TESTING_DIR / "dashboard.json"
 DASHBOARD_MD_PATH = TESTING_DIR / "dashboard.md"
 PARAPHRASE_SET_DIR = TESTING_DIR / "paraphrase_set"
+
+#: The frozen interface (plan 13, "Frozen interface"): for plans 04 and 09's wave sizing and the next dashboard
+#: refreshes.  ``ReviewRate`` / ``review_rate`` / ``pooled_review_rate`` measure Roger's review from a batch's logs;
+#: ``PromoteShare`` / ``promote_share`` give the share per group (decision 3) with the per-term share beside it;
+#: ``GeneratorRow`` is the dashboard's row (``schema_version`` 1) and ``load_dashboard`` reads the last one written.
+#: Fields are added, never renamed, without a schema bump.
+FROZEN_INTERFACE: tuple[str, ...] = ("review_rate", "ReviewRate", "pooled_review_rate", "promote_share", "PromoteShare",
+                                     "load_dashboard", "DASHBOARD_JSON_PATH", "GeneratorRow")
+
+from .review_minutes import PromoteShare, ReviewRate, pooled_review_rate, promote_share, review_rate  # noqa: E402
+from .dashboard import GeneratorRow, load_dashboard  # noqa: E402
+
+__all__ = ["TESTING_DIR", "DASHBOARD_JSON_PATH", "DASHBOARD_MD_PATH", "PARAPHRASE_SET_DIR", "FROZEN_INTERFACE",
+           *FROZEN_INTERFACE]
