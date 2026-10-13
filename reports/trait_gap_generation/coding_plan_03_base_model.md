@@ -453,7 +453,9 @@ eligible uniques): M1 ≈ $14-29 live, M3 at the pilot's measured pass rate (at 
 at the 0.95 high case ≈ $21-42); **≈ $16-32 batched** — over the $20 line, so the full run goes
 through the Message
 Batches API with Roger's explicit go (`--confirm-expensive --confirmed-by`), per the
-batch-or-real-time rule in [CLAUDE.md](../../CLAUDE.md).
+batch-or-real-time rule in [CLAUDE.md](../../CLAUDE.md).  The generator's own cost stays $0; the
+20k sampling is ≈ 1.6M tokens, ≈ 1.5-3 h of Mac time at the benchmarked rate — far under the
+13-GPU-hour line.
 
 **Re-based on the pilot (2026-10-13, at Roger's request).**  The pilot's batches charged only rows no earlier
 batch had judged: M1 $1.60 over 237 new rows ($0.0067 a row) and M3 $1.58 over 205 ($0.0077), so about **$0.013
@@ -473,9 +475,40 @@ The new words are rarer than the pilot's, so the per-row rate is the main uncert
 binding cost: at the pilot's rates for rows only this generator found (M1 trait about 80%, M3 new about 55%), the
 central case puts about 2,100 new kept candidates in front of review, about 14 hours at the measured 146 terms an
 hour before pre-handling.  Submitting in review-hour waves ranked by emission count, as plan 09 does (its
-decision 1), keeps each wave's M1/M3 cost and review time small.  The generator's own cost stays $0; the
-20k sampling is ≈ 1.6M tokens, ≈ 1.5-3 h of Mac time at the benchmarked rate — far under the
-13-GPU-hour line.
+decision 1), keeps each wave's M1/M3 cost and review time small.
+
+**Roger's pilot gate (2026-10-13), with the measurements behind the open items.**
+- (b) **`ai_assistant` family kept** (Roger: "SG").  (d) **Variant B not needed** (Roger: "SG"): the curve is
+  still steep.
+- (c) Noun normalization, open.  Roger: "I suspect other generators could use this?"  Yes: plan 05's nominal
+  frames ("an incorrigible X") need it (its open decision 3), and the masked-LM noun frames and plan 06's labels
+  can meet it.  The deterministic part exists here already (`normalize_form`'s suffix rules in
+  [parse.py](../../assistant_axis/gapgen/generators/base_model/parse.py)); plan 05's planner found the OEWN
+  derivation link relabels about half of 30 nominal traits tried (pedant to pedantic, coward to cowardly).  In
+  this pilot nouns are 8% of eligible words but 2.7% of M1 survivors, so M1 drops most of them as nouns.
+  Recommendation: one shared platform helper (the suffix rules plus the derivation link, $0), built with plan 05
+  and applied here before the 20k run; the LLM rewrite of task 11 only if a generator is left with more than
+  about 100 unrelabelled nouns.
+- (e) Iteration round, open.  Roger: "What would we be iterating on, and do we have clear evidence that we do,
+  or don't, need to?"  The round edits data only (header wordings, the family weights of `FAMILY_WEIGHTS`, seed
+  mixes, constraint phrases), resamples 2k on the Mac and compares free measures.  Measured on round 1: the
+  collapse index (share of emissions taken by the top 50 words) is 23% against the plan's target of under 15%,
+  worst in `ai_assistant` (44%), then occupation 31%, list 27%, contrast 26%, person 22%, list_gloss 19%; words
+  not yet judged anywhere per 100 samples run person 112, occupation 92, list 85, ai_assistant 80, list_gloss 42,
+  contrast 41.  So there is evidence that a reweighting would raise new words per sample (about 10%), and none
+  on which wording would cut the collapse.  But the 20k run already yields more new words (about 4,800, central
+  case) than review can absorb, so more yield per sample buys only Mac time.  Recommendation: keep round 1.
+- (f) Emission count as rank, open.  Roger asked what count and rank are and whether rank is a good use of the
+  count.  The count is the number of the run's samples (each a random prompt from the six families) whose
+  continuation emitted the word; `rank` is the word's place in the table by count, descending.  Rank decides
+  which rows go first when a wave or a cap cuts the list, and orders the report's recall curves; the count also
+  travels to the registry as the source's `score`.  The review app does not use either.  Measured over the
+  pilot's judged words at the floor: count predicts trait-hood up and novelty down (count 2: M1 trait 80%, M3 new
+  52%; 4-9: 90%, 40%; 10-49: 95%, 25%; 50+: 100%, 8%; words emitted by one family 42% new kept per row, by three
+  30%).  The high-count words are almost all registered already and ride free; among words new to the registry
+  the yield is flat by count (new kept per row 37% at count 2, 27% at 3, 34% at 4-9; small numbers).
+  Recommendation: keep the count as the rank (a wash for novelty among new rows, slightly fewer M1 rejects), and
+  let the first wave's measured yield by count bucket say whether to change it.
 
 ## 11. Report at the end
 
