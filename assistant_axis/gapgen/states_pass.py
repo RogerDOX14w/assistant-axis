@@ -69,6 +69,21 @@ Two modes, each with its own prompt and prompt hash:
   with M1's "now" markers taken out (:func:`strip_now_markers`), so that the duration question is about the state the
   word names.
 
+  **Readings** (``readings``; Roger, 2026-10-13: "if this is Haiku 5.5, and cheap, yes, run three times and average or
+  majority vote, as appropriate"): Haiku 5.5 cannot run at temperature 0, and two runs of the queue call on the same
+  rows disagreed on 23% of routes and 24% of typical durations (``reports/code_review_2026-10-12/gate_audits/
+  states_pass.md`` section 10).  So the queue call is sent ``readings`` times, as independent requests (the CLI's
+  default: 3 on Haiku 5.5, else 1, as M1's verdict waves, ``split_runner.default_readings``), and the answers are
+  combined by :func:`combine_queue_readings`: a majority vote on each answer that decides the route (``lasting``, then
+  ``role`` or ``plausible``, then ``name_fits``, each among the readings that answered it), the median
+  ``typical_duration``, and the free text (gloss, suggested name, reason, confidence) from the winning reading, the
+  first whose own answers agree with the vote.  The route follows from the combined answer through :func:`route_for`
+  (routes are not voted on).  The gloss check, when it runs, is read as often and combined by
+  :func:`combine_check_readings` (a majority on whether the reading confirms the gloss).  M1's alignment call stays at
+  one, on the winning gloss.  Each reading is recorded (``verdict_reading`` on the response records, the vote as
+  ``queue_readings`` and ``gloss_check.check_readings`` on the block); reading 1's requests are a one-reading run's,
+  byte for byte, and a one-reading run's records keep their shape.
+
   **Re-routing from the record** (``states_pass.py --reroute``; :class:`RecordOnlyTransport`): a row decided under
   older route rules is decided again from the answers its batch recorded (``responses.jsonl``: the queue row, the
   check reading, the alignment score), with no new call; a row whose new route needs a call its batch never made (a
@@ -84,7 +99,9 @@ The block written on a row (registry field ``states_pass``, or the run's ``resul
 ``rubric_version``, ``model``, ``batch_id``, the answers, ``confidence``, ``prompt_sha256`` and ``at``; in queue mode
 from v4 also ``route``, ``route_reason``, ``holding_after``, ``gloss_check`` and the alignment fields, and from
 2026-10-12 ``route_rules``, ``state_text_form`` (when the caller names it), ``one_hop`` (when that rule decided the
-row) and, on a re-routed row, ``rerouted`` (the re-route's batch and the decision it replaced).  Changing anything
+row) and, on a re-routed row, ``rerouted`` (the re-route's batch and the decision it replaced); from 2026-10-13
+``readings`` (every block), and with more than one reading ``queue_readings`` (and ``gloss_check.check_readings``
+when the check call ran).  Changing anything
 the model reads here is a rubric change: bump its entry in :data:`RUBRIC_VERSIONS` (or :data:`CHECK_RUBRIC_VERSION`)
 and add the pin in ``rubric_versions.HISTORY``.  The one exception (2026-10-09, W19): the labels are shown in the
 judge display form (a corpus label's standard in the long form, ``careless (from HEXACO)``;
@@ -682,6 +699,171 @@ def scan_gloss(gloss: Optional[str], kind: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# readings: the queue call and the gloss check read several times (Roger, 2026-10-13)
+# ---------------------------------------------------------------------------
+
+#: The answers that decide the route, voted in this order, each among the readings that answered it: ``lasting``
+#: among all; ``role`` (a lasting condition) or ``plausible`` (a state that does not last) among the readings whose
+#: ``lasting`` is the vote's (the validator nulls the other; :func:`validate_queue_row`); ``name_fits`` among those
+#: whose ``plausible`` is the vote's and true.
+QUEUE_VOTED_FIELDS = ("lasting", "role", "plausible", "name_fits")
+#: The rules' names, recorded with every vote.
+QUEUE_READINGS_RULE = "nested_majority_tie_first_median_duration"
+CHECK_READINGS_RULE = "majority_of_accepts_tie_first"
+#: How a field's vote was reached: every answering reading gave the same value; one value was given more often than
+#: any other; or no single value led and the first reading (in reading order) among the leaders decided.
+VOTE_HOW = ("unanimous", "most_common", "tie_first")
+#: The key of the readings count in ``run.json``, its sessions, the summary and every block.
+READINGS_KEY = "readings"
+
+
+def default_readings(model: str) -> int:
+    """How many readings the queue call gets on ``model`` by default: M1's rule
+    (:func:`assistant_axis.gapgen.split_runner.default_readings`: 3 on Haiku 5.5, else 1)."""
+    from .split_runner import default_readings as m1_default
+    return m1_default(model)
+
+
+def check_readings(n) -> int:
+    if isinstance(n, bool) or not isinstance(n, int) or n < 1:
+        raise ValueError(f"readings must be a whole number from 1 up, not {n!r}")
+    return n
+
+
+def vote_values(values: Sequence) -> tuple[Any, str]:
+    """``(value, how)`` of a vote over ``values`` (in reading order, at least one): the value given most often; with
+    several values given equally often, the first of them in reading order (``tie_first``).  ``how`` is one of
+    :data:`VOTE_HOW`."""
+    if not values:
+        raise ValueError("a vote needs at least one value")
+    counts = Counter(values)
+    if len(counts) == 1:
+        return values[0], "unanimous"
+    top = max(counts.values())
+    leaders = [v for v, n in counts.items() if n == top]
+    if len(leaders) == 1:
+        return leaders[0], "most_common"
+    return next(v for v in values if counts[v] == top), "tie_first"
+
+
+def median_duration(durations: Sequence[str]) -> str:
+    """The median of typical durations in :data:`DURATIONS` order (hours < days < weeks < months < years); for an
+    even count the lower of the two middle ones (a failed reading can leave two)."""
+    idx = sorted(DURATIONS.index(d) for d in durations)
+    if not idx:
+        raise ValueError("a median needs at least one duration")
+    return DURATIONS[idx[(len(idx) - 1) // 2]]
+
+
+#: The answers each reading's record on the block keeps (its free text included).
+_READING_FIELDS = ("typical_duration", "lasting", "role", "plausible", "name_fits", "suggested_name", "gloss",
+                   "reason", "confidence")
+
+
+def combine_queue_readings(rows: Sequence[Optional[Mapping]], *,
+                           errors: Optional[Sequence[Optional[str]]] = None) -> Optional[dict]:
+    """The combined answer of independent readings of the queue call for one row: ``rows`` in reading order, each a
+    row as :func:`validate_queue_row` returns it, or None for a reading that gave none (``errors[i]`` says why); a
+    failed reading is left out of the vote.  None when no reading answered.
+
+    * Each answer that decides the route (:data:`QUEUE_VOTED_FIELDS`) is voted (:func:`vote_values`) among the readings
+      that answered it, nested: ``lasting`` among all; ``role`` or ``plausible`` among the readings whose ``lasting``
+      is the vote's; ``name_fits`` among those whose ``plausible`` is the vote's.  A tie (two readings left that
+      differ, or more readings than three) goes to the first reading among the leaders, as M1's ``tie_first``.
+    * ``typical_duration`` is the median over every reading that answered (:func:`median_duration`), and
+      ``duration_agrees`` is recomputed from it and the voted ``lasting``.
+    * The free text (``gloss``, ``suggested_name``, ``suggested_stem``, ``reason``, ``confidence``, ``gloss_in_band``) is
+      the winning reading's: the reading that agrees with the vote on the most route-deciding answers, the first such
+      in reading order (the brief's "the first reading whose own fields agree with the vote; if none agrees fully,
+      the one that agrees on most").  The nested vote always leaves a reading that agrees on all of them (each vote is
+      taken among the readings that hold the values voted above it, and the value it picks is one of theirs), so the
+      winner is in fact always the first reading that agrees fully; ``winner_agrees`` records it.
+
+    Returns ``{"answer", "vote"}``: ``answer`` the combined row (the shape :func:`validate_queue_row` returns, so
+    :func:`route_for` and the block take it as they take one reading), ``vote`` the record for the block's
+    ``queue_readings``: ``n``, ``rule``, ``n_ok``, ``failed`` (1-based), ``fields`` (per voted answer: ``value``,
+    ``how``, ``votes`` per reading), ``winner`` (1-based), ``winner_agrees`` and ``n_voted`` (route-deciding answers the
+    winner agrees on, of those voted), ``unanimous`` (every reading answered and all gave the same duration and
+    route-deciding answers) and ``per_reading`` (each reading's answers, or its error)."""
+    rows = list(rows)
+    errs = list(errors) if errors is not None else [None] * len(rows)
+    ok = [(i, r) for i, r in enumerate(rows) if r is not None]
+    if not ok:
+        return None
+    voted: dict[str, Any] = {f: None for f in QUEUE_VOTED_FIELDS}
+    fields: dict[str, dict] = {}
+    pool = ok
+    for f in QUEUE_VOTED_FIELDS:
+        answering = [(i, r) for i, r in pool if r.get(f) is not None]
+        if not answering:
+            continue                                   # off the voted path (role of a state that does not last ...)
+        v, how = vote_values([r[f] for _, r in answering])
+        voted[f] = v
+        fields[f] = {"value": v, "how": how, "votes": [None if r is None else r.get(f) for r in rows]}
+        pool = [(i, r) for i, r in answering if r[f] == v]
+    durs = [r["typical_duration"] for _, r in ok]
+    dur = median_duration(durs)
+    fields["typical_duration"] = {"value": dur, "how": "unanimous" if len(set(durs)) == 1 else "median",
+                                  "votes": [None if r is None else r.get("typical_duration") for r in rows]}
+
+    def agrees(r: Mapping) -> int:
+        return sum(1 for f in QUEUE_VOTED_FIELDS if voted[f] is not None and r.get(f) == voted[f])
+    n_voted = sum(1 for f in QUEUE_VOTED_FIELDS if voted[f] is not None)
+    best = max(agrees(r) for _, r in ok)
+    w, wr = next((i, r) for i, r in ok if agrees(r) == best)
+    answer = dict(wr)
+    answer.update({f: voted[f] for f in QUEUE_VOTED_FIELDS}, typical_duration=dur,
+                  duration_agrees=voted["lasting"] == (dur in LASTING_DURATIONS))
+    same = {tuple(r.get(f) for f in ("typical_duration",) + QUEUE_VOTED_FIELDS) for _, r in ok}
+    per = [{"reading": i + 1, **{f: r.get(f) for f in _READING_FIELDS}} if r is not None
+           else {"reading": i + 1, "error": errs[i] if i < len(errs) else None} for i, r in enumerate(rows)]
+    vote = {"n": len(rows), "rule": QUEUE_READINGS_RULE, "n_ok": len(ok),
+            "failed": [i + 1 for i, r in enumerate(rows) if r is None], "fields": fields, "winner": w + 1,
+            "winner_agrees": best, "n_voted": n_voted, "unanimous": len(ok) == len(rows) and len(same) == 1,
+            "per_reading": per}
+    return {"answer": answer, "vote": vote}
+
+
+def combine_check_readings(parsed: Sequence[Optional[Mapping]], route: str, *, rules: int = ROUTE_RULES_VERSION,
+                           errors: Optional[Sequence[Optional[str]]] = None) -> Optional[dict]:
+    """The combined gloss check of independent readings for a gloss written for ``route``: ``parsed`` in reading order,
+    each :func:`parse_check`'s answer (``{"reason", "reading"}``) or None for a reading that gave none (``errors[i]``
+    says why; left out of the vote).  None when no reading answered.
+
+    The vote is on what decides the row, whether the reading confirms the gloss (:func:`gloss_check_accepts` under
+    ``rules``), not on the reading itself: under route rules 2 a gloss read ``lasting``, ``predisposition`` and
+    ``passing`` once each is confirmed by two of three, where a vote on the three readings would have no majority.  A
+    tie goes to the first reading among the leaders.  The reading recorded is the one given most often among the
+    readings on the winning side (a tie: the first of them), with that reading's reason (the winner: the first reading
+    that gave it).
+
+    Returns ``{"accepted", "check", "vote"}``: ``check`` the combined ``{"reason", "reading"}`` (the block's
+    ``gloss_check.check``), ``vote`` the record for ``gloss_check.check_readings``: ``n``, ``rule``, ``n_ok``,
+    ``failed`` (1-based), ``readings`` and ``accepts`` per reading, ``how`` (of the accept vote), ``winner`` (1-based),
+    ``unanimous`` (every reading answered and all gave the same reading) and ``per_reading``."""
+    parsed = list(parsed)
+    errs = list(errors) if errors is not None else [None] * len(parsed)
+    ok = [(i, p) for i, p in enumerate(parsed) if p is not None]
+    if not ok:
+        return None
+    acc_of = {i: gloss_check_accepts(p["reading"], route, rules=rules) for i, p in ok}
+    accepted, how = vote_values([acc_of[i] for i, _ in ok])
+    side = [(i, p) for i, p in ok if acc_of[i] == accepted]
+    reading, _ = vote_values([p["reading"] for _, p in side])
+    w, wp = next((i, p) for i, p in side if p["reading"] == reading)
+    per = [{"reading": i + 1, "check_reading": p["reading"], "reason": p["reason"], "accepts": acc_of[i]}
+           if p is not None else {"reading": i + 1, "error": errs[i] if i < len(errs) else None}
+           for i, p in enumerate(parsed)]
+    vote = {"n": len(parsed), "rule": CHECK_READINGS_RULE, "n_ok": len(ok),
+            "failed": [i + 1 for i, p in enumerate(parsed) if p is None],
+            "readings": [None if p is None else p["reading"] for p in parsed],
+            "accepts": [acc_of.get(i) for i in range(len(parsed))], "accepted": accepted, "how": how,
+            "winner": w + 1, "unanimous": len(ok) == len(parsed) and len({p["reading"] for _, p in ok}) == 1,
+            "per_reading": per}
+    return {"accepted": accepted, "check": {"reason": wp["reason"], "reading": wp["reading"]}, "vote": vote}
+
+
+# ---------------------------------------------------------------------------
 # reading a registry row (M3, the review graph, promotion)
 # ---------------------------------------------------------------------------
 
@@ -904,6 +1086,7 @@ class Call:
     cache_ttl: Optional[str] = None
     items: tuple = ()         # queue and corpus: ({"key", "label", "text"}, ...) in the order sent (id i is items[i-1])
     retry: bool = False
+    rep: int = 0              # queue and check: the reading (0-based); 0 for every other call
 
     @property
     def prompt_sha256(self) -> str:
@@ -911,12 +1094,23 @@ class Call:
 
     @property
     def custom_id(self) -> str:
-        """``<step>-<key>-<hash>``: within the Message Batches limit of 64 characters from ``[A-Za-z0-9_-]``."""
-        h = hashlib.sha256(f"{self.step}|{self.key}|{self.retry}|{self.user}".encode("utf-8")).hexdigest()[:12]
-        return f"{self.step[:3]}-{_CID_RE.sub('_', self.key)[:36]}-{h}"
+        """``<step>-<key>-<hash>``: within the Message Batches limit of 64 characters from ``[A-Za-z0-9_-]``.  A reading
+        after the first adds its number to the step (``que2``, ``che3``) and to the hashed text, so that the readings
+        of one wave differ; the first reading's id is a one-reading run's."""
+        seed = f"{self.step}|{self.key}|{self.retry}|{self.user}" + (f"|{self.rep}" if self.rep else "")
+        h = hashlib.sha256(seed.encode("utf-8")).hexdigest()[:12]
+        return f"{self.step[:3]}{self.rep + 1 if self.rep else ''}-{_CID_RE.sub('_', self.key)[:36]}-{h}"
 
-    def cache_key(self) -> tuple[str, str, str, str]:
-        return (self.step, self.prompt_sha256, self.model, self.user)
+    def cache_key(self) -> tuple:
+        """``(step, prompt hash, model, user)``, plus the reading after the first: the readings send the same request,
+        so on a resume each must find its own answer."""
+        return (self.step, self.prompt_sha256, self.model, self.user) + ((self.rep,) if self.rep else ())
+
+
+def record_rep(rec: Mapping) -> int:
+    """The reading (0-based) of a response record (``verdict_reading`` 1 to N; absent, in a one-reading run: 0)."""
+    vr = rec.get("verdict_reading")
+    return vr - 1 if isinstance(vr, int) and not isinstance(vr, bool) and vr > 1 else 0
 
 
 def call_tokens(c: Call) -> tuple[int, int]:
@@ -1065,7 +1259,13 @@ class StatesPassRunner:
     Queue mode (v4) runs the whole route: the queue wave(s), the routes, the keyword scan, then one ``gloss`` wave
     with the check call of every gloss the scan did not pass and (``align``) the alignment call of every gloss of a
     ``lasting`` or ``predisposition`` row.  A row whose route is final gets its block (stage ``judged``); a row whose
-    queue answer or gloss check never came is ``failed`` (no block), and one cut short by a stop is ``pending``."""
+    queue answer or gloss check never came is ``failed`` (no block), and one cut short by a stop is ``pending``.
+
+    ``readings`` (queue mode; 1 unless the caller says, the CLI's default being :func:`default_readings`): the queue
+    wave and its retry send every chunk once per reading, and the gloss wave every check call once per reading, as
+    independent requests; a row is decided from :func:`combine_queue_readings` and its check from
+    :func:`combine_check_readings`, a reading that failed twice left out of the vote.  A row with a reading that a stop
+    cut short stays ``pending`` (``--resume`` asks it)."""
 
     def __init__(self, *, client, batch_id: str, mode: str, model: str = DEFAULT_MODEL,
                  usage: Optional[MultiModelUsage] = None, limiter=None, batch_size: int = DEFAULT_BATCH_SIZE,
@@ -1074,7 +1274,12 @@ class StatesPassRunner:
                  transport: Any = None, align: bool = True, alignment_model: str = ALIGNMENT_MODEL,
                  resume_records: Sequence[Mapping] = (), rubrics_dir: Optional[Path] = None,
                  close_client: bool = False, label_form: str = DEFAULT_LABEL_FORM,
-                 route_rules: int = ROUTE_RULES_VERSION, text_form: Optional[str] = None):
+                 route_rules: int = ROUTE_RULES_VERSION, text_form: Optional[str] = None, readings: int = 1):
+        # readings: how many independent readings the queue call (and the gloss check) gets; 1 keeps a one-reading
+        # run's requests and records as they always were.  The corpus mode reads once.
+        self.readings = check_readings(readings)
+        if mode == "corpus" and self.readings != 1:
+            raise ValueError("readings apply to the queue mode only; the corpus mode reads once")
         # label_form (prompt_labels): how every call shows a row's label (a corpus label's standard in the long form
         # by default); the rows, the row cache and the records keep the stored label.  A resumed run passes the form
         # its run.json recorded: the row cache is keyed by key, stored label and text, not by the prompt.
@@ -1110,8 +1315,8 @@ class StatesPassRunner:
         self.responses: list[dict] = [dict(r) for r in resume_records]
         self.stats = Counter()
         self._stop: Optional[BaseException] = None
-        # resume: queue / corpus rows answered by the earlier session, by (key, label, text); check and alignment
-        # answers by request
+        # resume: queue / corpus rows answered by the earlier session, by (key, label, text, reading); check and
+        # alignment answers by request (and reading)
         self._row_cache: dict[tuple, dict] = {}
         self._call_cache: dict[tuple, str] = {}
         for rec in resume_records:
@@ -1135,6 +1340,7 @@ class StatesPassRunner:
         step, text = rec.get("step") or rec.get("mode"), rec.get("text")
         if text is None:
             return
+        rep = record_rep(rec)
         if step in MODES and step == self.mode:
             if rec.get("prompt_sha256") not in (None, PROMPT_SHA256[self.mode]) or rec.get("model") != self.model:
                 return
@@ -1144,9 +1350,10 @@ class StatesPassRunner:
                                           for i, it in enumerate(items)})
             for i, row in rows.items():
                 it = items[i - 1]
-                self._row_cache[(it["key"], it["label"], it.get("text"))] = row
+                self._row_cache[(it["key"], it["label"], it.get("text"), rep)] = row
         elif step in ("check", "alignment") and not rec.get("parse_error"):
-            self._call_cache[(step, rec.get("prompt_sha256"), rec.get("model"), rec.get("user"))] = text
+            self._call_cache[(step, rec.get("prompt_sha256"), rec.get("model"), rec.get("user"))
+                             + ((rep,) if rep else ())] = text
 
     def _record(self, rec: dict) -> None:
         self.responses.append(rec)
@@ -1161,18 +1368,19 @@ class StatesPassRunner:
         return sum(cost_for_usage(c.model + suffix, *call_tokens(c)) for c in calls)
 
     # -- calls -------------------------------------------------------------------
-    def _rows_call(self, items: Sequence[StatesItem], n: int, *, retry: bool = False) -> Call:
+    def _rows_call(self, items: Sequence[StatesItem], n: int, *, retry: bool = False, rep: int = 0) -> Call:
         payload = [{"id": i + 1, "label": it.label, "text": it.text} for i, it in enumerate(items)]
         return Call(step=self.mode, key=f"{'r' if retry else 'c'}{n:03d}", model=self.model, system=self.system_prompt,
                     user=build_batch_prompt(payload, self.mode, label_form=self.label_form), max_tokens=self.max_tokens,
                     temperature=self.temperature, cache_system=True,
-                    items=tuple({"key": it.key, "label": it.label, "text": it.text} for it in items), retry=retry)
+                    items=tuple({"key": it.key, "label": it.label, "text": it.text} for it in items), retry=retry,
+                    rep=rep)
 
-    def check_call(self, key: str, label: str, gloss: str) -> Call:
+    def check_call(self, key: str, label: str, gloss: str, *, rep: int = 0) -> Call:
         mt = CHECK_MAX_TOKENS if accepts_temperature(self.model) else CHECK_MAX_TOKENS_THINKING
         return Call(step="check", key=key, model=self.model, system=CHECK_PROMPT,
                     user=build_check_prompt(label, gloss, label_form=self.label_form),
-                    max_tokens=mt, temperature=self.temperature, cache_system=False)
+                    max_tokens=mt, temperature=self.temperature, cache_system=False, rep=rep)
 
     def alignment_call(self, key: str, label: str, gloss: str) -> Call:
         from . import physical_pass as PP
@@ -1199,14 +1407,17 @@ class StatesPassRunner:
                 self._stop = exc
 
     def _base_record(self, c: Call, text: Optional[str], meta: Mapping, wave: str) -> dict:
-        return {"batch_id": self.batch_id, "stage": wave, "step": c.step, "mode": self.mode, "model": c.model,
-                "key": c.key, "keys": [it["key"] for it in c.items] if c.items else [c.key],
-                "items": list(c.items) if c.items else None, "user": c.user, "prompt_sha256": c.prompt_sha256,
-                "request": {"max_tokens": c.max_tokens, "temperature": c.temperature, "cache_system": c.cache_system},
-                "text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
-                "attempts": meta.get("attempts"), "error": meta.get("error"), "parse_errors": None, "parse_error": None,
-                "retry": c.retry, "transport": getattr(self.transport, "name", "live"), "custom_id": c.custom_id,
-                "charged_as": meta.get("charged_as"), "batch_request_id": meta.get("batch_request_id"), "at": utc_now()}
+        rec = {"batch_id": self.batch_id, "stage": wave, "step": c.step, "mode": self.mode, "model": c.model,
+               "key": c.key, "keys": [it["key"] for it in c.items] if c.items else [c.key],
+               "items": list(c.items) if c.items else None, "user": c.user, "prompt_sha256": c.prompt_sha256,
+               "request": {"max_tokens": c.max_tokens, "temperature": c.temperature, "cache_system": c.cache_system},
+               "text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
+               "attempts": meta.get("attempts"), "error": meta.get("error"), "parse_errors": None, "parse_error": None,
+               "retry": c.retry, "transport": getattr(self.transport, "name", "live"), "custom_id": c.custom_id,
+               "charged_as": meta.get("charged_as"), "batch_request_id": meta.get("batch_request_id"), "at": utc_now()}
+        if self.readings > 1 and c.step in (self.mode, "check"):   # a one-reading run's records keep their old shape
+            rec["verdict_reading"] = c.rep + 1
+        return rec
 
     # -- the run -----------------------------------------------------------------
     async def run_async(self, items: Sequence[StatesItem]) -> list[StatesResult]:
@@ -1219,17 +1430,24 @@ class StatesPassRunner:
                 self.results[it.key].stage = "failed"
                 self.results[it.key].error = "no text to judge"
         self.stats["n_items"] += len(items)
-        answers: dict[str, dict] = {}
+        # answers[r][key]: reading r's valid row; rerrs[r][key]: why reading r has none; errs[key]: why the row failed
+        answers: list[dict[str, dict]] = [{} for _ in range(self.readings)]
+        rerrs: list[dict[str, str]] = [{} for _ in range(self.readings)]
         errs: dict[str, str] = {}
         try:
-            await self._rows_stage(todo, answers, errs)
+            await self._rows_stage(todo, answers, rerrs)
+            for it in todo:
+                es = [rerrs[r].get(it.key) for r in range(self.readings)]
+                if not any(it.key in a for a in answers) and any(e is not None for e in es):
+                    errs[it.key] = es[0] if self.readings == 1 else "; ".join(
+                        f"queue reading {r + 1}: {e or 'no answer'}" for r, e in enumerate(es))
             if self.mode == "corpus":
                 now = utc_now()
                 for it in todo:
-                    if it.key in answers:
-                        self._judged(it, self._corpus_block(answers[it.key], now))
+                    if it.key in answers[0]:
+                        self._judged(it, self._corpus_block(answers[0][it.key], now))
             else:
-                await self._queue_stages(todo, answers, errs)
+                await self._queue_stages(todo, answers, rerrs, errs)
         finally:
             for it in todo:
                 res = self.results[it.key]
@@ -1260,15 +1478,17 @@ class StatesPassRunner:
     def _corpus_block(self, row: Mapping, now: str) -> dict:
         return {"mode": self.mode, "rubric_version": RUBRIC_VERSIONS[self.mode], "model": self.model,
                 "batch_id": self.batch_id, **{k: v for k, v in row.items() if k != "label"},
-                "prompt_sha256": PROMPT_SHA256[self.mode], "at": now}
+                READINGS_KEY: self.readings, "prompt_sha256": PROMPT_SHA256[self.mode], "at": now}
 
-    async def _rows_stage(self, todo: Sequence[StatesItem], answers: dict, errs: dict) -> None:
-        """The queue (or corpus) wave and its retry: ``answers[key]`` gets each valid row."""
-        for it in todo:
-            hit = self._row_cache.get((it.key, it.label, it.text))
-            if hit is not None:
-                answers[it.key] = hit
-                self.stats["resumed_rows"] += 1
+    async def _rows_stage(self, todo: Sequence[StatesItem], answers: list[dict], errs: list[dict]) -> None:
+        """The queue (or corpus) wave and its retry, every chunk once per reading (reading 0's calls first, in a
+        one-reading run's order): ``answers[r][key]`` gets reading r's valid row, ``errs[r][key]`` why it has none."""
+        for r in range(self.readings):
+            for it in todo:
+                hit = self._row_cache.get((it.key, it.label, it.text, r))
+                if hit is not None:
+                    answers[r][it.key] = hit
+                    self.stats["resumed_rows"] += 1
 
         def handle(c: Call, text: Optional[str], meta: dict, *, wave: str) -> None:
             rec = self._base_record(c, text, meta, wave)
@@ -1281,49 +1501,79 @@ class StatesPassRunner:
                 perr = {i: f"no response: {meta.get('error')}" for i in range(1, len(c.items) + 1)}
             rec["parse_errors"] = {c.items[i - 1]["key"]: e for i, e in perr.items()}
             for i, row in rows.items():
-                answers[c.items[i - 1]["key"]] = row
-                errs.pop(c.items[i - 1]["key"], None)
+                answers[c.rep][c.items[i - 1]["key"]] = row
+                errs[c.rep].pop(c.items[i - 1]["key"], None)
             for i, e in perr.items():
-                errs[c.items[i - 1]["key"]] = e
+                errs[c.rep][c.items[i - 1]["key"]] = e
 
-        first = [it for it in todo if it.key not in answers]
-        await self._wave(self.mode, [self._rows_call(ch, n) for n, ch in enumerate(_chunks(first, self.batch_size))],
-                         handle)
-        failed = [it for it in first if it.key not in answers]
-        if failed and self._stop is None:
-            self.stats["row_retries"] += len(failed)
+        reps = range(self.readings)
+        first = {r: [it for it in todo if it.key not in answers[r]] for r in reps}
+        await self._wave(self.mode, [self._rows_call(ch, n, rep=r) for r in reps
+                                     for n, ch in enumerate(_chunks(first[r], self.batch_size))], handle)
+        failed = {r: [it for it in first[r] if it.key not in answers[r]] for r in reps}
+        n_failed = sum(len(v) for v in failed.values())
+        if n_failed and self._stop is None:
+            self.stats["row_retries"] += n_failed
             size = max(1, self.batch_size // 2)
-            await self._wave(f"{self.mode}_retry",
-                             [self._rows_call(ch, n, retry=True) for n, ch in enumerate(_chunks(failed, size))], handle)
+            await self._wave(f"{self.mode}_retry", [self._rows_call(ch, n, retry=True, rep=r) for r in reps
+                                                    for n, ch in enumerate(_chunks(failed[r], size))], handle)
 
-    async def _queue_stages(self, todo: Sequence[StatesItem], answers: dict, errs: dict) -> None:
-        """Routes, the keyword scan, the gloss wave (check and alignment calls) and the blocks."""
+    def _combine_rows(self, todo: Sequence[StatesItem], answers: list[dict], rerrs: list[dict]
+                      ) -> tuple[dict[str, dict], dict[str, dict]]:
+        """``(combined, votes)``: each row's answer (one reading's row as it came, or :func:`combine_queue_readings`'s)
+        and, with several readings, its vote (each reading's own route added to its record).  A row no reading
+        answered has neither; one with a reading a stop cut short has neither and stays pending."""
+        combined: dict[str, dict] = {}
+        votes: dict[str, dict] = {}
+        for it in todo:
+            rows = [answers[r].get(it.key) for r in range(self.readings)]
+            if self.readings == 1:
+                if rows[0] is not None:
+                    combined[it.key] = rows[0]
+                continue
+            if all(x is None for x in rows) or (self._stop is not None and any(x is None for x in rows)):
+                continue
+            v = combine_queue_readings(rows, errors=[rerrs[r].get(it.key) for r in range(self.readings)])
+            hop = bool(it.meta.get("from_states_pass"))
+            for pr, x in zip(v["vote"]["per_reading"], rows):
+                if x is not None:
+                    pr["route"] = route_for(x, label=it.label, from_states_pass=hop, rules=self.route_rules)[0]
+            combined[it.key], votes[it.key] = v["answer"], v["vote"]
+            self.stats["reading_rows_total"] += self.readings
+            self.stats["reading_rows_ok"] += v["vote"]["n_ok"]
+        return combined, votes
+
+    async def _queue_stages(self, todo: Sequence[StatesItem], answers: list[dict], rerrs: list[dict],
+                            errs: dict) -> None:
+        """The readings combined (:meth:`_combine_rows`), routes, the keyword scan, the gloss wave (check calls, one
+        per reading, and alignment calls) and the blocks."""
+        combined, votes = self._combine_rows(todo, answers, rerrs)
         routed: dict[str, tuple[str, Optional[str]]] = {}
         one_hop: set[str] = set()
         for it in todo:
-            if it.key in answers:
+            if it.key in combined:
                 hop = bool(it.meta.get("from_states_pass"))
-                routed[it.key] = route_for(answers[it.key], label=it.label, from_states_pass=hop,
+                routed[it.key] = route_for(combined[it.key], label=it.label, from_states_pass=hop,
                                            rules=self.route_rules)
-                if hop and route_for(answers[it.key], label=it.label, rules=self.route_rules)[0] == "renamed":
+                if hop and route_for(combined[it.key], label=it.label, rules=self.route_rules)[0] == "renamed":
                     one_hop.add(it.key)                     # the one-hop rule decided it (held, or released)
         now = utc_now()
         gloss_items = [it for it in todo if it.key in routed and routed[it.key][0] in RELEASED_ROUTES]
         gloss_keys = {it.key for it in gloss_items}
         for it in todo:     # rows whose route needs no call are final now
             if it.key in routed and it.key not in gloss_keys:
-                self._judged(it, self._queue_block(answers[it.key], *routed[it.key], now=now,
-                                                   one_hop=it.key in one_hop))
+                self._judged(it, self._queue_block(combined[it.key], *routed[it.key], now=now,
+                                                   one_hop=it.key in one_hop, queue_readings=votes.get(it.key)))
         if not gloss_items or self._stop is not None:
             return
-        scans = {it.key: scan_gloss(answers[it.key]["gloss"], routed[it.key][0]) for it in gloss_items}
-        checks: dict[str, tuple[Optional[dict], Optional[str]]] = {}
-        aligns: dict[str, tuple[Optional[dict], Optional[str]]] = {}
+        scans = {it.key: scan_gloss(combined[it.key]["gloss"], routed[it.key][0]) for it in gloss_items}
+        checks: dict[tuple[str, int], tuple[Optional[dict], Optional[str]]] = {}
+        aligns: dict[tuple[str, int], tuple[Optional[dict], Optional[str]]] = {}
         calls: list[Call] = []
         for it in gloss_items:
-            g = answers[it.key]["gloss"]
+            g = combined[it.key]["gloss"]
             if scans[it.key]["verdict"] != "pass":
-                calls.append(self.check_call(it.key, it.label, g))
+                calls += [self.check_call(it.key, it.label, g, rep=r) for r in range(self.readings)]
             if self.align:
                 calls.append(self.alignment_call(it.key, it.label, g))
         await self._gloss_waves(calls, {it.key: it.label for it in gloss_items}, checks, aligns)
@@ -1335,21 +1585,27 @@ class StatesPassRunner:
             if scan["verdict"] == "pass":
                 chk.update(accepted=True, by="scan")
             else:
-                parsed, err = checks.get(it.key, (None, None))
-                if parsed is None:
-                    if err is None and self._stop is not None:
-                        continue                                    # never asked: pending
+                outs = [checks.get((it.key, r), (None, None)) for r in range(self.readings)]
+                if self._stop is not None and any(p is None and e is None for p, e in outs):
+                    continue                                        # a reading never asked: pending
+                # route rules 2 (Roger, 2026-10-12): any reading but passing confirms; rules 1: the route's own only
+                cv = combine_check_readings([p for p, _ in outs], route, rules=self.route_rules,
+                                            errors=[e for _, e in outs])
+                if cv is None:
+                    err = outs[0][1] if self.readings == 1 else "; ".join(
+                        f"check reading {r + 1}: {e or 'no answer'}" for r, (_, e) in enumerate(outs))
                     errs[it.key] = f"gloss check: {err or 'no answer'}"
                     self.results[it.key].stage, self.results[it.key].error = "failed", errs[it.key]
                     continue
-                chk["check"] = {**parsed, "model": self.model, "rubric_version": CHECK_RUBRIC_VERSION,
+                chk["check"] = {**cv["check"], "model": self.model, "rubric_version": CHECK_RUBRIC_VERSION,
                                 "prompt_sha256": CHECK_PROMPT_SHA256}
-                # route rules 2 (Roger, 2026-10-12): any reading but passing confirms; rules 1: the route's own only
-                chk.update(accepted=gloss_check_accepts(parsed["reading"], route, rules=self.route_rules), by="check")
+                chk.update(accepted=cv["accepted"], by="check")
+                if self.readings > 1:
+                    chk["check_readings"] = cv["vote"]
             align = None
             if chk["accepted"]:
                 if self.align:
-                    a, aerr = aligns.get(it.key, (None, None))
+                    a, aerr = aligns.get((it.key, 0), (None, None))
                     if a is None and aerr is None and self._stop is not None:
                         continue                                    # never asked: pending
                     align = {"parsed": a, "error": aerr}
@@ -1358,15 +1614,16 @@ class StatesPassRunner:
                        f"{chk['check']['reason']}")
                 chk_route = route
                 route = "held"
-                self._judged(it, self._queue_block(answers[it.key], route, why, now=now, gloss_check=chk,
-                                                   proposed_route=chk_route, one_hop=it.key in one_hop))
+                self._judged(it, self._queue_block(combined[it.key], route, why, now=now, gloss_check=chk,
+                                                   proposed_route=chk_route, one_hop=it.key in one_hop,
+                                                   queue_readings=votes.get(it.key)))
                 continue
-            self._judged(it, self._queue_block(answers[it.key], route, why, now=now, gloss_check=chk, alignment=align,
-                                               one_hop=it.key in one_hop))
+            self._judged(it, self._queue_block(combined[it.key], route, why, now=now, gloss_check=chk, alignment=align,
+                                               one_hop=it.key in one_hop, queue_readings=votes.get(it.key)))
 
     async def _gloss_waves(self, calls: list[Call], labels: Mapping[str, str], checks: dict, aligns: dict) -> None:
-        """The ``gloss`` wave and its retry: ``checks[key]`` / ``aligns[key]`` get ``(parsed, None)`` or
-        ``(None, error)``."""
+        """The ``gloss`` wave and its retry: ``checks[(key, reading)]`` / ``aligns[(key, 0)]`` get ``(parsed, None)``
+        or ``(None, error)``."""
         from . import split
 
         def outcome(c: Call, text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
@@ -1385,7 +1642,7 @@ class StatesPassRunner:
                 parsed, err = None, f"no response: {meta.get('error')}"
             rec["parse_error"] = err
             self._record(rec)
-            out_for(c)[c.key] = (parsed, err)
+            out_for(c)[(c.key, c.rep)] = (parsed, err)
             self.stats[f"sent_{c.step}"] += 1
             self.stats[f"ok_{c.step}"] += err is None
 
@@ -1395,32 +1652,35 @@ class StatesPassRunner:
             if hit is not None:
                 parsed, err = outcome(c, hit)
                 if err is None:
-                    out_for(c)[c.key] = (parsed, None)
+                    out_for(c)[(c.key, c.rep)] = (parsed, None)
                     self.stats["resumed_calls"] += 1
                     continue
             todo.append(c)
         await self._wave("gloss", todo, handle)
         # a call answered with an error is asked once more; one never answered (a stop) waits for --resume
         again = [Call(**{**c.__dict__, "retry": True}) for c in todo
-                 if c.key in out_for(c) and out_for(c)[c.key][1] is not None]
+                 if (c.key, c.rep) in out_for(c) and out_for(c)[(c.key, c.rep)][1] is not None]
         if again and self._stop is None:
             self.stats["call_retries"] += len(again)
             await self._wave("gloss_retry", again, handle)
 
     def _queue_block(self, row: Mapping, route: str, route_reason: Optional[str], *, now: str,
                      gloss_check: Optional[dict] = None, alignment: Optional[Mapping] = None,
-                     proposed_route: Optional[str] = None, one_hop: bool = False) -> dict:
+                     proposed_route: Optional[str] = None, one_hop: bool = False,
+                     queue_readings: Optional[dict] = None) -> dict:
         b = {"mode": self.mode, "rubric_version": RUBRIC_VERSIONS[self.mode], "model": self.model,
              "batch_id": self.batch_id, **{k: v for k, v in row.items() if k != "label"},
              "route": route, "route_reason": route_reason, "holding_after": holding_after(route),
              "gloss_check": gloss_check, "alignment": None, "alignment_reason": None,
-             "route_rules": self.route_rules}
+             "route_rules": self.route_rules, READINGS_KEY: self.readings}
         if self.text_form is not None:
             b[TEXT_FORM_KEY] = self.text_form
         if one_hop:
             b["one_hop"] = True
         if proposed_route is not None:
             b["proposed_route"] = proposed_route
+        if queue_readings is not None:
+            b["queue_readings"] = queue_readings
         if route in RELEASED_ROUTES:
             if alignment is not None:
                 a = alignment.get("parsed") or {}
@@ -1448,6 +1708,10 @@ class StatesPassRunner:
         ok, n = self.parse_counts()
         warn_if_low_parse_rate(label=f"states_pass:{self.mode}:{self.model}", n_ok=ok, n_total=n,
                                logger_obj=logger_obj or logger)
+        if self.readings > 1:     # each reading's rows (a row is decided with a failed reading left out of the vote)
+            warn_if_low_parse_rate(label=f"states_pass:{self.mode}_readings:{self.model}",
+                                   n_ok=self.stats["reading_rows_ok"], n_total=self.stats["reading_rows_total"],
+                                   logger_obj=logger_obj or logger)
         for step, model in (("check", self.model), ("alignment", self.alignment_model)):
             warn_if_low_parse_rate(label=f"states_pass:{step}:{model}", n_ok=self.stats[f"ok_{step}"],
                                    n_total=self.stats[f"sent_{step}"], logger_obj=logger_obj or logger)
@@ -1503,12 +1767,65 @@ def renamed_record(cand) -> dict:
 # summary
 # ---------------------------------------------------------------------------
 
-def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usage: MultiModelUsage) -> dict:
+def _agreement(values: Sequence) -> str:
+    """``"<most common>/<answered>"`` over the values readings gave (``"3/3"``: all three agree; ``"2/3"``: two of
+    three)."""
+    vals = list(values)
+    return f"{max(Counter(vals).values())}/{len(vals)}" if vals else "0/0"
+
+
+def readings_summary(results: Sequence[StatesResult], *, n_readings: int) -> dict:
+    """The summary's ``queue_readings`` section over the judged rows voted on (blocks with ``queue_readings``): how
+    far the readings agreed on the route (each reading's own, before the gloss check) and on the typical duration
+    (``"3/3"``, ``"2/3"`` ...), the rows whose route differs from reading 1's, the ties, the rows with a failed reading,
+    and the gloss check's readings (their agreement, and the rows whose readings split on confirming the gloss)."""
+    out: dict[str, Any] = {"n_readings": n_readings}
+    voted = [r for r in results if r.stage == "judged" and (r.block or {}).get("queue_readings")]
+    if n_readings == 1 or not voted:
+        return out
+    route_ag, dur_ag = Counter(), Counter()
+    differs, ties, failed = [], [], []
+    for r in voted:
+        v = r.block["queue_readings"]
+        per = [p for p in v["per_reading"] if "error" not in p]
+        route_ag[_agreement([p.get("route") for p in per])] += 1
+        dur_ag[_agreement([p.get("typical_duration") for p in per])] += 1
+        pre = r.block.get("proposed_route") or r.block["route"]          # the route before the gloss check
+        if v["per_reading"][0].get("route") != pre:
+            differs.append(r.label)
+        if any(f.get("how") == "tie_first" for f in v["fields"].values()):
+            ties.append(r.label)
+        if v["failed"]:
+            failed.append(r.label)
+    chk = [r for r in results if r.stage == "judged" and ((r.block or {}).get("gloss_check") or {}).get("check_readings")]
+    chk_ag = Counter(_agreement([x for x in r.block["gloss_check"]["check_readings"]["readings"] if x is not None])
+                     for r in chk)
+    split_acc = [r.label for r in chk if r.block["gloss_check"]["check_readings"]["how"] != "unanimous"]
+    n = len(voted)
+    all_n = f"{n_readings}/{n_readings}"
+    return {**out, "rule": QUEUE_READINGS_RULE, "n_rows": n,
+            "route_agreement": dict(sorted(route_ag.items(), reverse=True)),
+            "route_all_agree": route_ag.get(all_n, 0), "route_all_agree_share": round(route_ag.get(all_n, 0) / n, 4),
+            "duration_agreement": dict(sorted(dur_ag.items(), reverse=True)),
+            "duration_all_agree": dur_ag.get(all_n, 0),
+            "duration_all_agree_share": round(dur_ag.get(all_n, 0) / n, 4),
+            "unanimous": sum(1 for r in voted if r.block["queue_readings"]["unanimous"]),
+            "differs_from_first_reading": {"n": len(differs), "labels": sorted(differs)},
+            "ties": {"n": len(ties), "labels": sorted(ties)},
+            "with_a_failed_reading": {"n": len(failed), "labels": sorted(failed)},
+            "check": {"rule": CHECK_READINGS_RULE, "n_rows": len(chk),
+                      "reading_agreement": dict(sorted(chk_ag.items(), reverse=True)),
+                      "accept_split": {"n": len(split_acc), "labels": sorted(split_acc)}}}
+
+
+def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usage: MultiModelUsage,
+              readings: int = 1) -> dict:
     """``summary.json`` payload.  Queue mode: plausibility counts and the suggested renames (``renamed`` leaves out a
     suggestion that is the label itself up to case, surrounding whitespace and hyphen/space, counted in
     ``n_name_unchanged`` instead; the row keeps the suggestion either way); from v4 also the routes, the typical
-    durations, the gloss check's results, the alignment scores and the words of every route.  Corpus mode:
-    ``exceptions``, the labels whose corpus description reads as a momentary state (the short list for Roger)."""
+    durations, the gloss check's results, the alignment scores and the words of every route; from 2026-10-13
+    ``n_readings`` and the readings' agreement (:func:`readings_summary`).  Corpus mode: ``exceptions``, the labels
+    whose corpus description reads as a momentary state (the short list for Roger)."""
     judged = [r for r in results if r.stage == "judged"]
     n = stats.get("n_judged_or_failed", 0)
     out: dict[str, Any] = {
@@ -1518,9 +1835,10 @@ def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usa
         "parse_rate": round(len(judged) / n, 4) if n else None,
         "calls": {k[len("calls_"):]: v for k, v in sorted(stats.items()) if k.startswith("calls_")},
         "rubric_version": RUBRIC_VERSIONS[mode], "prompt_sha256": PROMPT_SHA256[mode],
-        "cost_usd": round(usage.total_cost_usd, 4), "usage": usage.as_dict(),
+        "cost_usd": round(usage.total_cost_usd, 4), "usage": usage.as_dict(), "n_readings": readings,
     }
     if mode == "queue":
+        out["queue_readings"] = readings_summary(results, n_readings=readings)
         pl = [r for r in judged if r.block.get("plausible")]
         named = [r for r in pl if r.block.get("suggested_name")]
         out.update({
