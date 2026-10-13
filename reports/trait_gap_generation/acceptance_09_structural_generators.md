@@ -118,7 +118,7 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
 
 | command | result |
 |---|---|
-| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **146 passed, 7 skipped** (the skips: the acceptance checks on recorded outputs, none recorded yet) |
+| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **153 passed, 7 skipped** (the skips: the acceptance checks on recorded outputs, none recorded yet) |
 | `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_*.py data_analysis/tests/ -q` | **3,483 passed, 18 skipped** |
 | `... pytest pipeline/tests`, `results_analysis/tests`, `scripts/tests`, `tools/tests` (without `test_boundary_check.py`) | 232, 193, 20 and 262 passed |
 | `... pytest assistant_axis/tests --ignore-glob='*test_gapgen_*'` | 1,277 passed, 26 skipped, 8 errors, all in [test_generation.py](../../assistant_axis/tests/test_generation.py), whose fixtures downloaded Qwen and Gemma tokenizers; **fixed after the review** (its fixtures now load from the local cache only and skip when it is absent or unreadable): in the sandbox the file now gives 8 skips |
@@ -330,3 +330,35 @@ The `position` answers and the negative-label checks stay in
 [negative_label_mismatches.md](../../data/candidates/structural/negative_label_mismatches.md) (both not there
 yet).  **TODO (Roger, 2026-10-12): review whether the side table is promoted into `arrangement`, once the pairing
 review is done**, so that the table is read against the pairs it would change.
+
+## 13. The first paid steps (2026-10-13, run by the coordinator) and the fixes they led to
+
+- **The null-rate pilot passed**: `retarget` and `remode` inside the 5-40% band, parse rate 1.0.
+- **Stability on Haiku 5.5 failed**: median label-set Jaccard **0.29** on the 30 traits (the bar is 0.5).  By
+  operator the medians were 1.0 for `opposite`, `excess` and `deficiency` and 0.5 for `retarget` and `remode`, so
+  the instability is in the optional slots: of the slots that differed between the two runs, 39 were one label
+  against another (mostly synonyms) and 48 a label against `null`.
+- **The second model refused the prompt.**  Under Roger's rule (a second model when stability fails) the
+  coordinator ran stability with `--model claude-sonnet-5-5` (runs
+  [2026-10-13-stab-sonnet-a](../../data/candidates/runs/structural/2026-10-13-stab-sonnet-a/) and
+  [2026-10-13-stab-sonnet-b](../../data/candidates/runs/structural/2026-10-13-stab-sonnet-b/)).  Sonnet 5.5 refused
+  53 and 54 of the 58 calls: `stop_reason` "refusal", empty text, no output tokens, `stop_details.category`
+  "reasoning_extraction" (the request "blocked as it seems to violate Anthropic's Terms of Service restrictions on
+  reverse engineering or duplicating model outputs").  The trigger is the operators prompt's line 'Think first, in
+  "reasoning": what the trait is and what drives it ...'; M3's overlap rubric ("Give a reason in one short sentence,
+  then the answer", field `reason`) is answered by Sonnet 5.5, and Haiku 5.5 answers both.  **Not changed here**: a
+  version 2 of [structural_operators.md](./rubrics/structural_operators.md) asking for a short reason instead of
+  "think first" is Roger's decision, put to him by the coordinator.
+- **Three bugs the runs exposed, fixed in this worktree** (with tests):
+  - **B1**: a response that stopped other than `end_turn` (`refusal`; also `max_tokens`, the review's N6) was
+    recorded as an ordinary answer with empty text.  It is now a failed call: the record carries `failure`, the
+    `stop_reason` and the `stop_details` (the platform's `llm.call_anthropic_json` now passes `stop_details` on in
+    its `meta` when a response has it, and only then), the call is retried once as other failures are, it is never
+    reused on a resume, the run counts it (`failures`), and a loud line is printed (`*** N of M responses stopped
+    other than end_turn: {...}, categories {...} ***`).  For the operators, modernise and stability commands; the
+    null-rate readout records the stop reasons and categories.
+  - **B2**: the stability gate printed "median Jaccard 1.0 >= 0.5" for the Sonnet runs, on the 3 of 30 traits
+    answered in both, because unanswered traits fell out of the denominator.  Both pilot gates now report "answered
+    n of N" and fail (exit 3) when fewer than 90% of the sampled traits have the answers the gate reads
+    (`evaluate.answered_coverage`, `MIN_ANSWERED_SHARE`); `stability_jaccard` records `n_sampled` and `coverage`.
+  - **B3**: the dry-run estimate line said "at Haiku 5.5 rates" whatever `--model` was; it names the model used.
