@@ -1,0 +1,126 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "2026-10-09-iv-pilot_censuses_r3,2026-10-09-rare-pilot_censuses_r3,2026-10-10-tda_censuses_r3,2026-10-11-allport_hi_censuses_r3,2026-10-11-b_alignment_sweep_r3,2026-10-11-b_alignment_sweep_krakovna,2026-10-11-full_roget_r3,2026-10-11-full_wn_clusters_r3,2026-10-11-g600_ipip_r3,2026-10-11-papers_alignment_sweep_r3,2026-10-11-usage_alignment_sweep,2026-10-12-allport_iv_rare_censuses,2026-10-12-allport_rare_censuses,2026-10-12-m1_phrase_rejudge,2026-10-12-pilot-mc2_base_model,2026-10-12-pilot_base_model_r3,2026-10-12-rule1b_roget,2026-10-12-rule1b_wn_clusters,2026-10-13-full_roget_regloss,2026-10-13-g600_ipip,2026-10-13-m1_phrase_others,gen_pilot_censuses_r3,gen_pilot_roget_r3,gen_pilot_wn_clusters_r3,m3_pilot_1_r3,m3_states_renamed_w23,m3_w23_five_rescore_r3,states_unjudged_r3_names"
+        },
+        "fingerprint": "v1:2026-10-13T04:35:12+00:00@461135313",
+        "kind": "file",
+        "last_modified_at": "2026-10-13T04:35:12+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "2026-10-09-iv-pilot_censuses_r3,2026-10-09-rare-pilot_censuses_r3,2026-10-10-tda_censuses_r3,2026-10-11-allport_hi_censuses_r3,2026-10-11-b_alignment_sweep_r3,2026-10-11-b_alignment_sweep_krakovna,2026-10-11-full_roget_r3,2026-10-11-full_wn_clusters_r3,2026-10-11-g600_ipip_r3,2026-10-11-papers_alignment_sweep_r3,2026-10-11-usage_alignment_sweep,2026-10-12-allport_iv_rare_censuses,2026-10-12-allport_rare_censuses,2026-10-12-m1_phrase_rejudge,2026-10-12-pilot-mc2_base_model,2026-10-12-pilot_base_model_r3,2026-10-12-rule1b_roget,2026-10-12-rule1b_wn_clusters,2026-10-13-full_roget_regloss,2026-10-13-g600_ipip,2026-10-13-m1_phrase_others,gen_pilot_censuses_r3,gen_pilot_roget_r3,gen_pilot_wn_clusters_r3,m3_pilot_1_r3,m3_states_renamed_w23,m3_w23_five_rescore_r3,states_unjudged_r3_names"
+        },
+        "fingerprint": "v1:multi:1bfc30c011a3",
+        "kind": "multi",
+        "last_modified_at": "2026-10-13T04:35:12+00:00",
+        "member_paths": [
+          "data/candidates/novelty/2026-10-09-iv-pilot_censuses_r3/run.json",
+          "data/candidates/novelty/2026-10-09-rare-pilot_censuses_r3/run.json",
+          "data/candidates/novelty/2026-10-10-tda_censuses_r3/run.json",
+          "data/candidates/novelty/2026-10-11-allport_hi_censuses_r3/run.json",
+          "data/candidates/novelty/2026-10-11-b_alignment_sweep_krakovna/run.json",
+          "data/candidates/novelty/2026-10-11-b_alignment_sweep_r3/run.json",
+          "data/candidates/novelty/2026-10-11-full_roget_r3/run.json",
+          "data/candidates/novelty/2026-10-11-full_wn_clusters_r3/run.json",
+          "data/candidates/novelty/2026-10-11-g600_ipip_r3/run.json",
+          "data/candidates/novelty/2026-10-11-papers_alignment_sweep_r3/run.json",
+          "data/candidates/novelty/2026-10-11-usage_alignment_sweep/run.json",
+          "data/candidates/novelty/2026-10-12-allport_iv_rare_censuses/run.json",
+          "data/candidates/novelty/2026-10-12-allport_rare_censuses/run.json",
+          "data/candidates/novelty/2026-10-12-m1_phrase_rejudge/run.json",
+          "data/candidates/novelty/2026-10-12-pilot-mc2_base_model/run.json",
+          "data/candidates/novelty/2026-10-12-pilot_base_model_r3/run.json",
+          "data/candidates/novelty/2026-10-12-rule1b_roget/run.json",
+          "data/candidates/novelty/2026-10-12-rule1b_wn_clusters/run.json",
+          "data/candidates/novelty/2026-10-13-full_roget_regloss/run.json",
+          "data/candidates/novelty/2026-10-13-g600_ipip/run.json",
+          "data/candidates/novelty/2026-10-13-m1_phrase_others/run.json",
+          "data/candidates/novelty/gen_pilot_censuses_r3/run.json",
+          "data/candidates/novelty/gen_pilot_roget_r3/run.json",
+          "data/candidates/novelty/gen_pilot_wn_clusters_r3/run.json",
+          "data/candidates/novelty/m3_pilot_1_r3/run.json",
+          "data/candidates/novelty/m3_states_renamed_w23/run.json",
+          "data/candidates/novelty/m3_w23_five_rescore_r3/run.json",
+          "data/candidates/novelty/states_unjudged_r3_names/run.json"
+        ],
+        "path": "data/candidates/novelty"
+      }
+    ],
+    "inputs_sha256": "23e2a2ce0fedbaa410d142a191b7cde5c3f39eac08d44c80d13ee59a8a3f6347",
+    "produced_at": "2026-10-13T05:43:47+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_traits_all_2 --from-batches 2026-10-09-iv-pilot_censuses_r3 2026-10-09-rare-pilot_censuses_r3 2026-10-10-tda_censuses_r3 2026-10-11-allport_hi_censuses_r3 2026-10-11-b_alignment_sweep_r3 2026-10-11-b_alignment_sweep_krakovna 2026-10-11-full_roget_r3 2026-10-11-full_wn_clusters_r3 2026-10-11-g600_ipip_r3 2026-10-11-papers_alignment_sweep_r3 2026-10-11-usage_alignment_sweep 2026-10-12-allport_iv_rare_censuses 2026-10-12-allport_rare_censuses 2026-10-12-m1_phrase_rejudge 2026-10-12-pilot-mc2_base_model 2026-10-12-pilot_base_model_r3 2026-10-12-rule1b_roget 2026-10-12-rule1b_wn_clusters 2026-10-13-full_roget_regloss 2026-10-13-g600_ipip 2026-10-13-m1_phrase_others gen_pilot_censuses_r3 gen_pilot_roget_r3 gen_pilot_wn_clusters_r3 m3_pilot_1_r3 m3_states_renamed_w23 m3_w23_five_rescore_r3 states_unjudged_r3_names --transport batches --budget-usd 40 --confirm-expensive --confirmed-by 'Roger, 2026-10-13 (G11: R1 over all trait batches, up to $40; dry-run estimate $37.901)'",
+      "git_sha": "6968595d+dirty",
+      "title": "review_graph build review_traits_all_2"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 42405,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 4895697,
+      "cost_usd": 1.5192,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 3972,
+      "prompt_tokens": 5906168
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 1499901,
+      "cost_usd": 19.6033,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 11879,
+      "prompt_tokens": 2302167
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 2179385,
+      "cost_usd": 16.1556,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 26552,
+      "prompt_tokens": 5258679
+    },
+    "text-embedding-3-large": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0,
+      "model": "text-embedding-3-large",
+      "n_calls": 2,
+      "prompt_tokens": 238
+    }
+  },
+  "total_completion_tokens": 8574983,
+  "total_cost_usd": 37.2782,
+  "total_prompt_tokens": 13467252
+}
