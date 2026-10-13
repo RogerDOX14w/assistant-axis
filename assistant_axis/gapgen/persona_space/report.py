@@ -63,13 +63,17 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) ->
         if len(r2) >= x1:
             m = float(r2[x0 - 1:x1].mean())
             a1.hlines(m, x0 - 0.4, x1 + 0.4, color="#c0392b", lw=1.6)
-            a1.text((x0 + x1) / 2, m + 0.03, f"mean {m:.2f}", ha="center", fontsize=8, color="#c0392b")
+            a1.text((x0 + x1) / 2, m + 0.03, f"mean {m:.2f}", ha="center", fontsize=8, color="#c0392b",
+                    bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none", "pad": 1.5})
     Ns = sorted(int(n) for n in s["rho_by_N"])
-    for alpha in sorted(cv.summary):
+    alphas = sorted(cv.summary)
+    cmap = plt.get_cmap("viridis")
+    for j, alpha in enumerate(alphas):
         rho = [cv.summary[alpha]["rho_by_N"][str(n)] for n in Ns]
         chosen = alpha == cv.alpha
-        a2.plot(Ns, rho, marker="o", ms=4 if not chosen else 6, lw=2.2 if chosen else 1.0,
-                color="#4a7ab5" if chosen else "#aaaaaa", label=f"alpha {alpha:g}" + (" (chosen)" if chosen else ""))
+        a2.plot(Ns, rho, marker="o", ms=6 if chosen else 3.5, lw=2.6 if chosen else 1.0,
+                color=cmap(0.1 + 0.8 * j / max(1, len(alphas) - 1)), alpha=1.0 if chosen else 0.75,
+                label=f"alpha {alpha:g}" + (" (chosen)" if chosen else ""), zorder=4 if chosen else 2)
     best = cv.summary[cv.alpha]["rho_by_N"][str(cv.N)]
     a2.scatter([cv.N], [best], s=140, facecolors="none", edgecolors="#c0392b", lw=2, zorder=5,
                label=f"chosen N = {cv.N}")
@@ -77,7 +81,7 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) ->
     a2.set_xlabel("N (top principal directions the residual is taken outside)")
     a2.set_ylabel("Spearman, predicted vs actual residual")
     a2.set_title("Residual rank agreement on held-out rows", fontsize=11)
-    a2.legend(fontsize=8, loc="lower right")
+    a2.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=3, frameon=False)
     fig.suptitle(title, fontsize=13, fontweight="bold")
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs))
@@ -164,9 +168,10 @@ def fit_report(cv: CV, cal: Calibration, *, fit_id: str, pool_counts: Mapping, p
           f"the actual {cal.residual_true_quantiles[10]:.3f}, so a candidate's residual is read as its percentile "
           f"among the held-out predictions (`residual_pct`).", "",
           f"- `dup_threshold` = **{cal.dup_threshold:.3f}** (the median held-out cosine between a prediction and its "
-          f"own vector); the median held-out nearest-other cosine is {cal.nn_cos_pred_quantiles[10]:.3f} "
-          f"(p90 {cal.nn_cos_pred_quantiles[18]:.3f}), so an existing entity's prediction is duplicate-like to "
-          f"another entity at about that rate.",
+          f"own vector).  The flag's base rate: a held-out existing entity's prediction is at or above it to "
+          f"*another* entity {_f(cal.dup_base_rate and cal.dup_base_rate * 100, 1)}% of the time (the median "
+          f"nearest-other cosine is {cal.nn_cos_pred_quantiles[10]:.3f}, p90 {cal.nn_cos_pred_quantiles[18]:.3f}); "
+          f"a candidate that is a genuinely new trait can expect about that rate of duplicate-like flags.",
           f"- `novel_pct` = **{cal.novel_pct:.2f}**.",
           f"- `cover_questioned` cosine: {cal.cover_questioned_cos:.3f} (the 10th percentile of held-out "
           f"self-cosines); `novel_vs_covered` percentile {cal.novel_vs_covered_pct:.2f}.",

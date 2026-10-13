@@ -226,8 +226,18 @@ def embed_all(args, cfg, texts: list[str], usage, *, canary: bool) -> np.ndarray
     return E
 
 
+def clean_argv(argv) -> list[str]:
+    """``argv`` with every absolute path that exists written relative to the checkout holding it (a tracked record
+    never carries a home directory; from that checkout's root the command is the same)."""
+    out = []
+    for a in argv:
+        a = str(a)
+        out.append(repo_rel(Path(a)) if a.startswith("/") and Path(a).exists() else a)
+    return out
+
+
 def base_run(args, argv, cmd: str) -> dict:
-    return {"command": cmd, "argv": list(argv), "git_sha": git_sha(), "started_at": utc_now(),
+    return {"command": cmd, "argv": clean_argv(argv), "git_sha": git_sha(), "started_at": utc_now(),
             "script": "data_analysis/gap_generation/persona_novelty.py"}
 
 

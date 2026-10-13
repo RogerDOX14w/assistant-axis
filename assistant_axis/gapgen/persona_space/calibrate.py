@@ -52,6 +52,9 @@ class Calibration:
     thresholds_set_by: str = PLAN_DEFAULT
     residual_pred_quantiles_by_N: dict = field(default_factory=dict)
     residual_true_quantiles_by_N: dict = field(default_factory=dict)
+    #: the share of held-out training entities whose prediction is at or above ``dup_threshold`` to *another* entity:
+    #: the rate at which the flag would call an existing entity duplicate-like (the flag's base rate)
+    dup_base_rate: Optional[float] = None
     feature_source: dict = field(default_factory=dict)
     levels: list = field(default_factory=lambda: list(QUANTILE_LEVELS))
 
@@ -85,6 +88,7 @@ def from_cv(cv, N: Optional[int] = None, *, fit_id: str, config_version: str, al
         config_version=config_version, n_train=int(len(rp)), residual_pred_mean=float(np.mean(rp)),
         residual_pred_sd=float(np.std(rp, ddof=1)) if len(rp) > 1 else 1.0,
         cover_questioned_cos=round(float(np.quantile(h["cos"], COVER_QUESTIONED_LEVEL)), 4),
+        dup_base_rate=round(float(np.mean(np.asarray(h["nn_cos"]) >= round(dup, 4))), 4),
         thresholds_set_by=thresholds_set_by,
         residual_pred_quantiles_by_N={str(n): quantiles(h["res_pred"][n]) for n in sorted(h["res_pred"])},
         residual_true_quantiles_by_N={str(n): quantiles(cv.res_true[n]) for n in sorted(cv.res_true)},
