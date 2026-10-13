@@ -62,6 +62,37 @@ TABLE_MD = """| Title | Intended goal | Behaviour |
 | Coding | pass the tests | edits the tests |
 """
 
+#: Krakovna's sheet in the form its TSV export (``<sheet>/pub?output=tsv``) had on 2026-10-13: CRLF line ends, ten
+#: cells on every line, a banner line above the header, and section dividers (one filled cell, the second) before
+#: each section's examples.  The banner, header and section names are the sheet's; the examples are invented (the
+#: sheet has no licence, and its text is never stored).
+KRAKOVNA_HEADER = ("Title", "Description", "Illustration", "Type of system", "Intended goal", "Misspecified goal",
+                   "Behavior", "Authors", "Source", "Credit")
+KRAKOVNA_BANNER = "Submit more examples through this form"
+KRAKOVNA_SECTIONS = ("Evolutionary and genetic algorithms", "Large language models (LLMs)",
+                     "Reinforcement learning (RL)")
+
+
+def krakovna_line(*cells: str) -> str:
+    return "\t".join(list(cells) + [""] * (len(KRAKOVNA_HEADER) - len(cells)))
+
+
+def krakovna_example(i: int, j: int) -> str:
+    return krakovna_line(f"Example {i}.{j}", f"An agent in setting {i}.{j} meets the letter of its goal.", "",
+                         "RL agent", f"goal {i}.{j}", f"proxy {i}.{j}", f"games proxy {i}.{j}", "A. Author",
+                         f"https://example.org/{i}-{j}", "")
+
+
+#: 24 rows under the header (3 dividers and 21 examples) and one empty row (tabs only) at the end: 3 chunks of
+#: up to 10 rows.
+KRAKOVNA_TSV_EXPORT = "\r\n".join(
+    [krakovna_line("", KRAKOVNA_BANNER, "More information in this blog post", "", "",
+                   "Related: goal misgeneralisation examples"),
+     "\t".join(KRAKOVNA_HEADER)]
+    + [line for i, sec in enumerate(KRAKOVNA_SECTIONS, 1)
+       for line in [krakovna_line("", sec)] + [krakovna_example(i, j) for j in range(1, 8)]]
+    + [krakovna_line()]) + "\r\n"
+
 
 def fake_fetcher(pages: dict[str, bytes], calls: Optional[list] = None) -> Callable[[str], bytes]:
     def fetch(url: str) -> bytes:

@@ -32,6 +32,7 @@ def test_krakovna_and_machiavelli_are_optional_and_krakovna_is_never_stored():
     k, m = SRC.SOURCES["krakovna"], SRC.SOURCES["machiavelli"]
     assert k.optional and m.optional
     assert k.read_only and not k.store and k.license is None
+    assert k.fmt == "sheet_tsv" and k.table_header == "Title"          # the TSV export, from its header line on
     assert m.license == "MIT" and "Alex Pan" in m.license_line
 
 

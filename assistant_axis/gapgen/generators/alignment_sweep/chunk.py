@@ -11,7 +11,9 @@
   code fences into parts of at most ``max_tokens`` each (a single paragraph longer than that stays whole); every
   part starts with the section's heading line and is named ``<id>:p1``, ``<id>:p2``, ...
 * **Rows** (a markdown or tab-separated table: Krakovna's sheet, MACHIAVELLI's categories): ``rows_per_chunk`` rows
-  a chunk, the header row repeated at the top of each.
+  a chunk, the header row repeated at the top of each.  A published sheet's TSV export is read from its header line
+  on (the source's ``table_header``: Krakovna's export has a banner line above it); a row with one filled cell (a
+  section divider, such as Krakovna's "Large language models (LLMs)") is a row like any other.
 * A source's ``drop_before`` (a heading title) drops everything before that heading, and ``drop_sections`` drops a
   section with its sub-sections (the constitution's preface and acknowledgements).
 
@@ -197,10 +199,21 @@ def html_to_markdown(html_text: str, *, root_tag: Optional[str] = "main") -> str
     return "\n\n".join(p.blocks) + "\n"
 
 
-def html_table_to_tsv(html_text: str) -> str:
-    """Every table row of a page as a tab-separated line (the published-sheet form)."""
-    md = html_to_markdown(html_text, root_tag=None)
-    return "\n".join(line for line in md.split("\n\n") if "\t" in line) + "\n"
+def sheet_table(tsv_text: str, header: Optional[str]) -> str:
+    """A published sheet's TSV export from its header line on: the first line whose first cell is ``header`` (None:
+    the first line with a filled cell), then every line after it that holds a filled cell; lines above the header,
+    such as a banner, are dropped.  Raises ``ValueError`` when no line has that first cell or no row follows it, so a
+    sheet whose layout changed stops the run instead of giving no chunks."""
+    lines = tsv_text.splitlines()
+    start = next((i for i, l in enumerate(lines)
+                  if (l.split("\t", 1)[0].strip() == header if header is not None else l.strip())), None)
+    if start is None:
+        raise ValueError(f"no header line (first cell {header!r}) in the sheet's TSV export "
+                         f"(first line: {lines[0][:80]!r})" if lines else "the sheet's TSV export is empty")
+    rows = [l for l in lines[start + 1:] if l.strip()]
+    if not rows:
+        raise ValueError(f"no row under the header line {lines[start][:80]!r} in the sheet's TSV export")
+    return "\n".join([lines[start]] + rows) + "\n"
 
 
 # --------------------------------------------------------------------------- headings
@@ -343,12 +356,12 @@ def chunk_rows(key: str, text: str, *, version: str, rows_per_chunk: int = ROWS_
 # --------------------------------------------------------------------------- sources
 
 def source_markdown(key: str, raw: str) -> str:
-    """A fetched source's text in the form :func:`chunk_markdown` reads."""
-    fmt = SOURCES[key].fmt
-    if fmt == "html":
+    """A fetched source's text in the form :func:`chunk_markdown` (headings) or :func:`chunk_rows` (rows) reads."""
+    s = SOURCES[key]
+    if s.fmt == "html":
         return html_to_markdown(raw)
-    if fmt == "sheet_html":
-        return html_table_to_tsv(raw)
+    if s.fmt == "sheet_tsv":
+        return sheet_table(raw, s.table_header)
     return raw
 
 
@@ -361,7 +374,7 @@ def chunk_source(key: str, text: str, *, version: Optional[str] = None, max_toke
     if not version:
         raise ValueError(f"{key}: no version label (the capture date is set by fetch)")
     body = source_markdown(key, text)
-    if s.fmt in ("table", "sheet_html"):
+    if s.fmt in ("table", "sheet_tsv"):
         return chunk_rows(key, body, version=version, rows_per_chunk=rows_per_chunk)
     return chunk_markdown(key, body, version=version, max_tokens=max_tokens, drop_before=s.drop_before,
                           drop_sections=s.drop_sections)
@@ -406,5 +419,5 @@ def counts(chunks: Sequence[Chunk]) -> dict:
 
 
 __all__ = ["Chunk", "CHARS_PER_TOKEN", "MAX_CHUNK_TOKENS", "ROWS_PER_CHUNK", "html_to_markdown",
-           "html_table_to_tsv", "chunk_markdown", "chunk_rows", "chunk_source", "source_markdown", "build_all",
+           "sheet_table", "chunk_markdown", "chunk_rows", "chunk_source", "source_markdown", "build_all",
            "write_chunks", "load_chunks", "counts", "slugify", "tokens_est"]

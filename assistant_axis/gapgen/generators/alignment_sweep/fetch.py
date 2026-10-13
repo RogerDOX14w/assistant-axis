@@ -11,7 +11,10 @@ lines of the repository's LICENSE file, or the page's sentence naming the licenc
 records is not fetched again unless ``force``.
 
 A source with ``store`` false (the Krakovna list) is never written: :func:`fetch_all` refuses it, and
-:func:`fetch_transient` returns its text to the caller (``extract --variant B``) without touching the disk.
+:func:`fetch_transient` returns its text to the caller (``extract --variant B``) without touching the disk, with a
+record of what it read in the form of a manifest entry (``file`` None, ``stored`` false), which the extract run keeps
+in its ``run.json`` args (``transient_sources``).  A published Google sheet is read through its TSV export
+(:func:`published_sheet_tsv_url`): its ``pubhtml`` page, read 2026-10-13, is drawn by script and holds no table.
 
 No paid API.
 """
@@ -23,6 +26,7 @@ import json
 import re
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -33,11 +37,12 @@ from assistant_axis.gapgen.paths import REPO_ROOT
 from assistant_axis.gapgen.registry import utc_now
 
 from . import EXTERNAL_DIR, FETCH_MANIFEST_NAME, SOURCES_MANIFEST_PATH
-from .chunk import html_table_to_tsv, html_to_markdown
+from .chunk import html_to_markdown
 from .sources import DEFAULT_FETCH, SOURCES as _SOURCES, Source
 
 Fetcher = Callable[[str], bytes]
 TOOL = "alignment_sweep.py fetch"
+TRANSIENT_TOOL = "alignment_sweep.py extract (fetch_transient)"
 USER_AGENT = "Mozilla/5.0 (compatible; assistant-axis alignment sweep; research use)"
 
 
@@ -110,11 +115,14 @@ def licence_line_found(s: Source, data: bytes, fetcher: Fetcher) -> Optional[str
     return None
 
 
-def _entry(s: Source, dest: Path, data_sha: str, size: int, *, now: str, git_sha: Optional[str],
-           found: Optional[str]) -> dict:
+def _entry(s: Source, dest: Optional[Path], data_sha: str, size: int, *, now: str, git_sha: Optional[str],
+           found: Optional[str], url: Optional[str] = None, page_url: Optional[str] = None) -> dict:
+    """A manifest entry; ``dest`` None for a source read transiently (never stored), ``url`` and ``page_url``
+    when what was read is not the source table's ``url`` (a published sheet's TSV export)."""
     label = s.version_label or now[:10]
     pin = s.version_pin or f"captured {now[:10]}, sha256 {data_sha[:12]}"
-    return {"key": s.key, "name": s.name, "file": _rel(dest), "url": s.url, "page_url": s.page_url, "kind": s.kind,
+    return {"key": s.key, "name": s.name, "file": _rel(dest) if dest is not None else None, "url": url or s.url,
+            "page_url": page_url or s.page_url, "kind": s.kind,
             "fmt": s.fmt, "variant": s.variant, "size_bytes": size, "sha256": data_sha, "fetched_at": now,
             "version_label": label, "version_pin": pin, "license": s.license, "license_url": s.license_url,
             "license_line": s.license_line, "license_line_found": found, "license_verified_at": s.license_verified_at,
@@ -171,24 +179,52 @@ def fetch_all(*, only: Optional[Iterable[str]] = None, force: bool = False, fetc
     return out
 
 
-def fetch_transient(key: str, *, fetcher: Fetcher = _urlopen_bytes) -> str:
-    """The text of a never-stored source, read and returned without writing anything: for a published sheet,
-    the landing page's first ``docs.google.com/spreadsheets`` link is followed and its table returned as
-    tab-separated lines."""
+def published_sheet_tsv_url(link: str) -> str:
+    """The TSV export of a published Google sheet, from a link to it (``.../d/e/<id>/pubhtml``, ``.../pub?...``,
+    ``.../d/<id>/edit#gid=N``): ``<sheet>/pub?output=tsv``, with the link's ``gid`` kept (``gid=N&single=true``)
+    so that the same tab is read."""
+    parts = urllib.parse.urlsplit(link)
+    m = re.match(r"/spreadsheets/d/(?:e/)?[^/]+", parts.path)
+    if parts.netloc != "docs.google.com" or not m:
+        raise ValueError(f"not a Google sheet link: {link}")
+    gid = (urllib.parse.parse_qs(parts.query).get("gid") or urllib.parse.parse_qs(parts.fragment).get("gid")
+           or [None])[0]
+    query = "output=tsv" if gid is None else f"gid={gid}&single=true&output=tsv"
+    return f"https://docs.google.com{m.group(0)}/pub?{query}"
+
+
+def fetch_transient(key: str, *, fetcher: Fetcher = _urlopen_bytes, record: Optional[dict] = None,
+                    now: Optional[str] = None) -> str:
+    """The text of a never-stored source, read and returned without writing anything.  For a published sheet
+    (``sheet_tsv``) the landing page's first ``docs.google.com/spreadsheets`` link is followed to the sheet's TSV
+    export, and the export is returned as fetched (:func:`.chunk.source_markdown` drops the lines above its header).
+
+    ``record``, when given, is filled with what was read, in the form of a manifest entry: ``url`` the URL whose text
+    is returned (the TSV export), ``page_url`` the landing page, ``sheet_url`` the link found on it, ``sha256`` and
+    ``size_bytes`` of the text, ``fetched_at`` and ``version_label`` (the capture date, ``now``), ``file`` None
+    and ``stored`` false."""
     s = _SOURCES[key]
     if s.store:
         raise ValueError(f"{key} is stored by fetch_all; fetch_transient is for never-stored sources")
-    raw = fetcher(s.url).decode("utf-8", "replace")
-    if s.fmt != "sheet_html":
-        return raw
-    m = re.search(r'href="(https://docs\.google\.com/spreadsheets/[^"]+)"', raw)
-    if not m:
-        raise RuntimeError(f"{key}: no published-sheet link on {s.url}")
-    url = m.group(1).replace("&amp;", "&")
-    if "/pubhtml" not in url and "/edit" in url:
-        url = url.split("/edit")[0] + "/pubhtml"
-    return html_table_to_tsv(fetcher(url).decode("utf-8", "replace"))
+    sheet_url = None
+    if s.fmt == "sheet_tsv":
+        landing = fetcher(s.url).decode("utf-8", "replace")
+        m = re.search(r'href="(https://docs\.google\.com/spreadsheets/[^"]+)"', landing)
+        if not m:
+            raise RuntimeError(f"{key}: no published-sheet link on {s.url}")
+        sheet_url = m.group(1).replace("&amp;", "&")
+        url, page_url = published_sheet_tsv_url(sheet_url), s.url
+    else:
+        url, page_url = s.url, s.page_url
+    data = fetcher(url)
+    if record is not None:
+        now = now or utc_now()
+        record.clear()
+        record.update(_entry(s, None, _sha256(data), len(data), now=now, git_sha=None, found=None, url=url,
+                             page_url=page_url))
+        record.update(tool=TRANSIENT_TOOL, sheet_url=sheet_url, stored=False)
+    return data.decode("utf-8", "replace")
 
 
-__all__ = ["FetchManifest", "fetch_all", "fetch_transient", "load_manifest", "write_manifest", "licence_sentence",
-           "licence_line_found", "TOOL"]
+__all__ = ["FetchManifest", "fetch_all", "fetch_transient", "published_sheet_tsv_url", "load_manifest",
+           "write_manifest", "licence_sentence", "licence_line_found", "TOOL"]

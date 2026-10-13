@@ -10,7 +10,8 @@ import pytest
 from assistant_axis.gapgen.generators.alignment_sweep import chunk as CH
 from assistant_axis.gapgen.generators.alignment_sweep import fetch as F
 from assistant_axis.gapgen.generators.alignment_sweep import sources as SRC
-from assistant_axis.tests.alignment_sweep_fakes import CONSTITUTION_HTML, SPEC_MD, TABLE_MD, fake_fetcher
+from assistant_axis.tests.alignment_sweep_fakes import (CONSTITUTION_HTML, KRAKOVNA_HEADER, KRAKOVNA_TSV_EXPORT,
+                                                       SPEC_MD, TABLE_MD, fake_fetcher)
 
 # --------------------------------------------------------------------------- chunk: headings
 
@@ -195,15 +196,72 @@ def test_fetch_refuses_a_source_that_is_never_stored(tmp_path):
     assert not (tmp_path / "ext").exists()
 
 
-def test_transient_fetch_of_krakovna_writes_nothing(tmp_path, monkeypatch):
+KRA_SHEET = "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pubhtml"
+KRA_TSV = "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pub?output=tsv"
+KRA_LANDING = f'<html><body><p>See <a href="{KRA_SHEET}">the master list</a>.</p></body></html>'.encode()
+
+
+def test_transient_fetch_of_krakovna_reads_the_tsv_export_and_writes_nothing(tmp_path, monkeypatch):
+    """CHANGED EXPECTATION (2026-10-13): this test fed a hand-made ``<table>`` as the ``pubhtml`` page and passed,
+    while the real page is drawn by script and holds no table, so the live sheet gave 0 chunks.  The sheet is now read
+    through its TSV export; the fixture is that export's form (banner, header, dividers)."""
     monkeypatch.chdir(tmp_path)
     kra = SRC.SOURCES["krakovna"]
-    sheet = "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pubhtml"
-    landing = f'<html><body><p>See <a href="{sheet}">the master list</a>.</p></body></html>'.encode()
-    table = b"<html><body><table><tr><td>Title</td><td>Goal</td></tr><tr><td>Boat</td><td>race</td></tr></table></body></html>"
-    text = F.fetch_transient("krakovna", fetcher=fake_fetcher({kra.url: landing, sheet: table}))
-    assert "Title\tGoal" in text and "Boat\trace" in text
+    calls: list = []
+    rec: dict = {}
+    text = F.fetch_transient("krakovna", fetcher=fake_fetcher({kra.url: KRA_LANDING,
+                                                               KRA_TSV: KRAKOVNA_TSV_EXPORT.encode()}, calls),
+                             record=rec, now="2026-10-13T09:00:00+00:00")
+    assert calls == [kra.url, KRA_TSV]                       # never the pubhtml page
+    assert text == KRAKOVNA_TSV_EXPORT                       # as fetched: source_markdown drops the banner
     assert list(tmp_path.iterdir()) == []
+    # the record says what was read, as the manifest's entries do, and holds no text of the sheet
+    assert rec["url"] == KRA_TSV and rec["page_url"] == kra.url and rec["sheet_url"] == KRA_SHEET
+    assert rec["file"] is None and rec["stored"] is False and rec["fmt"] == "sheet_tsv"
+    assert rec["sha256"] == F._sha256(KRAKOVNA_TSV_EXPORT.encode())
+    assert rec["size_bytes"] == len(KRAKOVNA_TSV_EXPORT.encode())
+    assert rec["version_label"] == "2026-10-13"
+    assert rec["version_pin"] == f"captured 2026-10-13, sha256 {rec['sha256'][:12]}"
+    assert rec["license"] is None and rec["read_only"] is True and rec["tool"] == F.TRANSIENT_TOOL
+    assert "Example" not in json.dumps(rec)
+
+
+def test_krakovna_tsv_export_chunks_from_its_header_line():
+    """Regression (2026-10-13): the TSV export's first line is a banner, and the header line (first cell ``Title``)
+    comes second; read from the top, the banner was taken for the header.  Section dividers stay rows, as before."""
+    chunks = CH.chunk_source("krakovna", KRAKOVNA_TSV_EXPORT, version="2026-10-13")
+    assert [c.chunk_id for c in chunks] == ["krakovna:2026-10-13:rows-0001-0010", "krakovna:2026-10-13:rows-0011-0020",
+                                            "krakovna:2026-10-13:rows-0021-0024"]
+    for c in chunks:
+        assert c.text.splitlines()[0].split("\t") == list(KRAKOVNA_HEADER)       # the header, not the banner
+        assert "Submit more examples" not in c.text and "\r" not in c.text
+    lines = chunks[0].text.splitlines()
+    assert lines[1].split("\t") == ["", "Evolutionary and genetic algorithms"] + [""] * 8   # a divider: one row
+    first = dict(zip(KRAKOVNA_HEADER, lines[2].split("\t")))
+    assert first["Title"] == "Example 1.1" and first["Intended goal"] == "goal 1.1"
+    assert first["Misspecified goal"] == "proxy 1.1" and first["Behavior"] == "games proxy 1.1"
+    assert first["Type of system"] == "RL agent" and first["Credit"] == ""
+    assert chunks[-1].text.splitlines()[-1].startswith("Example 3.7\t")            # the empty last row is dropped
+
+
+def test_a_sheet_with_no_header_line_stops_instead_of_giving_no_chunks():
+    """The ``pubhtml`` page as Google draws it now (a script widget, no table) gave 0 chunks and no error."""
+    page = '<html><body><div id="sheets-viewport"></div><script>var x = 1;</script></body></html>'
+    with pytest.raises(ValueError, match=r"no header line \(first cell 'Title'\)"):
+        CH.chunk_source("krakovna", page, version="v")
+    with pytest.raises(ValueError, match="no row under the header"):
+        CH.chunk_source("krakovna", "\tbanner\t\r\n" + "\t".join(KRAKOVNA_HEADER) + "\r\n\t\t\r\n", version="v")
+
+
+def test_published_sheet_tsv_url():
+    base = "https://docs.google.com/spreadsheets/d/e/2PACX-abc"
+    assert F.published_sheet_tsv_url(f"{base}/pubhtml") == f"{base}/pub?output=tsv"
+    assert F.published_sheet_tsv_url(f"{base}/pubhtml?gid=7&single=true") == f"{base}/pub?gid=7&single=true&output=tsv"
+    assert F.published_sheet_tsv_url(f"{base}/pub?output=csv") == f"{base}/pub?output=tsv"
+    assert (F.published_sheet_tsv_url("https://docs.google.com/spreadsheets/d/1AbC/edit#gid=0")
+            == "https://docs.google.com/spreadsheets/d/1AbC/pub?gid=0&single=true&output=tsv")
+    with pytest.raises(ValueError):
+        F.published_sheet_tsv_url("https://example.org/spreadsheets/d/e/x/pubhtml")
 
 
 def test_unknown_key_refused(tmp_path):

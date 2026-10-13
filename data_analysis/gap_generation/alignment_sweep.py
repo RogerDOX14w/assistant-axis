@@ -130,10 +130,12 @@ def _print_estimate(lines: list[tuple[str, dict]], budget: float) -> float:
 
 # --------------------------------------------------------------------------- extract
 
-def _select_chunks(args, chunks: list) -> tuple[list, list]:
-    """``(the chunks to extract, every transient chunk read for them)``.  A never-stored source (Krakovna) is chunked
-    here and is in no ``chunks.jsonl``, so the item ids' ordinals must also count its transient chunks (all of them,
-    not only the ones a ``--chunks`` sample draws, so an id does not depend on the sample)."""
+def _select_chunks(args, chunks: list) -> tuple[list, list, list]:
+    """``(the chunks to extract, every transient chunk read for them, the records of the transient reads)``.  A
+    never-stored source (Krakovna) is chunked here and is in no ``chunks.jsonl``, so the item ids' ordinals must also
+    count its transient chunks (all of them, not only the ones a ``--chunks`` sample draws, so an id does not depend
+    on the sample).  Each record (:func:`fetch.fetch_transient`'s, a manifest entry with ``file`` None) says what
+    was read: for Krakovna the sheet's TSV export, its sha256 and the capture date."""
     from assistant_axis.gapgen.generators.alignment_sweep import extract as X
     from assistant_axis.gapgen.generators.alignment_sweep.sources import VARIANT_B_SOURCES
     if args.variant == "A":
@@ -144,16 +146,19 @@ def _select_chunks(args, chunks: list) -> tuple[list, list]:
         keys &= set(args.sources)
     pool = [c for c in chunks if c.source in keys]
     transient: list = []
+    records: list = []
     if args.variant == "B" and "krakovna" in keys and not args.dry_run and not args.render:
-        from assistant_axis.gapgen.generators.alignment_sweep.fetch import fetch_transient
-        from assistant_axis.gapgen.registry import utc_now
-        # fetch_transient already returns the sheet's rows as tab-separated lines; chunk_source would read them as
-        # HTML a second time and find no table row at all, so they go to chunk_rows directly
-        transient = CH.chunk_rows("krakovna", fetch_transient("krakovna"), version=utc_now()[:10])
+        rec: dict = {}
+        # the sheet's TSV export as fetched (a banner line above the header); chunk_source reads it from the header
+        text = F.fetch_transient("krakovna", fetcher=F._urlopen_bytes, record=rec)
+        transient = CH.chunk_source("krakovna", text, version=rec["version_label"])
+        records.append(rec)
+        print(f"krakovna: read transiently from {rec['url']} ({rec['size_bytes']:,} bytes, sha256 "
+              f"{rec['sha256'][:12]}), never stored: {len(transient)} chunks")
         pool += transient
     if args.chunks:
         pool = X.stratified_sample(pool, args.chunks, args.seed)
-    return pool, transient
+    return pool, transient, records
 
 
 def cmd_extract(args) -> int:
@@ -191,7 +196,7 @@ def cmd_extract(args) -> int:
         return 0
     if not args.run_id:
         raise SystemExit("extract needs --run-id")
-    chunks, transient = _select_chunks(args, all_chunks)
+    chunks, transient, transient_sources = _select_chunks(args, all_chunks)
     ordinals = X.chunk_ordinals(all_chunks + transient)
     try:
         rub_x = X.load_rubric(X.RUBRIC_EXTRACT, args.rubrics_dir)
@@ -235,7 +240,7 @@ def cmd_extract(args) -> int:
         "model": args.model, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
         "rubrics": {r["name"]: {k: r[k] for k in ("version", "sha256", "file")} for r in (rub_x, rub_r)},
         "reuse_from": args.reuse_from, "allow_dirty": bool(args.allow_dirty), LABEL_FORM_KEY: DEFAULT_LABEL_FORM,
-        "sources_manifest": F.load_manifest(args.sources_manifest)})
+        "sources_manifest": F.load_manifest(args.sources_manifest), "transient_sources": transient_sources})
     ctx.confirmed_by = args.confirmed_by
     ctx.usage = GuardedUsage(budget_usd=cap)
     x_res, r_res = X.StageResult(), X.StageResult()

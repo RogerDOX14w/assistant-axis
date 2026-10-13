@@ -150,10 +150,18 @@ def test_end_to_end(env, monkeypatch, capsys):
     assert "honest" in hidden["hidden"] and "dishonest" in hidden["hidden"]
 
 
-KRAKOVNA_TSV = ("Title\tIntended goal\tBehaviour\n"
-                "Boat race\tfinish the race\tcircles to collect points\n"
-                "Tetris\tsurvive\tpauses the game forever\n"
-                "Coding\tpass the tests\tedits the tests zzsheetonlyword\n")
+# CHANGED EXPECTATION (2026-10-13): this fixture was the tab-separated table that fetch_transient returned, with the
+# header first, fed past fetch_transient by a monkeypatch; the live sheet then gave 0 chunks unseen (its pubhtml page
+# holds no table).  It is now the sheet's TSV export as fetched (CRLF, a banner line above the header, a section
+# divider), served by the fake network to the real fetch_transient.
+KRAKOVNA_SHEET = "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pubhtml"
+KRAKOVNA_EXPORT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pub?output=tsv"
+KRAKOVNA_TSV = ("\tSubmit more examples through this form\t\r\n"
+                "Title\tIntended goal\tBehaviour\r\n"
+                "\tEvolutionary and genetic algorithms\t\r\n"
+                "Boat race\tfinish the race\tcircles to collect points\r\n"
+                "Tetris\tsurvive\tpauses the game forever\r\n"
+                "Coding\tpass the tests\tedits the tests zzsheetonlyword\r\n")
 LONG_QUOTE = " ".join(f"w{i}" for i in range(40))
 
 
@@ -170,7 +178,11 @@ def test_variant_b_extracts_the_transient_krakovna_chunks(env, monkeypatch):
     no chunks.jsonl, and before the review of 2026-10-12 the item ids' ordinals were counted over chunks.jsonl alone,
     so assembling them raised KeyError after the paid calls."""
     root, common, cdir = env
-    monkeypatch.setattr(F, "fetch_transient", lambda key: KRAKOVNA_TSV)
+    kra = SOURCES["krakovna"]
+    kra_pages = {kra.url: f'<p><a href="{KRAKOVNA_SHEET}">the master list</a></p>'.encode(),
+                 KRAKOVNA_EXPORT_URL: KRAKOVNA_TSV.encode()}
+    network = F._urlopen_bytes                                              # the env's fake network
+    monkeypatch.setattr(F, "_urlopen_bytes", lambda url: kra_pages[url] if url in kra_pages else network(url))
     monkeypatch.setattr(CLI, "_anthropic_client", lambda: FakeAsyncAnthropic(kra_responder))
     assert CLI.main(common + ["fetch"]) == 0 and CLI.main(common + ["chunk"]) == 0
     assert CLI.main(common + ["extract", "--run-id", "tb", "--variant", "B", "--sources", "krakovna",
@@ -180,8 +192,13 @@ def test_variant_b_extracts_the_transient_krakovna_chunks(env, monkeypatch):
     assert [e["item_id"] for e in ext] == ["kra001-1a", "kra001-1b"] and {e["source"] for e in ext} == {"krakovna"}
     assert ext[0]["label"] == "games the metric" and ext[0]["source_quote"].endswith(" [...]")
     assert len(ext[0]["source_quote"].split()) == 25 + 1                     # 25 words and the cut marker
+    assert ext[0]["chunk_id"].endswith(":rows-0001-0004")                    # divider + 3 rows; not the banner
     recs = [json.loads(x) for x in (rdir / "extract_responses.jsonl").read_text().splitlines()]
     assert recs and all(r["user"] is None and r["text"] is None for r in recs)  # a read-only source's text is not kept
+    # the run records what was read: the TSV export, not the pubhtml page, with its sha256
+    (src,) = json.loads((rdir / "run.json").read_text())["args"]["transient_sources"]
+    assert src["key"] == "krakovna" and src["url"] == KRAKOVNA_EXPORT_URL and src["sheet_url"] == KRAKOVNA_SHEET
+    assert src["file"] is None and src["stored"] is False and src["size_bytes"] == len(KRAKOVNA_TSV.encode())
     # never stored: no file anywhere under the test root holds the sheet's text
     assert not [p for p in root.rglob("*") if p.is_file() and b"zzsheetonlyword" in p.read_bytes()]
 

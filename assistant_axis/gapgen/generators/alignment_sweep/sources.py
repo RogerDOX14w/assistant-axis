@@ -30,8 +30,9 @@ from typing import Optional
 
 KINDS = ("spec", "constitution", "policy", "taxonomy", "glossary", "incidents", "schema")
 #: How a fetched text is read: a markdown file (headings), an HTML page (its headings, through
-#: :func:`.chunk.html_to_markdown`), a published spreadsheet (rows), or a markdown or tab-separated table (rows).
-FORMATS = ("markdown", "html", "sheet_html", "table")
+#: :func:`.chunk.html_to_markdown`), a published Google sheet read through its TSV export (rows, from the header
+#: line on), or a markdown or tab-separated table (rows).
+FORMATS = ("markdown", "html", "sheet_tsv", "table")
 #: Quotes from a ``read_only`` source are cut at this many words (Roger's rule for unlicensed text).
 READ_ONLY_QUOTE_WORDS = 25
 
@@ -64,6 +65,7 @@ class Source:
     license_file_url: Optional[str] = None
     drop_before: Optional[str] = None     # heading title: everything before it is dropped (a preface)
     drop_sections: tuple = ()             # heading titles whose sections are dropped
+    table_header: Optional[str] = None    # a table's header line has this first cell; lines above it are dropped
     filename: Optional[str] = None
     citation: Optional[str] = None
     notes: Optional[str] = None
@@ -80,7 +82,7 @@ class Source:
         """File name under ``data/external/alignment_sweep/``."""
         if self.filename:
             return self.filename
-        ext = {"markdown": "md", "html": "html", "sheet_html": "html", "table": "tsv"}[self.fmt]
+        ext = {"markdown": "md", "html": "html", "sheet_tsv": "tsv", "table": "tsv"}[self.fmt]
         return f"{self.key}.{ext}"
 
 
@@ -149,11 +151,13 @@ SOURCES: dict[str, Source] = {s.key: s for s in (
            notes="names only, never extracted from; the page to read is chosen before the full extraction"),
     Source(key="krakovna", name="Krakovna et al., specification gaming examples in AI (master list)",
            url="https://vkrakovna.wordpress.com/2018/04/02/specification-gaming-examples-in-ai/", kind="incidents",
-           fmt="sheet_html", license=None, license_url=None,
+           fmt="sheet_tsv", license=None, license_url=None,
            license_line="no licence stated on the landing page (checked 2026-10-10)", license_verified_at=CHECKED,
-           read_only=True, weight=1, variant="B", short="kra", optional=True, store=False,
-           notes="the published sheet linked from the landing page is read transiently by extract --variant B; "
-                 "never written to the repository; quotes of 25 words or fewer"),
+           read_only=True, weight=1, variant="B", short="kra", optional=True, store=False, table_header="Title",
+           notes="the published sheet linked from the landing page is read transiently by extract --variant B, "
+                 "through its TSV export (<sheet>/pub?output=tsv; the pubhtml page, read 2026-10-13, is drawn by "
+                 "script and holds no table); a banner line sits above the header; never written to the "
+                 "repository; quotes of 25 words or fewer"),
     Source(key="machiavelli", name="MACHIAVELLI benchmark annotation schema",
            url="https://raw.githubusercontent.com/aypan17/machiavelli/main/README.md", kind="schema",
            fmt="markdown", license="MIT", license_url="https://github.com/aypan17/machiavelli/blob/main/LICENSE",
