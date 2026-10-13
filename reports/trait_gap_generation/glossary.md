@@ -368,6 +368,52 @@ is the [paired bootstrap](#paired-bootstrap)'s idea applied to a correlation.  F
 between rubrics A and B both are recomputed on each redraw, so the interval is for the difference
 itself: one that excludes zero says the difference is unlikely to be luck of the draw.
 
+## Lexical recall terms (added 2026-10-13, for workstream 11)
+
+Workstream 11 checks M3's retrieval against dictionaries ([coding_plan_11_novelty_ensemble.md](./coding_plan_11_novelty_ensemble.md);
+the code is [lexical.py](../../assistant_axis/gapgen/lexical.py) and [lexical_sweep.py](../../assistant_axis/gapgen/lexical_sweep.py)).
+
+<a id="lexical-link"></a>
+### Lexical link
+A dictionary's recorded tie between two words: in Open English WordNet (OEWN), the two words share a synset
+(*synonym*), or a synset of one points at a synset of the other by "similar to" (*similar*) or "see also"
+(*also*); in the Moby thesaurus, one word is in the other's row.  Links are by word, not by sense: every sense of
+the label counts, so `productive` is linked to [fat](../../data/traits/instructions/fat.json) through the "fertile
+land" sense.  OEWN's antonym links and the negation-affix rule (`un-X`, `X-less` / `X-ful`) are kept apart, as
+*antonym evidence*.
+
+<a id="lexical-neighbour"></a>
+### Lexical neighbour
+A corpus trait or live seed-queue entry that a candidate's label has a [lexical link](#lexical-link) to (a trait's
+old name, its `renamed_from`, counts as the trait).
+
+<a id="lexical-only-pair"></a>
+### Lexical-only pair
+A candidate and a [lexical neighbour](#lexical-neighbour) that M3 never listed, read or covered the candidate by:
+no model has read the pair, because the embedding did not put the trait among the candidate's ten nearest.
+
+<a id="retroactive-sweep"></a>
+### Retroactive sweep
+The overlap call run afterwards on every lexical-only pair of the rows M3 already kept, each pair at its row's own
+cut-off and rule set.  It records what M3 would have decided had the trait been listed; it never changes M3's
+decision.
+
+<a id="lexical-cover"></a>
+### Lexical cover
+A lexical-only pair that the sweep read at its row's cut-off: a possible miss of M3's retrieval, until Roger's
+blind marks say whether the existing trait really covers the word (a dictionary link can be a coincidence of
+two senses).
+
+<a id="name-only-link"></a>
+### Name-only link
+A lexical link to a seed-queue entry that has no description yet: recorded and shown in review, never judged (the
+overlap call needs a description) and never a cover.
+
+<a id="stem-family"></a>
+### Stem family
+Words that share a stem by OEWN's `derivation` links (agreeable, agreeableness) or by the negation-affix rule
+(kind, unkind; careful, careless): annotation for the review, never a decision.
+
 ## Generator diversity terms (added 2026-10-10, for the base-model generator)
 
 The diversity harness of [coding_plan_03_base_model.md](./coding_plan_03_base_model.md) ("Frozen

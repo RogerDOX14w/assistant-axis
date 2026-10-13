@@ -554,6 +554,7 @@ reachability; open QUESTIONS entries; the proposed `data/README.md` and `AGENT_N
 Opus retries a failing step once with a changed approach, then Fable (diff review, architecture, stubborn
 failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. [11] question. Assumption
 proceeded under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-12),
+(**copied in on 2026-10-13 as QUESTIONS 121-130, the build's own questions 131-136**; the build's range is 121-139),
 proceeding under the assumption unless the answer would make the work useless.  Pre-registered entries Opus
 copies in at the start: (1) OEWN 2024 as installed, not 2025; (2) a text-less queue entry gives a name-only
 link, recorded and never judged; (3) links by word, the overlap call the sense filter, no auto-reject; (4)
