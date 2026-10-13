@@ -172,7 +172,11 @@ def build_review_rates(args, rows, batches=None) -> dict:
     pshare = RM.pooled_promote_share(rows, res)
     shares = {g: RM.promote_share(rows, generator=g, resolutions=res, pooled=pshare).as_dict()
               for g in D.generator_names(rows) if g not in IND.POOL_GENERATORS + IND.ATTRIBUTED_GENERATORS}
-    by_batch = {d.name: RM.pooled_promote_share(rows, RM.load_resolutions([d])).as_dict() for d in dirs}
+    by_batch = {}
+    for d in dirs:                       # the groups each batch resolved (its terms' per-term share is not separable)
+        b = RM.pooled_promote_share(rows, RM.load_resolutions([d]))
+        by_batch[d.name] = {"per_group": b.per_group, "n_groups": b.n_groups, "n_promoted_groups": b.n_promoted_groups,
+                            "by_shape": b.by_shape}
     as_of = max((e.at for d in dirs for e in RM.load_events(d, drop_undone=False)), default=None)
     return {"batches": recs, "pooled": pooled.as_dict(), "promote_share_pooled": pshare.as_dict(),
             "promote_share_by_batch": by_batch, "promote_share_by_generator": shares, "idle_s": args.idle_s,

@@ -135,10 +135,7 @@
   },
   "promote_share_by_batch": {
    "review_states_v4": {
-    "per_term": 0.2079,
     "per_group": 1.0,
-    "n_decided": 178,
-    "borrowed": false,
     "n_groups": 3,
     "n_promoted_groups": 3,
     "by_shape": {
@@ -156,14 +153,10 @@
       "extended": 0,
       "share": 1.0
      }
-    },
-    "n_accepted": 37
+    }
    },
    "review_tda_1": {
-    "per_term": 0.2079,
     "per_group": 0.5147,
-    "n_decided": 178,
-    "borrowed": false,
     "n_groups": 68,
     "n_promoted_groups": 35,
     "by_shape": {
@@ -181,8 +174,7 @@
       "extended": 55,
       "share": 0.5357
      }
-    },
-    "n_accepted": 37
+    }
    }
   },
   "promote_share_by_generator": {
@@ -369,11 +361,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
-   "git_sha": "604f6fab+dirty",
+   "git_sha": "20bc5bef+dirty",
    "author": "Roger Dearnaley",
    "title": "generator_dashboard review-rate"
   },
-  "produced_at": "2026-10-13T19:51:42+00:00",
+  "produced_at": "2026-10-13T19:55:25+00:00",
   "inputs": [
    {
     "dep_key": "registry",

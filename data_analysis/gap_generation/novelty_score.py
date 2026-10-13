@@ -1728,7 +1728,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     transport, why = choose_transport(args.transport, n_live)
     # the estimate: real listed sizes where every candidate's vector is cached, else the corpus's own
     listed_mean = None
-    if index is not None and not miss:
+    if index is not None and not miss and texts:
         sizes = []
         for i in range(len(texts)):
             q = index.project(found[i])
@@ -2905,7 +2905,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--keys", nargs="+", help="registry keys (with --redecide: narrows the source run's rows)")
     g.add_argument("--unscored", action="store_true", help="every row with no novelty block")
     g.add_argument("--keys-file", type=Path, default=None, metavar="PATH",
-                   help="registry keys, one per line ('#' starts a comment): --keys for a selection too long for a "
+                   help="registry keys, one per line (a line starting with '#' is a comment): --keys for a selection too long for a "
                         "command line (the pooled recovery harness's rows)")
     sp.add_argument("--affected-only", action="store_true",
                     help="with --hide (plan 13 decision 1 (c)): score only the selected rows whose decision hiding can "

@@ -562,3 +562,104 @@ and not a word M1 and M3 have already decided, whichever generator brought it (a
 have not decided still counts, since it still costs and is still reviewed).  The review-hour wave counts only
 net-new rows toward its 300.  The *net-new kept share* is the kept rows (M3 `new` or `grey`) per
 submitted net-new row, measured at the pilot; it replaces plan 04's assumed 0.5 in sizing the wave.
+
+## Generator testing terms (added 2026-10-13, for workstream 13)
+
+Workstream 13 measures the generators instead of adding to them: how much of the corpus each finds again, how
+much of what it finds is new, what review costs, and how many concepts are left.  Plan:
+[coding_plan_13_generator_testing.md](./coding_plan_13_generator_testing.md); the table it prints:
+[dashboard.md](../../data/candidates/testing/dashboard.md).
+
+<a id="recovery-harness"></a>
+### Recovery harness: hidden, recall, precision, false cover
+The harness hides a tenth of the corpus (a pair or simplex hides whole), scores a generator's candidates against
+the rest, and asks which hidden traits they find again.  **Recall**: hidden traits recovered by a candidate M3
+kept, over hidden traits.  **Precision**: kept candidates that recover a hidden trait, over kept candidates (low
+by design when a generator proposes mostly new words).  **False cover**: a candidate M3 turned away as covered by
+another trait although it matches a hidden one.
+
+<a id="pooled-harness"></a>
+### Pooled harness, affected only
+**Pooled**: one hidden draw per seed for every generator at once; every candidate row is scored once and each
+generator's figures are read from the rows it proposed (the same figures a separate run would give).  **Affected
+only**: only the rows whose decision hiding could change are scored again (a hidden trait among their nearest
+traits, in their label or in their recorded decision, or a list of nearest traits that moves without the hidden
+ones); the others' recorded decisions are copied.  Exact, not a sample.
+
+<a id="strict-column"></a>
+### Strict column
+Recall with every overlap reading held to the cut-off 4 (the same concept) instead of M3's own cut-off (3 for most
+traits).  Printed beside the headline recall; Roger: "3 is primary, report 4 as well".
+
+<a id="pair-recovery"></a>
+### Pair recovery
+A hidden trait some kept candidate was read *opposite* against: the generator found its antonym.  Printed beside
+recall, never added to it.
+
+*Not the same as plan 09's pair recovery*, where a blind `opposite` call recovers a recorded pair's other pole (the structural generator's evaluation, in [coding_plan_09_structural_generators.md](./coding_plan_09_structural_generators.md)).
+
+<a id="edges-3-4"></a>
+### 3-edge, 4-edge
+Two kept candidates in the review graph whose overlap readings are both 4 in both directions (a **4-edge**: what
+review merges) or both 3 or above (a **3-edge**: the review app proposes them as a group).
+
+<a id="concept-unit"></a>
+### Concept unit (concept component): components_4, grown_3
+How kept candidates are grouped into concepts for counting.  **components_4**: candidates joined by 4-edges, chains
+included (the strict unit: it splits real concepts, seldom joins wrong ones).  **grown_3**: those groups merged
+across 3-edges while the merged group keeps at least two-thirds of its pairs linked (a chain's share falls with
+every link, which stops it).  **components_3** (3-edges, chains unbroken) is only a diagnostic: one chain holds a
+quarter of the candidates.
+
+<a id="review-agreement"></a>
+### Kept together, one concept, hard negatives
+Scores of a concept unit against Roger's review.  **Kept together**: of the pairs of decided candidates he made one
+concept, the share one unit holds.  **One concept**: of the decided pairs a unit puts together, the share he made
+one concept.  **Hard negatives**: pairs he marked distinct, or dropped from a group the graph had proposed; a good
+unit joins few.
+
+<a id="review-minute"></a>
+### Review-minute
+One minute of Roger's active review: the time between consecutive actions in the review app's log, a gap longer
+than five minutes counted as a break.  The rate is terms decided per review-minute (2.43 on the TDA batch).
+
+<a id="promote-share"></a>
+### Promote share
+Of the groups review resolved (a single term is a group of one), the share promoted as a new concept (decision 3:
+per group, 51-54% so far); the per-term share (about 20%) is printed beside it.
+
+<a id="pre-handled"></a>
+### Pre-handled
+A kept term with a 3-edge (or 4-edge) to a term another review batch already decided: the review app counts it as
+handled from the start, so it costs no review-minute.
+
+<a id="stop-rule"></a>
+### Stop rule
+When a generator is worth another wave: expected accepted terms per review-minute, from its undecided, not
+pre-handled kept terms (the groups they form times the promote share, over the minutes their shapes take).
+
+<a id="capture-recapture"></a>
+### Capture-recapture, occasion
+Estimating the size of a population from how much two or more samples of it overlap: the fewer they share, the
+larger it is.  An **occasion** is one sample; here a generator *mechanism* (the lexicon walks, IPIP, the base
+model), not a generator, and the corpus itself can be one.
+
+<a id="chapman"></a>
+### Chapman estimator
+Capture-recapture from two occasions: (n1 + 1)(n2 + 1) / (m + 1) - 1, where n1 and n2 are what each found and m
+what both found.
+
+<a id="chao2"></a>
+### Chao2
+Capture-recapture over several occasions from how many concepts were seen on exactly one (Q1) and exactly two
+(Q2) of them; many concepts seen only once mean many not seen at all.  Like Chapman it assumes every concept is
+equally easy to find and the occasions independent; both are false here, so the estimate is a lower bound.
+
+<a id="good-turing"></a>
+### Good-Turing coverage
+1 - Q1 / (all sightings): roughly the share of the population the occasions have already seen.
+
+<a id="accumulation-curve"></a>
+### Accumulation curve, end slope
+New concepts found against candidates emitted, in the order a generator emitted them.  The **end slope** (new
+concepts per candidate over the last tenth) is its marginal yield; a flat end means it has saturated.

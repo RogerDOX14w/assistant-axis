@@ -202,3 +202,24 @@ class TestFixedAndExcluded:
         assert harness(env, "--generator", "toy", "--run-id", "r1", "--seed", "0", "--exclude-provenance", "censuses",
                        "--dry-run", batch="exp") == 0
         assert "no exclusion applies" in capsys.readouterr().out
+
+
+def test_affected_only_with_nothing_to_score(env):
+    """Every selected row unaffected: the run scores nothing, copies every block, and finishes (status 0, none
+    stalled), so the harness can read it."""
+    score_full(env)
+    hp = env["tmp"] / "far.json"
+    hp.write_text(json.dumps({"hidden": ["theta", "iota"]}))
+    keys = []
+    for k in ("alphoid#1", "betaish#1", "deltaish#1", "epsilonic#1", "zetaish#1", "lambdaish#1", "muish#1"):
+        d = env["cand_dir"] / "novelty" / f"probe_{k[:-2]}"
+        assert cli.main(["score", "--batch-id", d.name, "--keys", k, "--hide", str(hp), "--affected-only",
+                         *env["base"]]) == 0
+        if not json.loads((d / "affected.jsonl").read_text())["scored"]:
+            keys.append(k)
+            run = json.loads((d / "run.json").read_text())
+            assert run["status"] == 0 and run["n_stalled"] == 0 and run["finished_at"]
+            res = cli._read_jsonl(d / "results.jsonl")
+            assert len(res) == 1 and res[0]["novelty"]["copied_from"] == "full"
+            assert cli._read_jsonl(d / "readings.jsonl") == []
+    assert keys                                                     # at least one row was wholly unaffected
