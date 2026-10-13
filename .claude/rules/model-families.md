@@ -66,6 +66,9 @@ families" and its step 1 and step 2 sections.
   tokenizer-only download (§ 15 Q5); never look in the Mac's Hugging Face
   cache to see whether a tokenizer is there.
 - **Single-family TODOs** (§ 15 Q6: built only when that family is
-  confirmed): Llama's date pin, an exact header match for headers under four
-  tokens (OLMo 2; Gemma 2 has three), all of gpt-oss, and
+  confirmed): Llama's date pin, all of gpt-oss, and
   [`models.py`](assistant_axis/models.py)'s stub rows for the named models.
+  A header under four tokens must match exactly (Gemma 2's three, OLMo 2's
+  two; `spans.allowed_header_mismatches`, built 2026-10-13 on Roger's word
+  since two families need it); from four tokens on one wrong token is
+  tolerated, as the 8slot run's seven were.

@@ -16,6 +16,19 @@ logger = logging.getLogger(__name__)
 # the value the hand-written table had for "qwen").
 _DEFAULT_SEARCH_SLACK = 7
 
+# A header of at least this many tokens is accepted with one wrong token; a
+# shorter one must match exactly (Roger, 2026-10-13: Gemma 2's three-token
+# and OLMo 2's two-token headers, where one wrong token of two or three is
+# no match).  The 8slot run's seven tokens keep the one-token tolerance.
+EXACT_MATCH_BELOW = 4
+
+
+def allowed_header_mismatches(n_header: int) -> int:
+    """How many of an ``n_header``-token header may differ for
+    ``_find_header`` to accept it: 1 from :data:`EXACT_MATCH_BELOW` tokens on,
+    0 below."""
+    return 1 if n_header >= EXACT_MATCH_BELOW else 0
+
 
 class SpanMapper:
     """
@@ -68,11 +81,12 @@ class SpanMapper:
         """Search backwards from *span_start* for the assistant header.
 
         The nearest occurrence of the header's first token within the search
-        distance is taken, and accepted when at most one of the N header
-        tokens differs (``matched >= N - 1``, what the 8slot run used for
-        N = 7).  For a short header that tolerance is loose (one wrong token
-        of two still matches); an exact match for N < 4 is a TODO of the
-        multi-model plan (§ 5.4; § 15 Q6 deferred it with OLMo 2).
+        distance is taken, and accepted when at most
+        :func:`allowed_header_mismatches` of the N header tokens differ: one
+        for N >= 4 (what the 8slot run used for N = 7, so Qwen3 is
+        unchanged), none for a shorter header (Gemma 2's three tokens, OLMo
+        2's two; built 2026-10-13, the multi-model plan § 5.4, on Roger's
+        word: one wrong token of two or three is no match).
 
         Returns:
             (header_start_index, mismatches) where mismatches is a list of
@@ -105,7 +119,7 @@ class SpanMapper:
             else:
                 mismatches.append((k, expected_header[k], full_ids[idx]))
 
-        if matched >= N - 1:
+        if matched >= N - allowed_header_mismatches(N):
             return candidate, mismatches
         return None, mismatches
 

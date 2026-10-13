@@ -160,13 +160,36 @@ class TestFindHeader:
         assert sm._find_header(full_ids, span_start=8, expected_header=QWEN_HEADER)[0] == 1
         assert sm._find_header(full_ids, span_start=9, expected_header=QWEN_HEADER)[0] is None
 
-    @pytest.mark.xfail(strict=True, reason=(
-        "TODO (multi-model plan § 5.4; § 15 Q6 deferred it with OLMo 2): a header of fewer "
-        "than four tokens should match exactly; today one wrong token of two still matches"))
     def test_a_two_token_header_needs_an_exact_match(self):
+        # OLMo 2's two-token header (Roger, 2026-10-13; was a strict xfail
+        # while the rule was a TODO): one wrong token of two is no match.
         sm = SpanMapper(FakeTokenizer({}), header_ids=[50, 51])
-        hdr_start, _ = sm._find_header([7, 50, 99, 42], span_start=3, expected_header=[50, 51])
-        assert hdr_start is None
+        hdr_start, mm = sm._find_header([7, 50, 99, 42], span_start=3, expected_header=[50, 51])
+        assert hdr_start is None and mm == [(1, 51, 99)]
+        assert sm._find_header([7, 50, 51, 42], span_start=3, expected_header=[50, 51])[0] == 1
+
+    def test_a_three_token_header_needs_an_exact_match(self):
+        # Gemma 2's <start_of_turn> model \n.
+        sm = SpanMapper(FakeTokenizer(GEMMA_VOCAB), header_ids=GEMMA_HEADER)
+        assert sm._find_header([7] + GEMMA_HEADER + [42], span_start=4,
+                               expected_header=GEMMA_HEADER) == (1, [])
+        wrong = [106, 2516, 555]
+        hdr_start, mm = sm._find_header([7] + wrong + [42], span_start=4,
+                                        expected_header=GEMMA_HEADER)
+        assert hdr_start is None and mm == [(2, 108, 555)]
+
+    def test_a_four_token_header_still_accepts_one_mismatch(self):
+        # Llama 3's four tokens: the 8slot run's tolerance applies from four on.
+        sm = SpanMapper(FakeTokenizer(LLAMA_VOCAB), header_ids=LLAMA_HEADER)
+        wrong = [128006, 78191, 128007, 555]
+        hdr_start, mm = sm._find_header([7] + wrong + [42], span_start=5,
+                                        expected_header=LLAMA_HEADER)
+        assert hdr_start == 1 and mm == [(3, 271, 555)]
+
+    def test_the_tolerance_rule(self):
+        from assistant_axis.internals.spans import EXACT_MATCH_BELOW, allowed_header_mismatches
+        assert EXACT_MATCH_BELOW == 4
+        assert [allowed_header_mismatches(n) for n in (1, 2, 3, 4, 7)] == [0, 0, 0, 1, 1]
 
 
 # ---------------------------------------------------------------------------
