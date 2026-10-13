@@ -84,6 +84,9 @@ Thumbs.db
 # record, census and sources manifest beside it are tracked.
 /data/candidates/masked_lm/mlm_table.jsonl
 /data/candidates/masked_lm/mlm_table.jsonl.bak.*
+# The structural generators' tracked tables (operator table, position table, classical_modern, evaluation.json,
+# mismatches) are snapshotted to .bak.<UTC> before a change; the snapshots stay local (coding_plan_09).
+/data/candidates/structural/*.bak.*
 
 # Trait rubric V2 experiments (2026-09/10): the reports, plans, rubric texts,
 # samples and usage records are committed; the bulky per-file intermediates
