@@ -1,0 +1,135 @@
+{
+  "result": {
+    "passes": {
+      "probe:roberta": {
+        "pass": "probe",
+        "model_key": "roberta",
+        "model": "roberta-large",
+        "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+        "device": "cpu",
+        "versions": {
+          "machine": "arm64",
+          "python": "3.11.13",
+          "torch": "2.10.0",
+          "transformers": "5.1.0"
+        },
+        "frame_bank_sha256": "4085005682d118e06ecb025f237af2fb94e94c33a77bc97010c9aa6514182137",
+        "settings": {
+          "pll_mode": "l2r",
+          "top_rank": 2000,
+          "track": [
+            "helpful",
+            "harmless",
+            "honest",
+            "sycophantic",
+            "obedient",
+            "transparent",
+            "manipulative",
+            "truthful",
+            "deferential"
+          ]
+        },
+        "seconds": 0.9,
+        "n_forward": 161,
+        "at": "2026-10-13T18:56:14+00:00",
+        "frames_arg": "pilot10",
+        "subjects_arg": null,
+        "git_sha": "999d41b6+dirty",
+        "words_limit": null,
+        "universe_size": null,
+        "pll_mode_source": "per-pass default (QUESTIONS 90)",
+        "pll_mode": "l2r"
+      },
+      "single:roberta": {
+        "pass": "single",
+        "model_key": "roberta",
+        "model": "roberta-large",
+        "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+        "device": "cpu",
+        "versions": {
+          "machine": "arm64",
+          "python": "3.11.13",
+          "torch": "2.10.0",
+          "transformers": "5.1.0"
+        },
+        "frame_bank_sha256": "4085005682d118e06ecb025f237af2fb94e94c33a77bc97010c9aa6514182137",
+        "settings": {
+          "pll_mode": "l2r",
+          "top_rank": 2000,
+          "track": [
+            "helpful",
+            "harmless",
+            "honest",
+            "sycophantic",
+            "obedient",
+            "transparent",
+            "manipulative",
+            "truthful",
+            "deferential"
+          ]
+        },
+        "seconds": 5.52,
+        "n_forward": 700,
+        "at": "2026-10-13T18:56:12+00:00",
+        "frames_arg": "pilot10",
+        "subjects_arg": null,
+        "git_sha": "999d41b6+dirty",
+        "words_limit": null,
+        "universe_size": null,
+        "pll_mode_source": "per-pass default (QUESTIONS 90)",
+        "pll_mode": "l2r"
+      }
+    },
+    "counts": {
+      "n_union": 9050,
+      "n_eligible": 9043,
+      "ineligible": {
+        "below_hard_reject": 7
+      },
+      "token_class": {
+        "single": 8174,
+        "subword": 876
+      },
+      "best_pass": {
+        "single:roberta": 9050
+      },
+      "with_gloss_hint": 7816,
+      "with_contrast": 3015,
+      "stoplist_flagged": 104,
+      "corpus_stem_match": 335,
+      "queue_stem_match": 217
+    },
+    "table_sha256": "b2339eac341b8dc0bc17e2eb9c5d452c19714598f7b5571727c4e8810c8cba69"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py table --device cpu",
+      "git_sha": "999d41b6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "masked-LM generator: what generated the table"
+    },
+    "produced_at": "2026-10-13T19:01:44+00:00",
+    "inputs": [
+      {
+        "dep_key": "agg_single_roberta",
+        "path": "data/candidates/cache/masked_lm/agg/roberta/single.jsonl",
+        "fingerprint": "v1:2026-10-13T18:56:13+00:00@7867839",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T18:56:13+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "agg_probe_roberta",
+        "path": "data/candidates/cache/masked_lm/agg/roberta/probe.jsonl",
+        "fingerprint": "v1:2026-10-13T18:56:14+00:00@2862041",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T18:56:14+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "d5255afb032afd84f1ad3074149bc027340d005aa28fadf510a1ca4486a492a7"
+  }
+}
