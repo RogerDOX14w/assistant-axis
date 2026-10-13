@@ -43,17 +43,38 @@ MODEL_CONFIGS = {
 }
 
 
-def get_config(model_name: str) -> dict:
+def get_config(model_name: str, *, with_family: bool = False) -> dict:
     """
     Get configuration for a model.
 
     Args:
         model_name: HuggingFace model name
+        with_family: also return ``"family"``, the model's row of the family
+            table (:func:`assistant_axis.model_families.family_for_model`, read
+            from its ``config.json``; an unknown ``model_type`` raises).  The
+            two tables are kept apart on purpose (multi-model plan § 5.2, § 15
+            Q1): this one is keyed by the exact repository id and holds
+            per-model facts (target layer, layer count, short name, capping);
+            the family table is keyed on ``config.model_type`` and holds what
+            every checkpoint of an architecture shares.
 
     Returns:
-        Dict with target_layer, total_layers, and short_name.
-        If model is not in known configs, infers values from model architecture.
+        Dict with target_layer, total_layers, and short_name (and ``family``
+        when asked).  If model is not in known configs, infers values from
+        model architecture.
+
+    TODO (multi-model plan § 10 task 11, § 15 Q6): stub rows
+    (``short_name``, ``total_layers``, ``target_layer = total // 2``) for the
+    other-family models, once Roger names them.
     """
+    config = _base_config(model_name)
+    if with_family:
+        from .model_families import family_for_model
+        config["family"] = family_for_model(model_name)
+    return config
+
+
+def _base_config(model_name: str) -> dict:
     if model_name in MODEL_CONFIGS:
         return MODEL_CONFIGS[model_name].copy()
 

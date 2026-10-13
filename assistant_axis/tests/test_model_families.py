@@ -106,3 +106,17 @@ def test_rows_pickle_and_do_not_share_their_dicts():
         row.model_type = "u"
     for r in list(mf.FAMILIES.values()) + [row]:
         assert pickle.loads(pickle.dumps(r)) == r
+
+
+def test_get_config_adds_the_family_only_when_asked(monkeypatch):
+    # models.py keeps its job (per-model facts by repository id); the family
+    # comes through family_for_model on request (plan § 5.2, § 15 Q1).
+    from assistant_axis import models
+    seen = []
+    monkeypatch.setattr(mf, "family_for_model", lambda name: seen.append(name) or mf.FAMILIES["qwen3"])
+    plain = models.get_config("Qwen/Qwen3-32B")
+    assert "family" not in plain and plain["short_name"] == "Qwen" and seen == []
+    cfg = models.get_config("Qwen/Qwen3-32B", with_family=True)
+    assert cfg["family"] is mf.FAMILIES["qwen3"] and cfg["target_layer"] == 32
+    assert seen == ["Qwen/Qwen3-32B"]
+    assert "family" not in models.MODEL_CONFIGS["Qwen/Qwen3-32B"]       # a copy
