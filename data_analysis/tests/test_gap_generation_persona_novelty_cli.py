@@ -130,8 +130,9 @@ class TestFullFlow:
         d = env["out"] / "score" / "b_all"
         dis = [json.loads(x) for x in (d / "disagreements.jsonl").read_text().splitlines()]
         pairs = [x for x in dis if x["kind"] == "dup_vs_new"]
+        # no --write-registry: the batch wrote its blocks to this registry, so the readings go there too (§ 7)
         args = PN.build_parser().parse_args(["judge-disagreements"] + env["common"] +
-                                            ["--batch-id", "b_all", "--allow-dirty", "--write-registry"])
+                                            ["--batch-id", "b_all", "--allow-dirty"])
         client = FakeAsyncAnthropic(responder_for({}, {}, default_overlap=3))
         assert PN.cmd_judge(args, [], client=client) == 0
         readings = [json.loads(x) for x in (d / "readings.jsonl").read_text().splitlines()]
@@ -197,6 +198,11 @@ class TestGates:
         monkeypatch.setattr(PN, "platform_dirty_files", lambda *a, **k: [" M assistant_axis/gapgen/x.py"])
         assert run(env, "score", "--batch-id", "b_free", "--fit-id", "fit_t", "--run", "ipip/r1") == 0
         assert json.loads((env["out"] / "score" / "b_free" / "usage.json").read_text())["n_calls"] == 0
+
+    def test_a_recorded_fit_is_not_moved_in_place(self, env):
+        with pytest.raises(SystemExit, match="needs a new --fit-id"):
+            run(env, "fit", "--fit-id", "fit_t", "--dup-threshold", "0.8")
+        assert run(env, "fit", "--fit-id", "fit_t") == 1              # its model is there: nothing to do
 
     def test_an_existing_batch_is_not_overwritten(self, env, capsys):
         assert run(env, "score", "--batch-id", "b_all", "--fit-id", "fit_t", "--all-rows") == 1

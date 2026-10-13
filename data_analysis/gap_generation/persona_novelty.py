@@ -23,13 +23,14 @@ The library is :mod:`assistant_axis.gapgen.persona_space`.  Commands:
 * ``apply --batch-id B``: the batch's blocks (``scores.jsonl``, with the readings of ``readings.jsonl``) applied to
   this checkout's registry log; $0, idempotent.
 * ``compare --batch-id B``: the agreement and the disagreements again, from ``scores.jsonl`` and M3's decisions in
-  the registry now; $0.
+  the registry now (``scores.jsonl`` is rewritten with the new ``disagreement`` marks; ``apply`` carries them to the
+  registry); $0.
 * ``judge-disagreements --batch-id B [--kind dup_vs_new] [--max-pairs 700] [--budget-usd 5] [--resume]
   [--write-registry]`` (decision 2b): M3's overlap call (rubric A as pinned, Sonnet 5.5 then Opus 5.5 under M3's
   rule, one pair per call, live) on each listed disagreement, the candidate as the target and the persona-nearest
   corpus trait as the other: ``responses.jsonl`` (every response, recorded before it is parsed), ``readings.jsonl``,
-  the ``reading`` on the blocks (with ``--write-registry``), never the ``novelty`` block.  The dry run prints the
-  rendered prompt of the first pair.
+  the ``reading`` on the blocks (with ``--write-registry``, or by itself when ``score`` wrote the batch's blocks to the
+  same registry), never the ``novelty`` block.  The dry run prints the rendered prompt of the first pair.
 * ``prospective predict --fit-id F``: the corpus entities with a file and no training vector, scored with the fit
   ($0: their texts are cached): ``data/candidates/persona/prospective/F/predicted.jsonl``.
   ``prospective compare --fit-id F --new-vectors-dir DIR [--N n]``: after the next extraction ($0).
@@ -326,6 +327,11 @@ def cmd_fit(args, argv) -> int:
               f"model.npz, run.json, usage.json); nothing written")
         return 0
     if out.exists() and (out / "cv.json").exists() and not args.force:
+        moved = [f for f in ("alpha", "N", "dup_threshold", "novel_pct", "thresholds_set_by")
+                 if getattr(args, f) is not None]
+        if moved:
+            raise SystemExit(f"{repo_rel(out)} is a recorded fit: --{', --'.join(m.replace('_', '-') for m in moved)} "
+                             f"needs a new --fit-id (or --force, which moves this one to a .bak directory)")
         return rebuild_model(args, out, pool, cfg, texts)
     if out.exists() and args.force:
         bak = backup_dir(out)
@@ -607,7 +613,8 @@ def cmd_compare(args, argv) -> int:
     write_outputs(args, out, srows, dis, counts, agr, cal, readings=batch_readings(out) or None)
     print(f"compared {len(srows)} rows ({n} covering traits refreshed): AUC {agr.auc_nn_cos_covered_vs_new}, "
           f"covered_by is nearest {agr.covered_by_is_nearest}; disagreements "
-          f"{ {k: counts[k]['listed'] for k in SC.DISAGREEMENTS} }")
+          f"{ {k: counts[k]['listed'] for k in SC.DISAGREEMENTS} }; scores.jsonl rewritten with them (run `apply "
+          f"--batch-id {args.batch_id}` to carry them to a registry that holds the batch's blocks)")
     return 0
 
 
@@ -682,6 +689,7 @@ def cmd_judge(args, argv, *, client=None) -> int:
     if args.write_registry and args.snapshot:
         raise SystemExit("--write-registry writes the live log; --snapshot is read-only")
     pl, cands, missing = judge_inputs(args, out)
+    run_score = json.loads((out / "run.json").read_text(encoding="utf-8")) if (out / "run.json").exists() else {}
     est = JDG.estimate(len(pl))
     proj = est.usd * ESTIMATE_CALIBRATION
     print(f"{len(pl)} {args.kind} pairs to read ({len(missing)} rows left out: {missing[:5]})\n{est.format()}\n"
@@ -730,7 +738,9 @@ def cmd_judge(args, argv, *, client=None) -> int:
         logger.warning("%d responses were refusals (stop_reason refusal): counted as failed calls", n_ref)
     rows_out = [{"key": k, **v} for k, v in sorted(summ.items())]
     write_jsonl(out / "readings.jsonl", rows_out)
-    if args.write_registry and status == 0:
+    # the reading goes on the blocks when asked, or when the batch wrote its blocks to this registry (§ 7)
+    wrote = (run_score.get("registry") or {}).get("path")
+    if (args.write_registry or (wrote and wrote == repo_rel(args.registry) and not args.snapshot)) and status == 0:
         srows = [r for r in read_jsonl(out / "scores.jsonl") if r["key"] in summ]
         n = SC.apply_blocks(Registry(args.registry), srows, args.batch_id,
                             readings={k: JDG.block_reading(v) for k, v in summ.items()})
