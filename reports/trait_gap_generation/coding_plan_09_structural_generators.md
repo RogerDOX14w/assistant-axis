@@ -70,7 +70,7 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
 | decision | reason | source |
 |---|---|---|
 | **Phrase-only labels are accepted** ("harsh toward self", "kind to animals" is the precedent); `has_common_word` is recorded on every item as information and is never a filter. | Roger, 2026-10-12 | plan 09 § 9.1 |
-| **Retarget gets three principal targets, the user, the operator and the developer, for alignment-region traits only**; their non-null outputs are listed apart for the AI-identity sub-family sign-off ([QUESTIONS 67 and 78](./QUESTIONS.md)) before promotion.  "Alignment region" is the `alignment_ai_agent` region of [corpus_regions.json](../../data/candidates/corpus_regions.json): **10 traits** on 2026-10-12 ([absentee](../../data/traits/instructions/absentee.json), [hands-on](../../data/traits/instructions/hands_on.json), [helpful](../../data/traits/instructions/helpful.json), [inefficient](../../data/traits/instructions/inefficient.json), [obedient](../../data/traits/instructions/obedient.json), [proactive](../../data/traits/instructions/proactive.json), [rebellious](../../data/traits/instructions/rebellious.json), [scheming](../../data/traits/instructions/scheming.json), [self-starting](../../data/traits/instructions/self_starting.json), [unhelpful](../../data/traits/instructions/unhelpful.json)), not the 183 traits at alignment score 2-3 (pre-registered, § 12). | Roger, 2026-10-12: "yes, for the alignment region" | plan 09 § 9.2, § 3.4 |
+| **Retarget gets three principal targets, the user, the operator and the developer, for principal-target traits only**; their non-null outputs are listed apart for the AI-identity sub-family sign-off ([QUESTIONS 67 and 78](./QUESTIONS.md)) before promotion.  **Principal-target traits are staged by `alignment_score` in [corpus_regions.json](../../data/candidates/corpus_regions.json)** (decided 2026-10-13): **stage 1 is the 108 traits at score 3**, among them [obedient](../../data/traits/instructions/obedient.json), [rebellious](../../data/traits/instructions/rebellious.json), [scheming](../../data/traits/instructions/scheming.json) and [unhelpful](../../data/traits/instructions/unhelpful.json) of the AI-agent region and [sycophantic](../../data/traits/instructions/sycophantic.json), [honest](../../data/traits/instructions/honest.json), [manipulative](../../data/traits/instructions/manipulative.json) and [deferential](../../data/traits/instructions/deferential.json) from other regions; stage 2 (the 75 at score 2) and stage 3 (the 317 at score 1) run only on Roger's word after stage 1's yield (the non-null share per principal target, the M1 and M3 kept share, and how many he signs off).  This replaces the plan's first reading, the 10 traits of the `alignment_ai_agent` region, half of which score 0-1 and which left out sycophantic, Roger's own example. | Roger, 2026-10-12: "yes, for the alignment region"; 2026-10-13: "Let's start with the 108 score 3 ones, then decide whether to go on to score 2 and even score 1, depending on yield." | plan 09 § 9.2, § 3.4 |
 | **`position` annotations go to a side table** under `data/candidates/structural/`, never into a trait file's `arrangement`; **TODO (Roger): review promotion of the side table into `arrangement` once the pairing review is done.** | Roger, 2026-10-12 | plan 09 § 9.3, § 7 |
 | **One model, Haiku 5.5** (`claude-haiku-5-5`, $0.10 / $0.50 per MTok in [judge_pricing.py](../../assistant_axis/judge_pricing.py)); a second model only if the stability test (§ 8, test 6) fails, and then Roger's call.  Haiku 5.5 refuses a `temperature` ([llm.py](../../assistant_axis/gapgen/llm.py) leaves it out), so the stability test is the measure of its sampling noise. | Roger, 2026-10-12 | plan 09 § 9.4, § 6.5-6 |
 | **The VIA over/under pass is in**, gated: the 24 strengths with their overuse and underuse names are typed from Niemiec (2019) and **verified against the paper before the A run** (§ 9 task 2); the survey itself is copyrighted and not used. | Roger, 2026-10-12 | plan 09 § 9.5, § 2 |
@@ -137,9 +137,9 @@ assistant_axis/gapgen/generators/structural/
                   (1-3 modern labels, gloss <= 25 words, polysemy flag, reasoning first)
   operators.py    OPERATORS = ("opposite", "excess", "deficiency", "retarget", "remode"); TARGETS = ("self",
                   "intimates", "strangers", "authority", "animals", "ideas"); PRINCIPAL_TARGETS = ("the_user",
-                  "the_operator", "the_developer"); MODES = ("attitude", "habit", "speech"); ALIGNMENT_REGION =
-                  "alignment_ai_agent"; TraitInput(stem, label, description, arrangement_kind, region,
-                  principal_targets: bool); build_inputs(stems, *, data_dir, regions_path) -> list[TraitInput]
+                  "the_operator", "the_developer"); MODES = ("attitude", "habit", "speech"); PRINCIPAL_MIN_SCORE = 3
+                  (stage 1; 2 and 1 are later stages); TraitInput(stem, label, description, arrangement_kind,
+                  region, alignment_score, principal_targets: bool); build_inputs(stems, *, data_dir, regions_path) -> list[TraitInput]
                   (never the negative_label, never the members); render_operator_user(ti) -> str;
                   parse_operator_reply(text, *, principal) -> (OperatorReply | None, problem); validate_item
                   (rejects over-/under-/too-/non-X labels, > 4 words, non-ASCII); run_operators(inputs, *,
@@ -203,7 +203,7 @@ it (the gate); on the other schemes it is informational.  The modernised row
 
 **Operator response** (one JSON object per call, reasoning first, then `position`, `opposite`, `excess`,
 `deficiency`, `retarget`, `remode`; each item `{label, gloss, has_common_word, polysemy}` or `null`; the
-principal-target keys are present only for alignment-region traits).  Illustrative, with a made-up trait:
+principal-target keys are present only for principal-target traits, those at or above `--principal-min-score`).  Illustrative, with a made-up trait:
 
 ```json
 {"reasoning": "A tightfisted person keeps money back as a settled habit; the opposite spends freely; ...",
@@ -294,7 +294,7 @@ flags `--data-dir`, `--registry`, `--candidates-dir`, `--regions`, `--dry-run`; 
 under $1) and `--allow-dirty` (refuses uncommitted platform code otherwise), prints its estimate as
 `n_calls x (in, out) tokens at model rates = $X` before sending, charges every answer to a `GuardedUsage`, and
 writes `usage.json` beside its output in a `finally` block.  Dry runs print the estimate, the row counts and
-one **rendered prompt** per variant (a singleton, a pair pole, an alignment-region trait, a classical batch:
+one **rendered prompt** per variant (a singleton, a pair pole, a principal-target trait, a classical batch:
 the working-style rule) and write nothing.
 
 - `classical [--scheme S ...]`: loads and validates the hand-typed tables, prints counts per scheme and role and
@@ -304,7 +304,10 @@ the working-style rule) and write nothing.
   `usage.json`.  Refuses `via` as `classical` does.
 - `operators --run-id R (--all | --traits STEM ... | --sample N --seed S) [--budget-usd 3] [--resume]`: one call
   per trait (≈ $0.0004; 932 calls ≈ $0.37, so the default cap is the first-of-kind `ceil(1.5 x 0.37 + 2)`);
-  principal targets added for alignment-region traits; answers appended to `responses.jsonl`, parse rate
+  principal targets added for traits at alignment score >= `--principal-min-score` (default 3: stage 1, 108 traits
+  on 2026-10-13); a later stage on Roger's word runs `--principal-min-score 2` (or 1) with `--principal-only`, which
+  sends only the three principal slots and only for the traits the lower score newly includes; answers appended
+  to `responses.jsonl`, parse rate
   printed through `warn_if_low_parse_rate`.
 - `null-rate --run-id R [--n 20 --seed 0] [--budget-usd 0.5]`: `operators --sample 20` plus the null-rate readout
   (§ 10): per operator and target the non-null share, the band 5-40% for retarget and remode, the principal
@@ -359,8 +362,9 @@ sets no gate but "expect > 80%" for pair recovery); parse rate, the null-rate ba
   `TraitInput`); principal-target keys appear only when `principal_targets` is true.
 - `operators`: parse of a scripted reply; `null` accepted everywhere but `reasoning` and `position`; `validate_item`
   rejects over-/under-/too-/non-X labels, five-word labels and non-ASCII; a reply naming a principal target for a
-  non-alignment trait is dropped with a problem recorded (**the guard**: principal targets only for
-  alignment-region traits, checked on the way in and on the way out); failed calls counted, retried once, left
+  trait below the run's `--principal-min-score` is dropped with a problem recorded (**the guard**: principal targets
+  only for principal-target traits, checked on the way in and on the way out); `--principal-only` sends no other
+  operator and skips traits already operated on at a higher stage; failed calls counted, retried once, left
   unparsed, never guessed; every response is charged (fake usage) including unparseable ones; `--resume` sends
   nothing for an answered (stem, prompt sha256, model).
 - `postprocess`: `stem_of` on phrases ("harsh toward self" -> `harsh_toward_self`), nominals (`-ness` only with the
@@ -403,7 +407,7 @@ sets no gate but "expect > 80%" for pair recovery); parse rate, the null-rate ba
   `evaluation.json` carries pair recovery (reported against the > 80% expectation), structure recovery, the
   hold-out recall on the 96 by operator, the rejected names regenerated, and the accepted and candidate lines
   apart, and the principal-target count equals the items of
-  alignment-region traits; `position_table.jsonl` has a row for every trait operated on; the pilot's and the
+  principal-target traits; `position_table.jsonl` has a row for every trait operated on; the pilot's and the
   wave's `report.md` carry the already-registered headline and the novel figure raw and net (2026-10-13); the
   package imports no `openai` beyond the embedding cache.
 - **Manual check, listed as such**: the 50-row `roger_sample.md` judged trait / not-trait / duplicate by Roger,
@@ -468,7 +472,7 @@ prompt verbatim.  Each task ends with the § 8 commands.
 
 **Null-rate pilot** (task 5, 20 traits stratified by region and arrangement kind, ≈ $0.01).  Readout: per
 operator the non-null share; for retarget per target and for remode per mode, with the principal targets (only
-the alignment-region traits in the sample, at least two forced in) on their own line.  **Gate**: retarget and
+the principal-target traits in the sample, at least two forced in) on their own line.  **Gate**: retarget and
 remode non-null **above 40% means hallucinated forms, below 5% means laziness** (plan 09 § 6.5); either way
 one prompt revision and a re-pilot.  Also printed: the `position` answers of the sample's pair poles (do the
 two poles of a pair land at deficiency and excess, or mean and vice?), which decides whether the pair-level
@@ -493,7 +497,8 @@ at ~150 an hour.  The readout is ordered as Roger expects B to be useful (decisi
 degree fillers (the excess and deficiency of existing traits, the opposites of singleton and `non-X` traits)
 first, wholly new concepts second.  **Roger decides**: (a) the wave's transport by the re-based estimate (its
 size is decided: 300 net-new kept rows, decision 1), (b) the classical candidates (30 minutes), (c) whether the
-principal-target items go on as traits (QUESTIONS 67/78 sign-off), (d) the pair-level call variant, worth it or
+principal-target items go on as traits (QUESTIONS 67/78 sign-off), and whether to go on to stage 2 (score 2, 75
+traits) and then stage 3 (score 1, 317 traits) on stage 1's yield, (d) the pair-level call variant, worth it or
 not.
 
 ## 11. Report at the end
@@ -521,8 +526,8 @@ failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. 
 proceeded under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-12),
 proceeding under the assumption unless the answer would make the work useless.  Pre-registered entries Opus
 copies in at the start: (1) the `opposite` call is blind to the recorded `negative_label` and to arrangement
-members; (2) "alignment region" is the `alignment_ai_agent` region of `corpus_regions.json` (10 traits), not
-alignment score >= 2 (183); (3) role and siblings live in the generator's table and `source_ref`,
+members; (2) the principal-target traits are the 108 at alignment score 3 in `corpus_regions.json` (decided by
+Roger, 2026-10-13; stages 2 and 3, score 2 and score 1, only on his word after stage 1's yield); (3) role and siblings live in the generator's table and `source_ref`,
 `partner_hint` is the registry-facing field, and no scorer change is made (interface request: the review graph
 reading `load_operator_table`'s siblings so a triple is shown together); (4) glosses are "This means ..."
 without the label, as [QUESTIONS 41](./QUESTIONS.md) settled for Roget; (5) B's call shape is per trait;
@@ -548,7 +553,7 @@ is assumed (plan 09 § 3.5's "900 cached" does not change the figure).
 | A, modernise (~205 rows, 20 a call) | ~11 | (1,500, 2,500) | ≈ $0.02 |
 | B, null-rate pilot | 20 | (1,200, 550) | ≈ $0.01 |
 | B, stability (30 x 2) | 60 | (1,200, 550) | ≈ $0.02 |
-| B, full pass (932 traits; the 10 alignment-region traits +200 out) | 932 | (1,200, 550) | **≈ $0.37** |
+| B, full pass (932 traits; the 108 principal-target traits +200 out) | 932 | (1,200, 550) | **≈ $0.37** |
 | gloss embeddings for the recovery checks (~2,500 glosses) | cached | ~100k tokens at $0.13/MTok | ≈ $0.01 |
 | **generator total, one pass of everything** | | | **≈ $0.45** |
 
