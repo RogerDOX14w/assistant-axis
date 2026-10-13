@@ -3,10 +3,10 @@
   "n_codes": 3389,
   "n_multi_code": 67,
   "n_with_scales": 1598,
-  "n_multi_scale": 1026,
+  "n_multi_scale": 833,
   "n_keyed_minus": 778,
-  "n_scale_links": 5073,
-  "n_assignment_rows": 5443,
+  "n_scale_links": 4357,
+  "n_assignment_rows": 4727,
   "unmatched_assignments": 370,
   "unmatched_list": [
     "Act in a play.",
@@ -365,10 +365,6 @@
       "items": 230,
       "constructs": 24
     },
-    "7FACTOR": {
-      "items": 59,
-      "constructs": 7
-    },
     "AB5C": {
       "items": 480,
       "constructs": 45
@@ -378,8 +374,8 @@
       "constructs": 1
     },
     "BARCHARD2001": {
-      "items": 66,
-      "constructs": 7
+      "items": 10,
+      "constructs": 1
     },
     "BAS-Drive": {
       "items": 10,
@@ -396,10 +392,6 @@
     "BFAS": {
       "items": 98,
       "constructs": 13
-    },
-    "BFAS-20": {
-      "items": 64,
-      "constructs": 5
     },
     "BIDR": {
       "items": 37,
@@ -469,10 +461,6 @@
       "items": 240,
       "constructs": 24
     },
-    "HEXACO_PI": {
-      "items": 221,
-      "constructs": 24
-    },
     "HOYLE2002": {
       "items": 23,
       "constructs": 1
@@ -482,8 +470,8 @@
       "constructs": 45
     },
     "HPI-HIC": {
-      "items": 180,
-      "constructs": 38
+      "items": 13,
+      "constructs": 2
     },
     "IPIP-IPC": {
       "items": 31,
@@ -507,11 +495,7 @@
     },
     "NEO": {
       "items": 329,
-      "constructs": 36
-    },
-    "NEO5-20": {
-      "items": 56,
-      "constructs": 5
+      "constructs": 35
     },
     "Need for Cognition": {
       "items": 10,
@@ -571,10 +555,10 @@
     },
     "VIA": {
       "items": 248,
-      "constructs": 31
+      "constructs": 24
     }
   },
-  "n_constructs": 534,
+  "n_constructs": 443,
   "hex": {
     "constructs": 24,
     "items": 240,
@@ -657,7 +641,7 @@
   },
   "key_sources": {
     "ipip_key_pages": 3870,
-    "tedone_workbook": 1203
+    "tedone_workbook": 487
   },
   "n_items_with_a_only_key": 15,
   "key_pages": {
@@ -1502,21 +1486,26 @@
       "mismatch": 0.02,
       "coverage_items": 50
     },
-    "needs_roger": true,
-    "reasons": [
-      "35.1% of the items both key do not match exactly on instrument, scale and sign (limit 2%)"
+    "gate": "sign disagreement on the shared links (link_mismatch_rate) <= limits.mismatch (C1, 2026-10-12)",
+    "needs_roger": false,
+    "reasons": [],
+    "reported_not_gated": [
+      "35.1% of the items both key do not match exactly on instrument, scale and sign (over 2%; mostly links one side keys and the other does not)",
+      "coverage: 974 links only the key pages key, 487 only the workbook; 44 and 15 items"
     ],
     "instruction": "QUESTIONS 52, Roger 2026-10-11: 'we may find A and B are identical, or very nearly so.  If the differences are large, remind me of this and ask if I want to revisit it.'  Report these numbers; do not resolve a large difference in code."
   },
   "key_merge": {
     "n_from_key_pages": 3870,
-    "n_gap_filled_from_workbook": 1573,
-    "n_disputed": 1,
-    "gap_filled_items": 1184,
-    "n_committed": 5443,
+    "n_gap_filled_from_workbook": 857,
+    "n_disputed": 3,
+    "gap_filled_items": 730,
+    "n_paired_with_key_pages": 2909,
+    "gap_fill_rule": "a workbook link _match_item pairs with no key-page link of its item",
+    "n_committed": 4727,
     "by_source": {
       "ipip_key_pages": 3870,
-      "tedone_workbook": 1573
+      "tedone_workbook": 857
     }
   },
   "workbook": {
@@ -1601,7 +1590,6 @@
     "BIS (ANXIETY) [Alpha = .84)",
     "Behavioral Inhibition/Activation System",
     "Belligerence",
-    "Bravery/Courage/Valor",
     "Callousness",
     "Calmness",
     "Capacity for Love",
@@ -1670,7 +1658,6 @@
     "Happiness",
     "Harm-avoidance",
     "Health Anxiety",
-    "Honesty/Integrity/Authenticity",
     "Hope/Optimism",
     "Hostile Aggression",
     "Humility/Modesty",
@@ -1683,7 +1670,6 @@
     "Immoderation",
     "Imperturbability",
     "Impression-management",
-    "Impulse-Control",
     "Impulse-control",
     "Independence",
     "Industriousness/Perseverance/Persistence",
@@ -1731,14 +1717,12 @@
     "Need for Order and Cleanliness",
     "Negative Expressivity",
     "Negative Valence",
-    "Negative-Valence",
     "Neuroticism",
     "Non-Perseverance",
     "Non-Planfulness",
     "Norm Violation",
     "Nurturance",
     "Obsessive-Compulsive Symptoms",
-    "Openness To Experience",
     "Openness to Experience",
     "Orderliness",
     "Organization",
@@ -1810,7 +1794,6 @@
     "Submissiveness",
     "Sympathy",
     "Talkativeness",
-    "Teamwork/Citizenship",
     "Temperance",
     "Tenderness",
     "Timidity",
@@ -1830,7 +1813,6 @@
     "Vitality/Enthusiasm/Zest",
     "Vulnerability",
     "Warmth",
-    "Wisdom/Perspective",
     "Workaholism"
   ]
 }

@@ -1,15 +1,15 @@
 {
-  "n_calls": 649,
+  "n_calls": 1010,
   "per_model": {
     "claude-sonnet-5-5": {
-      "completion_tokens": 50219,
-      "cost_usd": 0.7745,
+      "completion_tokens": 78581,
+      "cost_usd": 1.1883,
       "model": "claude-sonnet-5-5",
-      "n_calls": 649,
-      "prompt_tokens": 136163
+      "n_calls": 1010,
+      "prompt_tokens": 201259
     }
   },
-  "total_completion_tokens": 50219,
-  "total_cost_usd": 0.7745,
-  "total_prompt_tokens": 136163
+  "total_completion_tokens": 78581,
+  "total_cost_usd": 1.1883,
+  "total_prompt_tokens": 201259
 }

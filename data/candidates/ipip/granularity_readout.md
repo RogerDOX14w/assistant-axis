@@ -8,54 +8,54 @@ The within-pole item pairs are the third, cheaper view (each item shown as a tra
 
 | | ~600 clusters | ~350 clusters | ~150 clusters |
 |---|---|---|---|
-| share_3 | 7.5% | 0.0% | 0.0% |
-| share_3_4 | 9.0% | 0.0% | 0.0% |
-| 4 | 1.5% | 0.0% | 0.0% |
-| 3 | 7.5% | 0.0% | 0.0% |
-| 2 | 37.3% | 20.0% | 0.0% |
-| 1 | 38.8% | 50.0% | 50.0% |
-| 0 | 10.4% | 20.0% | 50.0% |
-| opposite | 4.5% | 10.0% | 0.0% |
+| share_3 | 8.2% | 5.2% | 5.8% |
+| share_3_4 | 9.1% | 5.4% | 6.1% |
+| 4 | 0.9% | 0.3% | 0.3% |
+| 3 | 8.2% | 5.2% | 5.8% |
+| 2 | 37.2% | 32.7% | 34.0% |
+| 1 | 34.2% | 36.1% | 32.4% |
+| 0 | 13.1% | 20.9% | 22.8% |
+| opposite | 6.3% | 4.9% | 4.8% |
 | unsure | 0.0% | 0.0% | 0.0% |
-| n | 67 | 10 | 2 |
+| n | 427 | 349 | 312 |
 | n_unparsed | 0 | 0 | 0 |
 
 By cluster-size band (share at 3, share at 3-4, pairs read):
 
 | band | ~600 | ~350 | ~150 |
 |---|---|---|---|
-| 2-3 items | 3.3% / 3.3% / 30 | 0.0% / 0.0% / 3 |  /  / 0 |
-| 4-7 items | 10.7% / 14.3% / 28 | 0.0% / 0.0% / 5 |  /  / 0 |
-| 8-15 items | 14.3% / 14.3% / 7 | 0.0% / 0.0% / 1 | 0.0% / 0.0% / 2 |
-| 16+ items | 0.0% / 0.0% / 2 | 0.0% / 0.0% / 1 |  /  / 0 |
+| 2-3 items | 6.8% / 7.4% / 148 | 3.7% / 3.7% / 81 | 8.0% / 8.0% / 50 |
+| 4-7 items | 7.0% / 8.8% / 171 | 4.1% / 4.9% / 123 | 5.1% / 6.2% / 97 |
+| 8-15 items | 12.7% / 12.7% / 71 | 6.7% / 6.7% / 89 | 5.9% / 5.9% / 84 |
+| 16+ items | 10.8% / 10.8% / 37 | 7.1% / 7.1% / 56 | 4.9% / 4.9% / 81 |
 
 ## The within-pole item pairs, and the bipolar check
 
 | | ~600 clusters | ~350 clusters | ~150 clusters |
 |---|---|---|---|
-| within: 0 | 6.9% | 14.2% | 23.3% |
-| within: 1 | 31.5% | 33.8% | 39.7% |
-| within: 2 | 34.5% | 31.5% | 24.7% |
-| within: 3 | 18.0% | 14.2% | 4.1% |
-| within: 4 | 2.5% | 1.4% | 0.0% |
-| within: opposite | 6.7% | 5.0% | 8.2% |
-| within: unsure | 0.0% | 0.0% | 0.0% |
-| within: share_3_4 | 20.4% | 15.5% | 4.1% |
-| within: n | 568 | 219 | 73 |
+| within: 0 |  |  |  |
+| within: 1 |  |  |  |
+| within: 2 |  |  |  |
+| within: 3 |  |  |  |
+| within: 4 |  |  |  |
+| within: opposite |  |  |  |
+| within: unsure |  |  |  |
+| within: share_3_4 |  |  |  |
+| within: n | 0 | 0 | 0 |
 | within: n_unparsed | 0 | 0 | 0 |
-| cross-pole pairs read "opposite" | 57.1% of 14 | 71.4% of 7 | 42.9% of 7 |
-| n_clusters | 224 | 84 | 26 |
-| n_pairs_read | 649 | 236 | 82 |
-| cost_usd | 0.7745 | 0.2891 | 0.0962 |
+| cross-pole pairs read "opposite" |  |  |  |
+| n_clusters | 486 | 363 | 307 |
+| n_pairs_read | 427 | 349 | 312 |
+| cost_usd | 1.1883 | 0.6795 | 0.4553 |
 
 Kept clusters per size band:
 
 | band | ~600 | ~350 | ~150 |
 |---|---|---|---|
-| 2-3 items | 104 | 33 | 8 |
-| 4-7 items | 92 | 29 | 6 |
-| 8-15 items | 20 | 16 | 7 |
-| 16+ items | 8 | 6 | 5 |
+| 2-3 items | 173 | 84 | 50 |
+| 4-7 items | 207 | 125 | 95 |
+| 8-15 items | 79 | 101 | 87 |
+| 16+ items | 27 | 53 | 75 |
 
 ## Signal 2: ~600 clusters, 10 clusters in full (spanning the size range)
 
@@ -98,377 +98,311 @@ Kept clusters per size band:
   - I am good at making jokes.
   - I think that in difficult situations it is possible to find something to laugh or joke about.
   - I am good at making people laugh.
-- reading (within): "I laugh and cry at the same time." / "I keep my sense of humor even in gloomy situations." -> **1** (Laughing and crying at once is mixed emotional expression, while keeping humor in gloomy situations is coping through humor; they share a laughter-amid-sadness theme but neither implies the other.)
-- reading (within): "I like to laugh out loud." / "I joke around a lot." -> **2** (Both are about humor, but one is enjoying laughing out loud (reacting) while the other is frequently joking (producing humor); neither implies the other, though they share a playful core.)
-- reading (within): "I laugh a lot." / "I see the humor in situations." -> **2** (Laughing often is about frequent laughter, while seeing humor in situations is about perceiving the funny side; they are related and tend to go together, but a person can have either without the other.)
+- reading (nearest): "playful and humorous" / "relishes irreverent humor" -> **2** (Both involve enjoying humor, but the target is a general playful, entertaining disposition while the other is a specific taste for crude or offensive jokes; neither implies the other.)
 
-### Cluster 27 (16 items, band 16+, bipolar)
-- nearest corpus trait (novelty, not size): quick_witted at 0.3777
-- **pole a** -- blind **quick-witted** (trait); hinted **quick-witted** (trait)
-  - blind gloss: This means you grasp situations, learn new things, and respond to problems rapidly, often without needing extended thought or repeated explanation.
-  - hinted gloss: This means you grasp, understand and respond to things rapidly, often seeing what to do without needing time to work it out.
-  - nearest other cluster: c016a at 0.7074
-  - I quickly recognize possibilities.
-  - I react immediately.
-  - I come up with a solution right away.
-  - I know immediately what to do.
-  - I learn quickly.
-  - I think quickly.
-  - I take things in quickly.
-  - I quickly get the idea of things.
-  - I understand things quickly.
-  - I find out things quickly.
-  - I react quickly.
-  - I acquire skills quickly.
-  - I am quick to understand things.
-  - I catch on to things quickly.
-- **pole b** -- blind **slow-burning reactions** (trait); hinted **emotionally reactive** (trait)
-  - blind gloss: This means that when something happens, they respond only after a delay, but the response that follows is strong.
-  - hinted gloss: This means the person's responses to events tend to be strong and forceful, with feelings readily stirred up and expressed.
-  - nearest other cluster: c038a at 0.6363
-  - I react slowly.
-  - I react intensely.
-- reading (within): "I find out things quickly." / "I react immediately." -> **1** (Finding things out quickly is about speed of learning or discovering information, while reacting immediately is about speed of response to events; both involve quickness but are different concepts.)
-- reading (within): "I take things in quickly." / "I quickly recognize possibilities." -> **2** (Both are about quick mental uptake, but the target is fast comprehension of information in general, while the other is spotting opportunities or options quickly, which is a narrower and different skill.)
-- reading (cross): "I react slowly." / "I acquire skills quickly." -> **0** (Slow reaction concerns response speed to events or stimuli, while quick skill acquisition concerns learning speed; both are about speed but in different domains, and neither is the reverse of the other.)
-- reading (within): "I learn quickly." / "I come up with a solution right away." -> **1** (Both involve mental quickness, but learning quickly is about absorbing new information while producing solutions right away is about problem-solving speed; either can occur without the other.)
-- reading (nearest): "quick-witted" / "acts on tasks promptly" -> **1** (Quick-witted is about fast mental grasp and response, whereas acting promptly on tasks is about starting and finishing chores without procrastination; both involve speed but are different qualities.)
-
-### Cluster 118 (7 items, band 4-7)
-- nearest corpus trait (novelty, not size): impatient at 0.3004
-- **pole a** -- blind **easily irritated by others** (trait); hinted **irritable with others** (trait)
-  - blind gloss: This means you are quick to feel annoyed, frustrated, or disappointed when other people make mistakes, behave badly, or fall short of your expectations.
-  - hinted gloss: This means you tend to become annoyed, frustrated, or disappointed easily when other people fall short, make mistakes, or behave in ways you dislike.
-  - nearest other cluster: c004a at 0.6894
-  - I when interacting with a group of people, am often bothered by at least one of them.
-  - I sometimes find my friends to be irritating.
-  - I become frustrated and angry with people when they don't live up to my expectations.
-  - I am annoyed by others' mistakes.
-  - I get annoyed with others' behaviors.
-  - I am often disappointed by people.
-  - I often am irritated with others.
-- reading (within): "I often am irritated with others." / "I am annoyed by others' mistakes." -> **3** (Both describe a tendency toward irritation with other people, but the other trait is limited to irritation at others' mistakes, while the target covers irritation with others in general.)
-- reading (within): "I am often disappointed by people." / "I get annoyed with others' behaviors." -> **1** (Both are negative reactions to other people, but disappointment (unmet expectations) is a different emotion from annoyance (irritation at behavior); each can occur without the other.)
-- reading (within): "I become frustrated and angry with people when they don't live up to my expectations." / "I when interacting with a group of people, am often bothered by at least one of them." -> **1** (Both involve being bothered by others, but the target is anger and frustration when expectations go unmet, while the other is being often annoyed by someone in a group, with no link to expectations or anger.)
-
-### Cluster 181 (5 items, band 4-7)
-- nearest corpus trait (novelty, not size): guilt_prone at 0.534
-- **pole a** -- blind **chronically guilt-ridden** (trait); hinted **chronically guilt-ridden** (trait)
-  - blind gloss: This means you habitually feel guilty, often out of proportion to any real wrongdoing, and tend to see yourself as culpable.
-  - hinted gloss: This means the person habitually feels guilty, often out of proportion to any real wrongdoing, and considers guilt a constant part of their life.
-  - nearest other cluster: c324a at 0.5995
-  - I feel guilty as if I had committed a crime, although I did not really commit one.
-  - I feel guilty when I see a policeman.
-  - I am a guilty person.
-  - I feel guilty much of the time.
-  - I feel unbearable guilt much the time.
-- reading (within): "I feel guilty when I see a policeman." / "I feel guilty much of the time." -> **2** (Both concern a tendency toward guilt feelings, but one is triggered specifically by seeing police while the other is pervasive guilt; each can occur without the other.)
-- reading (within): "I feel guilty when I see a policeman." / "I feel unbearable guilt much the time." -> **1** (Both are guilt tendencies, but one is guilt triggered specifically by seeing police, while the other is pervasive, intense guilt not tied to any trigger; neither implies the other.)
-- reading (within): "I feel guilty much of the time." / "I am a guilty person." -> **3** (Both most plausibly describe a general tendency toward feeling guilt, but 'a guilty person' is vaguer and could also mean culpability, so they are near-identical with a slight difference in emphasis.)
-- reading (nearest): "chronically guilt-ridden" / "compassionate" -> **1** (Both involve feeling bad about others' pain, but guilt-ridden is chronic, self-focused, disproportionate self-blame, while compassion is outward-directed concern and comforting, so they are distinct neighbours.)
-
-### Cluster 224 (5 items, band 4-7)
-- nearest corpus trait (novelty, not size): asexual at 0.3322
-- **pole a** -- blind **uninterested in romance** (trait); hinted **uninterested in romance** (trait)
-  - blind gloss: This means the person has little desire for romantic or sexual relationships and does not seek them out, preferring friendships.
-  - hinted gloss: This means the person has little desire for romantic relationships or sex and does not see romance as something they need.
-  - nearest other cluster: c184a at 0.6345
-  - I am not interested in romance.
-  - I have little desire for sex or romance.
-  - I have no interest in long-term romantic relationships.
-  - I see little need for romance in my life.
-  - I would much prefer to have friends than romantic partners in my life.
-- reading (within): "I would much prefer to have friends than romantic partners in my life." / "I have no interest in long-term romantic relationships." -> **2** (Both express a lean away from romance, but one is a preference for friendship over romantic partners (a comparison), while the other is a lack of interest in long-term romantic relationships (not a comparison, and limited to long-term ones); neither implies the other.)
-- reading (within): "I would much prefer to have friends than romantic partners in my life." / "I have little desire for sex or romance." -> **2** (Both describe low interest in romance, but the target is a preference for friendship over romantic partners (a comparison), while the other is low desire for sex and romance in general, so a person could have either without the other.)
-- reading (within): "I am not interested in romance." / "I see little need for romance in my life." -> **3** (Both describe a general lack of romantic inclination; 'little need' is a slightly softer, need-based framing than flat 'not interested', but they largely express the same concept.)
-- reading (nearest): "uninterested in romance" / "averse to closeness" -> **1** (Both involve low desire for relationships, but the target is about romantic/sexual relationships while still valuing friendships, whereas the other rejects emotional closeness and friendships generally; they diverge on friendship.)
-
-### Cluster 371 (3 items, band 2-3)
-- nearest corpus trait (novelty, not size): incrementalist at 0.336
-- **pole a** -- blind **averse to change** (trait); hinted **averse to change** (trait)
-  - blind gloss: This means the person tends to dislike change and prefers things to stay as they are.
-  - hinted gloss: This means the person dislikes change and prefers things to stay familiar, routine, and as they already are.
-  - nearest other cluster: c262a at 0.5713
-  - I don't like the idea of change.
-  - I dislike changes.
-  - I love change.
-- reading (within): "I love change." / "I don't like the idea of change." -> **opposite** (Loving change and disliking the idea of change are the same attitude toward change at opposite ends.)
-- reading (within): "I love change." / "I dislike changes." -> **opposite** (Loving change and disliking changes are opposite attitudes toward the same thing, at opposite ends of the same dimension.)
-- reading (within): "I don't like the idea of change." / "I dislike changes." -> **4** (Both describe a general tendency to dislike change; the wording differs only slightly (disliking the idea of change versus disliking changes), so either label could replace the other.)
-- reading (nearest): "averse to change" / "dislikes uncertainty" -> **2** (Both involve a preference for stability and familiarity, but one is about disliking change itself and the other about disliking surprise and unpredictability; a person could have either without the other.)
-
-### Cluster 422 (3 items, band 2-3)
-- nearest corpus trait (novelty, not size): avoidant at 0.3271
-- **pole a** -- blind **fears being abandoned** (trait); hinted **fears abandonment** (trait)
-  - blind gloss: This means the person will go to great lengths to avoid being left alone, rejected, or losing the people they are close to.
-  - hinted gloss: This means the person will go to great lengths to avoid being alone, rejected, or losing the people close to them.
-  - nearest other cluster: c133a at 0.6077
-  - I will do almost anything to avoid being alone.
-  - I will do almost anything to avoid being rejected.
-  - I will do anything to avoid losing my friends and romantic partners.
-- reading (within): "I will do almost anything to avoid being alone." / "I will do anything to avoid losing my friends and romantic partners." -> **2** (Both describe extreme efforts to avoid isolation or abandonment, but one is about avoiding being alone and the other about avoiding losing particular relationships; a person could fear solitude without clinging to existing partners, or vice versa.)
-- reading (within): "I will do almost anything to avoid being alone." / "I will do almost anything to avoid being rejected." -> **1** (Both are fear-driven, extreme avoidance tendencies from attachment anxiety, but one is about avoiding aloneness and the other about avoiding rejection, and either can occur without the other.)
-- reading (within): "I will do anything to avoid losing my friends and romantic partners." / "I will do almost anything to avoid being rejected." -> **3** (Both describe going to extreme lengths to avoid social loss; the target focuses on losing friends and partners (abandonment), the other on rejection, which is broader in scope and slightly different in emphasis.)
-
-### Cluster 425 (3 items, band 2-3)
-- nearest corpus trait (novelty, not size): wise at 0.4552
-- **pole a** -- blind **wise** (trait); hinted **wise** (trait)
-  - blind gloss: This means you are seen by others, and see yourself, as having sound judgment and good understanding beyond what your age would suggest.
-  - hinted gloss: This means the person has sound judgment and insight, and is seen by others as having good perspective on life.
-  - nearest other cluster: c086a at 0.602
-  - I have been described as wise beyond my years.
-  - I consider myself to be a wise person.
-  - I am considered to be a wise person.
-- reading (within): "I am considered to be a wise person." / "I consider myself to be a wise person." -> **1** (One is about others regarding the person as wise (reputation), the other about the person's own self-view; they are related but neither implies the other, and a person can have either without the other.)
-- reading (within): "I consider myself to be a wise person." / "I have been described as wise beyond my years." -> **2** (Both are about being wise, but one is self-assessed wisdom and the other is wisdom attributed by others and set against one's age, so each adds something the other lacks.)
-- reading (within): "I am considered to be a wise person." / "I have been described as wise beyond my years." -> **3** (Both describe being regarded as wise, but 'wise beyond my years' adds the emphasis of unusual maturity for one's age, a narrower, more specific claim.)
-
-### Cluster 469 (2 items, band 2-3)
-- nearest corpus trait (novelty, not size): curious at 0.2899
-- **pole a** -- blind **curious about mechanisms** (trait); hinted **curious about mechanisms** (trait)
-  - blind gloss: This means they enjoy understanding how objects and machines work, and are drawn to finding out the workings behind things.
-  - hinted gloss: This means the person is drawn to understanding how things function, enjoying the inner workings of objects and machines.
-  - nearest other cluster: c137a at 0.5408
-  - I like to know how things work.
-  - I am fascinated by how machines work.
-- reading (within): "I like to know how things work." / "I am fascinated by how machines work." -> **3** (Both describe curiosity about how things work, but the other is limited to machines and stronger in emphasis (fascination), so it is the same concept differing in scope and degree.)
-
-### Cluster 600 (2 items, band 2-3, bipolar)
-- nearest corpus trait (novelty, not size): political at 0.395
-- **pole a** -- blind **politically liberal** (membership); hinted **politically liberal** (trait)
-  - blind gloss: This means the person generally supports liberal candidates and progressive political causes when they vote.
-  - hinted gloss: This means the person habitually supports liberal political candidates and tends to hold progressive political views.
-  - nearest other cluster: c481a at 0.4135
-  - I tend to vote for liberal political candidates.
-- **pole b** -- blind **politically conservative** (membership); hinted **politically conservative** (trait)
-  - blind gloss: This means the person generally backs conservative candidates and positions in elections and political life.
-  - hinted gloss: This means the person tends to back conservative candidates and positions in politics, favoring established political values and traditional approaches to government.
-  - nearest other cluster: c335a at 0.4252
-  - I tend to vote for conservative political candidates.
-- reading (cross): "I tend to vote for liberal political candidates." / "I tend to vote for conservative political candidates." -> **opposite** (Voting tendencies toward liberal versus conservative candidates are opposite ends of the same political-leaning dimension.)
-- reading (nearest): "politically conservative" / "conventional" -> **1** (Both involve favoring tradition, but one is about political affiliation and voting while the other is a general social preference for respectability and orthodox living; either can occur without the other.)
-
-## Signal 2: ~350 clusters, 10 clusters in full (spanning the size range)
-
-### Cluster 7 (44 items, band 16+, bipolar)
-- nearest corpus trait (novelty, not size): quick_witted at 0.2939
-- **pole a** -- blind **quick and prompt** (trait); hinted **acts and thinks quickly** (trait)
-  - blind gloss: This means you start tasks at once, finish them without delay, and grasp ideas and answers quickly.
-  - hinted gloss: This means you habitually start tasks at once, act without delay, and grasp things and get to the point fast.
-  - nearest other cluster: c018a at 0.7143
+### Cluster 16 (19 items, band 16+)
+- nearest corpus trait (novelty, not size): efficient at 0.3599
+- **pole a** -- blind **acts on tasks promptly** (trait); hinted **prompt and efficient** (trait)
+  - blind gloss: This means you tend to start responsibilities and chores right away and get them finished quickly, without putting them off.
+  - hinted gloss: This means someone habitually starts work at once and gets tasks finished quickly and on time, without procrastinating.
+  - nearest other cluster: c026a at 0.7121
   - I usually get right to work on something that needs to be done as soon as I think of it.
   - I usually take care of my responsibilities as soon as possible.
   - I do unpleasant tasks immediately.
   - I get chores done right away.
-  - I quickly recognize possibilities.
   - I plunge into tasks with all my heart.
-  - I react immediately.
   - I accomplish my work on time.
   - I finish tasks quickly.
-  - I get to the bottom of things.
-  - I get a head start on others.
   - I get into my work.
-  - I go straight for the goal.
-  - I get to the heart of the matter.
-  - I speak briefly and to the point.
-  - I come up with a solution right away.
-  - I know immediately what to do.
-  - I get to the point quickly.
   - I start tasks right away.
   - I get to work at once.
-  - I pitch in readily.
   - I accomplish a lot of work.
   - I get things done quickly.
   - I hurry my work.
-  - I learn quickly.
   - I complete tasks successfully.
-  - I think quickly.
-  - I take things in quickly.
-  - I quickly get the idea of things.
-  - I understand things quickly.
-  - I find out things quickly.
-  - I react quickly.
-  - I acquire skills quickly.
   - I handle tasks smoothly.
-  - I come straight to the point.
   - I complete my duties as soon as possible.
   - I get started quickly on doing a job.
   - I deal efficiently with practical matters.
-  - I begin to answer before the other person finishes the question.
   - I do my tasks only just before they need to be done.
-  - I am quick to understand things.
-  - I catch on to things quickly.
-- **pole b** -- blind **reacts strongly** (trait); hinted **emotionally reactive** (trait)
-  - blind gloss: This means the person's responses to events tend to be intense and forceful rather than muted.
-  - hinted gloss: This means responding to events with strong feelings or outbursts, and tending to be affected by what happens around them.
-  - nearest other cluster: c002a at 0.6655
-  - I react slowly.
-  - I react intensely.
-- reading (within): "I accomplish a lot of work." / "I come straight to the point." -> **0** (Accomplishing a lot of work concerns productivity, while coming straight to the point concerns directness in communication; they are unrelated concepts in different areas.)
-- reading (within): "I acquire skills quickly." / "I begin to answer before the other person finishes the question." -> **0** (One is about learning skills quickly, the other about interrupting by answering before a question ends; both involve speed but in unrelated domains.)
-- reading (within): "I react immediately." / "I handle tasks smoothly." -> **0** (Reacting immediately is about speed of response, while handling tasks smoothly is about ease and competence in execution; they are different concepts in the same broad area of how someone acts.)
-- reading (cross): "I react slowly." / "I get a head start on others." -> **0** (Reacting slowly is about delayed response time, while getting a head start is about starting ahead of others; they are loosely opposed in timing but not the same quality at opposite ends, and the descriptions don't clearly settle it.)
+- reading (nearest): "acts on tasks promptly" / "persistent" -> **1** (Both involve getting tasks done, but one is about starting and finishing quickly without delay, the other is about sticking with difficult tasks despite obstacles; neither implies the other.)
 
-### Cluster 76 (13 items, band 8-15)
-- nearest corpus trait (novelty, not size): sickly at 0.3112
-- **pole a** -- blind **prone to health anxiety** (trait); hinted **chronically worried about illness** (trait)
-  - blind gloss: This means someone habitually worries about catching serious illness, fears dying of disease, and takes steps to avoid getting sick.
-  - hinted gloss: This means someone who habitually fears serious disease, dwells on their health, and takes steps to avoid getting sick.
-  - nearest other cluster: c074a at 0.7129
-  - I believe that I have a serious disease.
-  - I worry a lot about catching a serious illness.
-  - I do a lot of things just to avoid getting sick.
-  - I worry about my health.
-  - I fear dying from a lingering or painful illness.
-  - I have avoided situations or people for fear that I would get sick.
-  - I am afraid that my life will be cut short by illness.
-  - I think of things like developing cancer or catching a serious illness.
-  - I feel like I wouldn't know what to do if I developed a serious illness.
-  - I go to bed immediately if I feel that I'm getting sick.
-  - I am convinced that I am dying.
-  - I feel that a deadly disease is always around the corner.
-  - I often am concerned about diseases I might have.
-- reading (within): "I feel like I wouldn't know what to do if I developed a serious illness." / "I worry a lot about catching a serious illness." -> **1** (One is feeling unprepared or helpless about handling a serious illness, the other is worrying about catching one; both concern serious illness but one is a lack of coping confidence and the other is anxious anticipation, and either can occur without the other.)
-- reading (within): "I am convinced that I am dying." / "I worry about my health." -> **2** (Both concern health anxiety, but being convinced one is dying is a specific, extreme belief, while worrying about health is a broader and milder concern that does not imply that conviction.)
-- reading (within): "I often am concerned about diseases I might have." / "I worry about my health." -> **3** (Worrying about one's health is broader than worrying about having diseases, but the two share the same core of health anxiety and differ mainly in scope.)
+### Cluster 79 (9 items, band 8-15)
+- nearest corpus trait (novelty, not size): contented at 0.3582
+- **pole a** -- blind **satisfied with life** (trait); hinted **content with life** (trait)
+  - blind gloss: This means you generally feel your life is good, that you have what matters, and that you are thankful and content with how things are.
+  - hinted gloss: This means generally feeling that life is good, that one has what matters, and that one is satisfied and happy overall.
+  - nearest other cluster: c252a at 0.5854
+  - I love life.
+  - I have all the material things I really need to enjoy life.
+  - I have been richly blessed in my life.
+  - I am satisfied with my life.
+  - I am happy with my life.
+  - I feel thankful for what I have received in life.
+  - I have gotten the important things I want in my life.
+  - I am content with my life.
+  - I feel that life is full of many wonderful surprises.
+- reading (nearest): "satisfied with life" / "enthusiastic about work" -> **1** (Both involve positive contentment, but one is global life satisfaction and the other is excitement about work specifically, so they are neighbours rather than the same concept.)
 
-### Cluster 106 (10 items, band 8-15)
-- nearest corpus trait (novelty, not size): confrontational at 0.293
-- **pole a** -- blind **combative** (trait); hinted **combative** (trait)
-  - blind gloss: This means you readily seek out or enjoy physical fighting and conflict, and do not shy away from brawls.
-  - hinted gloss: This means the person readily picks fights, enjoys physical confrontation, and is quick to use force when provoked or challenged.
-  - nearest other cluster: c001a at 0.618
-  - I start conversations.
-  - I am ready to do battle for a cause.
-  - I love a good fight.
-  - I start fights.
-  - I am ready for a fight when someone tries to take advantage of me.
-  - I enjoy a good brawl.
-  - I have gotten into more fights than most people.
-  - I have started many fist fights in my life.
-  - I will use whatever I can find as a weapon to fight with.
-  - I like to start fights.
-- reading (within): "I have started many fist fights in my life." / "I love a good fight." -> **2** (Both concern a fight-prone disposition, but one is a track record of initiating physical fights while the other is enjoying fights (possibly verbal); neither implies the other.)
-- reading (within): "I am ready to do battle for a cause." / "I like to start fights." -> **1** (Both involve conflict, but readiness to fight for a cause is principled and motivated by purpose, while liking to start fights is a taste for provoking conflict; neither implies the other.)
-- reading (within): "I am ready to do battle for a cause." / "I enjoy a good brawl." -> **1** (Both involve readiness for conflict, but one is willingness to fight for a principle or cause while the other is enjoying fighting for its own sake; neither implies the other.)
+### Cluster 111 (7 items, band 4-7)
+- nearest corpus trait (novelty, not size): mystical at 0.3211
+- **pole a** -- blind **mystically inclined** (trait); hinted **spiritually experienced** (trait)
+  - blind gloss: This means the person often has intense spiritual experiences and feels a personal connection to a divine or supernatural power that shapes them.
+  - hinted gloss: This means the person has had vivid, personal experiences of contact with God, a higher power, or supernatural guidance, which strongly shape their life.
+  - nearest other cluster: c176a at 0.7173
+  - I have had intense religious experiences.
+  - I have intense religious experiences which influence me in a strong manner.
+  - I have felt contact with a divine power.
+  - I have experienced a spiritual force that is greater than any human being.
+  - I experience supernatural guidance.
+  - I believe in a supernatural source of peace and love.
+  - I have felt the presence of God / a Higher Power.
+- reading (nearest): "mystically inclined" / "religiously devout" -> **2** (Both involve a personal relationship with the divine, but mystical inclination centers on intense spiritual experiences while devoutness centers on firm belief and reliance on faith for guidance; either can exist without the other.)
 
-### Cluster 143 (7 items, band 4-7)
-- nearest corpus trait (novelty, not size): artistic at 0.3658
-- **pole a** -- blind **aesthetically attuned** (trait); hinted **aesthetically attuned** (trait)
-  - blind gloss: This means someone is consistently drawn to beauty, notices it in everyday things, delights in it, and makes or values beautiful things.
-  - hinted gloss: This means the person is consistently alert to beauty, noticing it in ordinary things, valuing it, and wanting to surround themselves with it.
-  - nearest other cluster: c068a at 0.6165
-  - I see beauty in things that others might not notice.
-  - I love beautiful things.
-  - I make beautiful things.
-  - I feel it's important to live in a world of beauty.
-  - I am in awe of simple things in life that others might take for granted.
-  - I see the beauty in everyday things.
-  - I enjoy the beauty of nature.
-- reading (within): "I am in awe of simple things in life that others might take for granted." / "I make beautiful things." -> **0** (One is awe and appreciation of simple everyday things, the other is creating beautiful things; both touch on beauty but one is receptive appreciation and the other is productive making.)
-- reading (within): "I feel it's important to live in a world of beauty." / "I am in awe of simple things in life that others might take for granted." -> **1** (Both involve aesthetic appreciation, but one is valuing a beautiful environment while the other is awe at ordinary everyday things; neither implies the other.)
-- reading (within): "I love beautiful things." / "I make beautiful things." -> **1** (Loving beautiful things is an appreciation of beauty, while making beautiful things is a creative output; they share the theme of beauty but neither implies the other.)
+### Cluster 149 (6 items, band 4-7)
+- nearest corpus trait (novelty, not size): distractible at 0.3877
+- **pole a** -- blind **inattentive to speech** (trait); hinted **inattentive listener** (trait)
+  - blind gloss: This means you often miss or fail to register what other people are saying, because your attention drifts to your own thoughts or to surrounding noise.
+  - hinted gloss: This means someone often loses track of what others say, tunes out conversation, and fails to notice when people are trying to talk to them.
+  - nearest other cluster: c045b at 0.6747
+  - I was listening to someone talk and suddenly realized I did not hear part or all of what was said.
+  - I find it easy to tune out background noises when trying to concentrate on something else.
+  - I drown out conversations.
+  - I have been told I'm not listening when others are speaking to me.
+  - I don't pay enough attention when others are speaking to me.
+  - I am sometimes so preoccupied with my own thoughts I don't realize others are trying to speak to me.
+- reading (nearest): "inattentive to speech" / "easily distracted" -> **2** (Both involve attention drifting, but one is specifically failing to register others' speech while the other is general difficulty staying on tasks; each can occur without the other.)
 
-### Cluster 178 (6 items, band 4-7)
-- nearest corpus trait (novelty, not size): sentimental at 0.281
-- **pole a** -- blind **easily moved to tears** (trait); hinted **tears easily** (trait)
-  - blind gloss: This means you tend to cry readily when feeling emotion, whether from sad events, films, or other touching moments.
-  - hinted gloss: This means someone is prone to weeping readily when moved, touched or upset, and does so often rather than once.
-  - nearest other cluster: c002a at 0.6546
-  - I burst into tears.
-  - I have crying fits.
-  - I am easily moved to tears.
-  - I cry during movies.
-  - I cry easily.
-  - I had crying spells.
-- reading (within): "I have crying fits." / "I cry during movies." -> **2** (Both involve a tendency to cry, but crying fits are intense, possibly uncontrolled episodes of any cause, while crying during movies is a specific, milder emotional response to media; each can occur without the other.)
-- reading (within): "I cry during movies." / "I cry easily." -> **3** (Crying during movies is a specific instance of crying easily; the general tendency covers it but is broader, while the movie-crying trait is narrower in context.)
-- reading (within): "I have crying fits." / "I had crying spells." -> **3** (Both describe a tendency toward episodes of uncontrollable crying; 'fits' and 'spells' are near-synonyms, differing only in tense (present vs. past).)
+### Cluster 265 (4 items, band 4-7)
+- nearest corpus trait (novelty, not size): ends_justify_means at 0.3824
+- **pole a** -- blind **morally flexible** (trait); hinted **accepts expedient wrongdoing** (trait)
+  - blind gloss: This means the person believes rules, honesty and laws can be set aside when the goal justifies it or when one won't get caught.
+  - hinted gloss: This means you believe bending rules, lying, or cheating is justified when it achieves a goal or escapes detection.
+  - nearest other cluster: c406a at 0.5994
+  - I believe that the end justifies the means.
+  - I believe that cheating is ok if you get away with it.
+  - I believe that small lies are ok.
+  - I feel that breaking the law is okay as long as you don't get caught.
+- reading (nearest): "morally flexible" / "willing to exploit others" -> **2** (Both involve setting aside ethics for gain, but moral flexibility is about bending rules, honesty and laws in general, while exploitation is specifically about treating others unfairly for advantage; neither implies the other.)
 
-### Cluster 200 (5 items, band 4-7)
-- nearest corpus trait (novelty, not size): extraverted_hexaco at 0.2689
-- **pole a** -- blind **party-loving** (trait); hinted **sociable** (trait)
-  - blind gloss: This means you enjoy lively parties and social gatherings, and tend to be energetic and talkative at them.
-  - hinted gloss: This means someone enjoys being with other people, seeks out parties and large gatherings, and mixes freely with many different people.
-  - nearest other cluster: c017a at 0.6231
-  - I love surprise parties.
-  - I am the life of the party.
-  - I love large parties.
-  - I like wild parties.
-  - I talk to a lot of different people at parties.
-- reading (within): "I love surprise parties." / "I like wild parties." -> **1** (Both are about enjoying parties, but one is about the surprise element and the other about wildness; a person can like either without the other.)
-- reading (within): "I love surprise parties." / "I love large parties." -> **1** (Both are about enjoying parties, but one is about the surprise element and the other about size; a person can love either without the other.)
-- reading (within): "I like wild parties." / "I am the life of the party." -> **2** (Both involve parties, but liking wild parties is an enjoyment preference, while being the life of the party is about energizing social gatherings; each can occur without the other.)
+### Cluster 275 (4 items, band 4-7)
+- nearest corpus trait (novelty, not size): quarrelsome_hexaco at 0.3422
+- **pole a** -- blind **habitually grumpy** (trait); hinted **habitually grumpy** (trait)
+  - blind gloss: This means someone tends to complain, grumble and show irritability often, expressing discontent in their everyday manner and speech.
+  - hinted gloss: This means someone often grumbles, complains and comes across as cranky or irritable, expressing displeasure readily in their everyday dealings.
+  - nearest other cluster: c004a at 0.6353
+  - I grumble about things.
+  - I am a cranky person.
+  - I am prone to complain about my health.
+  - I am described as grumpy.
+- reading (nearest): "habitually grumpy" / "quick to rage" -> **1** (Both involve irritability and anger, but grumpy is chronic low-level complaining and discontent while quick to rage is sudden, intense, explosive fury; neither implies the other.)
 
-### Cluster 218 (4 items, band 4-7)
-- nearest corpus trait (novelty, not size): organized at 0.2373
-- **pole a** -- blind **scrupulously honest with money** (trait); hinted **scrupulously honest with property** (trait)
-  - blind gloss: This means being careful and principled about money and borrowed property, correcting errors and returning what belongs to others on time.
-  - hinted gloss: This means you carefully keep track of money and belongings and make sure what belongs to others gets returned to them.
-  - nearest other cluster: c047a at 0.5652
-  - I keep my checkbook balanced.
-  - I return extra change when a cashier makes a mistake.
-  - I return borrowed items.
-  - I return library books on time.
-- reading (within): "I return library books on time." / "I return borrowed items." -> **2** (Both concern reliably returning what one has borrowed, but the target is specifically about library books and punctuality, while the other is about returning any borrowed item at all, with no mention of timing.)
-- reading (within): "I keep my checkbook balanced." / "I return borrowed items." -> **0** (Both are conscientious everyday habits, but one is about keeping personal finances in order and the other about giving back what was borrowed, so they are distinct concepts.)
-- reading (within): "I return library books on time." / "I return extra change when a cashier makes a mistake." -> **1** (Returning library books on time is about punctual responsibility with borrowed items, while returning extra change is about honesty when one gains unfairly; both are conscientious behaviors but different concepts.)
+### Cluster 354 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): company_loyal at 0.2457
+- **pole a** -- blind **scrupulously upright** (trait); hinted **scrupulously principled** (trait)
+  - blind gloss: This means they hold themselves to strict personal standards, refusing to cheat, betray a partner, or take help they see as unearned.
+  - hinted gloss: This means holding oneself to strict personal ethical rules and refusing even tempting or convenient violations of them.
+  - nearest other cluster: c237a at 0.6159
+  - I would never accept welfare.
+  - I would never indulge in extramarital affairs.
+  - I would never cheat on my taxes.
+- reading (nearest): "scrupulously upright" / "scrupulously fair" -> **2** (Both are about strict moral scrupulousness, including refusing to cheat or exploit, but 'upright' covers broader personal standards such as loyalty and refusing unearned help, while 'fair' centers on not taking advantage of others and on distress at temptation.)
 
-### Cluster 276 (3 items, band 2-3)
-- nearest corpus trait (novelty, not size): mobility_impaired at 0.3637
-- **pole a** -- blind **identifies as disabled** (membership); hinted **disabled** (membership)
-  - blind gloss: This means the person regards themselves as having a disability and is comfortable with that identity, including in how they see disabled people in their family.
-  - hinted gloss: This means the person regards themselves as having a physical or mental disability, and sees that as part of who they are.
-  - nearest other cluster: c044a at 0.5185
-  - I consider myself a disabled person.
-  - I am not handicapped in any way.
-  - I would consider adopting a handicapped child.
-- reading (within): "I am not handicapped in any way." / "I consider myself a disabled person." -> **opposite** (Not being handicapped in any way and considering oneself disabled are reverse statements about disability status.)
-- reading (within): "I would consider adopting a handicapped child." / "I consider myself a disabled person." -> **0** (One is willingness to adopt a child with a disability; the other is self-identifying as disabled. Both involve disability but concern different things (openness to adopting vs. one's own identity).)
-- reading (within): "I am not handicapped in any way." / "I would consider adopting a handicapped child." -> **0** (One concerns the persona's own lack of disability, the other their willingness to adopt a disabled child; both involve disability but are about entirely different things.)
+### Cluster 410 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): flirty at 0.4415
+- **pole a** -- blind **flirtatious** (trait); hinted **flirtatious** (trait)
+  - blind gloss: This means the person enjoys playful, teasing romantic attention and readily flirts, even with people they have just met.
+  - hinted gloss: This means the person readily enjoys flirting, including with people they have just met, and seeks out playful, teasing attention-making with others.
+  - nearest other cluster: c226a at 0.6279
+  - I am not much of a flirt.
+  - I enjoy flirting with complete strangers.
+  - I enjoy flirting.
+- reading (nearest): "flirtatious" / "sexually provocative" -> **2** (Both involve seeking romantic or sexual attention from others, but flirtatiousness is playful and teasing while sexual provocativeness is explicitly sexual and arousal-focused, so each can exist without the other.)
 
-### Cluster 316 (2 items, band 2-3)
-- nearest corpus trait (novelty, not size): world_accepting at 0.3696
-- **pole a** -- blind **values harmony** (trait); hinted **values harmony** (trait)
-  - blind gloss: This means the person prizes peace, balance and smooth relations, both in their own life and in how they see the world.
-  - hinted gloss: This means the person prizes peace, balance and agreement, wanting them in their own life and seeing them as a general principle of the world.
-  - nearest other cluster: c041a at 0.537
-  - I like harmony in my life.
-  - I believe in universal harmony.
-- reading (within): "I believe in universal harmony." / "I like harmony in my life." -> **2** (Both involve valuing harmony, but one is a belief in a cosmic or universal order while the other is a personal preference for peace in one's own life; each adds something the other lacks.)
+### Cluster 489 (2 items, band 2-3)
+- nearest corpus trait (novelty, not size): accountable at 0.3341
+- **pole a** -- blind **accountable for actions** (trait); hinted **accountable for actions** (trait)
+  - blind gloss: This means you readily take responsibility for what you do and do not shift blame or excuse your conduct.
+  - hinted gloss: This means the person owns what they do and its results, standing behind their choices instead of avoiding blame.
+  - nearest other cluster: c080a at 0.6087
+  - I accept the consequences of my actions.
+  - I stand behind my actions.
+- reading (nearest): "accountable for actions" / "principled and truthful" -> **1** (Both are moral-integrity traits, but one is owning responsibility for one's conduct and the other is honesty and acting on conscience; neither implies the other.)
 
-### Cluster 328 (2 items, band 2-3)
-- nearest corpus trait (novelty, not size): picky_eater at 0.279
-- **pole a** -- blind **lacks appetite** (state); hinted **prone to low appetite** (state)
-  - blind gloss: This means one often has little desire to eat, even when they should be hungry.
-  - hinted gloss: This means the person tends to have little hunger or desire to eat, even when they should be hungry.
-  - nearest other cluster: c093a at 0.5329
-  - I had a poor appetite.
-  - I did not feel like eating, even though I should have been hungry.
-- reading (within): "I had a poor appetite." / "I did not feel like eating, even though I should have been hungry." -> **3** (Both describe a lack of desire to eat; the other adds that hunger should be present, a slight difference in emphasis, but essentially the same concept of reduced appetite.)
+## Signal 2: ~350 clusters, 10 clusters in full (spanning the size range)
 
-## Signal 2: ~150 clusters, 10 clusters in full (spanning the size range)
+### Cluster 21 (28 items, band 16+, bipolar)
+- nearest corpus trait (novelty, not size): self_absorbed at 0.254
+- **pole a** -- blind **talks excessively** (trait); hinted **talks excessively** (trait)
+  - blind gloss: This means the person talks a lot, frequently and without restraint, often about themselves and sometimes without any real purpose.
+  - hinted gloss: This means being someone who talks far more than others, often without need, regardless of whether the talk is about themselves or addressed to anyone.
+  - nearest other cluster: c081a at 0.7345
+  - I talked out loud to myself.
+  - I usually like to talk a lot.
+  - I talk during movies.
+  - I talk even when I know I shouldn't.
+  - I do most of the talking.
+  - I am willing to talk about myself.
+  - I speak loudly.
+  - I like to hear myself talk.
+  - I never stop talking.
+  - I chatter away aimlessly.
+  - I talk for no reason.
+  - I talk nonsense.
+  - I talk mainly about myself.
+  - I talk too much.
+  - I only talk about my own interests.
+  - I sing out loud to myself when I'm alone.
+  - I speak rapidly.
+  - I talk out loud to myself.
+  - I talk to myself a lot.
+  - I tend to talk sarcastically.
+  - I talk a lot.
+  - I like to talk about myself.
+- **pole b** -- blind **reticent** (trait); hinted **quiet and reserved** (trait)
+  - blind gloss: This means someone tends to talk little, speak quietly and slowly, and hold back from sharing much about themselves.
+  - hinted gloss: This means you tend to speak little, softly and slowly, and keep your own talk and self-disclosure to a minimum.
+  - nearest other cluster: c163a at 0.6521
+  - I speak softly.
+  - I speak only when spoken to.
+  - I talked less than usual.
+  - I don't talk a lot.
+  - I dislike talking about myself.
+  - I speak slowly.
+- reading (nearest): "talks excessively" / "prone to exaggeration" -> **1** (Both concern how a person speaks and often show up in storytelling, but one is about the amount of talk and the other about inflating the content; neither implies the other.)
+- reading (nearest): "reticent" / "dislikes small talk" -> **2** (Both involve limited talk, but reticence is about holding back personal disclosure and speaking quietly or slowly, while disliking small talk is an aversion to casual chatter that can coexist with openness or fluent talk on practical topics.)
 
-### Cluster 17 (45 items, band 16+, bipolar)
-- nearest corpus trait (novelty, not size): wry at 0.3102
-- **pole a** -- blind **playful humor-lover** (trait); hinted **humorous** (trait)
-  - blind gloss: This means someone who readily finds things funny, jokes around often, and brings humor into everyday life and difficult moments alike.
-  - hinted gloss: This means you habitually find things funny, laugh readily, and tend to joke around and bring a light, playful humor to whatever you do.
-  - nearest other cluster: c007a at 0.7288
+### Cluster 71 (14 items, band 8-15)
+- nearest corpus trait (novelty, not size): incompetent at 0.2813
+- **pole a** -- blind **self-doubting** (trait); hinted **doubts own competence** (trait)
+  - blind gloss: This means the person tends to believe they lack ability, whether in dealing with people, getting things done, or achieving goals.
+  - hinted gloss: This means the person generally believes they are not capable or skilled at dealing with people, getting things done, leading, or achieving, and expects to fall short.
+  - nearest other cluster: c057a at 0.673
+  - I am not good at knowing human nature.
+  - I am not good at judging people.
+  - I lack the talent for influencing people.
+  - I am not good at getting people to like me.
+  - I am not good at sports.
+  - I am without talent.
+  - I am not a dependable person.
+  - I cannot be counted on to get things done.
+  - I am not good at working with a group.
+  - I am not very good at getting things done.
+  - I am not good at taking charge of a group.
+  - I am not good at planning group activities.
+  - I am not good at figuring out what really matters.
+  - I am not highly motivated to succeed.
+- reading (nearest): "self-doubting" / "feels unable to cope" -> **2** (Both involve believing oneself incapable, but self-doubting is a broad belief about lacking ability, while feeling unable to cope is specifically about being overwhelmed by tasks, workload and stress; each adds something the other lacks.)
+
+### Cluster 124 (9 items, band 8-15, bipolar)
+- nearest corpus trait (novelty, not size): religious at 0.3215
+- **pole a** -- blind **devoutly religious** (trait); hinted **devoutly religious** (trait)
+  - blind gloss: This means religious faith is central to the person, guiding their daily choices, sense of self, and convictions about what is true.
+  - hinted gloss: This means religious faith is central to how the person lives, guides their decisions, and understands who they are.
+  - nearest other cluster: c075a at 0.7186
+  - I guide my life using religious scriptures.
+  - I am devoted to religion.
+  - I am a spiritual person.
+  - I am who I am because of my faith.
+  - I believe in one true religion.
+- **pole b** -- blind **irreligious** (trait); hinted **irreligious** (membership)
+  - blind gloss: This means the person does not believe in or practice any religion, and tends to regard religion with doubt or disdain.
+  - hinted gloss: This means the person does not hold religious beliefs, does not practice any religion, and tends to regard religion skeptically or dismissively.
+  - nearest other cluster: c075b at 0.5997
+  - I doubt the value of religion.
+  - I don't consider myself religious.
+  - I believe that religion is foolish.
+  - I do not practice any religion.
+
+### Cluster 153 (7 items, band 4-7)
+- nearest corpus trait (novelty, not size): superstitious at 0.3056
+- **pole a** -- blind **believes strongly in luck** (trait); hinted **attributes life to luck** (trait)
+  - blind gloss: This means the person sees life's outcomes as largely governed by luck, good or bad, and relies on or trusts that idea.
+  - hinted gloss: This means the person believes that what happens to them is largely governed by luck, chance, or being born fortunate, not by their own choices.
+  - nearest other cluster: c063a at 0.5462
+  - I feel lucky most of the time.
+  - I believe that unfortunate events occur because of bad luck.
+  - I believe that some people are born lucky.
+  - I have bad things happen to me for no reason.
+  - I have bad luck.
+  - I have good luck.
+  - I carry around something that gives me good luck.
+- reading (nearest): "believes strongly in luck" / "financially well-off" -> **0** (One is a belief that outcomes are governed by luck, the other is having plenty of money; they are unrelated concepts.)
+
+### Cluster 205 (5 items, band 4-7)
+- nearest corpus trait (novelty, not size): controlling at 0.2957
+- **pole a** -- blind **controlling** (trait); hinted **seeks control** (trait)
+  - blind gloss: This means wanting to direct events, conversations and other people, and to have the final say over how things go.
+  - hinted gloss: This means the person wants to direct events, conversations and decisions, and prefers that things go according to their own plan.
+  - nearest other cluster: c174a at 0.6117
+  - I want things to proceed according to plan.
+  - I want to have the last word.
+  - I want to control the conversation.
+  - I want to be in charge.
+  - I want to keep things as they are.
+- reading (nearest): "controlling" / "intellectually curious" -> **0** (Controlling is about directing events and people and having the final say, while intellectual curiosity is about a drive to learn and understand; they are unrelated concepts.)
+
+### Cluster 235 (4 items, band 4-7, bipolar)
+- nearest corpus trait (novelty, not size): body_insecure at 0.3965
+- **pole a** -- blind **self-admiring** (trait); hinted **vain about appearance** (trait)
+  - blind gloss: This means the person takes pleasure in looking at their own body and appearance, often seeking their reflection.
+  - hinted gloss: This means the person takes pleasure in regularly looking at and admiring their own body and reflection, with a fondness for their own looks.
+  - nearest other cluster: c065a at 0.5918
+  - I like to look at my body.
+  - I like to look at myself in the mirror.
+- **pole b** -- blind **averse to self-viewing** (trait); hinted **dislikes seeing own body** (trait)
+  - blind gloss: This means you generally dislike seeing your own reflection or body and tend to avoid looking at yourself.
+  - hinted gloss: This means the person feels uncomfortable looking at their reflection or their body, and tends to avoid such views of themselves.
+  - nearest other cluster: c150a at 0.5435
+  - I dislike looking at myself in the mirror.
+  - I dislike looking at my body.
+- reading (nearest): "self-admiring" / "sexually exhibitionistic" -> **2** (Both involve focus on one's own body and appearance, but self-admiring is private pleasure in one's own looks, while sexual exhibitionism is about displaying sexuality to be seen and desired by others; neither implies the other.)
+- reading (nearest): "averse to self-viewing" / "low self-regard" -> **1** (Avoiding looking at one's own reflection or body is a specific behavior about physical self-viewing, while low self-regard is a broad negative global self-evaluation; they are related and may co-occur but neither implies the other.)
+
+### Cluster 261 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): bitter at 0.2857
+- **pole a** -- blind **openly displays disapproval** (trait); hinted **openly shows disapproval** (trait)
+  - blind gloss: This means you readily let your negative reactions show on your face and in your words rather than hiding them.
+  - hinted gloss: This means the person readily lets displeasure, doubt and disgust show in their words and expressions rather than hiding them.
+  - nearest other cluster: c377b at 0.5461
+  - I express disapproval.
+  - I react with disbelief.
+  - I show disgust.
+- reading (nearest): "openly displays disapproval" / "reacts strongly" -> **1** (Both involve visible emotional responses, but one is specifically about showing negative disapproval openly while the other is about general intensity of reaction to any event; neither implies the other.)
+
+### Cluster 350 (2 items, band 2-3, bipolar)
+- nearest corpus trait (novelty, not size): political at 0.395
+- **pole a** -- blind **politically conservative** (trait); hinted **politically conservative** (trait)
+  - blind gloss: This means the person generally favors conservative political candidates and parties, supporting traditional values, limited government, and established institutions.
+  - hinted gloss: This means the person tends to back conservative political candidates and aligns with conservative political positions.
+  - nearest other cluster: c196a at 0.4329
+  - I tend to vote for conservative political candidates.
+- **pole b** -- blind **politically liberal** (trait); hinted **politically liberal** (membership)
+  - blind gloss: This means the person generally supports liberal candidates and left-leaning political causes when they vote.
+  - hinted gloss: This means the person consistently supports liberal political candidates and leans toward progressive political causes at the ballot box.
+  - nearest other cluster: c064a at 0.3946
+  - I tend to vote for liberal political candidates.
+- reading (nearest): "politically liberal" / "egalitarian" -> **1** (Politically liberal is about voting for left-leaning candidates and causes, while egalitarian is a moral belief in equal treatment and fairness; they are related, since egalitarianism often underlies liberal views, but neither implies the other.)
+- reading (nearest): "politically conservative" / "conventional" -> **1** (Both favor tradition and established ways, but one is a political orientation toward conservative parties and limited government, while the other is a general preference for customs and proper behavior with no political content.)
+
+### Cluster 351 (33 items, band 16+)
+- nearest corpus trait (novelty, not size): wry at 0.3244
+- **pole a** -- blind **playful and humorous** (trait); hinted **playful and humorous** (trait)
+  - blind gloss: This means you habitually look for the funny side of things, laugh often, enjoy joking, and like to entertain and amuse the people around you.
+  - hinted gloss: This means someone who habitually finds things funny, jokes around, laughs often, and tries to bring humor and fun into whatever they do.
+  - nearest other cluster: c135a at 0.7198
   - I laugh out loud if something is funny.
   - I usually end up laughing if the people around me are laughing.
   - I sometimes laugh out loud when reading or watching TV.
   - I have a quiet laugh.
   - I have an intense, boisterous laugh.
   - I often enjoy telling jokes or behaving in a humorous manner.
-  - I enjoy crude jokes.
   - I can laugh at myself.
   - I make jokes.
   - I laugh aloud.
   - I laugh my way through life.
   - I joke around a lot.
   - I go too far with jokes.
-  - I can take a joke.
   - I laugh and cry at the same time.
   - I amuse my friends.
   - I laugh at others.
@@ -490,201 +424,240 @@ Kept clusters per size band:
   - I am good at making jokes.
   - I think that in difficult situations it is possible to find something to laugh or joke about.
   - I am good at making people laugh.
-  - I enjoy cartoons.
-  - I enjoy a good ethnic joke among friends.
-- **pole b** -- blind **humorless** (trait); hinted **not playful** (trait)
-  - blind gloss: This means the person is not amused easily, rarely makes others laugh, and does not enjoy being the target of jokes.
-  - hinted gloss: This means the person rarely joins in joking, does not try to be funny or amusing, and dislikes being the target of laughter.
-  - nearest other cluster: c009a at 0.642
-  - I am the last to laugh at a joke.
-  - I am often the last to understand the point of a joke.
-  - I don't enjoy being the object of jokes.
-  - I am not good at telling jokes.
-  - I would not be a good comedian.
-  - I don't like being laughed at.
-  - I am not known for my sense of humor.
-  - I do not go out of my way to make others smile or laugh.
-- reading (cross): "I like to laugh out loud." / "I am not good at telling jokes." -> **0** (Enjoying laughing out loud is about expressing amusement, while being bad at telling jokes is about skill at producing humor; both concern humor but are different concepts.)
-- reading (within): "I like to laugh out loud." / "I am always joking." -> **1** (Both relate to humor and laughter, but liking to laugh aloud is about enjoying and expressing amusement, while always joking is about producing jokes; neither implies the other.)
-- reading (within): "I amuse myself easily." / "I don't mind others making fun of me." -> **0** (Easily amusing oneself is about finding things entertaining, while not minding being teased is about tolerance of ridicule; both involve a light-hearted attitude but are different concepts.)
-- reading (within): "I laugh a lot." / "I have a quiet laugh." -> **1** (One is about how often a person laughs, the other about how loud their laugh is, so they are different aspects of laughter and neither implies the other.)
 
-### Cluster 45 (22 items, band 16+, bipolar)
-- nearest corpus trait (novelty, not size): fashionable at 0.2771
-- **pole a** -- blind **appearance-focused** (trait); hinted **appearance-conscious** (trait)
-  - blind gloss: This means someone cares a great deal about their looks, grooming and self-presentation, and tends to weigh appearance heavily in judging others.
-  - hinted gloss: This means someone pays close attention to their looks, grooming and how they present themselves, and values keeping up appearances.
-  - nearest other cluster: c023a at 0.6566
-  - I feel that people or things change in their appearance when they really do not.
-  - I believe that appearances are important.
-  - I judge people by their appearance.
-  - I keep myself well-groomed.
-  - I keep up an appearance.
-  - I am always aware of how I am presenting myself.
-  - I keep my hair fashionable.
-  - I feel it is important to keep up appearances.
-  - I love to look my best.
-- **pole b** -- blind **indifferent to dress** (trait); hinted **indifferent to appearance** (trait)
-  - blind gloss: This means the person pays little attention to how they dress, and does not aim for style, elegance, or making a good impression through clothing.
-  - hinted gloss: This means the person pays little attention to how they dress or look, and does not bother to dress up or make an impression.
-  - nearest other cluster: c048a at 0.6296
-  - I know that sometimes my clothes don't match (and I don't care).
-  - I buy clothes without trying them on first.
-  - I don't like to get dressed up.
-  - I don't care about dressing nicely.
-  - I like to dress up formally.
-  - I wear T-shirts in public.
-  - I don't strive for elegance in my appearance.
-  - I own a formal dress or tuxedo.
-  - I wear stylish clothing.
-  - I don't like seeing people dressed carelessly.
-  - I don't wear fashionable clothing.
-  - I like being well-dressed at all times.
-  - I dress to make an impression.
-- reading (within): "I don't care about dressing nicely." / "I don't strive for elegance in my appearance." -> **3** (Both describe indifference to looking polished or well-dressed, so they are near-synonymous, with 'elegance' being slightly narrower than 'dressing nicely' and 'appearance' slightly broader than clothing.)
-- reading (cross): "I feel that people or things change in their appearance when they really do not." / "I like being well-dressed at all times." -> **0** (One is a perceptual tendency to see appearances change when they haven't; the other is a preference for always dressing well, so they are unrelated concepts.)
-- reading (within): "I wear T-shirts in public." / "I like being well-dressed at all times." -> **opposite** (Wearing T-shirts in public suggests casual dress, while liking to be well-dressed at all times suggests a polished, formal standard, so they point toward opposite ends of dress style, though a T-shirt wearer could still like looking good.)
-- reading (within): "I like being well-dressed at all times." / "I don't like to get dressed up." -> **opposite** (Liking to be well-dressed at all times and disliking getting dressed up are opposite attitudes toward dressing well.)
+### Cluster 417 (10 items, band 8-15, bipolar)
+- nearest corpus trait (novelty, not size): credulous at 0.2427
+- **pole a** -- blind **easily swayed** (trait); hinted **easily swayed** (trait)
+  - blind gloss: This means you are readily influenced, persuaded, or fooled by what others say and do, and you accept suggestions without much resistance.
+  - hinted gloss: This means you readily give in to others' persuasion and influence, are easily fooled or excited, and do not resist pressure to go along.
+  - nearest other cluster: c358a at 0.7241
+  - I am easily talked into doing silly things.
+  - I am easily excited.
+  - I am easy to fool.
+  - I am easy to satisfy.
+  - I am easily impressed.
+  - I am not easily fooled by others.
+  - I let myself be talked into doing things.
+  - I am easy to persuade.
+  - I am easily influenced.
+- **pole b** -- blind **hard to satisfy** (trait); hinted **hard to satisfy** (trait)
+  - blind gloss: This means you are difficult to please and rarely feel that something is good enough.
+  - hinted gloss: This means you are difficult to please and rarely feel that things or people meet your standards or expectations.
+  - nearest other cluster: c030a at 0.6017
+  - I am hard to satisfy.
+- reading (nearest): "easily swayed" / "easily upset" -> **0** (Being readily influenced or persuaded by others is a different quality from being quick to feel fear, anger or hurt; both involve high sensitivity to outside input, but the concepts do not share a core.)
+- reading (nearest): "hard to satisfy" / "perfectionistic" -> **2** (Both involve standards that are rarely felt to be met, but 'hard to satisfy' is about being difficult to please, while perfectionistic is about insisting on flawlessness and applies to oneself and others; each can occur without the other.)
 
-### Cluster 61 (16 items, band 16+)
-- nearest corpus trait (novelty, not size): impatient at 0.323
-- **pole a** -- blind **impatient** (trait); hinted **impatient** (trait)
-  - blind gloss: This means you find waiting irritating and dislike having to queue or wait your turn, and feel you should not have to.
-  - hinted gloss: This means someone who becomes irritated by waiting and dislikes having to queue or hold back for others.
-  - nearest other cluster: c018b at 0.6185
-  - I am rarely a patient person.
-  - I find it very annoying to have to wait a few minutes for a phone connection.
-  - I am usually a patient person.
-  - I tend to become agitated whenever I have to sit and wait for something (for instance, in a waiting room).
-  - I appreciate people who wait on me.
-  - I wait for my turn.
-  - I can't stand waiting.
-  - I keep people waiting.
-  - I don't let others cut in front of me in line.
-  - I hate standing in lines.
-  - I hate waiting for anything.
-  - I am patient with people who annoy me.
-  - I hate to wait for my turn in line or in a game.
-  - I don't mind cutting in line.
-  - I don't think I should have to wait in lines like others.
-  - I feel that I shouldn't have to wait for anything.
-- reading (within): "I can't stand waiting." / "I don't let others cut in front of me in line." -> **1** (Impatience with waiting and refusing to let others cut in line are related, but one is a feeling about waiting and the other is assertiveness about fairness in queues; neither implies the other.)
-- reading (within): "I tend to become agitated whenever I have to sit and wait for something (for instance, in a waiting room)." / "I hate waiting for anything." -> **3** (Both describe intolerance of waiting, but 'hate waiting for anything' is a broader dislike of any waiting, while the target is specifically agitation (restlessness) when sitting and waiting; they share a core but each adds something.)
-- reading (within): "I find it very annoying to have to wait a few minutes for a phone connection." / "I don't let others cut in front of me in line." -> **1** (Both are about impatience or intolerance in waiting situations, but one is annoyance at waiting for a phone connection and the other is refusing to let others cut in line, which is assertiveness about fairness and not necessarily impatience.)
+## Signal 2: ~150 clusters, 10 clusters in full (spanning the size range)
 
-### Cluster 73 (13 items, band 8-15)
-- nearest corpus trait (novelty, not size): curious at 0.2521
-- **pole a** -- blind **intellectually curious** (trait); hinted **inquisitive** (trait)
-  - blind gloss: This means you have a strong drive to understand things, ask for explanations, and learn as much as you can.
-  - hinted gloss: This means you have a strong, steady drive to understand things, ask why, and find explanations for yourself.
-  - nearest other cluster: c030a at 0.6668
-  - I am willing to explain things twice.
-  - I want to know what I am up against.
-  - I demand explanations from others.
-  - I want to see things for myself.
-  - I want to understand things.
-  - I want to increase my knowledge.
-  - I seek explanations of things.
-  - I want to form my own opinions.
-  - I want to know everything.
-  - I want to know the reasons why.
-  - I need things explained only once.
-  - I don't understand things.
-  - I need a lot of explanations.
-- reading (within): "I want to know the reasons why." / "I don't understand things." -> **1** (Wanting to know the reasons why is a curiosity or explanation-seeking drive, while not understanding things is a comprehension deficit; they are related but neither implies the other.)
-- reading (within): "I want to increase my knowledge." / "I want to understand things." -> **2** (Both describe a general drive toward learning, but increasing knowledge stresses accumulating information while understanding stresses grasping how and why things work, so each adds something the other lacks.)
-- reading (within): "I don't understand things." / "I want to know what I am up against." -> **1** (One is a general tendency to lack understanding, the other a desire to understand one's situation or opposition; they are related to comprehension but are different concepts (a deficit versus a motive).)
+### Cluster 42 (25 items, band 16+, bipolar)
+- nearest corpus trait (novelty, not size): career_oriented at 0.2954
+- **pole a** -- blind **workaholic** (trait); hinted **works compulsively** (trait)
+  - blind gloss: This means someone who puts work above everything else, working long hours and neglecting pleasure, relationships and health as a result.
+  - hinted gloss: This means someone works very hard and long, putting work above other parts of life, even when it harms their health or relationships.
+  - nearest other cluster: c206b at 0.6809
+  - I put work above pleasure.
+  - I work hard.
+  - I work too much.
+  - I feel better after some hard work.
+  - I like hard jobs better than easy ones.
+  - I work longer hours than most people.
+  - I behave as if my work is more important than anything else.
+  - I have been told that I neglect other important parts of my life because I work so hard.
+  - I have noticed that I put my work ahead of too many other things.
+  - I work so hard that my mental health has suffered.
+  - I work so hard that my relationships have suffered.
+  - I am a workaholic, with little time for fun or pleasure.
+  - I am a hard worker.
+  - I am told by my friends that I am a hard worker.
+- **pole b** -- blind **work-averse** (trait); hinted **work-shy** (trait)
+  - blind gloss: This means the person dislikes working, puts little effort into it, and does only enough to get by.
+  - hinted gloss: This means someone who avoids exertion at work, puts in minimal effort, and does only what is needed to get by.
+  - nearest other cluster: c040a at 0.6733
+  - I am happy doing mindless work.
+  - I detest working.
+  - I don't bother to make an effort.
+  - I enjoy my work.
+  - I do too little work.
+  - I dislike work.
+  - I love what I do.
+  - I get excited about the things that I am doing.
+  - I do just enough work to get by.
+  - I feel that work is not an important part of my life.
+  - I put little time and effort into my work.
+- reading (nearest): "work-averse" / "lethargic" -> **1** (Both involve low effort, but work-averse is a motivational dislike of work specifically, while lethargic is a general physical/energy sluggishness across activities; neither implies the other.)
+- reading (nearest): "workaholic" / "self-driven achiever" -> **2** (Both involve working hard, but the workaholic neglects relationships, health and pleasure, while the self-driven achiever is about internal motivation, persistence and belief in effort, without implying neglect; each can exist without the other.)
 
-### Cluster 88 (9 items, band 8-15)
-- nearest corpus trait (novelty, not size): famous at 0.2174
-- **pole a** -- blind **drawn to the spotlight** (trait); hinted **craves the spotlight** (trait)
-  - blind gloss: This means you like being watched and admired by an audience, and you see yourself as well suited to performing and being noticed.
-  - hinted gloss: This means the person enjoys being watched and admired, wants public attention and fame, and sees themselves as a natural performer.
-  - nearest other cluster: c011a at 0.5718
-  - I would make a good actor.
-  - I would be good at rescuing people from a burning building.
-  - I would not enjoy being a famous celebrity.
-  - I would make a good night-club comedian.
-  - I could be a success in many fields.
-  - I think I would make a good actor.
-  - I can play many roles convincingly.
-  - I would love to be a celebrity.
-  - I would love to be on a reality TV show.
-- reading (within): "I would not enjoy being a famous celebrity." / "I would be good at rescuing people from a burning building." -> **0** (One is about disliking the prospect of fame, the other about competence at fire rescue; they are unrelated self-descriptions.)
-- reading (within): "I would make a good night-club comedian." / "I would not enjoy being a famous celebrity." -> **0** (One concerns aptitude for stand-up comedy and the other concerns disliking fame; both are self-assessments about entertainment-related careers, but they are different concepts.)
-- reading (within): "I can play many roles convincingly." / "I would be good at rescuing people from a burning building." -> **0** (One is about versatility in acting or role-playing, the other about competence and courage in physical rescue; they share nothing beyond both being self-assessed abilities.)
+### Cluster 80 (10 items, band 8-15)
+- nearest corpus trait (novelty, not size): opaque at 0.2483
+- **pole a** -- blind **keeps matters private** (trait); hinted **keeps personal matters private** (trait)
+  - blind gloss: This means the person values privacy, guards personal information, and tends to keep their affairs and confidences to themselves.
+  - hinted gloss: This means you guard your personal information and feelings, value your privacy, and reliably keep confidences to yourself rather than sharing them.
+  - nearest other cluster: c200a at 0.6833
+  - I can never keep a secret.
+  - I believe that privacy is very important.
+  - I enjoy my privacy.
+  - I like having secrets.
+  - I have no secrets.
+  - I can keep a secret.
+  - I love security.
+  - I am a very private person.
+  - I have secret strategies.
+  - I am trusted to keep secrets.
+- reading (nearest): "keeps matters private" / "keeps feelings guarded" -> **2** (Both involve reticence about oneself, but one centres on guarding personal affairs and information, the other on withholding inner emotions and intentions; they share a core without either implying the other.)
 
-### Cluster 99 (6 items, band 4-7)
-- nearest corpus trait (novelty, not size): financially_conservative at 0.2835
-- **pole a** -- blind **cautious, avoids risk** (trait); hinted **cautious and principled** (trait)
-  - blind gloss: This means the person keeps clear of danger, gambles and questionable shortcuts, preferring safe, conventional choices even when the rewards are tempting.
-  - hinted gloss: This means being wary of danger and financial risk, and holding firmly to moral and legal rules about honesty, fidelity and fair dealing.
-  - nearest other cluster: c052a at 0.5561
-  - I would never make a high-risk investment.
-  - I would never accept welfare.
-  - I would never indulge in extramarital affairs.
-  - I would never go riding down a stretch of rapids in a canoe.
-  - I would never cheat on my taxes.
-  - I would never go hang-gliding or bungee-jumping.
-- reading (within): "I would never go hang-gliding or bungee-jumping." / "I would never cheat on my taxes." -> **0** (One is avoiding extreme physical thrill-seeking activities, the other is refusing to commit tax fraud; they concern entirely different areas (risk-taking vs. honesty/rule-following).)
-- reading (within): "I would never accept welfare." / "I would never cheat on my taxes." -> **0** (Refusing welfare is about self-reliance or pride in not taking aid, while refusing to cheat on taxes is about honesty and law-abiding behavior; they are different commitments in the same broad area of money and the state.)
-- reading (within): "I would never go riding down a stretch of rapids in a canoe." / "I would never cheat on my taxes." -> **0** (One is about avoiding physically risky adventure (canoeing rapids), the other about honesty/integrity regarding taxes; both are 'would never' statements but concern unrelated qualities.)
+### Cluster 133 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): nomadic at 0.283
+- **pole a** -- blind **rootless** (trait); hinted **feels unrooted** (trait)
+  - blind gloss: This means having no lasting sense of belonging anywhere, and feeling no place is truly one's own or where one can settle.
+  - hinted gloss: This means someone has long lacked a sense of belonging anywhere and feels they have no settled place they can call their own.
+  - nearest other cluster: c188a at 0.4995
+  - I don't have a place I call home.
+  - I stay only where I'm wanted.
+  - I wanted to run away from home when I was a child.
+- reading (nearest): "rootless" / "independent and self-reliant" -> **0** (Rootless is about lacking a sense of belonging to any place, while independent and self-reliant is about autonomy and not depending on others; they are different concepts that only sometimes co-occur.)
 
-### Cluster 107 (5 items, band 4-7)
-- nearest corpus trait (novelty, not size): world_changing at 0.2688
-- **pole a** -- blind **zealous world reformer** (trait); hinted **zealous world-reformer** (trait)
-  - blind gloss: This means feeling a strong personal duty and passion to make the world better, and believing one's own leadership would improve it.
-  - hinted gloss: This means feeling strongly driven to improve the world and believing that things would go better if one were in charge.
-  - nearest other cluster: c026a at 0.5767
-  - I am passionate about bettering the world's condition.
-  - I know that the world would be a much better place if I were in charge.
-  - I believe strongly that the world would be a much better place if I had my way.
-  - I believe the world would be better off without me.
-  - I feel a responsibility to improve the world in which I live.
-- reading (within): "I am passionate about bettering the world's condition." / "I know that the world would be a much better place if I were in charge." -> **1** (One is a passion for improving the world; the other is a grandiose belief that one's own leadership would make it better, so they share a world-improvement theme but differ in motive (altruistic drive vs. self-importance).)
-- reading (within): "I believe strongly that the world would be a much better place if I had my way." / "I believe the world would be better off without me." -> **opposite** (One is grandiose conviction that the world would improve if the person ruled, the other is a self-negating belief that the world would be better without them; both concern the person's worth to the world but point in opposite directions.)
-- reading (within): "I feel a responsibility to improve the world in which I live." / "I believe strongly that the world would be a much better place if I had my way." -> **1** (Both concern improving the world, but one is a felt duty to improve it while the other is a grandiose belief that the world would be better under one's own control, so they share only a loose theme.)
+### Cluster 204 (16 items, band 16+)
+- nearest corpus trait (novelty, not size): insecure at 0.2899
+- **pole a** -- blind **prone to worry** (trait); hinted **chronically worried** (trait)
+  - blind gloss: This means someone habitually fears bad outcomes, frets over trivial matters and what others think, and doubts their own abilities and choices.
+  - hinted gloss: This means someone who habitually frets about possible problems, doubts their abilities, and worries about how others see them, even over trivial matters.
+  - nearest other cluster: c205a at 0.7232
+  - I often think about the possibility of negative outcomes that are not likely to occur.
+  - I often worry about things that turn out to be unimportant.
+  - I am always worried about something.
+  - I talk about my worries.
+  - I am filled with doubts about things.
+  - I worry about things.
+  - I often express doubts.
+  - I worry about what people think of me.
+  - I am often worried by things that I said or did.
+  - I often worry about things to the extent that my intellectual performance is impaired.
+  - I believe worry causes me to lose sleep.
+  - I worry so much that I can't get anything done.
+  - I worry too much about what others might think.
+  - I am not confident that my way of doing things will work out for the best.
+  - I worry about being embarrassed.
+  - I question my ability to do my work properly.
+- reading (nearest): "prone to worry" / "chronically fearful" -> **2** (Both describe a habitual anxious disposition, including fear of bad outcomes and self-doubt, but worry centers on fretting and rumination while chronic fear centers on pervasive fear that inhibits action, so each adds something the other lacks.)
 
-### Cluster 115 (4 items, band 4-7)
-- nearest corpus trait (novelty, not size): self_uncertain at 0.236
-- **pole a** -- blind **aimless** (trait); hinted **purposeful** (trait)
-  - blind gloss: This means the person does not know what they want from life and has no clear plan for where they are heading.
-  - hinted gloss: This means having clear goals and a settled plan for where one's life is heading.
-  - nearest other cluster: c001b at 0.5619
-  - I don't know what I really want.
-  - I know what I want.
-  - I have no plan for my life five years from now.
-  - I have a plan for what I want to be doing five years from now.
-- reading (within): "I know what I want." / "I have no plan for my life five years from now." -> **opposite** (Knowing what one wants (clear desires and direction) and having no long-term plan (lack of direction) point in opposite directions, though not perfectly, since someone can know what they want without planning five years out.)
-- reading (within): "I don't know what I really want." / "I know what I want." -> **opposite** (Not knowing what one wants and knowing what one wants are the same quality at opposite ends: clarity about one's own desires.)
-- reading (within): "I have no plan for my life five years from now." / "I don't know what I really want." -> **1** (Both describe a lack of direction, but having no five-year plan concerns future planning, while not knowing what one wants concerns unclear desires; a person can lack a plan while knowing their wants, or be unsure of their wants yet have a plan.)
+### Cluster 218 (14 items, band 8-15)
+- nearest corpus trait (novelty, not size): optimistic at 0.267
+- **pole a** -- blind **optimistic outlook** (trait); hinted **sees the bright side** (trait)
+  - blind gloss: This means you tend to look for the bright side of things and see situations from several angles, finding value even in setbacks.
+  - hinted gloss: This means habitually viewing events and circumstances from a positive angle, looking for the good, the hidden gift, or the meaning in whatever happens.
+  - nearest other cluster: c178a at 0.6841
+  - I look at the bright side of life.
+  - I am able to see the best in a situation.
+  - I throw a new light on the situation.
+  - I look at things from different angles.
+  - I put a new perspective on things.
+  - I only look at things from a single angle.
+  - I have a broad outlook on what is going on.
+  - I look on the bright side.
+  - I can find the positive in what seems negative to others.
+  - I have an excellent view of the world.
+  - I have a mature view on life.
+  - I can find something of interest in any situation.
+  - I feel that most bad things that happen have a hidden gift in them.
+  - I am able to see the "big picture."
+- reading (nearest): "optimistic outlook" / "finds problems everywhere" -> **opposite** (One habitually looks for the bright side and value in setbacks, the other habitually sees faults and dangers everywhere, so they are the same dimension at opposite ends.)
 
-### Cluster 134 (3 items, band 2-3)
-- nearest corpus trait (novelty, not size): mobility_impaired at 0.3637
-- **pole a** -- blind **identifies as disabled** (membership); hinted **identifies as disabled** (membership)
-  - blind gloss: This means the person regards disability as a true description of themselves and is comfortable being known as disabled.
-  - hinted gloss: This means the person regards themselves as having a disability and as part of the disabled community.
-  - nearest other cluster: c038a at 0.5109
-  - I consider myself a disabled person.
-  - I am not handicapped in any way.
-  - I would consider adopting a handicapped child.
-- reading (within): "I consider myself a disabled person." / "I would consider adopting a handicapped child." -> **0** (One is about self-identifying as disabled; the other is about willingness to adopt a disabled child, so they share only the topic of disability.)
-- reading (within): "I would consider adopting a handicapped child." / "I am not handicapped in any way." -> **0** (One is willingness to adopt a handicapped child, the other is one's own lack of a handicap; unrelated concepts.)
-- reading (within): "I consider myself a disabled person." / "I am not handicapped in any way." -> **opposite** (Considering oneself disabled and saying one is not handicapped in any way are reverse self-descriptions of the same quality.)
+### Cluster 241 (11 items, band 8-15)
+- nearest corpus trait (novelty, not size): socially_perceptive at 0.2895
+- **pole a** -- blind **believes in personal precognition** (trait); hinted **believes in psychic powers** (trait)
+  - blind gloss: This means the person firmly believes they have a special, supernatural ability to foresee what will happen and sense hidden dangers or forces.
+  - hinted gloss: This means the person firmly holds that they can foresee events, sense danger, and perceive hidden forces beyond ordinary means.
+  - nearest other cluster: c169a at 0.7358
+  - I feel a special sense of destiny or prophecy.
+  - I can control the outcome of events.
+  - I can predict the outcome of events.
+  - I can sense how things will turn out.
+  - I tend to know beforehand what a conversation partner is about to say.
+  - I can tell from persons' attitudes what they will do next
+  - I can see into the future.
+  - I sometimes know that something will happen before it actually does.
+  - I can sense when danger or harm is coming.
+  - I have a special ability to know what will happen before it happens .
+  - I can sense the presence of strange persons or forces.
+- reading (nearest): "believes in personal precognition" / "socially perceptive and persuasive" -> **0** (One is a belief in having supernatural foresight, the other is a real skill at reading and influencing people; they share no core concept.)
 
-### Cluster 150 (2 items, band 2-3, bipolar)
-- nearest corpus trait (novelty, not size): political at 0.395
-- **pole a** -- blind **politically liberal** (trait); hinted **politically liberal** (membership)
-  - blind gloss: This means the person generally supports liberal candidates and left-leaning political causes when voting.
-  - hinted gloss: This means the person generally votes for and supports liberal political candidates and the progressive positions they represent.
-  - nearest other cluster: c015a at 0.4199
-  - I tend to vote for liberal political candidates.
-- **pole b** -- blind **politically conservative** (trait); hinted **politically conservative** (trait)
-  - blind gloss: This means the person tends to favor conservative candidates and positions in elections and political matters.
-  - hinted gloss: This means the person consistently backs conservative parties and candidates and holds conservative political views.
-  - nearest other cluster: c055a at 0.45
-  - I tend to vote for conservative political candidates.
-- reading (cross): "I tend to vote for liberal political candidates." / "I tend to vote for conservative political candidates." -> **opposite** (Voting liberal and voting conservative are opposite ends of the same political-orientation voting dimension.)
+### Cluster 343 (5 items, band 4-7)
+- nearest corpus trait (novelty, not size): science_skeptical at 0.2789
+- **pole a** -- blind **distrustful of doctors** (trait); hinted **distrustful of medicine** (trait)
+  - blind gloss: This means you tend to doubt medical tests and professionals, suspecting they are inaccurate or dishonest, and so you keep your distance from them.
+  - hinted gloss: This means the person doubts doctors, medical tests and the medical profession, and tends to avoid seeing doctors for fear of bad news.
+  - nearest other cluster: c226a at 0.6446
+  - I believe that medical tests are often inaccurate.
+  - I have complete confidence in my doctor.
+  - I am convinced my doctor is lying to me.
+  - I distrust the medical profession to handle my health.
+  - I stay away from the doctor, for fear of what they might find.
+- reading (nearest): "distrustful of doctors" / "prone to health anxiety" -> **1** (Both concern attitudes toward health, but one is doubting and avoiding medical professionals while the other is worrying about illness and avoiding sickness; neither implies the other.)
+
+### Cluster 431 (3 items, band 2-3)
+- nearest corpus trait (novelty, not size): short_term_oriented at 0.4072
+- **pole a** -- blind **prefers immediate gains** (trait); hinted **favors immediate gains** (trait)
+  - blind gloss: This means the person tends to choose options that pay off now, even when a later, larger benefit is available.
+  - hinted gloss: This means tending to choose rewards that pay off now over those that pay off later, even when the later payoff would be better.
+  - nearest other cluster: c503a at 0.624
+  - I sometimes do things for quick gains.
+  - I generally give preference to those activities that imply an immediate gain.
+  - I forego things that are bad for me in the long run even if they make me feel good in the short run.
+- reading (nearest): "prefers immediate gains" / "impulsive" -> **1** (Both involve poor self-restraint, but preferring immediate rewards over larger delayed ones is a specific choice pattern, while impulsiveness is acting spontaneously without thinking; neither implies the other.)
+
+### Cluster 501 (33 items, band 16+)
+- nearest corpus trait (novelty, not size): wry at 0.3244
+- **pole a** -- blind **playful and humorous** (trait); hinted **playful and humorous** (trait)
+  - blind gloss: This means you habitually look for the funny side of things, laugh often, enjoy joking, and like to entertain and amuse the people around you.
+  - hinted gloss: This means someone who habitually finds things funny, jokes around, laughs often, and tries to bring humor and fun into whatever they do.
+  - nearest other cluster: c285a at 0.7198
+  - I laugh out loud if something is funny.
+  - I usually end up laughing if the people around me are laughing.
+  - I sometimes laugh out loud when reading or watching TV.
+  - I have a quiet laugh.
+  - I have an intense, boisterous laugh.
+  - I often enjoy telling jokes or behaving in a humorous manner.
+  - I can laugh at myself.
+  - I make jokes.
+  - I laugh aloud.
+  - I laugh my way through life.
+  - I joke around a lot.
+  - I go too far with jokes.
+  - I laugh and cry at the same time.
+  - I amuse my friends.
+  - I laugh at others.
+  - I see the humor in situations.
+  - I amuse myself easily.
+  - I like to amuse others.
+  - I like to laugh out loud.
+  - I don't mind others making fun of me.
+  - I am always joking.
+  - I smile a lot.
+  - I laugh a lot.
+  - I easily laugh at myself.
+  - I can see the funny side of a painful situation.
+  - I try to have fun in all kinds of situations.
+  - I try to add some humor to whatever I do.
+  - I keep my sense of humor even in gloomy situations.
+  - I have a great sense of humor.
+  - I easily find things to laugh or joke about.
+  - I am good at making jokes.
+  - I think that in difficult situations it is possible to find something to laugh or joke about.
+  - I am good at making people laugh.
+
+### Cluster 665 (6 items, band 4-7)
+- nearest corpus trait (novelty, not size): clear at 0.3479
+- **pole a** -- blind **direct and to-the-point** (trait)
+  - blind gloss: This means you cut through detail and get straight to the core of a matter, in how you think and how you speak.
+  - nearest other cluster: c527a at 0.6667
+  - I get to the bottom of things.
+  - I go straight for the goal.
+  - I get to the heart of the matter.
+  - I speak briefly and to the point.
+  - I get to the point quickly.
+  - I come straight to the point.
+- reading (nearest): "direct and to-the-point" / "quick-witted" -> **0** (Directness is about cutting to the core of a matter in thought and speech, while quick-wittedness is about the speed of grasping and responding; the two share little beyond both involving efficient thinking.)
 
 ## Files
 

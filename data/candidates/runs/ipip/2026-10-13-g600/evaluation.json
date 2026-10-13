@@ -1,0 +1,3952 @@
+{
+  "result": {
+    "run_id": "2026-10-13-g600",
+    "generator": "ipip",
+    "granularity": 600,
+    "label_choice": "blind",
+    "ingest": {
+      "n_items": 3320,
+      "n_codes": 3389,
+      "n_with_scales": 1598,
+      "n_constructs": 443,
+      "hex": {
+        "constructs": 24,
+        "items": 240,
+        "construct_list": [
+          "Aesthetic Appreciation/Artistic Interests",
+          "Anxiety",
+          "Conformity/Dependence/Need for approval",
+          "Creativity/Originality",
+          "Diligence",
+          "Equity/Fairness",
+          "Expressiveness",
+          "Fearfulness",
+          "Flexibility",
+          "Forgiveness/Mercy",
+          "Gentleness",
+          "Greed Avoidance",
+          "Humility/Modesty",
+          "Inquisitiveness",
+          "Liveliness",
+          "Organization",
+          "Patience",
+          "Perfectionism",
+          "Prudence",
+          "Sentimentality",
+          "Sincerity",
+          "Sociability",
+          "Social Boldness",
+          "Unconventionality"
+        ]
+      },
+      "hex_assertion": "passed",
+      "unmatched_assignments": 370
+    },
+    "clusters": {
+      "600": {
+        "granularity": 600,
+        "n_items": 3320,
+        "primary": "openai",
+        "second": "gemma",
+        "cut": {
+          "openai": {
+            "target": 600,
+            "n_clusters": 600,
+            "threshold": 0.543792,
+            "n_merges": 2539,
+            "peak_count": 828,
+            "peak_threshold": 0.435621,
+            "n_singletons": 181,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              2,
+              4,
+              6,
+              33
+            ]
+          },
+          "gemma": {
+            "target": 600,
+            "n_clusters": 600,
+            "threshold": 0.288626,
+            "n_merges": 2385,
+            "peak_count": 721,
+            "peak_threshold": 0.2235,
+            "n_singletons": 335,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              2,
+              3,
+              6,
+              42
+            ]
+          }
+        },
+        "consensus": {
+          "rule": "r2",
+          "min_jaccard": 0.5,
+          "r2_min_size": 3,
+          "n_kept": 486,
+          "n_loose": 114,
+          "kept_items": 2911,
+          "loose_items": 228,
+          "jaccard_kept_median": 0.4286,
+          "reasons": {
+            "pair_coclustered": 58,
+            "pair_not_coclustered": 114,
+            "size>=3": 428
+          },
+          "before_ceiling": {
+            "n_kept": 486,
+            "n_loose": 114,
+            "kept_items": 2911,
+            "loose_items": 228,
+            "reasons": {
+              "pair_coclustered": 58,
+              "pair_not_coclustered": 114,
+              "size>=3": 428
+            }
+          }
+        },
+        "ceiling": {
+          "size_ceiling": 30,
+          "recut_targets": [],
+          "n_recut": 0,
+          "recut_items": 0,
+          "n_pieces": 0,
+          "n_pieces_kept": 0,
+          "items_left_single": 0,
+          "blobs": [],
+          "cuts": {}
+        },
+        "n_rows": 600,
+        "sizes": {
+          "primary": {
+            "n": 600,
+            "items": 3139,
+            "min": 2,
+            "median": 4.0,
+            "max": 33,
+            "share_4_to_15": 0.4767
+          },
+          "second": {
+            "n": 600,
+            "items": 2985,
+            "min": 2,
+            "median": 3.0,
+            "max": 42,
+            "share_4_to_15": 0.425
+          },
+          "table": {
+            "n": 600,
+            "items": 3139,
+            "min": 2,
+            "median": 4.0,
+            "max": 33,
+            "share_4_to_15": 0.4767
+          },
+          "kept": {
+            "n": 486,
+            "items": 2911,
+            "min": 2,
+            "median": 4.0,
+            "max": 33,
+            "share_4_to_15": 0.5885
+          }
+        },
+        "purity": {
+          "openai": {
+            "nmi": 0.820151,
+            "ari": 0.127903,
+            "n_items_scored": 721,
+            "purity_mean": 0.533597,
+            "purity_median": 0.666667,
+            "by_inventory": {
+              "16PF": {
+                "n": 142,
+                "nmi": 0.717003,
+                "ari": 0.141227
+              },
+              "6FPQ": {
+                "n": 222,
+                "nmi": 0.723191,
+                "ari": 0.128608
+              },
+              "AB5C": {
+                "n": 463,
+                "nmi": 0.693841,
+                "ari": 0.089129
+              },
+              "BFAS": {
+                "n": 56,
+                "nmi": 0.639024,
+                "ari": 0.056057
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.423371,
+                "ari": 0.011628
+              },
+              "BIS_BAS": {
+                "n": 23,
+                "nmi": 0.533441,
+                "ari": 0.049697
+              },
+              "Barchard, 2001": {
+                "n": 63,
+                "nmi": 0.633795,
+                "ari": 0.191649
+              },
+              "Big-7": {
+                "n": 64,
+                "nmi": 0.630104,
+                "ari": 0.039604
+              },
+              "Big-Five": {
+                "n": 95,
+                "nmi": 0.565063,
+                "ari": 0.101
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.82104,
+                "ari": 0.286435
+              },
+              "CES-D": {
+                "n": 20,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 21,
+                "nmi": 0.416215,
+                "ari": 0.080492
+              },
+              "CPI": {
+                "n": 307,
+                "nmi": 0.684167,
+                "ari": 0.072327
+              },
+              "Dissociation": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "GOLDBERG1999": {
+                "n": 28,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 226,
+                "nmi": 0.73338,
+                "ari": 0.125816
+              },
+              "HOYLE2002": {
+                "n": 20,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 197,
+                "nmi": 0.790705,
+                "ari": 0.146204
+              },
+              "IPIP-IPC": {
+                "n": 30,
+                "nmi": 0.717899,
+                "ari": 0.050669
+              },
+              "JPI": {
+                "n": 131,
+                "nmi": 0.728185,
+                "ari": 0.116214
+              },
+              "MPQ": {
+                "n": 114,
+                "nmi": 0.695548,
+                "ari": 0.111539
+              },
+              "NEO": {
+                "n": 258,
+                "nmi": 0.748266,
+                "ari": 0.129455
+              },
+              "RADLOFF1977": {
+                "n": 20,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 82,
+                "nmi": 0.728398,
+                "ari": 0.133283
+              },
+              "TCI": {
+                "n": 263,
+                "nmi": 0.7353,
+                "ari": 0.134516
+              },
+              "VIA": {
+                "n": 226,
+                "nmi": 0.74461,
+                "ari": 0.12208
+              }
+            }
+          },
+          "gemma": {
+            "nmi": 0.81686,
+            "ari": 0.101889,
+            "n_items_scored": 701,
+            "purity_mean": 0.512424,
+            "purity_median": 0.666667,
+            "by_inventory": {
+              "16PF": {
+                "n": 145,
+                "nmi": 0.700279,
+                "ari": 0.108002
+              },
+              "6FPQ": {
+                "n": 221,
+                "nmi": 0.720855,
+                "ari": 0.105187
+              },
+              "AB5C": {
+                "n": 465,
+                "nmi": 0.696565,
+                "ari": 0.075202
+              },
+              "BFAS": {
+                "n": 58,
+                "nmi": 0.619278,
+                "ari": 0.034956
+              },
+              "BIDR": {
+                "n": 31,
+                "nmi": 0.437296,
+                "ari": -0.008569
+              },
+              "BIS_BAS": {
+                "n": 24,
+                "nmi": 0.498652,
+                "ari": 0.031305
+              },
+              "Barchard, 2001": {
+                "n": 61,
+                "nmi": 0.651684,
+                "ari": 0.192876
+              },
+              "Big-7": {
+                "n": 66,
+                "nmi": 0.638237,
+                "ari": 0.040643
+              },
+              "Big-Five": {
+                "n": 99,
+                "nmi": 0.539512,
+                "ari": 0.07672
+              },
+              "CAT-PD": {
+                "n": 193,
+                "nmi": 0.820324,
+                "ari": 0.255545
+              },
+              "CHAPMAN1986": {
+                "n": 22,
+                "nmi": 0.403234,
+                "ari": 0.065359
+              },
+              "CPI": {
+                "n": 302,
+                "nmi": 0.704353,
+                "ari": 0.064448
+              },
+              "Dissociation": {
+                "n": 23,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "FOA2002": {
+                "n": 20,
+                "nmi": 0.443504,
+                "ari": 0.102638
+              },
+              "GOLDBERG1999": {
+                "n": 23,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 226,
+                "nmi": 0.72344,
+                "ari": 0.125523
+              },
+              "HPI": {
+                "n": 197,
+                "nmi": 0.781242,
+                "ari": 0.08484
+              },
+              "IPIP-IPC": {
+                "n": 31,
+                "nmi": 0.719625,
+                "ari": 0.052229
+              },
+              "JPI": {
+                "n": 128,
+                "nmi": 0.701584,
+                "ari": 0.070986
+              },
+              "MPQ": {
+                "n": 107,
+                "nmi": 0.705253,
+                "ari": 0.090772
+              },
+              "NEO": {
+                "n": 255,
+                "nmi": 0.753778,
+                "ari": 0.113217
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 74,
+                "nmi": 0.704705,
+                "ari": 0.087604
+              },
+              "TCI": {
+                "n": 255,
+                "nmi": 0.732926,
+                "ari": 0.104676
+              },
+              "VIA": {
+                "n": 219,
+                "nmi": 0.733389,
+                "ari": 0.089949
+              }
+            }
+          },
+          "kept": {
+            "nmi": 0.821202,
+            "ari": 0.139643,
+            "n_items_scored": 675,
+            "purity_mean": 0.516129,
+            "purity_median": 0.6,
+            "by_inventory": {
+              "16PF": {
+                "n": 137,
+                "nmi": 0.720775,
+                "ari": 0.150518
+              },
+              "6FPQ": {
+                "n": 206,
+                "nmi": 0.728024,
+                "ari": 0.143678
+              },
+              "AB5C": {
+                "n": 439,
+                "nmi": 0.693599,
+                "ari": 0.096631
+              },
+              "BFAS": {
+                "n": 52,
+                "nmi": 0.648881,
+                "ari": 0.065416
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.423371,
+                "ari": 0.011628
+              },
+              "BIS_BAS": {
+                "n": 22,
+                "nmi": 0.5377,
+                "ari": 0.053279
+              },
+              "Barchard, 2001": {
+                "n": 60,
+                "nmi": 0.640102,
+                "ari": 0.209966
+              },
+              "Big-7": {
+                "n": 64,
+                "nmi": 0.630104,
+                "ari": 0.039604
+              },
+              "Big-Five": {
+                "n": 95,
+                "nmi": 0.565063,
+                "ari": 0.101
+              },
+              "CAT-PD": {
+                "n": 198,
+                "nmi": 0.822615,
+                "ari": 0.292689
+              },
+              "CHAPMAN1986": {
+                "n": 21,
+                "nmi": 0.416215,
+                "ari": 0.080492
+              },
+              "CPI": {
+                "n": 289,
+                "nmi": 0.684794,
+                "ari": 0.079931
+              },
+              "Dissociation": {
+                "n": 26,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "GOLDBERG1999": {
+                "n": 25,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 211,
+                "nmi": 0.738746,
+                "ari": 0.139393
+              },
+              "HPI": {
+                "n": 187,
+                "nmi": 0.794016,
+                "ari": 0.155326
+              },
+              "IPIP-IPC": {
+                "n": 28,
+                "nmi": 0.717677,
+                "ari": 0.053874
+              },
+              "JPI": {
+                "n": 125,
+                "nmi": 0.733634,
+                "ari": 0.126902
+              },
+              "MPQ": {
+                "n": 108,
+                "nmi": 0.701133,
+                "ari": 0.122502
+              },
+              "NEO": {
+                "n": 248,
+                "nmi": 0.750647,
+                "ari": 0.138255
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 73,
+                "nmi": 0.73416,
+                "ari": 0.154499
+              },
+              "TCI": {
+                "n": 249,
+                "nmi": 0.736228,
+                "ari": 0.14321
+              },
+              "VIA": {
+                "n": 206,
+                "nmi": 0.756194,
+                "ari": 0.144691
+              }
+            }
+          }
+        },
+        "bipolar": {
+          "n_clusters": 40,
+          "n_kept": 39
+        },
+        "n_poles_kept": 525,
+        "nearest_other_among": "kept",
+        "naming_carried_over": 240,
+        "naming_carried_across_cuts": 0,
+        "naming_not_carried": 0,
+        "hdbscan": {
+          "n_clusters": 249,
+          "noise_share": 0.226506,
+          "umap": true,
+          "min_cluster_size": 4,
+          "seed": 0,
+          "ari_vs_reference": 0.042226
+        }
+      },
+      "350": {
+        "granularity": 350,
+        "n_items": 3320,
+        "primary": "openai",
+        "second": "gemma",
+        "cut": {
+          "openai": {
+            "target": 350,
+            "n_clusters": 350,
+            "threshold": 0.617428,
+            "n_merges": 2921,
+            "peak_count": 828,
+            "peak_threshold": 0.435621,
+            "n_singletons": 49,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              3,
+              6,
+              12,
+              79
+            ]
+          },
+          "gemma": {
+            "target": 350,
+            "n_clusters": 350,
+            "threshold": 0.349326,
+            "n_merges": 2871,
+            "peak_count": 721,
+            "peak_threshold": 0.2235,
+            "n_singletons": 99,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              3,
+              5,
+              10,
+              103
+            ]
+          }
+        },
+        "consensus": {
+          "rule": "r2",
+          "min_jaccard": 0.5,
+          "r2_min_size": 3,
+          "n_kept": 363,
+          "n_loose": 42,
+          "kept_items": 3177,
+          "loose_items": 84,
+          "jaccard_kept_median": 0.3333,
+          "reasons": {
+            "pair_coclustered": 25,
+            "pair_not_coclustered": 42,
+            "size>=3": 338
+          },
+          "before_ceiling": {
+            "n_kept": 313,
+            "n_loose": 37,
+            "kept_items": 3197,
+            "loose_items": 74,
+            "reasons": {
+              "pair_coclustered": 21,
+              "pair_not_coclustered": 37,
+              "size>=3": 292
+            }
+          }
+        },
+        "ceiling": {
+          "size_ceiling": 30,
+          "recut_targets": [
+            600
+          ],
+          "n_recut": 18,
+          "recut_items": 749,
+          "n_pieces": 73,
+          "n_pieces_kept": 68,
+          "items_left_single": 10,
+          "blobs": [
+            {
+              "cluster_id": 1,
+              "size": 79,
+              "n_pieces": 9,
+              "n_pieces_kept": 9,
+              "piece_items": 78
+            },
+            {
+              "cluster_id": 2,
+              "size": 51,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 50
+            },
+            {
+              "cluster_id": 3,
+              "size": 49,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 48
+            },
+            {
+              "cluster_id": 4,
+              "size": 48,
+              "n_pieces": 6,
+              "n_pieces_kept": 5,
+              "piece_items": 47
+            },
+            {
+              "cluster_id": 5,
+              "size": 46,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 45
+            },
+            {
+              "cluster_id": 6,
+              "size": 44,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 44
+            },
+            {
+              "cluster_id": 7,
+              "size": 44,
+              "n_pieces": 4,
+              "n_pieces_kept": 3,
+              "piece_items": 43
+            },
+            {
+              "cluster_id": 8,
+              "size": 43,
+              "n_pieces": 4,
+              "n_pieces_kept": 3,
+              "piece_items": 43
+            },
+            {
+              "cluster_id": 9,
+              "size": 39,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 39
+            },
+            {
+              "cluster_id": 10,
+              "size": 37,
+              "n_pieces": 2,
+              "n_pieces_kept": 2,
+              "piece_items": 36
+            },
+            {
+              "cluster_id": 11,
+              "size": 36,
+              "n_pieces": 2,
+              "n_pieces_kept": 2,
+              "piece_items": 35
+            },
+            {
+              "cluster_id": 12,
+              "size": 35,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 34
+            },
+            {
+              "cluster_id": 13,
+              "size": 35,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 35
+            },
+            {
+              "cluster_id": 14,
+              "size": 33,
+              "n_pieces": 5,
+              "n_pieces_kept": 4,
+              "piece_items": 33
+            },
+            {
+              "cluster_id": 15,
+              "size": 33,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 33
+            },
+            {
+              "cluster_id": 16,
+              "size": 33,
+              "n_pieces": 6,
+              "n_pieces_kept": 5,
+              "piece_items": 32
+            },
+            {
+              "cluster_id": 17,
+              "size": 32,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 32
+            },
+            {
+              "cluster_id": 18,
+              "size": 32,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 32
+            }
+          ],
+          "cuts": {
+            "600": {
+              "openai": {
+                "target": 600,
+                "n_clusters": 600,
+                "threshold": 0.543792,
+                "n_merges": 2539,
+                "peak_count": 828,
+                "peak_threshold": 0.435621,
+                "n_singletons": 181,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  2,
+                  4,
+                  6,
+                  33
+                ]
+              },
+              "gemma": {
+                "target": 600,
+                "n_clusters": 600,
+                "threshold": 0.288626,
+                "n_merges": 2385,
+                "peak_count": 721,
+                "peak_threshold": 0.2235,
+                "n_singletons": 335,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  2,
+                  3,
+                  6,
+                  42
+                ]
+              }
+            }
+          }
+        },
+        "n_rows": 405,
+        "sizes": {
+          "primary": {
+            "n": 350,
+            "items": 3271,
+            "min": 2,
+            "median": 6.0,
+            "max": 79,
+            "share_4_to_15": 0.5314
+          },
+          "second": {
+            "n": 350,
+            "items": 3221,
+            "min": 2,
+            "median": 5.0,
+            "max": 103,
+            "share_4_to_15": 0.4657
+          },
+          "table": {
+            "n": 405,
+            "items": 3261,
+            "min": 2,
+            "median": 6.0,
+            "max": 33,
+            "share_4_to_15": 0.558
+          },
+          "kept": {
+            "n": 363,
+            "items": 3177,
+            "min": 2,
+            "median": 7.0,
+            "max": 33,
+            "share_4_to_15": 0.6226
+          }
+        },
+        "purity": {
+          "openai": {
+            "nmi": 0.773095,
+            "ari": 0.124981,
+            "n_items_scored": 753,
+            "purity_mean": 0.416614,
+            "purity_median": 0.5,
+            "by_inventory": {
+              "16PF": {
+                "n": 148,
+                "nmi": 0.694168,
+                "ari": 0.166175
+              },
+              "6FPQ": {
+                "n": 228,
+                "nmi": 0.701547,
+                "ari": 0.155415
+              },
+              "AB5C": {
+                "n": 476,
+                "nmi": 0.64412,
+                "ari": 0.099511
+              },
+              "BFAS": {
+                "n": 57,
+                "nmi": 0.623378,
+                "ari": 0.087328
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.431299,
+                "ari": 0.022401
+              },
+              "BIS_BAS": {
+                "n": 24,
+                "nmi": 0.505953,
+                "ari": 0.046287
+              },
+              "Barchard, 2001": {
+                "n": 66,
+                "nmi": 0.633305,
+                "ari": 0.266018
+              },
+              "Big-7": {
+                "n": 66,
+                "nmi": 0.617035,
+                "ari": 0.055893
+              },
+              "Big-Five": {
+                "n": 98,
+                "nmi": 0.551323,
+                "ari": 0.116336
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.802886,
+                "ari": 0.321028
+              },
+              "CES-D": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 23,
+                "nmi": 0.462336,
+                "ari": 0.230605
+              },
+              "CPI": {
+                "n": 316,
+                "nmi": 0.640392,
+                "ari": 0.075246
+              },
+              "Dissociation": {
+                "n": 30,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "GOLDBERG1999": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 236,
+                "nmi": 0.708089,
+                "ari": 0.145717
+              },
+              "HOYLE2002": {
+                "n": 22,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 203,
+                "nmi": 0.764859,
+                "ari": 0.173579
+              },
+              "IPIP-IPC": {
+                "n": 31,
+                "nmi": 0.675791,
+                "ari": 0.054237
+              },
+              "JPI": {
+                "n": 133,
+                "nmi": 0.70064,
+                "ari": 0.145071
+              },
+              "LEVENSON1981": {
+                "n": 20,
+                "nmi": 0.578215,
+                "ari": 0.059738
+              },
+              "MPQ": {
+                "n": 116,
+                "nmi": 0.695566,
+                "ari": 0.135407
+              },
+              "NEO": {
+                "n": 262,
+                "nmi": 0.723383,
+                "ari": 0.148832
+              },
+              "RADLOFF1977": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 87,
+                "nmi": 0.71069,
+                "ari": 0.225399
+              },
+              "TCI": {
+                "n": 268,
+                "nmi": 0.708054,
+                "ari": 0.154768
+              },
+              "VIA": {
+                "n": 241,
+                "nmi": 0.723278,
+                "ari": 0.152136
+              }
+            }
+          },
+          "gemma": {
+            "nmi": 0.755205,
+            "ari": 0.106841,
+            "n_items_scored": 748,
+            "purity_mean": 0.364272,
+            "purity_median": 0.5,
+            "by_inventory": {
+              "16PF": {
+                "n": 150,
+                "nmi": 0.667641,
+                "ari": 0.132946
+              },
+              "6FPQ": {
+                "n": 228,
+                "nmi": 0.702307,
+                "ari": 0.169382
+              },
+              "AB5C": {
+                "n": 477,
+                "nmi": 0.630619,
+                "ari": 0.081799
+              },
+              "BFAS": {
+                "n": 58,
+                "nmi": 0.600579,
+                "ari": 0.066152
+              },
+              "BIDR": {
+                "n": 34,
+                "nmi": 0.429823,
+                "ari": 0.013209
+              },
+              "BIS_BAS": {
+                "n": 25,
+                "nmi": 0.520418,
+                "ari": 0.096386
+              },
+              "Barchard, 2001": {
+                "n": 65,
+                "nmi": 0.640157,
+                "ari": 0.280942
+              },
+              "Big-7": {
+                "n": 67,
+                "nmi": 0.619353,
+                "ari": 0.066614
+              },
+              "Big-Five": {
+                "n": 100,
+                "nmi": 0.520346,
+                "ari": 0.094727
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.808444,
+                "ari": 0.328165
+              },
+              "CES-D": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 24,
+                "nmi": 0.409262,
+                "ari": 0.086643
+              },
+              "CPI": {
+                "n": 318,
+                "nmi": 0.63928,
+                "ari": 0.059989
+              },
+              "Dissociation": {
+                "n": 28,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "FOA2002": {
+                "n": 20,
+                "nmi": 0.468929,
+                "ari": 0.170592
+              },
+              "GOLDBERG1999": {
+                "n": 27,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 238,
+                "nmi": 0.691884,
+                "ari": 0.144985
+              },
+              "HOYLE2002": {
+                "n": 23,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 203,
+                "nmi": 0.737674,
+                "ari": 0.106549
+              },
+              "IPIP-IPC": {
+                "n": 31,
+                "nmi": 0.700993,
+                "ari": 0.098837
+              },
+              "JPI": {
+                "n": 134,
+                "nmi": 0.673223,
+                "ari": 0.093887
+              },
+              "MPQ": {
+                "n": 117,
+                "nmi": 0.672717,
+                "ari": 0.084284
+              },
+              "NEO": {
+                "n": 265,
+                "nmi": 0.711323,
+                "ari": 0.138991
+              },
+              "RADLOFF1977": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 86,
+                "nmi": 0.670412,
+                "ari": 0.095488
+              },
+              "TCI": {
+                "n": 270,
+                "nmi": 0.682059,
+                "ari": 0.111541
+              },
+              "VIA": {
+                "n": 238,
+                "nmi": 0.695593,
+                "ari": 0.128146
+              }
+            }
+          },
+          "kept": {
+            "nmi": 0.797581,
+            "ari": 0.14585,
+            "n_items_scored": 735,
+            "purity_mean": 0.457385,
+            "purity_median": 0.5,
+            "by_inventory": {
+              "16PF": {
+                "n": 147,
+                "nmi": 0.707238,
+                "ari": 0.16019
+              },
+              "6FPQ": {
+                "n": 222,
+                "nmi": 0.707967,
+                "ari": 0.154331
+              },
+              "AB5C": {
+                "n": 462,
+                "nmi": 0.678568,
+                "ari": 0.112467
+              },
+              "BFAS": {
+                "n": 54,
+                "nmi": 0.62003,
+                "ari": 0.068018
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.427298,
+                "ari": 0.01702
+              },
+              "BIS_BAS": {
+                "n": 24,
+                "nmi": 0.53549,
+                "ari": 0.06092
+              },
+              "Barchard, 2001": {
+                "n": 64,
+                "nmi": 0.646512,
+                "ari": 0.24876
+              },
+              "Big-7": {
+                "n": 66,
+                "nmi": 0.618615,
+                "ari": 0.040514
+              },
+              "Big-Five": {
+                "n": 97,
+                "nmi": 0.555115,
+                "ari": 0.107846
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.821527,
+                "ari": 0.332658
+              },
+              "CES-D": {
+                "n": 20,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 23,
+                "nmi": 0.416643,
+                "ari": 0.094488
+              },
+              "CPI": {
+                "n": 311,
+                "nmi": 0.665091,
+                "ari": 0.071498
+              },
+              "Dissociation": {
+                "n": 30,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "GOLDBERG1999": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 231,
+                "nmi": 0.724783,
+                "ari": 0.149687
+              },
+              "HOYLE2002": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 198,
+                "nmi": 0.785939,
+                "ari": 0.178825
+              },
+              "IPIP-IPC": {
+                "n": 28,
+                "nmi": 0.703941,
+                "ari": 0.075384
+              },
+              "JPI": {
+                "n": 131,
+                "nmi": 0.712579,
+                "ari": 0.149484
+              },
+              "LEVENSON1981": {
+                "n": 20,
+                "nmi": 0.578215,
+                "ari": 0.059738
+              },
+              "MPQ": {
+                "n": 114,
+                "nmi": 0.700067,
+                "ari": 0.13667
+              },
+              "NEO": {
+                "n": 258,
+                "nmi": 0.743432,
+                "ari": 0.156356
+              },
+              "RADLOFF1977": {
+                "n": 20,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 85,
+                "nmi": 0.71497,
+                "ari": 0.16373
+              },
+              "TCI": {
+                "n": 263,
+                "nmi": 0.729863,
+                "ari": 0.153925
+              },
+              "VIA": {
+                "n": 230,
+                "nmi": 0.734671,
+                "ari": 0.160884
+              }
+            }
+          }
+        },
+        "bipolar": {
+          "n_clusters": 51,
+          "n_kept": 51
+        },
+        "n_poles_kept": 414,
+        "nearest_other_among": "kept",
+        "naming_carried_over": 137,
+        "naming_carried_across_cuts": 0,
+        "naming_not_carried": 0,
+        "hdbscan": {
+          "n_clusters": 249,
+          "noise_share": 0.226506,
+          "umap": true,
+          "min_cluster_size": 4,
+          "seed": 0,
+          "ari_vs_reference": 0.056428
+        }
+      },
+      "150": {
+        "granularity": 150,
+        "n_items": 3320,
+        "primary": "openai",
+        "second": "gemma",
+        "cut": {
+          "openai": {
+            "target": 150,
+            "n_clusters": 150,
+            "threshold": 0.690297,
+            "n_merges": 3164,
+            "peak_count": 828,
+            "peak_threshold": 0.435621,
+            "n_singletons": 6,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              5,
+              12,
+              28,
+              242
+            ]
+          },
+          "gemma": {
+            "target": 150,
+            "n_clusters": 150,
+            "threshold": 0.410814,
+            "n_merges": 3141,
+            "peak_count": 721,
+            "peak_threshold": 0.2235,
+            "n_singletons": 29,
+            "within_tol": true,
+            "tol": 0.1,
+            "size_quartiles": [
+              2,
+              3,
+              7,
+              18,
+              390
+            ]
+          }
+        },
+        "consensus": {
+          "rule": "r2",
+          "min_jaccard": 0.5,
+          "r2_min_size": 3,
+          "n_kept": 307,
+          "n_loose": 17,
+          "kept_items": 3264,
+          "loose_items": 34,
+          "jaccard_kept_median": 0.2857,
+          "reasons": {
+            "pair_coclustered": 14,
+            "pair_not_coclustered": 17,
+            "size>=3": 293
+          },
+          "before_ceiling": {
+            "n_kept": 143,
+            "n_loose": 7,
+            "kept_items": 3300,
+            "loose_items": 14,
+            "reasons": {
+              "pair_coclustered": 6,
+              "pair_not_coclustered": 7,
+              "size>=3": 137
+            }
+          }
+        },
+        "ceiling": {
+          "size_ceiling": 30,
+          "recut_targets": [
+            350,
+            600
+          ],
+          "n_recut": 34,
+          "recut_items": 2150,
+          "n_pieces": 208,
+          "n_pieces_kept": 198,
+          "items_left_single": 16,
+          "blobs": [
+            {
+              "cluster_id": 1,
+              "size": 242,
+              "n_pieces": 22,
+              "n_pieces_kept": 19,
+              "piece_items": 240
+            },
+            {
+              "cluster_id": 2,
+              "size": 242,
+              "n_pieces": 21,
+              "n_pieces_kept": 21,
+              "piece_items": 240
+            },
+            {
+              "cluster_id": 3,
+              "size": 174,
+              "n_pieces": 16,
+              "n_pieces_kept": 15,
+              "piece_items": 173
+            },
+            {
+              "cluster_id": 4,
+              "size": 90,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 89
+            },
+            {
+              "cluster_id": 5,
+              "size": 89,
+              "n_pieces": 7,
+              "n_pieces_kept": 7,
+              "piece_items": 88
+            },
+            {
+              "cluster_id": 6,
+              "size": 87,
+              "n_pieces": 9,
+              "n_pieces_kept": 8,
+              "piece_items": 86
+            },
+            {
+              "cluster_id": 7,
+              "size": 67,
+              "n_pieces": 9,
+              "n_pieces_kept": 9,
+              "piece_items": 67
+            },
+            {
+              "cluster_id": 8,
+              "size": 59,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 59
+            },
+            {
+              "cluster_id": 9,
+              "size": 54,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 54
+            },
+            {
+              "cluster_id": 10,
+              "size": 54,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 53
+            },
+            {
+              "cluster_id": 11,
+              "size": 51,
+              "n_pieces": 6,
+              "n_pieces_kept": 5,
+              "piece_items": 51
+            },
+            {
+              "cluster_id": 12,
+              "size": 50,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 50
+            },
+            {
+              "cluster_id": 13,
+              "size": 50,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 49
+            },
+            {
+              "cluster_id": 14,
+              "size": 49,
+              "n_pieces": 6,
+              "n_pieces_kept": 6,
+              "piece_items": 48
+            },
+            {
+              "cluster_id": 15,
+              "size": 48,
+              "n_pieces": 5,
+              "n_pieces_kept": 4,
+              "piece_items": 48
+            },
+            {
+              "cluster_id": 16,
+              "size": 46,
+              "n_pieces": 9,
+              "n_pieces_kept": 8,
+              "piece_items": 43
+            },
+            {
+              "cluster_id": 17,
+              "size": 45,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 44
+            },
+            {
+              "cluster_id": 18,
+              "size": 45,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 45
+            },
+            {
+              "cluster_id": 19,
+              "size": 45,
+              "n_pieces": 6,
+              "n_pieces_kept": 5,
+              "piece_items": 45
+            },
+            {
+              "cluster_id": 20,
+              "size": 44,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 44
+            },
+            {
+              "cluster_id": 21,
+              "size": 44,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 44
+            },
+            {
+              "cluster_id": 22,
+              "size": 43,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 43
+            },
+            {
+              "cluster_id": 23,
+              "size": 42,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 42
+            },
+            {
+              "cluster_id": 24,
+              "size": 40,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 40
+            },
+            {
+              "cluster_id": 25,
+              "size": 39,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 38
+            },
+            {
+              "cluster_id": 26,
+              "size": 37,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 37
+            },
+            {
+              "cluster_id": 27,
+              "size": 37,
+              "n_pieces": 5,
+              "n_pieces_kept": 5,
+              "piece_items": 37
+            },
+            {
+              "cluster_id": 28,
+              "size": 36,
+              "n_pieces": 2,
+              "n_pieces_kept": 2,
+              "piece_items": 36
+            },
+            {
+              "cluster_id": 29,
+              "size": 36,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 36
+            },
+            {
+              "cluster_id": 30,
+              "size": 35,
+              "n_pieces": 6,
+              "n_pieces_kept": 5,
+              "piece_items": 35
+            },
+            {
+              "cluster_id": 31,
+              "size": 34,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 34
+            },
+            {
+              "cluster_id": 32,
+              "size": 34,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 34
+            },
+            {
+              "cluster_id": 33,
+              "size": 31,
+              "n_pieces": 3,
+              "n_pieces_kept": 3,
+              "piece_items": 31
+            },
+            {
+              "cluster_id": 34,
+              "size": 31,
+              "n_pieces": 4,
+              "n_pieces_kept": 4,
+              "piece_items": 31
+            }
+          ],
+          "cuts": {
+            "350": {
+              "openai": {
+                "target": 350,
+                "n_clusters": 350,
+                "threshold": 0.617428,
+                "n_merges": 2921,
+                "peak_count": 828,
+                "peak_threshold": 0.435621,
+                "n_singletons": 49,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  3,
+                  6,
+                  12,
+                  79
+                ]
+              },
+              "gemma": {
+                "target": 350,
+                "n_clusters": 350,
+                "threshold": 0.349326,
+                "n_merges": 2871,
+                "peak_count": 721,
+                "peak_threshold": 0.2235,
+                "n_singletons": 99,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  3,
+                  5,
+                  10,
+                  103
+                ]
+              }
+            },
+            "600": {
+              "openai": {
+                "target": 600,
+                "n_clusters": 600,
+                "threshold": 0.543792,
+                "n_merges": 2539,
+                "peak_count": 828,
+                "peak_threshold": 0.435621,
+                "n_singletons": 181,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  2,
+                  4,
+                  6,
+                  33
+                ]
+              },
+              "gemma": {
+                "target": 600,
+                "n_clusters": 600,
+                "threshold": 0.288626,
+                "n_merges": 2385,
+                "peak_count": 721,
+                "peak_threshold": 0.2235,
+                "n_singletons": 335,
+                "within_tol": true,
+                "tol": 0.1,
+                "size_quartiles": [
+                  2,
+                  2,
+                  3,
+                  6,
+                  42
+                ]
+              }
+            }
+          }
+        },
+        "n_rows": 324,
+        "sizes": {
+          "primary": {
+            "n": 150,
+            "items": 3314,
+            "min": 2,
+            "median": 12.0,
+            "max": 242,
+            "share_4_to_15": 0.42
+          },
+          "second": {
+            "n": 150,
+            "items": 3291,
+            "min": 2,
+            "median": 7.0,
+            "max": 390,
+            "share_4_to_15": 0.44
+          },
+          "table": {
+            "n": 324,
+            "items": 3298,
+            "min": 2,
+            "median": 7.5,
+            "max": 33,
+            "share_4_to_15": 0.5617
+          },
+          "kept": {
+            "n": 307,
+            "items": 3264,
+            "min": 2,
+            "median": 8.0,
+            "max": 33,
+            "share_4_to_15": 0.5928
+          }
+        },
+        "purity": {
+          "openai": {
+            "nmi": 0.672155,
+            "ari": 0.081972,
+            "n_items_scored": 764,
+            "purity_mean": 0.265038,
+            "purity_median": 0.436508,
+            "by_inventory": {
+              "16PF": {
+                "n": 151,
+                "nmi": 0.624114,
+                "ari": 0.153501
+              },
+              "6FPQ": {
+                "n": 229,
+                "nmi": 0.62615,
+                "ari": 0.164145
+              },
+              "AB5C": {
+                "n": 480,
+                "nmi": 0.552727,
+                "ari": 0.092255
+              },
+              "BFAS": {
+                "n": 58,
+                "nmi": 0.513681,
+                "ari": 0.124525
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.440149,
+                "ari": 0.079374
+              },
+              "BIS_BAS": {
+                "n": 25,
+                "nmi": 0.514813,
+                "ari": 0.069579
+              },
+              "Barchard, 2001": {
+                "n": 66,
+                "nmi": 0.619695,
+                "ari": 0.319881
+              },
+              "Big-7": {
+                "n": 67,
+                "nmi": 0.576078,
+                "ari": 0.137476
+              },
+              "Big-Five": {
+                "n": 100,
+                "nmi": 0.546671,
+                "ari": 0.26709
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.739131,
+                "ari": 0.273055
+              },
+              "CES-D": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 24,
+                "nmi": 0.458091,
+                "ari": 0.320675
+              },
+              "CPI": {
+                "n": 319,
+                "nmi": 0.544292,
+                "ari": 0.074918
+              },
+              "Dissociation": {
+                "n": 30,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "FOA2002": {
+                "n": 20,
+                "nmi": 0.536422,
+                "ari": 0.294205
+              },
+              "GOLDBERG1999": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 240,
+                "nmi": 0.651892,
+                "ari": 0.176911
+              },
+              "HOYLE2002": {
+                "n": 23,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 205,
+                "nmi": 0.697876,
+                "ari": 0.173377
+              },
+              "IPIP-IPC": {
+                "n": 31,
+                "nmi": 0.629521,
+                "ari": 0.08951
+              },
+              "JPI": {
+                "n": 135,
+                "nmi": 0.680016,
+                "ari": 0.237787
+              },
+              "LEVENSON1981": {
+                "n": 20,
+                "nmi": 0.519971,
+                "ari": 0.085932
+              },
+              "MPQ": {
+                "n": 118,
+                "nmi": 0.647202,
+                "ari": 0.187834
+              },
+              "NEO": {
+                "n": 265,
+                "nmi": 0.655091,
+                "ari": 0.162371
+              },
+              "RADLOFF1977": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 88,
+                "nmi": 0.67409,
+                "ari": 0.296919
+              },
+              "TCI": {
+                "n": 274,
+                "nmi": 0.607823,
+                "ari": 0.130894
+              },
+              "VIA": {
+                "n": 247,
+                "nmi": 0.666995,
+                "ari": 0.22035
+              }
+            }
+          },
+          "gemma": {
+            "nmi": 0.627989,
+            "ari": 0.045585,
+            "n_items_scored": 759,
+            "purity_mean": 0.203017,
+            "purity_median": 0.5,
+            "by_inventory": {
+              "16PF": {
+                "n": 151,
+                "nmi": 0.564739,
+                "ari": 0.132575
+              },
+              "6FPQ": {
+                "n": 229,
+                "nmi": 0.577105,
+                "ari": 0.120915
+              },
+              "AB5C": {
+                "n": 479,
+                "nmi": 0.483163,
+                "ari": 0.05969
+              },
+              "BFAS": {
+                "n": 58,
+                "nmi": 0.488291,
+                "ari": 0.124979
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.386179,
+                "ari": 0.046901
+              },
+              "BIS_BAS": {
+                "n": 25,
+                "nmi": 0.492713,
+                "ari": 0.108892
+              },
+              "Barchard, 2001": {
+                "n": 66,
+                "nmi": 0.559068,
+                "ari": 0.221379
+              },
+              "Big-7": {
+                "n": 67,
+                "nmi": 0.543532,
+                "ari": 0.166592
+              },
+              "Big-Five": {
+                "n": 100,
+                "nmi": 0.4466,
+                "ari": 0.148712
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.690801,
+                "ari": 0.194759
+              },
+              "CES-D": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 24,
+                "nmi": 0.432329,
+                "ari": 0.188766
+              },
+              "CPI": {
+                "n": 319,
+                "nmi": 0.496867,
+                "ari": 0.052213
+              },
+              "Dissociation": {
+                "n": 30,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "FOA2002": {
+                "n": 20,
+                "nmi": 0.417447,
+                "ari": 0.149547
+              },
+              "GOLDBERG1999": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 240,
+                "nmi": 0.589775,
+                "ari": 0.149307
+              },
+              "HOYLE2002": {
+                "n": 23,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 205,
+                "nmi": 0.627942,
+                "ari": 0.093297
+              },
+              "IPIP-IPC": {
+                "n": 31,
+                "nmi": 0.586599,
+                "ari": 0.09128
+              },
+              "JPI": {
+                "n": 135,
+                "nmi": 0.574464,
+                "ari": 0.110185
+              },
+              "LEVENSON1981": {
+                "n": 20,
+                "nmi": 0.459499,
+                "ari": -0.021162
+              },
+              "MPQ": {
+                "n": 118,
+                "nmi": 0.574331,
+                "ari": 0.098423
+              },
+              "NEO": {
+                "n": 265,
+                "nmi": 0.584566,
+                "ari": 0.105451
+              },
+              "RADLOFF1977": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 88,
+                "nmi": 0.627246,
+                "ari": 0.19099
+              },
+              "TCI": {
+                "n": 274,
+                "nmi": 0.554284,
+                "ari": 0.088593
+              },
+              "VIA": {
+                "n": 243,
+                "nmi": 0.586445,
+                "ari": 0.106185
+              }
+            }
+          },
+          "kept": {
+            "nmi": 0.784339,
+            "ari": 0.145779,
+            "n_items_scored": 754,
+            "purity_mean": 0.419847,
+            "purity_median": 0.5,
+            "by_inventory": {
+              "16PF": {
+                "n": 149,
+                "nmi": 0.702285,
+                "ari": 0.157471
+              },
+              "6FPQ": {
+                "n": 226,
+                "nmi": 0.695841,
+                "ari": 0.158519
+              },
+              "AB5C": {
+                "n": 471,
+                "nmi": 0.668317,
+                "ari": 0.111536
+              },
+              "BFAS": {
+                "n": 56,
+                "nmi": 0.616597,
+                "ari": 0.063419
+              },
+              "BIDR": {
+                "n": 35,
+                "nmi": 0.429211,
+                "ari": 0.024419
+              },
+              "BIS_BAS": {
+                "n": 24,
+                "nmi": 0.543288,
+                "ari": 0.075843
+              },
+              "Barchard, 2001": {
+                "n": 64,
+                "nmi": 0.650708,
+                "ari": 0.266443
+              },
+              "Big-7": {
+                "n": 66,
+                "nmi": 0.623966,
+                "ari": 0.05795
+              },
+              "Big-Five": {
+                "n": 97,
+                "nmi": 0.555115,
+                "ari": 0.107846
+              },
+              "CAT-PD": {
+                "n": 200,
+                "nmi": 0.822538,
+                "ari": 0.340861
+              },
+              "CES-D": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "CHAPMAN1986": {
+                "n": 23,
+                "nmi": 0.416643,
+                "ari": 0.094488
+              },
+              "CPI": {
+                "n": 314,
+                "nmi": 0.661227,
+                "ari": 0.078415
+              },
+              "Dissociation": {
+                "n": 30,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "FOA2002": {
+                "n": 20,
+                "nmi": 0.536422,
+                "ari": 0.294205
+              },
+              "GOLDBERG1999": {
+                "n": 29,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HEX": {
+                "n": 236,
+                "nmi": 0.7263,
+                "ari": 0.172611
+              },
+              "HOYLE2002": {
+                "n": 22,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "HPI": {
+                "n": 200,
+                "nmi": 0.776832,
+                "ari": 0.172224
+              },
+              "IPIP-IPC": {
+                "n": 30,
+                "nmi": 0.705409,
+                "ari": 0.071257
+              },
+              "JPI": {
+                "n": 135,
+                "nmi": 0.707673,
+                "ari": 0.16053
+              },
+              "LEVENSON1981": {
+                "n": 20,
+                "nmi": 0.578215,
+                "ari": 0.059738
+              },
+              "MPQ": {
+                "n": 116,
+                "nmi": 0.695328,
+                "ari": 0.149051
+              },
+              "NEO": {
+                "n": 263,
+                "nmi": 0.738769,
+                "ari": 0.154348
+              },
+              "RADLOFF1977": {
+                "n": 21,
+                "nmi": 0.0,
+                "ari": 0.0
+              },
+              "SINGLECONSTRUCTS": {
+                "n": 86,
+                "nmi": 0.710273,
+                "ari": 0.162513
+              },
+              "TCI": {
+                "n": 272,
+                "nmi": 0.72179,
+                "ari": 0.157296
+              },
+              "VIA": {
+                "n": 242,
+                "nmi": 0.726596,
+                "ari": 0.174437
+              }
+            }
+          }
+        },
+        "bipolar": {
+          "n_clusters": 57,
+          "n_kept": 57
+        },
+        "n_poles_kept": 364,
+        "nearest_other_among": "kept",
+        "naming_carried_over": 107,
+        "naming_carried_across_cuts": 0,
+        "naming_not_carried": 0,
+        "hdbscan": {
+          "n_clusters": 249,
+          "noise_share": 0.226506,
+          "umap": true,
+          "min_cluster_size": 4,
+          "seed": 0,
+          "ari_vs_reference": 0.051055
+        }
+      }
+    },
+    "granularity_readout": [
+      {
+        "granularity": 600,
+        "n_clusters": 486,
+        "n_pairs_read": 427,
+        "n_pairs_sent": 427,
+        "within": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "opposite": null,
+          "unsure": null,
+          "share_3_4": null,
+          "share_3": null,
+          "n": 0,
+          "n_unparsed": 0
+        },
+        "within_by_band": {
+          "2-3": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          }
+        },
+        "nearest": {
+          "0": 0.1311,
+          "1": 0.3419,
+          "2": 0.3724,
+          "3": 0.082,
+          "4": 0.0094,
+          "opposite": 0.0632,
+          "unsure": 0.0,
+          "share_3_4": 0.0913,
+          "share_3": 0.082,
+          "n": 427,
+          "n_unparsed": 0
+        },
+        "nearest_by_band": {
+          "2-3": {
+            "0": 0.1351,
+            "1": 0.3581,
+            "2": 0.3784,
+            "3": 0.0676,
+            "4": 0.0068,
+            "opposite": 0.0541,
+            "unsure": 0.0,
+            "share_3_4": 0.0743,
+            "share_3": 0.0676,
+            "n": 148,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.1345,
+            "1": 0.345,
+            "2": 0.3509,
+            "3": 0.0702,
+            "4": 0.0175,
+            "opposite": 0.0819,
+            "unsure": 0.0,
+            "share_3_4": 0.0877,
+            "share_3": 0.0702,
+            "n": 171,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.1408,
+            "1": 0.2676,
+            "2": 0.4085,
+            "3": 0.1268,
+            "4": 0.0,
+            "opposite": 0.0563,
+            "unsure": 0.0,
+            "share_3_4": 0.1268,
+            "share_3": 0.1268,
+            "n": 71,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.0811,
+            "1": 0.4054,
+            "2": 0.3784,
+            "3": 0.1081,
+            "4": 0.0,
+            "opposite": 0.027,
+            "unsure": 0.0,
+            "share_3_4": 0.1081,
+            "share_3": 0.1081,
+            "n": 37,
+            "n_unparsed": 0
+          }
+        },
+        "nearest_counts": {
+          "n_calls": 427,
+          "n_poles": 525,
+          "n_named": 517,
+          "n_unnamed": 8,
+          "n_without_nearest": 0,
+          "n_nearest_unnamed": 14,
+          "n_nearest_in_other_consensus": 0,
+          "nearest_among": [
+            "kept"
+          ],
+          "form": "blind",
+          "label_form": "judge-display-v1"
+        },
+        "cross_pole": {
+          "n": 0,
+          "opposite": null,
+          "n_unparsed": 0
+        },
+        "sizes": {
+          "n_clusters": 486,
+          "per_band": {
+            "2-3": 173,
+            "4-7": 207,
+            "8-15": 79,
+            "16+": 27
+          },
+          "min": 2,
+          "median": 4,
+          "max": 33
+        },
+        "bands": [
+          "2-3",
+          "4-7",
+          "8-15",
+          "16+"
+        ],
+        "model": "claude-sonnet-5-5",
+        "rubric": "A",
+        "rubric_version": 6,
+        "label_form": "judge-display-v1",
+        "cost_usd": 1.1883
+      },
+      {
+        "granularity": 350,
+        "n_clusters": 363,
+        "n_pairs_read": 349,
+        "n_pairs_sent": 349,
+        "within": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "opposite": null,
+          "unsure": null,
+          "share_3_4": null,
+          "share_3": null,
+          "n": 0,
+          "n_unparsed": 0
+        },
+        "within_by_band": {
+          "2-3": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          }
+        },
+        "nearest": {
+          "0": 0.2092,
+          "1": 0.361,
+          "2": 0.3266,
+          "3": 0.0516,
+          "4": 0.0029,
+          "opposite": 0.0487,
+          "unsure": 0.0,
+          "share_3_4": 0.0544,
+          "share_3": 0.0516,
+          "n": 349,
+          "n_unparsed": 0
+        },
+        "nearest_by_band": {
+          "2-3": {
+            "0": 0.2222,
+            "1": 0.4198,
+            "2": 0.2963,
+            "3": 0.037,
+            "4": 0.0,
+            "opposite": 0.0247,
+            "unsure": 0.0,
+            "share_3_4": 0.037,
+            "share_3": 0.037,
+            "n": 81,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.2927,
+            "1": 0.3415,
+            "2": 0.2683,
+            "3": 0.0407,
+            "4": 0.0081,
+            "opposite": 0.0488,
+            "unsure": 0.0,
+            "share_3_4": 0.0488,
+            "share_3": 0.0407,
+            "n": 123,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.1236,
+            "1": 0.3483,
+            "2": 0.4045,
+            "3": 0.0674,
+            "4": 0.0,
+            "opposite": 0.0562,
+            "unsure": 0.0,
+            "share_3_4": 0.0674,
+            "share_3": 0.0674,
+            "n": 89,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.1429,
+            "1": 0.3393,
+            "2": 0.375,
+            "3": 0.0714,
+            "4": 0.0,
+            "opposite": 0.0714,
+            "unsure": 0.0,
+            "share_3_4": 0.0714,
+            "share_3": 0.0714,
+            "n": 56,
+            "n_unparsed": 0
+          }
+        },
+        "nearest_counts": {
+          "n_calls": 349,
+          "n_poles": 414,
+          "n_named": 405,
+          "n_unnamed": 9,
+          "n_without_nearest": 0,
+          "n_nearest_unnamed": 8,
+          "n_nearest_in_other_consensus": 0,
+          "nearest_among": [
+            "kept"
+          ],
+          "form": "blind",
+          "label_form": "judge-display-v1"
+        },
+        "cross_pole": {
+          "n": 0,
+          "opposite": null,
+          "n_unparsed": 0
+        },
+        "sizes": {
+          "n_clusters": 363,
+          "per_band": {
+            "2-3": 84,
+            "4-7": 125,
+            "8-15": 101,
+            "16+": 53
+          },
+          "min": 2,
+          "median": 7,
+          "max": 33
+        },
+        "bands": [
+          "2-3",
+          "4-7",
+          "8-15",
+          "16+"
+        ],
+        "model": "claude-sonnet-5-5",
+        "rubric": "A",
+        "rubric_version": 6,
+        "label_form": "judge-display-v1",
+        "cost_usd": 0.6795
+      },
+      {
+        "granularity": 150,
+        "n_clusters": 307,
+        "n_pairs_read": 312,
+        "n_pairs_sent": 312,
+        "within": {
+          "0": null,
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "opposite": null,
+          "unsure": null,
+          "share_3_4": null,
+          "share_3": null,
+          "n": 0,
+          "n_unparsed": 0
+        },
+        "within_by_band": {
+          "2-3": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "opposite": null,
+            "unsure": null,
+            "share_3_4": null,
+            "share_3": null,
+            "n": 0,
+            "n_unparsed": 0
+          }
+        },
+        "nearest": {
+          "0": 0.2276,
+          "1": 0.3237,
+          "2": 0.3397,
+          "3": 0.0577,
+          "4": 0.0032,
+          "opposite": 0.0481,
+          "unsure": 0.0,
+          "share_3_4": 0.0609,
+          "share_3": 0.0577,
+          "n": 312,
+          "n_unparsed": 0
+        },
+        "nearest_by_band": {
+          "2-3": {
+            "0": 0.28,
+            "1": 0.32,
+            "2": 0.3,
+            "3": 0.08,
+            "4": 0.0,
+            "opposite": 0.02,
+            "unsure": 0.0,
+            "share_3_4": 0.08,
+            "share_3": 0.08,
+            "n": 50,
+            "n_unparsed": 0
+          },
+          "4-7": {
+            "0": 0.2784,
+            "1": 0.2887,
+            "2": 0.3299,
+            "3": 0.0515,
+            "4": 0.0103,
+            "opposite": 0.0412,
+            "unsure": 0.0,
+            "share_3_4": 0.0619,
+            "share_3": 0.0515,
+            "n": 97,
+            "n_unparsed": 0
+          },
+          "8-15": {
+            "0": 0.2262,
+            "1": 0.2976,
+            "2": 0.381,
+            "3": 0.0595,
+            "4": 0.0,
+            "opposite": 0.0357,
+            "unsure": 0.0,
+            "share_3_4": 0.0595,
+            "share_3": 0.0595,
+            "n": 84,
+            "n_unparsed": 0
+          },
+          "16+": {
+            "0": 0.1358,
+            "1": 0.3951,
+            "2": 0.3333,
+            "3": 0.0494,
+            "4": 0.0,
+            "opposite": 0.0864,
+            "unsure": 0.0,
+            "share_3_4": 0.0494,
+            "share_3": 0.0494,
+            "n": 81,
+            "n_unparsed": 0
+          }
+        },
+        "nearest_counts": {
+          "n_calls": 312,
+          "n_poles": 364,
+          "n_named": 357,
+          "n_unnamed": 7,
+          "n_without_nearest": 0,
+          "n_nearest_unnamed": 8,
+          "n_nearest_in_other_consensus": 0,
+          "nearest_among": [
+            "kept"
+          ],
+          "form": "blind",
+          "label_form": "judge-display-v1"
+        },
+        "cross_pole": {
+          "n": 0,
+          "opposite": null,
+          "n_unparsed": 0
+        },
+        "sizes": {
+          "n_clusters": 307,
+          "per_band": {
+            "2-3": 50,
+            "4-7": 95,
+            "8-15": 87,
+            "16+": 75
+          },
+          "min": 2,
+          "median": 8,
+          "max": 33
+        },
+        "bands": [
+          "2-3",
+          "4-7",
+          "8-15",
+          "16+"
+        ],
+        "model": "claude-sonnet-5-5",
+        "rubric": "A",
+        "rubric_version": 6,
+        "label_form": "judge-display-v1",
+        "cost_usd": 0.4553
+      }
+    ],
+    "naming": {
+      "parse": {
+        "150": {
+          "n_asked": 581,
+          "n_ok": 567,
+          "parse_rate": 0.9759,
+          "first_attempt_ok": 554,
+          "n_calls": 645,
+          "rejected_by_kind": {
+            "bad_label": 47
+          },
+          "models": [
+            "claude-haiku-5-5"
+          ],
+          "prompt_versions": [
+            "blind v1",
+            "hinted v1"
+          ]
+        },
+        "350": {
+          "n_asked": 736,
+          "n_ok": 717,
+          "parse_rate": 0.9742,
+          "first_attempt_ok": 697,
+          "n_calls": 871,
+          "rejected_by_kind": {
+            "bad_label": 64,
+            "bad_value": 1
+          },
+          "models": [
+            "claude-haiku-5-5"
+          ],
+          "prompt_versions": [
+            "blind v1",
+            "hinted v1"
+          ]
+        },
+        "600": {
+          "n_asked": 1046,
+          "n_ok": 1026,
+          "parse_rate": 0.9809,
+          "first_attempt_ok": 1004,
+          "n_calls": 1351,
+          "rejected_by_kind": {
+            "bad_label": 90,
+            "bad_value": 2
+          },
+          "models": [
+            "claude-haiku-5-5"
+          ],
+          "prompt_versions": [
+            "blind v1",
+            "hinted v1"
+          ]
+        }
+      },
+      "agreement": {
+        "150": {
+          "n_named": {
+            "blind": 357,
+            "hinted": 357
+          },
+          "kind": {
+            "blind": {
+              "membership": 6,
+              "physical": 2,
+              "state": 1,
+              "trait": 348
+            },
+            "hinted": {
+              "membership": 9,
+              "physical": 2,
+              "trait": 346
+            }
+          },
+          "single_word_exists": 0.5294,
+          "ambiguity_flag": 0.3193,
+          "n_both_forms": 352,
+          "disagree_rate": 0.6705,
+          "bipolar_directions": 110,
+          "antonym_exact": 13,
+          "antonym_overlap": 26,
+          "antonym_agreement": 0.3545,
+          "antonym_target": 0.8,
+          "antonym_misses": [
+            {
+              "cluster_id": 36,
+              "pole": "a",
+              "antonym": "rule-flouting",
+              "other_pole_label": "rebellious against authority"
+            },
+            {
+              "cluster_id": 36,
+              "pole": "b",
+              "antonym": "deferential to authority",
+              "other_pole_label": "rule-abiding"
+            },
+            {
+              "cluster_id": 37,
+              "pole": "a",
+              "antonym": "prefers routine",
+              "other_pole_label": "averse to novelty"
+            },
+            {
+              "cluster_id": 37,
+              "pole": "b",
+              "antonym": "seeks out novelty",
+              "other_pole_label": "craves variety"
+            },
+            {
+              "cluster_id": 42,
+              "pole": "b",
+              "antonym": "diligent at work",
+              "other_pole_label": "workaholic"
+            },
+            {
+              "cluster_id": 44,
+              "pole": "a",
+              "antonym": "risk-averse",
+              "other_pole_label": "cautious about danger"
+            },
+            {
+              "cluster_id": 44,
+              "pole": "b",
+              "antonym": "reckless about danger",
+              "other_pole_label": "risk-taking"
+            },
+            {
+              "cluster_id": 45,
+              "pole": "b",
+              "antonym": "attentive to dress",
+              "other_pole_label": "appearance-focused"
+            },
+            {
+              "cluster_id": 46,
+              "pole": "b",
+              "antonym": "empathically distressed by others",
+              "other_pole_label": "easily moved to tears"
+            },
+            {
+              "cluster_id": 47,
+              "pole": "a",
+              "antonym": "unconcerned with appearance",
+              "other_pole_label": "dissatisfied with own body"
+            },
+            {
+              "cluster_id": 47,
+              "pole": "b",
+              "antonym": "comfortable in own body",
+              "other_pole_label": "vain about appearance"
+            },
+            {
+              "cluster_id": 53,
+              "pole": "a",
+              "antonym": "free of guilt",
+              "other_pole_label": "unremorseful exploitation"
+            },
+            {
+              "cluster_id": 53,
+              "pole": "b",
+              "antonym": "remorseful about wrongs",
+              "other_pole_label": "prone to guilt"
+            },
+            {
+              "cluster_id": 54,
+              "pole": "a",
+              "antonym": "secure and trusting",
+              "other_pole_label": "insecure in relationships"
+            },
+            {
+              "cluster_id": 54,
+              "pole": "b",
+              "antonym": "secure in relationships",
+              "other_pole_label": "possessively jealous"
+            },
+            {
+              "cluster_id": 69,
+              "pole": "a",
+              "antonym": "non-reader",
+              "other_pole_label": "avoids difficult reading"
+            },
+            {
+              "cluster_id": 69,
+              "pole": "b",
+              "antonym": "reads difficult material readily",
+              "other_pole_label": "avid reader"
+            },
+            {
+              "cluster_id": 71,
+              "pole": "a",
+              "antonym": "indifferent to beauty",
+              "other_pole_label": "creatively inactive"
+            },
+            {
+              "cluster_id": 71,
+              "pole": "b",
+              "antonym": "creatively active",
+              "other_pole_label": "aesthetically inclined"
+            },
+            {
+              "cluster_id": 82,
+              "pole": "b",
+              "antonym": "lawbreaking",
+              "other_pole_label": "law-breaking"
+            }
+          ]
+        },
+        "350": {
+          "n_named": {
+            "blind": 405,
+            "hinted": 405
+          },
+          "kind": {
+            "blind": {
+              "membership": 7,
+              "physical": 2,
+              "state": 2,
+              "trait": 394
+            },
+            "hinted": {
+              "membership": 11,
+              "physical": 1,
+              "state": 2,
+              "trait": 391
+            }
+          },
+          "single_word_exists": 0.5037,
+          "ambiguity_flag": 0.2519,
+          "n_both_forms": 401,
+          "disagree_rate": 0.6683,
+          "bipolar_directions": 100,
+          "antonym_exact": 10,
+          "antonym_overlap": 31,
+          "antonym_agreement": 0.41,
+          "antonym_target": 0.8,
+          "antonym_misses": [
+            {
+              "cluster_id": 20,
+              "pole": "a",
+              "antonym": "straightforward with others",
+              "other_pole_label": "non-manipulative"
+            },
+            {
+              "cluster_id": 21,
+              "pole": "a",
+              "antonym": "speaks sparingly",
+              "other_pole_label": "reticent"
+            },
+            {
+              "cluster_id": 21,
+              "pole": "b",
+              "antonym": "talkative",
+              "other_pole_label": "talks excessively"
+            },
+            {
+              "cluster_id": 22,
+              "pole": "a",
+              "antonym": "rule-flouting",
+              "other_pole_label": "rebellious against authority"
+            },
+            {
+              "cluster_id": 22,
+              "pole": "b",
+              "antonym": "deferential to authority",
+              "other_pole_label": "rule-abiding"
+            },
+            {
+              "cluster_id": 24,
+              "pole": "a",
+              "antonym": "unimaginative and routine-bound",
+              "other_pole_label": "questions prescribed methods"
+            },
+            {
+              "cluster_id": 24,
+              "pole": "b",
+              "antonym": "follows instructions readily",
+              "other_pole_label": "inventive and idea-prone"
+            },
+            {
+              "cluster_id": 29,
+              "pole": "a",
+              "antonym": "quits easily",
+              "other_pole_label": "fails to follow through"
+            },
+            {
+              "cluster_id": 29,
+              "pole": "b",
+              "antonym": "follows through reliably",
+              "other_pole_label": "persistent"
+            },
+            {
+              "cluster_id": 35,
+              "pole": "a",
+              "antonym": "emotionally guarded",
+              "other_pole_label": "holds back negative feelings"
+            },
+            {
+              "cluster_id": 37,
+              "pole": "b",
+              "antonym": "single-minded focus",
+              "other_pole_label": "hard to distract"
+            },
+            {
+              "cluster_id": 41,
+              "pole": "a",
+              "antonym": "distrustful of people",
+              "other_pole_label": "cynical about human nature"
+            },
+            {
+              "cluster_id": 43,
+              "pole": "a",
+              "antonym": "risk-averse",
+              "other_pole_label": "cautious and self-protective"
+            },
+            {
+              "cluster_id": 47,
+              "pole": "b",
+              "antonym": "keeps their word",
+              "other_pole_label": "scrupulously honest"
+            },
+            {
+              "cluster_id": 56,
+              "pole": "a",
+              "antonym": "aimless",
+              "other_pole_label": "driven and self-assured"
+            },
+            {
+              "cluster_id": 56,
+              "pole": "b",
+              "antonym": "lacks drive",
+              "other_pole_label": "goal-oriented"
+            },
+            {
+              "cluster_id": 60,
+              "pole": "b",
+              "antonym": "keeps busy",
+              "other_pole_label": "idles away free time"
+            },
+            {
+              "cluster_id": 67,
+              "pole": "a",
+              "antonym": "prefers routine",
+              "other_pole_label": "resists novelty"
+            },
+            {
+              "cluster_id": 67,
+              "pole": "b",
+              "antonym": "embraces novelty",
+              "other_pole_label": "craves variety"
+            },
+            {
+              "cluster_id": 69,
+              "pole": "a",
+              "antonym": "sees people as equals",
+              "other_pole_label": "self-aggrandizing"
+            }
+          ]
+        },
+        "600": {
+          "n_named": {
+            "blind": 517,
+            "hinted": 514
+          },
+          "kind": {
+            "blind": {
+              "action": 1,
+              "membership": 12,
+              "physical": 3,
+              "state": 2,
+              "trait": 499
+            },
+            "hinted": {
+              "membership": 10,
+              "physical": 3,
+              "state": 1,
+              "trait": 500
+            }
+          },
+          "single_word_exists": 0.4913,
+          "ambiguity_flag": 0.1954,
+          "n_both_forms": 509,
+          "disagree_rate": 0.6758,
+          "bipolar_directions": 76,
+          "antonym_exact": 8,
+          "antonym_overlap": 22,
+          "antonym_agreement": 0.3947,
+          "antonym_target": 0.8,
+          "antonym_misses": [
+            {
+              "cluster_id": 2,
+              "pole": "a",
+              "antonym": "puts own needs first",
+              "other_pole_label": "insincerely caring"
+            },
+            {
+              "cluster_id": 2,
+              "pole": "b",
+              "antonym": "genuinely caring",
+              "other_pole_label": "puts others' needs first"
+            },
+            {
+              "cluster_id": 5,
+              "pole": "a",
+              "antonym": "grounded in surroundings",
+              "other_pole_label": "rarely daydreams"
+            },
+            {
+              "cluster_id": 6,
+              "pole": "a",
+              "antonym": "unimaginative and routine-bound",
+              "other_pole_label": "questions prescribed methods"
+            },
+            {
+              "cluster_id": 6,
+              "pole": "b",
+              "antonym": "follows prescribed methods",
+              "other_pole_label": "inventive and idea-driven"
+            },
+            {
+              "cluster_id": 11,
+              "pole": "a",
+              "antonym": "reticent in speech",
+              "other_pole_label": "talks mostly about self"
+            },
+            {
+              "cluster_id": 11,
+              "pole": "b",
+              "antonym": "turns talk to others",
+              "other_pole_label": "compulsively talkative"
+            },
+            {
+              "cluster_id": 19,
+              "pole": "a",
+              "antonym": "straightforward with others",
+              "other_pole_label": "non-manipulative"
+            },
+            {
+              "cluster_id": 25,
+              "pole": "a",
+              "antonym": "emotionally guarded",
+              "other_pole_label": "holds back negative feelings"
+            },
+            {
+              "cluster_id": 26,
+              "pole": "a",
+              "antonym": "gives up easily",
+              "other_pole_label": "leaves tasks unfinished"
+            },
+            {
+              "cluster_id": 26,
+              "pole": "b",
+              "antonym": "follows things through",
+              "other_pole_label": "persistent"
+            },
+            {
+              "cluster_id": 43,
+              "pole": "b",
+              "antonym": "reads difficult material readily",
+              "other_pole_label": "avid reader"
+            },
+            {
+              "cluster_id": 45,
+              "pole": "b",
+              "antonym": "steadily focused",
+              "other_pole_label": "hard to distract"
+            },
+            {
+              "cluster_id": 46,
+              "pole": "b",
+              "antonym": "trusting of human nature",
+              "other_pole_label": "believes people are good"
+            },
+            {
+              "cluster_id": 67,
+              "pole": "b",
+              "antonym": "easily satisfied",
+              "other_pole_label": "gullible"
+            },
+            {
+              "cluster_id": 98,
+              "pole": "a",
+              "antonym": "takes on own share",
+              "other_pole_label": "scrupulous about credit"
+            },
+            {
+              "cluster_id": 98,
+              "pole": "b",
+              "antonym": "careless about credit",
+              "other_pole_label": "shirks work onto others"
+            },
+            {
+              "cluster_id": 99,
+              "pole": "a",
+              "antonym": "breaks promises",
+              "other_pole_label": "overpromises and underdelivers"
+            },
+            {
+              "cluster_id": 117,
+              "pole": "a",
+              "antonym": "prefers solitude",
+              "other_pole_label": "dislikes company"
+            },
+            {
+              "cluster_id": 117,
+              "pole": "b",
+              "antonym": "enjoys company",
+              "other_pole_label": "sociable"
+            }
+          ]
+        }
+      },
+      "kind_vs_m1": {
+        "n_pairs": 517,
+        "form": "blind",
+        "cross": {
+          "action / tagged": 1,
+          "membership / reject": 1,
+          "membership / tagged": 2,
+          "membership / trait": 9,
+          "physical / tagged": 3,
+          "state / tagged": 2,
+          "trait / reject": 2,
+          "trait / tagged": 5,
+          "trait / trait": 492
+        },
+        "m1_tags": {
+          "membership": 10,
+          "no_persona_reading": 2,
+          "physical": 5,
+          "state": 8,
+          "stretched": 1
+        },
+        "n_agree": 501,
+        "agreement": 0.9691,
+        "note": "approximate: M1's tags are the verdict of record, this column is the naming call's guess"
+      }
+    },
+    "census_overlap": {
+      "n": 517,
+      "n_census": 99,
+      "share": 0.1915,
+      "words": [
+        "analytical",
+        "assertive",
+        "atheistic",
+        "attention_seeking",
+        "bossy",
+        "careless",
+        "cheerful",
+        "compassionate",
+        "competitive",
+        "conceited",
+        "conventional",
+        "deceitful",
+        "decisive",
+        "deliberate",
+        "disabled",
+        "domineering",
+        "down_to_earth",
+        "eloquent",
+        "energetic",
+        "envious",
+        "exacting",
+        "exploitative",
+        "fearful",
+        "fearless",
+        "flamboyant",
+        "flirtatious",
+        "forgiving",
+        "frugal",
+        "good_looking",
+        "grateful",
+        "gullible",
+        "habitual",
+        "humorless",
+        "impartial",
+        "inattentive",
+        "indecisive",
+        "inflexible",
+        "inquisitive",
+        "insubordinate",
+        "introspective",
+        "intrusive",
+        "irreligious",
+        "jealous",
+        "joyless",
+        "laid_back",
+        "law_abiding",
+        "materialistic",
+        "modest",
+        "open_minded",
+        "opinionated",
+        "optimistic",
+        "outspoken",
+        "patient",
+        "perfectionistic",
+        "persistent",
+        "possessive",
+        "punctual",
+        "quarrelsome",
+        "quick_witted",
+        "resourceful",
+        "restless",
+        "reticent",
+        "ruminative",
+        "secretive",
+        "self_absorbed",
+        "self_deprecating",
+        "self_doubting",
+        "self_effacing",
+        "self_important",
+        "self_improving",
+        "self_reliant",
+        "self_restrained",
+        "self_righteous",
+        "serious_minded",
+        "show_off",
+        "single_minded",
+        "sociable",
+        "soft_hearted",
+        "tender_hearted",
+        "traditional",
+        "trusting",
+        "undependable",
+        "unemotional",
+        "ungrateful",
+        "unhurried",
+        "unimaginative",
+        "unprejudiced",
+        "unreflective",
+        "unworried",
+        "vindictive",
+        "wise"
+      ]
+    },
+    "submitted": {
+      "n_candidates": 517,
+      "n_distinct": 506,
+      "counts": {
+        "n_kept_clusters": 486,
+        "n_poles": 525,
+        "n_named": 517,
+        "n_unnamed": 8,
+        "n_loose_skipped": 114,
+        "n_selected_out": 0,
+        "n_submitted": 517,
+        "label_choice": "blind",
+        "kinds": {
+          "action": 1,
+          "membership": 12,
+          "physical": 3,
+          "state": 2,
+          "trait": 499
+        }
+      },
+      "registry": {
+        "n_submitted": 517,
+        "n_new": 212,
+        "n_merged": 305,
+        "n_unchanged": 0,
+        "invalid": [],
+        "n_keys": 506
+      },
+      "estimate": {
+        "n": 506,
+        "m1_usd": 3.6432,
+        "m3_usd": 4.8981,
+        "total_usd": 8.5413,
+        "assumptions": {
+          "m1_usd_per_word": 0.0072,
+          "m3_usd_per_passed_word": 0.011,
+          "m1_pass_rate": 0.88,
+          "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6), via censuses/submit.py"
+        }
+      }
+    },
+    "m1_m3": {
+      "n_rows": 506,
+      "n_filtered": 506,
+      "verdict": {
+        "reject": {
+          "n": 3,
+          "share": 0.0059
+        },
+        "tagged": {
+          "n": 13,
+          "share": 0.0257
+        },
+        "trait": {
+          "n": 490,
+          "share": 0.9684
+        }
+      },
+      "outcome": {
+        "physical": {
+          "n": 5,
+          "share": 0.0099
+        },
+        "states": {
+          "n": 8,
+          "share": 0.0158
+        },
+        "trait": {
+          "n": 490,
+          "share": 0.9684
+        },
+        "turned_away": {
+          "n": 3,
+          "share": 0.0059
+        }
+      },
+      "n_scored": 496,
+      "decision": {
+        "covered": {
+          "n": 258,
+          "share": 0.5202
+        },
+        "grey": {
+          "n": 1,
+          "share": 0.002
+        },
+        "new": {
+          "n": 237,
+          "share": 0.4778
+        }
+      },
+      "pair_completions": 61,
+      "review_flags": 58
+    },
+    "known_analogues": {
+      "exact": {
+        "adhd": [
+          "ADHD"
+        ],
+        "problem_solving": [
+          "Problem-solving"
+        ]
+      },
+      "variant": {
+        "adaptable": [
+          "Adaptability"
+        ],
+        "adventurous": [
+          "Adventurousness"
+        ],
+        "agreeable": [
+          "Agreeableness"
+        ],
+        "anxious": [
+          "Anxiety"
+        ],
+        "authentic": [
+          "Integrity/Honesty/Authenticity"
+        ],
+        "callous": [
+          "Callousness"
+        ],
+        "calm": [
+          "Calmness"
+        ],
+        "cautious": [
+          "Cautiousness"
+        ],
+        "cheerful": [
+          "Cheerfulness"
+        ],
+        "competent": [
+          "Competence"
+        ],
+        "conscientious": [
+          "Conscientiousness"
+        ],
+        "cooperative": [
+          "Cooperation"
+        ],
+        "creative": [
+          "Creativity/Originality",
+          "Originality/Creativity"
+        ],
+        "deliberate": [
+          "Deliberateness"
+        ],
+        "dependent": [
+          "Conformity/Dependence/Need for approval"
+        ],
+        "dissociative": [
+          "Dissociation"
+        ],
+        "dominant": [
+          "Dominance"
+        ],
+        "emotional": [
+          "Emotionality"
+        ],
+        "expressive": [
+          "Expressiveness"
+        ],
+        "extravagant": [
+          "Extravagance"
+        ],
+        "fair": [
+          "Equity/Fairness"
+        ],
+        "feminine": [
+          "Femininity"
+        ],
+        "flexible": [
+          "Flexibility"
+        ],
+        "friendly": [
+          "Friendliness"
+        ],
+        "gentle": [
+          "Gentleness"
+        ],
+        "grandiose": [
+          "Grandiosity"
+        ],
+        "gregarious": [
+          "Gregariousness"
+        ],
+        "independent": [
+          "Independence"
+        ],
+        "industrious": [
+          "Industriousness/Perseverance/Persistence"
+        ],
+        "inquisitive": [
+          "Inquisitiveness"
+        ],
+        "introspective": [
+          "Introspection/Private Self-Consciousness"
+        ],
+        "irresponsible": [
+          "Irresponsibility"
+        ],
+        "joyful": [
+          "Joyfulness"
+        ],
+        "manipulative": [
+          "Manipulativeness"
+        ],
+        "methodical": [
+          "Methodicalness"
+        ],
+        "moral": [
+          "Morality"
+        ],
+        "open_minded": [
+          "Judgment/Open-mindedness"
+        ],
+        "patient": [
+          "Patience"
+        ],
+        "perfectionist": [
+          "Perfectionism"
+        ],
+        "playful": [
+          "Humor/Playfulness"
+        ],
+        "polite": [
+          "Politeness"
+        ],
+        "provocative": [
+          "Provocativeness"
+        ],
+        "prudent": [
+          "Prudence"
+        ],
+        "rebellious": [
+          "Rebelliousness"
+        ],
+        "reckless": [
+          "Recklessness"
+        ],
+        "religious": [
+          "Spirituality/Religiousness"
+        ],
+        "resourceful": [
+          "Resourcefulness"
+        ],
+        "responsible": [
+          "Responsibility"
+        ],
+        "rigid": [
+          "Rigidity"
+        ],
+        "rude": [
+          "Rudeness"
+        ],
+        "self_conscious": [
+          "Self-consciousness"
+        ],
+        "sentimental": [
+          "Sentimentality"
+        ],
+        "sincere": [
+          "Sincerity"
+        ],
+        "spiritual": [
+          "Spirituality/Religiousness"
+        ],
+        "submissive": [
+          "Submissiveness"
+        ],
+        "timid": [
+          "Timidity"
+        ],
+        "unpretentious": [
+          "Unpretentiousness"
+        ]
+      }
+    },
+    "recovery": {
+      "exact": {
+        "n_analogues": 2,
+        "n_hit": 0,
+        "share": 0.0,
+        "target": 0.9,
+        "hits": {},
+        "misses": [
+          "adhd",
+          "problem_solving"
+        ]
+      },
+      "variant": {
+        "n_analogues": 57,
+        "n_hit": 30,
+        "share": 0.5263,
+        "target": 0.9,
+        "hits": {
+          "adventurous": [
+            "craves_variety#1",
+            "open_to_new_experiences#1",
+            "seeks_thrills#1"
+          ],
+          "agreeable": [
+            "harmony_seeking#1",
+            "values_harmony#1"
+          ],
+          "anxious": [
+            "fearful#1",
+            "fearful_of_illness#1",
+            "prone_to_health_anxiety#1"
+          ],
+          "callous": [
+            "emotionally_unmoved_by_sadness#1"
+          ],
+          "cheerful": [
+            "cheerful#1"
+          ],
+          "creative": [
+            "inventive_and_idea_driven#1",
+            "offers_fresh_perspectives#1"
+          ],
+          "deliberate": [
+            "deliberate#1",
+            "weighs_options_carefully#1"
+          ],
+          "dissociative": [
+            "prone_to_derealization#1",
+            "prone_to_dissociative_detachment#1",
+            "prone_to_dissociative_lapses#1"
+          ],
+          "expressive": [
+            "emotionally_open#1"
+          ],
+          "extravagant": [
+            "spends_money_recklessly#1"
+          ],
+          "fair": [
+            "impartial#1",
+            "scrupulously_fair#1"
+          ],
+          "gentle": [
+            "harmlessly_gentle#1"
+          ],
+          "grandiose": [
+            "conceited#1",
+            "self_admiring#1",
+            "self_important#1"
+          ],
+          "gregarious": [
+            "sociable#1",
+            "socially_oriented#1"
+          ],
+          "independent": [
+            "prefers_self_sufficiency#1"
+          ],
+          "inquisitive": [
+            "inquisitive#1"
+          ],
+          "introspective": [
+            "introspective#1"
+          ],
+          "irresponsible": [
+            "shirks_responsibilities#1"
+          ],
+          "joyful": [
+            "joyfully_exuberant#1"
+          ],
+          "manipulative": [
+            "manipulative_toward_others#1"
+          ],
+          "methodical": [
+            "methodical_and_orderly#1"
+          ],
+          "open_minded": [
+            "open_minded#1"
+          ],
+          "patient": [
+            "comfortable_with_waiting#1",
+            "patient#1"
+          ],
+          "perfectionist": [
+            "hard_to_satisfy#1",
+            "intolerant_of_sloppiness#1",
+            "perfectionistic#1"
+          ],
+          "playful": [
+            "playful_and_humorous#1"
+          ],
+          "prudent": [
+            "cautious_and_self_protective#1"
+          ],
+          "religious": [
+            "devoutly_religious#1",
+            "spiritually_convinced#1"
+          ],
+          "resourceful": [
+            "resourceful#1"
+          ],
+          "sentimental": [
+            "sentimental_keeper_of_things#1"
+          ],
+          "submissive": [
+            "easily_dominated_by_others#1"
+          ]
+        },
+        "misses": [
+          "adaptable",
+          "authentic",
+          "calm",
+          "cautious",
+          "competent",
+          "conscientious",
+          "cooperative",
+          "dependent",
+          "dominant",
+          "emotional",
+          "feminine",
+          "flexible",
+          "friendly",
+          "industrious",
+          "moral",
+          "polite",
+          "provocative",
+          "rebellious",
+          "reckless",
+          "responsible",
+          "rigid",
+          "rude",
+          "self_conscious",
+          "sincere",
+          "spiritual",
+          "timid",
+          "unpretentious"
+        ]
+      }
+    },
+    "cost": {
+      "files": {
+        "naming": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/ipip/naming_usage.json",
+        "cluster_embeddings": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/ipip/cluster_usage.json",
+        "granularity_g600": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/ipip/granularity/g600/usage.json",
+        "granularity_g350": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/ipip/granularity/g350/usage.json",
+        "granularity_g150": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/ipip/granularity/g150/usage.json",
+        "run": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/ipip/2026-10-13-g600/usage.json",
+        "m1_filter": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-13-g600_ipip/usage.json",
+        "m3_novelty": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-13-g600_ipip/usage.json"
+      },
+      "per_model": {
+        "claude-haiku-5-5": 1.1914,
+        "claude-opus-5-5": 1.1938,
+        "claude-sonnet-5-5": 4.3442,
+        "embeddinggemma-300m": 0.0,
+        "text-embedding-3-large": 0.0048
+      },
+      "by_stage": {
+        "naming": 0.5896,
+        "cluster_embeddings": 0.0043,
+        "granularity_g600": 1.1883,
+        "granularity_g350": 0.6795,
+        "granularity_g150": 0.4553,
+        "run": 0.0,
+        "m1_filter": 1.6218,
+        "m3_novelty": 2.1954
+      },
+      "total_usd": 6.7342
+    },
+    "per_pole_m1_m3_usd": 0.00738,
+    "projected_full_run": {
+      "n_kept_poles": 525,
+      "named_share_measured": 0.9848,
+      "n_poles_projected": 517,
+      "naming_usd": 0.59,
+      "m1_m3_usd": 3.82,
+      "rate_source": "measured on this run",
+      "total_usd": 4.41
+    },
+    "useful_per_dollar": {
+      "n_new": 237,
+      "n_pair_completion": 20,
+      "useful": 257,
+      "usd": 6.7342,
+      "per_dollar": 38.1634
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/ipip_generator.py report --run-id 2026-10-13-g600",
+      "git_sha": "9ede3f5a+dirty",
+      "author": "Roger Dearnaley",
+      "title": "IPIP generator evaluation, run 2026-10-13-g600"
+    },
+    "produced_at": "2026-10-13T03:27:02+00:00",
+    "inputs": [
+      {
+        "dep_key": "candidates",
+        "path": "data/candidates/runs/ipip/2026-10-13-g600/candidates.jsonl",
+        "fingerprint": "v1:2026-10-13T02:49:18+00:00@169686",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:49:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "run_json",
+        "path": "data/candidates/runs/ipip/2026-10-13-g600/run.json",
+        "fingerprint": "v1:2026-10-13T02:49:21+00:00@57812",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:49:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "items",
+        "path": "data/candidates/ipip/items.jsonl",
+        "fingerprint": "v1:2026-10-13T02:35:20+00:00@846469",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:35:20+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "cluster_summary",
+        "path": "data/candidates/ipip/cluster_summary.json",
+        "fingerprint": "v1:2026-10-13T02:37:19+00:00@58330",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:37:19+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "granularity_readout",
+        "path": "data/candidates/ipip/granularity_readout.json",
+        "fingerprint": "v1:2026-10-13T02:49:18+00:00@14833",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:49:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "naming_responses",
+        "path": "data/candidates/ipip/naming_responses.jsonl",
+        "fingerprint": "v1:2026-10-13T02:45:55+00:00@6928384",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T02:45:55+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-13T03:26:58+00:00@459752816",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T03:26:58+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "07c2078963c2c3f98024f1ed406883ec0470c71cdfb999e87f4edf0fb2795ec1"
+  }
+}
