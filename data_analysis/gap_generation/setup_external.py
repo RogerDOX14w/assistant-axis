@@ -28,6 +28,16 @@ nothing is read from or written under the home directory, because
 ``data/external/hf`` before ``huggingface_hub`` is imported.  ``--dry-run``
 prints the target and patterns and makes no network call.
 
+    uv run python data_analysis/gap_generation/setup_external.py --moby [--dry-run]
+
+``--moby`` fetches the Moby Thesaurus II (Project Gutenberg #3202, public domain, about 25 MB: 24,853,275 bytes
+on 2026-10-13) into ``data/external/moby/mthesaur.txt`` for workstream 11's lexical lookup (approved by Roger in
+plan 11, 11_novelty_ensemble.md section 9.1): written to ``.part`` and renamed, its sha256 and size recorded in
+``data/external/moby/DOWNLOAD_MANIFEST.json`` (git-ignored) and the tracked
+``data/candidates/lexical/sources_manifest.json``, with the URL, time, tool, licence and head count
+(``assistant_axis.gapgen.lexical.fetch_moby``).  Idempotent: a file matching its manifest is not fetched again.
+The sandbox's network filter may need ``www.gutenberg.org`` allowed for this one command.
+
 No API cost.  ``data/external/`` is gitignored.
 """
 from __future__ import annotations
@@ -96,19 +106,55 @@ def fetch_hf_model(model_id: str, *, dry_run: bool = False) -> int:
     return 0
 
 
+def fetch_moby(*, dry_run: bool = False, fetcher=None, dest_dir: Path | None = None,
+               sources_manifest_path: Path | None = None) -> int:
+    """``--moby``: :func:`assistant_axis.gapgen.lexical.fetch_moby` into ``data/external/moby/``, then the
+    manifest line (size, heads, sha256, URL)."""
+    from assistant_axis.gapgen import lexical as LX
+    from assistant_axis.gapgen.runs import git_sha
+    target_dir = Path(dest_dir) if dest_dir is not None else LX.MOBY_DIR
+    if not target_dir.resolve().is_relative_to(_REPO_ROOT.resolve()):
+        print(f"REFUSED: {target_dir} is outside the repository (the download stays in-tree)", file=sys.stderr)
+        return 1
+    kw = {"dry_run": dry_run, "git_sha": None if dry_run else git_sha()}
+    if fetcher is not None:
+        kw["fetcher"] = fetcher
+    if dest_dir is not None:
+        kw["dest_dir"] = dest_dir
+    if sources_manifest_path is not None:
+        kw["sources_manifest_path"] = sources_manifest_path
+    res = LX.fetch_moby(**kw)
+    for line in res.lines:
+        print(line)
+    if dry_run:
+        return 0
+    m = res.manifest
+    if not res.target.resolve().is_relative_to(_REPO_ROOT.resolve()):
+        print(f"REFUSED: the file landed outside the repository: {res.target}", file=sys.stderr)
+        return 1
+    print(f"manifest: {m.get('size'):,} bytes, {m.get('n_heads'):,} heads, sha256 {m.get('sha256')}, {m.get('url')}")
+    for p in res.written:
+        print(f"wrote {p}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--wn", action="store_true", help="install OEWN 2024 into data/external/wn/")
     ap.add_argument("--hf-model", action="append", default=[], metavar="ID",
                     help="pre-fetch a Hugging Face model (an M2 embedder or a generator's sampler) into "
                          "data/external/hf/ (repeatable); one of: " + ", ".join(allow_patterns()))
+    ap.add_argument("--moby", action="store_true",
+                    help="fetch the Moby Thesaurus II (Gutenberg #3202, about 25 MB) into data/external/moby/")
     ap.add_argument("--dry-run", action="store_true", help="print what would be downloaded, download nothing")
     args = ap.parse_args(argv)
-    if not args.wn and not args.hf_model:
-        ap.error("nothing to do: pass --wn and/or --hf-model ID")
+    if not args.wn and not args.hf_model and not args.moby:
+        ap.error("nothing to do: pass --wn, --moby and/or --hf-model ID")
     rc = 0
     for model_id in args.hf_model:
         rc = max(rc, fetch_hf_model(model_id, dry_run=args.dry_run))
+    if args.moby:
+        rc = max(rc, fetch_moby(dry_run=args.dry_run))
     if not args.wn:
         return rc
 

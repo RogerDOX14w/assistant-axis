@@ -79,8 +79,9 @@ def read_snapshot(path: Path | str) -> dict[str, dict]:
 ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "gloss", "entity_type",
               "sources", "freq", "wordnet", "filter", "novelty", "holding", "matches_existing",
               "heldout_hit", "review", "seed_queue_stem", "rev", "created_at", "updated_at")
-#: Blocks other workstreams fill (merge_block targets).
-BLOCKS = ("freq", "wordnet", "filter", "novelty", "review")
+#: Blocks other workstreams fill (merge_block targets).  ``lexical``: workstream 11's lexical sweep
+#: (``assistant_axis.gapgen.lexical_sweep``; not in :data:`ROW_FIELDS`, so a new row is unchanged).
+BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical")
 
 
 def utc_now() -> str:
