@@ -88,22 +88,22 @@ class TestPlanted:
 
 @pytest.mark.skipif(not RECORDED, reason="no recorded harness batch")
 class TestRecorded:
-    #: The four pilot batches the plan's hard figure was measured on.  Scoped 2026-10-13 (QUESTIONS 160): synonym
-    #: candidates produce Sonnet-4 readings at cut-off 3, which the match wave did not send to Opus (Sonnet covers
-    #: alone there), so a batch matched before the match wave also asked Opus at the strict cut-off
-    #: (`match_opus_also_at`, the same day) can list `needs_opus`: `rec_testing_paraphrase_set` lists 10 until it is
-    #: resumed (`recovery_test.py --resume`, 14 Opus calls, about $0.05); widen this test to every batch then.
-    PILOT_BATCHES = ("rec_antonym_check_pilot_1", "rec_censuses_2026-10-08-pilot", "rec_roget_2026-10-08-pilot",
-                     "rec_wn_clusters_2026-10-08-pilot")
+    #: History (QUESTIONS 160): synonym candidates produce Sonnet-4 readings at cut-off 3, which the match wave did
+    #: not send to Opus before 2026-10-13 (`match_opus_also_at` since); `rec_testing_paraphrase_set` listed 10 such
+    #: pairs until its resume the same day (14 Opus calls, $0.05).  Every recorded batch now has none.
 
     def test_needs_opus_is_empty_on_the_recorded_batches(self):
-        """Plan 13 § 8 (hard): the pilot batches hold no Sonnet reading that needs an Opus reading at cut-off 4 and
-        lacks one (they hold no Sonnet 4 at cut-off 3; a batch matched since 2026-10-13 has none by construction)."""
-        pilots = [b for b in RECORDED if b.name in self.PILOT_BATCHES]
-        assert len(pilots) == 4
-        for b in pilots:
+        """Plan 13 § 8 (hard): no recorded batch holds a Sonnet reading that needs an Opus reading at cut-off 4 and
+        lacks one (a batch matched since 2026-10-13 has none by construction)."""
+        assert len(RECORDED) >= 5
+        for b in RECORDED:
             ex = RX.extras_json(b)
             assert ex["needs_opus"] == [], b.name
+            for s in ex["seeds"]:
+                st = s["strict"]
+                assert st["n_recovered"] <= st["n_recovered_headline"]
+
+    def test_strict_never_exceeds_headline(self):
         for b in RECORDED:
             ex = RX.extras_json(b)
             for s in ex["seeds"]:
