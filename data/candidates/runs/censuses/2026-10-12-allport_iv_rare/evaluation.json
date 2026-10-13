@@ -1,0 +1,258 @@
+{
+  "result": {
+    "run_id": "2026-10-12-allport_iv_rare",
+    "generator": "censuses",
+    "stage": "allport_iv_rare",
+    "stage_rule": "Allport-only, below_hard_reject (allport_rare's rule), listed in column IV alone (Roger, 2026-10-12, gate audit 1)",
+    "every_nth": null,
+    "offset": null,
+    "transport": "batches",
+    "estimate": {
+      "n": 310,
+      "transport": "batches",
+      "m1_usd": 1.116,
+      "m3_usd": 1.5004,
+      "total_usd": 2.6164,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "batch_factor": 0.5,
+        "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
+      }
+    },
+    "parsed": {
+      "table_rows": 17958,
+      "tda_words": 2818,
+      "allport_words": 17708,
+      "allport_only_words": 15139,
+      "in_both": 2569,
+      "allport_lines": {
+        "I": 4470,
+        "II": 4511,
+        "III": 5191,
+        "IV": 3652
+      },
+      "malformed": 1
+    },
+    "floor": {
+      "stage_pool": 310,
+      "tda_cut": 0,
+      "registry_cuts": {
+        "n_floor": 0,
+        "n_floor_tda": 0,
+        "n_floor_rescued_now": 0,
+        "floor": [],
+        "n_probe": 5
+      },
+      "tda_below_dictionary_floor": 251,
+      "allport_only_cut": {
+        "below_hard_reject": 1341,
+        "unknown_word": 5614
+      },
+      "allport_only_eligible": {
+        "allport_hi": 4746,
+        "allport_probe": 3438
+      },
+      "stage_pools": {
+        "stages": {
+          "tda": 2818,
+          "allport_hi": 3646,
+          "allport_probe": 2525,
+          "allport_iv": 2013,
+          "allport_rare": 1031,
+          "allport_iv_rare": 310
+        },
+        "in_no_stage": {
+          "malformed": 1,
+          "unknown_word": 5614
+        },
+        "n_rows": 17958
+      },
+      "submitted_to_probe": 310,
+      "submitted_probe_routes": {
+        "curated_source": 75,
+        "gloss_hint": 235
+      }
+    },
+    "submitted": {
+      "n_candidates": 310,
+      "n_with_gloss_hint": 235,
+      "n_state_prefix": 0,
+      "registry": {
+        "n_submitted": 310,
+        "n_new": 308,
+        "n_merged": 2,
+        "n_unchanged": 0,
+        "invalid": [],
+        "n_keys": 310
+      }
+    },
+    "merges": {
+      "allport_cross_column": 58,
+      "allport_within_column": 57,
+      "tda_and_allport": 2569,
+      "tda_multi_row": 0,
+      "repaired": 23,
+      "submit_n_merged": 2,
+      "submit_n_unchanged": 0
+    },
+    "known_labels": {
+      "n": 1,
+      "stems": [
+        "polyandrous"
+      ]
+    },
+    "ceiling": {
+      "n_corpus": 932,
+      "n_multiword": 304,
+      "n_tda": 417,
+      "n_allport": 464,
+      "n_union": 498,
+      "tda": 0.4474,
+      "allport": 0.4979,
+      "union": 0.5343,
+      "union_single_word": 0.7436,
+      "n_matched_eligible": 496,
+      "submitted_of_matched": 0.996,
+      "matched_ineligible": [
+        "neopagan",
+        "polyandrous"
+      ],
+      "n_queue": 133,
+      "n_queue_union": 44,
+      "n_paren": 89,
+      "union_no_paren": 0.5907,
+      "guidelines": {
+        "union_no_paren": {
+          "value": 0.5907,
+          "aim": 0.5,
+          "met": true
+        },
+        "union_single_word": {
+          "value": 0.7436,
+          "aim": 0.75,
+          "met": false
+        }
+      }
+    },
+    "filter": {
+      "n_filtered": 310,
+      "n_rows": 310,
+      "verdict": {
+        "reject": 134,
+        "tagged": 75,
+        "trait": 101
+      },
+      "outcome": {
+        "physical": 35,
+        "roles": 11,
+        "states": 29,
+        "trait": 101,
+        "turned_away": 134
+      },
+      "tags": {
+        "evaluative_only": 2,
+        "membership": 13,
+        "no_persona_reading": 72,
+        "physical": 35,
+        "role_person": 11,
+        "state": 29,
+        "stretched": 55,
+        "too_rare": 5
+      },
+      "known_label_pass": {
+        "n_known": 1,
+        "n_filtered": 1,
+        "n_pass": 1,
+        "pass_rate": 1.0,
+        "by_outcome": {
+          "trait": 1
+        },
+        "misses": [],
+        "unfiltered": []
+      },
+      "state_gloss_compliance": 0.0
+    },
+    "novelty": {
+      "n_scored": 101,
+      "decision": {
+        "covered": 40,
+        "new": 61
+      },
+      "pair_completion": 12
+    },
+    "cost": {
+      "files": [
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/censuses/2026-10-12-allport_iv_rare/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-12-allport_iv_rare_censuses/usage.json",
+        "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-12-allport_iv_rare_censuses/usage.json"
+      ],
+      "per_model": {
+        "claude-haiku-5-5:batch": 0.3702,
+        "claude-opus-5-5:batch": 0.2567,
+        "claude-sonnet-5-5:batch": 0.6306,
+        "text-embedding-3-large": 0.0002
+      },
+      "total_usd": 1.2577
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-12-allport_iv_rare",
+      "git_sha": "32a9e824+dirty",
+      "author": "Roger Dearnaley",
+      "title": "census generator evaluation, run 2026-10-12-allport_iv_rare"
+    },
+    "produced_at": "2026-10-13T04:35:19+00:00",
+    "inputs": [
+      {
+        "dep_key": "census_table",
+        "path": "data/candidates/censuses/census_table.jsonl",
+        "fingerprint": "v1:2026-10-12T22:17:04+00:00@12717383",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-12T22:17:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "ingest_counts",
+        "path": "data/candidates/censuses/ingest_counts.json",
+        "fingerprint": "v1:2026-10-12T22:17:04+00:00@99550",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-12T22:17:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "candidates",
+        "path": "data/candidates/runs/censuses/2026-10-12-allport_iv_rare/candidates.jsonl",
+        "fingerprint": "v1:2026-10-12T22:55:13+00:00@84410",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-12T22:55:13+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "run_json",
+        "path": "data/candidates/runs/censuses/2026-10-12-allport_iv_rare/run.json",
+        "fingerprint": "v1:2026-10-12T22:55:15+00:00@19049",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-12T22:55:15+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-13T04:35:12+00:00@461135313",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T04:35:12+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "0a683d65524bdbbc912ff996120082e8fc2e525fb449b4b8e98158ddb82f69f9"
+  }
+}

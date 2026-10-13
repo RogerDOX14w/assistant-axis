@@ -1,0 +1,1287 @@
+{
+  "result": {
+    "n": 909,
+    "n_done": 909,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 238,
+      "tagged": 147,
+      "trait": 524
+    },
+    "verdict_fractions": {
+      "reject": 0.2618,
+      "tagged": 0.1617,
+      "trait": 0.5765
+    },
+    "tag_counts": {
+      "action": 12,
+      "evaluative_only": 7,
+      "membership": 24,
+      "no_persona_reading": 94,
+      "physical": 17,
+      "role_person": 19,
+      "state": 111,
+      "stretched": 97,
+      "too_rare": 28
+    },
+    "tag_fractions": {
+      "action": 0.0132,
+      "evaluative_only": 0.0077,
+      "membership": 0.0264,
+      "no_persona_reading": 0.1034,
+      "physical": 0.0187,
+      "role_person": 0.0209,
+      "state": 0.1221,
+      "stretched": 0.1067,
+      "too_rare": 0.0308
+    },
+    "region_counts": {
+      "alignment_ai_agent": 10,
+      "cognitive_epistemic": 90,
+      "communication_style": 98,
+      "emotional_temperament": 89,
+      "identity_demographic": 33,
+      "moral_stance": 66,
+      "social_interpersonal": 138
+    },
+    "polysemy_n": 304,
+    "polysemy_rate": 0.3344,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 286,
+    "second_opinion_n": 94,
+    "disagreements": 23,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 909,
+    "probe_n": 909,
+    "probe_unknown": 28,
+    "probe_failed": 0,
+    "second_opinion_requested": 94,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 524,
+      "comparison": 460,
+      "descriptors": 524,
+      "established": 2432,
+      "established_retry": 1,
+      "gloss": 524,
+      "gloss_retry": 2,
+      "kind": 2432,
+      "probe": 909,
+      "same_sense": 68,
+      "second_established": 110,
+      "second_kind": 110,
+      "second_same_sense": 25,
+      "second_sense": 94,
+      "second_sense_retry": 1,
+      "second_vague": 110,
+      "sense": 2643,
+      "sense_retry": 2,
+      "vague": 2432,
+      "vague_retry": 9
+    },
+    "cost_usd": 2.501,
+    "cost_per_candidate_usd": 0.002751,
+    "yield_per_usd": 114.4,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 2839038,
+          "completion_tokens": 3699294,
+          "cost_usd": 1.0668,
+          "n_calls": 12442
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 875117,
+          "completion_tokens": 111829,
+          "cost_usd": 1.4343,
+          "n_calls": 970
+        }
+      },
+      "total_cost_usd": 2.501,
+      "total_prompt_tokens": 3714155,
+      "total_completion_tokens": 3811123,
+      "n_calls": 13412
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 157,
+      "membership_kind": {
+        "affinity": 2,
+        "circumstance": 2,
+        "class": 2,
+        "family": 2,
+        "geography": 1,
+        "nationality_ethnicity_language": 2,
+        "relationship": 1,
+        "religion": 12
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 7,
+        "nontrait_person_sense": 1,
+        "obvious_sense_not_trait": 4,
+        "overshadowed": 61,
+        "reading_related": 53,
+        "first_thought_in_the_way": 171,
+        "leaves_something_out": 45,
+        "fits_many_in_different_ways": 46,
+        "most_likely_reading_stretched": 2
+      },
+      "comparison_relations": {
+        "None": 553
+      },
+      "holding": {
+        "nationalities": 2,
+        "physical": 17,
+        "roles": 19,
+        "states": 111
+      },
+      "freq_rescue": {
+        "curated_source": 353,
+        "gloss_hint": 556
+      },
+      "alignment_scores": {
+        "0": 203,
+        "1": 164,
+        "2": 74,
+        "3": 83,
+        "none": 0
+      }
+    },
+    "batch_id": "2026-10-12-allport_rare_censuses",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": "claude-sonnet-5-5",
+    "label_form": "judge-display-v1",
+    "split": {
+      "transport": "batches",
+      "pilot_figures": {
+        "n": 909,
+        "n_reached_step1": 881,
+        "outcomes": {
+          "physical": 17,
+          "roles": 19,
+          "states": 111,
+          "trait": 524,
+          "turned_away": 210
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "anormal",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Anormal\" is a misspelling of \"abnormal\" in English, and it is a Spanish, Portuguese, or French word rather than an English one."
+          },
+          {
+            "label": "bauch",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Bauch\" is the German word for belly, not an English word, and I know of no established English usage."
+          },
+          {
+            "label": "bel-espirit",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a misspelling of the French loanword \"bel esprit\" (with \"esprit\" spelled wrongly), so it is not a real English word as written."
+          },
+          {
+            "label": "capax",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Capax\" is a Latin adjective (\"capacious\"), not an English word, and it is not a regular English formation from an English root."
+          },
+          {
+            "label": "convertable",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a common misspelling of the standard form 'convertible', though some dictionaries list it as a variant."
+          },
+          {
+            "label": "cooning",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I know 'coon' as a noun for a raccoon and as a slur, but I cannot confidently pin down a standard verb sense that makes 'cooning' a clearly definable word."
+          },
+          {
+            "label": "fickling",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Fickle' is an adjective, and '-ing' is not a regular way to make a verb or noun from it in standard English, so 'fickling' has no plain meaning from its parts."
+          },
+          {
+            "label": "gorlin",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Gorlin' is mainly a surname (as in Gorlin syndrome) and is not an English common noun or a regular formation from one."
+          },
+          {
+            "label": "hairbrained",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Hairbrained' is a misspelling of the real word 'harebrained' (foolish or impractical), not a word in its own right."
+          },
+          {
+            "label": "hetter",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I can't confidently identify \"hetter\" as a real English word; it looks like a misspelling of \"better\" or \"hotter\", or an obscure dialect form I can't pin down."
+          },
+          {
+            "label": "hoit",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I can't confidently place \"hoit\" as a real English word or dialect term with a settled meaning, so I can't define it."
+          },
+          {
+            "label": "hydra-tained",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a nonce string built from 'hydra' and 'tained' (a fragment of 'attained' or 'retained'), with no recognized meaning."
+          },
+          {
+            "label": "javel",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Javel' appears in English only within the phrase 'javel water' (a variant of Javelle water), and as a standalone word it is essentially French, so I can't confidently call it an English word."
+          },
+          {
+            "label": "ketty",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I don't recognize \"ketty\" as a standard English word or a clear regular formation from one, so I can't define it confidently."
+          },
+          {
+            "label": "leaming",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Leaming' is a misspelling of 'learning' (the 'rn' typed as 'm'), not a recognized English word."
+          },
+          {
+            "label": "leresis",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I don't recognise \"leresis\" as an English word, and it isn't a regular formation from any English root I can identify, so I can't define it confidently."
+          },
+          {
+            "label": "orting",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Ort\" is a real noun meaning a scrap of leftover food, but \"orting\" is not an attested word and is not a regular verb form in English, so its meaning cannot be worked out confidently."
+          },
+          {
+            "label": "plausive",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Plausive' is not a standard English word; the real word is 'plausible', and 'plausive' is not a regular derivation from any real base."
+          },
+          {
+            "label": "precautious",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. Not a standard English word; it looks like a misspelling of \"precocious\" or a nonce formation, and \"precautionary\" is the real word for the intended sense."
+          },
+          {
+            "label": "reginal",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Reginal\" is not a standard English word; the real words are \"regnal\" (relating to a reign) and \"regional\", so this reads as a misspelling and cannot be built regularly from a real base."
+          },
+          {
+            "label": "rudas",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Rudas\" is not an English word; it is a proper name (a Budapest bath complex and a surname), and it does not follow from any English base by a regular affix."
+          },
+          {
+            "label": "secretar",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Secretar' is a truncated or misspelled form of 'secretary', not a standalone English word."
+          },
+          {
+            "label": "soverign",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. 'Soverign' is a misspelling of 'sovereign', which is a real English word meaning a supreme ruler or a self-governing state."
+          },
+          {
+            "label": "spack",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I know of no standard English word \"spack\" and cannot confidently define it from a regular prefix, suffix, or compound."
+          },
+          {
+            "label": "sprunt",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. I recall 'sprunt' only vaguely as a Scots dialect form, and I cannot pin down its meaning confidently."
+          },
+          {
+            "label": "streck",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Streck\" is not an English word; it resembles German \"strecken\" (to stretch) and is not a recognised English term or regular formation from one."
+          },
+          {
+            "label": "swad",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Swad\" is a Hindi/Urdu loanword meaning \"taste\" or \"flavor\" that is not an established English word, so I cannot confidently treat it as one."
+          },
+          {
+            "label": "underly",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. \"Underly\" is not a standard English word; the verb is \"underlie\" and the adjective is \"underlying\", and \"underly\" is not a regular derivation from a real word."
+          }
+        ],
+        "glosses": 524,
+        "glosses_form_ok": 504
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 524,
+          "ok_first_pass": 524,
+          "ok": 524
+        },
+        "comparison:first:claude-sonnet-5-5": {
+          "n": 460,
+          "ok_first_pass": 460,
+          "ok": 460
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 524,
+          "ok_first_pass": 524,
+          "ok": 524
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 2432,
+          "ok_first_pass": 2431,
+          "ok": 2432
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 110,
+          "ok_first_pass": 110,
+          "ok": 110
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 465,
+          "ok_first_pass": 464,
+          "ok": 465
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 59,
+          "ok_first_pass": 58,
+          "ok": 59
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 2432,
+          "ok_first_pass": 2432,
+          "ok": 2432
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 110,
+          "ok_first_pass": 110,
+          "ok": 110
+        },
+        "probe:first:claude-haiku-5-5": {
+          "n": 909,
+          "ok_first_pass": 909,
+          "ok": 909
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 68,
+          "ok_first_pass": 68,
+          "ok": 68
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 25,
+          "ok_first_pass": 25,
+          "ok": 25
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 2643,
+          "ok_first_pass": 2641,
+          "ok": 2643
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 94,
+          "ok_first_pass": 93,
+          "ok": 94
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 2432,
+          "ok_first_pass": 2423,
+          "ok": 2432
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 110,
+          "ok_first_pass": 110,
+          "ok": 110
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5:batch": {
+          "n_calls": 524,
+          "prompt_tokens": 75995,
+          "completion_tokens": 110806,
+          "cost_usd": 0.031501
+        },
+        "comparison@claude-sonnet-5-5:batch": {
+          "n_calls": 460,
+          "prompt_tokens": 511972,
+          "completion_tokens": 53667,
+          "cost_usd": 0.780307
+        },
+        "descriptors@claude-haiku-5-5:batch": {
+          "n_calls": 524,
+          "prompt_tokens": 250724,
+          "completion_tokens": 124590,
+          "cost_usd": 0.043684
+        },
+        "established@claude-haiku-5-5:batch": {
+          "n_calls": 2432,
+          "prompt_tokens": 292395,
+          "completion_tokens": 1048059,
+          "cost_usd": 0.276634
+        },
+        "established_retry@claude-haiku-5-5:batch": {
+          "n_calls": 1,
+          "prompt_tokens": 780,
+          "completion_tokens": 456,
+          "cost_usd": 0.000153
+        },
+        "gloss@claude-haiku-5-5:batch": {
+          "n_calls": 465,
+          "prompt_tokens": 52125,
+          "completion_tokens": 62935,
+          "cost_usd": 0.01834
+        },
+        "gloss@claude-sonnet-5-5:batch": {
+          "n_calls": 59,
+          "prompt_tokens": 41026,
+          "completion_tokens": 4313,
+          "cost_usd": 0.062591
+        },
+        "gloss_retry@claude-haiku-5-5:batch": {
+          "n_calls": 1,
+          "prompt_tokens": 860,
+          "completion_tokens": 320,
+          "cost_usd": 0.000123
+        },
+        "gloss_retry@claude-sonnet-5-5:batch": {
+          "n_calls": 1,
+          "prompt_tokens": 693,
+          "completion_tokens": 73,
+          "cost_usd": 0.001058
+        },
+        "kind@claude-haiku-5-5:batch": {
+          "n_calls": 2432,
+          "prompt_tokens": 346252,
+          "completion_tokens": 270675,
+          "cost_usd": 0.084981
+        },
+        "probe@claude-haiku-5-5:batch": {
+          "n_calls": 909,
+          "prompt_tokens": 375192,
+          "completion_tokens": 123565,
+          "cost_usd": 0.049651
+        },
+        "same_sense@claude-haiku-5-5:batch": {
+          "n_calls": 68,
+          "prompt_tokens": 29097,
+          "completion_tokens": 11409,
+          "cost_usd": 0.004307
+        },
+        "second_established@claude-sonnet-5-5:batch": {
+          "n_calls": 110,
+          "prompt_tokens": 69562,
+          "completion_tokens": 11637,
+          "cost_usd": 0.127747
+        },
+        "second_kind@claude-sonnet-5-5:batch": {
+          "n_calls": 110,
+          "prompt_tokens": 111956,
+          "completion_tokens": 8386,
+          "cost_usd": 0.153886
+        },
+        "second_same_sense@claude-sonnet-5-5:batch": {
+          "n_calls": 25,
+          "prompt_tokens": 10679,
+          "completion_tokens": 2264,
+          "cost_usd": 0.021999
+        },
+        "second_sense@claude-sonnet-5-5:batch": {
+          "n_calls": 94,
+          "prompt_tokens": 77062,
+          "completion_tokens": 19585,
+          "cost_usd": 0.174987
+        },
+        "second_sense_retry@claude-sonnet-5-5:batch": {
+          "n_calls": 1,
+          "prompt_tokens": 821,
+          "completion_tokens": 156,
+          "cost_usd": 0.001601
+        },
+        "second_vague@claude-sonnet-5-5:batch": {
+          "n_calls": 110,
+          "prompt_tokens": 51346,
+          "completion_tokens": 11748,
+          "cost_usd": 0.110086
+        },
+        "sense@claude-haiku-5-5:batch": {
+          "n_calls": 2643,
+          "prompt_tokens": 274377,
+          "completion_tokens": 1672293,
+          "cost_usd": 0.431792
+        },
+        "sense_retry@claude-haiku-5-5:batch": {
+          "n_calls": 2,
+          "prompt_tokens": 206,
+          "completion_tokens": 1180,
+          "cost_usd": 0.000305
+        },
+        "vague@claude-haiku-5-5:batch": {
+          "n_calls": 2432,
+          "prompt_tokens": 1136842,
+          "completion_tokens": 272097,
+          "cost_usd": 0.124866
+        },
+        "vague_retry@claude-haiku-5-5:batch": {
+          "n_calls": 9,
+          "prompt_tokens": 4193,
+          "completion_tokens": 909,
+          "cost_usd": 0.000437
+        }
+      },
+      "cache": {
+        "alignment:claude-haiku-5-5": {
+          "calls": 524,
+          "calls_writing": 1,
+          "calls_reading": 523,
+          "cache_write_tokens": 706,
+          "cache_read_tokens": 369238,
+          "hit_rate": 0.9981
+        },
+        "comparison:claude-sonnet-5-5": {
+          "calls": 460,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "descriptors:claude-haiku-5-5": {
+          "calls": 524,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "established:claude-haiku-5-5": {
+          "calls": 2433,
+          "calls_writing": 3,
+          "calls_reading": 2430,
+          "cache_write_tokens": 1716,
+          "cache_read_tokens": 1389960,
+          "hit_rate": 0.9988
+        },
+        "established:claude-sonnet-5-5": {
+          "calls": 110,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "gloss:claude-haiku-5-5": {
+          "calls": 466,
+          "calls_writing": 3,
+          "calls_reading": 463,
+          "cache_write_tokens": 1956,
+          "cache_read_tokens": 301876,
+          "hit_rate": 0.9936
+        },
+        "gloss:claude-sonnet-5-5": {
+          "calls": 60,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "kind:claude-haiku-5-5": {
+          "calls": 2432,
+          "calls_writing": 2,
+          "calls_reading": 2430,
+          "cache_write_tokens": 1950,
+          "cache_read_tokens": 2369250,
+          "hit_rate": 0.9992
+        },
+        "kind:claude-sonnet-5-5": {
+          "calls": 110,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "probe:claude-haiku-5-5": {
+          "calls": 909,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-haiku-5-5": {
+          "calls": 68,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "same_sense:claude-sonnet-5-5": {
+          "calls": 25,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "sense:claude-haiku-5-5": {
+          "calls": 2645,
+          "calls_writing": 3,
+          "calls_reading": 2642,
+          "cache_write_tokens": 2391,
+          "cache_read_tokens": 2105674,
+          "hit_rate": 0.9989
+        },
+        "sense:claude-sonnet-5-5": {
+          "calls": 95,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-haiku-5-5": {
+          "calls": 2441,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        },
+        "vague:claude-sonnet-5-5": {
+          "calls": 110,
+          "calls_writing": 0,
+          "calls_reading": 0,
+          "cache_write_tokens": 0,
+          "cache_read_tokens": 0,
+          "hit_rate": 0.0
+        }
+      },
+      "cached_steps": {
+        "claude-haiku-5-5": [
+          "sense",
+          "established",
+          "kind",
+          "gloss",
+          "alignment"
+        ],
+        "claude-sonnet-5-5": []
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5:batch": 3.5e-05,
+        "comparison@claude-sonnet-5-5:batch": 0.000858,
+        "descriptors@claude-haiku-5-5:batch": 4.8e-05,
+        "established@claude-haiku-5-5:batch": 0.000304,
+        "established_retry@claude-haiku-5-5:batch": 0.0,
+        "gloss@claude-haiku-5-5:batch": 2e-05,
+        "gloss@claude-sonnet-5-5:batch": 6.9e-05,
+        "gloss_retry@claude-haiku-5-5:batch": 0.0,
+        "gloss_retry@claude-sonnet-5-5:batch": 1e-06,
+        "kind@claude-haiku-5-5:batch": 9.3e-05,
+        "probe@claude-haiku-5-5:batch": 5.5e-05,
+        "same_sense@claude-haiku-5-5:batch": 5e-06,
+        "second_established@claude-sonnet-5-5:batch": 0.000141,
+        "second_kind@claude-sonnet-5-5:batch": 0.000169,
+        "second_same_sense@claude-sonnet-5-5:batch": 2.4e-05,
+        "second_sense@claude-sonnet-5-5:batch": 0.000193,
+        "second_sense_retry@claude-sonnet-5-5:batch": 2e-06,
+        "second_vague@claude-sonnet-5-5:batch": 0.000121,
+        "sense@claude-haiku-5-5:batch": 0.000475,
+        "sense_retry@claude-haiku-5-5:batch": 0.0,
+        "vague@claude-haiku-5-5:batch": 0.000137,
+        "vague_retry@claude-haiku-5-5:batch": 0.0
+      },
+      "second_opinion": {
+        "n": 94,
+        "disagree": [
+          "bookless",
+          "cabbing",
+          "chainless",
+          "complotting",
+          "decoying",
+          "dubitable",
+          "embroiling",
+          "envenomed",
+          "feting",
+          "frowsy",
+          "gorgonian",
+          "haloed",
+          "neurasthenic",
+          "onlooking",
+          "orgastic",
+          "overdriving",
+          "prevision",
+          "purloining",
+          "reclaimable",
+          "rubbishy",
+          "simplism",
+          "vatic",
+          "whapping"
+        ]
+      },
+      "resumed_calls": 0,
+      "batches_submitted": 10,
+      "readings": {
+        "n_readings": 3,
+        "rule": "turned_away_only_if_unanimous_else_majority",
+        "n_words": 881,
+        "all_the_same": 627,
+        "all_the_same_share": 0.7117,
+        "by_how": {
+          "unanimous": 627,
+          "most_common": 245,
+          "tie_trait": 8,
+          "tie_first": 1
+        },
+        "turned_away_by_every_reading": 210,
+        "rescued": {
+          "n": 192,
+          "by_n_turned_away": {
+            "1": 90,
+            "2": 102
+          },
+          "labels": [
+            "aery",
+            "aflare",
+            "alchemistic",
+            "amort",
+            "anachronous",
+            "apprising",
+            "approbative",
+            "arraigning",
+            "assimilative",
+            "attent",
+            "aulic",
+            "awing",
+            "backboned",
+            "barracking",
+            "bastardizing",
+            "battleful",
+            "beauclerk",
+            "bedeviling",
+            "belletristic",
+            "benedictory",
+            "blackballing",
+            "bloomy",
+            "bookless",
+            "bosky",
+            "brainish",
+            "buddhistic",
+            "cabbing",
+            "cacodemonic",
+            "callet",
+            "cankerous",
+            "cattish",
+            "chirruping",
+            "chording",
+            "chorusing",
+            "christianise",
+            "ciphering",
+            "clangorous",
+            "cogging",
+            "conformant",
+            "confutative",
+            "conscionable",
+            "consentaneous",
+            "consentient",
+            "coquetting",
+            "cosset",
+            "countermanding",
+            "debauching",
+            "denunciative",
+            "depraving",
+            "desiccating",
+            "detesting",
+            "direful",
+            "disgorging",
+            "disgustful",
+            "disharmonic",
+            "disordering",
+            "divinized",
+            "dubitable",
+            "duncical",
+            "dunderhead",
+            "earthborn",
+            "effectuating",
+            "enfeebling",
+            "enfranchising",
+            "engorging",
+            "errorless",
+            "excitative",
+            "exculpating",
+            "excusatory",
+            "fathoming",
+            "felicitating",
+            "feting",
+            "finespun",
+            "flummery",
+            "footle",
+            "foudroyant",
+            "fremd",
+            "frighting",
+            "frumpish",
+            "fulgent",
+            "genuflecting",
+            "gladdening",
+            "glossarist",
+            "gorgonian",
+            "haloed",
+            "hamstringing",
+            "harpooning",
+            "hazarding",
+            "hefting",
+            "hoaxing",
+            "hortative",
+            "impugnable",
+            "inexpugnable",
+            "jouncing",
+            "laving",
+            "lenitive",
+            "libeling",
+            "lightful",
+            "limmer",
+            "lubricious",
+            "lunkhead",
+            "macaronic",
+            "maltreating",
+            "manumitting",
+            "miry",
+            "misapplying",
+            "miscreated",
+            "misstating",
+            "motiveless",
+            "murmurous",
+            "mysophobia",
+            "neophobia",
+            "neoteric",
+            "nerving",
+            "nocent",
+            "numskull",
+            "nyctophobia",
+            "orgastic",
+            "originative",
+            "orphean",
+            "otiose",
+            "outthrust",
+            "overdriving",
+            "overpainted",
+            "overpainting",
+            "overreckoning",
+            "overtaxing",
+            "overweighting",
+            "paramnesia",
+            "peccant",
+            "plaguy",
+            "plangent",
+            "polytropic",
+            "precipitant",
+            "preponderating",
+            "press-agenting",
+            "prevision",
+            "propitiating",
+            "purloining",
+            "quean",
+            "quenchless",
+            "rankling",
+            "reclaimable",
+            "recollective",
+            "refreshful",
+            "reiterative",
+            "renascent",
+            "repressible",
+            "resistless",
+            "resuscitative",
+            "retrenching",
+            "robustious",
+            "rubbishy",
+            "ruthful",
+            "satiable",
+            "savable",
+            "savorless",
+            "scintillant",
+            "screamy",
+            "secularizing",
+            "semidetached",
+            "semiparasitic",
+            "separative",
+            "shatter-pated",
+            "slaughterous",
+            "smeary",
+            "smeller",
+            "spiritous",
+            "splendiferous",
+            "spoilable",
+            "stomaching",
+            "suasive",
+            "suborning",
+            "sufferable",
+            "suppling",
+            "surcharging",
+            "swimmy",
+            "swingeing",
+            "thrillful",
+            "trustless",
+            "twopenny",
+            "umbrageous",
+            "uncrossable",
+            "unimprovable",
+            "unsoundable",
+            "upbraiding",
+            "vilipend",
+            "vincible",
+            "vivifying",
+            "voluntarist",
+            "warragal",
+            "whapping"
+          ]
+        },
+        "ties": {
+          "n": 9,
+          "labels": [
+            "bloomy",
+            "cacodemonic",
+            "coquetting",
+            "divinized",
+            "effectuating",
+            "glossarist",
+            "impugnable",
+            "press-agenting",
+            "smeller"
+          ]
+        },
+        "differs_from_first_reading": {
+          "n": 126,
+          "labels": [
+            "aflare",
+            "apprising",
+            "arraigning",
+            "assimilative",
+            "attent",
+            "backboned",
+            "barracking",
+            "battleful",
+            "belletristic",
+            "blushful",
+            "bookless",
+            "bullyragging",
+            "cacodemonic",
+            "chirruping",
+            "chording",
+            "chorusing",
+            "christianise",
+            "clangorous",
+            "cogging",
+            "complotting",
+            "confutative",
+            "conscionable",
+            "coxy",
+            "crapulous",
+            "dementing",
+            "denunciative",
+            "depraving",
+            "detesting",
+            "direful",
+            "disgorging",
+            "disgustful",
+            "disordering",
+            "distempered",
+            "dubitable",
+            "effectuating",
+            "enfranchising",
+            "engorging",
+            "errorless",
+            "excitative",
+            "exculpating",
+            "excusatory",
+            "fathoming",
+            "feting",
+            "flummery",
+            "foudroyant",
+            "frighting",
+            "frowsy",
+            "fulgent",
+            "gladdening",
+            "gorgonian",
+            "gymnosophist",
+            "hamstringing",
+            "harpooning",
+            "hazarding",
+            "hefting",
+            "hoaxing",
+            "impugnable",
+            "inexpugnable",
+            "jocund",
+            "jouncing",
+            "laving",
+            "lenitive",
+            "lightful",
+            "limmer",
+            "lionizing",
+            "lubricious",
+            "lunkhead",
+            "macaronic",
+            "maltreating",
+            "manumitting",
+            "mephistophelean",
+            "miry",
+            "misapplying",
+            "misconstruing",
+            "miscreated",
+            "misstating",
+            "monarchal",
+            "motiveless",
+            "neophobia",
+            "numskull",
+            "nyctophobia",
+            "orgastic",
+            "otiose",
+            "outthrust",
+            "overexerting",
+            "overpainting",
+            "overreckoning",
+            "overweighting",
+            "plaguy",
+            "preponderating",
+            "press-agenting",
+            "prevision",
+            "purloining",
+            "quean",
+            "rankling",
+            "reiterative",
+            "repressible",
+            "resistless",
+            "retrenching",
+            "robustious",
+            "savable",
+            "savorless",
+            "scintillant",
+            "screamy",
+            "semiparasitic",
+            "separative",
+            "slaughterous",
+            "smeller",
+            "spoilable",
+            "stomaching",
+            "sufferable",
+            "swingeing",
+            "thrillful",
+            "twopenny",
+            "undestroyable",
+            "unsoundable",
+            "upbraiding",
+            "vincible",
+            "vivifying",
+            "voluntarist",
+            "wailful",
+            "wangling",
+            "whapping",
+            "wizardly",
+            "wonderworking",
+            "woolgathering"
+          ]
+        },
+        "with_a_failed_reading": {
+          "n": 0,
+          "labels": []
+        },
+        "outcomes_by_reading": [
+          {
+            "physical": 15,
+            "roles": 19,
+            "states": 91,
+            "trait": 443,
+            "turned_away": 313
+          },
+          {
+            "physical": 17,
+            "roles": 21,
+            "states": 100,
+            "trait": 438,
+            "turned_away": 305
+          },
+          {
+            "physical": 16,
+            "roles": 17,
+            "states": 100,
+            "trait": 442,
+            "turned_away": 306
+          }
+        ],
+        "patterns": {
+          "trait,trait,trait": 336,
+          "turned_away,turned_away,turned_away": 210,
+          "states,states,states": 60,
+          "trait,turned_away,turned_away": 28,
+          "turned_away,trait,trait": 28,
+          "turned_away,turned_away,trait": 28,
+          "trait,trait,turned_away": 22,
+          "turned_away,trait,turned_away": 21,
+          "trait,turned_away,trait": 19,
+          "physical,physical,physical": 11,
+          "roles,roles,roles": 10,
+          "trait,states,states": 9,
+          "trait,states,trait": 9,
+          "trait,trait,states": 9,
+          "turned_away,turned_away,states": 8,
+          "turned_away,states,turned_away": 7,
+          "states,trait,trait": 6,
+          "states,states,turned_away": 5,
+          "states,trait,states": 5,
+          "states,turned_away,turned_away": 5,
+          "states,states,trait": 4,
+          "roles,trait,trait": 3,
+          "states,physical,states": 3,
+          "trait,roles,trait": 3,
+          "turned_away,states,states": 3,
+          "roles,roles,trait": 2,
+          "roles,roles,turned_away": 2,
+          "states,turned_away,states": 2,
+          "trait,roles,roles": 2,
+          "turned_away,physical,turned_away": 2,
+          "physical,states,physical": 1,
+          "physical,trait,physical": 1,
+          "physical,trait,trait": 1,
+          "physical,turned_away,states": 1,
+          "roles,trait,roles": 1,
+          "roles,trait,turned_away": 1,
+          "states,turned_away,trait": 1,
+          "trait,physical,trait": 1,
+          "trait,roles,turned_away": 1,
+          "trait,states,turned_away": 1,
+          "trait,trait,physical": 1,
+          "trait,trait,roles": 1,
+          "trait,turned_away,roles": 1,
+          "turned_away,roles,turned_away": 1,
+          "turned_away,states,trait": 1,
+          "turned_away,trait,physical": 1,
+          "turned_away,trait,roles": 1,
+          "turned_away,turned_away,physical": 1,
+          "turned_away,turned_away,roles": 1
+        }
+      },
+      "phrases": {
+        "routing": {
+          "version": 1,
+          "probe": "phrase_not_probed",
+          "frame": "phrase_turned_away_by_the_frame_decided_by_second_model",
+          "frame_causes": [
+            "no_reading",
+            "stretched"
+          ],
+          "roles": "alignment_sweep_roles_to_review",
+          "roles_generators": [
+            "alignment_sweep"
+          ],
+          "source": "reports/code_review_2026-10-12/gate_audits/m1_traithood.md section 7; Roger 2026-10-12"
+        },
+        "probe_skipped": {
+          "n": 0,
+          "labels": []
+        },
+        "decided_by_second_model": {
+          "rule": "phrase_turned_away_by_the_frame_decided_by_second_model",
+          "n": 0,
+          "outcomes": {},
+          "labels": {},
+          "failed": [],
+          "no_second_model": []
+        },
+        "rerouted": {
+          "rule": "alignment_sweep_roles_to_review",
+          "n": 0,
+          "labels": []
+        }
+      }
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": {
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5",
+        "third": null
+      },
+      "source_field": "generator",
+      "overall": {
+        "n": 94,
+        "first_vs_second": {
+          "n": 94,
+          "agree": 71,
+          "disagree": 23,
+          "rate": 0.7553
+        }
+      },
+      "by_source": {
+        "censuses": {
+          "n": 94,
+          "first_vs_second": {
+            "n": 94,
+            "agree": 71,
+            "disagree": 23,
+            "rate": 0.7553
+          }
+        }
+      },
+      "failed": {
+        "second": 0,
+        "third": 0
+      }
+    },
+    "tripwire": {
+      "threshold": 0.1,
+      "min_n": 20,
+      "source_field": "generator",
+      "overall": {
+        "n": 94,
+        "disagree": 23,
+        "rate": 0.2447,
+        "eligible": true,
+        "over": true,
+        "n_failed": 0
+      },
+      "by_source": {
+        "censuses": {
+          "n": 94,
+          "disagree": 23,
+          "rate": 0.2447,
+          "eligible": true,
+          "over": true,
+          "n_failed": 0
+        }
+      },
+      "tripped": true,
+      "tripped_by": [
+        "overall",
+        "generator:censuses"
+      ],
+      "models": {
+        "first": "claude-haiku-5-5",
+        "second": "claude-sonnet-5-5"
+      },
+      "accepted": false,
+      "action": "warned",
+      "stopped_before": null,
+      "calls_not_sent": 0,
+      "checked_at": "2026-10-12T23:51:20+00:00"
+    },
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id 2026-10-12-allport_rare_censuses --run censuses/2026-10-12-allport_rare --pipeline split --transport batches --budget-usd 8",
+      "git_sha": "54064848+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter 2026-10-12-allport_rare_censuses"
+    },
+    "produced_at": "2026-10-13T00:01:33+00:00"
+  }
+}
