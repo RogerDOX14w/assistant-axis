@@ -145,7 +145,49 @@ class TestImportRows:
         assert rep.verified and len(rep.replayed["refuses_grave_harm#1"]) == 3
 
 
+def _drop_last_append(monkeypatch):
+    """Make the registry's append lose its last record, as a write cut short at a line boundary would."""
+    real = Registry._append
+
+    def lossy(self, records):
+        return real(self, list(records)[:-1])
+    monkeypatch.setattr(Registry, "_append", lossy)
+
+
+class TestImportVerification:
+    def test_a_lost_line_is_reported(self, logs, monkeypatch):
+        src, dst = logs
+        _drop_last_append(monkeypatch)
+        # the last line planned is the present key's source line (after the replayed lines)
+        rep = import_rows(src, ["refuses_grave_harm#1", "accepts_oversight#1"], registry_path=dst, only_run=RUN)
+        assert rep.verified is False
+        assert rep.mismatches == {"accepts_oversight#1": ["sources"]}
+
+    def test_a_source_history_not_starting_at_rev_1_is_counted_here(self, logs, tmp_path):
+        src, dst = logs
+        # the source compacted after its first two revisions: one line at rev 2 for the key
+        one = tmp_path / "compacted" / "registry.jsonl"
+        one.parent.mkdir()
+        one.write_text(json.dumps(Registry(src).fold()["checks_intent#1"]) + "\n")
+        rep = import_rows(one, ["checks_intent#1"], registry_path=dst)
+        got = Registry(dst).fold()["checks_intent#1"]
+        assert rep.verified and got["rev"] == 1 and Registry(src).fold()["checks_intent#1"]["rev"] == 2
+
+
 class TestImportRowsCli:
+    def test_a_mismatch_exits_1_and_still_writes_the_record(self, logs, tmp_path, monkeypatch, capsys):
+        from data_analysis.gap_generation import gap_registry as GR
+        src, dst = logs
+        kf = tmp_path / "keys.txt"
+        kf.write_text("refuses_grave_harm#1\naccepts_oversight#1\n")
+        rec = tmp_path / "import.json"
+        _drop_last_append(monkeypatch)
+        assert GR.main(["--registry", str(dst), "import-rows", "--from", str(src), "--keys-file", str(kf),
+                        "--only-run", "/".join(RUN), "--record", str(rec)]) == 1
+        assert "MISMATCH after the write, 1 key(s)" in capsys.readouterr().err
+        body = json.loads(rec.read_text())["result"]
+        assert body["verified"] is False and body["mismatches"] == {"accepts_oversight#1": ["sources"]}
+
     def test_import_record_rerun_and_dry_run(self, logs, tmp_path, capsys):
         from data_analysis.gap_generation import gap_registry as GR
         src, dst = logs

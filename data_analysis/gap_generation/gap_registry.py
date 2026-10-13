@@ -694,7 +694,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="the other checkout's registry.jsonl (read without its lock; nothing is written there)")
     sp.add_argument("--keys-file", type=Path, required=True, help="the keys to import, one per line")
     sp.add_argument("--only-run", metavar="GENERATOR/RUN_ID",
-                    help="a key this log already has gains only this run's sources (default: every source it lacks)")
+                    help="a key this log already has gains only this run's sources (default: every source it lacks); "
+                         "a key it lacks gets its whole source history, other runs' sources included")
     sp.add_argument("--record", type=Path, help="write what was imported to this JSON file (refused if it exists)")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_import_rows)

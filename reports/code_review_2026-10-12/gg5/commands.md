@@ -6,8 +6,10 @@ constitution; 386 candidates, [keys.txt](../../../data/candidates/runs/alignment
 submitted, filtered ([filter batch](../../../data/candidates/filter/2026-10-10-full_alignment_sweep/)) and scored
 ([novelty batch](../../../data/candidates/novelty/2026-10-10-full_alignment_sweep/)) inside the `gen02-roget`
 worktree, so its rows went into that worktree's git-ignored log, and its candidates' query vectors into that
-worktree's git-ignored embedding cache.  335 keys are absent from the main log; 51 are there through later runs
-(chiefly `2026-10-11-papers`) and lack only this run's source.
+worktree's git-ignored embedding cache.  335 keys are absent from the main log.  51 are there and lack only this
+run's source; by main's `novelty.run_id` they are 22 `2026-10-10-tda_censuses_r3`, 18 keys that pre-date the sweep
+in the worktree too (the M3 pilot's 10, `gen_pilot_censuses`'s 7 and one undecided: the sweep only merged a source
+onto them, so none of the sweep's judging is lost there), 6 papers, 2 states-renamed, 2 base model and 1 Allport.
 
 ## Method: replay the worktree's lines, then the phase-B steps the rows missed
 
@@ -47,9 +49,12 @@ Tests: [test_gapgen_registry_import.py](../../../assistant_axis/tests/test_gapge
 ## Commands for the main checkout, in order
 
 Run from the main checkout after this branch is merged (the paid CLIs refuse while the platform's paths are
-dirty).  Nothing else should be writing the registry meanwhile.
+dirty).  Nothing else should be writing the registry or the embedding cache meanwhile (a live M3 or review run
+rewrites the cache's npz; `save()` merges such writes safely, but step 1's backup would then predate them).  Step 1
+must succeed before steps 2 and 3: its copies are the only backups the import and the merge have, hence `set -e`.
 
 ```bash
+set -e
 cd /Users/roger/Documents/GitHub/assistant-axis
 WT=.claude/worktrees/gen02-roget
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
@@ -62,27 +67,50 @@ cp -p data/candidates/cache/embeddings/openai_text-embedding-3-large.npz \
       data/candidates/cache/embeddings/openai_text-embedding-3-large.npz.bak.${STAMP}
 cp -p data/candidates/cache/embeddings/manifest.json data/candidates/cache/embeddings/manifest.json.bak.${STAMP}
 
-# 2. Import ($0): expect 335 replayed (923 lines), 51 gaining a source, 974 lines, then "verified"
-uv run python data_analysis/gap_generation/gap_registry.py import-rows --from $WT/data/candidates/registry.jsonl \
+# 2. Import ($0) from step 1's copy of the worktree log (idle; kept beside the registry; the record's sha256 names
+#    it).  Expect, from the dry run on a copy of main: 335 new keys replayed with 923 lines ({"2": 82, "3": 253}),
+#    51 existing keys gaining 51 sources, 0 unchanged, 974 lines; source sha256 ea1a7aeb69190075...
+SRC=data/candidates/registry.jsonl.bak.${STAMP}_gen02_roget
+uv run python data_analysis/gap_generation/gap_registry.py import-rows --from $SRC \
     --keys-file data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt \
     --only-run alignment_sweep/2026-10-10-full --dry-run
-uv run python data_analysis/gap_generation/gap_registry.py import-rows --from $WT/data/candidates/registry.jsonl \
+uv run python data_analysis/gap_generation/gap_registry.py import-rows --from $SRC \
     --keys-file data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt \
     --only-run alignment_sweep/2026-10-10-full \
     --record data/candidates/runs/alignment_sweep/2026-10-10-full/registry_import_gg5.json
+#    Recovery rule: compare the real run's counts with the dry run's (they differ only if one of the 386 keys reached
+#    main in between; the import handles that, but read why).  If the run does not end with "verified" (exit 1, or
+#    no exit at all: a kill, a full disk), restore the log and run step 2 again from scratch:
+#        cp -p data/candidates/registry.jsonl.bak.${STAMP}_before_gg5 data/candidates/registry.jsonl
+#    Never rerun on top of a partial import: a rerun treats a partly replayed key as present and only adds its
+#    source, leaving a history cut short.  (The record is written on a mismatch too; move it aside before rerunning.)
+#    The import does not check main's log for malformed lines (only the source's); main has none today, and
+#    step 10's compact would refuse them.
 
-# 3. Cache merge ($0): the run's query vectors from the worktree's cache
+# 3. Cache merge ($0): the run's query vectors from the worktree's cache.  Expect (the reviewer's dry run against
+#    main's cache, 2026-10-13): 4,383 in the worktree, 29,996 in main; would add 954; 358 the same; 3,071 differ
+#    (kept main's; largest component difference 1.44e-2).  The differing pairs are OpenAI's run-to-run noise on
+#    texts both checkouts embedded (cosine median 0.999999, minimum 0.9972); no vector is ever replaced.  It loads
+#    main's 376 MB table two or three times (about 1 GB peak, tens of seconds).
 uv run python data_analysis/gap_generation/novelty_score.py cache-merge \
     --from $WT/data/candidates/cache/embeddings --tag openai_text-embedding-3-large \
     --check-batch 2026-10-10-full_alignment_sweep --dry-run
 uv run python data_analysis/gap_generation/novelty_score.py cache-merge \
     --from $WT/data/candidates/cache/embeddings --tag openai_text-embedding-3-large
 
-# 4. M3 under rule set 3 (G7 for this batch), the 253 rows that hold this batch's block; expect $0
+# 4. M3 under rule set 3 (G7 for this batch), the 253 rows that hold this batch's block.  It is $0 only if the
+#    dry run shows "253 of 253 rows identical [OK]" and 0 calls not on record.  The query vectors come from the
+#    worktree (step 3), but the corpus vectors are main's copies, up to cosine 0.9972 from those the worktree run
+#    retrieved against, so a neighbour can swap at the k = 10 boundary or the cut-off and leave a row's calls off
+#    the record.  Otherwise do not run it: the fallback is the fresh rule-set-3 M3 below, a PAID step (about $2.24)
+#    that needs Roger's go.  The registry is correct either way; only the replay property is lost.
 uv run python data_analysis/gap_generation/novelty_score.py score --redecide \
     --from-batch 2026-10-10-full_alignment_sweep --batch-id 2026-10-10-full_alignment_sweep_r3 \
     --keys $(cat $K/redecide_keys.txt) --rules 3 --transport live --budget-usd 1 --write-registry --dry-run
 #    check: "reproduction: ... 253 of 253 rows identical [OK]" and "calls not on record ... 0"; then without --dry-run
+# 4-fallback (PAID, Roger's go; instead of step 4, not after it):
+#   uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-13-full_alignment_sweep_r3_fresh \
+#       --keys $(cat $K/redecide_keys.txt) --rescore --rules 3 --transport live --budget-usd 3 [--dry-run]
 
 # 5. M1 on the 77 phrase rows gate 5 changes (G1 for this run: 41 cut unread by the definition probe, 36 turned
 #    away by the frames) and respects_user_autonomy (gloss call failed)
@@ -106,7 +134,9 @@ uv run python data_analysis/gap_generation/novelty_score.py score --batch-id phy
     --keys 'padded#1' --transport live --budget-usd 1 --dry-run
 #    then without --dry-run
 
-# 9. Review (G11): resume review_traits_all_2 with the new M3 batches (needs Roger's go: see below)
+# 9. Review (G11): resume review_traits_all_2 with the new M3 batches (needs Roger's go: see below).
+#    2026-10-13-g600_ipip_renamed is not GG5's and not in review_traits_all_2's 28 batches: it rides along (its 5
+#    kept rows, M3-scored after G11; $0.45 by batches of the estimate).  Drop it to keep the step to GG5 alone.
 uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_traits_all_2 \
     --from-batches $(python3 -c "import json; print(' '.join(json.load(open('data/candidates/review/review_traits_all_2/run.json'))['from_batches']))") \
     2026-10-10-full_alignment_sweep_r3 2026-10-13-m1_phrase_gg5 2026-10-13-g600_ipip_renamed \
@@ -121,7 +151,7 @@ uv run python data_analysis/gap_generation/gap_registry.py compact
 | step | estimate | basis |
 |---|---|---|
 | 1-3 backups, import, cache merge | $0 | no call |
-| 4 M3 re-decide, 253 rows | about $0 | G7's re-decides of the papers and variant-B batches sent nothing; the dry run after step 3 gives the figure.  If the worktree cache lacks the vectors: a fresh rule-set-3 M3 on the 253 instead, $2.24 by `novelty_score.py estimate` (G13's actual rate, $0.010 a row, gives $2.5) |
+| 4 M3 re-decide, 253 rows | $0 only if the dry run shows 253 of 253 identical and 0 calls not on record | G7's re-decides of the papers and variant-B batches sent nothing.  Otherwise (main's corpus vectors differ by run-to-run noise from the worktree's, or the worktree cache lacks the query vectors): the fresh rule-set-3 M3 on the 253, **paid, Roger's go**, $2.24 by `novelty_score.py estimate` (G13's actual rate, $0.010 a row, gives $2.5), with `--budget-usd 3` |
 | 5 M1, 78 rows | $0.77 | dry run on the copy: $0.765 ($0.0098 a word); G1's actual was 1.03 times its estimate |
 | 6 M3 on the new traits | about $0.64 | `estimate --n-candidates 72` (G1: 117 traits of 126 rows; actual $0.0081 a row) |
 | 7 states pass | $0.03 | dry run on the copy (17 rows); follow-ups cents |
@@ -141,7 +171,9 @@ Steps 4-8: about $1.5 live.  With step 9: about $7-15.
    states pass itself suggested (11 in G9's `states_unjudged_r3`, 1 in both it and `states_tda_1`) that M1 then
    tagged as states again, and 3 IPIP g600 rows.  A second reading of a suggested name can suggest another name.
    The CLI has no `--keys`.
-3. **Physical scope**: the run's 1 row, or all 76 unscored physical rows (75 from the census rare stages, the
+3. **Step 4's fallback**: if the re-decide's dry run does not reproduce 253 of 253 with 0 calls not on record,
+   the fresh rule-set-3 M3 on the 253 (about $2.24 live, `--budget-usd 3`) is a paid step and waits for his go.
+4. **Physical scope**: the run's 1 row, or all 76 unscored physical rows (75 from the census rare stages, the
    base model at count 2, the G9 states names and IPIP g600, which arrived after G9's physical pass), $0.68.
 
 ## Files
