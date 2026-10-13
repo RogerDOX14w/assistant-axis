@@ -204,8 +204,10 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
 
 ## During and after the extraction
 
-8. **Fresh output dir on every pod** (walk-through P2) and **delete the activations once the scanner
-   passes** (P1; about 8 TB in all).
+8. **Fresh output dir on every pod** (walk-through P2).  **Keep the activations** on the pods (Roger,
+   2026-10-13: RunPod charges for the volume's size, so deleting saves nothing; the volume is discarded when
+   the extraction is done); before discarding it, copy off the activations to keep (roles and traits about
+   3.3 TB, all about 8 TB; Roger's 6 TB drive holds the roles and traits).
 9. **The October-run rows of the regeneration list**
    ([regeneration_list.md](../code_review_2026-10-12/regeneration_list.md), "when: at the October run"):
    check each is covered by the run, then close it there.

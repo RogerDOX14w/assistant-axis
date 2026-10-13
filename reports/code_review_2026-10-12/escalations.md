@@ -1795,6 +1795,8 @@ review label is added in square brackets; where it does not, no mapping is guess
   activations after the scanner passes; code: batch sizing/holding for N pods on one org queue,
   a merge-and-verify tool; [README](../../pipeline/README.md) procedure.
   [[P5 October extraction arithmetic](#p5-end-to-end-contracts)]
+  Amended (Roger, 2026-10-13): activations are **not** deleted after the scanner; RunPod charges for a
+  volume's size, not its contents, and the volume is discarded when the extraction is done.
 - **P2**: all three — fresh OUTPUT_DIR rule + `generation_config.json` side-car now; step-4
   recompute rule + `stale_vector` status and step-5 filter/minimum before October.
   [[P1 D2](#p1-d2-resume-skips-any-entity-whose-file-exists),
