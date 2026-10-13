@@ -8,8 +8,8 @@ deterministically from the runs' responses, snapshotted to ``.bak.<UTC>`` when i
 a trait file** (Roger, 2026-10-12: a side table until the pairing review; TODO (Roger): review its promotion into
 ``arrangement`` once the pairing review is done).
 
-``negative_label_check``: ``match`` (the recorded label's stem equals the model's opposite's, after the same folding
-as the operator table), ``mismatch`` (a real-word label recorded and another word returned, or no opposite
+``negative_label_check``: ``match`` (the recorded label's stem, or its bare label's without a standard's suffix,
+equals the model's opposite's, after the same folding as the operator table), ``mismatch`` (a real-word label recorded and another word returned, or no opposite
 returned), ``placeholder`` (``non-X`` recorded), ``none_recorded``.  The mismatches are rendered to
 ``negative_label_mismatches.md`` (:data:`.MISMATCH_PATH`) with both words and the model's reasoning, for the pairing
 review.
@@ -17,6 +17,7 @@ review.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Iterable, Mapping, Optional, Sequence
@@ -29,6 +30,8 @@ from .operators import OperatorReply
 from .postprocess import Corpus, stem_of
 
 CHECKS: tuple[str, ...] = ("match", "mismatch", "placeholder", "none_recorded")
+#: A standard's parenthesised suffix ("careless (HEXACO)"): a blind opposite "careless" matches the bare label.
+_SUFFIX_RE = re.compile(r"\s*\([^)]*\)\s*$")
 
 
 def _stem(label: Optional[str], lexicon) -> Optional[str]:
@@ -46,8 +49,9 @@ def compare_negative_label(model_opposite: Optional[str], recorded: Optional[str
         return "none_recorded"
     if recorded.strip().lower().startswith("non-"):
         return "placeholder"
-    a, b = _stem(model_opposite, lexicon), _stem(recorded, lexicon)
-    return "match" if a is not None and a == b else "mismatch"
+    a = _stem(model_opposite, lexicon)
+    want = {_stem(recorded, lexicon), _stem(_SUFFIX_RE.sub("", recorded), lexicon)} - {None}
+    return "match" if a is not None and a in want else "mismatch"
 
 
 def position_rows(replies: Iterable[OperatorReply], *, corpus: Corpus, lexicon=None) -> list[dict]:

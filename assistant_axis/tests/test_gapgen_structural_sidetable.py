@@ -18,6 +18,8 @@ from assistant_axis.tests import structural_fakes as F
     ("stubbornness", "stubborn", "match"),         # folded by the lexicon (nominal to adjective)
     ("craven", "cowardly", "mismatch"),
     (None, "cowardly", "mismatch"),                # no opposite returned against a real word
+    ("careless", "careless (HEXACO)", "match"),     # a standard's suffix is not asked of a blind opposite
+    ("careful", "careless (HEXACO)", "mismatch"),
     ("sunny", "non-gloomy", "placeholder"),
     ("sunny", None, "none_recorded"),
     ("sunny", "", "none_recorded"),

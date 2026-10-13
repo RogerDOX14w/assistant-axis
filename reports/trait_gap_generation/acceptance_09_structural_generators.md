@@ -111,7 +111,7 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
 
 | command | result |
 |---|---|
-| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **135 passed, 7 skipped** (the acceptance checks on recorded outputs, none recorded yet) |
+| `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_structural_*.py data_analysis/tests/test_gap_generation_structural_cli.py -q` | **137 passed, 7 skipped** (the skips: the acceptance checks on recorded outputs, none recorded yet) |
 | `uv run --extra dev python -m pytest assistant_axis/tests/test_gapgen_*.py data_analysis/tests/ -q` | **3,483 passed, 18 skipped** |
 | `... pytest pipeline/tests`, `results_analysis/tests`, `scripts/tests`, `tools/tests` (without `test_boundary_check.py`) | 232, 193, 20 and 262 passed |
 | `... pytest assistant_axis/tests --ignore-glob='*test_gapgen_*'` | 1,277 passed, 26 skipped, **8 errors**, all in [test_generation.py](../../assistant_axis/tests/test_generation.py), which loads Qwen and Gemma tokenizers from Hugging Face: the sandbox refused its writes under the home directory's Hugging Face cache and the gated Gemma repository refused the request (environmental, untouched by this work; see the note below the table) |
