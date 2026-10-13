@@ -264,7 +264,7 @@ record the run on the earlier pins.**
 
 | | first run (sense 6, established 4, kind 4) | rerun (sense 8, established 7, kind 6) |
 |---|---|---|
-| parse rate | 100% | 100% (12,261 calls) |
+| parse rate | 100% | 100% (13,378 calls; 12,261 before the usage record was corrected on 2026-10-13) |
 | outcomes | trait 1,008; states 162; physical 66; roles 11; turned away 297 | trait 1,078; states 148; physical 62; roles 11; turned away 245 |
 | existing labels as traits | 633 of 659, 96.1% | **642 of 659, 97.4%** |
 | six rejects flagged | 2 of 6 | 3 of 6 (balanced, economic, empowered) |
@@ -273,7 +273,7 @@ record the run on the earlier pins.**
 | alignment score 0 / 1 / 2 / 3 | 669 / 163 / 54 / 122 | 711 / 176 / 56 / 135 |
 | glosses | median 15 words, 1,002 of 1,008 in form | median 14 words, 1,072 of 1,078 in form |
 | stability rerun | 193 of 210, 91.9% | **205 of 210, 97.6%** ([`filter/m1_stability_r2/`](../../data/candidates/filter/m1_stability_r2/), $2.22; the five that moved: coming, mass-produced, purple-veined, supreme, unrevealed) |
-| cost | $7.38 in batches | $15.70 live, from the recorded calls; the run's [usage.json](../../data/candidates/filter/m1_validation_r2/usage.json) says $14.07 because the killed first process never wrote its $1.63 |
+| cost | $7.38 in batches | $15.70 live, from the recorded calls; the run's [usage.json](../../data/candidates/filter/m1_validation_r2/usage.json) said $14.07 until 2026-10-13, because the killed first process never wrote its $1.63; it was corrected from the responses then (13,378 calls, $15.70; walk-through B3) |
 
 Verdicts agree on 1,638 of the 1,810 rows between the runs.  On the existing labels the rerun gains
 [approximate](../../data/traits/instructions/approximate.json),
