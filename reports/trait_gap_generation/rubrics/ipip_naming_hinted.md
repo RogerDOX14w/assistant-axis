@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Draft 1 (2026-10-11), pinned as version 1.  The twin of [ipip_naming_blind.md](./ipip_naming_blind.md): the same text but for its first two paragraphs, which add the questionnaire scales.  Not yet run. |
+| **Status** | Draft 2 (2026-10-13), pinned as version 2: the blind form's draft-2 edit, made identically here (change log).  Draft 1 (2026-10-11), version 1, was the twin of [ipip_naming_blind.md](./ipip_naming_blind.md): the same text but for its first two paragraphs, which add the questionnaire scales. |
 | **What the model is shown** | One cluster pole per call: up to 30 of its IPIP item statements as first-person sentences, **and** the scales they are scored on — each with its inventory, its direction (`for` / `against`) and how many of the pole's statements it scores. |
 | **What it returns** | The same fields as the blind form: a reason, then `label`, `gloss`, `antonym_label`, `antonym_gloss`, `kind`, `ambiguity_flag`, `single_word_exists`. |
 | **What it is tuned on** | Not tuned.  The pilot runs it beside the blind form on the same 40 seeded clusters per granularity; the disagreement rate is a readout column and a review flag, not a gate. |
-| **Model** | Haiku 5.5 (`claude-haiku-5-5`); no temperature; about 1,090 tokens, over Haiku 5.5's 512-token minimum, so it is sent cached (measured 2026-10-11). |
+| **Model** | Haiku 5.5 (`claude-haiku-5-5`); no temperature; 4,545 characters, about 1,130 tokens (draft 1: about 1,090), over Haiku 5.5's 512-token minimum, so it is sent cached (draft 1 measured 2026-10-11). |
 
 **To edit:** change the text inside the block below.  Everything between the two fence lines is sent
 to the model exactly as written.  Leave the fence lines themselves alone.  Notes for me go under
@@ -48,7 +48,7 @@ Name whatever the group indicates, and do not hold back because what you find is
 
 Give:
 - "reason": one short sentence on what the statements have in common.
-- "label": the name of what the group indicates, in 1 to 4 lowercase words: an adjective or adjective phrase where English has one (for example "punctilious" or "slow to anger"), otherwise a short descriptive phrase (for example "keeps others at arm's length").
+- "label": the name of what the group indicates, in 1 to 4 lowercase words: an adjective or adjective phrase where English has one (for example "punctilious" or "slow to anger"), otherwise a short descriptive phrase (for example "avoids the limelight"). Count the words: at most four, a hyphenated word counting as one; if the natural phrase is longer, use a shorter one or a single word. Give one name, with no commas.
 - "gloss": one sentence of at most 25 words that starts "This means" and describes it in plain words, without repeating the label.
 - "antonym_label": the name of the opposite, in the same form, or null if it has no clear opposite.
 - "antonym_gloss": one sentence starting "This means" that describes the opposite, or null.
@@ -99,3 +99,4 @@ the scale name, because the direction is `against`:
 | draft | who | what changed | why |
 |---|---|---|---|
 | 1 | Opus | First draft in this file, from the in-code `HINTED_PROMPT` (pinned in `naming.py` by sha256 `e33a08e9...`), with the same rewrite as the blind form: the narrow trait definition and `is_trait` replaced by "the one standing thing about a person that the group indicates", the habitual-self-report and predisposition paragraph, and `kind` in M1's eight-way vocabulary.  The scale paragraph is unchanged | Roger, 2026-10-11 (QUESTIONS 48, "1-3 SG"): `is_trait` stops being a submission gate, the definition excluded things the corpus contains, and the two naming prompts join the pinned set |
+| 2 | Opus | The blind form's draft 2, made identically: the third example label `keeps others at arm's length` replaced by `avoids the limelight`, and the label line's two new sentences (count the words, at most four; one name, with no commas) | Roger, 2026-10-13 ("SG"); the reasons are in [ipip_naming_blind.md](./ipip_naming_blind.md)'s change log |

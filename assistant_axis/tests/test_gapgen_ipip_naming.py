@@ -123,14 +123,25 @@ class TestPrompts:
                 assert normalize_to_file_name(q) not in names, q
         assert prompt_words(N.system_prompt("blind"))
 
-    @pytest.mark.xfail(strict=True, reason="rubric v1's third example, \"keeps others at arm's length\", is five "
-                       "words against the prompt's own 1 to 4, and Haiku 5.5 copies it (12 rejected answers on "
-                       "2026-10-13, 14 more of the form \"keeps others at a distance\").  The fix is a v2 text of both "
-                       "naming rubrics, which needs Roger's sign-off; remove this mark with it.")
     def test_every_example_label_passes_the_label_check(self):
+        """Rubric v1's third example, "keeps others at arm's length", was five words against the prompt's own 1 to
+        4, and Haiku 5.5 copied it (12 rejected answers on 2026-10-13, 14 more of the form "keeps others at a
+        distance"); this test was a strict xfail until rubric v2 (Roger 2026-10-13) replaced it."""
         for w in N.EXAMPLE_LABELS:
             assert w in N.system_prompt("blind") and w in N.system_prompt("hinted")
             assert N.label_problem(w) is None, w
+        assert "keeps others at arm's length" not in N.system_prompt("blind") + N.system_prompt("hinted")
+
+    @pytest.mark.parametrize("form", ["blind", "hinted"])
+    def test_the_label_line_asks_for_four_words_and_one_name(self, form):
+        """Rubric v2 (Roger 2026-10-13): the two sentences are in the label line, before the gloss, in both forms."""
+        t = N.system_prompt(form)
+        count = ("Count the words: at most four, a hyphenated word counting as one; if the natural phrase is longer, "
+                 "use a shorter one or a single word.")
+        line = next(x for x in t.splitlines() if x.startswith('- "label":'))
+        assert count in line and "Give one name, with no commas." in line
+        assert line.endswith("Give one name, with no commas.")
+        assert N.prompt_version(form) >= 2
 
 
 class TestParser:
@@ -197,6 +208,35 @@ class TestParser:
         _n, err = N.parse_naming(json.dumps(dict(GOOD, antonym_label=["last-minute"])))
         assert err.startswith("bad_label: antonym")
 
+    def test_a_four_word_label_is_accepted_and_a_five_word_one_rejected(self):
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label="avoids the limelight")))
+        assert err is None and n.label == "avoids the limelight"
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label="slow to warm up")))
+        assert err is None and n.label == "slow to warm up" and n.stem == "slow_to_warm_up"
+        _n, err = N.parse_naming(json.dumps(dict(GOOD, label="slow to warm to people")))
+        assert err == "bad_label: 'slow to warm to people' (5 words, at most 4)"
+
+    def test_a_comma_label_is_rejected_and_says_why(self):
+        """Parser version 3 (Roger 2026-10-13): a comma label is a bad label, rejected and asked again like an
+        over-long one; most were two names joined ("vengeful, unforgiving")."""
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label="vengeful, unforgiving")))
+        assert n is None and err == "bad_label: 'vengeful, unforgiving' (comma: one name asked)"
+        assert N.label_problem("vengeful, unforgiving") == "comma: one name asked"
+        # both breaks at once are both named
+        _n, err = N.parse_naming(json.dumps(dict(GOOD, label="overly compliant, desperate to please")))
+        assert err == "bad_label: 'overly compliant, desperate to please' (5 words, at most 4; comma: one name asked)"
+        # other punctuation is not the comma rule
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label="doesn't fuss")))
+        assert err is None and n.label == "doesn't fuss"
+
+    def test_a_comma_antonym_is_noted_not_rejected(self):
+        """The antonym is held to the label form but noted, not rejected (version 2), and that covers the comma."""
+        n, err = N.parse_naming(json.dumps(dict(GOOD, antonym_label="forgiving, forgetful")))
+        assert err is None and n.antonym_label == "forgiving, forgetful"
+        assert n.notes == ["antonym_label with a comma"]
+        n, err = N.parse_naming(json.dumps(dict(GOOD, antonym_label="quick to forgive, quick to forget")))
+        assert err is None and n.notes == ["antonym_label over 4 words", "antonym_label with a comma"]
+
     def test_the_label_limit_is_unchanged_and_says_why(self):
         _n, err = N.parse_naming(json.dumps(dict(GOOD, label="takes things at face value")))
         assert err == "bad_label: 'takes things at face value' (5 words, at most 4)"
@@ -220,10 +260,35 @@ RECORDED_REJECTIONS = [
 ]
 
 
+#: Answers parser version 1 accepted whose label has a comma, which version 3 rejects (``comma: one name asked``):
+#: (granularity, cluster, pole, form) and the label.  The 15 of the recorded runs; the last twelve are the namings
+#: the cluster tables held on 2026-10-13 (the first three had been replaced by later answers), which ``name`` asks
+#: again (``ipip_generator._named``).
+RECORDED_COMMA_LABELS = [
+    ((350, 7, "b", "blind"), "slow-burning, intense reactions"),
+    ((150, 100, "a", "blind"), "lighthearted, giving outlook"),
+    ((150, 125, "a", "blind"), "joyless, rarely happy"),
+    ((150, 99, "a", "blind"), "cautious, avoids risk"),
+    ((600, 201, "a", "hinted"), "rivalrous, envious of peers"),
+    ((600, 243, "a", "hinted"), "serious, not playful"),
+    ((350, 73, "a", "blind"), "prefers quiet, low-key life"),
+    ((350, 214, "a", "hinted"), "often ill, health-focused"),
+    ((350, 242, "a", "hinted"), "dulled enjoyment, easily irritated"),
+    ((350, 422, "a", "hinted"), "vengeful, unforgiving"),
+    ((350, 34, "a", "hinted"), "intrusive, disorganized thinking"),
+    ((150, 114, "a", "blind"), "unscrupulous, takes advantage"),
+    ((150, 279, "a", "blind"), "unhurried, easygoing pace"),
+    ((150, 58, "a", "blind"), "helpful, sought-out adviser"),
+    ((150, 184, "a", "hinted"), "chaotic, uncontrollable thinking"),
+]
+
+
 class TestRecordedRejections:
     """The ``bad_label`` rejections of the recorded naming runs, replayed through the parser (2026-10-13): every
     rejection was a label or an antonym over four words; version 2 accepts the answers whose antonym alone was
-    over, and still rejects every over-long label."""
+    over, and still rejects every over-long label.  Version 3 (the comma rule) rejects the 15 version-1 answers
+    whose label has a comma, and one answer version 1 rejected for its antonym and version 2 accepted
+    (``has close, trusting bonds``, 2026-10-11)."""
 
     @pytest.mark.parametrize("key,label,antonym,accepted", RECORDED_REJECTIONS, ids=lambda x: str(x))
     def test_frozen_examples(self, key, label, antonym, accepted):
@@ -234,25 +299,44 @@ class TestRecordedRejections:
         else:
             assert n is None and err.startswith(f"bad_label: {label!r}")
 
+    @pytest.mark.parametrize("key,label", RECORDED_COMMA_LABELS, ids=lambda x: str(x))
+    def test_frozen_comma_labels(self, key, label):
+        n, err = N.parse_naming(json.dumps(dict(GOOD, label=label)))
+        assert n is None and err == f"bad_label: {label!r} (comma: one name asked)"
+
     def test_replay_of_the_recorded_responses(self):
         from assistant_axis.gapgen.generators.ipip import NAMING_RESPONSES_PATH
         if not NAMING_RESPONSES_PATH.exists():
             pytest.skip("no recorded naming responses")
         recs = [json.loads(x) for x in NAMING_RESPONSES_PATH.read_text().splitlines() if x.strip()]
         v1 = [r for r in recs if r.get("parser_version") is None]
-        tally = {"antonym_now_ok": 0, "label_still_rejected": 0}
+        tally = {"v1_ok_unchanged": 0, "v1_ok_now_comma": 0, "antonym_now_ok": 0, "antonym_label_comma": 0,
+                 "label_still_rejected": 0}
+        comma = []
         for r in v1:
             n, err = N.parse_naming(r["text"])
             old_err = r["parse_error"]
-            if old_err is None:
-                # nothing version 1 accepted changes
-                assert err is None, (r["granularity"], r["cluster_id"], r["pole"], r["form"], err)
+            key = (r["granularity"], r["cluster_id"], r["pole"], r["form"])
+            if old_err is None and "," not in r["parsed"]["label"]:
+                # nothing else version 1 accepted changes
+                assert err is None, (key, err)
                 assert {k: getattr(n, k) for k in ("label", "stem", "antonym_label", "kind")} == \
                     {k: r["parsed"][k] for k in ("label", "stem", "antonym_label", "kind")}
+                tally["v1_ok_unchanged"] += 1
+            elif old_err is None:
+                # version 3: a comma label is rejected (it is asked again by the next `name` run)
+                assert err == f"bad_label: {r['parsed']['label']!r} (comma: one name asked)", (key, err)
+                comma.append((key, r["parsed"]["label"]))
+                tally["v1_ok_now_comma"] += 1
             elif old_err.startswith("bad_label: antonym"):
                 obj = json.loads(r["text"])
-                assert err is None and n.label == " ".join(obj["label"].split()).lower()
+                label = " ".join(obj["label"].split()).lower()
                 assert len(obj["antonym_label"].split()) > N.MAX_LABEL_WORDS
+                if "," in label:
+                    assert err == f"bad_label: {label!r} (comma: one name asked)", (key, err)
+                    tally["antonym_label_comma"] += 1
+                    continue
+                assert err is None and n.label == label
                 assert "antonym_label over 4 words" in n.notes
                 tally["antonym_now_ok"] += 1
             elif old_err.startswith("bad_label"):
@@ -263,6 +347,12 @@ class TestRecordedRejections:
         tonight = [r for r in v1 if r["at"].startswith("2026-10-13") and r["parse_error"]]
         if len(tonight) == 134:      # the three runs of 2026-10-13 (600, 350, 150), as recorded
             assert sum(1 for r in tonight if N.parse_naming(r["text"])[1] is None) == 60
+        if len(v1) == 2867:          # every version-1 record (2026-10-11 and 2026-10-13), as recorded
+            # changed by parser version 3 (2026-10-13): 15 accepted answers now rejected for a comma, and 1 of the
+            # 94 antonym rejections stays rejected for its label's comma (93 now accepted, against 94 under v2)
+            assert tally == {"v1_ok_unchanged": 2648, "v1_ok_now_comma": 15, "antonym_now_ok": 93,
+                             "antonym_label_comma": 1, "label_still_rejected": 107}, tally
+            assert comma == RECORDED_COMMA_LABELS
 
 
 def responder(answers=None, bad_first=False):
@@ -306,7 +396,7 @@ class TestCalls:
                   "label_form", "user", "text", "usage_raw", "parsed", "parse_error", "parser_version", "attempt",
                   "at"):
             assert k in r
-        assert r["label_form"] == "judge-display-v1" and r["parser_version"] == N.PARSER_VERSION == 2
+        assert r["label_form"] == "judge-display-v1" and r["parser_version"] == N.PARSER_VERSION == 3
         assert r["rubric"] in N.RUBRIC_NAMES.values()
         assert r["prompt_sha256"] == N.prompt_sha256(r["form"])
         # temperature is left out for Haiku 5.5 (it refuses one); the system prompt is the form's rubric text
@@ -344,3 +434,40 @@ class TestCalls:
     def test_estimate(self):
         est = N.estimate([pole(), pole(2)], hinted=True, model=N.DEFAULT_MODEL)
         assert est.lines[0].n_calls == 4 and est.usd > 0
+
+
+class TestCurrentParseRate:
+    """``report.current_naming_parse_stats``, the acceptance bar's measure since 2026-10-13: the latest answer per
+    pole and form in the current tables, re-parsed with the current parser."""
+
+    @staticmethod
+    def rec(g, cid, pole, form, label, attempt=1, parsed=True):
+        return {"granularity": g, "cluster_id": cid, "pole": pole, "form": form, "attempt": attempt,
+                "text": json.dumps(dict(GOOD, label=label)), "parsed": {"label": label} if parsed else None}
+
+    def test_latest_answer_reparsed_on_the_current_tables(self):
+        from assistant_axis.gapgen.generators.ipip.report import current_naming_parse_stats
+        recs = [
+            self.rec(350, 1, "a", "blind", "takes things at face value", parsed=False),   # superseded below
+            self.rec(350, 1, "a", "blind", "literal-minded", attempt=2),
+            self.rec(350, 1, "a", "hinted", "vengeful, unforgiving"),     # parser 1 accepted it; version 3 does not
+            self.rec(350, 2, "a", "blind", "chore-prompt"),
+            self.rec(350, 2, "a", "blind", "keeps others at arm's length"),   # the latest answer counts
+            self.rec(600, 7, "b", "blind", "unhurried"),                  # carried to ~350 cluster 3
+            self.rec(350, 99, "a", "blind", "gone, rebuilt"),             # no current table holds this pole
+        ]
+        tables = {350: [
+            {"cluster_id": 1, "poles": [{"pole": "a", "blind": {"label": "literal-minded"},
+                                         "hinted": {"label": "vengeful, unforgiving"}}]},
+            {"cluster_id": 2, "poles": [{"pole": "a"}]},
+            {"cluster_id": 3, "poles": [{"pole": "a", "blind": {"label": "unhurried", "carried_from": {
+                "granularity": 600, "cluster_id": 7, "pole": "b"}}}]},
+            {"cluster_id": 4, "poles": [{"pole": "a"}, {"pole": "b"}]},   # never asked: not counted
+        ]}
+        s = current_naming_parse_stats(recs, tables)
+        assert (s["n_asked"], s["n_ok"]) == (4, 2) and s["parse_rate"] == 0.5
+        assert s["parser_version"] == N.PARSER_VERSION and s["by_granularity"] == {"350": {"n_asked": 4, "n_ok": 2}}
+        assert s["rejected_by_kind"] == {"bad_label": 2}
+        assert [(f["cluster_id"], f["form"], f["named_in_table"]) for f in s["failing"]] == [(1, "hinted", True),
+                                                                                             (2, "blind", False)]
+        assert "comma: one name asked" in s["failing"][0]["error"]

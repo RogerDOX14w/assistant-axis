@@ -1,8 +1,10 @@
 """IPIP generator, acceptance on the recorded outputs (plan § 8, last item).  Each check skips while its output is
 not on disk.  One is red on purpose as of 2026-10-12, a finding for Roger rather than a failure of the tool: the
-naming parse rate (98.5% against the 99% bar).  The A-vs-B key comparison was the other (QUESTIONS 52, a 35% item
-mismatch) until Roger set its criterion that day (code review C1): sign disagreement on the shared links, with the
-coverage differences reported, not gated."""
+naming parse rate against the 99% bar (98.5% that day; rescoped 2026-10-13 to the current parser on the current
+tables, 0.9847 at parser version 3, 40 of 2,609 pole-forms failing, green once the 63-call re-ask under rubric v2
+has run).  The A-vs-B key comparison was the other (QUESTIONS 52, a 35% item mismatch) until Roger set its
+criterion that day (code review C1): sign disagreement on the shared links, with the coverage differences
+reported, not gated."""
 import json
 import warnings
 
@@ -10,7 +12,8 @@ import pytest
 
 from assistant_axis.gapgen.generators import ipip as P
 from assistant_axis.gapgen.generators.ipip import ingest as I
-from assistant_axis.gapgen.generators.ipip.report import naming_parse_stats
+from assistant_axis.gapgen.generators.ipip.cluster import load_table
+from assistant_axis.gapgen.generators.ipip.report import current_naming_parse_stats
 from assistant_axis.gapgen.paths import runs_root
 
 
@@ -70,10 +73,24 @@ def test_the_licence_sentence_is_on_record_verbatim():
 
 
 def test_naming_parse_rate():
+    """The 99% bar, on the current parser and the current tables: for every pole and form in the cluster tables,
+    the latest recorded answer to it, re-parsed with the parser as it stands (``current_naming_parse_stats``).
+
+    Changed 2026-10-13 (coordinator, with Roger's naming v2): it was ``naming_parse_stats`` over every record,
+    pooled across runs and across clusterings since rebuilt, reading ``parsed`` as recorded, so it measured history
+    (0.9776 that day), not what the parser makes of the answers the tables rest on.  The bar is unchanged.  At parser
+    version 3 it reads 0.9847 (2,569 of 2,609): 28 unnamed pole-forms whose latest answer still fails, and the 12
+    comma labels parser version 1 accepted.  `name --all --hinted` at 600, 350 and 150 re-asks all 63 unnamed or
+    failing pole-forms; the bar allows 26 failures."""
     _skip_unless(P.NAMING_RESPONSES_PATH)
+    tables = {g: load_table(P.clusters_path(g)) for g in P.GRANULARITIES}
+    tables = {g: rows for g, rows in tables.items() if rows}
+    if not tables:
+        pytest.skip("no cluster table recorded yet")
     recs = [json.loads(x) for x in P.NAMING_RESPONSES_PATH.read_text().splitlines() if x.strip()]
-    stats = naming_parse_stats(recs)
-    assert stats["parse_rate"] >= 0.99, stats
+    stats = current_naming_parse_stats(recs, tables)
+    assert stats["n_asked"] > 0
+    assert stats["n_ok"] >= 0.99 * stats["n_asked"], {k: v for k, v in stats.items() if k != "failing"}
     assert P.NAMING_USAGE_PATH.exists()
 
 

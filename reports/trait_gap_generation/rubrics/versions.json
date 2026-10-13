@@ -337,6 +337,12 @@
         "sha256": "acb14bc9ff76d3366dae672540336c3d5529df858881c96bfd17121911a549e1",
         "pinned_at": "2026-10-11T05:26:01+00:00",
         "why": "draft 1: the blind IPIP cluster-naming prompt moves out of naming.py's PROMPT_VERSIONS into the pinned set, with the trait definition rewritten (name the standing thing the statements indicate; a momentary feeling gets the predisposition behind it) and is_trait replaced by kind in M1's eight-way vocabulary (Roger, QUESTIONS 48, 2026-10-11)"
+      },
+      {
+        "version": 2,
+        "sha256": "54ec18e6806b09f1fabfacfa7f82bc87a86c24c1bac4813c8a2e57247419c42e",
+        "pinned_at": "2026-10-13T13:58:49+00:00",
+        "why": "Draft 2 (Roger 2026-10-13, SG): the third example label \"keeps others at arm's length\" (five words, against the prompt's own 1 to 4; Haiku 5.5 copied it and its keeps-at pattern) replaced by \"avoids the limelight\"; the label line adds \"Count the words: at most four, a hyphenated word counting as one; if the natural phrase is longer, use a shorter one or a single word.\" and \"Give one name, with no commas.\" Parser version 3 rejects a comma label"
       }
     ],
     "ipip_naming_hinted": [
@@ -345,6 +351,12 @@
         "sha256": "f83abd497885046182674449427b066ae43a3fec50c900611ea55989535088c9",
         "pinned_at": "2026-10-11T05:26:03+00:00",
         "why": "draft 1: the hinted IPIP cluster-naming prompt moves out of naming.py's PROMPT_VERSIONS into the pinned set, with the same rewrite as the blind form; the scale-hint paragraph unchanged (Roger, QUESTIONS 48, 2026-10-11)"
+      },
+      {
+        "version": 2,
+        "sha256": "44e1ee766470823738d81906ff06c0d5d56ef93ddf6d3251fa3c1eeff2028a04",
+        "pinned_at": "2026-10-13T13:58:49+00:00",
+        "why": "Draft 2 (Roger 2026-10-13, SG): the blind form's draft-2 edit made identically (example \"avoids the limelight\" for the five-word \"keeps others at arm's length\"; count the words, at most four; one name, with no commas)"
       }
     ]
   }

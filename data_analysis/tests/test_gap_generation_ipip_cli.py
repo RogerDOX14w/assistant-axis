@@ -169,7 +169,8 @@ def test_name_render_prints_the_calls_as_sent(env, capsys):
     out = capsys.readouterr().out
     assert not client.calls
     assert N.system_prompt("blind") in out and N.system_prompt("hinted") in out
-    assert "ipip_naming_blind version 1" in out and '{"statements": ["I ' in out
+    assert f"ipip_naming_blind version {N.prompt_version('blind')}" in out and '{"statements": ["I ' in out
+    assert f"ipip_naming_hinted version {N.prompt_version('hinted')}" in out and N.prompt_version("blind") >= 2
     assert '"scales": [{"scale": "' in out and '"direction": "' in out
 
 
@@ -370,3 +371,48 @@ def test_a_hinted_pass_after_a_blind_one_asks_only_the_hinted_form(env):
     n1 = len(client.calls)
     assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted", "--force"]) == 0
     assert len(client.calls) - n1 == 2 * len(poles)                                      # --force asks both again
+
+
+def test_a_stored_label_that_fails_the_current_check_is_asked_again(env, capsys):
+    """Roger 2026-10-13 (parser version 3): a comma label is a bad label and gets retried.  A naming stored under an
+    older parser whose label the current check rejects (12 comma labels in the tables that day) counts as unnamed,
+    so a plain `name` run asks that pole-form again and nothing else; a failed re-ask leaves the old naming."""
+    from assistant_axis.tests.fake_anthropic import user_text
+    root, common, ipip, cdir, client = env
+    assert CLI.main(common + ["ingest", "--skip-hex-check"]) in (0, 3)
+    assert CLI.main(common + ["cluster", "--no-hdbscan"]) == 0
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted"]) == 0
+    path = ipip / "clusters_g350.jsonl"
+    rows = [json.loads(x) for x in path.read_text().splitlines()]
+    poles = [p for r in rows for p in r["poles"]]
+    assert len(poles) >= 3
+    # as parser version 1 stored them: a comma label (blind), and one over four words (hinted)
+    poles[0]["blind"] = dict(poles[0]["blind"], label="vengeful, unforgiving", stem="vengeful_unforgiving")
+    poles[1]["hinted"] = dict(poles[1]["hinted"], label="keeps others at arm's length")
+    del poles[1]["hinted"]["parser_version"]
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    before = {(i, f): p[f] for i, p in enumerate(poles) for f in ("blind", "hinted")}
+    assert not CLI._named(poles[0], "blind") and not CLI._named(poles[1], "hinted")
+    assert CLI._named(poles[0], "hinted") and CLI._named(poles[2], "blind") and not CLI._named({}, "blind")
+    capsys.readouterr()
+    # the dry run says how many it would ask again, and writes nothing
+    dry(root, common, ["name", "--granularity", "350", "--all", "--hinted"])
+    out = capsys.readouterr().out
+    assert "2 poles to name (blind 1 + hinted 1), of which a stored label fails the current check: blind 1 + " \
+           "hinted 1" in out
+    n0 = len(client.calls)
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted"]) == 0
+    new = client.calls[n0:]
+    assert len(new) == 2 and sum('"scales"' in user_text(kw) for kw in new) == 1
+    rows = [json.loads(x) for x in path.read_text().splitlines()]
+    after = [p for r in rows for p in r["poles"]]
+    assert after[0]["blind"]["label"] != "vengeful, unforgiving" and after[0]["blind"]["parser_version"] == 3
+    assert after[1]["hinted"]["label"] != "keeps others at arm's length"
+    assert all(CLI._named(p, f) for p in after for f in ("blind", "hinted"))
+    # every other naming is untouched
+    changed = {(i, f) for i, p in enumerate(after) for f in ("blind", "hinted") if p[f] != before[(i, f)]}
+    assert changed == {(0, "blind"), (1, "hinted")}
+    # and a second run asks nothing
+    n1 = len(client.calls)
+    assert CLI.main(common + ["name", "--granularity", "350", "--all", "--hinted"]) == 0
+    assert len(client.calls) == n1

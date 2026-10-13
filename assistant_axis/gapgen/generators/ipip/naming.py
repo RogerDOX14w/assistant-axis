@@ -23,12 +23,14 @@ it.  The examples in the prompts are near-duplicates of corpus words, never corp
 hygiene rule; tested).  No temperature (Haiku 5.5 refuses one, ``llm.accepts_temperature``).
 
 **Parser** (:func:`parse_naming`): strict, as the plan asks: the reply must be one JSON object and nothing else (a
-fenced or prose-wrapped reply is rejected and counted), every key present, the label 1-4 words (lower-cased with a
-note), the gloss opening "This means" (over 25 words is noted, not rejected), ``kind`` one of the eight (an
-unknown kind is a ``bad_value``), the two flags booleans.  The antonym is held to the same form but **noted, not
-rejected**, when it breaks it (:data:`PARSER_VERSION` 2): it is never submitted, only the evaluation's antonym
-agreement reads it, and under version 1 a five-word antonym threw away a good label with it (60 of the 134
-rejected answers of 2026-10-13).  A rejected answer is asked once more (:data:`ASK_ATTEMPTS`); every response
+fenced or prose-wrapped reply is rejected and counted), every key present, the label 1-4 words with no comma
+(lower-cased with a note; :func:`label_problem`), the gloss opening "This means" (over 25 words is noted, not
+rejected), ``kind`` one of the eight (an unknown kind is a ``bad_value``), the two flags booleans.  The antonym is
+held to the same form but **noted, not rejected**, when it breaks it (:data:`PARSER_VERSION` 2): it is never
+submitted, only the evaluation's antonym agreement reads it, and under version 1 a five-word antonym threw away a
+good label with it (60 of the 134 rejected answers of 2026-10-13).  A label with a comma is rejected like an
+over-long one (:data:`PARSER_VERSION` 3, Roger 2026-10-13: the prompt asks for one name, and most comma labels
+were two joined, "vengeful, unforgiving").  A rejected answer is asked once more (:data:`ASK_ATTEMPTS`); every response
 received is charged to ``usage`` and recorded, before parsing, in ``naming_responses.jsonl`` (append-only), with
 the ``parser_version`` that read it (a record without the field was read by version 1).
 
@@ -67,11 +69,13 @@ MAX_STATEMENTS = 30
 #: to four).
 MAX_LABEL_WORDS = 4
 MAX_GLOSS_WORDS = 25
+#: 3 (2026-10-13, rubric version 2): a label with a comma breaks the label form (``comma: one name asked``), so the
+#: answer is rejected and asked again, as an over-long label is; an antonym with one is kept with a note.
 #: 2 (2026-10-13): an antonym that breaks the label form (over :data:`MAX_LABEL_WORDS` words) is kept with a note
 #: (``antonym_label over 4 words``) instead of rejecting the answer; the label's own check is unchanged.
 #: 1 (2026-10-11): either label over the limit rejected the answer (``bad_label: antonym ...`` for the antonym).
 #: Records carry it as ``parser_version`` (none on a version-1 record).
-PARSER_VERSION = 2
+PARSER_VERSION = 3
 FORMS: tuple[str, ...] = ("blind", "hinted")
 #: form -> the pinned rubric name in ``reports/trait_gap_generation/rubrics/`` (QUESTIONS 48 part 3).
 RUBRIC_NAMES: dict[str, str] = {"blind": "ipip_naming_blind", "hinted": "ipip_naming_hinted"}
@@ -84,8 +88,10 @@ ANSWER_KEYS: tuple[str, ...] = FIELD_NAMES[:8]
 #: comparable with M1's verdicts (QUESTIONS 48 part 2).  Nothing gates on it.
 KIND_VALUES: tuple[str, ...] = ("trait", "membership", "state", "physical", "role", "action", "evaluative",
                                 "not_a_persona")
-#: The example labels the prompts quote (none is a corpus label, a corpus stem or a seed-queue name; tested).
-EXAMPLE_LABELS: tuple[str, ...] = ("punctilious", "slow to anger", "keeps others at arm's length")
+#: The example labels the prompts quote (none is a corpus label, a corpus stem or a seed-queue name, and each passes
+#: :func:`label_problem`; tested).  Rubric version 2 replaced "keeps others at arm's length", five words, which
+#: Haiku 5.5 copied with its "keeps ... at ..." pattern.
+EXAMPLE_LABELS: tuple[str, ...] = ("punctilious", "slow to anger", "avoids the limelight")
 #: For the estimate (measured on nothing yet; the plan's 700 in / 250 out per call, with the system prompt).
 EST_IN_TOKENS, EST_OUT_TOKENS = 900, 400
 
@@ -208,18 +214,28 @@ def _bool(v: Any) -> Optional[bool]:
     return None
 
 
-def label_problem(label: str) -> Optional[str]:
-    """Why ``label`` (whitespace collapsed) breaks the label form, or None: more than :data:`MAX_LABEL_WORDS`
-    words.  (The same test as version 1, which also counted the words with hyphens split and rejected only when
-    both counts were over: a hyphen can only add words, so that was the whitespace count alone.)"""
+def _too_long(label: str) -> Optional[str]:
     n = len(label.split())
     return f"{n} words, at most {MAX_LABEL_WORDS}" if n > MAX_LABEL_WORDS else None
+
+
+def _has_comma(label: str) -> Optional[str]:
+    return "comma: one name asked" if "," in label else None
+
+
+def label_problem(label: str) -> Optional[str]:
+    """Why ``label`` (whitespace collapsed) breaks the label form, or None: more than :data:`MAX_LABEL_WORDS`
+    words, or a comma (:data:`PARSER_VERSION` 3); both, ``;``-joined, when both hold.  (The word count is the same
+    test as version 1, which also counted the words with hyphens split and rejected only when both counts were over:
+    a hyphen can only add words, so that was the whitespace count alone.)"""
+    probs = [p for p in (_too_long(label), _has_comma(label)) if p]
+    return "; ".join(probs) if probs else None
 
 
 def _label(v: Any, notes: list, what: str, *, lenient: bool = False) -> Optional[str]:
     """The label lower-cased with whitespace collapsed, or None when it is not a string, is empty, or (unless
     ``lenient``) breaks the form (:func:`label_problem`).  ``lenient`` keeps a label that breaks the form, with a
-    note (the antonym, :data:`PARSER_VERSION` 2)."""
+    note for each break (the antonym, :data:`PARSER_VERSION` 2 and 3)."""
     if not isinstance(v, str) or not v.strip():
         return None
     s = " ".join(v.split())
@@ -229,7 +245,10 @@ def _label(v: Any, notes: list, what: str, *, lenient: bool = False) -> Optional
     if label_problem(s) is None:
         return s
     if lenient:
-        notes.append(f"{what} over {MAX_LABEL_WORDS} words")
+        if _too_long(s):
+            notes.append(f"{what} over {MAX_LABEL_WORDS} words")
+        if _has_comma(s):
+            notes.append(f"{what} with a comma")
         return s
     return None
 
@@ -270,8 +289,8 @@ def parse_naming(text: Optional[str]) -> tuple[Optional[Naming], Optional[str]]:
     if len(gloss.split()) > MAX_GLOSS_WORDS + 2:          # "This means" plus 25 words, with a little slack
         notes.append("gloss over 25 words")
     ant = obj["antonym_label"]
-    # lenient (PARSER_VERSION 2): an antonym over the word limit is kept with a note; one that is not a string is
-    # still rejected
+    # lenient (PARSER_VERSION 2 and 3): an antonym over the word limit or with a comma is kept with a note; one that
+    # is not a string is still rejected
     ant_label = None if ant is None or (isinstance(ant, str) and ant.strip().lower() in ("", "null", "none")) \
         else _label(ant, notes, "antonym_label", lenient=True)
     if ant is not None and ant_label is None and not (isinstance(ant, str) and ant.strip().lower() in ("", "null", "none")):

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Draft 1 (2026-10-11), pinned as version 1.  First draft in this file: the text it replaces lived in code (`NAMING_PROMPT` in [naming.py](../../../assistant_axis/gapgen/generators/ipip/naming.py), pinned there by sha256), and this draft rewrites its definition (QUESTIONS 48).  Not yet run: the naming pilot has not happened. |
+| **Status** | Draft 2 (2026-10-13), pinned as version 2: the third example label is four words or fewer, and the label line says to count the words and to give one name with no commas (change log).  Draft 1 (2026-10-11), version 1, was the first draft in this file: the text it replaces lived in code (`NAMING_PROMPT` in [naming.py](../../../assistant_axis/gapgen/generators/ipip/naming.py), pinned there by sha256), and it rewrote its definition (QUESTIONS 48).  Draft 1 named the three granularities on 2026-10-11 and 2026-10-13. |
 | **What the model is shown** | One cluster pole per call: up to 30 of its IPIP item statements, each as a first-person sentence ("I get chores done right away."), in one JSON object under `"statements"`.  No construct name, no corpus label — that is what *blind* means. |
 | **What it returns** | A reason, then `label`, `gloss`, `antonym_label`, `antonym_gloss`, `kind`, `ambiguity_flag`, `single_word_exists`. |
 | **What it is tuned on** | Not tuned.  The pilot names 40 seeded clusters per granularity, blind and hinted, and Roger reads them side by side ([coding_plan_07_behaviour_items.md](../coding_plan_07_behaviour_items.md) § 10). |
-| **Model** | Haiku 5.5 (`claude-haiku-5-5`); no temperature (it refuses one); the prompt is 3,960 characters, about 990 tokens, so it clears Haiku 5.5's 512-token minimum and is sent cached (measured 2026-10-11). |
+| **Model** | Haiku 5.5 (`claude-haiku-5-5`); no temperature (it refuses one); the prompt is 4,118 characters (draft 1: 3,960), about 1,030 tokens, so it clears Haiku 5.5's 512-token minimum and is sent cached (draft 1 measured 2026-10-11). |
 
 **To edit:** change the text inside the block below.  Everything between the two fence lines is sent
 to the model exactly as written.  Leave the fence lines themselves alone.  Notes for me go under
@@ -57,8 +57,10 @@ are abridged from [step2_kind.md](./step2_kind.md) draft 6; where the two differ
 decides, since M1's is the verdict of record.
 
 **Word hygiene.**  No example in the text is a corpus label, a corpus stem or a seed-queue name (the three example
-labels are `punctilious`, `slow to anger` and `keeps others at arm's length`, and the two example statements are
-invented), and `test_gapgen_ipip_naming.py` fails if one ever becomes one.
+labels are `punctilious`, `slow to anger` and `avoids the limelight`, and the two example statements are
+invented), and `test_gapgen_ipip_naming.py` fails if one ever becomes one.  It also fails if an example breaks the
+label check (`naming.label_problem`: more than four words, or a comma), as draft 1's `keeps others at arm's length`
+did.
 
 ## The prompt
 
@@ -71,7 +73,7 @@ Name whatever the group indicates, and do not hold back because what you find is
 
 Give:
 - "reason": one short sentence on what the statements have in common.
-- "label": the name of what the group indicates, in 1 to 4 lowercase words: an adjective or adjective phrase where English has one (for example "punctilious" or "slow to anger"), otherwise a short descriptive phrase (for example "keeps others at arm's length").
+- "label": the name of what the group indicates, in 1 to 4 lowercase words: an adjective or adjective phrase where English has one (for example "punctilious" or "slow to anger"), otherwise a short descriptive phrase (for example "avoids the limelight"). Count the words: at most four, a hyphenated word counting as one; if the natural phrase is longer, use a shorter one or a single word. Give one name, with no commas.
 - "gloss": one sentence of at most 25 words that starts "This means" and describes it in plain words, without repeating the label.
 - "antonym_label": the name of the opposite, in the same form, or null if it has no clear opposite.
 - "antonym_gloss": one sentence starting "This means" that describes the opposite, or null.
@@ -128,3 +130,4 @@ which is the whole point of replacing `is_trait`: the pole is still named and st
 | draft | who | what changed | why |
 |---|---|---|---|
 | 1 | Opus | First draft in this file, from the in-code `NAMING_PROMPT` (pinned in `naming.py` by sha256 `41b361d7...`), with the definition rewritten: "a persona trait is a lasting disposition ... These are not traits: a passing mood or state, an ability or skill, an interest or hobby, and a life circumstance" becomes "name the one standing thing about a person that the group indicates", with the habitual-self-report paragraph and the predisposition instruction for momentary feelings, and `is_trait` replaced by `kind` in M1's eight-way vocabulary | Roger, 2026-10-11 (QUESTIONS 48, "1-3 SG"): `is_trait` stops being a submission gate, the definition excluded things the corpus itself contains (sixteen examples), and the two naming prompts join the pinned set so that an edit cannot escape `rubric_pins.py check` |
+| 2 | Opus | The third example label `keeps others at arm's length` (five words) replaced by `avoids the limelight`; two sentences added to the label line: "Count the words: at most four, a hyphenated word counting as one; if the natural phrase is longer, use a shorter one or a single word." and "Give one name, with no commas."  Nothing else in the block changed, and the hinted form took the same edit | Roger, 2026-10-13 ("SG"): the prompt's own example broke its 1-to-4 rule and Haiku 5.5 copied it and its "keeps ... at ..." pattern (74 of the night's 134 rejected answers were 5-6-word labels), and labels with commas were accepted although most were two names joined ("joyless, rarely happy", "vengeful, unforgiving"); parser version 3 rejects a comma label and retries it |

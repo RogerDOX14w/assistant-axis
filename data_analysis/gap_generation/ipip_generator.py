@@ -427,12 +427,24 @@ def cmd_cluster(args) -> int:
 
 # --------------------------------------------------------------------------- name
 
+def _named(pole: dict, form: str) -> bool:
+    """The pole carries a naming in ``form`` whose label passes the current label check.  A naming stored under an
+    older parser whose label the current one rejects (a comma label under parser version 1, 12 in the tables of
+    2026-10-13) counts as unnamed, so the next ``name`` run asks it again, as the parser would have (Roger
+    2026-10-13: a comma label is a bad label and gets retried).  Its old answer stays in the table until a new one
+    is accepted, and in ``naming_responses.jsonl`` for good."""
+    from assistant_axis.gapgen.generators.ipip import naming as N
+    nm = pole.get(form)
+    label = nm.get("label") if isinstance(nm, dict) else None
+    return isinstance(label, str) and bool(label.strip()) and N.label_problem(" ".join(label.split())) is None
+
+
 def _pole_refs(rows, items_by_id, *, forms, force):
     from assistant_axis.gapgen.generators.ipip import naming as N
     refs = []
     for r in rows:
         for p in r["poles"]:
-            if not force and all(p.get(f) for f in forms):
+            if not force and all(_named(p, f) for f in forms):
                 continue
             refs.append(N.PoleRef(granularity=int(r["granularity"]), cluster_id=int(r["cluster_id"]), pole=p["pole"],
                                   statements=[items_by_id[i].text for i in p["items"]],
@@ -462,7 +474,8 @@ def cmd_name(args) -> int:
     items = {r.ipip_id: r for r in _load_items(args)}
     chosen = select_clusters(rows, n=args.clusters, all_=args.all, ids=args.cluster_ids, seed=args.seed)
     forms = ["blind", "hinted"] if args.hinted else ["blind"]
-    # the poles to ask, per form: a pole already named in a form is not asked that form again unless --force
+    # the poles to ask, per form: a pole already named in a form is not asked that form again unless --force (a
+    # stored label the current label check rejects does not count as named: ``_named``)
     # (review 2026-10-12: a `--hinted` pass after a blind-only pass re-asked every blind name -- 362 of them, and
     # Haiku 5.5 gave a different blind label for 189 -- because a pole missing either form was asked both)
     refs_by_form = {f: _pole_refs(chosen, items, forms=[f], force=args.force) for f in forms}
@@ -471,8 +484,13 @@ def cmd_name(args) -> int:
     est = Estimate()
     for f in forms:
         est.add(f"naming ({f})", args.model, len(refs_by_form[f]), N.EST_IN_TOKENS, N.EST_OUT_TOKENS)
+    # a stored naming whose label fails the current check is asked again (``_named``); say how many
+    by_key = {(int(r["granularity"]), int(r["cluster_id"]), p["pole"]): p for r in chosen for p in r["poles"]}
+    n_bad = {f: sum(1 for x in refs_by_form[f] if by_key[x.key].get(f)) for f in forms} if not args.force else {}
     print(f"{len(chosen)} clusters chosen (seed {args.seed}), {len(refs)} poles to name ("
-          + " + ".join(f"{f} {len(refs_by_form[f])}" for f in forms) + "):")
+          + " + ".join(f"{f} {len(refs_by_form[f])}" for f in forms) + ")"
+          + (", of which a stored label fails the current check: "
+             + " + ".join(f"{f} {n_bad[f]}" for f in forms) if any(n_bad.values()) else "") + ":")
     print(est.format())
     confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
     if _dirty_gate(args):
@@ -803,7 +821,9 @@ def build_parser() -> argparse.ArgumentParser:
     which.add_argument("--all", action="store_true", help="every kept cluster")
     which.add_argument("--cluster-ids", type=int, nargs="+", default=None)
     p.add_argument("--hinted", action="store_true", help="also the hinted call beside the blind one")
-    p.add_argument("--force", action="store_true", help="name poles already named again")
+    p.add_argument("--force", action="store_true",
+                   help="name poles already named again (without it, a pole-form is asked when it has no naming or "
+                        "its stored label fails the current label check: over four words, or a comma)")
     p.add_argument("--render", type=int, nargs="?", const=3, default=0, metavar="N",
                    help="print the system prompt and the first N user turns exactly as they are sent (for the "
                         "rubric files' rendered samples); with --dry-run it prints and stops")

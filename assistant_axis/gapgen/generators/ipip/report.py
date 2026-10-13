@@ -66,6 +66,51 @@ def naming_parse_stats(records: Sequence[Mapping], *, granularity: Optional[int]
                 {f"{r['form']} v{r.get('prompt_version')}" for r in recs})}
 
 
+def current_naming_parse_stats(records: Sequence[Mapping], tables: Mapping[int, Sequence[Mapping]]) -> dict:
+    """The naming parse rate of the current parser on the current cluster tables (the acceptance bar's measure
+    since 2026-10-13; :func:`naming_parse_stats` pools every record as the parser of its day read it, across
+    clusterings since rebuilt, so it measures history).
+
+    For every pole and form in ``tables`` (granularity -> rows), the **latest** recorded answer to it, re-parsed
+    with :func:`naming.parse_naming` as it stands (a record's ``parsed`` is what the parser of that day made of it),
+    as ``overlap_test`` re-parses its records.  A naming carried from another cut (``carried_from``) is the answer
+    of the pole that gave it.  A pole and form with no answer on record was never asked and is not counted; an
+    answer to a pole no table holds now (an earlier clustering) is not counted either.  Answers are keyed by
+    (granularity, cluster id, pole, form) as recorded, so a pole whose letter changed in a rebuild is paired with
+    the answer recorded under its letter (the political cluster's poles a and b, on the 2026-10-13 tables; both
+    parse, so the rate is unaffected)."""
+    from .naming import FORMS, PARSER_VERSION, parse_naming
+    latest: dict[tuple, Mapping] = {}
+    for r in records:                                    # append-only, so the last record of a key is its latest
+        latest[(int(r["granularity"]), int(r["cluster_id"]), r["pole"], r["form"])] = r
+    n_asked, n_ok = Counter(), Counter()
+    kinds: Counter = Counter()
+    failing = []
+    for g, rows in sorted(tables.items(), key=lambda kv: -int(kv[0])):
+        for row in rows:
+            for p in row.get("poles") or []:
+                for f in FORMS:
+                    nm = p.get(f) if isinstance(p.get(f), Mapping) else None
+                    cf = (nm or {}).get("carried_from")
+                    key = ((int(cf["granularity"]), int(cf["cluster_id"]), cf["pole"], f) if cf
+                           else (int(g), int(row["cluster_id"]), p["pole"], f))
+                    r = latest.get(key)
+                    if r is None:
+                        continue
+                    n_asked[int(g)] += 1
+                    naming, err = parse_naming(r.get("text"))
+                    if naming is not None:
+                        n_ok[int(g)] += 1
+                        continue
+                    kinds[err.split(":")[0]] += 1
+                    failing.append({"granularity": int(g), "cluster_id": int(row["cluster_id"]), "pole": p["pole"],
+                                    "form": f, "named_in_table": nm is not None, "error": err})
+    n, ok = sum(n_asked.values()), sum(n_ok.values())
+    return {"n_asked": n, "n_ok": ok, "parse_rate": round(ok / n, 4) if n else None, "parser_version": PARSER_VERSION,
+            "by_granularity": {str(g): {"n_asked": n_asked[g], "n_ok": n_ok[g]} for g in sorted(n_asked, reverse=True)},
+            "rejected_by_kind": dict(sorted(kinds.items())), "failing": failing}
+
+
 def build_evaluation(run_id: str, *, run_dir: Path, tables: Mapping[int, Sequence[Mapping]],
                      cluster_summaries: Mapping, readouts: Sequence[Mapping], naming_records: Sequence[Mapping],
                      registry_rows: Sequence[Mapping], ingest_counts: Optional[Mapping], corpus_stems: set,
