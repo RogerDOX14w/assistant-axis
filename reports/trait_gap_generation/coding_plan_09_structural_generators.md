@@ -71,6 +71,11 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
   no single opposite.  So for a mean, the `opposite` answer is recorded as one of the triangle's corners (matched to
   the excess or deficiency answer where it names one), never as a pair partner (`partner_hint` empty, the triple's
   arrangement hint `triangle`), and pair recovery is read only over traits that are poles of a recorded pair.
+  Roger, 2026-10-14: traits can belong to more than one arrangement, so the triangle can coexist with a pair, and
+  **pairing the two opposite vices** (cowardice with recklessness) "makes a certain amount of sense".  Triangle
+  candidates come only from this generator, so their handling is semi-manual (a TODO in the
+  [README](./README.md) "Low-priority TODOs"), not a general solution; M3's pair detector pairing a vice with a
+  lone mean trait is corrected at review.
 - **Siblings together in review** — Roger: "Sounds good."  The review graph shows an operator's outputs for one
   trait (its opposite, excess, deficiency, and the principal-target items) as one group; the interface request of
   § 12 item 3 is approved.
