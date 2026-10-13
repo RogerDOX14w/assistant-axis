@@ -73,3 +73,45 @@ equivalences:
     default is resolved after parsing and refuses a tree whose header is not Qwen3''s
     seven tokens; no-op on the 8-slot layout; identical I/O'
   marked_at: '2026-10-13T00:43:48+00:00'
+- script: results_analysis/axis_cosine_seriation.py
+  from_fp: v1:2026-05-22T20:40:02+00:00@36759
+  to_fp: v1:2026-10-13T00:30:38+00:00@38335
+  reason: 'Provenance pass 2026-10-13 (the outputs record the 1448a84c content, 36759
+    B). Four later commits, none of which changes the recorded outputs. 820d07f1 adds
+    a CLEAN_COHORT_ONTOLOGY entry for the renamed pole instrumentally_aligned_ai;
+    only a list naming that pole uses it. 0e215a88: ontology_for_cohort strips a _vN
+    suffix, so a _v1 list keeps its ontology (the recorded cohort is clean); the --ca_kind
+    choices become r_only/t_only (the old traits/roles only crashed; the default,
+    combined, is unchanged). 791c0313 (A2): check_pair_list stops before any output
+    on an axis without pole vectors, a no-op on a valid list. 94d3e256 (P7): --slot
+    None resolves to 6 and checks the 8slot header layout, a no-op on 8slot. Verified
+    by rerunning both outputs (L=0 and L=3) into TMPDIR with the recorded arguments
+    on the May list (pair_list_clean_v1.json, byte-identical to the May 22 pair_list_clean.json,
+    copied under the recorded name): JSON equal (max |diff| 5e-15), PNGs pixel-identical.
+    The pair list is not a declared input: the recorded pairs: pair_list_clean.json
+    is now the _v1 file''s content.'
+  marked_at: '2026-10-13T01:29:52+00:00'
+- script: results_analysis/di_weights_ablation.py
+  from_fp: v1:2026-05-11T23:14:23+00:00@17145
+  to_fp: v1:2026-10-13T00:30:38+00:00@18050
+  reason: 'Provenance pass 2026-10-13 (the outputs record the df6444a0 content, 17145
+    B). 791c0313 (A2): check_pair_list on both lists (pole vectors and the four desc+inst
+    caches) stops before any output on an incomplete axis, a no-op on a valid list.
+    94d3e256 (P7): --slot None resolves to 6 and checks the 8slot header layout, a
+    no-op on 8slot. Verified: the recorded version (df6444a0) and the current version
+    were run into TMPDIR on the same inputs (the recorded --whitening soft_shear=3,
+    pair_list_di_v1.json, pair_list_resp_12axes_2026-04-29.json, 8slot): JSON equal
+    (max |diff| 1e-16), PNGs pixel-identical, and both equal the recorded di_weights_ablation.json
+    exactly. The outputs still read stale on pairs_di_json and pairs_resp_json (those
+    names now hold the current lists), one Sonnet cache and judge_score_combine.py;
+    these are input drifts, not the producer.'
+  marked_at: '2026-10-13T01:29:52+00:00'
+- script: results_analysis/rho_by_layer_simple.py
+  from_fp: v1:2026-05-22T20:18:07+00:00@9330
+  to_fp: v1:2026-05-27T15:44:25+00:00@9330
+  reason: 'Provenance pass 2026-10-13: an mtime touch on 2026-05-27 15:44:25 UTC,
+    shared with judge_score_combine.py; the size is unchanged at 9330 B. The file''s
+    only commit is 1448a84c (2026-05-24, 9330 B), with no diff since. Verified: rerunning
+    the recorded command (defaults: slot 6, L=0, rho_by_layer_L.json) into TMPDIR
+    gives an equal JSON (max |diff| 0) and a pixel-identical PNG.'
+  marked_at: '2026-10-13T01:29:52+00:00'
