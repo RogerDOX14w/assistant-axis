@@ -34,7 +34,7 @@ generators counts under both.
 | 06 | [LLM generation with injected entropy](./coding_plan_06_llm_entropy.md) | **4** | | Roger: plan review, three decisions |
 | 07 | [IPIP behaviour items](./coding_plan_07_behaviour_items.md) | **8** | 237 / 3 | Roger, small: the loose pile (hold or submit, about $1); confirm blind labels from the [40-pole sample](../../data/candidates/runs/ipip/2026-10-13-g600/roger_sample.md) |
 | 08 | [Alignment sweep](./coding_plan_08_alignment_sweep.md) | **8, under repair** | 360 / 2, plus 226 missing | the coordinator: the core run's rows (Model Spec and constitution, 226 kept) never reached the main registry ([regeneration list](../code_review_2026-10-12/regeneration_list.md) GG5); an Opus agent is preparing the import |
-| 09 | [Structural generators](./coding_plan_09_structural_generators.md) | **6** | none submitted yet | Roger: the model after the stability gate failed (prompt v2 and a re-test, or Haiku three times); VIA's names verified; the opposite of a mean; siblings shown together in review |
+| 09 | [Structural generators](./coding_plan_09_structural_generators.md) | **6** (reviewed, merged; null-rate gate passed, stability gate failed) | none submitted yet | Roger: the model after the stability gate failed (prompt v2 and a re-test, or Haiku three times); VIA's names verified; the opposite of a mean; siblings shown together in review |
 | — | antonym-check seeds (words the corpus antonym checks proposed) | **8** | 135 / 0 | nothing; refreshed when new antonym checks add words |
 | — | states and physical passes (the holding lists re-routed) | **8** | 158 / 7 | nothing |
 | — | role generators | **parked** (Roger, 2026-10-10) | | Roger: the role-category sketch in the [README](./README.md) ("Parked: generators aimed at roles"), unread |
@@ -55,6 +55,6 @@ generators counts under both.
 
 | # | item | stage | blocked on |
 |---|---|---|---|
-| 13 | [Generator testing and saturation](./coding_plan_13_generator_testing.md) | **5** (built; Fable review running) | the review, then merge; the paraphrase sanity check (about $1.50); then the pooled recovery harness: Roger's cap, $80 or $68 |
+| 13 | [Generator testing and saturation](./coding_plan_13_generator_testing.md) | **6** (reviewed by Fable, merged 2026-10-13; the first dashboard is [built](../../data/candidates/testing/dashboard.md), free) | three small review fixes being made, one (the estimate's calibration) needed before the harness; then the paraphrase sanity check (about $1.50); then the pooled recovery harness: Roger's cap, $80 or $68 |
 | — | recovery harness (platform close-out) | **8, finished**; extended by plan 13 | nothing |
 | — | **review itself** | ongoing | Roger's review sessions: about 3,835 kept candidates in the review graph, about 210 decided |
