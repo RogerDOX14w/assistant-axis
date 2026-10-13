@@ -97,7 +97,15 @@ any other generator can apply to its own output.
 
 ## 9. Open questions for Roger
 1. Year cutoff for Books (>= 1900, >= 1950?), trading archaic vocabulary against volume.
+**Roger:** Maybe 1920?
 2. Are NSFW-flagged PIPPA and non-commercial PersonaHub acceptable inputs?
+**Roger:** Sure. NSFW is not something we're trying to filter out: it is one aspect of humans, as valid as any other.
 3. Are synthetic, LLM-authored personas a plus (on-distribution) or circular with the generator's priors?
+**Roger:** I think we have other generators to cover that.  But if other people have generated such personas and then applied any curation or selection to them, that's potentially of value.
 4. Include nominal traits (pedant, gossip, yes-man) with adjectival relabels?
+**Roger:** Yes: often we can shift grammatical form easily enough, and they're still useful for clustering.
 5. Review depth: top 500 novel survivors, or everything the novelty scorer calls a gap?
+**Roger:** I'd say start with an hour's review of the ones that seem most novel.
+6. (Raised by Roger, 2026-10-13, not by the plan.) **Frame bias.**
+**Roger:** The "very" frame is probably going to bias the traits we get, so we need to use a range of such frames: ideally ones that give a high yield of things that actually are traits, but either are not applying a strong net filter to what we find, or are a wide enough range that summing across them gives little net filtering.
+Consequences for the method (2026-10-13): (1) every frame filters: degree adverbs ("very", "extremely") keep only gradable adjectives and favour evaluative, socially desirable words; noun frames ("an incorrigible X") keep nominal labels; "known for his X" favours nouns of quality; "X to a fault" favours virtues in excess; so frames are chosen across syntactic types, not as variations of one (degree adverbs, copular "was a(n) X person", possessive "known for POSS X" and "POSS X nature", "a man of X", "X by nature", "X to a fault", "tendency to be X", the nominal anchors of step 1); (2) each frame's filter is measured, not assumed: per frame, the M1 trait share of its fillers (its yield) and the distribution of its traits over the corpus's regions and over adjective, noun and phrase forms against the union of all frames (its net filter), plus its recovery curve on the existing labels; (3) the ranking merges frames by rank within each frame (reciprocal-rank or max), so a high-volume frame such as "very" cannot dominate the union by count; (4) a frame with a low trait yield or a strong filter is kept only if it adds labels no other frame finds, and the report says which frame contributed each new label.
