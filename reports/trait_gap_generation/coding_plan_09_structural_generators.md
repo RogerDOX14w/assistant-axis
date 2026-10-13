@@ -77,6 +77,11 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
 - **VIA's 72 names** — Roger: "Source fetch authorized."  An agent fetches Niemiec (2019) to read (not stored in the
   repository, quotes 25 words or fewer), checks every over- and underuse name, and fills `verified_by`; the other
   four classical tables are accepted as typed, with Roger's 30-minute read of the classical candidates as the check.
+  **Done 2026-10-13 (938bd617):** Niemiec (2019) itself is paywalled and was not read; all 72 rows were checked
+  against Freidlin, Littman-Ovadia & Niemiec (2017), *Personality and Individual Differences* 108, Table 1 (the same
+  labels, co-authored by Niemiec, hosted by the VIA Institute) and the VIA Institute's chart "Finding the Golden
+  Mean".  Nine labels corrected (the old ones kept in each row's note), the citation fixed from Crossref, every row
+  `verified_by`.
 - **Stability** — Roger's rule for sampled outputs at T=1 (AGENT_NOTES, judging rule): three samples per trait,
   combined as a deduplicated union with support recorded; stability is a diagnostic, never a gate.
 
