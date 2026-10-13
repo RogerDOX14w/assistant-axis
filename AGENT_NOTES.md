@@ -1562,6 +1562,25 @@ or one item at a time (e.g. ``results_analysis/infer_axis_description.py``,
 tracker — N=1 makes the rate meaningless, and they already raise on
 unrecoverable parse failure rather than silently dropping records.
 
+### Judge requests: temperature, refusals and HTTP 400s (`judge.py`, 2026-10-12, B1/B1b)
+<!-- claude: rule=judging -->
+
+[`assistant_axis/judge.py`](assistant_axis/judge.py) never sends a
+`temperature` equal to the provider default (`DEFAULT_TEMPERATURE`, 1), so a
+model that refuses the parameter works at the default with no special case.
+A non-default temperature is checked against `judge.MODEL_CAPABILITIES`, the
+table of the non-default cases, before any call, and a model listed there as
+refusing one raises `JudgeRequestError` at once (the message says to drop the
+temperature or choose another model).  **Add a model to that table before
+switching a judge to it.**  Any HTTP 400 raises `JudgeRequestError`: a wrong
+parameter is a bug in the call, not a per-item failure to swallow.  The one
+exception is a 400 whose error code says one prompt's content was flagged
+(`CONTENT_FLAG_CODES`): that item gives `None` with a WARNING naming the
+model and the code, is counted in `judge.CONTENT_FLAGGED`, and the batch goes
+on.  No reasoning-effort setting is sent yet, so a switch to GPT-5 or GPT-6 as
+a judge must add one (and its capability row) first.  Commits 8bf84f14 (B1)
+and fb58d416 (B1b), from the 2026-10-12 review.
+
 ### NFS-safe file I/O (mandatory for `/workspace` reads and writes)
 <!-- claude: rule=nfs-io -->
 
