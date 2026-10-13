@@ -1236,6 +1236,25 @@ reason as a failed call that is recorded and counted, never as an empty answer
 (the structural generator's stability gate passed on 3 of 30 traits because
 refusals were dropped from its denominator; fixed the same day).
 
+### Sampled outputs at T=1: combine them, never gate on stability (Roger, 2026-10-13)
+<!-- claude: rule=judging -->
+
+The 5.x models (Haiku 5.5, Sonnet 5.5) run at temperature 1 and refuse any
+other setting, so run-to-run agreement is not expected.  Roger, after plan
+09's stability gate failed on Haiku 5.5: "Stability is not expected, and we
+shouldn't gate on it, or design assuming it, or throw answers away because the
+three weren't unanimous.  I'm instead leaning towards running three times and
+intelligently combining their answers.  For something that returns a word,
+that might be making a deduped list of them."  So, for a call that
+**generates** candidates: sample it three times (the cache keyed on the sample
+index as well as the prompt), keep the deduplicated union with each answer's
+support (1-3) recorded, never drop an answer for low support, and report
+agreement as a diagnostic, never as a gate.  For a call that **decides** (a
+verdict, a score, a route), combine by majority as the states pass does
+(`--readings 3`); the decision rule is chosen per call.  Agreement statistics
+count only slots at least one sample filled: two empty answers are not
+agreement.
+
 ### Judge prompts show the judge display form (Roger, 2026-10-09)
 <!-- claude: rule=judging -->
 
