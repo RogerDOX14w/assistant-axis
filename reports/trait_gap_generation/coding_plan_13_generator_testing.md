@@ -94,6 +94,53 @@ run must reproduce them.  Roger's review comments go into this file.
      unit is as good on false joins and better on true ones.  Both split about 40% of real merges, which biases
      the estimates of the total upward (missed matches between mechanisms), against the downward bias of uneven
      catchability; the plan's "lower bound" reading holds only if the second dominates, and the report says so.
+   - **Roger (2026-10-13, from review):** 4-simplices are fairly often too small and almost never too large;
+     3-simplices often need some splitting to line up with the nearest corpus concept, or an item excluded, but
+     seldom seem too small (or, where several overlap, a concept that needs joining is in some of them).
+     Simplices that share corners or edges are often the same concept, or mostly, but a chain of them can extend
+     too far: we probably need a majority-overlap or Jaccard-like criterion strong enough to break chains once
+     they start connecting things that don't overlap enough.  In general, compute both the 3 and the 4 numbers
+     and see which seems more useful.
+   - *Measured 2026-10-13* (a scratch prototype, read-only, on the all-batches graph's 3,835 kept candidates).
+     Ground truth: the 173 candidates decided in review, which collapse to 58 final concepts (a promoted
+     candidate is its own concept, a merged one takes its target's), giving 328 same-concept pairs; and 147 hard
+     negatives, pairs Roger marked distinct or dropped from a group the graph had proposed.  "Kept together" is
+     the share of same-concept pairs in one unit; "one concept" is the share of decided pairs sharing a unit that
+     Roger made one concept.  Chao2 is computed the same way on every row (four occasions, bias-corrected form).
+
+     | unit | units | largest | kept together | one concept | hard negatives joined | Chao2 |
+     |---|---|---|---|---|---|---|
+     | strict components (4) | 3,065 | 21 | 39% | 76% | 19 | 9,225 |
+     | loose groups, first assignment (this plan's earlier loose column) | 2,769 | 13 | 26% | 71% | 23 | 7,210 |
+     | components at 3 (chains unbroken) | 1,585 | 1,028 | 99% | 7% | 136 | 4,511 |
+     | loose groups merged at Jaccard >= 0.34 | 2,290 | 112 | 85% | 50% | 94 | 6,389 |
+     | loose groups merged at Jaccard >= 0.5 | 2,418 | 61 | 62% | 59% | 62 | 6,478 |
+     | the same, and the merged group at least 2/3 interlinked | 2,484 | 27 | 45% | 70% | 32 | 6,369 |
+     | strict components grown across 3-links, group density >= 0.5 | 1,927 | 30 | 64% | 75% | 43 | 4,159 |
+     | **the same, density >= 0.67** | **2,256** | **23** | **54%** | **75%** | **29** | **5,145** |
+     | the same, density >= 0.8 | 2,324 | 21 | 51% | 78% | 27 | 5,288 |
+     | strict components grown while every member links to a majority | 2,205 | 21 | 51% | 78% | 28 | 4,756 |
+     | density >= 0.67, and no merge across different corpus traits | 2,260 | 23 | 54% | 76% | 29 | 5,125 |
+
+     Reading.  The data agree with Roger's impression: the strict unit splits real concepts (39% kept together)
+     but seldom joins wrong ones; the loose groups taken one at a time are worse on both counts, because
+     overlapping groups are cut arbitrarily; merging overlapping groups by Jaccard alone chains (largest 61-112,
+     and only 50-59% one concept).  A **density test on the whole merged group** breaks the chains: growing the
+     strict components across 3-links only while the merged group keeps at least two-thirds of its pairs linked
+     at 3 or above raises "kept together" from 39% to 54% at the strict unit's precision, and nothing grows past
+     23.  It is the majority criterion applied to the group a merge would create rather than to the two groups
+     being merged, which is what stops a chain: a chain's density falls with every link.  Requiring the two sides
+     to lean to the same corpus trait adds nothing, because kept candidates rarely have a 3-link to a corpus trait
+     (M3 judged them new).  Chao2's estimate of the total moves by nearly two to one between the strict unit and
+     the grown one, so the choice matters.  Caveats: the ground truth is small and mostly the TDA census; the
+     prototype merged greedily in an order that ties do not fix; the three densities are the only ones tried.
+   - **Decided (2026-10-13): both numbers are computed on every dashboard**: the strict components
+     (`components_4`) and the strict components grown across 3-links at density >= 0.67 (`grown_3`), which
+     replaces the first-assignment loose groups; density 0.5 and 0.8 are printed as sensitivity; the agreement
+     table above is rebuilt from all review logs each time; Roger names the headline on data.  The growth rule
+     and its 0.67 are a recommendation Roger can change at the pilot gate.  (Not in this plan: the review app's
+     proposed groups could be built by the same rule; that is a separate decision for
+     [coding_plan_review.md](./coding_plan_review.md).)
 3. **OPEN: the promote share's denominator.**  The workstream plan's § 3.5 gives "55% for the TDA census" as the
    promote share ("promoted of kept").  The record gives two figures: **per decided term, 20%** (34 `accepted` of
    174 decided censuses rows in the registry; 35 promoted of 204 review writes in
@@ -238,8 +285,12 @@ assistant_axis/gapgen/testing/
   repetition.py      load_graph(path) -> dict; kept_nodes(graph); decided_keys(graph); adjacency(graph, level=3|4);
                      repetition(graph, *, level) -> {generator: Repetition(n_kept, n_undecided, pre_handled,
                      share, attached_to_batch: {batch: share})}
-  concepts.py        components(graph, *, level=4) -> list[set[str]]; clique_assignment(graph) -> {key: group}
-                     (first proposed group by order); concept_table(graph, *, unit) -> ConceptTable (§ 6):
+  concepts.py        components(graph, *, level=4) -> list[set[str]]; grow(graph, *, seeds, tau=0.67) ->
+                     list[set[str]] (seeds the 4-components; merge two units joined by a 3-link, highest
+                     cross-link density first, ties by sorted key, only while the merged unit has at least tau of
+                     its pairs linked at 3 or above; repeat until nothing merges); review_agreement(units,
+                     review_dirs, graph) -> Agreement(kept_together, one_concept, hard_negatives_joined, n_pairs,
+                     n_negatives) (decision 2's table); concept_table(graph, *, unit) -> ConceptTable (§ 6):
                      per concept its mechanisms, region (most common), generators, decided status
   estimators.py      chapman(n1, n2, m) -> Estimate(N, se, lo, hi) (Seber's variance, log-normal interval);
                      chao2(Q: Counter, m_occ) -> Estimate (bias-corrected; Q2 == 0 form);
@@ -357,7 +408,7 @@ level, over the all-batches graph's kept candidates; figures measured 2026-10-13
 app counts it as handled from the start and it costs no review-minute.
 
 **Concept table** ([concepts.json](../../data/candidates/testing/concepts.json), not there yet; `unit` is
-`components_4`, `cliques_3` or `components_3`): `{"unit", "n_concepts", "n_singletons", "largest", "by_mechanism":
+`components_4`, `grown_3` (with its `tau`) or `components_3`): `{"unit", "n_concepts", "n_singletons", "largest", "by_mechanism":
 {"lexicon": 2402, ...}, "pairs": [{"a": "lexicon", "b": "ipip", "n1": 2402, "n2": 232, "m": 54}], "incidence":
 {"1": 2513, "2": 375, "3+": 41}, "by_region": {...}, "concepts": [{"id": 0, "keys": [...], "mechanisms": [...],
 "region": "moral_stance", "decided": "merged_into" | null}]}`.
@@ -418,7 +469,7 @@ JSON with its inputs (`json_metadata`), rewritten whole, `.bak.<UTC>` on change.
   exits 1 if a registry generator has no row in `STREAMS`.  $0.
 - `review-rate [--batch B ...] [--idle-s 300]`: the review-rate record per batch with a `decisions.jsonl`, plus
   the pooled rate and the per-generator promote shares.  $0.
-- `repetition [--level 3 4]`, `concepts [--unit components_4 cliques_3]`, `estimate [--unit ...] [--by-region]`:
+- `repetition [--level 3 4]`, `concepts [--unit components_4 grown_3] [--tau 0.67]`, `estimate [--unit ...] [--by-region]`:
   the records of § 6; `estimate` prints the assumptions block every time.  $0.
 - `simulate [--n 2000 --occasions 4 --sigma 1.0 --rho 0.3 --replicates 200 --seed 0]`: the estimator sanity run,
   writes `simulation.json`.  $0, seconds.
@@ -454,7 +505,11 @@ estimate figures are **report-and-decide**.
 - `repetition`: on a toy graph with decided and undecided nodes, 3- and 4-edges, pre-handled counts by level;
   attachment to a batch; **on the recorded all-batches graph: censuses 185 of 2,698 at level 3, 57 at level 4;
   720 of 2,076 non-TDA censuses terms attached to the TDA batch** (hard).
-- `concepts` and `estimators`: components on a toy graph; clique assignment deterministic; `chapman(10, 10, 5)` =
+- `concepts` and `estimators`: components on a toy graph; `grow` deterministic; on a toy chain of five
+  candidates joined only by consecutive 3-links, `grow` at 0.67 never puts the two ends in one unit; two triangles
+  sharing an edge merge; `review_agreement` on a fixture log gives hand-computed shares; on the recorded graph
+  `grown_3` at 0.67 gives about 2,250 units with none above about 25 (the prototype's 2,256 and 23; soft, since
+  the prototype's tie order differs); `chapman(10, 10, 5)` =
   19.2 and its interval; `chao2` with Q2 = 0 uses the corrected form; coverage in [0, 1]; the accumulation curve
   is non-decreasing and the extrapolation continues it; **on the recorded graph: 3,065 four-edge components, 2,691
   singletons, largest 21; a 3-edge component of 1,028** (hard); `ASSUMPTIONS` printed by `estimate`.
@@ -535,8 +590,8 @@ harness ones: per generator the cost, counts, regions, repetition, review figure
 the stop rule from the measured review rate and promote shares; plus the concept table and the estimates at both
 units.  **Roger decides** on it: (a) decision 1, the harness scope (the dashboard's stop-rule column says which
 generators' remaining terms are worth the review-minutes, and so which are worth measuring recall for);
-(b) decision 2, by reading twenty of the 4-edge components and twenty of the 3-edge cliques (printed with their
-members, seeded); (c) decision 3; (d) whether the giant 3-edge component is a review-graph finding worth filing.
+(b) decision 2's headline, by reading twenty strict components and twenty grown units (printed with their
+members, seeded) beside the review-agreement table; (c) decision 3; (d) whether the giant 3-edge component is a review-graph finding worth filing.
 The second pilot is the paraphrase set (task 7, about $1.5): a matcher sanity check, with a gate.  Yield per
 dollar is not the figure here (nothing is generated); the readout's figures are the stop-rule ones and the
 estimates with their intervals.
@@ -560,7 +615,7 @@ failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. 
 under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-13), proceeding under the
 assumption unless the answer would make the work useless.  Pre-registered entries Opus copies in at the start:
 (1) the harness scope is decision 1's recommendation (a) unless Roger says otherwise at gate 1; (2) the concept
-unit is 4-edge components, 3-edge cliques loose (decision 2); (3) the promote share is per term (decision 3);
+units are `components_4` and `grown_3` at 0.67, both computed, headline Roger's on the first dashboard (decision 2); (3) the promote share is per term (decision 3);
 (4) the workstream plan's "about 40%" repetition is attachment to the first reviewed batch (measured 35% for the
 censuses), and the pre-handled share is 7%; (5) no seeded generator has generator-side hiding; the harness-side
 figure is reported, marked; (6) states-pass and physical-pass rows are attributed to the source row's generator;
