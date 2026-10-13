@@ -156,8 +156,13 @@ def file_specs(**named: Optional[Path]) -> list:
     return out
 
 
+#: The command's arguments as recorded in every envelope and PNG (``main`` sets them, absolute paths made relative).
+_ARGV: Optional[list[str]] = None
+
+
 def write_json(path: Path, payload, *, title: str, inputs=None) -> None:
-    env = json_metadata(payload, title=title, inputs=inputs)
+    env = json_metadata(payload, title=title, inputs=inputs, script="data_analysis/gap_generation/persona_novelty.py",
+                        argv=_ARGV)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False, default=_default) + "\n", path)
 
 
@@ -394,7 +399,7 @@ def cmd_fit(args, argv) -> int:
     write_json(out / "calibration.json", cal.as_dict(), title=f"persona-space fit {args.fit_id}: calibration",
                inputs=specs)
     title = f"Persona-space fit {args.fit_id}: held-out R² by PC and residual agreement by N"
-    REP.fit_png(cv, cal, out / "fit_report.png", title=title, inputs=specs)
+    REP.fit_png(cv, cal, out / "fit_report.png", title=title, inputs=specs, argv=_ARGV)
     atomic_write_text(REP.fit_report(cv, cal, fit_id=args.fit_id, pool_counts=counts) + "\n", out / "fit_report.md")
     run |= {"status": 0, "alpha": cv.alpha, "N": cv.N, "chosen_by_rule": chosen, "n_train": cv.n_rows,
             "n_groups": cv.n_groups, "dup_threshold": cal.dup_threshold, "novel_pct": cal.novel_pct,
@@ -961,7 +966,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    global _ARGV
     argv = list(sys.argv[1:] if argv is None else argv)
+    _ARGV = clean_argv(argv)
     configure_logging()
     args = build_parser().parse_args(argv)
     try:

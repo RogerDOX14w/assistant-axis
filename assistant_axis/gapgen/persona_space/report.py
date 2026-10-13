@@ -40,7 +40,7 @@ def _mean(xs) -> Optional[float]:
     return float(np.mean(xs)) if xs else None
 
 
-def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) -> Path:
+def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None, argv=None) -> Path:
     """Two panels: the per-PC R² of the held-out predictions (PCs 1-64 of the pool) at the chosen alpha, and the
     residual Spearman against N for every alpha, the chosen alpha bold and the chosen N marked."""
     import matplotlib
@@ -85,7 +85,8 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None) ->
     a2.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=3, frameon=False)
     fig.suptitle(title, fontsize=13, fontweight="bold")
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=150, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs))
+    kw = {} if argv is None else {"argv": list(argv), "script": "data_analysis/gap_generation/persona_novelty.py"}
+    fig.savefig(path, dpi=150, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs, **kw))
     plt.close(fig)
     return path
 

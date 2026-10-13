@@ -85,7 +85,11 @@ class TestFullFlow:
         assert json.loads((d / "usage.json").read_text())["n_calls"] == 0          # every text cached: $0
         assert "fit_report.png" in (d / "fit_report.md").read_text()
         from PIL import Image
-        assert Image.open(d / "fit_report.png").info.get("Title", "").startswith("Persona-space fit fit_t")
+        info = Image.open(d / "fit_report.png").info
+        assert info.get("Title", "").startswith("Persona-space fit fit_t")
+        assert info.get("Software", "").startswith("uv run python data_analysis/gap_generation/persona_novelty.py fit")
+        env_ = json.loads((d / "cv.json").read_text())["_provenance"]
+        assert env_["produced_by"]["cmd"].startswith("uv run python data_analysis/gap_generation/persona_novelty.py fit ")
 
     def test_score_outputs_and_blocks(self, env):
         d = env["out"] / "score" / "b_all"
