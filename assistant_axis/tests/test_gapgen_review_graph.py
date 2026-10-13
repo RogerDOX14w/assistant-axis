@@ -15,6 +15,12 @@ from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage, c
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, user_text
 from assistant_axis.tests.test_gapgen_novelty import responder_for, rubrics, toy_index
 
+
+@pytest.fixture(autouse=True)
+def _no_real_operator_table(monkeypatch):
+    """Keep these tests hermetic: never read the repository's real structural operator table (review S5)."""
+    monkeypatch.setattr(RG, "structural_operator_table", lambda *a, **k: [])
+
 BATCH = "m3b"
 DIM = 12
 

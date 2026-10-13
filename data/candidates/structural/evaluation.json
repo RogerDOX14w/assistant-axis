@@ -1,0 +1,917 @@
+{
+  "result": {
+    "holdout_lists": {
+      "frozen_at": "2026-10-13T20:49:51+00:00",
+      "queue_sha256": "a97c600cc979a3ea859c1a77ccb1a5dca787a28903ede15f952e025cabc77ebf",
+      "holdout": [
+        {
+          "stem": "bland",
+          "label": "bland",
+          "status": "paired"
+        },
+        {
+          "stem": "cultural_relativist",
+          "label": "cultural relativist",
+          "status": "paired"
+        },
+        {
+          "stem": "disciplined",
+          "label": "disciplined",
+          "status": "paired"
+        },
+        {
+          "stem": "exclusive",
+          "label": "exclusive",
+          "status": "paired"
+        },
+        {
+          "stem": "indulgent",
+          "label": "indulgent",
+          "status": "paired"
+        },
+        {
+          "stem": "rule_bending",
+          "label": "rule-bending",
+          "status": "paired"
+        },
+        {
+          "stem": "tough",
+          "label": "tough",
+          "status": "paired"
+        },
+        {
+          "stem": "deterministic",
+          "label": "deterministic",
+          "status": "paired"
+        },
+        {
+          "stem": "libertarian",
+          "label": "libertarian",
+          "status": "paired"
+        },
+        {
+          "stem": "boundary_fuzzy",
+          "label": "boundary-fuzzy",
+          "status": "backlog"
+        },
+        {
+          "stem": "financially_adventurous",
+          "label": "financially adventurous",
+          "status": "paired"
+        },
+        {
+          "stem": "job_hopper",
+          "label": "job-hopper",
+          "status": "paired"
+        },
+        {
+          "stem": "present_focused",
+          "label": "present-focused",
+          "status": "backlog"
+        },
+        {
+          "stem": "self_attentive",
+          "label": "self-attentive",
+          "status": "backlog"
+        },
+        {
+          "stem": "self_other_boundary_aware",
+          "label": "self-other-boundary-aware",
+          "status": "backlog"
+        },
+        {
+          "stem": "transcendentally_oriented",
+          "label": "transcendentally-oriented",
+          "status": "backlog"
+        },
+        {
+          "stem": "variety_seeking",
+          "label": "variety-seeking",
+          "status": "paired"
+        },
+        {
+          "stem": "achievement_striving_ipip_neo",
+          "label": "Achievement Striving (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "activity_level_ipip_neo",
+          "label": "Activity Level (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "adventurousness_ipip_neo",
+          "label": "Adventurousness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "aesthetic_appreciation_hexaco",
+          "label": "Aesthetic Appreciation (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "altruism_hexaco",
+          "label": "Altruism (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "altruism_ipip_neo",
+          "label": "Altruism (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "anger_ipip_neo",
+          "label": "Anger (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "anxiety_hexaco",
+          "label": "Anxiety (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "anxious_ipip_neo",
+          "label": "anxious (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "artistic_interests_ipip_neo",
+          "label": "Artistic Interests (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "assertiveness_bfas",
+          "label": "Assertiveness (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "assertiveness_ipip_neo",
+          "label": "Assertiveness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "calm_ipip_neo",
+          "label": "calm (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "cautiousness_ipip_neo",
+          "label": "Cautiousness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "cheerfulness_ipip_neo",
+          "label": "Cheerfulness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "compassion_bfas",
+          "label": "Compassion (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "cooperation_ipip_neo",
+          "label": "Cooperation (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "creativity_hexaco",
+          "label": "Creativity (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "dependence_hexaco",
+          "label": "Dependence (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "depression_ipip_neo",
+          "label": "Depression (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "diligence_hexaco",
+          "label": "Diligence (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "dutifulness_ipip_neo",
+          "label": "Dutifulness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "emotionality_ipip_neo",
+          "label": "Emotionality (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "enthusiastic_bfas",
+          "label": "enthusiastic (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "excitement_seeking_ipip_neo",
+          "label": "Excitement-Seeking (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "extraverted_mbti",
+          "label": "extraverted (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "fairness_hexaco",
+          "label": "Fairness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "fearfulness_hexaco",
+          "label": "Fearfulness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "feeling_mbti",
+          "label": "feeling (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "flexibility_hexaco",
+          "label": "Flexibility (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "forgivingness_hexaco",
+          "label": "Forgivingness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "friendliness_ipip_neo",
+          "label": "Friendliness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "gentleness_hexaco",
+          "label": "Gentleness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "greed_avoidance_hexaco",
+          "label": "Greed Avoidance (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "gregariousness_ipip_neo",
+          "label": "Gregariousness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "imagination_ipip_neo",
+          "label": "Imagination (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "immoderation_ipip_neo",
+          "label": "Immoderation (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "industriousness_bfas",
+          "label": "Industriousness (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "inquisitiveness_hexaco",
+          "label": "Inquisitiveness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "intellect_bfas",
+          "label": "Intellect (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "intellect_ipip_neo",
+          "label": "Intellect (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "introverted_mbti",
+          "label": "introverted (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "intuitive_mbti",
+          "label": "intuitive (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "judging_mbti",
+          "label": "judging (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "liberalism_ipip_neo",
+          "label": "Liberalism (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "liveliness_hexaco",
+          "label": "Liveliness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "modesty_hexaco",
+          "label": "Modesty (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "modesty_ipip_neo",
+          "label": "Modesty (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "morality_ipip_neo",
+          "label": "Morality (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "openness_bfas",
+          "label": "Openness (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "orderliness_bfas",
+          "label": "Orderliness (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "orderliness_ipip_neo",
+          "label": "Orderliness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "organization_hexaco",
+          "label": "Organization (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "patience_hexaco",
+          "label": "Patience (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "perceiving_mbti",
+          "label": "perceiving (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "perfectionism_hexaco",
+          "label": "Perfectionism (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "politeness_bfas",
+          "label": "Politeness (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "prudence_hexaco",
+          "label": "Prudence (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "self_consciousness_ipip_neo",
+          "label": "Self-Consciousness (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "self_discipline_ipip_neo",
+          "label": "Self-Discipline (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "self_efficacy_ipip_neo",
+          "label": "Self-Efficacy (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "sensing_mbti",
+          "label": "sensing (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "sentimentality_hexaco",
+          "label": "Sentimentality (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "sincere_hexaco",
+          "label": "sincere (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "sociability_hexaco",
+          "label": "Sociability (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "social_boldness_hexaco",
+          "label": "Social Boldness (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "social_self_esteem_hexaco",
+          "label": "Social Self-Esteem (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "sympathy_ipip_neo",
+          "label": "Sympathy (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "thinking_mbti",
+          "label": "thinking (MBTI)",
+          "status": "backlog"
+        },
+        {
+          "stem": "trust_ipip_neo",
+          "label": "Trust (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "unconventionality_hexaco",
+          "label": "Unconventionality (HEXACO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "volatility_bfas",
+          "label": "Volatility (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "vulnerability_ipip_neo",
+          "label": "Vulnerability (IPIP-NEO)",
+          "status": "backlog"
+        },
+        {
+          "stem": "withdrawal_bfas",
+          "label": "Withdrawal (BFAS)",
+          "status": "backlog"
+        },
+        {
+          "stem": "cultured/uncultured_tentative,_pc13",
+          "label": "cultured/uncultured (tentative, PC13)",
+          "status": "backlog"
+        },
+        {
+          "stem": "humorous/serious_tentative,_pc10",
+          "label": "humorous/serious (tentative, PC10)",
+          "status": "backlog"
+        },
+        {
+          "stem": "literal_explicitness_/_withholding_evasion_tentative,_pc14",
+          "label": "literal-explicitness / withholding-evasion (tentative, PC14)",
+          "status": "backlog"
+        },
+        {
+          "stem": "solitary_reserved_/_connective_communicative_tentative,_pc15",
+          "label": "solitary-reserved / connective-communicative (tentative, PC15)",
+          "status": "backlog"
+        },
+        {
+          "stem": "symbolic_manipulation_/_embodied_care_tentative,_pc16",
+          "label": "symbolic-manipulation / embodied-care (tentative, PC16)",
+          "status": "backlog"
+        }
+      ],
+      "rejected": [
+        "360_ratings",
+        "academic",
+        "acquiescence",
+        "aio",
+        "aloof",
+        "applied",
+        "assessment_centers",
+        "attention_checks",
+        "attitude_accessibility",
+        "balanced",
+        "brilliant",
+        "careless_responding",
+        "category_usage",
+        "channel_preference",
+        "churn_risk",
+        "cliftonstrengths",
+        "coies_five_peer_statuses",
+        "commute",
+        "conclusive",
+        "contraception",
+        "csat",
+        "cultural_capital_bourdieu",
+        "death_tarot",
+        "device_ownership",
+        "dim_witted",
+        "disciplinary",
+        "disgruntled",
+        "distressed",
+        "economic",
+        "economic_capital_bourdieu",
+        "emotive",
+        "empowered",
+        "epistemically_humble",
+        "extreme_responding",
+        "faith_in_humanity_light_triad",
+        "flow_prone",
+        "free_market",
+        "general",
+        "geodemographic_clusters",
+        "gloating",
+        "grave",
+        "hierarchy_conscious",
+        "hierarchy_indifferent",
+        "hogan_hpi_hds_mvpi",
+        "hopeful",
+        "humanism_light_triad",
+        "iconodule",
+        "implicit_association_tests",
+        "indifferent_to_religion",
+        "ingenuous",
+        "intemperate",
+        "interventionist",
+        "involvement",
+        "job_satisfied",
+        "judgement_tarot",
+        "justice_tarot",
+        "kantian",
+        "kantianism_light_triad",
+        "kind",
+        "language",
+        "left_brained",
+        "lifetime_value",
+        "literalist",
+        "liwc",
+        "lmx",
+        "loyalty_tier",
+        "mean",
+        "meaningful",
+        "measured",
+        "meek",
+        "merciful",
+        "modern",
+        "modern_racism_scales",
+        "modernist",
+        "monodisciplinary",
+        "morally_disengaged",
+        "music_genre_identities",
+        "network_density_and_composition",
+        "non_contemplative",
+        "nonchalant",
+        "obscure",
+        "opq",
+        "orderly",
+        "perceived_organizational_support",
+        "perfunctory",
+        "person_organization_fit",
+        "predictable",
+        "preoccupied_with_religion",
+        "purchase_frequency",
+        "racist",
+        "rational",
+        "resentful",
+        "restrained",
+        "rfm",
+        "right_brained",
+        "rogers_five_adopter_categories",
+        "scientific",
+        "secure",
+        "sedate",
+        "self_made",
+        "situational_judgment_tests",
+        "social_desirability",
+        "spiralist",
+        "stable",
+        "straightforward",
+        "strength_tarot",
+        "strong_vs_weak_ties",
+        "structured",
+        "subdued",
+        "systematic",
+        "tech_savvy",
+        "technophobic",
+        "temperance_tarot",
+        "tender",
+        "the_chariot_tarot",
+        "the_devil_tarot",
+        "the_emperor_tarot",
+        "the_empress_tarot",
+        "the_fool_tarot",
+        "the_hanged_man_tarot",
+        "the_hermit_tarot",
+        "the_hierophant_tarot",
+        "the_high_priestess_tarot",
+        "the_lovers_tarot",
+        "the_magician_tarot",
+        "the_moon_tarot",
+        "the_star_tarot",
+        "the_sun_tarot",
+        "the_tower_tarot",
+        "the_world_tarot",
+        "thieving",
+        "time_use_diaries",
+        "unceremonious",
+        "undiplomatic",
+        "undocumented_immigration_status",
+        "unprovocative",
+        "vanilla",
+        "vehicles",
+        "wheel_of_fortune_tarot"
+      ],
+      "accepted": [
+        "adorable",
+        "aimless",
+        "amorous",
+        "chattering",
+        "clandestine",
+        "concealing",
+        "crude",
+        "declining",
+        "deft",
+        "derisive",
+        "disheveled",
+        "disobedient",
+        "fickle",
+        "flattering",
+        "incorruptible",
+        "insulting",
+        "irrestrainable",
+        "jumpy",
+        "malleable",
+        "maniacal",
+        "masochistic",
+        "meddling",
+        "minimizing",
+        "morose",
+        "nosy",
+        "obscene",
+        "overdiligent",
+        "overmasculine",
+        "overstepping",
+        "parasitic",
+        "pathetic",
+        "phony",
+        "prudish",
+        "purposive",
+        "repressed",
+        "resigned",
+        "restrainable",
+        "rugged",
+        "strong_willed",
+        "sulky",
+        "unladylike"
+      ],
+      "candidates": [
+        {
+          "stem": "crude",
+          "label": "crude",
+          "status": "candidate"
+        },
+        {
+          "stem": "chattering",
+          "label": "chattering",
+          "status": "candidate"
+        },
+        {
+          "stem": "malleable",
+          "label": "malleable",
+          "status": "candidate"
+        },
+        {
+          "stem": "irrestrainable",
+          "label": "irrestrainable",
+          "status": "candidate"
+        },
+        {
+          "stem": "nosy",
+          "label": "nosy",
+          "status": "candidate"
+        },
+        {
+          "stem": "flattering",
+          "label": "flattering",
+          "status": "candidate"
+        },
+        {
+          "stem": "phony",
+          "label": "phony",
+          "status": "candidate"
+        },
+        {
+          "stem": "incorruptible",
+          "label": "incorruptible",
+          "status": "candidate"
+        },
+        {
+          "stem": "unladylike",
+          "label": "unladylike",
+          "status": "candidate"
+        },
+        {
+          "stem": "derisive",
+          "label": "derisive",
+          "status": "candidate"
+        },
+        {
+          "stem": "insulting",
+          "label": "insulting",
+          "status": "candidate"
+        },
+        {
+          "stem": "disobedient",
+          "label": "disobedient",
+          "status": "candidate"
+        },
+        {
+          "stem": "deft",
+          "label": "deft",
+          "status": "candidate"
+        },
+        {
+          "stem": "purposive",
+          "label": "purposive",
+          "status": "candidate"
+        },
+        {
+          "stem": "aimless",
+          "label": "aimless",
+          "status": "candidate"
+        },
+        {
+          "stem": "jumpy",
+          "label": "jumpy",
+          "status": "candidate"
+        },
+        {
+          "stem": "clandestine",
+          "label": "clandestine",
+          "status": "candidate"
+        },
+        {
+          "stem": "concealing",
+          "label": "concealing",
+          "status": "candidate"
+        },
+        {
+          "stem": "overdiligent",
+          "label": "overdiligent",
+          "status": "candidate"
+        },
+        {
+          "stem": "overstepping",
+          "label": "overstepping",
+          "status": "candidate"
+        },
+        {
+          "stem": "restrainable",
+          "label": "restrainable",
+          "status": "candidate"
+        },
+        {
+          "stem": "adorable",
+          "label": "adorable",
+          "status": "candidate"
+        },
+        {
+          "stem": "overmasculine",
+          "label": "overmasculine",
+          "status": "candidate"
+        },
+        {
+          "stem": "parasitic",
+          "label": "parasitic",
+          "status": "candidate"
+        },
+        {
+          "stem": "obscene",
+          "label": "obscene",
+          "status": "candidate"
+        },
+        {
+          "stem": "meddling",
+          "label": "meddling",
+          "status": "candidate"
+        },
+        {
+          "stem": "maniacal",
+          "label": "maniacal",
+          "status": "candidate"
+        },
+        {
+          "stem": "masochistic",
+          "label": "masochistic",
+          "status": "candidate"
+        },
+        {
+          "stem": "minimizing",
+          "label": "minimizing",
+          "status": "candidate"
+        },
+        {
+          "stem": "morose",
+          "label": "morose",
+          "status": "candidate"
+        },
+        {
+          "stem": "pathetic",
+          "label": "pathetic",
+          "status": "candidate"
+        },
+        {
+          "stem": "prudish",
+          "label": "prudish",
+          "status": "candidate"
+        },
+        {
+          "stem": "repressed",
+          "label": "repressed",
+          "status": "candidate"
+        },
+        {
+          "stem": "resigned",
+          "label": "resigned",
+          "status": "candidate"
+        },
+        {
+          "stem": "rugged",
+          "label": "rugged",
+          "status": "candidate"
+        },
+        {
+          "stem": "disheveled",
+          "label": "disheveled",
+          "status": "candidate"
+        },
+        {
+          "stem": "declining",
+          "label": "declining",
+          "status": "candidate"
+        },
+        {
+          "stem": "sulky",
+          "label": "sulky",
+          "status": "candidate"
+        }
+      ],
+      "counts": {
+        "holdout": 96,
+        "rejected": 139,
+        "accepted": 41,
+        "candidates": 38
+      }
+    },
+    "stability": {
+      "n_traits": 3,
+      "jaccard_median": 1.0,
+      "below_0.5": 0,
+      "min_median": 0.5,
+      "distribution": {
+        "0.0-0.1": 0,
+        "0.1-0.2": 0,
+        "0.2-0.3": 0,
+        "0.3-0.4": 0,
+        "0.4-0.5": 0,
+        "0.5-0.6": 1,
+        "0.6-0.7": 0,
+        "0.7-0.8": 0,
+        "0.8-0.9": 0,
+        "0.9-1.0": 2
+      },
+      "by_operator": {
+        "opposite": 1.0,
+        "excess": 1.0,
+        "deficiency": 1.0,
+        "retarget": 1.0,
+        "remode": 1.0
+      },
+      "runs": [
+        "2026-10-13-stab-sonnet-a",
+        "2026-10-13-stab-sonnet-b"
+      ],
+      "seed": 1,
+      "per_trait": {
+        "christian": 1.0,
+        "moral_relativist": 1.0,
+        "punishment_fearing": 0.5
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/structural_generator.py stability --run-id 2026-10-13-stab-sonnet-a --against 2026-10-13-stab-sonnet-b --model claude-sonnet-5-5 --budget-usd 2",
+      "git_sha": "0568c5c5+dirty",
+      "author": "Roger Dearnaley",
+      "title": "structural evaluation"
+    },
+    "produced_at": "2026-10-13T20:53:44+00:00"
+  }
+}

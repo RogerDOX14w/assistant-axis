@@ -1,0 +1,35 @@
+{
+  "n_traits": 3,
+  "jaccard_median": 1.0,
+  "below_0.5": 0,
+  "min_median": 0.5,
+  "distribution": {
+    "0.0-0.1": 0,
+    "0.1-0.2": 0,
+    "0.2-0.3": 0,
+    "0.3-0.4": 0,
+    "0.4-0.5": 0,
+    "0.5-0.6": 1,
+    "0.6-0.7": 0,
+    "0.7-0.8": 0,
+    "0.8-0.9": 0,
+    "0.9-1.0": 2
+  },
+  "by_operator": {
+    "opposite": 1.0,
+    "excess": 1.0,
+    "deficiency": 1.0,
+    "retarget": 1.0,
+    "remode": 1.0
+  },
+  "per_trait": {
+    "christian": 1.0,
+    "moral_relativist": 1.0,
+    "punishment_fearing": 0.5
+  },
+  "runs": [
+    "2026-10-13-stab-sonnet-a",
+    "2026-10-13-stab-sonnet-b"
+  ],
+  "seed": 1
+}

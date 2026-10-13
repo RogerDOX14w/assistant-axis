@@ -15,6 +15,12 @@ from assistant_axis.tests.test_gapgen_novelty import responder_for
 from assistant_axis.tests.test_gapgen_review_graph import (
     BATCH, OVERLAP, QUEUE, RELATIONS, both, edge, key, make_runner, overlap_calls, row, toy_rows, toy_vectors)
 
+
+@pytest.fixture(autouse=True)
+def _no_real_operator_table(monkeypatch):
+    """Keep these tests hermetic: never read the repository's real structural operator table (review S5)."""
+    monkeypatch.setattr(RG, "structural_operator_table", lambda *a, **k: [])
+
 GODLESS3 = sorted(key(x) for x in ["godless", "irreligious", "nonreligious"])
 
 

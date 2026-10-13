@@ -47,6 +47,7 @@ import hashlib
 import json
 import shutil
 from dataclasses import dataclass, field
+import sys
 from pathlib import Path
 from typing import Iterable, Mapping, Optional, Sequence
 
@@ -262,6 +263,11 @@ def collect_replies(run_dirs: Sequence[Path], *, lexicon=None, renamed: Optional
             if rep is None:
                 continue
             (run_ponly if rep.principal_only else run_full).setdefault(rep.stem, {})[rep.sample] = rep
+        for stem, samples in run_full.items():                      # review S4: say when a later run replaces more
+            had = out.full_samples.get(stem)                        # samples than it brings
+            if had is not None and len(samples) < len(had):
+                print(f"WARNING: run {Path(d).name} replaces {len(had)} samples of {stem} with {len(samples)} "
+                      f"(the run named last wins a trait; name the fuller run last)", file=sys.stderr)
         out.full_samples.update(run_full)
         out.principal_only_samples.update(run_ponly)
     kw = {"lexicon": lexicon, "renamed": renamed}
@@ -318,7 +324,7 @@ def operator_sources(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list
         unpaired = corpus.is_unpaired(rep.stem)
         mean = rep.position == "mean"
         from .combine import _dedupe_key
-        vice_keys = {op: {_dedupe_key(it["label"], lexicon=lexicon) for it in rep.slot(op)}
+        vice_keys = {op: {_dedupe_key(it["label"], lexicon=lexicon, renamed=corpus.renamed) for it in rep.slot(op)}
                      for op in ("excess", "deficiency")}
         for op, sub, it in rep.items():
             got = _safe_stem(it["label"], lexicon)
@@ -331,7 +337,7 @@ def operator_sources(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list
                 # excess are the three corners; the opposite answer is one of the vice corners (matched by stem
                 # where it names one), and none of the three is anyone's pair partner.
                 if op == "opposite":
-                    key = _dedupe_key(it["label"], lexicon=lexicon)
+                    key = _dedupe_key(it["label"], lexicon=lexicon, renamed=corpus.renamed)   # review S2: as combine does
                     corner = next((v for v in ("excess", "deficiency") if key in vice_keys[v]), None)
             elif op == "opposite":
                 partner = corpus.labels.get(rep.stem) or rep.label

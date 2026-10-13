@@ -1,0 +1,89 @@
+{
+  "run_id": "2026-10-13-nullrate",
+  "n": 20,
+  "seed": 0,
+  "null_rates": {
+    "n_traits": 20,
+    "opposite": 1.0,
+    "excess": 0.6,
+    "deficiency": 0.55,
+    "retarget_by_target": {
+      "self": 0.2,
+      "intimates": 0.15,
+      "strangers": 0.1,
+      "authority": 0.15,
+      "animals": 0.0,
+      "ideas": 0.1
+    },
+    "retarget": 0.1167,
+    "remode_by_mode": {
+      "attitude": 0.15,
+      "habit": 0.05,
+      "speech": 0.25
+    },
+    "remode": 0.15,
+    "principal": {
+      "n_traits": 2,
+      "by_target": {
+        "the_user": 0.5,
+        "the_operator": 0.0,
+        "the_developer": 0.0
+      },
+      "share": 0.1667,
+      "n_items": 1
+    },
+    "band": {
+      "low": 0.05,
+      "high": 0.4,
+      "retarget_in_band": true,
+      "remode_in_band": true,
+      "pass": true
+    },
+    "positions": {
+      "deficiency": 4,
+      "excess": 3,
+      "mean": 8,
+      "not_scalar": 5
+    }
+  },
+  "pair_positions": {
+    "n_pairs": 2,
+    "combinations": {
+      "deficiency/mean": 1,
+      "not_scalar/not_scalar": 1
+    },
+    "pairs": [
+      {
+        "pair": [
+          "distractible",
+          "focused"
+        ],
+        "positions": [
+          "deficiency",
+          "mean"
+        ]
+      },
+      {
+        "pair": [
+          "high_context_hall",
+          "low_context_hall"
+        ],
+        "positions": [
+          "not_scalar",
+          "not_scalar"
+        ]
+      }
+    ]
+  },
+  "rejections": {},
+  "parse_rate": {
+    "n_units": 20,
+    "n_ok": 20,
+    "rate": 1.0,
+    "n_records": 20,
+    "n_records_ok": 20,
+    "record_rate": 1.0,
+    "min_rate": 0.99
+  },
+  "unanswered": {}
+}

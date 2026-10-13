@@ -1,0 +1,119 @@
+{
+  "generator": "structural",
+  "run_id": "2026-10-13-nullrate",
+  "git_sha": "0568c5c5+dirty",
+  "args": {
+    "step": "null-rate",
+    "n_traits": 20,
+    "stems": [
+      "blue_eyed",
+      "calculating",
+      "competent",
+      "dignified",
+      "distractible",
+      "financially_reckless",
+      "focused",
+      "fundamentalist",
+      "hawkish",
+      "high_context_hall",
+      "irresponsible",
+      "joyless",
+      "low_context_hall",
+      "principled",
+      "respectful",
+      "self_deprecating",
+      "settled",
+      "shabby_genteel",
+      "thorough",
+      "traditional"
+    ],
+    "model": "claude-haiku-5-5",
+    "principal_min_score": 3,
+    "principal_only": false,
+    "n_principal": 2,
+    "budget_usd": 0.5,
+    "rubric": {
+      "name": "structural_operators",
+      "version": 1,
+      "sha256": "fb75b698aaf98c2e4f538c603ecb4eee98d1f8f96622d648988265e1aa50235d",
+      "file": "reports/trait_gap_generation/rubrics/structural_operators.md"
+    },
+    "label_form": "judge-display-v1",
+    "allow_dirty": false,
+    "n": 20,
+    "seed": 0
+  },
+  "n_emitted": 0,
+  "started_at": "2026-10-13T20:49:52+00:00",
+  "finished_at": "2026-10-13T20:50:21+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0.0175,
+  "sessions": [
+    {
+      "session_id": "1c53910ae939",
+      "started_at": "2026-10-13T20:49:52+00:00",
+      "finished_at": "2026-10-13T20:50:21+00:00",
+      "git_sha": "0568c5c5+dirty",
+      "args": {
+        "step": "null-rate",
+        "n_traits": 20,
+        "stems": [
+          "blue_eyed",
+          "calculating",
+          "competent",
+          "dignified",
+          "distractible",
+          "financially_reckless",
+          "focused",
+          "fundamentalist",
+          "hawkish",
+          "high_context_hall",
+          "irresponsible",
+          "joyless",
+          "low_context_hall",
+          "principled",
+          "respectful",
+          "self_deprecating",
+          "settled",
+          "shabby_genteel",
+          "thorough",
+          "traditional"
+        ],
+        "model": "claude-haiku-5-5",
+        "principal_min_score": 3,
+        "principal_only": false,
+        "n_principal": 2,
+        "budget_usd": 0.5,
+        "rubric": {
+          "name": "structural_operators",
+          "version": 1,
+          "sha256": "fb75b698aaf98c2e4f538c603ecb4eee98d1f8f96622d648988265e1aa50235d",
+          "file": "reports/trait_gap_generation/rubrics/structural_operators.md"
+        },
+        "label_form": "judge-display-v1",
+        "allow_dirty": false,
+        "n": 20,
+        "seed": 0
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.0175,
+      "n_calls": 20,
+      "usage": {
+        "per_model": {
+          "claude-haiku-5-5": {
+            "model": "claude-haiku-5-5",
+            "prompt_tokens": 26904,
+            "completion_tokens": 29629,
+            "cost_usd": 0.0175,
+            "n_calls": 20
+          }
+        },
+        "total_cost_usd": 0.0175,
+        "total_prompt_tokens": 26904,
+        "total_completion_tokens": 29629,
+        "n_calls": 20
+      }
+    }
+  ]
+}

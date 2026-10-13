@@ -377,8 +377,9 @@ combined output proves poor.  The decision is recorded in the decisions table of
 - **Three samples per trait.**  `operators --samples 3` is the default (`--samples 1` still works; `null-rate`
   takes it too).  The samples are independent calls: the answer cache keys on (trait, prompt hash, model, **sample
   index**), every response records its `sample`, and a resume reuses each recorded sample and sends only the
-  missing ones.  A record made before samples existed counts as sample 1, so the null-rate pilot's 20 answers are
-  reused as the first of three.
+  missing ones.  A record made before samples existed counts as sample 1 within its own run (a resume of the
+  null-rate run sends only samples 2 and 3); a full pass under a new run id does not reuse another run's answers
+  (corrected 2026-10-14, review S3).
 - **Combining** ([combine.py](../../assistant_axis/gapgen/generators/structural/combine.py)): per trait and slot
   the union of the samples' labels, deduplicated by normalised stem (the table's folding, `renamed_from`-aware,
   separator-blind in M3's blind form, so `fool-hardy` and `foolhardy` are one label).  Each kept label carries its

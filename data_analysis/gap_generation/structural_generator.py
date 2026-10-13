@@ -354,6 +354,9 @@ def cmd_operators(args) -> int:
     if args.principal_only:
         prior = []
         for r in [args.run_id, *(args.prior_run or [])]:
+            if S.read_void(_run_dir(args, r)) is not None:      # a void run's records answer nothing (review S1)
+                print(f"SKIPPED: run {r} is marked void; its answers do not count as done", file=sys.stderr)
+                continue
             prior += O.read_responses(_run_dir(args, r) / S.RESPONSES_NAME)
         done = O.already_principal(prior)
         before = len(selected)
@@ -890,7 +893,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_void)
 
     p = sub.add_parser("postprocess", help="the operator table and evaluation.json (free; pennies of embeddings)")
-    p.add_argument("--run-id", nargs="+", default=None, help="operator runs to read, the last winning per trait")
+    p.add_argument("--run-id", nargs="+", default=None, help="operator runs to read; a trait in several runs takes all its samples from the run named last (not mixed), so name the fuller run last")
     p.add_argument("--embedder", choices=("openai", "hash", "none"), default="openai")
     p.add_argument("--embedding-cache", type=Path, default=paths.DATA_CANDIDATES / "cache" / "embeddings")
     p.add_argument("--budget-usd", type=float, default=0.1)
@@ -900,7 +903,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_postprocess)
 
     p = sub.add_parser("side-table", help="position_table.jsonl and negative_label_mismatches.md ($0)")
-    p.add_argument("--run-id", nargs="+", default=None)
+    p.add_argument("--run-id", nargs="+", default=None, help="operator runs to read; a trait in several runs takes all its samples from the run named last (not mixed), so name the fuller run last")
     p.add_argument("--no-fold", action="store_true")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_side_table)

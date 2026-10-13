@@ -32,6 +32,22 @@ def _answers(stem: str, principal: bool) -> str:
     return F.reply("mean", principal=principal, opposite=F.item(f"anti-{stem.replace('_', '-')}"))
 
 
+def _unverified_classical(tmp_path):
+    """The real classical tables copied with VIA's `verified_by` cleared, so these tests exercise the VIA gate whatever
+    the repository's table holds (VIA was verified 2026-10-13, 938bd617)."""
+    import shutil
+    from assistant_axis.gapgen.generators import structural as S
+    cdir = tmp_path / "classical"
+    shutil.copytree(S.CLASSICAL_DIR, cdir)
+    via = cdir / "via.json"
+    rows = json.loads(via.read_text())
+    for r in rows:
+        r["verified_by"] = None
+    via.write_text(json.dumps(rows, indent=2) + "\n")
+    return cdir
+
+
+
 @pytest.fixture()
 def env(tmp_path, monkeypatch):
     data = F.write_corpus(tmp_path)
@@ -39,7 +55,8 @@ def env(tmp_path, monkeypatch):
         F.registry_row("foolhardy", "base_model", verdict="trait", decision="new"),
         F.registry_row("craven", "censuses")])
     sdir = tmp_path / "candidates" / "structural"
-    base = ["--data-dir", str(data), "--registry", str(reg), "--candidates-dir", str(tmp_path / "candidates"),
+    cdir = _unverified_classical(tmp_path)
+    base = ["--classical-dir", str(cdir), "--data-dir", str(data), "--registry", str(reg), "--candidates-dir", str(tmp_path / "candidates"),
             "--regions", str(data / "candidates" / "corpus_regions.json"), "--queue", str(data / "seed_queue.json"),
             "--structural-dir", str(sdir), "--classical-modern", str(sdir / "classical_modern.jsonl"),
             "--operator-table", str(sdir / "operator_table.jsonl"),
@@ -178,7 +195,7 @@ def test_modernise_twice_sends_nothing_the_second_time(env, monkeypatch):
     """Review S1 (2026-10-13): the CLI always reuses recorded answers to the same prompt, without --resume."""
     from assistant_axis.gapgen.generators.structural import modernise as M
     from assistant_axis.gapgen.generators.structural.classical import load_all
-    rows = [r for r in load_all() if r.scheme != "via"]
+    rows = [r for r in load_all(classical_dir=env["tmp"] / "classical") if r.scheme != "via"]
     system = P.modernise_system()
     answers = {}
     for unit in M.batches(rows):
