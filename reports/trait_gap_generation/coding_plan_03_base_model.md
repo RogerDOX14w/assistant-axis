@@ -491,7 +491,7 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
   Recommendation: one shared platform helper (the suffix rules plus the derivation link, $0), built with plan 05
   and applied here before the 20k run; the LLM rewrite of task 11 only if a generator is left with more than
   about 100 unrelabelled nouns.
-- (e) Iteration round, open.  Roger: "What would we be iterating on, and do we have clear evidence that we do,
+- (e) Iteration round: **decided 2026-10-13, keep round 1** (Roger: "OK").  Roger: "What would we be iterating on, and do we have clear evidence that we do,
   or don't, need to?"  The round edits data only (header wordings, the family weights of `FAMILY_WEIGHTS`, seed
   mixes, constraint phrases), resamples 2k on the Mac and compares free measures.  Measured on round 1: the
   collapse index (share of emissions taken by the top 50 words) is 23% against the plan's target of under 15%,
@@ -500,7 +500,12 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
   contrast 41.  So there is evidence that a reweighting would raise new words per sample (about 10%), and none
   on which wording would cut the collapse.  But the 20k run already yields more new words (about 4,800, central
   case) than review can absorb, so more yield per sample buys only Mac time.  Recommendation: keep round 1.
-- (f) Emission count as rank, open.  Roger asked what count and rank are and whether rank is a good use of the
+- (f) Emission count as rank: **decided 2026-10-13, count no longer orders the waves** (Roger: "I would expect count to
+  be correlated with corpus membership, and perhaps anticorrelated with novelty.  So I agree, it may not be a good
+  way to prioritize.").  The first wave of the 20k run draws its net-new rows evenly across count buckets (2, 3, 4-9,
+  10+) and the six families; later waves are ordered by the measured new-kept rate of each bucket and family.  The
+  count stays on the row and in `Candidate.score` as a free signal of a real trait word.  A small change to the
+  wave selection in `submit`, built before the 20k run's first submission, with the shared noun helper.  Roger asked what count and rank are and whether rank is a good use of the
   count.  The count is the number of the run's samples (each a random prompt from the six families) whose
   continuation emitted the word; `rank` is the word's place in the table by count, descending.  Rank decides
   which rows go first when a wave or a cap cuts the list, and orders the report's recall curves; the count also
@@ -509,8 +514,11 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
   52%; 4-9: 90%, 40%; 10-49: 95%, 25%; 50+: 100%, 8%; words emitted by one family 42% new kept per row, by three
   30%).  The high-count words are almost all registered already and ride free; among words new to the registry
   the yield is flat by count (new kept per row 37% at count 2, 27% at 3, 34% at 4-9; small numbers).
-  Recommendation: keep the count as the rank (a wash for novelty among new rows, slightly fewer M1 rejects), and
-  let the first wave's measured yield by count bucket say whether to change it.
+  The coordinator recommended keeping the count as the rank and letting the first wave say; Roger's reading
+  above decided it the other way, and the stratified first wave measures it.
+- (a) The 20k run: the sampling is free and resumable (`sample --round 1 --n 20000 --temperature 1.0` keeps the
+  pilot's 2,000 samples and adds 18,000, on the Mac GPU in Roger's terminal); the paid submission waits on the
+  noun helper and the stratified wave selection, then goes in review-hour waves, each under $20.
 
 ## 11. Report at the end
 
