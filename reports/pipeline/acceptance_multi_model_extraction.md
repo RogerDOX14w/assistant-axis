@@ -68,5 +68,5 @@ GPU-hours used so far: **0**.  Paid calls: **none**.
 
 `llama`, `gemma2`, `olmo2`, `olmo3` (every "to check" cell of `TO_CHECK`), `gpt_oss` (the TODO).  What
 closes each, in order: the real-tokenizer test on the pod, the smoke run, Roger reading the derived
-header, `expected_header_tokens` pinned.  The pod steps are items 7, 12 and 13 and rows T17-T27 of
+header, `expected_header_tokens` pinned.  The pod steps are items 7, 12 and 13 and rows T17-T28 of
 [pre_extraction_pod_todo.md](./pre_extraction_pod_todo.md).
