@@ -41,7 +41,9 @@ through, and is regenerated.  Those excluded strengths are part of the
 resumed scan's history (their records feed the stop rules and the cursor
 walk as when they were generated) but are never generated again or written
 back to records.jsonl, and the summary rewrite keeps the cutoff's
-``excluded_*`` fields (since 2026-10-13).
+``excluded_*`` fields (since 2026-10-13).  A cell recorded before the
+bidirectional scan (a summary.json without ``scan_mode``) is not resumed
+through it unless ``resume_pre_bidirectional=True`` (since 2026-10-13).
 """
 from __future__ import annotations
 
@@ -647,6 +649,48 @@ def _excluded_strengths(
     return sorted(out)
 
 
+def _pre_bidirectional_reason(
+    output_dir: Path,
+    summary: Optional[Dict[str, Any]],
+    existing_records: Sequence[Dict[str, Any]],
+) -> Optional[str]:
+    """Why a cell with records looks recorded before the bidirectional scan
+    (the default since 2026-05-14), or None.
+
+    * summary.json without ``scan_mode``: every runner summary since
+      2026-05-14 carries one (``"bidirectional"`` or
+      ``"legacy_unidirectional"``); the runner's summaries before had none,
+      and the corrected stop cutoff creates one without it on a cell that had
+      none (the R19 cell, teacher_egalitarian_v1 s3_l25_+1, in the 8slot
+      copy).
+    * no summary.json: the experiment's other cells decide, when they agree:
+      at least one has a runner summary (one with a ``reason``) and none has
+      a ``scan_mode``.  A bidirectional cell killed before its first summary
+      has siblings with a ``scan_mode``, or none yet, and resumes as before.
+
+    A cell with no records is never taken for one (2026-10-13)."""
+    if not existing_records:
+        return None
+    if summary is not None:
+        if "scan_mode" in summary:
+            return None
+        return ("its summary.json has no scan_mode"
+                + ("" if "reason" in summary else
+                   " (only the corrected stop cutoff's fields)"))
+    siblings = []
+    for path in sorted(Path(output_dir).parent.glob("s*_l*_*/summary.json")):
+        if path.parent.resolve() == Path(output_dir).resolve():
+            continue
+        s = _read_summary(path)
+        if s is not None:
+            siblings.append(s)
+    runner_written = [s for s in siblings if "reason" in s]
+    if runner_written and not any("scan_mode" in s for s in siblings):
+        return (f"it has no summary.json, and none of the experiment's "
+                f"{len(siblings)} other cell summaries has a scan_mode")
+    return None
+
+
 def _keep_prior_summary_fields(
     summary: Dict[str, Any], prior: Optional[Dict[str, Any]],
 ) -> Dict[str, Any]:
@@ -981,7 +1025,9 @@ def compute_baselines(
 class CellResult:
     """Outcome of running a single (slot, layer, sign) cell."""
     stopped_at_strength: Optional[float] = None
-    reason: str = "completed"     # "completed" | "incoherent" | "already_done"
+    # "completed" | "incoherent" | "bidirectional_done" | "already_done" |
+    # "skipped_pre_bidirectional" (since 2026-10-13)
+    reason: str = "completed"
     n_records: int = 0
     n_strengths_swept: int = 0
     summary: Dict[str, Any] = field(default_factory=dict)
@@ -1016,6 +1062,7 @@ def run_steering_cell(
     multiplier: float = 1.189,
     min_strength: float = 0.125,
     start_strength_multiplier_steps: int = 2,
+    resume_pre_bidirectional: bool = False,
 ) -> CellResult:
     """Run the steering sweep for one (slot, layer, sign) cell.
 
@@ -1085,6 +1132,18 @@ def run_steering_cell(
         multiplier ** start_strength_multiplier_steps`` (default
         ``1.0 * 1.189**2 ≈ 1.414``).  See :class:`BidirectionalCursor`
         for the full geometry.
+    resume_pre_bidirectional
+        A cell recorded before the bidirectional scan (2026-05-14; see
+        :func:`_pre_bidirectional_reason`) that would be resumed through the
+        bidirectional path is skipped with a WARNING unless this is True
+        (2026-10-13).  Such a resume rescans the cell from today's
+        ``s_init`` with today's question list (the oldest cells have 6 or 10
+        responses a strength, their experiments 14 questions now), and on
+        the 8slot copy adds strengths the original scan never had (38 in 14
+        cells, on a replay of 2026-10-13).  True resumes it that way anyway.
+        An explicit ``scan_mode="legacy_unidirectional"`` is not affected
+        (and does not reproduce these cells either: it asks the missing
+        questions at every recorded strength and walks on past the old stop).
 
     Returns
     -------
@@ -1219,6 +1278,30 @@ def run_steering_cell(
             effective_scan_mode = persisted
 
     existing_records = _read_existing_records(records_path)
+
+    # 2026-10-13: a cell recorded before the bidirectional scan is not
+    # resumed through it unless the caller opts in (see the docstring).
+    if effective_scan_mode == "bidirectional" and not resume_pre_bidirectional:
+        why = _pre_bidirectional_reason(
+            output_dir, existing_summary, existing_records)
+        if why is not None:
+            logger.warning(
+                f"[cell s{slot}_l{layer}_{sign:+d}] recorded before the "
+                f"bidirectional scan of 2026-05-14 ({why}); not resuming it "
+                f"through the bidirectional path, which would rescan it from "
+                f"today's s_init with today's {len(questions)} questions and "
+                f"add strengths the original scan never had.  Skipping; pass "
+                f"resume_pre_bidirectional=True to resume it anyway"
+            )
+            prior = existing_summary or {}
+            return CellResult(
+                stopped_at_strength=prior.get("stopped_at_strength"),
+                reason="skipped_pre_bidirectional",
+                n_records=len(existing_records),
+                n_strengths_swept=prior.get("n_strengths_swept", 0),
+                summary=prior,
+            )
+
     done_pairs = {(r["strength"], r["question_idx"]) for r in existing_records}
     if existing_records:
         logger.info(

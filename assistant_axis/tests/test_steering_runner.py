@@ -1482,7 +1482,7 @@ class _ResumeHarness:
         return out_dir
 
     @staticmethod
-    def _run(out_dir, *, model=None, dispatcher=None):
+    def _run(out_dir, *, model=None, dispatcher=None, **kwargs):
         d = dispatcher or _RecordingStubDispatcher()
         for s in (2.0, 4.0, 8.0):
             d.set(s, mean_coh=0.0, mean_abs_eff=0.5)
@@ -1500,6 +1500,7 @@ class _ResumeHarness:
             weakest_strength=1.0, max_strength=8.0,
             min_strength=0.0625, multiplier=2.0,
             start_strength_multiplier_steps=1, scan_mode="bidirectional",
+            **kwargs,
         )
         return d, result
 
@@ -1808,6 +1809,104 @@ class TestResumeOfACutCell(_ResumeHarness):
         assert on_disk["excluded_strengths"] == [0.5]
         assert {k: on_disk[k] for k in _CUTOFF_FIELDS} == _CUTOFF_FIELDS
         assert on_disk["n_records"] == 4
+
+
+# ---------------------------------------------------------------------------
+# Cells recorded before the bidirectional scan (2026-10-13): resuming one
+# through the bidirectional path rescans it from today's s_init with today's
+# question list and adds strengths the original scan never had, so it is
+# skipped unless the caller opts in with resume_pre_bidirectional=True.
+# ---------------------------------------------------------------------------
+
+# What the runner wrote before 2026-05-14: no scan_mode.
+_PRE_BIDIRECTIONAL_SUMMARY = {
+    "slot": 0, "layer": 26, "sign": 1, "stopped_at_strength": 8.0,
+    "reason": "incoherent", "n_records": 10, "n_strengths_swept": 5,
+    "last_strength_completed": 8.0, "coh_stop_consecutive": 2,
+    "coh_stop_threshold": 1.5,
+}
+
+
+class TestPreBidirectionalCellsAreNotRescanned(_ResumeHarness):
+    """The seed would fall through on resume: 4.0 has an UNPARSEABLE
+    persona."""
+
+    @staticmethod
+    def _seed():
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (8.0, 0.5), (1.0, 0.1), (0.5, 0.1))
+                for q in (0, 1)]
+        return seed + [_rj_rec(4.0, 0), _rj_rec(4.0, 1, persona=None)]
+
+    @staticmethod
+    def _sibling(tmp_path, summary):
+        sib = tmp_path / "s0_l26_-1"
+        sib.mkdir()
+        (sib / "summary.json").write_text(json.dumps(summary))
+
+    @staticmethod
+    def _warnings(caplog):
+        return [r.getMessage() for r in caplog.records
+                if r.levelname == "WARNING"
+                and "before the bidirectional scan" in r.getMessage()]
+
+    @pytest.mark.parametrize("kind", [
+        "runner_summary", "cutoff_only_summary", "no_summary_old_sibling"])
+    def test_skipped_by_default_with_a_warning(
+            self, tmp_path, monkeypatch, caplog, kind):
+        seed = self._seed()
+        summary = {
+            "runner_summary": _PRE_BIDIRECTIONAL_SUMMARY,
+            "cutoff_only_summary": dict(excluded_strengths=[0.25],
+                                        **_CUTOFF_FIELDS),
+            "no_summary_old_sibling": None,
+        }[kind]
+        out_dir = self._cell(tmp_path, monkeypatch, seed, summary=summary)
+        if kind == "no_summary_old_sibling":
+            self._sibling(tmp_path, _PRE_BIDIRECTIONAL_SUMMARY)
+        summary_before = ((out_dir / "summary.json").read_text()
+                          if summary is not None else None)
+
+        d, result = self._run(out_dir)
+        assert result.reason == "skipped_pre_bidirectional"
+        assert self._generated() == []
+        assert d.coh_qidx == {} and d.enqueued_qidx == {}
+        assert self._disk(out_dir) == seed
+        summary_after = ((out_dir / "summary.json").read_text()
+                         if (out_dir / "summary.json").exists() else None)
+        assert summary_after == summary_before
+        (warning,) = self._warnings(caplog)
+        assert "resume_pre_bidirectional=True" in warning
+
+    def test_resumed_through_the_bidirectional_path_under_the_flag(
+            self, tmp_path, monkeypatch, caplog):
+        out_dir = self._cell(tmp_path, monkeypatch, self._seed(),
+                             summary=_PRE_BIDIRECTIONAL_SUMMARY)
+        d, result = self._run(out_dir, resume_pre_bidirectional=True)
+        assert result.reason == "bidirectional_done"
+        assert d.enqueued_qidx == {4.0: [[0, 1]]}
+        assert self._warnings(caplog) == []
+        assert json.loads((out_dir / "summary.json").read_text())[
+            "scan_mode"] == "bidirectional"
+
+    def test_a_cell_without_records_beside_old_cells_runs_as_usual(
+            self, tmp_path, monkeypatch, caplog):
+        out_dir = self._cell(tmp_path, monkeypatch, [])
+        self._sibling(tmp_path, _PRE_BIDIRECTIONAL_SUMMARY)
+        _, result = self._run(out_dir)
+        assert result.reason == "bidirectional_done"
+        assert 2.0 in self._generated()
+        assert self._warnings(caplog) == []
+
+    def test_a_cell_without_summary_beside_a_bidirectional_cell_resumes(
+            self, tmp_path, monkeypatch, caplog):
+        """A bidirectional cell killed before its first summary.json."""
+        out_dir = self._cell(tmp_path, monkeypatch, self._seed())
+        self._sibling(tmp_path, _FINISHED_SUMMARY)
+        d, result = self._run(out_dir)
+        assert result.reason == "bidirectional_done"
+        assert d.enqueued_qidx == {4.0: [[0, 1]]}
+        assert self._warnings(caplog) == []
 
 
 class TestRejudgeStrengthWithTheRealDispatcher:
