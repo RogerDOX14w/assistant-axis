@@ -430,18 +430,19 @@ directions does it see that the text called covered.**
 
 Opus retries a failing step once with a changed approach, then Fable (diff review, architecture, stubborn
 failures), then Roger through [QUESTIONS.md](./QUESTIONS.md) in its format (`N. [12] question. Assumption proceeded
-under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-13), proceeding under the
+under: ... Status: open`, numbering continuing from the file's last entry, 90 on 2026-10-13; **the build used 140-159**, the parallel plan 11
+build 121-139, so the pre-registered entries below are QUESTIONS 140-148), proceeding under the
 assumption unless the answer would make the work useless.  Pre-registered entries Opus copies in at the start:
-(91) antonyms are not antipodal at the canonical cell (pole-pole cosine median −0.04, partner percentile 0.41, 3% of
+(140) antonyms are not antipodal at the canonical cell (pole-pole cosine median −0.04, partner percentile 0.41, 3% of
 partners among the five nearest), so the signed cosine is reported as information, the pair-axis position is added,
-and antonymy stays with M3's relation call; (92) PLS is not built, kNN is the baseline (measured 0.68 against ridge's
-0.73); (93) the eight orphan vectors and the three sense-changed renames stay in the pool for centring, shear and
-the PC basis and out of training and neighbour lists; (94) the N tie rule: within 0.02 of the best Spearman, the N
-nearest 20; (95) the prospective comparison is on ranks and names, since the October extraction re-extracts every
-entity under regenerated instructions and the two spaces are not aligned; (96) seed-queue entries are not scored;
-(97) K_95 of the pool is 170, not the workstream plan's 37 (which was the 60-axis Gram matrix's), and
-`persona.PLAN12_K = 37` is left as M2 recorded it; (98) the duplicate and novel thresholds are the plan's defaults
-until gate 1; (99) decision 1 taken as (a) and decision 2 as (b) if unanswered.  Anything that would edit a trait
+and antonymy stays with M3's relation call; (141) PLS is not built, kNN is the baseline (measured 0.68 against ridge's
+0.73); (142) the eight orphan vectors and the three sense-changed renames stay in the pool for centring, shear and
+the PC basis and out of training and neighbour lists; (143) the N tie rule: within 0.02 of the best Spearman, the N
+nearest 20; (144) the prospective comparison is on ranks and names, since the October extraction re-extracts every
+entity under regenerated instructions and the two spaces are not aligned; (145) seed-queue entries are not scored;
+(146) K_95 of the pool is 170, not the workstream plan's 37 (which was the 60-axis Gram matrix's), and
+`persona.PLAN12_K = 37` is left as M2 recorded it; (147) the duplicate and novel thresholds are the plan's defaults
+until gate 1; (148) decision 1 taken as (a) and decision 2 as (b) if unanswered.  Anything that would edit a trait
 file, the queue, a `novelty` block, a review log, a recorded M3 or harness output, `load_persona_space`, spend over a
 command's budget, or change a frozen signature stops and asks.
 
@@ -521,7 +522,7 @@ holds 29,917 texts; `w20` texts cached for 932 of 932 traits and 339 of 340 role
 2. **"37 PCs carry 95% of variance."**  That is the 60-axis Gram matrix of May 2026
    ([TRAITS_ADDED.md](../../data/traits/instructions/TRAITS_ADDED.md) § "dimensionality-yield"); on the entity pool
    K_95 = 170 (K_50 = 10), as [pilot_m2_readout.md](./pilot_m2_readout.md) already noted.  `persona.PLAN12_K = 37`
-   and M2's task (c) inherit the figure; left as recorded (QUESTIONS 97).  N is Roger's 12-32 and does not depend on
+   and M2's task (c) inherit the figure; left as recorded (QUESTIONS 146).  N is Roger's 12-32 and does not depend on
    K_95.
 3. **"Antonyms land (at least partially) antipodal, so pair completions and duplicates are told apart by sign."**
    Not in this space: pole-pole cosine median −0.04, indistinguishable from an unrelated trait (§ "Measured
@@ -529,12 +530,12 @@ holds 29,917 texts; `w20` texts cached for 932 of 932 traits and 339 of 340 role
    pair-axis position is added; antonymy stays M3's relation call's (§ 1).  (The readout's "opposite" mean of 0.03
    against 0.22 for reading 0 is on text-nearest pairs, which bias reading 0 upward.)
 4. **Candidates: "[seed_queue.json](../../data/seed_queue.json) (972 entries ...) plus whatever the generators produce."**  The candidates
-   are the registry's 6,735 trait rows (every generator); the queue is out of scope (QUESTIONS 96).
+   are the registry's 6,735 trait rows (every generator); the queue is out of scope (QUESTIONS 145).
 5. **Step 1, "keep K = 20-40 PCs, store the PCA basis"; step 6(b), "the top-20 PC subspace of the axis Gram
    matrix".**  Superseded by Roger's consequences paragraph: the full vector is predicted, and the subspace is the
    entity pool's top N (the basis M2 and [persona.py](../../assistant_axis/gapgen/persona.py) already use), N swept.
 6. **Step 3, "ridge ... and, as a second model, PLS; compare both with kNN."**  kNN measured and beaten; PLS not
-   built (QUESTIONS 92).
+   built (QUESTIONS 141).
 7. **Step 7, "Spearman between the two novelty ranks over the queue."**  M3 has no novelty rank: it is
    retrieve-then-judge with a decision.  The comparison is the AUC of the persona nearest-cosine for `covered`
    against `new`, the share of M3's covering trait among the persona-nearest, and the three disagreement kinds of
@@ -544,7 +545,7 @@ holds 29,917 texts; `w20` texts cached for 932 of 932 traits and 339 of 340 role
    decision; this plan uses the live OpenAI model only.
 9. **§ 6, "the 143 pending entities ... compare predicted versus actual positions."**  Positions cannot be compared
    across the May and October spaces (every entity is re-extracted under regenerated instructions); ranks and
-   nearest names are (QUESTIONS 95).
+   nearest names are (QUESTIONS 144).
 10. **Status, "the persona-space cosine is logged beside every overlap reading ... which is the data this plan's
     regression would train on."**  Those are actual-actual cosines of trait pairs; the regression trains on
     (embedding, vector) pairs.  The readings are the duplicate-threshold check (§ 1).

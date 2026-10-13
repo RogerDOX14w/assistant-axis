@@ -718,3 +718,80 @@ equally easy to find and the occasions independent; both are false here, so the 
 ### Accumulation curve, end slope
 New concepts found against candidates emitted, in the order a generator emitted them.  The **end slope** (new
 concepts per candidate over the last tenth) is its marginal yield; a flat end means it has saturated.
+
+<a id="persona-space-novelty"></a>
+## Persona-space novelty terms (added 2026-10-13, for workstream 12)
+
+Workstream 12 ([coding_plan_12_persona_space.md](./coding_plan_12_persona_space.md)) predicts where a candidate's
+[persona vector](#persona-space) would land from its text, and reads novelty there instead of in text space.
+
+<a id="canonical-cell"></a>
+### Canonical cell
+The one place in Qwen3-32B's activations the platform reads persona vectors from: the 8-slot extraction's slot 6,
+layer 25, centred on the mean of every trait and role vector, [soft-sheared](#soft-shear) at L = 3.  M2, M3's
+overlap test and the persona-space scorer all use it, so their cosines are comparable.
+
+<a id="orphan-vector"></a>
+### Orphan vector
+An extracted vector whose entity no longer has a file (dropped, or renamed with the old name not recorded).  It stays
+in the pool, so the mean, the shear and the principal directions are unchanged, but nothing is trained on it and no
+neighbour list names it.
+
+<a id="ridge"></a>
+### Ridge regression
+Least squares with a penalty, alpha, on the size of the coefficients, which keeps a fit with many more inputs than
+examples (3,072 embedding dimensions, 572 entities) from memorising noise.  Larger alpha: smoother, and predictions
+pulled harder toward the average.
+
+<a id="kind-covariate"></a>
+### Kind covariate
+One extra input to the regression, 1 for a role and 0 for a trait, so traits and roles are fitted together while
+their average positions may differ.
+
+<a id="grouped-folds"></a>
+### Arrangement-grouped folds
+Cross-validation in which a clean pair, triangle or other arrangement is held out whole: a trait is never predicted
+while its antonym is in the training set, which would flatter the fit.
+
+<a id="energy-outside"></a>
+### Energy outside the top N (residual_N)
+The share of a vector's squared length that lies outside the pool's N strongest [principal directions](#pcs):
+the [residual fraction](#residual) at N.  High: the vector points somewhere the
+existing entities mostly do not, a new direction.  N is swept over 12-32 and chosen where predicted and actual
+residuals agree best.
+
+<a id="shrinkage"></a>
+### Shrinkage
+A regression's pull toward the average: predicted vectors are more typical than real ones, so every predicted
+residual is smaller than the actual (median 0.22 against 0.40 at N = 20).  That is why a raw predicted residual is
+never read directly.
+
+<a id="calibration-percentile"></a>
+### Calibration percentile (residual_pct)
+A candidate's predicted residual read against the predicted residuals of existing entities, each predicted while it
+was held out, where the shrinkage is the same: 0.9 means more novel-looking than 90% of the corpus would look to the
+same predictor.
+
+<a id="pair-axis-position"></a>
+### Pair-axis position
+Where a predicted vector sits along the line between its nearest trait and that trait's clean-pair partner: +1 at
+the trait, -1 at the partner, 0 halfway.  Reported because antonyms are not opposite each other in persona space
+(their cosine is about 0), so the sign of a cosine cannot tell a pair completion from an unrelated trait.
+
+<a id="duplicate-like"></a>
+### Duplicate-like, novel-like, flag base rate
+The scorer's flag.  **Duplicate-like**: the predicted vector is at least as close to an existing entity as a
+held-out entity's prediction is to its own vector half the time (cosine 0.732).  **Novel-like**: otherwise, and a
+calibration percentile of 0.80 or more.  The **base rate** is how often an existing entity's held-out prediction is
+duplicate-like to *another* entity (32% at 0.732): the rate at which a genuinely new candidate is flagged anyway.
+
+<a id="disagreement-quantile"></a>
+### Disagreement quantile
+The candidates on which persona space and M3 disagree most (M3 "new" but duplicate-like; M3 "covered" but far from
+the covering trait; M3 "covered" but novel-like), each kind ranked by strength and cut to 10% of the scored rows.
+They go to Roger, and the first kind through M3's own overlap call; M3's decision never changes.
+
+<a id="prospective-test"></a>
+### Prospective test
+Predicting, before the next extraction, the persona vectors of the entities that have none yet, then comparing with
+the vectors when they come.  Judged on ranks and nearest names, since the new extraction is a different space.
