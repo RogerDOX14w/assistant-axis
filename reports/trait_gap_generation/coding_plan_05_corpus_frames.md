@@ -15,9 +15,9 @@ filter, unique contribution, net-new row) are defined on first use below and go 
 figure marked *measured* was measured read-only on 2026-10-13 (§ "Baseline measured for this plan").  Roger's review
 comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; all three decided 2026-10-14)
 
-1. **OPEN: how much of the Books stream the first build buys.**  The workstream plan priced variant A at "15-25
+1. **Decided (2026-10-14, Roger): both tiers in the first build, streamed.**  Roger: "I have plenty of bandwidth, so I have no problem with 16 or 27GB downloads. I'd rather it didn't all end up on disk, as I'm shorter of disk": the shards are streamed and only the matching lines are kept (tens of MB), so nothing large reaches the disk and there is nothing to delete afterwards.  The original question, how much of the Books stream the first build buys:  The workstream plan priced variant A at "15-25
    shards, 6-10 GB"; a **shard** is one of the 6,881 gzipped files of the 3-grams (6,668 for the 4-grams), globally
    sorted, so that a frame with a fixed prefix occupies a contiguous run of them.  *Measured*: a 3-gram shard is
    0.55-0.56 GB and a 4-gram shard 0.47-0.54 GB compressed, not ~390 MB, and the eight anchors probed span one or two
@@ -32,7 +32,7 @@ comments go into this file.
    - (c) A reduced tier 1 (drop `so`, `rather`, `quite` and four nominal anchors), about 20 shards, about 11 GB.
    - **Recommendation: (a).**  `locate` (§ 7) prints the exact shard count and GB for the chosen tier before anything
      streams, from head-peeks costing about 1 MB; Roger approves the stream on that figure, not on this estimate.
-2. **OPEN: the text corpora (variant B), and spaCy.**  Roger's answer 3 rules the synthetic Nemotron personas out
+2. **Decided (2026-10-14, Roger): the text corpora go in this build.**  Roger: "Why not now? This sounds like a good source, we might need less of a frame for this."  So PIPPA and the character cards are mined in the first build, with looser extraction than the Books frames (character descriptions list traits directly, so adjective lists in descriptive passages count, not only fixed frames); regex, no spaCy unless the pilot shows regex is not enough.  PIPPA (257 MB deduplicated) is deleted after extraction if disk is short.  The original question, the text corpora (variant B) and spaCy:  Roger's answer 3 rules the synthetic Nemotron personas out
    ("other generators cover that") and rules in personas "others have generated and then applied any curation or
    selection to": that is PIPPA's `bot_description` (human-written Character.AI bot descriptions, selected by their
    users; *measured* 257 MB deduped, Apache-2.0, not gated, tagged not-for-all-audiences, which answer 2 accepts) and
@@ -47,7 +47,7 @@ comments go into this file.
    - **Recommendation: (a)**, so that the frame-bias measurement is made on one source first and the second build
      inherits a measured bank.  `datasets` is not needed in any option (the files are fetched by URL, as the IPIP
      pages are; parquet reads through `pyarrow`, already a dependency).  **No new dependency in this plan.**
-3. **Decided (2026-10-13, Roger: "SG, make this happen"; the shared helper of [coding_plan_noun_normalization.md](./coding_plan_noun_normalization.md), not there yet, replaces a local one): nominal fillers with no adjective.**  Roger's answer 4 includes nominal traits (pedant, gossip, yes-man)
+3. **Decided (2026-10-13, Roger: "SG, make this happen"; the shared helper of [coding_plan_noun_normalization.md](./coding_plan_noun_normalization.md), not there yet, replaces a local one): nominal fillers with no adjective.**  Roger's answer 4 includes nominal traits (pedant, gossip, yes-man)  Roger, 2026-10-14: the noun helper is built first (its plan reviewed first); a noun that cannot be converted to an adjective and is not a role goes into the registry anyway, to be sorted out in manual review (as the helper's design already does: the noun row is always submitted, the adjective added beside it).  ("Hypocrite" does have an adjective, hypocritical; the helper's -ite to -itical suffix rule finds it.)
    with adjectival relabels.  *Measured* on the repository's OEWN copy: the `derivation` link gives an adjective for
    about half of thirty nominal traits tried (pedant → pedantic, sycophant → sycophantic, gossip → gossipy, coward →
    cowardly, miser → miserly, snob → snobby, cynic → cynical) and nothing for the rest (hypocrite, busybody, yes-man,
