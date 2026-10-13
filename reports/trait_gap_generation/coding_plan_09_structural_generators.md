@@ -11,7 +11,7 @@ Both emit structural metadata (a *role* in a structure and its *siblings*) besid
 M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scoring.  Terms: the
 [glossary](./glossary.md).  Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided; decision 1 decided 2026-10-13)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; decisions 1 and 2 decided 2026-10-13)
 
 1. **Decided (2026-10-13, Roger): the review-hour wave.**  § 5 of the workstream plan proposed sizing the
    first B wave by review hours, as [plan 04](./coding_plan_04_masked_lm.md) is sized (about two hours at the
@@ -43,18 +43,27 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
      the § 11 report lead with **pair completions and degree fillers** (the excess and deficiency of existing
      traits, the opposites of singleton and `non-X` traits), what B is expected to be good at, and report
      **wholly new concepts** as the secondary figure, raw and net (§ 10).
-2. **OPEN: the reference set of the queue hold-out** (§ 8, test 3).  The workstream plan's set is the **96
-   queued-but-unfiled labels from taxonomy scans and audits**: 84 `backlog` entries and 12 `paired` entries
-   whose stem has no file (bland, cultural_relativist, disciplined, exclusive, indulgent, rule_bending,
-   tough, deterministic, libertarian, financially_adventurous, job_hopper, variety_seeking; all counted
-   2026-10-12 from [seed_queue.json](../../data/seed_queue.json)).  The 35 `candidate` entries promoted from
-   the census review on 2026-10-11 are left out because a generator made them.  The alternative is all 131
-   live unfiled trait entries (the 96 plus the 35).  **Recommendation: the 96**, with recall on the 35
-   printed as a second line, never in the denominator (a generator's words recovering another generator's
-   words measures the generators' overlap, not the corpus's gaps).
+2. **Decided (2026-10-13, Roger: "SG"): the reference sets of the queue hold-out** (§ 8, test 3).  The
+   workstream plan had one set; three sources exist now that did not when it was written, so the hold-out
+   prints three lines, all matched by string and all free:
+   - **Recall on the 96**, the denominator: the queued-but-unfiled labels from taxonomy scans and audits, 84
+     `backlog` entries and 12 `paired` entries whose stem has no file (bland, cultural_relativist, disciplined,
+     exclusive, indulgent, rule_bending, tough, deterministic, libertarian, financially_adventurous, job_hopper,
+     variety_seeking; all counted 2026-10-12 from [seed_queue.json](../../data/seed_queue.json)).
+   - **Regeneration of Roger's rejections**: how many of the trait names marked `not_adopted` in the queue
+     that have no trait file B produces (139 on 2026-10-13; 144 distinct `not_adopted` stems, of which
+     compassionate, conformist, forgiving, forthright and unforgiving have files).  Recall alone cannot
+     penalise a generator that produces everything; this line can.
+   - **Recall on the 41 registry rows Roger accepted in review** (`review.status` `accepted`, most of them
+     census words), printed as a second recall line beside the 38 queue `candidate` entries (35 promoted from
+     the census review on 2026-10-11, 3 on 2026-10-13), never in the denominator: a generator's words
+     recovering another generator's words measures the generators' overlap, not the corpus's gaps.
 
-If decision 2 is unanswered when Opus reaches the step (§ 8, test 3), it proceeds under the recommendation and
-records that in [QUESTIONS.md](./QUESTIONS.md) (§ 12).  (2026-10-13: decision 1 is decided, above.)
+   The four stem lists are frozen when the pilot starts and written into `evaluation.json`, since the queue
+   and the registry keep moving.  Not used: the 169 rows Roger merged into another candidate (they say where
+   synonyms land, which pair recovery already measures).
+
+(2026-10-13: both decisions are decided, above; nothing in this section is open.)
 
 ## 1. Decisions already made
 
@@ -145,8 +154,9 @@ assistant_axis/gapgen/generators/structural/
                   -> "match" | "mismatch" | "placeholder" | "none_recorded"; write_position_table;
                   render_mismatches(rows) -> markdown
   evaluate.py     pair_recovery(table, pairs, *, embed=None) (hide each pole; stem match and gloss cosine at
-                  0.7/0.8/0.9); structure_recovery(table, triangles, sequence); queue_holdout(table, holdout,
-                  excluded) (recall by operator); null_rates(replies) (per operator and target; principal apart);
+                  0.7/0.8/0.9); structure_recovery(table, triangles, sequence); queue_holdout(table, holdout, *,
+                  rejected, accepted, candidates) (recall on the holdout by operator; how many rejected
+                  names regenerated; recall on accepted and candidates apart); null_rates(replies) (per operator and target; principal apart);
                   stability_jaccard(run_a, run_b) (per trait, per operator; median and distribution);
                   parse_rate(replies)
   submit.py       estimate_downstream_usd(n, *, transport, pass_rate=0.88); select_all / select_wave (plan 04's
@@ -271,7 +281,8 @@ with both words and the model's reasoning, for the pairing review), `placeholder
 enveloped; figures illustrative): `{"pair_recovery": {"n_pairs": 297, "recall_stem": 0.71, "recall_cos_0.8":
 0.84}, "structure_recovery": {"triangles": {"n": 8, "corners_recovered": 5}, "sequence": {"n": 13,
 "recovered": 6}}, "queue_holdout": {"n": 96, "recall_stem": 0.19, "by_operator": {"opposite": 0.11, ...},
-"excluded_35_recall": 0.3}, "null_rates": {"retarget": 0.22, "remode": 0.31, "principal": 0.5}, "stability":
+"rejected": {"n": 139, "regenerated": 4}, "accepted": {"n": 41, "recall_stem": 0.3}, "candidates": {"n": 38,
+"recall_stem": 0.3}}, "null_rates": {"retarget": 0.22, "remode": 0.31, "principal": 0.5}, "stability":
 {"n_traits": 30, "jaccard_median": 0.6, "below_0.5": 9}, "parse_rate": 0.997}`.
 
 ## 7. CLI
@@ -364,7 +375,8 @@ sets no gate but "expect > 80%" for pair recovery); parse rate, the null-rate ba
   only** (a watched tmp `data/traits` is untouched); snapshot on change.
 - `evaluate`: `pair_recovery` on a planted fixture (hidden pole recovered by stem; by cosine with the hash
   embedder; `renamed_from` resolved); `structure_recovery` finds a planted triangle corner and a planted sequence
-  neighbour; `queue_holdout` recall by operator, the excluded 35 reported apart and never in the denominator;
+  neighbour; `queue_holdout` recall by operator on the hold-out; a planted rejected stem in the output counts as regenerated
+  and an absent one does not; the accepted and candidate lines reported apart and never in the denominator;
   `null_rates` per operator and target with the principal targets apart; `stability_jaccard` on planted runs
   (identical -> 1.0, disjoint -> 0.0, the median and the below-0.5 count); `parse_rate`.
 - `submit` (tmp registry, real API): one candidate per source with the crossed `partner_hint`s for opposite and
@@ -389,7 +401,8 @@ sets no gate but "expect > 80%" for pair recovery); parse rate, the null-rate ba
   (hard for the pilot gate; outside it the run is a prompt-revision round, § 10); stability median Jaccard >= 0.5
   on 30 traits (hard; failing it is Roger's model decision); `usage.json` beside every run with nonzero cost;
   `evaluation.json` carries pair recovery (reported against the > 80% expectation), structure recovery, the
-  hold-out recall on the 96 by operator (the 35 apart), and the principal-target count equals the items of
+  hold-out recall on the 96 by operator, the rejected names regenerated, and the accepted and candidate lines
+  apart, and the principal-target count equals the items of
   alignment-region traits; `position_table.jsonl` has a row for every trait operated on; the pilot's and the
   wave's `report.md` carry the already-registered headline and the novel figure raw and net (2026-10-13); the
   package imports no `openai` beyond the embedding cache.
@@ -492,7 +505,8 @@ and stability readouts and the prompt revision if one happened; the pilot's yiel
 the already-registered share, by any generator, and how many of those rows were decided; the measured net-new
 kept share and the re-based projections; 2026-10-13) and Roger's decisions; pair recovery (against the > 80%
 expectation), structure recovery (8 triangles, the 13-member sequence), the hold-out recall on the 96 by
-operator with the 35 apart; the first wave's counts (submitted, net-new, already registered and decided),
+operator, how many of Roger's rejected names were regenerated, and recall on the accepted and candidate sets
+apart; the first wave's counts (submitted, net-new, already registered and decided),
 M1/M3 fractions, the novel figure **twice**, raw and net of other generators' pending `new` candidates of the
 same stem (and, once R1 has run, net of review-graph groups shared with another generator's candidates),
 ordered as decision 1 asks (pair completions and degree fillers first, wholly new concepts second), the 50-row
