@@ -245,6 +245,127 @@ class TestMatch:
         assert client2.calls == [] and rows2 == rows
 
 
+# --------------------------------------------------------------------------- 3b. Opus at the strict cut-off
+
+#: Candidate a (cut-off 3) is read Sonnet 4 on beta: Sonnet covers alone there, so the rule asks no Opus; at the
+#: strict column's fixed 4 the same reading needs Opus to decide.  Its Opus (asked only at the strict cut-off) reads 2.
+OV_STRICT = OV | {("candidate a", "beta", "opus"): 2}
+
+
+def pairs_called(client) -> list[tuple]:
+    out = []
+    for kw in client.calls:
+        u = json.loads(user_text(kw))
+        out.append((u["target"]["label"], u["other"]["label"], "opus" if "opus" in kw["model"] else "sonnet"))
+    return sorted(out)
+
+
+def recorded_batch(root: Path, rows, cs, dec, rules=R2) -> Path:
+    """The match stage's rows as a recorded harness batch (``recovery_extras`` reads it): ``recovery/B/seed0`` and
+    the reduced run's results and rules in ``novelty/B_s0``."""
+    from assistant_axis.gapgen.testing import recovery_extras as RX
+    sd = root / "recovery" / "B" / "seed0"
+    sd.mkdir(parents=True)
+    (sd / "matches.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    (sd / "hidden.json").write_text(json.dumps(hidden_doc()))
+    nd = root / "novelty" / "B_s0"
+    nd.mkdir(parents=True)
+    (nd / "results.jsonl").write_text("".join(json.dumps({"key": c.key, "novelty": dec[c.key]}) + "\n" for c in cs))
+    (nd / "run.json").write_text(json.dumps({"rules": rules.as_dict()}))
+    (root / "recovery" / "B" / "run.json").write_text("{}")
+    assert RX.m3_dir_for(sd) == nd
+    return root / "recovery" / "B"
+
+
+class TestStrictCutOffOpus:
+    """``match_candidates(opus_also_at=4)`` (2026-10-13; ``recovery_test.match_seed`` passes ``STRICT_C``): Opus is
+    also asked where the strict column's cut-off needs it, the headline verdicts are unchanged, ``needs_opus`` is
+    empty, and a resume of a batch matched without it sends only the missing Opus calls."""
+
+    def run(self, tmp_path, records=(), **kw):
+        r, client, cs, vec, dec = match_setup(tmp_path, responder_for({}, OV_STRICT))
+        if records:
+            r, client, _ = make_runner(tmp_path / "resumed", responder_for({}, OV_STRICT), records=records)
+        rows, _ = RC.match_candidates(r, cs, vec, HIDDEN, k=4, decisions=dec, rules=R2, **kw)
+        return r, client, rows, cs, dec
+
+    def test_off_nothing_changes(self, tmp_path, monkeypatch):
+        """Keyword off (M3's own path and the default): the same calls and byte-identical records."""
+        from assistant_axis.gapgen import novelty_runner as NR
+        monkeypatch.setattr(NR, "utc_now", lambda: "2026-10-13T00:00:00+00:00")
+        out = []
+        for name, kw in (("omitted", {}), ("none", {"opus_also_at": None})):
+            r, client, rows, _, _ = self.run(tmp_path / name, **kw)
+            out.append((rows, pairs_called(client), r.responses_path.read_bytes()))
+        assert out[0] == out[1]
+        rows, called, _ = out[0]
+        assert ("candidate a", "beta", "opus") not in called                       # Sonnet 4 at c = 3 covers alone
+        assert [c for c in called if c[2] == "opus"] == [("candidate b", "alpha", "opus"),
+                                                          ("candidate c", "alpha", "opus")]
+        assert next(x for x in rows if x["key"] == "candidate_a#1")["opus"] is None
+
+    def test_m3s_full_scan_asks_no_opus_above_the_cut_off(self, tmp_path):
+        """The full scan (``read_pairs`` without the keyword): a Sonnet 4 at cut-off 3 goes to no Opus."""
+        r, _, _ = make_runner(tmp_path, responder_for({}, {("candidate a", "alpha", "sonnet"): 4}),
+                              mode="full_scan")
+        c = cand("candidate a")
+        st = r.run([c], {c.key: query(alpha=0.9, zeta=0.6, eta=0.5, kappa=0.4)})[c.key]
+        assert st.block["decision"] == "covered" and not [x for x in r.records if x["role"] == "opus"]
+
+    def test_on_the_strict_reading_is_asked_and_the_headline_is_unchanged(self, tmp_path):
+        from assistant_axis.gapgen.testing import recovery_extras as RX
+        _, _, off, cs, dec = self.run(tmp_path / "off")
+        r, client, on, _, _ = self.run(tmp_path / "on", opus_also_at=RX.STRICT_C)
+        assert pairs_called(client).count(("candidate a", "beta", "opus")) == 1
+        assert [c for c in pairs_called(client) if c[2] == "opus"] == [
+            ("candidate a", "beta", "opus"), ("candidate b", "alpha", "opus"), ("candidate c", "alpha", "opus")]
+        a = next(x for x in on if x["key"] == "candidate_a#1")
+        assert a["sonnet"]["value"] == 4 and a["opus"]["value"] == 2
+        # the verdict at the candidate's own cut-off (3) does not read the strict Opus: Sonnet 4 still covers
+        assert a["cut_off"] == 3 and a["verdict"] == "cut" and a["recovers"]
+        strip = [{k: v for k, v in x.items() if k != "opus"} for x in on]
+        assert strip == [{k: v for k, v in x.items() if k != "opus"} for x in off]   # every headline field the same
+        assert {x["wave"] for x in r.records} == {"m_sonnet", "m_opus"}               # one Opus wave, as before
+        # the strict column: listed as needing Opus without the keyword, complete with it
+        ex_off = RX.extras_json(recorded_batch(tmp_path / "b_off", off, cs, dec))
+        ex_on = RX.extras_json(recorded_batch(tmp_path / "b_on", on, cs, dec))
+        assert ex_off["needs_opus"] == [{"key": "candidate_a#1", "stem": "beta", "sonnet": 4, "cut_off": 3, "seed": 0}]
+        assert ex_on["needs_opus"] == [] and ex_on["n_needs_opus"] == 0
+        st = ex_on["seeds"][0]["strict"]
+        assert st["n_recovered_headline"] == 3 and "beta" in st["lost_at_strict"]   # Opus 2: not at 4
+
+    def test_a_resume_of_a_batch_matched_without_it_sends_only_the_missing_opus(self, tmp_path):
+        from assistant_axis.gapgen.testing import recovery_extras as RX
+        r0, client0, _, _, _ = self.run(tmp_path / "first")
+        assert client0.calls
+        r1, client1, on, _, _ = self.run(tmp_path / "first", records=r0.records, opus_also_at=RX.STRICT_C)
+        assert pairs_called(client1) == [("candidate a", "beta", "opus")]
+        assert [x["role"] for x in r1.records[len(r0.records):]] == ["opus"]          # one new record, appended
+        assert next(x for x in on if x["key"] == "candidate_a#1")["opus"]["value"] == 2
+        r2, client2, again, _, _ = self.run(tmp_path / "first", records=r1.records, opus_also_at=RX.STRICT_C)
+        assert client2.calls == [] and again == on                                   # and then nothing
+
+    def test_a_strict_only_opus_without_an_answer_leaves_the_headline(self, tmp_path):
+        """An Opus call asked only for the strict cut-off that fails outright leaves ``opus`` None (listed in
+        ``needs_opus``; a resume asks it again); one the rule itself needs stalls the pair, as before."""
+        from assistant_axis.gapgen.testing import recovery_extras as RX
+        good = responder_for({}, OV_STRICT)
+
+        def flaky(kw):
+            if "opus" in kw["model"] and json.loads(user_text(kw))["target"]["label"] in ("candidate a", "candidate b"):
+                return RuntimeError("network down")
+            return good(kw)
+        _, _, off, _, _ = self.run(tmp_path / "off")
+        r, _, cs, vec, dec = match_setup(tmp_path / "on", flaky)
+        on, _ = RC.match_candidates(r, cs, vec, HIDDEN, k=4, decisions=dec, rules=R2, opus_also_at=RX.STRICT_C)
+        a = next(x for x in on if x["key"] == "candidate_a#1")
+        assert a == next(x for x in off if x["key"] == "candidate_a#1")              # Sonnet 4 still covers at 3
+        assert a["opus"] is None and a["recovers"] and "stalled" not in a
+        assert next(x for x in on if x["key"] == "candidate_b#1")["stalled"].startswith("Opus on alpha")
+        ex = RX.extras_json(recorded_batch(tmp_path / "b", on, cs, dec))
+        assert [(x["key"], x["stem"]) for x in ex["needs_opus"]] == [("candidate_a#1", "beta")]
+
+
 # --------------------------------------------------------------------------- 4. report
 
 class TestFigures:

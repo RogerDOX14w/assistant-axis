@@ -865,7 +865,8 @@ class NoveltyRunner:
         self.stats["positions"] = position
 
     # -- reading pairs whole (the full scan, the recovery harness) ---------------------------
-    async def read_pairs(self, items: Sequence[tuple["CandState", str, int]], *, wave: str) -> dict[tuple[str, str], dict]:
+    async def read_pairs(self, items: Sequence[tuple["CandState", str, int]], *, wave: str,
+                         opus_also_at: Optional[int] = None) -> dict[tuple[str, str], dict]:
         """Sonnet on every ``(state, stem, position)`` of ``items`` (wave ``<wave>_sonnet``), then Opus on the
         pairs the rule sends it at the candidate's cut-off (:func:`novelty.sonnet_action`; wave ``<wave>_opus``):
         each pair read whole, with no walk and no early exit, as the full scan reads it and as the recovery
@@ -873,11 +874,17 @@ class NoveltyRunner:
         ``{(key, stem): {"sonnet": {"value", "reason"} | {"value": None, "error"}, "opus": ... | None}}``; a pair
         left without an answer (a request that failed outright, or a stop before Opus was asked) is
         ``{"stalled": why, "phase": "sonnet" | "opus"}``.  The candidates' states must be in ``self.states``
-        (each call is charged to its candidate)."""
+        (each call is charged to its candidate).
+
+        ``opus_also_at`` (the recovery harness's strict cut-off, 2026-10-13; ``None``, M3's own scans: off): Opus
+        also reads the pairs the rule would send it at that fixed cut-off (a Sonnet 4 at cut-off 3, where Sonnet
+        covers alone), in the same wave, so that the pair can be decided at both cut-offs.  The verdict at the
+        candidate's own cut-off does not read that Opus answer (:func:`novelty.pair_verdict`), and such a call
+        that gets no answer (a failed request, a stop) leaves ``"opus": None`` rather than stalling the pair."""
         calls = [self._overlap_call(st, stem, "sonnet", pos) for st, stem, pos in items]
         res = await self._wave(f"{wave}_sonnet", calls)
         out: dict[tuple[str, str], dict] = {}
-        opus: list[tuple[CandState, str, Call]] = []
+        opus: list[tuple[CandState, str, Call, bool]] = []
         for (st, stem, pos), c in zip(items, calls):
             o, k = res[id(c)], (st.cand.key, stem)
             if o.status == "ok":
@@ -887,17 +894,19 @@ class NoveltyRunner:
             else:
                 out[k] = {"stalled": f"Sonnet on {stem}: {o.status}", "phase": "sonnet"}
                 continue
-            if NV.sonnet_action(out[k]["sonnet"]["value"], self.cut_spec(st)) in NV.OPUS_ROLES:
-                opus.append((st, stem, self._overlap_call(st, stem, "opus", pos)))
-        ocalls = [c for _, _, c in opus]
+            v = out[k]["sonnet"]["value"]
+            own = NV.sonnet_action(v, self.cut_spec(st)) in NV.OPUS_ROLES      # the rule needs Opus at the cut-off
+            if own or (opus_also_at is not None and NV.sonnet_action(v, opus_also_at) in NV.OPUS_ROLES):
+                opus.append((st, stem, self._overlap_call(st, stem, "opus", pos), own))
+        ocalls = [c for _, _, c, _ in opus]
         res = await self._wave(f"{wave}_opus", ocalls) if ocalls and self._stop is None else {}
-        for st, stem, c in opus:
+        for st, stem, c, own in opus:
             o, k = res.get(id(c), Outcome("not_sent")), (st.cand.key, stem)
             if o.status == "ok":
                 out[k]["opus"] = {"value": o.parsed["value"], "reason": o.parsed["reason"]}
             elif o.status == "unparsed":
                 out[k]["opus"] = {"value": None, "error": o.error}
-            else:
+            elif own:
                 out[k] = {"stalled": f"Opus on {stem}: {o.status}", "phase": "opus"}
         return out
 
@@ -915,16 +924,17 @@ class NoveltyRunner:
         return out
 
     def run_pairs(self, cands: Sequence[M3Candidate], pairs: Sequence[tuple[str, str, int]], *,
-                  wave: str = "m") -> dict[tuple[str, str], dict]:
+                  wave: str = "m", opus_also_at: Optional[int] = None) -> dict[tuple[str, str], dict]:
         """:meth:`read_pairs` for ``pairs`` (``(key, stem, position)``, each key one of ``cands``), run to the
         end: every answer is recorded and charged before a stop (a budget stop, a failed batch) is raised."""
-        return asyncio.run(self._run_pairs(cands, pairs, wave))
+        return asyncio.run(self._run_pairs(cands, pairs, wave, opus_also_at))
 
-    async def _run_pairs(self, cands, pairs, wave):
+    async def _run_pairs(self, cands, pairs, wave, opus_also_at=None):
         self._stop = None
         for c in cands:
             self.states.setdefault(c.key, CandState(cand=c))
-        out = await self.read_pairs([(self.states[k], stem, pos) for k, stem, pos in pairs], wave=wave)
+        out = await self.read_pairs([(self.states[k], stem, pos) for k, stem, pos in pairs], wave=wave,
+                                    opus_also_at=opus_also_at)
         if self._stop is not None:
             raise self._stop
         return out

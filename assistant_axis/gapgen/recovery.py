@@ -26,7 +26,9 @@ trait that one of the run's kept candidates matches is *recovered*.  The CLI is
    overlap call (rubric A, one pair per call, the candidate's gloss against the hidden trait's description,
    Sonnet then Opus under the pipeline's rule, :meth:`novelty_runner.NoveltyRunner.read_pairs`) reads at the
    candidate's cut-off or above (:func:`pair_outcome`: the rule set's ``cuts``).  Only the hidden traits among
-   the candidate's ``k`` nearest by cosine in the *full* corpus are judged.
+   the candidate's ``k`` nearest by cosine in the *full* corpus are judged.  The harness also asks Opus where
+   the strict column's fixed cut-off 4 would need it (``match_candidates(opus_also_at=4)``, 2026-10-13: a Sonnet
+   4 at cut-off 3), which leaves the verdict at the candidate's own cut-off unchanged.
 4. **Report** (:func:`seed_figures`, :func:`combine_seeds`, :func:`report_markdown`).  For the candidates M3
    kept (``new`` or ``grey``): recall (hidden traits matched), by region and by arrangement kind; precision
    (the kept candidates that match a hidden trait); hiding groups recovered whole.  The same figures for the
@@ -556,20 +558,22 @@ def pair_outcome(reading: Mapping, c: Any, rules: Optional[NV.Rules] = None) -> 
 
 def match_candidates(runner, cands: Sequence, vectors: Mapping[str, Any], hidden: Iterable[str], *, k: int,
                      decisions: Mapping[str, Mapping], rules: Optional[NV.Rules] = None,
-                     wave: str = "m") -> tuple[list[dict], dict[str, list[str]]]:
+                     wave: str = "m", opus_also_at: Optional[int] = None) -> tuple[list[dict], dict[str, list[str]]]:
     """Step 3 for ``cands`` (decided by the reduced run; ``decisions``: key -> its ``novelty`` block): the label
     matches, and the overlap pairs read through ``runner`` (a :class:`novelty_runner.NoveltyRunner` on the
     *full* corpus, so that it knows the hidden traits' descriptions; its records, usage and transport are the
     match stage's).  Returns ``(rows, near)``: one row per label match and per pair judged (the candidate, its
     reduced-run decision and covering trait, the hidden trait, cosine and rank, how, the readings, the verdict,
     ``recovers``; ``stalled`` for a pair left without an answer), and :func:`match_plan`'s ``near``.  A stop (a
-    budget stop) is raised after every answer is recorded."""
+    budget stop) is raised after every answer is recorded.  ``opus_also_at``: Opus also reads the pairs the rule
+    would send it at that fixed cut-off (the strict column's 4, ``recovery_extras.STRICT_C``; see
+    :meth:`~novelty_runner.NoveltyRunner.read_pairs`); the verdicts at the candidates' own cut-offs are unchanged."""
     rules = rules or NV.DEFAULT_RULES
     by_key = {c.key: c for c in cands}
     items, near = match_plan(cands, vectors, runner.index, hidden, k=k)
     pairs = [(it["key"], it["stem"], it["rank"] or 0) for it in items if it["how"] == "overlap"]
-    readings = runner.run_pairs([by_key[k_] for k_ in dict.fromkeys(p[0] for p in pairs)], pairs, wave=wave) \
-        if pairs else {}
+    readings = runner.run_pairs([by_key[k_] for k_ in dict.fromkeys(p[0] for p in pairs)], pairs, wave=wave,
+                                opus_also_at=opus_also_at) if pairs else {}
     rows = []
     for it in items:
         c, nv = by_key[it["key"]], decisions.get(it["key"]) or {}

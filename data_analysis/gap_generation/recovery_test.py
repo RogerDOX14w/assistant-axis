@@ -20,8 +20,9 @@ rec_<G>_<R>``.  ``--budget-usd`` is required.  Per seed S:
    run's rows must already carry their M1 filter blocks (``traithood_filter.py --run G/R``); M1 is not run
    again, and rows without one are counted and left out;
 3. **match**: every candidate the reduced run decided, against the hidden traits (its label, then the overlap
-   call on the hidden traits among its 10 nearest in the full corpus): ``seed<S>/matches.jsonl`` (one line per
-   label match and pair judged), ``seed<S>/responses.jsonl``, ``seed<S>/usage.json``;
+   call on the hidden traits among its 10 nearest in the full corpus; Opus also where the strict column's cut-off
+   4 needs it, ``run.json`` ``match_opus_also_at``): ``seed<S>/matches.jsonl`` (one line per label match and pair
+   judged), ``seed<S>/responses.jsonl``, ``seed<S>/usage.json``;
 4. **report**: ``data/candidates/recovery/<B>/recovery_report.json`` (with its provenance envelope) and
    ``recovery_report.md`` (each seed and the mean: recall over the candidates M3 kept, by region and by
    arrangement kind, precision, groups recovered whole, false covers, reachability, cost), ``usage.json`` (the
@@ -37,8 +38,9 @@ or estimate over $20 needs ``--confirm-expensive`` and ``--confirmed-by``.  ``--
 dry runs and the estimates, and writes nothing.  A paid run is refused while the platform's code or prompt paths
 have uncommitted changes, unless ``--allow-dirty`` (recorded).  ``--resume`` continues a run: the hidden files are
 reused, a finished M3 run is not run again (an unfinished one is resumed), and no call already answered is sent
-again.  Exit status: 0; 1 (the run directory exists without ``--resume``, or is missing with it); 2 (refused, or
-a budget stop).
+again (the match stage is run again on its records, so a batch recorded before ``match_opus_also_at`` sends only
+the strict column's missing Opus readings and rewrites ``matches.jsonl``).  Exit status: 0; 1 (the run directory
+exists without ``--resume``, or is missing with it); 2 (refused, or a budget stop).
 """
 from __future__ import annotations
 
@@ -67,6 +69,7 @@ from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # no
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, has_source, utc_now  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
+from assistant_axis.gapgen.testing import recovery_extras as RX  # noqa: E402
 from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage  # noqa: E402
 from data_analysis.gap_generation import novelty_score as NS  # noqa: E402
 
@@ -229,8 +232,10 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), seed_dir / "batches.json", budget_usd=budget)
         logger.info("seed %s: matching %d candidates, %d label matches, %d overlap pairs (%s)", seed, len(cands),
                     sum(1 for it in items if it["how"] == "label"), sum(1 for it in items if it["how"] == "overlap"), why)
+        # Opus also where the strict column's fixed cut-off would need it (a Sonnet 4 at cut-off 3; 2026-10-13), so
+        # that recovery_extras' strict column is complete; the verdicts at the run's cut-offs are unchanged
         rows, near = RC.match_candidates(runner, cands, vectors, hidden_doc["hidden"], k=cfg.k, decisions=decisions,
-                                         rules=rules)
+                                         rules=rules, opus_also_at=RX.STRICT_C)
         runner.warn_parse_rates(logger)
     except BudgetExceededError as exc:
         print(f"STOPPED (seed {seed}, match): {exc}", file=sys.stderr)
@@ -600,6 +605,9 @@ def main(argv=None) -> int:
                 "candidates": {"n": len(cands), "skipped": skipped},
                 "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
                 "models": {"overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
+                # the match wave's Opus readings also cover this fixed cut-off (the strict column; absent before
+                # 2026-10-13, when a Sonnet reading above a cut-off of 3 got none)
+                "match_opus_also_at": RX.STRICT_C,
                 "resumed": bool(args.resume), "started_at": utc_now()}
     if args.pooled:
         run_meta["pooled_selection"] = {"counts": pooled_counts, "keys_file": str(keys_on_record),

@@ -378,7 +378,9 @@ def cmd_recovery_extras(args) -> int:
     print(RX.extras_markdown(ex))
     if ex["needs_opus"]:
         print(f"{ex['n_needs_opus']} pair(s) need an Opus reading the record lacks; they are listed in extras.json and "
-              "left out of the strict column.  Sending them (--send-opus) is not built: no recorded batch needed it.")
+              "left out of the strict column.  To fill them, resume the batch (its recovery_test.py command with "
+              "--resume: since 2026-10-13 the match wave asks Opus at cut-off 4 too, and a resume sends only the "
+              "missing calls); --send-opus is not built.")
         if args.send_opus:
             print("REFUSED: --send-opus is not built (see above)", file=sys.stderr)
             return 2
@@ -644,7 +646,8 @@ def build_parser() -> argparse.ArgumentParser:
     common(p)
     p.add_argument("--batch", required=True)
     p.add_argument("--c", type=int, default=RX.STRICT_C)
-    p.add_argument("--send-opus", action="store_true", help="not built (no recorded batch has needed it)")
+    p.add_argument("--send-opus", action="store_true",
+                   help="not built: resume the batch with recovery_test.py --resume instead")
     p.add_argument("--budget-usd", type=float, default=1.0)
     p.set_defaults(func=cmd_recovery_extras)
     p = sub.add_parser("roger-sample")

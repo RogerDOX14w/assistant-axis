@@ -7,8 +7,10 @@ label match and per pair the match stage judged), the reduced-corpus M3 run's ``
   2026-10-12: "3 is primary, report 4 as well"), from the recorded readings (``recovery.pair_outcome(reading, 4)``
   under the reduced run's rules).  A pair whose Sonnet reading would need an Opus reading at 4 that it lacks (Sonnet
   4, or 3 under the Opus check, with no Opus reading) cannot be decided from the record: it is listed in
-  ``needs_opus`` and not counted.  On the four recorded batches there are none (the match wave sends every Sonnet
-  reading at c - 1 or above to Opus).
+  ``needs_opus`` and not counted.  Since 2026-10-13 the match wave asks Opus wherever cut-off 4 needs it
+  (``recovery.match_candidates(opus_also_at=STRICT_C)``), so a batch matched since then has none; a batch matched
+  before it can (a Sonnet 4 at cut-off 3, where Sonnet covers alone: none in the four pilot batches, 10 kept-candidate
+  pairs in ``rec_testing_paraphrase_set``), and ``recovery_test.py --resume`` fills them.
 * **Pair recovery** (:func:`pair_recovery`): a hidden trait some kept candidate was read ``opposite`` against: the
   candidate is its antonym, which finds the trait's pole when the harness hides pairs whole.  Printed beside recall,
   never summed into it.

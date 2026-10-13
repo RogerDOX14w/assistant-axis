@@ -89,13 +89,16 @@ class TestPlanted:
 @pytest.mark.skipif(not RECORDED, reason="no recorded harness batch")
 class TestRecorded:
     #: The four pilot batches the plan's hard figure was measured on.  Scoped 2026-10-13 (QUESTIONS 160): synonym
-    #: candidates produce Sonnet-4 readings at cut-off 3, which the match wave does not send to Opus (Sonnet covers
-    #: alone there), so later batches can list `needs_opus` until the match wave also asks Opus at the strict cut-off.
+    #: candidates produce Sonnet-4 readings at cut-off 3, which the match wave did not send to Opus (Sonnet covers
+    #: alone there), so a batch matched before the match wave also asked Opus at the strict cut-off
+    #: (`match_opus_also_at`, the same day) can list `needs_opus`: `rec_testing_paraphrase_set` lists 10 until it is
+    #: resumed (`recovery_test.py --resume`, 14 Opus calls, about $0.05); widen this test to every batch then.
     PILOT_BATCHES = ("rec_antonym_check_pilot_1", "rec_censuses_2026-10-08-pilot", "rec_roget_2026-10-08-pilot",
                      "rec_wn_clusters_2026-10-08-pilot")
 
     def test_needs_opus_is_empty_on_the_recorded_batches(self):
-        """Plan 13 § 8 (hard): the match wave sent every Sonnet reading at c - 1 or above to Opus."""
+        """Plan 13 § 8 (hard): the pilot batches hold no Sonnet reading that needs an Opus reading at cut-off 4 and
+        lacks one (they hold no Sonnet 4 at cut-off 3; a batch matched since 2026-10-13 has none by construction)."""
         pilots = [b for b in RECORDED if b.name in self.PILOT_BATCHES]
         assert len(pilots) == 4
         for b in pilots:
