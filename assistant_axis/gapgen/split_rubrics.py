@@ -31,7 +31,8 @@ records use them), while :data:`PINNED_NAMES` (every set) is what the pins, :fun
 ``rubric_pins.py`` cover.  Since 2026-10-07 a third set, :data:`M3_FILES`: M3's relation call
 (``relation.md``), first pinned as version 1.  Since 2026-10-08 a fourth, :data:`GENERATOR_FILES`: the
 generators' own calls: the Roget head-scope call (``roget_head_scope.md``) and the Roget label placement
-check (``roget_placement.md``), each first pinned as version 1.
+check (``roget_placement.md``), each first pinned as version 1; the alignment sweep's and the IPIP generator's
+since; and since 2026-10-13 workstream 13's paraphrase synonym call (``paraphrase_synonym.md``).
 """
 from __future__ import annotations
 
@@ -88,7 +89,9 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: hinted, first pinned as version 1: they were pinned in that module's own code until QUESTIONS 48 part 3, where
 #: Roger moved them here so that an edit cannot escape ``rubric_pins.py check``.  Since 2026-10-13 the structural
 #: generators' two calls (workstream 9, ``.../structural/``): the operators call and the classical modernise call,
-#: each first pinned as version 1.
+#: each first pinned as version 1; and workstream 13's
+#: paraphrase synonym call (``assistant_axis/gapgen/testing/paraphrase_set.py``, the matcher's sanity set; not a
+#: generator, but a call that makes candidates), first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -99,6 +102,7 @@ GENERATOR_FILES: dict[str, str] = {
     "ipip_naming_hinted": "ipip_naming_hinted.md",
     "structural_operators": "structural_operators.md",
     "structural_modernise": "structural_modernise.md",
+    "paraphrase_synonym": "paraphrase_synonym.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.
