@@ -44,6 +44,44 @@ EVALUATION_PATH = STRUCTURAL_DIR / "evaluation.json"
 RESPONSES_NAME = "responses.jsonl"
 SCHEMA_VERSION = 1
 
+#: A run directory holding this file is **void** (2026-10-13): its records stay on disk as the record of what was
+#: paid, but the readouts, the postprocess and the checks on recorded outputs skip it.  The first: the two Sonnet 5.5
+#: stability runs whose calls were refused (``reasoning_extraction``).  ``{"reason", "date", "by"}``.
+VOID_NAME = "void.json"
+
+
+def read_void(run_dir) -> "dict | None":
+    """The run's ``void.json`` marker (``{"reason", "date", "by"}``), or None when the run is not void."""
+    import json
+    from pathlib import Path
+    p = Path(run_dir) / VOID_NAME
+    if not p.exists():
+        return None
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(d, dict) or not d.get("reason"):
+        raise ValueError(f"{p}: a void marker needs at least a reason")
+    return d
+
+
+def write_void(run_dir, *, reason: str, by: str, date: "str | None" = None) -> "Path":
+    """Mark a run void (refuses a run already marked, an empty reason or an empty ``by``)."""
+    import json
+    from pathlib import Path
+
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.registry import utc_now
+    p = Path(run_dir) / VOID_NAME
+    if not Path(run_dir).is_dir():
+        raise FileNotFoundError(f"no run directory {run_dir}")
+    if p.exists():
+        raise FileExistsError(f"{p} exists already")
+    if not reason.strip() or not by.strip():
+        raise ValueError("a void marker needs a reason and who marked it")
+    atomic_write_text(json.dumps({"reason": reason.strip(), "date": date or utc_now(), "by": by.strip()},
+                                 indent=2, ensure_ascii=False) + "\n", p)
+    return p
+
+
 #: The frozen interface's functions, imported from their modules on first use.
 LAZY_EXPORTS: dict[str, str] = {"load_operator_table": "postprocess", "load_position_table": "sidetable"}
 
@@ -55,6 +93,6 @@ def __getattr__(name: str):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["GENERATOR", "STRUCTURAL_DIR", "CLASSICAL_DIR", "CLASSICAL_MODERN_PATH", "OPERATOR_TABLE_PATH",
+__all__ = ["VOID_NAME", "read_void", "write_void", "GENERATOR", "STRUCTURAL_DIR", "CLASSICAL_DIR", "CLASSICAL_MODERN_PATH", "OPERATOR_TABLE_PATH",
            "POSITION_TABLE_PATH", "MISMATCH_PATH", "EVALUATION_PATH", "RESPONSES_NAME", "SCHEMA_VERSION",
            "load_operator_table", "load_position_table"]

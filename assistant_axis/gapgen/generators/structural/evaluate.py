@@ -1,9 +1,11 @@
 """The free checks (plan section 8; tasks 5-7 and 10): recovery, the queue hold-out, null rates, stability, parse rate.
 
 All are report-and-decide (plan 09 section 6 sets no gate but "expect > 80%" for pair recovery), except the parse
-rate, the null-rate band and stability, which the acceptance test reads as hard.
+rate and the null-rate band, which the acceptance test reads as hard.  Stability is reported, never a gate (Roger,
+2026-10-13: the model runs at temperature 1; the samples are combined by union instead, :mod:`.combine`).
 
-* :func:`pair_recovery`: each recorded clean pair's poles in turn; the blind ``opposite`` of one pole recovers the
+* :func:`pair_recovery`: each recorded clean pair's poles in turn; the blind opposites of one pole (the union of its
+  samples) recover the
   other by stem (the folded stem, the other's bare label without a standard's suffix, or a ``renamed_from``), or by
   gloss cosine (``label: gloss`` against ``label: description``) at 0.7, 0.8 and 0.9.
 * :func:`structure_recovery`: each corner of the 8 triangles and each member of the sequences (the moral-circle one
@@ -15,10 +17,13 @@ rate, the null-rate band and stability, which the acceptance test reads as hard.
   accepted in review, beside the 38 queue ``candidate`` entries, never in the denominator.  The four lists are
   frozen when the pilot starts (:func:`freeze_holdout`) and written into ``evaluation.json``.
 * :func:`null_rates`: per operator, target and mode, the share of answers that are not null; the principal targets
-  apart, over the traits that were asked them; the 5-40% band for retarget and remode (the pilot's gate).
-* :func:`stability_jaccard`: per trait, the label-set Jaccard (intersection over union of the stems of all
-  answers) of two runs; median, distribution, count below 0.5, per operator.
-* :func:`parse_rate`: answered calls over calls attempted (after the one retry), and records that parse over records.
+  apart, over the traits that were asked them; the 5-40% band for retarget and remode (the pilot's gate), read over
+  every sample.
+* :func:`stability_jaccard` (two runs) and :func:`sample_agreement` (a run's own samples): per trait the Jaccard of
+  the (slot, stem) pairs over the slots either answer filled (two empty answers are no agreement and are left out),
+  median, distribution, count below 0.5, and per operator the mean slot agreement; reported, never gated.
+* :func:`parse_rate`: answered (trait, sample) calls over those attempted (after the one retry), and records that
+  parse over records.
 """
 from __future__ import annotations
 
@@ -88,43 +93,50 @@ def target_stems(stem: str, corpus: Corpus, *, lexicon=None) -> set[str]:
 
 # --------------------------------------------------------------------------- recovery
 
-def pair_recovery(replies: Mapping[str, OperatorReply], pairs: Sequence[tuple[str, str]], *, corpus: Corpus,
+def _combined(replies: Mapping) -> dict:
+    """Combined replies by stem (a single sample's :class:`OperatorReply` combined on its own)."""
+    from .combine import CombinedReply, combine
+    return {s: r if isinstance(r, CombinedReply) else combine({r.sample: r}) for s, r in replies.items()}
+
+
+def pair_recovery(replies: Mapping, pairs: Sequence[tuple[str, str]], *, corpus: Corpus,
                   lexicon=None, embed: Optional[Callable[[Sequence[str]], "object"]] = None,
                   thresholds: Sequence[float] = COSINE_THRESHOLDS) -> dict:
-    """Recall of each recorded pair's other pole from one pole's blind opposite (module docstring).  ``embed(texts)``
-    returns unit rows (an embedder through its cache in the CLI, ``HashEmbedder`` in tests); without it only the stem
-    figures are given."""
+    """Recall of each recorded pair's other pole from one pole's blind opposites, the union of its samples (module
+    docstring): a direction is recovered by stem when any of the opposites is the other pole, and by cosine when the
+    best of them reaches the threshold.  ``embed(texts)`` returns unit rows (an embedder through its cache in the CLI,
+    ``HashEmbedder`` in tests); without it only the stem figures are given."""
+    reps = _combined(replies)
     dirs = []
     for a, b in pairs:
         dirs += [(a, b), (b, a)]
-    answered = [(x, y) for x, y in dirs if x in replies and not replies[x].principal_only]
+    answered = [(x, y) for x, y in dirs if x in reps and not reps[x].principal_only]
     hits_stem, misses, texts = [], [], []
     for x, y in answered:
-        opp = replies[x].opposite
-        ok = bool(opp) and _stem(opp["label"], lexicon) in target_stems(y, corpus, lexicon=lexicon)
-        hits_stem.append(ok)
-        if opp:
-            texts.append((f"{opp['label']}: {opp.get('gloss') or ''}",
-                          f"{corpus.labels.get(y, y)}: {corpus.descriptions.get(y, '')}"))
-        else:
-            texts.append(None)
+        opps = reps[x].slot("opposite")
+        want = target_stems(y, corpus, lexicon=lexicon)
+        hits_stem.append(any(_stem(o["label"], lexicon) in want for o in opps))
+        target = f"{corpus.labels.get(y, y)}: {corpus.descriptions.get(y, '')}"
+        texts.append([(f"{o['label']}: {o.get('gloss') or ''}", target) for o in opps])
     out = {"n_pairs": len(pairs), "n_directions": len(dirs), "n_answered": len(answered),
-           "n_null_opposite": sum(1 for t in texts if t is None),
+           "n_null_opposite": sum(1 for t in texts if not t),
+           "n_opposites": sum(len(t) for t in texts),
            "recall_stem": _frac(sum(hits_stem), len(answered)), "expected": PAIR_RECOVERY_EXPECTED}
     by_pair: dict[tuple, list] = {}
     for (x, y), ok in zip(answered, hits_stem):
         by_pair.setdefault(tuple(sorted((x, y))), []).append(ok)
     out["pairs_both_directions_stem"] = sum(1 for v in by_pair.values() if len(v) == 2 and all(v))
     out["pairs_either_direction_stem"] = sum(1 for v in by_pair.values() if any(v))
-    cos = [None] * len(answered)
+    cos: list = [None] * len(answered)
     if embed is not None and answered:
         import numpy as np
-        idx = [i for i, t in enumerate(texts) if t is not None]
-        if idx:
-            A = np.asarray(embed([texts[i][0] for i in idx]))
-            B = np.asarray(embed([texts[i][1] for i in idx]))
-            for j, i in enumerate(idx):
-                cos[i] = float(np.dot(A[j], B[j]))
+        flat = [(i, t) for i, ts in enumerate(texts) for t in ts]
+        if flat:
+            A = np.asarray(embed([t[0] for _, t in flat]))
+            B = np.asarray(embed([t[1] for _, t in flat]))
+            for j, (i, _t) in enumerate(flat):
+                c = float(np.dot(A[j], B[j]))
+                cos[i] = c if cos[i] is None else max(cos[i], c)
         for t in thresholds:
             rec = sum(1 for ok, c in zip(hits_stem, cos) if ok or (c is not None and c >= t))
             out[f"recall_cos_{t}"] = _frac(rec, len(answered))
@@ -132,8 +144,8 @@ def pair_recovery(replies: Mapping[str, OperatorReply], pairs: Sequence[tuple[st
         out["cosine_median"] = round(statistics.median(vals), 4) if vals else None
     for (x, y), ok, c in zip(answered, hits_stem, cos):
         if not ok:
-            opp = replies[x].opposite
-            misses.append({"from": x, "hidden": y, "opposite": opp["label"] if opp else None,
+            opps = reps[x].slot("opposite")
+            misses.append({"from": x, "hidden": y, "opposites": [o["label"] for o in opps] or None,
                            "cosine": None if c is None else round(c, 4)})
     out["misses"] = misses
     return out
@@ -295,39 +307,102 @@ def _jaccard(a: set, b: set) -> float:
     return 1.0 if not a and not b else len(a & b) / len(a | b)
 
 
-def stability_jaccard(run_a: Mapping[str, OperatorReply], run_b: Mapping[str, OperatorReply], *,
-                      lexicon=None, n_sampled: Optional[int] = None) -> dict:
-    """Per trait answered in both runs: the Jaccard of the stems of all answers; the median, a 0.1-bin distribution,
-    the count below 0.5, and the median per operator.  With ``n_sampled`` (the traits the two runs were asked),
-    ``coverage`` says whether enough of them were answered in both for the median to be read (review B2)."""
-    common = sorted(s for s in set(run_a) & set(run_b)
-                    if not run_a[s].principal_only and not run_b[s].principal_only)
-    per = {s: round(_jaccard(produced_stems(run_a[s], lexicon=lexicon), produced_stems(run_b[s], lexicon=lexicon)), 4)
-           for s in common}
-    by_op = {}
-    for op in ("opposite", "excess", "deficiency", "retarget", "remode"):
-        vals = [_jaccard(produced_stems(run_a[s], lexicon=lexicon, operators=[op]),
-                         produced_stems(run_b[s], lexicon=lexicon, operators=[op])) for s in common]
-        by_op[op] = round(statistics.median(vals), 4) if vals else None
+def _slot_stems(rep, lexicon=None) -> dict[str, set]:
+    """``{slot: {stems}}`` over the answered slots of a reply (sample or combined)."""
+    from .combine import slot_key
+    out: dict[str, set] = {}
+    for op, sub, it in rep.items():
+        s = _stem(it["label"], lexicon)
+        if s:
+            out.setdefault(slot_key(op, sub), set()).add(s)
+    return out
+
+
+def _pair_agreement(a, b, lexicon=None) -> tuple[Optional[float], list]:
+    """``(trait Jaccard, [(operator, slot Jaccard), ...])`` of two answers to one trait, over the slots either
+    answered: the Jaccard of their (slot, stem) pairs, None when neither answered any slot (two empty answers are
+    no evidence of agreement; Roger, 2026-10-13), and per answered slot the Jaccard of the two slots' stems."""
+    sa, sb = _slot_stems(a, lexicon), _slot_stems(b, lexicon)
+    keys = set(sa) | set(sb)
+    if not keys:
+        return None, []
+    pa = {(k, x) for k, v in sa.items() for x in v}
+    pb = {(k, x) for k, v in sb.items() for x in v}
+    slots = [(k.split(":")[0], _jaccard(sa.get(k, set()), sb.get(k, set()))) for k in sorted(keys)]
+    return len(pa & pb) / len(pa | pb), slots
+
+
+def _agreement_summary(per: Mapping[str, float], slots: list, n_empty: int) -> dict:
     vals = list(per.values())
     bins = Counter(min(9, int(v * 10)) for v in vals)
-    return {"n_traits": len(common), "n_sampled": n_sampled,
-            "coverage": answered_coverage(len(common), n_sampled) if n_sampled is not None else None,
+    by_op: dict[str, list] = {}
+    for op, j in slots:
+        by_op.setdefault(op, []).append(j)
+    return {"n_traits": len(vals), "n_both_empty": n_empty,
             "jaccard_median": round(statistics.median(vals), 4) if vals else None,
-            "below_0.5": sum(1 for v in vals if v < 0.5), "min_median": STABILITY_MIN_MEDIAN,
+            "below_0.5": sum(1 for v in vals if v < 0.5),
             "distribution": {f"{b / 10:.1f}-{(b + 1) / 10:.1f}": bins.get(b, 0) for b in range(10)},
-            "by_operator": by_op, "per_trait": per}
+            "by_operator": {op: {"agreement": round(sum(v) / len(v), 4), "n_slots": len(v)}
+                            for op, v in sorted(by_op.items())},
+            "reported_not_gated": True}
+
+
+def stability_jaccard(run_a: Mapping[str, OperatorReply], run_b: Mapping[str, OperatorReply], *,
+                      lexicon=None, n_sampled: Optional[int] = None) -> dict:
+    """Two runs' single answers per trait, compared over the slots either answered (Roger, 2026-10-13: a reported
+    diagnostic, never a gate): per trait the Jaccard of the (slot, stem) pairs; the median, a 0.1-bin distribution,
+    the count below 0.5; per operator the mean slot agreement over the slots either answered (``n_slots``).  A trait
+    whose two answers are both empty is left out and counted (``n_both_empty``).  With ``n_sampled``, ``coverage``
+    says how many of the asked traits were answered in both runs."""
+    common = sorted(s for s in set(run_a) & set(run_b)
+                    if not run_a[s].principal_only and not run_b[s].principal_only)
+    per, slots, n_empty = {}, [], 0
+    for s in common:
+        j, sl = _pair_agreement(run_a[s], run_b[s], lexicon)
+        if j is None:
+            n_empty += 1
+            continue
+        per[s] = round(j, 4)
+        slots += sl
+    out = _agreement_summary(per, slots, n_empty)
+    out.update({"n_answered_both": len(common), "n_sampled": n_sampled, "min_median": STABILITY_MIN_MEDIAN,
+                "coverage": answered_coverage(len(common), n_sampled) if n_sampled is not None else None,
+                "per_trait": per})
+    return out
+
+
+def sample_agreement(samples: Mapping[str, Mapping[int, OperatorReply]], *, lexicon=None) -> dict:
+    """The same measure between a run's own samples (every pair of samples of each trait, pooled): what the union
+    of three samples adds over one.  Free: it reads the recorded samples (a reported diagnostic, never a gate)."""
+    per, slots, n_empty, n_pairs = {}, [], 0, 0
+    for stem, by_k in sorted(samples.items()):
+        ks = sorted(by_k)
+        for i, a in enumerate(ks):
+            for b in ks[i + 1:]:
+                if by_k[a].principal_only or by_k[b].principal_only:
+                    continue
+                n_pairs += 1
+                j, sl = _pair_agreement(by_k[a], by_k[b], lexicon)
+                if j is None:
+                    n_empty += 1
+                    continue
+                per[f"{stem}:{a}-{b}"] = round(j, 4)
+                slots += sl
+    out = _agreement_summary(per, slots, n_empty)
+    out.update({"n_sample_pairs": n_pairs, "n_traits_with_two": sum(1 for v in samples.values() if len(v) >= 2)})
+    return out
 
 
 def parse_rate(records: Sequence[Mapping]) -> dict:
-    """Answered calls over calls attempted (the retry counted once per trait) and parsed records over records."""
+    """Answered calls over calls attempted (the retry counted once per trait and sample) and parsed records over
+    records."""
     units: dict[str, bool] = {}
     n_rec_ok = 0
     for r in records:
         rep, _ = reply_from_record(r)
         ok = rep is not None
         n_rec_ok += ok
-        u = r.get("stem") or r.get("unit_id")
+        u = (r.get("stem") or r.get("unit_id"), int(r.get("sample") or 1))
         units[u] = units.get(u, False) or ok
     n_ok = sum(units.values())
     return {"n_units": len(units), "n_ok": n_ok, "rate": _frac(n_ok, len(units)), "n_records": len(records),
@@ -365,7 +440,7 @@ def write_evaluation(payload: Mapping, path: Path = EVALUATION_PATH, *, inputs: 
 
 
 __all__ = ["COSINE_THRESHOLDS", "NULL_BAND", "PAIR_RECOVERY_EXPECTED", "STABILITY_MIN_MEDIAN", "PARSE_RATE_MIN",
-           "MIN_ANSWERED_SHARE", "answered_coverage",
+           "MIN_ANSWERED_SHARE", "answered_coverage", "sample_agreement",
            "produced_stems", "target_stems", "pair_recovery", "structure_recovery", "freeze_holdout",
            "queue_holdout", "null_rates", "pair_positions", "stability_jaccard", "parse_rate", "read_evaluation",
            "write_evaluation"]

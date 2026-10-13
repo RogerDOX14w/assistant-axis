@@ -229,27 +229,28 @@ def _refusing_client(env, *, first_ok: bool):
         for t in ins}))
 
 
-def test_stability_gate_fails_when_the_sample_is_not_answered_in_both_runs(env, monkeypatch, capsys):
-    """Review B2 (2026-10-13): the gate passed at a median of 1.0 on 3 of 30 traits; now it fails and says so."""
+def test_stability_is_reported_never_a_gate(env, monkeypatch, capsys):
+    """Roger, 2026-10-13: stability is reported, never a gate.  The two-run form exits 0 whatever it finds, and says
+    how many traits both runs answered (review B2: the Sonnet runs' 1.0 was on 3 of 30)."""
     client = _refusing_client(env, first_ok=True)          # one client for both runs: the second gets refusals
     monkeypatch.setattr(CLI, "_anthropic_client", lambda: client)
     rc = CLI.main(env["base"] + ["stability", "--run-id", "sa", "--against", "sb", "--n", "4", "--seed", "1"])
-    err = capsys.readouterr().err
-    assert rc == CLI.EXIT_GATE
-    assert "only 0 of 4 sampled traits answered in both runs" in err and "stopped other than end_turn" in err
+    captured = capsys.readouterr()
+    assert rc == 0 and "answered in both runs: 0 of 4 sampled traits" in captured.out
+    assert "REPORTED (not a gate" in captured.out and "stopped other than end_turn" in captured.err
     st = json.loads((env["sdir"] / "evaluation.json").read_text())["result"]["stability"]
-    assert st["coverage"]["pass"] is False and st["n_sampled"] == 4
+    assert st["coverage"]["pass"] is False and st["n_sampled"] == 4 and st["reported_not_gated"]
 
 
 def test_null_rate_gate_fails_when_the_sample_is_not_answered(env, monkeypatch, capsys):
     monkeypatch.setattr(CLI, "_anthropic_client", lambda: _refusing_client(env, first_ok=False))
-    rc = CLI.main(env["base"] + ["null-rate", "--run-id", "nr", "--n", "6"])
+    rc = CLI.main(env["base"] + ["null-rate", "--run-id", "nr", "--n", "6"])          # 6 traits x 3 samples
     captured = capsys.readouterr()
-    assert rc == CLI.EXIT_GATE and "answered 0 of 6 sampled traits" in captured.out
-    assert "only 0 of 6 sampled traits answered" in captured.err and "*** 12 of 12 responses" in captured.err
+    assert rc == CLI.EXIT_GATE and "answered 0 of 18 (trait, sample) calls" in captured.out
+    assert "only 0 of 18 (trait, sample) calls answered" in captured.err and "*** 36 of 36 responses" in captured.err
     readout = json.loads((env["tmp"] / "candidates" / "runs" / "structural" / "nr" / "nullrate_readout.json").read_text())
-    assert readout["coverage"]["pass"] is False and readout["stops"]["stop_reasons"] == {"refusal": 12}
-    assert readout["stops"]["categories"] == {"reasoning_extraction": 12}
+    assert readout["coverage"]["pass"] is False and readout["stops"]["stop_reasons"] == {"refusal": 36}
+    assert readout["stops"]["categories"] == {"reasoning_extraction": 36} and readout["samples"] == 3
 
 
 def test_estimates_name_the_model_used(env, capsys):
@@ -262,3 +263,50 @@ def test_estimates_name_the_model_used(env, capsys):
         out = capsys.readouterr().out
         line = next(x for x in out.splitlines() if "rates = $" in x)
         assert "at claude-sonnet-5-5 rates" in line and "Haiku" not in line and "haiku" not in line, line
+
+
+def test_samples_dry_run_estimate_is_three_calls_a_trait(env, capsys):
+    """Roger, 2026-10-13: three independent samples a trait by default; --samples 1 still possible."""
+    n = len(list((env["data"] / "traits" / "instructions").glob("*.json")))
+    assert CLI.main(env["base"] + ["operators", "--run-id", "o1", "--all", "--dry-run"]) == 0
+    line = next(x for x in capsys.readouterr().out.splitlines() if "rates = $" in x)
+    assert f"operators: {3 * n} calls" in line
+    assert CLI.main(env["base"] + ["operators", "--run-id", "o1", "--all", "--samples", "1", "--dry-run"]) == 0
+    line = next(x for x in capsys.readouterr().out.splitlines() if "rates = $" in x)
+    assert f"operators: {n} calls" in line
+
+
+def test_three_samples_end_to_end_with_support_and_the_within_run_agreement(env, capsys):
+    b = env["base"]
+    assert CLI.main(b + ["operators", "--run-id", "o3", "--all"]) == 0
+    recs = [json.loads(x) for x in (env["tmp"] / "candidates" / "runs" / "structural" / "o3" /
+                                    "responses.jsonl").read_text().splitlines()]
+    assert sorted({r["sample"] for r in recs}) == [1, 2, 3]
+    out = capsys.readouterr().out
+    assert "union of 3 samples" in out
+    # free: the agreement between the run's own samples, reported, exit 0
+    assert CLI.main(b + ["stability", "--run-id", "o3"]) == 0
+    st = json.loads((env["sdir"] / "evaluation.json").read_text())["result"]["stability"]
+    assert st["mode"] == "between the samples of one run" and st["jaccard_median"] == 1.0   # identical scripts
+    assert "REPORTED (not a gate)" in capsys.readouterr().out
+    assert CLI.main(b + ["postprocess", "--run-id", "o3", "--embedder", "none"]) == 0
+    assert "union of 3 samples" in capsys.readouterr().out
+    ev = json.loads((env["sdir"] / "evaluation.json").read_text())["result"]
+    assert ev["n_samples"] == 3 and ev["union"] == "union of 3 samples" and set(ev["support"]["by_support"]) == {"3"}
+    table = [json.loads(x) for x in (env["sdir"] / "operator_table.jsonl").read_text().splitlines()]
+    assert all(s["support"] == 3 and s["n_samples"] == 3 for r in table for s in r["sources"])
+
+
+def test_void_command_and_the_readouts_skip_a_void_run(env, capsys):
+    b = env["base"]
+    assert CLI.main(b + ["operators", "--run-id", "v1", "--traits", "brave", "--samples", "1"]) == 0
+    assert CLI.main(b + ["void", "--run-id", "v1", "--reason", "refused", "--by", "test", "--dry-run"]) == 0
+    assert not (env["tmp"] / "candidates" / "runs" / "structural" / "v1" / "void.json").exists()
+    assert CLI.main(b + ["void", "--run-id", "v1", "--reason", "refused", "--by", "test"]) == 0
+    assert CLI.main(b + ["void", "--run-id", "v1", "--reason", "again", "--by", "test"]) == 2   # once only
+    capsys.readouterr()
+    assert CLI.main(b + ["postprocess", "--run-id", "v1", "--embedder", "none"]) == 0
+    captured = capsys.readouterr()
+    assert "skipped run v1: marked void" in captured.err and "0 traits answered in full" in captured.out
+    assert CLI.main(b + ["stability", "--run-id", "v1"]) == 2
+    assert CLI.main(b + ["report", "--run-id", "v1"]) == 2

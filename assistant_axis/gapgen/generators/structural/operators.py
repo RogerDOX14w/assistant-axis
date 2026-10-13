@@ -1,6 +1,8 @@
 """Generator B: the five structural operators on the corpus's traits (plan sections 5-7; tasks 4, 5, 7 and 10).
 
-**The call** (rubric ``structural_operators``, pinned; Haiku 5.5, no temperature): one call per trait.  The user
+**The call** (rubric ``structural_operators``, pinned; Haiku 5.5, no temperature): ``samples`` independent calls per
+trait, three by default (Roger, 2026-10-13: the model runs at temperature 1, so stability is not expected; the samples
+are combined by union, :mod:`.combine`, never filtered by agreement).  The user
 turn (:func:`render_operator_user`) is one JSON object: the trait's label in the judge display form, its
 ``description``, its arrangement **kind** (``pair``, ``triangle``, ``sequence``, ``singleton``, ``unclassified``,
 ...) and the targets to consider.  It never carries the trait's ``negative_label`` or its arrangement's members:
@@ -26,10 +28,10 @@ accepted for every slot but ``reasoning`` and ``position``; a reply without a st
 ``position`` does not parse and is asked once more; a second failure leaves the trait unanswered.
 
 **Records**: every response is appended to the run's ``responses.jsonl`` *before* it is parsed (the Roget precedent,
-QUESTIONS 37), with the trait stem, the prompt's sha256 (system and user turn), the model, the billed usage and the
-model it was charged as; a ``--resume`` reuses a recorded answer to the same (stem, prompt sha256, model) that
-parses, so a changed prompt is sent again and an unchanged one is not.  Every response is charged, including the
-ones that do not parse.
+QUESTIONS 37), with the trait stem, its sample index, the prompt's sha256 (system and user turn), the model, the
+billed usage and the model it was charged as; a resume reuses a recorded answer to the same (stem, prompt sha256,
+model, sample) that parses, so a changed prompt is sent again, an unchanged one is not, and a third sample is asked
+for a trait that has two.  Every response is charged, including the ones that do not parse.
 """
 from __future__ import annotations
 
@@ -69,11 +71,15 @@ CONCURRENCY = 8
 MAX_LABEL_WORDS = 4
 MAX_GLOSS_WORDS = 25
 CHARS_PER_TOKEN = 4.0
-#: Output tokens a call for the estimate (the plan's figure; the null-rate pilot measures it): +200 for a trait with
-#: the principal targets, 250 for a principal-only call.
-EST_OUT_TOKENS = 550
+#: Output tokens a call for the estimate, measured on 2026-10-13: 1,481 a call on the null-rate pilot and 1,524 on
+#: the Haiku 5.5 stability runs (Haiku 5.5's adaptive thinking counts as output; the plan's 550 was the answer
+#: alone): +200 for a trait with the principal targets; a principal-only call assumed at 1,000.
+EST_OUT_TOKENS = 1500
 EST_OUT_PRINCIPAL_EXTRA = 200
-EST_OUT_PRINCIPAL_ONLY = 250
+EST_OUT_PRINCIPAL_ONLY = 1000
+#: Samples a trait is asked (Roger, 2026-10-13): three independent calls, their answers combined by union
+#: (:mod:`.combine`); Haiku 5.5 runs at temperature 1, so the samples differ, and that is the point.
+DEFAULT_SAMPLES = 3
 STAGE = "operators"
 
 #: A first word that makes a label a degree phrase, not a name.
@@ -289,6 +295,8 @@ class OperatorReply:
     model: Optional[str] = None
     prompt_sha256: Optional[str] = None
     at: Optional[str] = None
+    #: which of the trait's independent samples this answer is (1-based; a record without one is sample 1)
+    sample: int = 1
 
     def items(self) -> list[tuple[str, Optional[str], dict]]:
         """``(operator, target or mode or None, item)`` for every non-null answer, in operator order."""
@@ -384,19 +392,39 @@ def parse_operator_reply(text: Optional[str], *, principal: bool, principal_only
 
 @dataclass
 class OperatorRun:
-    replies: dict = field(default_factory=dict)        # stem -> OperatorReply
-    errors: dict = field(default_factory=dict)         # stem -> why there is no answer
+    """A run's answers by trait and sample: ``samples[stem][k]`` is sample ``k``'s parsed reply; ``errors[(stem, k)]``
+    why that sample has none.  :func:`.combine.combine_all` turns ``samples`` into one combined reply per trait."""
+    samples: dict = field(default_factory=dict)        # stem -> {sample: OperatorReply}
+    errors: dict = field(default_factory=dict)         # (stem, sample) -> why there is no answer
     records: list = field(default_factory=list)
     n_calls: int = 0
     n_reused: int = 0
     n_attempted: int = 0
+    n_units: int = 0
     stopped_by_budget: bool = False
     #: responses that stopped other than ``end_turn``, by stop reason (each a failed call, retried once)
     failures: Counter = field(default_factory=Counter)
 
     @property
+    def n_answered(self) -> int:
+        """(trait, sample) units with a parsed answer, reused ones included."""
+        return sum(len(v) for v in self.samples.values())
+
+    @property
     def n_ok(self) -> int:
-        return len(self.replies) - self.n_reused
+        """Units answered by this run's own calls (the parse rate's numerator)."""
+        return self.n_answered - self.n_reused
+
+    def sample_replies(self) -> list[OperatorReply]:
+        """Every parsed sample, by trait and sample."""
+        return [self.samples[s][k] for s in sorted(self.samples) for k in sorted(self.samples[s])]
+
+    def error_stems(self) -> dict[str, list]:
+        """``{stem: [why, ...]}`` for the traits with at least one unanswered sample."""
+        out: dict[str, list] = {}
+        for (stem, k), why in sorted(self.errors.items()):
+            out.setdefault(stem, []).append(f"sample {k}: {why}")
+        return out
 
 
 #: The stop reasons of a complete answer.  ``None`` is a record from code that did not record one (the test fakes).
@@ -459,18 +487,25 @@ def reply_from_record(rec: Mapping) -> tuple[Optional[OperatorReply], Optional[s
         rep.stem, rep.label = rec.get("stem") or "", rec.get("label") or ""
         rep.run_id, rep.model = rec.get("run_id"), rec.get("model")
         rep.prompt_sha256, rep.at = rec.get("prompt_sha256"), rec.get("at")
+        rep.sample = record_sample(rec)
     return rep, why
 
 
+def record_sample(rec: Mapping) -> int:
+    """A record's sample index (1-based); records made before samples existed are sample 1."""
+    return int(rec.get("sample") or 1)
+
+
 def reusable(records: Iterable[Mapping], *, model: str, prompts: Mapping[str, str]) -> dict:
-    """``{stem: reply}`` for the recorded answers that parse, to the same stem, prompt sha256 and model (the last
-    one per stem winning)."""
+    """``{(stem, sample): reply}`` for the recorded answers that parse, to the same stem, prompt sha256, model and
+    sample index (the last one per key winning): the cache keys on the sample as well as the prompt, so a trait's
+    samples are independent calls and a resume sends only the missing ones (Roger, 2026-10-13)."""
     out = {}
     for r in records:
         if r.get("stage") == STAGE and r.get("model") == model and prompts.get(r.get("stem")) == r.get("prompt_sha256"):
             rep, _ = reply_from_record(r)
             if rep is not None:
-                out[r["stem"]] = rep
+                out[(r["stem"], record_sample(r))] = rep
     return out
 
 
@@ -488,25 +523,32 @@ def already_principal(records: Iterable[Mapping]) -> set[str]:
 async def run_operators(inputs: Sequence[TraitInput], *, client, model: str, usage, system: str, run_id: str,
                         out_path: Optional[Path] = None, resume: bool = False, rubric_version: Optional[int] = None,
                         principal_min_score: int = PRINCIPAL_MIN_SCORE, label_form: str = DEFAULT_LABEL_FORM,
-                        concurrency: int = CONCURRENCY, max_tokens: int = MAX_TOKENS,
+                        concurrency: int = CONCURRENCY, max_tokens: int = MAX_TOKENS, samples: int = 1,
                         now: Optional[Callable[[], str]] = None) -> OperatorRun:
-    """One call per trait (module docstring): every response appended to ``out_path`` before it is parsed, a reply
-    that does not parse asked once more, ``resume`` reusing recorded answers to the same prompt and model.  A
-    ``BudgetExceededError`` keeps the answer that crossed the cap and stops the run."""
+    """``samples`` independent calls per trait (module docstring): every response appended to ``out_path`` before it
+    is parsed with its sample index, a reply that does not parse asked once more, ``resume`` reusing recorded answers
+    to the same prompt, model and sample.  A ``BudgetExceededError`` keeps the answer that crossed the cap and stops
+    the run."""
+    if samples < 1:
+        raise ValueError(f"samples must be at least 1, not {samples}")
     for ti in inputs:
         check_principal(ti, principal_min_score)
     res = OperatorRun()
     users = {ti.stem: render_operator_user(ti, label_form=label_form) for ti in inputs}
     prompts = {s: prompt_sha256(system, u) for s, u in users.items()}
+    units = [(ti, k) for ti in inputs for k in range(1, samples + 1)]
+    res.n_units = len(units)
     if resume and out_path is not None:
         done = reusable(read_responses(out_path), model=model, prompts=prompts)
-        res.replies.update(done)
-        res.n_reused = len(done)
-    todo = [ti for ti in inputs if ti.stem not in res.replies]
+        for (stem, k), rep in done.items():
+            if stem in users and k <= samples:
+                res.samples.setdefault(stem, {})[k] = rep
+                res.n_reused += 1
+    todo = [(ti, k) for ti, k in units if k not in res.samples.get(ti.stem, {})]
     sem = asyncio.Semaphore(max(1, concurrency))
     sys_sha = sha256(system)
 
-    async def one(ti: TraitInput, attempt: int) -> tuple[Optional[OperatorReply], Optional[str]]:
+    async def one(ti: TraitInput, k: int, attempt: int) -> tuple[Optional[OperatorReply], Optional[str]]:
         meta: dict = {}
         over = False
         try:
@@ -517,7 +559,7 @@ async def run_operators(inputs: Sequence[TraitInput], *, client, model: str, usa
             text, over = meta.get("text"), True
         res.n_calls += 1
         rec = {"schema_version": SCHEMA_VERSION, "stage": STAGE, "run_id": run_id, "stem": ti.stem, "label": ti.label,
-               "attempt": attempt, "model": model, "rubric": "structural_operators", "rubric_version": rubric_version,
+               "sample": k, "attempt": attempt, "model": model, "rubric": "structural_operators", "rubric_version": rubric_version,
                "system_sha256": sys_sha, "user_sha256": sha256(users[ti.stem]), "prompt_sha256": prompts[ti.stem],
                "principal_targets": ti.principal_targets, "principal_only": ti.principal_only,
                "alignment_score": ti.alignment_score, "principal_min_score": principal_min_score,
@@ -536,38 +578,39 @@ async def run_operators(inputs: Sequence[TraitInput], *, client, model: str, usa
         rep, why = reply_from_record(rec)
         return rep, why
 
-    async def run_one(ti: TraitInput) -> None:
+    async def run_one(ti: TraitInput, k: int) -> None:
         async with sem:
             if res.stopped_by_budget:
                 return
             res.n_attempted += 1
-            rep, why = await one(ti, 1)
+            rep, why = await one(ti, k, 1)
             if rep is None and not res.stopped_by_budget:
-                rep, why = await one(ti, 2)
+                rep, why = await one(ti, k, 2)
             if rep is not None:
-                res.replies[ti.stem] = rep
+                res.samples.setdefault(ti.stem, {})[k] = rep
             else:
-                res.errors[ti.stem] = why
+                res.errors[(ti.stem, k)] = why
 
-    await asyncio.gather(*(run_one(ti) for ti in todo))
-    res.records.sort(key=lambda r: (r["stem"], r["attempt"]))
+    await asyncio.gather(*(run_one(ti, k) for ti, k in todo))
+    res.records.sort(key=lambda r: (r["stem"], r["sample"], r["attempt"]))
     return res
 
 
 # --------------------------------------------------------------------------- estimate and samples
 
 def estimate(inputs: Sequence[TraitInput], system: str, model: str = MODEL, *,
-             label_form: str = DEFAULT_LABEL_FORM) -> dict:
-    """``{"n_calls", "in_tok", "out_tok", "usd"}``: input from the characters sent, output at
-    :data:`EST_OUT_TOKENS` a call (+:data:`EST_OUT_PRINCIPAL_EXTRA` for a principal-target trait,
-    :data:`EST_OUT_PRINCIPAL_ONLY` for a principal-only call); no cache hit assumed."""
+             label_form: str = DEFAULT_LABEL_FORM, samples: int = 1) -> dict:
+    """``{"n_calls", "in_tok", "out_tok", "usd"}`` for ``samples`` calls per trait: input from the characters sent,
+    output at :data:`EST_OUT_TOKENS` a call (+:data:`EST_OUT_PRINCIPAL_EXTRA` for a principal-target trait,
+    :data:`EST_OUT_PRINCIPAL_ONLY` for a principal-only call); no cache hit assumed (an upper bound: the recorded
+    runs read most of the system prompt from the cache)."""
     if not inputs:
         return {"n_calls": 0, "in_tok": 0, "out_tok": 0, "usd": 0.0}
-    in_tok = int(round(sum((len(system) + len(render_operator_user(ti, label_form=label_form))) / CHARS_PER_TOKEN
-                           for ti in inputs)))
-    out_tok = sum(EST_OUT_PRINCIPAL_ONLY if ti.principal_only else
-                  EST_OUT_TOKENS + (EST_OUT_PRINCIPAL_EXTRA if ti.principal_targets else 0) for ti in inputs)
-    return {"n_calls": len(inputs), "in_tok": in_tok, "out_tok": out_tok,
+    in_tok = samples * int(round(sum((len(system) + len(render_operator_user(ti, label_form=label_form)))
+                                     / CHARS_PER_TOKEN for ti in inputs)))
+    out_tok = samples * sum(EST_OUT_PRINCIPAL_ONLY if ti.principal_only else
+                            EST_OUT_TOKENS + (EST_OUT_PRINCIPAL_EXTRA if ti.principal_targets else 0) for ti in inputs)
+    return {"n_calls": samples * len(inputs), "in_tok": in_tok, "out_tok": out_tok,
             "usd": round(cost_for_usage(model, in_tok, out_tok), 4)}
 
 
@@ -628,7 +671,8 @@ def rejection_counts(replies: Iterable[OperatorReply]) -> dict:
 
 
 __all__ = ["OPERATORS", "SINGLE_OPERATORS", "TARGETS", "PRINCIPAL_TARGETS", "MODES", "POSITIONS",
-           "PRINCIPAL_MIN_SCORE", "MODEL", "MAX_TOKENS", "TraitInput", "OperatorReply", "OperatorRun",
+           "PRINCIPAL_MIN_SCORE", "MODEL", "MAX_TOKENS", "DEFAULT_SAMPLES", "TraitInput", "OperatorReply", "OperatorRun",
+           "record_sample",
            "arrangement_kinds", "load_regions", "is_principal", "build_inputs", "check_principal",
            "render_operator_user", "prompt_sha256", "degree_form", "label_problem", "validate_item",
            "parse_operator_reply", "OK_STOP_REASONS", "stop_problem", "stop_summary", "read_responses",

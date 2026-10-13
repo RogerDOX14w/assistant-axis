@@ -158,7 +158,7 @@ def test_failed_calls_retried_once_left_unparsed_and_every_response_charged(inpu
     out = tmp_path / "responses.jsonl"
     run = asyncio.run(O.run_operators(sel, client=client, model=O.MODEL, usage=usage, system=SYSTEM, run_id="r1",
                                       out_path=out, now=lambda: "2026-10-13T00:00:00+00:00"))
-    assert set(run.replies) == {"brave", "obedient"} and run.errors == {"gloomy": "unparseable"}
+    assert set(run.samples) == {"brave", "obedient"} and run.errors == {("gloomy", 1): "unparseable"}
     assert run.n_calls == 5 and run.n_attempted == 3
     assert usage.n_calls == 5                                  # every response charged, unparseable ones too
     recs = O.read_responses(out)
@@ -166,7 +166,8 @@ def test_failed_calls_retried_once_left_unparsed_and_every_response_charged(inpu
                                   for r in recs)
     assert {(r["stem"], r["attempt"]) for r in recs} == {("brave", 1), ("gloomy", 1), ("gloomy", 2), ("obedient", 1),
                                                          ("obedient", 2)}
-    assert run.replies["obedient"].retarget["the_operator"]["label"] == "operator-pleasing"
+    assert all(r["sample"] == 1 for r in recs)
+    assert run.samples["obedient"][1].retarget["the_operator"]["label"] == "operator-pleasing"
     assert next(r for r in recs if r["stem"] == "obedient")["principal_targets"] is True
 
 
@@ -190,7 +191,7 @@ def test_resume_sends_nothing_for_an_answered_prompt(inputs, tmp_path):
     client = F.ScriptedClient(script)
     run = asyncio.run(O.run_operators(sel, client=client, model=O.MODEL, usage=MultiModelUsage(), system=SYSTEM,
                                       run_id="r1", out_path=out, resume=True))
-    assert client.calls == [] and run.n_reused == 2 and run.replies["timid"].position == "deficiency"
+    assert client.calls == [] and run.n_reused == 2 and run.samples["timid"][1].position == "deficiency"
     # another model, or a changed prompt, is sent again
     run = asyncio.run(O.run_operators(sel, client=F.ScriptedClient(F.script_for(sel, SYSTEM + " ", {
         "brave": F.reply("mean"), "timid": F.reply("mean")})), model=O.MODEL, usage=MultiModelUsage(),
@@ -205,15 +206,17 @@ def test_budget_stop_keeps_the_answer_that_crossed(inputs, tmp_path):
     usage = GuardedUsage(budget_usd=0.0001)
     run = asyncio.run(O.run_operators(sel, client=F.ScriptedClient(script), model=O.MODEL, usage=usage, system=SYSTEM,
                                       run_id="r1", out_path=tmp_path / "r.jsonl", concurrency=1))
-    assert run.stopped_by_budget and len(run.replies) == 1 and run.n_calls == 1
+    assert run.stopped_by_budget and run.n_answered == 1 and run.n_calls == 1
     assert len(O.read_responses(tmp_path / "r.jsonl")) == 1
 
 
 def test_estimate_and_sample(inputs):
     e = O.estimate(inputs, SYSTEM)
     n_pr = sum(t.principal_targets for t in inputs)
-    assert e["n_calls"] == len(inputs) and e["out_tok"] == 550 * len(inputs) + 200 * n_pr
-    assert 0 < e["usd"] < 0.02
+    assert e["n_calls"] == len(inputs) and e["out_tok"] == O.EST_OUT_TOKENS * len(inputs) + 200 * n_pr
+    assert O.EST_OUT_TOKENS == 1500 and 0 < e["usd"] < 0.02            # measured on the 2026-10-13 runs
+    e3 = O.estimate(inputs, SYSTEM, samples=3)
+    assert e3["n_calls"] == 3 * len(inputs) and e3["out_tok"] == 3 * e["out_tok"] and e3["in_tok"] == 3 * e["in_tok"]
     pairs = [("brave", "timid"), ("dishonest", "honest"), ("obedient", "rebellious")]
     s = O.stratified_sample(inputs, 8, 0, pairs=pairs, n_pairs=2, min_principal=2)
     stems = {t.stem for t in s}
@@ -259,8 +262,8 @@ def test_a_refusal_is_a_failed_call_retried_once_counted_and_never_reused(inputs
     out = tmp_path / "responses.jsonl"
     run = asyncio.run(O.run_operators(sel, client=F.ScriptedClient(script), model=O.MODEL, usage=usage,
                                       system=SYSTEM, run_id="r1", out_path=out))
-    assert set(run.replies) == {"timid", "gloomy"}
-    assert run.errors == {"brave": "stop_reason refusal (reasoning_extraction)"}
+    assert set(run.samples) == {"timid", "gloomy"}
+    assert run.errors == {("brave", 1): "stop_reason refusal (reasoning_extraction)"}
     assert run.failures == {"refusal": 3, "max_tokens": 1} and run.n_calls == 6 and usage.n_calls == 6
     recs = O.read_responses(out)
     refused = [r for r in recs if r["stop_reason"] == "refusal"]
@@ -278,4 +281,4 @@ def test_a_refusal_is_a_failed_call_retried_once_counted_and_never_reused(inputs
     again = F.ScriptedClient(F.script_for(sel, SYSTEM, {"brave": F.reply("mean")}))
     run2 = asyncio.run(O.run_operators(sel, client=again, model=O.MODEL, usage=MultiModelUsage(), system=SYSTEM,
                                        run_id="r1", out_path=out, resume=True))
-    assert run2.n_reused == 2 and len(again.calls) == 1 and set(run2.replies) == {"brave", "timid", "gloomy"}
+    assert run2.n_reused == 2 and len(again.calls) == 1 and set(run2.samples) == {"brave", "timid", "gloomy"}

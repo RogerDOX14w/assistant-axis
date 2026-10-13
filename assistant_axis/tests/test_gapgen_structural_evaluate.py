@@ -128,10 +128,15 @@ def test_stability_jaccard_on_planted_runs():
          "s3": _rep("s3", opposite=F.item("dd"))}
     out = E.stability_jaccard(a, b)
     assert out["per_trait"] == {"s1": 0.0, "s2": 0.0, "s3": 0.5}
-    assert out["jaccard_median"] == 0.0 and out["below_0.5"] == 2
-    assert out["by_operator"]["opposite"] == 0.0 and sum(out["distribution"].values()) == 3
-    empty = E.stability_jaccard({"s": _rep("s")}, {"s": _rep("s")})
-    assert empty["jaccard_median"] == 1.0
+    assert out["jaccard_median"] == 0.0 and out["below_0.5"] == 2 and sum(out["distribution"].values()) == 3
+    # per operator, over the slots either answered: opposite 0, 0, 1; excess and deficiency answered once each
+    assert out["by_operator"]["opposite"] == {"agreement": 0.3333, "n_slots": 3}
+    assert out["by_operator"]["excess"] == {"agreement": 0.0, "n_slots": 1} and out["reported_not_gated"]
+    # two empty answers are no agreement (Roger, 2026-10-13): the trait is left out and counted
+    empty = E.stability_jaccard({"s": _rep("s"), "t": _rep("t", opposite=F.item("aa"))},
+                                {"s": _rep("s"), "t": _rep("t", opposite=F.item("aa"), excess=F.item("bb"))})
+    assert empty["n_both_empty"] == 1 and empty["per_trait"] == {"t": 0.5} and empty["jaccard_median"] == 0.5
+    assert E.stability_jaccard({"s": _rep("s")}, {"s": _rep("s")})["jaccard_median"] is None
 
 
 def test_parse_rate():
@@ -161,6 +166,6 @@ def test_answered_coverage_and_stability_over_the_sample():
     assert not E.answered_coverage(0, 0)["pass"] and E.answered_coverage(3, 30)["share"] == 0.1
     a = {"s1": _rep("s1", opposite=F.item("aa"))}
     st = E.stability_jaccard(a, a, n_sampled=30)
-    assert st["jaccard_median"] == 1.0 and st["n_traits"] == 1 and st["n_sampled"] == 30
+    assert st["jaccard_median"] == 1.0 and st["n_traits"] == 1 and st["n_sampled"] == 30 and st["n_answered_both"] == 1
     assert st["coverage"] == {"n_answered": 1, "n_sampled": 30, "share": 0.0333, "min_share": 0.9, "pass": False}
     assert E.stability_jaccard(a, a)["coverage"] is None

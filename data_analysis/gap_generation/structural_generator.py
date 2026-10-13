@@ -5,12 +5,13 @@
     uv run python data_analysis/gap_generation/structural_generator.py modernise --run-id R [--scheme S ...]
         [--per-call 20] [--budget-usd 0.5] [--resume] [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/structural_generator.py operators --run-id R
-        (--all | --traits STEM ... | --sample N --seed S) [--principal-min-score 3 [--principal-only]
-        [--prior-run R0 ...]] [--budget-usd 3] [--resume] [--render STEM ...] [--allow-dirty] [--dry-run]
+        (--all | --traits STEM ... | --sample N --seed S) [--samples 3] [--principal-min-score 3 [--principal-only]
+        [--prior-run R0 ...]] [--budget-usd 6] [--resume] [--render STEM ...] [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/structural_generator.py null-rate --run-id R [--n 20 --seed 0]
-        [--budget-usd 0.5] [--allow-dirty] [--dry-run]
-    uv run python data_analysis/gap_generation/structural_generator.py stability --run-id R --against R2
-        [--n 30 --seed 1] [--budget-usd 0.5] [--allow-dirty] [--dry-run]
+        [--samples 3] [--budget-usd 0.5] [--allow-dirty] [--dry-run]
+    uv run python data_analysis/gap_generation/structural_generator.py stability --run-id R [--against R2
+        [--n 30 --seed 1] [--budget-usd 0.5] [--allow-dirty]] [--dry-run]
+    uv run python data_analysis/gap_generation/structural_generator.py void --run-id R --reason TEXT --by WHO
     uv run python data_analysis/gap_generation/structural_generator.py postprocess [--run-id R ...]
         [--embedder openai|hash|none] [--budget-usd 0.1] [--dry-run]
     uv run python data_analysis/gap_generation/structural_generator.py side-table [--run-id R ...] [--dry-run]
@@ -23,14 +24,18 @@
 Plan: ``reports/trait_gap_generation/coding_plan_09_structural_generators.md``.  Generator A: ``classical`` loads and
 checks the hand-typed tables (``data/candidates/structural/classical/``; the VIA rows are refused until every one
 carries ``verified_by``), ``modernise`` asks Haiku 5.5 for 1-3 modern labels per row.  Generator B: ``operators``
-asks Haiku 5.5, one call per corpus trait, for the trait's position and its opposite, excess, deficiency, retargets
-and remodes (the principal targets for traits at ``--principal-min-score`` and above, default 3); ``null-rate`` and
-``stability`` are the two pilot gates.  ``postprocess`` builds the operator table and ``evaluation.json`` (free;
+asks Haiku 5.5, three independent calls per corpus trait (``--samples``; Roger, 2026-10-13), for the trait's position
+and its opposite, excess, deficiency, retargets and remodes (the principal targets for traits at
+``--principal-min-score`` and above, default 3); the samples are combined by union (``combine.py``), each label with
+its support.  ``null-rate`` is the pilot's gate (the 5-40% band over every sample); ``stability`` is reported, never a
+gate: free between a run's own samples, or paid across two runs with ``--against``.  ``void`` marks a run the
+readouts and the recorded-output checks skip.  ``postprocess`` builds the operator table and ``evaluation.json`` (free;
 the gloss cosines of pair recovery cost pennies of embeddings with ``--embedder openai``), ``side-table`` the
 position table and the negative-label mismatches, ``submit`` the run's candidates (``--all``, or the review-hour wave
 ``--kept-target 300`` counted on net-new rows), ``report`` the readouts.  Every paid command prints its estimate,
 takes ``--budget-usd`` as a hard cap, writes ``usage.json``, refuses uncommitted platform code without
-``--allow-dirty``, and runs live (every generator-side estimate is under $1).  ``--dry-run`` prints the estimate,
+``--allow-dirty``, and runs live (every generator-side estimate is under $20; the full pass about $2.2 at three
+samples).  ``--dry-run`` prints the estimate,
 the counts and the rendered prompts, and writes and calls nothing.
 """
 from __future__ import annotations
@@ -270,8 +275,9 @@ def _select_inputs(args, inputs, pairs):
 
 
 def _operators_session(args, run_id: str, selected, *, step: str, extra: Optional[dict] = None,
-                       budget_usd: Optional[float] = None):
-    """Run (or reuse) the operator calls of ``selected`` under ``run_id``; returns ``(OperatorRun, usage, ok)``."""
+                       budget_usd: Optional[float] = None, samples: Optional[int] = None):
+    """Run (or reuse) the operator calls of ``selected`` under ``run_id``, ``samples`` per trait (default
+    ``args.samples``); returns ``(OperatorRun, usage, ok)``."""
     from assistant_axis.gapgen.cost import GuardedUsage
     from assistant_axis.gapgen.generators.structural import operators as O
     from assistant_axis.gapgen.generators.structural import prompts as P
@@ -286,6 +292,7 @@ def _operators_session(args, run_id: str, selected, *, step: str, extra: Optiona
         "step": step, "n_traits": len(selected), "stems": [t.stem for t in selected], "model": args.model,
         "principal_min_score": args.principal_min_score, "principal_only": bool(getattr(args, "principal_only", False)),
         "n_principal": sum(1 for t in selected if t.principal_targets), "budget_usd": args.budget_usd,
+        "samples": samples or args.samples,
         "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")}, LABEL_FORM_KEY: DEFAULT_LABEL_FORM,
         "allow_dirty": bool(args.allow_dirty), **dict(extra or {})})
     ctx.usage = GuardedUsage(budget_usd=args.budget_usd if budget_usd is None else budget_usd)
@@ -295,7 +302,7 @@ def _operators_session(args, run_id: str, selected, *, step: str, extra: Optiona
         run = asyncio.run(O.run_operators(selected, client=client, model=args.model, usage=ctx.usage,
                                           system=rub["text"], run_id=run_id, out_path=resp, resume=True,
                                           rubric_version=rub["version"], principal_min_score=args.principal_min_score,
-                                          concurrency=args.concurrency, now=utc_now))
+                                          concurrency=args.concurrency, samples=samples or args.samples, now=utc_now))
     finally:
         ctx.finish(n_emitted=0)
         print(ctx.usage.log_line(f"[usage this session, {run_id}]"), file=sys.stderr)
@@ -308,9 +315,10 @@ def _operators_session(args, run_id: str, selected, *, step: str, extra: Optiona
 
 def _operators_plan(args, selected, inputs, rub) -> float:
     from assistant_axis.gapgen.generators.structural import operators as O
-    est = O.estimate(selected, rub["text"], args.model)
+    est = O.estimate(selected, rub["text"], args.model, samples=args.samples)
     n_pr = sum(1 for t in selected if t.principal_targets)
-    print(f"{len(selected)} traits ({n_pr} with the principal targets at alignment score >= "
+    print(f"{len(selected)} traits x {args.samples} independent sample(s), combined by union ({n_pr} traits with "
+          f"the principal targets at alignment score >= "
           f"{args.principal_min_score}); rubric {rub['name']} v{rub['version']} ({(rub['sha256'] or 'unpinned')[:12]}); "
           f"model {args.model}")
     return _print_estimate("operators", est, args.budget_usd, args.model)
@@ -368,21 +376,26 @@ def cmd_operators(args) -> int:
     run, usage, ok = _operators_session(args, args.run_id, selected, step="operators",
                                         extra={"selection": "all" if args.all else "traits" if args.traits else
                                                f"sample {args.sample} seed {args.seed}"})
-    _print_run_summary(run)
+    _print_run_summary(run, args.samples)
     return 0 if ok else 1
 
 
-def _print_run_summary(run) -> None:
+def _print_run_summary(run, samples: int) -> None:
     from assistant_axis.gapgen.generators.structural import evaluate as E
     from assistant_axis.gapgen.generators.structural import operators as O
-    reps = list(run.replies.values())
+    from assistant_axis.gapgen.generators.structural.combine import combine_all, support_counts, union_phrase
+    reps = run.sample_replies()
     nr = E.null_rates(reps)
-    print(f"answered {len(run.replies)} ({run.n_reused} reused), unanswered {len(run.errors)}"
-          + (f": {dict(list(run.errors.items())[:5])}" if run.errors else "") + f"; {run.n_calls} calls"
+    err = run.error_stems()
+    print(f"answered {run.n_answered} of {run.n_units} (trait, sample) calls ({run.n_reused} reused) over "
+          f"{len(run.samples)} traits; unanswered {len(run.errors)}"
+          + (f": {dict(list(err.items())[:5])}" if err else "") + f"; {run.n_calls} calls"
           + (f"; responses stopped other than end_turn: {dict(run.failures)}" if run.failures else ""))
-    print(f"non-null shares: opposite {nr['opposite']}, excess {nr['excess']}, deficiency {nr['deficiency']}, "
-          f"retarget {nr['retarget']}, remode {nr['remode']}, principal {nr['principal']['share']}")
-    print(f"positions {nr['positions']}; rejected items {O.rejection_counts(reps)}")
+    print(f"non-null shares over every sample: opposite {nr['opposite']}, excess {nr['excess']}, deficiency "
+          f"{nr['deficiency']}, retarget {nr['retarget']}, remode {nr['remode']}, principal {nr['principal']['share']}")
+    sc = support_counts(combine_all(run.samples).values())
+    print(f"items by support ({union_phrase(samples)}): {sc['by_support']}; positions {nr['positions']}; rejected "
+          f"items {O.rejection_counts(reps)}")
 
 
 def _freeze_holdout_if_needed(args) -> dict:
@@ -404,6 +417,7 @@ def cmd_null_rate(args) -> int:
     from assistant_axis.gapgen.generators.structural import evaluate as E
     from assistant_axis.gapgen.generators.structural import operators as O
     from assistant_axis.gapgen.generators.structural import prompts as P
+    from assistant_axis.gapgen.generators.structural.combine import combine_all, support_counts, union_phrase
     try:
         rub = P.load_rubric(P.OPERATORS_RUBRIC, args.rubrics_dir, allow_unpinned=args.dry_run)
     except P.RubricNotPinned as exc:
@@ -429,28 +443,33 @@ def cmd_null_rate(args) -> int:
     _freeze_holdout_if_needed(args)
     run, _usage, ok = _operators_session(args, args.run_id, selected, step="null-rate",
                                          extra={"n": args.n, "seed": args.seed})
-    reps = run.replies
-    readout = {"run_id": args.run_id, "n": len(selected), "seed": args.seed,
-               "null_rates": E.null_rates(reps.values()), "pair_positions": E.pair_positions(reps, pairs),
-               "rejections": O.rejection_counts(reps.values()),
-               "parse_rate": E.parse_rate(O.read_responses(_run_dir(args, args.run_id) / S.RESPONSES_NAME)),
-               "coverage": E.answered_coverage(sum(1 for t in selected if t.stem in reps), len(selected)),
-               "stops": {k: v for k, v in O.stop_summary(
-                   O.read_responses(_run_dir(args, args.run_id) / S.RESPONSES_NAME)).items() if k != "line"},
-               "unanswered": run.errors}
+    combined = combine_all(run.samples)
+    records = O.read_responses(_run_dir(args, args.run_id) / S.RESPONSES_NAME)
+    readout = {"run_id": args.run_id, "n": len(selected), "seed": args.seed, "samples": args.samples,
+               "null_rates": E.null_rates(run.sample_replies()),
+               "pair_positions": E.pair_positions(combined, pairs),
+               "support": support_counts(combined.values()),
+               "sample_agreement": E.sample_agreement(run.samples),
+               "rejections": O.rejection_counts(run.sample_replies()),
+               "parse_rate": E.parse_rate(records),
+               "coverage": E.answered_coverage(run.n_answered, run.n_units),
+               "stops": {k: v for k, v in O.stop_summary(records).items() if k != "line"},
+               "unanswered": {f"{st}:{k}": why for (st, k), why in sorted(run.errors.items())}}
     out = _run_dir(args, args.run_id) / "nullrate_readout.json"
     from assistant_axis.atomic_io import atomic_write_text
     atomic_write_text(json.dumps(readout, indent=2, ensure_ascii=False) + "\n", out)
     nr = readout["null_rates"]
+    print(f"non-null shares over every sample ({args.samples} a trait):")
     print(json.dumps({k: nr[k] for k in ("opposite", "excess", "deficiency", "retarget", "remode", "retarget_by_target",
                                          "remode_by_mode", "principal", "positions", "band")}, indent=1))
-    print(f"pair poles: {readout['pair_positions']['combinations']}; rejections {readout['rejections']}; parse rate "
-          f"{readout['parse_rate']['rate']}")
+    print(f"items by support ({union_phrase(args.samples)}): {readout['support']['by_support']}; pair poles (the "
+          f"samples' majority): {readout['pair_positions']['combinations']}; rejections {readout['rejections']}; "
+          f"parse rate {readout['parse_rate']['rate']}")
     print(f"wrote {out}")
     cov = readout["coverage"]
-    print(f"answered {cov['n_answered']} of {cov['n_sampled']} sampled traits")
+    print(f"answered {cov['n_answered']} of {cov['n_sampled']} (trait, sample) calls")
     if not cov["pass"]:
-        print(f"GATE: only {cov['n_answered']} of {cov['n_sampled']} sampled traits answered (under "
+        print(f"GATE: only {cov['n_answered']} of {cov['n_sampled']} (trait, sample) calls answered (under "
               f"{cov['min_share']:.0%}): the null rates are not read; stop reasons {readout['stops']['stop_reasons']}",
               file=sys.stderr)
         return EXIT_GATE
@@ -462,28 +481,59 @@ def cmd_null_rate(args) -> int:
     return 0 if ok else 1
 
 
+def _write_stability(args, st: dict, *, where: Path) -> None:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.generators.structural import evaluate as E
+    ev_path = _sdir(args) / "evaluation.json"
+    ev = E.read_evaluation(ev_path)
+    ev["stability"] = st
+    E.write_evaluation(ev, ev_path)
+    atomic_write_text(json.dumps(st, indent=2) + "\n", where)
+
+
 def cmd_stability(args) -> int:
+    """A reported diagnostic, never a gate (Roger, 2026-10-13).  Without ``--against``: the agreement between the
+    recorded samples of ``--run-id`` (free).  With it: ``--n`` traits answered once under each of the two runs (paid,
+    as before)."""
     from assistant_axis.gapgen.cost import confirm_or_abort
     from assistant_axis.gapgen.generators.structural import evaluate as E
     from assistant_axis.gapgen.generators.structural import operators as O
     from assistant_axis.gapgen.generators.structural import prompts as P
+    from assistant_axis.gapgen.generators.structural.postprocess import collect_replies
+    for r in (args.run_id, args.against):
+        if r and S.read_void(_run_dir(args, r)) is not None:
+            print(f"SKIPPED: run {r} is marked void ({S.read_void(_run_dir(args, r)).get('reason')})", file=sys.stderr)
+            return 2
+    if not args.against:
+        col = collect_replies([_run_dir(args, args.run_id)])
+        st = E.sample_agreement(col.full_samples)
+        st.update({"runs": [args.run_id], "mode": "between the samples of one run"})
+        print(json.dumps({k: st[k] for k in ("n_traits_with_two", "n_sample_pairs", "n_traits", "n_both_empty",
+                                             "jaccard_median", "below_0.5", "by_operator")}, indent=1))
+        print("REPORTED (not a gate): the agreement between each trait's samples, over the slots either answered")
+        if not args.dry_run and st["n_sample_pairs"]:
+            _write_stability(args, st, where=_run_dir(args, args.run_id) / "stability.json")
+        return 0
     try:
         rub = P.load_rubric(P.OPERATORS_RUBRIC, args.rubrics_dir, allow_unpinned=args.dry_run)
     except P.RubricNotPinned as exc:
         raise SystemExit(f"REFUSED: {exc}")
     inputs = _inputs(args)
     selected = O.stratified_sample(inputs, args.n, args.seed, pairs=(), n_pairs=0, min_principal=0)
-    print(f"stability: {len(selected)} traits (seed {args.seed}), answered under {args.run_id} and {args.against}")
+    print(f"stability: {len(selected)} traits (seed {args.seed}), answered once under {args.run_id} and under "
+          f"{args.against}")
     users = {t.stem: O.render_operator_user(t) for t in selected}
     todo = 0
     for r in (args.run_id, args.against):
         done = O.reusable(O.read_responses(_run_dir(args, r) / S.RESPONSES_NAME), model=args.model,
                           prompts={s: O.prompt_sha256(rub["text"], u) for s, u in users.items()})
-        print(f"  {r}: {len(done)} answered already, {len(selected) - len(done)} to send")
-        todo += len(selected) - len(done)
+        n_done = sum(1 for (st_, k) in done if k == 1 and st_ in users)
+        print(f"  {r}: {n_done} answered already, {len(selected) - n_done} to send")
+        todo += len(selected) - n_done
     est = O.estimate(selected, rub["text"], args.model)
     est = {**est, "n_calls": todo, "usd": round(est["usd"] * todo / max(1, len(selected)), 4),
-           "in_tok": est["in_tok"] * todo // max(1, len(selected)), "out_tok": est["out_tok"] * todo // max(1, len(selected))}
+           "in_tok": est["in_tok"] * todo // max(1, len(selected)),
+           "out_tok": est["out_tok"] * todo // max(1, len(selected))}
     total = _print_estimate("stability", est, args.budget_usd, args.model)
     confirm_or_abort(total, args.budget_usd, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
     if args.dry_run:
@@ -494,33 +544,22 @@ def cmd_stability(args) -> int:
         raise SystemExit(f"REFUSED: {refused}")
     runs, left = {}, args.budget_usd
     for r in (args.run_id, args.against):
-        run, used, ok = _operators_session(args, r, selected, step="stability", budget_usd=left,
+        run, used, ok = _operators_session(args, r, selected, step="stability", budget_usd=left, samples=1,
                                            extra={"n": args.n, "seed": args.seed, "against": args.against})
         if not ok:
             return 1
         left -= used.total_cost_usd
-        runs[r] = run.replies
+        runs[r] = {stem: by_k[1] for stem, by_k in run.samples.items() if 1 in by_k}
     st = E.stability_jaccard(runs[args.run_id], runs[args.against], n_sampled=len(selected))
-    st.update({"runs": [args.run_id, args.against], "seed": args.seed})
-    ev_path = _sdir(args) / "evaluation.json"
-    ev = E.read_evaluation(ev_path)
-    ev["stability"] = {k: v for k, v in st.items() if k != "per_trait"} | {"per_trait": st["per_trait"]}
-    E.write_evaluation(ev, ev_path)
-    from assistant_axis.atomic_io import atomic_write_text
-    atomic_write_text(json.dumps(st, indent=2) + "\n", _run_dir(args, args.against) / "stability.json")
-    print(json.dumps({k: st[k] for k in ("n_traits", "n_sampled", "jaccard_median", "below_0.5", "distribution",
-                                         "by_operator")}, indent=1))
+    st.update({"runs": [args.run_id, args.against], "seed": args.seed, "mode": "two runs, one sample each"})
+    _write_stability(args, st, where=_run_dir(args, args.against) / "stability.json")
+    print(json.dumps({k: st[k] for k in ("n_traits", "n_sampled", "n_both_empty", "jaccard_median", "below_0.5",
+                                         "distribution", "by_operator")}, indent=1))
     cov = st["coverage"]
-    print(f"answered in both runs: {cov['n_answered']} of {cov['n_sampled']} sampled traits")
-    if not cov["pass"]:
-        print(f"GATE: only {cov['n_answered']} of {cov['n_sampled']} sampled traits answered in both runs (under "
-              f"{cov['min_share']:.0%}): the median Jaccard is not read; stop", file=sys.stderr)
-        return EXIT_GATE
-    if st["jaccard_median"] is None or st["jaccard_median"] < E.STABILITY_MIN_MEDIAN:
-        print(f"GATE: median Jaccard {st['jaccard_median']} below {E.STABILITY_MIN_MEDIAN}: stop; the numbers go to "
-              f"Roger (n = 2 samples by design, or a second model, his call)", file=sys.stderr)
-        return EXIT_GATE
-    print(f"GATE: median Jaccard {st['jaccard_median']} >= {E.STABILITY_MIN_MEDIAN}")
+    print(f"answered in both runs: {cov['n_answered']} of {cov['n_sampled']} sampled traits"
+          + ("" if cov["pass"] else f" (under {cov['min_share']:.0%}: read the median with care)"))
+    print(f"REPORTED (not a gate; Roger, 2026-10-13): median Jaccard {st['jaccard_median']} over the slots either "
+          f"answer filled")
     return 0
 
 
@@ -533,11 +572,15 @@ def _lexicon(args):
     return oewn_lexicon()
 
 
-def _replies(args):
+def _replies(args, *, lexicon=None, corpus=None):
+    """The named runs' answers combined per trait (:class:`postprocess.Collected`) and the run directories; a run
+    marked void is skipped with a note."""
     from assistant_axis.gapgen.generators.structural.postprocess import collect_replies
     dirs = [_run_dir(args, r) for r in args.run_id or []]
-    full, ponly = collect_replies(dirs)
-    return full, ponly, dirs
+    col = collect_replies(dirs, lexicon=lexicon, renamed=corpus.renamed if corpus else None)
+    for v in col.void:
+        print(f"skipped run {v}: marked void ({S.VOID_NAME})", file=sys.stderr)
+    return col, [d for d in dirs if d.name not in col.void]
 
 
 def cmd_postprocess(args) -> int:
@@ -546,31 +589,34 @@ def cmd_postprocess(args) -> int:
     from assistant_axis.gapgen.generators.structural import modernise as M
     from assistant_axis.gapgen.generators.structural import operators as O
     from assistant_axis.gapgen.generators.structural import postprocess as PP
+    from assistant_axis.gapgen.generators.structural.combine import support_counts, union_phrase
     from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
-    full, ponly, dirs = _replies(args)
     modern = M.load_modern(Path(args.classical_modern))
     corpus = PP.load_corpus(Path(args.data_dir))
     queue = PP.load_queue_index(Path(args.queue))
     reg_rows = _registry_rows(args)
     reg = PP.registry_index(reg_rows)
     lex = _lexicon(args)
+    col, dirs = _replies(args, lexicon=lex, corpus=corpus)
+    full, ponly = col.full, col.principal_only
+    union = union_phrase(col.n_samples or 1)
     table = PP.build_table(list(full.values()) + list(ponly.values()), modern, corpus=corpus, queue=queue,
                            registry=reg, lexicon=lex)
     st = {}
     for r in table:
         st[r["status"]] = st.get(r["status"], 0) + 1
-    print(f"postprocess: {len(full)} traits answered in full and {len(ponly)} principal-only in {len(dirs)} run(s); "
-          f"{len(modern)} modernised classical rows; {len(table)} distinct stems {dict(sorted(st.items()))}; "
-          f"{sum(1 for r in table if r['net_new'])} net-new; {sum(1 for r in table if r['principal_target'])} "
-          f"principal-target rows; registry {len(reg_rows)} keys")
+    print(f"postprocess: {len(full)} traits answered in full and {len(ponly)} principal-only in {len(dirs)} run(s), "
+          f"each the {union}; {len(modern)} modernised classical rows; {len(table)} distinct stems "
+          f"{dict(sorted(st.items()))}; {sum(1 for r in table if r['net_new'])} net-new; "
+          f"{sum(1 for r in table if r['principal_target'])} principal-target rows; registry {len(reg_rows)} keys")
     pairs = _pairs(args)
     triangles, sequences = _structures(args)
     embed, usage, emb_note = None, None, args.embedder
     texts = []
     for x, y in pairs:
         for a, b in ((x, y), (y, x)):
-            if a in full and full[a].opposite:
-                texts += [f"{full[a].opposite['label']}: {full[a].opposite.get('gloss') or ''}",
+            for o in (full[a].slot("opposite") if a in full else []):
+                texts += [f"{o['label']}: {o.get('gloss') or ''}",
                           f"{corpus.labels.get(b, b)}: {corpus.descriptions.get(b, '')}"]
     if args.embedder != "none" and texts:
         tok = int(sum(len(t) for t in texts) / 4) + 1
@@ -628,9 +674,12 @@ def cmd_postprocess(args) -> int:
         "structure_recovery": E.structure_recovery(full, triangles, sequences, corpus=corpus, lexicon=lex),
         "queue_holdout": E.queue_holdout(reps, hl["holdout"], rejected=hl["rejected"], accepted=hl["accepted"],
                                          candidates=hl["candidates"], lexicon=lex),
-        "null_rates": E.null_rates(reps), "parse_rate": E.parse_rate(records),
+        "null_rates": E.null_rates(col.sample_replies()), "parse_rate": E.parse_rate(records),
+        "n_samples": col.n_samples, "union": union, "void_runs_skipped": col.void,
+        "support": support_counts(reps), "sample_agreement": E.sample_agreement(col.full_samples, lexicon=lex),
         "principal": {"n_traits": sum(1 for r in reps if r.principal),
-                      "n_items": sum(1 for r in reps for t in O.PRINCIPAL_TARGETS if r.retarget.get(t)),
+                      "n_items": sum(1 for r in reps for op, sub, _it in r.items()
+                                     if op == "retarget" and sub in O.PRINCIPAL_TARGETS),
                       "n_table_rows": sum(1 for r in table if r["principal_target"])},
         "embedder": emb_note, "folded": lex is not None})
     bak = E.write_evaluation(ev, ev_path, inputs=None, title="structural evaluation (postprocess)")
@@ -640,6 +689,9 @@ def cmd_postprocess(args) -> int:
     qh = ev["queue_holdout"]
     print(f"queue hold-out {qh['recall_stem']} of {qh['n']}; rejected regenerated {qh['rejected']['regenerated']} of "
           f"{qh['rejected']['n']}; accepted {qh['accepted']['recall_stem']}, candidates {qh['candidates']['recall_stem']}")
+    sa = ev["sample_agreement"]
+    print(f"items by support ({union}): {ev['support']['by_support']}; agreement between samples (reported, not a "
+          f"gate): median Jaccard {sa['jaccard_median']} over {sa['n_traits']} sample pairs")
     print(f"wrote {ev_path}" + (f" (snapshot {bak.name})" if bak else ""))
     return 0
 
@@ -647,9 +699,12 @@ def cmd_postprocess(args) -> int:
 def cmd_side_table(args) -> int:
     from assistant_axis.gapgen.generators.structural import postprocess as PP
     from assistant_axis.gapgen.generators.structural import sidetable as ST
-    full, _ponly, dirs = _replies(args)
+    from assistant_axis.gapgen.generators.structural.combine import union_phrase
     corpus = PP.load_corpus(Path(args.data_dir))
-    rows = ST.position_rows(full.values(), corpus=corpus, lexicon=_lexicon(args))
+    lex = _lexicon(args)
+    col, dirs = _replies(args, lexicon=lex, corpus=corpus)
+    rows = ST.position_rows(col.full.values(), corpus=corpus, lexicon=lex)
+    print(f"each trait's opposites are the {union_phrase(col.n_samples or 1)}; its position the samples' majority")
     counts = {c: sum(1 for r in rows if r["negative_label_check"] == c) for c in ST.CHECKS}
     pos = {}
     for r in rows:
@@ -696,6 +751,9 @@ def cmd_report(args) -> int:
     rdir = _run_dir(args, args.run_id)
     if not (rdir / "run.json").exists():
         raise SystemExit(f"no run {rdir}: submit it first")
+    if S.read_void(rdir) is not None:
+        print(f"SKIPPED: run {args.run_id} is marked void ({S.read_void(rdir).get('reason')})", file=sys.stderr)
+        return 2
     reg_rows = _registry_rows(args)
     table = PP.load_operator_table(Path(args.operator_table))
     ev = E.read_evaluation(_sdir(args) / "evaluation.json")
@@ -720,6 +778,21 @@ def cmd_report(args) -> int:
         atomic_write_text(body, rdir / name)
     atomic_write_text(json.dumps(fig, indent=2, ensure_ascii=False, default=str) + "\n", rdir / "report.json")
     print(f"wrote {', '.join(str(rdir / f) for f in [*files, 'report.json'])}")
+    return 0
+
+
+def cmd_void(args) -> int:
+    """Mark a run void (2026-10-13; the first: the two Sonnet 5.5 stability runs, their calls refused)."""
+    rdir = _run_dir(args, args.run_id)
+    if args.dry_run:
+        print(f"DRY-RUN: would write {rdir / S.VOID_NAME} (reason {args.reason!r}, by {args.by!r})")
+        return 0
+    try:
+        p = S.write_void(rdir, reason=args.reason, by=args.by)
+    except (FileExistsError, FileNotFoundError, ValueError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    print(f"wrote {p}")
     return 0
 
 
@@ -768,7 +841,8 @@ def build_parser() -> argparse.ArgumentParser:
     paid(p, 0.5)
     p.set_defaults(func=cmd_modernise)
 
-    p = sub.add_parser("operators", help="the operators call, one per trait (Haiku 5.5, ~$0.37 for all)")
+    p = sub.add_parser("operators", help="the operators call, --samples per trait combined by union (Haiku 5.5, "
+                                         "~$2.2 for all at 3 samples)")
     p.add_argument("--run-id", required=True)
     g = p.add_mutually_exclusive_group()
     g.add_argument("--all", action="store_true")
@@ -782,26 +856,38 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--prior-run", nargs="+", metavar="RUN_ID", help="runs whose principal answers count as done")
     p.add_argument("--resume", action="store_true", help="(always on: answers to the same prompt are reused)")
     p.add_argument("--render", nargs="+", metavar="STEM", help="print these traits' user turns; no call")
-    paid(p, 3.0)
+    p.add_argument("--samples", type=int, default=O.DEFAULT_SAMPLES,
+                   help=f"independent calls per trait, combined by union (default {O.DEFAULT_SAMPLES}; Roger, "
+                        f"2026-10-13)")
+    paid(p, 6.0)
     ops(p)
     p.set_defaults(func=cmd_operators)
 
-    p = sub.add_parser("null-rate", help="the null-rate pilot (20 traits, ~$0.01) and its readout")
+    p = sub.add_parser("null-rate", help="the null-rate pilot (20 traits x 3 samples, ~$0.05) and its readout")
     p.add_argument("--run-id", required=True)
     p.add_argument("--n", type=int, default=20)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--samples", type=int, default=O.DEFAULT_SAMPLES, help="independent calls per trait")
     paid(p, 0.5)
     ops(p)
     p.set_defaults(func=cmd_null_rate, principal_only=False)
 
-    p = sub.add_parser("stability", help="30 traits under two run ids, label-set Jaccard (~$0.02)")
+    p = sub.add_parser("stability", help="reported, never a gate: the agreement between a run's own samples ($0), "
+                                         "or with --against, 30 traits under two run ids (~$0.05)")
     p.add_argument("--run-id", required=True)
-    p.add_argument("--against", required=True)
+    p.add_argument("--against", default=None, help="a second run id: answer --n traits once under each (paid)")
     p.add_argument("--n", type=int, default=30)
     p.add_argument("--seed", type=int, default=1)
     paid(p, 0.5)
     ops(p)
-    p.set_defaults(func=cmd_stability, principal_only=False)
+    p.set_defaults(func=cmd_stability, principal_only=False, samples=1)
+
+    p = sub.add_parser("void", help="mark a run void (void.json): the readouts and the recorded-output checks skip it")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--reason", required=True)
+    p.add_argument("--by", required=True, help="who marks it, and on whose word")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_void)
 
     p = sub.add_parser("postprocess", help="the operator table and evaluation.json (free; pennies of embeddings)")
     p.add_argument("--run-id", nargs="+", default=None, help="operator runs to read, the last winning per trait")

@@ -1,9 +1,10 @@
 """Structural generators: acceptance on the recorded outputs (coding_plan_09 section 8, the last bullet).  Each check
 skips while what it reads is absent (no paid run has been made yet in a fresh checkout); the hard ones fail once it
 is there: parse rate >= 0.99 in every run's responses, the null-rate pilot inside the 5-40% band for retarget and
-remode under the current prompt, the stability median >= 0.5 on 30 traits, ``usage.json`` beside every run with a
-call, ``evaluation.json`` carrying every figure the plan names, a position row for every trait operated on, and the
-readouts' headline and novel figures.  The package imports no ``openai`` beyond the embedding cache."""
+remode under the current prompt, ``usage.json`` beside every run with a call, ``evaluation.json`` carrying every
+figure the plan names, a position row for every trait operated on, and the readouts' headline and novel figures.
+Stability is reported, never a gate (Roger, 2026-10-13): its record is checked for its fields, not its median.  A run
+marked void (``void.json``) is skipped.  The package imports no ``openai`` beyond the embedding cache."""
 from __future__ import annotations
 
 import json
@@ -24,7 +25,8 @@ RUNS = DATA_CANDIDATES / "runs" / S.GENERATOR
 
 
 def _run_dirs():
-    return sorted(p for p in RUNS.glob("*") if p.is_dir()) if RUNS.exists() else []
+    """The structural runs, those marked void (``void.json``) left out."""
+    return sorted(p for p in RUNS.glob("*") if p.is_dir() and S.read_void(p) is None) if RUNS.exists() else []
 
 
 def _paid_runs():
@@ -95,13 +97,15 @@ def _evaluation():
     return ev
 
 
-def test_stability_median():
+def test_stability_is_recorded_not_gated():
+    """Roger, 2026-10-13: stability is reported, never a gate; the record is checked for its fields only, and a
+    record made from a void run is skipped."""
     st = _evaluation().get("stability")
     if not st:
-        pytest.skip("no stability run yet")
-    assert st["n_traits"] >= 30 and st["jaccard_median"] >= E.STABILITY_MIN_MEDIAN, st
-    if st.get("coverage"):                             # since review B2: answered in both runs, of the sample
-        assert st["coverage"]["pass"], st["coverage"]
+        pytest.skip("no stability record yet")
+    if any(S.read_void(RUNS / r) is not None for r in st.get("runs") or [] if (RUNS / r).exists()):
+        pytest.skip("the stability record is of a void run")
+    assert "jaccard_median" in st and "by_operator" in st and "distribution" in st, st
 
 
 def test_evaluation_carries_every_figure():

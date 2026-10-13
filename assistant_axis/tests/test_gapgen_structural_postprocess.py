@@ -196,11 +196,11 @@ def test_collect_replies_last_run_wins(world, tmp_path):
                        "principal_only": True, "principal_targets": True,
                        "text": json.dumps({"reasoning": "r", "retarget": {"the_user": F.item("user-first")}})},
                       d1 / "responses.jsonl")
-    full, ponly = PP.collect_replies([d1, d2])
-    assert full["brave"].position == "excess" and full["brave"].run_id == "r2"
-    assert set(ponly) == {"obedient"} and ponly["obedient"].retarget["the_user"]["label"] == "user-first"
-    full, _ = PP.collect_replies([d2, d1])
-    assert full["brave"].position == "mean"
+    col = PP.collect_replies([d1, d2])
+    assert col.full["brave"].position == "excess" and col.full["brave"].run_id == "r2"
+    assert set(col.principal_only) == {"obedient"}
+    assert col.principal_only["obedient"].slot("retarget", "the_user")[0]["label"] == "user-first"
+    assert PP.collect_replies([d2, d1]).full["brave"].position == "mean"
 
 
 def test_frozen_interface():

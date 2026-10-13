@@ -29,8 +29,13 @@
   ``retarget``, ``principal_retarget``, ``remode``, ``classical``.
 
 **Several runs** (``postprocess --run-id R1 R2``): when two named runs answered the same trait in full, the run
-named last wins (one reply per trait); a principal-only answer (a later principal-target stage) adds its items
-beside the trait's full reply.
+named last wins (its samples, not a mix of runs); a principal-only answer (a later principal-target stage) adds its
+items beside the trait's full reply.  A run marked void (``void.json``) is skipped.
+
+**Samples** (Roger, 2026-10-13): a trait's answers are the union of its samples (:mod:`.combine`), so one slot can
+give several rows; each operator source carries its ``support`` (how many samples named the label, 1-3), the samples
+and every sample's gloss, and each row its ``max_support``.  Support is a readout figure: it ranks, gates and
+filters nothing.
 """
 from __future__ import annotations
 
@@ -209,18 +214,56 @@ def tag_membership(stem: str, *, corpus_stems: Iterable[str], renamed: Mapping[s
 
 # --------------------------------------------------------------------------- replies across runs
 
-def collect_replies(run_dirs: Sequence[Path]) -> tuple[dict, dict]:
-    """``(full, principal_only)``: ``{stem: OperatorReply}`` from the named runs' ``responses.jsonl``, the run named
-    last winning for a trait answered in full by several, the last parsed record within a run winning."""
-    full: dict[str, OperatorReply] = {}
-    ponly: dict[str, OperatorReply] = {}
+@dataclass
+class Collected:
+    """What the named runs answered: per trait the combined reply (``full``, ``principal_only``) and the samples it
+    was combined from (``full_samples``, ``principal_only_samples``: ``{stem: {sample: OperatorReply}}``), and the
+    runs left out because they carry a ``void.json`` marker (``void``)."""
+    full: dict = field(default_factory=dict)
+    principal_only: dict = field(default_factory=dict)
+    full_samples: dict = field(default_factory=dict)
+    principal_only_samples: dict = field(default_factory=dict)
+    void: list = field(default_factory=list)
+
+    def sample_replies(self) -> list[OperatorReply]:
+        """Every sample of both kinds (the null rates are read over these)."""
+        out = []
+        for d in (self.full_samples, self.principal_only_samples):
+            out += [d[s][k] for s in sorted(d) for k in sorted(d[s])]
+        return out
+
+    @property
+    def n_samples(self) -> int:
+        """The most samples any trait has (the "union of N samples" of the readouts)."""
+        return max((len(v) for v in self.full_samples.values()), default=0)
+
+
+def collect_replies(run_dirs: Sequence[Path], *, lexicon=None, renamed: Optional[Mapping[str, str]] = None
+                    ) -> Collected:
+    """The named runs' answers (``responses.jsonl``), combined per trait by union of its samples
+    (:func:`.combine.combine`).  Within a run the last parsed record per (trait, sample) wins; across runs the run
+    named last that has any sample of a trait wins for that trait (its samples are not mixed with another run's).  A
+    run with a ``void.json`` marker is left out and listed in ``void``."""
+    from . import read_void
+    from .combine import combine
+    out = Collected()
     for d in run_dirs:
+        if read_void(Path(d)) is not None:
+            out.void.append(Path(d).name)
+            continue
+        run_full: dict[str, dict] = {}
+        run_ponly: dict[str, dict] = {}
         for rec in read_responses(Path(d) / RESPONSES_NAME):
             rep, _ = reply_from_record(rec)
             if rep is None:
                 continue
-            (ponly if rep.principal_only else full)[rep.stem] = rep
-    return full, ponly
+            (run_ponly if rep.principal_only else run_full).setdefault(rep.stem, {})[rep.sample] = rep
+        out.full_samples.update(run_full)
+        out.principal_only_samples.update(run_ponly)
+    kw = {"lexicon": lexicon, "renamed": renamed}
+    out.full = {s: combine(v, **kw) for s, v in sorted(out.full_samples.items())}
+    out.principal_only = {s: combine(v, **kw) for s, v in sorted(out.principal_only_samples.items())}
+    return out
 
 
 # --------------------------------------------------------------------------- merge and rank
@@ -251,17 +294,21 @@ def _safe_stem(label: str, lexicon) -> Optional[tuple[str, str]]:
         return None
 
 
-def operator_sources(replies: Iterable[OperatorReply], *, corpus: Corpus, lexicon=None) -> list[tuple[str, str, dict]]:
-    """``(stem, folded label, source)`` for every non-null answer of every reply."""
+def operator_sources(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list[tuple[str, str, dict]]:
+    """``(stem, folded label, source)`` for every item of every combined reply (:class:`.combine.CombinedReply`; a
+    single sample's :class:`OperatorReply` is combined first).  Each source carries the item's ``support`` (how many
+    of the trait's samples named it), the samples, every sample's gloss (``glosses``) and the first one's (``gloss``,
+    which becomes the candidate's ``gloss_hint``)."""
+    from .combine import CombinedReply, combine
     out = []
-    for rep in sorted(replies, key=lambda r: (r.stem, r.principal_only)):
-        stems = {}
+    reps = [r if isinstance(r, CombinedReply) else combine({r.sample: r}, lexicon=lexicon) for r in replies]
+    for rep in sorted(reps, key=lambda r: (r.stem, r.principal_only)):
+        stems: dict[str, list] = {}
         for op in SINGLE_OPERATORS:
-            it = getattr(rep, op)
-            if it:
+            for it in rep.slot(op):
                 got = _safe_stem(it["label"], lexicon)
                 if got:
-                    stems[op] = got[0]
+                    stems.setdefault(op, []).append(got[0])
         unpaired = corpus.is_unpaired(rep.stem)
         for op, sub, it in rep.items():
             got = _safe_stem(it["label"], lexicon)
@@ -272,12 +319,15 @@ def operator_sources(replies: Iterable[OperatorReply], *, corpus: Corpus, lexico
             if op == "opposite":
                 partner = corpus.labels.get(rep.stem) or rep.label
             elif op in ("excess", "deficiency"):
-                other = rep.deficiency if op == "excess" else rep.excess
-                partner = other["label"] if other else None
-            sib = [rep.stem] + ([s for o, s in stems.items() if o != op] if op in SINGLE_OPERATORS else [])
+                other = rep.slot("deficiency" if op == "excess" else "excess")
+                partner = other[0]["label"] if other else None          # the best-supported sibling vice
+            sib = [rep.stem] + ([x for o, xs in stems.items() if o != op for x in xs]
+                                if op in SINGLE_OPERATORS else [])
             src = {"generator_part": "operators", "source_stem": rep.stem, "source_label": rep.label, "operator": op,
                    "run_id": rep.run_id, "label": it["label"], "gloss": it.get("gloss"),
                    "has_common_word": it.get("has_common_word"), "polysemy": it.get("polysemy"),
+                   "support": it.get("support", 1), "n_samples": rep.n_samples, "samples": list(it.get("samples") or []),
+                   "glosses": list(it.get("glosses") or []),
                    "kind": operator_kind(op, sub, source_unpaired=unpaired), "partner_hint": partner,
                    "siblings": sib}
             if op == "retarget":
@@ -343,6 +393,8 @@ def merge_items(replies: Iterable[OperatorReply], modern_rows: Sequence = (), *,
             "siblings": sibs,
             "has_common_word": hcw if hcw is not None else len(first["folded"].split()) == 1,
             "polysemy": any(s.get("polysemy") is True for s in srcs),
+            "max_support": max((s.get("support") or 0 for s in srcs if s["generator_part"] == "operators"),
+                               default=None),
             "principal_target": any(s["kind"] == "principal_retarget" for s in srcs),
         })
     return out

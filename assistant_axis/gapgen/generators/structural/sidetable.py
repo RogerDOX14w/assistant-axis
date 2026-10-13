@@ -2,7 +2,8 @@
 
 ``position_table.jsonl`` (:data:`.POSITION_TABLE_PATH`, tracked) has one row per corpus trait operated on (a full
 answer; a principal-only answer has no position): the trait's ``position`` (``deficiency``, ``mean``, ``excess``,
-``not_scalar``), its recorded ``negative_label``, the model's blind opposite, the comparison of the two
+``not_scalar``; the majority of its samples, each sample's beside it), its recorded ``negative_label``, the model's
+blind opposites (the union of the samples, each with its support), the comparison of the two
 (:func:`compare_negative_label`), the model's reasoning, and the run, model, prompt hash and time.  It is rebuilt
 deterministically from the runs' responses, snapshotted to ``.bak.<UTC>`` when it changes, and **never written into
 a trait file** (Roger, 2026-10-12: a side table until the pairing review; TODO (Roger): review its promotion into
@@ -54,19 +55,40 @@ def compare_negative_label(model_opposite: Optional[str], recorded: Optional[str
     return "match" if a is not None and a in want else "mismatch"
 
 
-def position_rows(replies: Iterable[OperatorReply], *, corpus: Corpus, lexicon=None) -> list[dict]:
-    """One row per trait answered in full, in stem order."""
+def check_union(opposites: Sequence[Mapping], recorded: Optional[str], *, lexicon=None) -> tuple[str, Optional[int]]:
+    """``(negative_label_check, recorded_support)`` over a trait's combined opposites: ``match`` when any of them is
+    the recorded label (its support, how many samples named it, is returned too), else as
+    :func:`compare_negative_label` of the best-supported one (``mismatch`` with no opposite at all)."""
+    for it in opposites:
+        if compare_negative_label(it["label"], recorded, lexicon=lexicon) == "match":
+            return "match", it.get("support")
+    top = opposites[0]["label"] if opposites else None
+    return compare_negative_label(top, recorded, lexicon=lexicon), None
+
+
+def position_rows(replies: Iterable, *, corpus: Corpus, lexicon=None) -> list[dict]:
+    """One row per trait answered in full, in stem order, from its combined reply (a single sample's reply is
+    combined first): the majority ``position`` and every sample's (``positions``), the blind opposites with their
+    support (``model_opposites``; ``model_opposite`` the best supported), and the check against the recorded label
+    over all of them (Roger, 2026-10-13: the union of the samples)."""
+    from .combine import CombinedReply, combine
+    reps = [r if isinstance(r, CombinedReply) else combine({r.sample: r}, lexicon=lexicon) for r in replies]
     out = []
-    for rep in sorted((r for r in replies if not r.principal_only), key=lambda r: r.stem):
+    for rep in sorted((r for r in reps if not r.principal_only), key=lambda r: r.stem):
         rec = corpus.negative_labels.get(rep.stem)
-        opp = rep.opposite["label"] if rep.opposite else None
+        opps = rep.slot("opposite")
+        check, rec_support = check_union(opps, rec, lexicon=lexicon)
         out.append({"schema_version": SCHEMA_VERSION, "stem": rep.stem,
                     "label": corpus.labels.get(rep.stem) or rep.label, "position": rep.position,
-                    "recorded_negative_label": rec, "model_opposite": opp,
-                    "model_opposite_gloss": rep.opposite.get("gloss") if rep.opposite else None,
-                    "negative_label_check": compare_negative_label(opp, rec, lexicon=lexicon),
-                    "arrangement": corpus.kinds.get(rep.stem), "reasoning": rep.reasoning, "run_id": rep.run_id,
-                    "model": rep.model, "prompt_sha256": rep.prompt_sha256, "at": rep.at})
+                    "positions": list(rep.positions), "n_samples": rep.n_samples,
+                    "recorded_negative_label": rec, "model_opposite": opps[0]["label"] if opps else None,
+                    "model_opposite_gloss": opps[0].get("gloss") if opps else None,
+                    "model_opposites": [{"label": it["label"], "support": it.get("support", 1),
+                                         "gloss": it.get("gloss")} for it in opps],
+                    "negative_label_check": check, "recorded_support": rec_support,
+                    "arrangement": corpus.kinds.get(rep.stem), "reasoning": rep.reasoning,
+                    "reasonings": list(rep.reasonings), "run_id": rep.run_id, "model": rep.model,
+                    "prompt_sha256": rep.prompt_sha256, "at": rep.at})
     return out
 
 
@@ -115,11 +137,16 @@ def render_mismatches(rows: Sequence[Mapping], *, trait_link_prefix: str = "../.
              "whose recorded `negative_label` is a real word and whose opposite, asked without seeing that label, "
              "is another word (or none).  The side table is never written into a trait file.", "",
              f"Of {len(rows)} traits: " + ", ".join(f"{counts[c]} {c}" for c in CHECKS) + ".", "",
-             "| trait | position | recorded negative label | blind opposite | its gloss | the model's reasoning |",
+             "The blind opposites are the union of the trait's samples, each with its support (how many samples "
+             "named it); the position is the samples' majority, every sample's in brackets.", "",
+             "| trait | position | recorded negative label | blind opposites (support) | gloss of the first | "
+             "the first sample's reasoning |",
              "|---|---|---|---|---|---|"]
     for r in mm:
-        lines.append(f"| [{_cell(r['label'])}]({trait_link_prefix}{r['stem']}.json) | {_cell(r.get('position'))} | "
-                     f"{_cell(r.get('recorded_negative_label'))} | {_cell(r.get('model_opposite'))} | "
+        opps = ", ".join(f"{o['label']} ({o.get('support', 1)})" for o in r.get("model_opposites") or []) or None
+        pos = f"{r.get('position')} [{', '.join(str(x) for x in r.get('positions') or [])}]"
+        lines.append(f"| [{_cell(r['label'])}]({trait_link_prefix}{r['stem']}.json) | {_cell(pos)} | "
+                     f"{_cell(r.get('recorded_negative_label'))} | {_cell(opps)} | "
                      f"{_cell(r.get('model_opposite_gloss'))} | {_cell(r.get('reasoning'))} |")
     return "\n".join(lines) + "\n"
 
@@ -128,5 +155,5 @@ def write_mismatches(rows: Sequence[Mapping], path: Path) -> Optional[Path]:
     return _write(render_mismatches(rows), path)
 
 
-__all__ = ["CHECKS", "compare_negative_label", "position_rows", "write_position_table", "load_position_table",
+__all__ = ["CHECKS", "compare_negative_label", "check_union", "position_rows", "write_position_table", "load_position_table",
            "render_mismatches", "write_mismatches"]

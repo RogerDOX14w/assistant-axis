@@ -174,7 +174,8 @@ def figures(run_id: str, *, run_dir: Path, registry_rows: Mapping[str, Mapping],
             "review_rate": {"terms_per_hour": rate, "source": rate_src}, "projection": proj,
             "evaluation": {k: (evaluation or {}).get(k) for k in ("pair_recovery", "structure_recovery",
                                                                     "queue_holdout", "null_rates", "stability",
-                                                                    "parse_rate")}}
+                                                                    "sample_agreement", "parse_rate")},
+            "support": (evaluation or {}).get("support"), "n_samples": (evaluation or {}).get("n_samples")}
 
 
 def _pct(x) -> str:
@@ -187,8 +188,12 @@ def _link_trait(stem: str, prefix: str, label: Optional[str] = None) -> str:
 
 def render_report(fig: Mapping, *, trait_prefix: str = "../../../../traits/instructions/") -> str:
     """``report.md`` (module docstring)."""
+    from .combine import union_phrase
     h, nv = fig["headline"], fig["novel"]
+    union = union_phrase(fig.get("n_samples") or 1)
     L = [f"# Structural run `{fig['run_id']}`: yield-per-dollar readout", "",
+         f"Every operator count below is over the **{union}** per trait (Roger, 2026-10-13: each trait asked "
+         f"independently, the answers combined by union, deduplicated by stem; no answer dropped for low support).", "",
          "Written by `structural_generator.py report` (coding_plan_09 sections 10-11); figures from the registry "
          "blocks, `evaluation.json` and every `usage.json`.  Terms: [glossary](../../../../../reports/"
          "trait_gap_generation/glossary.md).", "",
@@ -199,7 +204,7 @@ def render_report(fig: Mapping, *, trait_prefix: str = "../../../../traits/instr
          f"{h['already_decided']} of those ({_pct(h['already_decided_share_of_registered'])}): free, no review row, "
          f"arrangement evidence only.  {h['exists']} rows are corpus traits and {h['queued']} seed-queue entries; "
          f"**{h['net_new']} were net-new** (not yet filtered by the registry).", "",
-         "## Pair completions and degree fillers first", "",
+         f"## Pair completions and degree fillers first ({union})", "",
          "| what | rows | M1 trait share | novel raw | novel net | net-new rows | net-new kept share | "
          "M3 pair completions |", "|---|---|---|---|---|---|---|---|"]
     for k in KIND_ORDER:
@@ -208,7 +213,18 @@ def render_report(fig: Mapping, *, trait_prefix: str = "../../../../traits/instr
             L.append(f"| {KIND_NAMES[k]} | {p['n']} | {_pct(p['m1_trait_share'])} | {p['novel_raw']} | "
                      f"{p['novel_net']} | {p['net_new']} | {_pct(p['net_new_kept_share'])} | "
                      f"{p['pair_completions_m3']} |")
-    L += ["", "A row reached by several routes is counted under each.", "",
+    L += ["", "A row reached by several routes is counted under each.", ""]
+    sup = fig.get("support")
+    if sup:
+        L += [f"## Support ({union})", "",
+              "How many of a trait's samples named each label (a readout figure: nothing is filtered or ranked on "
+              "it).", "", "| operator | " + " | ".join(f"support {k}" for k in sorted(sup["by_support"])) + " |",
+              "|---|" + "---|" * len(sup["by_support"])]
+        for op, c in sup["by_operator"].items():
+            L.append(f"| {op} | " + " | ".join(str(c.get(k, 0)) for k in sorted(sup["by_support"])) + " |")
+        L.append("| **all** | " + " | ".join(f"**{v}**" for _k, v in sorted(sup["by_support"].items())) + " |")
+        L.append("")
+    L += [
           "## Wholly new concepts (secondary)", "",
           f"Novel after the scorer (M3 `new` or `grey`): **{nv['raw']} raw**, **{nv['net_pending']} net** of other "
           f"generators' candidates of the same stem ({len(nv['twins_pending'])} pending review, "
@@ -256,6 +272,12 @@ def render_report(fig: Mapping, *, trait_prefix: str = "../../../../traits/instr
                      f"{(qh.get('rejected') or {}).get('regenerated')} of {(qh.get('rejected') or {}).get('n')}; "
                      f"accepted {_pct((qh.get('accepted') or {}).get('recall_stem'))}, candidates "
                      f"{_pct((qh.get('candidates') or {}).get('recall_stem'))} (never in the denominator).")
+        sa = ev.get("sample_agreement") or {}
+        if sa.get("n_traits"):
+            L.append(f"- Agreement between a trait's samples (reported, never a gate): median Jaccard "
+                     f"{sa.get('jaccard_median')} over the slots either sample answered, {sa.get('n_traits')} sample "
+                     f"pairs; by operator " + ", ".join(f"{op} {v['agreement']}" for op, v in
+                                                       (sa.get("by_operator") or {}).items()) + ".")
         L.append("")
     L += ["## Files", "", "- [roger_sample.md](./roger_sample.md): 50 rows decided new or grey, for the manual check.",
           "- [ai_identity_subfamily.md](./ai_identity_subfamily.md): the principal-target items, for sign-off.", ""]
@@ -272,8 +294,9 @@ def _sources_text(stem: str, table_by: Mapping[str, Mapping], prefix: str) -> st
             bits.append(f"{s['role']} of `{s['source_id']}`")
         else:
             sub = s.get("target") or s.get("mode")
+            sup = f" ({s['support']} of {s['n_samples']} samples)" if s.get("support") and s.get("n_samples") else ""
             bits.append(f"{s['operator']}{' ' + sub if sub else ''} of "
-                        f"{_link_trait(s['source_stem'], prefix, s.get('source_label'))}")
+                        f"{_link_trait(s['source_stem'], prefix, s.get('source_label'))}{sup}")
     more = len(row["sources"]) - 4
     return "; ".join(bits) + (f"; +{more}" if more > 0 else "")
 
@@ -311,7 +334,7 @@ def ai_identity_list(table: Sequence[Mapping], registry_rows: Optional[Mapping[s
          "Every answer of the operators call for the user, the operator or the developer as the target (stage 1: the "
          "traits at alignment score 3).  These presuppose an AI assistant, so none is promoted before Roger signs "
          "the sub-family off (QUESTIONS 67 and 78).", "",
-         "| label | gloss | target | from trait | M1 | M3 | sign-off |", "|---|---|---|---|---|---|---|"]
+         "| label | gloss | target | from trait | support | M1 | M3 | sign-off |", "|---|---|---|---|---|---|---|---|"]
     n = 0
     for row in sorted(table, key=lambda r: r["rank"]):
         if not row.get("principal_target"):
@@ -326,6 +349,7 @@ def ai_identity_list(table: Sequence[Mapping], registry_rows: Optional[Mapping[s
             n += 1
             L.append(f"| {_cell(row['label'])} | {_cell(s.get('gloss'))} | {s.get('target')} | "
                      f"{_link_trait(s['source_stem'], trait_prefix, s.get('source_label'))} | "
+                     f"{s.get('support', 1)} of {s.get('n_samples', 1)} | "
                      f"{_cell((reg.get('filter') or {}).get('verdict'))} "
                      f"| {_cell((reg.get('novelty') or {}).get('decision'))} | |")
     L += ["", f"{n} items."]
