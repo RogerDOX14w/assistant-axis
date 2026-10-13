@@ -87,7 +87,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
+from collections import defaultdict
+
+from assistant_axis import (
+    cohort_from_pairs, corpus_display_name, json_metadata, pair_type_of, png_metadata,
+)
 from assistant_axis.provenance import (
     CACHE_POLICIES,
     InputSpec,
@@ -261,8 +265,12 @@ def main() -> int:
                if np.isfinite(x_raw) else MIN_LOG)
         y_c = (min(MAX_LOG, max(MIN_LOG, y_raw))
                if np.isfinite(y_raw) else MIN_LOG)
+        # Plot text shows the corpus display name, never the stem
+        # (plotting rule; ``systems_thinker`` printed with its underscore before).
+        kind = pair_type_of(it)
         points.append({
-            "key": key, "x": x_c, "y": y_c, "w": w,
+            "key": key, "label": corpus_display_name(it["pos"], kind),
+            "x": x_c, "y": y_c, "w": w,
             "x_raw": x_raw, "y_raw": y_raw,
             "peak_rho_di": peak_rho_di, "peak_rho_rs": peak_rho_rs,
         })
@@ -279,15 +287,42 @@ def main() -> int:
     # Plot
     # ------------------------------------------------------------------
     size_scale = 150.0 / ws.max() if ws.max() > 0 else 1.0
-    sizes = size_scale * ws
-    colors = plt.cm.tab10(np.linspace(0, 1, max(10, len(points))))
+    # A zero-weight point used to be drawn at size 0 (invisible: honest and
+    # truthful at slots 3 and 7); it keeps a minimum marker, drawn hollow so
+    # the weight is still readable (2026-10-13).
+    MIN_MARKER = 18.0
+    sizes = np.maximum(size_scale * ws, MIN_MARKER)
+    # tab10 repeated colours past ten points; tab20 holds the 12-axis cohort.
+    palette = plt.cm.tab20 if len(points) > 10 else plt.cm.tab10
+    colors = [palette(i % palette.N) for i in range(len(points))]
 
     fig, ax = plt.subplots(figsize=(7, 7))
     for p_i, c, sz in zip(points, colors, sizes):
-        ax.scatter(p_i["x"], p_i["y"], s=sz, color=c, edgecolor="black",
+        ax.scatter(p_i["x"], p_i["y"], s=sz,
+                   facecolor=c if p_i["w"] > 0 else "none", edgecolor="black",
                    linewidth=0.8, zorder=3)
-        ax.annotate(p_i["key"][0], (p_i["x"], p_i["y"]),
-                    fontsize=8, xytext=(6, 4), textcoords="offset points")
+    # Points close enough for their labels to collide (within about one
+    # label's width and height in data units: the axes are log2(K+1) on a
+    # 7-inch square) are labelled as a stack, one line each, instead of
+    # printing over one another (four at (K=0, K=0) at slot 6 before, and
+    # near-coincident pairs at slots 3 and 7; 2026-10-13).  Greedy
+    # single-linkage clustering, then a vertical offset by rank.
+    DX_TOL, DY_TOL = 1.0, 0.3
+    clusters: list[list[int]] = []
+    for i in sorted(range(len(points)), key=lambda j: (points[j]["y"], points[j]["x"])):
+        for cl in clusters:
+            if any(abs(points[i]["x"] - points[j]["x"]) <= DX_TOL
+                   and abs(points[i]["y"] - points[j]["y"]) <= DY_TOL for j in cl):
+                cl.append(i)
+                break
+        else:
+            clusters.append([i])
+    for cl in clusters:
+        for rank, i in enumerate(sorted(cl, key=lambda j: (points[j]["y"], points[j]["label"]))):
+            p_i = points[i]
+            text = p_i["label"] + ("  (w=0)" if p_i["w"] == 0 else "")
+            ax.annotate(text, (p_i["x"], p_i["y"]), fontsize=8,
+                        xytext=(6, 4 + 10 * rank), textcoords="offset points")
 
     lims = [-0.2, MAX_LOG + 0.3]
     ax.plot(lims, lims, "k--", alpha=0.4, lw=0.8, label="y = x")
@@ -310,13 +345,14 @@ def main() -> int:
     else:
         ref_ws = list(ws_sorted)
     for ref_w in ref_ws:
-        ax.scatter([], [], s=size_scale * ref_w, color="grey",
+        ax.scatter([], [], s=max(size_scale * ref_w, MIN_MARKER),
+                   facecolor="grey" if ref_w > 0 else "none",
                    edgecolor="black", linewidth=0.5,
                    label=f"w={ref_w:.3f}")
 
     ax.set_xlabel("desc+inst fitted peak  log₂(K+1)  (clipped to K ≥ 0)")
     ax.set_ylabel("responses fitted peak  log₂(K+1)  (clipped to K ≥ 0)")
-    title_line = "Peak K desc+inst vs responses (circle area ∝ weight)"
+    title_line = "Peak K desc+inst vs responses (circle area ∝ weight; hollow = w 0)"
     ax.set_title(
         title_line + "\n"
         f"Unweighted Pearson={pear_u:+.3f}, Spearman={spear_u:+.3f}  |  "
