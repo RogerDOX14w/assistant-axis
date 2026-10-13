@@ -195,7 +195,9 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     `expected_header_tokens` is pinned from it** (a commit to `model_families.py`); (2) step 2's side-car
     check passes and the first conversation's ids carry exactly one BOS where the template writes one;
     (3) `activations.log`: `HEADER NOT FOUND` 0, header mismatches 0, dropped conversations 0 (or only
-    empty responses) on both entities; (4) `--verify_spans 20`: 20 of 20; (5) the vector shape is
+    empty responses) on both entities (a zero on every family is also the evidence for removing the N - 1
+    header tolerance altogether: the TODO at `EXACT_MATCH_BELOW` in
+    [`spans.py`](../../assistant_axis/internals/spans.py)); (4) `--verify_spans 20`: 20 of 20; (5) the vector shape is
     `(1 + N, n_layers, hidden)` and `slot_labels` prints the layout; (6) `axis.pt` is written.
     Anything else is a stop, reported with the log lines.  Results go into the smoke-run table of
     [acceptance_multi_model_extraction.md](./acceptance_multi_model_extraction.md).

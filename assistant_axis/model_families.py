@@ -9,7 +9,8 @@ the model's name, so a local path or a quantised copy finds its row.
 
 Only what is genuinely per family lives here.  The header tolerance is not
 per family either: ``internals.spans.allowed_header_mismatches`` accepts one
-wrong header token from four tokens on and none below (Gemma 2, OLMo 2).
+wrong header token from three tokens on and none below (OLMo 2's two); the
+TODO there says the tolerance is almost certainly unnecessary.
 The header slots are *not*
 listed per family: they are derived from the model's own chat template at
 startup (:func:`assistant_axis.internals.chat_layout.derive_chat_layout`).
@@ -140,8 +141,8 @@ FAMILIES: Dict[str, FamilySpec] = {
         hf_load_kwargs={"attn_implementation": "eager"},
         notes=("google/gemma-2-27b-it; gated; ~54 GB.  The template raises on a system role; "
                "format_conversation folds the instruction into the user turn.  Its three-token "
-               "header must match exactly (spans.allowed_header_mismatches: one wrong token is "
-               "tolerated only from four tokens on)."),
+               "header is accepted with one wrong token, like Qwen3's seven and Llama 3's four "
+               "(spans.allowed_header_mismatches; Roger, 2026-10-13)."),
     ),
     "olmo2": FamilySpec(
         model_type="olmo2",
@@ -155,8 +156,9 @@ FAMILIES: Dict[str, FamilySpec] = {
         end_token="<|endoftext|>",
         expected_header_tokens=None,
         notes=("allenai/OLMo-2-0325-32B-Instruct (or 7B/13B); which OLMo is open (§ 15 Q6).  "
-               "Its two-token header must match exactly (spans.allowed_header_mismatches; "
-               "built 2026-10-13, Roger: Gemma 2 needs it too)."),
+               "Its two-token header must match exactly (spans.allowed_header_mismatches; the "
+               "search is anchored on the opening tag, so one wrong token of two would accept "
+               "anything; Roger, 2026-10-13)."),
     ),
     "olmo3": FamilySpec(
         model_type="olmo3",

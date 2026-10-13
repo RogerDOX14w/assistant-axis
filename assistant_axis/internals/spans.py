@@ -16,11 +16,25 @@ logger = logging.getLogger(__name__)
 # the value the hand-written table had for "qwen").
 _DEFAULT_SEARCH_SLACK = 7
 
-# A header of at least this many tokens is accepted with one wrong token; a
-# shorter one must match exactly (Roger, 2026-10-13: Gemma 2's three-token
-# and OLMo 2's two-token headers, where one wrong token of two or three is
-# no match).  The 8slot run's seven tokens keep the one-token tolerance.
-EXACT_MATCH_BELOW = 4
+# A header of at least this many tokens is accepted with one wrong token
+# (N - 1 of N); a shorter one must match exactly.  Roger, 2026-10-13: 3, so
+# that Gemma 2's three-token header gets the same N - 1 rule as Qwen3's seven
+# and Llama 3's four (the most consistent behaviour), while OLMo 2's two
+# tokens must match exactly: the search is anchored on the opening tag, so
+# 1 of 2 would accept any token after it.
+#
+# TODO (Roger, 2026-10-13): the whole N - 1 tolerance is almost certainly
+# unnecessary.  The header is written by the chat template in both steps (the
+# generation prompt in step 1, the re-rendered history turn in step 2), never
+# by the model; and in the 8slot run (2,367 entities, about a million
+# conversations; the step-2 logs under runpod_workspace/qwen/qwen-3-32b Roger
+# 8slot/) step 2 logged zero header-token mismatches, tolerated or not, and no
+# header not found.  The rule dates from the first header-slot commit
+# (e979b30e, 2026-04-04, "Untested") with no recorded reason.  Once the other
+# families' smoke runs also show zero mismatches (the checks in
+# reports/pipeline/pre_extraction_pod_todo.md), make the match exact and
+# delete allowed_header_mismatches and EXACT_MATCH_BELOW.
+EXACT_MATCH_BELOW = 3
 
 
 def allowed_header_mismatches(n_header: int) -> int:
@@ -83,10 +97,12 @@ class SpanMapper:
         The nearest occurrence of the header's first token within the search
         distance is taken, and accepted when at most
         :func:`allowed_header_mismatches` of the N header tokens differ: one
-        for N >= 4 (what the 8slot run used for N = 7, so Qwen3 is
-        unchanged), none for a shorter header (Gemma 2's three tokens, OLMo
-        2's two; built 2026-10-13, the multi-model plan § 5.4, on Roger's
-        word: one wrong token of two or three is no match).
+        for N >= 3 (what the 8slot run used for N = 7, so Qwen3 is
+        unchanged; Llama 3's four and Gemma 2's three too), none for OLMo
+        2's two (Roger, 2026-10-13: the search is anchored on the opening
+        tag, so one wrong token of two would accept anything).  See the TODO
+        at :data:`EXACT_MATCH_BELOW`: the tolerance is almost certainly
+        unnecessary.
 
         Returns:
             (header_start_index, mismatches) where mismatches is a list of

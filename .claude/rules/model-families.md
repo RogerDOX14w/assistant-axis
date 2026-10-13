@@ -70,7 +70,14 @@ families" and its step 1 and step 2 sections.
 - **Single-family TODOs** (§ 15 Q6: built only when that family is
   confirmed): Llama's date pin, all of gpt-oss, and
   [`models.py`](assistant_axis/models.py)'s stub rows for the named models.
-  A header under four tokens must match exactly (Gemma 2's three, OLMo 2's
-  two; `spans.allowed_header_mismatches`, built 2026-10-13 on Roger's word
-  since two families need it); from four tokens on one wrong token is
-  tolerated, as the 8slot run's seven were.
+  A header under three tokens must match exactly (OLMo 2's two: the search
+  is anchored on the opening tag, so one wrong token of two would accept
+  anything); from three tokens on one wrong token is tolerated (Gemma 2's
+  three, Llama 3's four, the 8slot run's seven;
+  `spans.allowed_header_mismatches`, Roger, 2026-10-13).  **TODO**: the whole
+  tolerance is almost certainly unnecessary.  The template writes the header
+  in both steps, never the model, and the 8slot run's step-2 logs record zero
+  header-token mismatches, tolerated or not, over its 2,367 entities; the
+  TODO at `EXACT_MATCH_BELOW` in
+  [`spans.py`](assistant_axis/internals/spans.py) says when to remove it
+  (after the other families' smoke runs also show zero).

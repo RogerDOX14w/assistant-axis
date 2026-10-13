@@ -35,7 +35,10 @@ fakes compared bit for bit with a fixture made from the code before this work (8
 1. The golden fixture records `process_role`, not `extract_activations_batch` (same tensors; the latter's
    signature changed).
 2. The short-header tolerance rule of § 5.4 was first left a TODO (§ 15 Q6), then built the same day on
-   Roger's word (Gemma 2 needs it too): an exact match below four header tokens.
+   Roger's word (Gemma 2 needs it too): an exact match below four header tokens; the same day Roger set
+   the bound to three (Gemma 2's three keep the N - 1 rule, OLMo 2's two are exact) and had the whole
+   tolerance marked as almost certainly unnecessary (the TODO at `EXACT_MATCH_BELOW` in
+   [spans.py](../../assistant_axis/internals/spans.py)).
 3. `require_built` refuses the TODO `gpt_oss` row in both steps (a reading of § 15 Q3).
 4. `cleanup_applied` is not added (the fix batch's recommendation).
 5. [`whitening_k_weighted_scatter.py`](../../results_analysis/whitening_k_weighted_scatter.py) and [`rho_by_layer_simple.py`](../../results_analysis/rho_by_layer_simple.py) are not guarded (no data directory;
