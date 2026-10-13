@@ -8,6 +8,12 @@ activations for each conversation, saving them as .pt files per role.
 Supports automatic multi-worker parallelization when total GPUs > tensor_parallel_size.
 Number of workers = total_gpus // tensor_parallel_size
 
+The model's family (assistant_axis/model_families.py, keyed on config.json's
+model_type) gives the chat-template kwargs and the span builder; the header
+slots are derived from the model's own chat template before any model is
+loaded (assistant_axis/internals/chat_layout.py).  A model_type with no row
+in the table refuses to run (multi-model plan, 2026-10-13).
+
 Usage:
     uv run pipeline/2_activations.py \
         --model google/gemma-2-27b-it \
@@ -27,10 +33,65 @@ import logging
 import os
 import sys
 from pathlib import Path
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+class LayersError(ValueError):
+    """``--layers`` is not ``all`` or a strictly increasing list of layer
+    indices within the model's range."""
+
+
+def parse_layers(spec: str, n_layers: Optional[int]) -> List[int]:
+    """``--layers`` as model layer indices: ``all``, or comma-separated
+    integers, strictly increasing (sorted, no repeats) and within
+    ``[0, n_layers)``; with ``n_layers`` None only the form and the order are
+    checked.  Raises :class:`LayersError`.
+
+    Until 2026-10-13 any list was taken as given (review P2 D1): a negative
+    index picked a layer from the end and a repeated or unsorted one shifted
+    the layer axis, which is positional in ``--layers``, without a word."""
+    if spec.strip() == "all":
+        if n_layers is None:
+            return []
+        return list(range(n_layers))
+    have = f" (the model has {n_layers} layers, 0..{n_layers - 1})" if n_layers else ""
+    try:
+        layers = [int(x.strip()) for x in spec.split(",") if x.strip()]
+    except ValueError:
+        raise LayersError(f"--layers {spec!r}: not 'all' or a comma-separated list of "
+                          f"integers{have}") from None
+    if not layers:
+        raise LayersError(f"--layers {spec!r}: no layer given{have}")
+    if any(b <= a for a, b in zip(layers, layers[1:])):
+        raise LayersError(f"--layers {spec}: must be strictly increasing (sorted, no "
+                          f"repeats){have}")
+    bad = [x for x in layers if x < 0 or (n_layers is not None and x >= n_layers)]
+    if bad:
+        raise LayersError(f"--layers {spec}: {bad} out of range{have}")
+    return layers
+
+
+def _layers_arg(spec: str) -> str:
+    """argparse type for --layers: the form and order now, the range once the
+    model's layer count is known (main, and each worker after its load)."""
+    try:
+        parse_layers(spec, None)
+    except LayersError as e:
+        raise argparse.ArgumentTypeError(str(e)) from None
+    return spec
+
+
+class _RemovedFlag(argparse.Action):
+    """A flag that is gone: an argparse error saying why."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.error(f"{option_string} was removed on 2026-10-13 (multi-model plan, review "
+                     f"P2 D2): step 1 never generates with thinking on, and the chat-template "
+                     f"kwargs come from the model's family row (assistant_axis/model_families.py)")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -38,7 +99,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", type=str, required=True, help="HuggingFace model name")
     parser.add_argument("--responses_dir", type=str, required=True, help="Directory with response JSONL files")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for .pt files")
-    parser.add_argument("--layers", type=str, default="all", help="Layers to extract (all or comma-separated)")
+    parser.add_argument("--layers", type=_layers_arg, default="all",
+                        help="Layers to extract: all, or a comma-separated list of layer indices, "
+                             "strictly increasing and within the model's range")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
     parser.add_argument("--max_length", type=int, default=2048, help="Maximum sequence length")
     parser.add_argument("--tensor_parallel_size", type=int, default=None, help="GPUs per model (auto-detect if None)")
@@ -49,10 +112,14 @@ def build_parser() -> argparse.ArgumentParser:
                              "run_pipeline.sh's r_combinations / t_combinations "
                              "subset types so disk-limited runs can extract one "
                              "half of the combination grid at a time.")
-    parser.add_argument("--thinking", type=lambda x: x.lower() in ['true', '1', 'yes'], default=False,
-                       help="Enable thinking mode for Qwen models (default: False)")
+    parser.add_argument("--thinking", nargs="?", action=_RemovedFlag, help=argparse.SUPPRESS)
     parser.add_argument("--no-headers", action="store_true", default=False,
                        help="Disable header token extraction (legacy compat)")
+    parser.add_argument("--verify_spans", type=int, default=0, metavar="N",
+                        help="Before extracting each worker's first entity, decode the assistant "
+                             "span of its first N conversations and compare it with the stored "
+                             "content; exit 1 on any mismatch (default 0, off; the smoke runs "
+                             "pass 20)")
     return parser
 
 
@@ -92,6 +159,14 @@ from tqdm import tqdm  # noqa: E402
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from assistant_axis.internals import ProbingModel, ConversationEncoder, ActivationExtractor, SpanMapper  # noqa: E402
+from assistant_axis.internals.chat_layout import ChatLayout, LayoutError, derive_chat_layout  # noqa: E402
+from assistant_axis.model_families import (  # noqa: E402
+    FamilyNotBuiltError,
+    FamilySpec,
+    UnknownFamilyError,
+    family_for_model_type,
+    require_built,
+)
 
 
 def _hf_home_path() -> Path:
@@ -207,16 +282,91 @@ def load_responses(responses_file: Path) -> List[dict]:
     return read_jsonl_with_retry(responses_file, logger_obj=logger)
 
 
-def _interim_family(model_name: str):
-    """INTERIM (tasks 3-5 of the multi-model plan): the family by a substring
-    of the model name, as SpanMapper found it before; task 6 replaces this
-    with ProbingModel.family (config.model_type)."""
-    from assistant_axis.model_families import FAMILIES
-    name = model_name.lower()
-    for sub, key in (("qwen", "qwen3"), ("gemma", "gemma2"), ("llama", "llama")):
-        if sub in name:
-            return FAMILIES[key]
-    return None
+class ContractError(RuntimeError):
+    """A response file breaks the pipeline's single-turn contract: a
+    conversation with more than one assistant turn.  Step 1 writes exactly
+    one per record; until 2026-10-13 step 2 picked assistant turns by parity
+    (turns 1, 3, ...) and averaged them (review P2 D4)."""
+
+
+class SpanVerificationError(RuntimeError):
+    """``--verify_spans`` found an assistant span that does not decode to the
+    stored content."""
+
+
+@dataclass
+class Preflight:
+    """What step 2 knows before loading any model: the family row, the layer
+    count from ``config.json``, the tokenizer and the header layout derived
+    from its chat template (None when it could not be derived under
+    ``--no-headers``)."""
+
+    family: FamilySpec
+    n_layers: Optional[int]
+    tokenizer: object
+    layout: Optional[ChatLayout]
+
+
+def preflight_model(model_name: str, *, extract_headers: bool = True) -> Preflight:
+    """Read the model's ``config.json`` and tokenizer (a few MB, no weights):
+    refuse a ``model_type`` with no row or a row not built
+    (``UnknownFamilyError`` / ``FamilyNotBuiltError``; § 15 Q8, Q3), and derive
+    the header layout (``LayoutError`` when the template gives none).  Run
+    once in the parent before any worker loads the model."""
+    from transformers import AutoConfig, AutoTokenizer
+    cfg = AutoConfig.from_pretrained(model_name)
+    family = require_built(family_for_model_type(cfg.model_type))
+    n_layers = getattr(cfg, "num_hidden_layers", None)
+    if n_layers is None:          # a multimodal config keeps it in text_config
+        n_layers = getattr(getattr(cfg, "text_config", None), "num_hidden_layers", None)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    try:
+        layout = derive_chat_layout(tokenizer, family)
+    except LayoutError as e:
+        if extract_headers:
+            raise
+        logger.warning(f"--no-headers: no header layout derived ({e}); body means only")
+        layout = None
+    return Preflight(family=family, n_layers=n_layers, tokenizer=tokenizer, layout=layout)
+
+
+def log_layout(layout: Optional[ChatLayout], log=None) -> None:
+    log = log or logger
+    if layout is None:
+        return
+    log.info(f"Header layout ({layout.model_type}, template kwargs {layout.template_kwargs}): "
+             f"{len(layout.header_tokens)} tokens {list(layout.header_tokens)!r}, ids "
+             f"{list(layout.header_ids)}; generation prompt ids "
+             f"{list(layout.generation_prompt_ids)}")
+
+
+def verify_assistant_spans(pm: ProbingModel, conversations: List[List[Dict[str, str]]],
+                           n: int, *, entity: str, log=None) -> List[Dict]:
+    """``--verify_spans``: for the first ``n`` conversations, decode the
+    assistant span that slot 0 averages and compare it with the stored
+    content, both stripped of leading and trailing whitespace (the span
+    builders leave boundary whitespace out: the strip rule).  Each mismatch
+    is logged with both strings and returned."""
+    log = log or logger
+    family = pm.family
+    encoder = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder=family.span_builder)
+    kwargs = dict(family.template_kwargs)
+    mismatches = []
+    for i, conv in enumerate(conversations[:n]):
+        full_ids, spans = encoder.build_turn_spans(conv, **kwargs)
+        got = [pm.tokenizer.decode(full_ids[s["start"]:s["end"]],
+                                   clean_up_tokenization_spaces=False).strip()
+               for s in spans if s["role"] == "assistant"]
+        want = [m.get("content", "").strip() for m in conv
+                if m["role"] == "assistant" and m.get("content", "").strip()]
+        if got != want:
+            mismatches.append({"conversation": i, "decoded": got, "stored": want})
+            log.error(f"{entity}: conversation {i}: the assistant span decodes to {got!r}; "
+                      f"the stored content is {want!r}")
+    checked = min(n, len(conversations))
+    log.info(f"{entity}: --verify_spans: {checked - len(mismatches)} of {checked} assistant "
+             f"spans decode to the stored content")
+    return mismatches
 
 
 def extract_activations_batch(
@@ -225,53 +375,54 @@ def extract_activations_batch(
     layers: List[int],
     batch_size: int = 16,
     max_length: int = 2048,
-    enable_thinking: bool = False,
+    *,
+    layout: Optional[ChatLayout] = None,
     extract_headers: bool = True,
+    entity: str = "?",
 ) -> tuple[List[Optional[torch.Tensor]], List[Dict], Dict]:
     """Extract mean response activations for a batch of conversations.
+
+    The family (``pm.family``, from the loaded model's ``config.model_type``;
+    an unknown type raises ``UnknownFamilyError``) gives the template kwargs
+    and the span builder; ``layout`` (derived from the template when None)
+    gives the header slots.  Each conversation must have at most one
+    assistant turn (:class:`ContractError` otherwise): its activation is that
+    turn's, ``(1 + N, n_layers, hidden)`` with headers, ``(n_layers,
+    hidden)`` without; none when the response is empty or cut away.
 
     Returns:
         (activations_list, all_mismatches, header_metadata) -- one activation
         tensor per conversation (or None), accumulated header-token mismatch
-        records, and header metadata dict (empty when headers not extracted).
+        records, and the layout's metadata (``header_tokens``, ``header_ids``,
+        ``model_name``, ``extract_headers``, ``model_type``,
+        ``template_kwargs``, ``generation_prompt_ids``; only ``model_type``
+        and ``template_kwargs`` when headers are not extracted).
     """
-    encoder = ConversationEncoder(pm.tokenizer, pm.model_name)
+    family = pm.family
+    chat_kwargs = dict(family.template_kwargs)
+    encoder = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder=family.span_builder)
     extractor = ActivationExtractor(pm, encoder)
 
-    # INTERIM (multi-model plan, task 3 until task 6): the header ids come
-    # from the chat template (chat_layout.derive_chat_layout); the family is
-    # still found by a substring of --model until ProbingModel knows its
-    # model_type (task 5) and step 2 derives the layout once per worker.
     header_metadata: Dict = {}
-    layout = None
     if extract_headers:
-        family = _interim_family(pm.model_name)
-        if family is None:
-            # Header slots off: each activation is (layers, hidden), not
-            # (1 + N, layers, hidden).  The model family comes from a
-            # substring of --model, so a local path without "qwen" in it
-            # lands here too; say so rather than change the layout silently.
-            logger.warning(f"Header extraction requested but unavailable (Unrecognized model "
-                           f"family for header extraction: {pm.model_name.lower()}); "
-                           f"saving body means only, without header slots")
-        else:
-            from assistant_axis.internals.chat_layout import derive_chat_layout
+        if layout is None:
             layout = derive_chat_layout(pm.tokenizer, family)
-            header_metadata = {
-                "header_tokens": list(layout.header_tokens),
-                "header_ids": list(layout.header_ids),
-                "model_name": pm.model_name,
-                "extract_headers": True,
-            }
+        header_metadata = {
+            "header_tokens": list(layout.header_tokens),
+            "header_ids": list(layout.header_ids),
+            "model_name": pm.model_name,
+            "extract_headers": True,
+        }
+    else:
+        layout = None
+    header_metadata.update({"model_type": family.model_type,
+                            "template_kwargs": dict(family.template_kwargs)})
+    if layout is not None:
+        header_metadata["generation_prompt_ids"] = list(layout.generation_prompt_ids)
     span_mapper = SpanMapper(
         pm.tokenizer,
         header_ids=layout.header_ids if layout is not None else None,
         search_distance=layout.search_distance if layout is not None else None)
-
-    # Build chat_kwargs for Qwen models
-    chat_kwargs = {}
-    if 'qwen' in pm.model_name.lower():
-        chat_kwargs['enable_thinking'] = enable_thinking
 
     print(f"DEBUG: chat_kwargs = {chat_kwargs}")
 
@@ -315,40 +466,32 @@ def extract_activations_batch(
                     print(f"  Actual tokens before span[{cid}] start={s}: {window}")
                     shown += 1
 
-        conv_activations_list, mismatches, _turn_roles = span_mapper.map_spans(
+        conv_activations_list, mismatches, turn_roles = span_mapper.map_spans(
             batch_activations, batch_spans, batch_metadata,
             batch_full_ids=batch_full_ids,
             extract_headers=extract_headers,
         )
         all_mismatches.extend(mismatches)
 
-        for conv_acts in conv_activations_list:
-            if conv_acts.numel() == 0:
+        # The assistant turn by its role (multi-model plan § 5.4), not by
+        # parity: exactly one is allowed.  For a [system?, user, assistant]
+        # conversation it is turn 1, which is what the parity rule (1::2)
+        # picked; indexing it gives the same bf16 values as the nanmean over
+        # a size-1 axis that the parity rule took (the golden gate checks).
+        for local, (conv_acts, roles) in enumerate(zip(conv_activations_list, turn_roles)):
+            assistant_turns = [t for t, r in enumerate(roles) if r == "assistant"]
+            if len(assistant_turns) > 1:
+                raise ContractError(
+                    f"{entity}: conversation {batch_start + local} has {len(assistant_turns)} "
+                    f"assistant turns; the pipeline is single-turn")
+            if not assistant_turns or conv_acts.numel() == 0:
                 all_activations.append(None)
                 continue
-
-            if conv_acts.ndim == 4:
-                # (1+N, turns, layers, hidden) -> mean across assistant turns per slot
-                if conv_acts.shape[1] >= 2:
-                    assistant_slots = conv_acts[:, 1::2, :, :]
-                    if assistant_slots.shape[1] > 0:
-                        mean_act = assistant_slots.nanmean(dim=1).cpu()  # (1+N, layers, hidden)
-                        all_activations.append(mean_act)
-                    else:
-                        all_activations.append(None)
-                else:
-                    all_activations.append(None)
-            else:
-                # 3D: (turns, layers, hidden) -- no-headers path
-                if conv_acts.shape[0] >= 2:
-                    assistant_act = conv_acts[1::2]
-                    if assistant_act.shape[0] > 0:
-                        mean_act = assistant_act.mean(dim=0).cpu()  # (layers, hidden)
-                        all_activations.append(mean_act)
-                    else:
-                        all_activations.append(None)
-                else:
-                    all_activations.append(None)
+            t = assistant_turns[0]
+            # A copy, not a view: a view would keep (and torch.save would
+            # write) the whole stacked turns tensor.
+            act = conv_acts[:, t] if conv_acts.ndim == 4 else conv_acts[t]
+            all_activations.append(act.to("cpu", copy=True))   # (1+N, layers, hidden) or (layers, hidden)
 
         # Cleanup
         del batch_activations
@@ -365,10 +508,16 @@ def process_role(
     layers: List[int],
     batch_size: int,
     max_length: int,
-    enable_thinking: bool = False,
+    *,
+    layout: Optional[ChatLayout] = None,
     extract_headers: bool = True,
+    verify_spans: int = 0,
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
+
+    ``layout`` is the worker's header layout (derived from the template when
+    None); ``verify_spans`` > 0 runs :func:`verify_assistant_spans` on the
+    first that many conversations before extracting anything.
 
     Returns:
         (saved, mismatch_count) for the caller to accumulate; ``saved`` is
@@ -378,6 +527,8 @@ def process_role(
     Raises:
         NoActivationsError: the file had conversations but not one of them
             yielded an activation, so nothing was saved.
+        ContractError: a conversation has more than one assistant turn.
+        SpanVerificationError: ``--verify_spans`` found a mismatch.
     """
     role = role_file.stem
     output_file = output_dir / f"{role}.pt"
@@ -401,14 +552,22 @@ def process_role(
 
     logger.info(f"Processing {role}: {len(conversations)} conversations")
 
+    if verify_spans > 0:
+        bad = verify_assistant_spans(pm, conversations, verify_spans, entity=role)
+        if bad:
+            raise SpanVerificationError(
+                f"{role}: {len(bad)} of {min(verify_spans, len(conversations))} assistant spans "
+                f"do not decode to the stored content (logged above); nothing extracted")
+
     activations_list, mismatches, header_metadata = extract_activations_batch(
         pm=pm,
         conversations=conversations,
         layers=layers,
         batch_size=batch_size,
         max_length=max_length,
-        enable_thinking=enable_thinking,
+        layout=layout,
         extract_headers=extract_headers,
+        entity=role,
     )
 
     if mismatches:
@@ -473,12 +632,15 @@ def process_role(
         # layer axis, which is positional in --layers: a subset gives an axis
         # shorter than the model's; step 5 does not yet check the lists agree.  Files
         # written before lack these keys; every one of them used all layers.
+        # Since 2026-10-13 (multi-model plan § 7) also model_type,
+        # template_kwargs and, with headers, generation_prompt_ids; the
+        # "thinking" key written on 2026-10-12 went (it was False in every
+        # file; template_kwargs carries enable_thinking now).
         file_metadata = dict(header_metadata)
         file_metadata.setdefault("extract_headers", False)
         file_metadata.update({
             "layers": [int(x) for x in layers],
             "max_length": int(max_length),
-            "thinking": bool(enable_thinking),
             "batch_size": int(batch_size),
         })
         activations_dict["metadata"] = file_metadata
@@ -496,6 +658,32 @@ def process_role(
     torch.cuda.empty_cache()
 
     return True, len(mismatches)
+
+
+def load_worker_model(args, log=None):
+    """Load the model and set up what every entity of this process uses:
+    ``(pm, layers, layout)``.  The family is the loaded model's
+    (``config.model_type``; refused if unknown or not built), ``--layers`` is
+    checked against its layer count, and the header layout is derived once
+    from its tokenizer (and must equal the preflight's ids, which main put on
+    ``args.expected_header_ids``)."""
+    log = log or logger
+    log.info(f"Loading model: {args.model}")
+    pm = ProbingModel(args.model, hf_load_kwargs=getattr(args, "hf_load_kwargs", None))
+    family = require_built(pm.family)
+    n_layers = len(pm.get_layers())
+    layers = parse_layers(args.layers, n_layers)
+    log.info(f"Model has {n_layers} layers; extracting {len(layers)}")
+    layout = None
+    if not args.no_headers:
+        layout = derive_chat_layout(pm.tokenizer, family)
+        expected = getattr(args, "expected_header_ids", None)
+        if expected is not None and list(layout.header_ids) != list(expected):
+            raise LayoutError(
+                f"the loaded model's tokenizer derives the header ids {list(layout.header_ids)}; "
+                f"the preflight derived {list(expected)}")
+        log_layout(layout, log)
+    return pm, layers, layout
 
 
 def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List[Path], args):
@@ -532,18 +720,8 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
     exit_code = 0
 
     try:
-        # Load model
-        worker_logger.info(f"Loading model: {args.model}")
-        pm = ProbingModel(args.model)
-
-        # Determine layers
-        n_layers = len(pm.get_layers())
-        if args.layers == "all":
-            layers = list(range(n_layers))
-        else:
-            layers = [int(x.strip()) for x in args.layers.split(",")]
-
-        worker_logger.info(f"Extracting {len(layers)} layers")
+        # Load the model; the layout is derived once per worker
+        pm, layers, layout = load_worker_model(args, worker_logger)
 
         # Process assigned roles
         extract_headers = not args.no_headers
@@ -552,18 +730,22 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
         failed_count = 0
         total_mismatches = 0
 
-        for role_file in tqdm(role_files, desc=f"Worker-{worker_id}", position=worker_id):
+        for i, role_file in enumerate(tqdm(role_files, desc=f"Worker-{worker_id}",
+                                           position=worker_id)):
             try:
                 saved, n_mm = process_role(
                     pm, role_file, output_dir, layers,
-                    args.batch_size, args.max_length, args.thinking,
-                    extract_headers=extract_headers,
+                    args.batch_size, args.max_length,
+                    layout=layout, extract_headers=extract_headers,
+                    verify_spans=getattr(args, "verify_spans", 0) if i == 0 else 0,
                 )
                 total_mismatches += n_mm
                 if saved:
                     completed_count += 1
                 else:
                     empty_count += 1
+            except SpanVerificationError:
+                raise                     # the spans are wrong for every entity: stop
             except Exception as e:
                 failed_count += 1
                 worker_logger.error(f"Exception processing {role_file.stem}: {e}",
@@ -685,7 +867,8 @@ def run_multi_worker(args) -> int:
 
 
 def main():
-    args = build_parser().parse_args()
+    parser = build_parser()
+    args = parser.parse_args()
 
     # Set up file logging (append to output_dir/activations.log)
     output_dir = Path(args.output_dir)
@@ -698,6 +881,36 @@ def main():
     # loading large models from NFS-backed HF caches silently hangs for
     # hours on cold mmap reads.  Advisory only; doesn't block the run.
     _warn_if_hf_cache_not_tmpfs(args.model)
+
+    # Determine which roles need processing -- BEFORE reading the model's
+    # config or loading it.  This lets the script run cleanly on a CPU-only
+    # box when all activations are already cached (e.g. re-running just to
+    # drive the downstream pipeline steps).
+    responses_dir = Path(args.responses_dir)
+    role_files = pending_response_files(responses_dir, output_dir,
+                                        roles=args.roles, name_prefix=args.name_prefix)
+    if not role_files:
+        logger.info("Nothing to process — all activations already exist")
+        return
+
+    # Before any model is loaded (multi-model plan § 5.4): the family from
+    # config.json (an unknown model_type or a row not built refuses), the
+    # header layout from the tokenizer's chat template, --layers against the
+    # layer count.  Each worker derives the layout again from its own load
+    # and must find the same ids.
+    try:
+        pre = preflight_model(args.model, extract_headers=not args.no_headers)
+    except (UnknownFamilyError, FamilyNotBuiltError, LayoutError) as e:
+        logger.error(f"{args.model}: {e}")
+        sys.exit(1)
+    try:
+        parse_layers(args.layers, pre.n_layers)
+    except LayersError as e:
+        parser.error(str(e))
+    log_layout(pre.layout)
+    args.hf_load_kwargs = dict(pre.family.hf_load_kwargs)
+    args.expected_header_ids = (list(pre.layout.header_ids)
+                                if pre.layout is not None and not args.no_headers else None)
 
     # Detect GPUs for multi-worker decision
     if 'CUDA_VISIBLE_DEVICES' in os.environ:
@@ -727,47 +940,19 @@ def main():
         # Single-worker mode
         logger.info(f"Single-worker mode: Using {tensor_parallel_size} GPU(s)")
 
-        output_dir = Path(args.output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        responses_dir = Path(args.responses_dir)
-
-        # Determine which roles need processing -- BEFORE loading the model.
-        # This lets the script run cleanly on a CPU-only box when all
-        # activations are already cached (e.g. re-running just to drive the
-        # downstream pipeline steps).  Loading ProbingModel triggers a
-        # multi-GB GPU allocation, which would fail without CUDA even when
-        # there's no actual work to do.
-        role_files = pending_response_files(responses_dir, output_dir,
-                                            roles=args.roles, name_prefix=args.name_prefix)
-
-        if not role_files:
-            logger.info("Nothing to process — all activations already exist")
-            return
-
-        # Load model
-        logger.info(f"Loading model: {args.model}")
-        pm = ProbingModel(args.model)
-
-        n_layers = len(pm.get_layers())
-        logger.info(f"Model has {n_layers} layers")
-
-        if args.layers == "all":
-            layers = list(range(n_layers))
-        else:
-            layers = [int(x.strip()) for x in args.layers.split(",")]
-
-        logger.info(f"Extracting {len(layers)} layers")
+        pm, layers, layout = load_worker_model(args)
 
         extract_headers = not args.no_headers
         total_mismatches = 0
         no_activations: List[str] = []
 
-        for role_file in tqdm(role_files, desc="Processing roles"):
+        for i, role_file in enumerate(tqdm(role_files, desc="Processing roles")):
             try:
                 _, n_mm = process_role(
                     pm, role_file, output_dir, layers,
-                    args.batch_size, args.max_length, args.thinking,
-                    extract_headers=extract_headers,
+                    args.batch_size, args.max_length,
+                    layout=layout, extract_headers=extract_headers,
+                    verify_spans=args.verify_spans if i == 0 else 0,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any
@@ -775,6 +960,9 @@ def main():
                 logger.error(str(e))
                 no_activations.append(role_file.stem)
                 continue
+            except SpanVerificationError as e:
+                logger.error(str(e))
+                sys.exit(1)
             total_mismatches += n_mm
 
         if total_mismatches:

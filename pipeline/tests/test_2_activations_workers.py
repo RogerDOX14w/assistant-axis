@@ -79,13 +79,29 @@ def test_a_worker_reporting_failed_roles_returns_1(mod, monkeypatch, tmp_path):
 # ---------------------------------------------------------------------------
 
 class _FakePM:
+    """What load_worker_model reads: the layers, the family row and a
+    tokenizer whose chat template the header layout is derived from (since
+    the multi-model plan, 2026-10-13)."""
+
+    model_name = "Qwen/Qwen3-32B"
+
+    def __init__(self):
+        from assistant_axis.model_families import FAMILIES
+        from assistant_axis.tests.internals_fakes import make_qwen3_like_tokenizer
+        self.family = FAMILIES["qwen3"]
+        self.tokenizer = make_qwen3_like_tokenizer()
+
     def get_layers(self):
         return [object()] * 3
 
 
+def _fake_probing_model(_name, **kwargs):
+    return _FakePM()
+
+
 def _worker_args(tmp_path):
     return argparse.Namespace(model="Qwen/Qwen3-32B", output_dir=str(tmp_path), layers="all",
-                              no_headers=False, batch_size=2, max_length=2048, thinking=False)
+                              no_headers=False, batch_size=2, max_length=2048, verify_spans=0)
 
 
 def _role_files(tmp_path, names=("alpha", "beta")):
@@ -95,7 +111,7 @@ def _role_files(tmp_path, names=("alpha", "beta")):
 def test_worker_exits_1_when_the_model_fails_to_load(mod, monkeypatch, tmp_path):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")    # the worker overwrites it
 
-    def boom(_name):
+    def boom(_name, **kwargs):
         raise RuntimeError("CUDA out of memory")
 
     monkeypatch.setattr(mod, "ProbingModel", boom)
@@ -106,7 +122,7 @@ def test_worker_exits_1_when_the_model_fails_to_load(mod, monkeypatch, tmp_path)
 
 def test_worker_exits_1_when_a_role_raises_and_still_does_the_rest(mod, monkeypatch, tmp_path):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
-    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    monkeypatch.setattr(mod, "ProbingModel", _fake_probing_model)
     done = []
 
     def fake_process_role(pm, role_file, *a, **k):
@@ -124,7 +140,7 @@ def test_worker_exits_1_when_a_role_raises_and_still_does_the_rest(mod, monkeypa
 
 def test_worker_returns_normally_when_every_role_is_saved_or_empty(mod, monkeypatch, tmp_path):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
-    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    monkeypatch.setattr(mod, "ProbingModel", _fake_probing_model)
     # "beta" has no responses: a warning, not a failure.
     monkeypatch.setattr(mod, "process_role",
                         lambda pm, role_file, *a, **k: (role_file.stem == "alpha", 0))
@@ -142,7 +158,7 @@ def test_single_worker_mode_exits_1_after_a_role_with_no_activations(
     for name in ("alpha", "beta"):
         (responses / f"{name}.jsonl").write_text("{}\n")
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")    # no GPUs: single-worker mode
-    monkeypatch.setattr(mod, "ProbingModel", lambda _name: _FakePM())
+    monkeypatch.setattr(mod, "ProbingModel", _fake_probing_model)
     done = []
 
     def fake_process_role(pm, role_file, *a, **k):
@@ -152,6 +168,13 @@ def test_single_worker_mode_exits_1_after_a_role_with_no_activations(
         return True, 0
 
     monkeypatch.setattr(mod, "process_role", fake_process_role)
+    # The preflight reads config.json and the tokenizer (never on the Mac):
+    # faked with the qwen3 row and the Qwen3-like tokenizer.
+    from assistant_axis.model_families import FAMILIES
+    fake = _FakePM()
+    monkeypatch.setattr(mod, "preflight_model", lambda name, **kw: mod.Preflight(
+        family=FAMILIES["qwen3"], n_layers=3, tokenizer=fake.tokenizer,
+        layout=mod.derive_chat_layout(fake.tokenizer, FAMILIES["qwen3"])))
     monkeypatch.setattr(_sys, "argv", [
         "2_activations.py", "--model", "Qwen/Qwen3-32B",
         "--responses_dir", str(responses), "--output_dir", str(tmp_path / "out")])
