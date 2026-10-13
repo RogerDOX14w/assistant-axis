@@ -1,0 +1,1082 @@
+[
+ {
+  "schema_version": 1,
+  "id": "via:creativity:strength",
+  "scheme": "via",
+  "item": "creativity",
+  "role": "strength",
+  "gloss": "thinking of new and productive ways to do things",
+  "sibling_ids": [
+   "via:creativity:underuse",
+   "via:creativity:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:creativity:underuse",
+  "scheme": "via",
+  "item": "conformity",
+  "role": "underuse",
+  "gloss": "creativity used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:creativity:strength",
+   "via:creativity:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:creativity:overuse",
+  "scheme": "via",
+  "item": "eccentricity",
+  "role": "overuse",
+  "gloss": "creativity used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:creativity:strength",
+   "via:creativity:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:curiosity:strength",
+  "scheme": "via",
+  "item": "curiosity",
+  "role": "strength",
+  "gloss": "taking an interest in experience for its own sake, exploring and discovering",
+  "sibling_ids": [
+   "via:curiosity:underuse",
+   "via:curiosity:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:curiosity:underuse",
+  "scheme": "via",
+  "item": "disinterest",
+  "role": "underuse",
+  "gloss": "curiosity used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:curiosity:strength",
+   "via:curiosity:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also boredom; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:curiosity:overuse",
+  "scheme": "via",
+  "item": "nosiness",
+  "role": "overuse",
+  "gloss": "curiosity used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:curiosity:strength",
+   "via:curiosity:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also intrusiveness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:judgment:strength",
+  "scheme": "via",
+  "item": "judgment",
+  "role": "strength",
+  "gloss": "thinking things through and examining them from all sides; not jumping to conclusions",
+  "sibling_ids": [
+   "via:judgment:underuse",
+   "via:judgment:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:judgment:underuse",
+  "scheme": "via",
+  "item": "unreflectiveness",
+  "role": "underuse",
+  "gloss": "judgment used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:judgment:strength",
+   "via:judgment:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also gullibility; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:judgment:overuse",
+  "scheme": "via",
+  "item": "narrow-mindedness",
+  "role": "overuse",
+  "gloss": "judgment used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:judgment:strength",
+   "via:judgment:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also cynicism; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love_of_learning:strength",
+  "scheme": "via",
+  "item": "love of learning",
+  "role": "strength",
+  "gloss": "mastering new skills, topics and bodies of knowledge",
+  "sibling_ids": [
+   "via:love_of_learning:underuse",
+   "via:love_of_learning:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love_of_learning:underuse",
+  "scheme": "via",
+  "item": "complacency",
+  "role": "underuse",
+  "gloss": "love of learning used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:love_of_learning:strength",
+   "via:love_of_learning:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love_of_learning:overuse",
+  "scheme": "via",
+  "item": "know-it-all-ism",
+  "role": "overuse",
+  "gloss": "love of learning used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:love_of_learning:strength",
+   "via:love_of_learning:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perspective:strength",
+  "scheme": "via",
+  "item": "perspective",
+  "role": "strength",
+  "gloss": "being able to give wise counsel; seeing the world in ways that make sense to oneself and others",
+  "sibling_ids": [
+   "via:perspective:underuse",
+   "via:perspective:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perspective:underuse",
+  "scheme": "via",
+  "item": "superficiality",
+  "role": "underuse",
+  "gloss": "perspective used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:perspective:strength",
+   "via:perspective:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also shallowness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perspective:overuse",
+  "scheme": "via",
+  "item": "overbearing",
+  "role": "overuse",
+  "gloss": "perspective used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:perspective:strength",
+   "via:perspective:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also pushiness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:bravery:strength",
+  "scheme": "via",
+  "item": "bravery",
+  "role": "strength",
+  "gloss": "not shrinking from threat, challenge, difficulty or pain; speaking up for what is right",
+  "sibling_ids": [
+   "via:bravery:underuse",
+   "via:bravery:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:bravery:underuse",
+  "scheme": "via",
+  "item": "cowardice",
+  "role": "underuse",
+  "gloss": "bravery used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:bravery:strength",
+   "via:bravery:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also debilitating fear; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:bravery:overuse",
+  "scheme": "via",
+  "item": "foolhardiness",
+  "role": "overuse",
+  "gloss": "bravery used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:bravery:strength",
+   "via:bravery:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also risk-taking; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perseverance:strength",
+  "scheme": "via",
+  "item": "perseverance",
+  "role": "strength",
+  "gloss": "finishing what one starts; persisting in the face of obstacles",
+  "sibling_ids": [
+   "via:perseverance:underuse",
+   "via:perseverance:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perseverance:underuse",
+  "scheme": "via",
+  "item": "fragility",
+  "role": "underuse",
+  "gloss": "perseverance used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:perseverance:strength",
+   "via:perseverance:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also laziness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:perseverance:overuse",
+  "scheme": "via",
+  "item": "obsessiveness",
+  "role": "overuse",
+  "gloss": "perseverance used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:perseverance:strength",
+   "via:perseverance:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also stubbornness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:honesty:strength",
+  "scheme": "via",
+  "item": "honesty",
+  "role": "strength",
+  "gloss": "speaking the truth and presenting oneself genuinely",
+  "sibling_ids": [
+   "via:honesty:underuse",
+   "via:honesty:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:honesty:underuse",
+  "scheme": "via",
+  "item": "phoniness",
+  "role": "underuse",
+  "gloss": "honesty used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:honesty:strength",
+   "via:honesty:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also inauthenticity; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:honesty:overuse",
+  "scheme": "via",
+  "item": "righteousness",
+  "role": "overuse",
+  "gloss": "honesty used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:honesty:strength",
+   "via:honesty:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:zest:strength",
+  "scheme": "via",
+  "item": "zest",
+  "role": "strength",
+  "gloss": "approaching life with excitement and energy",
+  "sibling_ids": [
+   "via:zest:underuse",
+   "via:zest:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:zest:underuse",
+  "scheme": "via",
+  "item": "sedentary",
+  "role": "underuse",
+  "gloss": "zest used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:zest:strength",
+   "via:zest:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also restraint; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:zest:overuse",
+  "scheme": "via",
+  "item": "hyperactivity",
+  "role": "overuse",
+  "gloss": "zest used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:zest:strength",
+   "via:zest:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also overexcitement; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love:strength",
+  "scheme": "via",
+  "item": "love",
+  "role": "strength",
+  "gloss": "valuing close relations with others, in which care is given and returned",
+  "sibling_ids": [
+   "via:love:underuse",
+   "via:love:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love:underuse",
+  "scheme": "via",
+  "item": "emotional isolation",
+  "role": "underuse",
+  "gloss": "love used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:love:strength",
+   "via:love:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also aloofness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:love:overuse",
+  "scheme": "via",
+  "item": "emotional promiscuity",
+  "role": "overuse",
+  "gloss": "love used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:love:strength",
+   "via:love:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:kindness:strength",
+  "scheme": "via",
+  "item": "kindness",
+  "role": "strength",
+  "gloss": "doing favors and good deeds for others",
+  "sibling_ids": [
+   "via:kindness:underuse",
+   "via:kindness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:kindness:underuse",
+  "scheme": "via",
+  "item": "indifference",
+  "role": "underuse",
+  "gloss": "kindness used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:kindness:strength",
+   "via:kindness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also selfishness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:kindness:overuse",
+  "scheme": "via",
+  "item": "intrusiveness",
+  "role": "overuse",
+  "gloss": "kindness used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:kindness:strength",
+   "via:kindness:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:social_intelligence:strength",
+  "scheme": "via",
+  "item": "social intelligence",
+  "role": "strength",
+  "gloss": "being aware of the motives and feelings of others and of oneself",
+  "sibling_ids": [
+   "via:social_intelligence:underuse",
+   "via:social_intelligence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:social_intelligence:underuse",
+  "scheme": "via",
+  "item": "obtuseness",
+  "role": "underuse",
+  "gloss": "social intelligence used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:social_intelligence:strength",
+   "via:social_intelligence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also cluelessness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:social_intelligence:overuse",
+  "scheme": "via",
+  "item": "over-analysis",
+  "role": "overuse",
+  "gloss": "social intelligence used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:social_intelligence:strength",
+   "via:social_intelligence:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also self-deception; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:teamwork:strength",
+  "scheme": "via",
+  "item": "teamwork",
+  "role": "strength",
+  "gloss": "working well as a member of a group, being loyal and doing one's share",
+  "sibling_ids": [
+   "via:teamwork:underuse",
+   "via:teamwork:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:teamwork:underuse",
+  "scheme": "via",
+  "item": "selfishness",
+  "role": "underuse",
+  "gloss": "teamwork used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:teamwork:strength",
+   "via:teamwork:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:teamwork:overuse",
+  "scheme": "via",
+  "item": "dependence",
+  "role": "overuse",
+  "gloss": "teamwork used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:teamwork:strength",
+   "via:teamwork:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also chauvinism; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:fairness:strength",
+  "scheme": "via",
+  "item": "fairness",
+  "role": "strength",
+  "gloss": "treating all people the same according to notions of fairness and justice",
+  "sibling_ids": [
+   "via:fairness:underuse",
+   "via:fairness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:fairness:underuse",
+  "scheme": "via",
+  "item": "partisanship",
+  "role": "underuse",
+  "gloss": "fairness used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:fairness:strength",
+   "via:fairness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:fairness:overuse",
+  "scheme": "via",
+  "item": "detachment",
+  "role": "overuse",
+  "gloss": "fairness used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:fairness:strength",
+   "via:fairness:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:leadership:strength",
+  "scheme": "via",
+  "item": "leadership",
+  "role": "strength",
+  "gloss": "encouraging a group to get things done while keeping good relations within it",
+  "sibling_ids": [
+   "via:leadership:underuse",
+   "via:leadership:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:leadership:underuse",
+  "scheme": "via",
+  "item": "compliance",
+  "role": "underuse",
+  "gloss": "leadership used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:leadership:strength",
+   "via:leadership:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:leadership:overuse",
+  "scheme": "via",
+  "item": "despotism",
+  "role": "overuse",
+  "gloss": "leadership used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:leadership:strength",
+   "via:leadership:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also bossiness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:forgiveness:strength",
+  "scheme": "via",
+  "item": "forgiveness",
+  "role": "strength",
+  "gloss": "forgiving those who have done wrong; giving people a second chance",
+  "sibling_ids": [
+   "via:forgiveness:underuse",
+   "via:forgiveness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:forgiveness:underuse",
+  "scheme": "via",
+  "item": "mercilessness",
+  "role": "underuse",
+  "gloss": "forgiveness used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:forgiveness:strength",
+   "via:forgiveness:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also vengefulness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:forgiveness:overuse",
+  "scheme": "via",
+  "item": "permissiveness",
+  "role": "overuse",
+  "gloss": "forgiveness used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:forgiveness:strength",
+   "via:forgiveness:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humility:strength",
+  "scheme": "via",
+  "item": "humility",
+  "role": "strength",
+  "gloss": "letting one's accomplishments speak for themselves; not regarding oneself as more special than one is",
+  "sibling_ids": [
+   "via:humility:underuse",
+   "via:humility:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humility:underuse",
+  "scheme": "via",
+  "item": "baseless self-esteem",
+  "role": "underuse",
+  "gloss": "humility used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:humility:strength",
+   "via:humility:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also arrogance; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humility:overuse",
+  "scheme": "via",
+  "item": "self-deprecation",
+  "role": "overuse",
+  "gloss": "humility used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:humility:strength",
+   "via:humility:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:prudence:strength",
+  "scheme": "via",
+  "item": "prudence",
+  "role": "strength",
+  "gloss": "being careful about one's choices; not taking undue risks",
+  "sibling_ids": [
+   "via:prudence:underuse",
+   "via:prudence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:prudence:underuse",
+  "scheme": "via",
+  "item": "sensation-seeking",
+  "role": "underuse",
+  "gloss": "prudence used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:prudence:strength",
+   "via:prudence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also thrill-seeking; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:prudence:overuse",
+  "scheme": "via",
+  "item": "stuffiness",
+  "role": "overuse",
+  "gloss": "prudence used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:prudence:strength",
+   "via:prudence:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also prudishness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:self_regulation:strength",
+  "scheme": "via",
+  "item": "self-regulation",
+  "role": "strength",
+  "gloss": "regulating what one feels and does; being disciplined",
+  "sibling_ids": [
+   "via:self_regulation:underuse",
+   "via:self_regulation:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:self_regulation:underuse",
+  "scheme": "via",
+  "item": "self-indulgence",
+  "role": "underuse",
+  "gloss": "self-regulation used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:self_regulation:strength",
+   "via:self_regulation:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:self_regulation:overuse",
+  "scheme": "via",
+  "item": "inhibition",
+  "role": "overuse",
+  "gloss": "self-regulation used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:self_regulation:strength",
+   "via:self_regulation:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:appreciation_of_beauty_and_excellence:strength",
+  "scheme": "via",
+  "item": "appreciation of beauty and excellence",
+  "role": "strength",
+  "gloss": "noticing and appreciating beauty, excellence and skilled performance",
+  "sibling_ids": [
+   "via:appreciation_of_beauty_and_excellence:underuse",
+   "via:appreciation_of_beauty_and_excellence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:appreciation_of_beauty_and_excellence:underuse",
+  "scheme": "via",
+  "item": "oblivion",
+  "role": "underuse",
+  "gloss": "appreciation of beauty and excellence used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:appreciation_of_beauty_and_excellence:strength",
+   "via:appreciation_of_beauty_and_excellence:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:appreciation_of_beauty_and_excellence:overuse",
+  "scheme": "via",
+  "item": "snobbery",
+  "role": "overuse",
+  "gloss": "appreciation of beauty and excellence used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:appreciation_of_beauty_and_excellence:strength",
+   "via:appreciation_of_beauty_and_excellence:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also perfectionism; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:gratitude:strength",
+  "scheme": "via",
+  "item": "gratitude",
+  "role": "strength",
+  "gloss": "being aware of and thankful for the good things that happen",
+  "sibling_ids": [
+   "via:gratitude:underuse",
+   "via:gratitude:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:gratitude:underuse",
+  "scheme": "via",
+  "item": "rugged individualism",
+  "role": "underuse",
+  "gloss": "gratitude used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:gratitude:strength",
+   "via:gratitude:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also entitlement; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:gratitude:overuse",
+  "scheme": "via",
+  "item": "ingratiation",
+  "role": "overuse",
+  "gloss": "gratitude used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:gratitude:strength",
+   "via:gratitude:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:hope:strength",
+  "scheme": "via",
+  "item": "hope",
+  "role": "strength",
+  "gloss": "expecting the best in the future and working to achieve it",
+  "sibling_ids": [
+   "via:hope:underuse",
+   "via:hope:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:hope:underuse",
+  "scheme": "via",
+  "item": "negativity",
+  "role": "underuse",
+  "gloss": "hope used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:hope:strength",
+   "via:hope:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also despair; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:hope:overuse",
+  "scheme": "via",
+  "item": "Pollyannaism",
+  "role": "overuse",
+  "gloss": "hope used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:hope:strength",
+   "via:hope:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humor:strength",
+  "scheme": "via",
+  "item": "humor",
+  "role": "strength",
+  "gloss": "liking to laugh and tease; bringing smiles to other people",
+  "sibling_ids": [
+   "via:humor:underuse",
+   "via:humor:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humor:underuse",
+  "scheme": "via",
+  "item": "overseriousness",
+  "role": "underuse",
+  "gloss": "humor used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:humor:strength",
+   "via:humor:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also humorlessness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:humor:overuse",
+  "scheme": "via",
+  "item": "giddiness",
+  "role": "overuse",
+  "gloss": "humor used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:humor:strength",
+   "via:humor:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also foolishness; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:spirituality:strength",
+  "scheme": "via",
+  "item": "spirituality",
+  "role": "strength",
+  "gloss": "having coherent beliefs about the higher purpose and meaning of life",
+  "sibling_ids": [
+   "via:spirituality:underuse",
+   "via:spirituality:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "VIA strength name (public); name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:spirituality:underuse",
+  "scheme": "via",
+  "item": "anomie",
+  "role": "underuse",
+  "gloss": "spirituality used too little, or not at all, where it would serve",
+  "sibling_ids": [
+   "via:spirituality:strength",
+   "via:spirituality:overuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also disconnection; name from memory; confirm against Niemiec (2019) Table 1"
+ },
+ {
+  "schema_version": 1,
+  "id": "via:spirituality:overuse",
+  "scheme": "via",
+  "item": "fanaticism",
+  "role": "overuse",
+  "gloss": "spirituality used too much, past the point where it serves",
+  "sibling_ids": [
+   "via:spirituality:strength",
+   "via:spirituality:underuse"
+  ],
+  "source": "Niemiec (2019), 'Finding the golden mean: the overuse, underuse, and optimal use of character strengths', Counselling Psychology Quarterly (citation from memory, to be confirmed at verification), Table 1",
+  "verified_by": null,
+  "note": "also preachiness; name from memory; confirm against Niemiec (2019) Table 1"
+ }
+]

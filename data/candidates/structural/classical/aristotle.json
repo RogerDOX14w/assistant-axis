@@ -1,0 +1,590 @@
+[
+ {
+  "schema_version": 1,
+  "id": "aristotle:courage:deficiency",
+  "scheme": "aristotle",
+  "item": "cowardice",
+  "role": "deficiency",
+  "gloss": "fearing too much and too readily, and having too little confidence, in the face of danger",
+  "sibling_ids": [
+   "aristotle:courage:mean",
+   "aristotle:courage:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:courage:mean",
+  "scheme": "aristotle",
+  "item": "courage",
+  "role": "mean",
+  "gloss": "feeling fear and confidence in the right measure when facing danger, and standing firm for a worthy end",
+  "sibling_ids": [
+   "aristotle:courage:deficiency",
+   "aristotle:courage:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:courage:excess",
+  "scheme": "aristotle",
+  "item": "rashness",
+  "role": "excess",
+  "gloss": "having too much confidence: rushing at danger with no proper sense of the risk",
+  "sibling_ids": [
+   "aristotle:courage:deficiency",
+   "aristotle:courage:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:temperance:deficiency",
+  "scheme": "aristotle",
+  "item": "insensibility",
+  "role": "deficiency",
+  "gloss": "taking too little pleasure in food, drink and sex; a type Aristotle says is rarely met",
+  "sibling_ids": [
+   "aristotle:temperance:mean",
+   "aristotle:temperance:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:temperance:mean",
+  "scheme": "aristotle",
+  "item": "temperance",
+  "role": "mean",
+  "gloss": "enjoying the pleasures of the body in the right measure, at the right times, without being ruled by them",
+  "sibling_ids": [
+   "aristotle:temperance:deficiency",
+   "aristotle:temperance:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:temperance:excess",
+  "scheme": "aristotle",
+  "item": "self-indulgence",
+  "role": "excess",
+  "gloss": "pursuing the pleasures of food, drink and sex to excess and being pained when they are missing",
+  "sibling_ids": [
+   "aristotle:temperance:deficiency",
+   "aristotle:temperance:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:liberality:deficiency",
+  "scheme": "aristotle",
+  "item": "meanness",
+  "role": "deficiency",
+  "gloss": "giving too little and taking too much where money is concerned",
+  "sibling_ids": [
+   "aristotle:liberality:mean",
+   "aristotle:liberality:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:liberality:mean",
+  "scheme": "aristotle",
+  "item": "liberality",
+  "role": "mean",
+  "gloss": "giving and taking money in the right measure, to the right people, with pleasure",
+  "sibling_ids": [
+   "aristotle:liberality:deficiency",
+   "aristotle:liberality:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:liberality:excess",
+  "scheme": "aristotle",
+  "item": "prodigality",
+  "role": "excess",
+  "gloss": "giving and spending money far too freely, wasting one's substance",
+  "sibling_ids": [
+   "aristotle:liberality:deficiency",
+   "aristotle:liberality:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnificence:deficiency",
+  "scheme": "aristotle",
+  "item": "niggardliness",
+  "role": "deficiency",
+  "gloss": "spending too little on great public occasions, spoiling the effect to save a little",
+  "sibling_ids": [
+   "aristotle:magnificence:mean",
+   "aristotle:magnificence:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnificence:mean",
+  "scheme": "aristotle",
+  "item": "magnificence",
+  "role": "mean",
+  "gloss": "spending large sums fittingly and with taste on great occasions and public works",
+  "sibling_ids": [
+   "aristotle:magnificence:deficiency",
+   "aristotle:magnificence:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnificence:excess",
+  "scheme": "aristotle",
+  "item": "vulgarity",
+  "role": "excess",
+  "gloss": "spending lavishly on display where it is not fitting, to show off one's wealth",
+  "sibling_ids": [
+   "aristotle:magnificence:deficiency",
+   "aristotle:magnificence:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnanimity:deficiency",
+  "scheme": "aristotle",
+  "item": "undue humility",
+  "role": "deficiency",
+  "gloss": "thinking oneself worthy of less than one deserves, and so not claiming one's due",
+  "sibling_ids": [
+   "aristotle:magnanimity:mean",
+   "aristotle:magnanimity:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnanimity:mean",
+  "scheme": "aristotle",
+  "item": "proper pride",
+  "role": "mean",
+  "gloss": "thinking oneself worthy of great things and being worthy of them",
+  "sibling_ids": [
+   "aristotle:magnanimity:deficiency",
+   "aristotle:magnanimity:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:magnanimity:excess",
+  "scheme": "aristotle",
+  "item": "empty vanity",
+  "role": "excess",
+  "gloss": "thinking oneself worthy of great things without being worthy of them",
+  "sibling_ids": [
+   "aristotle:magnanimity:deficiency",
+   "aristotle:magnanimity:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:proper_ambition:deficiency",
+  "scheme": "aristotle",
+  "item": "unambitiousness",
+  "role": "deficiency",
+  "gloss": "caring too little for honor, even for the honor that would be fitting",
+  "sibling_ids": [
+   "aristotle:proper_ambition:mean",
+   "aristotle:proper_ambition:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:proper_ambition:mean",
+  "scheme": "aristotle",
+  "item": "proper ambition",
+  "role": "mean",
+  "gloss": "desiring honor as one should and from the right sources; a mean Aristotle says has no name",
+  "sibling_ids": [
+   "aristotle:proper_ambition:deficiency",
+   "aristotle:proper_ambition:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:proper_ambition:excess",
+  "scheme": "aristotle",
+  "item": "ambition",
+  "role": "excess",
+  "gloss": "desiring honor more than is right, and from the wrong sources",
+  "sibling_ids": [
+   "aristotle:proper_ambition:deficiency",
+   "aristotle:proper_ambition:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:good_temper:deficiency",
+  "scheme": "aristotle",
+  "item": "inirascibility",
+  "role": "deficiency",
+  "gloss": "not getting angry even when anger is called for, and putting up with insult",
+  "sibling_ids": [
+   "aristotle:good_temper:mean",
+   "aristotle:good_temper:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:good_temper:mean",
+  "scheme": "aristotle",
+  "item": "good temper",
+  "role": "mean",
+  "gloss": "being angry at the right things, with the right people, to the right degree and for the right length of time",
+  "sibling_ids": [
+   "aristotle:good_temper:deficiency",
+   "aristotle:good_temper:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:good_temper:excess",
+  "scheme": "aristotle",
+  "item": "irascibility",
+  "role": "excess",
+  "gloss": "getting angry quickly, too often and too much, at the wrong things",
+  "sibling_ids": [
+   "aristotle:good_temper:deficiency",
+   "aristotle:good_temper:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:truthfulness:deficiency",
+  "scheme": "aristotle",
+  "item": "mock modesty",
+  "role": "deficiency",
+  "gloss": "understating or disclaiming one's own merits and achievements",
+  "sibling_ids": [
+   "aristotle:truthfulness:mean",
+   "aristotle:truthfulness:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:truthfulness:mean",
+  "scheme": "aristotle",
+  "item": "truthfulness",
+  "role": "mean",
+  "gloss": "presenting oneself, in word and in life, as neither more nor less than one is",
+  "sibling_ids": [
+   "aristotle:truthfulness:deficiency",
+   "aristotle:truthfulness:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:truthfulness:excess",
+  "scheme": "aristotle",
+  "item": "boastfulness",
+  "role": "excess",
+  "gloss": "claiming merits and achievements one does not have, or more of them than one has",
+  "sibling_ids": [
+   "aristotle:truthfulness:deficiency",
+   "aristotle:truthfulness:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:ready_wit:deficiency",
+  "scheme": "aristotle",
+  "item": "boorishness",
+  "role": "deficiency",
+  "gloss": "making no jokes and taking offense at those who do",
+  "sibling_ids": [
+   "aristotle:ready_wit:mean",
+   "aristotle:ready_wit:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:ready_wit:mean",
+  "scheme": "aristotle",
+  "item": "ready wit",
+  "role": "mean",
+  "gloss": "joking tastefully and in the right measure in relaxed company",
+  "sibling_ids": [
+   "aristotle:ready_wit:deficiency",
+   "aristotle:ready_wit:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:ready_wit:excess",
+  "scheme": "aristotle",
+  "item": "buffoonery",
+  "role": "excess",
+  "gloss": "trying to raise a laugh at any cost, with no regard for decency or for the feelings of the target",
+  "sibling_ids": [
+   "aristotle:ready_wit:deficiency",
+   "aristotle:ready_wit:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:friendliness:deficiency",
+  "scheme": "aristotle",
+  "item": "quarrelsomeness",
+  "role": "deficiency",
+  "gloss": "opposing everything and caring nothing for the pain one causes in company",
+  "sibling_ids": [
+   "aristotle:friendliness:mean",
+   "aristotle:friendliness:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:friendliness:mean",
+  "scheme": "aristotle",
+  "item": "friendliness",
+  "role": "mean",
+  "gloss": "being pleasant in company as one should, approving and objecting in the right measure",
+  "sibling_ids": [
+   "aristotle:friendliness:deficiency",
+   "aristotle:friendliness:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:friendliness:excess",
+  "scheme": "aristotle",
+  "item": "obsequiousness",
+  "role": "excess",
+  "gloss": "praising everything and never opposing, so as to give no pain; done for gain it is flattery",
+  "sibling_ids": [
+   "aristotle:friendliness:deficiency",
+   "aristotle:friendliness:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:modesty:deficiency",
+  "scheme": "aristotle",
+  "item": "shamelessness",
+  "role": "deficiency",
+  "gloss": "feeling no shame at all, even at disgraceful acts",
+  "sibling_ids": [
+   "aristotle:modesty:mean",
+   "aristotle:modesty:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:modesty:mean",
+  "scheme": "aristotle",
+  "item": "modesty",
+  "role": "mean",
+  "gloss": "feeling shame in the right measure at what is disgraceful",
+  "sibling_ids": [
+   "aristotle:modesty:deficiency",
+   "aristotle:modesty:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:modesty:excess",
+  "scheme": "aristotle",
+  "item": "bashfulness",
+  "role": "excess",
+  "gloss": "being ashamed of everything, too easily and too much",
+  "sibling_ids": [
+   "aristotle:modesty:deficiency",
+   "aristotle:modesty:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:righteous_indignation:deficiency",
+  "scheme": "aristotle",
+  "item": "spite",
+  "role": "deficiency",
+  "gloss": "falling so short of being pained at others' undeserved good fortune that one rejoices at their ill fortune",
+  "sibling_ids": [
+   "aristotle:righteous_indignation:mean",
+   "aristotle:righteous_indignation:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:righteous_indignation:mean",
+  "scheme": "aristotle",
+  "item": "righteous indignation",
+  "role": "mean",
+  "gloss": "being pained at good fortune that is undeserved",
+  "sibling_ids": [
+   "aristotle:righteous_indignation:deficiency",
+   "aristotle:righteous_indignation:excess"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:righteous_indignation:excess",
+  "scheme": "aristotle",
+  "item": "envy",
+  "role": "excess",
+  "gloss": "being pained at all good fortune of others, deserved or not",
+  "sibling_ids": [
+   "aristotle:righteous_indignation:deficiency",
+   "aristotle:righteous_indignation:mean"
+  ],
+  "source": "Nicomachean Ethics II.7 (Ross); the fuller accounts in III.6-IV.9",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:dignity:deficiency",
+  "scheme": "aristotle",
+  "item": "self-will",
+  "role": "deficiency",
+  "gloss": "living with no regard for anyone else, taking no account of what others want",
+  "sibling_ids": [
+   "aristotle:dignity:mean",
+   "aristotle:dignity:excess"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:dignity:mean",
+  "scheme": "aristotle",
+  "item": "dignity",
+  "role": "mean",
+  "gloss": "keeping a proper measure of regard for others, neither ignoring them nor living only to please them",
+  "sibling_ids": [
+   "aristotle:dignity:deficiency",
+   "aristotle:dignity:excess"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:dignity:excess",
+  "scheme": "aristotle",
+  "item": "subservience",
+  "role": "excess",
+  "gloss": "adjusting everything to what others want, living to please them",
+  "sibling_ids": [
+   "aristotle:dignity:deficiency",
+   "aristotle:dignity:mean"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:practical_wisdom:deficiency",
+  "scheme": "aristotle",
+  "item": "simpleness",
+  "role": "deficiency",
+  "gloss": "lacking the shrewdness to see how to reach one's ends, and so being easily taken in",
+  "sibling_ids": [
+   "aristotle:practical_wisdom:mean",
+   "aristotle:practical_wisdom:excess"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:practical_wisdom:mean",
+  "scheme": "aristotle",
+  "item": "practical wisdom",
+  "role": "mean",
+  "gloss": "deliberating well about what is good for a human life and how to achieve it",
+  "sibling_ids": [
+   "aristotle:practical_wisdom:deficiency",
+   "aristotle:practical_wisdom:excess"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "aristotle:practical_wisdom:excess",
+  "scheme": "aristotle",
+  "item": "rascality",
+  "role": "excess",
+  "gloss": "being clever at reaching any end at all, good or bad; cunning without scruple",
+  "sibling_ids": [
+   "aristotle:practical_wisdom:deficiency",
+   "aristotle:practical_wisdom:mean"
+  ],
+  "source": "Eudemian Ethics II.3 (Rackham); the fuller account in III.7",
+  "verified_by": null
+ }
+]

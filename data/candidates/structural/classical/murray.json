@@ -1,0 +1,522 @@
+[
+ {
+  "schema_version": 1,
+  "id": "murray:abasement:need_high",
+  "scheme": "murray",
+  "item": "high need for abasement",
+  "role": "need_high",
+  "gloss": "a strong need for submitting passively to others, accepting blame, criticism and punishment, confessing faults",
+  "sibling_ids": [
+   "murray:abasement:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:abasement:need_low",
+  "scheme": "murray",
+  "item": "low need for abasement",
+  "role": "need_low",
+  "gloss": "rarely submitting or accepting blame; resisting criticism",
+  "sibling_ids": [
+   "murray:abasement:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:achievement:need_high",
+  "scheme": "murray",
+  "item": "high need for achievement",
+  "role": "need_high",
+  "gloss": "a strong need for accomplishing something difficult, mastering obstacles, excelling and rivaling others",
+  "sibling_ids": [
+   "murray:achievement:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:achievement:need_low",
+  "scheme": "murray",
+  "item": "low need for achievement",
+  "role": "need_low",
+  "gloss": "little drive to accomplish or excel; content with ordinary results",
+  "sibling_ids": [
+   "murray:achievement:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:affiliation:need_high",
+  "scheme": "murray",
+  "item": "high need for affiliation",
+  "role": "need_high",
+  "gloss": "a strong need for drawing close to others, forming friendships and winning affection",
+  "sibling_ids": [
+   "murray:affiliation:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:affiliation:need_low",
+  "scheme": "murray",
+  "item": "low need for affiliation",
+  "role": "need_low",
+  "gloss": "little wish for company or friendship; content to be alone",
+  "sibling_ids": [
+   "murray:affiliation:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:aggression:need_high",
+  "scheme": "murray",
+  "item": "high need for aggression",
+  "role": "need_high",
+  "gloss": "a strong need for overcoming opposition forcefully, fighting, attacking or belittling others",
+  "sibling_ids": [
+   "murray:aggression:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:aggression:need_low",
+  "scheme": "murray",
+  "item": "low need for aggression",
+  "role": "need_low",
+  "gloss": "little wish to fight or attack; avoiding confrontation",
+  "sibling_ids": [
+   "murray:aggression:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:autonomy:need_high",
+  "scheme": "murray",
+  "item": "high need for autonomy",
+  "role": "need_high",
+  "gloss": "a strong need for being free of restraint, acting independently and resisting coercion",
+  "sibling_ids": [
+   "murray:autonomy:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:autonomy:need_low",
+  "scheme": "murray",
+  "item": "low need for autonomy",
+  "role": "need_low",
+  "gloss": "little need for independence; content to follow rules and others' direction",
+  "sibling_ids": [
+   "murray:autonomy:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:counteraction:need_high",
+  "scheme": "murray",
+  "item": "high need for counteraction",
+  "role": "need_high",
+  "gloss": "a strong need for mastering or making up for a failure by trying again, overcoming weakness",
+  "sibling_ids": [
+   "murray:counteraction:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:counteraction:need_low",
+  "scheme": "murray",
+  "item": "low need for counteraction",
+  "role": "need_low",
+  "gloss": "little drive to retry after failure; accepting defeat",
+  "sibling_ids": [
+   "murray:counteraction:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:defendance:need_high",
+  "scheme": "murray",
+  "item": "high need for defendance",
+  "role": "need_high",
+  "gloss": "a strong need for defending oneself against attack, criticism and blame, justifying oneself",
+  "sibling_ids": [
+   "murray:defendance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:defendance:need_low",
+  "scheme": "murray",
+  "item": "low need for defendance",
+  "role": "need_low",
+  "gloss": "little need to justify or defend oneself against criticism",
+  "sibling_ids": [
+   "murray:defendance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:deference:need_high",
+  "scheme": "murray",
+  "item": "high need for deference",
+  "role": "need_high",
+  "gloss": "a strong need for admiring and supporting a superior, praising and conforming to custom",
+  "sibling_ids": [
+   "murray:deference:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:deference:need_low",
+  "scheme": "murray",
+  "item": "low need for deference",
+  "role": "need_low",
+  "gloss": "little wish to admire or follow superiors; unimpressed by rank",
+  "sibling_ids": [
+   "murray:deference:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:dominance:need_high",
+  "scheme": "murray",
+  "item": "high need for dominance",
+  "role": "need_high",
+  "gloss": "a strong need for controlling one's human environment, directing and influencing others",
+  "sibling_ids": [
+   "murray:dominance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:dominance:need_low",
+  "scheme": "murray",
+  "item": "low need for dominance",
+  "role": "need_low",
+  "gloss": "little wish to control or direct others",
+  "sibling_ids": [
+   "murray:dominance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:exhibition:need_high",
+  "scheme": "murray",
+  "item": "high need for exhibition",
+  "role": "need_high",
+  "gloss": "a strong need for making an impression, being seen and heard, entertaining and shocking",
+  "sibling_ids": [
+   "murray:exhibition:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:exhibition:need_low",
+  "scheme": "murray",
+  "item": "low need for exhibition",
+  "role": "need_low",
+  "gloss": "little wish to be noticed; avoiding attention",
+  "sibling_ids": [
+   "murray:exhibition:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:harmavoidance:need_high",
+  "scheme": "murray",
+  "item": "high need for harmavoidance",
+  "role": "need_high",
+  "gloss": "a strong need for avoiding pain, injury and danger, taking precautions",
+  "sibling_ids": [
+   "murray:harmavoidance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:harmavoidance:need_low",
+  "scheme": "murray",
+  "item": "low need for harmavoidance",
+  "role": "need_low",
+  "gloss": "little concern with avoiding danger or injury",
+  "sibling_ids": [
+   "murray:harmavoidance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:infavoidance:need_high",
+  "scheme": "murray",
+  "item": "high need for infavoidance",
+  "role": "need_high",
+  "gloss": "a strong need for avoiding humiliation, embarrassment and failure, refraining from action for fear of it",
+  "sibling_ids": [
+   "murray:infavoidance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:infavoidance:need_low",
+  "scheme": "murray",
+  "item": "low need for infavoidance",
+  "role": "need_low",
+  "gloss": "little fear of embarrassment or failure",
+  "sibling_ids": [
+   "murray:infavoidance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:nurturance:need_high",
+  "scheme": "murray",
+  "item": "high need for nurturance",
+  "role": "need_high",
+  "gloss": "a strong need for giving sympathy and help to the helpless, feeding, protecting and comforting",
+  "sibling_ids": [
+   "murray:nurturance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:nurturance:need_low",
+  "scheme": "murray",
+  "item": "low need for nurturance",
+  "role": "need_low",
+  "gloss": "little wish to care for or help the helpless",
+  "sibling_ids": [
+   "murray:nurturance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:order:need_high",
+  "scheme": "murray",
+  "item": "high need for order",
+  "role": "need_high",
+  "gloss": "a strong need for putting things in order, achieving cleanliness, arrangement and precision",
+  "sibling_ids": [
+   "murray:order:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:order:need_low",
+  "scheme": "murray",
+  "item": "low need for order",
+  "role": "need_low",
+  "gloss": "little need for order or neatness; tolerant of mess",
+  "sibling_ids": [
+   "murray:order:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:play:need_high",
+  "scheme": "murray",
+  "item": "high need for play",
+  "role": "need_high",
+  "gloss": "a strong need for acting for fun without further purpose, laughing and joking, seeking relaxation",
+  "sibling_ids": [
+   "murray:play:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:play:need_low",
+  "scheme": "murray",
+  "item": "low need for play",
+  "role": "need_low",
+  "gloss": "little wish for fun or play; serious and work-bound",
+  "sibling_ids": [
+   "murray:play:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:rejection:need_high",
+  "scheme": "murray",
+  "item": "high need for rejection",
+  "role": "need_high",
+  "gloss": "a strong need for separating oneself from people one dislikes, excluding, snubbing and jilting them",
+  "sibling_ids": [
+   "murray:rejection:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:rejection:need_low",
+  "scheme": "murray",
+  "item": "low need for rejection",
+  "role": "need_low",
+  "gloss": "little wish to exclude or snub others; accepting of most people",
+  "sibling_ids": [
+   "murray:rejection:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:sentience:need_high",
+  "scheme": "murray",
+  "item": "high need for sentience",
+  "role": "need_high",
+  "gloss": "a strong need for seeking and enjoying sensuous impressions",
+  "sibling_ids": [
+   "murray:sentience:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:sentience:need_low",
+  "scheme": "murray",
+  "item": "low need for sentience",
+  "role": "need_low",
+  "gloss": "little interest in sensuous pleasures",
+  "sibling_ids": [
+   "murray:sentience:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:sex:need_high",
+  "scheme": "murray",
+  "item": "high need for sex",
+  "role": "need_high",
+  "gloss": "a strong need for forming and furthering an erotic relationship",
+  "sibling_ids": [
+   "murray:sex:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:sex:need_low",
+  "scheme": "murray",
+  "item": "low need for sex",
+  "role": "need_low",
+  "gloss": "little sexual interest",
+  "sibling_ids": [
+   "murray:sex:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:succorance:need_high",
+  "scheme": "murray",
+  "item": "high need for succorance",
+  "role": "need_high",
+  "gloss": "a strong need for having one's needs met by a sympathetic other, being nursed, supported and protected",
+  "sibling_ids": [
+   "murray:succorance:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:succorance:need_low",
+  "scheme": "murray",
+  "item": "low need for succorance",
+  "role": "need_low",
+  "gloss": "little wish to be helped or comforted; self-reliant in trouble",
+  "sibling_ids": [
+   "murray:succorance:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:understanding:need_high",
+  "scheme": "murray",
+  "item": "high need for understanding",
+  "role": "need_high",
+  "gloss": "a strong need for asking and answering general questions, interested in theory, analysis and generalization",
+  "sibling_ids": [
+   "murray:understanding:need_low"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "murray:understanding:need_low",
+  "scheme": "murray",
+  "item": "low need for understanding",
+  "role": "need_low",
+  "gloss": "little interest in theory or in understanding why",
+  "sibling_ids": [
+   "murray:understanding:need_high"
+  ],
+  "source": "Murray (1938), Explorations in Personality: the twenty manifest needs",
+  "verified_by": null
+ }
+]

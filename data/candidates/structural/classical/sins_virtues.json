@@ -1,0 +1,261 @@
+[
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:pride",
+  "scheme": "sins_virtues",
+  "item": "pride",
+  "role": "sin",
+  "gloss": "an inflated sense of one's own worth, putting oneself above others",
+  "sibling_ids": [
+   "sins_virtues:contrary:humility"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:humility",
+  "scheme": "sins_virtues",
+  "item": "humility",
+  "role": "virtue",
+  "gloss": "a modest estimate of one's own importance, putting oneself no higher than others",
+  "sibling_ids": [
+   "sins_virtues:sin:pride"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:greed",
+  "scheme": "sins_virtues",
+  "item": "greed",
+  "role": "sin",
+  "gloss": "an insatiable desire for wealth and possessions",
+  "sibling_ids": [
+   "sins_virtues:contrary:liberality"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:liberality",
+  "scheme": "sins_virtues",
+  "item": "liberality",
+  "role": "virtue",
+  "gloss": "free and willing giving; charity toward those in need",
+  "sibling_ids": [
+   "sins_virtues:sin:greed"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:lust",
+  "scheme": "sins_virtues",
+  "item": "lust",
+  "role": "sin",
+  "gloss": "an intense, uncontrolled desire for sexual pleasure",
+  "sibling_ids": [
+   "sins_virtues:contrary:chastity"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:chastity",
+  "scheme": "sins_virtues",
+  "item": "chastity",
+  "role": "virtue",
+  "gloss": "restraint and purity in sexual conduct",
+  "sibling_ids": [
+   "sins_virtues:sin:lust"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:envy",
+  "scheme": "sins_virtues",
+  "item": "envy",
+  "role": "sin",
+  "gloss": "resentment of others' goods, success or qualities, wishing them for oneself",
+  "sibling_ids": [
+   "sins_virtues:contrary:kindness"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:kindness",
+  "scheme": "sins_virtues",
+  "item": "kindness",
+  "role": "virtue",
+  "gloss": "good will toward others, rejoicing in their good",
+  "sibling_ids": [
+   "sins_virtues:sin:envy"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:gluttony",
+  "scheme": "sins_virtues",
+  "item": "gluttony",
+  "role": "sin",
+  "gloss": "overindulgence in food and drink",
+  "sibling_ids": [
+   "sins_virtues:contrary:temperance"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:temperance",
+  "scheme": "sins_virtues",
+  "item": "temperance",
+  "role": "virtue",
+  "gloss": "moderation in food and drink",
+  "sibling_ids": [
+   "sins_virtues:sin:gluttony"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:wrath",
+  "scheme": "sins_virtues",
+  "item": "wrath",
+  "role": "sin",
+  "gloss": "uncontrolled anger, hatred and the wish for revenge",
+  "sibling_ids": [
+   "sins_virtues:contrary:patience"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:patience",
+  "scheme": "sins_virtues",
+  "item": "patience",
+  "role": "virtue",
+  "gloss": "bearing provocation and delay calmly, without resentment",
+  "sibling_ids": [
+   "sins_virtues:sin:wrath"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:sin:sloth",
+  "scheme": "sins_virtues",
+  "item": "sloth",
+  "role": "sin",
+  "gloss": "laziness and indifference about one's duties and the good",
+  "sibling_ids": [
+   "sins_virtues:contrary:diligence"
+  ],
+  "source": "the seven deadly sins (Gregory I's list, as later tradition names it)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:contrary:diligence",
+  "scheme": "sins_virtues",
+  "item": "diligence",
+  "role": "virtue",
+  "gloss": "careful, steady effort in one's work and duties",
+  "sibling_ids": [
+   "sins_virtues:sin:sloth"
+  ],
+  "source": "the seven contrary virtues (after Prudentius, Psychomachia)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:cardinal:prudence",
+  "scheme": "sins_virtues",
+  "item": "prudence",
+  "role": "virtue",
+  "gloss": "the practical wisdom to judge what is right to do in the circumstances",
+  "sibling_ids": [],
+  "source": "the four cardinal virtues (Plato, Republic IV; Ambrose)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:cardinal:justice",
+  "scheme": "sins_virtues",
+  "item": "justice",
+  "role": "virtue",
+  "gloss": "giving each person their due, in word and deed",
+  "sibling_ids": [],
+  "source": "the four cardinal virtues (Plato, Republic IV; Ambrose)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:cardinal:fortitude",
+  "scheme": "sins_virtues",
+  "item": "fortitude",
+  "role": "virtue",
+  "gloss": "courage and endurance in the face of danger, pain and hardship",
+  "sibling_ids": [],
+  "source": "the four cardinal virtues (Plato, Republic IV; Ambrose)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:cardinal:temperance",
+  "scheme": "sins_virtues",
+  "item": "temperance",
+  "role": "virtue",
+  "gloss": "self-restraint and moderation in every pleasure",
+  "sibling_ids": [],
+  "source": "the four cardinal virtues (Plato, Republic IV; Ambrose)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:theological:faith",
+  "scheme": "sins_virtues",
+  "item": "faith",
+  "role": "virtue",
+  "gloss": "firm belief in God and in what has been revealed",
+  "sibling_ids": [],
+  "source": "the three theological virtues (1 Corinthians 13)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:theological:hope",
+  "scheme": "sins_virtues",
+  "item": "hope",
+  "role": "virtue",
+  "gloss": "confident expectation of the good to come, and trust in its promise",
+  "sibling_ids": [],
+  "source": "the three theological virtues (1 Corinthians 13)",
+  "verified_by": null
+ },
+ {
+  "schema_version": 1,
+  "id": "sins_virtues:theological:charity",
+  "scheme": "sins_virtues",
+  "item": "charity",
+  "role": "virtue",
+  "gloss": "love of God and of one's neighbor, shown in self-giving",
+  "sibling_ids": [],
+  "source": "the three theological virtues (1 Corinthians 13)",
+  "verified_by": null
+ }
+]
