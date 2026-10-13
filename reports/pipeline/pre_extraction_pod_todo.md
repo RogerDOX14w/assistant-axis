@@ -91,6 +91,18 @@ result.  A failure is a bug in the batch, fixed before the four-pod launch.
 | T14 | the merge: two pod trees into one, the duplicate-stem refusal, `usage.json` merged per type, the root scan | P1, b43ce369 | merge the pilot's tree with a second small tree | counts match the entity list; refusal on a duplicate |
 | T15 | NFS: the retry set without `FileNotFoundError`, and the opt-in `fsync` timing on `/workspace` | P8.4, E4 | the E4 timing (item 4); a missing-file read returns at once | no 265 s wait on a missing file |
 | T16 | `run_pipeline.sh` from the pod's shell: the `pipeline/` guard, the end-of-run summary with step 4/5 lines, the `--judge-batch-requests` pass-through | ba4efef2, P1 | one full run on the pilot's entities | summary counts the `[ERROR]`/`[WARNING]` lines of every step |
+| T17 | step 1's preflight: `config.json` and the tokenizer read before vLLM starts, the `qwen3` row found, the derived header logged | P7 task 7, 3fe3581c | step 1's log before "Loading vLLM model" | "Family qwen3 ... header [the seven] (ids [151644, 77091, 198, 151667, 271, 151668, 271])" |
+| T18 | vLLM 0.18.1 takes token-id prompts (`{"prompt_token_ids": ids}`), and Qwen3's ids equal the old text path's | P7 task 7, 3fe3581c | in a Python shell on the pod, for one conversation: `prompt_token_ids(tok, conv, {"enable_thinking": False})` against `tok(tok.apply_chat_template(conv, tokenize=False, add_generation_prompt=True, enable_thinking=False))["input_ids"]`; then step 1 on a few entities | equal; responses written as before |
+| T19 | vLLM loads Qwen3-32B with `trust_remote_code=False` (from the row; it was `True`), and vLLM's tokenizer derives the preflight's header ids | P7 task 7, 3fe3581c | step 1's "Model loaded successfully; header" line | no error; the seven |
+| T20 | the side-car's new fields on a real run | P7 task 7, 3fe3581c | read `<responses>/generation_config.json` | `model_type` qwen3, `header_ids` the seven ids, `system_prompt` native, `sample_conversation` and `sample_prompt_ids` present |
+| T21 | step 2's preflight and side-car check against a real step-1 side-car, without `--ignore_generation_config` | P7 tasks 6, 8, a9d3f9dd, 8156f4c2 | step 2's log before "Loading model" | the layout line, then "... match"; no refusal |
+| T22 | the activation metadata of the new step 2: `model_type`, `template_kwargs`, `generation_prompt_ids` present, `thinking` gone (row T5's `thinking` no longer applies); step 4 copies it, step 5 compares it | P7 tasks 6, 8, a9d3f9dd, 8156f4c2 | one activation's, one vector's and the axis's `metadata` | the keys present, `thinking` absent |
+| T23 | `--verify_spans 20` on real Qwen3 responses (real BPE, real content) | P7 task 6, a9d3f9dd | step 2 with `--verify_spans 20` | "20 of 20 assistant spans decode to the stored content" |
+| T24 | `--layers` checked against the real layer count before any load | P7 task 6, a9d3f9dd | step 2 once with `--layers 0,64` (Qwen3-32B has 64) | an argparse error naming "64 layers, 0..63", before "Loading model" |
+| T25 | the byte-identical regression on the real model (item 7 (b)) | P7 build abdfa16c-7a6e5acb; golden fixture from 828817a4 | item 7's comparison | 0 activations differ |
+| T26 | the analysis scripts' slot-layout guard passes on the October Qwen3 tree | P7 task 10, 94d3e256 | any `DEFAULT_SLOT` script on the new data dir without `--slot` (e.g. `whitening_k_sweep.py --data_dir <October tree>`) | no `SlotLayoutError` |
+| T27 | steering's template kwargs from the row, and the slot label, on the real model | P7 task 10, e82b74a7 | one steering cell: the sweep log and the first prompt's rendering | the empty think block in the prompt; "steering slot 6 ('</think>')" logged; no header warning |
+| T28 | the real-tokenizer test for `qwen3` under the pod's transformers 4.57.6 | P7 task 11, 0301aa09 | item 12 for `qwen3` | 5 passed; the printed header is the seven |
 
 Not on this list because they are experiments, not tests: the cap pilot's decision (item 2), the rubric
 experiment (item 11), P7's smoke runs per family (item 7).
@@ -99,7 +111,94 @@ experiment (item 11), P7's smoke runs per family (item 7).
 
 7. **P7's byte-identical Qwen regression** on a GPU
    ([coding_plan_multi_model_extraction.md](./coding_plan_multi_model_extraction.md)): the gate that the
-   generalised steps 1 and 2 reproduce today's Qwen output exactly.  The plan's build waits on Roger's go.
+   generalised steps 1 and 2 reproduce today's Qwen output exactly.  **Built off-pod on 2026-10-13**
+   (commits abdfa16c to 7a6e5acb; [p7_build_2026-10-13.md](./p7_build_2026-10-13.md),
+   [acceptance_multi_model_extraction.md](./acceptance_multi_model_extraction.md)); on the in-process
+   fakes the gate is green ([test_step2_qwen3_golden.py](../../pipeline/tests/test_step2_qwen3_golden.py),
+   fixture made from 828817a4, the code before P7).  On the pod, with the real model:
+
+   (a) **The Qwen3 smoke run** rides on item 1 (the first entities of the October run or the cap pilot;
+   § 15 Q9): step 1 logs the family and the derived header (the seven tokens, ids `151644 77091 198
+   151667 271 151668 271`) and writes the side-car's new fields; step 2, run with `--verify_spans 20`,
+   passes its side-car check and the span check.  Rows T17-T24 and T28.
+
+   (b) **The regression**: step 2 from 828817a4 and from today's code on the same two response files,
+   compared bit for bit (row T25).  About 0.5 GPU-hour on one 80 GB GPU (two Hugging Face loads of
+   Qwen3-32B and about 1,000 conversations each); the four activation files, about 10 GB, are deleted
+   afterwards.  From a pilot or October responses directory `<R>` that has a side-car:
+
+   ```bash
+   git -C /workspace/assistant-axis worktree add /workspace/aa_828817a4 828817a4
+   # the old code in the repository's own environment (a plain `uv run` in the worktree would
+   # build a second one); the script puts its own checkout first on sys.path
+   cd /workspace/aa_828817a4/pipeline && CUDA_VISIBLE_DEVICES=0 uv run --project /workspace/assistant-axis \
+       python 2_activations.py --model Qwen/Qwen3-32B --responses_dir <R> --roles default absolutist \
+       --output_dir /workspace/p7_reg/old
+   cd /workspace/assistant-axis/pipeline && CUDA_VISIBLE_DEVICES=0 uv run 2_activations.py \
+       --model Qwen/Qwen3-32B --responses_dir <R> --roles default absolutist --output_dir /workspace/p7_reg/new
+   uv run python -c "
+   import torch
+   for e in ('default', 'absolutist'):
+       a = torch.load(f'/workspace/p7_reg/old/{e}.pt', weights_only=False); ma = a.pop('metadata')
+       b = torch.load(f'/workspace/p7_reg/new/{e}.pt', weights_only=False); mb = b.pop('metadata')
+       assert 'thinking' in ma and 'model_type' in mb, 'not the old and the new code'
+       assert sorted(a) == sorted(b), e
+       bad = [k for k in a if not torch.equal(a[k].view(torch.int16), b[k].view(torch.int16))]
+       print(e, len(a), 'activations,', len(bad), 'differ')"
+   ```
+
+   Pass: `0 differ` for both.  Afterwards `git worktree remove /workspace/aa_828817a4`.  Any difference is a stop, reported with the keys, before the October
+   extraction uses the new code.
+
+12. **The real-tokenizer check per family** (P7, the plan's § 9 test 11,
+    [test_chat_layout_real.py](../../assistant_axis/tests/test_chat_layout_real.py)), before that family's
+    smoke run, and for `qwen3` before the October run (row T28).  Tokenizer and config files only, about
+    10-20 MB each, downloaded on the pod (Roger, § 15 Q5: no need to ask); Llama and Gemma are gated, so
+    Roger's Hugging Face token must be in the pod's environment.  No GPU.
+
+    ```bash
+    huggingface-cli download <model> --include "*.json" "tokenizer*" "*.model" "*.jinja"
+    ASSISTANT_AXIS_HF_TESTS=1 ASSISTANT_AXIS_HF_FAMILIES=<row> \
+        uv run pytest -s assistant_axis/tests/test_chat_layout_real.py
+    ```
+
+    `<model>` / `<row>`: `Qwen/Qwen3-32B` / `qwen3`; `meta-llama/Llama-3.3-70B-Instruct` / `llama`;
+    `google/gemma-2-27b-it` / `gemma2`; `allenai/OLMo-2-0325-32B-Instruct` / `olmo2` (or the OLMo § 15 Q6
+    picks).  Pass: 5 passed for the row, and the printed header goes into the acceptance report for Roger
+    to read.  A failure means a "to check" cell of the row was wrong (`TO_CHECK` in
+    [model_families.py](../../assistant_axis/model_families.py) lists them with their checks): correct
+    the row before the smoke run.
+
+13. **P7's smoke run per new family** (the plan's § 11), one family per launch, each only after **Roger's
+    go with quoted parameters** (model, GPUs, GPU-hours, download size with its delete-when-done TODO, the
+    Hugging Face token for a gated repo): Llama 3.3 70B about 2-3 GPU-hours on 4 GPUs and about 140 GB of
+    weights; Gemma 2 27B about 1 GPU-hour and about 54 GB; OLMo 2 32B Instruct (or the OLMo § 15 Q6 picks)
+    about 1 GPU-hour and about 65 GB.  gpt-oss is a TODO row and refuses to run (§ 15 Q3).  Step 3's 150
+    real-time judge calls cost cents.  From `pipeline/`:
+
+    ```bash
+    uv run 1_generate.py --mode roger --model <M> --roles default absolutist \
+        --question_count 30 --reduce_questions 1 --output_dir /workspace/smoke/<family>/responses
+    uv run 2_activations.py --model <M> --responses_dir /workspace/smoke/<family>/responses \
+        --output_dir /workspace/smoke/<family>/activations --batch_size 8 --verify_spans 20
+    uv run 3_judge.py --entity_type trait --responses_dir /workspace/smoke/<family>/responses \
+        --output_dir /workspace/smoke/<family>/scores --no_batch
+    uv run 4_vectors.py --activations_dir /workspace/smoke/<family>/activations \
+        --scores_dir /workspace/smoke/<family>/scores --output_dir /workspace/smoke/<family>/vectors --min_count 10
+    uv run 5_axis.py --vectors_dir /workspace/smoke/<family>/vectors \
+        --output /workspace/smoke/<family>/axis.pt --min_entities 1
+    ```
+
+    (`--min_entities 1`: step 5 refuses fewer than 10 non-default vectors since the fix batch's P2, and
+    the smoke run has one; the plan's § 11 command predates that.)  The checks, in order (§ 11): (1)
+    step 1 prints the derived header and writes it into the side-car; **Roger reads it, and the row's
+    `expected_header_tokens` is pinned from it** (a commit to `model_families.py`); (2) step 2's side-car
+    check passes and the first conversation's ids carry exactly one BOS where the template writes one;
+    (3) `activations.log`: `HEADER NOT FOUND` 0, header mismatches 0, dropped conversations 0 (or only
+    empty responses) on both entities; (4) `--verify_spans 20`: 20 of 20; (5) the vector shape is
+    `(1 + N, n_layers, hidden)` and `slot_labels` prints the layout; (6) `axis.pt` is written.
+    Anything else is a stop, reported with the log lines.  Results go into the smoke-run table of
+    [acceptance_multi_model_extraction.md](./acceptance_multi_model_extraction.md).
 
 ## During and after the extraction
 
