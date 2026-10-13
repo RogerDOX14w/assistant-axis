@@ -143,6 +143,7 @@ from __future__ import annotations
 
 import argparse
 import atexit
+import hashlib
 import io
 import json
 import logging
@@ -155,7 +156,7 @@ import tarfile
 import tempfile
 from collections import Counter
 from pathlib import Path
-from typing import Optional
+from typing import Mapping, Optional
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
@@ -918,13 +919,15 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
     results = NR.merge_results(earlier, NR.result_rows(runner.states))
     decided = {r["key"] for r in results}
     stalled = {k: st.stalled for k, st in runner.states.items() if st.block is None and k not in decided}
-    readings = [x for r in results for x in NV.reading_rows(runner.batch_id, {"key": r["key"], "label": r["label"]},
-                                                              r["novelty"])]
+    # a block copied from the run that decided it (score --affected-only) was read by that run, not this one
+    readings = [x for r in results if not r["novelty"].get("copied_from")
+                for x in NV.reading_rows(runner.batch_id, {"key": r["key"], "label": r["label"]}, r["novelty"])]
     atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in results), rp)
     atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in readings), out_dir / "readings.jsonl")
     parse_rates = runner.warn_parse_rates(logger)
     summary = NR.summarize(results, runner.records, usage, stalled=stalled, skipped=skipped, mode=runner.mode)
     summary.update({"batch_id": runner.batch_id, "parse_rates": parse_rates, "stopped_by_budget": status == 2,
+                    "n_copied": sum(1 for r in results if r["novelty"].get("copied_from")),
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                     "resumed_calls": runner.stats.get("resumed", 0), "rubrics": runner.rubric_pins,
                     "rules_of_run": runner.rules.as_dict()})
@@ -1116,6 +1119,8 @@ def _check_score_selection(args, redecide: bool) -> Optional[str]:
             return "--holding and --hide are not combined (the recovery harness hides corpus traits from trait runs)"
     if getattr(args, "hide", None) and (redecide or getattr(args, "relation_only", False)):
         return "--hide is for a new score run (the recovery harness), not --redecide or --relation-only"
+    if getattr(args, "affected_only", False) and not getattr(args, "hide", None):
+        return "--affected-only is for a run with --hide (plan 13: the recovery harness's affected rows only)"
     if getattr(args, "relation_only", False):
         if redecide:
             return "--relation-only and --redecide are two different runs: choose one"
@@ -1515,6 +1520,69 @@ def _embedding_settings(cfg, query_form: str) -> dict:
             "variant": cfg.covered["space"]["variant"], "k": cfg.k}
 
 
+def read_keys_file(path: Path) -> list[str]:
+    """``--keys-file``: one registry key per line (keys carry ``#``, as in ``brave#1``), blank lines and lines that
+    start with ``#`` skipped, duplicates kept once."""
+    out = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        k = line.strip()
+        if k and not k.startswith("#"):
+            out.append(k)
+    return list(dict.fromkeys(out))
+
+
+def affected_only_split(cands: list, *, rows: dict, hide, index, cfg, cache, data_dir: Path, queue_on: bool,
+                        rules: NV.Rules, query_form: str, sets: NV.LabelSets):
+    """``score --hide --affected-only`` (plan 13 decision 1 (c)): ``(scored candidates, copied results rows, the
+    record, {key: reasons})`` by :func:`recovery.affected_split`, or why it cannot be told (a string).  The full
+    corpus is indexed twice beside the reduced run's own index: as the run would index it without hiding (the same
+    seed-queue setting) and alone (the match stage's index)."""
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.recovery import affected_split, copied_result
+    if index is None:
+        return ("the corpus (or the seed queue's entries) are not all in the embedding cache, so the affected rows "
+                "cannot be told; embed them first (score --embed-only), or run without --affected-only")
+    full_index, _ = load_index(cfg, data_dir=data_dir, cache=cache, queue_search=queue_on)
+    match_index, _ = load_index(cfg, data_dir=data_dir, cache=cache)
+    if full_index is None or match_index is None:
+        return "the full corpus is not all in the embedding cache"
+    embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+    qt = [NV.query_text(c.label, c.gloss, query_form=query_form, representation=cfg.representation) for c in cands]
+    found, _ = cache.lookup(embedder.tag, qt)
+    vectors = {}
+    if found:
+        idx = sorted(found)
+        unit = EM.normalize_rows([found[i] for i in idx])        # as embed_texts hands them to a run
+        vectors = {cands[i].key: unit[j] for j, i in enumerate(idx)}
+    blocks = {c.key: (rows.get(c.key) or {}).get("novelty") for c in cands}
+    split = affected_split(cands, blocks=blocks, hidden=hide, traits=NV.load_trait_corpus(data_dir), vectors=vectors,
+                           k=cfg.k, reduced_index=index, full_index=full_index, match_index=match_index,
+                           full_sets=label_sets_for(data_dir), reduced_sets=sets, rules=rules)
+    scored = [c for c in cands if c.key in split]
+    copied = [copied_result(rows[c.key], c) for c in cands if c.key not in split]
+    reasons = Counter(r for rs in split.values() for r in rs)
+    meta = {"n_selected": len(cands), "n_scored": len(scored), "n_copied": len(copied),
+            "share_scored": round(len(scored) / len(cands), 4) if cands else None,
+            "by_reason": dict(sorted(reasons.items())),
+            "only_reason": dict(sorted(Counter(rs[0] for rs in split.values() if len(rs) == 1).items())),
+            "copied_by_decision": dict(sorted(Counter(r["novelty"].get("decision") for r in copied).items())),
+            "copied_from_runs": dict(sorted(Counter(str(r["novelty"].get("copied_from")) for r in copied).items())),
+            "copied_rules": dict(sorted(Counter(str((r["novelty"].get("rules") or {}).get("name"))
+                                                for r in copied).items())),
+            "n_vectors": len(vectors), "queue_search": bool(queue_on)}
+    return scored, copied, meta, {c.key: split.get(c.key, []) for c in cands}
+
+
+def write_affected(out_dir: Path, copied_rows: list, reasons: Mapping[str, list]) -> None:
+    """``score --affected-only``: ``affected.jsonl`` (every selected row: ``scored`` and its reasons, or copied) and
+    the copied rows into ``results.jsonl`` (a resumed session's own results win)."""
+    atomic_write_text("".join(json.dumps({"key": k, "scored": bool(rs), "reasons": rs}) + "\n"
+                              for k, rs in sorted(reasons.items())), out_dir / "affected.jsonl")
+    rp = out_dir / "results.jsonl"
+    merged = NR.merge_results(copied_rows, _read_jsonl(rp))
+    atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in merged), rp)
+
+
 def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     """``score`` and ``full-scan``.  ``info`` (the recovery harness calls this in-process): filled with the
     run's directory, plan, estimate and refusal (``out_dir``, ``plan``, ``estimate_usd``, ``estimate_lines``,
@@ -1524,6 +1592,15 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     from assistant_axis.provenance import current_file_input, current_files_input
     info = info if info is not None else {}
     paths.check_id(args.batch_id, "batch_id")
+    if getattr(args, "keys_file", None) is not None:
+        try:
+            args.keys = read_keys_file(args.keys_file)
+        except OSError as exc:
+            print(f"REFUSED (--keys-file): {exc}", file=sys.stderr)
+            return 2
+        if not args.keys:
+            print(f"REFUSED (--keys-file): {args.keys_file} names no key", file=sys.stderr)
+            return 2
     redecide = mode == "shortlist" and bool(getattr(args, "redecide", False))
     if mode == "shortlist":
         bad = _check_score_selection(args, redecide)
@@ -1629,6 +1706,22 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
              for c in cands}
     found, miss = cache.lookup(embedder.tag, list(texts.values()))
     sets = label_sets_for(data_dir, hide)
+    affected_meta, copied_rows, affected_reasons = None, [], {}
+    if mode == "shortlist" and getattr(args, "affected_only", False):
+        split = affected_only_split(cands, rows=rows, hide=hide, index=index, cfg=cfg, cache=cache, data_dir=data_dir,
+                                    queue_on=queue_on, rules=rules, query_form=args.query_form, sets=sets)
+        if isinstance(split, str):
+            print(f"REFUSED (--affected-only): {split}", file=sys.stderr)
+            return 2
+        cands, copied_rows, affected_meta, affected_reasons = split
+        texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
+                 for c in cands}
+        found, miss = cache.lookup(embedder.tag, list(texts.values()))
+        info["affected"] = dict(affected_meta)
+        info["affected_scored"] = sorted(k for k, rs in affected_reasons.items() if rs)
+        print(f"affected only: {affected_meta['n_scored']} of {affected_meta['n_selected']} rows scored again "
+              f"({affected_meta['share_scored']:.1%}), {affected_meta['n_copied']} recorded blocks copied; reasons "
+              f"{json.dumps(affected_meta['by_reason'])}")
     relation_seed = _relation_seed(source) if redecide else args.batch_id
     n_exact = sum(1 for c in cands if NV.exact_label_match(c.stem, sets, rules=rules)) if mode == "shortlist" else 0
     n_live = len(cands) - n_exact
@@ -1663,6 +1756,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             PL.LABEL_FORM_KEY: label_form}
     if hide_meta:
         plan["hide"] = hide_meta
+    if affected_meta:
+        plan["affected_only"] = affected_meta
     if holding:
         plan["holding"] = holding
         if holding == PP.HOLDING and mode == "shortlist" and not redecide:
@@ -1859,6 +1954,11 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         run_meta["replay_from"] = source["replay_from"]
     if hide_meta:
         run_meta["hide"] = hide_meta
+    if affected_meta:
+        run_meta["affected_only"] = affected_meta
+    if getattr(args, "keys_file", None) is not None:
+        run_meta["keys_file"] = {"path": str(args.keys_file), "n_keys": len(args.keys or []),
+                                 "sha256": hashlib.sha256(Path(args.keys_file).read_bytes()).hexdigest()}
     if holding:
         run_meta["pass"] = run_pass
         if holding == PP.HOLDING and mode == "shortlist" and not redecide:
@@ -1866,6 +1966,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    if affected_meta is not None:
+        write_affected(out_dir, copied_rows, affected_reasons)
 
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
@@ -1947,6 +2049,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                extra=({"redecide": redecide_meta} if redecide else {})
                                | ({"hide": hide_meta} if hide_meta else {})
                                | ({"pass": run_pass} if holding else {})
+                               | ({"affected_only": affected_meta} if affected_meta else {})
                                | {"queue_search_record": queue_meta, PL.LABEL_FORM_KEY: label_form})
         else:
             usage.write_json(out_dir / "usage.json")
@@ -2801,6 +2904,15 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--run", type=parse_run, action="append", help="GENERATOR/RUN_ID (repeatable)")
     g.add_argument("--keys", nargs="+", help="registry keys (with --redecide: narrows the source run's rows)")
     g.add_argument("--unscored", action="store_true", help="every row with no novelty block")
+    g.add_argument("--keys-file", type=Path, default=None, metavar="PATH",
+                   help="registry keys, one per line ('#' starts a comment): --keys for a selection too long for a "
+                        "command line (the pooled recovery harness's rows)")
+    sp.add_argument("--affected-only", action="store_true",
+                    help="with --hide (plan 13 decision 1 (c)): score only the selected rows whose decision hiding can "
+                         "change (recovery.affected_split: a hidden trait among their nearest, by label, or in their "
+                         "recorded block; a listed set that moves; no recorded block); copy the others' recorded "
+                         "novelty blocks into results.jsonl, marked copied_from; affected.jsonl lists every row's "
+                         "reasons")
     sp.add_argument("--redecide", action="store_true",
                     help="re-run the decision rules on --from-batch's records (its candidates, corpus, relation order, "
                          "relation model and answers on record); only calls a rule now needs and the source never made "

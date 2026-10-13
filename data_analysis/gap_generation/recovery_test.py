@@ -81,7 +81,9 @@ def m3_batch_id(batch_id: str, seed: int) -> str:
 
 def score_argv(args, seed: int, hidden_path: Path, *, budget: float, dry_run: bool, resume: bool) -> list[str]:
     """The ``novelty_score.py score`` command line of one seed's reduced-corpus run."""
-    a = ["score", "--batch-id", m3_batch_id(args.batch_id, seed), "--run", f"{args.generator}/{args.run_id}",
+    sel = ["--keys-file", str(args.keys_file)] if getattr(args, "pooled", False) else \
+        ["--run", f"{args.generator}/{args.run_id}"]
+    a = ["score", "--batch-id", m3_batch_id(args.batch_id, seed), *sel,
          "--hide", str(hidden_path), "--transport", args.transport, "--budget-usd", f"{max(0.0, budget):.4f}",
          "--registry", str(args.registry), "--data-dir", str(args.data_dir), "--metric-config", str(args.metric_config),
          "--cache-dir", str(args.cache_dir), "--query-form", args.query_form, "--concurrency", str(args.concurrency)]
@@ -89,7 +91,8 @@ def score_argv(args, seed: int, hidden_path: Path, *, budget: float, dry_run: bo
         if val is not None:
             a += [flag, str(val)]
     for flag, on in (("--dry-run", dry_run), ("--resume", resume), ("--allow-dirty", args.allow_dirty),
-                     ("--confirm-expensive", args.confirm_expensive)):
+                     ("--confirm-expensive", args.confirm_expensive),
+                     ("--affected-only", getattr(args, "affected_only", False))):
         if on:
             a.append(flag)
     qs = getattr(args, "queue_search", None)        # the seed queue in the reduced run's search (default: on)
@@ -110,11 +113,13 @@ def run_m3(argv: list[str], *, quiet: bool) -> tuple[int, dict]:
     return rc, info
 
 
-def run_candidates(rows: dict, generator: str, run_id: str) -> tuple[list[NR.M3Candidate], dict]:
-    """The run's rows M3 would take (``novelty_score.select_candidates`` as ``--hide`` calls it: a ``trait``
-    verdict with a gloss, not held), and why the others are left out."""
-    a = SimpleNamespace(keys=None, run=[(generator, run_id)], unscored=False, rescore=False, include_held=False,
-                        limit=None)
+def run_candidates(rows: dict, generator: Optional[str], run_id: Optional[str], *,
+                   keys: Optional[list] = None) -> tuple[list[NR.M3Candidate], dict]:
+    """The run's rows (or ``keys``, the pooled harness's) M3 would take (``novelty_score.select_candidates`` as
+    ``--hide`` calls it: a ``trait`` verdict with a gloss, not held), and why the others are left out."""
+    a = SimpleNamespace(keys=list(keys) if keys is not None else None,
+                        run=None if keys is not None else [(generator, run_id)], unscored=False, rescore=False,
+                        include_held=False, limit=None)
     return NS.select_candidates(rows, a, batch_id="", ignore_decided=True)
 
 
@@ -232,7 +237,56 @@ def match_seed(args, *, seed: int, seed_dir: Path, hidden_doc: dict, m3_dir: Pat
     reduced = {"batch_id": m3_dir.name, "by_decision": m3_summary.get("by_decision"),
                "n_stalled": m3_summary.get("n_stalled"), "skipped": m3_summary.get("skipped"),
                "rules": rules.name, "cosine_floor": rules.cosine_floor, PL.LABEL_FORM_KEY: label_form}
-    return 0, RC.seed_figures(hidden_doc, results, rows, near=near, reduced_run=reduced, cost=cost)
+    fig = RC.seed_figures(hidden_doc, results, rows, near=near, reduced_run=reduced, cost=cost)
+    if m3_run.get("affected_only"):                  # plan 13 decision 1 (c): rows scored again and rows copied
+        fig["affected"] = m3_run["affected_only"]
+    if getattr(args, "attributed", None):            # plan 13 decision 1 (d): per generator and per run
+        fig["breakdown"] = RC.generator_breakdown(hidden_doc, results, rows, args.attributed)
+    return 0, fig
+
+
+def exclusion_set(args, traits) -> dict[str, str]:
+    """``--exclude-stems`` (a file, one stem per line or a JSON list) and ``--exclude-provenance GENERATOR``
+    (``independence.excluded_stems``): stems whose hiding group is never drawn, with why."""
+    out: dict[str, str] = {}
+    p = getattr(args, "exclude_stems", None)
+    if p is not None:
+        text = Path(p).read_text(encoding="utf-8")
+        try:
+            stems = json.loads(text)
+            stems = stems.get("stems", stems) if isinstance(stems, dict) else stems
+        except json.JSONDecodeError:
+            stems = [x.strip() for x in text.splitlines() if x.strip() and not x.lstrip().startswith("#")]
+        for x in stems:
+            out[str(x)] = f"--exclude-stems {p}"
+    g = getattr(args, "exclude_provenance", None)
+    if g:
+        from assistant_axis.gapgen.testing import independence as IND
+        queue = json.loads((Path(args.data_dir) / "seed_queue.json").read_text(encoding="utf-8")) \
+            if (Path(args.data_dir) / "seed_queue.json").exists() else {"entries": []}
+        out.update(IND.excluded_stems(g, traits=IND.trait_sources(args.data_dir), queue=queue))
+    unknown = sorted(set(out) - set(traits))
+    if unknown:
+        print(f"WARNING: {len(unknown)} excluded stem(s) are not corpus traits and change nothing: {unknown[:10]}",
+              file=sys.stderr)
+    return out
+
+
+def make_draw(args, traits, *, seed: int, regions, kinds) -> dict:
+    """One seed's hidden set: ``--hidden-file``'s fixed list (every hiding group with a listed member hidden whole,
+    ``hidden_frac`` null), else today's draw, without the excluded stems' groups when there are any."""
+    hf = getattr(args, "hidden_file", None)
+    if hf is not None:
+        doc = RC.load_hidden(hf)["doc"]
+        if not doc.get("traits") or not doc.get("groups"):
+            doc = RC.fixed_hidden(doc["hidden"], traits, regions=regions, kinds=kinds, seed=seed, source=str(hf))
+        return dict(doc, seed=seed, hidden_frac=None, from_file=str(hf))
+    ex = getattr(args, "exclude", None) or {}
+    kw = {"exclude": sorted(ex)} if ex else {}
+    d = RC.draw_hidden(traits, frac=args.hidden_frac, seed=seed, regions=regions, kinds=kinds, **kw)
+    if ex:
+        d["exclusion_reasons"] = {s: ex[s] for s in d.get("excluded", [])}
+    return d
 
 
 def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sha, cands, cfg, cache):
@@ -243,12 +297,14 @@ def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sh
     hidden_docs: dict[int, dict] = {}
     for s in seeds:
         on_record = out_dir / f"seed{s}" / "hidden.json"
-        draw = RC.draw_hidden(traits, frac=args.hidden_frac, seed=s, regions=regions, kinds=kinds)
+        draw = make_draw(args, traits, seed=s, regions=regions, kinds=kinds)
+        want_frac = None if getattr(args, "hidden_file", None) else args.hidden_frac
         if args.resume and on_record.exists():
             doc = json.loads(on_record.read_text(encoding="utf-8"))
-            if doc.get("hidden_frac") != args.hidden_frac:
+            if doc.get("hidden_frac") != want_frac:
                 print(f"REFUSED: seed {s}: {on_record} hid {doc.get('hidden_frac')} of the corpus, this command "
-                      f"--hidden-frac {args.hidden_frac}", file=sys.stderr)
+                      f"{'a fixed --hidden-file' if want_frac is None else '--hidden-frac ' + str(want_frac)}",
+                      file=sys.stderr)
                 return 2
             if doc.get("hidden") != draw["hidden"]:
                 print(f"WARNING: seed {s}: {on_record} differs from today's draw (the corpus or the regions changed "
@@ -259,10 +315,15 @@ def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sh
             doc = RC.write_hidden(hidden_paths[s], draw, data_dir=args.data_dir, regions_path=args.regions, git_sha=sha)
         hidden_docs[s] = doc
         print(f"seed {s}: hidden {doc['n_hidden']} of {doc['n_corpus']} traits in {doc['n_groups']} groups "
-              f"(target {doc['n_target']}; by stratum {json.dumps({k: v['n_hidden'] for k, v in doc['strata'].items()})})")
+              f"(target {doc['n_target']}; by stratum {json.dumps({k: v['n_hidden'] for k, v in doc['strata'].items()})})"
+              + (f"; {len(doc['excluded'])} stems excluded from the draw" if doc.get("excluded") else "")
+              + ("; a fixed hidden list" if doc.get("hidden_frac") is None else ""))
     full_index, full_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache)
     vectors = cached_vectors(cands, cfg, cache, args.query_form)
     total, lines = 0.0, []
+    m3_infos = getattr(args, "m3_infos", None)
+    if m3_infos is None:
+        m3_infos = args.m3_infos = {}
     for s in seeds:
         d = paths.novelty_dir(m3_batch_id(args.batch_id, s), candidates_dir=args.out_root)
         if args.resume and m3_finished(d):
@@ -270,6 +331,7 @@ def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sh
         else:
             rc, info = run_m3(score_argv(args, s, hidden_paths[s], budget=args.budget_usd, dry_run=True, resume=False),
                               quiet=not args.dry_run)
+            m3_infos[s] = info
             if rc != 0 or info.get("estimate_usd") is None:
                 print(info.get("stdout", ""))
                 print(f"REFUSED: seed {s}: the M3 dry run gave no estimate (status {rc})", file=sys.stderr)
@@ -306,8 +368,26 @@ def prepare(args, *, seeds, out_dir: Path, tmp: Path, traits, regions, kinds, sh
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--generator", required=True)
-    ap.add_argument("--run-id", required=True)
+    ap.add_argument("--generator", default=None, help="the generator whose run is tested (or --pooled)")
+    ap.add_argument("--run-id", default=None)
+    ap.add_argument("--pooled", action="store_true",
+                    help="plan 13 decision 1 (d): every generator at once: every registry row with an M1 trait verdict "
+                         "that counts for a generator (a states-pass row for its source row's generator; the M1 "
+                         "validation and manual pools left out), scored once per seed; the report gives each generator "
+                         "and each run its own figures and the union (batch id default rec_pooled)")
+    ap.add_argument("--affected-only", action="store_true",
+                    help="plan 13 decision 1 (c): score again only the rows whose decision hiding can change "
+                         "(recovery.affected_split) and copy the rest's recorded blocks (novelty_score.py score "
+                         "--affected-only)")
+    ap.add_argument("--hidden-file", type=Path, default=None,
+                    help="a fixed hidden list (a hidden.json, or any JSON with a 'hidden' list of stems) in place of the "
+                         "draw: one seed, hidden_frac recorded as null; each listed stem's hiding group hides whole")
+    ap.add_argument("--exclude-stems", type=Path, default=None,
+                    help="stems whose hiding group is never drawn (one per line, or a JSON list); recorded in "
+                         "hidden.json as excluded")
+    ap.add_argument("--exclude-provenance", default=None, metavar="GENERATOR",
+                    help="exclude from the draw the corpus traits that came from GENERATOR's own source "
+                         "(independence.provenance_excluded; the contamination check)")
     ap.add_argument("--hidden-frac", type=float, default=RC.DEFAULT_HIDDEN_FRAC,
                     help=f"the share of the corpus's traits hidden (default {RC.DEFAULT_HIDDEN_FRAC})")
     ap.add_argument("--seed", type=int, nargs="+", default=list(RC.DEFAULT_SEEDS),
@@ -334,18 +414,59 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
+def check_selection(args) -> Optional[str]:
+    """Exactly one of ``--generator G --run-id R`` and ``--pooled``; the ids safe as directory names; the seeds of a
+    fixed hidden list (one seed); the batch id (default ``rec_<G>_<R>``, ``rec_pooled``)."""
+    if args.pooled and (args.generator or args.run_id):
+        return "--pooled tests every generator at once: drop --generator and --run-id"
+    if not args.pooled and not (args.generator and args.run_id):
+        return "give --generator and --run-id (one run), or --pooled (every generator)"
+    if args.hidden_file is not None and len(dict.fromkeys(args.seed)) != 1:
+        return "--hidden-file is one fixed hidden list: give one --seed (it names the seed's directory)"
+    if args.hidden_file is not None and (args.exclude_stems is not None or args.exclude_provenance):
+        return "--hidden-file is a fixed list: --exclude-stems and --exclude-provenance apply to a draw"
+    try:
+        if not args.pooled:
+            paths.check_id(args.generator, "generator")
+            paths.check_id(args.run_id, "run_id")
+        args.batch_id = args.batch_id or ("rec_pooled" if args.pooled else f"rec_{args.generator}_{args.run_id}")
+        paths.check_id(args.batch_id, "batch_id")
+    except ValueError as exc:
+        return str(exc)
+    return None
+
+
+def pooled_selection(rows: dict) -> tuple[list[str], dict, dict]:
+    """The pooled harness's keys, their counts (``recovery.pooled_rows``) and each key's (generator, run_id) pairs."""
+    keys, counts = RC.pooled_rows(rows)
+    attributed = {k: RC.attribution(rows[k], rows) for k in keys}
+    return keys, counts, attributed
+
+
+def print_pooled(cands, attributed: dict, infos: dict) -> None:
+    """The dry run's rows by generator: rows, and per seed the rows scored again and copied (affected only)."""
+    from collections import Counter
+    keys = {c.key for c in cands}
+    by_g = Counter(g for k in keys for g in dict.fromkeys(g for g, _ in attributed.get(k, [])))
+    seeds = sorted(infos)
+    scored = {s: set(infos[s].get("affected_scored") or []) for s in seeds if infos[s].get("affected")}
+    head = "generator | rows" + "".join(f" | seed {s} scored | seed {s} copied" for s in scored)
+    print("rows by generator (a row counts for each generator that proposed it):\n" + head)
+    for g, n in sorted(by_g.items(), key=lambda kv: -kv[1]):
+        mine = {k for k in keys if any(x == g for x, _ in attributed.get(k, []))}
+        cells = "".join(f" | {len(mine & sc)} | {len(mine - sc)}" for sc in scored.values())
+        print(f"{g} | {n}{cells}")
+    print(f"sum over generators {sum(by_g.values())} (distinct rows {len(keys)})")
+
+
 def main(argv=None) -> int:
     configure_logging()
     args = build_parser().parse_args(argv)
-    try:
-        paths.check_id(args.generator, "generator")
-        paths.check_id(args.run_id, "run_id")
-        args.batch_id = args.batch_id or f"rec_{args.generator}_{args.run_id}"
-        paths.check_id(args.batch_id, "batch_id")
-    except ValueError as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
+    bad = check_selection(args)
+    if bad:
+        print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
-    if not 0.0 < args.hidden_frac <= 1.0:
+    if args.hidden_file is None and not 0.0 < args.hidden_frac <= 1.0:
         print(f"REFUSED: --hidden-frac {args.hidden_frac} is not a share from 0 (excluded) to 1", file=sys.stderr)
         return 2
     seeds = list(dict.fromkeys(args.seed))
@@ -367,19 +488,31 @@ def main(argv=None) -> int:
     cfg = MetricConfig.load(args.metric_config)
     cache = EM.EmbeddingCache(args.cache_dir)
     rows = Registry(args.registry).fold()
-    run_rows = [r for r in rows.values() if has_source(r, args.generator, args.run_id)]
-    if not run_rows:
-        print(f"REFUSED: no registry rows from {args.generator}/{args.run_id} in {args.registry}; submit the run first "
-              f"(gap_registry.py submit --from data/candidates/runs/{args.generator}/{args.run_id}/candidates.jsonl)",
-              file=sys.stderr)
-        return 2
-    cands, skipped = run_candidates(rows, args.generator, args.run_id)
+    pooled_counts, args.attributed = None, None
+    if args.pooled:
+        keys, pooled_counts, args.attributed = pooled_selection(rows)
+        if not keys:
+            print(f"REFUSED: no registry row in {args.registry} has an M1 trait verdict and a generator", file=sys.stderr)
+            return 2
+        cands, skipped = run_candidates(rows, None, None, keys=keys)
+        print(f"pooled: {len(keys)} registry rows ({json.dumps(pooled_counts)}), {len(cands)} M3 candidates "
+              f"(left out: {json.dumps(skipped)})")
+        what = "pooled"
+    else:
+        run_rows = [r for r in rows.values() if has_source(r, args.generator, args.run_id)]
+        if not run_rows:
+            print(f"REFUSED: no registry rows from {args.generator}/{args.run_id} in {args.registry}; submit the run "
+                  f"first (gap_registry.py submit --from data/candidates/runs/{args.generator}/{args.run_id}/"
+                  "candidates.jsonl)", file=sys.stderr)
+            return 2
+        cands, skipped = run_candidates(rows, args.generator, args.run_id)
+        print(f"{args.generator}/{args.run_id}: {len(run_rows)} registry rows, {len(cands)} M3 candidates "
+              f"(left out: {json.dumps(skipped)})")
+        what = f"{args.generator}/{args.run_id}"
     n_unfiltered = skipped.get("not_filtered", 0)
-    print(f"{args.generator}/{args.run_id}: {len(run_rows)} registry rows, {len(cands)} M3 candidates "
-          f"(left out: {json.dumps(skipped)})")
     if n_unfiltered:
-        print(f"WARNING: {n_unfiltered} rows of {args.generator}/{args.run_id} have no M1 filter block and are left out; "
-              f"run traithood_filter.py --pipeline split --run {args.generator}/{args.run_id} first", file=sys.stderr)
+        print(f"WARNING: {n_unfiltered} rows of {what} have no M1 filter block and are left out; run "
+              f"traithood_filter.py --pipeline split on them first", file=sys.stderr)
     if not cands:
         print("REFUSED: no candidate to score", file=sys.stderr)
         return 2
@@ -387,14 +520,31 @@ def main(argv=None) -> int:
     traits = NV.load_trait_corpus(data_dir)
     regions = RC.load_regions(args.regions)
     kinds = RC.arrangement_kinds(data_dir, traits)
+    args.exclude = exclusion_set(args, traits) if (args.exclude_stems or args.exclude_provenance) else {}
+    if args.exclude_provenance and not args.exclude:
+        print(f"--exclude-provenance {args.exclude_provenance}: no corpus trait came from its source; the draw is "
+              "today's (no exclusion applies)")
     sha = git_sha()
     tmp = Path(tempfile.mkdtemp(prefix="recovery_"))   # this run's draws until the gate passes (scratch)
+    keys_on_record = out_dir / "pooled_keys.txt"
     try:
+        if args.pooled:
+            if args.resume and keys_on_record.exists():
+                args.keys_file = keys_on_record
+                on_record = NS.read_keys_file(keys_on_record)
+                if on_record != [c.key for c in cands] and on_record != keys:
+                    print(f"WARNING: {keys_on_record} (the rows the run began with) differs from today's selection; "
+                          "the file on record is kept", file=sys.stderr)
+            else:
+                args.keys_file = tmp / "pooled_keys.txt"
+                args.keys_file.write_text("".join(c.key + "\n" for c in cands), encoding="utf-8")
         prep = prepare(args, seeds=seeds, out_dir=out_dir, tmp=tmp, traits=traits, regions=regions, kinds=kinds,
                        sha=sha, cands=cands, cfg=cfg, cache=cache)
         if isinstance(prep, int):
             return prep
         hidden_paths, total, dirty = prep
+        if args.pooled:
+            print_pooled(cands, args.attributed, getattr(args, "m3_infos", {}) or {})
         if args.dry_run:
             print(f"DRY-RUN: would write {out_dir}/ and data/candidates/novelty/{args.batch_id}_s<seed>/ "
                   "(never the registry)")
@@ -404,11 +554,23 @@ def main(argv=None) -> int:
             if not dest.exists():
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(hidden_paths[s], dest)
+        if args.pooled and args.keys_file != keys_on_record:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(args.keys_file, keys_on_record)
+            args.keys_file = keys_on_record
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-    run_meta = {"batch_id": args.batch_id, "generator": args.generator, "run_id": args.run_id, "git_sha": sha,
-                "argv": sys.argv[1:] if argv is None else argv, "hidden_frac": args.hidden_frac, "seeds": seeds,
+    run_meta = {"batch_id": args.batch_id, "generator": "pooled" if args.pooled else args.generator,
+                "run_id": None if args.pooled else args.run_id, "pooled": bool(args.pooled),
+                "affected_only": bool(args.affected_only), "git_sha": sha,
+                "argv": sys.argv[1:] if argv is None else argv,
+                "hidden_frac": None if args.hidden_file else args.hidden_frac,
+                "hidden_file": str(args.hidden_file) if args.hidden_file else None,
+                "excluded": {"n": len(args.exclude), "from_stems_file": str(args.exclude_stems) if args.exclude_stems
+                             else None, "provenance_of": args.exclude_provenance} if (args.exclude_stems or
+                                                                                      args.exclude_provenance) else None,
+                "seeds": seeds,
                 "transport": args.transport, "budget_usd": args.budget_usd, "estimate_usd": round(total, 4),
                 "confirmed_by": args.confirmed_by, "allow_dirty": bool(args.allow_dirty),
                 "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
@@ -418,6 +580,9 @@ def main(argv=None) -> int:
                 "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
                 "models": {"overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
                 "resumed": bool(args.resume), "started_at": utc_now()}
+    if args.pooled:
+        run_meta["pooled_selection"] = {"counts": pooled_counts, "keys_file": str(keys_on_record),
+                                        "keys_sha256": RC.file_sha256(keys_on_record)}
     earlier = json.loads((out_dir / "run.json").read_text(encoding="utf-8")) if (out_dir / "run.json").exists() else None
     # the label form of the harness's prompts (prompt_labels): new M3 runs and their match stages show the judge
     # display form; a resumed seed keeps its M3 run's recorded form (match_seed), as a resumed harness keeps its own
@@ -482,8 +647,10 @@ def write_report(args, out_dir: Path, figures: list[dict], *, seeds_done: list[i
     from assistant_axis.plot_metadata import json_metadata
     from assistant_axis.provenance import current_file_input
     report = RC.combine_seeds(figures)
-    report.update({"batch_id": args.batch_id, "generator": args.generator, "run_id": args.run_id,
-                   "hidden_frac": args.hidden_frac, "seeds_reported": seeds_done})
+    gen = "pooled" if getattr(args, "pooled", False) else args.generator
+    report.update({"batch_id": args.batch_id, "generator": gen, "run_id": None if gen == "pooled" else args.run_id,
+                   "hidden_frac": None if getattr(args, "hidden_file", None) else args.hidden_frac,
+                   "affected_only": bool(getattr(args, "affected_only", False)), "seeds_reported": seeds_done})
     inputs = []
     for s in seeds_done:
         d = paths.novelty_dir(m3_batch_id(args.batch_id, s), candidates_dir=args.out_root)
@@ -493,8 +660,9 @@ def write_report(args, out_dir: Path, figures: list[dict], *, seeds_done: list[i
     env = json_metadata(report, title=f"recovery_test {args.batch_id}", inputs=inputs)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "recovery_report.json")
     labels = {s: t.label for s, t in NV.load_trait_corpus(args.data_dir).items()}
-    atomic_write_text(RC.report_markdown(report, batch_id=args.batch_id, generator=args.generator, run_id=args.run_id,
-                                         labels=labels), out_dir / "recovery_report.md")
+    atomic_write_text(RC.report_markdown(report, batch_id=args.batch_id, generator=gen,
+                                         run_id=report["run_id"] or "every generator", labels=labels),
+                      out_dir / "recovery_report.md")
     m = report["mean"]
     print(f"report: {out_dir / 'recovery_report.md'}; mean recall {RC._pct(m['recall_kept'])}, precision "
           f"{RC._pct(m['precision_kept'])}, false-cover candidates {m['false_cover_candidates']}, total cost "
