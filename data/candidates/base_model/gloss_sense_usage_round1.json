@@ -1,0 +1,29 @@
+{
+  "n_calls": 403,
+  "per_model": {
+    "bge-large-en-v1.5": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0,
+      "model": "bge-large-en-v1.5",
+      "n_calls": 1,
+      "prompt_tokens": 286
+    },
+    "claude-haiku-5-5": {
+      "completion_tokens": 70409,
+      "cost_usd": 0.054,
+      "model": "claude-haiku-5-5",
+      "n_calls": 344,
+      "prompt_tokens": 188101
+    },
+    "embeddinggemma-300m": {
+      "completion_tokens": 0,
+      "cost_usd": 0.0,
+      "model": "embeddinggemma-300m",
+      "n_calls": 58,
+      "prompt_tokens": 30685
+    }
+  },
+  "total_completion_tokens": 70409,
+  "total_cost_usd": 0.054,
+  "total_prompt_tokens": 219072
+}
