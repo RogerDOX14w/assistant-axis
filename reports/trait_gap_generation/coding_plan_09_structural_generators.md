@@ -65,6 +65,21 @@ M1 (the trait-hood filter) and M3 (the novelty scorer) do the filtering and scor
 
 (2026-10-13: both decisions are decided, above; nothing in this section is open.)
 
+**Roger's answers after the build's review (2026-10-13, written in `roger/open_items.md`):**
+- **The opposite of a mean** — Roger: "This isn't a pair, it's a type of triangle."  A trait whose `position` is
+  `mean` (Aristotle's courage) forms a triangle with its deficiency and its excess (cowardice, recklessness); it has
+  no single opposite.  So for a mean, the `opposite` answer is recorded as one of the triangle's corners (matched to
+  the excess or deficiency answer where it names one), never as a pair partner (`partner_hint` empty, the triple's
+  arrangement hint `triangle`), and pair recovery is read only over traits that are poles of a recorded pair.
+- **Siblings together in review** — Roger: "Sounds good."  The review graph shows an operator's outputs for one
+  trait (its opposite, excess, deficiency, and the principal-target items) as one group; the interface request of
+  § 12 item 3 is approved.
+- **VIA's 72 names** — Roger: "Source fetch authorized."  An agent fetches Niemiec (2019) to read (not stored in the
+  repository, quotes 25 words or fewer), checks every over- and underuse name, and fills `verified_by`; the other
+  four classical tables are accepted as typed, with Roger's 30-minute read of the classical candidates as the check.
+- **Stability** — Roger's rule for sampled outputs at T=1 (AGENT_NOTES, judging rule): three samples per trait,
+  combined as a deduplicated union with support recorded; stability is a diagnostic, never a gate.
+
 ## 1. Decisions already made
 
 | decision | reason | source |
