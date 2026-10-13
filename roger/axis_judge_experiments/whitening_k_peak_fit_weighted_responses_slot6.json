@@ -677,11 +677,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python results_analysis/whitening_k_weighted_scatter.py --slot 6 --pairs pair_list_resp_12axes_2026-04-29.json --sweep whitening_k_sweep_responses_slot6.json --plot rho_peak_K_weighted_scatter_responses_slot6.png --fit_json whitening_k_peak_fit_weighted_responses_slot6.json",
-      "git_sha": "abdfa16c+dirty",
+      "git_sha": "00123e28+dirty",
       "author": "Roger Dearnaley",
       "title": "whitening_k_weighted_scatter slot=6"
     },
-    "produced_at": "2026-10-12T23:44:44+00:00",
+    "produced_at": "2026-10-13T01:12:06+00:00",
     "inputs": [
       {
         "dep_key": "sweep_json",
