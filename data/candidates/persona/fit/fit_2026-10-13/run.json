@@ -1,0 +1,37 @@
+{
+  "command": "fit",
+  "argv": [
+    "fit",
+    "--fit-id",
+    "fit_2026-10-13",
+    "--vectors-dir",
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot",
+    "--cache-dir",
+    "data/candidates/cache/embeddings",
+    "--force"
+  ],
+  "git_sha": "f50d0f27+dirty",
+  "started_at": "2026-10-13T22:59:00+00:00",
+  "script": "data_analysis/gap_generation/persona_novelty.py",
+  "fit_id": "fit_2026-10-13",
+  "dirty_check": null,
+  "status": 0,
+  "alpha": 0.3,
+  "N": 20,
+  "chosen_by_rule": {
+    "alpha": 0.3,
+    "N": 20
+  },
+  "n_train": 572,
+  "n_groups": 485,
+  "dup_threshold": 0.7322,
+  "novel_pct": 0.8,
+  "thresholds_set_by": "plan default",
+  "config_version": "2026-10-02",
+  "canary": null,
+  "n_embedded": 0,
+  "model_sha256": "ba71202ecdc91a16249e5cc549fc4a8397754fda786c31ba3f11260dba409793",
+  "finished_at": "2026-10-13T22:59:06+00:00",
+  "cost_usd": 0,
+  "n_calls": 0
+}

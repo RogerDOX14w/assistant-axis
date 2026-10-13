@@ -1,0 +1,35 @@
+{
+  "command": "prospective predict",
+  "argv": [
+    "prospective",
+    "predict",
+    "--fit-id",
+    "fit_2026-10-13",
+    "--vectors-dir",
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot",
+    "--cache-dir",
+    "data/candidates/cache/embeddings",
+    "--force"
+  ],
+  "git_sha": "f50d0f27+dirty",
+  "started_at": "2026-10-13T22:59:09+00:00",
+  "script": "data_analysis/gap_generation/persona_novelty.py",
+  "fit_id": "fit_2026-10-13",
+  "dirty_check": null,
+  "status": 0,
+  "n": 699,
+  "by_kind": {
+    "traits": 639,
+    "roles": 60
+  },
+  "flags": {
+    "novel_like": 271,
+    "ordinary": 353,
+    "duplicate_like": 75
+  },
+  "n_embedded": 0,
+  "compare_command": "uv run python data_analysis/gap_generation/persona_novelty.py prospective compare --fit-id fit_2026-10-13 --new-vectors-dir '<the new extraction's model directory, holding traits/vectors and roles/vectors>'",
+  "finished_at": "2026-10-13T22:59:10+00:00",
+  "cost_usd": 0,
+  "n_calls": 0
+}

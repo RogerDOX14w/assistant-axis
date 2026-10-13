@@ -1,0 +1,162 @@
+{
+  "result": {
+    "n": 36,
+    "auc_nn_cos_covered_vs_new": 0.7071,
+    "spearman_nn_cos_vs_m3_cosine": -0.1163,
+    "covered_by_is_nearest": 0.5,
+    "covered_by_in_top3": 1.0,
+    "n_covered_by_with_vector": 2,
+    "m3": {
+      "new": 33,
+      "covered": 3
+    },
+    "flags": {
+      "duplicate_like": 5,
+      "novel_like": 7,
+      "ordinary": 24
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 2,
+        "auc": null,
+        "covered_by_is_nearest": null,
+        "flags": {
+          "ordinary": 1,
+          "duplicate_like": 1
+        },
+        "m3": {
+          "new": 2
+        },
+        "mean_residual_pct": 0.3503,
+        "disagreements": {}
+      },
+      "antonym_check": {
+        "n": 1,
+        "auc": null,
+        "covered_by_is_nearest": 1.0,
+        "flags": {
+          "ordinary": 1
+        },
+        "m3": {
+          "covered": 1
+        },
+        "mean_residual_pct": 0.7225,
+        "disagreements": {}
+      },
+      "base_model": {
+        "n": 5,
+        "auc": null,
+        "covered_by_is_nearest": null,
+        "flags": {
+          "duplicate_like": 2,
+          "novel_like": 1,
+          "ordinary": 2
+        },
+        "m3": {
+          "new": 5
+        },
+        "mean_residual_pct": 0.3273,
+        "disagreements": {
+          "dup_vs_new": 1
+        }
+      },
+      "censuses": {
+        "n": 36,
+        "auc": 0.7071,
+        "covered_by_is_nearest": 0.5,
+        "flags": {
+          "ordinary": 24,
+          "novel_like": 7,
+          "duplicate_like": 5
+        },
+        "m3": {
+          "new": 33,
+          "covered": 3
+        },
+        "mean_residual_pct": 0.5424,
+        "disagreements": {
+          "dup_vs_new": 3
+        }
+      },
+      "roget": {
+        "n": 5,
+        "auc": 0.25,
+        "covered_by_is_nearest": 1.0,
+        "flags": {
+          "novel_like": 1,
+          "duplicate_like": 3,
+          "ordinary": 1
+        },
+        "m3": {
+          "new": 4,
+          "covered": 1
+        },
+        "mean_residual_pct": 0.4668,
+        "disagreements": {
+          "dup_vs_new": 2
+        }
+      },
+      "states_pass": {
+        "n": 4,
+        "auc": null,
+        "covered_by_is_nearest": null,
+        "flags": {
+          "novel_like": 1,
+          "duplicate_like": 1,
+          "ordinary": 2
+        },
+        "m3": {
+          "new": 4
+        },
+        "mean_residual_pct": 0.439,
+        "disagreements": {
+          "dup_vs_new": 1
+        }
+      },
+      "wn_clusters": {
+        "n": 3,
+        "auc": null,
+        "covered_by_is_nearest": null,
+        "flags": {
+          "ordinary": 3
+        },
+        "m3": {
+          "new": 3
+        },
+        "mean_residual_pct": 0.5459,
+        "disagreements": {}
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py score --batch-id smoke_cached36_2026-10-13 --fit-id fit_2026-10-13 --keys 'adorable#1' 'aimless#1' 'chattering#1' 'clandestine#1' 'concealing#1' 'crude#1' 'deft#1' 'derisive#1' 'disobedient#1' 'flattering#1' 'incorruptible#1' 'insulting#1' 'irrestrainable#1' 'jumpy#1' 'malleable#1' 'maniacal#1' 'masochistic#1' 'meddling#1' 'minimizing#1' 'morose#1' 'nosy#1' 'obscene#1' 'overdiligent#1' 'overmasculine#1' 'overstepping#1' 'parasitic#1' 'pathetic#1' 'phony#1' 'prudish#1' 'purposive#1' 'repressed#1' 'resigned#1' 'restrainable#1' 'rugged#1' 'unladylike#1' 'urgent#1' --snapshot --vectors-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --cache-dir data/candidates/cache/embeddings --force",
+      "git_sha": "f50d0f27+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores smoke_cached36_2026-10-13: agreement"
+    },
+    "produced_at": "2026-10-13T22:59:15+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-13T22:58:21+00:00@53756",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T22:58:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-13T22:15:47+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T22:15:47+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "67f9e365c5ae4163dfeecfe87cbc70f24da12ad8454cd0a31647398f52ea33e3"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "result": {
+    "batch_id": "smoke_cached36_2026-10-13",
+    "fit_id": "fit_2026-10-13",
+    "N": 20,
+    "n": 36,
+    "flags": {
+      "duplicate_like": 5,
+      "novel_like": 7,
+      "ordinary": 24
+    },
+    "disagreements": {
+      "dup_vs_new": {
+        "met_rule": 5,
+        "listed": 3
+      },
+      "cover_questioned": {
+        "met_rule": 0,
+        "listed": 0
+      },
+      "novel_vs_covered": {
+        "met_rule": 0,
+        "listed": 0
+      },
+      "cap": 3,
+      "quantile": 0.1
+    },
+    "thresholds": {
+      "dup_threshold": 0.7322,
+      "novel_pct": 0.8,
+      "set_by": "plan default"
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 2,
+        "flags": {
+          "ordinary": 1,
+          "duplicate_like": 1
+        }
+      },
+      "antonym_check": {
+        "n": 1,
+        "flags": {
+          "ordinary": 1
+        }
+      },
+      "base_model": {
+        "n": 5,
+        "flags": {
+          "duplicate_like": 2,
+          "novel_like": 1,
+          "ordinary": 2
+        }
+      },
+      "censuses": {
+        "n": 36,
+        "flags": {
+          "ordinary": 24,
+          "novel_like": 7,
+          "duplicate_like": 5
+        }
+      },
+      "roget": {
+        "n": 5,
+        "flags": {
+          "novel_like": 1,
+          "duplicate_like": 3,
+          "ordinary": 1
+        }
+      },
+      "states_pass": {
+        "n": 4,
+        "flags": {
+          "novel_like": 1,
+          "duplicate_like": 1,
+          "ordinary": 2
+        }
+      },
+      "wn_clusters": {
+        "n": 3,
+        "flags": {
+          "ordinary": 3
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py score --batch-id smoke_cached36_2026-10-13 --fit-id fit_2026-10-13 --keys 'adorable#1' 'aimless#1' 'chattering#1' 'clandestine#1' 'concealing#1' 'crude#1' 'deft#1' 'derisive#1' 'disobedient#1' 'flattering#1' 'incorruptible#1' 'insulting#1' 'irrestrainable#1' 'jumpy#1' 'malleable#1' 'maniacal#1' 'masochistic#1' 'meddling#1' 'minimizing#1' 'morose#1' 'nosy#1' 'obscene#1' 'overdiligent#1' 'overmasculine#1' 'overstepping#1' 'parasitic#1' 'pathetic#1' 'phony#1' 'prudish#1' 'purposive#1' 'repressed#1' 'resigned#1' 'restrainable#1' 'rugged#1' 'unladylike#1' 'urgent#1' --snapshot --vectors-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --cache-dir data/candidates/cache/embeddings --force",
+      "git_sha": "f50d0f27+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores smoke_cached36_2026-10-13: summary"
+    },
+    "produced_at": "2026-10-13T22:59:15+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-13T22:58:21+00:00@53756",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T22:58:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-13T22:15:47+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T22:15:47+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "67f9e365c5ae4163dfeecfe87cbc70f24da12ad8454cd0a31647398f52ea33e3"
+  }
+}
