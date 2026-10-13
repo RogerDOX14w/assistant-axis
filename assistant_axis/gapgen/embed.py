@@ -399,9 +399,44 @@ class EmbeddingCache:
             finally:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
+    def _replace_on_disk(self, tag: str, items: dict, *, model_id: str) -> None:
+        """Overwrite these keys' vectors in ``<root>/<tag>.npz`` (under ``<root>/.lock``, merged with what is on disk):
+        for :func:`merge_cache` ``prefer_source`` only, never for the live cache."""
+        import fcntl
+        with open(self.root / ".lock", "a+") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                table: dict = {}
+                p = self.path(tag)
+                if p.exists():
+                    with np.load(p, allow_pickle=False) as z:
+                        table = {str(k): v for k, v in zip(z["keys"], z["vecs"])}
+                table.update(items)
+                _write_table(self.root, tag, table, model_id)
+                self._mem[tag] = table
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def _write_table(root: Path, tag: str, table: dict, model_id: str) -> None:
+    """Write ``<root>/<tag>.npz`` from ``table`` (tmp file, then replace) and its manifest entry; the caller holds
+    ``<root>/.lock``."""
+    keys = np.array(sorted(table), dtype="U64")
+    vecs = np.stack([table[k] for k in keys]).astype(np.float32) if len(keys) else np.zeros((0, 0), np.float32)
+    fd, tmp = tempfile.mkstemp(dir=root, suffix=".npz.tmp")
+    os.close(fd)
+    with open(tmp, "wb") as fh:
+        np.savez(fh, keys=keys, vecs=vecs)
+    os.replace(tmp, root / f"{tag}.npz")
+    mpath = root / "manifest.json"
+    manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
+    manifest[tag] = {"model_id": model_id, "dim": int(vecs.shape[1]) if vecs.ndim == 2 else 0, "n": int(len(keys)),
+                     "updated_at": utc_now()}
+    atomic_write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", mpath)
+
 
 def merge_cache(src_root: Path | str, dst: EmbeddingCache, *, tags: Optional[Sequence[str]] = None,
-                dry_run: bool = False) -> dict:
+                dry_run: bool = False, prefer_source: bool = False) -> dict:
     """Copy into ``dst`` the vectors another checkout's cache holds and ``dst`` lacks (regeneration list GG5,
     2026-10-13: an M3 run made in a worktree embedded its candidates into that worktree's git-ignored cache, and
     ``novelty_score.py score --redecide`` replays retrieval only from cached vectors, the very ones the run used).
@@ -412,7 +447,18 @@ def merge_cache(src_root: Path | str, dst: EmbeddingCache, *, tags: Optional[Seq
     largest absolute difference).  ``src_root`` is only read (no lock taken, nothing created there).  Refused
     (``ValueError``) when the two manifests name different models for a tag, or the vectors' dimensions differ.
     ``dry_run`` counts and writes nothing.  Returns ``{tag: {n_source, n_target_before, n_added, n_same, n_differ,
-    max_abs_diff, model_id}}``."""
+    max_abs_diff, n_replaced, model_id}}``.
+
+    ``prefer_source`` (the replay cache, GG5 step 4, 2026-10-14): the differing vectors are taken from the source
+    too (``n_replaced``), so that the target holds exactly the vectors the source checkout's runs read.  A run made
+    in a worktree embedded some corpus texts itself (the alignment sweep's M3 run: 69), and main's own embeddings of
+    the same texts differ by OpenAI's run-to-run noise; the corpus index is centred on its mean, so every cosine a
+    re-decide replays then moves in the fourth decimal and its reproduction check fails.  Refused (``ValueError``)
+    for the checkout's live cache (:data:`EMBEDDING_CACHE_DIR`), whose vectors are never replaced: point ``dst`` at a
+    copy of it made for the replay."""
+    if prefer_source and Path(dst.root).resolve() == Path(EMBEDDING_CACHE_DIR).resolve():
+        raise ValueError(f"--prefer-source replaces vectors: not in the live cache {EMBEDDING_CACHE_DIR}; copy it to a "
+                         f"replay cache first and merge into that")
     src_root = Path(src_root)
     mpath = src_root / "manifest.json"
     src_manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
@@ -438,7 +484,7 @@ def merge_cache(src_root: Path | str, dst: EmbeddingCache, *, tags: Optional[Seq
         dims = {v.shape[-1] for v in list(src.values())[:1] + list(table.values())[:1]}
         if len(dims) > 1:
             raise ValueError(f"{tag}: the source's vectors have dimension {sorted(dims)}; the target's differ")
-        add, same, differ, max_diff = {}, 0, 0, 0.0
+        add, same, differ, max_diff, replace = {}, 0, 0, 0.0, {}
         for k, v in src.items():
             mine = table.get(k)
             if mine is None:
@@ -447,14 +493,22 @@ def merge_cache(src_root: Path | str, dst: EmbeddingCache, *, tags: Optional[Seq
                 same += 1
             else:
                 differ += 1
+                if prefer_source:
+                    replace[k] = v
                 max_diff = max(max_diff, float(np.max(np.abs(np.asarray(mine, np.float64) - np.asarray(v, np.float64)))))
         if add and not dry_run:
             table.update(add)
             dst._dirty[tag] = model_id
         out[tag] = {"n_source": len(src), "n_target_before": n_before, "n_added": len(add), "n_same": same,
-                    "n_differ": differ, "max_abs_diff": max_diff, "model_id": model_id}
+                    "n_differ": differ, "max_abs_diff": max_diff, "n_replaced": len(replace), "model_id": model_id,
+                    "_replace": replace}
     if not dry_run:
         dst.save()
+        for tag, r in out.items():
+            if r["_replace"]:
+                dst._replace_on_disk(tag, r["_replace"], model_id=r["model_id"])
+    for r in out.values():
+        r.pop("_replace")
     return out
 
 

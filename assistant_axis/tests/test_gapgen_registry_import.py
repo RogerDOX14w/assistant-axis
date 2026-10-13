@@ -261,3 +261,45 @@ class TestMergeCache:
         assert "added 1" in capsys.readouterr().out
         assert EM.EmbeddingCache(dst).get("openai_text-embedding-3-large", "a") is not None
         assert NS.main(["cache-merge", "--from", str(dst), "--cache-dir", str(dst)]) == 2
+
+
+class TestReplayCache:
+    """``prefer_source``: a copy of the cache made to replay another checkout's run takes that checkout's vectors,
+    the differing ones included; the live cache never does."""
+
+    def _cache(self, root: Path, items: dict, tag="openai_text-embedding-3-large"):
+        c = EM.EmbeddingCache(root)
+        c.put(tag, list(items), np.asarray(list(items.values()), dtype=np.float32), model_id="text-embedding-3-large")
+        c.save()
+
+    def test_prefer_source_takes_the_differing_vectors(self, tmp_path):
+        tag = "openai_text-embedding-3-large"
+        src, dst = tmp_path / "wt", tmp_path / "replay"
+        self._cache(src, {"a": [1, 0, 0], "c": [0, 0, 1]})
+        self._cache(dst, {"c": [0, 0.5, 0.5], "z": [1, 1, 0]})
+        res = EM.merge_cache(src, EM.EmbeddingCache(dst), prefer_source=True, dry_run=True)
+        assert res[tag]["n_replaced"] == 1 and np.allclose(EM.EmbeddingCache(dst).get(tag, "c"), [0, 0.5, 0.5])
+        res = EM.merge_cache(src, EM.EmbeddingCache(dst), prefer_source=True)
+        fresh = EM.EmbeddingCache(dst)
+        assert (res[tag]["n_added"], res[tag]["n_replaced"]) == (1, 1)
+        assert np.allclose(fresh.get(tag, "c"), [0, 0, 1]) and np.allclose(fresh.get(tag, "a"), [1, 0, 0])
+        assert np.allclose(fresh.get(tag, "z"), [1, 1, 0])
+        assert json.loads((dst / "manifest.json").read_text())[tag]["n"] == 3
+        res = EM.merge_cache(src, EM.EmbeddingCache(dst), prefer_source=True)        # idempotent
+        assert (res[tag]["n_added"], res[tag]["n_differ"], res[tag]["n_replaced"]) == (0, 0, 0)
+
+    def test_refused_for_the_live_cache(self, tmp_path):
+        src = tmp_path / "wt"
+        self._cache(src, {"a": [1, 0, 0]})
+        with pytest.raises(ValueError, match="live cache"):
+            EM.merge_cache(src, EM.EmbeddingCache(EM.EMBEDDING_CACHE_DIR), prefer_source=True, dry_run=True)
+
+    def test_cli(self, tmp_path, capsys):
+        from data_analysis.gap_generation import novelty_score as NS
+        src, dst = tmp_path / "s", tmp_path / "d"
+        self._cache(src, {"c": [0, 0, 1]})
+        self._cache(dst, {"c": [0, 1, 0]})
+        assert NS.main(["cache-merge", "--from", str(src), "--cache-dir", str(dst), "--prefer-source"]) == 0
+        assert "took --from's: 1 replaced" in capsys.readouterr().out
+        assert np.allclose(EM.EmbeddingCache(dst).get("openai_text-embedding-3-large", "c"), [0, 0, 1])
+        assert NS.main(["cache-merge", "--from", str(src), "--prefer-source"]) == 2         # the live cache

@@ -85,7 +85,11 @@ Commands:
   For re-deciding a run scored in a worktree (regeneration list GG5): ``score --redecide`` replays retrieval from
   cached vectors only, and that run's query texts are in the worktree's cache.  ``--check-batch B`` counts B's
   query texts (rebuilt from the registry as the re-decided run rebuilds them) in each cache.  No call; the other
-  cache is only read.
+  cache is only read.  ``--prefer-source`` also takes the other cache's vector where both hold one that differs,
+  so that a *replay cache* (a copy of this cache, never the live one: refused) holds exactly the vectors the other
+  checkout's run read; ``score --redecide --cache-dir <replay cache>`` then reproduces that run (GG5 step 4: the
+  alignment sweep's worktree run embedded 69 corpus texts itself, and main's own vectors for them differ by OpenAI's
+  run-to-run noise, which the centred index spreads to every cosine).
 * ``compare --scan-batch S --main-batch B``: what the shortlist missed (pairs the full scan put at the cut-off or
   above that the relation call did not mark similar), what early exit skipped, and the decisions side by side:
   ``<S>/comparison.json`` and ``comparison.md``.  No call.
@@ -630,14 +634,17 @@ def cmd_cache_merge(args) -> int:
                  "in_cache_after": n_after}
     dst = EM.EmbeddingCache(args.cache_dir)
     try:
-        res = EM.merge_cache(args.from_dir, dst, tags=args.tag, dry_run=args.dry_run)
+        res = EM.merge_cache(args.from_dir, dst, tags=args.tag, dry_run=args.dry_run, prefer_source=args.prefer_source)
     except (OSError, ValueError) as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
     for tag, r in res.items():
         print(f"{'DRY-RUN: ' if args.dry_run else ''}{tag}: {r['n_source']} in {args.from_dir}, {r['n_target_before']} "
               f"in {args.cache_dir}; {'would add' if args.dry_run else 'added'} {r['n_added']}; {r['n_same']} the "
-              f"same in both; {r['n_differ']} differ (kept this cache's; largest difference {r['max_abs_diff']:.2e})")
+              f"same in both; {r['n_differ']} differ ("
+              + (f"{'would take' if args.dry_run else 'took'} --from's: {r['n_differ']} replaced"
+                 if args.prefer_source else "kept this cache's")
+              + f"; largest difference {r['max_abs_diff']:.2e})")
     if check is not None:
         print(f"{check['batch']}'s query texts ({check['n_query_texts']}; skipped {json.dumps(check['skipped'])}): "
               f"{check['in_cache_before']} in this cache before, {check['in_source']} in --from, "
@@ -3069,6 +3076,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
     sp.add_argument("--out-root", type=Path, default=None)
     sp.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM)
+    sp.add_argument("--prefer-source", action="store_true",
+                    help="also take --from's vector where both hold one and they differ, so that --cache-dir holds "
+                         "exactly what the other checkout's runs read: for a replay cache (a copy made for "
+                         "score --redecide --cache-dir), refused for the live cache")
     sp.add_argument("--dry-run", action="store_true", help="count what would be copied; write nothing")
     sp.set_defaults(func=lambda a, argv: cmd_cache_merge(a))
     sp = sub.add_parser("compare")

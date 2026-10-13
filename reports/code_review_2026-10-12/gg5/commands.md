@@ -98,17 +98,33 @@ uv run python data_analysis/gap_generation/novelty_score.py cache-merge \
 uv run python data_analysis/gap_generation/novelty_score.py cache-merge \
     --from $WT/data/candidates/cache/embeddings --tag openai_text-embedding-3-large
 
-# 4. M3 under rule set 3 (G7 for this batch), the 253 rows that hold this batch's block.  It is $0 only if the
-#    dry run shows "253 of 253 rows identical [OK]" and 0 calls not on record.  The query vectors come from the
-#    worktree (step 3), but the corpus vectors are main's copies, up to cosine 0.9972 from those the worktree run
-#    retrieved against, so a neighbour can swap at the k = 10 boundary or the cut-off and leave a row's calls off
-#    the record.  Otherwise do not run it: the fallback is the fresh rule-set-3 M3 below, a PAID step (about $2.24)
-#    that needs Roger's go.  The registry is correct either way; only the replay property is lost.
+# 4. M3 under rule set 3 (G7 for this batch), the 253 rows that hold this batch's block, replayed against the
+#    vectors the worktree run read.  Against main's cache the dry run gives "3 of 253 rows identical [MISMATCH]"
+#    and 4 relation calls not on record (main, 2026-10-13): the worktree run embedded 69 of the 932 corpus texts
+#    itself (its run.json: n_corpus_missing 69), main's own vectors for the same texts differ by OpenAI's
+#    run-to-run noise, and the index is centred on the corpus mean, so every listed cosine moves (by up to 0.007)
+#    and the check compares cosines exactly.  The corpus texts are the same (all 637 descriptions the run showed
+#    are 9d49ad6's), and every decision, covering trait, reason and review flag of the 249 replayable rows
+#    reproduces; 6 rows' shortlists and 4 walks differ.  So: a replay cache, a copy of main's cache that takes the
+#    worktree's vectors where they differ (main's live cache is never changed; --prefer-source refuses it).
+mkdir -p data/candidates/cache/gg5_replay_embeddings      # git-ignored; about 390 MB; delete after step 4
+cp -p data/candidates/cache/embeddings/openai_text-embedding-3-large.npz data/candidates/cache/embeddings/manifest.json \
+      data/candidates/cache/gg5_replay_embeddings/
+uv run python data_analysis/gap_generation/novelty_score.py cache-merge \
+    --from $WT/data/candidates/cache/embeddings --cache-dir data/candidates/cache/gg5_replay_embeddings \
+    --tag openai_text-embedding-3-large --prefer-source [--dry-run]
+#    expect: 0 added (step 3 added them), about 3,071 differ, all taken from --from
 uv run python data_analysis/gap_generation/novelty_score.py score --redecide \
     --from-batch 2026-10-10-full_alignment_sweep --batch-id 2026-10-10-full_alignment_sweep_r3 \
-    --keys $(cat $K/redecide_keys.txt) --rules 3 --transport live --budget-usd 1 --write-registry --dry-run
-#    check: "reproduction: ... 253 of 253 rows identical [OK]" and "calls not on record ... 0"; then without --dry-run
-# 4-fallback (PAID, Roger's go; instead of step 4, not after it):
+    --keys $(cat $K/redecide_keys.txt) --rules 3 --transport live --budget-usd 1 --write-registry \
+    --cache-dir data/candidates/cache/gg5_replay_embeddings --dry-run
+#    $0 only if: "reproduction: ... 253 of 253 rows identical [OK]" and "calls not on record ... 0"; then without
+#    --dry-run.  Expected offline (from main's cache, the same records): of 249 rows, 14 new -> covered by the
+#    graded cut-off, 188 stay new, 47 stay covered.  If the replay cache does not reproduce, stop and report: the choices are
+#    (a) step 4 against main's cache as is (4 relation calls, about $0.004 plus their walks, cents; decisions on
+#    main's vectors, the mismatch recorded in run.json), or (b) the fresh rule-set-3 M3 below, about $2.24.
+#    Both are paid and need Roger's go; (a) is the cheaper and was enough to reproduce every decision.
+# 4-fallback (b) (PAID, Roger's go; instead of step 4, not after it):
 #   uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-13-full_alignment_sweep_r3_fresh \
 #       --keys $(cat $K/redecide_keys.txt) --rescore --rules 3 --transport live --budget-usd 3 [--dry-run]
 
@@ -151,7 +167,7 @@ uv run python data_analysis/gap_generation/gap_registry.py compact
 | step | estimate | basis |
 |---|---|---|
 | 1-3 backups, import, cache merge | $0 | no call |
-| 4 M3 re-decide, 253 rows | $0 only if the dry run shows 253 of 253 identical and 0 calls not on record | G7's re-decides of the papers and variant-B batches sent nothing.  Otherwise (main's corpus vectors differ by run-to-run noise from the worktree's, or the worktree cache lacks the query vectors): the fresh rule-set-3 M3 on the 253, **paid, Roger's go**, $2.24 by `novelty_score.py estimate` (G13's actual rate, $0.010 a row, gives $2.5), with `--budget-usd 3` |
+| 4 M3 re-decide, 253 rows | $0 with the replay cache if its dry run shows 253 of 253 identical and 0 calls not on record | Against main's cache: 3 of 253 identical, 4 calls not on record (corpus-vector noise, see step 4).  Otherwise, with Roger's go: (a) step 4 against main's cache, cents; (b) the fresh rule-set-3 M3 on the 253, $2.24 by `novelty_score.py estimate`, `--budget-usd 3` |
 | 5 M1, 78 rows | $0.77 | dry run on the copy: $0.765 ($0.0098 a word); G1's actual was 1.03 times its estimate |
 | 6 M3 on the new traits | about $0.64 | `estimate --n-candidates 72` (G1: 117 traits of 126 rows; actual $0.0081 a row) |
 | 7 states pass | $0.03 | dry run on the copy (17 rows); follow-ups cents |
@@ -171,8 +187,10 @@ Steps 4-8: about $1.5 live.  With step 9: about $7-15.
    states pass itself suggested (11 in G9's `states_unjudged_r3`, 1 in both it and `states_tda_1`) that M1 then
    tagged as states again, and 3 IPIP g600 rows.  A second reading of a suggested name can suggest another name.
    The CLI has no `--keys`.
-3. **Step 4's fallback**: if the re-decide's dry run does not reproduce 253 of 253 with 0 calls not on record,
-   the fresh rule-set-3 M3 on the 253 (about $2.24 live, `--budget-usd 3`) is a paid step and waits for his go.
+3. **Step 4's fallback**: if the re-decide against the replay cache does not reproduce 253 of 253 with 0 calls
+   not on record, either run it against main's cache (4 relation calls, cents; every decision reproduced there,
+   only cosines and 6 shortlists move) or the fresh rule-set-3 M3 on the 253 (about $2.24 live, `--budget-usd
+   3`).  Both are paid and wait for his go.
 4. **Physical scope**: the run's 1 row, or all 76 unscored physical rows (75 from the census rare stages, the
    base model at count 2, the G9 states names and IPIP g600, which arrived after G9's physical pass), $0.68.
 
