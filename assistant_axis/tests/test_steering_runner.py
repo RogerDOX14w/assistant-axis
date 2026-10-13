@@ -313,11 +313,13 @@ class _FakeTokenizer:
 
     def apply_chat_template(self, conv, tokenize=False, add_generation_prompt=False, **_):
         # Render as "S: <sys> | U: <user> | A: " so the user-prompt text
-        # appears verbatim and is decoded back recognisably.
+        # appears verbatim and is decoded back recognisably.  With
+        # tokenize=True (how the runner calls it since 2026-10-13), the
+        # same text as character codes, as __call__ below makes them.
         sys_msg = next((m["content"] for m in conv if m["role"] == "system"), "")
         usr_msg = next((m["content"] for m in conv if m["role"] == "user"), "")
         text = f"S:{sys_msg}|U:{usr_msg}|A:"
-        return text
+        return list(text.encode("utf-8")) if tokenize else text
 
     def __call__(self, prompts, return_tensors="pt", padding=True):
         # Convert each prompt to a tensor of char codes.  Left-pad to
@@ -1837,14 +1839,15 @@ class TestTemplateKwargsFromTheFamily:
             pad_token = "<pad>"
             padding_side = "right"
 
+            pad_token_id = 0
+
             def apply_chat_template(self, conv, tokenize, add_generation_prompt, **kw):
                 seen.append(kw)
-                return "x"
-
-            def __call__(self, prompts, return_tensors, padding):
-                return {"input_ids": torch.zeros(len(prompts), 1, dtype=torch.long)}
+                return [120] if tokenize else "x"
 
         model = SimpleNamespace(config=SimpleNamespace(model_type="qwen3"))
         steering_runner._tokenize_batch(Tok(), [[{"role": "user", "content": "q"}]],
                                         model_name="", model=model)
-        assert seen == [{"enable_thinking": False}]
+        # The template is asked for ids directly since 2026-10-13, so
+        # return_dict=False rides along with the row's kwargs.
+        assert seen == [{"return_dict": False, "enable_thinking": False}]

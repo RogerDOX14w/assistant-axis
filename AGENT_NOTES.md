@@ -4155,7 +4155,9 @@ families" and its step 1 and step 2 sections.
   Qwen3's refuse another layout unless `--slot` is given
   (`assistant_axis.axis.require_header_layout` /
   `require_tree_header_layout`); steering takes its template kwargs from the
-  row and refuses a slot outside the axis.
+  row, tokenizes each prompt through the template and left-pads the ids
+  itself (one BOS on Llama and Gemma; since 2026-10-13, Roger; Qwen3's ids
+  unchanged), and refuses a slot outside the axis.
 - **Tests run on fakes only**
   ([`internals_fakes.py`](assistant_axis/tests/internals_fakes.py): Qwen3-like,
   Llama-3-like, harmony-like tokenizers).  The real-tokenizer test

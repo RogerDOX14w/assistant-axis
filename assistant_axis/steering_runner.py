@@ -341,25 +341,35 @@ def _tokenize_batch(
     generated tokens would start at different absolute positions for
     each batch element, producing garbled output.  The template kwargs are
     the model's family row's (:func:`_chat_template_kwargs`).
-    """
-    chat_template_kwargs = _chat_template_kwargs(model, model_name)
 
-    prompts = [
-        tokenizer.apply_chat_template(
-            conv, tokenize=False, add_generation_prompt=True,
-            **chat_template_kwargs
-        )
-        for conv in conversations
-    ]
+    Each conversation is tokenized by the chat template itself
+    (``chat_layout.chat_ids``, ``add_generation_prompt=True``), and the id
+    lists are left-padded here with the pad token (the eos token when the
+    tokenizer has none, as before) into ``input_ids`` / ``attention_mask``
+    (1 on the real tokens, 0 on the padding).  Until 2026-10-13 the template
+    was rendered to text and the text tokenized again, which on Llama 3 and
+    Gemma 2 puts a second BOS after the one the template writes (review P1
+    D8; the multi-model plan's step 1 fix, applied here at Roger's word).
+    Qwen3's tokenizer adds nothing to text, so its ids and masks are
+    unchanged.
+    """
+    from .internals.chat_layout import chat_ids
+
+    chat_template_kwargs = _chat_template_kwargs(model, model_name)
+    rows = [chat_ids(tokenizer, conv, add_generation_prompt=True,
+                     template_kwargs=chat_template_kwargs)
+            for conv in conversations]
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    prev_padding_side = tokenizer.padding_side
-    tokenizer.padding_side = "left"
-    try:
-        inputs = tokenizer(prompts, return_tensors="pt", padding=True)
-    finally:
-        tokenizer.padding_side = prev_padding_side
-    return inputs
+    pad_id = tokenizer.pad_token_id
+    width = max((len(r) for r in rows), default=0)
+    input_ids = torch.full((len(rows), width), pad_id, dtype=torch.long)
+    attention_mask = torch.zeros((len(rows), width), dtype=torch.long)
+    for i, row in enumerate(rows):
+        if row:
+            input_ids[i, width - len(row):] = torch.tensor(row, dtype=torch.long)
+            attention_mask[i, width - len(row):] = 1
+    return {"input_ids": input_ids, "attention_mask": attention_mask}
 
 
 # ---------------------------------------------------------------------------
