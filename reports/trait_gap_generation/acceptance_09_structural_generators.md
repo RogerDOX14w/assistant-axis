@@ -30,7 +30,7 @@ M1 is the platform's trait-hood filter and M3 its novelty check.
 | [classical/](../../data/candidates/structural/classical/) | [aristotle.json](../../data/candidates/structural/classical/aristotle.json), [theophrastus.json](../../data/candidates/structural/classical/theophrastus.json), [sins_virtues.json](../../data/candidates/structural/classical/sins_virtues.json), [via.json](../../data/candidates/structural/classical/via.json), [murray.json](../../data/candidates/structural/classical/murray.json): hand-typed, tracked |
 | tests | [test_gapgen_structural_classical.py](../../assistant_axis/tests/test_gapgen_structural_classical.py), [\_prompts](../../assistant_axis/tests/test_gapgen_structural_prompts.py), [\_operators](../../assistant_axis/tests/test_gapgen_structural_operators.py), [\_postprocess](../../assistant_axis/tests/test_gapgen_structural_postprocess.py), [\_sidetable](../../assistant_axis/tests/test_gapgen_structural_sidetable.py), [\_evaluate](../../assistant_axis/tests/test_gapgen_structural_evaluate.py), [\_submit](../../assistant_axis/tests/test_gapgen_structural_submit.py), [\_acceptance](../../assistant_axis/tests/test_gapgen_structural_acceptance.py), the CLI's [test_gap_generation_structural_cli.py](../../data_analysis/tests/test_gap_generation_structural_cli.py), and the fixtures [structural_fakes.py](../../assistant_axis/tests/structural_fakes.py) |
 
-Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md) 91-103 (§ 10 below), and one
+Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md) 108-120 (§ 10 below), and one
 `.gitignore` line for the tables' `.bak.<UTC>` snapshots.  Not there yet, because each is written by a paid step:
 [classical_modern.jsonl](../../data/candidates/structural/classical_modern.jsonl),
 [operator_table.jsonl](../../data/candidates/structural/operator_table.jsonl),
@@ -72,13 +72,14 @@ Also: six [glossary](./glossary.md) entries (task 6), [QUESTIONS](./QUESTIONS.md
 
 - **`registered_decided`** means M1 and M3 have nothing left to do (an M1 verdict other than `trait`, or `trait`
   and an M3 block), not "an M1 verdict and an M3 decision": M3 never scores a rejected word, so the plan's literal
-  rule would count M1's rejects as undecided for ever ([QUESTIONS](./QUESTIONS.md) 100).
+  rule would count M1's rejects as undecided for ever ([QUESTIONS](./QUESTIONS.md) 117).
 - **The estimate prices every selected row the registry has not decided**, a corpus or queue word not yet in the
-  registry included (M1 will be charged for it); the wave's target counts net-new rows only (QUESTIONS 101).
-- **`excess` and `deficiency` follow the plan's rule, not its illustration**: the illustrative reply has the two
-  the other way round from the rule beside it (QUESTIONS 102).
+  registry included (M1 will be charged for it); the wave's target counts net-new rows only (QUESTIONS 118).
+- **`excess` and `deficiency` follow the plan's rule, not its illustration**: the illustrative reply had the two
+  the other way round from the rule beside it (QUESTIONS 119); the coding plan's illustration was corrected to the
+  rule on 2026-10-13.
 - **`n_sources` counts distinct traits and classical rows** reaching a stem, not sources (one trait whose
-  opposite and deficiency land on one word counts once; QUESTIONS 98).
+  opposite and deficiency land on one word counts once; QUESTIONS 115).
 - **The evaluation functions read the replies, not the merged table** (`pair_recovery(replies, pairs, ...)`), so
   that each trait's blind opposite is judged as answered, not through a merged row's first gloss.
 - **The prompt is longer than the plan's estimate**: 6,625 characters, about 1,740 input tokens a call with the
@@ -149,7 +150,7 @@ no `openai` (the embeddings go through the platform's cache).
 note.  **Roger's action (task 2's stop)**: check the 24 underuse and 24 overuse names (each row's `note` gives the
 alternatives I half-remember, such as boredom for curiosity's underuse and cynicism for judgment's overuse) and the
 citation against Niemiec (2019), or say an agent may fetch the paper; then fill `verified_by` and run `modernise
---scheme via`.  The other four tables were typed from memory too (QUESTIONS 103); their `verified_by` is
+--scheme via`.  The other four tables were typed from memory too (QUESTIONS 120); their `verified_by` is
 informational, and Roger's 30 minutes on the classical candidates is also their check.
 
 ## 6. Rendered prompts (the dry runs' output, no API call)
@@ -300,11 +301,11 @@ belong in this report's next revision.
 
 ## 10. Open QUESTIONS entries and interface requests
 
-[QUESTIONS](./QUESTIONS.md) 91-99 are the plan's pre-registered entries (§ 12), copied in; 100-103 are this build's
-assumptions (what `registered_decided` means, which rows the estimate prices, the illustration that contradicts
-its rule, the classical tables typed from memory).  The numbering continues from 90; the plan 13 agent was adding
-entries in parallel, so the two sets may collide when the branches meet.  Interface requests: (1) **the review
-graph (R1) reads `load_operator_table`'s `siblings`** so a triple is shown together (QUESTIONS 93); (2) **plan
+[QUESTIONS](./QUESTIONS.md) 108-116 are the plan's pre-registered entries (§ 12), copied in; 117-120 are this
+build's assumptions (what `registered_decided` means, which rows the estimate prices, the illustration that
+contradicted its rule, the classical tables typed from memory).  They were first numbered 91-103; plan 13's build,
+cherry-picked first, took 91-107, so these were renumbered 108-120 on 2026-10-13 (the coordinator's instruction).  Interface requests: (1) **the review
+graph (R1) reads `load_operator_table`'s `siblings`** so a triple is shown together (QUESTIONS 110); (2) **plan
 13's `pooled_review_rate`** becomes the wave's review rate through `submit.review_terms_per_hour("measured")` once
 merged (the hook is in place; the default stays the plan's figure until someone switches it).
 
