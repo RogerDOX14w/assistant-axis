@@ -25,6 +25,8 @@ the most trait batches, today ``review_traits_all_2``), ``--review-root``, ``--o
 * ``simulate [--n 2000 --occasions 4 --sigma 1.0 --rho 0.3 --replicates 200 --seed 0]``: ``simulation.json``.
 * ``recovery-extras --batch B [--c 4]``: ``data/candidates/recovery/<B>/extras.json`` (the strict column, pair
   recovery, recall at N, the ``needs_opus`` list).  No call: a pair the record cannot decide at 4 is listed.
+* ``roger-sample --batch B [--n 20 --seed 0]``: ``data/candidates/recovery/<B>/roger_sample.md``, the manual check
+  of plan 13 § 8 (twenty recovered and twenty novel verdicts of a harness batch, seeded, for Roger to mark).
 * ``dashboard [--harness B ...]``: every record above rebuilt and folded into ``dashboard.json`` and
   ``dashboard.md``; costs from every ``usage.json``.  Re-run after every M3 batch, every review ``apply`` and every
   harness run.
@@ -380,6 +382,20 @@ def cmd_recovery_extras(args) -> int:
     return 0
 
 
+def cmd_roger_sample(args) -> int:
+    d = Path(args.recovery_root) / args.batch
+    if not (d / "run.json").exists():
+        print(f"REFUSED: no harness batch at {d}", file=sys.stderr)
+        return 2
+    md = RX.roger_sample(d, traits=NV.load_trait_corpus(args.data_dir), n=args.n, seed=args.seed)
+    if args.dry_run:
+        print(md)
+        return 0
+    atomic_write_text(md, d / "roger_sample.md")
+    print(f"wrote {d / 'roger_sample.md'}")
+    return 0
+
+
 def cmd_dashboard(args) -> int:
     print_assumptions()
     rows = load_rows(args)
@@ -624,6 +640,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--send-opus", action="store_true", help="not built (no recorded batch has needed it)")
     p.add_argument("--budget-usd", type=float, default=1.0)
     p.set_defaults(func=cmd_recovery_extras)
+    p = sub.add_parser("roger-sample")
+    common(p)
+    p.add_argument("--batch", required=True)
+    p.add_argument("--n", type=int, default=20)
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=cmd_roger_sample)
     p = sub.add_parser("dashboard")
     common(p)
     p.add_argument("--harness", nargs="+", default=None, help="the harness batches to read (default: every one)")

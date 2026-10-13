@@ -255,5 +255,50 @@ def extras_markdown(ex: Mapping) -> str:
     return "\n".join(L) + "\n"
 
 
-__all__ = ["STRICT_C", "StrictFigures", "strict_column", "PairFigures", "pair_recovery", "run_ranks", "recall_at_n",
+def roger_sample(batch_dir: Path, *, traits: Mapping[str, NV.CorpusTrait], n: int = 20, seed: int = 0) -> str:
+    """``roger_sample.md`` (plan 13 § 8, the manual check): ``n`` seeded "recovered" verdicts (overlap pairs of a kept
+    candidate that recovered a hidden trait) and ``n`` "novel" ones (overlap pairs of a kept candidate read below the
+    cut-off against a hidden trait), over every seed of the batch, each with the candidate's gloss, the hidden
+    trait's description and both models' readings, and an empty column for Roger's verdict.  Label matches are left
+    out (they need no judgement).  Links are relative to the batch directory."""
+    import random
+    batch_dir = Path(batch_dir)
+    rec, nov = [], []
+    for sd in seed_dirs(batch_dir):
+        dec = decisions_of(sd)
+        gloss = {r["key"]: r.get("gloss") for r in read_jsonl(m3_dir_for(sd) / "results.jsonl")}
+        for r in read_jsonl(sd / "matches.jsonl"):
+            if r.get("how") != "overlap" or r.get("stalled") or dec.get(r["key"]) not in RC.KEPT_DECISIONS:
+                continue
+            x = dict(r, seed=int(sd.name[4:] or 0), gloss=gloss.get(r["key"]))
+            (rec if r.get("recovers") else nov).append(x)
+    rng = random.Random(seed)
+    pick_r = rng.sample(rec, min(n, len(rec)))
+    pick_n = rng.sample(nov, min(n, len(nov)))
+
+    def md(x) -> str:
+        return str("" if x is None else x).replace("|", "/").replace("\n", " ")
+
+    def reading(x) -> str:
+        s, o = x.get("sonnet") or {}, x.get("opus") or {}
+        out = f"Sonnet {s.get('value')}: {md(s.get('reason'))}"
+        return out + (f"<br>Opus {o.get('value')}: {md(o.get('reason'))}" if o else "")
+    L = [f"# Manual check of the harness's verdicts (`{batch_dir.name}`)", "",
+         f"Plan 13 § 8: {len(pick_r)} recovered and {len(pick_n)} novel verdicts drawn at random (seed {seed}) from "
+         f"the overlap pairs of the kept candidates ({len(rec)} recovered and {len(nov)} novel pairs in all; "
+         "label matches left out).  *Recovered*: the overlap call read the candidate as the hidden trait, at the "
+         "candidate's cut-off or above; *novel*: it read it below.  Mark each row **agree** or **disagree** in the "
+         "last column.", ""]
+    for title, xs in (("Recovered", pick_r), ("Novel", pick_n)):
+        L += [f"## {title}", "", "| # | seed | candidate (its gloss) | hidden trait (its description) | readings | "
+              "verdict | Roger |", "|---|---|---|---|---|---|---|"]
+        for i, x in enumerate(xs, 1):
+            t = traits.get(x["stem"])
+            L.append(f"| {i} | {x['seed']} | **{md(x['label'])}**: {md(x.get('gloss'))} | **{md(t.label if t else x['stem'])}**"
+                     f": {md(t.description if t else '')} | {reading(x)} | {x.get('verdict')} at {x.get('cut_off')} | |")
+        L.append("")
+    return "\n".join(L) + "\n"
+
+
+__all__ = ["roger_sample", "STRICT_C", "StrictFigures", "strict_column", "PairFigures", "pair_recovery", "run_ranks", "recall_at_n",
            "contamination", "extras_json", "extras_markdown", "seed_dirs", "m3_dir_for", "decisions_of"]

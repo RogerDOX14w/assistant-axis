@@ -97,3 +97,17 @@ class TestRecorded:
             for s in ex["seeds"]:
                 st = s["strict"]
                 assert st["n_recovered"] <= st["n_recovered_headline"]
+
+
+def test_roger_sample(tmp_path):
+    bd, _ = planted(tmp_path)
+    traits = {s: NV.CorpusTrait(stem=s, label=s, description=f"This means {s}.", negative_label=None,
+                                pair_partner=None, partners=[], expands_to=[], renamed_from=[])
+              for s in ("alpha", "beta", "gamma", "eta")}
+    md = RX.roger_sample(bd, traits=traits, n=20, seed=0)
+    assert "## Recovered" in md and "## Novel" in md
+    rec = md.split("## Recovered")[1].split("## Novel")[0]
+    nov = md.split("## Novel")[1]
+    assert rec.count("\n| ") == 3 + 1 and "**alpha**" in rec and "covered" not in rec   # a b c, not the covered g
+    assert "**eta**" in nov and "delta" not in md                                       # label matches left out
+    assert md == RX.roger_sample(bd, traits=traits, n=20, seed=0)                       # seeded
