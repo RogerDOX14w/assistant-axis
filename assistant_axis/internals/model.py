@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -23,6 +23,7 @@ class ProbingModel:
         max_memory_per_gpu: Optional[Dict[int, str]] = None,
         chat_model_name: Optional[str] = None,
         dtype: torch.dtype = torch.bfloat16,
+        hf_load_kwargs: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize and load a HuggingFace model and tokenizer.
@@ -36,6 +37,10 @@ class ProbingModel:
             max_memory_per_gpu: Optional dict mapping GPU ids to max memory (e.g. {0: "40GiB", 1: "40GiB"})
             chat_model_name: Optional HuggingFace model identifier for tokenizer (if different from base model)
             dtype: Data type for model weights (default: torch.bfloat16)
+            hf_load_kwargs: extra keyword arguments for
+                ``AutoModelForCausalLM.from_pretrained``; step 2 passes its
+                family row's (assistant_axis/model_families.py), e.g.
+                ``{"attn_implementation": "eager"}`` for Gemma 2
         """
         self.model_name = model_name
         self.chat_model_name = chat_model_name
@@ -54,6 +59,7 @@ class ProbingModel:
         model_kwargs = {
             "dtype": dtype,
         }
+        model_kwargs.update(dict(hf_load_kwargs or {}))
 
         if max_memory_per_gpu is not None:
             # Use custom memory limits (for multi-worker setups)
@@ -107,6 +113,22 @@ class ProbingModel:
         instance._layers = None
         instance._model_type = None
         return instance
+
+    @property
+    def model_type(self) -> Optional[str]:
+        """``model.config.model_type`` (``"qwen3"``, ``"llama"``, ...): the key
+        of the family table, read from the loaded model's config, not from
+        its name.  None when the model has no config."""
+        return getattr(getattr(self.model, "config", None), "model_type", None)
+
+    @property
+    def family(self):
+        """This model's row of the family table
+        (:func:`assistant_axis.model_families.family_for_model_type`); raises
+        ``UnknownFamilyError`` for a ``model_type`` with no row (the
+        multi-model plan's § 15 Q8: refuse rather than guess)."""
+        from assistant_axis.model_families import family_for_model_type
+        return family_for_model_type(self.model_type)
 
     @property
     def hidden_size(self) -> int:
@@ -173,6 +195,10 @@ class ProbingModel:
 
         Returns:
             Model type as a string: 'qwen', 'llama', 'gemma', or 'unknown'
+
+        A substring of the model name; nothing on the pipeline path reads it
+        since the multi-model plan.  Use :attr:`model_type` and
+        :attr:`family` (keyed on ``config.model_type``) instead.
         """
         if self._model_type is not None:
             return self._model_type
@@ -214,7 +240,9 @@ class ProbingModel:
 
         Note:
             Only Gemma 2 doesn't support system prompts. All other models
-            (including Gemma 3, Llama, Qwen, etc.) support them.
+            (including Gemma 3, Llama, Qwen, etc.) support them.  Not on the
+            pipeline path; the family row's ``system_prompt`` (:attr:`family`)
+            and step 1's behavioural probe are what the pipeline uses.
         """
         return 'gemma-2' not in self.model_name.lower()
 

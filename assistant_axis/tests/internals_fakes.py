@@ -22,6 +22,8 @@ Nothing here downloads or loads a real model.
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import torch
 import torch.nn as nn
 
@@ -223,9 +225,12 @@ class FakeCausalLM(nn.Module):
 
     HIDDEN = 4
 
-    def __init__(self, n_layers: int = 3):
+    def __init__(self, n_layers: int = 3, model_type: str = "qwen3"):
         super().__init__()
         self.model = _FakeInner(n_layers)   # ProbingModel.get_layers: model.model.layers
+        # What ProbingModel.model_type / .family read (the family table's key).
+        self.config = SimpleNamespace(model_type=model_type, hidden_size=self.HIDDEN,
+                                      num_hidden_layers=n_layers)
         self._anchor = nn.Parameter(torch.zeros(1))
         self.calls: list[dict] = []
 
@@ -248,8 +253,11 @@ class FakeCausalLM(nn.Module):
         return h
 
 
-def make_fake_probing_model(n_layers: int = 3, model_name: str = "Qwen/Qwen3-32B"):
+def make_fake_probing_model(n_layers: int = 3, model_name: str = "Qwen/Qwen3-32B",
+                            model_type: str = "qwen3", tokenizer=None):
     from assistant_axis.internals import ProbingModel
 
     return ProbingModel.from_existing(
-        FakeCausalLM(n_layers), make_qwen3_like_tokenizer(), model_name=model_name)
+        FakeCausalLM(n_layers, model_type=model_type),
+        tokenizer if tokenizer is not None else make_qwen3_like_tokenizer(),
+        model_name=model_name)
