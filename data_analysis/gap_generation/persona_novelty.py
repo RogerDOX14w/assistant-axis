@@ -465,8 +465,9 @@ def cmd_score(args, argv) -> int:
     can_tok, can_usd = embed_estimate([c["text"] for c in cfg.canary.get("texts", [])], emb.model_id) \
         if missing else (0, 0.0)
     est = Estimate()
-    est.add(f"embed {len(missing)} candidate texts (label: gloss, w20)", emb.model_id,
-            1 if missing else 0, tok, 0)
+    n_calls = -(-len(missing) // emb.max_batch) if missing else 0
+    est.add(f"embed {len(missing)} candidate texts (label: gloss, w20; {emb.max_batch} a call)", emb.model_id,
+            n_calls, int(round(tok / max(1, n_calls))), 0)
     est.add("canary (8 texts, re-embedded first)", emb.model_id, 1 if missing else 0, can_tok, 0)
     print(f"{len(cands)} candidates ({dict(skipped)} left out); {len(texts) - len(missing)} texts cached, "
           f"{len(missing)} to embed\n{est.format()}")
