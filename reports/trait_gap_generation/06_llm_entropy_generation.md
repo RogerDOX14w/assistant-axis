@@ -50,7 +50,8 @@ call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
    their era, place and occupation; give the trait, gloss, antonym". Factual accuracy is
    irrelevant; only the vocabulary matters. 600 calls, one run each.
 3. **(c) Multilingual.** Languages: German, Japanese, Mandarin, Russian, Arabic, Persian, Finnish,
-   Korean, Hindi, Turkish (Persian replaced Tagalog, 2026-10-13, on Roger's high-resource guidance). Prompt written *in the language* for each of the 30 domains: "list 20
+   Korean, Hindi, Turkish (Persian replaced Tagalog, 2026-10-13, on Roger's high-resource guidance).
+   Prompt written *in the language* for each of the 30 domains: "list 20
    character traits a native speaker would name here, preferring ones with no single English word".
    A second call back-translates each to the shortest English phrase plus a gloss and flags
    listicle clichés (hygge, ikigai, Schadenfreude are about things or feelings, not persona
@@ -93,8 +94,9 @@ cliché-prone and most likely to yield labels needing a multi-word English form.
 forces lexicon traversal (small-yield bigrams like "sq", "gn" are where the odd words live) and
 over-produces rare or archaic words, hence the frequency floor. Overall guess: 8-12k
 string-unique, 4-6k semantically distinct candidates, of which perhaps 300-800 survive trait-hood
-and novelty filtering. That is roughly 1,000 semantically-distinct candidates per dollar before
-filtering.
+and novelty filtering. That is roughly 300-450 semantically distinct candidates per batched dollar
+before filtering with (c) on Sonnet 5.5, or 1,000-1,500 with (c) on Haiku 5.5 (2026-10-13; the generation
+bill is now small beside the downstream M1 and M3, § 5).
 
 ## 5. Cost
 
@@ -107,7 +109,8 @@ Downstream, not counted in the plan before: M1 and M3 on the candidates at the p
 rates (M1 $0.0072 a word, M3 $0.011 a passed word): for 4-6k semantically distinct candidates, M1
 $29-43 and M3 $20-30, so **$50-75 live, $25-37 batched**, less by the share already in the registry,
 which for single-word labels is large (74% of the corpus's single-word labels are registry stems already,
-measured 2026-10-13 for plan 09).  Over $20, so batched, with Roger's go at the run. Local compute: embedding 60k short strings, minutes. Roger: ~1 h to
+measured 2026-10-13 for plan 09).  Over $20, so batched, with Roger's go at the run.
+Local compute: embedding 60k short strings, minutes. Roger: ~1 h to
 approve the prompt set and language list, ~2 h to spot-check 50 random survivors per family (250
 items) with glosses.
 
@@ -158,7 +161,8 @@ generator workstreams can be compared against.
 2. Are role-like outputs from (b) worth keeping for the roles queue, or discarded?
 3. Multi-word back-translations as labels: accept as-is ("reads the room"), or require a
    single-word English form when one exists?
-4. Budget split: full grid everywhere (~$18 unbatched) or pilot at 20% (~$4) and scale only the
-   families whose rarefaction slope is still steep?
+4. Budget split: full grid everywhere (~$13 batched with (c) on Sonnet 5.5, ~$4 on Haiku 5.5; figures of
+   2026-10-13, were ~$18 unbatched) or pilot at 20% (~$3 batched) and scale only the families whose
+   rarefaction slope is still steep?
 5. Should generation run on the RunPod Qwen itself so knowledge of the label is guaranteed, at
    the cost of GPU hours rather than API dollars?
