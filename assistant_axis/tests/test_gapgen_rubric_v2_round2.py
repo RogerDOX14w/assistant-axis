@@ -356,8 +356,9 @@ def _corpus(tmp_path):
 class TestStatesPassCLI:
     def test_queue_mode_from_filter_results(self, tmp_path, cli):
         cand = tmp_path / "cand"
+        # one reading (the default on Haiku 5.5 is three from 2026-10-13: test_gapgen_states_pass_readings.py)
         rc = cli["mod"].main(["--batch-id", "sp1", "--mode", "queue", "--filter-results",
-                              str(_filter_results(tmp_path)), "--out-root", str(cand)])
+                              str(_filter_results(tmp_path)), "--out-root", str(cand), "--readings", "1"])
         assert rc == 0
         d = cand / "states_pass" / "sp1"
         for f in ("responses.jsonl", "results.jsonl", "summary.json", "usage.json", "run.json"):

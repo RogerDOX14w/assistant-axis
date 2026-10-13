@@ -437,8 +437,9 @@ class TestCLI:
     def test_registry_mode_routes_every_row(self, tmp_path, cli):
         reg = _registry(tmp_path)
         cand = tmp_path / "cand"
+        # one reading (2026-10-13: the default on Haiku 5.5 is three; test_gapgen_states_pass_readings.py runs it)
         rc = cli["mod"].main(["--batch-id", "sp4", "--mode", "queue", "--holding-states", "--registry", str(reg),
-                              "--out-root", str(cand), "--transport", "live"])
+                              "--out-root", str(cand), "--transport", "live", "--readings", "1"])
         assert rc == 0
         rows = Registry(reg).fold()
         hold = {k.split("#")[0]: rows[k]["holding"] for k in rows if k != "stubborn#1" and not k.startswith("jumpyish")}
@@ -502,7 +503,8 @@ class TestCLI:
         cli["responder"] = responder(tokens=(1_000_000, 10))
         args = ["--batch-id", "sp4", "--mode", "queue", "--holding-states", "--registry", str(reg), "--out-root",
                 str(cand), "--transport", "live"]
-        assert cli["mod"].main(args + ["--budget-usd", "0.05"]) == 2
+        # one reading (the resume keeps it); three readings: test_gapgen_states_pass_readings.py
+        assert cli["mod"].main(args + ["--budget-usd", "0.05", "--readings", "1"]) == 2
         rows = Registry(reg).fold()
         assert rows["rolish#1"]["holding"] == "roles"                      # final before the stop: written
         assert rows["lastwell#1"]["holding"] == "states" and not rows["lastwell#1"].get("states_pass")

@@ -515,3 +515,185 @@ class TestOneReadingIsUnchanged:
         assert not any("verdict_reading" in rec for rec in r.responses)
         assert all(x.block["readings"] == 1 and "queue_readings" not in x.block for x in out)
         assert not any("check_readings" in (x.block.get("gloss_check") or {}) for x in out)
+
+
+# --------------------------------------------------------------------------- the CLI
+
+from assistant_axis.gapgen.registry import Registry  # noqa: E402
+from assistant_axis.tests.test_gapgen_states_pass_v4 import _registry, _states_row, cli  # noqa: E402,F401 (fixture)
+
+
+def _argv(reg, cand, *extra, batch="sp3"):
+    return ["--batch-id", batch, "--mode", "queue", "--holding-states", "--registry", str(reg), "--out-root",
+            str(cand), "--transport", "live", *extra]
+
+
+class TestCLI:
+    def test_three_readings_by_default_on_haiku_55_end_to_end(self, tmp_path, cli):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        # lastwell: reading 2 reads a passing state; the vote keeps it lasting
+        cli["responder"] = by_reading(responder(), {"lastwell": {1: dict(typical_duration="weeks", lasting=False,
+                                                                         plausible=False)}})
+        assert cli["mod"].main(_argv(reg, cand)) == 0
+        d = cand / "states_pass" / "sp3"
+        run = json.loads((d / "run.json").read_text())
+        assert run["readings"] == 3 and run["sessions"][0]["readings"] == 3
+        assert run["readings_rule"] == sp.QUEUE_READINGS_RULE and run["check_readings_rule"] == sp.CHECK_READINGS_RULE
+        assert "3 readings" in run["estimate_lines"][0] and "3 readings" in run["estimate_lines"][1]
+        rows = Registry(reg).fold()
+        labels = ("lastwell", "rolish", "glumish", "moodish", "nowish", "startly", "startly2", "wetish")
+        blocks = {lb: rows[f"{lb}#1"]["states_pass"] for lb in labels}
+        assert all(b["readings"] == 3 and b["queue_readings"]["n"] == 3 for b in blocks.values())
+        lw = blocks["lastwell"]
+        assert lw["route"] == "lasting" and rows["lastwell#1"]["holding"] == "states_released"
+        assert lw["queue_readings"]["fields"]["lasting"]["votes"] == [True, False, True]
+        assert blocks["moodish"]["gloss_check"]["check_readings"]["n"] == 3
+        # the same routes as one reading (test_gapgen_states_pass_v4: test_registry_mode_routes_every_row)
+        assert {lb: rows[f"{lb}#1"]["holding"] for lb in labels} == {
+            "lastwell": "states_released", "rolish": "roles", "glumish": "states_released",
+            "moodish": "states_released", "nowish": "states", "startly": "states", "startly2": "states_released",
+            "wetish": "states"}
+        res = {json.loads(x)["key"]: json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()}
+        assert all(res[k]["block"] == rows[k]["states_pass"] for k in res)
+        # three queue calls, two checks three times, five alignment calls (one a released gloss)
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == 14
+        recs = [json.loads(x) for x in (d / "responses.jsonl").read_text().splitlines()]
+        assert Counter(r.get("verdict_reading") for r in recs if r["step"] == "queue") == {1: 1, 2: 1, 3: 1}
+        s = json.loads((d / "summary.json").read_text())["result"]
+        assert s["n_readings"] == 3 and s["queue_readings"]["route_agreement"] == {"3/3": 7, "2/3": 1}
+        assert s["routes"] == {"role": 1, "lasting": 1, "predisposition": 3, "renamed": 1, "held": 2}
+
+    def test_one_reading_by_default_off_haiku_55(self, tmp_path, cli):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        assert cli["mod"].main(_argv(reg, cand, "--model", "claude-haiku-4-5-20251001")) == 0
+        d = cand / "states_pass" / "sp3"
+        run = json.loads((d / "run.json").read_text())
+        assert run["readings"] == 1 and "readings_rule" not in run and run["sessions"][0]["readings"] == 1
+        rows = Registry(reg).fold()
+        b = rows["moodish#1"]["states_pass"]
+        assert b["readings"] == 1 and "queue_readings" not in b and "check_readings" not in b["gloss_check"]
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == 8
+        assert not any("verdict_reading" in json.loads(x) for x in (d / "responses.jsonl").read_text().splitlines())
+
+    def test_an_explicit_count_wins(self, tmp_path, cli):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        assert cli["mod"].main(_argv(reg, cand, "--model", "claude-haiku-4-5-20251001", "--readings", "2")) == 0
+        assert json.loads((cand / "states_pass" / "sp3" / "run.json").read_text())["readings"] == 2
+        assert Registry(reg).fold()["glumish#1"]["states_pass"]["queue_readings"]["n"] == 2
+        for bad in ("0", "-2"):
+            with pytest.raises(SystemExit):
+                cli["mod"].main(_argv(reg, cand, "--readings", bad, batch="bad"))
+
+    def test_resume_keeps_the_recorded_count_and_refuses_another(self, tmp_path, cli):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        cli["responder"] = responder(tokens=(1_000_000, 10))
+        assert cli["mod"].main(_argv(reg, cand, "--budget-usd", "0.05")) == 2
+        rows = Registry(reg).fold()
+        # only reading 1 came back before the stop: no row is decided, none is written
+        assert all(not rows[f"{lb}#1"].get("states_pass") for lb in ("rolish", "wetish", "lastwell"))
+        d = cand / "states_pass" / "sp3"
+        before = (d / "run.json").read_text()
+        with pytest.raises(SystemExit, match="read the queue call 3 time"):
+            cli["mod"].main(_argv(reg, cand, "--resume", "--readings", "1"))
+        assert (d / "run.json").read_text() == before
+        cli["responder"] = responder()
+        assert cli["mod"].main(_argv(reg, cand, "--resume")) == 0
+        second = cli["live"][-1]
+        assert steps(second) == {"queue": 2, "check": 6, "alignment": 5}
+        run = json.loads((d / "run.json").read_text())
+        assert run["readings"] == 3 and [s["readings"] for s in run["sessions"]] == [3, 3]
+        assert Registry(reg).fold()["rolish#1"]["states_pass"]["queue_readings"]["n_ok"] == 3
+
+    def test_resume_of_a_run_that_recorded_no_count_reads_once(self, tmp_path, cli):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        cli["responder"] = responder(tokens=(1_000_000, 10))
+        assert cli["mod"].main(_argv(reg, cand, "--budget-usd", "0.05", "--readings", "1")) == 2
+        d = cand / "states_pass" / "sp3"
+        run = json.loads((d / "run.json").read_text())
+        run.pop("readings")                           # a run from before 2026-10-13
+        for s in run["sessions"]:
+            s.pop("readings")
+        (d / "run.json").write_text(json.dumps(run))
+        with pytest.raises(SystemExit, match="resume with --readings 1"):
+            cli["mod"].main(_argv(reg, cand, "--resume", "--readings", "3"))
+        cli["responder"] = responder()
+        assert cli["mod"].main(_argv(reg, cand, "--resume")) == 0
+        assert json.loads((d / "run.json").read_text())["readings"] == 1
+        assert Registry(reg).fold()["lastwell#1"]["states_pass"]["readings"] == 1
+
+    def test_the_estimate_counts_every_reading(self, tmp_path, cli):
+        import argparse
+        its = [sp.StatesItem(key=f"w{i}#1", label=f"w{i}", text="being low for a while") for i in range(100)]
+        est = {}
+        for k in (1, 3):
+            args = argparse.Namespace(mode="queue", batch_size=20, model=H55, readings=k)
+            est[k] = cli["mod"].build_estimate(its, args, "live")
+        one, three = ({x.label.split(" (")[0]: x for x in est[k].lines} for k in (1, 3))
+        assert three["states pass"].n_calls == 3 * one["states pass"].n_calls == 18
+        assert three["gloss check v1"].n_calls == 3 * one["gloss check v1"].n_calls == 300
+        assert three["M1's alignment call"].n_calls == one["M1's alignment call"].n_calls == 100
+        align = one["M1's alignment call"].usd
+        assert est[3].usd == pytest.approx(3 * (est[1].usd - align) + align)
+
+    def test_dry_run_says_how_many_readings_and_the_gate_counts_them(self, tmp_path, cli, capsys):
+        reg, cand = _registry(tmp_path), tmp_path / "cand"
+        assert cli["mod"].main(_argv(reg, cand, "--dry-run")) == 0
+        out = capsys.readouterr().out
+        assert '"readings": 3' in out and "readings: 3 of the queue call and of the gloss check per row" in out
+        assert "each call below is sent 3 times" in out and "3 readings" in out
+        est3 = float(out.split("total estimate = $")[1].split()[0])
+        assert cli["mod"].main(_argv(reg, cand, "--dry-run", "--readings", "1")) == 0
+        est1 = float(capsys.readouterr().out.split("total estimate = $")[1].split()[0])
+        assert est3 > 2 * est1
+        # the cost gate refuses an estimate over the cap: three readings cost more than one
+        assert cli["mod"].main(_argv(reg, cand, "--budget-usd", f"{(est1 + est3) / 2:.4f}")) == 2
+        assert cli["live"] == []
+
+    def test_the_corpus_mode_and_reroute_refuse_a_count(self, tmp_path, cli):
+        with pytest.raises(SystemExit, match="queue only"):
+            cli["mod"].main(["--batch-id", "c3", "--mode", "corpus", "--stems", "fretful", "--readings", "3",
+                             "--dry-run"])
+        with pytest.raises(SystemExit, match="replays each batch"):
+            cli["mod"].main(["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry",
+                             str(tmp_path / "r.jsonl"), "--readings", "3"])
+
+
+class TestReroute:
+    """A batch judged with three readings under route rules 1 is re-routed under rules 2 from its record: every
+    reading replayed, no call; ``--send-missing`` asks the missing check once per reading."""
+
+    def _batch(self, tmp_path, cli):
+        from assistant_axis.tests.test_gapgen_states_pass_rules2 import answers
+        reg = tmp_path / "registry.jsonl"
+        for lb in ("crossish", "passish", "hopish", "plainheld", "renamish"):
+            _states_row(reg, lb, gen="states_pass" if lb == "hopish" else "g")
+        cand = tmp_path / "cand"
+        cli["responder"] = answers()
+        assert cli["mod"].main(_argv(reg, cand, "--route-rules", "1", batch="b3")) == 0
+        assert json.loads((cand / "states_pass" / "b3" / "run.json").read_text())["readings"] == 3
+        return reg, cand
+
+    def test_reroute_replays_every_reading(self, tmp_path, cli, capsys):
+        reg, cand = self._batch(tmp_path, cli)
+        n_clients = len(cli["live"])
+        capsys.readouterr()
+        assert cli["mod"].main(["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry", str(reg),
+                                "--out-root", str(cand), "--dry-run"]) == 0
+        out = capsys.readouterr().out
+        assert "CHANGED   crossish (b3): held -> predisposition (states_released)" in out
+        assert "NEEDS     hopish (b3): held -> predisposition once alignment and 3 check call(s) are made" in out
+        assert "--send-missing would make 4 call(s)" in out
+        assert cli["mod"].main(["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry", str(reg),
+                                "--out-root", str(cand)]) == 0
+        assert len(cli["live"]) == n_clients
+        b = Registry(reg).fold()["crossish#1"]["states_pass"]
+        assert b["route"] == "predisposition" and b["readings"] == 3 and b["queue_readings"]["n_ok"] == 3
+        assert b["gloss_check"]["check_readings"]["readings"] == ["lasting"] * 3 and b["batch_id"] == "b3"
+
+    def test_send_missing_asks_each_reading(self, tmp_path, cli):
+        reg, cand = self._batch(tmp_path, cli)
+        assert cli["mod"].main(["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry", str(reg),
+                                "--out-root", str(cand), "--send-missing"]) == 0
+        assert steps(cli["live"][-1]) == {"check": 3, "alignment": 1}
+        h = Registry(reg).fold()["hopish#1"]
+        assert h["holding"] == "states_released" and h["states_pass"]["gloss_check"]["check_readings"]["n"] == 3

@@ -632,6 +632,24 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   ties and the outcome patterns.  The second opinion and the tripwire compare
   the combined outcome.  `--resume` refuses a batch whose earlier session ran
   on another `--model` or `--readings`.
+- **States pass readings (`states_pass.py --readings N`, 2026-10-13).**  The
+  states pass's queue call had the same noise (two single-reading runs on the
+  same rows disagreed on 23% of routes and 24% of typical durations:
+  [gate audit 7](../reports/code_review_2026-10-12/gate_audits/states_pass.md)
+  section 10), so it takes the same default (3 on Haiku 5.5, else 1).  Each
+  answer that decides the route (`lasting`, then `role` or `plausible`, then
+  `name_fits`) is voted among the readings that answered it, a tie going to
+  the first reading among the leaders; `typical_duration` is the median
+  (the lower middle for an even count); the gloss, suggested name and reason
+  come from the first reading that agrees with the vote; the route is derived
+  from the voted answers by `route_for`, not voted on
+  (`states_pass.combine_queue_readings`).  The gloss check is read as often,
+  voted on whether it confirms the gloss (`combine_check_readings`); the
+  alignment call runs once.  Blocks carry `readings` and, voted, `queue_readings`
+  and `gloss_check.check_readings`; `summary.json` `queue_readings` gives the
+  readings' agreement.  A one-reading run sends exactly the requests it sent
+  before (pinned in `test_gapgen_states_pass_readings.py`).  `--resume` keeps
+  the recorded count, `--reroute` replays each batch with its own.
 - **Phrases (2026-10-12, gate audit 5).**  A label of two or more words
   (`split.is_phrase`; a hyphenated compound is one word) skips the definition
   probe, which had cut 75 of 77 phrase labels, 67 of them traits

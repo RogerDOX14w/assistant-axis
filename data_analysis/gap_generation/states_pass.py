@@ -9,7 +9,20 @@
         [--send-missing] [--route-rules 2] [--dry-run]
     common: [--model claude-haiku-5-5] [--batch-size 20] [--budget-usd 1.0] [--transport auto|live|batches]
             [--resume] [--confirm-expensive --confirmed-by WHO] [--allow-dirty] [--dry-run] [--overwrite]
-            [--route-rules 1|2] [--state-text-form as_recorded|now_stripped]
+            [--route-rules 1|2] [--state-text-form as_recorded|now_stripped] [--readings N]
+
+Readings (``--readings``, queue mode, from 2026-10-13; Roger: "if this is Haiku 5.5, and cheap, yes, run three times
+and average or majority vote, as appropriate"): the queue call, and the gloss check when it runs, is sent N times as
+independent requests, default 3 when ``--model`` is Haiku 5.5 and 1 otherwise (M1's rule,
+``split_runner.default_readings``), since two single-reading runs on the same rows disagreed on 23% of routes.  The
+answers are combined by vote (``assistant_axis.gapgen.states_pass.combine_queue_readings``: a majority on each answer
+that decides the route, the median typical duration, the free text of the first reading that agrees with the vote; the
+route derived from the voted answers), the check by a majority on whether it confirms the gloss
+(``combine_check_readings``); M1's alignment call runs once.  ``run.json``, every session and every block record
+``readings``; a block voted on several carries ``queue_readings`` (each reading and the vote), and ``summary.json``
+``queue_readings`` says how far the readings agreed.  The estimate and the cost gate count every reading.  A resume
+keeps its recorded count (1 when it recorded none) and refuses a different ``--readings``; ``--reroute`` replays each
+batch with the count its ``run.json`` recorded.  The corpus mode reads once.
 
 Route rules (``--route-rules``, default 2 from 2026-10-12; ``assistant_axis.gapgen.states_pass.ROUTE_RULES``): under 2
 the gloss check confirms any reading but ``passing``, and a row the pass itself submitted whose name does not fit is
@@ -140,6 +153,33 @@ def resolve_text_form(args, earlier: Optional[dict] = None) -> str:
     return recorded or sp.DEFAULT_TEXT_FORM
 
 
+def resolve_readings(args, earlier: Optional[dict] = None) -> int:
+    """``--readings``, set on ``args`` and returned: on ``--resume`` the count the first session recorded (1 when it
+    recorded none, every run before 2026-10-13), which an explicit flag may not contradict (the answers on record are
+    one set per reading); else the model's default (:func:`states_pass.default_readings`: 3 on Haiku 5.5, else 1).
+    The corpus mode reads once."""
+    asked = getattr(args, "readings", None)
+    if asked is not None:
+        try:
+            sp.check_readings(asked)
+        except ValueError as exc:
+            raise SystemExit(f"--readings {asked}: {exc}")
+    if args.mode == "corpus":
+        if asked not in (None, 1):
+            raise SystemExit("--readings applies to --mode queue only; the corpus mode reads once")
+        args.readings = 1
+        return 1
+    if earlier is not None:
+        recorded = sp.check_readings(earlier.get(sp.READINGS_KEY) or 1)
+        if asked is not None and asked != recorded:
+            raise SystemExit(f"--resume: the batch's earlier session read the queue call {recorded} time(s), this one "
+                             f"{asked}; resume with --readings {recorded}")
+        args.readings = recorded
+        return recorded
+    args.readings = asked if asked is not None else sp.default_readings(args.model)
+    return args.readings
+
+
 def select_items(args, earlier: Optional[dict] = None, text_form: str = sp.DEFAULT_TEXT_FORM
                  ) -> tuple[list[sp.StatesItem], Optional[Registry], dict]:
     """Items to judge, the registry to write (queue mode from the registry only) and a map of skipped names
@@ -191,19 +231,22 @@ def select_items(args, earlier: Optional[dict] = None, text_form: str = sp.DEFAU
 def build_estimate(items: list[sp.StatesItem], args, transport: str = "live") -> Estimate:
     """The run's estimate: the queue (or corpus) calls with a retry margin; in queue mode, as upper bounds, one
     check call and one alignment call a row (only the rows of the two released routes get them, the check only
-    when the scan does not pass the gloss)."""
+    when the scan does not pass the gloss).  The queue and check calls count once per reading (``args.readings``,
+    1 when unset); the alignment call runs once."""
     est = Estimate()
     n = len(items)
     suffix = BATCH_SUFFIX if transport == "batches" else ""
+    k = getattr(args, "readings", None) or 1
+    rd = f", {k} readings" if k > 1 else ""
     if n:
         sys_tok = int(len(sp.PROMPTS[args.mode]) / CHARS_PER_TOKEN)
         per = min(args.batch_size, n)
-        est.add(f"states pass ({args.mode} v{sp.RUBRIC_VERSIONS[args.mode]})", args.model + suffix,
-                math.ceil(RETRY_MARGIN * n / args.batch_size), sys_tok + IN_TOK_PER_ITEM * per,
+        est.add(f"states pass ({args.mode} v{sp.RUBRIC_VERSIONS[args.mode]}{rd})", args.model + suffix,
+                k * math.ceil(RETRY_MARGIN * n / args.batch_size), sys_tok + IN_TOK_PER_ITEM * per,
                 OUT_TOK_PER_ITEM[args.mode] * per + sp.OUT_TOK_MARGIN)
         if args.mode == "queue":
             from assistant_axis.gapgen import split_runner as SR
-            est.add(f"gloss check v{sp.CHECK_RUBRIC_VERSION} (at most one a row)", args.model + suffix, n,
+            est.add(f"gloss check v{sp.CHECK_RUBRIC_VERSION} (at most one a row{rd})", args.model + suffix, k * n,
                     int(len(sp.CHECK_PROMPT) / CHARS_PER_TOKEN) + 80, sp.CHECK_OUT_TOK)
             i, o = SR.tokens_for("alignment", sp.ALIGNMENT_MODEL)
             est.add("M1's alignment call (at most one a row)", sp.ALIGNMENT_MODEL + suffix, n, i, o)
@@ -234,6 +277,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--state-text-form", choices=sp.TEXT_FORMS, default=None,
                     help=f"what the queue call is shown (default {sp.DEFAULT_TEXT_FORM}; a resume keeps its "
                          f"recorded form): M1's reading without its 'now' markers, or as recorded")
+    ap.add_argument("--readings", type=int, default=None,
+                    help="queue mode: how many independent readings of the queue call (and of the gloss check), "
+                         "combined by vote (default 3 on Haiku 5.5, else 1; a resume keeps its recorded count)")
     ap.add_argument("--rejudge", action="store_true", help="with --holding-states: rows already judged too")
     ap.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR, help="corpus data dir (read only)")
@@ -289,6 +335,9 @@ def main(argv=None) -> int:
     if args.reroute:
         if args.resume:
             raise SystemExit("--reroute reads the record of every batch it re-routes; it is not resumed")
+        if args.readings is not None:
+            raise SystemExit("--reroute replays each batch with the readings its run.json recorded; --readings "
+                             "applies to a judging run")
         return run_reroute(args, out_dir)
     earlier = None
     if args.resume:
@@ -310,6 +359,7 @@ def main(argv=None) -> int:
         raise SystemExit("--send-missing applies to --reroute only")
     route_rules = resolve_route_rules(args, earlier)
     text_form = resolve_text_form(args, earlier) if args.mode == "queue" else None
+    readings = resolve_readings(args, earlier)
     items, reg, skipped = select_items(args, earlier, text_form or sp.DEFAULT_TEXT_FORM)
     for name, why in skipped.items():
         print(f"SKIPPED {name}: {why}", file=sys.stderr)
@@ -320,7 +370,7 @@ def main(argv=None) -> int:
     est = build_estimate(items, args, transport)
     plan = {'mode': args.mode, 'n_rows': len(items), 'registry': bool(reg), 'transport': transport}
     if args.mode == "queue":
-        plan.update(route_rules=route_rules, state_text_form=text_form)
+        plan.update(route_rules=route_rules, state_text_form=text_form, readings=readings)
     print(f"plan: {json.dumps(plan)}")
     print(f"transport: {transport} ({why})")
     print("estimate:\n" + est.format())
@@ -351,6 +401,9 @@ def main(argv=None) -> int:
             n_strip = sum(1 for it in items if it.meta.get("text_as_recorded"))
             print(f"route rules: {route_rules}; state text form: {text_form}"
                   + (f" ({n_strip} of {len(items)} texts lose a 'now' marker)" if text_form == "now_stripped" else ""))
+            print(f"readings: {readings} of the queue call and of the gloss check per row"
+                  + (f", combined by vote ({sp.QUEUE_READINGS_RULE}; check: {sp.CHECK_READINGS_RULE}); each call "
+                     f"below is sent {readings} times" if readings > 1 else ""))
         print(_render(items, args, label_form))
         return 0
     if refused:
@@ -395,6 +448,11 @@ def main(argv=None) -> int:
         run_meta.setdefault("route_rules", route_rules)
         run_meta.setdefault(sp.TEXT_FORM_KEY, text_form)
         session.update(route_rules=route_rules, state_text_form=text_form)
+    # the readings (resolve_readings: a resume keeps the recorded count, 1 for a run that recorded none)
+    run_meta[sp.READINGS_KEY] = readings
+    if readings > 1:
+        run_meta.update(readings_rule=sp.QUEUE_READINGS_RULE, check_readings_rule=sp.CHECK_READINGS_RULE)
+    session[sp.READINGS_KEY] = readings
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -411,7 +469,7 @@ def main(argv=None) -> int:
                                  usage=usage, batch_size=args.batch_size, concurrency=args.concurrency,
                                  responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
                                  close_client=True, label_form=label_form, route_rules=route_rules,
-                                 text_form=text_form)
+                                 text_form=text_form, readings=readings)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap,
                                           poll_seconds=POLL_SECONDS)
@@ -447,11 +505,13 @@ def _replay_batch(batch: str, rows: dict, args, rules: int, transport, *, usage=
         return None, [], {k: f"no record of batch {batch} ({bdir})" for k in rows}
     recs = _read_jsonl([resp])
     items, missing = sp.reroute_items(rows, recs)
+    # the batch's readings (1 for a batch that recorded none): every reading's answers on record are replayed, and
+    # --send-missing asks a missing check once per reading
     runner = sp.StatesPassRunner(client=client, batch_id=args.batch_id, mode="queue", model=run_json["model"],
                                  usage=usage, label_form=PL.resolve_label_form(source=run_json), route_rules=rules,
                                  text_form=sp.recorded_text_form(run_json), resume_records=recs,
                                  transport=transport, responses_path=responses_path, close_client=client is not None,
-                                 concurrency=args.concurrency)
+                                 concurrency=args.concurrency, readings=run_json.get(sp.READINGS_KEY) or 1)
     if items:
         try:
             runner.run(items)
@@ -519,7 +579,8 @@ def run_reroute(args, out_dir: Path) -> int:
                      + (f"; suggested name '{r['suggested_name']}' on its card" if r["suggested_name"] else ""))
             print(f"CHANGED   {r['label']} ({r['batch']}): {r['from']} -> {r['to']} ({r['holding_after']}){extra}")
         elif r["outcome"] == "needs_calls":
-            print(f"NEEDS     {r['label']} ({r['batch']}): {r['from']} -> {r['to']} once {' and '.join(r['needs'])} "
+            need = " and ".join(f"{n} {s}" if n > 1 else s for s, n in sorted(Counter(r["needs"]).items()))
+            print(f"NEEDS     {r['label']} ({r['batch']}): {r['from']} -> {r['to']} once {need} "
                   f"call(s) are made (not on record); {r['route_reason']}")
         elif r["outcome"] == "no_record":
             print(f"NO RECORD {r['label']} ({r['batch']}): {r['why']}")
@@ -663,7 +724,7 @@ def _finalize(args, items, reg, runner, usage, run_meta, session, out_dir, statu
               f"submitted")
     write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
     runner.warn_parse_rate(logger)
-    summary = sp.summarize(results, mode=args.mode, stats=runner.stats, usage=usage)
+    summary = sp.summarize(results, mode=args.mode, stats=runner.stats, usage=usage, readings=runner.readings)
     summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                     "model": args.model, "transport": session["transport"], PL.LABEL_FORM_KEY: runner.label_form,
@@ -679,8 +740,8 @@ def _finalize(args, items, reg, runner, usage, run_meta, session, out_dir, statu
                     stopped_by_error=summary["stopped_by_error"])
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     print(usage.log_line())
-    keys = ("n", "n_judged", "parse_rate", "cost_usd") + (("plausible", "renamed", "routes") if args.mode == "queue"
-                                                           else ("exceptions",))
+    keys = ("n", "n_judged", "parse_rate", "cost_usd", "n_readings") + (
+        ("plausible", "renamed", "routes") if args.mode == "queue" else ("exceptions",))
     print(json.dumps({k: summary.get(k) for k in keys}, ensure_ascii=False))
 
 

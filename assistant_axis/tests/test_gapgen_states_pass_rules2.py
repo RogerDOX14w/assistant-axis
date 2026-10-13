@@ -265,8 +265,10 @@ def _batch_under_rules_1(tmp_path, cli):
         _states_row(reg, lb, gen="states_pass" if lb == "hopish" else "g")
     cand = tmp_path / "cand"
     cli["responder"] = answers()
+    # one reading, as those batches were (a batch of three readings: test_gapgen_states_pass_readings.py)
     assert cli["mod"].main(["--batch-id", "b1", "--mode", "queue", "--holding-states", "--registry", str(reg),
-                            "--out-root", str(cand), "--transport", "live", "--route-rules", "1"]) == 0
+                            "--out-root", str(cand), "--transport", "live", "--route-rules", "1",
+                            "--readings", "1"]) == 0
     rows = Registry(reg).fold()
     assert {k.split("#")[0]: rows[k]["states_pass"]["route"] for k in rows if rows[k].get("states_pass")} == {
         "crossish": "held", "passish": "held", "hopish": "held", "plainheld": "held", "renamish": "renamed"}
