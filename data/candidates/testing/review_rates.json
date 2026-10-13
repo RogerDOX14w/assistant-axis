@@ -1,0 +1,417 @@
+{
+ "result": {
+  "batches": [
+   {
+    "batch_id": "review_states_v4",
+    "events": 13,
+    "events_counted": 13,
+    "undone": 0,
+    "first_at": "2026-10-10T10:22:45+00:00",
+    "last_at": "2026-10-10T10:51:32+00:00",
+    "wall_minutes": 28.8,
+    "active_minutes": 5.5,
+    "idle_s": 300,
+    "idle_gaps": 2,
+    "terms": {
+     "applied": 4,
+     "from_log": 4,
+     "promoted": 3
+    },
+    "groups": {
+     "opened": 6,
+     "singletons": 5,
+     "multi": 1,
+     "members": 7,
+     "resolved": 3,
+     "resolutions": {
+      "promote": 3
+     },
+     "distinct_events": 0,
+     "extend_events": 0
+    },
+    "times": {
+     "singleton_median_s": 84.0,
+     "singleton_mean_s": 82.2,
+     "multi_median_s": null,
+     "per_member_s": null,
+     "spans_left_out": 2
+    },
+    "rate": {
+     "terms_per_active_minute": 0.73,
+     "terms_per_hour_active": 44.0,
+     "terms_per_hour_wall": 8.0,
+     "accepted_per_active_minute": 0.55
+    },
+    "pooled": false,
+    "superseded_logs": []
+   },
+   {
+    "batch_id": "review_tda_1",
+    "events": 354,
+    "events_counted": 348,
+    "undone": 6,
+    "first_at": "2026-10-11T19:40:34+00:00",
+    "last_at": "2026-10-11T21:21:26+00:00",
+    "wall_minutes": 100.9,
+    "active_minutes": 84.1,
+    "idle_s": 300,
+    "idle_gaps": 1,
+    "terms": {
+     "applied": 204,
+     "from_log": 176,
+     "promoted": 35
+    },
+    "groups": {
+     "opened": 88,
+     "singletons": 44,
+     "multi": 44,
+     "members": 218,
+     "resolved": 68,
+     "resolutions": {
+      "merge_into": 32,
+      "promote": 35,
+      "reject": 1
+     },
+     "distinct_events": 76,
+     "extend_events": 67
+    },
+    "times": {
+     "singleton_median_s": 12.0,
+     "singleton_mean_s": 14.6,
+     "multi_median_s": 71.0,
+     "per_member_s": 25.4,
+     "spans_left_out": 1
+    },
+    "rate": {
+     "terms_per_active_minute": 2.43,
+     "terms_per_hour_active": 146.0,
+     "terms_per_hour_wall": 121.0,
+     "accepted_per_active_minute": 0.42
+    },
+    "pooled": true,
+    "superseded_logs": [
+     "decisions.before_leftovers_2026-10-11.jsonl"
+    ]
+   }
+  ],
+  "pooled": {
+   "batches": [
+    "review_tda_1"
+   ],
+   "active_minutes": 84.1,
+   "terms": 204,
+   "terms_per_active_minute": 2.43,
+   "singleton_mean_s": 14.6,
+   "per_member_s": 25.4,
+   "promoted": 35,
+   "left_out": [
+    "review_states_v4"
+   ]
+  },
+  "promote_share_pooled": {
+   "per_term": 0.2079,
+   "per_group": 0.5352,
+   "n_decided": 178,
+   "borrowed": false,
+   "n_groups": 71,
+   "n_promoted_groups": 38,
+   "by_shape": {
+    "singleton": {
+     "resolved": 42,
+     "promoted": 22,
+     "terms": 42,
+     "extended": 12,
+     "share": 0.5238
+    },
+    "multi": {
+     "resolved": 29,
+     "promoted": 16,
+     "terms": 99,
+     "extended": 55,
+     "share": 0.5517
+    }
+   },
+   "n_accepted": 37
+  },
+  "promote_share_by_batch": {
+   "review_states_v4": {
+    "per_term": 0.2079,
+    "per_group": 1.0,
+    "n_decided": 178,
+    "borrowed": false,
+    "n_groups": 3,
+    "n_promoted_groups": 3,
+    "by_shape": {
+     "singleton": {
+      "resolved": 2,
+      "promoted": 2,
+      "terms": 2,
+      "extended": 0,
+      "share": 1.0
+     },
+     "multi": {
+      "resolved": 1,
+      "promoted": 1,
+      "terms": 2,
+      "extended": 0,
+      "share": 1.0
+     }
+    },
+    "n_accepted": 37
+   },
+   "review_tda_1": {
+    "per_term": 0.2079,
+    "per_group": 0.5147,
+    "n_decided": 178,
+    "borrowed": false,
+    "n_groups": 68,
+    "n_promoted_groups": 35,
+    "by_shape": {
+     "singleton": {
+      "resolved": 40,
+      "promoted": 20,
+      "terms": 40,
+      "extended": 12,
+      "share": 0.5
+     },
+     "multi": {
+      "resolved": 28,
+      "promoted": 15,
+      "terms": 97,
+      "extended": 55,
+      "share": 0.5357
+     }
+    },
+    "n_accepted": 37
+   }
+  },
+  "promote_share_by_generator": {
+   "censuses": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 178,
+    "borrowed": false,
+    "n_groups": 71,
+    "n_promoted_groups": 38,
+    "by_shape": {
+     "singleton": {
+      "resolved": 42,
+      "promoted": 22,
+      "terms": 42,
+      "extended": 12,
+      "share": 0.5238
+     },
+     "multi": {
+      "resolved": 29,
+      "promoted": 16,
+      "terms": 99,
+      "extended": 55,
+      "share": 0.5517
+     }
+    },
+    "n_accepted": 37
+   },
+   "roget": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 18,
+    "borrowed": true,
+    "n_groups": 15,
+    "n_promoted_groups": 9,
+    "by_shape": {
+     "singleton": {
+      "resolved": 5,
+      "promoted": 3,
+      "terms": 5,
+      "extended": 5,
+      "share": 0.6
+     },
+     "multi": {
+      "resolved": 10,
+      "promoted": 6,
+      "terms": 37,
+      "extended": 26,
+      "share": 0.6
+     }
+    },
+    "n_accepted": 4
+   },
+   "wn_clusters": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 28,
+    "borrowed": true,
+    "n_groups": 22,
+    "n_promoted_groups": 10,
+    "by_shape": {
+     "singleton": {
+      "resolved": 8,
+      "promoted": 4,
+      "terms": 8,
+      "extended": 3,
+      "share": 0.5
+     },
+     "multi": {
+      "resolved": 14,
+      "promoted": 6,
+      "terms": 54,
+      "extended": 42,
+      "share": 0.4286
+     }
+    },
+    "n_accepted": 4
+   },
+   "ipip": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 3,
+    "borrowed": true,
+    "n_groups": 3,
+    "n_promoted_groups": 1,
+    "by_shape": {
+     "singleton": {
+      "resolved": 0,
+      "promoted": 0,
+      "terms": 0,
+      "extended": 0,
+      "share": null
+     },
+     "multi": {
+      "resolved": 3,
+      "promoted": 1,
+      "terms": 12,
+      "extended": 10,
+      "share": 0.3333
+     }
+    },
+    "n_accepted": 0
+   },
+   "base_model": {
+    "per_term": 0.1017,
+    "per_group": 0.4,
+    "n_decided": 59,
+    "borrowed": false,
+    "n_groups": 30,
+    "n_promoted_groups": 12,
+    "by_shape": {
+     "singleton": {
+      "resolved": 10,
+      "promoted": 4,
+      "terms": 10,
+      "extended": 7,
+      "share": 0.4
+     },
+     "multi": {
+      "resolved": 20,
+      "promoted": 8,
+      "terms": 76,
+      "extended": 49,
+      "share": 0.4
+     }
+    },
+    "n_accepted": 6
+   },
+   "alignment_sweep": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 2,
+    "borrowed": true,
+    "n_groups": 2,
+    "n_promoted_groups": 2,
+    "by_shape": {
+     "singleton": {
+      "resolved": 1,
+      "promoted": 1,
+      "terms": 1,
+      "extended": 0,
+      "share": 1.0
+     },
+     "multi": {
+      "resolved": 1,
+      "promoted": 1,
+      "terms": 4,
+      "extended": 3,
+      "share": 1.0
+     }
+    },
+    "n_accepted": 2
+   },
+   "antonym_check": {
+    "per_term": 0.2079,
+    "per_group": 0.5352,
+    "n_decided": 0,
+    "borrowed": true,
+    "n_groups": 0,
+    "n_promoted_groups": 0,
+    "by_shape": {
+     "singleton": {
+      "resolved": 0,
+      "promoted": 0,
+      "terms": 0,
+      "extended": 0,
+      "share": null
+     },
+     "multi": {
+      "resolved": 0,
+      "promoted": 0,
+      "terms": 0,
+      "extended": 0,
+      "share": null
+     }
+    },
+    "n_accepted": 0
+   }
+  },
+  "idle_s": 300,
+  "review_as_of": "2026-10-11T21:21:26+00:00"
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard review-rate"
+  },
+  "produced_at": "2026-10-13T19:51:42+00:00",
+  "inputs": [
+   {
+    "dep_key": "registry",
+    "path": "data/candidates/registry.jsonl",
+    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "graph",
+    "path": "data/candidates/review/review_traits_all_2/graph.json",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@53598310",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "log_review_states_v4",
+    "path": "data/candidates/review/review_states_v4/decisions.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@3173",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "log_review_tda_1",
+    "path": "data/candidates/review/review_tda_1/decisions.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@86632",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "0e2f52f650ecf9d6cb4417939e753e88e629e30a4d5d9d7e55b620e105b23e41"
+ }
+}

@@ -1,0 +1,3606 @@
+{
+ "result": {
+  "schema_version": 1,
+  "produced_at": "2026-10-13T19:51:41+00:00",
+  "inputs": {
+   "registry": "data/candidates/registry.jsonl",
+   "registry_keys": 9949,
+   "registry_sha256": "2a6e801e0067c42c722b02bb9844b6afe2e9c47de75d2f22e3d723172bb9b24b",
+   "graph": "data/candidates/review/review_traits_all_2/graph.json",
+   "graph_batch": "review_traits_all_2",
+   "review_batches": [
+    "review_states_v4",
+    "review_tda_1"
+   ],
+   "review_as_of": "2026-10-11T21:21:26+00:00",
+   "harness_batches": [
+    "rec_antonym_check_pilot_1",
+    "rec_censuses_2026-10-08-pilot",
+    "rec_roget_2026-10-08-pilot",
+    "rec_wn_clusters_2026-10-08-pilot"
+   ]
+  },
+  "rows": [
+   {
+    "generator": "censuses",
+    "mechanism": "lexicon",
+    "runs": [
+     "2026-10-08-pilot",
+     "2026-10-09-iv-pilot",
+     "2026-10-09-rare-pilot",
+     "2026-10-10-tda",
+     "2026-10-11-allport_hi",
+     "2026-10-12-allport_iv_rare",
+     "2026-10-12-allport_rare"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 25.7094,
+     "m3": 30.7633,
+     "r1_share": 30.9188,
+     "harness": 6.626,
+     "total": 94.0175
+    },
+    "candidates": 8007,
+    "m1": {
+     "reject": 1169,
+     "tagged": 1699,
+     "trait": 5139
+    },
+    "m3": {
+     "kept": 2872,
+     "covered": 2243,
+     "exact_label": 468,
+     "undecided": 24
+    },
+    "regions_of_kept": {
+     "social_interpersonal": 876,
+     "communication_style": 495,
+     "emotional_temperament": 425,
+     "cognitive_epistemic": 387,
+     "moral_stance": 373,
+     "identity_demographic": 245,
+     "alignment_ai_agent": 71
+    },
+    "repetition": {
+     "pre_handled_3": 0.0686,
+     "pre_handled_4": 0.0211,
+     "attached_to_first_batch": 0.3468,
+     "n_undecided": 2698
+    },
+    "review": {
+     "decided": 174,
+     "accepted": 34,
+     "merged": 139,
+     "rejected": 1,
+     "decided_not_kept": 37,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": false,
+     "groups_resolved": 71,
+     "by_shape": {
+      "singleton": {
+       "resolved": 42,
+       "promoted": 22,
+       "terms": 42,
+       "extended": 12,
+       "share": 0.5238
+      },
+      "multi": {
+       "resolved": 29,
+       "promoted": 16,
+       "terms": 99,
+       "extended": 55,
+       "share": 0.5517
+      }
+     }
+    },
+    "string_recall": {
+     "n": 475,
+     "of": 932,
+     "share": 0.5097
+    },
+    "negatives": {
+     "hit": 45,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": [
+      {
+       "batch": "rec_censuses_2026-10-08-pilot",
+       "scope": "run 2026-10-08-pilot",
+       "recall": 0.2289,
+       "precision": 0.0929,
+       "false_cover_candidates": 8.0,
+       "n_kept": null,
+       "strict": 0.1325,
+       "pair": 0.1446,
+       "seeds": 1,
+       "by_region": {
+        "cognitive_epistemic": {
+         "recall": 0.1765,
+         "n_hidden": 17.0
+        },
+        "communication_style": {
+         "recall": 0.3125,
+         "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+         "recall": 0.5,
+         "n_hidden": 8.0
+        },
+        "identity_demographic": {
+         "recall": 0.0,
+         "n_hidden": 6.0
+        },
+        "moral_stance": {
+         "recall": 0.3571,
+         "n_hidden": 14.0
+        },
+        "none": {
+         "recall": 0.0588,
+         "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+         "recall": 0.2,
+         "n_hidden": 5.0
+        }
+       },
+       "recall_at_n": [
+        {
+         "quantile": 0.1,
+         "max_rank": 276.0,
+         "n_candidates": 56,
+         "n_recovered": 3,
+         "recall": 0.0361
+        },
+        {
+         "quantile": 0.25,
+         "max_rank": 701.0,
+         "n_candidates": 141,
+         "n_recovered": 6,
+         "recall": 0.0723
+        },
+        {
+         "quantile": 0.5,
+         "max_rank": 1406.0,
+         "n_candidates": 282,
+         "n_recovered": 10,
+         "recall": 0.1205
+        },
+        {
+         "quantile": 0.75,
+         "max_rank": 2111.0,
+         "n_candidates": 423,
+         "n_recovered": 14,
+         "recall": 0.1687
+        },
+        {
+         "quantile": 1.0,
+         "max_rank": 2816.0,
+         "n_candidates": 564,
+         "n_recovered": 19,
+         "recall": 0.2289
+        }
+       ]
+      }
+     ]
+    },
+    "stop_rule": {
+     "undecided_kept": 2698,
+     "pre_handled": 185,
+     "terms": 2513,
+     "groups": 1912,
+     "singleton_terms": 1562,
+     "grouped_terms": 951,
+     "expected_minutes": 782.7,
+     "expected_accepted": 1023.3,
+     "novel_per_review_minute": 1.307,
+     "novel_per_usd": 10.88,
+     "share_used": 0.5352,
+     "share_borrowed": false
+    },
+    "streams": [
+     {
+      "generator": "censuses",
+      "stream": "tda",
+      "class": "independent",
+      "mechanism": "lexicon",
+      "inputs": "the Trait Descriptive Adjectives census list (Condon, Coughlin and Weston 2022); source_ref prefix tda:",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose file's `source` names the TDA list, or a corpus trait whose seed-queue entry carries `source:censuses` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 2855,
+      "n_trait": 2546,
+      "n_kept": 1132,
+      "n_excluded_from_denominator": 0
+     },
+     {
+      "generator": "censuses",
+      "stream": "allport",
+      "class": "independent",
+      "mechanism": "lexicon",
+      "inputs": "Allport and Odbert's 1936 word list as digitised on OSF; source_ref prefix allport:",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose file's `source` names Allport and Odbert's list (not Allport and Ross's religious orientation scale, which extrinsic_allport and intrinsic_allport name), or a corpus trait whose seed-queue entry carries `source:censuses` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 5558,
+      "n_trait": 2928,
+      "n_kept": 1881,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 202,
+    "class": "independent"
+   },
+   {
+    "generator": "roget",
+    "mechanism": "lexicon",
+    "runs": [
+     "2026-10-08-pilot",
+     "2026-10-11-full",
+     "2026-10-12-rule1b"
+    ],
+    "cost_usd": {
+     "generator": 6.3761,
+     "m1": 2.3099,
+     "m3": 2.3267,
+     "r1_share": 1.9484,
+     "harness": 1.3575,
+     "total": 14.3186
+    },
+    "candidates": 576,
+    "m1": {
+     "reject": 99,
+     "tagged": 128,
+     "trait": 349
+    },
+    "m3": {
+     "kept": 243,
+     "covered": 101,
+     "exact_label": 2,
+     "undecided": 5
+    },
+    "regions_of_kept": {
+     "social_interpersonal": 70,
+     "communication_style": 44,
+     "moral_stance": 39,
+     "identity_demographic": 28,
+     "cognitive_epistemic": 27,
+     "emotional_temperament": 25,
+     "alignment_ai_agent": 10
+    },
+    "repetition": {
+     "pre_handled_3": 0.0844,
+     "pre_handled_4": 0.0222,
+     "attached_to_first_batch": 0.3743,
+     "n_undecided": 225
+    },
+    "review": {
+     "decided": 18,
+     "accepted": 4,
+     "merged": 14,
+     "rejected": 0,
+     "decided_not_kept": 0,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": true,
+     "groups_resolved": 15,
+     "by_shape": {
+      "singleton": {
+       "resolved": 5,
+       "promoted": 3,
+       "terms": 5,
+       "extended": 5,
+       "share": 0.6
+      },
+      "multi": {
+       "resolved": 10,
+       "promoted": 6,
+       "terms": 37,
+       "extended": 26,
+       "share": 0.6
+      }
+     }
+    },
+    "string_recall": {
+     "n": 3,
+     "of": 932,
+     "share": 0.0032
+    },
+    "negatives": {
+     "hit": 0,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": true,
+     "batches": [
+      {
+       "batch": "rec_roget_2026-10-08-pilot",
+       "scope": "run 2026-10-08-pilot",
+       "recall": 0.012,
+       "precision": 0.0133,
+       "false_cover_candidates": 0.0,
+       "n_kept": null,
+       "strict": 0.0,
+       "pair": 0.0602,
+       "seeds": 1,
+       "by_region": {
+        "cognitive_epistemic": {
+         "recall": 0.0588,
+         "n_hidden": 17.0
+        },
+        "communication_style": {
+         "recall": 0.0,
+         "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+         "recall": 0.0,
+         "n_hidden": 8.0
+        },
+        "identity_demographic": {
+         "recall": 0.0,
+         "n_hidden": 6.0
+        },
+        "moral_stance": {
+         "recall": 0.0,
+         "n_hidden": 14.0
+        },
+        "none": {
+         "recall": 0.0,
+         "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+         "recall": 0.0,
+         "n_hidden": 5.0
+        }
+       },
+       "recall_at_n": [
+        {
+         "quantile": 0.1,
+         "max_rank": 18.0,
+         "n_candidates": 18,
+         "n_recovered": 0,
+         "recall": 0.0
+        },
+        {
+         "quantile": 0.25,
+         "max_rank": 46.0,
+         "n_candidates": 45,
+         "n_recovered": 0,
+         "recall": 0.0
+        },
+        {
+         "quantile": 0.5,
+         "max_rank": 91.0,
+         "n_candidates": 90,
+         "n_recovered": 1,
+         "recall": 0.012
+        },
+        {
+         "quantile": 0.75,
+         "max_rank": 138.0,
+         "n_candidates": 136,
+         "n_recovered": 1,
+         "recall": 0.012
+        },
+        {
+         "quantile": 1.0,
+         "max_rank": 185.0,
+         "n_candidates": 181,
+         "n_recovered": 1,
+         "recall": 0.012
+        }
+       ]
+      }
+     ]
+    },
+    "stop_rule": {
+     "undecided_kept": 225,
+     "pre_handled": 19,
+     "terms": 206,
+     "groups": 193,
+     "singleton_terms": 182,
+     "grouped_terms": 24,
+     "expected_minutes": 54.4,
+     "expected_accepted": 103.3,
+     "novel_per_review_minute": 1.897,
+     "novel_per_usd": 7.21,
+     "share_used": 0.5352,
+     "share_borrowed": true
+    },
+    "streams": [
+     {
+      "generator": "roget",
+      "stream": "heads",
+      "class": "seeded",
+      "mechanism": "lexicon",
+      "inputs": "Roget's Thesaurus heads chosen as the gap heads of the coverage report, which is built from corpus labels (roget/harvest.py select_heads); the harvest within a head is independent",
+      "generator_side_hiding": false,
+      "harness_side_only": true,
+      "exclusion_rule": "a corpus trait whose file's `source` names Roget, or a corpus trait whose seed-queue entry carries `source:roget` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 618,
+      "n_trait": 385,
+      "n_kept": 255,
+      "n_excluded_from_denominator": 0,
+      "note": "no `recover` command: generator-side hiding not built"
+     }
+    ],
+    "attributed_via_states_pass": 42,
+    "class": "seeded"
+   },
+   {
+    "generator": "wn_clusters",
+    "mechanism": "lexicon",
+    "runs": [
+     "2026-10-08-pilot",
+     "2026-10-11-full",
+     "2026-10-12-rule1b"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 1.1694,
+     "m3": 1.9641,
+     "r1_share": 1.7565,
+     "harness": 1.1304,
+     "total": 6.0204
+    },
+    "candidates": 647,
+    "m1": {
+     "reject": 14,
+     "tagged": 55,
+     "trait": 578
+    },
+    "m3": {
+     "kept": 277,
+     "covered": 300,
+     "exact_label": 2,
+     "undecided": 1
+    },
+    "regions_of_kept": {
+     "social_interpersonal": 86,
+     "communication_style": 54,
+     "emotional_temperament": 44,
+     "moral_stance": 38,
+     "cognitive_epistemic": 33,
+     "alignment_ai_agent": 14,
+     "identity_demographic": 8
+    },
+    "repetition": {
+     "pre_handled_3": 0.108,
+     "pre_handled_4": 0.036,
+     "attached_to_first_batch": 0.4578,
+     "n_undecided": 250
+    },
+    "review": {
+     "decided": 27,
+     "accepted": 3,
+     "merged": 24,
+     "rejected": 0,
+     "decided_not_kept": 5,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": true,
+     "groups_resolved": 22,
+     "by_shape": {
+      "singleton": {
+       "resolved": 8,
+       "promoted": 4,
+       "terms": 8,
+       "extended": 3,
+       "share": 0.5
+      },
+      "multi": {
+       "resolved": 14,
+       "promoted": 6,
+       "terms": 54,
+       "extended": 42,
+       "share": 0.4286
+      }
+     }
+    },
+    "string_recall": {
+     "n": 7,
+     "of": 932,
+     "share": 0.0075
+    },
+    "negatives": {
+     "hit": 0,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": true,
+     "batches": [
+      {
+       "batch": "rec_wn_clusters_2026-10-08-pilot",
+       "scope": "run 2026-10-08-pilot",
+       "recall": 0.0723,
+       "precision": 0.125,
+       "false_cover_candidates": 1.0,
+       "n_kept": null,
+       "strict": 0.0,
+       "pair": 0.0482,
+       "seeds": 1,
+       "by_region": {
+        "cognitive_epistemic": {
+         "recall": 0.0588,
+         "n_hidden": 17.0
+        },
+        "communication_style": {
+         "recall": 0.125,
+         "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+         "recall": 0.125,
+         "n_hidden": 8.0
+        },
+        "identity_demographic": {
+         "recall": 0.0,
+         "n_hidden": 6.0
+        },
+        "moral_stance": {
+         "recall": 0.0714,
+         "n_hidden": 14.0
+        },
+        "none": {
+         "recall": 0.0588,
+         "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+         "recall": 0.0,
+         "n_hidden": 5.0
+        }
+       },
+       "recall_at_n": [
+        {
+         "quantile": 0.1,
+         "max_rank": 9.0,
+         "n_candidates": 9,
+         "n_recovered": 0,
+         "recall": 0.0
+        },
+        {
+         "quantile": 0.25,
+         "max_rank": 22.0,
+         "n_candidates": 22,
+         "n_recovered": 1,
+         "recall": 0.012
+        },
+        {
+         "quantile": 0.5,
+         "max_rank": 44.0,
+         "n_candidates": 44,
+         "n_recovered": 5,
+         "recall": 0.0602
+        },
+        {
+         "quantile": 0.75,
+         "max_rank": 65.0,
+         "n_candidates": 65,
+         "n_recovered": 6,
+         "recall": 0.0723
+        },
+        {
+         "quantile": 1.0,
+         "max_rank": 87.0,
+         "n_candidates": 87,
+         "n_recovered": 6,
+         "recall": 0.0723
+        }
+       ]
+      }
+     ]
+    },
+    "stop_rule": {
+     "undecided_kept": 250,
+     "pre_handled": 27,
+     "terms": 223,
+     "groups": 202,
+     "singleton_terms": 186,
+     "grouped_terms": 37,
+     "expected_minutes": 60.9,
+     "expected_accepted": 108.1,
+     "novel_per_review_minute": 1.775,
+     "novel_per_usd": 17.96,
+     "share_used": 0.5352,
+     "share_borrowed": true
+    },
+    "streams": [
+     {
+      "generator": "wn_clusters",
+      "stream": "closure",
+      "class": "independent",
+      "mechanism": "lexicon",
+      "inputs": "WordNet's (OEWN) trait-noun closure: adjectives under the trait synsets (no partner_hint)",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose file's `source` names OEWN or WordNet, or a corpus trait whose seed-queue entry carries `source:wn_clusters` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 553,
+      "n_trait": 504,
+      "n_kept": 235,
+      "n_excluded_from_denominator": 0
+     },
+     {
+      "generator": "wn_clusters",
+      "stream": "antonym",
+      "class": "seeded",
+      "mechanism": "lexicon",
+      "inputs": "WordNet antonyms of corpus labels with no partner file (partner_hint set)",
+      "generator_side_hiding": false,
+      "harness_side_only": true,
+      "exclusion_rule": "a corpus trait whose queue entry carries `source:wn_clusters`, or whose file's `source` names OEWN",
+      "n_rows": 108,
+      "n_trait": 85,
+      "n_kept": 46,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 8,
+    "class": "independent/seeded"
+   },
+   {
+    "generator": "ipip",
+    "mechanism": "ipip",
+    "runs": [
+     "2026-10-11-g600",
+     "2026-10-13-g600"
+    ],
+    "cost_usd": {
+     "generator": 2.9348,
+     "m1": 2.5882,
+     "m3": 3.3661,
+     "r1_share": 2.1766,
+     "harness": null,
+     "total": 11.0656
+    },
+    "candidates": 514,
+    "m1": {
+     "reject": 3,
+     "tagged": 13,
+     "trait": 498
+    },
+    "m3": {
+     "kept": 240,
+     "covered": 258,
+     "exact_label": 51,
+     "undecided": 0
+    },
+    "regions_of_kept": {
+     "social_interpersonal": 79,
+     "emotional_temperament": 62,
+     "cognitive_epistemic": 35,
+     "moral_stance": 32,
+     "identity_demographic": 15,
+     "communication_style": 13,
+     "alignment_ai_agent": 4
+    },
+    "repetition": {
+     "pre_handled_3": 0.0388,
+     "pre_handled_4": 0.0086,
+     "attached_to_first_batch": 0.2321,
+     "n_undecided": 232
+    },
+    "review": {
+     "decided": 3,
+     "accepted": 0,
+     "merged": 3,
+     "rejected": 0,
+     "decided_not_kept": 2,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": true,
+     "groups_resolved": 3,
+     "by_shape": {
+      "singleton": {
+       "resolved": 0,
+       "promoted": 0,
+       "terms": 0,
+       "extended": 0,
+       "share": null
+      },
+      "multi": {
+       "resolved": 3,
+       "promoted": 1,
+       "terms": 12,
+       "extended": 10,
+       "share": 0.3333
+      }
+     }
+    },
+    "string_recall": {
+     "n": 55,
+     "of": 932,
+     "share": 0.059
+    },
+    "negatives": {
+     "hit": 0,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 232,
+     "pre_handled": 9,
+     "terms": 223,
+     "groups": 217,
+     "singleton_terms": 211,
+     "grouped_terms": 12,
+     "expected_minutes": 56.4,
+     "expected_accepted": 116.1,
+     "novel_per_review_minute": 2.058,
+     "novel_per_usd": 10.5,
+     "share_used": 0.5352,
+     "share_borrowed": true
+    },
+    "streams": [
+     {
+      "generator": "ipip",
+      "stream": "ipip",
+      "class": "independent",
+      "mechanism": "ipip",
+      "inputs": "the International Personality Item Pool's items, clustered and named blind (no corpus label shown)",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose file's `source` names the IPIP, or a corpus trait whose seed-queue entry carries `source:ipip` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 514,
+      "n_trait": 498,
+      "n_kept": 240,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 0,
+    "class": "independent"
+   },
+   {
+    "generator": "base_model",
+    "mechanism": "base_model",
+    "runs": [
+     "2026-10-12-pilot",
+     "2026-10-12-pilot-mc2"
+    ],
+    "cost_usd": {
+     "generator": 0.054,
+     "m1": 1.5965,
+     "m3": 2.3587,
+     "r1_share": 3.4693,
+     "harness": null,
+     "total": 7.4785
+    },
+    "candidates": 1541,
+    "m1": {
+     "reject": 26,
+     "tagged": 160,
+     "trait": 1355
+    },
+    "m3": {
+     "kept": 517,
+     "covered": 836,
+     "exact_label": 354,
+     "undecided": 2
+    },
+    "regions_of_kept": {
+     "social_interpersonal": 176,
+     "communication_style": 93,
+     "cognitive_epistemic": 77,
+     "emotional_temperament": 75,
+     "moral_stance": 63,
+     "identity_demographic": 19,
+     "alignment_ai_agent": 14
+    },
+    "repetition": {
+     "pre_handled_3": 0.0961,
+     "pre_handled_4": 0.0393,
+     "attached_to_first_batch": 0.4931,
+     "n_undecided": 458
+    },
+    "review": {
+     "decided": 59,
+     "accepted": 6,
+     "merged": 53,
+     "rejected": 0,
+     "decided_not_kept": 8,
+     "promote_share_term": 0.1017,
+     "promote_share_group": 0.4,
+     "borrowed": false,
+     "groups_resolved": 30,
+     "by_shape": {
+      "singleton": {
+       "resolved": 10,
+       "promoted": 4,
+       "terms": 10,
+       "extended": 7,
+       "share": 0.4
+      },
+      "multi": {
+       "resolved": 20,
+       "promoted": 8,
+       "terms": 76,
+       "extended": 49,
+       "share": 0.4
+      }
+     }
+    },
+    "string_recall": {
+     "n": 352,
+     "of": 932,
+     "share": 0.3777
+    },
+    "negatives": {
+     "hit": 30,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 458,
+     "pre_handled": 44,
+     "terms": 414,
+     "groups": 366,
+     "singleton_terms": 324,
+     "grouped_terms": 90,
+     "expected_minutes": 116.9,
+     "expected_accepted": 146.4,
+     "novel_per_review_minute": 1.252,
+     "novel_per_usd": 19.58,
+     "share_used": 0.4,
+     "share_borrowed": false
+    },
+    "streams": [
+     {
+      "generator": "base_model",
+      "stream": "base_model",
+      "class": "independent",
+      "mechanism": "base_model",
+      "inputs": "a base model's continuations of list and gloss frames (base_model/prompts.py names no corpus trait)",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:base_model` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 1563,
+      "n_trait": 1368,
+      "n_kept": 523,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 22,
+    "class": "independent"
+   },
+   {
+    "generator": "alignment_sweep",
+    "mechanism": "alignment",
+    "runs": [
+     "2026-10-11-b",
+     "2026-10-11-papers",
+     "2026-10-11-usage"
+    ],
+    "cost_usd": {
+     "generator": 18.2015,
+     "m1": 7.0319,
+     "m3": 5.654,
+     "r1_share": 3.5071,
+     "harness": null,
+     "total": 34.3945
+    },
+    "candidates": 464,
+    "m1": {
+     "reject": 5,
+     "tagged": 4,
+     "trait": 455
+    },
+    "m3": {
+     "kept": 362,
+     "covered": 93,
+     "exact_label": 21,
+     "undecided": 0
+    },
+    "regions_of_kept": {
+     "alignment_ai_agent": 132,
+     "moral_stance": 118,
+     "cognitive_epistemic": 51,
+     "social_interpersonal": 38,
+     "communication_style": 13,
+     "emotional_temperament": 5,
+     "identity_demographic": 5
+    },
+    "repetition": {
+     "pre_handled_3": 0.0889,
+     "pre_handled_4": 0.0111,
+     "attached_to_first_batch": 0.1844,
+     "n_undecided": 360
+    },
+    "review": {
+     "decided": 2,
+     "accepted": 2,
+     "merged": 0,
+     "rejected": 0,
+     "decided_not_kept": 0,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": true,
+     "groups_resolved": 2,
+     "by_shape": {
+      "singleton": {
+       "resolved": 1,
+       "promoted": 1,
+       "terms": 1,
+       "extended": 0,
+       "share": 1.0
+      },
+      "multi": {
+       "resolved": 1,
+       "promoted": 1,
+       "terms": 4,
+       "extended": 3,
+       "share": 1.0
+      }
+     }
+    },
+    "string_recall": {
+     "n": 20,
+     "of": 932,
+     "share": 0.0215
+    },
+    "negatives": {
+     "hit": 1,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 360,
+     "pre_handled": 32,
+     "terms": 328,
+     "groups": 277,
+     "singleton_terms": 244,
+     "grouped_terms": 84,
+     "expected_minutes": 94.9,
+     "expected_accepted": 148.3,
+     "novel_per_review_minute": 1.562,
+     "novel_per_usd": 4.31,
+     "share_used": 0.5352,
+     "share_borrowed": true
+    },
+    "streams": [
+     {
+      "generator": "alignment_sweep",
+      "stream": "alignment_sweep",
+      "class": "separate_population",
+      "mechanism": "alignment",
+      "inputs": "AI-disposition phrases extracted from alignment papers, incident lists and usage policies",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:alignment_sweep` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 467,
+      "n_trait": 458,
+      "n_kept": 364,
+      "n_excluded_from_denominator": 0,
+      "note": "its occasions are its own runs (the papers run and variant B), tested on their own"
+     }
+    ],
+    "attributed_via_states_pass": 3,
+    "class": "separate_population"
+   },
+   {
+    "generator": "antonym_check",
+    "mechanism": "corpus",
+    "runs": [
+     "pilot_1"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 4.6644,
+     "m3": 11.494,
+     "r1_share": 0.7566,
+     "harness": 4.8698,
+     "total": 21.7849
+    },
+    "candidates": 405,
+    "m1": {
+     "reject": 15,
+     "tagged": 16,
+     "trait": 374
+    },
+    "m3": {
+     "kept": 135,
+     "covered": 239,
+     "exact_label": 4,
+     "undecided": 0
+    },
+    "regions_of_kept": {
+     "cognitive_epistemic": 39,
+     "communication_style": 38,
+     "moral_stance": 24,
+     "emotional_temperament": 15,
+     "social_interpersonal": 10,
+     "identity_demographic": 9
+    },
+    "repetition": {
+     "pre_handled_3": 0.0667,
+     "pre_handled_4": 0.0148,
+     "attached_to_first_batch": 0.363,
+     "n_undecided": 135
+    },
+    "review": {
+     "decided": 0,
+     "accepted": 0,
+     "merged": 0,
+     "rejected": 0,
+     "decided_not_kept": 1,
+     "promote_share_term": 0.2079,
+     "promote_share_group": 0.5352,
+     "borrowed": true,
+     "groups_resolved": 0,
+     "by_shape": {
+      "singleton": {
+       "resolved": 0,
+       "promoted": 0,
+       "terms": 0,
+       "extended": 0,
+       "share": null
+      },
+      "multi": {
+       "resolved": 0,
+       "promoted": 0,
+       "terms": 0,
+       "extended": 0,
+       "share": null
+      }
+     }
+    },
+    "string_recall": {
+     "n": 17,
+     "of": 932,
+     "share": 0.0182
+    },
+    "negatives": {
+     "hit": 0,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": true,
+     "batches": [
+      {
+       "batch": "rec_antonym_check_pilot_1",
+       "scope": "run pilot_1",
+       "recall": 0.1566,
+       "precision": 0.1049,
+       "false_cover_candidates": 16.0,
+       "n_kept": null,
+       "strict": 0.0482,
+       "pair": 0.2048,
+       "seeds": 1,
+       "by_region": {
+        "cognitive_epistemic": {
+         "recall": 0.2353,
+         "n_hidden": 17.0
+        },
+        "communication_style": {
+         "recall": 0.1875,
+         "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+         "recall": 0.125,
+         "n_hidden": 8.0
+        },
+        "identity_demographic": {
+         "recall": 0.5,
+         "n_hidden": 6.0
+        },
+        "moral_stance": {
+         "recall": 0.0714,
+         "n_hidden": 14.0
+        },
+        "none": {
+         "recall": 0.0,
+         "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+         "recall": 0.2,
+         "n_hidden": 5.0
+        }
+       },
+       "recall_at_n": null
+      }
+     ]
+    },
+    "stop_rule": {
+     "undecided_kept": 135,
+     "pre_handled": 9,
+     "terms": 126,
+     "groups": 119,
+     "singleton_terms": 112,
+     "grouped_terms": 14,
+     "expected_minutes": 33.2,
+     "expected_accepted": 63.7,
+     "novel_per_review_minute": 1.919,
+     "novel_per_usd": 2.92,
+     "share_used": 0.5352,
+     "share_borrowed": true
+    },
+    "streams": [
+     {
+      "generator": "antonym_check",
+      "stream": "antonym_check",
+      "class": "seeded",
+      "mechanism": "corpus",
+      "inputs": "the antonym check's candidate antonyms of corpus traits (generate_antonyms.py answers)",
+      "generator_side_hiding": false,
+      "harness_side_only": true,
+      "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:antonym_check` (or a `gap_registry_key`), or a renamed_from of one",
+      "n_rows": 413,
+      "n_trait": 380,
+      "n_kept": 136,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 8,
+    "class": "seeded"
+   },
+   {
+    "generator": "states_pass",
+    "mechanism": null,
+    "runs": [
+     "states_tda_1",
+     "states_unjudged_r3",
+     "states_v4_pilot"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 1.2461,
+     "m3": 1.065,
+     "r1_share": 0.0,
+     "harness": null,
+     "total": 2.3111
+    },
+    "candidates": 459,
+    "m1": {
+     "reject": 2,
+     "tagged": 73,
+     "trait": 372,
+     "unfiltered": 12
+    },
+    "m3": {
+     "kept": 165,
+     "covered": 207,
+     "exact_label": 83,
+     "undecided": 0
+    },
+    "regions_of_kept": {
+     "emotional_temperament": 63,
+     "social_interpersonal": 33,
+     "cognitive_epistemic": 31,
+     "moral_stance": 17,
+     "communication_style": 12,
+     "identity_demographic": 8,
+     "alignment_ai_agent": 1
+    },
+    "repetition": {
+     "pre_handled_3": 0.0506,
+     "pre_handled_4": 0.0253,
+     "attached_to_first_batch": 0.272,
+     "n_undecided": 158
+    },
+    "review": {
+     "decided": 7,
+     "accepted": 4,
+     "merged": 3,
+     "rejected": 0,
+     "decided_not_kept": 1,
+     "promote_share_term": null,
+     "promote_share_group": null,
+     "borrowed": null,
+     "groups_resolved": null,
+     "by_shape": null
+    },
+    "string_recall": {
+     "n": 90,
+     "of": 932,
+     "share": 0.0966
+    },
+    "negatives": {
+     "hit": 9,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 158,
+     "pre_handled": 8,
+     "terms": 150,
+     "groups": 140,
+     "singleton_terms": 130,
+     "grouped_terms": 20,
+     "expected_minutes": 40.1,
+     "expected_accepted": null,
+     "novel_per_review_minute": null,
+     "novel_per_usd": null,
+     "share_used": null,
+     "share_borrowed": false
+    },
+    "streams": [
+     {
+      "generator": "states_pass",
+      "stream": "states_pass",
+      "class": "not_a_generator",
+      "mechanism": null,
+      "inputs": "names the states pass proposed for rows M1 held as states; source_ref is the source row's key",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "attributed to the source row's generator (pre-registered question 6)",
+      "n_rows": 459,
+      "n_trait": 372,
+      "n_kept": 165,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 0,
+    "class": "not_a_generator"
+   },
+   {
+    "generator": "m1_validation",
+    "mechanism": null,
+    "runs": [
+     "pilot_1"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 2.6537,
+     "m3": 3.8246,
+     "r1_share": 0.3911,
+     "harness": null,
+     "total": 6.8693
+    },
+    "candidates": 150,
+    "m1": {
+     "reject": 28,
+     "tagged": 14,
+     "trait": 108
+    },
+    "m3": {
+     "kept": 58,
+     "covered": 43,
+     "exact_label": 0,
+     "undecided": 7
+    },
+    "regions_of_kept": {
+     "identity_demographic": 19,
+     "social_interpersonal": 13,
+     "emotional_temperament": 9,
+     "communication_style": 9,
+     "moral_stance": 6,
+     "cognitive_epistemic": 1,
+     "alignment_ai_agent": 1
+    },
+    "repetition": {
+     "pre_handled_3": 0.0517,
+     "pre_handled_4": 0.0172,
+     "attached_to_first_batch": 0.3276,
+     "n_undecided": 58
+    },
+    "review": {
+     "decided": 0,
+     "accepted": 0,
+     "merged": 0,
+     "rejected": 0,
+     "decided_not_kept": 0,
+     "promote_share_term": null,
+     "promote_share_group": null,
+     "borrowed": null,
+     "groups_resolved": null,
+     "by_shape": null
+    },
+    "string_recall": {
+     "n": 1,
+     "of": 932,
+     "share": 0.0011
+    },
+    "negatives": {
+     "hit": 0,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 58,
+     "pre_handled": 3,
+     "terms": 55,
+     "groups": 53,
+     "singleton_terms": 51,
+     "grouped_terms": 4,
+     "expected_minutes": 14.1,
+     "expected_accepted": null,
+     "novel_per_review_minute": null,
+     "novel_per_usd": null,
+     "share_used": null,
+     "share_borrowed": false
+    },
+    "streams": [
+     {
+      "generator": "m1_validation",
+      "stream": "m1_validation",
+      "class": "not_a_generator",
+      "mechanism": null,
+      "inputs": "the M1 validation pool (corpus labels and known non-traits)",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a pool, not a generator",
+      "n_rows": 155,
+      "n_trait": 112,
+      "n_kept": 60,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 0,
+    "class": "not_a_generator"
+   },
+   {
+    "generator": "manual",
+    "mechanism": null,
+    "runs": [
+     "2026-10-09-w23-gap-scan"
+    ],
+    "cost_usd": {
+     "generator": 0.0,
+     "m1": 0.0,
+     "m3": 0.0355,
+     "r1_share": 0.0097,
+     "harness": null,
+     "total": 0.0452
+    },
+    "candidates": 5,
+    "m1": {
+     "trait": 5
+    },
+    "m3": {
+     "kept": 3,
+     "covered": 2,
+     "exact_label": 0,
+     "undecided": 0
+    },
+    "regions_of_kept": {
+     "emotional_temperament": 2,
+     "cognitive_epistemic": 1
+    },
+    "repetition": {
+     "pre_handled_3": 0.3333,
+     "pre_handled_4": 0.3333,
+     "attached_to_first_batch": 0.6667,
+     "n_undecided": 3
+    },
+    "review": {
+     "decided": 0,
+     "accepted": 0,
+     "merged": 0,
+     "rejected": 0,
+     "decided_not_kept": 0,
+     "promote_share_term": null,
+     "promote_share_group": null,
+     "borrowed": null,
+     "groups_resolved": null,
+     "by_shape": null
+    },
+    "string_recall": {
+     "n": 0,
+     "of": 932,
+     "share": 0.0
+    },
+    "negatives": {
+     "hit": 5,
+     "of": 158
+    },
+    "recall": {
+     "headline": null,
+     "strict": null,
+     "pair": null,
+     "precision": null,
+     "false_cover_candidates": null,
+     "harness_batch": null,
+     "harness_side": false,
+     "batches": []
+    },
+    "stop_rule": {
+     "undecided_kept": 3,
+     "pre_handled": 1,
+     "terms": 2,
+     "groups": 2,
+     "singleton_terms": 2,
+     "grouped_terms": 0,
+     "expected_minutes": 0.5,
+     "expected_accepted": null,
+     "novel_per_review_minute": null,
+     "novel_per_usd": null,
+     "share_used": null,
+     "share_borrowed": false
+    },
+    "streams": [
+     {
+      "generator": "manual",
+      "stream": "manual",
+      "class": "not_a_generator",
+      "mechanism": null,
+      "inputs": "words Roger sent to the pipeline by hand (W23)",
+      "generator_side_hiding": false,
+      "harness_side_only": false,
+      "exclusion_rule": "a pool, not a generator",
+      "n_rows": 5,
+      "n_trait": 5,
+      "n_kept": 3,
+      "n_excluded_from_denominator": 0
+     }
+    ],
+    "attributed_via_states_pass": 0,
+    "class": "not_a_generator"
+   }
+  ],
+  "review_rate": {
+   "batches": [
+    "review_tda_1"
+   ],
+   "active_minutes": 84.1,
+   "terms": 204,
+   "terms_per_active_minute": 2.43,
+   "singleton_mean_s": 14.6,
+   "per_member_s": 25.4,
+   "promoted": 35,
+   "left_out": [
+    "review_states_v4"
+   ]
+  },
+  "promote_share_pooled": {
+   "per_term": 0.2079,
+   "per_group": 0.5352,
+   "n_decided": 178,
+   "borrowed": false,
+   "n_groups": 71,
+   "n_promoted_groups": 38,
+   "by_shape": {
+    "singleton": {
+     "resolved": 42,
+     "promoted": 22,
+     "terms": 42,
+     "extended": 12,
+     "share": 0.5238
+    },
+    "multi": {
+     "resolved": 29,
+     "promoted": 16,
+     "terms": 99,
+     "extended": 55,
+     "share": 0.5517
+    }
+   },
+   "n_accepted": 37
+  },
+  "string_recall_any": {
+   "n": 517,
+   "of": 932,
+   "share": 0.5547
+  },
+  "concepts_summary": [
+   {
+    "unit": "components_4",
+    "tau": null,
+    "label": "strict components (4)",
+    "n_concepts": 3065,
+    "n_singletons": 2691,
+    "largest": 21,
+    "agreement": {
+     "kept_together": 0.3902,
+     "one_concept": 0.7619,
+     "hard_negatives_joined": 19,
+     "n_pairs": 328,
+     "n_negatives": 147,
+     "n_decided": 173,
+     "n_concepts": 58,
+     "n_same_unit_pairs": 168,
+     "n_kept_together": 128,
+     "n_one_concept": 128
+    },
+    "chao2_3": {
+     "N": 7344.3,
+     "se": 313.7,
+     "lo": 6769.2,
+     "hi": 8000.9,
+     "Q1": 2299,
+     "Q2": 379,
+     "S_obs": 2710,
+     "classic": 7358.5
+    },
+    "chao2_4": {
+     "N": 9391.1,
+     "se": 418.3,
+     "lo": 8622.4,
+     "hi": 10264.7,
+     "Q1": 2572,
+     "Q2": 387,
+     "S_obs": 3000,
+     "classic": 9410.1
+    }
+   },
+   {
+    "unit": "grown_3",
+    "tau": 0.67,
+    "label": "grown across 3-links, density >= 0.67",
+    "n_concepts": 2258,
+    "n_singletons": 1514,
+    "largest": 26,
+    "agreement": {
+     "kept_together": 0.5396,
+     "one_concept": 0.7564,
+     "hard_negatives_joined": 29,
+     "n_pairs": 328,
+     "n_negatives": 147,
+     "n_decided": 173,
+     "n_concepts": 58,
+     "n_same_unit_pairs": 234,
+     "n_kept_together": 177,
+     "n_one_concept": 177
+    },
+    "chao2_3": {
+     "N": 4412.3,
+     "se": 179.2,
+     "lo": 4086.1,
+     "hi": 4790.1,
+     "Q1": 1618,
+     "Q2": 364,
+     "S_obs": 2023,
+     "classic": 4420.4
+    },
+    "chao2_4": {
+     "N": 5233.7,
+     "se": 218.0,
+     "lo": 4835.7,
+     "hi": 5692.0,
+     "Q1": 1763,
+     "Q2": 384,
+     "S_obs": 2208,
+     "classic": 5243.3
+    }
+   },
+   {
+    "unit": "grown_3",
+    "tau": 0.5,
+    "label": "the same, density >= 0.5",
+    "n_concepts": 1935,
+    "n_singletons": 1306,
+    "largest": 30,
+    "agreement": {
+     "kept_together": 0.6433,
+     "one_concept": 0.7673,
+     "hard_negatives_joined": 44,
+     "n_pairs": 328,
+     "n_negatives": 147,
+     "n_decided": 173,
+     "n_concepts": 58,
+     "n_same_unit_pairs": 275,
+     "n_kept_together": 211,
+     "n_one_concept": 211
+    },
+    "chao2_3": {
+     "N": 3620.6,
+     "se": 150.9,
+     "lo": 3347.3,
+     "hi": 3940.4,
+     "Q1": 1368,
+     "Q2": 331,
+     "S_obs": 1743,
+     "classic": 3627.6
+    },
+    "chao2_4": {
+     "N": 4294.9,
+     "se": 187.8,
+     "lo": 3953.9,
+     "hi": 4692.0,
+     "Q1": 1474,
+     "Q2": 337,
+     "S_obs": 1886,
+     "classic": 4303.7
+    }
+   },
+   {
+    "unit": "grown_3",
+    "tau": 0.8,
+    "label": "the same, density >= 0.8",
+    "n_concepts": 2329,
+    "n_singletons": 1552,
+    "largest": 21,
+    "agreement": {
+     "kept_together": 0.5122,
+     "one_concept": 0.7887,
+     "hard_negatives_joined": 28,
+     "n_pairs": 328,
+     "n_negatives": 147,
+     "n_decided": 173,
+     "n_concepts": 58,
+     "n_same_unit_pairs": 213,
+     "n_kept_together": 168,
+     "n_one_concept": 168
+    },
+    "chao2_3": {
+     "N": 4547.8,
+     "se": 181.5,
+     "lo": 4217.0,
+     "hi": 4930.0,
+     "Q1": 1671,
+     "Q2": 377,
+     "S_obs": 2087,
+     "classic": 4555.8
+    },
+    "chao2_4": {
+     "N": 5420.9,
+     "se": 222.9,
+     "lo": 5013.5,
+     "hi": 5889.0,
+     "Q1": 1822,
+     "Q2": 395,
+     "S_obs": 2279,
+     "classic": 5430.6
+    }
+   },
+   {
+    "unit": "components_3",
+    "tau": null,
+    "label": "components at 3 (chains unbroken)",
+    "n_concepts": 1585,
+    "n_singletons": 1238,
+    "largest": 1028,
+    "agreement": {
+     "kept_together": 0.9909,
+     "one_concept": 0.0678,
+     "hard_negatives_joined": 136,
+     "n_pairs": 328,
+     "n_negatives": 147,
+     "n_decided": 173,
+     "n_concepts": 58,
+     "n_same_unit_pairs": 4794,
+     "n_kept_together": 325,
+     "n_one_concept": 325
+    },
+    "chao2_3": {
+     "N": 3798.0,
+     "se": 223.1,
+     "lo": 3399.2,
+     "hi": 4276.9,
+     "Q1": 1193,
+     "Q2": 198,
+     "S_obs": 1416,
+     "classic": 3812.0
+    },
+    "chao2_4": {
+     "N": 4651.8,
+     "se": 283.2,
+     "lo": 4144.3,
+     "hi": 5258.1,
+     "Q1": 1302,
+     "Q2": 203,
+     "S_obs": 1538,
+     "classic": 4669.5
+    }
+   }
+  ],
+  "estimates_summary": [
+   {
+    "unit": "components_4",
+    "label": "the strict unit (components_4)",
+    "three": {
+     "occasions": [
+      "lexicon",
+      "ipip",
+      "base_model"
+     ],
+     "chapman": [
+      {
+       "a": "lexicon",
+       "b": "ipip",
+       "n1": 2478,
+       "n2": 232,
+       "m": 57,
+       "N": 9957.7,
+       "se": 1110.4,
+       "lo": 8084.9,
+       "hi": 12476.4
+      },
+      {
+       "a": "lexicon",
+       "b": "base_model",
+       "n1": 2478,
+       "n2": 443,
+       "m": 386,
+       "N": 2843.1,
+       "se": 47.5,
+       "lo": 2763.1,
+       "hi": 2951.1
+      },
+      {
+       "a": "ipip",
+       "b": "base_model",
+       "n1": 232,
+       "n2": 443,
+       "m": 32,
+       "N": 3133.9,
+       "se": 479.2,
+       "lo": 2357.2,
+       "hi": 4262.4
+      }
+     ],
+     "Q": {
+      "1": 2299,
+      "2": 379,
+      "3": 32
+     },
+     "chao2": {
+      "N": 7344.3,
+      "se": 313.7,
+      "lo": 6769.2,
+      "hi": 8000.9,
+      "Q1": 2299,
+      "Q2": 379,
+      "S_obs": 2710,
+      "classic": 7358.5
+     },
+     "coverage": 0.2709
+    },
+    "four": {
+     "occasions": [
+      "lexicon",
+      "ipip",
+      "base_model",
+      "alignment"
+     ],
+     "chapman": [
+      {
+       "a": "lexicon",
+       "b": "ipip",
+       "n1": 2478,
+       "n2": 232,
+       "m": 57,
+       "N": 9957.7,
+       "se": 1110.4,
+       "lo": 8084.9,
+       "hi": 12476.4
+      },
+      {
+       "a": "lexicon",
+       "b": "base_model",
+       "n1": 2478,
+       "n2": 443,
+       "m": 386,
+       "N": 2843.1,
+       "se": 47.5,
+       "lo": 2763.1,
+       "hi": 2951.1
+      },
+      {
+       "a": "lexicon",
+       "b": "alignment",
+       "n1": 2478,
+       "n2": 321,
+       "m": 29,
+       "N": 26606.9,
+       "se": 4523.2,
+       "lo": 19257.4,
+       "hi": 37232.7
+      },
+      {
+       "a": "ipip",
+       "b": "base_model",
+       "n1": 232,
+       "n2": 443,
+       "m": 32,
+       "N": 3133.9,
+       "se": 479.2,
+       "lo": 2357.2,
+       "hi": 4262.4
+      },
+      {
+       "a": "ipip",
+       "b": "alignment",
+       "n1": 232,
+       "n2": 321,
+       "m": 10,
+       "N": 6819.5,
+       "se": 1888.8,
+       "lo": 4067.5,
+       "hi": 11720.4
+      },
+      {
+       "a": "base_model",
+       "b": "alignment",
+       "n1": 443,
+       "n2": 321,
+       "m": 11,
+       "N": 11913.0,
+       "se": 3198.1,
+       "lo": 7187.7,
+       "hi": 20108.2
+      }
+     ],
+     "Q": {
+      "1": 2572,
+      "2": 387,
+      "3": 36,
+      "4": 5
+     },
+     "chao2": {
+      "N": 9391.1,
+      "se": 418.3,
+      "lo": 8622.4,
+      "hi": 10264.7,
+      "Q1": 2572,
+      "Q2": 387,
+      "S_obs": 3000,
+      "classic": 9410.1
+     },
+     "coverage": 0.2596
+    },
+    "corpus": {
+     "occasions": [
+      "corpus",
+      "lexicon",
+      "ipip",
+      "base_model"
+     ],
+     "n_corpus": 932,
+     "chapman_with_corpus": [
+      {
+       "mechanism": "lexicon",
+       "n_corpus": 932,
+       "n_mechanism": 3072,
+       "m": 594,
+       "N": 4817.7,
+       "se": 106.7,
+       "lo": 4623.6,
+       "hi": 5042.7,
+       "left": 3885.7
+      },
+      {
+       "mechanism": "ipip",
+       "n_corpus": 932,
+       "n_mechanism": 415,
+       "m": 183,
+       "N": 2108.4,
+       "se": 103.8,
+       "lo": 1925.9,
+       "hi": 2334.6,
+       "left": 1176.4
+      },
+      {
+       "mechanism": "base_model",
+       "n_corpus": 932,
+       "n_mechanism": 843,
+       "m": 400,
+       "N": 1962.7,
+       "se": 53.6,
+       "lo": 1866.7,
+       "hi": 2077.4,
+       "left": 1030.7
+      }
+     ],
+     "chao2": {
+      "N": 8022.0,
+      "se": 258.2,
+      "lo": 7544.6,
+      "hi": 8557.9,
+      "Q": {
+       "1": 2610,
+       "2": 582,
+       "3": 312,
+       "4": 138
+      },
+      "left": 7090.0
+     }
+    },
+    "accumulation": {
+     "lexicon": {
+      "runs": [
+       "censuses/2026-10-08-pilot",
+       "censuses/2026-10-09-iv-pilot",
+       "censuses/2026-10-09-rare-pilot",
+       "censuses/2026-10-10-tda",
+       "censuses/2026-10-11-allport_hi",
+       "censuses/2026-10-12-allport_iv_rare",
+       "censuses/2026-10-12-allport_rare",
+       "roget/2026-10-08-pilot",
+       "roget/2026-10-11-full",
+       "roget/2026-10-12-rule1b",
+       "wn_clusters/2026-10-08-pilot",
+       "wn_clusters/2026-10-11-full",
+       "wn_clusters/2026-10-12-rule1b"
+      ],
+      "n_emitted": 10082,
+      "unique": 2402,
+      "extrapolation": [
+       [
+        10082,
+        2402.0
+       ],
+       [
+        11090,
+        2569.2
+       ],
+       [
+        12098,
+        2728.0
+       ],
+       [
+        13107,
+        2879.1
+       ],
+       [
+        14115,
+        3022.6
+       ],
+       [
+        15123,
+        3158.9
+       ],
+       [
+        16131,
+        3288.5
+       ],
+       [
+        17139,
+        3411.6
+       ],
+       [
+        18148,
+        3528.8
+       ],
+       [
+        19156,
+        3639.9
+       ],
+       [
+        20164,
+        3745.6
+       ]
+      ],
+      "end_slope": 0.0688,
+      "Q1": 1715,
+      "Q2": 437
+     },
+     "ipip": {
+      "runs": [
+       "ipip/2026-10-11-g600",
+       "ipip/2026-10-13-g600"
+      ],
+      "n_emitted": 760,
+      "unique": 232,
+      "extrapolation": [
+       [
+        760,
+        232.0
+       ],
+       [
+        836,
+        242.8
+       ],
+       [
+        912,
+        251.8
+       ],
+       [
+        988,
+        259.3
+       ],
+       [
+        1064,
+        265.5
+       ],
+       [
+        1140,
+        270.6
+       ],
+       [
+        1216,
+        274.9
+       ],
+       [
+        1292,
+        278.4
+       ],
+       [
+        1368,
+        281.4
+       ],
+       [
+        1444,
+        283.8
+       ],
+       [
+        1520,
+        285.8
+       ]
+      ],
+      "end_slope": 0.1053,
+      "Q1": 119,
+      "Q2": 111
+     },
+     "base_model": {
+      "runs": [
+       "base_model/2026-10-12-pilot",
+       "base_model/2026-10-12-pilot-mc2"
+      ],
+      "n_emitted": 2007,
+      "unique": 437,
+      "extrapolation": [
+       [
+        2007,
+        437.0
+       ],
+       [
+        2208,
+        468.4
+       ],
+       [
+        2408,
+        498.2
+       ],
+       [
+        2609,
+        526.6
+       ],
+       [
+        2810,
+        553.7
+       ],
+       [
+        3011,
+        579.4
+       ],
+       [
+        3211,
+        603.7
+       ],
+       [
+        3412,
+        627.0
+       ],
+       [
+        3613,
+        649.1
+       ],
+       [
+        3813,
+        670.0
+       ],
+       [
+        4014,
+        690.0
+       ]
+      ],
+      "end_slope": 0.3333,
+      "Q1": 322,
+      "Q2": 81
+     },
+     "alignment": {
+      "runs": [
+       "alignment_sweep/2026-10-10-full",
+       "alignment_sweep/2026-10-11-b",
+       "alignment_sweep/2026-10-11-papers",
+       "alignment_sweep/2026-10-11-usage"
+      ],
+      "n_emitted": 865,
+      "unique": 330,
+      "extrapolation": [
+       [
+        865,
+        330.0
+       ],
+       [
+        951,
+        358.5
+       ],
+       [
+        1038,
+        386.8
+       ],
+       [
+        1125,
+        414.4
+       ],
+       [
+        1211,
+        441.2
+       ],
+       [
+        1297,
+        467.3
+       ],
+       [
+        1384,
+        493.3
+       ],
+       [
+        1471,
+        518.6
+       ],
+       [
+        1557,
+        543.2
+       ],
+       [
+        1643,
+        567.2
+       ],
+       [
+        1730,
+        591.0
+       ]
+      ],
+      "end_slope": 0.573,
+      "Q1": 290,
+      "Q2": 31
+     }
+    },
+    "alignment": {
+     "runs": [
+      "2026-10-11-papers",
+      "2026-10-11-b"
+     ],
+     "rows": {
+      "n1": 408,
+      "n2": 67,
+      "m": 13,
+      "N": 1985.6,
+      "se": 449.2,
+      "lo": 1327.2,
+      "hi": 3145.0
+     },
+     "kept_concepts": {
+      "n1": 280,
+      "n2": 52,
+      "m": 15,
+      "N": 929.8,
+      "se": 183.2,
+      "lo": 662.4,
+      "hi": 1404.3
+     }
+    }
+   },
+   {
+    "unit": "grown_3",
+    "label": "the grown unit (grown_3, density >= 0.67)",
+    "three": {
+     "occasions": [
+      "lexicon",
+      "ipip",
+      "base_model"
+     ],
+     "chapman": [
+      {
+       "a": "lexicon",
+       "b": "ipip",
+       "n1": 1860,
+       "n2": 223,
+       "m": 88,
+       "N": 4682.9,
+       "se": 374.0,
+       "lo": 4043.9,
+       "hi": 5521.0
+      },
+      {
+       "a": "lexicon",
+       "b": "base_model",
+       "n1": 1860,
+       "n2": 386,
+       "m": 357,
+       "N": 2010.8,
+       "se": 26.1,
+       "lo": 1969.3,
+       "hi": 2073.5
+      },
+      {
+       "a": "ipip",
+       "b": "base_model",
+       "n1": 223,
+       "n2": 386,
+       "m": 42,
+       "N": 2015.0,
+       "se": 257.6,
+       "lo": 1591.5,
+       "hi": 2613.5
+      }
+     ],
+     "Q": {
+      "1": 1618,
+      "2": 364,
+      "3": 41
+     },
+     "chao2": {
+      "N": 4412.3,
+      "se": 179.2,
+      "lo": 4086.1,
+      "hi": 4790.1,
+      "Q1": 1618,
+      "Q2": 364,
+      "S_obs": 2023,
+      "classic": 4420.4
+     },
+     "coverage": 0.3447
+    },
+    "four": {
+     "occasions": [
+      "lexicon",
+      "ipip",
+      "base_model",
+      "alignment"
+     ],
+     "chapman": [
+      {
+       "a": "lexicon",
+       "b": "ipip",
+       "n1": 1860,
+       "n2": 223,
+       "m": 88,
+       "N": 4682.9,
+       "se": 374.0,
+       "lo": 4043.9,
+       "hi": 5521.0
+      },
+      {
+       "a": "lexicon",
+       "b": "base_model",
+       "n1": 1860,
+       "n2": 386,
+       "m": 357,
+       "N": 2010.8,
+       "se": 26.1,
+       "lo": 1969.3,
+       "hi": 2073.5
+      },
+      {
+       "a": "lexicon",
+       "b": "alignment",
+       "n1": 1860,
+       "n2": 254,
+       "m": 66,
+       "N": 7081.9,
+       "se": 724.1,
+       "lo": 5850.7,
+       "hi": 8711.8
+      },
+      {
+       "a": "ipip",
+       "b": "base_model",
+       "n1": 223,
+       "n2": 386,
+       "m": 42,
+       "N": 2015.0,
+       "se": 257.6,
+       "lo": 1591.5,
+       "hi": 2613.5
+      },
+      {
+       "a": "ipip",
+       "b": "alignment",
+       "n1": 223,
+       "n2": 254,
+       "m": 17,
+       "N": 3172.3,
+       "se": 673.1,
+       "lo": 2139.8,
+       "hi": 4839.5
+      },
+      {
+       "a": "base_model",
+       "b": "alignment",
+       "n1": 386,
+       "n2": 254,
+       "m": 24,
+       "N": 3946.4,
+       "se": 711.1,
+       "lo": 2817.8,
+       "hi": 5653.5
+      }
+     ],
+     "Q": {
+      "1": 1763,
+      "2": 384,
+      "3": 52,
+      "4": 9
+     },
+     "chao2": {
+      "N": 5233.7,
+      "se": 218.0,
+      "lo": 4835.7,
+      "hi": 5692.0,
+      "Q1": 1763,
+      "Q2": 384,
+      "S_obs": 2208,
+      "classic": 5243.3
+     },
+     "coverage": 0.3526
+    },
+    "corpus": {
+     "occasions": [
+      "corpus",
+      "lexicon",
+      "ipip",
+      "base_model"
+     ],
+     "n_corpus": 932,
+     "chapman_with_corpus": [
+      {
+       "mechanism": "lexicon",
+       "n_corpus": 932,
+       "n_mechanism": 2454,
+       "m": 594,
+       "N": 3848.6,
+       "se": 82.6,
+       "lo": 3698.7,
+       "hi": 4023.3,
+       "left": 2916.6
+      },
+      {
+       "mechanism": "ipip",
+       "n_corpus": 932,
+       "n_mechanism": 406,
+       "m": 183,
+       "N": 2062.8,
+       "se": 100.6,
+       "lo": 1886.0,
+       "hi": 2282.3,
+       "left": 1130.8
+      },
+      {
+       "mechanism": "base_model",
+       "n_corpus": 932,
+       "n_mechanism": 786,
+       "m": 400,
+       "N": 1830.1,
+       "se": 48.3,
+       "lo": 1743.8,
+       "hi": 1933.8,
+       "left": 898.1
+      }
+     ],
+     "chao2": {
+      "N": 5410.4,
+      "se": 159.9,
+      "lo": 5116.5,
+      "hi": 5744.2,
+      "Q": {
+       "1": 1929,
+       "2": 567,
+       "3": 321,
+       "4": 138
+      },
+      "left": 4478.4
+     }
+    },
+    "accumulation": {
+     "lexicon": {
+      "runs": [
+       "censuses/2026-10-08-pilot",
+       "censuses/2026-10-09-iv-pilot",
+       "censuses/2026-10-09-rare-pilot",
+       "censuses/2026-10-10-tda",
+       "censuses/2026-10-11-allport_hi",
+       "censuses/2026-10-12-allport_iv_rare",
+       "censuses/2026-10-12-allport_rare",
+       "roget/2026-10-08-pilot",
+       "roget/2026-10-11-full",
+       "roget/2026-10-12-rule1b",
+       "wn_clusters/2026-10-08-pilot",
+       "wn_clusters/2026-10-11-full",
+       "wn_clusters/2026-10-12-rule1b"
+      ],
+      "n_emitted": 10082,
+      "unique": 1802,
+      "extrapolation": [
+       [
+        10082,
+        1802.0
+       ],
+       [
+        11090,
+        1900.6
+       ],
+       [
+        12098,
+        1991.8
+       ],
+       [
+        13107,
+        2076.1
+       ],
+       [
+        14115,
+        2153.9
+       ],
+       [
+        15123,
+        2225.8
+       ],
+       [
+        16131,
+        2292.3
+       ],
+       [
+        17139,
+        2353.7
+       ],
+       [
+        18148,
+        2410.5
+       ],
+       [
+        19156,
+        2463.0
+       ],
+       [
+        20164,
+        2511.4
+       ]
+      ],
+      "end_slope": 0.0475,
+      "Q1": 1026,
+      "Q2": 405
+     },
+     "ipip": {
+      "runs": [
+       "ipip/2026-10-11-g600",
+       "ipip/2026-10-13-g600"
+      ],
+      "n_emitted": 760,
+      "unique": 223,
+      "extrapolation": [
+       [
+        760,
+        223.0
+       ],
+       [
+        836,
+        232.7
+       ],
+       [
+        912,
+        240.6
+       ],
+       [
+        988,
+        247.0
+       ],
+       [
+        1064,
+        252.2
+       ],
+       [
+        1140,
+        256.5
+       ],
+       [
+        1216,
+        260.0
+       ],
+       [
+        1292,
+        262.8
+       ],
+       [
+        1368,
+        265.2
+       ],
+       [
+        1444,
+        267.1
+       ],
+       [
+        1520,
+        268.6
+       ]
+      ],
+      "end_slope": 0.1053,
+      "Q1": 107,
+      "Q2": 109
+     },
+     "base_model": {
+      "runs": [
+       "base_model/2026-10-12-pilot",
+       "base_model/2026-10-12-pilot-mc2"
+      ],
+      "n_emitted": 2007,
+      "unique": 381,
+      "extrapolation": [
+       [
+        2007,
+        381.0
+       ],
+       [
+        2208,
+        405.3
+       ],
+       [
+        2408,
+        428.0
+       ],
+       [
+        2609,
+        449.4
+       ],
+       [
+        2810,
+        469.5
+       ],
+       [
+        3011,
+        488.3
+       ],
+       [
+        3211,
+        505.8
+       ],
+       [
+        3412,
+        522.3
+       ],
+       [
+        3613,
+        537.8
+       ],
+       [
+        3813,
+        552.3
+       ],
+       [
+        4014,
+        565.9
+       ]
+      ],
+      "end_slope": 0.2754,
+      "Q1": 251,
+      "Q2": 81
+     },
+     "alignment": {
+      "runs": [
+       "alignment_sweep/2026-10-10-full",
+       "alignment_sweep/2026-10-11-b",
+       "alignment_sweep/2026-10-11-papers",
+       "alignment_sweep/2026-10-11-usage"
+      ],
+      "n_emitted": 865,
+      "unique": 263,
+      "extrapolation": [
+       [
+        865,
+        263.0
+       ],
+       [
+        951,
+        281.4
+       ],
+       [
+        1038,
+        299.1
+       ],
+       [
+        1125,
+        315.9
+       ],
+       [
+        1211,
+        331.6
+       ],
+       [
+        1297,
+        346.6
+       ],
+       [
+        1384,
+        361.0
+       ],
+       [
+        1471,
+        374.7
+       ],
+       [
+        1557,
+        387.5
+       ],
+       [
+        1643,
+        399.7
+       ],
+       [
+        1730,
+        411.4
+       ]
+      ],
+      "end_slope": 0.4157,
+      "Q1": 190,
+      "Q2": 49
+     }
+    },
+    "alignment": {
+     "runs": [
+      "2026-10-11-papers",
+      "2026-10-11-b"
+     ],
+     "rows": {
+      "n1": 408,
+      "n2": 67,
+      "m": 13,
+      "N": 1985.6,
+      "se": 449.2,
+      "lo": 1327.2,
+      "hi": 3145.0
+     },
+     "kept_concepts": {
+      "n1": 229,
+      "n2": 50,
+      "m": 27,
+      "N": 417.9,
+      "se": 49.0,
+      "lo": 346.2,
+      "hi": 544.3
+     }
+    }
+   }
+  ],
+  "unit_samples": {
+   "components_4": [
+    {
+     "size": 2,
+     "labels": [
+      "foo-foo",
+      "pretty-pretty"
+     ],
+     "keys": [
+      "foo_foo#1",
+      "pretty_pretty#1"
+     ]
+    },
+    {
+     "size": 5,
+     "labels": [
+      "habitually dishonest",
+      "liar",
+      "lying",
+      "mendacious",
+      "untruthful"
+     ],
+     "keys": [
+      "habitually_dishonest#1",
+      "liar#1",
+      "lying#1",
+      "mendacious#1",
+      "untruthful#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "aimless",
+      "rudderless",
+      "unpurposed"
+     ],
+     "keys": [
+      "aimless#1",
+      "rudderless#1",
+      "unpurposed#1"
+     ]
+    },
+    {
+     "size": 4,
+     "labels": [
+      "contemptuous",
+      "disdainful",
+      "scornful",
+      "sneering"
+     ],
+     "keys": [
+      "contemptuous#1",
+      "disdainful#1",
+      "scornful#1",
+      "sneering#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "intuiting",
+      "unanalytic"
+     ],
+     "keys": [
+      "intuiting#1",
+      "unanalytic#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "inextinguishable",
+      "infrangible",
+      "unsubduable"
+     ],
+     "keys": [
+      "inextinguishable#1",
+      "infrangible#1",
+      "unsubduable#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "genuine",
+      "unfeigning"
+     ],
+     "keys": [
+      "genuine#1",
+      "unfeigning#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "disguiseless",
+      "frank-hearted",
+      "plain-hearted"
+     ],
+     "keys": [
+      "disguiseless#1",
+      "frank_hearted#1",
+      "plain_hearted#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "indirect",
+      "oblique"
+     ],
+     "keys": [
+      "indirect#1",
+      "oblique#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "experienced",
+      "seasoned"
+     ],
+     "keys": [
+      "experienced#1",
+      "seasoned#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "noninterfering",
+      "unmeddling"
+     ],
+     "keys": [
+      "noninterfering#1",
+      "unmeddling#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "cloudy",
+      "murky"
+     ],
+     "keys": [
+      "cloudy#1",
+      "murky#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "interfering",
+      "meddlesome",
+      "meddling"
+     ],
+     "keys": [
+      "interfering#1",
+      "meddlesome#1",
+      "meddling#1"
+     ]
+    },
+    {
+     "size": 4,
+     "labels": [
+      "boisterous",
+      "rackety",
+      "raucous",
+      "rowdy"
+     ],
+     "keys": [
+      "boisterous#1",
+      "rackety#1",
+      "raucous#1",
+      "rowdy#1"
+     ]
+    },
+    {
+     "size": 4,
+     "labels": [
+      "dapper",
+      "spruce",
+      "trig",
+      "trim"
+     ],
+     "keys": [
+      "dapper#1",
+      "spruce#1",
+      "trig#1",
+      "trim#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "baiting",
+      "provoking",
+      "taunting"
+     ],
+     "keys": [
+      "baiting#1",
+      "provoking#1",
+      "taunting#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "polytropic",
+      "versatile"
+     ],
+     "keys": [
+      "polytropic#1",
+      "versatile#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "conquerable",
+      "subduable"
+     ],
+     "keys": [
+      "conquerable#1",
+      "subduable#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "lifeless",
+      "spiritless"
+     ],
+     "keys": [
+      "lifeless#1",
+      "spiritless#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "turns against developer",
+      "undermines its developer"
+     ],
+     "keys": [
+      "turns_against_developer#1",
+      "undermines_its_developer#1"
+     ]
+    }
+   ],
+   "grown_3": [
+    {
+     "size": 3,
+     "labels": [
+      "engrossing",
+      "gripping",
+      "mesmerizing"
+     ],
+     "keys": [
+      "engrossing#1",
+      "gripping#1",
+      "mesmerizing#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "ferocious",
+      "tigerish"
+     ],
+     "keys": [
+      "ferocious#1",
+      "tigerish#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "agrees to almost everything",
+      "amenable",
+      "complaisant"
+     ],
+     "keys": [
+      "agrees_to_almost_everything#1",
+      "amenable#1",
+      "complaisant#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "consequential",
+      "significant"
+     ],
+     "keys": [
+      "consequential#1",
+      "significant#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "independent candor",
+      "independent honesty"
+     ],
+     "keys": [
+      "independent_candor#1",
+      "independent_honesty#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "honest judgment",
+      "honest overseer"
+     ],
+     "keys": [
+      "honest_judgment#1",
+      "honest_overseer#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "faithful to the task",
+      "stays on topic"
+     ],
+     "keys": [
+      "faithful_to_the_task#1",
+      "stays_on_topic#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "decorative",
+      "ornamental"
+     ],
+     "keys": [
+      "decorative#1",
+      "ornamental#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "highly dependent on others",
+      "self-helpless"
+     ],
+     "keys": [
+      "highly_dependent_on_others#1",
+      "self_helpless#1"
+     ]
+    },
+    {
+     "size": 5,
+     "labels": [
+      "double-dyed",
+      "flagitious",
+      "rotten",
+      "sinful",
+      "unspeakable"
+     ],
+     "keys": [
+      "double_dyed#1",
+      "flagitious#1",
+      "rotten#1",
+      "sinful#1",
+      "unspeakable#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "messing",
+      "mucking"
+     ],
+     "keys": [
+      "messing#1",
+      "mucking#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "clings to own survival",
+      "self-conserving",
+      "self-preserving"
+     ],
+     "keys": [
+      "clings_to_own_survival#1",
+      "self_conserving#1",
+      "self_preserving#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "incendiary",
+      "inflammatory"
+     ],
+     "keys": [
+      "incendiary#1",
+      "inflammatory#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "boggling",
+      "unbelievable"
+     ],
+     "keys": [
+      "boggling#1",
+      "unbelievable#1"
+     ]
+    },
+    {
+     "size": 4,
+     "labels": [
+      "criminal",
+      "felonious",
+      "lawbreaker",
+      "malfeasant"
+     ],
+     "keys": [
+      "criminal#1",
+      "felonious#1",
+      "lawbreaker#1",
+      "malfeasant#1"
+     ]
+    },
+    {
+     "size": 11,
+     "labels": [
+      "bogus",
+      "counterfeit",
+      "faker",
+      "humbug",
+      "masquerading",
+      "poses as someone else",
+      "pretender",
+      "sham",
+      "spoofing",
+      "spurious",
+      "supposititious"
+     ],
+     "keys": [
+      "bogus#1",
+      "counterfeit#1",
+      "faker#1",
+      "humbug#1",
+      "masquerading#1",
+      "poses_as_someone_else#1",
+      "pretender#1",
+      "sham#1",
+      "spoofing#1",
+      "spurious#1",
+      "supposititious#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "baggage",
+      "millstone"
+     ],
+     "keys": [
+      "baggage#1",
+      "millstone#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "overstrict",
+      "unpermissive"
+     ],
+     "keys": [
+      "overstrict#1",
+      "unpermissive#1"
+     ]
+    },
+    {
+     "size": 3,
+     "labels": [
+      "conflict averse",
+      "conflict avoidant",
+      "dodging confrontation"
+     ],
+     "keys": [
+      "conflict_averse#1",
+      "conflict_avoidant#1",
+      "dodging_confrontation#1"
+     ]
+    },
+    {
+     "size": 2,
+     "labels": [
+      "invincible",
+      "unbeatable"
+     ],
+     "keys": [
+      "invincible#1",
+      "unbeatable#1"
+     ]
+    }
+   ]
+  },
+  "costs": {
+   "n_files": 227,
+   "total_read": 317.5369,
+   "attributed": 198.3056,
+   "unattributed": 119.2313,
+   "unattributed_files": {
+    "filter/h45_split_test_words_36/usage.json": 0.291,
+    "filter/h55_cache_smoke/usage.json": 0.1305,
+    "filter/h55_m1_validation_pool/usage.json": 0.1747,
+    "filter/h55_m1_validation_pool_rep2/usage.json": 0.1733,
+    "filter/h55_opus_audit_sample/usage.json": 0.2173,
+    "filter/h55_opus_audit_sample_rep2/usage.json": 0.2178,
+    "filter/h55_split_test_words/usage.json": 0.3056,
+    "filter/h55_split_test_words_rep2/usage.json": 0.1094,
+    "filter/h55_verdict_600/usage.json": 0.5621,
+    "filter/h55_verdict_600_rep2/usage.json": 0.5658,
+    "filter/h55_verdict_600_rep3/usage.json": 0.5556,
+    "filter/h55_x3_split_test_words/usage.json": 0.4407,
+    "filter/m1_pilot/usage.json": 0.3125,
+    "filter/m1_pilot_v0_parse_bug/usage.json": 0.3421,
+    "filter/m1_r2_opus_audit/usage.json": 8.9756,
+    "filter/m1_smoke/usage.json": 0.0096,
+    "filter/m1_smoke2/usage.json": 0.0096,
+    "filter/m1_stability/usage.json": 2.0869,
+    "filter/m1_stability_r2/usage.json": 2.2169,
+    "filter/m1_states_renamed_w23/usage.json": 0.3948,
+    "filter/m1_validation/usage.json": 7.3828,
+    "filter/m1_validation_r2/usage.json": 15.7024,
+    "filter/m2rubric_r2_classifier/usage.json": 0.066,
+    "filter/m2rubric_r2_probe/usage.json": 0.0047,
+    "filter/m2rubric_r3_classifier/usage.json": 0.0738,
+    "filter/m2rubric_r4_classifier/usage.json": 0.0816,
+    "filter/m2rubric_r5_sample_1/usage.json": 0.2499,
+    "filter/m2rubric_smoke_1/usage.json": 0.0565,
+    "filter/m2rubric_smoke_2/usage.json": 0.0501,
+    "filter/m2rubric_smoke_3/usage.json": 0.0653,
+    "filter/new_corpus_labels_2026_10_02/usage.json": 0.0528,
+    "filter/opus55_verdict_600/usage.json": 23.755,
+    "filter/r6_rubric_probe/usage.json": 0.415,
+    "filter/r6_split_test_words/usage.json": 1.1171,
+    "filter/r7_effect_probe/usage.json": 0.0905,
+    "filter/r7_rubric_probe/usage.json": 0.4247,
+    "filter/r7_split_test_words/usage.json": 1.0237,
+    "filter/r8_kind6_probe/usage.json": 0.2722,
+    "filter/smoke_third_opinion/usage.json": 1.8017,
+    "filter/split_pilot_batches/usage.json": 0.4568,
+    "filter/split_pilot_live/usage.json": 0.9171,
+    "calibration/usage.json": 0.9418,
+    "calibration_916/usage.json": 0.0001,
+    "corpus_regions_runs/corpus_desc_20261009T024251Z/usage.json": 0.0024,
+    "corpus_regions_runs/corpus_desc_20261009T162512Z/usage.json": 0.001,
+    "corpus_regions_runs/corpus_desc_20261009T192049Z/usage.json": 0.0008,
+    "corpus_regions_runs/corpus_desc_20261009T232256Z/usage.json": 0.0093,
+    "corpus_regions_runs/corpus_desc_20261009T233453Z/usage.json": 0.0023,
+    "corpus_regions_runs/corpus_desc_20261010T000554Z/usage.json": 0.0069,
+    "corpus_regions_runs/corpus_desc_20261010T001103Z/usage.json": 0.0003,
+    "corpus_regions_runs/corpus_desc_20261010T015155Z/usage.json": 0.0018,
+    "corpus_regions_runs/corpus_desc_20261010T021610Z/usage.json": 0.0005,
+    "corpus_regions_runs/corpus_desc_20261010T115753Z/usage.json": 0.0017,
+    "corpus_regions_runs/corpus_desc_20261010T125740Z/usage.json": 0.0016,
+    "corpus_regions_runs/corpus_desc_20261010T130451Z/usage.json": 0.0008,
+    "corpus_regions_runs/corpus_desc_2026_10_09/usage.json": 0.2579,
+    "near_duplicates_916/usage.json": 3.9381,
+    "near_duplicates_arrangements/usage.json": 0.6737,
+    "overlap_test/overlap_arms_1/usage.json": 15.8945,
+    "overlap_test/overlap_arms_2/usage.json": 8.8939,
+    "overlap_test/overlap_arms_3/usage.json": 3.5577,
+    "overlap_test/overlap_arms_4/usage.json": 0.7555,
+    "overlap_test/overlap_test_1/usage.json": 7.1509,
+    "overlap_test/overlap_test_2/usage.json": 1.8811,
+    "plain_reading/corpus_comparison_1/usage.json": 1.2345,
+    "plain_reading/label_probe_free_will/usage.json": 0.0428,
+    "plain_reading/label_probe_free_will_2/usage.json": 0.0589,
+    "plain_reading/m2rubric_r3_dev_haiku_v2/usage.json": 0.0311,
+    "plain_reading/m2rubric_r3_dev_sonnet_v1/usage.json": 0.089,
+    "plain_reading/m2rubric_r3_dev_sonnet_v2/usage.json": 0.0776,
+    "plain_reading/m2rubric_r3_heldout/usage.json": 0.0112,
+    "review/review_tda_1/opus_pilot_1/usage.json": 0.6291,
+    "states_pass/m1_states_corpus/usage.json": 0.0093,
+    "states_pass/m1_states_corpus_r2/usage.json": 0.0055,
+    "states_pass/m1_states_queue/usage.json": 0.1066,
+    "states_pass/m1_states_queue_r2/usage.json": 0.0966,
+    "states_pass/m2rubric_r2_corpus/usage.json": 0.0055,
+    "states_pass/m2rubric_r2_states/usage.json": 0.0076,
+    "states_pass/states_reroute_r2/usage.json": 0.0008,
+    "states_pass/states_tda_1/usage.json": 0.0231,
+    "states_pass/states_unjudged_r3/usage.json": 0.6425,
+    "states_pass/states_v4_pilot/usage.json": 0.0335
+   },
+   "by_run": {
+    "alignment_sweep/2026-10-10-d2": {
+     "generator": 0.3834,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.3834
+    },
+    "alignment_sweep/2026-10-10-d3": {
+     "generator": 0.3734,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.3734
+    },
+    "alignment_sweep/2026-10-10-d3b": {
+     "generator": 0.3431,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.3431
+    },
+    "alignment_sweep/2026-10-10-full": {
+     "generator": 5.1697,
+     "m1": 3.8454,
+     "m3": 2.9919,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 12.007
+    },
+    "alignment_sweep/2026-10-10-pilot": {
+     "generator": 0.8486,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.8486
+    },
+    "alignment_sweep/2026-10-11-b": {
+     "generator": 0.3683,
+     "m1": 0.3802,
+     "m3": 0.364,
+     "r1": 0.4844,
+     "harness": 0.0,
+     "total": 1.597
+    },
+    "alignment_sweep/2026-10-11-papers": {
+     "generator": 10.69,
+     "m1": 2.7981,
+     "m3": 2.2751,
+     "r1": 2.9984,
+     "harness": 0.0,
+     "total": 18.7616
+    },
+    "alignment_sweep/2026-10-11-usage": {
+     "generator": 0.025,
+     "m1": 0.0082,
+     "m3": 0.0229,
+     "r1": 0.0243,
+     "harness": 0.0,
+     "total": 0.0804
+    },
+    "antonym_check/pilot_1": {
+     "generator": 0.0,
+     "m1": 4.6644,
+     "m3": 11.494,
+     "r1": 0.7566,
+     "harness": 4.8698,
+     "total": 21.7849
+    },
+    "base_model/2026-10-12-pilot": {
+     "generator": 0.027,
+     "m1": 0.0613,
+     "m3": 0.2592,
+     "r1": 0.4405,
+     "harness": 0.0,
+     "total": 0.7879
+    },
+    "base_model/2026-10-12-pilot-mc2": {
+     "generator": 0.027,
+     "m1": 1.5352,
+     "m3": 2.0995,
+     "r1": 3.0288,
+     "harness": 0.0,
+     "total": 6.6905
+    },
+    "censuses/2026-10-08-pilot": {
+     "generator": 0.0,
+     "m1": 3.6331,
+     "m3": 4.9581,
+     "r1": 1.4962,
+     "harness": 6.626,
+     "total": 16.7134
+    },
+    "censuses/2026-10-09-iv-pilot": {
+     "generator": 0.0,
+     "m1": 0.5402,
+     "m3": 0.4901,
+     "r1": 0.6709,
+     "harness": 0.0,
+     "total": 1.7012
+    },
+    "censuses/2026-10-09-rare-pilot": {
+     "generator": 0.0,
+     "m1": 0.281,
+     "m3": 0.4028,
+     "r1": 0.2251,
+     "harness": 0.0,
+     "total": 0.9089
+    },
+    "censuses/2026-10-10-tda": {
+     "generator": 0.0,
+     "m1": 7.1245,
+     "m3": 10.5336,
+     "r1": 11.7311,
+     "harness": 0.0,
+     "total": 29.3891
+    },
+    "censuses/2026-10-11-allport_hi": {
+     "generator": 0.0,
+     "m1": 10.842,
+     "m3": 10.8904,
+     "r1": 12.3251,
+     "harness": 0.0,
+     "total": 34.0576
+    },
+    "censuses/2026-10-12-allport_iv_rare": {
+     "generator": 0.0,
+     "m1": 0.7876,
+     "m3": 0.4843,
+     "r1": 0.5791,
+     "harness": 0.0,
+     "total": 1.8509
+    },
+    "censuses/2026-10-12-allport_rare": {
+     "generator": 0.0,
+     "m1": 2.501,
+     "m3": 3.004,
+     "r1": 3.8914,
+     "harness": 0.0,
+     "total": 9.3964
+    },
+    "ipip/2026-10-11-g600": {
+     "generator": 1.4674,
+     "m1": 0.8,
+     "m3": 0.9855,
+     "r1": 0.517,
+     "harness": 0.0,
+     "total": 3.77
+    },
+    "ipip/2026-10-13-g600": {
+     "generator": 1.4674,
+     "m1": 1.7882,
+     "m3": 2.3805,
+     "r1": 1.6595,
+     "harness": 0.0,
+     "total": 7.2957
+    },
+    "m1_validation/pilot_1": {
+     "generator": 0.0,
+     "m1": 2.6537,
+     "m3": 3.8246,
+     "r1": 0.3911,
+     "harness": 0.0,
+     "total": 6.8693
+    },
+    "manual/2026-10-09-w23-gap-scan": {
+     "generator": 0.0,
+     "m1": 0.0,
+     "m3": 0.0355,
+     "r1": 0.0097,
+     "harness": 0.0,
+     "total": 0.0452
+    },
+    "roget/2026-10-08-pilot": {
+     "generator": 2.1254,
+     "m1": 1.3756,
+     "m3": 1.2364,
+     "r1": 0.5774,
+     "harness": 1.3575,
+     "total": 6.6723
+    },
+    "roget/2026-10-11-full": {
+     "generator": 2.1254,
+     "m1": 0.8621,
+     "m3": 0.9679,
+     "r1": 1.295,
+     "harness": 0.0,
+     "total": 5.2503
+    },
+    "roget/2026-10-12-rule1b": {
+     "generator": 2.1254,
+     "m1": 0.0722,
+     "m3": 0.1224,
+     "r1": 0.076,
+     "harness": 0.0,
+     "total": 2.396
+    },
+    "states_pass/states_tda_1": {
+     "generator": 0.0,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.0
+    },
+    "states_pass/states_unjudged_r3": {
+     "generator": 0.0,
+     "m1": 1.2461,
+     "m3": 1.065,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 2.3111
+    },
+    "states_pass/states_v4_pilot": {
+     "generator": 0.0,
+     "m1": 0.0,
+     "m3": 0.0,
+     "r1": 0.0,
+     "harness": 0.0,
+     "total": 0.0
+    },
+    "wn_clusters/2026-10-08-pilot": {
+     "generator": 0.0,
+     "m1": 0.4205,
+     "m3": 0.7861,
+     "r1": 0.1739,
+     "harness": 1.1304,
+     "total": 2.5109
+    },
+    "wn_clusters/2026-10-11-full": {
+     "generator": 0.0,
+     "m1": 0.3085,
+     "m3": 0.6106,
+     "r1": 1.1378,
+     "harness": 0.0,
+     "total": 2.0569
+    },
+    "wn_clusters/2026-10-12-rule1b": {
+     "generator": 0.0,
+     "m1": 0.4404,
+     "m3": 0.5674,
+     "r1": 0.4448,
+     "harness": 0.0,
+     "total": 1.4526
+    }
+   }
+  },
+  "simulation_table": "| scenario | sigma | rho | estimator | mean N̂ | bias | interval coverage | leave-one-out spread |\n|---|---|---|---|---|---|---|---|\n| equal_independent | 0 | 0 | chao2 | 1,982 | -0.9% | 96% | 13.8% |\n| equal_independent | 0 | 0 | chapman_01 | 1,979 | -1.1% | 92% | n/a |\n| heterogeneous_independent | 1 | 0 | chao2 | 1,033 | -48.4% | 0% | 7.7% |\n| heterogeneous_independent | 1 | 0 | chapman_01 | 779 | -61.1% | 0% | n/a |\n| heterogeneous_correlated | 1 | 0.3 | chao2 | 944 | -52.8% | 0% | 13.8% |\n| heterogeneous_correlated | 1 | 0.3 | chapman_01 | 783 | -60.8% | 0% | n/a |\n\nTrue N = 2,000; 4 occasions, marginal catch rate 0.15; 200 replicates per scenario, seed 0; Chapman on occasions 0 and 1; rho loads on occasions 1, 2, 3.  Bias is the mean of (N̂ - N) / N; coverage the share of 95% intervals containing N; the spread is (max - min) / N̂ over the Chao2 estimates with one occasion left out.\n"
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard dashboard"
+  },
+  "produced_at": "2026-10-13T19:51:42+00:00",
+  "inputs": [
+   {
+    "dep_key": "registry",
+    "path": "data/candidates/registry.jsonl",
+    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "graph",
+    "path": "data/candidates/review/review_traits_all_2/graph.json",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@53598310",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "log_review_states_v4",
+    "path": "data/candidates/review/review_states_v4/decisions.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@3173",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "log_review_tda_1",
+    "path": "data/candidates/review/review_tda_1/decisions.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@86632",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "0e2f52f650ecf9d6cb4417939e753e88e629e30a4d5d9d7e55b620e105b23e41"
+ }
+}

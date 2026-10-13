@@ -1,0 +1,132 @@
+{
+ "result": {
+  "batch_id": "rec_wn_clusters_2026-10-08-pilot",
+  "pooled": false,
+  "c_strict": 4,
+  "seeds": [
+   {
+    "seed": 0,
+    "strict": {
+     "c": 4,
+     "n_hidden": 83,
+     "n_recovered": 0,
+     "recall": 0.0,
+     "n_recovered_headline": 6,
+     "recovered": [],
+     "lost_at_strict": [
+      "callous",
+      "confrontational",
+      "exclusivist",
+      "friendly",
+      "observant",
+      "pluralist"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 83,
+     "n_pair_recovered": 4,
+     "share": 0.0482,
+     "n_also_recovered": 1,
+     "by_region": {
+      "cognitive_epistemic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 0
+      },
+      "communication_style": {
+       "n_hidden": 16,
+       "n_pair_recovered": 1
+      },
+      "emotional_temperament": {
+       "n_hidden": 8,
+       "n_pair_recovered": 0
+      },
+      "identity_demographic": {
+       "n_hidden": 6,
+       "n_pair_recovered": 0
+      },
+      "moral_stance": {
+       "n_hidden": 14,
+       "n_pair_recovered": 2
+      },
+      "none": {
+       "n_hidden": 17,
+       "n_pair_recovered": 0
+      },
+      "social_interpersonal": {
+       "n_hidden": 5,
+       "n_pair_recovered": 1
+      }
+     },
+     "stems": [
+      "friendly",
+      "oblivious",
+      "puritanical",
+      "sectarian"
+     ]
+    },
+    "recall_at_n": [
+     {
+      "quantile": 0.1,
+      "max_rank": 9.0,
+      "n_candidates": 9,
+      "n_recovered": 0,
+      "recall": 0.0
+     },
+     {
+      "quantile": 0.25,
+      "max_rank": 22.0,
+      "n_candidates": 22,
+      "n_recovered": 1,
+      "recall": 0.012
+     },
+     {
+      "quantile": 0.5,
+      "max_rank": 44.0,
+      "n_candidates": 44,
+      "n_recovered": 5,
+      "recall": 0.0602
+     },
+     {
+      "quantile": 0.75,
+      "max_rank": 65.0,
+      "n_candidates": 65,
+      "n_recovered": 6,
+      "recall": 0.0723
+     },
+     {
+      "quantile": 1.0,
+      "max_rank": 87.0,
+      "n_candidates": 87,
+      "n_recovered": 6,
+      "recall": 0.0723
+     }
+    ]
+   }
+  ],
+  "needs_opus": [],
+  "n_needs_opus": 0
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py recovery-extras --batch rec_wn_clusters_2026-10-08-pilot",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard recovery-extras rec_wn_clusters_2026-10-08-pilot"
+  },
+  "produced_at": "2026-10-13T19:47:19+00:00",
+  "inputs": [
+   {
+    "dep_key": "matches_s0",
+    "path": "data/candidates/recovery/rec_wn_clusters_2026-10-08-pilot/seed0/matches.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@41994",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "cfd07c40b4b27406b5184c8f7a0bd068872b7299f7659003a74ba2a945be4484"
+ }
+}

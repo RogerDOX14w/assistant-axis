@@ -1,0 +1,117 @@
+{
+ "result": {
+  "batch_id": "rec_antonym_check_pilot_1",
+  "pooled": false,
+  "c_strict": 4,
+  "seeds": [
+   {
+    "seed": 0,
+    "strict": {
+     "c": 4,
+     "n_hidden": 83,
+     "n_recovered": 4,
+     "recall": 0.0482,
+     "n_recovered_headline": 13,
+     "recovered": [
+      "bargain_hunter",
+      "clear",
+      "fashionable",
+      "incompetent"
+     ],
+     "lost_at_strict": [
+      "competent",
+      "confrontational",
+      "educated",
+      "full_price_shopper",
+      "hostile",
+      "jaded",
+      "oblivious",
+      "observant",
+      "uneducated"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 83,
+     "n_pair_recovered": 17,
+     "share": 0.2048,
+     "n_also_recovered": 7,
+     "by_region": {
+      "cognitive_epistemic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 4
+      },
+      "communication_style": {
+       "n_hidden": 16,
+       "n_pair_recovered": 3
+      },
+      "emotional_temperament": {
+       "n_hidden": 8,
+       "n_pair_recovered": 1
+      },
+      "identity_demographic": {
+       "n_hidden": 6,
+       "n_pair_recovered": 2
+      },
+      "moral_stance": {
+       "n_hidden": 14,
+       "n_pair_recovered": 4
+      },
+      "none": {
+       "n_hidden": 17,
+       "n_pair_recovered": 2
+      },
+      "social_interpersonal": {
+       "n_hidden": 5,
+       "n_pair_recovered": 1
+      }
+     },
+     "stems": [
+      "apathetic",
+      "clear",
+      "competent",
+      "dog_person",
+      "educated",
+      "formalist",
+      "friendly",
+      "full_price_shopper",
+      "merciful",
+      "oblivious",
+      "observant",
+      "puritanical",
+      "self_assured",
+      "uncalculating",
+      "uncaring",
+      "uneducated",
+      "unfashionable"
+     ]
+    },
+    "recall_at_n": []
+   }
+  ],
+  "needs_opus": [],
+  "n_needs_opus": 0
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py recovery-extras --batch rec_antonym_check_pilot_1",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard recovery-extras rec_antonym_check_pilot_1"
+  },
+  "produced_at": "2026-10-13T19:47:17+00:00",
+  "inputs": [
+   {
+    "dep_key": "matches_s0",
+    "path": "data/candidates/recovery/rec_antonym_check_pilot_1/seed0/matches.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@198107",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "bc6e934640db86ba8e33057afb6a9ebf6e1e532b39926d0e121dea6d45593fe2"
+ }
+}

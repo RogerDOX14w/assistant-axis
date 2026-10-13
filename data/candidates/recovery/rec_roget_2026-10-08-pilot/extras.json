@@ -1,0 +1,128 @@
+{
+ "result": {
+  "batch_id": "rec_roget_2026-10-08-pilot",
+  "pooled": false,
+  "c_strict": 4,
+  "seeds": [
+   {
+    "seed": 0,
+    "strict": {
+     "c": 4,
+     "n_hidden": 83,
+     "n_recovered": 0,
+     "recall": 0.0,
+     "n_recovered_headline": 1,
+     "recovered": [],
+     "lost_at_strict": [
+      "incompetent"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 83,
+     "n_pair_recovered": 5,
+     "share": 0.0602,
+     "n_also_recovered": 0,
+     "by_region": {
+      "cognitive_epistemic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 2
+      },
+      "communication_style": {
+       "n_hidden": 16,
+       "n_pair_recovered": 1
+      },
+      "emotional_temperament": {
+       "n_hidden": 8,
+       "n_pair_recovered": 0
+      },
+      "identity_demographic": {
+       "n_hidden": 6,
+       "n_pair_recovered": 2
+      },
+      "moral_stance": {
+       "n_hidden": 14,
+       "n_pair_recovered": 0
+      },
+      "none": {
+       "n_hidden": 17,
+       "n_pair_recovered": 0
+      },
+      "social_interpersonal": {
+       "n_hidden": 5,
+       "n_pair_recovered": 0
+      }
+     },
+     "stems": [
+      "clear",
+      "competent",
+      "financially_secure",
+      "self_assured",
+      "uneducated"
+     ]
+    },
+    "recall_at_n": [
+     {
+      "quantile": 0.1,
+      "max_rank": 18.0,
+      "n_candidates": 18,
+      "n_recovered": 0,
+      "recall": 0.0
+     },
+     {
+      "quantile": 0.25,
+      "max_rank": 46.0,
+      "n_candidates": 45,
+      "n_recovered": 0,
+      "recall": 0.0
+     },
+     {
+      "quantile": 0.5,
+      "max_rank": 91.0,
+      "n_candidates": 90,
+      "n_recovered": 1,
+      "recall": 0.012
+     },
+     {
+      "quantile": 0.75,
+      "max_rank": 138.0,
+      "n_candidates": 136,
+      "n_recovered": 1,
+      "recall": 0.012
+     },
+     {
+      "quantile": 1.0,
+      "max_rank": 185.0,
+      "n_candidates": 181,
+      "n_recovered": 1,
+      "recall": 0.012
+     }
+    ]
+   }
+  ],
+  "needs_opus": [],
+  "n_needs_opus": 0
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py recovery-extras --batch rec_roget_2026-10-08-pilot",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard recovery-extras rec_roget_2026-10-08-pilot"
+  },
+  "produced_at": "2026-10-13T19:47:18+00:00",
+  "inputs": [
+   {
+    "dep_key": "matches_s0",
+    "path": "data/candidates/recovery/rec_roget_2026-10-08-pilot/seed0/matches.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@59147",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "fc023055d94f65164f91611e07d9a00c6e6c259f598c279f5306163ddc53189c"
+ }
+}

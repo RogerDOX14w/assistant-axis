@@ -1,0 +1,154 @@
+{
+ "result": {
+  "batch_id": "rec_censuses_2026-10-08-pilot",
+  "pooled": false,
+  "c_strict": 4,
+  "seeds": [
+   {
+    "seed": 0,
+    "strict": {
+     "c": 4,
+     "n_hidden": 83,
+     "n_recovered": 11,
+     "recall": 0.1325,
+     "n_recovered_headline": 19,
+     "recovered": [
+      "accountable",
+      "benign",
+      "effusive",
+      "friendly",
+      "hostile",
+      "idealistic",
+      "malicious",
+      "merciful",
+      "superstitious",
+      "uncalculating",
+      "unfashionable"
+     ],
+     "lost_at_strict": [
+      "apathetic",
+      "callous",
+      "compassionate",
+      "competent",
+      "incompetent",
+      "jaded",
+      "oblivious",
+      "sassy"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 83,
+     "n_pair_recovered": 12,
+     "share": 0.1446,
+     "n_also_recovered": 8,
+     "by_region": {
+      "cognitive_epistemic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 2
+      },
+      "communication_style": {
+       "n_hidden": 16,
+       "n_pair_recovered": 2
+      },
+      "emotional_temperament": {
+       "n_hidden": 8,
+       "n_pair_recovered": 2
+      },
+      "identity_demographic": {
+       "n_hidden": 6,
+       "n_pair_recovered": 2
+      },
+      "moral_stance": {
+       "n_hidden": 14,
+       "n_pair_recovered": 2
+      },
+      "none": {
+       "n_hidden": 17,
+       "n_pair_recovered": 1
+      },
+      "social_interpersonal": {
+       "n_hidden": 5,
+       "n_pair_recovered": 1
+      }
+     },
+     "stems": [
+      "callous",
+      "compassionate",
+      "competent",
+      "educated",
+      "fashionable",
+      "friendly",
+      "hostile",
+      "merciful",
+      "oblivious",
+      "observant",
+      "puritanical",
+      "unfashionable"
+     ]
+    },
+    "recall_at_n": [
+     {
+      "quantile": 0.1,
+      "max_rank": 276.0,
+      "n_candidates": 56,
+      "n_recovered": 3,
+      "recall": 0.0361
+     },
+     {
+      "quantile": 0.25,
+      "max_rank": 701.0,
+      "n_candidates": 141,
+      "n_recovered": 6,
+      "recall": 0.0723
+     },
+     {
+      "quantile": 0.5,
+      "max_rank": 1406.0,
+      "n_candidates": 282,
+      "n_recovered": 10,
+      "recall": 0.1205
+     },
+     {
+      "quantile": 0.75,
+      "max_rank": 2111.0,
+      "n_candidates": 423,
+      "n_recovered": 14,
+      "recall": 0.1687
+     },
+     {
+      "quantile": 1.0,
+      "max_rank": 2816.0,
+      "n_candidates": 564,
+      "n_recovered": 19,
+      "recall": 0.2289
+     }
+    ]
+   }
+  ],
+  "needs_opus": [],
+  "n_needs_opus": 0
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py recovery-extras --batch rec_censuses_2026-10-08-pilot",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard recovery-extras rec_censuses_2026-10-08-pilot"
+  },
+  "produced_at": "2026-10-13T19:47:18+00:00",
+  "inputs": [
+   {
+    "dep_key": "matches_s0",
+    "path": "data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/matches.jsonl",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@278129",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "1716e18abc0bb2a7ceb5d62bec5e89c83629c6c6171892f0f2edf4894e202d6f"
+ }
+}

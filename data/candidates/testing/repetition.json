@@ -1,0 +1,398 @@
+{
+ "result": {
+  "graph": "data/candidates/review/review_traits_all_2/graph.json",
+  "rows": [
+   {
+    "graph": "review_traits_all_2",
+    "generator": "alignment_sweep",
+    "level": 3,
+    "n_kept": 362,
+    "n_decided": 2,
+    "n_undecided": 360,
+    "pre_handled": 32,
+    "share": 0.0889,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 358,
+      "attached": 66,
+      "share": 0.1844
+     }
+    },
+    "with_another_generator": 7
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "antonym_check",
+    "level": 3,
+    "n_kept": 135,
+    "n_decided": 0,
+    "n_undecided": 135,
+    "pre_handled": 9,
+    "share": 0.0667,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 135,
+      "attached": 49,
+      "share": 0.363
+     }
+    },
+    "with_another_generator": 86
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "base_model",
+    "level": 3,
+    "n_kept": 517,
+    "n_decided": 59,
+    "n_undecided": 458,
+    "pre_handled": 44,
+    "share": 0.0961,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 290,
+      "attached": 143,
+      "share": 0.4931
+     }
+    },
+    "with_another_generator": 440
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "censuses",
+    "level": 3,
+    "n_kept": 2872,
+    "n_decided": 174,
+    "n_undecided": 2698,
+    "pre_handled": 185,
+    "share": 0.0686,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 2076,
+      "attached": 720,
+      "share": 0.3468
+     }
+    },
+    "with_another_generator": 690
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "ipip",
+    "level": 3,
+    "n_kept": 235,
+    "n_decided": 3,
+    "n_undecided": 232,
+    "pre_handled": 9,
+    "share": 0.0388,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 224,
+      "attached": 52,
+      "share": 0.2321
+     }
+    },
+    "with_another_generator": 25
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "m1_validation",
+    "level": 3,
+    "n_kept": 58,
+    "n_decided": 0,
+    "n_undecided": 58,
+    "pre_handled": 3,
+    "share": 0.0517,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 58,
+      "attached": 19,
+      "share": 0.3276
+     }
+    },
+    "with_another_generator": 32
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "manual",
+    "level": 3,
+    "n_kept": 3,
+    "n_decided": 0,
+    "n_undecided": 3,
+    "pre_handled": 1,
+    "share": 0.3333,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 3,
+      "attached": 2,
+      "share": 0.6667
+     }
+    },
+    "with_another_generator": 3
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "roget",
+    "level": 3,
+    "n_kept": 243,
+    "n_decided": 18,
+    "n_undecided": 225,
+    "pre_handled": 19,
+    "share": 0.0844,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 187,
+      "attached": 70,
+      "share": 0.3743
+     }
+    },
+    "with_another_generator": 161
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "states_pass",
+    "level": 3,
+    "n_kept": 165,
+    "n_decided": 7,
+    "n_undecided": 158,
+    "pre_handled": 8,
+    "share": 0.0506,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 125,
+      "attached": 34,
+      "share": 0.272
+     }
+    },
+    "with_another_generator": 76
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "wn_clusters",
+    "level": 3,
+    "n_kept": 277,
+    "n_decided": 27,
+    "n_undecided": 250,
+    "pre_handled": 27,
+    "share": 0.108,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 166,
+      "attached": 76,
+      "share": 0.4578
+     }
+    },
+    "with_another_generator": 231
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "alignment_sweep",
+    "level": 4,
+    "n_kept": 362,
+    "n_decided": 2,
+    "n_undecided": 360,
+    "pre_handled": 4,
+    "share": 0.0111,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 358,
+      "attached": 66,
+      "share": 0.1844
+     }
+    },
+    "with_another_generator": 7
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "antonym_check",
+    "level": 4,
+    "n_kept": 135,
+    "n_decided": 0,
+    "n_undecided": 135,
+    "pre_handled": 2,
+    "share": 0.0148,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 135,
+      "attached": 49,
+      "share": 0.363
+     }
+    },
+    "with_another_generator": 86
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "base_model",
+    "level": 4,
+    "n_kept": 517,
+    "n_decided": 59,
+    "n_undecided": 458,
+    "pre_handled": 18,
+    "share": 0.0393,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 290,
+      "attached": 143,
+      "share": 0.4931
+     }
+    },
+    "with_another_generator": 440
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "censuses",
+    "level": 4,
+    "n_kept": 2872,
+    "n_decided": 174,
+    "n_undecided": 2698,
+    "pre_handled": 57,
+    "share": 0.0211,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 2076,
+      "attached": 720,
+      "share": 0.3468
+     }
+    },
+    "with_another_generator": 690
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "ipip",
+    "level": 4,
+    "n_kept": 235,
+    "n_decided": 3,
+    "n_undecided": 232,
+    "pre_handled": 2,
+    "share": 0.0086,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 224,
+      "attached": 52,
+      "share": 0.2321
+     }
+    },
+    "with_another_generator": 25
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "m1_validation",
+    "level": 4,
+    "n_kept": 58,
+    "n_decided": 0,
+    "n_undecided": 58,
+    "pre_handled": 1,
+    "share": 0.0172,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 58,
+      "attached": 19,
+      "share": 0.3276
+     }
+    },
+    "with_another_generator": 32
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "manual",
+    "level": 4,
+    "n_kept": 3,
+    "n_decided": 0,
+    "n_undecided": 3,
+    "pre_handled": 1,
+    "share": 0.3333,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 3,
+      "attached": 2,
+      "share": 0.6667
+     }
+    },
+    "with_another_generator": 3
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "roget",
+    "level": 4,
+    "n_kept": 243,
+    "n_decided": 18,
+    "n_undecided": 225,
+    "pre_handled": 5,
+    "share": 0.0222,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 187,
+      "attached": 70,
+      "share": 0.3743
+     }
+    },
+    "with_another_generator": 161
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "states_pass",
+    "level": 4,
+    "n_kept": 165,
+    "n_decided": 7,
+    "n_undecided": 158,
+    "pre_handled": 4,
+    "share": 0.0253,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 125,
+      "attached": 34,
+      "share": 0.272
+     }
+    },
+    "with_another_generator": 76
+   },
+   {
+    "graph": "review_traits_all_2",
+    "generator": "wn_clusters",
+    "level": 4,
+    "n_kept": 277,
+    "n_decided": 27,
+    "n_undecided": 250,
+    "pre_handled": 9,
+    "share": 0.036,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 166,
+      "attached": 76,
+      "share": 0.4578
+     }
+    },
+    "with_another_generator": 231
+   }
+  ]
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard repetition"
+  },
+  "produced_at": "2026-10-13T19:51:42+00:00",
+  "inputs": [
+   {
+    "dep_key": "registry",
+    "path": "data/candidates/registry.jsonl",
+    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "graph",
+    "path": "data/candidates/review/review_traits_all_2/graph.json",
+    "fingerprint": "v1:2026-10-13T19:03:54+00:00@53598310",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "c2c70ac6c2bc58c77bd6e48a570546891e0fda28b33f544d330b06df21da1315"
+ }
+}

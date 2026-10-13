@@ -1,0 +1,146 @@
+{
+ "result": {
+  "params": {
+   "N": 2000,
+   "m_occ": 4,
+   "sigma": 1.0,
+   "rho": 0.3,
+   "p_mean": 0.15,
+   "replicates": 200,
+   "seed": 0,
+   "dependent_occasions": [
+    1,
+    2,
+    3
+   ],
+   "chapman_occasions": [
+    0,
+    1
+   ],
+   "model": "probit threshold: caught_ij = [sigma z_i + e_ij > t], e_ij = sqrt(rho) c_i + sqrt(1 - rho) u_ij on the dependent occasions and u_ij on the others, t = sqrt(1 + sigma^2) Phi^-1(1 - p_mean); z, c, u ~ N(0, 1)"
+  },
+  "scenarios": {
+   "equal_independent": {
+    "sigma_catch": 0.0,
+    "rho_occ": 0.0,
+    "check": {
+     "n_replicates": 200,
+     "truth": 2000,
+     "estimators": {
+      "chao2": {
+       "mean_N": 1981.9,
+       "mean_bias": -0.009,
+       "bias_se": 0.0037,
+       "bias_sign": -1,
+       "coverage": 0.96,
+       "mean_se": 110.2
+      },
+      "chapman_01": {
+       "mean_N": 1979.1,
+       "mean_bias": -0.0105,
+       "bias_se": 0.0088,
+       "bias_sign": -1,
+       "coverage": 0.925,
+       "mean_se": 247.4
+      }
+     },
+     "loo_spread": {
+      "mean": 0.1375,
+      "median": 0.1234
+     },
+     "loo_mean_N_by_left_out": [
+      1988.0,
+      1974.0,
+      1970.8,
+      2009.8
+     ],
+     "mean_S_obs": 954.8
+    }
+   },
+   "heterogeneous_independent": {
+    "sigma_catch": 1.0,
+    "rho_occ": 0.0,
+    "check": {
+     "n_replicates": 200,
+     "truth": 2000,
+     "estimators": {
+      "chao2": {
+       "mean_N": 1032.8,
+       "mean_bias": -0.4836,
+       "bias_se": 0.0016,
+       "bias_sign": -1,
+       "coverage": 0.0,
+       "mean_se": 43.3
+      },
+      "chapman_01": {
+       "mean_N": 779.1,
+       "mean_bias": -0.6105,
+       "bias_se": 0.0017,
+       "bias_sign": -1,
+       "coverage": 0.0,
+       "mean_se": 44.3
+      }
+     },
+     "loo_spread": {
+      "mean": 0.0771,
+      "median": 0.0765
+     },
+     "loo_mean_N_by_left_out": [
+      931.7,
+      924.2,
+      929.2,
+      931.2
+     ],
+     "mean_S_obs": 715.4
+    }
+   },
+   "heterogeneous_correlated": {
+    "sigma_catch": 1.0,
+    "rho_occ": 0.3,
+    "check": {
+     "n_replicates": 200,
+     "truth": 2000,
+     "estimators": {
+      "chao2": {
+       "mean_N": 944.2,
+       "mean_bias": -0.5279,
+       "bias_se": 0.0017,
+       "bias_sign": -1,
+       "coverage": 0.0,
+       "mean_se": 39.0
+      },
+      "chapman_01": {
+       "mean_N": 783.3,
+       "mean_bias": -0.6083,
+       "bias_se": 0.0017,
+       "bias_sign": -1,
+       "coverage": 0.0,
+       "mean_se": 44.7
+      }
+     },
+     "loo_spread": {
+      "mean": 0.1379,
+      "median": 0.1387
+     },
+     "loo_mean_N_by_left_out": [
+      761.7,
+      860.7,
+      865.0,
+      863.9
+     ],
+     "mean_S_obs": 675.1
+    }
+   }
+  }
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py simulate",
+   "git_sha": "604f6fab+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard simulate"
+  },
+  "produced_at": "2026-10-13T19:47:17+00:00"
+ }
+}
