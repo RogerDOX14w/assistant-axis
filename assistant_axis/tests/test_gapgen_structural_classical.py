@@ -73,13 +73,18 @@ def test_every_sibling_resolves_and_is_mutual(rows):
 
 def test_via_is_refused_while_unverified_and_accepted_when_verified(rows, tmp_path):
     via = [r for r in rows if r.scheme == "via"]
-    assert C.verification_state(rows)["via"]["unverified"] == 72           # typed from memory, not yet checked
+    # the file's rows were checked against the source on 2026-10-13, so the shipped table passes the gate
+    assert C.verification_state(rows)["via"] == {"n": 72, "verified": 72, "unverified": 0, "gated": True}
+    assert all(r.verified_by and "source check" in r.verified_by for r in via)
+    C.require_verified(rows)
+    unverified = [replace(r, verified_by=None) for r in via]               # the state the table was typed in
+    assert C.verification_state(unverified)["via"]["unverified"] == 72
     with pytest.raises(C.SchemeUnverified):
-        C.require_verified(rows)
+        C.require_verified([*unverified, *(r for r in rows if r.scheme != "via")])
     with pytest.raises(C.SchemeUnverified):
-        C.require_verified(via, ["via"])
+        C.require_verified(unverified, ["via"])
     C.require_verified([r for r in rows if r.scheme != "via"])             # the other schemes are not gated
-    verified = [replace(r, verified_by="Roger, 2026-10-14") for r in via]
+    verified = [replace(r, verified_by="Roger, 2026-10-14") for r in unverified]
     C.require_verified(verified)
     one_left = [replace(r, verified_by=None) if i == 5 else r for i, r in enumerate(verified)]
     with pytest.raises(C.SchemeUnverified):
