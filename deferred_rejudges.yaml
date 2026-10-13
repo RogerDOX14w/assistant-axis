@@ -735,13 +735,95 @@ deferrals:
     a different output dir). Kept on-disk for archival reference; remove the file
     (and this entry) when truly superseded.
   deferred_at: '2026-05-09T03:49:51+00:00'
-- path_glob: roger/axis_judge_experiments/rho_*.png
+- path_glob: roger/axis_judge_experiments/rho_by_mode_per_axis.png
   dep_key: null
   category: orphan_no_producer
-  reason: Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py
-    or has been removed/superseded by a migrated canonical producer that writes to
-    a different output dir). Kept on-disk for archival reference; remove the file
-    (and this entry) when truly superseded.
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_histograms.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_histograms_by_mode.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_peak_K_desc_inst_vs_responses.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_peak_K_desc_inst_vs_responses__rubric_v1.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_per_axis.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_raw_vs_whitened_scatter.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_scatter_by_mode.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
+  deferred_at: '2026-05-09T03:49:53+00:00'
+- path_glob: roger/axis_judge_experiments/rho_vs_pc_truncation.png
+  dep_key: null
+  category: orphan_no_producer
+  reason: >-
+    Pre-Phase-6 one-off PNG output with no current producer (no provenance chunk, or a /tmp/_*.py
+    script). Kept on-disk for archival reference; remove the file (and this entry) when truly
+    superseded. Narrowed 2026-10-13 from the glob roger/axis_judge_experiments/rho_*.png, which
+    also hid 32 plots whose producers are live (rho_by_layer, rho_by_slot_and_K/L, the shear and
+    whitening sweeps, the peak fits and weighted scatters).
   deferred_at: '2026-05-09T03:49:53+00:00'
 - path_glob: roger/axis_judge_experiments/scree_*.png
   dep_key: null
