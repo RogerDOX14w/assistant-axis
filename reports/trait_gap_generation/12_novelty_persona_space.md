@@ -2,7 +2,7 @@
 
 ## 1. Idea
 
-Answer "do we already have something close?" in the space we actually study: predict where a candidate's Qwen3-32B persona vector would land, from a text embedding of its description, and score novelty as distance from (or low density among) the 584 extracted vectors. It is independent of the English list because the geometry comes from the model's residual stream, which merges traits the model *enacts* identically and separates ones it enacts differently, and because antonyms land antipodal rather than adjacent, so pair completions and duplicates are told apart by sign. A scorer, not a generator.
+Answer "do we already have something close?" in the space we actually study: predict where a candidate's Qwen3-32B persona vector would land, from a text embedding of its description, and score novelty as distance from (or low density among) the 584 extracted vectors. It is independent of the English list because the geometry comes from the model's residual stream, which merges traits the model *enacts* identically and separates ones it enacts differently, and because antonyms land (at least partially) antipodal rather than adjacent, so pair completions and duplicates are told apart by sign. A scorer, not a generator.
 
 ## 2. Sources and tools (all local, all verified present)
 
@@ -47,9 +47,14 @@ A (above): text embedding -> PC scores, ridge/PLS versus kNN. B: same-model prox
 ## 9. Open questions for Roger
 
 - Fit on traits only (303) or traits plus roles with a kind covariate (584)? Candidates are traits, but roles double the sample.
+**Roger:** Both
 - Wait for the pending extraction (143 entities, 727 training points) before trusting scores, or run now and use the pending set as the prospective test?
+**Roger:** Start now, pending set ar proably at leas a week away
 - Is the residual-fraction yield metric (May 2026) still the preferred novelty definition, or nearest-neighbour distance?
+**Roger (2026-10-13):** The residual: "One of my concerns with the distance metric is that the slope of the power law for the PCA eigenvalues is quite steep: the few large directions are relatively large. But we know the space responds poorly to full whitening. So I prefer the energy outside the top N directions. But we might want to test different values of N in the 12-32 range, rather than just assuming 20."
+Consequences for the method (2026-10-13): (1) the energy outside the top N exists only in the components the prediction covers, so step 3 predicts at least about 48 PCs, or the full centred vector by ridge, rather than 20-40; (2) those tail components are the worst predicted, so the predicted residual runs low and is calibrated against its held-out distribution (as step 5 does for distance), not read raw; (3) N is swept over 12, 16, 20, 24, 28 and 32: for each, the Spearman between predicted and actual residual on the arrangement-grouped held-out traits of step 4, with the whole curve reported and N chosen where they agree best; (4) the nearest-neighbour distance stays as the secondary score, with the signed cosine for duplicate against antonym (step 6c).
 - Is variant B worth a small RunPod spend if A's per-PC R² collapses past PC8?
+**Roger:** Ler's hold off on it for now, but keep the ideas as an optional TODO
 
 ## Status (2026-10-08)
 
