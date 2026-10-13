@@ -4,7 +4,7 @@
   "run_id": "paraphrase_set",
   "pooled": false,
   "affected_only": false,
-  "git_sha": "2d10e476+dirty",
+  "git_sha": "c1a1c5ef+dirty",
   "argv": [
     "--generator",
     "testing",
@@ -17,7 +17,8 @@
     "--seed",
     "0",
     "--budget-usd",
-    "4"
+    "4",
+    "--resume"
   ],
   "hidden_frac": null,
   "hidden_file": "data/candidates/testing/paraphrase_set/hidden.json",
@@ -27,7 +28,9 @@
   ],
   "transport": "auto",
   "budget_usd": 4.0,
-  "estimate_usd": 0.8031,
+  "estimate_usd": 0.4797,
+  "projected_usd": 0.5996,
+  "estimate_calibration": 1.25,
   "confirmed_by": null,
   "allow_dirty": false,
   "dirty_check": {
@@ -73,12 +76,100 @@
     "overlap_first": "claude-sonnet-5-5",
     "overlap_second": "claude-opus-5-5"
   },
-  "resumed": false,
-  "started_at": "2026-10-13T22:04:06+00:00",
+  "match_opus_also_at": 4,
+  "resumed": true,
+  "started_at": "2026-10-13T22:36:27+00:00",
   "label_form": "judge-display-v1",
-  "finished_at": "2026-10-13T22:08:37+00:00",
+  "earlier_sessions": [
+    {
+      "batch_id": "rec_testing_paraphrase_set",
+      "generator": "testing",
+      "run_id": "paraphrase_set",
+      "pooled": false,
+      "affected_only": false,
+      "git_sha": "2d10e476+dirty",
+      "argv": [
+        "--generator",
+        "testing",
+        "--run-id",
+        "paraphrase_set",
+        "--registry",
+        "data/candidates/testing/paraphrase_set/registry.jsonl",
+        "--hidden-file",
+        "data/candidates/testing/paraphrase_set/hidden.json",
+        "--seed",
+        "0",
+        "--budget-usd",
+        "4"
+      ],
+      "hidden_frac": null,
+      "hidden_file": "data/candidates/testing/paraphrase_set/hidden.json",
+      "excluded": null,
+      "seeds": [
+        0
+      ],
+      "transport": "auto",
+      "budget_usd": 4.0,
+      "estimate_usd": 0.8031,
+      "confirmed_by": null,
+      "allow_dirty": false,
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "assistant_axis/arrangements.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": []
+      },
+      "m3_runs": {
+        "0": "rec_testing_paraphrase_set_s0"
+      },
+      "regions": {
+        "path": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/corpus_regions.json",
+        "sha256": "474942f7785d31514501eb0b1a62ae4c163a1dbb2e1eacdd42ee337ccdd14052"
+      },
+      "candidates": {
+        "n": 79,
+        "skipped": {}
+      },
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "models": {
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "resumed": false,
+      "started_at": "2026-10-13T22:04:06+00:00",
+      "label_form": "judge-display-v1",
+      "finished_at": "2026-10-13T22:08:37+00:00",
+      "status": 0,
+      "cost_usd": 1.265,
+      "seeds_reported": [
+        0
+      ]
+    }
+  ],
+  "finished_at": "2026-10-13T22:36:35+00:00",
   "status": 0,
-  "cost_usd": 1.265,
+  "cost_usd": 1.314,
   "seeds_reported": [
     0
   ]

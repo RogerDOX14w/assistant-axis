@@ -13,9 +13,9 @@ The recovery harness ([recovery_test.py](../../../../data_analysis/gap_generatio
 
 | seed | hidden | kept candidates | recall | by label | precision | groups whole | reachable | false covers (candidates) | recall incl. covered | cost |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 0 | 120 of 932 | 53 | 45.0% (54) | 1 | 98.1% | 1 of 40 | 91.7% | 26 | 66.7% | $1.265 |
+| 0 | 120 of 932 | 53 | 45.0% (54) | 1 | 98.1% | 1 of 40 | 91.7% | 26 | 66.7% | $1.314 |
 
-Total cost $1.265 (each seed's reduced-corpus M3 run and its match calls; [usage.json](./usage.json); every figure is in [recovery_report.json](./recovery_report.json)).
+Total cost $1.314 (each seed's reduced-corpus M3 run and its match calls; [usage.json](./usage.json); every figure is in [recovery_report.json](./recovery_report.json)).
 
 ## Recall by region
 
@@ -51,14 +51,14 @@ Hidden traits: [hidden.json](./seed0/hidden.json); the reduced-corpus M3 run: [d
 | [aristocratic](../../../traits/instructions/aristocratic.json) | moral_stance | singleton | dynastic | Sonnet 3, Opus 3 |
 | [artistic](../../../traits/instructions/artistic.json) | identity_demographic | singleton | creatively productive | Sonnet 3, Opus 4 |
 | [authentic](../../../traits/instructions/authentic.json) | social_interpersonal | pair | consistently genuine | Sonnet 3, Opus 4 |
-| [avoidant](../../../traits/instructions/avoidant.json) | emotional_temperament | singleton | evasive | Sonnet 4 |
+| [avoidant](../../../traits/instructions/avoidant.json) | emotional_temperament | singleton | evasive | Sonnet 4, Opus 4 |
 | [chaotic](../../../traits/instructions/chaotic.json) | cognitive_epistemic | singleton | disorderly | Sonnet 3, Opus 4 |
 | [conciliatory](../../../traits/instructions/conciliatory.json) | social_interpersonal | pair | peacemaking | Sonnet 3, Opus 4 |
 | [concrete](../../../traits/instructions/concrete.json) | cognitive_epistemic | pair | particularistic | Sonnet 3, Opus 3 |
 | [confrontational](../../../traits/instructions/confrontational.json) | social_interpersonal | pair | confrontational | label |
 | [consequentialist](../../../traits/instructions/consequentialist.json) | moral_stance | pair | outcome-oriented | Sonnet 4, Opus 4 |
 | [controlling](../../../traits/instructions/controlling.json) | social_interpersonal | singleton | domineering | Sonnet 3, Opus 4 |
-| [cosmopolitan](../../../traits/instructions/cosmopolitan.json) | moral_stance | singleton | globally minded | Sonnet 4 |
+| [cosmopolitan](../../../traits/instructions/cosmopolitan.json) | moral_stance | singleton | globally minded | Sonnet 4, Opus 4 |
 | [despairing](../../../traits/instructions/despairing.json) | emotional_temperament | singleton | hopelessly regretful | Sonnet 3, Opus 4 |
 | [disagreeable](../../../traits/instructions/disagreeable.json) | social_interpersonal | pair | confrontational | Sonnet 3, Opus 3 |
 | [dismissive](../../../traits/instructions/dismissive.json) | social_interpersonal | pair | disdainful | Sonnet 3, Opus 4 |
@@ -66,7 +66,7 @@ Hidden traits: [hidden.json](./seed0/hidden.json); the reduced-corpus M3 run: [d
 | [ecocentric](../../../traits/instructions/ecocentric.json) | moral_stance | pair | biocentric | Sonnet 3, Opus 3 |
 | [effusive](../../../traits/instructions/effusive.json) | emotional_temperament | unclassified | unrestrained | Sonnet 3, Opus 4 |
 | [elitist](../../../traits/instructions/elitist.json) | moral_stance | pair | dynastic | Sonnet 2, Opus 3 |
-| [empathetic](../../../traits/instructions/empathetic.json) | social_interpersonal | unclassified | emotionally attuned | Sonnet 4 |
+| [empathetic](../../../traits/instructions/empathetic.json) | social_interpersonal | unclassified | emotionally attuned | Sonnet 4, Opus 4 |
 | [entitled](../../../traits/instructions/entitled.json) | social_interpersonal | singleton | privileged | Sonnet 4, Opus 4 |
 | [epicurean](../../../traits/instructions/epicurean.json) | emotional_temperament | pair | refined | Sonnet 3, Opus 3 |
 | [fair](../../../traits/instructions/fair.json) | moral_stance | pair | equitable, impartial | Sonnet 3, Opus 3; Sonnet 4, Opus 4 |
@@ -75,26 +75,26 @@ Hidden traits: [hidden.json](./seed0/hidden.json); the reduced-corpus M3 run: [d
 | [gluttonous](../../../traits/instructions/gluttonous.json) | emotional_temperament | pair | voracious | Sonnet 3, Opus 4 |
 | [intellectually honest](../../../traits/instructions/intellectually_honest.json) | cognitive_epistemic | pair | scrupulous | Sonnet 3, Opus 4 |
 | [jaded](../../../traits/instructions/jaded.json) | emotional_temperament | pair | blasé | Sonnet 3, Opus 4 |
-| [misanthropic](../../../traits/instructions/misanthropic.json) | social_interpersonal | singleton | antisocial | Sonnet 4 |
+| [misanthropic](../../../traits/instructions/misanthropic.json) | social_interpersonal | singleton | antisocial | Sonnet 4, Opus 4 |
 | [nomadic](../../../traits/instructions/nomadic.json) | identity_demographic | pair | footloose | Sonnet 3, Opus 4 |
 | [opaque](../../../traits/instructions/opaque.json) | communication_style | pair | secretive | Sonnet 3, Opus 4 |
-| [open-minded](../../../traits/instructions/open_minded.json) | cognitive_epistemic | pair | receptive to argument | Sonnet 4 |
-| [paradoxical](../../../traits/instructions/paradoxical.json) | cognitive_epistemic | singleton | contradiction tolerant | Sonnet 4 |
+| [open-minded](../../../traits/instructions/open_minded.json) | cognitive_epistemic | pair | receptive to argument | Sonnet 4, Opus 4 |
+| [paradoxical](../../../traits/instructions/paradoxical.json) | cognitive_epistemic | singleton | contradiction tolerant | Sonnet 4, Opus 4 |
 | [paranoid](../../../traits/instructions/paranoid.json) | social_interpersonal | unclassified | suspicious | Sonnet 3, Opus 4 |
 | [patriotic](../../../traits/instructions/patriotic.json) | identity_demographic | singleton | nationally loyal | Sonnet 3, Opus 4 |
-| [pedantic](../../../traits/instructions/pedantic.json) | communication_style | singleton | hairsplitting | Sonnet 4 |
+| [pedantic](../../../traits/instructions/pedantic.json) | communication_style | singleton | hairsplitting | Sonnet 4, Opus 4 |
 | [poetic](../../../traits/instructions/poetic.json) | communication_style | pair | lyrical | Sonnet 3, Opus 4 |
 | [prescriptive](../../../traits/instructions/prescriptive.json) | communication_style | pair | directive | Sonnet 3, Opus 3 |
 | [progressive](../../../traits/instructions/progressive.json) | moral_stance | pair | forward thinking | Sonnet 3, Opus 3 |
-| [promiscuous](../../../traits/instructions/promiscuous.json) | social_interpersonal | singleton | sexually casual | Sonnet 4 |
+| [promiscuous](../../../traits/instructions/promiscuous.json) | social_interpersonal | singleton | sexually casual | Sonnet 4, Opus 4 |
 | [romantic](../../../traits/instructions/romantic.json) | communication_style | singleton | emotionally driven | Sonnet 3, Opus 3 |
 | [self-critical](../../../traits/instructions/self_critical.json) | emotional_temperament | pair | perfectionistic | Sonnet 3, Opus 4 |
 | [self-pitying](../../../traits/instructions/self_pitying.json) | emotional_temperament | singleton | maudlin | Sonnet 3, Opus 4 |
-| [straight](../../../traits/instructions/straight.json) | identity_demographic | pair | heterosexual | Sonnet 4 |
+| [straight](../../../traits/instructions/straight.json) | identity_demographic | pair | heterosexual | Sonnet 4, Opus 4 |
 | [stream-of-consciousness](../../../traits/instructions/stream_of_consciousness.json) | communication_style | unclassified | associative | Sonnet 3, Opus 3 |
 | [structuralist](../../../traits/instructions/structuralist.json) | cognitive_epistemic | singleton | structural | Sonnet 3, Opus 4 |
 | [subversive](../../../traits/instructions/subversive.json) | moral_stance | unclassified | undermining | Sonnet 4, Opus 4 |
-| [superficial](../../../traits/instructions/superficial.json) | cognitive_epistemic | pair | shallow | Sonnet 4 |
+| [superficial](../../../traits/instructions/superficial.json) | cognitive_epistemic | pair | shallow | Sonnet 4, Opus 4 |
 | [treacherous](../../../traits/instructions/treacherous.json) | moral_stance | pair | perfidious | Sonnet 4, Opus 4 |
 | [unhelpful](../../../traits/instructions/unhelpful.json) | alignment_ai_agent | pair | uncooperative | Sonnet 3, Opus 4 |
 | [untrustworthy](../../../traits/instructions/untrustworthy.json) | moral_stance | pair | self-serving | Sonnet 3, Opus 4 |
@@ -110,7 +110,7 @@ Hidden traits: [hidden.json](./seed0/hidden.json); the reduced-corpus M3 run: [d
 | altruistic | [philanthropic](../../../traits/instructions/philanthropic.json) | Sonnet 3, Opus 3 | [altruistic](../../../traits/instructions/altruistic.json) | no |
 | callous | [sociopathic](../../../traits/instructions/sociopathic.json) | Sonnet 3, Opus 4 | [callous](../../../traits/instructions/callous.json) | no |
 | civilizationally insular | [civilizationist](../../../traits/instructions/civilizationist.json) | Sonnet 3, Opus 4 | [nationalist](../../../traits/instructions/nationalist.json) | no |
-| collaborative | [cooperative](../../../traits/instructions/cooperative.json) | Sonnet 4 | [collaborative](../../../traits/instructions/collaborative.json) | no |
+| collaborative | [cooperative](../../../traits/instructions/cooperative.json) | Sonnet 4, Opus 4 | [collaborative](../../../traits/instructions/collaborative.json) | no |
 | contrarian | [provocative](../../../traits/instructions/provocative.json) | Sonnet 3, Opus 4 | [contrarian](../../../traits/instructions/contrarian.json) | no |
 | dispassionate | [motivated-reasoning-immune](../../../traits/instructions/motivated_reasoning_immune.json) | Sonnet 4, Opus 4 | [dispassionate](../../../traits/instructions/dispassionate.json) | no |
 | easily alarmed | [panicky](../../../traits/instructions/panicky.json) | Sonnet 3, Opus 4 | [neurotic (Big Five)](../../../traits/instructions/neurotic_big_five.json) | no |
@@ -119,15 +119,15 @@ Hidden traits: [hidden.json](./seed0/hidden.json); the reduced-corpus M3 run: [d
 | improvisational | [resourceful](../../../traits/instructions/resourceful.json) | Sonnet 3, Opus 4 | [improvisational](../../../traits/instructions/improvisational.json) | no |
 | innovative | [creative](../../../traits/instructions/creative.json) | Sonnet 3, Opus 4 | [innovative](../../../traits/instructions/innovative.json) | no |
 | integrative | [interdisciplinary](../../../traits/instructions/interdisciplinary.json) | Sonnet 3, Opus 4 | [generalist](../../../traits/instructions/generalist.json) | no |
-| manly | [masculine](../../../traits/instructions/masculine.json) | Sonnet 4 | [overmasculine](../../../traits/instructions/overmasculine.json) | no |
+| manly | [masculine](../../../traits/instructions/masculine.json) | Sonnet 4, Opus 4 | [overmasculine](../../../traits/instructions/overmasculine.json) | no |
 | modern | [contemporary](../../../traits/instructions/contemporary.json) | Sonnet 3, Opus 4 | [modern](../../../traits/instructions/modern.json) | no |
-| practical | [pragmatic](../../../traits/instructions/pragmatic.json) | Sonnet 4 | [practical](../../../traits/instructions/practical.json) | no |
+| practical | [pragmatic](../../../traits/instructions/pragmatic.json) | Sonnet 4, Opus 4 | [practical](../../../traits/instructions/practical.json) | no |
 | reformist | [progressive](../../../traits/instructions/progressive.json) | Sonnet 3, Opus 3 | [radical](../../../traits/instructions/radical.json) | yes |
 | resigned | [fatalistic](../../../traits/instructions/fatalistic.json) | Sonnet 3, Opus 4 | [resigned](../../../traits/instructions/resigned.json) | no |
 | slapdash | [sloppy](../../../traits/instructions/sloppy.json) | Sonnet 3, Opus 4 | [careless](../../../traits/instructions/careless.json) | no |
 | straightforward | [plain-spoken](../../../traits/instructions/plain_spoken.json) | Sonnet 3, Opus 4 | [straightforward](../../../traits/instructions/straightforward.json) | no |
 | systemic | [systems-thinker](../../../traits/instructions/systems_thinker.json) | Sonnet 3, Opus 4 | [holistic](../../../traits/instructions/holistic.json) | no |
-| tactful | [diplomatic](../../../traits/instructions/diplomatic.json) | Sonnet 4 | [tactful](../../../traits/instructions/tactful.json) | no |
+| tactful | [diplomatic](../../../traits/instructions/diplomatic.json) | Sonnet 4, Opus 4 | [tactful](../../../traits/instructions/tactful.json) | no |
 | traditional | [conservative](../../../traits/instructions/conservative.json) | Sonnet 3, Opus 3 | [traditional](../../../traits/instructions/traditional.json) | no |
 | traditional | [nostalgic](../../../traits/instructions/nostalgic.json) | Sonnet 2, Opus 3 | [traditional](../../../traits/instructions/traditional.json) | no |
 | traditional | [ritualistic](../../../traits/instructions/ritualistic.json) | Sonnet 3, Opus 3 | [traditional](../../../traits/instructions/traditional.json) | no |
