@@ -120,6 +120,9 @@ Greenlit for detailed planning: 14, 15, 10; 1, 2.
 [format](./PLAN_FORMAT.md)).  11 rewritten 2026-10-10 as lexical recall insurance, awaiting review.
 2026-10-12: **11 (lexical recall insurance) and 13 (generator testing) greenlit for detailed planning**, after Roger's answers to their open questions in each plan.
 2026-10-12, later: **09 (structural generators) greenlit for detailed planning**; its coding plan commissioned the same day.
+2026-10-13: **05 (corpus frames), 06 (LLM generation with injected entropy) and 12 (novelty in persona space)
+greenlit for detailed planning** after Roger's answers to all their open questions in each plan; coding plans
+commissioned the same day (Fable).  The same day plan 13's three decisions were closed and its build began (Opus).
 Currently discussing, will greenlight once done: -
 
 ## Process for greenlit plans (agreed with Roger, 2026-09-18)
