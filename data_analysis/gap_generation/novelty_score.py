@@ -79,6 +79,13 @@ Commands:
   pairs the rule sends it; the walk is replayed on the readings afterwards under the run's rules (listed traits
   below the floor are read but left out of the replayed walk).  The corpus is B's (``--corpus-at``).  Writes only
   its own run directory, never the registry.
+* ``cache-merge --from OTHER_CACHE_DIR [--tag T ...] [--check-batch B] [--dry-run]``: copy into ``--cache-dir`` the
+  vectors another checkout's embedding cache holds and this one lacks (``embed.merge_cache``; keyed by the text's
+  sha256; a vector already here is never replaced, and the keys both hold with different vectors are counted).
+  For re-deciding a run scored in a worktree (regeneration list GG5): ``score --redecide`` replays retrieval from
+  cached vectors only, and that run's query texts are in the worktree's cache.  ``--check-batch B`` counts B's
+  query texts (rebuilt from the registry as the re-decided run rebuilds them) in each cache.  No call; the other
+  cache is only read.
 * ``compare --scan-batch S --main-batch B``: what the shortlist missed (pairs the full scan put at the cut-off or
   above that the relation call did not mark similar), what early exit skipped, and the decisions side by side:
   ``<S>/comparison.json`` and ``comparison.md``.  No call.
@@ -580,6 +587,62 @@ def write_promotion(out_dir: Path, rec: dict, registry_path: Path) -> None:
             **{k: v for k, v in rec.items() if k != "already"}, "n_already": len(rec["already"])}
     with open(out_dir / "registry_writes.jsonl", "a", encoding="utf-8") as fh:
         fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+
+
+def batch_query_hashes(batch_id: str, *, registry_path: Path, out_root: Optional[Path], metric_config: Path,
+                       query_form: str) -> tuple[str, list[str], dict]:
+    """``(cache tag, [sha256 of each query text], skipped)`` of the candidates ``score --redecide --from-batch
+    batch_id`` would rebuild from the registry (:func:`select_redecide`), embedded as the run embeds them."""
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    cfg = MetricConfig.load(metric_config)
+    source = load_source(batch_id, out_root)
+    cands, skipped = select_redecide(Registry(registry_path).fold(), argparse.Namespace(keys=None), source)
+    tag = EM.OpenAIEmbedder(cfg.live_model["model_id"]).tag      # the client is made lazily: none here
+    texts = [NV.query_text(c.label, c.gloss, query_form=query_form, representation=cfg.representation) for c in cands]
+    return tag, [EM.text_sha256(t) for t in texts], skipped
+
+
+def cmd_cache_merge(args) -> int:
+    """``cache-merge``: another checkout's cached embeddings into this cache (``embed.merge_cache``); no call."""
+    import numpy as np
+    from assistant_axis.gapgen import embed as EM
+    if not args.from_dir.is_dir():
+        print(f"REFUSED: {args.from_dir} is not a directory", file=sys.stderr)
+        return 2
+    if args.from_dir.resolve() == args.cache_dir.resolve():
+        print("REFUSED: --from and --cache-dir are the same directory", file=sys.stderr)
+        return 2
+    check = None
+    if args.check_batch:
+        tag, hashes, skipped = batch_query_hashes(args.check_batch, registry_path=args.registry, out_root=args.out_root,
+                                                  metric_config=args.metric_config, query_form=args.query_form)
+        before = EM.EmbeddingCache(args.cache_dir)._table(tag)
+        src_p = args.from_dir / f"{tag}.npz"
+        src_keys = set()
+        if src_p.exists():
+            with np.load(src_p, allow_pickle=False) as z:
+                src_keys = {str(k) for k in z["keys"]}
+        n_before = sum(1 for h in hashes if h in before)
+        n_after = sum(1 for h in hashes if h in before or h in src_keys)
+        check = {"batch": args.check_batch, "tag": tag, "n_query_texts": len(hashes), "skipped": skipped,
+                 "in_cache_before": n_before, "in_source": sum(1 for h in hashes if h in src_keys),
+                 "in_cache_after": n_after}
+    dst = EM.EmbeddingCache(args.cache_dir)
+    try:
+        res = EM.merge_cache(args.from_dir, dst, tags=args.tag, dry_run=args.dry_run)
+    except (OSError, ValueError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    for tag, r in res.items():
+        print(f"{'DRY-RUN: ' if args.dry_run else ''}{tag}: {r['n_source']} in {args.from_dir}, {r['n_target_before']} "
+              f"in {args.cache_dir}; {'would add' if args.dry_run else 'added'} {r['n_added']}; {r['n_same']} the "
+              f"same in both; {r['n_differ']} differ (kept this cache's; largest difference {r['max_abs_diff']:.2e})")
+    if check is not None:
+        print(f"{check['batch']}'s query texts ({check['n_query_texts']}; skipped {json.dumps(check['skipped'])}): "
+              f"{check['in_cache_before']} in this cache before, {check['in_source']} in --from, "
+              f"{check['in_cache_after']} after the merge")
+    return 0
 
 
 def run_promotion(batch_id: str, *, out_root: Optional[Path], registry_path: Path, dry_run: bool = False) -> int:
@@ -2993,6 +3056,21 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--dry-run", action="store_true", help="count what would be written; write nothing")
     sp.set_defaults(func=lambda a, argv: run_promotion(a.batch_id, out_root=a.out_root, registry_path=a.registry,
                                                        dry_run=a.dry_run))
+    sp = sub.add_parser("cache-merge",
+                        help="copy another checkout's cached embeddings that this cache lacks (no API call)")
+    sp.add_argument("--from", dest="from_dir", type=Path, required=True,
+                    help="the other checkout's data/candidates/cache/embeddings (only read)")
+    sp.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR, help="the cache written to")
+    sp.add_argument("--tag", action="append", help="one cache tag (repeatable; default every tag in --from)")
+    sp.add_argument("--check-batch", metavar="B",
+                    help="also count how many of M3 run B's query texts (as score --redecide builds them from the "
+                         "registry) each cache holds")
+    sp.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
+    sp.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
+    sp.add_argument("--out-root", type=Path, default=None)
+    sp.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM)
+    sp.add_argument("--dry-run", action="store_true", help="count what would be copied; write nothing")
+    sp.set_defaults(func=lambda a, argv: cmd_cache_merge(a))
     sp = sub.add_parser("compare")
     sp.add_argument("--scan-batch", required=True)
     sp.add_argument("--main-batch", required=True)

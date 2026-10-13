@@ -400,6 +400,64 @@ class EmbeddingCache:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
 
+def merge_cache(src_root: Path | str, dst: EmbeddingCache, *, tags: Optional[Sequence[str]] = None,
+                dry_run: bool = False) -> dict:
+    """Copy into ``dst`` the vectors another checkout's cache holds and ``dst`` lacks (regeneration list GG5,
+    2026-10-13: an M3 run made in a worktree embedded its candidates into that worktree's git-ignored cache, and
+    ``novelty_score.py score --redecide`` replays retrieval only from cached vectors, the very ones the run used).
+
+    Tag by tag (``tags``, default every ``<tag>.npz`` in ``src_root``): entries are keyed by the text's sha256, as
+    the cache keys them; a key ``dst`` has keeps its vector (never replaced, as :meth:`EmbeddingCache.save` keeps
+    them and the canary assumes), and the keys both hold with different vectors are counted (``n_differ``, with the
+    largest absolute difference).  ``src_root`` is only read (no lock taken, nothing created there).  Refused
+    (``ValueError``) when the two manifests name different models for a tag, or the vectors' dimensions differ.
+    ``dry_run`` counts and writes nothing.  Returns ``{tag: {n_source, n_target_before, n_added, n_same, n_differ,
+    max_abs_diff, model_id}}``."""
+    src_root = Path(src_root)
+    mpath = src_root / "manifest.json"
+    src_manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
+    dpath = dst.root / "manifest.json"
+    dst_manifest = json.loads(dpath.read_text()) if dpath.exists() else {}
+    if tags is None:
+        tags = sorted(p.name[:-len(".npz")] for p in src_root.glob("*.npz"))
+    out: dict = {}
+    for tag in tags:
+        p = src_root / f"{tag}.npz"
+        if not p.exists():
+            raise FileNotFoundError(f"no {tag}.npz in {src_root}")
+        model_id = (src_manifest.get(tag) or {}).get("model_id") or (dst_manifest.get(tag) or {}).get("model_id")
+        if not model_id:
+            raise ValueError(f"{tag}: neither manifest names its model")
+        theirs = (dst_manifest.get(tag) or {}).get("model_id")
+        if theirs and theirs != model_id:
+            raise ValueError(f"{tag}: the source cache's model is {model_id!r}, the target's {theirs!r}")
+        with np.load(p, allow_pickle=False) as z:
+            src = {str(k): v for k, v in zip(z["keys"], z["vecs"])}
+        table = dst._table(tag)
+        n_before = len(table)
+        dims = {v.shape[-1] for v in list(src.values())[:1] + list(table.values())[:1]}
+        if len(dims) > 1:
+            raise ValueError(f"{tag}: the source's vectors have dimension {sorted(dims)}; the target's differ")
+        add, same, differ, max_diff = {}, 0, 0, 0.0
+        for k, v in src.items():
+            mine = table.get(k)
+            if mine is None:
+                add[k] = v
+            elif np.array_equal(mine, v):
+                same += 1
+            else:
+                differ += 1
+                max_diff = max(max_diff, float(np.max(np.abs(np.asarray(mine, np.float64) - np.asarray(v, np.float64)))))
+        if add and not dry_run:
+            table.update(add)
+            dst._dirty[tag] = model_id
+        out[tag] = {"n_source": len(src), "n_target_before": n_before, "n_added": len(add), "n_same": same,
+                    "n_differ": differ, "max_abs_diff": max_diff, "model_id": model_id}
+    if not dry_run:
+        dst.save()
+    return out
+
+
 def normalize_rows(E: np.ndarray) -> np.ndarray:
     E = np.asarray(E, dtype=np.float64)
     n = np.linalg.norm(E, axis=1, keepdims=True)

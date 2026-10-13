@@ -13,6 +13,17 @@ Commands:
   generator and run id included; ``registry.read_candidates``) into this checkout's
   log, the way a run made in another worktree reaches the main checkout.  Idempotent
   (a source already on a row changes nothing); no run directory is touched.
+* ``import-rows --from OTHER_REGISTRY --keys-file F [--only-run GEN/RUN] [--record PATH] [--dry-run]``:
+  the rows of the keys in F (one per line; blank lines and lines starting with ``#`` skipped) from another
+  checkout's registry log, with the blocks that checkout's filter and novelty runs wrote, for a run that was
+  submitted *and judged* in a worktree (regeneration list GG5; ``registry.import_rows``).  A key this log lacks
+  gets the other log's lines for it, in order, through the registry's write path (its fold then matches the
+  other's but for ``rev`` and ``updated_at``); a key it has keeps every field and gains only the ``sources[]``
+  entries it lacks (with ``--only-run``, only that run's).  Idempotent; checks the fold after writing (exit 1 on
+  a mismatch); refused, before any write, for a key the other log lacks or a malformed line in it.  The other log
+  is read without its lock (nothing is created in that checkout).  ``--record`` writes what was imported (keys,
+  source lines with their revs and times, sources added, the other log's sha256) as a JSON envelope; refused
+  when the file exists.  ``--dry-run`` prints the plan and writes nothing.
 * ``status``: counts by verdict, decision, review status, holding list and generator.
 * ``report [--generator G] [--decision D] [--verdict V] [--include-held]``: a
   markdown table, the main review list: rows on a holding list are left off
@@ -152,6 +163,74 @@ def cmd_submit(args) -> int:
     run.finish()
     print(json.dumps({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}))
     return 0
+
+
+def read_keys_file(path: Path) -> list[str]:
+    """Registry keys, one per line; blank lines and lines starting with ``#`` are skipped (a key never starts
+    with ``#``, though it contains one: ``stem#sense``)."""
+    return [s for s in (line.strip() for line in Path(path).read_text(encoding="utf-8").splitlines())
+            if s and not s.startswith("#")]
+
+
+def _sha256_file(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def cmd_import_rows(args) -> int:
+    """``import-rows``: rows of another checkout's registry log into this one (``registry.import_rows``)."""
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.registry import import_rows, utc_now
+    only_run = None
+    if args.only_run:
+        gen, sep, run_id = args.only_run.partition("/")
+        if not sep:
+            print("REFUSED: --only-run takes GENERATOR/RUN_ID", file=sys.stderr)
+            return 2
+        only_run = (paths.check_id(gen, "generator"), paths.check_id(run_id, "run_id"))
+    if args.record is not None and args.record.exists() and not args.dry_run:
+        print(f"REFUSED: {args.record} exists: give a new --record path (a record is never overwritten)", file=sys.stderr)
+        return 2
+    try:
+        keys = read_keys_file(args.keys_file)
+        source_sha = _sha256_file(args.from_path)
+        rep = import_rows(args.from_path, keys, registry_path=args.registry, only_run=only_run, dry_run=args.dry_run)
+    except (OSError, ValueError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    c = rep.counts()
+    by_lines = Counter(len(v) for v in rep.replayed.values())
+    runs_added = Counter(f"{s.get('generator')}/{s.get('run_id')}" for v in rep.sources_added.values() for s in v)
+    head = "DRY-RUN: would import" if args.dry_run else "imported"
+    print(f"{head} {c['n_keys']} keys from {args.from_path} (sha256 {source_sha[:16]}) into {args.registry}: "
+          f"{c['replayed_keys']} new keys replayed with {c['replayed_lines']} lines "
+          f"(lines a key: {json.dumps(dict(sorted(by_lines.items())))}); {c['keys_gaining_sources']} existing keys "
+          f"gaining {c['sources_added']} sources ({json.dumps(dict(sorted(runs_added.items())))}); "
+          f"{c['unchanged']} existing keys unchanged; "
+          + (f"{c['lines_planned']} lines to append" if args.dry_run else f"{c['n_lines_written']} lines appended"))
+    if args.dry_run:
+        return 0
+    if rep.verified:
+        print(f"verified: the fold of every touched key ({len(rep.replayed) + len(rep.sources_added)}) is what the "
+              f"import meant to write (rev and updated_at aside)")
+    else:
+        print(f"MISMATCH after the write, {len(rep.mismatches)} key(s): "
+              f"{json.dumps(dict(list(rep.mismatches.items())[:10]))}", file=sys.stderr)
+    if args.record is not None:
+        from assistant_axis.plot_metadata import json_metadata
+        from assistant_axis.provenance import current_file_input
+        body = {"what": "gap_registry.py import-rows", "at": utc_now(), "git_sha": git_sha(), "argv": sys.argv,
+                "source_sha256": source_sha, "keys_file": str(args.keys_file),
+                "only_run": "/".join(only_run) if only_run else None, "counts": c, **rep.as_dict()}
+        env = json_metadata(body, title=f"registry import of {c['n_keys']} keys from {args.from_path}",
+                            inputs=[current_file_input(dep_key="keys_file", path=args.keys_file)])
+        atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", args.record)
+        print(f"record: {args.record}")
+    return 0 if rep.verified else 1
 
 
 def cmd_status(args) -> int:
@@ -608,6 +687,17 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--run-id")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_submit)
+    sp = sub.add_parser("import-rows",
+                        help="rows of another checkout's registry log (with their filter and novelty blocks) into this "
+                             "one, by key; idempotent")
+    sp.add_argument("--from", dest="from_path", type=Path, required=True,
+                    help="the other checkout's registry.jsonl (read without its lock; nothing is written there)")
+    sp.add_argument("--keys-file", type=Path, required=True, help="the keys to import, one per line")
+    sp.add_argument("--only-run", metavar="GENERATOR/RUN_ID",
+                    help="a key this log already has gains only this run's sources (default: every source it lacks)")
+    sp.add_argument("--record", type=Path, help="write what was imported to this JSON file (refused if it exists)")
+    sp.add_argument("--dry-run", action="store_true")
+    sp.set_defaults(func=cmd_import_rows)
     sp = sub.add_parser("status")
     sp.set_defaults(func=cmd_status)
     sp = sub.add_parser("report")

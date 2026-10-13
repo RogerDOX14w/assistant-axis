@@ -12,7 +12,9 @@ uncompressed snapshot over :data:`SNAPSHOT_UNCOMPRESSED_MAX_BYTES`, and
 :func:`snapshot_file` names the snapshot to read in a directory.
 
 Generators never write the file directly: they call
-:func:`submit_candidates` (frozen interface).  The filter and the novelty
+:func:`submit_candidates` (frozen interface); rows a run left in another
+checkout's log are brought over by :func:`import_rows`, which replays that
+log's lines through the same write path.  The filter and the novelty
 scorer update one block of a record at a time (:meth:`Registry.merge_block`,
 :meth:`Registry.update_many`).  Appends and read-modify-write cycles hold an
 exclusive ``fcntl`` lock on ``<registry>.lock``, so parallel generator runs can
@@ -594,6 +596,159 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
                          n_keys=len(folded), n_malformed=len(reg.malformed) if rejected else 0,
                          rejected_path=rejected, n_bytes=len(data), snapshot_bytes=len(out),
                          stale_snapshot=plain if plain is not None and plain.exists() else None)
+
+
+# ---------------------------------------------------------------------------
+# Import from another checkout's log
+# ---------------------------------------------------------------------------
+
+#: The fields an imported row may differ in from the source's fold: the registry stamps them on every write.
+IMPORT_STAMPED_FIELDS = ("rev", "updated_at")
+
+
+@dataclass
+class ImportReport:
+    """What :func:`import_rows` did (or, with ``dry_run``, would do)."""
+    source_path: Path
+    registry_path: Path
+    n_keys: int
+    #: keys this registry lacked: ``{key: [{"line", "rev", "updated_at"} of each source line replayed, in order]}``
+    #: (``line``: the n-th non-blank line of the source log; ``rev`` and ``updated_at`` as the source stamped them)
+    replayed: dict = field(default_factory=dict)
+    #: keys this registry had: ``{key: [the sources[] entries appended]}``
+    sources_added: dict = field(default_factory=dict)
+    #: keys this registry had with nothing to add
+    unchanged: list = field(default_factory=list)
+    n_lines_written: int = 0
+    dry_run: bool = False
+    #: after a write: keys whose new fold differs from what the import meant to write (empty when it landed)
+    mismatches: dict = field(default_factory=dict)
+    verified: Optional[bool] = None
+
+    def counts(self) -> dict:
+        return {"n_keys": self.n_keys, "replayed_keys": len(self.replayed),
+                "replayed_lines": sum(len(v) for v in self.replayed.values()),
+                "keys_gaining_sources": len(self.sources_added),
+                "sources_added": sum(len(v) for v in self.sources_added.values()),
+                "unchanged": len(self.unchanged),
+                "lines_planned": sum(len(v) for v in self.replayed.values()) + len(self.sources_added),
+                "n_lines_written": self.n_lines_written}
+
+    def as_dict(self) -> dict:
+        d = asdict(self)
+        d["source_path"], d["registry_path"] = str(self.source_path), str(self.registry_path)
+        return d
+
+
+def _strip_stamps(rec: dict) -> dict:
+    return {k: v for k, v in rec.items() if k not in IMPORT_STAMPED_FIELDS}
+
+
+def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: Path = REGISTRY_PATH,
+                only_run: Optional[tuple[str, str]] = None, dry_run: bool = False,
+                now: Optional[str] = None) -> ImportReport:
+    """Bring the rows of ``keys`` from another checkout's registry log into this one (regeneration list GG5,
+    2026-10-13: a generator run submitted, filtered and scored inside a worktree left its rows in that worktree's
+    git-ignored log, so they never reached the main checkout's).
+
+    * A key this registry lacks gets **every line the source log holds for it, in the source's order**, appended
+      through the registry's own write path (under the writer lock, after a torn last line, fsynced): each line's
+      ``rev`` is counted here from 1, ``created_at`` is the source's, ``updated_at`` the time of the import (so it
+      follows this log's order, as every write's does).  Its fold then equals the source's fold in every field but
+      those two (``rev`` too when the source's history starts at rev 1).  Lines of different keys keep their
+      relative source order.
+    * A key this registry already has keeps every field it has: it gains only the ``sources[]`` entries of the
+      source's latest row that it lacks, compared as :func:`submit_candidates` compares them (generator, run id,
+      surface, source ref), appended in the source's order, one line per key; with ``only_run`` (``(generator,
+      run_id)``) only that run's entries.  A block the source holds (filter, novelty ...) is never copied onto an
+      existing row, so an older block from another checkout cannot overwrite a newer one here.
+    * Idempotent: a second import finds every key present and every source on it, and writes nothing.
+
+    Refused (``ValueError``, nothing written): a key the source does not hold; a source with malformed lines (one
+    could belong to a requested key); a gzipped target (a snapshot is read-only).  The source is read without its
+    lock, so that reading another checkout's log creates nothing there (import from an idle log, or a copy of it).
+
+    ``dry_run`` reads this registry under the reader lock and writes nothing.  After a write the target is folded
+    again and every touched key compared with what was meant (``mismatches``, ``verified``)."""
+    src = Registry(source_path)
+    reg = Registry(registry_path)
+    if is_gzip_path(reg.path):
+        raise ValueError(f"{reg.path} is a gzipped registry snapshot, read-only: import into the live log")
+    if not src.path.exists():
+        raise FileNotFoundError(f"no source registry at {src.path}")
+    if src.path.resolve() == reg.path.resolve():
+        raise ValueError(f"the source and the target are the same file: {src.path}")
+    want = list(dict.fromkeys(k.strip() for k in keys if k and k.strip()))
+    wanted = set(want)
+    lines: list[tuple[int, dict]] = []          # (n-th non-blank source line, record) of the wanted keys, in order
+    src_fold: dict[str, dict] = {}
+    for n, rec in enumerate(src.iter_lines(), 1):
+        if rec["key"] in wanted:
+            lines.append((n, rec))
+            src_fold[rec["key"]] = rec
+    if src.n_malformed:
+        raise ValueError(f"{src.path}: {src.n_malformed} malformed line(s) (line {src.malformed[0][0]} first); "
+                         f"one could belong to a requested key: repair the source (or compact a copy) first")
+    missing = [k for k in want if k not in src_fold]
+    if missing:
+        raise ValueError(f"{len(missing)} key(s) not in {src.path}: {', '.join(missing[:10])}"
+                         + (" ..." if len(missing) > 10 else ""))
+    report = ImportReport(source_path=src.path, registry_path=reg.path, n_keys=len(want), dry_run=dry_run)
+
+    def plan(cur: dict) -> tuple[list[dict], dict[str, dict]]:
+        """(records to append, in order; {key: what its fold should be afterwards, stamps aside})"""
+        out, expect = [], {}
+        absent = {k for k in want if k not in cur}
+        for i, rec in lines:
+            if rec["key"] in absent:
+                out.append(copy.deepcopy(rec))
+                report.replayed.setdefault(rec["key"], []).append(
+                    {"line": i, "rev": rec.get("rev"), "updated_at": rec.get("updated_at")})
+        for k in absent:
+            expect[k] = _strip_stamps(src_fold[k])
+        for k in want:
+            if k in absent:
+                continue
+            row = cur[k]
+            have = {_source_identity(s) for s in row.get("sources") or []}
+            add = []
+            for s in src_fold[k].get("sources") or []:
+                ident = _source_identity(s)
+                if ident in have or (only_run is not None and (s.get("generator"), s.get("run_id")) != tuple(only_run)):
+                    continue
+                have.add(ident)
+                add.append(dict(s))
+            if not add:
+                report.unchanged.append(k)
+                continue
+            rec = copy.deepcopy(row)
+            rec["sources"] = list(rec.get("sources") or []) + add
+            out.append(rec)
+            report.sources_added[k] = add
+            expect[k] = _strip_stamps(rec)
+        return out, expect
+
+    if dry_run:
+        plan(reg.fold())
+        return report
+    with reg.locked():
+        now = now or utc_now()              # under the lock: ``updated_at`` follows the log's order
+        cur = reg._fold_unlocked()
+        out, expect = plan(cur)
+        stamped = []
+        for rec in out:
+            s = reg._stamp(rec, cur.get(rec["key"]), now)
+            cur[rec["key"]] = s
+            stamped.append(s)
+        reg._append(stamped)
+        report.n_lines_written = len(stamped)
+        after = reg._fold_unlocked() if stamped else cur
+    for k, exp in expect.items():
+        got = _strip_stamps(after.get(k) or {})
+        if got != exp:
+            report.mismatches[k] = sorted(f for f in set(got) | set(exp) if got.get(f) != exp.get(f))
+    report.verified = not report.mismatches
+    return report
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:
