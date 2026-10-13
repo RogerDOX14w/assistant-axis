@@ -79,7 +79,7 @@ result.  A failure is a bug in the batch, fixed before the four-pod launch.
 | T2 | `--roles` filtering and `--non_goal_count 54` (the pilot's `verbose`) build exactly the listed work items | P1 review, P6 | step 1's "work items" log line against [cap_pilot_entities.json](./cap_pilot_entities.json) | counts equal; no "no work item is named" warning |
 | T3 | the `generation_config.json` side-car is written and a rerun into the same dir with changed settings is refused | P2, 35acbe43 | rerun step 1 with a different `--max_tokens` into the pilot's dir | refused without `--allow_mixed_settings` |
 | T4 | step 2 under the pod's transformers 4.57.6 finds the seven header tokens (the `BatchEncoding` fix is proven only under the Mac's 5.1.0) | 11d7f28c | `activations.log` after the first entity | 0 header misses, 500 keys saved |
-| T5 | the activation metadata carries `layers`, `max_length`, `thinking`, `batch_size`, `extract_headers` and step 4 copies it | 11d7f28c | read one vector's `metadata` | all keys present |
+| T5 | the activation metadata carries `layers`, `max_length`, `batch_size`, `extract_headers`, `model_type` and `template_kwargs` (`thinking` was replaced by `template_kwargs` in P7) and step 4 copies it | 11d7f28c, a9d3f9dd | read one vector's `metadata` | all keys present |
 | T6 | the tmpfs mirror: `rsync` present or the staged `cp` fallback; the completeness marker written; a second run reuses the mirror | P8.6 | the driver's `[tmpfs]` lines on two consecutive runs | marker file present; second run "reusing" |
 | T7 | the HF-cache check and the torch import time with the venv on local disk vs `/workspace` | P8.3 (b) | `time uv run python -c "import torch"` from each | the number goes in the README |
 | T8 | step 3 batch mode at real scale: `token_limit_exceeded` on a full chunk, the queue-holding behaviour, `batches.list` newest-first with many batches | 56f3df3e, P5 | the first chunk over the org limit; a second pod submitting | the "queue limit reached" line, then a wait, not a split |
@@ -105,7 +105,7 @@ result.  A failure is a bug in the batch, fixed before the four-pod launch.
 | T28 | the real-tokenizer test for `qwen3` under the pod's transformers 4.57.6 | P7 task 11, 0301aa09 | item 12 for `qwen3` | 5 passed; the printed header is the seven |
 
 Not on this list because they are experiments, not tests: the cap pilot's decision (item 2), the rubric
-experiment (item 11), P7's smoke runs per family (item 7).
+experiment (item 11), P7's real-tokenizer checks and smoke runs per family (items 12–13; the byte-identical regression on the real model is item 7).
 
 ## Only if the multi-model plan is built first
 
