@@ -53,6 +53,12 @@ Stored record schema::
 Averages are computed in float32 then cast back to bf16 for storage; this
 avoids the cumulative bf16 rounding that would lose ~3 bits per add.
 
+TODO (walk-through P3, 2026-10-12; the fix batch's hand-off): the October
+tree stores float32 vectors (steps 4 and 5 since 2026-10-12), so when this
+script is next run on it, store the marginals in float32 too and drop the
+bf16 cast.  Not changed now: the May 8slot marginals are bf16 and a change
+here would regenerate them.
+
 Default behaviour:
 
     - --mode defaults to 'residual' (the principled choice for canonical-

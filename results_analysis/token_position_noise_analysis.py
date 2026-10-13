@@ -142,7 +142,12 @@ METRIC_NAMES = [
 
 def load_all_vectors(vectors_dir: Path):
     """Load all role vectors into a single bf16 tensor.
-    Returns ``(tensor, role_names)``."""
+    Returns ``(tensor, role_names)``.
+
+    TODO (walk-through P3, 2026-10-12): the cast to bf16 is for the May
+    vectors, which are bf16; on the October tree (float32 vectors since
+    2026-10-12) keep float32 here instead, when the script is next run on it.
+    """
     pt_files = sorted(vectors_dir.glob("*.pt"))
     if not pt_files:
         raise SystemExit(f"No .pt files found in {vectors_dir}")
