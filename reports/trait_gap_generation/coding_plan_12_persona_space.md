@@ -16,9 +16,9 @@ duplicate-like and novel-like, disagreement quantile, orphan vector, prospective
 into the glossary in task 9.  **Every figure below was measured read-only on 2026-10-13** (§ "Measured figures" says
 how); the fit's first run must reproduce them.  Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; both decided 2026-10-13)
 
-1. **OPEN: where the score lives.**  The brief asks for a block or a side table that M3 and the review graph can
+1. **Decided (2026-10-13, Roger): where the score lives: (a), a `persona` block on the registry row.**  The brief asks for a block or a side table that M3 and the review graph can
    read.
    - (a) **A `persona` block on the registry row**: one word added to `BLOCKS` in
      [registry.py](../../assistant_axis/gapgen/registry.py) (`("freq", "wordnet", "filter", "novelty", "review",
@@ -31,7 +31,8 @@ how); the fit's first run must reproduce them.  Roger's review comments go into 
    - **Recommendation: (a)**, with the batch directory kept as the tracked record either way (§ 5), so that another
      checkout re-applies the scores to its own log with `apply` (§ 7) exactly as `gap_registry.py submit --from`
      re-applies candidates.
-2. **OPEN: what happens to the disagreement quantile.**  Step 7 of the workstream plan hands the candidates on
+   **Roger (2026-10-13): recommendation approved.**
+2. **Decided (2026-10-13, Roger): what happens to the disagreement quantile: (b), to Roger and through M3's overlap call.**  Step 7 of the workstream plan hands the candidates on
    which the two novelty readings disagree "to an LLM or to Roger".
    - (a) **To Roger only**: `disagreements.md`, ordered, with both readings' evidence; $0.
    - (b) **To Roger and through M3's own [overlap call](./glossary.md#relation-overlap-calls)** ([rubric
@@ -44,6 +45,7 @@ how); the fit's first run must reproduce them.  Roger's review comments go into 
    - **Recommendation: (b)**: a reading on record is what turns "persona space disagrees" into something a later M3
      rule can be built on, and the rendered prompt is M3's pinned one (no new rubric).  Roger reads the list either
      way.
+   **Roger (2026-10-13): recommendation approved.**
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).

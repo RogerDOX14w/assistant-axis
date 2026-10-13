@@ -15,16 +15,17 @@ a corpus trait or live seed-queue entry its label is linked to; a **lexical-only
 lexical neighbour that M3's retrieval and expansion never listed, so no model has read the pair.  Roger's
 review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; both decided 2026-10-13)
 
-1. **OPEN: the pilot's scope.**  The workstream plan's § 8 judges "a sample of those pairs (~$1)".  The dry
+1. **Decided (2026-10-13, Roger): the pilot's scope: (a), every lexical-only pair.**  The workstream plan's § 8 judges "a sample of those pairs (~$1)".  The dry
    lookup (measured below) finds **821 lexical-only pairs on 561 kept rows** from OEWN alone, and the overlap
    call on all of them costs **about $2.0-2.6 live** (§ Cost).  Options: (a) judge every pair, so that the pilot
    *is* the retroactive sweep of § 3 step 4 and nothing is run twice; (b) a seeded sample of 300 (≈ $1) and the
    rest only past the gate.  **Recommendation: (a).**  Under the $20 line the batch-or-real-time rule says
    real time; a sample saves about $1.5 and costs a second run and a sampling design, and the full count is the
    stop rule's own input.
-2. **OPEN: the stop rule's arbiter.**  § 8 stops the plan "if the recorded batches show fewer than ~5 real
+   **Roger (2026-10-13): recommendation approved.**
+2. **Decided (2026-10-13, Roger): the stop rule's arbiter: (b), with Roger's blind marks.**  § 8 stops the plan "if the recorded batches show fewer than ~5 real
    misses".  Options: (a) a *real miss* is a lexical-only pair that reads at the row's own cut-off under the
    row's own rule set, counted by the machine; (b) the same, but Roger blind-marks up to 40 of them first, as in
    the cover audit ([m3_cover_audit_for_marks.md](./m3_cover_audit_for_marks.md); about 30 minutes), and the
@@ -34,6 +35,7 @@ review comments go into this file.
    [healthy](../../data/traits/instructions/healthy.json)); the overlap call is the sense filter, and its
    measured false-cover rate is about 3%, but the integration lets a lexical neighbour *cover* in every later
    wave, which is worth 30 minutes of marks once.
+   **Roger (2026-10-13): recommendation approved.**
 
 If either is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
