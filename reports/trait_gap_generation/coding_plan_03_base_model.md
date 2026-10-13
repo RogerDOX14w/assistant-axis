@@ -480,7 +480,9 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
 **Roger's pilot gate (2026-10-13), with the measurements behind the open items.**
 - (b) **`ai_assistant` family kept** (Roger: "SG").  (d) **Variant B not needed** (Roger: "SG"): the curve is
   still steep.
-- (c) Noun normalization, open.  Roger: "I suspect other generators could use this?"  Yes: plan 05's nominal
+- (c) Noun normalization, **decided 2026-10-13**: a shared, deterministic helper used by every generator that can
+  meet nouns, or built into the platform's pipeline; its own plan, [coding_plan_noun_normalization.md](./coding_plan_noun_normalization.md)
+  (not there yet), which also covers the backlog and the roles (Roger's words in that plan).  The discussion:  Roger: "I suspect other generators could use this?"  Yes: plan 05's nominal
   frames ("an incorrigible X") need it (its open decision 3), and the masked-LM noun frames and plan 06's labels
   can meet it.  The deterministic part exists here already (`normalize_form`'s suffix rules in
   [parse.py](../../assistant_axis/gapgen/generators/base_model/parse.py)); plan 05's planner found the OEWN

@@ -47,7 +47,7 @@ comments go into this file.
    - **Recommendation: (a)**, so that the frame-bias measurement is made on one source first and the second build
      inherits a measured bank.  `datasets` is not needed in any option (the files are fetched by URL, as the IPIP
      pages are; parquet reads through `pyarrow`, already a dependency).  **No new dependency in this plan.**
-3. **OPEN: nominal fillers with no adjective.**  Roger's answer 4 includes nominal traits (pedant, gossip, yes-man)
+3. **Decided (2026-10-13, Roger: "SG, make this happen"; the shared helper of [coding_plan_noun_normalization.md](./coding_plan_noun_normalization.md), not there yet, replaces a local one): nominal fillers with no adjective.**  Roger's answer 4 includes nominal traits (pedant, gossip, yes-man)
    with adjectival relabels.  *Measured* on the repository's OEWN copy: the `derivation` link gives an adjective for
    about half of thirty nominal traits tried (pedant → pedantic, sycophant → sycophantic, gossip → gossipy, coward →
    cowardly, miser → miserly, snob → snobby, cynic → cynical) and nothing for the rest (hypocrite, busybody, yes-man,
