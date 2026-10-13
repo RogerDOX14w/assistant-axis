@@ -662,13 +662,13 @@ class TestReroute:
     """A batch judged with three readings under route rules 1 is re-routed under rules 2 from its record: every
     reading replayed, no call; ``--send-missing`` asks the missing check once per reading."""
 
-    def _batch(self, tmp_path, cli):
+    def _batch(self, tmp_path, cli, change=None):
         from assistant_axis.tests.test_gapgen_states_pass_rules2 import answers
         reg = tmp_path / "registry.jsonl"
         for lb in ("crossish", "passish", "hopish", "plainheld", "renamish"):
             _states_row(reg, lb, gen="states_pass" if lb == "hopish" else "g")
         cand = tmp_path / "cand"
-        cli["responder"] = answers()
+        cli["responder"] = by_reading(answers(), change) if change else answers()
         assert cli["mod"].main(_argv(reg, cand, "--route-rules", "1", batch="b3")) == 0
         assert json.loads((cand / "states_pass" / "b3" / "run.json").read_text())["readings"] == 3
         return reg, cand
@@ -697,3 +697,33 @@ class TestReroute:
         assert steps(cli["live"][-1]) == {"check": 3, "alignment": 1}
         h = Registry(reg).fold()["hopish#1"]
         assert h["holding"] == "states_released" and h["states_pass"]["gloss_check"]["check_readings"]["n"] == 3
+
+    def test_a_failed_reading_waits_on_its_queue_call(self, tmp_path, cli, capsys):
+        """crossish's reading 2 failed twice in its batch (decided on two readings): the re-route waits on that
+        reading's queue call, which is keyed by its chunk, and lists it; the estimate counts it and the gloss calls
+        that may follow; the other rows are replayed without crossish, so their gloss answers on record settle them.
+        Before 2026-10-13 crossish and passish listed no call, the estimate was $0 and --send-missing ran with no
+        cap."""
+        reg, cand = self._batch(tmp_path, cli, change={"crossish": {1: "bad", 3: "bad"}})
+        before = {k: r["states_pass"] for k, r in Registry(reg).fold().items() if r.get("states_pass")}
+        assert before["crossish#1"]["queue_readings"]["failed"] == [2]
+        capsys.readouterr()
+        argv = ["--batch-id", "rr", "--mode", "queue", "--reroute", "--registry", str(reg), "--out-root", str(cand)]
+        assert cli["mod"].main([*argv, "--dry-run"]) == 0
+        out = capsys.readouterr().out
+        assert ("NEEDS     crossish (b3): held -> predisposition once queue call(s) are made (not on record), then up "
+                "to 4 gloss call(s)") in out
+        assert "NEEDS     hopish (b3): held -> predisposition once alignment and 3 check call(s) are made" in out
+        assert "UNCHANGED 3: passish (held), plainheld (held), renamish (renamed)" in out
+        assert "--send-missing would make 5 call(s) ({'queue': 1, 'check': 3, 'alignment': 1}), then up to 4" in out
+        assert cli["mod"].main([*argv, "--send-missing"]) == 0
+        client = cli["live"][-1]
+        assert steps(client) == {"queue": 1, "check": 3, "alignment": 1}
+        q = next(c for c in client.calls if system_text(c) == sp.QUEUE_PROMPT)
+        assert [json.loads(x)["label"] for x in user_text(q).splitlines()[1:]] == ["crossish"]
+        run = json.loads((cand / "states_pass" / "rr" / "run.json").read_text())
+        assert run["estimate_usd"] > 0 and run["cap_usd"] == 1.0
+        rows = Registry(reg).fold()
+        c = rows["crossish#1"]["states_pass"]
+        assert c["route"] == "predisposition" and c["queue_readings"]["n_ok"] == 3 and c["batch_id"] == "b3"
+        assert {k for k in before if rows[k]["states_pass"] != before[k]} == {"crossish#1", "hopish#1"}

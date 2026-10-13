@@ -40,10 +40,14 @@ recorded none), since its answers on record are keyed by the text shown.
 decided under other rules, from the answers its batch recorded (``states_pass/<batch>/responses.jsonl``: the queue
 row, the gloss check's reading, the alignment score): no call is sent.  It prints every row whose route changes, the
 rows that stay, and the rows whose new route needs a call their batch never made (a one-hop row's gloss check and
-alignment call), with what they need.  Without ``--dry-run`` it writes the changed rows' blocks (the answers' batch
-kept as ``batch_id``, the re-route in ``rerouted``) and their new ``holding`` to the registry, and its own record to
-``states_pass/<batch_id>/``.  ``--send-missing`` (paid, through the cost gate, live) then makes the missing calls for
-the rows that need them, and writes those rows too.  Its ``run.json`` records the prompts under a queue run's names
+alignment call), with what they need.  A row whose queue answer is not on record (a reading that failed in its batch,
+or answers under another queue prompt, which the runner does not replay) waits on the queue call of its chunk, then
+on at most a check call per reading and an alignment call; the estimate counts both (from 2026-10-13: before, such a
+row listed no call and the estimate was $0).  Without ``--dry-run`` it writes the changed rows' blocks (the answers'
+batch kept as ``batch_id``, the re-route in ``rerouted``) and their new ``holding`` to the registry, and its own
+record to ``states_pass/<batch_id>/``.  ``--send-missing`` (paid, live) then makes the missing calls for the rows that
+need them, always under the cost gate's cap (an estimate that counts nothing for rows waiting on calls is refused),
+and writes those whose route or list changes.  Its ``run.json`` records the prompts under a queue run's names
 (from 2026-10-13; the one earlier re-route, ``states_reroute_r2``, was filled in by hand): ``rubric_version`` and
 ``prompt_sha256``, the queue prompt of the answers it used, as each source batch's ``run.json`` recorded it (per batch
 in ``queue_prompts``, with the re-route's own batch when ``--send-missing`` sent a queue call; the two top-level
@@ -557,6 +561,22 @@ def _source_queue_prompt(batch: str, args) -> dict:
     return {"rubric_version": run_json.get("rubric_version"), "prompt_sha256": run_json.get("prompt_sha256")}
 
 
+def _waits_on(call: sp.Call, key: str) -> bool:
+    """Whether the row ``key`` waits on ``call``: a queue call is keyed by its chunk (``c000``) and carries the chunk's
+    rows in ``items``; a check or alignment call is keyed by its row."""
+    if call.items:
+        return any(x.get("key") == key for x in call.items)
+    return call.key == key
+
+
+def _follow_on_calls(runner: sp.StatesPassRunner, it: sp.StatesItem, old: dict) -> list:
+    """The gloss calls a row waiting on a queue call may need once the answer comes, as an upper bound (as a queue run's
+    estimate counts them: a check call per reading and an alignment call), sized on the row's earlier gloss."""
+    gloss = old.get("gloss") or it.label
+    return [runner.check_call(it.key, it.label, gloss, rep=r) for r in range(runner.readings)] + (
+        [runner.alignment_call(it.key, it.label, gloss)] if runner.align else [])
+
+
 def run_reroute(args, out_dir: Path) -> int:
     """``--reroute``: every row on the states list decided under other route rules than ``--route-rules``, decided
     again from its batch's answers on record (no call); printed, then written unless ``--dry-run``.  With
@@ -576,7 +596,8 @@ def run_reroute(args, out_dir: Path) -> int:
     print(f"plan: {json.dumps({'reroute': True, 'route_rules': rules, 'n_rows': len(todo), 'batches': {b: len(v) for b, v in sorted(by_batch.items())}})}")
     changed: dict[str, dict] = {}          # key -> new block
     report: list[dict] = []
-    pending: dict[str, tuple[str, dict, list]] = {}   # key -> (batch, row, the calls it waits on)
+    # key -> (batch, row, the calls it waits on, the gloss calls it may need after a queue call it waits on)
+    pending: dict[str, tuple[str, dict, list, list]] = {}
     queue_prompts: dict[str, dict] = {}    # batch -> the queue prompt its answers were given under (run.json)
     for batch, brows in sorted(by_batch.items()):
         runner, items, missing = _replay_batch(batch, brows, args, rules, sp.RecordOnlyTransport())
@@ -585,11 +606,21 @@ def run_reroute(args, out_dir: Path) -> int:
         if runner is None:
             continue
         queue_prompts[batch] = _source_queue_prompt(batch, args)
-        needed = runner.transport.needed
+        # rows waiting on a queue call (a reading not on record: one that failed in its batch, or answers under
+        # another queue prompt, which the runner skips), matched by the chunk that holds them.  The replay stopped at
+        # that wave, before it read any row's gloss answers, so the other rows are replayed again without them.
+        queue_needed = [c for c in runner.transport.needed if c.step == "queue"]
+        waits = {it.key: [c for c in queue_needed if _waits_on(c, it.key)] for it in items}
+        waits = {k: cs for k, cs in waits.items() if cs}
+        settled = runner
+        if waits:
+            rest = {it.key: brows[it.key] for it in items if it.key not in waits}
+            settled = _replay_batch(batch, rest, args, rules, sp.RecordOnlyTransport())[0] if rest else None
+        needed = settled.transport.needed if settled is not None else []
         for it in items:
-            res = runner.results[it.key]
+            res = None if it.key in waits else settled.results[it.key]
             old = sp.block_of(brows[it.key])
-            if res.stage == "judged":
+            if res is not None and res.stage == "judged":
                 new = sp.rerouted_block(res.block, old, reroute_batch_id=args.batch_id)
                 ch = sp.route_change(old, new)
                 chk = new.get("gloss_check") or {}
@@ -602,14 +633,16 @@ def run_reroute(args, out_dir: Path) -> int:
                 if ch:
                     changed[it.key] = new
             else:
-                calls = [c for c in needed if c.key == it.key]
-                # the block holds the queue answers the record replayed
+                calls = waits.get(it.key) or [c for c in needed if _waits_on(c, it.key)]
+                follow = _follow_on_calls(runner, it, old) if it.key in waits else []
+                # the block holds the queue answers the batch decided on (for a row waiting on a queue call, the new
+                # answer may route it otherwise)
                 route, why = sp.route_for(old, label=it.label, from_states_pass=bool(it.meta.get("from_states_pass")),
                                           rules=rules)
-                pending[it.key] = (batch, brows[it.key], calls)
+                pending[it.key] = (batch, brows[it.key], calls, follow)
                 report.append({"key": it.key, "label": it.label, "batch": batch, "outcome": "needs_calls",
                                "from": old.get("route"), "to": route, "route_reason": why,
-                               "needs": sorted(c.step for c in calls),
+                               "needs": sorted(c.step for c in calls), "then_up_to": len(follow),
                                "suggested_name": old.get("suggested_name")})
     for r in report:
         if r["outcome"] == "changed":
@@ -619,8 +652,9 @@ def run_reroute(args, out_dir: Path) -> int:
             print(f"CHANGED   {r['label']} ({r['batch']}): {r['from']} -> {r['to']} ({r['holding_after']}){extra}")
         elif r["outcome"] == "needs_calls":
             need = " and ".join(f"{n} {s}" if n > 1 else s for s, n in sorted(Counter(r["needs"]).items()))
+            then = f", then up to {r['then_up_to']} gloss call(s)" if r.get("then_up_to") else ""
             print(f"NEEDS     {r['label']} ({r['batch']}): {r['from']} -> {r['to']} once {need} "
-                  f"call(s) are made (not on record); {r['route_reason']}")
+                  f"call(s) are made (not on record){then}; {r['route_reason']}")
         elif r["outcome"] == "no_record":
             print(f"NO RECORD {r['label']} ({r['batch']}): {r['why']}")
     same = [f"{r['label']} ({r['to']})" for r in report if r["outcome"] == "unchanged"]
@@ -630,19 +664,30 @@ def run_reroute(args, out_dir: Path) -> int:
     print(f"reroute: {n.get('changed', 0)} changed, {n.get('unchanged', 0)} unchanged, "
           f"{n.get('needs_calls', 0)} need calls, {n.get('no_record', 0)} without a record "
           f"(of {len(todo)} rows decided under other route rules)")
-    calls = [c for _, _, cs in pending.values() for c in cs]
-    est_usd = sp.StatesPassRunner(client=None, batch_id="estimate", mode="queue").estimate_usd(calls) if calls else 0.0
+    # a queue call covers its chunk's rows: each call counted once; then the gloss calls those rows may need
+    calls = list({id(c): c for _, _, cs, _ in pending.values() for c in cs}.values())
+    follow = [c for _, _, _, fs in pending.values() for c in fs]
+    est_runner = sp.StatesPassRunner(client=None, batch_id="estimate", mode="queue")
+    est_usd = est_runner.estimate_usd(calls) + est_runner.estimate_usd(follow)
     if calls:
-        print(f"--send-missing would make {len(calls)} call(s) ({dict(Counter(c.step for c in calls))}), "
-              f"about ${est_usd:.4f} live")
+        print(f"--send-missing would make {len(calls)} call(s) ({dict(Counter(c.step for c in calls))})"
+              + (f", then up to {len(follow)} gloss call(s) for the rows whose queue answers it asks again"
+                 if follow else "") + f", about ${est_usd:.4f} live" + (" at most" if follow else ""))
     refused: Optional[str] = None
     cap = None
-    if args.send_missing and calls:
-        try:
-            cap = confirm_or_abort(est_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
-                                   confirmed_by=args.confirmed_by)
-        except CostRefused as exc:
-            refused = exc.msg
+    if args.send_missing and pending:
+        # never uncapped: an estimate that counts nothing for rows that wait on calls is refused, not sent
+        if not calls or est_usd <= 0:
+            refused = (f"{len(pending)} row(s) wait on calls, but the estimate counts {len(calls)} call(s) at "
+                       f"${est_usd:.4f}; --send-missing does not run without a cap")
+        else:
+            try:
+                cap = confirm_or_abort(est_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                                       confirmed_by=args.confirmed_by)
+            except CostRefused as exc:
+                refused = exc.msg
+            if refused is None and cap is None:
+                refused = "the cost gate set no cap; --send-missing does not run without one"
     sha = git_sha()
     dirty = platform_dirty_files()
     dirty_check = {"paths": list(PLATFORM_PATHS), "dirty": dirty,
@@ -654,11 +699,13 @@ def run_reroute(args, out_dir: Path) -> int:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
         print(f"DRY-RUN: would write {len(changed)} rows to the registry {args.registry} and {out_dir}/"
-              + (f"; with --send-missing, {len(pending)} more after {len(calls)} call(s)" if pending else ""))
+              + (f"; with --send-missing, up to {len(pending)} more after {len(calls)} call(s)" if pending else ""))
         return 0
     if refused:
         print(f"REFUSED: {refused}", file=sys.stderr)
         return 2
+    if args.send_missing and pending and cap is None:     # the gate above refuses first: never sent uncapped
+        raise RuntimeError("--send-missing reached its calls without a cap")
     if not changed and not (args.send_missing and pending):
         print("nothing to write", file=sys.stderr)
         return 0
@@ -680,7 +727,7 @@ def run_reroute(args, out_dir: Path) -> int:
         import anthropic
         load_dotenv(_REPO_ROOT / ".env")
         by: dict[str, dict] = {}
-        for k, (batch, row, _) in pending.items():
+        for k, (batch, row, _, _) in pending.items():
             by.setdefault(batch, {})[k] = row
         for batch, brows in sorted(by.items()):
             client = anthropic.AsyncAnthropic(max_retries=0)
@@ -694,12 +741,15 @@ def run_reroute(args, out_dir: Path) -> int:
             for it in items:
                 res = runner.results[it.key]
                 if res.stage == "judged":
-                    changed[it.key] = sp.rerouted_block(res.block, sp.block_of(brows[it.key]),
-                                                        reroute_batch_id=args.batch_id)
+                    # written only when the route or the list changes, as from the record alone
+                    new = sp.rerouted_block(res.block, sp.block_of(brows[it.key]), reroute_batch_id=args.batch_id)
+                    ch = sp.route_change(sp.block_of(brows[it.key]), new)
+                    if ch:
+                        changed[it.key] = new
                     for r in report:
                         if r["key"] == it.key:
-                            r.update(outcome="changed_after_calls", to=res.block["route"],
-                                     holding_after=res.block["holding_after"])
+                            r.update(outcome="changed_after_calls" if ch else "unchanged_after_calls",
+                                     to=new["route"], holding_after=new["holding_after"])
             runner.warn_parse_rate(logger)
         # a queue call the record lacked (a reading that failed in its batch, or an answer under another queue prompt,
         # which the replay skips) was sent under the current queue prompt

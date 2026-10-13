@@ -12,6 +12,7 @@ The old behaviour stays reproducible behind ``route_rules=1`` / ``--route-rules 
 as_recorded``.  No API call: fake clients throughout (the CLI fixture of ``test_gapgen_states_pass_v4``)."""
 import argparse
 import json
+from collections import Counter
 
 import pytest
 
@@ -374,6 +375,24 @@ def _reroute(cli, reg, cand, *extra):
                             "--out-root", str(cand), *extra])
 
 
+def _under_another_queue_prompt(cand, batch="b1"):
+    """Make a batch's record say its queue answers were given under queue prompt v3 (its run.json and its queue
+    records), as a batch judged before a prompt change: the runner replays none of its queue answers (its check and
+    alignment answers still are).  Returns v3's sha."""
+    from assistant_axis.gapgen.rubric_versions import HISTORY
+    d, v3 = cand / "states_pass" / batch, HISTORY["states_queue"][3]
+    (d / "run.json").write_text(json.dumps({**_run_json(cand, batch), "rubric_version": 3, "prompt_sha256": v3}))
+    recs = [json.loads(x) for x in (d / "responses.jsonl").read_text().splitlines()]
+    (d / "responses.jsonl").write_text("".join(
+        json.dumps({**r, "prompt_sha256": v3} if r["step"] == "queue" else r) + "\n" for r in recs))
+    return v3
+
+
+def _steps(client):
+    return Counter("check" if system_text(c) == sp.CHECK_PROMPT else "queue" if system_text(c) == sp.QUEUE_PROMPT
+                   else "alignment" for c in client.calls)
+
+
 class TestRerouteRecord:
     """A re-route's run.json names the prompts of the answers it used under a queue run's names, so that the pin test
     reads it as it reads a queue run's (until 2026-10-13 it recorded none: ``states_reroute_r2`` was filled in by
@@ -404,8 +423,9 @@ class TestRerouteRecord:
         h = Registry(reg).fold()["hopish#1"]["states_pass"]
         assert (h["alignment_step_version"], h["alignment_prompt_sha256"]) == (run["alignment_step_version"],
                                                                                 run["alignment_prompt_sha256"])
-        # no queue call was sent: the queue prompt is the source batch's alone
+        # no queue call was sent: the queue prompt is the source batch's alone; the calls ran capped at the budget
         assert run["rubric_version"] == 4 and list(run["queue_prompts"]) == ["b1"]
+        assert run["estimate_usd"] > 0 and run["cap_usd"] == 1.0
         assert pin_problems("states_pass/rr", run) == []
 
     def test_batches_on_different_queue_prompts_are_recorded_per_batch(self, tmp_path, cli):
@@ -413,15 +433,9 @@ class TestRerouteRecord:
         replay can use (the runner skips another prompt's answers), so ``--send-missing`` asks its rows again under
         the current one: the re-route's own batch joins ``queue_prompts``, and with the two prompts differing no
         top-level pair is recorded.  Each batch's pair is still pinned."""
-        from assistant_axis.gapgen.rubric_versions import HISTORY
         from assistant_axis.tests.test_gapgen_rubric_v2_round4 import pin_problems
         reg, cand = _batch_under_rules_1(tmp_path, cli)
-        b1, v3 = cand / "states_pass" / "b1", HISTORY["states_queue"][3]
-        src = _run_json(cand, "b1")
-        (b1 / "run.json").write_text(json.dumps({**src, "rubric_version": 3, "prompt_sha256": v3}))
-        recs = [json.loads(x) for x in (b1 / "responses.jsonl").read_text().splitlines()]
-        (b1 / "responses.jsonl").write_text("".join(
-            json.dumps({**r, "prompt_sha256": v3} if r["step"] == "queue" else r) + "\n" for r in recs))
+        v3 = _under_another_queue_prompt(cand)
         assert _reroute(cli, reg, cand, "--send-missing") == 0
         run = _run_json(cand, "rr")
         sent = [json.loads(x) for x in (cand / "states_pass" / "rr" / "responses.jsonl").read_text().splitlines()]
@@ -434,3 +448,71 @@ class TestRerouteRecord:
         # the pin test reads each batch's pair
         bad = {**run, "queue_prompts": {**run["queue_prompts"], "b1": {"rubric_version": 3, "prompt_sha256": "0" * 64}}}
         assert pin_problems("states_pass/rr", bad) == [("states_pass/rr", "states_queue", 3, "0" * 12)]
+
+
+class TestRerouteQueueCalls:
+    """A row waiting on a queue call (a reading not on record) is matched by the chunk that holds it (a queue call is
+    keyed by its chunk, not by the row): it is listed with that call, the estimate counts it and the gloss calls that
+    may follow, ``--send-missing`` runs only under a cap, and a row whose route does not change is not rewritten.
+    Before 2026-10-13 such a row listed no call, the estimate was $0, the cost gate never ran and the calls were sent
+    with no cap (a 3-reading batch with a failed reading: ``test_gapgen_states_pass_readings.py``)."""
+
+    LABELS = ("crossish", "hopish", "passish", "plainheld", "renamish")
+
+    def test_a_batch_under_another_queue_prompt(self, tmp_path, cli, capsys):
+        reg, cand = _batch_under_rules_1(tmp_path, cli)
+        _under_another_queue_prompt(cand)
+        before = {k: r["states_pass"] for k, r in Registry(reg).fold().items() if r.get("states_pass")}
+        capsys.readouterr()
+        assert _reroute(cli, reg, cand, "--dry-run") == 0
+        out = capsys.readouterr().out
+        # every row waits on its chunk's one queue call, then on at most a check and an alignment call
+        for lb in self.LABELS:
+            line = next(x for x in out.splitlines() if x.startswith(f"NEEDS     {lb} (b1): "))
+            assert "once queue call(s) are made (not on record), then up to 2 gloss call(s)" in line
+        assert "reroute: 0 changed, 0 unchanged, 5 need calls" in out
+        assert "--send-missing would make 1 call(s) ({'queue': 1}), then up to 10 gloss call(s)" in out
+        assert float(out.split("about $")[1].split()[0]) > 0
+        assert _reroute(cli, reg, cand, "--send-missing", "--budget-usd", "0.5") == 0
+        # the queue call, then the gloss calls the record lacks (hopish's; crossish's are on record)
+        assert _steps(cli["live"][-1]) == {"queue": 1, "check": 1, "alignment": 1}
+        run = _run_json(cand, "rr")
+        assert run["estimate_usd"] > 0 and run["cap_usd"] == 0.5
+        # only the rows whose route changed are written
+        rows = Registry(reg).fold()
+        assert {k for k in before if rows[k]["states_pass"] != before[k]} == {"crossish#1", "hopish#1"}
+        assert rows["crossish#1"]["states_pass"]["route"] == "predisposition"
+        assert rows["plainheld#1"]["states_pass"]["route_rules"] == 1
+        res = {json.loads(x)["label"]: json.loads(x)["outcome"]
+               for x in (cand / "states_pass" / "rr" / "results.jsonl").read_text().splitlines()}
+        assert res == {"crossish": "changed_after_calls", "hopish": "changed_after_calls",
+                       "passish": "unchanged_after_calls", "plainheld": "unchanged_after_calls",
+                       "renamish": "unchanged_after_calls"}
+
+    def test_send_missing_never_runs_uncapped(self, tmp_path, cli, monkeypatch):
+        mod = cli["mod"]
+        reg, cand = _batch_under_rules_1(tmp_path, cli)
+        _under_another_queue_prompt(cand)
+        budgets = []                     # every GuardedUsage the re-route makes, by its cap
+
+        class Recording(mod.GuardedUsage):
+            def __post_init__(self):
+                budgets.append(self.budget_usd)
+                super().__post_init__()
+        monkeypatch.setattr(mod, "GuardedUsage", Recording)
+        before, n_clients = reg.read_bytes(), len(cli["live"])
+        # an estimate of $0 for rows that wait on calls is refused, not sent uncapped
+        real_estimate = sp.StatesPassRunner.estimate_usd
+        monkeypatch.setattr(sp.StatesPassRunner, "estimate_usd", lambda self, calls, **kw: 0.0)
+        assert _reroute(cli, reg, cand, "--send-missing") == 2
+        monkeypatch.setattr(sp.StatesPassRunner, "estimate_usd", real_estimate)
+        # so is a gate that set no cap
+        real_gate = mod.confirm_or_abort
+        monkeypatch.setattr(mod, "confirm_or_abort", lambda *a, **k: None)
+        assert _reroute(cli, reg, cand, "--send-missing") == 2
+        assert len(cli["live"]) == n_clients and budgets == [] and reg.read_bytes() == before
+        assert not (cand / "states_pass" / "rr").exists()
+        # through the real gate the calls go out under the typed budget
+        monkeypatch.setattr(mod, "confirm_or_abort", real_gate)
+        assert _reroute(cli, reg, cand, "--send-missing", "--budget-usd", "0.25") == 0
+        assert len(cli["live"]) == n_clients + 1 and budgets == [0.25]
