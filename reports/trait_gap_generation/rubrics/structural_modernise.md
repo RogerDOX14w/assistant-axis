@@ -21,7 +21,7 @@ rides the candidate's `partner_hint`.  The code is
 **Choices in the text, and why.**  The role says *whose* trait to name (the person with the vice, the person given
 to the sin, someone with a strong or a weak need), since a need's low pole and a strength's underuse are otherwise
 easy to answer with the need or the strength itself.  Plan 09's two illustrations ("pusillanimous" becoming
-"self-effacing", Theophrastus' "petty ambition" becoming "status-seeking") are not used: both items are rows of the
+[self-effacing](../../../data/traits/instructions/self_effacing.json), Theophrastus' "petty ambition" becoming [status-seeking](../../../data/traits/instructions/status_seeking.json)) are not used: both items are rows of the
 tables, so they would hand the call its own answers, and both answers are corpus traits.  The one example is an
 archaism outside every list (`pettifogging` to `nitpicking`).  The over-/under-/too-/non- rule is the operators
 call's.

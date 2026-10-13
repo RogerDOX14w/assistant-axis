@@ -44,8 +44,8 @@ same disposition in another mode.  `position` (where the trait sits: `deficiency
 **Word hygiene.**  The examples are traits outside the corpus, the seed queue and the validation files
 (`provident`, `censorious`, `monarchist`) and their answers too (`improvident`, `miserly`, `spendthrift`, `lax`,
 `self-scolding`, `carping`, `republican`, and the label-form examples `penny-pinching`, `slow to forgive`,
-`over-punctual`, `too punctual`): plan 09's own illustrations (cautious, honest, harsh, arrogant, reckless,
-self-critical) are corpus traits and would have seeded the pair-recovery test with its own answers.
+`over-punctual`, `too punctual`): plan 09's own illustrations ([cautious](../../../data/traits/instructions/cautious.json), [honest](../../../data/traits/instructions/honest.json), [harsh](../../../data/traits/instructions/harsh.json), [arrogant](../../../data/traits/instructions/arrogant.json), [reckless](../../../data/traits/instructions/reckless.json),
+[self-critical](../../../data/traits/instructions/self_critical.json)) are corpus traits and would have seeded the pair-recovery test with its own answers.
 [test_gapgen_structural_prompts.py](../../../assistant_axis/tests/test_gapgen_structural_prompts.py) fails if an
 example word becomes a corpus stem, a queue label or a validation word, and records the two prose words of the
 text that are on those lists anyway (`mean`, a value of `position`, and `operator`, inside `the_operator`; a new one

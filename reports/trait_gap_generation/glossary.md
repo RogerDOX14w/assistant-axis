@@ -511,3 +511,54 @@ well it separates them (target 0.85, report and decide).
 ### Union rank
 The generator's single ordering of every word any pass surfaced: by the best log-probability the word
 reached in any frame, any pass, ties by word frequency.  Recall@k against it is the recovery curve.
+
+## Structural-generator terms (added 2026-10-13, for workstream 9)
+
+Terms of [coding_plan_09_structural_generators.md](./coding_plan_09_structural_generators.md) and its readouts.
+
+<a id="aristotelian-mean"></a>
+### Aristotelian mean
+Aristotle's picture of a virtue as the right amount of something, between a vice of too little (the
+*deficiency*) and a vice of too much (the *excess*): courage between cowardice and rashness, liberality
+between meanness and prodigality.  A *triple* is the three together.  Generator A types his table by
+hand; generator B asks for the two vices of every corpus trait it can read this way.
+
+<a id="position"></a>
+### Position
+Where a corpus trait, as its description reads, sits on its own scale: `deficiency` (too little of a
+quality), `mean` (the sound amount), `excess` (too much), or `not_scalar` (a creed, a stance, a
+membership or a style that is not more or less of anything).  The operators call answers it for every
+trait; the answers go to a side table (`position_table.jsonl`) for the pairing review, never into a
+trait file.
+
+<a id="structural-operators"></a>
+### The five structural operators
+The moves generator B makes from each corpus trait, in one call: **opposite** (its contrary, asked
+without showing the recorded `negative_label`, so that a disagreement is a signal), **excess** and
+**deficiency** (the vices at the too-much and too-little ends of its scale; together the *degree
+fillers*), **retarget** (the same disposition aimed at oneself, intimates, strangers, authority,
+animals or ideas, and for the traits at alignment score 3 also at the user, the operator and the
+developer of an AI assistant) and **remode** (the same disposition as an attitude, a habit or a way of
+speaking).  An opposite of a `non-X` or singleton trait is a *pair completion*.
+
+<a id="null-rate"></a>
+### Null rate (and the non-null share)
+The share of a retarget target's or remode mode's answers that are `null`.  Most traits have no
+named disposition toward animals or in speech, so `null` should be the commonest answer; the pilot's
+gate reads the other side, the non-null share: above 40% means the model invents forms, below 5% means
+it does not try.
+
+<a id="label-set-jaccard"></a>
+### Label-set Jaccard
+How alike two runs of the same call are for one trait: the labels both runs gave (as stems) divided by
+the labels either gave, from 0 (nothing in common) to 1 (the same labels).  Haiku 5.5 takes no
+temperature setting, so the stability test runs 30 traits twice and reads the median; 0.5 or more is
+the bar.
+
+<a id="net-new"></a>
+### Net-new row, net-new kept share
+A *net-new* row is one the registry has not yet filtered: not a corpus trait, not a seed-queue entry,
+and not a word M1 and M3 have already decided, whichever generator brought it (a registered word they
+have not decided still counts, since it still costs and is still reviewed).  The review-hour wave counts only
+net-new rows toward its 300.  The *net-new kept share* is the kept rows (M3 `new` or `grey`) per
+submitted net-new row, measured at the pilot; it replaces plan 04's assumed 0.5 in sizing the wave.
