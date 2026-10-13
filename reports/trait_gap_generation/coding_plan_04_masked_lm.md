@@ -6,6 +6,8 @@ platform's "Interface as built" in [coding_plan_platform.md](./coding_plan_platf
 is entirely local (BERT-class fill-mask models on the Mac, $0 in API calls); the only paid steps are the
 platform's M1 and M3 on what it submits.  Roger's review comments go into this file.
 
+**Reviewed by Roger on 2026-10-13, after the build: no changes.**
+
 ## Open questions for Roger (decide when reviewing this plan)
 
 1. **Variant B — the decision this plan needs from you** (your answer 4 asked for the proposal in plain
