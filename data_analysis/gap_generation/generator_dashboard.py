@@ -139,7 +139,10 @@ def write_output(path: Path, payload, *, title: str, inputs: list, dry_run: bool
             old = json.loads(path.read_text(encoding="utf-8")).get("result")
         except (OSError, json.JSONDecodeError):
             old = None
-        if old != json.loads(json.dumps(payload, default=str)):
+
+        def comparable(d):              # the build time is not a change of the result
+            return {k: v for k, v in d.items() if k != "produced_at"} if isinstance(d, dict) else d
+        if comparable(old) != comparable(json.loads(json.dumps(payload, default=str))):
             shutil.copyfile(path, path.with_name(f"{path.name}.bak.{utc_stamp()}"))
     atomic_write_text(text, path)
     print(f"wrote {path}")

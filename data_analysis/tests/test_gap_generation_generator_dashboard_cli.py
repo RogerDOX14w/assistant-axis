@@ -80,7 +80,7 @@ def test_the_dashboard_writes_enveloped_outputs(env, capsys):
     assert any(i["dep_key"] == "graph" for i in dash["_provenance"]["inputs"])
     md = (env["out"] / "dashboard.md").read_text()
     assert "| gen1 |" in md and "| gen2 |" in md
-    # a second run with nothing changed keeps no backup; a changed result keeps the old file
+    # a second run with nothing changed keeps no backup (the build time is not a change), a changed result does
     assert GD.main(["dashboard", *env["base"]]) == 0
     assert not list(env["out"].glob("*.bak.*"))
 
@@ -110,3 +110,14 @@ def test_paraphrase_set_build_dry_run_and_run_refusal(env, capsys, monkeypatch):
     assert GD.main(["paraphrase-set", "run", *real, "--budget-usd", "0.00001"]) == 2
     assert "exceeds --budget-usd" in capsys.readouterr().err
     assert not (sd / "responses.jsonl").exists()
+
+
+def test_a_rebuild_keeps_a_backup_only_when_the_result_changes(env, monkeypatch):
+    times = iter(["2026-10-13T10:00:00+00:00", "2026-10-13T10:00:05+00:00", "2026-10-13T10:00:09+00:00"])
+    monkeypatch.setattr(GD, "utc_now", lambda: next(times))
+    assert GD.main(["dashboard", *env["base"]]) == 0
+    assert GD.main(["dashboard", *env["base"]]) == 0                 # a later second, the same result
+    assert not list(env["out"].glob("*.bak.*"))
+    (env["cd"] / "runs" / "gen1" / "r1" / "usage.json").write_text(json.dumps({"total_cost_usd": 2.5}))
+    assert GD.main(["dashboard", *env["base"]]) == 0                 # a cost changed
+    assert [p.name.split(".bak.")[0] for p in env["out"].glob("*.bak.*")] == ["dashboard.json"]
