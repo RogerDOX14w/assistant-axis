@@ -1,7 +1,7 @@
 {
  "result": {
   "schema_version": 1,
-  "produced_at": "2026-10-13T19:55:25+00:00",
+  "produced_at": "2026-10-13T22:04:47+00:00",
   "inputs": {
    "registry": "data/candidates/registry.jsonl",
    "registry_keys": 9949,
@@ -198,14 +198,18 @@
      "pre_handled": 185,
      "terms": 2513,
      "groups": 1912,
-     "singleton_terms": 1562,
-     "grouped_terms": 951,
-     "expected_minutes": 782.7,
+     "singleton_terms": 979,
+     "grouped_terms": 1534,
+     "expected_minutes": 887.6,
      "expected_accepted": 1023.3,
-     "novel_per_review_minute": 1.307,
+     "novel_per_review_minute": 1.153,
      "novel_per_usd": 10.88,
      "share_used": 0.5352,
-     "share_borrowed": false
+     "share_borrowed": false,
+     "blended_minutes": 1034.2,
+     "blended_accepted": 430.4,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 4.58
     },
     "streams": [
      {
@@ -413,14 +417,18 @@
      "pre_handled": 19,
      "terms": 206,
      "groups": 193,
-     "singleton_terms": 182,
-     "grouped_terms": 24,
-     "expected_minutes": 54.4,
+     "singleton_terms": 77,
+     "grouped_terms": 129,
+     "expected_minutes": 73.3,
      "expected_accepted": 103.3,
-     "novel_per_review_minute": 1.897,
+     "novel_per_review_minute": 1.408,
      "novel_per_usd": 7.21,
      "share_used": 0.5352,
-     "share_borrowed": true
+     "share_borrowed": true,
+     "blended_minutes": 84.8,
+     "blended_accepted": 35.3,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 2.46
     },
     "streams": [
      {
@@ -615,14 +623,18 @@
      "pre_handled": 27,
      "terms": 223,
      "groups": 202,
-     "singleton_terms": 186,
-     "grouped_terms": 37,
-     "expected_minutes": 60.9,
+     "singleton_terms": 72,
+     "grouped_terms": 151,
+     "expected_minutes": 81.4,
      "expected_accepted": 108.1,
-     "novel_per_review_minute": 1.775,
+     "novel_per_review_minute": 1.327,
      "novel_per_usd": 17.96,
      "share_used": 0.5352,
-     "share_borrowed": true
+     "share_borrowed": true,
+     "blended_minutes": 91.8,
+     "blended_accepted": 38.2,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 6.34
     },
     "streams": [
      {
@@ -750,14 +762,18 @@
      "pre_handled": 9,
      "terms": 223,
      "groups": 217,
-     "singleton_terms": 211,
-     "grouped_terms": 12,
-     "expected_minutes": 56.4,
+     "singleton_terms": 123,
+     "grouped_terms": 100,
+     "expected_minutes": 72.3,
      "expected_accepted": 116.1,
-     "novel_per_review_minute": 2.058,
+     "novel_per_review_minute": 1.607,
      "novel_per_usd": 10.5,
      "share_used": 0.5352,
-     "share_borrowed": true
+     "share_borrowed": true,
+     "blended_minutes": 91.8,
+     "blended_accepted": 38.2,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 3.45
     },
     "streams": [
      {
@@ -871,14 +887,18 @@
      "pre_handled": 44,
      "terms": 414,
      "groups": 366,
-     "singleton_terms": 324,
-     "grouped_terms": 90,
-     "expected_minutes": 116.9,
+     "singleton_terms": 113,
+     "grouped_terms": 301,
+     "expected_minutes": 154.9,
      "expected_accepted": 146.4,
-     "novel_per_review_minute": 1.252,
+     "novel_per_review_minute": 0.945,
      "novel_per_usd": 19.58,
      "share_used": 0.4,
-     "share_borrowed": false
+     "share_borrowed": false,
+     "blended_minutes": 170.4,
+     "blended_accepted": 70.9,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 9.48
     },
     "streams": [
      {
@@ -993,14 +1013,18 @@
      "pre_handled": 32,
      "terms": 328,
      "groups": 277,
-     "singleton_terms": 244,
-     "grouped_terms": 84,
-     "expected_minutes": 94.9,
+     "singleton_terms": 123,
+     "grouped_terms": 205,
+     "expected_minutes": 116.7,
      "expected_accepted": 148.3,
-     "novel_per_review_minute": 1.562,
+     "novel_per_review_minute": 1.27,
      "novel_per_usd": 4.31,
      "share_used": 0.5352,
-     "share_borrowed": true
+     "share_borrowed": true,
+     "blended_minutes": 135.0,
+     "blended_accepted": 56.2,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 1.63
     },
     "streams": [
      {
@@ -1156,14 +1180,18 @@
      "pre_handled": 9,
      "terms": 126,
      "groups": 119,
-     "singleton_terms": 112,
-     "grouped_terms": 14,
-     "expected_minutes": 33.2,
+     "singleton_terms": 59,
+     "grouped_terms": 67,
+     "expected_minutes": 42.7,
      "expected_accepted": 63.7,
-     "novel_per_review_minute": 1.919,
+     "novel_per_review_minute": 1.491,
      "novel_per_usd": 2.92,
      "share_used": 0.5352,
-     "share_borrowed": true
+     "share_borrowed": true,
+     "blended_minutes": 51.9,
+     "blended_accepted": 21.6,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 0.99
     },
     "streams": [
      {
@@ -1264,14 +1292,18 @@
      "pre_handled": 8,
      "terms": 150,
      "groups": 140,
-     "singleton_terms": 130,
-     "grouped_terms": 20,
-     "expected_minutes": 40.1,
+     "singleton_terms": 63,
+     "grouped_terms": 87,
+     "expected_minutes": 52.2,
      "expected_accepted": null,
      "novel_per_review_minute": null,
      "novel_per_usd": null,
      "share_used": null,
-     "share_borrowed": false
+     "share_borrowed": false,
+     "blended_minutes": 61.7,
+     "blended_accepted": 25.7,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 11.12
     },
     "streams": [
      {
@@ -1369,14 +1401,18 @@
      "pre_handled": 3,
      "terms": 55,
      "groups": 53,
-     "singleton_terms": 51,
-     "grouped_terms": 4,
-     "expected_minutes": 14.1,
+     "singleton_terms": 24,
+     "grouped_terms": 31,
+     "expected_minutes": 19.0,
      "expected_accepted": null,
      "novel_per_review_minute": null,
      "novel_per_usd": null,
      "share_used": null,
-     "share_borrowed": false
+     "share_borrowed": false,
+     "blended_minutes": 22.6,
+     "blended_accepted": 9.4,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 1.37
     },
     "streams": [
      {
@@ -1467,14 +1503,18 @@
      "pre_handled": 1,
      "terms": 2,
      "groups": 2,
-     "singleton_terms": 2,
-     "grouped_terms": 0,
-     "expected_minutes": 0.5,
+     "singleton_terms": 0,
+     "grouped_terms": 2,
+     "expected_minutes": 0.8,
      "expected_accepted": null,
      "novel_per_review_minute": null,
      "novel_per_usd": null,
      "share_used": null,
-     "share_borrowed": false
+     "share_borrowed": false,
+     "blended_minutes": 0.8,
+     "blended_accepted": 0.3,
+     "blended_per_review_minute": 0.416,
+     "blended_per_usd": 7.58
     },
     "streams": [
      {
@@ -3558,11 +3598,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
-   "git_sha": "20bc5bef+dirty",
+   "git_sha": "77e13c72+dirty",
    "author": "Roger Dearnaley",
    "title": "generator_dashboard dashboard"
   },
-  "produced_at": "2026-10-13T19:55:26+00:00",
+  "produced_at": "2026-10-13T22:04:47+00:00",
   "inputs": [
    {
     "dep_key": "registry",

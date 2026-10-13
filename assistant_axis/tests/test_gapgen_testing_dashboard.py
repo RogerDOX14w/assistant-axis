@@ -89,20 +89,31 @@ class TestCosts:
 
 class TestStopRule:
     def test_the_arithmetic(self):
-        """Terms a b c d e: e pre-handled; a b in one proposed group (with an outside term z), c alone, d in a group
-        with no other term of the generator.  Groups: {a b}, {c}, {d}: 3 groups; singleton terms c d (2), grouped
-        terms a b (2): minutes (2 x 15 + 2 x 25) / 60; accepted 3 x 0.5."""
+        """Terms a b c d e: e pre-handled; a b in one proposed group (with an outside term z), d in a group whose other
+        member y is another generator's, c in none.  Plan 13 § 6 (as fixed after the review of 2026-10-13): a term in
+        any proposed group is grouped, so the grouped terms are a b d (3) and the singleton c (1): minutes
+        (1 x 15 + 3 x 25) / 60 = 1.5; the groups {a b}, {d}, {c}: accepted 3 x 0.5.  Blended, at 2 terms and 0.5
+        accepted terms a minute: 4 / 2 = 2 minutes, 1 accepted."""
         sr = D.stop_rule(undecided={"a", "b", "c", "d", "e"}, pre_handled={"e", "zz"},
                          proposed_groups=[["a", "b", "z"], ["d", "y"]], singleton_mean_s=15, per_member_s=25,
-                         per_group_share=0.5, cost_usd=3.0)
+                         per_group_share=0.5, cost_usd=3.0, terms_per_minute=2.0, accepted_per_minute=0.5)
         assert (sr.undecided_kept, sr.pre_handled, sr.terms, sr.groups) == (5, 1, 4, 3)
-        assert (sr.singleton_terms, sr.grouped_terms) == (2, 2)
-        assert sr.expected_minutes == pytest.approx(round(80 / 60, 1))
-        assert sr.expected_accepted == 1.5 and sr.novel_per_usd == 0.5
-        assert sr.novel_per_review_minute == pytest.approx(round(1.5 / (80 / 60), 3), abs=0.05)
+        assert (sr.singleton_terms, sr.grouped_terms) == (1, 3)
+        assert sr.expected_minutes == 1.5 and sr.expected_accepted == 1.5 and sr.novel_per_review_minute == 1.0
+        assert sr.novel_per_usd == 0.5
+        assert (sr.blended_minutes, sr.blended_accepted, sr.blended_per_review_minute) == (2.0, 1.0, 0.5)
+        assert sr.blended_per_usd == 0.33
+        assert D.in_proposed_groups({"a", "c", "d"}, [["a", "b"], ["d", "y"]]) == {"a", "d"}
         none = D.stop_rule(undecided={"a"}, pre_handled=set(), proposed_groups=[], singleton_mean_s=None,
                            per_member_s=None, per_group_share=None, cost_usd=None)
         assert none.expected_minutes is None and none.expected_accepted is None and none.novel_per_usd is None
+        assert none.blended_minutes is None and none.blended_accepted is None
+
+    def test_the_blended_rate_of_a_pooled_review(self):
+        rate = RM.PooledRate(batches=("b",), active_minutes=84.1, terms=204, terms_per_active_minute=2.43,
+                             singleton_mean_s=14.6, per_member_s=25.4, promoted=35)
+        assert D.blended_accepted_rate(rate) == pytest.approx(35 / 84.1)
+        assert D.blended_accepted_rate(None) is None
 
 
 class TestStringRecallAndNegatives:
@@ -160,6 +171,7 @@ class TestRowsAndMarkdown:
         assert "| n/a |" in line and "| 0 |" not in line.split("|", 12)[-1][:8]   # recall n/a, never 0
         assert "as of 2026-10-11T21:21:26+00:00" in md            # the lagging figures carry their date
         assert "borrowed" in md
+        assert "*Blended*" in md
 
 
 def test_the_frozen_interface():

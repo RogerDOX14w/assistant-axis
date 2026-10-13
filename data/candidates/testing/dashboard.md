@@ -8,22 +8,22 @@ Inputs: the registry data/candidates/registry.jsonl, the review graph [review_tr
 
 | generator | class | mechanism | candidates | M1 trait | M3 kept / covered (exact label) | cost $ | pre-handled (3 / 4) | review decided (accepted) | promote share, group (term) | string recall | negatives | recall (strict, pair) | expected accepted in minutes | accepted per review-minute | accepted per $ |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| censuses | independent | lexicon | 8,007 | 5,139 | 2,872 / 2,243 (468) | 94.02 | 7% / 2% | 174 (34) | 54% (21%) | 475 (51.0%) | 45 | n/a | 1,023.3 in 783 | 1.31 | 10.9 |
-| roget | seeded | lexicon | 576 | 349 | 243 / 101 (2) | 14.32 | 8% / 2% | 18 (4) | 54% (21%), borrowed | 3 (0.3%) | 0 | n/a | 103.3 in 54 | 1.90 | 7.2 |
-| wn_clusters | independent/seeded | lexicon | 647 | 578 | 277 / 300 (2) | 6.02 | 11% / 4% | 27 (3) | 54% (21%), borrowed | 7 (0.8%) | 0 | n/a | 108.1 in 61 | 1.77 | 18.0 |
+| censuses | independent | lexicon | 8,007 | 5,139 | 2,872 / 2,243 (468) | 94.02 | 7% / 2% | 174 (34) | 54% (21%) | 475 (51.0%) | 45 | n/a | 1,023.3 in 888 (blended: 430 in 1,034) | 1.15 (0.42 blended) | 10.9 (4.6 blended) |
+| roget | seeded | lexicon | 576 | 349 | 243 / 101 (2) | 14.32 | 8% / 2% | 18 (4) | 54% (21%), borrowed | 3 (0.3%) | 0 | n/a | 103.3 in 73 (blended: 35 in 85) | 1.41 (0.42 blended) | 7.2 (2.5 blended) |
+| wn_clusters | independent/seeded | lexicon | 647 | 578 | 277 / 300 (2) | 6.02 | 11% / 4% | 27 (3) | 54% (21%), borrowed | 7 (0.8%) | 0 | n/a | 108.1 in 81 (blended: 38 in 92) | 1.33 (0.42 blended) | 18.0 (6.3 blended) |
 | &nbsp;&nbsp;wn_clusters/closure | independent | lexicon | 553 | 504 | 235 kept | | | | | | | | | | |
 | &nbsp;&nbsp;wn_clusters/antonym | seeded | lexicon | 108 | 85 | 46 kept | | | | | | | | | | |
-| ipip | independent | ipip | 514 | 498 | 240 / 258 (51) | 11.07 | 4% / 1% | 3 (0) | 54% (21%), borrowed | 55 (5.9%) | 0 | n/a | 116.1 in 56 | 2.06 | 10.5 |
-| base_model | independent | base_model | 1,541 | 1,355 | 517 / 836 (354) | 7.48 | 10% / 4% | 59 (6) | 40% (10%) | 352 (37.8%) | 30 | n/a | 146.4 in 117 | 1.25 | 19.6 |
-| alignment_sweep | separate_population | alignment | 464 | 455 | 362 / 93 (21) | 34.39 | 9% / 1% | 2 (2) | 54% (21%), borrowed | 20 (2.1%) | 1 | n/a | 148.3 in 95 | 1.56 | 4.3 |
-| antonym_check | seeded | corpus | 405 | 374 | 135 / 239 (4) | 21.78 | 7% / 1% | 0 (0) | 54% (21%), borrowed | 17 (1.8%) | 0 | n/a | 63.7 in 33 | 1.92 | 2.9 |
-| states_pass | not_a_generator |  | 459 | 372 | 165 / 207 (83) | 2.31 | 5% / 3% | 7 (4) | n/a | 90 (9.7%) | 9 | n/a | n/a in 40 | n/a | n/a |
-| m1_validation | not_a_generator |  | 150 | 108 | 58 / 43 (0) | 6.87 | 5% / 2% | 0 (0) | n/a | 1 (0.1%) | 0 | n/a | n/a in 14 | n/a | n/a |
-| manual | not_a_generator |  | 5 | 5 | 3 / 2 (0) | 0.05 | 33% / 33% | 0 (0) | n/a | 0 (0.0%) | 5 | n/a | n/a in 0 | n/a | n/a |
+| ipip | independent | ipip | 514 | 498 | 240 / 258 (51) | 11.07 | 4% / 1% | 3 (0) | 54% (21%), borrowed | 55 (5.9%) | 0 | n/a | 116.1 in 72 (blended: 38 in 92) | 1.61 (0.42 blended) | 10.5 (3.5 blended) |
+| base_model | independent | base_model | 1,541 | 1,355 | 517 / 836 (354) | 7.48 | 10% / 4% | 59 (6) | 40% (10%) | 352 (37.8%) | 30 | n/a | 146.4 in 155 (blended: 71 in 170) | 0.94 (0.42 blended) | 19.6 (9.5 blended) |
+| alignment_sweep | separate_population | alignment | 464 | 455 | 362 / 93 (21) | 34.39 | 9% / 1% | 2 (2) | 54% (21%), borrowed | 20 (2.1%) | 1 | n/a | 148.3 in 117 (blended: 56 in 135) | 1.27 (0.42 blended) | 4.3 (1.6 blended) |
+| antonym_check | seeded | corpus | 405 | 374 | 135 / 239 (4) | 21.78 | 7% / 1% | 0 (0) | 54% (21%), borrowed | 17 (1.8%) | 0 | n/a | 63.7 in 43 (blended: 22 in 52) | 1.49 (0.42 blended) | 2.9 (1.0 blended) |
+| states_pass | not_a_generator |  | 459 | 372 | 165 / 207 (83) | 2.31 | 5% / 3% | 7 (4) | n/a | 90 (9.7%) | 9 | n/a | n/a in 52 | n/a | n/a |
+| m1_validation | not_a_generator |  | 150 | 108 | 58 / 43 (0) | 6.87 | 5% / 2% | 0 (0) | n/a | 1 (0.1%) | 0 | n/a | n/a in 19 | n/a | n/a |
+| manual | not_a_generator |  | 5 | 5 | 3 / 2 (0) | 0.05 | 33% / 33% | 0 (0) | n/a | 0 (0.0%) | 5 | n/a | n/a in 1 | n/a | n/a |
 
 Any generator names 517 of 932 corpus stems by string (55.5%).
 
-**Reading the columns.**  *Pre-handled*: undecided kept terms with a 3-edge (4-edge) to a term review has decided; they cost no review-minute.  *Promote share*: promote resolutions over resolved groups (decision 3), per term in brackets; *borrowed*: under 50 decided terms, the pooled share.  *String recall*: corpus stems the generator's rows name, separator-blind, of the corpus.  *Negatives*: words Roger turned down in the seed queue that the generator proposed again.  *Recall*: the harness's mean recall over its kept candidates (n/a: no harness batch covers it yet), the strict column at cut-off 4 and pair recovery beside it; *harness side*: a seeded generator, no generator-side hiding.  *Expected accepted*: the groups its undecided, not pre-handled kept terms form times the per-group promote share; the minutes from the measured times per shape.
+**Reading the columns.**  *Pre-handled*: undecided kept terms with a 3-edge (4-edge) to a term review has decided; they cost no review-minute.  *Promote share*: promote resolutions over resolved groups (decision 3), per term in brackets; *borrowed*: under 50 decided terms, the pooled share.  *String recall*: corpus stems the generator's rows name, separator-blind, of the corpus.  *Negatives*: words Roger turned down in the seed queue that the generator proposed again.  *Recall*: the harness's mean recall over its kept candidates (n/a: no harness batch covers it yet), the strict column at cut-off 4 and pair recovery beside it; *harness side*: a seeded generator, no generator-side hiding.  *Expected accepted*: the groups its undecided, not pre-handled kept terms form times the per-group promote share; the minutes from the measured times per shape (a term in any proposed group is priced as a group member, the rest as singletons).  *Blended*, in brackets: the same terms at the review's measured overall rates (terms and accepted terms per active minute), the other end of the range.  The per-shape figure leans on the share at which singletons were promoted, measured on about forty resolved singletons (a 95% interval of roughly 0.37-0.66) that the app surfaced first in the TDA batch; the generators' remaining singletons need not resemble them.
 
 ## Recall from the recorded harness batches
 

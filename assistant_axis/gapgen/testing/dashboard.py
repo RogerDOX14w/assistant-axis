@@ -296,6 +296,13 @@ class StopRule:
     novel_per_usd: Optional[float]
     share_used: Optional[float] = None
     share_borrowed: bool = False
+    #: The same terms at the review's blended measured rate (terms and accepted terms per active minute over every
+    #: shape, the pooled review rate; 2.43 and 0.42 on the TDA batch): the other end of the range the per-shape
+    #: projection above sits in (plan 13 review, S2).
+    blended_minutes: Optional[float] = None
+    blended_accepted: Optional[float] = None
+    blended_per_review_minute: Optional[float] = None
+    blended_per_usd: Optional[float] = None
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -303,7 +310,7 @@ class StopRule:
 
 def term_groups(terms: Iterable[str], proposed_groups: Sequence[Sequence[str]]) -> list[list[str]]:
     """``terms`` grouped as the review would meet them: by the graph's proposed groups (a term in several, in its
-    first), a term in none alone."""
+    first; a proposed group counts once however many of ``terms`` it holds), a term in none alone."""
     left = set(terms)
     out = []
     for g in proposed_groups:
@@ -314,28 +321,47 @@ def term_groups(terms: Iterable[str], proposed_groups: Sequence[Sequence[str]]) 
     return out + [[k] for k in sorted(left)]
 
 
+def in_proposed_groups(terms: Iterable[str], proposed_groups: Sequence[Sequence[str]]) -> set[str]:
+    """The ``terms`` that sit in some proposed group of the graph (plan 13 § 6: "grouped by the graph's proposed
+    groups"), whoever proposed the group's other members."""
+    grouped = {k for g in proposed_groups for k in g}
+    return {k for k in terms if k in grouped}
+
+
 def stop_rule(*, undecided: set, pre_handled: set, proposed_groups: Sequence[Sequence[str]],
               singleton_mean_s: Optional[float], per_member_s: Optional[float], per_group_share: Optional[float],
-              cost_usd: Optional[float], borrowed: bool = False) -> StopRule:
+              cost_usd: Optional[float], borrowed: bool = False, terms_per_minute: Optional[float] = None,
+              accepted_per_minute: Optional[float] = None) -> StopRule:
     """Plan 13 § 6: over the undecided, not pre-handled kept terms, ``expected_minutes`` = (singleton terms x
-    singleton_mean_s + grouped terms x per_member_s) / 60 (a term is grouped when its proposed group has another of
-    the generator's terms); ``expected_accepted`` = the groups those terms form x the per-group promote share
-    (decision 3); their ratio, and accepted per dollar of the generator's cost."""
+    singleton_mean_s + grouped terms x per_member_s) / 60, a term being grouped when it sits in any proposed group of
+    the graph (:func:`in_proposed_groups`; before the review of 2026-10-13 only when the group held another of the
+    same generator's terms); ``expected_accepted`` = the groups those terms form (each proposed group one, each
+    singleton one) x the per-group promote share (decision 3); their ratio, and accepted per dollar of the
+    generator's cost.  Beside it, with ``terms_per_minute`` and ``accepted_per_minute`` (the review's blended
+    measured rates), the same terms at the blended rate: minutes = terms / terms_per_minute, accepted = minutes x
+    accepted_per_minute.  The two bracket the expectation: the per-shape figure leans on the share singletons were
+    promoted at, the blended one on the TDA batch's mix of shapes."""
     terms = set(undecided) - set(pre_handled)
     groups = term_groups(terms, proposed_groups)
-    single = sum(1 for g in groups if len(g) == 1)
-    grouped = sum(len(g) for g in groups if len(g) > 1)
+    grouped = len(in_proposed_groups(terms, proposed_groups))
+    single = len(terms) - grouped
     mins = None
     if singleton_mean_s is not None and per_member_s is not None:
         mins = (single * singleton_mean_s + grouped * per_member_s) / 60.0
     acc = len(groups) * per_group_share if per_group_share is not None else None
+    b_mins = len(terms) / terms_per_minute if terms_per_minute else None
+    b_acc = b_mins * accepted_per_minute if b_mins is not None and accepted_per_minute is not None else None
     return StopRule(undecided_kept=len(undecided), pre_handled=len(set(undecided) & set(pre_handled)), terms=len(terms),
                     groups=len(groups), singleton_terms=single, grouped_terms=grouped,
                     expected_minutes=round(mins, 1) if mins is not None else None,
                     expected_accepted=round(acc, 1) if acc is not None else None,
                     novel_per_review_minute=round(acc / mins, 3) if acc is not None and mins else None,
                     novel_per_usd=round(acc / cost_usd, 2) if acc is not None and cost_usd else None,
-                    share_used=per_group_share, share_borrowed=borrowed)
+                    share_used=per_group_share, share_borrowed=borrowed,
+                    blended_minutes=round(b_mins, 1) if b_mins is not None else None,
+                    blended_accepted=round(b_acc, 1) if b_acc is not None else None,
+                    blended_per_review_minute=round(b_acc / b_mins, 3) if b_acc is not None and b_mins else None,
+                    blended_per_usd=round(b_acc / cost_usd, 2) if b_acc is not None and cost_usd else None)
 
 
 # --------------------------------------------------------------------------- the generator rows
@@ -367,6 +393,14 @@ class GeneratorRow:
         d["string_recall"] = {k: v for k, v in d["string_recall"].items() if k != "stems"}
         d["negatives"] = {k: v for k, v in d["negatives"].items() if k != "names"}
         return d
+
+
+def blended_accepted_rate(rate: Any) -> Optional[float]:
+    """Accepted terms per active minute of a pooled review rate (promoted over active minutes; 0.42 on the TDA
+    batch), unrounded."""
+    mins = getattr(rate, "active_minutes", None)
+    promoted = getattr(rate, "promoted", None)
+    return promoted / mins if mins and promoted is not None else None
 
 
 def _pct(x: Optional[float], nd: int = 0) -> str:
@@ -463,7 +497,9 @@ def build_rows(rows: Mapping[str, Mapping], *, traits: Mapping[str, NV.CorpusTra
                        singleton_mean_s=getattr(rate, "singleton_mean_s", None),
                        per_member_s=getattr(rate, "per_member_s", None),
                        per_group_share=getattr(share, "per_group", None) if share else None,
-                       cost_usd=cost.total or None, borrowed=bool(getattr(share, "borrowed", False)))
+                       cost_usd=cost.total or None, borrowed=bool(getattr(share, "borrowed", False)),
+                       terms_per_minute=getattr(rate, "terms_per_active_minute", None),
+                       accepted_per_minute=blended_accepted_rate(rate))
         h = harness_entries(g, harness)
         pooled_h = next((x for x in h if x["scope"] == "pooled"), None)
         side = any(s.harness_side_only for s in rule)
@@ -654,6 +690,17 @@ def _num(x, fmt="{:,.0f}") -> str:
     return "n/a" if x is None else fmt.format(x)
 
 
+def _blended(sr: Mapping, what: str) -> str:
+    """The blended-rate figure beside a per-shape one in the table (empty when it is not known)."""
+    if sr.get("blended_minutes") is None or sr.get("expected_accepted") is None:
+        return ""
+    if what == "accepted":
+        return f" (blended: {_num(sr['blended_accepted'], '{:,.0f}')} in {_num(sr['blended_minutes'], '{:,.0f}')})"
+    if what == "rate":
+        return f" ({_num(sr['blended_per_review_minute'], '{:.2f}')} blended)"
+    return f" ({_num(sr['blended_per_usd'], '{:.1f}')} blended)" if sr.get("blended_per_usd") is not None else ""
+
+
 def render_markdown(dash: Mapping, *, rel: str = "../../../") -> str:
     """``dashboard.md`` (beside ``dashboard.json`` in ``data/candidates/testing/``; links relative to it)."""
     from .estimators import ASSUMPTIONS
@@ -695,8 +742,9 @@ def render_markdown(dash: Mapping, *, rel: str = "../../../") -> str:
                  f"{r['cost_usd']['total']:.2f} | {_pct(r['repetition']['pre_handled_3'])} / "
                  f"{_pct(r['repetition']['pre_handled_4'])} | {rv['decided']} ({rv['accepted']}) | {share} | "
                  f"{r['string_recall']['n']} ({_pct(r['string_recall']['share'], 1)}) | {r['negatives']['hit']} | "
-                 f"{recall} | {_num(sr['expected_accepted'], '{:,.1f}')} in {_num(sr['expected_minutes'], '{:,.0f}')} | "
-                 f"{_num(sr['novel_per_review_minute'], '{:.2f}')} | {_num(sr['novel_per_usd'], '{:.1f}')} |")
+                 f"{recall} | {_num(sr['expected_accepted'], '{:,.1f}')} in {_num(sr['expected_minutes'], '{:,.0f}')}"
+                 f"{_blended(sr, 'accepted')} | {_num(sr['novel_per_review_minute'], '{:.2f}')}"
+                 f"{_blended(sr, 'rate')} | {_num(sr['novel_per_usd'], '{:.1f}')}{_blended(sr, 'usd')} |")
         for st in r.get("streams") or []:
             if len(r.get("streams") or []) > 1 and len({x["class"] for x in r["streams"]}) > 1:
                 L.append(f"| &nbsp;&nbsp;{r['generator']}/{st['stream']} | {st['class']} | {st['mechanism'] or ''} | "
@@ -712,7 +760,11 @@ def render_markdown(dash: Mapping, *, rel: str = "../../../") -> str:
           "(n/a: no harness batch covers it yet), the strict column at cut-off 4 and pair recovery beside it; *harness "
           "side*: a seeded generator, no generator-side hiding.  *Expected accepted*: the groups its undecided, not "
           "pre-handled kept terms form times the per-group promote share; the minutes from the measured times per "
-          "shape.", ""]
+          "shape (a term in any proposed group is priced as a group member, the rest as singletons).  *Blended*, in "
+          "brackets: the same terms at the review's measured overall rates (terms and accepted terms per active "
+          "minute), the other end of the range.  The per-shape figure leans on the share at which singletons were "
+          "promoted, measured on about forty resolved singletons (a 95% interval of roughly 0.37-0.66) that the app "
+          "surfaced first in the TDA batch; the generators' remaining singletons need not resemble them.", ""]
     # recorded harness batches
     hb = [(r["generator"], h) for r in rows for h in r["recall"].get("batches") or []]
     if hb:
@@ -820,7 +872,8 @@ def load_dashboard(path: Optional[Path] = None) -> dict:
 
 
 __all__ = ["SCHEMA_VERSION", "corpus_names", "string_recall", "negative_names", "negative_hits", "weights_from_keys",
-           "CostLines", "CostReport", "cost_by_run", "StopRule", "term_groups", "stop_rule", "GeneratorRow",
+           "CostLines", "CostReport", "cost_by_run", "StopRule", "term_groups", "in_proposed_groups", "stop_rule",
+           "blended_accepted_rate", "GeneratorRow",
            "generator_names", "harness_entries", "build_rows", "any_generator_string_recall", "estimates_from_table",
            "estimates_by_region", "accumulation_by_mechanism", "alignment_occasions", "corpus_occasion",
            "render_markdown", "load_dashboard"]
