@@ -1,0 +1,353 @@
+{
+ "result": {
+  "by_lexicon": {
+   "oewn": {
+    "antonym": {
+     "n": 286,
+     "both_found": 211,
+     "abstain": 75,
+     "linked": 0,
+     "by_link": {
+      "synonym": 0,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 58,
+     "by_antonym": {
+      "antonym": 52,
+      "negation_affix": 6
+     },
+     "any_linked": 58,
+     "examples": [
+      {
+       "a": "abstemious",
+       "b": "gluttonous",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "abstract",
+       "b": "concrete",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "accurate",
+       "b": "inaccurate",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "adventurous",
+       "b": "unadventurous",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "agreeable",
+       "b": "disagreeable",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "ambitious",
+       "b": "unambitious",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "apolitical",
+       "b": "political",
+       "link": null,
+       "antonym": "negation_affix"
+      },
+      {
+       "a": "benign",
+       "b": "malign",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "brave",
+       "b": "cowardly",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "coherent",
+       "b": "incoherent",
+       "link": null,
+       "antonym": "antonym"
+      }
+     ],
+     "recall": 0.2749
+    },
+    "deliberate_duplicate": {
+     "n": 3,
+     "both_found": 0,
+     "abstain": 3,
+     "linked": 0,
+     "by_link": {
+      "synonym": 0,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 0,
+     "examples": []
+    },
+    "duplicate": {
+     "n": 79,
+     "both_found": 57,
+     "abstain": 22,
+     "linked": 16,
+     "by_link": {
+      "synonym": 4,
+      "similar": 9,
+      "also": 3
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 16,
+     "examples": [
+      {
+       "a": "bitter",
+       "b": "gloss:resentful",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "calm",
+       "b": "gloss:sedate",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "contemporary",
+       "b": "gloss:modern",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "discontented",
+       "b": "queue:disgruntled",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "gloss:grave",
+       "b": "serious",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "gloss:grave",
+       "b": "solemn",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "gloss:hopeful",
+       "b": "optimistic",
+       "link": "also",
+       "antonym": null
+      },
+      {
+       "a": "gloss:ingenuous",
+       "b": "naive",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "gloss:modern",
+       "b": "innovative",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "gloss:rational",
+       "b": "logical",
+       "link": "similar",
+       "antonym": null
+      }
+     ],
+     "recall": 0.2807
+    },
+    "near_distinct": {
+     "n": 34,
+     "both_found": 20,
+     "abstain": 14,
+     "linked": 1,
+     "by_link": {
+      "synonym": 1,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 1,
+     "by_antonym": {
+      "antonym": 1,
+      "negation_affix": 0
+     },
+     "any_linked": 2,
+     "examples": [
+      {
+       "a": "conformist",
+       "b": "nonconformist",
+       "link": null,
+       "antonym": "antonym"
+      },
+      {
+       "a": "insular",
+       "b": "parochial",
+       "link": "synonym",
+       "antonym": null
+      }
+     ],
+     "false_flag": 0.1
+    },
+    "polysemy_reject": {
+     "n": 5,
+     "both_found": 5,
+     "abstain": 0,
+     "linked": 5,
+     "by_link": {
+      "synonym": 5,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 5,
+     "examples": [
+      {
+       "a": "label:balanced",
+       "b": "queue:balanced",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "label:disciplinary",
+       "b": "queue:disciplinary",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "label:economic",
+       "b": "queue:economic",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "label:emotive",
+       "b": "queue:emotive",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "label:empowered",
+       "b": "queue:empowered",
+       "link": "synonym",
+       "antonym": null
+      }
+     ]
+    },
+    "unrelated": {
+     "n": 2000,
+     "both_found": 1330,
+     "abstain": 670,
+     "linked": 5,
+     "by_link": {
+      "synonym": 1,
+      "similar": 3,
+      "also": 1
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 5,
+     "examples": [
+      {
+       "a": "flat",
+       "b": "straight",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "conventional",
+       "b": "formulaic",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "compassionate",
+       "b": "merciful",
+       "link": "also",
+       "antonym": null
+      },
+      {
+       "a": "individualistic",
+       "b": "single",
+       "link": "similar",
+       "antonym": null
+      },
+      {
+       "a": "lenient",
+       "b": "permissive",
+       "link": "similar",
+       "antonym": null
+      }
+     ],
+     "false_flag": 0.0038
+    }
+   }
+  },
+  "n_pairs": 2407,
+  "labelled_file": {
+   "path": "/private/tmp/claude-501/wt_plan11/data/candidates/calibration/labelled_pairs.json",
+   "sha256": "3344d9e51161249078904a0aa2ab7965746eeae9c52d4cbe940f8a872ab9ca00",
+   "schema_version": 1,
+   "built_at": "2026-10-02T21:12:08+00:00"
+  },
+  "lexicons": {
+   "oewn": {
+    "id": "oewn:2024",
+    "wn_version": "1.1.1",
+    "lexicon_version": "2024"
+   }
+  }
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py labelled --lexicons oewn",
+   "git_sha": "cf772ff3+dirty",
+   "author": "Roger Dearnaley",
+   "title": "lexical links on the labelled pairs (plan 11, gate 1)"
+  },
+  "produced_at": "2026-10-13T22:59:36+00:00",
+  "inputs": [
+   {
+    "dep_key": "labelled_pairs",
+    "path": "data/candidates/calibration/labelled_pairs.json",
+    "fingerprint": "v1:2026-10-13T22:15:42+00:00@699547",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-13T22:15:42+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "74edf6bc3d1411884e086a3e2bc89ff6250be45055e61ee41c1098acea7222db"
+ }
+}
