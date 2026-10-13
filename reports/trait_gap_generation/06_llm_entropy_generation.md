@@ -12,9 +12,12 @@ with a one-line gloss and an antonym guess, so polysemy and pair-completion are 
 
 ## 2. Sources and tools
 
-- **Claude Haiku 4.5** (`claude-haiku-4-5`, $1/$5 per MTok; Batches API halves this) as the
-  default generator; **Claude Sonnet 5** (`claude-sonnet-5`, $2/$10) for the multilingual cells.
-  Structured JSON output (`output_config.format`) so nothing needs regex parsing.
+- **Claude Haiku 5.5** (`claude-haiku-5-5`, $0.10/$0.50 per MTok; the Batches API halves this) as the
+  default generator; **Claude Sonnet 5.5** (`claude-sonnet-5-5`, $2/$10) for the multilingual cells
+  (updated 2026-10-13, Roger; the plan was written for Haiku 4.5 at $1/$5 and Sonnet 5).  Both think
+  adaptively and refuse a `temperature`, and the thinking counts as output: Haiku 5.5's generative calls
+  in this project ran at about 2,000-3,000 output tokens (the states pass, 2026-10-13).  Structured JSON
+  output (`output_config.format`) so nothing needs regex parsing.
 - **Person seeds** (method b): Wikidata SPARQL, `instance of human (Q5)` and `fictional character
   (Q95074)` with `RAND()` ordering, CC0, JSON results; or a persona corpus. I could not verify
   licences without fetching: PersonaHub (HF, believed CC BY-NC-SA) and NVIDIA Nemotron-Personas
@@ -31,8 +34,9 @@ with a one-line gloss and an antonym guess, so polysemy and pair-completion are 
 
 Common scaffold for all five: system prompt fixes the target ("stable dispositions or styles a
 speaking persona can enact; not roles, moods, skills or one-off acts"), the output schema
-`{label, gloss, antonym, ambiguity_flag}`, and asks for 15-20 items per call. Temperature 1.0,
-three independent runs per prompt (needed for step 8), all sent through the Batches API. Every
+`{label, gloss, antonym, ambiguity_flag}`, and asks for 15-20 items per call. No temperature is sent
+(both models refuse one; their default sampling, with adaptive thinking, is what the collapse measurement of
+step 8 measures), three independent runs per prompt (needed for step 8), all sent through the Batches API. Every
 call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
 
 1. **(a) Domain x mode grid.** ~30 domains (money, authority, strangers, risk, rules, death, animals,
@@ -45,8 +49,8 @@ call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
    description only). Prompt: "which 8 traits most distinguish this person from a typical person of
    their era, place and occupation; give the trait, gloss, antonym". Factual accuracy is
    irrelevant; only the vocabulary matters. 600 calls, one run each.
-3. **(c) Multilingual.** Languages: German, Japanese, Mandarin, Russian, Arabic, Tagalog, Finnish,
-   Korean, Hindi, Turkish. Prompt written *in the language* for each of the 30 domains: "list 20
+3. **(c) Multilingual.** Languages: German, Japanese, Mandarin, Russian, Arabic, Persian, Finnish,
+   Korean, Hindi, Turkish (Persian replaced Tagalog, 2026-10-13, on Roger's high-resource guidance). Prompt written *in the language* for each of the 30 domains: "list 20
    character traits a native speaker would name here, preferring ones with no single English word".
    A second call back-translates each to the shortest English phrase plus a gloss and flags
    listicle clichés (hygge, ikigai, Schadenfreude are about things or feelings, not persona
@@ -72,12 +76,13 @@ call is logged with `MultiModelUsage` to a `usage.json` (repo hard rule).
    - Semantic version of all three: two labels count as the same if embedding cosine > 0.9, so
      "frugal"/"thrifty" do not inflate uniqueness.
    - Cross-family overlap matrix, to confirm each entropy source reaches a different region.
-9. **Model choice test**: 40 prompts from each family on Haiku 4.5 and Sonnet 5, compare
+9. **Model choice test**: 40 prompts from each family on Haiku 5.5 and Sonnet 5.5, compare
    unique-per-dollar, trait-hood pass rate and the fraction of glosses Roger accepts.
 
 ## 4. Expected yield and biases
 
-Per call ~400 tokens in, ~700 out: ~$0.004 on Haiku, ~$0.002 batched. Rough expectations for
+Per call ~500 tokens in and ~2,000 out with thinking (2026-10-13; was ~400 / ~700 without): ~$0.001 on
+Haiku 5.5, ~$0.0005 batched; ~$0.021 on Sonnet 5.5, ~$0.011 batched. Rough expectations for
 3,700 calls (~60k raw items): (a) strongest, ~35% string-unique, heavy on virtue/vice adjectives
 and the "conscientious/impulsive" mode; over-produces attitude-toward-X phrasings. (b) over-produces
 eminence traits (visionary, driven, uncompromising) and drifts into roles; fictional seeds supply
@@ -93,9 +98,16 @@ filtering.
 
 ## 5. Cost
 
-API: (a) $2.5, (b) $2.5, (c) $8 (Sonnet share dominates; halve with batching), (d) +$1, (e) $2.5,
-model-choice test $1: ~$12-18 unbatched, ~$7-10 batched. Well under $20; the grid can be shrunk if
-(c) is kept at full size. Local compute: embedding 60k short strings, minutes. Roger: ~1 h to
+Generation, at Haiku 5.5 and Sonnet 5.5 rates (recomputed 2026-10-13): (a) 630 calls $0.6, (b) 600
+calls $0.6, (c) 900 generation calls on Sonnet 5.5 $19 plus 900 translation calls on Haiku 5.5 $0.9
+(on Haiku 5.5 throughout: $1.8), (d) +$0.25, (e) 600 calls $0.6, model-choice test (200 calls a model)
+$4.4: **~$26 live, ~$13 batched with (c) on Sonnet; ~$8 live, ~$4 batched with (c) on Haiku.**  The
+Sonnet share of (c) is now nearly the whole generation bill.
+Downstream, not counted in the plan before: M1 and M3 on the candidates at the platform's measured
+rates (M1 $0.0072 a word, M3 $0.011 a passed word): for 4-6k semantically distinct candidates, M1
+$29-43 and M3 $20-30, so **$50-75 live, $25-37 batched**, less by the share already in the registry,
+which for single-word labels is large (74% of the corpus's single-word labels are registry stems already,
+measured 2026-10-13 for plan 09).  Over $20, so batched, with Roger's go at the run. Local compute: embedding 60k short strings, minutes. Roger: ~1 h to
 approve the prompt set and language list, ~2 h to spot-check 50 random survivors per family (250
 items) with glosses.
 
@@ -133,6 +145,16 @@ generator workstreams can be compared against.
 
 1. Language list for (c), and whether Sonnet's higher cost there is acceptable or (c) runs on
    Haiku for the high-resource languages only.
+   **Roger (2026-10-13):** What order are the costs?  On language choice, I have no opinion, though
+   high-to-fairly-high-resource seems advisable.
+   The costs (2026-10-13, at the 5.5 rates, § 5): (c) on Sonnet 5.5 is about $20 live or $10 batched,
+   on Haiku 5.5 about $2 live or $1 batched, so the choice is worth about $9 batched; the whole
+   generation bill is about $13 or $4 batched accordingly, and the downstream M1 and M3 (about $25-37
+   batched before registry overlap) outweigh either.  Languages, on Roger's guidance: Tagalog, the one
+   medium-resource language on the list, is replaced by Persian (fairly high-resource, and culturally
+   distant from English, with a rich politeness and honour vocabulary); the other nine are high or fairly
+   high-resource.  Recommendation: run (c) on Sonnet 5.5 for the pilot's 20% and on whichever model the
+   step-9 test favours for the rest.
 2. Are role-like outputs from (b) worth keeping for the roles queue, or discarded?
 3. Multi-word back-translations as labels: accept as-is ("reads the room"), or require a
    single-word English form when one exists?
