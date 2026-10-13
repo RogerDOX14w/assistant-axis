@@ -1458,11 +1458,13 @@ _FINISHED_SUMMARY = {
 }
 
 
-class TestNoStrengthIsLeftOffDisk:
-    """The schedule of TestResumeRejudgesInsteadOfRegenerating (s_init 2.0;
-    UP 4.0, 8.0 = the cap; DOWN 1.0, 0.5, 0.25, ...), with ``batch_size`` 1
-    so that each strength's two questions take two generate calls and a
-    kill can fall between them."""
+class _ResumeHarness:
+    """A cell on the schedule of TestResumeRejudgesInsteadOfRegenerating
+    (s_init 2.0; UP 4.0, 8.0 = the cap; DOWN 1.0, 0.5, 0.25, ...), resumed
+    with ``batch_size`` 1 so that each strength's two questions take two
+    generate calls and a kill can fall between them.  The stub judges UP
+    strengths coherent with effect 0.5 and DOWN strengths with effect 0.1
+    (below the 0.25 threshold)."""
 
     def _cell(self, tmp_path, monkeypatch, seed, *, summary=None,
               excluded=None):
@@ -1517,6 +1519,11 @@ class TestNoStrengthIsLeftOffDisk:
         return sorted((r for r in records
                        if abs(r["strength"] - strength) < 1e-9),
                       key=lambda r: r["question_idx"])
+
+
+class TestNoStrengthIsLeftOffDisk(_ResumeHarness):
+    """A kill during a regeneration leaves the old records or the new ones;
+    a strength lost before that fix is found and regenerated."""
 
     # -- (a) the replacement is written only once it exists -----------------
 
@@ -1670,6 +1677,137 @@ class TestNoStrengthIsLeftOffDisk:
             weakest=1.0, multiplier=2.0, start_steps_up=1,
             min_strength=0.0625, max_strength=8.0, up_to=6.0,
             down_to=None) is None
+
+
+# ---------------------------------------------------------------------------
+# Resuming a cut cell (2026-10-13): steering/post_judge.py's corrected stop
+# cutoff keeps the larger of the two sub-threshold strengths that stopped the
+# scan and moves every smaller strength to _excluded_records.jsonl.  A resume
+# used to see only records.jsonl, so its DOWN stop could not fire again and
+# it generated the strength below the anchor (and an excluded s_init and
+# excluded UP strengths) a second time; its summary rewrite dropped the
+# cutoff's excluded_* fields.
+# ---------------------------------------------------------------------------
+
+_CUTOFF_FIELDS = {
+    "excluded_reason": "below_corrected_eff_stop",
+    "excluded_eff_stop_threshold": 0.25,
+    "excluded_eff_stop_consecutive": 2,
+}
+_STOP_FIELDS = ("stopped_at_strength", "up_blocked_reason",
+                "down_blocked_reason", "up_blocked_at_strength",
+                "down_blocked_at_strength")
+
+
+class TestResumeOfACutCell(_ResumeHarness):
+    """The strengths the cutoff moved out are scanned history: they feed the
+    stop rules, are never generated again and stay out of records.jsonl."""
+
+    def test_a_resumed_cut_cell_regenerates_nothing_and_keeps_its_stops(
+            self, tmp_path, monkeypatch):
+        """The scan stopped DOWN on 0.5 and 0.25; the cutoff kept 0.5 and
+        moved 0.25 out.  An UNPARSEABLE persona at 4.0 makes the resume fall
+        through (re-judge only)."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (8.0, 0.5), (1.0, 0.5), (0.5, 0.1))
+                for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0), _rj_rec(4.0, 1, persona=None)]
+        cut = [_rj_rec(0.25, q, effect=0.1) for q in (0, 1)]
+        summary = dict(_FINISHED_SUMMARY, down_blocked_at_strength=0.25,
+                       n_records=12, n_strengths_swept=6,
+                       excluded_strengths=[0.25], **_CUTOFF_FIELDS)
+        # The rows twice over, as the cutoff left them in 132 local cells.
+        out_dir = self._cell(tmp_path, monkeypatch, seed, summary=summary,
+                             excluded=cut + cut)
+        excluded_before = (out_dir / "_excluded_records.jsonl").read_text()
+
+        d, result = self._run(out_dir)
+        assert self._generated() == []
+        assert d.enqueued_qidx == {4.0: [[0, 1]]}
+        assert sorted({r["strength"] for r in self._disk(out_dir)}) == [
+            0.5, 1.0, 2.0, 4.0, 8.0]
+        assert ((out_dir / "_excluded_records.jsonl").read_text()
+                == excluded_before)
+        s = result.summary
+        assert {k: s[k] for k in _STOP_FIELDS} == {
+            k: summary[k] for k in _STOP_FIELDS}
+        assert s["n_records"] == 10                 # records.jsonl's count
+        assert s["excluded_strengths"] == [0.25]
+        assert {k: s[k] for k in _CUTOFF_FIELDS} == _CUTOFF_FIELDS
+        assert json.loads((out_dir / "summary.json").read_text()) == s
+
+    @pytest.mark.parametrize("cut_questions", [(0, 1), (0,)])
+    def test_an_excluded_s_init_and_excluded_up_strengths_are_not_regenerated(
+            self, tmp_path, monkeypatch, cut_questions):
+        """The cutoff's anchor was 8.0, so s_init 2.0, UP 4.0 and DOWN 1.0
+        and 0.5 were all moved out; only 8.0 is in records.jsonl.  With
+        ``(0,)`` the cut rows cover fewer questions than the run asks (the
+        oldest cells have 6 or 10 rows a strength, their experiments 14
+        questions now): the missing question is not asked at a cut strength
+        either."""
+        seed = [_rj_rec(8.0, 0), _rj_rec(8.0, 1, persona=None)]
+        cut = [_rj_rec(s, q, effect=0.1)
+               for s in (4.0, 2.0, 1.0, 0.5) for q in cut_questions]
+        summary = dict(_FINISHED_SUMMARY,
+                       excluded_strengths=[0.5, 1.0, 2.0, 4.0],
+                       **_CUTOFF_FIELDS)
+        out_dir = self._cell(tmp_path, monkeypatch, seed, summary=summary,
+                             excluded=cut)
+
+        d, result = self._run(out_dir)
+        assert self._generated() == []
+        assert d.enqueued_qidx == {8.0: [[0, 1]]}
+        assert {r["strength"] for r in self._disk(out_dir)} == {8.0}
+        assert {k: result.summary[k] for k in _STOP_FIELDS} == {
+            k: summary[k] for k in _STOP_FIELDS}
+        assert result.summary["excluded_strengths"] == [0.5, 1.0, 2.0, 4.0]
+
+    def test_the_summary_rewrite_keeps_the_fields_it_does_not_write(
+            self, tmp_path, monkeypatch):
+        """Fields the runner does not write survive a rewrite (the cutoff's,
+        or any later tool's); the runner's own fields are rewritten."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (8.0, 0.5), (1.0, 0.1), (0.5, 0.1))
+                for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0), _rj_rec(4.0, 1, persona=None)]
+        summary = dict(_FINISHED_SUMMARY, n_records=999,
+                       note_from_another_tool="kept",
+                       excluded_strengths=[], **_CUTOFF_FIELDS)
+        out_dir = self._cell(tmp_path, monkeypatch, seed, summary=summary)
+
+        _, result = self._run(out_dir)
+        on_disk = json.loads((out_dir / "summary.json").read_text())
+        assert on_disk == result.summary
+        assert on_disk["note_from_another_tool"] == "kept"
+        assert on_disk["excluded_strengths"] == []
+        assert {k: on_disk[k] for k in _CUTOFF_FIELDS} == _CUTOFF_FIELDS
+        assert on_disk["n_records"] == 10
+
+    def test_the_legacy_summary_rewrite_keeps_them_too(
+            self, tmp_path, monkeypatch):
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+        prior = {"scan_mode": "legacy_unidirectional",
+                 "stopped_at_strength": None, "n_records": 999,
+                 "excluded_strengths": [0.5], **_CUTOFF_FIELDS}
+        (out_dir / "summary.json").write_text(json.dumps(prior))
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=3, layer=25, sign=+1, strengths=[1.0, 2.0],
+            persona_system_prompt="hist", questions=_RJ_QUESTIONS,
+            output_dir=out_dir, batch_size=2, max_new_tokens=4,
+            judge_dispatcher=NoOpJudgeDispatcher(),
+            scan_mode="legacy_unidirectional",
+        )
+        on_disk = json.loads((out_dir / "summary.json").read_text())
+        assert on_disk == result.summary
+        assert on_disk["excluded_strengths"] == [0.5]
+        assert {k: on_disk[k] for k in _CUTOFF_FIELDS} == _CUTOFF_FIELDS
+        assert on_disk["n_records"] == 4
 
 
 class TestRejudgeStrengthWithTheRealDispatcher:

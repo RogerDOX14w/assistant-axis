@@ -37,7 +37,11 @@ leaves the strength in no file (since 2026-10-13; it used to wipe first).
 A strength of the scan's schedule that is in no records file (lost to such
 a kill before the fix; strengths the corrected stop cutoff moved to
 ``_excluded_records.jsonl`` do not count) also makes a finished cell fall
-through, and is regenerated.
+through, and is regenerated.  Those excluded strengths are part of the
+resumed scan's history (their records feed the stop rules and the cursor
+walk as when they were generated) but are never generated again or written
+back to records.jsonl, and the summary rewrite keeps the cutoff's
+``excluded_*`` fields (since 2026-10-13).
 """
 from __future__ import annotations
 
@@ -601,27 +605,62 @@ def _near(s: float, pool) -> bool:
     return any(abs(float(s) - float(x)) <= _TOL for x in pool)
 
 
+def _read_excluded_records(output_dir: Path) -> List[Dict[str, Any]]:
+    """The records ``steering/post_judge.py --apply-corrected-stop-cutoff``
+    moved out of records.jsonl into ``_excluded_records.jsonl``, one per
+    ``(strength, sign, question_idx)`` (the last): the cutoff only appends,
+    and where it ran again on records a pull had brought back, the file
+    repeats rows two or three times (132 cells of the local copy, R18)."""
+    path = Path(output_dir) / "_excluded_records.jsonl"
+    if not path.exists():
+        return []
+    by_key: Dict[Tuple[float, int, int], Dict[str, Any]] = {}
+    for r in read_jsonl_with_retry(path, logger_obj=logger):
+        try:
+            s = float(r.get("strength", 0.0))
+            key = (round(s, 6), int(r.get("sign", 0)),
+                   int(r.get("question_idx", -1)))
+        except (TypeError, ValueError):
+            continue
+        if s != 0.0:
+            by_key[key] = r
+    return list(by_key.values())
+
+
 def _excluded_strengths(
-    output_dir: Path, summary: Optional[Dict[str, Any]],
+    summary: Optional[Dict[str, Any]],
+    excluded_records: Sequence[Dict[str, Any]],
 ) -> List[float]:
-    """Strengths that ``steering/post_judge.py --apply-corrected-stop-cutoff``
-    moved out of records.jsonl: listed in summary.json's
-    ``excluded_strengths`` and held in ``_excluded_records.jsonl``.  Both are
-    read, since a summary the runner rewrote after a cutoff has lost the list
-    (three cells of the local copy, R18).  Such a strength is not missing."""
+    """Strengths the corrected stop cutoff moved out of records.jsonl: listed
+    in summary.json's ``excluded_strengths`` and held in
+    ``_excluded_records.jsonl``.  Both count, since a summary the runner
+    rewrote after a cutoff lost the list until 2026-10-13 (three cells of the
+    local copy, R18).  Such a strength is neither missing nor to be
+    generated again."""
     out = set()
     for s in (summary or {}).get("excluded_strengths") or []:
         try:
             out.add(float(s))
         except (TypeError, ValueError):
             pass
-    path = Path(output_dir) / "_excluded_records.jsonl"
-    if path.exists():
-        for r in read_jsonl_with_retry(path, logger_obj=logger):
-            s = float(r.get("strength", 0.0))
-            if s != 0.0:
-                out.add(s)
+    out.update(float(r["strength"]) for r in excluded_records)
     return sorted(out)
+
+
+def _keep_prior_summary_fields(
+    summary: Dict[str, Any], prior: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """``summary`` plus every field of the previous summary.json that the
+    runner does not write itself: the corrected stop cutoff's
+    ``excluded_strengths``, ``excluded_reason``,
+    ``excluded_eff_stop_threshold`` and ``excluded_eff_stop_consecutive``
+    (the only such fields in the recorded cells), and whatever a later tool
+    adds.  The runner's own fields are rewritten as before.  Until
+    2026-10-13 a rewrite dropped them (R18's stale-summary cells)."""
+    out = dict(summary)
+    for k, v in (prior or {}).items():
+        out.setdefault(k, v)
+    return out
 
 
 def _schedule_between(
@@ -1070,9 +1109,10 @@ def run_steering_cell(
     # all strengths complete, skip as before.
     existing_summary = _read_summary(summary_path)
     # Strengths the corrected stop cutoff moved out of records.jsonl: not
-    # missing (2026-10-13; the resume checks below and the bidirectional
-    # walk consult them).
-    excluded_strengths = _excluded_strengths(output_dir, existing_summary)
+    # missing, and part of the scan's history (2026-10-13; the resume checks
+    # below and the bidirectional resume consult them).
+    excluded_records = _read_excluded_records(output_dir)
+    excluded_strengths = _excluded_strengths(existing_summary, excluded_records)
     if existing_summary and existing_summary.get("stopped_at_strength") is not None:
         pre_skip_records = _read_existing_records(records_path)
         K_questions = len(questions)
@@ -1219,6 +1259,8 @@ def run_steering_cell(
             min_strength=min_strength,
             start_strength_multiplier_steps=start_strength_multiplier_steps,
             excluded_strengths=excluded_strengths,
+            excluded_records=excluded_records,
+            prior_summary=existing_summary,
         )
 
     # Legacy unidirectional path -- preserves 2026-05-13-and-earlier
@@ -1497,6 +1539,7 @@ def run_steering_cell(
             "scan_mode": "legacy_unidirectional",
             "positions_mode": positions_mode,
         }
+        summary = _keep_prior_summary_fields(summary, existing_summary)
         _write_summary(summary_path, summary)
         dispatcher.drain()
         return CellResult(
@@ -1520,6 +1563,7 @@ def run_steering_cell(
         "scan_mode": "legacy_unidirectional",
         "positions_mode": positions_mode,
     }
+    summary = _keep_prior_summary_fields(summary, existing_summary)
     _write_summary(summary_path, summary)
     dispatcher.drain()
     return CellResult(
@@ -1715,6 +1759,8 @@ def _run_bidirectional_cell(
     min_strength: float,
     start_strength_multiplier_steps: int,
     excluded_strengths: Sequence[float] = (),
+    excluded_records: Sequence[Dict[str, Any]] = (),
+    prior_summary: Optional[Dict[str, Any]] = None,
 ) -> CellResult:
     """Bidirectional middle-out scan with two-stop-condition state machine.
 
@@ -1777,16 +1823,47 @@ def _run_bidirectional_cell(
     # the outermost strength on disk need nothing here: the main loop's next
     # cursor step generates them.
     vanished: List[float] = []
-    if existing_records:
-        # Stage 1: collect strengths + their stamped mean_coh from
-        # records.jsonl so the tail-window checks have history to chew on.
-        for rec in existing_records:
-            s = float(rec.get("strength", 0.0))
-            if s == 0.0:
-                continue
-            seen_strengths.setdefault(s, []).append(rec)
+    # Strengths the corrected stop cutoff moved to _excluded_records.jsonl
+    # (2026-10-13): part of the scan's history, not of records.jsonl.  Their
+    # records feed the Stage-1 bootstrap through the same code as
+    # records.jsonl's, so both stop rules see the history the original run
+    # saw (the cutoff keeps only the larger of the two sub-threshold
+    # strengths that stopped the scan, so without them the DOWN stop could
+    # not fire again); Stage 2 walks them; their (strength, question) pairs
+    # go into ``done_pairs``, so no generation call takes them for missing.
+    # They never enter ``existing_records`` (no flush writes them back) or
+    # the gap-fill (never re-judged or regenerated).  A strength also in
+    # records.jsonl is taken from records.jsonl.  Until 2026-10-13 a resumed
+    # cut cell regenerated the strength below its anchor, and an excluded
+    # s_init and excluded UP strengths.
+    cut_by_s: Dict[float, List[Dict[str, Any]]] = {}
+    # Stage 1: collect strengths + their stamped mean_coh from
+    # records.jsonl so the tail-window checks have history to chew on.
+    for rec in existing_records:
+        s = float(rec.get("strength", 0.0))
+        if s == 0.0:
+            continue
+        seen_strengths.setdefault(s, []).append(rec)
+    for rec in excluded_records:
+        s = float(rec["strength"])
+        if not _near(s, seen_strengths):
+            cut_by_s.setdefault(s, []).append(rec)
+    for s in excluded_strengths:
+        # Listed in summary.json with no rows left (no recorded cell): still
+        # done, with no history for the stop rules.
+        if not _near(s, seen_strengths) and not _near(s, cut_by_s):
+            cut_by_s[float(s)] = []
+    for s in cut_by_s:
+        # Every question, not only those with rows: the cutoff excluded the
+        # strength, so a question list longer than the cell's (the oldest
+        # cells have 6 or 10 rows a strength, their experiments 14 questions
+        # now) must not bring it back into records.jsonl.
+        done_pairs.update((s, q) for q in range(len(questions)))
+    if seen_strengths or cut_by_s:
+        history = dict(cut_by_s)
+        history.update(seen_strengths)
         # mean_coh from any record's strength_mean_coh stamp
-        for s, recs in seen_strengths.items():
+        for s, recs in history.items():
             for r in recs:
                 smc = (r.get("judges") or {}).get("strength_mean_coh")
                 if smc is not None:
@@ -1845,10 +1922,12 @@ def _run_bidirectional_cell(
         existing_above = sorted(
             {s for s in seen_strengths if s > cursor.s_init}
             | {s for s in vanished if s > cursor.s_init}
+            | {s for s in cut_by_s if s > cursor.s_init + _TOL}
         )
         existing_below = sorted(
             {s for s in seen_strengths if s < cursor.s_init}
-            | {s for s in vanished if s < cursor.s_init}, reverse=True,
+            | {s for s in vanished if s < cursor.s_init}
+            | {s for s in cut_by_s if s < cursor.s_init - _TOL}, reverse=True,
         )
         for expected in existing_above:
             got = cursor.next_up()
@@ -2345,6 +2424,7 @@ def _run_bidirectional_cell(
         ),
         "records_in_scan_order": True,
     }
+    summary = _keep_prior_summary_fields(summary, prior_summary)
     _write_summary(summary_path, summary)
     dispatcher.drain()
     return CellResult(
