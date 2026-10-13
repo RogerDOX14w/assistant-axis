@@ -1,0 +1,33 @@
+{
+  "batch_id": "testing/paraphrase_set",
+  "git_sha": "2d10e476+dirty",
+  "argv": [
+    "paraphrase-set",
+    "run",
+    "--budget-usd",
+    "0.5"
+  ],
+  "model": "claude-haiku-5-5",
+  "rubric": {
+    "name": "paraphrase_synonym",
+    "version": 1,
+    "sha256": "96302f36a2a0c27a46a0e53581b9afdff48ad8e9eddd801ba5bc69edc562107b",
+    "file": "reports/trait_gap_generation/rubrics/paraphrase_synonym.md"
+  },
+  "n_items": 80,
+  "estimate_usd": 0.0107,
+  "budget_usd": 0.5,
+  "cap_usd": 0.5,
+  "confirmed_by": null,
+  "allow_dirty": false,
+  "dirty": [],
+  "resumed": false,
+  "started_at": "2026-10-13T22:02:04+00:00",
+  "finished_at": "2026-10-13T22:03:09+00:00",
+  "status": 0,
+  "cost_usd": 0.047369,
+  "n_rows": 79,
+  "n_answered": 79,
+  "n_reasked": 49,
+  "n_label_path": 0
+}
