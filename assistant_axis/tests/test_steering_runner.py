@@ -1390,6 +1390,288 @@ class TestResumeRejudgesInsteadOfRegenerating:
         assert d.enqueued_qidx[2.0] == [[0, 1]]
 
 
+# ---------------------------------------------------------------------------
+# A strength is never left off disk (2026-10-13, R18): the resume gap-fill
+# used to wipe a strength with responses missing and then generate it again,
+# so a kill in between lost the strength, and a later resume, which looked
+# only at the strengths present, took the cell for finished
+# (navigator_progressive_v1 s0_l49_+1 lost strength 3.359487 that way on
+# 2026-05-18).
+# ---------------------------------------------------------------------------
+
+
+class _SimulatedKill(Exception):
+    """Stands for the process being killed; raised out of the runner."""
+
+
+class _KillingModel(_FakeModel):
+    """The fake model, raising ``_SimulatedKill`` on its ``fail_on_call``-th
+    generate call at ``strength`` (the coefficient of the ActivationSteering
+    the runner built last)."""
+
+    def __init__(self, strength, fail_on_call=1):
+        super().__init__(8)
+        self._target = float(strength)
+        self._fail_on = int(fail_on_call)
+        self._n_at_target = 0
+
+    def generate(self, **kwargs):
+        coeff = _FakeActivationSteering.construct_calls[-1]["coefficients"][0]
+        if abs(abs(coeff) - self._target) < 1e-9:
+            self._n_at_target += 1
+            if self._n_at_target == self._fail_on:
+                raise _SimulatedKill(f"killed while generating {self._target}")
+        return super().generate(**kwargs)
+
+
+class _KillAtCoherenceDispatcher(_RecordingStubDispatcher):
+    """Raises ``_SimulatedKill`` when coherence is asked for ``strength``:
+    a kill after a strength's records are written, before any judging."""
+
+    def __init__(self, strength):
+        super().__init__()
+        self._target = float(strength)
+
+    def judge_coherence_for_strength_async(self, records):
+        if abs(float(records[0]["strength"]) - self._target) < 1e-9:
+            raise _SimulatedKill(f"killed before judging {self._target}")
+        return super().judge_coherence_for_strength_async(records)
+
+
+# The summary a finished cell of the schedule below would carry (s_init 2.0;
+# UP 4.0, 8.0 = the cap; DOWN 1.0, 0.5 then stopped on two sub-threshold
+# strengths).
+_FINISHED_SUMMARY = {
+    "slot": 0, "layer": 26, "sign": 1,
+    "stopped_at_strength": 8.0, "reason": "bidirectional_done",
+    "n_records": 10, "n_strengths_swept": 5, "last_strength_completed": 8.0,
+    "coh_stop_consecutive": 2, "coh_stop_threshold": 1.5,
+    "scan_mode": "bidirectional", "positions_mode": "all",
+    "eff_stop_threshold": 0.25, "eff_stop_consecutive": 2,
+    "s_init": 2.0, "min_strength": 0.0625, "max_strength": 8.0,
+    "multiplier": 2.0, "weakest_strength": 1.0,
+    "start_strength_multiplier_steps": 1,
+    "up_blocked_reason": "max_strength_reached",
+    "down_blocked_reason": "sub_threshold_effect",
+    "up_blocked_at_strength": 8.0, "down_blocked_at_strength": 0.5,
+    "records_in_scan_order": True,
+}
+
+
+class TestNoStrengthIsLeftOffDisk:
+    """The schedule of TestResumeRejudgesInsteadOfRegenerating (s_init 2.0;
+    UP 4.0, 8.0 = the cap; DOWN 1.0, 0.5, 0.25, ...), with ``batch_size`` 1
+    so that each strength's two questions take two generate calls and a
+    kill can fall between them."""
+
+    def _cell(self, tmp_path, monkeypatch, seed, *, summary=None,
+              excluded=None):
+        from assistant_axis.atomic_io import write_jsonl
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+        write_jsonl(seed, out_dir / "records.jsonl")
+        if summary is not None:
+            (out_dir / "summary.json").write_text(json.dumps(summary))
+        if excluded is not None:
+            write_jsonl(excluded, out_dir / "_excluded_records.jsonl")
+        return out_dir
+
+    @staticmethod
+    def _run(out_dir, *, model=None, dispatcher=None):
+        d = dispatcher or _RecordingStubDispatcher()
+        for s in (2.0, 4.0, 8.0):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.5)
+        for s in (1.0, 0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.1)
+        result = steering_runner.run_steering_cell(
+            model or _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            persona_system_prompt="hist", questions=_RJ_QUESTIONS,
+            output_dir=out_dir, batch_size=1, max_new_tokens=4,
+            positions_mode="all", judge_dispatcher=d,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            eff_stop_threshold=0.25, eff_stop_consecutive=2,
+            weakest_strength=1.0, max_strength=8.0,
+            min_strength=0.0625, multiplier=2.0,
+            start_strength_multiplier_steps=1, scan_mode="bidirectional",
+        )
+        return d, result
+
+    @staticmethod
+    def _disk(out_dir):
+        return [json.loads(l) for l in
+                (out_dir / "records.jsonl").read_text().splitlines()
+                if l.strip()]
+
+    @staticmethod
+    def _generated():
+        return sorted({abs(c["coefficients"][0])
+                       for c in _FakeActivationSteering.construct_calls})
+
+    @staticmethod
+    def _at(records, strength):
+        return sorted((r for r in records
+                       if abs(r["strength"] - strength) < 1e-9),
+                      key=lambda r: r["question_idx"])
+
+    # -- (a) the replacement is written only once it exists -----------------
+
+    @pytest.mark.parametrize("fail_on_call", [1, 2])
+    def test_a_kill_while_regenerating_leaves_the_old_records(
+            self, tmp_path, monkeypatch, fail_on_call):
+        """Killed on the first generate call (where the old wipe left the
+        strength with no record at all) or the second (where it left the
+        first new record and lost the old one): the file is as before."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (1.0, 0.1)) for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0)]                       # q1 never generated
+        out_dir = self._cell(tmp_path, monkeypatch, seed)
+
+        with pytest.raises(_SimulatedKill):
+            self._run(out_dir, model=_KillingModel(4.0, fail_on_call))
+        assert self._disk(out_dir) == seed
+
+        # The next resume finds 4.0 partial again and regenerates it whole.
+        _FakeActivationSteering.construct_calls.clear()
+        d, _ = self._run(out_dir)
+        recs = self._at(self._disk(out_dir), 4.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert all(r["response"] != "seed" for r in recs)
+        assert d.coh_qidx[4.0] == [[0, 1]]
+        assert d.enqueued_qidx[4.0] == [[0, 1]]
+
+    def test_a_kill_while_regenerating_s_init_leaves_the_old_records(
+            self, tmp_path, monkeypatch):
+        seed = [_rj_rec(2.0, 0, coherence=None, persona=None, effect=None)]
+        seed += [_rj_rec(4.0, q) for q in (0, 1)]
+        seed += [_rj_rec(1.0, q, effect=0.1) for q in (0, 1)]
+        out_dir = self._cell(tmp_path, monkeypatch, seed)
+
+        with pytest.raises(_SimulatedKill):
+            self._run(out_dir, model=_KillingModel(2.0, 2))
+        assert self._disk(out_dir) == seed
+
+        _FakeActivationSteering.construct_calls.clear()
+        d, _ = self._run(out_dir)
+        recs = self._at(self._disk(out_dir), 2.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert all(r["response"] != "seed" for r in recs)
+        assert d.coh_qidx[2.0] == [[0, 1]]
+
+    def test_a_kill_after_the_replacement_leaves_the_new_records_to_rejudge(
+            self, tmp_path, monkeypatch):
+        """Killed once the K new records are written, before judging: the
+        next resume finds every response there and re-judges (E2) rather
+        than generating the strength a third time."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (1.0, 0.1)) for q in (0, 1)]
+        seed += [_rj_rec(4.0, 0)]
+        out_dir = self._cell(tmp_path, monkeypatch, seed)
+
+        with pytest.raises(_SimulatedKill):
+            self._run(out_dir, dispatcher=_KillAtCoherenceDispatcher(4.0))
+        recs = self._at(self._disk(out_dir), 4.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert all(r["response"] != "seed" for r in recs)
+        new_responses = [r["response"] for r in recs]
+
+        _FakeActivationSteering.construct_calls.clear()
+        d, _ = self._run(out_dir)
+        assert 4.0 not in self._generated()
+        assert d.coh_qidx[4.0] == [[0, 1]]
+        assert d.enqueued_qidx[4.0] == [[0, 1]]
+        assert [r["response"] for r in
+                self._at(self._disk(out_dir), 4.0)] == new_responses
+
+    # -- (b) a strength already lost is found and regenerated ----------------
+
+    def test_a_strength_missing_from_a_finished_cell_is_regenerated(
+            self, tmp_path, monkeypatch):
+        """navigator_progressive_v1 s0_l49_+1's shape: summary.json says the
+        cell is finished, and an interior strength of its schedule (4.0) is
+        in no records file."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (8.0, 0.5), (1.0, 0.1), (0.5, 0.1))
+                for q in (0, 1)]
+        out_dir = self._cell(tmp_path, monkeypatch, seed,
+                             summary=_FINISHED_SUMMARY)
+
+        d, result = self._run(out_dir)
+        assert self._generated() == [4.0]
+        recs = self._at(self._disk(out_dir), 4.0)
+        assert [r["question_idx"] for r in recs] == [0, 1]
+        assert d.coh_qidx[4.0] == [[0, 1]]
+        assert result.summary["n_records"] == 10
+        assert result.summary["up_blocked_reason"] == "max_strength_reached"
+        assert result.summary["down_blocked_reason"] == "sub_threshold_effect"
+
+    @pytest.mark.parametrize("where", ["excluded_file", "summary_field"])
+    def test_a_strength_moved_out_by_the_cutoff_is_not_missing(
+            self, tmp_path, monkeypatch, where):
+        """post_judge's corrected stop cutoff moves strengths into
+        _excluded_records.jsonl and lists them in summary.json; a summary
+        the runner rewrote later has lost the list (R18's stale-summary
+        cells), so the file counts too.  Either way the cell is finished."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (4.0, 0.5), (8.0, 0.5), (1.0, 0.1))
+                for q in (0, 1)]
+        summary = dict(_FINISHED_SUMMARY)
+        excluded = None
+        if where == "excluded_file":
+            excluded = [_rj_rec(0.5, q, effect=0.1) for q in (0, 1)]
+        else:
+            summary["excluded_strengths"] = [0.5]
+        out_dir = self._cell(tmp_path, monkeypatch, seed, summary=summary,
+                             excluded=excluded)
+
+        _, result = self._run(out_dir)
+        assert self._generated() == []
+        assert result.summary == summary
+        assert self._disk(out_dir) == seed
+
+    def test_an_interior_gap_without_a_summary_is_regenerated_in_place(
+            self, tmp_path, monkeypatch):
+        """No summary.json yet (killed mid-scan): the cursor walk used to
+        stop at the gap, so the gap was never filled and the tail history
+        above it was lost."""
+        seed = [_rj_rec(s, q, effect=e)
+                for s, e in ((2.0, 0.5), (8.0, 0.5), (1.0, 0.1), (0.5, 0.1))
+                for q in (0, 1)]
+        out_dir = self._cell(tmp_path, monkeypatch, seed)
+
+        _, result = self._run(out_dir)
+        assert self._generated() == [4.0]
+        assert [r["question_idx"] for r in
+                self._at(self._disk(out_dir), 4.0)] == [0, 1]
+        assert result.summary["up_blocked_reason"] == "max_strength_reached"
+        assert result.summary["up_blocked_at_strength"] == 8.0
+        assert result.summary["down_blocked_reason"] == "sub_threshold_effect"
+
+    def test_no_gap_is_reported_when_the_records_are_off_the_schedule(self):
+        """A strength on disk that the schedule does not contain means the
+        schedule is not the one the records came from: nothing is called
+        missing then."""
+        sched = steering_runner._schedule_between(
+            weakest=1.0, multiplier=2.0, start_steps_up=1,
+            min_strength=0.0625, max_strength=8.0, up_to=8.0, down_to=1.0)
+        assert sched == [2.0, 4.0, 8.0, 1.0]
+        assert steering_runner._missing_from_schedule(
+            sched, present=[2.0, 8.0, 1.0], excluded=[]) == [4.0]
+        assert steering_runner._missing_from_schedule(
+            sched, present=[2.0, 3.0, 8.0, 1.0], excluded=[]) == []
+        assert steering_runner._missing_from_schedule(
+            sched, present=[2.0, 8.0], excluded=[1.0]) == [4.0]
+        # A limit off the grid: no schedule.
+        assert steering_runner._schedule_between(
+            weakest=1.0, multiplier=2.0, start_steps_up=1,
+            min_strength=0.0625, max_strength=8.0, up_to=6.0,
+            down_to=None) is None
+
+
 class TestRejudgeStrengthWithTheRealDispatcher:
     """``_rejudge_strength`` against ``RealJudgeDispatcher`` (API calls
     faked): only the missing judgements are asked for, the judged ones are

@@ -31,7 +31,13 @@ function returns immediately with a no-op, unless a strength on disk
 is incomplete.  The bidirectional scan then re-judges a strength whose
 K responses are all on disk and regenerates one with responses missing
 (the resume gap-fill in ``_run_bidirectional_cell``; re-judging since
-2026-10-12).
+2026-10-12).  A regenerated strength's old records stay on disk until its K
+new records exist and replace them in one atomic write, so a kill never
+leaves the strength in no file (since 2026-10-13; it used to wipe first).
+A strength of the scan's schedule that is in no records file (lost to such
+a kill before the fix; strengths the corrected stop cutoff moved to
+``_excluded_records.jsonl`` do not count) also makes a finished cell fall
+through, and is regenerated.
 """
 from __future__ import annotations
 
@@ -573,6 +579,156 @@ def _strength_generation_complete(
     return all(isinstance(r.get("response"), str) for r in recs)
 
 
+# ---------------------------------------------------------------------------
+# Strengths missing from a cell's schedule (2026-10-13, R18)
+# ---------------------------------------------------------------------------
+#
+# Until 2026-10-13 the resume gap-fill wiped a strength with responses missing
+# and then generated it again, so a kill in between left the strength in no
+# file, and the completeness checks, which look only at the strengths present,
+# never noticed: navigator_progressive_v1 s0_l49_+1 lost strength 3.359487 that
+# way on 2026-05-18
+# (reports/code_review_2026-10-12/r18_sweep_consistency.md).  The regeneration
+# now replaces a strength's records only once the new ones exist
+# (``replace_strength`` in _generate_and_dispatch_strength); the helpers below
+# find a strength lost before that, by comparing the strengths on disk with
+# the schedule the cursor walks.
+
+_TOL = 1e-6
+
+
+def _near(s: float, pool) -> bool:
+    return any(abs(float(s) - float(x)) <= _TOL for x in pool)
+
+
+def _excluded_strengths(
+    output_dir: Path, summary: Optional[Dict[str, Any]],
+) -> List[float]:
+    """Strengths that ``steering/post_judge.py --apply-corrected-stop-cutoff``
+    moved out of records.jsonl: listed in summary.json's
+    ``excluded_strengths`` and held in ``_excluded_records.jsonl``.  Both are
+    read, since a summary the runner rewrote after a cutoff has lost the list
+    (three cells of the local copy, R18).  Such a strength is not missing."""
+    out = set()
+    for s in (summary or {}).get("excluded_strengths") or []:
+        try:
+            out.add(float(s))
+        except (TypeError, ValueError):
+            pass
+    path = Path(output_dir) / "_excluded_records.jsonl"
+    if path.exists():
+        for r in read_jsonl_with_retry(path, logger_obj=logger):
+            s = float(r.get("strength", 0.0))
+            if s != 0.0:
+                out.add(s)
+    return sorted(out)
+
+
+def _schedule_between(
+    *,
+    weakest: float,
+    multiplier: float,
+    start_steps_up: int,
+    min_strength: float,
+    max_strength: float,
+    up_to: Optional[float],
+    down_to: Optional[float],
+) -> Optional[List[float]]:
+    """The strengths a :class:`BidirectionalCursor` with these knobs walks:
+    ``s_init``, then UP up to ``up_to`` and DOWN down to ``down_to`` (both
+    inclusive; ``None`` walks no step on that side).  ``None`` when the knobs
+    are invalid or a limit is not on the cursor's grid: the schedule is then
+    not the one the strengths came from."""
+    try:
+        cursor = BidirectionalCursor(
+            weakest=weakest, max_strength=max_strength,
+            min_strength=min_strength, multiplier=multiplier,
+            start_steps_up=start_steps_up,
+        )
+    except ValueError:
+        return None
+    out = [cursor.s_init]
+    for limit, step, sign in ((up_to, cursor.next_up, +1),
+                              (down_to, cursor.next_down, -1)):
+        if limit is None or abs(float(limit) - cursor.s_init) <= _TOL:
+            continue
+        while True:
+            got = step()
+            if got is None or sign * (got - float(limit)) > _TOL:
+                return None
+            out.append(got)
+            if abs(got - float(limit)) <= _TOL:
+                break
+    return out
+
+
+def _missing_from_schedule(
+    schedule: Sequence[float],
+    *,
+    present: Sequence[float],
+    excluded: Sequence[float],
+) -> List[float]:
+    """The strengths of ``schedule`` that are neither ``present`` (in
+    records.jsonl) nor ``excluded`` (moved out by the cutoff).  Empty when a
+    known strength inside the schedule's range is not on it: the records then
+    come from another schedule, and nothing can be called missing."""
+    known = [float(s) for s in present] + [float(s) for s in excluded]
+    lo, hi = min(schedule) - _TOL, max(schedule) + _TOL
+    if any(lo <= s <= hi and not _near(s, schedule) for s in known):
+        return []
+    return [s for s in schedule if not _near(s, known)]
+
+
+def _vanished_from_summary(
+    summary: Dict[str, Any],
+    *,
+    present: Sequence[float],
+    excluded: Sequence[float],
+) -> List[float]:
+    """Strengths a finished bidirectional cell's summary.json says the scan
+    walked (``s_init`` out to ``up_blocked_at_strength`` and
+    ``down_blocked_at_strength``, on the summary's own knobs) that are in
+    neither records file.  Empty for a legacy summary or one whose knobs do
+    not reproduce its ``s_init``."""
+    if summary.get("scan_mode") != "bidirectional":
+        return []
+    try:
+        schedule = _schedule_between(
+            weakest=float(summary["weakest_strength"]),
+            multiplier=float(summary["multiplier"]),
+            start_steps_up=int(summary["start_strength_multiplier_steps"]),
+            min_strength=float(summary["min_strength"]),
+            max_strength=float(summary["max_strength"]),
+            up_to=summary.get("up_blocked_at_strength"),
+            down_to=summary.get("down_blocked_at_strength"),
+        )
+        s_init = float(summary["s_init"])
+    except (KeyError, TypeError, ValueError):
+        return []
+    if schedule is None or abs(schedule[0] - s_init) > _TOL:
+        return []
+    return _missing_from_schedule(schedule, present=present, excluded=excluded)
+
+
+def _replace_strength_records(
+    strength: float,
+    new_recs: List[Dict[str, Any]],
+    existing_records: List[Dict[str, Any]],
+    done_pairs: set,
+) -> None:
+    """Swap a strength's records in memory: drop the old ones, append
+    ``new_recs`` (where the old wipe-then-generate put them), and make
+    ``done_pairs`` match.  The caller then writes records.jsonl once."""
+    existing_records[:] = [
+        r for r in existing_records
+        if abs(float(r.get("strength", 0.0)) - float(strength)) > _TOL
+    ] + list(new_recs)
+    done_pairs.difference_update(
+        {p for p in done_pairs if abs(float(p[0]) - float(strength)) <= _TOL})
+    done_pairs.update(
+        (float(strength), int(r["question_idx"])) for r in new_recs)
+
+
 def _has_coherence_score(rec: Dict[str, Any]) -> bool:
     judges = rec.get("judges")
     coh = judges.get("coherence") if isinstance(judges, dict) else None
@@ -913,6 +1069,10 @@ def run_steering_cell(
     # will regenerate them.  Common case (no gaps): summary present,
     # all strengths complete, skip as before.
     existing_summary = _read_summary(summary_path)
+    # Strengths the corrected stop cutoff moved out of records.jsonl: not
+    # missing (2026-10-13; the resume checks below and the bidirectional
+    # walk consult them).
+    excluded_strengths = _excluded_strengths(output_dir, existing_summary)
     if existing_summary and existing_summary.get("stopped_at_strength") is not None:
         pre_skip_records = _read_existing_records(records_path)
         K_questions = len(questions)
@@ -932,6 +1092,13 @@ def run_steering_cell(
                 recs, K_questions, skip_threshold=_eff_skip_threshold,
             )
         ]
+        # 2026-10-13 (R18): a strength the summary's schedule walked but no
+        # records file holds was lost (a kill between the old gap-fill's wipe
+        # and its regeneration); the check above sees only strengths present.
+        pre_skip_vanished = _vanished_from_summary(
+            existing_summary, present=list(pre_skip_by_s),
+            excluded=excluded_strengths,
+        )
         # 2026-05-21: cap-extension fall-through.  If the cell previously
         # stopped because it hit the *configured* max_strength (UP cap)
         # rather than the physical coherence cliff, and the caller has
@@ -959,6 +1126,14 @@ def run_steering_cell(
                 f"{len(pre_skip_incomplete)} strength(s) incomplete "
                 f"{sorted(round(abs(s), 4) for s in pre_skip_incomplete)} -- "
                 f"falling through to gap-fill"
+            )
+        elif pre_skip_vanished:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume: summary exists but "
+                f"{len(pre_skip_vanished)} strength(s) of its schedule are in "
+                f"no records file "
+                f"{sorted(round(abs(s), 6) for s in pre_skip_vanished)} -- "
+                f"falling through to regenerate them"
             )
         elif cap_extend_up or cap_extend_down:
             parts = []
@@ -1043,6 +1218,7 @@ def run_steering_cell(
             multiplier=multiplier,
             min_strength=min_strength,
             start_strength_multiplier_steps=start_strength_multiplier_steps,
+            excluded_strengths=excluded_strengths,
         )
 
     # Legacy unidirectional path -- preserves 2026-05-13-and-earlier
@@ -1382,6 +1558,7 @@ def _generate_and_dispatch_strength(
     do_sample: bool,
     temperature: float,
     model_name: str,
+    replace_strength: bool = False,
 ) -> Tuple[bool, List[Dict[str, Any]], Optional["concurrent.futures.Future"]]:
     """Generate one strength's responses + fire async coh judging.
 
@@ -1392,6 +1569,14 @@ def _generate_and_dispatch_strength(
     flushes to disk, and returns the in-flight coherence future (which
     also chains into the dispatcher's effect/persona pipeline via an
     ``on_done`` callback).
+
+    ``replace_strength=True`` is the resume gap-fill's regeneration of a
+    strength with responses missing: all K questions are generated whatever
+    ``done_pairs`` holds, into a list of their own; ``existing_records`` and
+    records.jsonl keep the strength's old records until the K new ones exist,
+    which then replace them in one atomic write, before any judging is
+    dispatched.  A kill at any point leaves the old records or the new ones
+    on disk, never neither (2026-10-13, R18; it used to wipe first).
 
     Used by both legacy and bidirectional cell runners.  Mirrors the
     per-strength block of the legacy main loop verbatim, factored out
@@ -1407,7 +1592,7 @@ def _generate_and_dispatch_strength(
             q_idx = batch_start + offset
             if q_idx >= len(questions):
                 break
-            if (strength, q_idx) in done_pairs:
+            if not replace_strength and (strength, q_idx) in done_pairs:
                 continue
             batch_items.append((q_idx, questions[q_idx], conversations[q_idx]))
         if not batch_items:
@@ -1458,14 +1643,21 @@ def _generate_and_dispatch_strength(
                 "timing": {"gen_s": per_item_s},
                 "abandoned": False,
             }
-            existing_records.append(rec)
             new_at_strength.append(rec)
-            done_pairs.add((float(strength), int(q_idx)))
+            if not replace_strength:
+                existing_records.append(rec)
+                done_pairs.add((float(strength), int(q_idx)))
 
-        flush_records()
+        if not replace_strength:
+            flush_records()
 
     if not new_at_strength:
         return any_progress, [], None
+
+    if replace_strength:
+        _replace_strength_records(
+            strength, new_at_strength, existing_records, done_pairs)
+        flush_records()
 
     # Async coherence dispatch + chained RP/effect.
     coh_future = dispatcher.judge_coherence_for_strength_async(new_at_strength)
@@ -1522,6 +1714,7 @@ def _run_bidirectional_cell(
     multiplier: float,
     min_strength: float,
     start_strength_multiplier_steps: int,
+    excluded_strengths: Sequence[float] = (),
 ) -> CellResult:
     """Bidirectional middle-out scan with two-stop-condition state machine.
 
@@ -1577,6 +1770,13 @@ def _run_bidirectional_cell(
     # bootstrap), Stage 2 (cursor walk), and the post-s_init gap-fill
     # below.  Empty dict when ``existing_records`` is empty (fresh run).
     seen_strengths: Dict[float, List[Dict[str, Any]]] = {}
+    # Strengths of this cursor's schedule lying between strengths on disk
+    # but in no records file (2026-10-13, R18): lost to a kill between the
+    # old gap-fill's wipe and its regeneration.  Stage 2 walks them like the
+    # strengths present and the gap-fill regenerates them.  Missing ones past
+    # the outermost strength on disk need nothing here: the main loop's next
+    # cursor step generates them.
+    vanished: List[float] = []
     if existing_records:
         # Stage 1: collect strengths + their stamped mean_coh from
         # records.jsonl so the tail-window checks have history to chew on.
@@ -1619,13 +1819,36 @@ def _run_bidirectional_cell(
             # else: leave unset; tail-window check treats unset as
             # "still pending" and will not advance.
 
+        known = list(seen_strengths) + [float(s) for s in excluded_strengths]
+        known_above = [s for s in known if s > cursor.s_init + _TOL]
+        known_below = [s for s in known if s < cursor.s_init - _TOL]
+        interior = _schedule_between(
+            weakest=weakest_strength, multiplier=multiplier,
+            start_steps_up=start_strength_multiplier_steps,
+            min_strength=min_strength, max_strength=max_strength,
+            up_to=max(known_above) if known_above else None,
+            down_to=min(known_below) if known_below else None,
+        )
+        if interior is not None:
+            # s_init is left to its own generation call below.
+            vanished = [
+                s for s in _missing_from_schedule(
+                    interior, present=list(seen_strengths),
+                    excluded=excluded_strengths)
+                if abs(s - cursor.s_init) > _TOL
+            ]
+
         # Stage 2: advance the cursors past every existing strength on
         # each side, so subsequent next_up/next_down emit FRESH values.
         # Cursor is deterministic, so re-walking it matches what was
         # emitted before.
-        existing_above = sorted({s for s in seen_strengths if s > cursor.s_init})
+        existing_above = sorted(
+            {s for s in seen_strengths if s > cursor.s_init}
+            | {s for s in vanished if s > cursor.s_init}
+        )
         existing_below = sorted(
-            {s for s in seen_strengths if s < cursor.s_init}, reverse=True,
+            {s for s in seen_strengths if s < cursor.s_init}
+            | {s for s in vanished if s < cursor.s_init}, reverse=True,
         )
         for expected in existing_above:
             got = cursor.next_up()
@@ -1815,20 +2038,11 @@ def _run_bidirectional_cell(
             return "rejudge"
         return "regenerate"
 
-    def _wipe_strength(s: float) -> None:
-        """Drop a strength's partial records (in memory and on disk) so the
-        next generation call regenerates all K questions."""
-        existing_records[:] = [
-            r for r in existing_records
-            if abs(float(r.get("strength", 0.0)) - s) > 1e-6
-        ]
-        for q in range(K_questions):
-            done_pairs.discard((s, q))
-        # Clear stale stats; re-populated when the new future resolves
-        # via _reap_direction in the main loop.
-        mean_coh_by_strength.pop(s, None)
-        mean_abs_eff_by_strength.pop(s, None)
-        _flush_records()
+    # A strength with responses missing is regenerated whole with
+    # ``replace_strength=True``: its old records stay in memory and on disk
+    # until the K new ones exist and replace them in one atomic write.  Until
+    # 2026-10-13 they were wiped first (in memory and on disk), so a kill
+    # before the regeneration finished lost the strength (R18).
 
     # s_init gets the same treatment as every other strength.  Until
     # 2026-10-12 the gap-fill below left it out ("refreshed by the
@@ -1839,6 +2053,7 @@ def _run_bidirectional_cell(
     # and stayed unjudged), and a partial s_init had its new questions
     # judged as a group of their own, the old ones never.
     s_init_rejudge: Optional[Tuple[float, List[Dict[str, Any]]]] = None
+    s_init_regenerate = False
     for s, recs in list(seen_strengths.items()):
         if abs(s - cursor.s_init) >= 1e-6:
             continue
@@ -1856,7 +2071,10 @@ def _run_bidirectional_cell(
                 f"s_init {abs(s)} has {len(recs)}/{K_questions} responses "
                 f"-- regenerating"
             )
-            _wipe_strength(s)
+            s_init_regenerate = True
+            # Stale stats; re-populated when the new future resolves.
+            mean_coh_by_strength.pop(s, None)
+            mean_abs_eff_by_strength.pop(s, None)
 
     # ------------------------------------------------------------------
     # s_init: generate first (only if not already covered) so we have an
@@ -1880,6 +2098,7 @@ def _run_bidirectional_cell(
         positions_mode=positions_mode,
         do_sample=do_sample, temperature=temperature,
         model_name=model_name,
+        replace_strength=s_init_regenerate,
     )
     s_init_pending: List[Tuple[float, "concurrent.futures.Future", "concurrent.futures.Future"]] = []
     if s_init_progress and s_init_coh is not None:
@@ -1905,10 +2124,14 @@ def _run_bidirectional_cell(
     # * re-judge the ones whose K responses are all on disk
     #   (_rejudge_strength: coherence only where missing, then persona and
     #   effect only where a record has no score; nothing regenerated);
-    # * WIPE and regenerate from scratch the ones with responses missing
-    #   (partial K).  This costs at most K generations per gap; acceptable
+    # * regenerate from scratch the ones with responses missing (partial
+    #   K), and the interior strengths in no records file (``vanished``,
+    #   2026-10-13).  This costs at most K generations per gap; acceptable
     #   given the alternative is silent interior gaps in every restarted
-    #   cell's curve.
+    #   cell's curve.  The old records are replaced only once the K new
+    #   ones exist (``replace_strength``; until 2026-10-13 they were wiped
+    #   first, and a kill before the regeneration finished lost the
+    #   strength, R18).
     # ------------------------------------------------------------------
     if existing_records:
         rejudge: List[float] = []
@@ -1934,6 +2157,14 @@ def _run_bidirectional_cell(
                 f"{len(incomplete)} incomplete strength(s) "
                 f"{sorted(abs(s) for s in incomplete)} -- regenerating"
             )
+        if vanished:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
+                f"{len(vanished)} strength(s) of the schedule in no records "
+                f"file {sorted(round(abs(s), 6) for s in vanished)} "
+                f"-- regenerating"
+            )
+            incomplete.extend(vanished)
         for s in sorted(rejudge, key=abs):
             # Stale stats; re-populated when the futures resolve via
             # _reap_direction in the main loop.
@@ -1949,9 +2180,12 @@ def _run_bidirectional_cell(
             else:
                 pending_down.append((float(s), rj_coh, rj_eff))
         for s in sorted(incomplete, key=abs):
-            # Wipe partial records (in-memory + disk)
-            _wipe_strength(s)
-            # Regenerate + dispatch judging for all K questions
+            # Stale stats; re-populated when the new future resolves via
+            # _reap_direction in the main loop.
+            mean_coh_by_strength.pop(s, None)
+            mean_abs_eff_by_strength.pop(s, None)
+            # Regenerate all K questions, replace the old records in one
+            # atomic write, then dispatch judging.
             gp, gnew, gcoh = _generate_and_dispatch_strength(
                 strength=s, sign=sign,
                 model=model, tokenizer=tokenizer,
@@ -1965,6 +2199,7 @@ def _run_bidirectional_cell(
                 positions_mode=positions_mode,
                 do_sample=do_sample, temperature=temperature,
                 model_name=model_name,
+                replace_strength=True,
             )
             if gp and gcoh is not None:
                 geff = dispatcher.judge_effect_for_strength_async(gnew)
