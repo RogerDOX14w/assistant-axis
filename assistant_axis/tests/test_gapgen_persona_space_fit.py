@@ -108,6 +108,7 @@ class TestFinalModel:
         kinds = pool.train_kinds[:7]
         assert np.array_equal(FIT.predict(m1, E[:7], kinds), FIT.predict(m3, E[:7], kinds))
         assert m3.alpha == 0.3 and m3.ids == pool.train_ids and m3.kinds_seen == ["roles", "traits"]
+        assert FIT.model_sha256(m3) == FIT.model_sha256(m1) == FIT.model_sha256(FIT.fit_final(pool, E, 0.3, meta={"x": 1}))
 
 
 @pytest.mark.skipif(not F.real_data_present(), reason=F.REAL_REASON)

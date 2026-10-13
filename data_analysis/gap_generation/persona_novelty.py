@@ -394,7 +394,7 @@ def cmd_fit(args, argv) -> int:
             "n_groups": cv.n_groups, "dup_threshold": cal.dup_threshold, "novel_pct": cal.novel_pct,
             "thresholds_set_by": cal.thresholds_set_by, "config_version": cfg.config_version,
             "canary": getattr(args, "_canary", None), "n_embedded": getattr(args, "_n_embedded", 0),
-            "model_sha256": hashlib.sha256((out / PS.MODEL_FILE).read_bytes()).hexdigest()}
+            "model_sha256": FIT.model_sha256(model)}
     finish_run(out / "run.json", run, usage, out)
     s = cv.summary[cv.alpha]
     print(f"alpha {cv.alpha:g}, N {cv.N}: median cos {s['median_cos']:.3f}, top-1 {s['top1']:.3f}, "
@@ -423,7 +423,12 @@ def rebuild_model(args, out: Path, pool, cfg, texts) -> int:
     model = FIT.fit_final(pool, E, float(rec["alpha"]), meta={"fit_id": args.fit_id, "N": cal.get("N"),
                                                               "config_version": cal.get("config_version")})
     FIT.save_model(model, out / PS.MODEL_FILE)
-    print(f"rebuilt {repo_rel(out / PS.MODEL_FILE)} (alpha {rec['alpha']}, {model.n_train} rows)")
+    sha = FIT.model_sha256(model)
+    run = json.loads((out / "run.json").read_text(encoding="utf-8")) if (out / "run.json").exists() else {}
+    want = run.get("model_sha256")
+    same = "matches the recorded model" if sha == want else \
+        f"WARNING: differs from the recorded model (sha256 {sha[:12]} against {str(want)[:12]})"
+    print(f"rebuilt {repo_rel(out / PS.MODEL_FILE)} (alpha {rec['alpha']}, {model.n_train} rows): {same}")
     return 0
 
 

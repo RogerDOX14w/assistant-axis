@@ -125,6 +125,16 @@ def fit_final(pool: Pool, E: np.ndarray, alpha: float, *, meta: Optional[Mapping
                  kinds_seen=sorted(set(kinds)), n_train=len(kinds), ids=list(pool.train_ids), meta=dict(meta or {}))
 
 
+def model_sha256(model: Model) -> str:
+    """The sha256 of the model's arrays (coefficients, then intercept): the same for a rebuilt model, whatever its
+    file's metadata."""
+    import hashlib
+    h = hashlib.sha256()
+    h.update(np.ascontiguousarray(model.coef).tobytes())
+    h.update(np.ascontiguousarray(model.intercept).tobytes())
+    return h.hexdigest()
+
+
 def predict(model: Model, E: np.ndarray, kinds: Sequence[str]) -> np.ndarray:
     """Predicted persona vectors ``(n, 5120)`` float32 for embeddings ``E`` of entities of ``kinds``."""
     X = features(E, kinds).astype(np.float32)
