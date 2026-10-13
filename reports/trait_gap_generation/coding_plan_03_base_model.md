@@ -453,7 +453,27 @@ eligible uniques): M1 ≈ $14-29 live, M3 at the pilot's measured pass rate (at 
 at the 0.95 high case ≈ $21-42); **≈ $16-32 batched** — over the $20 line, so the full run goes
 through the Message
 Batches API with Roger's explicit go (`--confirm-expensive --confirmed-by`), per the
-batch-or-real-time rule in [CLAUDE.md](../../CLAUDE.md).  The generator's own cost stays $0; the
+batch-or-real-time rule in [CLAUDE.md](../../CLAUDE.md).
+
+**Re-based on the pilot (2026-10-13, at Roger's request).**  The pilot's batches charged only rows no earlier
+batch had judged: M1 $1.60 over 237 new rows ($0.0067 a row) and M3 $1.58 over 205 ($0.0077), so about **$0.013
+a new word live, $0.0067 batched**; the other ~1,300 of its 1,540 submitted rows were already in the registry,
+mostly from the censuses.  Every pilot word seen twice or more was already judged; of the 2,285 seen once, 723
+(32%) were.  At 20k samples with the absolute floor of 2 (the gate audit's recommendation, not a proportional
+20), the 3,825 eligible words seen in the pilot all clear the floor, and incidence extrapolation (Chao2 from
+f1 2,285 and f2 420: about 6,200 unseen eligible words) adds more:
+
+| case | words at the floor | new to the registry | live | batched |
+|---|---|---|---|---|
+| low: no unseen word reaches the floor | 3,825 | 1,562 | $21 | $10 |
+| central: richness extrapolated to 10k samples, read as "seen twice in 20k" | 8,611 | 4,833 | $65 | **$32** |
+| high: every word seen at 20k | 9,811 | 5,654 | $76 | $38 |
+
+The new words are rarer than the pilot's, so the per-row rate is the main uncertainty.  The dollars are not the
+binding cost: at the pilot's rates for rows only this generator found (M1 trait about 80%, M3 new about 55%), the
+central case puts about 2,100 new kept candidates in front of review, about 14 hours at the measured 146 terms an
+hour before pre-handling.  Submitting in review-hour waves ranked by emission count, as plan 09 does (its
+decision 1), keeps each wave's M1/M3 cost and review time small.  The generator's own cost stays $0; the
 20k sampling is ≈ 1.6M tokens, ≈ 1.5-3 h of Mac time at the benchmarked rate — far under the
 13-GPU-hour line.
 
