@@ -920,6 +920,22 @@ deferrals:
     never carried over to v2 rubric (limited to GPT and Haiku going forward). Snapshot-historical:
     legacy bare JSON kept for cross-judge comparison reference; not to be regenerated.'
   deferred_at: '2026-05-09T16:49:06+00:00'
+- path_glob: roger/axis_judge_experiments/gpt_sonnet_q9_response_weight_sweep_slot6.png
+  dep_key: null
+  category: experimental_one_off
+  reason: 'The PNG of the Sonnet Q9 weight sweep, held with its JSON (deferred above, 2026-05-09,
+    not to be regenerated). Roger, 2026-10-13 (regeneration row PV2): keep the pair together. A rerun
+    with --anthropic_combo sonnet_q9 --whitening raw --w_step 0.05 on the April 12-axis list reproduces
+    both (numbers to 6e-15; only the y-label text differs).'
+  deferred_at: '2026-10-13T07:00:00+00:00'
+- path_glob: roger/axis_judge_experiments/gpt_haiku_full_response_weight_sweep_slot6.*
+  dep_key: null
+  category: frozen_snapshot
+  reason: 'May 2026 four-axis weight sweep of the Haiku-full cohort (only truthful_vs_deceitful,
+    progressive_vs_conservative, ecocentric_vs_anthropocentric and improvisational_vs_methodical were
+    judged by Haiku-full; there is no v2 cohort), like its __rubric_v1 twin. Roger, 2026-10-13
+    (regeneration row PV3): frozen. A four-axis pair list reproduces it (numbers to 1e-15).'
+  deferred_at: '2026-10-13T07:00:00+00:00'
 - path_glob: roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json
   dep_key: null
   category: superseded
