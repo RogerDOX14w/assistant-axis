@@ -2,9 +2,9 @@
   "result": {
     "threshold": 0.8117,
     "embedding_model": "text-embedding-3-large",
-    "n_groups": 49,
-    "n_members": 59,
-    "n_merged": 10,
+    "n_groups": 67,
+    "n_members": 92,
+    "n_merged": 25,
     "groups": [
       {
         "rep": "am002-1a",
@@ -43,19 +43,19 @@
           "am020-1b",
           "am027-2b"
         ],
-        "min_cos": 0.858275,
+        "min_cos": 0.858282,
         "pole": "virtue",
         "note": "gloss cosine >= 0.8117",
         "joins": [
           {
             "member": "am020-1b",
             "how": "gloss cosine",
-            "cos": 0.858275
+            "cos": 0.858282
           },
           {
             "member": "am027-2b",
             "how": "gloss cosine",
-            "cos": 0.902773
+            "cos": 0.902786
           }
         ]
       },
@@ -66,19 +66,19 @@
           "am023-2a",
           "am027-1a"
         ],
-        "min_cos": 0.694335,
+        "min_cos": 0.694384,
         "pole": "vice",
         "note": "exact stem",
         "joins": [
           {
             "member": "am023-2a",
             "how": "exact stem",
-            "cos": 0.694335
+            "cos": 0.694384
           },
           {
             "member": "am027-1a",
             "how": "exact stem",
-            "cos": 0.779587
+            "cos": 0.77966
           }
         ]
       },
@@ -88,14 +88,14 @@
           "am003-1b",
           "am027-1b"
         ],
-        "min_cos": 0.779434,
+        "min_cos": 0.779328,
         "pole": "virtue",
         "note": "exact stem",
         "joins": [
           {
             "member": "am027-1b",
             "how": "exact stem",
-            "cos": 0.779434
+            "cos": 0.779328
           }
         ]
       },
@@ -105,14 +105,14 @@
           "am003-2a",
           "am011-1a"
         ],
-        "min_cos": 0.702448,
+        "min_cos": 0.702146,
         "pole": "vice",
         "note": "exact stem",
         "joins": [
           {
             "member": "am011-1a",
             "how": "exact stem",
-            "cos": 0.702448
+            "cos": 0.702146
           }
         ]
       },
@@ -153,19 +153,19 @@
           "am010-1b",
           "am011-1b"
         ],
-        "min_cos": 0.764686,
+        "min_cos": 0.764664,
         "pole": "virtue",
         "note": "exact stem",
         "joins": [
           {
             "member": "am010-1b",
             "how": "exact stem",
-            "cos": 0.764686
+            "cos": 0.764664
           },
           {
             "member": "am011-1b",
             "how": "exact stem",
-            "cos": 0.780497
+            "cos": 0.780515
           }
         ]
       },
@@ -185,14 +185,14 @@
           "am005-1b",
           "am017-1a"
         ],
-        "min_cos": 0.863632,
+        "min_cos": 0.864125,
         "pole": "virtue",
         "note": "gloss cosine >= 0.8117",
         "joins": [
           {
             "member": "am017-1a",
             "how": "gloss cosine",
-            "cos": 0.863632
+            "cos": 0.864125
           }
         ]
       },
@@ -272,14 +272,14 @@
           "am012-1a",
           "am018-1a"
         ],
-        "min_cos": 0.824241,
+        "min_cos": 0.82428,
         "pole": "vice",
         "note": "gloss cosine >= 0.8117",
         "joins": [
           {
             "member": "am018-1a",
             "how": "gloss cosine",
-            "cos": 0.824241
+            "cos": 0.82428
           }
         ]
       },
@@ -526,12 +526,19 @@
       {
         "rep": "am024-1b",
         "members": [
-          "am024-1b"
+          "am024-1b",
+          "kra004-2b"
         ],
-        "min_cos": 1.0,
+        "min_cos": 0.815844,
         "pole": "virtue",
-        "note": "",
-        "joins": []
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "kra004-2b",
+            "how": "gloss cosine",
+            "cos": 0.815844
+          }
+        ]
       },
       {
         "rep": "am025-1a",
@@ -560,6 +567,274 @@
         ],
         "min_cos": 1.0,
         "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra001-1a",
+        "members": [
+          "kra001-1a",
+          "kra002-1a",
+          "kra003-1a",
+          "kra005-1a",
+          "kra006-1a",
+          "kra007-1a",
+          "kra008-1a",
+          "kra009-1a",
+          "kra010-1a"
+        ],
+        "min_cos": 0.634006,
+        "pole": "vice",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "kra002-1a",
+            "how": "exact stem",
+            "cos": 0.777314
+          },
+          {
+            "member": "kra003-1a",
+            "how": "exact stem",
+            "cos": 0.689617
+          },
+          {
+            "member": "kra005-1a",
+            "how": "exact stem",
+            "cos": 0.761376
+          },
+          {
+            "member": "kra006-1a",
+            "how": "exact stem",
+            "cos": 0.634006
+          },
+          {
+            "member": "kra007-1a",
+            "how": "exact stem",
+            "cos": 0.655834
+          },
+          {
+            "member": "kra008-1a",
+            "how": "exact stem",
+            "cos": 0.742478
+          },
+          {
+            "member": "kra009-1a",
+            "how": "exact stem",
+            "cos": 0.682216
+          },
+          {
+            "member": "kra010-1a",
+            "how": "exact stem",
+            "cos": 0.774633
+          }
+        ]
+      },
+      {
+        "rep": "kra001-1b",
+        "members": [
+          "kra001-1b",
+          "kra002-1b",
+          "kra008-1b",
+          "kra009-1b",
+          "kra010-1b"
+        ],
+        "min_cos": 0.731667,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117; exact stem",
+        "joins": [
+          {
+            "member": "kra002-1b",
+            "how": "gloss cosine",
+            "cos": 0.84928
+          },
+          {
+            "member": "kra008-1b",
+            "how": "gloss cosine",
+            "cos": 0.857558
+          },
+          {
+            "member": "kra009-1b",
+            "how": "exact stem",
+            "cos": 0.731667
+          },
+          {
+            "member": "kra010-1b",
+            "how": "exact stem",
+            "cos": 0.816484
+          }
+        ]
+      },
+      {
+        "rep": "kra002-2a",
+        "members": [
+          "kra002-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra003-1b",
+        "members": [
+          "kra003-1b",
+          "kra007-1b"
+        ],
+        "min_cos": 0.860794,
+        "pole": "virtue",
+        "note": "gloss cosine >= 0.8117",
+        "joins": [
+          {
+            "member": "kra007-1b",
+            "how": "gloss cosine",
+            "cos": 0.860794
+          }
+        ]
+      },
+      {
+        "rep": "kra003-2a",
+        "members": [
+          "kra003-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra003-2b",
+        "members": [
+          "kra003-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra004-1a",
+        "members": [
+          "kra004-1a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra004-1b",
+        "members": [
+          "kra004-1b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra004-2a",
+        "members": [
+          "kra004-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra004-3a",
+        "members": [
+          "kra004-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra004-3b",
+        "members": [
+          "kra004-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra005-1b",
+        "members": [
+          "kra005-1b",
+          "kra006-1b"
+        ],
+        "min_cos": 0.610178,
+        "pole": "virtue",
+        "note": "exact stem",
+        "joins": [
+          {
+            "member": "kra006-1b",
+            "how": "exact stem",
+            "cos": 0.610178
+          }
+        ]
+      },
+      {
+        "rep": "kra005-2a",
+        "members": [
+          "kra005-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra005-2b",
+        "members": [
+          "kra005-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra005-3a",
+        "members": [
+          "kra005-3a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra005-3b",
+        "members": [
+          "kra005-3b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra006-2a",
+        "members": [
+          "kra006-2a"
+        ],
+        "min_cos": 1.0,
+        "pole": "vice",
+        "note": "",
+        "joins": []
+      },
+      {
+        "rep": "kra006-2b",
+        "members": [
+          "kra006-2b"
+        ],
+        "min_cos": 1.0,
+        "pole": "virtue",
         "note": "",
         "joins": []
       }
@@ -613,28 +888,46 @@
       "am024-1b": "games the reward",
       "am025-1a": "transparent reasoning",
       "am025-1b": "hidden agenda",
-      "am027-2a": "consistent conduct"
+      "am027-2a": "consistent conduct",
+      "kra001-1a": "serves the intended goal",
+      "kra001-1b": "games the metric",
+      "kra002-2a": null,
+      "kra003-1b": "games the metric",
+      "kra003-2a": "accepts correction",
+      "kra003-2b": "stubbornly insists",
+      "kra004-1a": "honest candor",
+      "kra004-1b": "sycophancy",
+      "kra004-2a": "serves the real goal",
+      "kra004-3a": "truthful",
+      "kra004-3b": "fabricates facts",
+      "kra005-1b": "games the metric",
+      "kra005-2a": "respects instructions",
+      "kra005-2b": "overrides limits",
+      "kra005-3a": "honest about its work",
+      "kra005-3b": "fabricates and covers up",
+      "kra006-2a": "respects imposed limits",
+      "kra006-2b": "circumvents safeguards"
     },
-    "threshold_source": "--threshold",
-    "at": "2026-10-11T21:33:32+00:00"
+    "threshold_source": "dedup_labeled_pairs.json (tuned)",
+    "at": "2026-10-13T01:40:38+00:00"
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-11-b --threshold 0.8117 --budget-usd 1",
-      "git_sha": "eb9ef29+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/alignment_sweep.py dedupe --run-id 2026-10-11-b",
+      "git_sha": "715ce693+dirty",
       "author": "Roger Dearnaley",
       "title": "alignment sweep: within-sweep dedup groups"
     },
-    "produced_at": "2026-10-11T21:33:32+00:00",
+    "produced_at": "2026-10-13T01:40:38+00:00",
     "inputs": [
       {
         "dep_key": "extraction",
         "path": "data/candidates/runs/alignment_sweep/2026-10-11-b/extraction.jsonl",
-        "fingerprint": "v1:2026-10-11T21:33:28+00:00@71573",
+        "fingerprint": "v1:2026-10-13T01:40:35+00:00@108883",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-11T21:33:28+00:00",
+        "last_modified_at": "2026-10-13T01:40:35+00:00",
         "extras": {}
       },
       {
@@ -647,6 +940,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "2b99382136d5da87b78fe6aa3dd6a4405963855317d3352b0b0c847c2e246519"
+    "inputs_sha256": "889c82ac60acd889aa00e88371abdf854b09d62a86cbe0fc95d5fcc1583323d0"
   }
 }

@@ -1,47 +1,47 @@
 {
-  "n_chunks": 31,
-  "n_chunks_answered": 31,
+  "n_chunks": 41,
+  "n_chunks_answered": 41,
   "n_calls": {
-    "extract": 31,
+    "extract": 10,
     "rewrite": 0
   },
-  "n_reused": 0,
+  "n_reused": 31,
   "unparsed": {},
   "n_invalid_items": 0,
-  "n_pairs": 30,
-  "n_poles": 60,
-  "pairs_per_chunk": 0.968,
+  "n_pairs": 47,
+  "n_poles": 94,
+  "pairs_per_chunk": 1.146,
   "type": {
-    "behaviour": 30
+    "behaviour": 47
   },
   "enactability": {
-    "agentic-only": 26,
-    "chat": 4
+    "agentic-only": 36,
+    "chat": 11
   },
   "source_pole": {
-    "vice": 29,
+    "vice": 46,
     "virtue": 1
   },
   "label_kind": {
-    "ordinary": 60
+    "ordinary": 94
   },
-  "label_rule_rejected": 1,
+  "label_rule_rejected": 2,
   "label_flagged_by_model": 0,
   "label_rule_bite": {
-    "n": 1,
-    "share": 0.0167
+    "n": 2,
+    "share": 0.0213
   },
   "polysemy_flags": {
-    "n": 2,
-    "share": 0.0333
+    "n": 4,
+    "share": 0.0426
   },
   "mechanism_pairs": 0,
   "rewritten_pairs": 0,
   "dropped": {
-    "label rule": 1
+    "label rule": 2
   },
-  "n_kept_poles": 59,
-  "n_kept_pairs_both_poles": 29,
+  "n_kept_poles": 92,
+  "n_kept_pairs_both_poles": 45,
   "run_id": "2026-10-11-b",
   "variant": "B",
   "model": "claude-sonnet-5-5",
@@ -55,23 +55,23 @@
       "sha256": "48d96bc78b2c49d9979febf7eba2f6b7b198554cab149acd2399d2a2abf565c3"
     }
   },
-  "cost_usd_this_session": 0.215,
+  "cost_usd_this_session": 0.1527,
   "usage_this_session": {
     "per_model": {
       "claude-sonnet-5-5": {
         "model": "claude-sonnet-5-5",
-        "prompt_tokens": 33782,
-        "completion_tokens": 14740,
-        "cost_usd": 0.215,
-        "n_calls": 31
+        "prompt_tokens": 37865,
+        "completion_tokens": 7697,
+        "cost_usd": 0.1527,
+        "n_calls": 10
       }
     },
-    "total_cost_usd": 0.215,
-    "total_prompt_tokens": 33782,
-    "total_completion_tokens": 14740,
-    "n_calls": 31
+    "total_cost_usd": 0.1527,
+    "total_prompt_tokens": 37865,
+    "total_completion_tokens": 7697,
+    "n_calls": 10
   },
   "stopped_by_budget": false,
-  "at": "2026-10-11T21:33:28+00:00",
+  "at": "2026-10-13T01:40:35+00:00",
   "label_form": "judge-display-v1"
 }

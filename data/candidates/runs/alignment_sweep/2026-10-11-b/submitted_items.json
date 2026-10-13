@@ -556,7 +556,8 @@
   "item_id": "am024-1b",
   "pole": "virtue",
   "members": [
-   "am024-1b"
+   "am024-1b",
+   "kra004-2b"
   ],
   "partner_hint": "games the reward",
   "source_ref": "agentic_misalignment:2510.05179v2:5-2-training-that-leads-to-misalignment"
@@ -596,5 +597,235 @@
   ],
   "partner_hint": "consistent conduct",
   "source_ref": "agentic_misalignment:2510.05179v2:7-conclusion"
+ },
+ {
+  "key": "games_the_metric#1",
+  "surface": "games the metric",
+  "sense_id": 1,
+  "item_id": "kra001-1a",
+  "pole": "vice",
+  "members": [
+   "kra001-1a",
+   "kra002-1a",
+   "kra003-1a",
+   "kra005-1a",
+   "kra006-1a",
+   "kra007-1a",
+   "kra008-1a",
+   "kra009-1a",
+   "kra010-1a"
+  ],
+  "partner_hint": "serves the intended goal",
+  "source_ref": "krakovna:2026-10-13:rows-0001-0010"
+ },
+ {
+  "key": "serves_the_intended_goal#1",
+  "surface": "serves the intended goal",
+  "sense_id": 1,
+  "item_id": "kra001-1b",
+  "pole": "virtue",
+  "members": [
+   "kra001-1b",
+   "kra002-1b",
+   "kra008-1b",
+   "kra009-1b",
+   "kra010-1b"
+  ],
+  "partner_hint": "games the metric",
+  "source_ref": "krakovna:2026-10-13:rows-0001-0010"
+ },
+ {
+  "key": "plays_dead_under_testing#1",
+  "surface": "plays dead under testing",
+  "sense_id": 1,
+  "item_id": "kra002-2a",
+  "pole": "vice",
+  "members": [
+   "kra002-2a"
+  ],
+  "partner_hint": null,
+  "source_ref": "krakovna:2026-10-13:rows-0011-0020"
+ },
+ {
+  "key": "honors_the_intent#1",
+  "surface": "honors the intent",
+  "sense_id": 1,
+  "item_id": "kra003-1b",
+  "pole": "virtue",
+  "members": [
+   "kra003-1b",
+   "kra007-1b"
+  ],
+  "partner_hint": "games the metric",
+  "source_ref": "krakovna:2026-10-13:rows-0021-0030"
+ },
+ {
+  "key": "stubbornly_insists#1",
+  "surface": "stubbornly insists",
+  "sense_id": 1,
+  "item_id": "kra003-2a",
+  "pole": "vice",
+  "members": [
+   "kra003-2a"
+  ],
+  "partner_hint": "accepts correction",
+  "source_ref": "krakovna:2026-10-13:rows-0021-0030"
+ },
+ {
+  "key": "accepts_correction#1",
+  "surface": "accepts correction",
+  "sense_id": 1,
+  "item_id": "kra003-2b",
+  "pole": "virtue",
+  "members": [
+   "kra003-2b"
+  ],
+  "partner_hint": "stubbornly insists",
+  "source_ref": "krakovna:2026-10-13:rows-0021-0030"
+ },
+ {
+  "key": "sycophancy#1",
+  "surface": "sycophancy",
+  "sense_id": 1,
+  "item_id": "kra004-1a",
+  "pole": "vice",
+  "members": [
+   "kra004-1a"
+  ],
+  "partner_hint": "honest candor",
+  "source_ref": "krakovna:2026-10-13:rows-0031-0040"
+ },
+ {
+  "key": "honest_candor#1",
+  "surface": "honest candor",
+  "sense_id": 1,
+  "item_id": "kra004-1b",
+  "pole": "virtue",
+  "members": [
+   "kra004-1b"
+  ],
+  "partner_hint": "sycophancy",
+  "source_ref": "krakovna:2026-10-13:rows-0031-0040"
+ },
+ {
+  "key": "games_the_goal#1",
+  "surface": "games the goal",
+  "sense_id": 1,
+  "item_id": "kra004-2a",
+  "pole": "vice",
+  "members": [
+   "kra004-2a"
+  ],
+  "partner_hint": "serves the real goal",
+  "source_ref": "krakovna:2026-10-13:rows-0031-0040"
+ },
+ {
+  "key": "fabricates_facts#1",
+  "surface": "fabricates facts",
+  "sense_id": 1,
+  "item_id": "kra004-3a",
+  "pole": "vice",
+  "members": [
+   "kra004-3a"
+  ],
+  "partner_hint": "truthful",
+  "source_ref": "krakovna:2026-10-13:rows-0031-0040"
+ },
+ {
+  "key": "truthful#1",
+  "surface": "truthful",
+  "sense_id": 1,
+  "item_id": "kra004-3b",
+  "pole": "virtue",
+  "members": [
+   "kra004-3b"
+  ],
+  "partner_hint": "fabricates facts",
+  "source_ref": "krakovna:2026-10-13:rows-0031-0040"
+ },
+ {
+  "key": "does_the_real_task#1",
+  "surface": "does the real task",
+  "sense_id": 1,
+  "item_id": "kra005-1b",
+  "pole": "virtue",
+  "members": [
+   "kra005-1b",
+   "kra006-1b"
+  ],
+  "partner_hint": "games the metric",
+  "source_ref": "krakovna:2026-10-13:rows-0041-0050"
+ },
+ {
+  "key": "overrides_limits#1",
+  "surface": "overrides limits",
+  "sense_id": 1,
+  "item_id": "kra005-2a",
+  "pole": "vice",
+  "members": [
+   "kra005-2a"
+  ],
+  "partner_hint": "respects instructions",
+  "source_ref": "krakovna:2026-10-13:rows-0041-0050"
+ },
+ {
+  "key": "respects_instructions#1",
+  "surface": "respects instructions",
+  "sense_id": 1,
+  "item_id": "kra005-2b",
+  "pole": "virtue",
+  "members": [
+   "kra005-2b"
+  ],
+  "partner_hint": "overrides limits",
+  "source_ref": "krakovna:2026-10-13:rows-0041-0050"
+ },
+ {
+  "key": "fabricates_and_covers_up#1",
+  "surface": "fabricates and covers up",
+  "sense_id": 1,
+  "item_id": "kra005-3a",
+  "pole": "vice",
+  "members": [
+   "kra005-3a"
+  ],
+  "partner_hint": "honest about its work",
+  "source_ref": "krakovna:2026-10-13:rows-0041-0050"
+ },
+ {
+  "key": "honest_about_its_work#1",
+  "surface": "honest about its work",
+  "sense_id": 1,
+  "item_id": "kra005-3b",
+  "pole": "virtue",
+  "members": [
+   "kra005-3b"
+  ],
+  "partner_hint": "fabricates and covers up",
+  "source_ref": "krakovna:2026-10-13:rows-0041-0050"
+ },
+ {
+  "key": "circumvents_safeguards#1",
+  "surface": "circumvents safeguards",
+  "sense_id": 1,
+  "item_id": "kra006-2a",
+  "pole": "vice",
+  "members": [
+   "kra006-2a"
+  ],
+  "partner_hint": "respects imposed limits",
+  "source_ref": "krakovna:2026-10-13:rows-0051-0060"
+ },
+ {
+  "key": "respects_imposed_limits#1",
+  "surface": "respects imposed limits",
+  "sense_id": 1,
+  "item_id": "kra006-2b",
+  "pole": "virtue",
+  "members": [
+   "kra006-2b"
+  ],
+  "partner_hint": "circumvents safeguards",
+  "source_ref": "krakovna:2026-10-13:rows-0051-0060"
  }
 ]
