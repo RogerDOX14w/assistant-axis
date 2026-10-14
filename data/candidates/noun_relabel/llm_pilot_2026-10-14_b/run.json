@@ -1,0 +1,68 @@
+{
+  "what": "noun_relabel.py llm-pilot",
+  "model": "claude-haiku-5-5",
+  "prompt_version": 1,
+  "prompt_sha256": "5e2d9f17f7b1a63f0f71affe8a5a5f3597dd4ca96c83b215cbf969db075bb9d3",
+  "n": 100,
+  "seed": 0,
+  "git_sha": "6560c72a+dirty",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "allow_dirty": false,
+    "note": null
+  },
+  "budget_usd": 0.25,
+  "estimate_usd": 0.0345,
+  "cost_usd": 0.017599,
+  "n_calls": 100,
+  "counts": {
+    "by_kind": {
+      "person": {
+        "n": 60,
+        "parsed": 60,
+        "answered": 22,
+        "yield": 18
+      },
+      "role": {
+        "n": 40,
+        "parsed": 40,
+        "answered": 6,
+        "yield": 6
+      }
+    },
+    "total": {
+      "n": 100,
+      "parsed": 100,
+      "answered": 28,
+      "yield": 24
+    },
+    "adopt_threshold_met": true
+  },
+  "stopped": null,
+  "started_at": "2026-10-14T17:36:53+00:00",
+  "finished_at": "2026-10-14T17:37:20+00:00",
+  "argv": [
+    "data_analysis/gap_generation/noun_relabel.py",
+    "llm-pilot",
+    "--n",
+    "100",
+    "--budget-usd",
+    "0.25",
+    "--out-dir",
+    "data/candidates/noun_relabel/llm_pilot_2026-10-14_b"
+  ]
+}

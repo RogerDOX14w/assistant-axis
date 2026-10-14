@@ -1,0 +1,146 @@
+{
+  "generator": "noun_relabel",
+  "run_id": "roles-2026-10-14",
+  "git_sha": "de929c92+dirty",
+  "args": {
+    "kind": "roles",
+    "argv": [
+      "data_analysis/gap_generation/noun_relabel.py",
+      "roles",
+      "--apply",
+      "--run-id",
+      "roles-2026-10-14"
+    ]
+  },
+  "n_emitted": 35,
+  "started_at": "2026-10-14T17:32:06+00:00",
+  "finished_at": "2026-10-14T17:32:12+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "df25d10f88f4",
+      "started_at": "2026-10-14T17:32:06+00:00",
+      "finished_at": "2026-10-14T17:32:12+00:00",
+      "git_sha": "de929c92+dirty",
+      "args": {
+        "kind": "roles",
+        "argv": [
+          "data_analysis/gap_generation/noun_relabel.py",
+          "roles",
+          "--apply",
+          "--run-id",
+          "roles-2026-10-14"
+        ]
+      },
+      "n_emitted": 35,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ],
+  "stream": "roles",
+  "helper_version": 1,
+  "oewn": "oewn:2024",
+  "rules": "bae02bb9af934e7d9b090f4e58ca7dd50a85c01ce5cd40c90f4ba4807e3c870d",
+  "counts": {
+    "n_relabelled": 49,
+    "by_rule": {
+      "derivation": 36,
+      "derivation+spelling": 2,
+      "suffix:+ish": 3,
+      "suffix:+y": 3,
+      "suffix:-ist+istic": 5
+    },
+    "by_where": {
+      "corpus": 14,
+      "new": 10,
+      "registry": 25
+    },
+    "by_noun_m1": {
+      "queue_done": 6,
+      "role_file": 43
+    },
+    "by_generator": {},
+    "by_source": {
+      "queue_role": {
+        "n_looked_at": 66,
+        "n_relabelled": 6,
+        "by_where": {
+          "corpus": 1,
+          "new": 2,
+          "registry": 3
+        }
+      },
+      "role": {
+        "n_looked_at": 329,
+        "n_relabelled": 43,
+        "by_where": {
+          "corpus": 13,
+          "new": 8,
+          "registry": 22
+        }
+      },
+      "roles_list": {
+        "n_looked_at": 208,
+        "n_relabelled": 0,
+        "by_where": {}
+      }
+    },
+    "n_distinct_new": 8,
+    "distinct_new": [
+      "beggarly#1",
+      "chimeric#1",
+      "entrepreneurial#1",
+      "ghostly#1",
+      "monarchical#1",
+      "oracular#1",
+      "paramedical#1",
+      "supervisory#1"
+    ],
+    "reasons": {
+      "queue_role:has_adjective_sense": 16,
+      "queue_role:not_in_oewn": 5,
+      "queue_role:person_no_adjective": 35,
+      "queue_role:pertainym_only": 4,
+      "role:below_floor": 5,
+      "role:has_adjective_sense": 48,
+      "role:not_in_oewn": 19,
+      "role:other_noun": 13,
+      "role:person_no_adjective": 185,
+      "role:pertainym_only": 13,
+      "role:quality_no_adjective": 3,
+      "roles_list:has_adjective_sense": 68,
+      "roles_list:not_a_noun": 3,
+      "roles_list:not_in_oewn": 46,
+      "roles_list:other_noun": 16,
+      "roles_list:person_no_adjective": 71,
+      "roles_list:pertainym_only": 1,
+      "roles_list:quality_no_adjective": 3
+    },
+    "n_already_linked": 4,
+    "n_phrases": 26,
+    "leftover_person_nouns": {
+      "queue_role": 35,
+      "role": 185,
+      "roles_list": 71
+    }
+  },
+  "n_blocks_written": 25,
+  "submit_report": {
+    "n_submitted": 35,
+    "n_new": 8,
+    "n_merged": 27,
+    "n_unchanged": 0,
+    "invalid": [],
+    "n_relabelled": 0,
+    "relabels": []
+  }
+}

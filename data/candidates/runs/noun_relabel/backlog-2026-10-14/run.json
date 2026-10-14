@@ -1,0 +1,154 @@
+{
+  "generator": "noun_relabel",
+  "run_id": "backlog-2026-10-14",
+  "git_sha": "de929c92+dirty",
+  "args": {
+    "kind": "backlog",
+    "argv": [
+      "data_analysis/gap_generation/noun_relabel.py",
+      "backlog",
+      "--apply",
+      "--run-id",
+      "backlog-2026-10-14"
+    ]
+  },
+  "n_emitted": 53,
+  "started_at": "2026-10-14T17:27:24+00:00",
+  "finished_at": "2026-10-14T17:27:30+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "12c91776f40a",
+      "started_at": "2026-10-14T17:27:24+00:00",
+      "finished_at": "2026-10-14T17:27:30+00:00",
+      "git_sha": "de929c92+dirty",
+      "args": {
+        "kind": "backlog",
+        "argv": [
+          "data_analysis/gap_generation/noun_relabel.py",
+          "backlog",
+          "--apply",
+          "--run-id",
+          "backlog-2026-10-14"
+        ]
+      },
+      "n_emitted": 53,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ],
+  "stream": "backlog",
+  "helper_version": 1,
+  "oewn": "oewn:2024",
+  "rules": "bae02bb9af934e7d9b090f4e58ca7dd50a85c01ce5cd40c90f4ba4807e3c870d",
+  "counts": {
+    "n_relabelled": 67,
+    "by_rule": {
+      "derivation": 34,
+      "derivation+spelling": 2,
+      "suffix:+ful": 1,
+      "suffix:+ish": 8,
+      "suffix:+ly": 3,
+      "suffix:+y": 6,
+      "suffix:-cy+te": 1,
+      "suffix:-ist+istic": 5,
+      "suffix:-ite+itical": 1,
+      "suffix:-ty+t": 2,
+      "suffix:-vert+verted": 1,
+      "suffix:noun_suffix": 3
+    },
+    "by_where": {
+      "corpus": 14,
+      "new": 18,
+      "registry": 35
+    },
+    "by_noun_m1": {
+      "held_physical": 3,
+      "held_roles": 4,
+      "held_states": 1,
+      "reject": 11,
+      "trait": 48
+    },
+    "by_generator": {
+      "antonym_check": 3,
+      "base_model": 17,
+      "censuses": 44,
+      "masked_lm": 4,
+      "roget": 1
+    },
+    "by_source": {
+      "registry": {
+        "n_looked_at": 9190,
+        "n_relabelled": 67,
+        "by_where": {
+          "corpus": 14,
+          "new": 18,
+          "registry": 35
+        }
+      }
+    },
+    "n_distinct_new": 18,
+    "distinct_new": [
+      "bitchy#1",
+      "blubbery#1",
+      "bratty#1",
+      "cabalistic#1",
+      "characteristic#1",
+      "complementary#1",
+      "contributory#1",
+      "curly#1",
+      "dwarfish#1",
+      "dysphoric#1",
+      "familial#1",
+      "hammy#1",
+      "lemony#1",
+      "pimply#1",
+      "shrimpy#1",
+      "simplistic#1",
+      "snobby#1",
+      "wormy#1"
+    ],
+    "reasons": {
+      "below_floor": 7,
+      "has_adjective_sense": 5463,
+      "not_a_noun": 140,
+      "not_in_oewn": 2405,
+      "other_noun": 639,
+      "person_no_adjective": 372,
+      "pertainym_only": 6,
+      "quality_no_adjective": 91
+    },
+    "n_already_linked": 0,
+    "n_phrases": 1801,
+    "leftover_person_nouns": {
+      "antonym_check": 7,
+      "base_model": 9,
+      "censuses": 324,
+      "ipip": 3,
+      "masked_lm": 11,
+      "roget": 1,
+      "states_pass": 24,
+      "structural": 6
+    }
+  },
+  "n_blocks_written": 120,
+  "submit_report": {
+    "n_submitted": 53,
+    "n_new": 18,
+    "n_merged": 35,
+    "n_unchanged": 0,
+    "invalid": [],
+    "n_relabelled": 0,
+    "relabels": []
+  },
+  "registry_snapshot_sha256": "0ee9020da79cf597550940a134ccc464eecd765f9fe8879614b8dd7273640f9d"
+}
