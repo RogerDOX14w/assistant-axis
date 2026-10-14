@@ -171,7 +171,8 @@ def build_review_rates(args, rows, batches=None) -> dict:
     dirs = review_dirs(args, batches)
     recs = [RM.review_record(d, idle_s=args.idle_s) for d in dirs]
     pooled = RM.pooled_review_rate(dirs, idle_s=args.idle_s)
-    res = RM.load_resolutions(dirs)
+    res_all = RM.load_resolutions(dirs)
+    res = RM.share_resolutions(res_all)          # a holding-list pass's groups left out (QUESTIONS 107)
     pshare = RM.pooled_promote_share(rows, res)
     shares = {g: RM.promote_share(rows, generator=g, resolutions=res, pooled=pshare).as_dict()
               for g in D.generator_names(rows) if g not in IND.POOL_GENERATORS + IND.ATTRIBUTED_GENERATORS}
@@ -182,7 +183,8 @@ def build_review_rates(args, rows, batches=None) -> dict:
                             "by_shape": b.by_shape}
     as_of = max((e.at for d in dirs for e in RM.load_events(d, drop_undone=False)), default=None)
     return {"batches": recs, "pooled": pooled.as_dict(), "promote_share_pooled": pshare.as_dict(),
-            "promote_share_by_batch": by_batch, "promote_share_by_generator": shares, "idle_s": args.idle_s,
+            "promote_share_by_batch": by_batch,
+            "promote_share_left_out": sorted({r.batch_id for r in res_all} - {r.batch_id for r in res}), "promote_share_by_generator": shares, "idle_s": args.idle_s,
             "review_as_of": as_of.isoformat() if as_of else None}
 
 
@@ -461,6 +463,7 @@ def cmd_dashboard(args) -> int:
                        "review_as_of": rr.get("review_as_of"), "harness_batches": [h["batch_id"] for h in harness]},
             "rows": [r.as_dict() for r in grows], "review_rate": rr["pooled"],
             "promote_share_pooled": rr["promote_share_pooled"],
+            "promote_share_left_out": rr["promote_share_left_out"],
             "string_recall_any": {k: v for k, v in D.any_generator_string_recall(rows, traits).items() if k != "stems"},
             "concepts_summary": csum, "estimates_summary": esum,
             "unit_samples": {u: conc["samples"][u] for u in conc["samples"]},

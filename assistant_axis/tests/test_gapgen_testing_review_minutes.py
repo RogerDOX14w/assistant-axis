@@ -104,6 +104,16 @@ class TestPromoteShare:
         assert cen.borrowed and cen.n_decided == 4 and cen.n_groups == 2          # under 50 decided: borrowed
         assert cen.per_group == pooled.per_group and cen.by_shape["multi"]["resolved"] == 1
 
+    def test_holding_pass_batches_left_out_of_the_share(self, tmp_path):
+        """QUESTIONS 107 (Roger, 2026-10-14): a states or physical pass's groups are a different population."""
+        res = [RM.Resolution("review_tda_1", "g1", ("a#1",), "promote"),
+               RM.Resolution("review_tda_1", "g2", ("b#1",), "reject"),
+               RM.Resolution("review_states_v4", "g1", ("c#1",), "promote"),
+               RM.Resolution("review_physical_tda_1", "g1", ("d#1",), "promote")]
+        kept = RM.share_resolutions(res)
+        assert [r.batch_id for r in kept] == ["review_tda_1", "review_tda_1"]
+        assert RM.pooled_promote_share({}, kept).per_group == 0.5
+
     def test_not_borrowed_at_50(self, monkeypatch, tmp_path):
         monkeypatch.setattr(RM, "MIN_DECIDED", 3)
         rows = {"a#1": row("a#1", "censuses", "accepted"), "b#1": row("b#1", "censuses", "merged_into"),

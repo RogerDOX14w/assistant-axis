@@ -17,7 +17,9 @@ the registry rows the batch changed.  From those:
 * the **promote share** is promote resolutions over resolved groups, a singleton a group of one (decision 3,
   Roger 2026-10-13), with the per-term share (accepted over decided terms) and the per-group share by shape beside
   it; a generator with fewer than :data:`MIN_DECIDED` decided terms takes the pooled share, flagged ``borrowed``
-  (:func:`promote_share`).
+  (:func:`promote_share`).  A holding-list pass's review batch (states, physical: :data:`SHARE_EXCLUDED_PREFIXES`)
+  is a different population and is left out of the share (:func:`share_resolutions`; QUESTIONS 107, Roger
+  2026-10-14); its own share is still reported per batch.
 
 A superseded log (``decisions.before_*.jsonl``, a log reset before a later pass) is listed, never counted.  A batch
 with fewer than :data:`MIN_POOL_TERMS` terms (``review_states_v4``: 4) is reported and left out of the pooled rate.
@@ -40,6 +42,9 @@ IDLE_S = 300
 MIN_POOL_TERMS = 50
 #: A generator with fewer decided terms than this borrows the pooled promote share.
 MIN_DECIDED = 50
+#: Review batches of a holding-list pass (lasting conditions, physical words): a different population from the trait
+#: generators' review, so their resolutions are left out of the promote share (QUESTIONS 107, Roger 2026-10-14).
+SHARE_EXCLUDED_PREFIXES = ("review_states_", "review_physical_")
 LOG_NAME = "decisions.jsonl"
 APPLIED_NAME = "applied.jsonl"
 SUPERSEDED_GLOB = "decisions.*.jsonl"
@@ -341,6 +346,11 @@ def load_resolutions(batch_dirs: Iterable[Path]) -> list[Resolution]:
     return out
 
 
+def share_resolutions(resolutions: Iterable[Resolution]) -> list[Resolution]:
+    """The resolutions the promote share counts: those of a holding-list pass's batch left out."""
+    return [r for r in resolutions if not r.batch_id.startswith(SHARE_EXCLUDED_PREFIXES)]
+
+
 @dataclass(frozen=True)
 class PromoteShare:
     """Decision 3: ``per_group`` is the share the stop rule uses; ``per_term`` beside it (the frozen interface)."""
@@ -424,4 +434,4 @@ def promote_share(rows: Mapping[str, Mapping], *, generator: str, resolutions: S
 __all__ = ["IDLE_S", "MIN_POOL_TERMS", "MIN_DECIDED", "Event", "load_events", "superseded_logs", "active_minutes",
            "wall_minutes", "idle_gaps", "TermsDecided", "terms_decided", "GroupTimes", "group_spans", "group_times",
            "ReviewRate", "review_rate", "review_record", "review_batch_dirs", "PooledRate", "pooled_review_rate",
-           "Resolution", "load_resolutions", "PromoteShare", "promote_share", "pooled_promote_share"]
+           "SHARE_EXCLUDED_PREFIXES", "Resolution", "load_resolutions", "share_resolutions", "PromoteShare", "promote_share", "pooled_promote_share"]

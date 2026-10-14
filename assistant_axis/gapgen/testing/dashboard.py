@@ -798,7 +798,8 @@ def render_markdown(dash: Mapping, *, rel: str = "../../../") -> str:
               f"{', '.join(rr.get('left_out') or []) or 'none'}.  Pooled promote share: per group "
               f"{_pct((dash.get('promote_share_pooled') or {}).get('per_group'), 1)}, per term "
               f"{_pct((dash.get('promote_share_pooled') or {}).get('per_term'), 1)}; by shape "
-              f"{json.dumps((dash.get('promote_share_pooled') or {}).get('by_shape'))}.", ""]
+              f"{json.dumps((dash.get('promote_share_pooled') or {}).get('by_shape'))}; holding-list passes left out of "
+              f"the share: {', '.join(dash.get('promote_share_left_out') or []) or 'none'}.", ""]
     # concepts and estimates
     ce = dash.get("concepts_summary") or []
     if ce:
