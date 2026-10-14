@@ -744,29 +744,29 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py fit --fit-id fit_2026-10-13 --vectors-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --cache-dir data/candidates/cache/embeddings --force",
-      "git_sha": "f50d0f27+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py fit --fit-id fit_2026-10-13 --vectors-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --cache-dir data/candidates/cache/embeddings --force --allow-dirty",
+      "git_sha": "1fd1dc36+dirty",
       "author": "Roger Dearnaley",
       "title": "persona-space fit fit_2026-10-13: cross-validation"
     },
-    "produced_at": "2026-10-13T22:59:05+00:00",
+    "produced_at": "2026-10-14T01:05:37+00:00",
     "inputs": [
       {
         "dep_key": "producer_script",
         "path": "data_analysis/gap_generation/persona_novelty.py",
-        "fingerprint": "v1:2026-10-13T22:58:21+00:00@53756",
+        "fingerprint": "v1:2026-10-14T01:03:58+00:00@53849",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T22:58:21+00:00",
+        "last_modified_at": "2026-10-14T01:03:58+00:00",
         "extras": {}
       },
       {
         "dep_key": "metric_config",
         "path": "data/candidates/metric_config.json",
-        "fingerprint": "v1:2026-10-13T22:15:47+00:00@54961",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T22:15:47+00:00",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
         "extras": {}
       },
       {
@@ -779,6 +779,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "bd04947f41f44cab006301e7e62aeb6d7b6b66952ade1d7fb655b582a2eb6596"
+    "inputs_sha256": "8df82879a373468d06f6b99fe4bd94465474b8b6455348916f5eb956cc796806"
   }
 }

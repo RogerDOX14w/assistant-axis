@@ -91,6 +91,19 @@ def fit_png(cv: CV, cal: Calibration, path: Path, *, title: str, inputs=None, ar
     return path
 
 
+def _split_line(cal) -> str:
+    s = cal.dup_base_rate_split
+    if not s:
+        return "the split into real neighbours and false alarms was not recorded for this fit (rerun `fit --force`)."
+    return (f"{s['share_with_neighbour'] * 100:.0f}% of existing entities have an actual neighbour at the threshold "
+            f"(the corpus is dense here: median actual nearest-other cosine {s['median_actual_nn_cos']:.3f}); the flag "
+            f"fires for {_f(s['hit_rate'] and s['hit_rate'] * 100, 0)}% of those and for "
+            f"{_f(s['false_alarm_rate'] and s['false_alarm_rate'] * 100, 0)}% of the entities with none (the predictor's "
+            f"false-alarm rate), so {_f(s['false_share_of_flags'] and s['false_share_of_flags'] * 100, 0)}% of flags are "
+            f"false alarms.  A genuinely new candidate with no close corpus neighbour can expect roughly the false-alarm "
+            f"rate.")
+
+
 def overlap_lines(cal: Calibration) -> list[str]:
     """The overlap test's pairs by rubric-A reading: how a candidate that duplicates a trait would read."""
     t = cal.overlap_check
@@ -189,8 +202,8 @@ def fit_report(cv: CV, cal: Calibration, *, fit_id: str, pool_counts: Mapping, p
           f"- `dup_threshold` = **{cal.dup_threshold:.3f}** (the median held-out cosine between a prediction and its "
           f"own vector).  The flag's base rate: a held-out existing entity's prediction is at or above it to "
           f"*another* entity {_f(cal.dup_base_rate and cal.dup_base_rate * 100, 1)}% of the time (the median "
-          f"nearest-other cosine is {cal.nn_cos_pred_quantiles[10]:.3f}, p90 {cal.nn_cos_pred_quantiles[18]:.3f}); "
-          f"a candidate that is a genuinely new trait can expect about that rate of duplicate-like flags.",
+          f"nearest-other cosine is {cal.nn_cos_pred_quantiles[10]:.3f}, p90 {cal.nn_cos_pred_quantiles[18]:.3f}).  "
+          f"That is not a false-alarm rate: {_split_line(cal)}",
           f"- `novel_pct` = **{cal.novel_pct:.2f}**.",
           f"- `cover_questioned` cosine: {cal.cover_questioned_cos:.3f} (the 10th percentile of held-out "
           f"self-cosines); `novel_vs_covered` percentile {cal.novel_vs_covered_pct:.2f}.",

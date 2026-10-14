@@ -89,3 +89,26 @@ def test_overlap_check_by_reading():
     c = float(P[1] @ pool.M[2] / (np.linalg.norm(P[1]) * np.linalg.norm(pool.M[2])))
     c2 = float(P[1] @ pool.M[3] / (np.linalg.norm(P[1]) * np.linalg.norm(pool.M[3])))
     assert t["3"]["median_pred_cos"] == pytest.approx(np.median([c, c2]), abs=1e-4)
+
+
+def test_base_rate_split():
+    """Review of 2026-10-13, should-fix 1: the base rate splits into real neighbours and predictor false alarms, and
+    the two parts add back to the base rate."""
+    pool, E, groups, _ = synthetic()
+    cv = FIT.cross_validate(pool, E, groups, CFG)
+    cal = CAL.from_cv(cv, fit_id="fit_x", config_version="cfg")
+    s = CAL.base_rate_split(cv, pool, dup_threshold=cal.dup_threshold)
+    assert s["n"] == cal.n_train == 240
+    near, fa, hit = s["share_with_neighbour"], s["false_alarm_rate"], s["hit_rate"]
+    total = (near * (hit or 0)) + ((1 - near) * (fa or 0))
+    assert total == pytest.approx(cal.dup_base_rate, abs=2e-3)
+    if s["false_share_of_flags"] is not None:
+        assert 0.0 <= s["false_share_of_flags"] <= 1.0
+
+
+@pytest.mark.skipif(not F.real_data_present(), reason=F.REAL_REASON)
+def test_real_base_rate_split():
+    """The reviewer's figures at alpha 0.3, threshold 0.732: 37% with an actual neighbour, false alarms 13%."""
+    cv, pool = F.real_cv_alpha03(), F.real_pool()
+    s = CAL.base_rate_split(cv, pool, dup_threshold=0.732, alpha=0.3)
+    assert 0.33 <= s["share_with_neighbour"] <= 0.41 and 0.10 <= s["false_alarm_rate"] <= 0.16

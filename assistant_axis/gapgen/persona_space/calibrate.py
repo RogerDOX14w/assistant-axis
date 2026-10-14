@@ -53,8 +53,12 @@ class Calibration:
     residual_pred_quantiles_by_N: dict = field(default_factory=dict)
     residual_true_quantiles_by_N: dict = field(default_factory=dict)
     #: the share of held-out training entities whose prediction is at or above ``dup_threshold`` to *another* entity:
-    #: the rate at which the flag would call an existing entity duplicate-like (the flag's base rate)
+    #: the rate at which the flag would call an existing entity duplicate-like (the flag's base rate).  Not a
+    #: false-alarm rate: most of it is the corpus's own close pairs (:data:`dup_base_rate_split`; review of
+    #: 2026-10-13, should-fix 1)
     dup_base_rate: Optional[float] = None
+    #: :func:`base_rate_split`: the base rate split into real neighbours and predictor false alarms
+    dup_base_rate_split: Optional[dict] = None
     #: :func:`overlap_check`'s table (the overlap test's pairs by rubric-A reading), when the fit had them
     overlap_check: Optional[dict] = None
     feature_source: dict = field(default_factory=dict)
@@ -138,6 +142,27 @@ def flag(nn_cos: float, residual_pct_: float, cal: Calibration) -> str:
     if residual_pct_ is not None and residual_pct_ >= cal.novel_pct:
         return "novel_like"
     return "ordinary"
+
+
+def base_rate_split(cv, pool, *, dup_threshold: float, alpha: Optional[float] = None) -> dict:
+    """The flag's base rate split by whether the held-out entity has an *actual* neighbour at the threshold (its
+    vector's cosine to another training entity's vector): ``share_with_neighbour``, ``false_alarm_rate`` (flagged
+    among those with none), ``hit_rate`` (flagged among those with one) and ``false_share_of_flags``.  The corpus is
+    dense at this scale, so most of the base rate is real neighbours (review of 2026-10-13, should-fix 1)."""
+    h = cv.heldout[float(cv.alpha if alpha is None else alpha)]
+    Y = np.asarray(pool.M[pool.train_idx], dtype=np.float64)
+    Yu = Y / np.linalg.norm(Y, axis=1, keepdims=True)
+    S = Yu @ Yu.T
+    np.fill_diagonal(S, -np.inf)
+    nn_act = S.max(axis=1)
+    flag = np.asarray(h["nn_cos"]) >= round(float(dup_threshold), 4)
+    near = nn_act >= round(float(dup_threshold), 4)
+    r = lambda x: round(float(x), 4)
+    return {"n": int(len(flag)), "share_with_neighbour": r(near.mean()),
+            "false_alarm_rate": r(flag[~near].mean()) if (~near).any() else None,
+            "hit_rate": r(flag[near].mean()) if near.any() else None,
+            "false_share_of_flags": r((flag & ~near).sum() / flag.sum()) if flag.any() else None,
+            "median_actual_nn_cos": r(np.median(nn_act))}
 
 
 def overlap_check(cv, pool, readings, *, dup_threshold: float, alpha: Optional[float] = None) -> dict:

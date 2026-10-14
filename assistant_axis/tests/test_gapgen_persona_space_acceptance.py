@@ -4,6 +4,7 @@ them; every score batch has ``usage.json`` and ``summary.json``; the first full 
 scored key of the tracked snapshot and an ``agreement.json``; the prospective ``predicted.jsonl`` has a row for every
 pending entity; the corpus and the queue are untouched."""
 import json
+import os
 import subprocess
 
 import pytest
@@ -82,6 +83,9 @@ def test_prospective_rows():
     assert (PRO_DIRS[0] / "run.json").exists()
 
 
+@pytest.mark.skipif(not os.environ.get("GAPGEN_ACCEPTANCE_WORKTREE"),
+                    reason="an acceptance step, not a standing test: Roger's tree has uncommitted trait edits mid-chunk "
+                           "(plan 12 review, should-fix 4); set GAPGEN_ACCEPTANCE_WORKTREE=1 to run it")
 def test_the_corpus_and_the_queue_are_untouched():
     out = subprocess.run(["git", "status", "--porcelain", "data/traits", "data/roles", "data/seed_queue.json"],
                          cwd=REPO_ROOT, capture_output=True, text=True)

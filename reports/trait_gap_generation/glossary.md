@@ -783,7 +783,7 @@ the trait, -1 at the partner, 0 halfway.  Reported because antonyms are not oppo
 The scorer's flag.  **Duplicate-like**: the predicted vector is at least as close to an existing entity as a
 held-out entity's prediction is to its own vector half the time (cosine 0.732).  **Novel-like**: otherwise, and a
 calibration percentile of 0.80 or more.  The **base rate** is how often an existing entity's held-out prediction is
-duplicate-like to *another* entity (32% at 0.732): the rate at which a genuinely new candidate is flagged anyway.
+duplicate-like to *another* entity (32% at 0.732).  It is **not** a false-alarm rate: the corpus is dense at that scale, and 37% of existing entities have an *actual* neighbour at 0.732 or above, so most of the 32% are real close pairs.  The **false-alarm rate** is the flag rate among entities with no actual neighbour at the threshold (13% at 0.732), and that is roughly what a genuinely new candidate with no close corpus neighbour can expect (plan 12 review, 2026-10-13; `calibration.json` `dup_base_rate_split`).
 
 <a id="disagreement-quantile"></a>
 ### Disagreement quantile

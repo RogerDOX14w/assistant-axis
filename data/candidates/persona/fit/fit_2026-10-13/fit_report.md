@@ -71,7 +71,7 @@ The cosine-weighted mean of the k nearest training vectors by embedding cosine, 
 
 Shrinkage: the held-out predicted `residual_20` has median 0.219 against the actual 0.399, so a candidate's residual is read as its percentile among the held-out predictions (`residual_pct`).
 
-- `dup_threshold` = **0.732** (the median held-out cosine between a prediction and its own vector).  The flag's base rate: a held-out existing entity's prediction is at or above it to *another* entity 32.3% of the time (the median nearest-other cosine is 0.683, p90 0.800); a candidate that is a genuinely new trait can expect about that rate of duplicate-like flags.
+- `dup_threshold` = **0.732** (the median held-out cosine between a prediction and its own vector).  The flag's base rate: a held-out existing entity's prediction is at or above it to *another* entity 32.3% of the time (the median nearest-other cosine is 0.683, p90 0.800).  That is not a false-alarm rate: 37% of existing entities have an actual neighbour at the threshold (the corpus is dense here: median actual nearest-other cosine 0.688); the flag fires for 66% of those and for 13% of the entities with none (the predictor's false-alarm rate), so 25% of flags are false alarms.  A genuinely new candidate with no close corpus neighbour can expect roughly the false-alarm rate.
 - `novel_pct` = **0.80**.
 - `cover_questioned` cosine: 0.610 (the 10th percentile of held-out self-cosines); `novel_vs_covered` percentile 0.90.
 - Set by: plan default.

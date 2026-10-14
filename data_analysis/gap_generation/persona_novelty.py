@@ -380,6 +380,7 @@ def cmd_fit(args, argv) -> int:
     cal = CAL.from_cv(cv, fit_id=args.fit_id, config_version=cfg.config_version, dup_threshold=args.dup_threshold,
                       novel_pct=args.novel_pct if args.novel_pct is not None else CAL.DEFAULT_NOVEL_PCT,
                       thresholds_set_by=set_by, feature_source=feature_source)
+    cal.dup_base_rate_split = CAL.base_rate_split(cv, pool, dup_threshold=cal.dup_threshold)
     ovl = overlap_readings(args.overlap_check)
     if ovl:
         cal.overlap_check = CAL.overlap_check(cv, pool, ovl, dup_threshold=cal.dup_threshold)

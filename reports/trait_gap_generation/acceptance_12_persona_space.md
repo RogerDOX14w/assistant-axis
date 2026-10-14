@@ -143,14 +143,14 @@ Means: PCs 25-48 0.32, 49-64 0.17.  The tail is predicted worse, not at zero, as
 the held-out predicted `residual_20` has median 0.219 against the actual 0.399 (`residual_24`: 0.184 against 0.362).
 `dup_threshold` = **0.732**, `novel_pct` = **0.80**; the cover-questioned cosine 0.610, novel-vs-covered 0.90.  The
 evidence for decision (b) (QUESTIONS 153): at 0.732 a held-out existing entity's prediction is duplicate-like to
-another entity **32%** of the time, and against M3's own concept readings (the overlap test's corpus pairs) it
+another entity **32%** of the time (the base rate; not a false-alarm rate: 37% of existing entities have an actual neighbour at 0.732, the flag fires for 67% of those and for **13%** of the rest, the false-alarm rate a genuinely new candidate can expect; review of 2026-10-13, `calibration.json` `dup_base_rate_split`), and against M3's own concept readings (the overlap test's corpus pairs) it
 catches 6 of 6 pairs read 4, 55% read 3, 12% read 2, 7% read 1, none read 0 or opposite.  A threshold of 0.80 would
-bring the base rate to 10% and keep half of the pairs read 4 and 29% of those read 3.
+bring the base rate to 10% (false alarms 6%) and keep half of the pairs read 4 and 29% of those read 3, but half of its remaining flags would be false alarms, since a higher threshold loses real neighbours faster than noise.
 
 **Gate 1 for Roger** (20 minutes): (a) N = 20, or another N of the flat curve; (b) `dup_threshold` (0.732, or
 higher for a lower base rate) and `novel_pct` (0.80); (c) whether the per-PC table changes which generators to run.
 To record a move: `persona_novelty.py fit --fit-id fit_<date> --dup-threshold X --novel-pct Y --N n
---thresholds-set-by "Roger, gate 1"` (a new fit id, $0).  *Roger's gate-1 notes: not yet.*
+--thresholds-set-by "Roger, gate 1"` (a new fit id, $0).  Settle the thresholds here, before the full batch (step 3): `compare` takes each row's flag as `score` wrote it, so a move afterwards means scoring the batch again (review of 2026-10-13, should-fix 2).  *Roger's gate-1 notes: not yet.*
 
 ## Comparison with M3, so far only on the smoke batch ($0)
 

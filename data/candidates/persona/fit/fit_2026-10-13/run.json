@@ -8,10 +8,11 @@
     "runpod_workspace/qwen/qwen-3-32b Roger 8slot",
     "--cache-dir",
     "data/candidates/cache/embeddings",
-    "--force"
+    "--force",
+    "--allow-dirty"
   ],
-  "git_sha": "f50d0f27+dirty",
-  "started_at": "2026-10-13T22:59:00+00:00",
+  "git_sha": "1fd1dc36+dirty",
+  "started_at": "2026-10-14T01:05:34+00:00",
   "script": "data_analysis/gap_generation/persona_novelty.py",
   "fit_id": "fit_2026-10-13",
   "dirty_check": null,
@@ -31,7 +32,7 @@
   "canary": null,
   "n_embedded": 0,
   "model_sha256": "ba71202ecdc91a16249e5cc549fc4a8397754fda786c31ba3f11260dba409793",
-  "finished_at": "2026-10-13T22:59:06+00:00",
+  "finished_at": "2026-10-14T01:05:38+00:00",
   "cost_usd": 0,
   "n_calls": 0
 }
