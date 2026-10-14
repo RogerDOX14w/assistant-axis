@@ -255,6 +255,16 @@ rubrics, which the role-promotion item below needs too.
 
 ## Low-priority TODOs
 
+- **Revisit the duplicate signals once review has data** (Roger, 2026-10-14: "we should review once we have more
+  data from me doing more reviewing").  Three signals now propose merges in review without cutting: plan 11's
+  lexical links (WordNet and Moby, gate 2 decision (d)), plan 12's persona-space duplicate flag, and M3 itself,
+  whose overlap readings ran about 0.8 below Roger's on the gate-2 pairs.  Trigger: about 100 resolved review
+  groups that carry a lexical or persona-space proposal (the review logs record what Roger merged).  Then measure,
+  per signal and per lexicon, how often Roger merged where it proposed, an unbiased sample unlike the sorted gate
+  tables, and decide (a) whether WordNet covers may cut, (b) whether the persona flag should escalate a row to
+  Opus, (c) whether M3's cut-off or rubric needs a calibration (with the 40-pair random blind check if the
+  record is thin).
+
 - **Retest the overlap rubrics after the October extraction** (Roger, 2026-10-14).  His concern: rubric A rates a
   domain-narrowed trait (picky eater against picky) a 3, "the same concept, narrower", though narrowing to a rare
   domain (caring about astronomy) may be a genuinely new direction in persona space.  Re-scoring the October overlap
