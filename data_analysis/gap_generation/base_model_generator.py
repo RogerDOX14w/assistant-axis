@@ -5,7 +5,8 @@
         --approved-by 'Roger, <date>' [--force] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py bench [--batch-sizes 32,64] [--device mps]
     uv run python data_analysis/gap_generation/base_model_generator.py sample --round N --n 2000 [--temperature 1.0]
-        [--t-grid 0.8,1.0,1.2 --per-t 500] [--families list,person,...] [--batch-size 32] [--device mps] [--dry-run]
+        [--t-grid 0.8,1.0,1.2 --per-t 500] [--families list,person,...] [--batch-size 32] [--token-budget 1024]
+        [--device mps] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py parse --round N [--temperature T] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py sense --round N [--arm bge|gemma|openai|hash]
         [--divergence-cosine 0.6] [--budget-usd 2] [--allow-dirty] [--dry-run]
@@ -214,7 +215,7 @@ def cmd_sample(args) -> int:
     print(f"round {args.round}: {len(plan)} samples ({n} prompts x T {temps}); {len(plan) - len(pending)} already "
           f"done, {len(pending)} to sample; families " + ", ".join(f"{k} {v}" for k, v in sorted(fam.items())))
     print(f"prompts v{PR.PROMPTS_VERSION} ({PR.wording_sha256()[:12]}); model {B.MODEL_ID} on {args.device}, "
-          f"batch {args.batch_size}; top-p {SM.TOP_P}, min-p {SM.MIN_P}, {SM.MAX_NEW_TOKENS} new tokens, stop at a "
+          f"batch {args.batch_size}, token budget {args.token_budget or 'off'}; top-p {SM.TOP_P}, min-p {SM.MIN_P}, {SM.MAX_NEW_TOKENS} new tokens, stop at a "
           f"blank line; cost $0 (local; tokens recorded at a zero rate in {_rel(usage_path)})")
     if args.dry_run:
         seen = set()
@@ -226,7 +227,7 @@ def cmd_sample(args) -> int:
         return 0
     rdir.mkdir(parents=True, exist_ok=True)
     session = {"started_at": utc_now(), "git_sha": _git_sha(), "n_requested": n, "device": args.device,
-               "batch_size": args.batch_size}
+               "batch_size": args.batch_size, "token_budget": args.token_budget or None}
     if record is None:
         record = {"round": args.round, "model": B.MODEL_ID, "key": key, "bundle": bundle.manifest,
                   "sampling": {"top_p": SM.TOP_P, "min_p": SM.MIN_P, "max_new_tokens": SM.MAX_NEW_TOKENS,
@@ -236,7 +237,8 @@ def cmd_sample(args) -> int:
     backend = SM.HFBackend(device=args.device, batch_size=args.batch_size, cache_dir=args.hf_dir)
     usage = MultiModelUsage.load_or_create(usage_path)
     try:
-        stats = SM.run_sampling(backend, plan, out_path=out, usage=usage, usage_path=usage_path)
+        stats = SM.run_sampling(backend, plan, out_path=out, usage=usage, usage_path=usage_path,
+                                token_budget=args.token_budget or None)
     finally:
         session["finished_at"] = utc_now()
         record["sessions"].append(session)
@@ -636,6 +638,7 @@ def cmd_report(args) -> int:
 # ---------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
+    from assistant_axis.gapgen.generators.base_model import sampler as SM     # light: no model, no torch
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR, help="corpus data dir (evaluation only)")
@@ -679,7 +682,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--t-grid", default=None, help="comma-separated temperatures (the shakedown), with --per-t")
     p.add_argument("--per-t", type=int, default=500)
     p.add_argument("--families", default=None, help="comma-separated subset of the six families")
-    p.add_argument("--batch-size", type=int, default=32)
+    p.add_argument("--batch-size", type=int, default=32, help="the most prompts a batch holds")
+    p.add_argument("--token-budget", type=int, default=SM.DEFAULT_TOKEN_BUDGET,
+                   help="a batch's prompts times its longest prompt (tokens) stay within this, so long prompts go in "
+                        f"smaller batches (default {SM.DEFAULT_TOKEN_BUDGET}: batch 32 at round 1's median prompt of 31 "
+                        "tokens); 0 turns it off")
     p.add_argument("--device", default="mps", choices=("mps", "cpu"))
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_sample)

@@ -133,3 +133,79 @@ def test_real_model_smoke():  # pragma: no cover - needs the 16 GB model and a d
     gens = be.generate(["Adjectives that describe a person's character:\nbrave, blunt,"] * 2, temperature=1.0,
                        top_p=0.95, min_p=0.05, max_new_tokens=16)
     assert len(gens) == 2 and all(g.n_new_tokens > 0 for g in gens)
+
+
+# --------------------------------------------------------------------------- batches by a token budget (2026-10-14)
+
+class TokenBackend(FakeBackend):
+    """A fake whose tokenizer counts one token per word (``prompt_tokens``)."""
+
+    def prompt_tokens(self, prompts):
+        return [len(p.split()) for p in prompts]
+
+
+def test_make_batches_caps_by_size_and_by_budget():
+    specs = list("abcdefgh")
+    lengths = [2, 2, 2, 3, 5, 5, 9, 20]
+    got = SM.make_batches(specs, lengths, batch_size=4, token_budget=12)
+    assert [b for b in got] == [["a", "b", "c", "d"], ["e", "f"], ["g"], ["h"]]
+    for b in got:                      # never over the budget, unless one prompt alone is longer
+        n = [lengths[specs.index(x)] for x in b]
+        assert len(b) <= 4 and (len(b) * max(n) <= 12 or len(b) == 1)
+    assert SM.make_batches(specs, lengths, batch_size=4, token_budget=None) == [list("abcd"), list("efgh")]
+    assert SM.make_batches(specs, lengths, batch_size=4, token_budget=0) == [list("abcd"), list("efgh")]
+    assert SM.make_batches([], [], batch_size=4) == []
+
+
+def test_prompt_lengths_tokenizer_or_char_proxy():
+    assert SM.prompt_lengths(TokenBackend(), ["a b c", "d"]) == [3, 1]
+    assert SM.prompt_lengths(FakeBackend(), ["abcdefgh", "abcdefghi", ""]) == [2, 3, 1]
+
+
+def test_budget_shrinks_the_long_batches_keeps_order_and_resume(tmp_path):
+    plan = SM.plan_samples(BUNDLE, round_n=1, n=40, seed=0)
+    be = TokenBackend(batch_size=8)
+    lens = dict(zip([s.sample_id for s in plan], be.prompt_tokens([s.prompt.text for s in plan])))
+    budget = 8 * sorted(lens.values())[len(lens) // 2]          # batch 8 at the median prompt
+    recorded = []
+    real = be.generate
+
+    def spy(prompts, **kw):
+        recorded.append(list(prompts))
+        return real(prompts, **kw)
+    be.generate = spy
+    run(tmp_path, plan, be, token_budget=budget)
+    by_text = {s.prompt.text: s.sample_id for s in plan}
+    sizes = [len(b) for b in recorded]
+    assert max(sizes) <= 8 and min(sizes) < 8                     # batch_size still the cap; long prompts in fewer
+    for b in recorded:
+        n = [lens[by_text[p]] for p in b]
+        assert len(b) * max(n) <= budget or len(b) == 1
+    # the order is the order without a budget: shortest first
+    ids = [r["sample_id"] for r in lines(tmp_path / "samples.jsonl")]
+    want = [s.sample_id for s in sorted(plan, key=lambda s: (len(s.prompt.text), s.sample_id))]
+    assert ids == want
+    # resume: nothing left, no call; a partial file is completed without repeating a sample
+    be2 = TokenBackend(batch_size=8)
+    run(tmp_path, plan, be2, token_budget=budget)
+    assert be2.calls == []
+    p2 = tmp_path / "second"
+    p2.mkdir()
+    run(p2, plan[:15], TokenBackend(batch_size=8), token_budget=budget)
+    run(p2, plan, TokenBackend(batch_size=8), token_budget=budget)
+    ids2 = [r["sample_id"] for r in lines(p2 / "samples.jsonl")]
+    assert sorted(ids2) == sorted(s.sample_id for s in plan) and len(ids2) == len(set(ids2))
+
+
+def test_no_budget_is_batch_size_alone(tmp_path):
+    plan = SM.plan_samples(BUNDLE, round_n=1, n=10, seed=0)
+    be = TokenBackend(batch_size=4)
+    run(tmp_path, plan, be, token_budget=None)
+    assert [c["n"] for c in be.calls] == [4, 4, 2]
+
+
+def test_cli_passes_the_token_budget(tmp_path, monkeypatch):
+    from data_analysis.gap_generation import base_model_generator as G
+    args = G.build_parser().parse_args(["sample", "--round", "1"])
+    assert args.token_budget == SM.DEFAULT_TOKEN_BUDGET == 1024
+    assert G.build_parser().parse_args(["sample", "--round", "1", "--token-budget", "0"]).token_budget == 0
