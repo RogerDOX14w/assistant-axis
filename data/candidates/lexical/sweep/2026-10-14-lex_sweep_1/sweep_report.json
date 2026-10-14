@@ -1,0 +1,1791 @@
+{
+ "result": {
+  "stop_rule": {
+   "covers_at_cut_off": 81,
+   "cover_rows": 72,
+   "stop_line": 5,
+   "below_stop_line": false,
+   "line": "covers at the cut-off: 81 pairs on 72 rows (at or over the stop line of about 5); Roger's marks decide the build (about 90% confirmed, 36 of 40)"
+  },
+  "n_rows_swept": 4563,
+  "n_rows_with_links": 1811,
+  "n_pairs": 11604,
+  "n_judged": 2217,
+  "n_stalled": 0,
+  "not_judged": {
+   "moby_below_floor": 9130,
+   "name_only": 236,
+   "no_description": 21
+  },
+  "covers_at_cut_off": 81,
+  "below_cut": 2136,
+  "unparsed": 0,
+  "by_link": {
+   "also": {
+    "judged": 84,
+    "covers": 2
+   },
+   "similar": {
+    "judged": 558,
+    "covers": 11
+   },
+   "synonym": {
+    "judged": 1575,
+    "covers": 68
+   }
+  },
+  "by_lexicon": {
+   "moby": {
+    "judged": 1288,
+    "covers": 50
+   },
+   "oewn": {
+    "judged": 929,
+    "covers": 31
+   }
+  },
+  "by_cut_off_band": {
+   "c3 alignment 0-1": {
+    "judged": 1294,
+    "covers": 69
+   },
+   "c3 alignment 2": {
+    "judged": 259,
+    "covers": 7
+   },
+   "c4 alignment 2-3": {
+    "judged": 1,
+    "covers": 0
+   },
+   "c4 alignment 3": {
+    "judged": 663,
+    "covers": 5
+   }
+  },
+  "by_pass": {
+   "physical": {
+    "judged": 38,
+    "covers": 0
+   },
+   "states": {
+    "judged": 47,
+    "covers": 8
+   },
+   "trait": {
+    "judged": 2132,
+    "covers": 73
+   }
+  },
+  "by_kind": {
+   "corpus": {
+    "judged": 1927,
+    "covers": 17
+   },
+   "queue": {
+    "judged": 290,
+    "covers": 64
+   }
+  },
+  "below_cut_best_reading": {
+   "0": 565,
+   "1": 975,
+   "2": 554,
+   "3": 25,
+   "none": 17
+  },
+  "below_cut_three_at_cut_off_four": 22,
+  "precision_proxies": {
+   "cover_rows": 72,
+   "merged_into_that_trait": [],
+   "merged_into_another_trait": [
+    "sneering#1"
+   ],
+   "accepted_as_new": [
+    "crude#1",
+    "meddling#1",
+    "morose#1",
+    "nosy#1",
+    "obscene#1",
+    "unladylike#1"
+   ],
+   "audit_list": []
+  },
+  "roger_merges": {
+   "rows": 62,
+   "into_corpus": 62,
+   "lexical_target": 4,
+   "lexical_target_read_at_cut_off": 0,
+   "lexical_target_rows": {
+    "annoying#1": "disagreeable",
+    "delightful#1": "agreeable",
+    "nice#1": "agreeable",
+    "pleasant#1": "agreeable"
+   }
+  },
+  "audit_retrieval_misses_reached": [
+   "annoying#1",
+   "delightful#1",
+   "nice#1",
+   "pleasant#1"
+  ],
+  "audit_retrieval_misses_covered": [],
+  "antonym_evidence": {
+   "rows": 96,
+   "singleton_partner": 43,
+   "beside_pair_completion_for": 19
+  },
+  "opus_share_measured": 0.1592,
+  "n_opus_readings": 353,
+  "parse_rate": {
+   "overlap:claude-sonnet-5-5": {
+    "n": 2217,
+    "ok_first": 2217,
+    "ok": 2217
+   },
+   "overlap:claude-opus-5-5": {
+    "n": 353,
+    "ok_first": 353,
+    "ok": 353
+   }
+  },
+  "spend_usd": 4.0123,
+  "spend_by_model": {
+   "claude-opus-5-5": 1.3751,
+   "claude-sonnet-5-5": 2.6371
+  },
+  "yield_per_dollar": 20.188,
+  "covers": [
+   {
+    "key": "abstracted#1",
+    "label": "abstracted",
+    "stem": "dreamy",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.242702,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "adroit#1",
+    "label": "adroit",
+    "stem": "deft",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.586959,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "artificial#1",
+    "label": "artificial",
+    "stem": "phony",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.449664,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "bustling#1",
+    "label": "bustling",
+    "stem": "energetic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.207033,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "charming#1",
+    "label": "charming",
+    "stem": "adorable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.265874,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "coarse#1",
+    "label": "coarse",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.616047,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "communal#1",
+    "label": "communal",
+    "stem": "collectivistic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.246625,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "crass#1",
+    "label": "crass",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.671638,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "crass#1",
+    "label": "crass",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.558366,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "crude#1",
+    "label": "crude",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.553279,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "crude#1",
+    "label": "crude",
+    "stem": "unladylike",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.501919,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "cute#1",
+    "label": "cute",
+    "stem": "adorable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.697202,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "derogatory#1",
+    "label": "derogatory",
+    "stem": "insulting",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.651584,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "diminishing#1",
+    "label": "diminishing",
+    "stem": "declining",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.582974,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "step",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "dour#1",
+    "label": "dour",
+    "stem": "morose",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.449134,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "dwindling#1",
+    "label": "dwindling",
+    "stem": "declining",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.58639,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "fading#1",
+    "label": "fading",
+    "stem": "declining",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.582916,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "fake#1",
+    "label": "fake",
+    "stem": "phony",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.551683,
+    "pass": "trait",
+    "cut_off": {
+     "c": 4,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 3"
+    },
+    "verdict": "review",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "glum#1",
+    "label": "glum",
+    "stem": "morose",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.239217,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "step",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "good_hearted#1",
+    "label": "good-hearted",
+    "stem": "benevolent",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.314163,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "heedful#1",
+    "label": "heedful",
+    "stem": "conscientious_big_five",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.24166,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "immoderate#1",
+    "label": "immoderate",
+    "stem": "gluttonous",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.227924,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "impressionable#1",
+    "label": "impressionable",
+    "stem": "malleable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.440541,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "inconsiderate#1",
+    "label": "inconsiderate",
+    "stem": "selfish",
+    "kind": "corpus",
+    "link": "also",
+    "lexicon": "oewn",
+    "cosine": 0.207275,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "incorrupt#1",
+    "label": "incorrupt",
+    "stem": "incorruptible",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.574998,
+    "pass": "trait",
+    "cut_off": {
+     "c": 4,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 3"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": 4
+   },
+   {
+    "key": "indecent#1",
+    "label": "indecent",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.574617,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "insensitive#1",
+    "label": "insensitive",
+    "stem": "callous",
+    "kind": "corpus",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.112873,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "interfering#1",
+    "label": "interfering",
+    "stem": "meddling",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.603247,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": 4
+   },
+   {
+    "key": "intrusive#1",
+    "label": "intrusive",
+    "stem": "meddling",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.658964,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "intrusive#1",
+    "label": "intrusive",
+    "stem": "nosy",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.667649,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "jeering#1",
+    "label": "jeering",
+    "stem": "derisive",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.578374,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "lewd#1",
+    "label": "lewd",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.681952,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "lewd#1",
+    "label": "lewd",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.571565,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "lovable#1",
+    "label": "lovable",
+    "stem": "adorable",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.223493,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "manipulable#1",
+    "label": "manipulable",
+    "stem": "malleable",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.570417,
+    "pass": "trait",
+    "cut_off": {
+     "c": 4,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 3"
+    },
+    "verdict": "review",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "matter_of_fact#1",
+    "label": "matter of fact",
+    "stem": "prosaic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.284892,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "meddlesome#1",
+    "label": "meddlesome",
+    "stem": "meddling",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.652815,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "meddling#1",
+    "label": "meddling",
+    "stem": "nosy",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.638626,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "mocking#1",
+    "label": "mocking",
+    "stem": "derisive",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.533191,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "moldable#1",
+    "label": "moldable",
+    "stem": "malleable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.45092,
+    "pass": "trait",
+    "cut_off": {
+     "c": 4,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 3"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": 4
+   },
+   {
+    "key": "morose#1",
+    "label": "morose",
+    "stem": "sulky",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.586937,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "nosy#1",
+    "label": "nosy",
+    "stem": "meddling",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.600859,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "obscene#1",
+    "label": "obscene",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.601309,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "passe#1",
+    "label": "passe",
+    "stem": "unfashionable",
+    "kind": "corpus",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.174854,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "pliable#1",
+    "label": "pliable",
+    "stem": "malleable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.496537,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": 4
+   },
+   {
+    "key": "pliant#1",
+    "label": "pliant",
+    "stem": "malleable",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.304979,
+    "pass": "trait",
+    "cut_off": {
+     "c": 4,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 3"
+    },
+    "verdict": "review",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "prominent#1",
+    "label": "prominent",
+    "stem": "famous",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.558402,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "purposeful#1",
+    "label": "purposeful",
+    "stem": "purposive",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.472723,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "racy#1",
+    "label": "racy",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.438737,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "raunchy#1",
+    "label": "raunchy",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.526614,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "raunchy#1",
+    "label": "raunchy",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.595211,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "risque#1",
+    "label": "risque",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.317331,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "rudderless#1",
+    "label": "rudderless",
+    "stem": "aimless",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.629965,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "rumpled#1",
+    "label": "rumpled",
+    "stem": "disheveled",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.669729,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "scornful#1",
+    "label": "scornful",
+    "stem": "derisive",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.297389,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "step",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "skittish#1",
+    "label": "skittish",
+    "stem": "jumpy",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.685673,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "smutty#1",
+    "label": "smutty",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.460147,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "sneering#1",
+    "label": "sneering",
+    "stem": "derisive",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.442423,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "snoopy#1",
+    "label": "snoopy",
+    "stem": "nosy",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.667596,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 4,
+    "opus": null
+   },
+   {
+    "key": "sombre#1",
+    "label": "sombre",
+    "stem": "melancholic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.212981,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "stony#1",
+    "label": "stony",
+    "stem": "callous",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.233452,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "sullen#1",
+    "label": "sullen",
+    "stem": "morose",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.489332,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "sullen#1",
+    "label": "sullen",
+    "stem": "sulky",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.51386,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "tepid#1",
+    "label": "tepid",
+    "stem": "apathetic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.234793,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "twitchy#1",
+    "label": "twitchy",
+    "stem": "jumpy",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.560242,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "uncouth#1",
+    "label": "uncouth",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.490736,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "unfeminine#1",
+    "label": "unfeminine",
+    "stem": "unladylike",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.384006,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "uninterested#1",
+    "label": "uninterested",
+    "stem": "apathetic",
+    "kind": "corpus",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.193002,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "unkempt#1",
+    "label": "unkempt",
+    "stem": "disheveled",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.639665,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "unladylike#1",
+    "label": "unladylike",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.633797,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "unpolished#1",
+    "label": "unpolished",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.624115,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "unrefined#1",
+    "label": "unrefined",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.669626,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "unrefined#1",
+    "label": "unrefined",
+    "stem": "unladylike",
+    "kind": "queue",
+    "link": "similar",
+    "lexicon": "oewn",
+    "cosine": 0.580648,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "untiring#1",
+    "label": "untiring",
+    "stem": "energetic",
+    "kind": "corpus",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.211684,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "untoward#1",
+    "label": "untoward",
+    "stem": "unladylike",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.501576,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "useful#1",
+    "label": "useful",
+    "stem": "helpful",
+    "kind": "corpus",
+    "link": "also",
+    "lexicon": "oewn",
+    "cosine": 0.090049,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "vulgar#1",
+    "label": "vulgar",
+    "stem": "crude",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "oewn",
+    "cosine": 0.651734,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 4
+   },
+   {
+    "key": "vulgar#1",
+    "label": "vulgar",
+    "stem": "obscene",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.61696,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "review",
+    "sonnet": 2,
+    "opus": 3
+   },
+   {
+    "key": "vulgar#1",
+    "label": "vulgar",
+    "stem": "unladylike",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.546287,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "waning#1",
+    "label": "waning",
+    "stem": "declining",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.422064,
+    "pass": "states",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": true,
+     "opus_check": true,
+     "rule": "graded",
+     "band": "alignment 0-1"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   },
+   {
+    "key": "wild#1",
+    "label": "wild",
+    "stem": "maniacal",
+    "kind": "queue",
+    "link": "synonym",
+    "lexicon": "moby",
+    "cosine": 0.273349,
+    "pass": "trait",
+    "cut_off": {
+     "c": 3,
+     "sonnet_alone": false,
+     "opus_check": false,
+     "rule": "graded",
+     "band": "alignment 2"
+    },
+    "verdict": "cut",
+    "sonnet": 3,
+    "opus": 3
+   }
+  ],
+  "n_blocks_written": 1977
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py sweep --batch-id 2026-10-14-lex_sweep_1 --budget-usd 10",
+   "git_sha": "58c4f495+dirty",
+   "author": "Roger Dearnaley",
+   "title": "lexical sweep 2026-10-14-lex_sweep_1"
+  },
+  "produced_at": "2026-10-14T07:07:23+00:00"
+ }
+}
