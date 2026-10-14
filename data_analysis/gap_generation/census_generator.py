@@ -7,6 +7,10 @@
         --run-id R [--every-nth N [--offset K]] [--extra-list PATH] [--transport live|batches]
         [--budget-usd 5.0] [--confirm-expensive --confirmed-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/census_generator.py report --run-id R [--dry-run]
+    uv run python data_analysis/gap_generation/census_generator.py repair-check [--readings N] [--limit N] [--render N]
+        [--resume] [--budget-usd 5.0] [--allow-dirty] [--dry-run]
+    uv run python data_analysis/gap_generation/census_generator.py repair-check --submit --run-id R
+        [--transport live|batches] [--budget-usd 5.0] [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_01_censuses.md`` (the 2026-10-08 revision
 overrides the earlier sections).  ``download`` fetches the TDA (Dataverse, CC0) and the
@@ -19,7 +23,13 @@ a run whose estimate exceeds ``--budget-usd`` or the $20 line without Roger's re
 ``report`` writes the run's ``evaluation.json`` and ``readout.md`` (counts; known-label pass
 rate once the filter has run).
 
-This generator makes no paid API call.
+``repair-check`` (QUESTIONS 35, Roger 2026-10-14) asks Sonnet 5.5 whether each listed one-edit repair suggestion
+whose repaired word is new to the census lists is a typo or a real word in its own right
+(:mod:`assistant_axis.gapgen.generators.censuses.repair_check`; outputs in ``data/candidates/censuses/repair_check/``);
+with ``--submit`` it makes no call and submits the accepted repairs (verdict ``typo``) as a census run.  It is the
+generator's only paid command: the estimate is printed first and capped by ``--budget-usd``, a dirty tree is refused
+without ``--allow-dirty``, and every response is recorded before it is parsed.  Every other command makes no paid
+API call.
 """
 from __future__ import annotations
 
@@ -179,6 +189,184 @@ def cmd_report(args) -> int:
     return 0
 
 
+def platform_dirty_files() -> Optional[list[str]]:
+    """``runs.platform_dirty_files`` under this module's name, so that tests can replace it."""
+    from assistant_axis.gapgen.runs import platform_dirty_files as dirty
+    return dirty()
+
+
+def _client():
+    """The Anthropic client, direct key (tests replace this)."""
+    from assistant_axis.gapgen.generators.ipip.naming import make_client
+    return make_client()
+
+
+def _senses():
+    """OEWN's sense lookup for the gloss hints of submitted repairs (the table's rows get theirs the same way), or
+    None when OEWN or wordfreq is not installed (the candidates then go without a hint)."""
+    try:
+        return I.default_lookups().senses
+    except (SystemExit, ImportError) as exc:
+        print(f"note: no OEWN gloss hints ({exc})")
+        return None
+
+
+def cmd_repair_check(args) -> int:
+    import asyncio
+    import logging
+
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort, resume_usage
+    from assistant_axis.gapgen.generators.censuses import repair_check as RC
+    from assistant_axis.gapgen.runs import dirty_refusal
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import MultiModelUsage
+    out = Path(args.out_dir) if args.out_dir else Path(args.counts).parent / "repair_check"
+    resp, usage_path = out / RC.RESPONSES_NAME, out / RC.USAGE_NAME
+    if not args.counts.exists() or not args.table.exists():
+        raise SystemExit(f"missing {args.counts} or {args.table}: run `census_generator.py ingest` first")
+    counts = json.loads(args.counts.read_text(encoding="utf-8"))
+    table = I.load_census_table(args.table)
+    selected, sel = RC.select_suggestions(counts.get("repair_suggestions_list") or [], table)
+    print(f"{sel['n_suggestions']} repair suggestions listed; {sel['n_held_elsewhere']} point to a word the census "
+          f"lists already hold; {sel['n_new']} to a new word (by kind {json.dumps(sel['by_kind_new'])})")
+    if args.limit is not None:
+        selected = selected[:args.limit]
+        print(f"--limit {args.limit}: the first {len(selected)} in list order")
+    try:
+        rubric = RC.load_rubric()
+    except RC.RubricNotPinned as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    items = RC.build_items(selected, table, rubric["text"])
+    records = RC.read_records(resp)
+    answers = RC.answers_on_record(records, model=args.model)
+    if args.submit:
+        return _repair_submit(args, RC, items, answers, sel, rubric)
+    if records and not args.resume:
+        print(f"REFUSED: {len(records)} responses are on record in {resp}; pass --resume to reuse them (only the "
+              f"suggestions without an answer are sent)", file=sys.stderr)
+        return 2
+    todo = [(it, r) for it in items for r in range(args.readings) if (it.request_sha256, r) not in answers]
+    est = RC.estimate(len(todo), args.model)
+    print(f"{len(items)} suggestions x {args.readings} reading(s); {len(items) * args.readings - len(todo)} answers "
+          f"on record; {len(todo)} calls to make:")
+    print(est.format())
+    confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                     confirmed_by=args.confirmed_by)
+    refused, dirty_rec = dirty_refusal(platform_dirty_files(), args.allow_dirty)
+    if refused and not args.dry_run:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        return 2
+    if refused:
+        print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+    if args.render:
+        print(f"=== system turn: {rubric['name']} version {rubric['version']} (sha {rubric['sha256'][:12]}...), "
+              f"sent byte for byte ===")
+        print(rubric["text"])
+        print(f"=== user turns, the first {min(args.render, len(items))} of {len(items)} ===")
+        for it in items[:args.render]:
+            print(it.user)
+    if args.dry_run:
+        print(f"DRY-RUN: would make {len(todo)} calls on {args.model} (max_tokens {RC.MAX_TOKENS}, no temperature) "
+              f"and write {resp}, {usage_path}, {out / RC.VERDICTS_NAME}, {out / RC.READOUT_NAME}")
+        return 0
+    out.mkdir(parents=True, exist_ok=True)
+    prev = resume_usage(MultiModelUsage.load_or_create(usage_path), records, where=str(out))
+    usage = GuardedUsage(per_model=dict(prev.per_model), budget_usd=prev.total_cost_usd + args.budget_usd,
+                         usage_path=usage_path)
+    res = None
+    try:
+        if todo:
+            res = asyncio.run(RC.check(todo, client=_client(), rubric=rubric, model=args.model, usage=usage,
+                                       responses_path=resp))
+    finally:
+        usage.write_json(usage_path)
+    if res is not None:
+        warn_if_low_parse_rate(label=f"census repair check:{args.model}", n_ok=res.n_ok, n_total=res.n_calls,
+                               logger_obj=logging.getLogger("census_generator"),
+                               extra=f"failed calls by kind {res.error_kinds}")
+        print(f"{res.n_ok} of {res.n_calls} calls answered; failed {res.error_kinds}; {usage.plain().log_line()}"
+              + ("; STOPPED at the budget" if res.stopped_by_budget else ""))
+    answers = RC.answers_on_record(RC.read_records(resp), model=args.model)
+    rows = RC.verdict_rows(items, answers, args.readings)
+    files = {"counts": args.counts, "rubric": _REPO_ROOT / rubric["file"], "usage": usage_path, "responses": resp,
+             "verdicts": out / RC.VERDICTS_NAME}
+    doc = {**RC.rows_as_json(rows, selection=sel, rubric=rubric, model=args.model, readings=args.readings),
+           "dirty_check": dirty_rec, "limit": args.limit, "cost_usd_on_record": round(usage.total_cost_usd, 4)}
+    atomic_write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", out / RC.VERDICTS_NAME)
+    md = RC.render_readout(rows, selection=sel, rubric=rubric, model=args.model, readings=args.readings,
+                           usage_usd=usage.total_cost_usd, doc_path=out / RC.READOUT_NAME, files=files)
+    atomic_write_text(md, out / RC.READOUT_NAME)
+    print(f"verdicts: {json.dumps(RC.counts_by_verdict(rows))}")
+    print(f"wrote {resp}, {usage_path}, {out / RC.VERDICTS_NAME}, {out / RC.READOUT_NAME}")
+    return 2 if res is not None and res.stopped_by_budget else 0
+
+
+def _repair_submit(args, RC, items, answers, sel, rubric) -> int:
+    """``repair-check --submit``: no call; the accepted repairs on record as a census run (candidates.jsonl, then the
+    registry), with the downstream estimate gated by ``--budget-usd`` as ``submit`` gates it."""
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen import start_run, submit_candidates
+    from assistant_axis.gapgen.cost import confirm_or_abort
+    from assistant_axis.gapgen.generators.censuses import submit as S
+    from dataclasses import asdict
+
+    from assistant_axis.gapgen.paths import check_id, run_dir
+    if not args.run_id:
+        raise SystemExit("--submit needs --run-id")
+    check_id(args.run_id, "run_id")
+    rows = RC.verdict_rows(items, answers, args.readings)
+    missing = [r for r in rows if r["verdict"] is None]
+    if missing:
+        print(f"REFUSED: {len(missing)} of {len(rows)} suggestions have no answer on record (first: "
+              f"{', '.join(r['entry'] for r in missing[:5])}); run `census_generator.py repair-check --resume` first",
+              file=sys.stderr)
+        return 2
+    by = RC.counts_by_verdict(rows)
+    print(f"verdicts on record: {json.dumps(by)}")
+    cands = RC.candidates_for(rows, args.run_id, senses=_senses())
+    if not cands:
+        print("no accepted repairs (verdict typo): nothing to submit")
+        return 0
+    est = S.estimate_downstream_usd(len(cands), transport=args.transport)
+    print(est.format())
+    confirm_or_abort(est.total_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                     confirmed_by=args.confirmed_by)
+    target = run_dir(C.GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
+    follow = S.followup_commands(args.run_id, est, candidates_path=target / "candidates.jsonl")[:3]
+    for c in cands:
+        print(f"  {c.surface:24s} {c.source_ref}")
+    if args.dry_run:
+        print(f"DRY-RUN: would write {target}/candidates.jsonl ({len(cands)} candidates), submit them to "
+              f"{args.registry}, and write keys.txt, submit_report.json, run.json, usage.json there")
+        for c in follow:
+            print(f"  then: {c}")
+        return 0
+    run_args = {"stage": "repair_check", "stage_rule": "the repair suggestions of ingest_counts.json whose repaired "
+                "word is new to the census lists and that the repair check judged a typo (QUESTIONS 35)",
+                "n": len(cands), "n_checked": len(rows), "verdicts": by, "readings": args.readings,
+                "model": args.model, "rubric": rubric["name"], "rubric_version": rubric["version"],
+                "prompt_sha256": rubric["sha256"], "transport": args.transport, "budget_usd": args.budget_usd,
+                "estimate": asdict(est), "selection": dict(sel),
+                "check_dir": str(_repo_rel(Path(args.out_dir) if args.out_dir else Path(args.counts).parent / "repair_check")),
+                "counts": str(_repo_rel(args.counts)), "table": str(_repo_rel(args.table)),
+                "table_sha256": I.file_sha256(args.table)}
+    ctx = start_run(C.GENERATOR, args.run_id, args=run_args, candidates_dir=args.candidates_dir)
+    ctx.confirmed_by = args.confirmed_by
+    ctx.record_candidates(cands)          # candidates.jsonl first (the tracked record of the run)
+    rep = submit_candidates(cands, registry_path=args.registry)
+    atomic_write_text("".join(k + "\n" for k in rep.keys), ctx.dir / "keys.txt")
+    rep_d = {k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}
+    atomic_write_text(json.dumps(rep_d, indent=2) + "\n", ctx.dir / "submit_report.json")
+    ctx.finish()
+    print(f"registry {args.registry}: {json.dumps(rep_d)}")
+    print(f"wrote {ctx.dir}/candidates.jsonl, keys.txt, submit_report.json, run.json, usage.json")
+    for c in follow:
+        print(f"  then: {c}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -223,6 +411,34 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--run-id", required=True)
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_report)
+
+    from assistant_axis.gapgen.generators.censuses.repair_check import DEFAULT_MODEL as RC_MODEL
+    p = sub.add_parser("repair-check", help="Sonnet 5.5 on the listed repair suggestions whose repaired word is new "
+                                            "(QUESTIONS 35; paid); --submit sends the accepted repairs (no call)")
+    p.add_argument("--out-dir", type=Path, default=None,
+                   help="responses.jsonl, usage.json, verdicts.json, readout.md (default: repair_check/ beside "
+                        "--counts, data/candidates/censuses/repair_check)")
+    p.add_argument("--model", default=RC_MODEL)
+    p.add_argument("--readings", type=int, default=1,
+                   help="answers per suggestion, combined by majority (a tie is unsure); default 1")
+    p.add_argument("--limit", type=int, default=None, help="only the first N selected suggestions (a pilot)")
+    p.add_argument("--render", type=int, default=0, metavar="N", help="print the system turn and N user turns")
+    p.add_argument("--resume", action="store_true",
+                   help="reuse the answers on record (by request sha, reading and model); refused without it when "
+                        "responses are on record")
+    p.add_argument("--submit", action="store_true",
+                   help="no call: submit the accepted repairs on record as census run --run-id")
+    p.add_argument("--run-id", default=None)
+    p.add_argument("--transport", choices=("live", "batches"), default="live",
+                   help="--submit: how the platform will run M1 and M3 (the downstream estimate)")
+    p.add_argument("--budget-usd", type=float, default=5.0,
+                   help="cap on the estimate: the check's calls, or with --submit the downstream M1 + M3 estimate")
+    p.add_argument("--confirm-expensive", action="store_true")
+    p.add_argument("--confirmed-by", default=None, help="Roger's explicit go for anything over $20")
+    p.add_argument("--allow-dirty", action="store_true",
+                   help="run although the platform's own code or prompt paths have uncommitted changes")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_repair_check)
     return ap
 
 

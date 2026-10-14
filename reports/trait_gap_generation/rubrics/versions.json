@@ -382,6 +382,14 @@
         "pinned_at": "2026-10-13T19:22:36+00:00",
         "why": "First pin: plan 13 task 7's paraphrase synonym call (the matcher's sanity set), the text of 'Rendered prompt: the paraphrase synonym call' in coding_plan_13_generator_testing.md, unchanged"
       }
+    ],
+    "census_repair_check": [
+      {
+        "version": 1,
+        "sha256": "ec9c1e475c5161c87915806bfd880dfc69adb87f6bb09d39b2d245fc0a57ce6a",
+        "pinned_at": "2026-10-14T21:58:24+00:00",
+        "why": "First text (QUESTIONS 35, Roger's go 2026-10-14): one repair suggestion per call, the entry, the suggested adjective and two alphabetical neighbours each side; a short reason, then typo / real_word / unsure."
+      }
     ]
   }
 }

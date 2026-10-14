@@ -1115,6 +1115,24 @@ map`/`place-check`/`head-scope`) refuse the same way.  The old form,
 `--from-filter <filter run dir>` (repeatable; the filter's region of the label),
 still works and writes the file whole.
 
+**The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
+[QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 35: of the 706 one-edit repair suggestions the census ingest
+lists (`repair_suggestions_list` in [ingest_counts.json](../data/candidates/censuses/ingest_counts.json)), the 314 whose
+repaired word the census lists do not hold go to Sonnet 5.5, one call each (the entry, the suggested adjective and two
+alphabetical neighbours each side; pinned prompt
+[census_repair_check.md](../reports/trait_gap_generation/rubrics/census_repair_check.md)): `typo`, `real_word` or
+`unsure`.  About $1.70; estimate first, `--budget-usd` cap, dirty-tree refusal (`--allow-dirty`), every response
+recorded before parsing, `--resume` by request sha.  Writes `data/candidates/censuses/repair_check/` (`responses.jsonl`,
+`usage.json`, `verdicts.json`, `readout.md`); `--submit --run-id R` (no call) submits the `typo` verdicts' repaired
+words as census run R and prints the M1 and M3 commands.  The census lists and table are never edited.  Library:
+[`repair_check.py`](../assistant_axis/gapgen/generators/censuses/repair_check.py).
+
+```bash
+uv run python data_analysis/gap_generation/census_generator.py repair-check --dry-run --render 2
+uv run python data_analysis/gap_generation/census_generator.py repair-check --budget-usd 4 [--resume]
+uv run python data_analysis/gap_generation/census_generator.py repair-check --submit --run-id repairs-2026-10-14 [--dry-run]
+```
+
 **The recovery harness (2026-10-08): `gap_generation/recovery_test.py`.**  Spec:
 [`coding_plan_platform.md`](../reports/trait_gap_generation/coding_plan_platform.md), "The
 recovery harness"; library [`recovery.py`](../assistant_axis/gapgen/recovery.py).  Per seed
