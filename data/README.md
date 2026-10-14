@@ -300,6 +300,24 @@ persona pipeline, and nothing the platform writes touches `traits/` or
   re-embeds and compares with the cache, warning below cosine 0.999).  Never
   edit it by hand; rewrite it with `--write-config` (its `config_version` is
   the date).
+- **Packed record files** (2026-10-14; GitHub refuses a file over 100 MB).
+  A run's record files may live gzip-compressed beside or instead of their
+  plain form, about 6x smaller, and every reader of the platform reads them
+  through [`records.py`](../assistant_axis/gapgen/records.py) as it reads the
+  plain files.  Two kinds, by file name: **logs** (`responses.jsonl`, appended
+  to while a run is live) read as `X.gz` followed by `X`, so a resume of a
+  packed run appends to a fresh plain `X`; **snapshots** (`results.jsonl`,
+  `graph.json`, `readings.jsonl`, `matches.jsonl`, rewritten whole) read the
+  plain `X` when it exists, else `X.gz`.
+  [`pack_records.py`](../data_analysis/gap_generation/pack_records.py) packs
+  them (`--dry-run` lists every file of `--min-mb`, default 50, or more under
+  `candidates/`; `--path P` packs one file); it refuses any other file name,
+  a run holding its lock, and a log whose plain file repeats its `.gz`, and
+  deletes the plain file only after the new `.gz` decompresses to exactly the
+  content it read.  Pack only a run that has ended, then commit the `.gz` with
+  the plain file's deletion.  The registry log `registry.jsonl` and the review
+  app's `decisions.jsonl` are not packed (the registry's tracked copy is its
+  gzipped snapshot).
 - **`candidates/cache/embeddings/`** (git-ignored): the embedding cache,
   one `<model_tag>.npz` per model keyed by sha256 of the text, plus
   `manifest.json`; written by `embed.embed_texts` and read by every
