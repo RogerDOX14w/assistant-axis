@@ -697,8 +697,40 @@ def llm_selection(rows: dict, *, lookups: N.NounLookups, data_dir: Path) -> tupl
     the person rows already linked (:func:`_llm_linked`).  A role file has no noun row: it is found linked once its
     answer is known (:func:`llm_items`)."""
     person, role = pilot_pool(rows, lookups=lookups, data_dir=data_dir)
+    held, queued = extra_role_pool(rows, lookups=lookups, data_dir=data_dir)
+    person = person + held
     keep = [r for r in person if not _llm_linked(rows.get(r["key"]))]
-    return keep + role, len(person) - len(keep)
+    return keep + role + queued, len(person) - len(keep)
+
+
+def extra_role_pool(rows: dict, *, lookups: N.NounLookups, data_dir: Path) -> tuple[list[dict], list[dict]]:
+    """``(held, queued)``: the role nouns beyond the pilot's population that ``llm-apply`` also takes (Roger,
+    2026-10-14, QUESTIONS 165: "Sure"): registry rows held on the ``roles`` list, and the seed queue's role entries,
+    each a single-word label the rules leave as ``person_no_adjective``.  A held row has a noun row (linked like a
+    person noun); a queue entry has none (linked through its adjective row, as a role file)."""
+    from assistant_axis.gapgen.registry import first_gloss_hint
+    held = []
+    for key, row in sorted(rows.items()):
+        label = row.get("label") or ""
+        if row.get("holding") != "roles" or " " in label:
+            continue
+        r = N.relabel(label, lookups=lookups)
+        if isinstance(r, N.NoRelabel) and r.reason == "person_no_adjective":
+            held.append({"key": key, "label": label, "gloss": row.get("gloss") or first_gloss_hint(row),
+                         "kind": "held_role"})
+    queued = []
+    qp = Path(data_dir) / "seed_queue.json"
+    for e in (json.loads(qp.read_text(encoding="utf-8")).get("entries") or []) if qp.exists() else []:
+        if e.get("entity_type") != "role" or not e.get("stem"):
+            continue
+        label = e.get("label") or e["stem"].replace("_", " ")
+        if " " in label:
+            continue
+        r = N.relabel(label, lookups=lookups)
+        if isinstance(r, N.NoRelabel) and r.reason == "person_no_adjective":
+            queued.append({"key": f"queue_role:{e['stem']}", "label": label,
+                           "gloss": e.get("description") or e.get("description_draft"), "kind": "queue_role"})
+    return held, queued
 
 
 def load_answers(candidates_dir: Path, *, sha: Optional[str] = None) -> dict[str, dict]:
@@ -784,7 +816,7 @@ def llm_items(sel: list[dict], answers: dict, rows: dict, *, lookups: N.NounLook
         if why:
             reasons[why] += 1
             continue
-        noun_key = row["key"] if row["kind"] == "person" else None
+        noun_key = row["key"] if row["kind"] in ("person", "held_role") else None
         where, adj_key, cstem = _where(adj, rows, cmap)
         if noun_key is not None and adj_key == noun_key:
             reasons["same_as_noun"] += 1
@@ -800,8 +832,10 @@ def llm_items(sel: list[dict], answers: dict, rows: dict, *, lookups: N.NounLook
         extra = {"model": rec.get("model") or N.PILOT_MODEL, "prompt_version": rec.get("prompt_version"),
                  "confidence": (parsed or {}).get("confidence"), "reason": (parsed or {}).get("reason")}
         entry["outcome"] = where
-        items.append(Item(source="registry" if noun_key else "role", ref=row["key"], label=row["label"],
-                          noun_key=noun_key, m1=m1_state(rows.get(noun_key)) if noun_key else "role_file",
+        items.append(Item(source="registry" if noun_key else ("queue_role" if row["kind"] == "queue_role" else "role"),
+                          ref=row["key"], label=row["label"],
+                          noun_key=noun_key, m1=m1_state(rows.get(noun_key)) if noun_key else (
+                              "queue_role" if row["kind"] == "queue_role" else "role_file"),
                           generators=_generators(rows[noun_key]) if noun_key else [], relabel=r, adj_key=adj_key,
                           where=where, corpus_stem=cstem, extra=extra))
     return items, reasons, table, n_linked

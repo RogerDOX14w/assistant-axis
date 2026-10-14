@@ -428,3 +428,21 @@ class TestLlmApply:
         before = lenv["reg"].read_bytes()
         assert run(lenv, "llm-apply", "--run-id", "llm-x") == 2
         assert "REFUSED" in capsys.readouterr().err and lenv["reg"].read_bytes() == before
+
+
+def test_llm_selection_adds_held_and_queue_roles(env):
+    """QUESTIONS 165 (Roger, 2026-10-14: "Sure"): llm-apply also takes the held roles and the queue's role entries the
+    rules leave as person_no_adjective; the pilot's own population is unchanged."""
+    submit_candidates([Candidate(surface="liar", generator="censuses", run_id="r1")], registry_path=env["reg"],
+                      relabel=None)
+    Registry(env["reg"]).update_many({"liar#1": {"holding": "roles"}})
+    q = json.loads((env["data"] / "seed_queue.json").read_text())
+    q["entries"].append({"stem": "charlatan", "label": "charlatan", "entity_type": "role", "status": "candidate",
+                         "description": "A charlatan is ..."})
+    (env["data"] / "seed_queue.json").write_text(json.dumps(q))
+    rows = Registry(env["reg"]).fold()
+    sel, _ = NR.llm_selection(rows, lookups=LK, data_dir=env["data"])
+    kinds = {r["key"]: r["kind"] for r in sel}
+    assert kinds.get("liar#1") == "held_role" and kinds.get("queue_role:charlatan") == "queue_role"
+    person, role = NR.pilot_pool(rows, lookups=LK, data_dir=env["data"])
+    assert "liar#1" not in {r["key"] for r in person + role}
