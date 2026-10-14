@@ -540,9 +540,12 @@ below-cut hits get a review flag (TODO 4); (c) whether the confirmed covers are 
 real misses, 7 rejected, 1 unsure (82%, under the 90% line); OEWN links 14 of 15, Moby 18 of 25.  He noted, and the
 count confirms, that the 40 are about 16 independent judgments (19 distinct corpus targets, 16 clusters; one cluster
 of 15, the vulgarity family crude / obscene / unladylike, holds 5 of the 7 rejections and the unsure); outside it,
-23 of 25 confirmed.  Decisions: **(a) build**, with **(d) Moby kept but split by lexicon: an OEWN lexical neighbour
-joins M3's listed traits and can cover (cut); a Moby link never joins M3's list and only flags the row for review
-as a proposed merge** (Roger: "c) SG", choosing the coordinator's option (c)).  (b) and (c) of the gate's
+23 of 25 confirmed.  Decisions: **(a) build, flags only: no lexical link ever cuts, whichever lexicon; every OEWN or
+Moby link flags the row for review as a proposed merge** (Roger: "D) SG", correcting a first "c) SG" that had OEWN
+neighbours join M3's list and cut).  Why (d): with about 16 independent judgments the 82% can't be set against the
+90% line, the OEWN / Moby split rested mostly on the one vulgarity cluster, and a false cut is the error Roger
+weighs worst; a false proposal costs a click.  If review later shows the proposals almost always right, that
+unbiased record can justify letting OEWN covers cut.  M3's decisions are never changed by the lexical step.  (b) and (c) of the gate's
 questions keep their defaults (below-cut readings not flagged; the sweep's confirmed covers stay flags for the
 end-of-generation R1 pass rather than a `--redecide` now).
 
