@@ -1148,7 +1148,9 @@ adjective sibling (pedant beside pedantic; the shared helper
 registry block `relabel`; `gap_registry.py submit --no-relabel` submits a file as given.  The rows submitted
 before it, and the role nouns, go through
 [`noun_relabel.py`](gap_generation/noun_relabel.py) (dry runs unless `--apply`; `check` shows the
-helper's answer; `llm-pilot` is the Haiku pilot for the nouns the rules leave).  Plan:
+helper's answer; `llm-pilot` is the Haiku pilot for the nouns the rules leave; `llm-apply`, adopted by Roger on
+2026-10-14 as a one-off pass, asks the pilot's call of every such noun, reusing recorded answers, and links the
+accepted adjectives with rule `llm`, "LLM relabel from '<noun>', sense not checked" on the card).  Plan:
 [coding_plan_noun_normalization.md](../reports/trait_gap_generation/coding_plan_noun_normalization.md).
 
 ```bash
@@ -1156,6 +1158,8 @@ uv run python data_analysis/gap_generation/noun_relabel.py check pedant hypocrit
 uv run python data_analysis/gap_generation/noun_relabel.py backlog [--report PATH] [--apply [--run-id backlog-<date>]]
 uv run python data_analysis/gap_generation/noun_relabel.py roles [--report PATH] [--apply [--run-id roles-<date>]]
 uv run python data_analysis/gap_generation/noun_relabel.py llm-pilot --n 100 --budget-usd 0.10 --dry-run
+uv run python data_analysis/gap_generation/noun_relabel.py llm-apply --dry-run
+uv run python data_analysis/gap_generation/noun_relabel.py llm-apply --budget-usd 0.50 [--run-id llm-<date>]
 ```
 
 ## Output

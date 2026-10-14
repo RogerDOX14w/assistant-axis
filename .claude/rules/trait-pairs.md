@@ -1072,7 +1072,13 @@ the promote note and in `gap_registry.py report` / `holding` (`-> adjective`, `<
 +y from 'slipper', sense not checked" (every suffix rule says so: the derivation link's lexicographer-file gate is
 the only sense check).  The review graph joins a noun and its adjective as a pre-assembled 3-edge, `via`
 `relabel` (`GRAPH_SCHEMA` 4).  `noun_relabel.py llm-pilot` is the 100-row Haiku pilot of open decision 3 for the
-nouns the rules leave (prompt `noun_relabel` v1 in `rubric_versions.HISTORY`).  Plan:
+nouns the rules leave (prompt `noun_relabel` v1 in `rubric_versions.HISTORY`); its yield of 24 of 100 cleared the
+threshold of 20 and Roger adopted it on 2026-10-14 as a **one-off pass, not a platform step**: `noun_relabel.py
+llm-apply` asks the same call of the pilot's whole population (person nouns M1 passed as traits and corpus role
+nouns that the rules leave), reuses recorded answers of the same prompt sha, accepts an answer that is an OEWN
+adjective or at Zipf 1.5, and links it as the streams do with rule `llm` (the block also records model, prompt
+version, confidence and the model's reason), shown on the card as "LLM relabel from '<noun>', sense not checked".
+Plan:
 [`coding_plan_noun_normalization.md`](./reports/trait_gap_generation/coding_plan_noun_normalization.md).
 
 ### Combined response generation (pipeline)

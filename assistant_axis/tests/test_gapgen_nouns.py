@@ -183,6 +183,15 @@ class TestRouteText:
         assert adj_b is None
         assert N.route_text(noun_b) == "adjective 'foolish' (a corpus trait) by suffix rule +ish, sense not checked"
 
+    def test_llm_relabel_says_sense_not_checked(self):
+        """The one-off Haiku pass (``noun_relabel.py llm-apply``; Roger 2026-10-14)."""
+        r = N.Relabel("cad", "caddish", N.LLM_RULE, None, None, 1.2)
+        noun_b, adj_b = N.relabel_blocks("cad#1", "caddish#1", r, run="noun_relabel/llm-x", now="T")
+        assert N.route_text(adj_b) == "LLM relabel from 'cad', sense not checked"
+        assert N.route_text(noun_b) == "adjective 'caddish' by LLM relabel, sense not checked"
+        noun_c, _ = N.relabel_blocks("cad#1", None, r, corpus_stem="caddish", now="T")
+        assert N.route_text(noun_c) == "adjective 'caddish' (a corpus trait) by LLM relabel, sense not checked"
+
     def test_none(self):
         assert N.route_text(None) is None and N.route_text({}) is None
 

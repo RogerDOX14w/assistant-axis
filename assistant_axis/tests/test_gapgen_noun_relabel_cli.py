@@ -238,3 +238,193 @@ class TestPilot:
             "reason": "r", "adjective": "bookish", "confidence": 1.0}
         assert N.parse_pilot_reply("no") is None and N.parse_pilot_reply(None) is None
         assert N.parse_pilot_reply('{"reason": "r", "adjective": 3}') is None
+
+
+class TestLlmApply:
+    """``llm-apply``: the one-off Haiku pass over the pilot's whole population (Roger, 2026-10-14, "A 1 yes")."""
+
+    @staticmethod
+    def lookups():
+        base = lookups()
+        pos = {**base._pos, "bookworm": ["n"], "bookish": ["a"], "cad": ["n"], "caddish": ["a"], "zealot": ["n"],
+               "zealous": ["a"]}
+        lexfiles = {**base._lexfiles, "bookworm": {"noun.person"}, "cad": {"noun.person"}, "zealot": {"noun.person"}}
+        definitions = {**base._definitions, "bookish": ["characterized by a love of books"],
+                       "caddish": ["lacking the instincts of a gentleman"]}
+        return N.FakeLookups(pos=pos, lexfiles=lexfiles, derivations=base._derivations, definitions=definitions,
+                             mates=base._mates, zipf={**base._zipf, "glorbular": 0.4})
+
+    @staticmethod
+    def pilot_rec(key, label, raw, *, sha=None, stop="end_turn", at="2026-10-14T17:00:00+00:00"):
+        return {"key": key, "label": label, "kind": "person", "prompt_version": N.PILOT_PROMPT_VERSION,
+                "prompt_sha256": sha or hashlib.sha256(N.PILOT_SYSTEM_PROMPT.encode()).hexdigest(),
+                "model": N.PILOT_MODEL, "raw": raw, "stop_reason": stop, "at": at}
+
+    @pytest.fixture
+    def lenv(self, env, monkeypatch):
+        from assistant_axis.gapgen import runs
+        lk = self.lookups()
+        monkeypatch.setattr(NR, "_lookups", lambda: lk)
+        monkeypatch.setattr(runs, "platform_dirty_files", lambda *a, **k: [])
+        reg = env["reg"]
+        submit_candidates([Candidate(surface=s, generator="censuses", run_id="r1") for s in
+                           ("bookworm", "cad", "zealot", "old fogey", "zealous")], registry_path=reg, relabel=None)
+        nb, ab = N.relabel_blocks("zealot#1", "zealous#1", N.Relabel("zealot", "zealous", N.LLM_RULE, None, None, 3.0),
+                                  run="noun_relabel/llm-0", now="T")
+        Registry(reg).update_many({**{k: {"filter": {"verdict": "trait"}, "gloss": f"the {k[:-2]} gloss"}
+                                      for k in ("bookworm#1", "cad#1", "zealot#1", "old_fogey#1")},
+                                   "zealot#1": {"filter": {"verdict": "trait"}, "relabel": nb},
+                                   "zealous#1": {"relabel": ab}})
+        pdir = env["cdir"] / "noun_relabel" / "llm_pilot_x"
+        pdir.mkdir(parents=True)
+        recs = [self.pilot_rec("bookworm#1", "bookworm", '{"reason": "r", "adjective": "bookish", "confidence": 0.9}'),
+                self.pilot_rec("cad#1", "cad", '{"reason": "r", "adjective": "caddish", "confidence": 0.9}',
+                               sha="0" * 64),                                     # another prompt: asked again
+                self.pilot_rec("charlatan#1", "charlatan", '{"reason": "r", "adj', stop="max_tokens")]  # cut off
+        (pdir / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+        return {**env, "lk": lk}
+
+    @staticmethod
+    def client(monkeypatch, replies: dict):
+        def responder(kw):
+            assert system_text(kw) == N.PILOT_SYSTEM_PROMPT and "temperature" not in kw
+            assert kw["model"] == N.PILOT_MODEL and kw["max_tokens"] == N.PILOT_MAX_TOKENS
+            noun = user_text(kw).split("\n")[0].removeprefix("Noun: ")
+            return make_response(replies[noun], input_tokens=440, output_tokens=300)
+        c = FakeAsyncAnthropic(responder)
+        monkeypatch.setattr(NR, "_anthropic_client", lambda: c)
+        return c
+
+    @staticmethod
+    def no_client(monkeypatch):
+        def boom():
+            raise AssertionError("no call may be sent")
+        monkeypatch.setattr(NR, "_anthropic_client", boom)
+
+    REPLIES = {"cad": '{"reason": "caddish means like a cad", "adjective": "caddish", "confidence": 0.8}',
+               "charlatan": '{"reason": "none in use", "adjective": null, "confidence": 0.9}',
+               "liar": '{"reason": "dishonest is a synonym", "adjective": null, "confidence": 0.9}'}
+
+    def test_selection_is_the_pilot_population_less_linked_nouns_and_phrases(self, lenv):
+        rows = Registry(lenv["reg"]).fold()
+        sel, n_linked = NR.llm_selection(rows, lookups=lenv["lk"], data_dir=lenv["data"])
+        assert [r["key"] for r in sel] == ["bookworm#1", "cad#1", "charlatan#1", "role:liar"]
+        assert n_linked == 1                                   # zealot: an earlier LLM link
+        person, role = NR.pilot_pool(rows, lookups=lenv["lk"], data_dir=lenv["data"])
+        assert "zealot#1" in {r["key"] for r in person} and "old_fogey#1" not in {r["key"] for r in person}
+
+    def test_pilot_answers_reused_by_prompt_sha(self, lenv):
+        ans = NR.load_answers(lenv["cdir"])
+        assert set(ans) == {"bookworm#1"}                      # cad: another sha; charlatan: cut off at max_tokens
+        assert ans["bookworm#1"]["parsed"]["adjective"] == "bookish"
+        assert ans["bookworm#1"]["reused_from"] == "llm_pilot_x"
+
+    def test_yield_rule_and_gates(self, lenv):
+        lk = lenv["lk"]
+
+        def acc(label, adj):
+            return NR.accept_answer(label, {"adjective": adj, "reason": "r", "confidence": 1.0}, lookups=lk)
+        assert acc("cad", "caddish") == ("caddish", None)                 # an OEWN adjective
+        assert acc("cad", "caddy-ish") == ("caddy-ish", None)             # not in OEWN, Zipf 3.0 (the fake's default)
+        assert acc("cad", "glorbular") == (None, "not_established")       # neither
+        assert acc("cad", None) == (None, "none")
+        assert acc("cad", "like a cad") == (None, "phrase")
+        assert acc("cad", "cad") == (None, "same_as_noun")
+        assert acc("cad", "---") == (None, "refused_stem")
+        assert NR.accept_answer("cad", None, lookups=lk) == (None, "unparsed")
+
+    def test_dry_run_writes_nothing(self, lenv, monkeypatch, capsys):
+        self.no_client(monkeypatch)
+        before = lenv["reg"].read_bytes()
+        assert run(lenv, "llm-apply", "--dry-run") == 0
+        out = capsys.readouterr().out
+        assert lenv["reg"].read_bytes() == before
+        assert not (lenv["cdir"] / "runs" / "noun_relabel").exists()
+        assert "4 nouns selected" in out and "1 person rows already linked" in out
+        assert 'answers reused: 1 ({"llm_pilot_x": 1}); to ask: 3' in out
+        assert "estimate" in out and "Noun: cad\nGloss: the cad gloss" in out and "DRY-RUN" in out
+
+    def test_apply_writes_llm_links_and_is_idempotent(self, lenv, monkeypatch, capsys):
+        from assistant_axis.gapgen.review_app.decisions import relabel_card
+        client = self.client(monkeypatch, self.REPLIES)
+        seen = {}
+        real = R.submit_candidates
+
+        def spy(cands, **kw):
+            seen["recorded_first"] = (lenv["cdir"] / "runs" / "noun_relabel" / "llm-x" / "candidates.jsonl").exists()
+            seen["relabel"] = kw.get("relabel")
+            return real(cands, **kw)
+        monkeypatch.setattr(NR, "submit_candidates", spy)
+        assert run(lenv, "llm-apply", "--run-id", "llm-x", "--budget-usd", "0.10") == 0
+        out = capsys.readouterr().out
+        assert len(client.messages.calls) == 3 and seen == {"recorded_first": True, "relabel": None}
+        rows = Registry(lenv["reg"]).fold()
+        nb, ab = rows["cad#1"]["relabel"], rows["caddish#1"]["relabel"]
+        assert nb["to_key"] == "caddish#1" and nb["rule"] == "llm" and nb["helper_version"] == N.HELPER_VERSION
+        assert {k: nb[k] for k in ("model", "prompt_version", "confidence", "reason")} == {
+            "model": N.PILOT_MODEL, "prompt_version": 1, "confidence": 0.8, "reason": "caddish means like a cad"}
+        assert ab["from_key"] == "cad#1" and ab["rule"] == "llm" and ab["run"] == "noun_relabel/llm-x"
+        assert ab["model"] == N.PILOT_MODEL and ab["confidence"] == 0.8
+        assert N.route_text(ab) == "LLM relabel from 'cad', sense not checked"
+        assert N.route_text(nb) == "adjective 'caddish' by LLM relabel, sense not checked"
+        assert relabel_card(rows["caddish#1"])["route"] == "LLM relabel from 'cad', sense not checked"
+        src = rows["caddish#1"]["sources"][0]
+        assert (src["generator"], src["run_id"], src["source_ref"], src["gloss_hint"]) == (
+            "noun_relabel", "llm-x", "relabel:llm:cad#1", "lacking the instincts of a gentleman")
+        # the pilot's answer, reused without a call
+        assert rows["bookworm#1"]["relabel"]["to_key"] == "bookish#1"
+        assert rows["bookish#1"]["relabel"]["from_key"] == "bookworm#1"
+        assert "relabel" not in rows["charlatan#1"] or not rows["charlatan#1"].get("relabel")
+        d = lenv["cdir"] / "runs" / "noun_relabel" / "llm-x"
+        assert [(c.surface, c.source_ref) for c in read_candidates(d / "candidates.jsonl")] == [
+            ("bookish", "relabel:llm:bookworm#1"), ("caddish", "relabel:llm:cad#1")]
+        resp = [json.loads(x) for x in (d / "responses.jsonl").read_text().splitlines()]
+        assert sorted(r["label"] for r in resp) == ["cad", "charlatan", "liar"]
+        assert all(r["raw"] and r["max_tokens"] == N.PILOT_MAX_TOKENS for r in resp)
+        meta = json.loads((d / "run.json").read_text())
+        assert meta["helper_version"] == N.HELPER_VERSION and meta["registry_snapshot_sha256"]
+        assert meta["prompt_sha256"] == hashlib.sha256(N.PILOT_SYSTEM_PROMPT.encode()).hexdigest()
+        assert (meta["n_selected"], meta["n_reused"], meta["n_asked"]) == (4, 1, 3)
+        assert meta["rejected"] == {"none": 2} and meta["counts"]["by_rule"] == {"llm": 2}
+        usage = json.loads((d / "usage.json").read_text())
+        assert usage["n_calls"] == 3 and usage["total_cost_usd"] > 0
+        report = (d / "llm_report.md").read_text()
+        assert "LLM relabel from 'cad', sense not checked" in report and "## Every answer" in report
+        assert "traithood_filter.py --batch-id llm-x --run noun_relabel/llm-x" in out
+        assert "novelty_score.py score --batch-id llm-x --run noun_relabel/llm-x" in out
+        # a rerun (a new run id, its answers on record) sends nothing and writes nothing
+        self.no_client(monkeypatch)
+        after = lenv["reg"].read_bytes()
+        assert run(lenv, "llm-apply", "--run-id", "llm-y") == 0
+        assert "nothing to do" in capsys.readouterr().out
+        assert lenv["reg"].read_bytes() == after and not (d.parent / "llm-y").exists()
+
+    def test_parse_failure_counted_not_written(self, lenv, monkeypatch, capsys):
+        self.client(monkeypatch, {**self.REPLIES, "liar": "I am not sure what you mean"})
+        assert run(lenv, "llm-apply", "--run-id", "llm-x") == 0
+        d = lenv["cdir"] / "runs" / "noun_relabel" / "llm-x"
+        meta = json.loads((d / "run.json").read_text())
+        assert meta["rejected"] == {"none": 1, "unparsed": 1} and meta["n_parsed"] == 2
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == 3          # the unparsed reply is charged
+        assert "I am not sure" in (d / "responses.jsonl").read_text()
+        assert [c.source_ref for c in read_candidates(d / "candidates.jsonl")] == [
+            "relabel:llm:bookworm#1", "relabel:llm:cad#1"]
+        # the next run asks the unparsed one again, and only it
+        capsys.readouterr()
+        client = self.client(monkeypatch, self.REPLIES)
+        assert run(lenv, "llm-apply", "--run-id", "llm-y", "--dry-run") == 0
+        assert "to ask: 1" in capsys.readouterr().out and not client.messages.calls
+
+    def test_budget_refusal(self, lenv, monkeypatch, capsys):
+        self.no_client(monkeypatch)
+        before = lenv["reg"].read_bytes()
+        assert run(lenv, "llm-apply", "--run-id", "llm-x", "--budget-usd", "0.0001") == 2
+        assert lenv["reg"].read_bytes() == before and not (lenv["cdir"] / "runs" / "noun_relabel").exists()
+
+    def test_dirty_tree_refusal(self, lenv, monkeypatch, capsys):
+        from assistant_axis.gapgen import runs
+        self.no_client(monkeypatch)
+        monkeypatch.setattr(runs, "platform_dirty_files", lambda *a, **k: ["assistant_axis/gapgen/nouns.py"])
+        before = lenv["reg"].read_bytes()
+        assert run(lenv, "llm-apply", "--run-id", "llm-x") == 2
+        assert "REFUSED" in capsys.readouterr().err and lenv["reg"].read_bytes() == before

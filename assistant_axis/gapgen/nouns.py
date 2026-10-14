@@ -32,7 +32,8 @@ matches :data:`PERTAINYM_RE`: doctor to doctoral is ``pertainym_only``) and clea
 passes.  A noun in :data:`SUFFIX_EXCEPTIONS` (personality, reality: the adjective is another sense) skips steps 6
 and 7 too.  Only the derivation link's lexicographer-file gate checks the sense; every suffix rule's route reads
 "sense not checked" on the review card (:func:`route_text`; Roger, decision 2 (c), 2026-10-14, which also admitted
-the +y and +ly endings).
+the +y and +ly endings).  The one-off Haiku pass over the nouns the rules leave (``noun_relabel.py llm-apply``,
+Roger 2026-10-14) links with rule :data:`LLM_RULE`, read "LLM relabel ..., sense not checked".
 
 The mechanical rules of the base model's parser (:func:`normalize_form` and its tables) live here since
 2026-10-14; ``generators/base_model/parse.py`` re-exports them under the same names.
@@ -622,10 +623,18 @@ def same_block(a: Optional[Mapping], b: Optional[Mapping]) -> bool:
     return {k: v for k, v in a.items() if k != "at"} == {k: v for k, v in b.items() if k != "at"}
 
 
+#: The rule name of a link made by the one-off Haiku pass (``noun_relabel.py llm-apply``; Roger, 2026-10-14: "A 1
+#: yes", adopting the pilot of open decision 3 for the backlog's leftover person nouns, not as a platform step).
+#: Its blocks carry ``model``, ``prompt_version``, ``confidence`` and ``reason`` besides the rule's fields.
+LLM_RULE = "llm"
+
+
 def _route(rule: Optional[str], lexfile: Optional[str]) -> tuple[str, str]:
-    """``(how, tail)``: "derivation link" with its lexicographer file, or "suffix rule <ending>" with "sense not
-    checked"."""
+    """``(how, tail)``: "derivation link" with its lexicographer file, "suffix rule <ending>" or "LLM relabel" with
+    "sense not checked"."""
     rule = rule or "?"
+    if rule == LLM_RULE:
+        return "LLM relabel", ", sense not checked"
     if rule.startswith("derivation"):
         spell = ", spelling mate" if rule == "derivation+spelling" else ""
         return f"derivation link{spell}", f" ({lexfile})" if lexfile else ""
@@ -637,7 +646,8 @@ def _route(rule: Optional[str], lexfile: Optional[str]) -> tuple[str, str]:
 def route_text(block: Optional[Mapping]) -> Optional[str]:
     """How a row was linked, for the review card (Roger, decision 2 (c), 2026-10-14): on an adjective row
     "suffix rule +y from 'slipper', sense not checked" / "derivation link from 'pedant' (noun.person)"; on a noun row
-    "adjective 'pedantic' by derivation link (noun.person)".  ``None`` for no block.  Every suffix rule says "sense
+    "adjective 'pedantic' by derivation link (noun.person)"; a link of the Haiku pass (rule :data:`LLM_RULE`): "LLM
+    relabel from 'cad', sense not checked".  ``None`` for no block.  Every suffix rule and the LLM pass say "sense
     not checked": the derivation link's lexicographer-file gate is the helper's only sense check."""
     if not block:
         return None
@@ -656,7 +666,8 @@ def link_wanted(old: Optional[Mapping], new: Mapping) -> bool:
     """Whether a row's ``relabel`` block ``old`` gives way to ``new``: not when they are equal but for their time
     stamps (a resubmission writes nothing), nor when ``old`` is of the same or a later helper version (the first
     noun to link an adjective stays its ``from_key``; a noun keeps its adjective).  A later helper version's link
-    replaces the block (the earlier linked row keeps its own)."""
+    replaces the block (the earlier linked row keeps its own).  A block of the LLM pass (rule :data:`LLM_RULE`) is
+    stamped with the helper version it ran under and follows the same rule."""
     if same_block(old, new):
         return False
     return not (old and int(old.get("helper_version") or 0) >= int(new.get("helper_version") or 0))
