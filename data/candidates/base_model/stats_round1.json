@@ -347,16 +347,16 @@
     "gloss_sense": {
       "n_rows": 16554,
       "n_two_sided": 3425,
-      "n_screened": 946,
-      "n_divergent": 137,
-      "divergence_rate": 0.1448,
-      "n_chose_sample": 118,
-      "n_chose_dictionary": 19,
-      "n_illegible_sample": 1,
+      "n_screened": 3425,
+      "n_divergent": 607,
+      "divergence_rate": 0.1772,
+      "n_chose_sample": 514,
+      "n_chose_dictionary": 93,
+      "n_illegible_sample": 12,
       "n_failed": 0,
-      "n_unresolved": 2479,
+      "n_unresolved": 0,
       "cosine_min": 0.3179,
-      "cosine_median": 0.7594,
+      "cosine_median": 0.7159,
       "prompt_version": 2,
       "prompt_sha256": "d67ad2a914ad7fe600209116714c0a08bf268a13ffd71a5a3a42de745bedf08f",
       "model": "claude-haiku-5-5"
@@ -401,11 +401,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/base_model_generator.py stats --round 1",
-      "git_sha": "30fadff6+dirty",
+      "git_sha": "cd473604+dirty",
       "author": "Roger Dearnaley",
       "title": "base-model generator stats, round 1"
     },
-    "produced_at": "2026-10-14T21:36:13+00:00",
+    "produced_at": "2026-10-14T21:57:33+00:00",
     "inputs": [
       {
         "dep_key": "samples",
@@ -419,10 +419,10 @@
       {
         "dep_key": "table",
         "path": "data/candidates/base_model/candidate_table_round1.jsonl",
-        "fingerprint": "v1:2026-10-14T21:36:12+00:00@10817742",
+        "fingerprint": "v1:2026-10-14T21:41:30+00:00@11976153",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-14T21:36:12+00:00",
+        "last_modified_at": "2026-10-14T21:41:30+00:00",
         "extras": {}
       },
       {
@@ -435,6 +435,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "e593bc124de0832ebea5469c5cae54325e851b78a8110bd7fb00ca9e5320371b"
+    "inputs_sha256": "335cfa2ebba5b9b0d02cb7c1a76b012d3011d8b0b24ed3447482156bdcb948a7"
   }
 }
