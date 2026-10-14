@@ -56,14 +56,16 @@ Roger's review comments go into this file.
    - **Recommendation: (a)**; the wave is sized on its measured shares (§ 10), and the pilot rows it leaves behind
      are the first rows of wave 1, so nothing is lost.
 3. **DECIDED (Roger, 2026-10-14): any human, living included; nothing that links a person to an invented
-   trait list goes into git or stays on disk after the run** (§ 5a).  Wikidata gives name and one-line
+   trait list goes into git or is written to the drive** (§ 5a; Roger: "never on the drive is a simple design if
+   practical"; a temporary file under `/tmp`, deleted once done, is the allowed fallback).  Wikidata gives name and one-line
    description of obscure people, which is the point (§ 2).  Roger: names carry period styles (an old name is
    likely to retrieve old-fashioned terms and concepts, the "emergent Victorianism" Owain Evans' team showed), so
    restricting to the dead would skew the family towards older vocabulary.  A living person's name beside an
    LLM-invented trait list is acceptable in memory and in temporary files deleted soon after the run, never in git
    and never on the drive a week later; had that been hard to arrange, the fallback was the dead only.  The options
    were (a) real persons with a recorded date of death (`P570`) only, (b) any human, tracked as planned, and
-   (c) any human, with the person-linked data private and purged; (c) chosen.
+   (c) any human, with the person-linked data held in memory only and redacted before anything is written; (c)
+   chosen.  Not a legal worry (a libel case would be hard to make), simply polite and prudent (Roger).
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
@@ -193,7 +195,7 @@ assistant_axis/gapgen/generators/llm_entropy/
                   fetch_real(n, *, session, rng, dead_only) (random-item API + wbgetentities; P31 = Q5; P570 when
                   dead_only); fetch_fictional(n, *, session, rng) (SPARQL over FICTIONAL_CLASSES with LIMIT/OFFSET);
                   throttled(session) (one request at a time, 2 s apart, 429 -> back-off (5, 20, 60, 180));
-                  write_seeds / load_seeds; the fetch record (counts, sha256, licence CC0, capture date)
+                  redact(text, seed) -> str; the fetch record (counts, era bands, licence CC0, capture date); no seed file (§ 5a)
   calls.py        EntropyCall(family, prompt_id, run, model, system, user, max_tokens, temperature=None,
                   cache_system=True, stage=1) with custom_id / prompt_sha256 / cache_key; EntropyRunner(client,
                   batch_id, usage, transport, responses_path, resume_records): estimate_usd(calls, batch=), wave(),
@@ -235,8 +237,6 @@ reports/trait_gap_generation/rubrics/{llm_entropy_scaffold.md, llm_entropy_multi
                   llm_entropy_backtranslate.md}                                   pinned texts
 data/candidates/llm_entropy/{person_seeds_fetch.json, multilingual_prompts.json,
                   items_table.jsonl, collapse.json, evaluation.json, roles_report.md}   tracked (the table ~3-5 MB)
-data/candidates/llm_entropy/private/{manifest.json, person_seeds.jsonl, <run_id>/responses_b.jsonl,
-                  <run_id>/batches_b.json}                   git-ignored, purged (§ 5a); never tracked
 data/candidates/runs/llm_entropy/<run_id>/{responses.jsonl, batches.json, candidates.jsonl, keys.txt,
                   submit_report.json, run.json, usage.json, report.md, roger_sample.md, gloss_check.md}
 assistant_axis/tests/test_gapgen_llm_entropy_{prompts,seeds,calls,parse,table,collapse,evaluate,submit,acceptance}.py
@@ -248,46 +248,48 @@ Every paid answer is appended to the run's `responses.jsonl` before it is parsed
 the same run id reuses them (`--resume`) and a changed prompt does not.  `batches.json` holds the Batches state
 ([batches.py](../../assistant_axis/gapgen/batches.py)), so a killed process collects what it paid for.
 
-## 5a. Person data: private and purged (decision 3)
+## 5a. Person data: held in memory, never written (decision 3)
 
-Everything that ties a real or fictional person (name, description, Wikidata id) to model output lives only in
-`data/candidates/llm_entropy/private/`, which is in `.gitignore` (added in task 2, with a test that
-`git check-ignore` covers a file there).  Tracked files carry an **opaque seed id** instead: `b:r0137` for real
-seeds, `b:f0042` for fictional ones, numbered in draw order; the map from opaque id to QID and name exists only in
-the private `person_seeds.jsonl`, so once that is purged nothing tracked can be traced back to a person.
+Nothing that ties a real or fictional person (name, description, Wikidata id) to model output is written to the
+drive: not to git, not to a git-ignored file.  Family (b) therefore runs as **one process from fetch to written
+items**: `generate --family b` fetches its seeds from Wikidata, renders the prompts, submits the batch, waits for it,
+collects, redacts, and only then writes; the seeds and the raw answers live in that process's memory and die with
+it.  Tracked files carry an **opaque seed id** instead: `b:r0137` for real seeds, `b:f0042` for fictional ones,
+numbered in draw order; no file holds the map from opaque id to person.
 
-- **Seeds**: `seeds` writes the private file; the tracked fetch record keeps counts, the sha256 of the private file,
-  licence and capture date, and per opaque id only `kind` and a birth-era band (`<1800`, `1800-1899`, `1900-1949`,
-  `1950+`, `unknown`), so the yield can be read by era (decision 3's reason) without a name.
-- **Prompts and answers**: (b) prompts are rendered in memory from the private seeds; (b)'s raw answers (which may
-  echo the name) are recorded before parsing to `private/<run_id>/responses_b.jsonl`, and its Batches state to
-  `private/<run_id>/batches_b.json`, not to the run's tracked `responses.jsonl`.  `prompt_id`, `custom_id` and every
-  tracked record use the opaque id; the prompt sha256 is kept (a hash, not the text).
-- **Redaction at `postprocess`**: a (b) item's gloss and antonym have every token of the seed's name (3 characters
-  or more, case-folded) replaced by `this person`; an item whose label contains such a token is dropped when the
-  seed is real (an eponym of a fictional or long-dead person, "quixotic", stays) and counted in the report as
-  `dropped_name_label`.  Only redacted items reach `items_table.jsonl`, `candidates.jsonl`, the registry
+- **Seeds**: fetched fresh by each (b) run (10-20 minutes, $0), never saved.  The tracked fetch record
+  [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json) (not there yet; one entry per
+  run) keeps counts, calls made, licence and capture date, and per opaque id only `kind` and a birth-era band
+  (`<1800`, `1800-1899`, `1900-1949`, `1950+`, `unknown`), so that the yield can be read by era (decision 3's
+  reason) without a name.
+- **Answers**: (b)'s response records go into the run's tracked `responses.jsonl` like every family's, but only
+  after redaction in memory: `user` is the prompt with the person line replaced by `Person: <b:r0137>`, `text` the
+  answer with every token of the seed's name (3 characters or more, case-folded) and its description replaced by
+  `this person`, so the audit trail of what was paid for stays.  `prompt_sha256` and `user_sha256` are hashes of
+  the real text (not reversible); `custom_id` uses the opaque id.  The Batches state (`batches.json`, ids only) is
+  tracked as for every family.
+- **Items**: the same redaction applies to each (b) item's gloss and antonym; an item whose label contains a name
+  token of a real seed is dropped and counted in the report as `dropped_name_label` (an eponym of a fictional
+  character, "quixotic", stays).  Only redacted items reach `items_table.jsonl`, `candidates.jsonl`, the registry
   (`gloss_hint`, `source_ref`), `gloss_check.md`, `roger_sample.md` and `report.md`.
-- **Purge**: `postprocess` deletes `private/<run_id>/` once every (b) batch of the run is collected and its items
-  written; the seeds file goes with the last run that uses it (`manifest.json` lists the runs pending), and the
-  `purge` subcommand removes the whole private directory at once.  Every subcommand first sweeps anything in
-  `private/` whose manifest stamp is more than **3 days** old and says so.  A crashed run therefore loses its (b)
-  answers at the next command after 3 days; rerunning (b) then costs its calls again (about $1 at pilot size).
-  The coordinator adds a purge-by date to [open_items.md](../../roger/open_items.md) when seeds are fetched, so a
-  run abandoned with no later command is still caught.
+- **A crash or a stop** before collection loses the seeds: the run cancels or abandons its open (b) batch (the
+  tracked `batches.json` names it, so `generate --family b --cancel-open` can cancel it after a crash) and a rerun
+  fetches new seeds and pays again (about $1 at pilot size).  `--resume` does not apply to (b); every other family
+  keeps it.  The command runs in the background (`run_in_background` or `nohup`) because a batch can take up to an
+  hour, rarely longer.
+- **Fallback, only if the in-memory run proves impractical** (Roger, 2026-10-14): a temporary file under `$TMPDIR`
+  (in `/tmp`), deleted in a `finally` block when the process ends; decided at build time, recorded in
+  [QUESTIONS.md](./QUESTIONS.md), and tested like the rest of this section.
 - **Logs and transcripts**: no log line, exception message, report or dry run prints a name or description; the
-  dry run's sample (b) prompt uses the fixed, long-dead Tian Yi row of § 6, never a fetched seed.  Agents never
-  print, `cat` or grep the private directory (a Claude Code transcript is itself a file on the drive that persists
-  for weeks).
-- **Outside the drive**: the (b) requests and batch results are held by Anthropic under its retention terms
-  (batch results 29 days); that is not this drive and is accepted.
+  dry run's sample (b) prompt is the fixed, long-dead Tian Yi row of § 6, never a fetched seed.  A Claude Code
+  transcript is itself a file on the drive, so agents never print a fetched seed or an unredacted answer.
+- **What Anthropic holds** (the batch requests and results under its retention terms) is its business (Roger).
 
 ## 6. Data schemas
 
-**Person seed** (`data/candidates/llm_entropy/private/person_seeds.jsonl`, git-ignored and purged, § 5a; 400 real
-and 200 fictional; the tracked fetch record [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json)
-(not there yet) with counts, calls made, the private file's sha256, licence, capture date and per opaque id only
-kind and era band):
+**Person seed** (in memory only, § 5a; 400 real and 200 fictional at full size; the tracked fetch record
+[person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json) (not there yet) with counts,
+calls made, licence, capture date and per opaque id only kind and era band):
 
 ```json
 {"seed_id": "b:r0001", "qid": "Q65871003", "name": "Tian Yi", "description": "person, CBDB ID = 367824",
@@ -382,13 +384,11 @@ charges every answer to a `GuardedUsage(usage_path=...)`, and writes `usage.json
 block.  Dry runs print the estimate, the counts and one **rendered prompt per variant** (§ "Rendered prompts") and
 write nothing.
 
-- `seeds --real 400 --fictional 200 [--dead-only] --seed 0`: the Wikidata fetch (task 2), $0, about 250-500 HTTP
-  requests at 2 s apart (10-20 minutes); writes the private seeds file and the tracked fetch record
-  [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json) (not there yet; § 5a).
-  Refuses to overwrite without `--force` (no snapshot: the private file is not kept).  `--dead-only` stays as an
-  option, off by default (decision 3).
-- `purge [--run R]`: deletes the private directory, or one run's part of it, and prints what it removed (counts,
-  never names).
+- `seeds --real N --fictional M [--dead-only] --seed 0 --dry-run`: the Wikidata fetch alone (task 2), $0, for
+  testing the fetch; prints counts and era bands, writes nothing.  The real fetch happens inside
+  `generate --family b --real 400 --fictional 200` (§ 5a), about 250-500 HTTP requests at 2 s apart (10-20
+  minutes), which appends to the tracked fetch record.  `--dead-only` stays as an option, off by default
+  (decision 3).
 - `prompts [--family F] [--n 3]`: renders prompts of every family ($0): the hygiene check of every prompt word
   (exit 1 on a hit), the grid sizes (210, 600, 300, 181), and the sample variants for Roger.
 - `translate-prompts --budget-usd 1`: Sonnet 5.5 translates the pinned English (c) master into the ten languages
@@ -454,13 +454,13 @@ the roles route are hard.
   each class once per call; a 429 is retried with the back-off and a fifth failure propagates; the throttle never
   sends two requests within 2 s (fake clock); the fetch record carries counts, sha256, licence and era bands; the
   file is not overwritten without `--force`.
-- **Person privacy (hard, § 5a)**: `git check-ignore` covers every path under `private/`; a fixture run with
-  canned seeds (names chosen to be distinctive strings) leaves **no seed name, description or QID** in any file
-  outside `private/` (a grep of the tmp tree), in the registry, or in captured stdout and stderr, and the (b)
-  `prompt_id`s are opaque ids; redaction replaces a name token in a gloss and drops a real seed's name-bearing label
-  but keeps a fictional one's; `postprocess` deletes `private/<run_id>/` after the last (b) batch is collected and
-  not before; a manifest stamp older than 3 days is swept by any subcommand (fake clock); `purge` empties the
-  directory; the dry run's (b) sample is the fixed § 6 row.
+- **Person privacy (hard, § 5a)**: a fixture (b) run with canned seeds (names and descriptions chosen to be
+  distinctive strings, echoed by the fake model in glosses, antonyms and one label) leaves **no seed name,
+  description or QID** anywhere: not in any file under the tmp repository tree or the tmp `$TMPDIR` (a grep of
+  both), not in the registry, not in captured stdout and stderr; the (b) `prompt_id`s and `custom_id`s are opaque
+  ids; recorded `user` and `text` are redacted; a real seed's name-bearing label is dropped and a fictional one's
+  kept; a run interrupted after submission writes nothing person-linked and `--cancel-open` cancels its batch; the
+  dry run's (b) sample is the fixed § 6 row.
 - `calls`: `custom_id` is 64 characters or fewer of the allowed set and differs across runs and stages; the
   estimate counts every call at the model's rate (`:batch` under batches); every response is recorded before it is
   parsed and charged, unparseable and `max_tokens`-stopped ones too; the once-more retry at 16,000; `--resume` sends
@@ -500,8 +500,7 @@ the roles route are hard.
   `--force`; `report` renders a fixture run with the three files.
 - **Acceptance on recorded outputs** (`test_gapgen_llm_entropy_acceptance.py`, skips while absent): parse rate
   >= 0.99 in every run's responses (hard); `usage.json` beside every run with nonzero cost; the fetch record counts
-  400 real and 200 fictional seeds, and nothing outside `private/` carries a seed name (a check against the private
-  file while it exists); every (c)
+  400 real and 200 fictional seeds per full (b) run; every (c)
   record's prompt hash is in `multilingual_prompts.json`; `collapse.json` has every family run; the pilot's and the
   wave's `report.md` carry the already-registered headline and the novel figure raw and net; the package imports no
   `openai` beyond the embedding cache; `git status --porcelain data/traits data/roles data/seed_queue.json` is empty
@@ -531,10 +530,9 @@ every task prompt verbatim.  Each task ends with the § 8 commands.
    OEWN and frozen into the file with its derivation in a comment), the three rubric files pinned
    (`rubric_pins.py bump NAME --why ... --version 1`), `parse.py`; CLI `prompts`.  Test: prompts, parse.  **Paste
    the rendered variants of every family into the task report; Roger reads them before any call is made.**
-2. `seeds.py`; CLI `seeds` and `purge`; the `.gitignore` line for `private/`.  **Run a 10-seed fetch** ($0, under a
-   minute) into a `$TMPDIR` copy, then `purge` it (decision 3, § 5a: the real 600-seed fetch is the first step of the
-   pilot, in the main checkout, so that the 3-day sweep does not take the seeds before they are used).  Tests: seeds,
-   person privacy.  Paste the fetch record (counts and era bands, no names) into the task report.
+2. `seeds.py`; CLI `seeds --dry-run`.  **Run a 10-seed `seeds --dry-run`** ($0, under a minute; decision 3,
+   § 5a: the real fetch happens inside each (b) run).  Tests: seeds.  Paste its counts and era bands (no names)
+   into the task report.  The person-privacy test lands with task 3's `generate`.
 3. `calls.py` (`EntropyRunner`, both transports) and CLI `generate` with `--dry-run`; `translate-prompts`; **run the
    translation** (about $0.3, live) and paste master and back-translations side by side for Roger's read of the
    ten texts.  Test: calls.
@@ -893,7 +891,7 @@ queue; the pilot's readout reproduces the registry figures as of its own date.
 ## Frozen interface (for plan 13's dashboard and the pairing review)
 
 `from assistant_axis.gapgen.generators.llm_entropy import load_items_table, ITEMS_TABLE_PATH, load_collapse,
-COLLAPSE_PATH, load_seeds, PERSON_SEEDS_PATH, EntropyRunner`: the § 6 table rows (`schema_version` 1) with
+COLLAPSE_PATH, PERSON_SEEDS_FETCH_PATH, EntropyRunner`: the § 6 table rows (`schema_version` 1) with
 `sources`, `n_sources`, `families`, `languages`, `models`, `antonyms`, `kinds` and the membership tags for every
 distinct label; the collapse payload per family (Jaccard, Lincoln-Petersen, rarefaction with end slope, unique per
 dollar, the cross-family matrix); the seeds; and the generator-side Batches runner, which another generator may
