@@ -536,6 +536,16 @@ below-cut hits get a review flag (TODO 4); (c) whether the confirmed covers are 
 `score --redecide --lexical-search` per batch (≈ $5, § Cost) or stay flags for the end-of-generation R1 pass
 (the decided default); (d) whether Moby stays in, on its own precision.
 
+**Gate 2 decided (Roger, 2026-10-14).**  His blind marks on the 40 covers of `2026-10-14-lex_sweep_1`: 32 confirmed
+real misses, 7 rejected, 1 unsure (82%, under the 90% line); OEWN links 14 of 15, Moby 18 of 25.  He noted, and the
+count confirms, that the 40 are about 16 independent judgments (19 distinct corpus targets, 16 clusters; one cluster
+of 15, the vulgarity family crude / obscene / unladylike, holds 5 of the 7 rejections and the unsure); outside it,
+23 of 25 confirmed.  Decisions: **(a) build**, with **(d) Moby kept but split by lexicon: an OEWN lexical neighbour
+joins M3's listed traits and can cover (cut); a Moby link never joins M3's list and only flags the row for review
+as a proposed merge** (Roger: "c) SG", choosing the coordinator's option (c)).  (b) and (c) of the gate's
+questions keep their defaults (below-cut readings not flagged; the sweep's confirmed covers stay flags for the
+end-of-generation R1 pass rather than a `--redecide` now).
+
 Yield per dollar is reported as the M3 pilots report it: `covers_at_cut_off / usage.json total_cost_usd`.
 
 ## 11. Report at the end
