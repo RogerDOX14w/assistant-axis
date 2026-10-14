@@ -1,0 +1,488 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 304,
+    "n_decided": 304,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "decided_by_another_run": 202,
+      "not_a_trait": 9
+    },
+    "by_decision": {
+      "covered": 142,
+      "new": 162
+    },
+    "by_reason": {
+      "overlap": 302,
+      "exact_label": 2
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 133,
+        "new": 125
+      },
+      "4": {
+        "new": 37,
+        "covered": 9
+      }
+    },
+    "exact_label": {
+      "corpus": 2
+    },
+    "pairs_judged_per_candidate": {
+      "0": 8,
+      "1": 116,
+      "2": 38,
+      "3": 31,
+      "4": 39,
+      "5": 23,
+      "6": 20,
+      "7": 14,
+      "8": 9,
+      "9": 4
+    },
+    "pairs_judged_total": 882,
+    "pairs_judged_mean": 2.921,
+    "listed_per_candidate_mean": 16.43,
+    "shortlist_length": {
+      "0": 8,
+      "1": 28,
+      "2": 41,
+      "3": 49,
+      "4": 48,
+      "5": 41,
+      "6": 37,
+      "7": 29,
+      "8": 14,
+      "9": 7
+    },
+    "early_exit_depth": {
+      "1": 95,
+      "2": 12,
+      "3": 13,
+      "4": 9,
+      "5": 4,
+      "6": 4,
+      "7": 1,
+      "8": 1,
+      "9": 1
+    },
+    "escalations": {
+      "at_cut_off": 102,
+      "below_cut_off": 325
+    },
+    "rescues": 7,
+    "review_flags": {
+      "sonnet_below_opus_at": 38,
+      "both_similar": 2
+    },
+    "pair_completions": 39,
+    "pair_completion_for": {
+      "appearance_conscious#1": [
+        "disheveled"
+      ],
+      "averse_to_touch#1": [
+        "physical_touch",
+        "clingy"
+      ],
+      "believes_thoughts_are_read#1": [
+        "autistic"
+      ],
+      "cruel_to_others#1": [
+        "self_harming"
+      ],
+      "cutthroat_worldview#1": [
+        "win_win_seeking"
+      ],
+      "emotionally_self_attentive#1": [
+        "repressed"
+      ],
+      "favors_strict_child_discipline#1": [
+        "permissive_baumrind"
+      ],
+      "flamboyant_in_appearance#1": [
+        "disheveled"
+      ],
+      "guards_personal_privacy#1": [
+        "nosy"
+      ],
+      "high_sex_drive#1": [
+        "asexual"
+      ],
+      "indifferent_to_the_arts#1": [
+        "artistic",
+        "artistic_holland"
+      ],
+      "intolerant_of_pushiness#1": [
+        "resigned"
+      ],
+      "lacks_humor#1": [
+        "flippant"
+      ],
+      "needs_constant_company#1": [
+        "secure_attachment"
+      ],
+      "news_aware#1": [
+        "historically_minded"
+      ],
+      "non_religious#1": [
+        "sikh"
+      ],
+      "openly_joyful#1": [
+        "glib"
+      ],
+      "openly_shows_disapproval#1": [
+        "passive_aggressive"
+      ],
+      "prompt_and_efficient#1": [
+        "foot_dragging"
+      ],
+      "prone_to_absorbed_daydreaming#1": [
+        "meditative"
+      ],
+      "prone_to_auditory_hallucination#1": [
+        "deaf"
+      ],
+      "prone_to_rumination#1": [
+        "meditative"
+      ],
+      "prone_to_visual_experiences#1": [
+        "blind"
+      ],
+      "reciprocity_bound_helpfulness#1": [
+        "parasitic"
+      ],
+      "rejects_personal_modesty#1": [
+        "modest"
+      ],
+      "relates_through_command#1": [
+        "authoritative_baumrind"
+      ],
+      "reliant_on_others#1": [
+        "unsupported"
+      ],
+      "resists_prescribed_methods#1": [
+        "ritualistic",
+        "formalist"
+      ],
+      "seeks_close_intimacy#1": [
+        "fearful_avoidant_attachment"
+      ],
+      "seeks_danger_for_thrill#1": [
+        "panicky"
+      ],
+      "seeks_hidden_meaning#1": [
+        "autistic"
+      ],
+      "self_injurious#1": [
+        "sadistic"
+      ],
+      "sentimental_about_belongings#1": [
+        "repressed"
+      ],
+      "struggles_to_make_conversation#1": [
+        "chattering"
+      ],
+      "struggles_to_name_feelings#1": [
+        "emotional"
+      ],
+      "undistractable#1": [
+        "adhd"
+      ],
+      "uneasy_with_being_admired#1": [
+        "vulnerable_narcissistic"
+      ],
+      "upset_by_others_suffering#1": [
+        "sadistic"
+      ],
+      "work_obsessed#1": [
+        "trapped_in_job"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 302
+      },
+      "answers": {
+        "similar": 1299,
+        "opposed": 1466,
+        "unrelated": 2160,
+        "unsure": 37
+      },
+      "final": {
+        "similar": 1310,
+        "opposed": 1467,
+        "unrelated": 2184,
+        "unsure": 1
+      },
+      "candidates_with_unsure_reasked": 28
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 302,
+        "input": 525204,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 910,
+        "input": 148299,
+        "cache_write": 574,
+        "cache_read": 505694,
+        "calls_with_read": 881,
+        "read_share_of_input": 0.7726,
+        "hit_rate_calls": 0.9681
+      },
+      "claude-opus-5-5": {
+        "calls": 427,
+        "input": 62978,
+        "cache_write": 53956,
+        "cache_read": 191142,
+        "calls_with_read": 333,
+        "read_share_of_input": 0.6204,
+        "hit_rate_calls": 0.7799
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 0.128336
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.035589
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 0.54238,
+        "claude-opus-5-5:batch": 0.935712
+      }
+    },
+    "spend_usd": 1.642703,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 525204,
+          "completion_tokens": 408302,
+          "cost_usd": 0.1283,
+          "n_calls": 302
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 189871,
+          "completion_tokens": 55597,
+          "cost_usd": 0.9357,
+          "n_calls": 427
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 199664,
+          "completion_tokens": 75661,
+          "cost_usd": 0.578,
+          "n_calls": 910
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 5277,
+          "completion_tokens": 0,
+          "cost_usd": 0.0007,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 1.6427,
+      "total_prompt_tokens": 920016,
+      "total_completion_tokens": 539560,
+      "n_calls": 1642
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 40,
+    "covered_flagged": 38,
+    "pair_notes": {
+      "rows": 2,
+      "notes": 2,
+      "by_kind": {
+        "pair": 2
+      },
+      "rows_by_decision": {
+        "new": 1,
+        "covered": 1
+      }
+    },
+    "pair_flag_rows": 10,
+    "floor": {
+      "rows_with_listed_below": 302,
+      "listed_below_total": 2823,
+      "similar_kept_out_total": 58,
+      "rows_with_similar_kept_out": 50
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "a97c600cc979a3ea859c1a77ccb1a5dca787a28903ede15f952e025cabc77ebf",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 304,
+      "rows_listing_a_queue_entry": 118,
+      "rows_reading_a_queue_entry": 28,
+      "covered_by_queue": 5,
+      "covered_by_queue_by_status": {
+        "candidate": 5
+      }
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "covered": 114,
+        "new": 112
+      },
+      "alignment 2": {
+        "covered": 19,
+        "new": 13
+      },
+      "alignment 3": {
+        "new": 37,
+        "covered": 9
+      }
+    },
+    "partners_skipped": {
+      "rows": 245,
+      "partners": 530,
+      "by_relation": {
+        "unrelated": 476,
+        "opposed": 54
+      },
+      "by_where": {
+        "shortlist": 528,
+        "opposite": 2
+      },
+      "est_readings_saved": {
+        "sonnet": 530,
+        "opus": 19.6
+      },
+      "est_saving_usd_live": 0.7068
+    },
+    "batch_id": "2026-10-14-g600-hinted_ipip",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 302,
+        "ok_first": 302,
+        "ok": 302
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 28,
+        "ok_first": 28,
+        "ok": 28
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 882,
+        "ok_first": 882,
+        "ok": 882
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 427,
+        "ok_first": 427,
+        "ok": 427
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 0,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-14-g600-hinted_ipip --run ipip/2026-10-14-g600-hinted --budget-usd 10",
+      "git_sha": "c3844e04+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-14-g600-hinted_ipip"
+    },
+    "produced_at": "2026-10-14T06:25:23+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-13T13:53:24+00:00@3497671",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T13:53:24+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "1bb1779652026a2bfb109cc0b4df1f69400674fb24612eace13e13666de368b4"
+  }
+}
