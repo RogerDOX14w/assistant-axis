@@ -59,7 +59,8 @@ VERDICTS: tuple[str, ...] = ("typo", "real_word", "unsure")
 ANSWER_KEYS: tuple[str, ...] = ("reason", "verdict")
 #: 1 (2026-10-14): one JSON object (a code fence around it is accepted with a note), ``reason`` a non-empty string,
 #: ``verdict`` one of :data:`VERDICTS` (spaces and hyphens read as underscores, case ignored).
-PARSER_VERSION = 1
+#: 2 (2026-10-14): one JSON object after leading prose is accepted (382 of 942 Sonnet replies wrote a sentence first).
+PARSER_VERSION = 2
 N_NEIGHBOURS = 2
 CONCURRENCY = 8
 #: For the estimate: the system prompt is about 2,100 characters (about 550 tokens; not cached, under Sonnet's
@@ -215,6 +216,17 @@ def parse_verdict(text: Optional[str], stop_reason: Optional[str] = None
         if body.rstrip().endswith("```"):
             t = body.rstrip()[:-3].strip()
             notes.append("code fence removed")
+    if not t.startswith("{") and t.endswith("}"):
+        # Sonnet 5.5 often writes its reason as a sentence, then the object: take the object that ends the text
+        for i in [k for k, ch in enumerate(t) if ch == "{"]:
+            try:
+                cand = json.loads(t[i:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(cand, dict):
+                t = t[i:]
+                notes.append("prose before the object")
+                break
     if not (t.startswith("{") and t.endswith("}")):
         return None, "not_one_object: text outside the JSON object", notes
     try:
@@ -261,8 +273,16 @@ def answers_on_record(records: Sequence[Mapping], *, model: str) -> dict[tuple, 
     """``{(request_sha256, reading): record}``: the latest parsed record of each request and reading on ``model``."""
     out: dict[tuple, dict] = {}
     for r in records:
-        if r.get("model") == model and r.get("parsed") and r.get("request_sha256"):
-            out[(r["request_sha256"], int(r.get("reading") or 0))] = dict(r)
+        if r.get("model") != model or not r.get("request_sha256"):
+            continue
+        r = dict(r)
+        if not r.get("parsed") and r.get("text") and int(r.get("parser_version") or 0) < PARSER_VERSION:
+            parsed, err, notes = parse_verdict(r.get("text"), r.get("stop_reason"))   # re-read with this parser
+            if parsed:
+                r.update(parsed=parsed, parse_error=None, notes=list(r.get("notes") or []) + notes + [
+                    f"re-parsed with parser {PARSER_VERSION}"])
+        if r.get("parsed"):
+            out[(r["request_sha256"], int(r.get("reading") or 0))] = r
     return out
 
 

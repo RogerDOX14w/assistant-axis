@@ -125,7 +125,9 @@ def test_the_prompt_is_pinned_and_an_edited_text_is_refused(tmp_path):
     ('{"reason": "Hm.", "verdict": "real word"}', "end_turn", "real_word", None),
     ('{"verdict": "typo"}', "end_turn", None, "missing_key"),
     ('{"reason": "x", "verdict": "maybe"}', "end_turn", None, "bad_value"),
-    ('Sure: {"reason": "x", "verdict": "typo"}', "end_turn", None, "not_one_object"),
+    # prose before one object is accepted since parser 2 (2026-10-14; was not_one_object), text after it is not
+    ('Sure: {"reason": "x", "verdict": "typo"}', "end_turn", "typo", None),
+    ('{"reason": "x", "verdict": "typo"} and more', "end_turn", None, "not_one_object"),
     ('{"reason": "x", "verdict": "typo"}', "refusal", None, "refusal"),
     ("", "end_turn", None, "empty"),
     (None, None, None, "no_response"),
@@ -229,3 +231,16 @@ def test_submit_writes_only_the_accepted_repairs(env, capsys):
     assert "novelty_score.py score --batch-id rc1_censuses --run censuses/rc1" in out
     # the census table and counts are never edited
     assert I.load_census_table(env["root"] / "censuses" / "census_table.jsonl") == TABLE
+
+
+def test_parser_takes_the_object_after_leading_prose():
+    """2026-10-14: 382 of 942 Sonnet 5.5 replies wrote the reason as a sentence, then the object."""
+    from assistant_axis.gapgen.generators.censuses import repair_check as RC
+    text = '"Accendible" is a real rare word.\n\n{"reason": "a rare word {from Latin}", "verdict": "real_word"}'
+    ans, err, notes = RC.parse_verdict(text, "end_turn")
+    assert err is None and ans["verdict"] == "real_word" and "prose before the object" in notes
+    assert RC.parse_verdict('{"reason": "x", "verdict": "typo"} trailing', "end_turn")[1].startswith("not_one_object")
+    rec = {"model": "m", "request_sha256": "s", "reading": 1, "parsed": None, "parser_version": 1, "text": text,
+           "stop_reason": "end_turn"}
+    got = RC.answers_on_record([rec], model="m")
+    assert got[("s", 1)]["parsed"]["verdict"] == "real_word"
