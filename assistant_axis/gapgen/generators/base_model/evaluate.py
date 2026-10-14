@@ -12,7 +12,9 @@
   relation-call opposites and pair completions, cost per candidate and useful candidates per dollar from the
   ``usage.json`` files; the run's count floor with its sample size (:func:`floor_of_run`); and, since gate
   audit 3 (2026-10-12), the per-family figures and the noun share of M1 survivors over the eligible table
-  **before** the floor as well (:func:`before_floor`), so the family comparison is not an artefact of the floor.
+  **before** the floor as well (:func:`before_floor`), so the family comparison is not an artefact of the floor;
+  and, for a wave (plan 03 decision (f), 2026-10-14), the **measured new-kept rate per cell** (:func:`wave_rates`):
+  this wave's and that of every wave up to it, which is what ``submit --order measured`` ranks by.
   Every number is counted from files on disk.
 """
 from __future__ import annotations
@@ -224,6 +226,21 @@ def floor_of_run(args: Optional[Mapping], stats: Optional[Mapping]) -> Optional[
             "chosen_at_n_samples": None, "source": "a run before the floor was recorded (2026-10-12)"}
 
 
+def wave_rates(run_id: str, *, run_dir: Path, registry_rows: Mapping[str, Mapping]) -> Optional[dict]:
+    """The per-cell measured new-kept rate of a wave (:func:`.waves.measure_cells`): this wave alone, and every
+    wave on record up to and including it.  None for a run that was not a wave (the pilot's ``--all``)."""
+    from . import waves as W
+    waves = W.load_waves(Path(run_dir).parent)
+    idx = next((i for i, w in enumerate(waves) if w.run_id == run_id), None)
+    if idx is None:
+        return None
+    reg = W.registry_by_stem(registry_rows)
+    w = waves[idx]
+    return {"order": w.order, "this_wave": W.measure_cells([w], reg),
+            "through_this_wave": W.measure_cells(waves[:idx + 1], reg),
+            "n_waves_on_record": len(waves)}
+
+
 def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats: Optional[Mapping],
                  registry_rows: Mapping[str, Mapping], filter_dir: Path, novelty_dir: Path,
                  sampling_usage: Optional[Path] = None, sense_usage: Optional[Path] = None) -> dict:
@@ -267,4 +284,6 @@ def evaluate_run(run_id: str, *, run_dir: Path, table: Sequence[Mapping], stats:
         "sampling_usage": cost_summary([sampling_usage]) if sampling_usage else None,
         # the generator's own paid calls, apart from the platform's: the gloss-sense step (QUESTIONS 56)
         "sense_usage": cost_summary([sense_usage]) if sense_usage else None,
+        # the wave's cells and their measured new-kept rates (plan 03 decision (f)); None for a whole-table run
+        "waves": wave_rates(run_id, run_dir=run_dir, registry_rows=registry_rows),
     }

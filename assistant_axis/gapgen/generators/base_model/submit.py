@@ -25,6 +25,15 @@
 4. prints the follow-up commands.
 
 A dry run prints the same and writes nothing.
+
+**Waves** (plan 03 decision (f), built 2026-10-14): with ``wave=True`` (the CLI's default; ``--all`` is the pilot's
+whole-table submission above) step 1 submits one review-hour wave instead of every row at the floor:
+:func:`.waves.select_wave` draws ``ceil(kept_target / kept_share)`` **net-new** rows evenly across the count-bucket x
+family cells (``--order stratified``, the first wave) or from the cell with the best measured new-kept rate down
+(``--order measured``, read from the earlier waves' ``run.json`` and the registry), and the rows the registry has
+already decided ride along free.  The count orders nothing.  ``run.json`` records the selection (``args.selection``:
+order, seed, cells with their quotas, kept share and whether it is assumed, and each counted row's cell), which is
+what the next wave and ``report`` measure from.
 """
 from __future__ import annotations
 
@@ -39,10 +48,11 @@ from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.gapgen import Candidate, start_run, submit_candidates
 from assistant_axis.gapgen.cost import HARD_LINE_USD, confirm_or_abort
 from assistant_axis.gapgen.normalize import make_key
-from assistant_axis.gapgen.paths import REGISTRY_PATH, REPO_ROOT, check_id, run_dir
+from assistant_axis.gapgen.paths import REGISTRY_PATH, REPO_ROOT, check_id, run_dir, runs_root
 from assistant_axis.judge_pricing import MultiModelUsage
 
 from . import GENERATOR
+from . import waves as W
 from .sense import BLOCK as SENSE_BLOCK
 from .sense import resolved_hint, summary as sense_summary, unresolved
 
@@ -289,12 +299,38 @@ class SubmitSummary:
     estimate_all_rows: Optional[dict] = None
     need: Optional[dict] = None
     floor: Optional[dict] = None
+    #: ``args.selection`` of ``run.json``: ``{"mode": "all"}`` or the wave's record (:meth:`.waves.WaveSelection.record`).
+    selection: Optional[dict] = None
 
 
 def _load_registry_rows(registry_path: Path) -> dict:
     from assistant_axis.gapgen.registry import Registry
     p = Path(registry_path)
     return Registry(p).fold() if p.exists() else {}
+
+
+def _wave_inputs(table: Sequence[Mapping], corpus_stems, queue_stems, renamed):
+    """The membership sets the net-new test reads; without them (tests, an older caller) the table's own flags from
+    ``parse`` stand in."""
+    if corpus_stems is None:
+        corpus_stems = {r["stem"] for r in table if r.get("corpus_stem_match")}
+    if queue_stems is None:
+        queue_stems = {r["stem"] for r in table if r.get("queue_stem_match")}
+    return set(corpus_stems), set(queue_stems), dict(renamed or {})
+
+
+def _kept_share(given: Optional[float], measured: Mapping, *, min_measured: int) -> tuple[float, bool, str]:
+    """``(kept share, assumed?, source)``: the value given; else the pooled rate the waves measured once at least
+    ``min_measured`` net-new rows are decided; else the pilot's, ASSUMED for the 20k table."""
+    pooled = measured.get("pooled") or {}
+    if given is not None:
+        assumed = float(given) == W.KEPT_SHARE_PILOT
+        return float(given), assumed, (W.KEPT_SHARE_SOURCE if assumed else "--kept-share, given")
+    if pooled.get("n_decided", 0) >= min_measured and pooled.get("rate"):
+        return (float(pooled["rate"]), False,
+                f"measured over the waves {', '.join(measured.get('waves') or [])}: {pooled['n_kept']} kept of "
+                f"{pooled['n_decided']} net-new rows decided")
+    return W.KEPT_SHARE_PILOT, True, W.KEPT_SHARE_SOURCE
 
 
 def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count: int = DEFAULT_MIN_COUNT,
@@ -304,29 +340,77 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None,
                sampling_record: Optional[Mapping] = None, sampling_usage_path: Optional[Path] = None,
-               registry_rows: Optional[Mapping[str, Mapping]] = None, echo=print) -> SubmitSummary:
+               registry_rows: Optional[Mapping[str, Mapping]] = None, wave: bool = False,
+               kept_target: int = W.KEPT_TARGET_DEFAULT, kept_share: Optional[float] = None,
+               order: Optional[str] = None, wave_seed: int = 0, ride_along: bool = True,
+               min_measured: int = W.MIN_MEASURED_DEFAULT, corpus_stems: Optional[Iterable[str]] = None,
+               queue_stems: Optional[Iterable[str]] = None, renamed: Optional[Mapping[str, str]] = None,
+               echo=print) -> SubmitSummary:
     """Select, estimate, gate and submit (see the module docstring).  ``n_samples``: the number of samples the
     table was built from, recorded with the floor (:func:`floor_record`).  ``registry_rows``: the folded
-    registry the estimate reads (default: ``registry_path``'s)."""
+    registry the estimate reads (default: ``registry_path``'s).  ``wave``: one review-hour wave (:mod:`.waves`)
+    instead of every row at the floor; ``corpus_stems``, ``queue_stems`` and ``renamed`` feed its net-new test."""
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
         raise ValueError("--transport must be live or batches")
-    rows = select_rows(table, min_count=min_count, families=families)
-    check_sense_resolved(rows, round_n=round_n)     # one settled sense before M1 (QUESTIONS 56)
+    floor_rows = select_rows(table, min_count=min_count, families=families)
+    # one settled sense before M1 (QUESTIONS 56), checked over every row at the floor, not only this wave's: a round
+    # the sense step has not finished is refused whichever rows a wave would draw
+    check_sense_resolved(floor_rows, round_n=round_n)
+    reg_rows = _load_registry_rows(registry_path) if registry_rows is None else registry_rows
+    sel = None
+    if wave:
+        reg = W.registry_by_stem(reg_rows)
+        waves = W.load_waves(runs_root(candidates_dir) / GENERATOR, exclude=[run_id])
+        measured = W.measure_cells(waves, reg)
+        pooled = measured["pooled"]
+        if order is None:
+            order = "measured" if pooled["n_decided"] else "stratified"
+            why = (f"the waves on record have {pooled['n_decided']} net-new rows decided" if pooled["n_decided"]
+                   else ("no wave on record" if not waves else
+                         f"the waves on record ({', '.join(w.run_id for w in waves)}) have no rows M1 and M3 have "
+                         f"decided yet"))
+            echo(f"order: {order} (the default: {why})")
+        share, assumed, share_src = _kept_share(kept_share, measured, min_measured=min_measured)
+        corpus, queue, ren = _wave_inputs(table, corpus_stems, queue_stems, renamed)
+        sel = W.select_wave(floor_rows, table=table, min_count=min_count, kept_target=kept_target,
+                            kept_share=share, kept_share_assumed=assumed, kept_share_source=share_src, order=order,
+                            seed=wave_seed, families=families, corpus=corpus, renamed=ren, queue=queue, reg=reg,
+                            earlier=W.earlier_stems(waves, reg_rows, GENERATOR), measured=measured,
+                            min_measured=min_measured, ride_along=ride_along)
+        rows = sel.rows
+    else:
+        rows = floor_rows
     cands = to_candidates(rows, run_id)
     floor = floor_record(min_count, n_samples=n_samples, explicit=min_count_explicit)
-    need = downstream_need(rows, _load_registry_rows(registry_path) if registry_rows is None else registry_rows)
+    need = downstream_need(rows, reg_rows)
     est_all = estimate_downstream_usd(len(cands), transport=transport)
     est = estimate_downstream_usd(need["n_m1"], transport=transport, n_m3_only=need["n_m3_only"])
     st = strata(rows)
-    echo(f"round {round_n}: {len(table)} table rows; selected {len(rows)} eligible (count >= {min_count}"
-         + (f", families {sorted(families)}" if families else "") + ")")
+    echo(f"round {round_n}: {len(table)} table rows; {len(floor_rows)} eligible at the floor (count >= {min_count}"
+         + (f", families {sorted(families)}" if families else "") + "); "
+         + (f"selected {len(rows)} for this wave" if sel else f"selected all {len(rows)}"))
     echo(f"  count floor: {min_count} at {floor['n_samples'] or 'an unknown number of'} samples "
          f"({floor['per_1k_samples']} per 1,000); chosen at {floor['chosen_at_n_samples']} samples "
          f"({floor['source']})")
     note = floor_note(floor)
     if note:
         echo(f"  {note}")
+    if sel:
+        hours = sel.expected_kept / W.REVIEW_TERMS_PER_HOUR
+        echo(f"wave, order {sel.order} (seed {sel.seed}): kept target {sel.kept_target} at kept share "
+             f"{sel.kept_share:g} -> {sel.need} net-new rows wanted; {len(sel.counted)} counted (net-new), "
+             f"{len(sel.ride_along)} riding along free (the registry has decided them)"
+             + ("  [kept share ASSUMED: " + sel.kept_share_source + "; pass a wave's measured share with "
+                "--kept-share]" if sel.kept_share_assumed else f"  [kept share: {sel.kept_share_source}]"))
+        echo(f"  rows at the floor by status: {sel.status_counts}; left out: {sel.left_out or 'none'}")
+        echo(f"  projection: {sel.expected_kept:.0f} kept terms, about {hours:.1f} h of review at "
+             f"{W.REVIEW_TERMS_PER_HOUR:.0f} terms an hour (plan 13's measured rate)")
+        echo("  cells (count bucket | home family; home family = " + W.HOME_FAMILY_RULE + "):")
+        for line in sel.table_lines():
+            echo(line)
+        if len(sel.counted) < sel.need:
+            echo(f"  NOTE: only {len(sel.counted)} net-new rows are left at the floor, under the {sel.need} wanted")
     for k, v in st.items():
         echo(f"  {k}: {v}")
     echo(f"selected rows the registry already holds a verdict for: {need['n_decided']} decided (M1 and M3 reuse "
@@ -334,10 +418,14 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
          f"verdict (M1, then M3 on those it passes)")
     echo("all rows, as if none had a verdict: " + est_all.format())
     echo("rows without a recorded verdict (the gate reads this one): " + est.format())
+    if transport == "live":
+        alt = estimate_downstream_usd(need["n_m1"], transport="batches", n_m3_only=need["n_m3_only"])
+        echo(f"  batched, the same rows: ${alt.total_usd:.2f} (M1 ${alt.m1_usd:.2f} + M3 ${alt.m3_usd:.2f})")
     confirm_or_abort(est.total_usd, budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
+    selection = sel.record() if sel else {"mode": "all"}
     summary = SubmitSummary(run_id=run_id, round=round_n, n_table=len(table), n_selected=len(rows),
                             estimate=asdict(est), strata=st, dry_run=dry_run, estimate_all_rows=asdict(est_all),
-                            need=need, floor=floor)
+                            need=need, floor=floor, selection=selection)
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
     if dry_run:
@@ -357,7 +445,9 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
             "estimate": asdict(est), "estimate_all_rows": asdict(est_all), "downstream_need": need,
             "strata": st, "table": str(table_path) if table_path else None, "table_sha256": table_sha256,
             "seed_bundle": rec.get("bundle"), "sampling": rec.get("sampling"),
-            "gloss_sense": sense_summary(rows)}
+            "gloss_sense": sense_summary(rows),
+            # the wave (plan 03 decision (f), 2026-10-14): what the next wave and the report measure from
+            "selection": selection}
     ctx = start_run(GENERATOR, run_id, args=args, candidates_dir=candidates_dir)
     ctx.confirmed_by = confirmed_by
     ctx.record_candidates(cands)          # candidates.jsonl first (the tracked record of the run)
@@ -366,6 +456,10 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
     rep_d = ({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}
              | {"floor": floor, "downstream_need": need, "estimate_usd": est.total_usd,
                 "estimate_all_rows_usd": est_all.total_usd})
+    if sel:
+        rep_d |= {"wave": {"order": sel.order, "n_counted": len(sel.counted), "n_ride_along": len(sel.ride_along),
+                           "kept_share": sel.kept_share, "kept_share_assumed": sel.kept_share_assumed,
+                           "expected_kept": sel.expected_kept}}
     atomic_write_text(json.dumps(rep_d, indent=2) + "\n", ctx.dir / "submit_report.json")
     if sampling_usage_path is not None and Path(sampling_usage_path).exists() and not ctx.total_usage().n_calls:
         ctx.usage.merge_from(MultiModelUsage.load_or_create(sampling_usage_path))

@@ -12,7 +12,8 @@
         [--divergence-cosine 0.6] [--budget-usd 2] [--allow-dirty] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py stats --round N [--temperature T] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py submit --round N --run-id R [--min-count 2]
-        [--budget-usd 15] [--transport live|batches] [--confirm-expensive --confirmed-by WHO] [--dry-run]
+        [--kept-target 300] [--kept-share X] [--order stratified|measured] [--wave-seed 0] [--no-ride-along]
+        [--all] [--budget-usd 15] [--transport live|batches] [--confirm-expensive --confirmed-by WHO] [--dry-run]
     uv run python data_analysis/gap_generation/base_model_generator.py report --run-id R [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_03_base_model.md``.  ``fetch`` downloads ``wiki_bio`` and the
@@ -23,7 +24,11 @@ runs the local model ($0; tokens charged at a zero rate to ``usage.json``).  ``p
 table, ``sense`` settles the gloss sense of the rows that carry two (free cosine screen, one cheap call per
 divergent row; QUESTIONS 56), ``stats`` the round's diversity figures.  ``submit`` writes a run's
 ``candidates.jsonl`` and submits it to the registry, gated on the downstream (M1 + M3) estimate, and refuses
-while any selected row's sense is unsettled.  ``report`` writes the pilot readout.
+while any selected row's sense is unsettled: by default one **review-hour wave** (plan 03 decision (f), 2026-10-14:
+net-new rows drawn evenly across the count-bucket x family cells, ``--order stratified``, or from the cell with the
+best measured new-kept rate down, ``--order measured``; the count orders nothing), with ``--all`` every eligible row
+at the floor (the pilot's submission).  ``report`` writes the readout, with the per-cell measured new-kept rates
+once a wave's M1 and M3 are on record.
 
 The generator's only paid call is ``sense``'s, hundredths of a cent a divergent row; M1 and M3 are the
 platform's CLIs, printed by ``submit``.  ``sense`` refuses while the platform's own paths have uncommitted changes
@@ -566,19 +571,34 @@ def cmd_submit(args) -> int:
     if not table_p.exists():
         print(f"missing {_rel(table_p)}: run `parse --round {args.round}` first", file=sys.stderr)
         return 2
+    from assistant_axis.gapgen.generators.base_model import evaluate as EV
+    from assistant_axis.gapgen.generators.base_model import waves as W
     record = json.loads(rec_p.read_text(encoding="utf-8")) if rec_p.exists() else None
     explicit = args.min_count is not None
     min_count = args.min_count if explicit else SB.DEFAULT_MIN_COUNT
+    table = TB.load_table(table_p)
+    wave_kw = {}
+    if not args.all:
+        # the net-new test reads the corpus, its former names and the seed queue as they are now, not the table's
+        # flags from parse time
+        corpus, queue = _corpus(args)
+        wave_kw = {"wave": True, "kept_target": args.kept_target, "kept_share": args.kept_share,
+                   "order": args.order, "wave_seed": args.wave_seed, "ride_along": not args.no_ride_along,
+                   "min_measured": args.min_measured, "corpus_stems": corpus, "queue_stems": queue,
+                   "renamed": EV.renamed_map([r["stem"] for r in table], corpus, data_dir=args.data_dir)}
     try:
-        SB.run_submit(args.run_id, table=TB.load_table(table_p), round_n=args.round, min_count=min_count,
+        SB.run_submit(args.run_id, table=table, round_n=args.round, min_count=min_count,
                       min_count_explicit=explicit, n_samples=_table_n_samples(args),
                       families=args.families.split(",") if args.families else None, budget_usd=args.budget_usd,
                       confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by,
                       transport=args.transport, dry_run=args.dry_run, registry_path=args.registry,
                       candidates_dir=args.candidates_dir, table_path=Path(_rel(table_p)),
                       table_sha256=sha256_file(table_p), sampling_record=record,
-                      sampling_usage_path=rec_p.parent / "usage.json")
+                      sampling_usage_path=rec_p.parent / "usage.json", **wave_kw)
     except SB.SenseUnresolved as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 2
+    except W.NothingMeasured as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return 2
     return 0
@@ -731,6 +751,23 @@ def build_parser() -> argparse.ArgumentParser:
                         "submit_report.json with the table's sample size, and a note is printed when the table "
                         "has another size)")
     p.add_argument("--families", default=None, help="only rows these families emitted (comma-separated)")
+    p.add_argument("--all", action="store_true",
+                   help="submit every eligible row at the floor (the pilot's submission) instead of one wave")
+    p.add_argument("--kept-target", type=int, default=300,
+                   help="the wave's size in kept terms (default 300, about two hours of review); the wave takes "
+                        "ceil(K / kept share) net-new rows")
+    p.add_argument("--kept-share", type=float, default=None,
+                   help="kept terms per submitted net-new row (default: the pooled share the earlier waves measured "
+                        "once 10 rows are decided, else the pilot's 0.34, printed as ASSUMED)")
+    p.add_argument("--order", choices=("stratified", "measured"), default=None,
+                   help="stratified: evenly across the count-bucket x family cells (the default while no wave is "
+                        "measured); measured: from the cell with the best measured new-kept rate down (the default "
+                        "once a wave has rows M1 and M3 decided; refused before)")
+    p.add_argument("--wave-seed", type=int, default=0, help="the seeded order within a cell and of the remainder")
+    p.add_argument("--min-measured", type=int, default=10,
+                   help="a cell with fewer decided rows is ranked at the pooled rate under --order measured")
+    p.add_argument("--no-ride-along", action="store_true",
+                   help="leave out the rows the registry has already decided (they ride along free by default)")
     p.add_argument("--transport", choices=("live", "batches"), default="live",
                    help="how the platform will run M1 and M3 (batches: half price in the estimate)")
     p.add_argument("--budget-usd", type=float, default=15.0,

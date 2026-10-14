@@ -163,6 +163,35 @@ def _before_floor_section(ev: Mapping) -> list[str]:
     return lines
 
 
+def _waves_section(ev: Mapping) -> list[str]:
+    """The measured new-kept rate per count-bucket x family cell (plan 03 decision (f)), once M1 and M3 have
+    decided some of the wave's net-new rows: what ``submit --order measured`` ranks the next wave's cells by."""
+    w = ev.get("waves") or {}
+    this, cum = w.get("this_wave") or {}, w.get("through_this_wave") or {}
+    if not this:
+        return []
+    lines = ["## Waves: the measured new-kept rate per cell", "",
+             f"This run is a wave (order **{w.get('order')}**).  A cell is a count bucket (2, 3, 4-9, 10+) and the "
+             "row's home family (the family that emitted it most often; a tie goes to the rarer family).  The "
+             "**new-kept rate** is the share of the wave's net-new rows that M3 kept (`new` or `grey`) among those M1 "
+             "and M3 have decided; rows still pending are counted apart, never guessed.  **Through this wave** pools "
+             f"the {len(cum.get('waves') or [])} waves on record up to this one, which is what `submit --order "
+             "measured` ranks the next wave's cells by (decision (f): count no longer orders the waves).", ""]
+    if not (this.get("pooled") or {}).get("n_decided"):
+        lines += [f"Nothing decided yet: {(this.get('pooled') or {}).get('n_submitted', 0)} net-new rows submitted, "
+                  "all pending M1 or M3.", ""]
+        return lines
+    lines += ["| cell | submitted | decided | M1 trait | kept | pending | new-kept rate | through this wave: "
+              "decided / kept / rate |", "|---|---|---|---|---|---|---|---|"]
+    cc = cum.get("cells") or {}
+    for c, v in list((this.get("cells") or {}).items()) + [("**all cells**", this.get("pooled") or {})]:
+        x = cc.get(c) if c in cc else (cum.get("pooled") or {}) if c == "**all cells**" else {}
+        lines.append(f"| {c} | {v.get('n_submitted')} | {v.get('n_decided')} | {v.get('n_m1_trait')} | "
+                     f"{v.get('n_kept')} | {v.get('n_pending')} | {_pct(v.get('rate'))} | "
+                     f"{_num(x.get('n_decided'))} / {_num(x.get('n_kept'))} / {_pct(x.get('rate'))} |")
+    return lines + [""]
+
+
 def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Path, stats_path: Optional[Path],
                   filter_dir: Path, novelty_dir: Path) -> str:
     d = Path(doc_path)
@@ -205,6 +234,7 @@ def render_report(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pat
               f"{m1.get('alignment_scores')}.",
               f"M3 scored {m3.get('n_scored', 0)}: {m3.get('decision')}; pair completions {m3.get('pair_completions')}; "
               f"relation-call opposites {m3.get('relation_opposites')}.", ""]
+    lines += _waves_section(ev)
     lines += _family_section(ev)
     lines += _before_floor_section(ev)
     c = ev.get("cost") or {}

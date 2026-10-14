@@ -14,7 +14,8 @@ Modules: :mod:`.sources` (what is fetched), :mod:`.download` (fetch, verify, man
 seed bundle), :mod:`.prompts` (six families, ``PROMPTS_VERSION``), :mod:`.sampler` and :mod:`.bench` (the
 local model), :mod:`.parse` (items out of a continuation), :mod:`.table` (one row per stem),
 :mod:`.sense` (the gloss sense, settled before M1: the generator's only paid call, QUESTIONS 56),
-:mod:`.diversity` (the frozen harness), :mod:`.submit` (estimate, guard, submission),
+:mod:`.diversity` (the frozen harness), :mod:`.submit` (estimate, guard, submission), :mod:`.waves`
+(the review-hour waves: count-bucket x family cells, plan 03 decision (f)),
 :mod:`.evaluate` and :mod:`.report` (the pilot readout).
 
 Layout: rounds are numbered; round 0 is the temperature shakedown, rounds 1 and 2 the pilot's round A and

@@ -86,7 +86,7 @@ def test_every_dry_run_writes_nothing(env, capsys):
     assert snapshot(tmp) == after_parse
     assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
     assert run(common, "stats", "--round", "1", "--step", "2") == 0
-    assert run(common, "submit", "--round", "1", "--run-id", "r1") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--all") == 0
     mid = snapshot(tmp)
     for argv in (["stats", "--round", "1", "--dry-run"], ["submit", "--round", "1", "--run-id", "r2", "--dry-run"],
                  ["report", "--run-id", "r1", "--dry-run"]):
@@ -214,7 +214,7 @@ def test_submit_records_the_floor_with_the_tables_sample_size(env, capsys):
     assert run(common, "parse", "--round", "1") == 0
     assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
     capsys.readouterr()
-    assert run(common, "submit", "--round", "1", "--run-id", "f1") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "f1", "--all") == 0
     out = capsys.readouterr().out
     assert "count floor: 2 at 8 samples" in out and "NOTE: the count floor 2 was chosen at 2,000 samples" in out
     assert "all rows, as if none had a verdict" in out and "the gate reads this one" in out
@@ -224,7 +224,7 @@ def test_submit_records_the_floor_with_the_tables_sample_size(env, capsys):
     assert a["floor"]["flag_given"] is False
     assert json.loads((rd / "submit_report.json").read_text())["floor"] == a["floor"]
     # a value typed for this table is recorded as chosen for it, with no note
-    assert run(common, "submit", "--round", "1", "--run-id", "f2", "--min-count", "3", "--dry-run") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "f2", "--min-count", "3", "--all", "--dry-run") == 0
     out = capsys.readouterr().out
     assert "count >= 3" in out and "chosen at 8 samples (--min-count, set for this run)" in out
     assert "NOTE" not in out
@@ -305,7 +305,7 @@ def test_report_reads_the_tracked_record_and_makes_it_when_missing(env, capsys):
     tmp, common = env
     assert run(common, "parse", "--round", "1") == 0
     assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
-    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1", "--all") == 0
     # a round sensed before the tracked record: only the round directory's file
     tracked = sense_usage(tmp)
     MultiModelUsage.load_or_create(tracked).write_json(tmp / "samples" / "round1" / SE.USAGE_NAME)
@@ -330,7 +330,7 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     st = json.loads((tmp / "base" / "stats_round1.json").read_text())
     assert "_provenance" in st and st["result"]["recovery_strings"]["found"] == 3
     # the fixture's eight samples emit most words once, so the run takes every count (below the default floor 2)
-    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1") == 0
+    assert run(common, "submit", "--round", "1", "--run-id", "r1", "--min-count", "1", "--all") == 0
     out = capsys.readouterr().out
     assert "traithood_filter.py --batch-id r1_base_model --run base_model/r1" in out
     rd = tmp / "cand" / "runs" / "base_model" / "r1"
@@ -369,3 +369,26 @@ def test_pipeline_end_to_end_and_report(env, capsys):
     assert json.loads((rd / "usage.json").read_text())["total_cost_usd"] == 0.0
     assert 0 < ev["cost"]["total_usd"] < 0.01
     assert ev["by_family"]["person"]["stats"]["malformed_rate"] is not None
+
+
+def test_submit_is_a_wave_by_default_and_refuses_measured_with_nothing_on_record(env, capsys):
+    """Plan 03 decision (f), 2026-10-14: `submit` sends one review-hour wave (net-new rows across the count-bucket x
+    family cells; the corpus and the seed queue read as they are now), `--all` the whole table; `--order measured`
+    is refused while no wave has M1 and M3 on record."""
+    tmp, common = env
+    assert run(common, "parse", "--round", "1") == 0
+    assert run(common, "sense", "--round", "1", "--arm", "hash") == 0
+    capsys.readouterr()
+    before = snapshot(tmp)
+    assert run(common, "submit", "--round", "1", "--run-id", "w1", "--min-count", "1", "--order", "measured",
+               "--dry-run") == 2
+    assert "no wave on record" in capsys.readouterr().err
+    assert run(common, "submit", "--round", "1", "--run-id", "w1", "--min-count", "1", "--dry-run") == 0
+    out = capsys.readouterr().out
+    assert snapshot(tmp) == before
+    assert "order: stratified (the default: no wave on record)" in out and "kept share ASSUMED" in out
+    assert run(common, "submit", "--round", "1", "--run-id", "w1", "--min-count", "1") == 0
+    sel = json.loads((tmp / "cand" / "runs" / "base_model" / "w1" / "run.json").read_text())["args"]["selection"]
+    # the fixture corpus (generous, warm, patient) and queue (unflappable) are never counted as net-new
+    assert sel["mode"] == "wave" and sel["counted"]
+    assert not {"generous", "warm", "patient", "unflappable"} & set(sel["counted"])

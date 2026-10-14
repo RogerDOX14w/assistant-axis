@@ -284,7 +284,9 @@ it never feeds eligibility.
   Chao1, collapse, noun share, per-family **yield and malformed rate**, recovery-by-string, the
   echo split with the words the name rule cost the run, the gloss-sense state).  $0.
 - `submit --run-id R [--min-count 2] [--budget-usd 15] [--confirm-expensive --confirmed-by WHO]
-  [--transport live|batches] [--dry-run]`: selects eligible table rows, **refuses while any of them
+  [--transport live|batches] [--dry-run]`, since 2026-10-14 with `[--kept-target 300] [--kept-share X]
+  [--order stratified|measured] [--wave-seed 0] [--no-ride-along] [--all]` (decision (f) in § 10: one
+  review-hour wave by default, `--all` the pilot's whole-table submission): selects eligible table rows, **refuses while any of them
   still has two candidate senses** (run `sense` first), prints counts per family and form, prints
   the **downstream estimate** (`n × $0.0072` M1 + `n × pass × $0.011` M3, batches ×0.5, pass rate
   0.80 until the pilot measures it, with the 0.95 high case printed beside it), gates with
@@ -520,6 +522,17 @@ decision 1), keeps each wave's M1/M3 cost and review time small.
   the yield is flat by count (new kept per row 37% at count 2, 27% at 3, 34% at 4-9; small numbers).
   The coordinator recommended keeping the count as the rank and letting the first wave say; Roger's reading
   above decided it the other way, and the stratified first wave measures it.
+  **Built 2026-10-14 (branch `base-model-waves`)**: [waves.py](../../assistant_axis/gapgen/generators/base_model/waves.py),
+  wired into `submit` and `report`, tests in [test_gapgen_base_model_waves.py](../../assistant_axis/tests/test_gapgen_base_model_waves.py).
+  The first wave is `uv run python data_analysis/gap_generation/base_model_generator.py submit --round 1 --run-id
+  <date>-w1 --min-count 2 --dry-run` (then without `--dry-run`): `ceil(300 / 0.34)` = 883 net-new rows (not a
+  corpus stem or former name, not queued, not decided by M1 and M3, not in an earlier wave) drawn evenly over the 24
+  cells, each row in one cell, its **home family** being the family that emitted it most often (a tie goes to the
+  family with fewer emissions over the table, then the order of `prompts.FAMILIES`); rows the registry has decided
+  ride along free; a stable seeded shuffle orders each cell.  The kept share 0.34 is the pilot's (81 kept of the 235
+  rows its own M1 batch judged), printed as ASSUMED until a wave measures one.  Later waves: `--order measured` (the
+  default once a wave has rows decided; refused before) fills from the cell with the best measured new-kept rate
+  down, a cell with under 10 decided rows ranked at the pooled rate; `report --run-id` prints the per-cell rates.
 - (a) The 20k run: the sampling is free and resumable (`sample --round 1 --n 20000 --temperature 1.0` keeps the
   pilot's 2,000 samples and adds 18,000, on the Mac GPU in Roger's terminal); the paid submission waits on the
   noun helper and the stratified wave selection, then goes in review-hour waves, each under $20.
