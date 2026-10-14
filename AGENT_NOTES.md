@@ -6503,6 +6503,35 @@ is versioned and the old rule stays reproducible.  The fixes, by gate:
   sent to Opus: the cut-off's loss is not recoverable that way, and the pair floor is the change that adds pairs
   Roger wants.
 
+**Noun normalization (2026-10-14).**  The corpus prefers an adjective (pedantic, cowardly) to a noun of
+disposition (pedant, coward), because a persona is prompted "You are <label>".  The shared helper
+[`gapgen/nouns.py`](./assistant_axis/gapgen/nouns.py) (`relabel(surface, *, lookups)` gives a `Relabel` or a
+`NoRelabel` with its reason; `HELPER_VERSION` 1, the rule tables pinned by `rules_sha256`) proposes the adjective as
+a *sibling*, never a replacement: mechanical rules only, each gated on OEWN having the result (the base model's
+suffix fold, which moved here from `base_model/parse.py` and is re-exported there under the same names; OEWN's
+derivation link from a `noun.person`, `noun.attribute`, `noun.feeling` or `noun.cognition` sense only; and
+person- and quality-noun suffix rules such as narcissist to narcissistic, fool to foolish and, by Roger's decision
+2 (c), slipper to slippery by +y and pimp to pimply by +ly), refusing a pure "of or relating to" adjective (doctor
+to doctoral) and one below Zipf 1.5.  It runs **in the platform**: `submit_candidates(..., relabel="auto")` submits
+each single-word noun as the generator emitted it and adds the adjective as a second candidate of the same
+generator and run (`source_ref` `relabel:<rule>:<noun>`), linked both ways by the registry block `relabel` (a noun
+row's `to_key`, or `to_corpus_stem` when the adjective is a corpus trait and no row is made; the adjective row's
+`from_key`, `from_surface`, `rule`, `lexfile`, `run`); derived candidates are not written to `candidates.jsonl`,
+since `gap_registry.py submit --from` re-derives them.  `"auto"` relabels nothing, with one WARNING, when OEWN is
+not installed; `relabel=None` (CLI: `gap_registry.py submit --no-relabel`) turns it off for a set that must be
+judged as given, such as M1's validation set.  The rows submitted before the helper are caught up by
+[`noun_relabel.py`](./data_analysis/gap_generation/noun_relabel.py) `backlog`, and Roger's role nouns feed a
+trait-candidate stream by `noun_relabel.py roles` (corpus role files, queue role entries, rows held on the roles
+list; no role file, queue entry or held label is ever written); both are dry runs unless `--apply`, write
+`data/candidates/runs/noun_relabel/<run-id>/` and print the M1 and M3 commands to run on the new rows.
+`noun_relabel.py check WORD` shows the helper's answer.  Every derived row shows its route on the review card, in
+the promote note and in `gap_registry.py report` / `holding` (`-> adjective`, `<- noun`): for example "suffix rule
++y from 'slipper', sense not checked" (every suffix rule says so: the derivation link's lexicographer-file gate is
+the only sense check).  The review graph joins a noun and its adjective as a pre-assembled 3-edge, `via`
+`relabel` (`GRAPH_SCHEMA` 4).  `noun_relabel.py llm-pilot` is the 100-row Haiku pilot of open decision 3 for the
+nouns the rules leave (prompt `noun_relabel` v1 in `rubric_versions.HISTORY`).  Plan:
+[`coding_plan_noun_normalization.md`](./reports/trait_gap_generation/coding_plan_noun_normalization.md).
+
 ### Clean pair validation results (April 2026)
 <!-- claude: archive -->
 
