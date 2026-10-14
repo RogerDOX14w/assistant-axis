@@ -142,17 +142,18 @@ def test_the_net_new_filter(tmp_path):
                     queue_stems={"queued_word"}, renamed={"renamed_old": "corpus_word"}, dry_run=True)
     sel = summ.selection
     assert set(sel["counted"]) == {"fresh", "pending_word", "floor_rejected"}
-    # decided rows ride along free (a corpus row too, once decided); undecided corpus or queued rows are left out
-    assert sel["ride_along"] == ["corpus_decided", "decided_word"]
-    assert sel["left_out"] == {"exists_undecided": 2, "queued_undecided": 1}
+    # decided rows ride along free; corpus and queue matches ride along too, decided or not (QUESTIONS 82, Roger
+    # 2026-10-14: "Yes"; until then the undecided ones were left out)
+    assert sel["ride_along"] == ["corpus_decided", "corpus_word", "decided_word", "queued_word", "renamed_old"]
+    assert sel["left_out"] == {}
     assert sel["status_counts"] == {"decided": 1, "exists": 3, "net_new": 3, "queued": 1}
-    assert summ.n_selected == 5
-    # the ride-along rows cost nothing: only the counted rows are charged
-    assert summ.need["n_decided"] == 2 and summ.need["n_m1"] + summ.need["n_m3_only"] == 3
-    # --no-ride-along leaves them out
+    assert summ.n_selected == 8
+    # the decided rows cost nothing; the undecided corpus and queue matches are charged like the counted rows
+    assert summ.need["n_decided"] == 2 and summ.need["n_m1"] + summ.need["n_m3_only"] == 6
+    # --no-ride-along leaves them all out
     sel2 = run_wave(tmp_path, table, registry_rows=reg, corpus_stems={"corpus_word", "corpus_decided"},
                     queue_stems={"queued_word"}, ride_along=False, dry_run=True).selection
-    assert sel2["ride_along"] == [] and sel2["left_out"]["ride_along_off"] == 2
+    assert sel2["ride_along"] == [] and sel2["left_out"]["ride_along_off"] == 4      # no renamed map here
 
 
 def test_the_selection_is_deterministic_by_seed_and_never_ordered_by_count(tmp_path):

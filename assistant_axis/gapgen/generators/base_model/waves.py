@@ -367,9 +367,10 @@ def select_wave(rows: Sequence[Mapping], *, table: Sequence[Mapping], min_count:
                 earlier: Iterable[str] = (), measured: Optional[Mapping] = None,
                 min_measured: int = MIN_MEASURED_DEFAULT, ride_along: bool = True) -> WaveSelection:
     """Choose a wave from ``rows`` (the eligible rows at the floor; ``table`` is the whole table, for the family
-    totals).  The ride-along rows are those the registry has decided (free: M1 and M3 reuse the verdicts) that no
-    earlier wave submitted; corpus or queued rows the registry has not decided are left out (they would cost M1 and
-    M3 and add no review term)."""
+    totals).  The ride-along rows are those no earlier wave submitted that the registry has decided (free: M1 and M3
+    reuse the verdicts) or that match a corpus or queue stem (QUESTIONS 82, Roger 2026-10-12, reaffirmed 2026-10-14:
+    corpus and queue matches are submitted, so the overlap with the corpus is recorded in full; an undecided one costs
+    its M1 and M3 calls, about $0.01 each batched, and M3 covers it with no review load)."""
     if order not in ORDERS:
         raise ValueError(f"--order must be one of {ORDERS}, not {order!r}")
     if not 0 < kept_share <= 1:
@@ -406,7 +407,10 @@ def select_wave(rows: Sequence[Mapping], *, table: Sequence[Mapping], min_count:
             else:
                 left_out["ride_along_off"] += 1
         elif st in ("exists", "queued"):
-            left_out[f"{st}_undecided"] += 1
+            if ride_along:
+                ride.append(r)
+            else:
+                left_out["ride_along_off"] += 1
         else:
             left_out[st] += 1
     for c in by_cell:
