@@ -255,22 +255,16 @@ rubrics, which the role-promotion item below needs too.
 
 ## Low-priority TODOs
 
-- **Gzip-aware record files**: **built 2026-10-14 on branch `gz-records`** ([records.py](../../assistant_axis/gapgen/records.py),
-  [pack_records.py](../../data_analysis/gap_generation/pack_records.py); the two kinds, logs and snapshots, are described
-  in [data/README.md](../../data/README.md)); the Fable review of the platform code is still to do.  (Roger, 2026-10-14:
-  option (a); build after the usage reset, about 2026-10-17, with a Fable review: platform code.)
-  `review_traits_all_2/responses.jsonl` reached 126 MB and GitHub refused the push
-  (limit 100 MB); it is now tracked as
-  [responses.jsonl.gz](../../data/candidates/review/review_traits_all_2/responses.jsonl.gz) beside a git-ignored plain
-  copy, which goes stale when the
-  batch is resumed.  The fix: one shared open-records helper that reads and appends `.jsonl.gz` (Python appends a
-  valid gzip member per write), used by the filter, M3, the review graph, the harness and every `--resume`, with the
-  plain-file form still read; large append-only records (responses, results, graph) then live compressed, about 6x
-  smaller.  Next largest at the time: [graph.json](../../data/candidates/review/review_traits_all_2/graph.json) 60 MB,
-  the Allport filter's [responses.jsonl](../../data/candidates/filter/2026-10-11-allport_hi_censuses/responses.jsonl)
-  59 MB.  Until it is
-  built, the coordinator gzips by hand any tracked record nearing 90 MB and checks sizes before committing.
-
+- **Gzip-aware record files**: **built and merged 2026-10-14** (Roger asked for it before the usage reset; Fable
+  reviewed it, no blockers; fixes S1-S3 applied): [records.py](../../assistant_axis/gapgen/records.py) and
+  [pack_records.py](../../data_analysis/gap_generation/pack_records.py); the two kinds, logs (read `.gz` then plain)
+  and snapshots (plain preferred, else `.gz`), are described in [data/README.md](../../data/README.md).  Why:
+  `review_traits_all_2/responses.jsonl` reached 126 MB and GitHub refused the push (limit 100 MB).  Operating rules:
+  pack only a run that has ended (`pack_records.py --dry-run`, then without); commit each `.gz` with `git rm --cached`
+  of its plain file; a resumed split filter or states pass rewrites its plain log and deletes the tracked `.gz`
+  (`git rm` it and re-pack before committing); a rebuilt review graph leaves a stale tracked `graph.json.gz` beside
+  the fresh plain file until re-packed (readers are unaffected).  The registry log and the review app's
+  `decisions.jsonl` are out of scope.
 - **Promotion and arrangements** (Roger, 2026-10-14; next week, not urgent: much manual review comes first).  How promotion forms pairs today: M3's pair detector queues a candidate that reads as the opposite of a lone corpus trait as that trait's partner, and a generator's `partner_hint` pairs two candidates promoted together ([promote.py](../../assistant_axis/gapgen/promote.py)); everything else is queued alone, and the clean-pair check runs only at seeding.  Roger: "we should deliberately attempt to find-or-generate an antonym for everything added (and give up if we can't find a good one)"; pairs formed at promotion need checking as clean.  Roger: the seeding code already has a first cut (the antonym check run at seeding, [seed_entities.py](../../data_analysis/seed_entities.py) and [generate_antonyms.py](../../data_analysis/generate_antonyms.py), whose history fed the `antonym_check` generator), so the goal is to review it and consider extending or modifying it, not to design from scratch.  To do: a brainstorm, then a plan-for-a-plan, then a coding plan.  Traits can belong to more than one arrangement (a pair and a triangle).
 
 - **Triangle candidates from the structural generator** (Roger, 2026-10-14).  Only plan 09 produces triangle candidates (a mean with its two vices), so handling is semi-manual, not a general solution: at review, a mean's vices may also be queued as a **pair with each other** ("pairing the two opposite vices makes a certain amount of sense"), alongside the triangle; M3's pair detector pairing a vice with a lone mean is corrected at review.

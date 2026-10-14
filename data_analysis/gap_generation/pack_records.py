@@ -21,6 +21,7 @@ Pack only a run that has ended.  Then commit the ``.gz`` and the deletion of the
 from __future__ import annotations
 
 import argparse
+import gzip
 import os
 import sys
 from pathlib import Path
@@ -71,7 +72,11 @@ def pack_one(p: Path, *, dry_run: bool) -> str:
         has = f"; beside {_mb(g.stat().st_size)} already packed" if g.exists() else ""
         print(f"would pack {_rel(p)}  {kind}  {_mb(size)} -> about {_mb(RF.estimate_packed_bytes(p))}{has}")
         return "would pack"
-    rep = RF.pack(p)
+    try:
+        rep = RF.pack(p)
+    except (OSError, EOFError, gzip.BadGzipFile) as e:      # a corrupt .gz, a full disk: report, go on scanning
+        print(f"refused   {_rel(p)}  {kind}: {type(e).__name__}: {e}", file=sys.stderr)
+        return "refused"
     if rep.action == "packed":
         print(f"packed    {_rel(p)}  {kind}  {_mb(rep.plain_bytes)} -> {_rel(RF.gz_path(p))} "
               f"{_mb(rep.gz_bytes_before)} -> {_mb(rep.gz_bytes_after)}")

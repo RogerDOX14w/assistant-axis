@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen import embed as EM
 from assistant_axis.gapgen import novelty_pools as NP
 from assistant_axis.gapgen.registry import Candidate, Registry, submit_candidates
@@ -501,7 +502,7 @@ class TestPilotPools:
         again, _ = NP.m1_validation_pool(p, n=150, seed=0)
         assert len(rows) == 150 and rows == again and counts["passed_as_trait"] == 309
         assert len({r["source_ref"] for r in rows}) == 150
-        res = {json.loads(x)["key"]: json.loads(x) for x in p.read_text().splitlines() if x.strip()}
+        res = {json.loads(x)["key"]: json.loads(x) for x in RF.read_text(p).splitlines() if x.strip()}
         for r in rows:
             src = res[r["source_ref"].split(":", 1)[1]]
             assert src["meta"]["stratum"] == "oewn_random" and src["filter"]["verdict"] == "trait"

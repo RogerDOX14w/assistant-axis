@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen.testing import concepts as C
 from assistant_axis.gapgen.testing import repetition as RP
 
@@ -140,7 +141,7 @@ class TestAgreement:
         assert big["keys"] == ["a#1", "b#1", "d#1"] and big["decided"] in ("accepted", "merged_into")
 
 
-@pytest.mark.skipif(not GRAPH.exists(), reason="the recorded review graph is absent")
+@pytest.mark.skipif(not RF.exists(GRAPH), reason="the recorded review graph is absent")
 class TestRecorded:
     @pytest.fixture(scope="class")
     def graph(self):

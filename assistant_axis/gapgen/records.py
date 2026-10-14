@@ -247,6 +247,11 @@ def pack(path: Path | str, kind: Optional[str] = None) -> PackReport:
                           "plain copy kept beside the .gz): the log reads it twice; check the plain file is "
                           "complete, delete the .gz, then pack")
             return rep
+        if head and head.endswith(tail):
+            rep.reason = ("the .gz already ends with the plain file's content (a pack interrupted between its rename "
+                          "and the plain file's deletion): the log reads it twice; check, delete the plain file, "
+                          "then pack")
+            return rep
         expected = head + tail
         new_gz = old_gz + _gzip_member(tail)
         tmp = g.with_name(f".{g.name}.packing.{os.getpid()}")

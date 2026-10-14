@@ -195,3 +195,25 @@ def test_a_gz_name_that_is_not_a_record_stays_itself(tmp_path):
     assert R.plain_path(p) == p and R.kind_of(p) is None
     p.write_bytes(gzip.compress(b"x\n"))
     assert R.exists(p) and R.read_bytes(p) == p.read_bytes()       # read as the bytes on disk, as before
+
+
+def test_pack_refuses_an_interrupted_second_pack(tmp_path):
+    """Review S1: a pack killed between its rename and the plain file's deletion leaves .gz = head + tail and plain =
+    tail; packing again must refuse, not append the tail a second time."""
+    p = tmp_path / "responses.jsonl"
+    a, b = _lines({"n": 1}), _lines({"n": 2})
+    R.gz_path(p).write_bytes(gzip.compress(a.encode()) + gzip.compress(b.encode()))
+    p.write_text(b, encoding="utf-8")
+    rep = R.pack(p)
+    assert rep.action == "refused" and "already ends with" in rep.reason
+    assert p.exists() and gzip.decompress(R.gz_path(p).read_bytes()) == (a + b).encode()
+
+
+def test_pack_records_cli_reports_a_corrupt_gz(tmp_path, capsys):
+    """Review S2: a truncated .gz is refused with its error, and the scan goes on."""
+    from data_analysis.gap_generation import pack_records as PR
+    p = tmp_path / "responses.jsonl"
+    p.write_text(_lines({"n": 2}), encoding="utf-8")
+    R.gz_path(p).write_bytes(gzip.compress(_lines({"n": 1}).encode())[:-6])
+    assert PR.pack_one(p, dry_run=False) == "refused"
+    assert "EOFError" in capsys.readouterr().err and p.exists()
