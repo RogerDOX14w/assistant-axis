@@ -400,7 +400,7 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], round_n: int, min_count
         hours = sel.expected_kept / W.REVIEW_TERMS_PER_HOUR
         echo(f"wave, order {sel.order} (seed {sel.seed}): kept target {sel.kept_target} at kept share "
              f"{sel.kept_share:g} -> {sel.need} net-new rows wanted; {len(sel.counted)} counted (net-new), "
-             f"{len(sel.ride_along)} riding along free (the registry has decided them)"
+             f"{len(sel.ride_along)} riding along (decided by the registry, free; or corpus and queue matches, charged)"
              + ("  [kept share ASSUMED: " + sel.kept_share_source + "; pass a wave's measured share with "
                 "--kept-share]" if sel.kept_share_assumed else f"  [kept share: {sel.kept_share_source}]"))
         echo(f"  rows at the floor by status: {sel.status_counts}; left out: {sel.left_out or 'none'}")
