@@ -1,0 +1,14 @@
+{
+  "file": "mthesaur.txt",
+  "path": "data/external/moby/mthesaur.txt",
+  "url": "https://www.gutenberg.org/files/3202/files/mthesaur.txt",
+  "sha256": "7c9742b1ed94435a893c0719b426725edb8a5242f8c526a75461bd6cee2dfd32",
+  "size": 24853275,
+  "hash_source": "received bytes (Project Gutenberg publishes no hash for this file)",
+  "fetched_at": "2026-10-14T01:14:25+00:00",
+  "tool": "setup_external.py --moby",
+  "licence": "public domain (Project Gutenberg #3202, Moby Thesaurus List by Grady Ward)",
+  "approval": "Roger: the Moby download approved in plan 11 (11_novelty_ensemble.md § 9.1; coding_plan_11 § 1)",
+  "n_heads": 30195,
+  "git_sha": "f0388c44+dirty"
+}

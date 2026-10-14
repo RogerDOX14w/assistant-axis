@@ -311,11 +311,285 @@
      ],
      "false_flag": 0.0038
     }
+   },
+   "moby": {
+    "antonym": {
+     "n": 286,
+     "both_found": 168,
+     "abstain": 118,
+     "linked": 4,
+     "by_link": {
+      "synonym": 4,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 4,
+     "examples": [
+      {
+       "a": "eloquent",
+       "b": "plain_spoken",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "feminine",
+       "b": "masculine",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "idealistic",
+       "b": "pragmatic",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "strategic",
+       "b": "tactical",
+       "link": "synonym",
+       "antonym": null
+      }
+     ],
+     "recall": 0.0
+    },
+    "deliberate_duplicate": {
+     "n": 3,
+     "both_found": 0,
+     "abstain": 3,
+     "linked": 0,
+     "by_link": {
+      "synonym": 0,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 0,
+     "examples": []
+    },
+    "duplicate": {
+     "n": 79,
+     "both_found": 48,
+     "abstain": 31,
+     "linked": 33,
+     "by_link": {
+      "synonym": 33,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 33,
+     "examples": [
+      {
+       "a": "apathetic",
+       "b": "gloss:perfunctory",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "bitter",
+       "b": "gloss:resentful",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "blunt",
+       "b": "queue:undiplomatic",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "calm",
+       "b": "gloss:sedate",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "cerebral",
+       "b": "gloss:rational",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "clear",
+       "b": "gloss:straightforward",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "contemporary",
+       "b": "gloss:modern",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "deferential",
+       "b": "queue:meek",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "detached",
+       "b": "queue:aloof",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "discontented",
+       "b": "queue:disgruntled",
+       "link": "synonym",
+       "antonym": null
+      }
+     ],
+     "recall": 0.6875
+    },
+    "near_distinct": {
+     "n": 34,
+     "both_found": 10,
+     "abstain": 24,
+     "linked": 2,
+     "by_link": {
+      "synonym": 2,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 2,
+     "examples": [
+      {
+       "a": "humanitarian",
+       "b": "philanthropic",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "insular",
+       "b": "parochial",
+       "link": "synonym",
+       "antonym": null
+      }
+     ],
+     "false_flag": 0.2
+    },
+    "polysemy_reject": {
+     "n": 5,
+     "both_found": 5,
+     "abstain": 0,
+     "linked": 0,
+     "by_link": {
+      "synonym": 0,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 0,
+     "examples": []
+    },
+    "unrelated": {
+     "n": 2000,
+     "both_found": 899,
+     "abstain": 1101,
+     "linked": 21,
+     "by_link": {
+      "synonym": 21,
+      "similar": 0,
+      "also": 0
+     },
+     "antonym_linked": 0,
+     "by_antonym": {
+      "antonym": 0,
+      "negation_affix": 0
+     },
+     "any_linked": 21,
+     "examples": [
+      {
+       "a": "dry",
+       "b": "sarcastic",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "accessible",
+       "b": "extroverted",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "flat",
+       "b": "straight",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "aristocratic",
+       "b": "elitist",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "calm",
+       "b": "unflappable",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "earnest",
+       "b": "observant",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "ambitious",
+       "b": "bold",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "expressive",
+       "b": "rhetorical",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "ambitious",
+       "b": "grandiose",
+       "link": "synonym",
+       "antonym": null
+      },
+      {
+       "a": "eccentric",
+       "b": "uncertain",
+       "link": "synonym",
+       "antonym": null
+      }
+     ],
+     "false_flag": 0.0234
+    }
    }
   },
   "n_pairs": 2407,
   "labelled_file": {
-   "path": "/private/tmp/claude-501/wt_plan11/data/candidates/calibration/labelled_pairs.json",
+   "path": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/calibration/labelled_pairs.json",
    "sha256": "3344d9e51161249078904a0aa2ab7965746eeae9c52d4cbe940f8a872ab9ca00",
    "schema_version": 1,
    "built_at": "2026-10-02T21:12:08+00:00"
@@ -325,29 +599,34 @@
     "id": "oewn:2024",
     "wn_version": "1.1.1",
     "lexicon_version": "2024"
+   },
+   "moby": {
+    "sha256": "7c9742b1ed94435a893c0719b426725edb8a5242f8c526a75461bd6cee2dfd32",
+    "source": "Gutenberg #3202",
+    "n_heads": 30178
    }
   }
  },
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py labelled --lexicons oewn",
-   "git_sha": "cf772ff3+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py labelled",
+   "git_sha": "f0388c44+dirty",
    "author": "Roger Dearnaley",
    "title": "lexical links on the labelled pairs (plan 11, gate 1)"
   },
-  "produced_at": "2026-10-13T22:59:36+00:00",
+  "produced_at": "2026-10-14T01:14:35+00:00",
   "inputs": [
    {
     "dep_key": "labelled_pairs",
     "path": "data/candidates/calibration/labelled_pairs.json",
-    "fingerprint": "v1:2026-10-13T22:15:42+00:00@699547",
+    "fingerprint": "v1:2026-10-02T21:44:32+00:00@699547",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T22:15:42+00:00",
+    "last_modified_at": "2026-10-02T21:44:32+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "74edf6bc3d1411884e086a3e2bc89ff6250be45055e61ee41c1098acea7222db"
+  "inputs_sha256": "357f8a9fefc27be62631e7651924961a1e0aa1b65e79b64e5d3d1e1ec6340a3a"
  }
 }

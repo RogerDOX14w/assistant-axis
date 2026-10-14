@@ -1,0 +1,83 @@
+{
+  "generator": "structural",
+  "run_id": "2026-10-14-pilot",
+  "git_sha": "f0388c44+dirty",
+  "args": {
+    "step": "modernise",
+    "schemes": [
+      "aristotle",
+      "murray",
+      "sins_virtues",
+      "theophrastus",
+      "via"
+    ],
+    "n_rows": 205,
+    "per_call": 20,
+    "model": "claude-haiku-5-5",
+    "budget_usd": 0.5,
+    "estimate_usd": 0.015,
+    "rubric": {
+      "name": "structural_modernise",
+      "version": 1,
+      "sha256": "42f34dbdf8843afe39de9a6b2bb3f71d2d880a320a106eca57d87f425c5ae320",
+      "file": "reports/trait_gap_generation/rubrics/structural_modernise.md"
+    },
+    "allow_dirty": true,
+    "skipped_schemes": []
+  },
+  "n_emitted": 0,
+  "started_at": "2026-10-14T01:08:48+00:00",
+  "finished_at": "2026-10-14T01:10:06+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0.0355,
+  "sessions": [
+    {
+      "session_id": "cc4a06cc9dab",
+      "started_at": "2026-10-14T01:08:48+00:00",
+      "finished_at": "2026-10-14T01:10:06+00:00",
+      "git_sha": "f0388c44+dirty",
+      "args": {
+        "step": "modernise",
+        "schemes": [
+          "aristotle",
+          "murray",
+          "sins_virtues",
+          "theophrastus",
+          "via"
+        ],
+        "n_rows": 205,
+        "per_call": 20,
+        "model": "claude-haiku-5-5",
+        "budget_usd": 0.5,
+        "estimate_usd": 0.015,
+        "rubric": {
+          "name": "structural_modernise",
+          "version": 1,
+          "sha256": "42f34dbdf8843afe39de9a6b2bb3f71d2d880a320a106eca57d87f425c5ae320",
+          "file": "reports/trait_gap_generation/rubrics/structural_modernise.md"
+        },
+        "allow_dirty": true,
+        "skipped_schemes": []
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.0355,
+      "n_calls": 11,
+      "usage": {
+        "per_model": {
+          "claude-haiku-5-5": {
+            "model": "claude-haiku-5-5",
+            "prompt_tokens": 28687,
+            "completion_tokens": 65176,
+            "cost_usd": 0.0355,
+            "n_calls": 11
+          }
+        },
+        "total_cost_usd": 0.0355,
+        "total_prompt_tokens": 28687,
+        "total_completion_tokens": 65176,
+        "n_calls": 11
+      }
+    }
+  ]
+}

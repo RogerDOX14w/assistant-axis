@@ -902,16 +902,340 @@
         "moral_relativist": 1.0,
         "punishment_fearing": 0.5
       }
-    }
+    },
+    "runs": [
+      "2026-10-14-nullrate"
+    ],
+    "n_traits": 20,
+    "n_principal_only": 0,
+    "n_rows": 499,
+    "pair_recovery": {
+      "n_pairs": 297,
+      "n_directions": 594,
+      "n_answered": 16,
+      "n_null_opposite": 0,
+      "n_opposites": 39,
+      "recall_stem": 0.75,
+      "expected": 0.8,
+      "by_source_position": {
+        "mean (any triangle corner)": {
+          "n": 6,
+          "recall_stem": 0.6667
+        },
+        "other (the opposite)": {
+          "n": 10,
+          "recall_stem": 0.8
+        }
+      },
+      "pairs_both_directions_stem": 2,
+      "pairs_either_direction_stem": 10,
+      "recall_cos_0.7": 0.8125,
+      "recall_cos_0.8": 0.75,
+      "recall_cos_0.9": 0.75,
+      "cosine_median": 0.8357,
+      "misses": [
+        {
+          "from": "calculating",
+          "hidden": "uncalculating",
+          "opposites": [
+            "guileless"
+          ],
+          "cosine": 0.4726
+        },
+        {
+          "from": "principled",
+          "hidden": "expedient",
+          "opposites": [
+            "unprincipled"
+          ],
+          "cosine": 0.7301
+        },
+        {
+          "from": "hawkish",
+          "hidden": "pacifist",
+          "opposites": [
+            "dovish"
+          ],
+          "cosine": 0.5015
+        },
+        {
+          "from": "settled",
+          "hidden": "nomadic",
+          "opposites": [
+            "restless",
+            "footloose"
+          ],
+          "cosine": 0.6901
+        }
+      ]
+    },
+    "structure_recovery": {
+      "triangles": {
+        "n": 8,
+        "corners": 24,
+        "corners_recovered": 0,
+        "triangles_with_a_corner": 0,
+        "detail": []
+      },
+      "sequence": {
+        "n": 13,
+        "recovered": 0,
+        "which": [],
+        "first_member": "selfish"
+      },
+      "sequences": [
+        {
+          "members": [
+            "selfish",
+            "clannish",
+            "cliquish",
+            "parochial",
+            "insular",
+            "regionalist",
+            "sectarian",
+            "nationalist",
+            "ethnocentric",
+            "civilizationist",
+            "humanitarian",
+            "kind_to_animals",
+            "ecocentric"
+          ],
+          "n": 13,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "altruistic",
+            "cooperative",
+            "selfish",
+            "competitive"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "boomer",
+            "gen_x",
+            "millennial",
+            "gen_z"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "micromanaging",
+            "hands_on",
+            "hands_off",
+            "absentee"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "young",
+            "middle_aged",
+            "elderly"
+          ],
+          "n": 3,
+          "recovered": 0,
+          "which": []
+        }
+      ]
+    },
+    "queue_holdout": {
+      "n": 96,
+      "recall_stem": 0.0,
+      "recovered": [],
+      "by_operator": {
+        "opposite": 0.0,
+        "excess": 0.0,
+        "deficiency": 0.0,
+        "retarget": 0.0,
+        "remode": 0.0
+      },
+      "by_operator_n": {
+        "opposite": 0,
+        "excess": 0,
+        "deficiency": 0,
+        "retarget": 0,
+        "remode": 0
+      },
+      "rejected": {
+        "n": 139,
+        "regenerated": 0,
+        "stems": []
+      },
+      "accepted": {
+        "n": 41,
+        "recall_stem": 0.0,
+        "stems": []
+      },
+      "candidates": {
+        "n": 38,
+        "recall_stem": 0.0,
+        "stems": []
+      }
+    },
+    "null_rates": {
+      "n_traits": 60,
+      "opposite": 0.9833,
+      "excess": 0.5333,
+      "deficiency": 0.65,
+      "retarget_by_target": {
+        "self": 0.1667,
+        "intimates": 0.1167,
+        "strangers": 0.0667,
+        "authority": 0.2,
+        "animals": 0.0,
+        "ideas": 0.1667
+      },
+      "retarget": 0.1194,
+      "remode_by_mode": {
+        "attitude": 0.1667,
+        "habit": 0.05,
+        "speech": 0.2
+      },
+      "remode": 0.1389,
+      "principal": {
+        "n_traits": 6,
+        "by_target": {
+          "the_user": 0.5,
+          "the_operator": 0.1667,
+          "the_developer": 0.0
+        },
+        "share": 0.2222,
+        "n_items": 4
+      },
+      "band": {
+        "low": 0.05,
+        "high": 0.4,
+        "retarget_in_band": true,
+        "remode_in_band": true,
+        "pass": true
+      },
+      "positions": {
+        "deficiency": 12,
+        "excess": 13,
+        "mean": 22,
+        "not_scalar": 13
+      }
+    },
+    "parse_rate": {
+      "n_units": 60,
+      "n_ok": 60,
+      "rate": 1.0,
+      "n_records": 60,
+      "n_records_ok": 60,
+      "record_rate": 1.0,
+      "min_rate": 0.99
+    },
+    "n_samples": 3,
+    "union": "union of 3 samples",
+    "void_runs_skipped": [],
+    "support": {
+      "n_traits": 20,
+      "samples_per_trait": {
+        "3": 20
+      },
+      "by_support": {
+        "1": 60,
+        "2": 26,
+        "3": 30
+      },
+      "by_operator": {
+        "deficiency": {
+          "1": 8,
+          "2": 5,
+          "3": 7
+        },
+        "excess": {
+          "1": 8,
+          "2": 3,
+          "3": 6
+        },
+        "opposite": {
+          "1": 9,
+          "2": 7,
+          "3": 12
+        },
+        "remode": {
+          "1": 9,
+          "2": 5,
+          "3": 2
+        },
+        "retarget": {
+          "1": 26,
+          "2": 6,
+          "3": 3
+        }
+      }
+    },
+    "sample_agreement": {
+      "n_traits": 60,
+      "n_both_empty": 0,
+      "jaccard_median": 0.4143,
+      "below_0.5": 32,
+      "distribution": {
+        "0.0-0.1": 10,
+        "0.1-0.2": 1,
+        "0.2-0.3": 11,
+        "0.3-0.4": 2,
+        "0.4-0.5": 8,
+        "0.5-0.6": 5,
+        "0.6-0.7": 6,
+        "0.7-0.8": 4,
+        "0.8-0.9": 1,
+        "0.9-1.0": 12
+      },
+      "by_operator": {
+        "deficiency": {
+          "agreement": 0.619,
+          "n_slots": 42
+        },
+        "excess": {
+          "agreement": 0.6176,
+          "n_slots": 34
+        },
+        "opposite": {
+          "agreement": 0.7167,
+          "n_slots": 60
+        },
+        "remode": {
+          "agreement": 0.3143,
+          "n_slots": 35
+        },
+        "retarget": {
+          "agreement": 0.2273,
+          "n_slots": 66
+        }
+      },
+      "reported_not_gated": true,
+      "n_sample_pairs": 60,
+      "n_traits_with_two": 20
+    },
+    "principal": {
+      "n_traits": 2,
+      "n_items": 3,
+      "n_table_rows": 2
+    },
+    "embedder": "openai (text-embedding-3-large)",
+    "folded": true
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/structural_generator.py stability --run-id 2026-10-13-stab-sonnet-a --against 2026-10-13-stab-sonnet-b --model claude-sonnet-5-5 --budget-usd 2",
-      "git_sha": "0568c5c5+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/structural_generator.py postprocess --run-id 2026-10-14-nullrate --budget-usd 0.1 --allow-dirty",
+      "git_sha": "f0388c44+dirty",
       "author": "Roger Dearnaley",
-      "title": "structural evaluation"
+      "title": "structural evaluation (postprocess)"
     },
-    "produced_at": "2026-10-13T20:53:44+00:00"
+    "produced_at": "2026-10-14T01:10:29+00:00"
   }
 }

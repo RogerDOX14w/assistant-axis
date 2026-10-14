@@ -5,9 +5,14 @@
     "id": "oewn:2024",
     "wn_version": "1.1.1",
     "lexicon_version": "2024"
+   },
+   "moby": {
+    "sha256": "7c9742b1ed94435a893c0719b426725edb8a5242f8c526a75461bd6cee2dfd32",
+    "source": "Gutenberg #3202",
+    "n_heads": 30178
    }
   },
-  "lookup_sha256": "9a838401a52377c900d0deb1d0311742113e73dda3b525bc04c87734ac7fb62e",
+  "lookup_sha256": "92408c7dfd3230f915aeb5214753b54fb4cb6a589ade53b266c195bf8079529f",
   "coverage": {
    "oewn": {
     "corpus": {
@@ -22,88 +27,107 @@
      "found": 31,
      "of": 38
     }
+   },
+   "moby": {
+    "corpus": {
+     "found": 539,
+     "of": 932
+    },
+    "queue": {
+     "found": 70,
+     "of": 122
+    },
+    "queue_with_text": {
+     "found": 27,
+     "of": 38
+    }
    }
   },
   "kept_rows": {
-   "n": 4091,
+   "n": 4283,
    "by_pass": {
     "physical": 126,
     "states": 122,
-    "trait": 3843
+    "trait": 4035
    },
-   "single_word": 2981,
-   "phrases": 1110,
+   "single_word": 2984,
+   "phrases": 1299,
    "found_in_lexicon": {
-    "oewn": 2618
+    "oewn": 2619,
+    "moby": 1981
    },
    "by_cut_off": {
-    "3": 2971,
-    "4": 1120
+    "3": 3067,
+    "4": 1216
    },
    "by_rules": {
     "m3_rules_2": 76,
-    "m3_rules_3": 4015
+    "m3_rules_3": 4207
    }
   },
   "pairs": {
-   "n_rows_with_links": 596,
-   "n_rows_with_links_single_word": 555,
-   "n_pairs": 944,
-   "n_judgeable": 925,
-   "n_listed_by_m3": 566,
+   "n_rows_with_links": 1797,
+   "n_rows_with_links_single_word": 1678,
+   "n_pairs": 11570,
+   "n_judgeable": 2209,
+   "n_listed_by_m3": 2923,
    "not_judged": {
-    "name_only": 19
+    "moby_below_floor": 9105,
+    "name_only": 235,
+    "no_description": 21
    },
    "by_link": {
     "also": 85,
-    "similar": 567,
-    "synonym": 292
+    "similar": 568,
+    "synonym": 10917
    },
    "by_lexicon": {
-    "oewn": 944
+    "moby": 10625,
+    "oewn": 945
    },
    "by_kind": {
-    "corpus": 851,
-    "queue": 93
+    "corpus": 10718,
+    "queue": 852
    },
    "by_cut_off_band": {
-    "c3 alignment 0-1": 581,
-    "c3 alignment 2": 105,
-    "c4 alignment 3": 258
+    "c3 alignment 0-1": 7171,
+    "c3 alignment 2": 1422,
+    "c4 alignment 2-3": 21,
+    "c4 alignment 3": 2956
    },
    "by_pass": {
-    "physical": 24,
-    "states": 24,
-    "trait": 896
+    "physical": 356,
+    "states": 268,
+    "trait": 10946
    },
    "rows_by_cut_off": {
-    "3": 435,
-    "4": 161
+    "3": 1381,
+    "4": 416
    },
    "rows_by_alignment": {
-    "0": 230,
-    "1": 139,
-    "2": 66,
-    "3": 161
+    "0": 783,
+    "1": 395,
+    "2": 205,
+    "3": 414
    },
-   "to_standards_derived_traits": 125,
-   "via_renamed_from": 48,
-   "name_only_links": 19,
+   "to_standards_derived_traits": 1499,
+   "via_renamed_from": 609,
+   "name_only_links": 235,
    "moby": {
-    "n": 0,
-    "moby_only": 0,
-    "moby_only_below_floor": 0,
+    "n": 10625,
+    "moby_only": 10625,
+    "moby_only_below_floor": 9105,
     "moby_only_no_cosine": 0
    },
    "cosine": {
-    "n": 925,
-    "min": -0.11,
-    "p10": -0.0005,
-    "median": 0.1319,
-    "p90": 0.2435,
-    "max": 0.696
+    "n": 11314,
+    "min": -0.1653,
+    "p10": -0.0234,
+    "median": 0.0926,
+    "p90": 0.2124,
+    "max": 0.6972
    },
-   "no_cosine": 19
+   "no_cosine": 256
   },
   "antonym_evidence": {
    "rows": 94,
@@ -186,24 +210,35 @@
   },
   "free_labels": {
    "roger_merges_into_corpus": 78,
-   "hit_rows_merged_into_corpus": 23,
-   "hit_rows_merged_into_their_lexical_target": 2,
+   "hit_rows_merged_into_corpus": 62,
+   "hit_rows_merged_into_their_lexical_target": 4,
    "lexical_target_merges": {
     "annoying#1": "disagreeable",
+    "delightful#1": "agreeable",
+    "nice#1": "agreeable",
     "pleasant#1": "agreeable"
    },
    "hit_rows_reviewed": {
-    "accepted": 5,
-    "merged_into": 53,
-    "unreviewed": 538
+    "accepted": 25,
+    "merged_into": 112,
+    "unreviewed": 1660
    }
   },
   "audit_retrieval_misses": {
    "delightful#1": {
     "trait": "agreeable",
     "in_sweep": true,
-    "reached": false,
-    "links": []
+    "reached": true,
+    "links": [
+     "adorable (moby synonym)",
+     "agreeable (moby synonym)",
+     "entertaining (moby synonym)",
+     "fair (moby synonym)",
+     "good (moby synonym)",
+     "grateful (moby synonym)",
+     "joyful (moby synonym)",
+     "unflinching (moby synonym)"
+    ]
    },
    "pleasant#1": {
     "trait": "agreeable",
@@ -211,18 +246,69 @@
     "reached": true,
     "links": [
      "grateful (oewn similar)",
-     "agreeable (oewn also)"
+     "agreeable (oewn also)",
+     "benevolent (moby synonym)",
+     "clear (moby synonym)",
+     "entertaining (moby synonym)",
+     "expedient (moby synonym)",
+     "fair (moby synonym)",
+     "famous (moby synonym)",
+     "good (moby synonym)",
+     "gregarious (moby synonym)",
+     "healthy (moby synonym)",
+     "helpful (moby synonym)",
+     "joyful (moby synonym)",
+     "open_big_five (moby synonym)",
+     "open_hexaco (moby synonym)",
+     "optimistic (moby synonym)",
+     "polite (moby synonym)",
+     "social_holland (moby synonym)",
+     "unflinching (moby synonym)",
+     "unselfconscious (moby synonym)"
     ]
    },
    "nice#1": {
     "trait": "agreeable",
     "in_sweep": true,
-    "reached": false,
+    "reached": true,
     "links": [
      "squeamish (oewn synonym)",
      "fastidious (oewn similar)",
      "good (oewn similar)",
-     "precise (oewn similar)"
+     "precise (oewn similar)",
+     "accurate (moby synonym)",
+     "agreeable (moby synonym)",
+     "agreeable_big_five (moby synonym)",
+     "benevolent (moby synonym)",
+     "benign (moby synonym)",
+     "cheerful (moby synonym)",
+     "christian (moby synonym)",
+     "conscientious (moby synonym)",
+     "conscientious_big_five (moby synonym)",
+     "conscientious_hexaco (moby synonym)",
+     "conventional (moby synonym)",
+     "conventional_hexaco (moby synonym)",
+     "conventional_holland (moby synonym)",
+     "conventional_kohlberg (moby synonym)",
+     "critical (moby synonym)",
+     "earnest (moby synonym)",
+     "expedient (moby synonym)",
+     "fair (moby synonym)",
+     "famous (moby synonym)",
+     "grateful (moby synonym)",
+     "healthy (moby synonym)",
+     "helpful (moby synonym)",
+     "intense (moby synonym)",
+     "meticulous (moby synonym)",
+     "modest (moby synonym)",
+     "observant (moby synonym)",
+     "religious (moby synonym)",
+     "rigid (moby synonym)",
+     "slight (moby synonym)",
+     "strict (moby synonym)",
+     "tactful (moby synonym)",
+     "unselfconscious (moby synonym)",
+     "wise (moby synonym)"
     ]
    },
    "annoying#1": {
@@ -230,21 +316,35 @@
     "in_sweep": true,
     "reached": true,
     "links": [
-     "disagreeable (oewn similar)"
+     "disagreeable (oewn similar)",
+     "bitter (moby synonym)",
+     "mischievous (moby synonym)",
+     "provocative (moby synonym)"
     ]
    },
    "unsteadfast#1": {
     "trait": "submissive",
     "in_sweep": true,
     "reached": false,
-    "links": []
+    "links": [
+     "eccentric (moby synonym)",
+     "impulsive (moby synonym)",
+     "indecisive (moby synonym)",
+     "insecure (moby synonym)",
+     "irresponsible (moby synonym)",
+     "restless (moby synonym)",
+     "uncertain (moby synonym)",
+     "unreliable (moby synonym)",
+     "untrustworthy (moby synonym)",
+     "whimsical (moby synonym)"
+    ]
    }
   },
   "estimate": {
-   "usd": 2.9175,
+   "usd": 6.965,
    "lines": [
-    "overlap, Sonnet on every lexical-only pair: 925 x (219, 78) tokens at claude-sonnet-5-5 rates = $1.127",
-    "overlap, Opus on 62% of them (ASSUMED until measured): 574 x (220, 112) tokens at claude-opus-5-5 rates = $1.791"
+    "overlap, Sonnet on every lexical-only pair: 2209 x (219, 78) tokens at claude-sonnet-5-5 rates = $2.691",
+    "overlap, Opus on 62% of them (ASSUMED until measured): 1370 x (220, 112) tokens at claude-opus-5-5 rates = $4.274"
    ],
    "opus_share_assumed": [
     0.4,
@@ -253,7 +353,7 @@
   },
   "cap": {
    "n_cut": 0,
-   "n_kept_moby": 0,
+   "n_kept_moby": 1283,
    "cut_cosine": null
   }
  },
@@ -261,10 +361,10 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py dry",
-   "git_sha": "cf772ff3+dirty",
+   "git_sha": "f0388c44+dirty",
    "author": "Roger Dearnaley",
    "title": "lexical recall: the dry readout (plan 11, gate 1)"
   },
-  "produced_at": "2026-10-13T23:01:10+00:00"
+  "produced_at": "2026-10-14T01:16:16+00:00"
  }
 }
