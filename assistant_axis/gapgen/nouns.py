@@ -684,7 +684,9 @@ adjective for being that kind of person.
 Respond with one JSON object and nothing else, reason first:
 {"reason": "<one short sentence>", "adjective": "<word>"|null, "confidence": <0-1>}"""
 PILOT_MODEL = "claude-haiku-5-5"
-PILOT_MAX_TOKENS = 120
+#: 120 starved Haiku 5.5's adaptive thinking (2026-10-14: 87 of 100 replies hit the limit with no text); it is a
+#: thinking model, so it takes the platform's ``split_runner.MAX_TOKENS_THINKING`` like M1's calls.
+PILOT_MAX_TOKENS = 2000
 
 
 def render_pilot_user(label: str, gloss: Optional[str]) -> str:

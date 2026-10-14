@@ -62,7 +62,7 @@ GENERATOR = "noun_relabel"
 PILOT_SHARES = {"person": 60, "role": 40}
 PILOT_ADOPT_THRESHOLD = 20
 #: The plan's per-call token estimate for the pilot (section 7: about 300 input and 60 output tokens).
-PILOT_IN_TOKENS, PILOT_OUT_TOKENS = 300, 60
+PILOT_IN_TOKENS, PILOT_OUT_TOKENS = 450, 600   # measured 2026-10-14: about 440 in; thinking output well over 120
 
 
 def _lookups() -> N.NounLookups:
