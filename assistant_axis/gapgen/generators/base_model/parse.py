@@ -20,7 +20,9 @@ comma, is prose and is still dropped whole.  The leading-word, list-ending and
 split rules were added after gate audit 3 (``reports/code_review_2026-10-12/gate_audits/base_model_table.md``
 section 8, proposal 4; Roger accepted it on 2026-10-12).
 
-:func:`normalize_form` applies **mechanical** rules only (Roger, plan 03 section 9.4), each gated on OEWN
+:func:`normalize_form` (in :mod:`assistant_axis.gapgen.nouns` since 2026-10-14, the shared noun relabel helper's
+module; re-exported here under the same names, so ``from ...base_model.parse import normalize_form, Lexicon`` keeps
+working) applies **mechanical** rules only (Roger, plan 03 section 9.4), each gated on OEWN
 having the result, so a fold never invents a word:
 
 * a single noun of disposition becomes its adjective: ``-ness`` / ``-ity`` (``stubbornness`` -> ``stubborn``,
@@ -48,6 +50,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 from assistant_axis.gapgen.normalize import STOPWORDS
+# The mechanical rules moved to the shared relabel helper's module (noun normalization plan, 2026-10-14); every name
+# stays importable from here (plan 09's ``postprocess.stem_of``, the base model's table and its tests import them).
+from assistant_axis.gapgen.nouns import (  # noqa: F401
+    ADVERB_EXCEPTIONS, NOUN_SUFFIXES, SUFFIX_EXCEPTIONS, UK_US_EXCEPTIONS, _UK_US, Lexicon, _adverb_candidates,
+    _in_lexicon, _noun_suffix_candidates, _suffix_candidates, normalize_form, normalize_form_kind, us_spelling,
+)
 
 MAX_WORDS = 4
 DETERMINERS = frozenset({"a", "an", "the", "his", "her", "their", "its", "my", "your", "our", "some", "this",
@@ -75,15 +83,6 @@ CLAUSE_WORDS = frozenset({"is", "are", "was", "were", "has", "have", "had", "can
 #: A leading conjunction left by an Oxford comma (", and fiercely loyal").
 CONJUNCTIONS = frozenset({"and", "or", "but", "nor"})
 COMMA_FAMILIES = ("list", "person", "occupation", "contrast")
-#: Words the suffix rules must leave alone: their suffix is not a derivation of the adjective found, or the
-#: adjective is another sense (``presence`` is not being ``present``, ``capacity`` not being ``capacious``).
-SUFFIX_EXCEPTIONS = frozenset({"business", "witness", "harness", "wilderness", "city", "pity", "duty", "entity",
-                               "unity", "community", "university", "variety", "society", "deity", "laity",
-                               "presence", "absence", "evidence", "difference", "instance", "importance",
-                               "currency", "emergency", "frequency", "capacity", "residence", "conference",
-                               "reference", "sentence", "substance", "consequence", "occurrence", "agency",
-                               "velocity", "atrocity", "criticism", "audience", "experience", "science"})
-
 _FOLD = {"œ": "oe", "æ": "ae", "ß": "ss", "ø": "o", "ł": "l"}
 _SENT_END = re.compile(r"[.!?](?=\s|$)")
 _SPLIT = re.compile(r"\s*[,;]\s*|\s+(?:and|but|&)\s+")
@@ -102,13 +101,6 @@ class RawItem:
     surface: str
     gloss: Optional[str]
     position: int
-
-
-@dataclass(frozen=True)
-class Lexicon:
-    """Adjective and noun lemmas, lower-case (OEWN in production, a fake in tests)."""
-    adjectives: frozenset
-    nouns: frozenset
 
 
 def fold(s: str) -> str:
@@ -219,143 +211,3 @@ def extract_items(text: str, family: str, *, truncated: bool = False) -> list[Ra
     else:
         raise ValueError(f"unknown family {family!r}")
     return out
-
-
-def _suffix_candidates(w: str) -> list[str]:
-    """The ``-ness`` / ``-ity`` rule: a word with one of these suffixes is tagged ``noun`` when no candidate is
-    an OEWN adjective."""
-    if w in SUFFIX_EXCEPTIONS:
-        return []
-    if w.endswith("ness") and len(w) > 6:
-        c = [w[:-5] + "y"] if w.endswith("iness") else []
-        return c + [w[:-4]]
-    if w.endswith("ity") and len(w) > 5:
-        c = []
-        if w.endswith("osity"):
-            c.append(w[:-5] + "ous")
-        if w.endswith(("acity", "ocity")):            # pugnacity -> pugnacious, ferocity -> ferocious
-            c.append(w[:-3] + "ious")
-        if w.endswith("bility"):
-            c.append(w[:-6] + "ble")
-        return c + [w[:-3], w[:-3] + "e"]
-    return []
-
-
-#: Further nouns of disposition (gate audit 3): suffix -> adjective endings tried in order.  ``-icism`` comes
-#: before ``-ism``.  Unlike ``-ness`` / ``-ity``, a word none of whose candidates is an adjective keeps its
-#: ordinary tag (``science`` is a noun because OEWN says so, not because of its ending).
-NOUN_SUFFIXES = (("ence", ("ent",)), ("ency", ("ent",)), ("ance", ("ant",)), ("ancy", ("ant",)),
-                 ("icism", ("ical", "ic")), ("ism", ("istic", "ist")))
-
-
-def _noun_suffix_candidates(w: str) -> list[str]:
-    if w in SUFFIX_EXCEPTIONS:
-        return []
-    for suf, ends in NOUN_SUFFIXES:
-        if w.endswith(suf) and len(w) - len(suf) >= 3:
-            return [w[:-len(suf)] + e for e in ends]
-    return []
-
-
-#: ``-ly`` adverbs whose adjective is another sense (``overly`` is not ``over``, ``hardly`` not ``hard``).
-ADVERB_EXCEPTIONS = frozenset({"overly", "rarely", "hardly", "barely", "nearly", "lately", "shortly", "highly",
-                               "fairly", "merely", "scarcely", "really", "presently", "surely", "simply",
-                               "purely", "largely", "greatly", "widely", "closely"})
-
-
-def _adverb_candidates(w: str) -> list[str]:
-    """Adjectives an ``-ly`` adverb may come from, most specific first (``bawdily`` -> ``bawdy``,
-    ``frantically`` -> ``frantic``, ``incompetently`` -> ``incompetent``, ``gently`` -> ``gentle``,
-    ``dully`` -> ``dull``, ``truly`` -> ``true``)."""
-    if len(w) < 5 or not w.endswith("ly") or w in ADVERB_EXCEPTIONS:
-        return []
-    c = []
-    if w.endswith("ily"):
-        c.append(w[:-3] + "y")
-    c.append(w[:-2])
-    if w.endswith("ically"):
-        c.append(w[:-4])
-    if w[-3] not in "aeiou":
-        c += [w[:-1] + "e", w[:-1]]
-    c.append(w[:-2] + "e")
-    return list(dict.fromkeys(c))
-
-
-#: British -> US spelling rules for one word (a space- or hyphen-separated part), applied in order; a fold is
-#: kept only when OEWN has the result (:func:`us_spelling`).  The entity-naming rule: corpus labels are US
-#: English, and the pilot's count 2-7 band held eight British variants of registry words (gate audit 3).
-_UK_US = (
-    (re.compile(r"(?<=[a-z]{3})our(?=(?:ed|ful|fully|less|able|ably|ing|ite|ites|s|ly|al|ally|hood|er|ers)?$)"),
-     "or"),                                                                             # humour, colourful
-    (re.compile(r"is(?=(?:e|ed|es|ing|ation|ations)$)"), "iz"),                        # organised, civilisation
-    (re.compile(r"tre$"), "ter"),                                                      # centre
-    (re.compile(r"tres$"), "ters"),
-    (re.compile(r"tred$"), "tered"),                                                   # centred, self-centred
-    (re.compile(r"(?<=[aeiou])ll(?=(?:ed|ing|er|ers)$)"), "l"),                        # travelled, untrammelled
-    (re.compile(r"ilful(?=(?:ly|ness)?$)"), "illful"),                                 # skilful, wilful
-    (re.compile(r"eable$"), "able"),                                                   # likeable, unshakeable
-    (re.compile(r"dgement"), "dgment"),                                                # judgement, judgemental
-    (re.compile(r"^sceptic"), "skeptic"),                                              # sceptical, scepticism
-)
-#: Words the spelling rules would turn into another word OEWN has.
-UK_US_EXCEPTIONS = frozenset({"outre"})
-
-
-def _in_lexicon(w: str, lexicon: Lexicon) -> bool:
-    return w in lexicon.adjectives or w in lexicon.nouns
-
-
-def us_spelling(s: str, *, lexicon: Lexicon) -> str:
-    """``s`` with British spellings made US (:data:`_UK_US`), or ``s`` unchanged.  The fold is kept when OEWN
-    has the whole result (``good-humored``) or every changed word (``well-organized`` from ``organized``)."""
-    parts = re.split(r"([ -])", s)
-    out, changed = [], []
-    for p in parts:
-        u = p
-        if p not in (" ", "-") and p not in UK_US_EXCEPTIONS:
-            for rx, rep in _UK_US:
-                u = rx.sub(rep, u)
-        if u != p:
-            changed.append(u)
-        out.append(u)
-    if not changed:
-        return s
-    us = "".join(out)
-    return us if _in_lexicon(us, lexicon) or all(_in_lexicon(u, lexicon) for u in changed) else s
-
-
-def normalize_form_kind(surface: str, *, lexicon: Lexicon) -> tuple[str, str, Optional[str], Optional[str]]:
-    """``(surface, form, normalized_from, kind)``: :func:`normalize_form` plus which rule folded the item
-    (``noun_suffix``, ``adverb``, ``us_spelling``, two joined by ``+``; None when nothing changed)."""
-    s = surface.strip().lower()
-    us = us_spelling(s, lexicon=lexicon)
-    spelled = us != s
-
-    def done(out: str, form: str, kind: Optional[str] = None):
-        kinds = "+".join(k for k in (("us_spelling" if spelled else None), kind) if k) or None
-        return out, form, (s if out != s else None), kinds
-
-    if " " in us:
-        return done(us, "adjective" if us in lexicon.adjectives else "phrase")
-    cands = _suffix_candidates(us)
-    for c in cands:
-        if c in lexicon.adjectives:
-            return done(c, "adjective", "noun_suffix")
-    if cands:
-        return done(us, "noun")
-    if us in lexicon.adjectives:
-        return done(us, "adjective")
-    for c in _noun_suffix_candidates(us):
-        if c in lexicon.adjectives:
-            return done(c, "adjective", "noun_suffix")
-    if us in lexicon.nouns:
-        return done(us, "noun")
-    for c in _adverb_candidates(us):
-        if c in lexicon.adjectives:
-            return done(c, "adjective", "adverb")
-    return done(us, "adjective")
-
-
-def normalize_form(surface: str, *, lexicon: Lexicon) -> tuple[str, str, Optional[str]]:
-    """``(surface, form, normalized_from)`` (see the module docstring)."""
-    return normalize_form_kind(surface, lexicon=lexicon)[:3]
