@@ -259,6 +259,12 @@ rubrics, which the role-promotion item below needs too.
 
 - **Triangle candidates from the structural generator** (Roger, 2026-10-14).  Only plan 09 produces triangle candidates (a mean with its two vices), so handling is semi-manual, not a general solution: at review, a mean's vices may also be queued as a **pair with each other** ("pairing the two opposite vices makes a certain amount of sense"), alongside the triangle; M3's pair detector pairing a vice with a lone mean is corrected at review.
 
+- **Revisit: IPIP's loose pile** (Roger, 2026-10-14: held for now, revisit the decision).  The ~600 run skipped 114
+  clusters (228 statements) too loose to name ([report.md](../../data/candidates/runs/ipip/2026-10-13-g600/report.md)).
+  Held while review time is the constraint; naming and submitting them is about $1 of calls plus their review.
+  Revisit when review time eases, or when the dashboard shows IPIP's kept clusters still paying (accepted per
+  review-minute above the stop rule's line).
+
 - **Memberships handled apart from the main review** (QUESTIONS 81, Roger 2026-10-12).  Memberships (religions, nationalities, families, affinities and the rest) are traits and are submitted flagged, but they are not added in full: a representative sample is kept, as the corpus already does for religions and nationalities (Buddhist, Christian, Hindu, Jewish, Muslim, French, German).  They go on a separate track, out of the main review queue.  The registry tags them already (`membership` tag and `membership_kind`, 247 rows across ten kinds), so the track can key on that.  **Trigger:** the first wave in which membership rows reach review.  **To decide then:** the sample for each new `membership_kind` (circumstance, family, affinity and so on), and whether the masked-LM stoplist flags (110 rows in the pilot table) use the same track.
 
 - **A field the question generator reads for elicitation guidance** (QUESTIONS 66, Roger 2026-10-11; deferred by him
