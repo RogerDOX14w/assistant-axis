@@ -453,8 +453,29 @@ def write_blocks(results, *, plan: dict, items, run_id: str, runner, out_dir: Pa
     return len(lines)
 
 
+def _resume_from_batches(args) -> Optional[str]:
+    """A resumed sweep keeps the earlier session's ``--from-batches`` (review S1, 2026-10-15): without the flag it is
+    taken from ``run.json``; given and different, the resume is refused.  Returns a refusal message or ``None``."""
+    rp = sweep_dir(args) / "run.json"
+    if not (getattr(args, "resume", False) and rp.exists()):
+        return None
+    earlier = json.loads(rp.read_text(encoding="utf-8")).get("from_batches")
+    now = getattr(args, "from_batches", None)
+    if now is None:
+        args.from_batches = earlier
+        return None
+    if sorted(earlier or []) != sorted(now):
+        return (f"--from-batches {now} differs from the earlier session's {earlier} in {rp}: a resume sweeps the same "
+                f"rows (give the same batches, or none to reuse them)")
+    return None
+
+
 def cmd_sweep(args) -> int:
     from data_analysis.gap_generation import novelty_score as NS
+    why = _resume_from_batches(args)
+    if why:
+        print(f"REFUSED: {why}", file=sys.stderr)
+        return 2
     try:
         plan = build_plan(args, need_index=True)
     except Refused as exc:

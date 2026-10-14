@@ -45,9 +45,11 @@ def test_review_rates_reproduce_the_hard_figures():
 def test_concepts_hard_figures():
     c = result(TESTING / "concepts.json")
     s = c["units"]["components_4"]
-    assert (s["n_concepts"], s["n_singletons"], s["largest"]) == (3065, 2691, 21)
-    assert c["chain_diagnostic"]["largest"] == 1028
-    assert 2200 <= c["units"]["grown_3"]["n_concepts"] <= 2300
+    # re-pinned 2026-10-15 to the dashboard rebuilt after the 2026-10-14 review-graph resume (Roger's A2 for the
+    # same figures in test_gapgen_testing_concepts.py); 2026-10-13: (3065, 2691, 21), 1,028, 2,200-2,300
+    assert (s["n_concepts"], s["n_singletons"], s["largest"]) == (3373, 2944, 25)
+    assert c["chain_diagnostic"]["largest"] == 1138
+    assert c["units"]["grown_3"]["n_concepts"] == 2477
 
 
 @pytest.mark.skipif(not (TESTING / "paraphrase_set" / "report.md").exists(), reason="the paraphrase set is not run yet")

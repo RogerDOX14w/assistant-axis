@@ -274,3 +274,19 @@ def test_reach_counts_the_unrecovered_hidden_traits_a_lexical_link_reaches(lenv,
     by = {x["stem"]: x for x in s["reached"]["traits"]}
     assert by[t1]["by"][0]["key"] == rows["deltaish"]["key"] and by[t1]["by"][0]["read_by_harness"] is False
     assert by[t2]["by"][0]["read_by_harness"] is True and s["unreached"] == ["zzz_hidden"]
+
+
+def test_a_resumed_sweep_keeps_the_earlier_from_batches(tmp_path):
+    """Review S1 (2026-10-15): a resume without --from-batches takes the earlier session's; a different one refuses."""
+    import argparse
+    import json as _json
+    from data_analysis.gap_generation import lexical_recall as LR
+    args = argparse.Namespace(out_root=tmp_path, batch_id="w5_lex", resume=True, from_batches=None)
+    d = LR.sweep_dir(args)
+    d.mkdir(parents=True)
+    (d / "run.json").write_text(_json.dumps({"from_batches": ["wave5"]}))
+    assert LR._resume_from_batches(args) is None and args.from_batches == ["wave5"]
+    args2 = argparse.Namespace(out_root=tmp_path, batch_id="w5_lex", resume=True, from_batches=["wave6"])
+    assert "differs" in LR._resume_from_batches(args2)
+    fresh = argparse.Namespace(out_root=tmp_path, batch_id="w5_lex", resume=False, from_batches=None)
+    assert LR._resume_from_batches(fresh) is None and fresh.from_batches is None

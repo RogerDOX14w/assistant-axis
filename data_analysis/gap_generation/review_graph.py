@@ -556,7 +556,9 @@ def cmd_build(args, argv) -> int:
                     f"${cap:.2f}; the relation answers are on record: --resume with a --budget-usd of at least that")
 
         graph = RG.build_graph(plan, runner=runner, corpus=corpus, queue=queue, overlap_floor=args.overlap_floor,
-                               config=graph_config(args, cfg, rubrics) | {PL.LABEL_FORM_KEY: label_form},
+                               config=graph_config(args, cfg, rubrics) | {PL.LABEL_FORM_KEY: label_form}
+                               | ({"stem_family_pairs": "linked: a candidate edge whatever its cosine, typed by its "
+                                   "readings (one stem family, from the lexical blocks)"} if args.stem_family else {}),
                                batch_id=args.batch_id, gate=gate,
                                proposed_cut_off=args.proposed_cut_off)
         graph.usage = usage.as_dict()

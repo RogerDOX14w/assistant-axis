@@ -404,6 +404,14 @@ A lexical-only pair that the sweep read at its row's cut-off: a possible miss of
 blind marks say whether the existing trait really covers the word (a dictionary link can be a coincidence of
 two senses).
 
+<a id="proposed-merge"></a>
+### Proposed merge (dictionary)
+How a lexical cover reaches review since plan 11's gate 2 (Roger, 2026-10-14, option (d)): the row keeps M3's
+decision, and its card carries a badge "dictionary (WordNet | Moby thesaurus): probably the same as [X]", with the
+linked trait among the card's targets so one click merges it.  No lexical link ever cuts on its own, whichever
+lexicon; the review record of these proposals later decides whether WordNet covers may (README TODO "Revisit the
+duplicate signals").  In the review graph the flag is `lexical_proposed_merge`.
+
 <a id="name-only-link"></a>
 ### Name-only link
 A lexical link to a seed-queue entry that has no description yet: recorded and shown in review, never judged (the

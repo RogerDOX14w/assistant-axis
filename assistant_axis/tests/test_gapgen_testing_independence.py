@@ -120,3 +120,18 @@ class TestRecorded:
         assert all(not r.get("no_rule") for r in table)
         md = IND.table_markdown(table)
         assert "| censuses | tda | independent | lexicon |" in md
+
+
+def test_noun_relabel_sources_are_attributed_to_the_noun_row():
+    """2026-10-15: an adjective the relabel streams added counts for the generators of its noun row (as a states-pass
+    rename does); a role-file noun has no row, so the adjective counts for nothing."""
+    from assistant_axis.gapgen.testing import independence as IND
+    rows = {"pedant#1": {"key": "pedant#1", "sources": [{"generator": "censuses", "run_id": "r1", "source_ref": "tda:1"}]},
+            "pedantic#1": {"key": "pedantic#1", "sources": [
+                {"generator": "noun_relabel", "run_id": "backlog-x", "source_ref": "relabel:derivation:pedant#1"}]},
+            "beggarly#1": {"key": "beggarly#1", "relabel": {"from_key": None, "from_source": "role:beggar"},
+                           "sources": [{"generator": "noun_relabel", "run_id": "roles-x",
+                                        "source_ref": "relabel:derivation:role:beggar"}]}}
+    got = IND.attributed_sources(rows["pedantic#1"], rows)
+    assert [(x["generator"], x["via"]) for x in got] == [("censuses", "pedant#1")]
+    assert IND.attributed_sources(rows["beggarly#1"], rows) == []

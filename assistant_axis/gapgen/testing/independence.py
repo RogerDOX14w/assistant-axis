@@ -37,7 +37,7 @@ MECHANISMS: tuple[str, ...] = ("lexicon", "ipip", "base_model", "masked_lm", "al
 #: population; ``corpus`` generators start from the corpus and so are no independent sample of what it lacks).
 OCCASION_MECHANISMS: tuple[str, ...] = ("lexicon", "ipip", "base_model", "masked_lm")
 #: The sources that name rows rather than generators: their rows count for the source row's generator.
-ATTRIBUTED_GENERATORS: tuple[str, ...] = ("states_pass",)
+ATTRIBUTED_GENERATORS: tuple[str, ...] = ("states_pass", "noun_relabel")
 #: The pools that are not generators at all (left out of the pooled harness and the per-generator figures).
 POOL_GENERATORS: tuple[str, ...] = ("m1_validation", "manual", "testing")
 KEPT_DECISIONS: tuple[str, ...] = ("new", "grey")
@@ -120,6 +120,9 @@ STREAMS: dict[tuple[str, str], Stream] = {(s.generator, s.stream): s for s in (
     _S("states_pass", "states_pass", "not_a_generator", None,
        "names the states pass proposed for rows M1 held as states; source_ref is the source row's key",
        "attributed to the source row's generator (pre-registered question 6)"),
+    _S("noun_relabel", "noun_relabel", "not_a_generator", None,
+       "the nouns helper's adjective relabel of a noun row (source_ref relabel:<rule>:<ref>; the backlog, roles and "
+       "LLM streams)", "attributed to the noun row's generators through the pair's relabel block"),
     _S("physical_pass", "physical_pass", "not_a_generator", None,
        "re-judges rows on the physical holding list; submits no row of its own",
        "attributed to the row's own generators"),
@@ -169,6 +172,9 @@ def attributed_sources(row: Mapping, rows: Mapping[str, Mapping], *, _seen: Opti
         g = s.get("generator")
         if g in ATTRIBUTED_GENERATORS:
             ref = s.get("source_ref")
+            if g == "noun_relabel":             # relabel:<rule>:<registry key | role:... | queue_role:...>
+                tail = str(ref or "").split(":", 2)[-1]
+                ref = tail if tail in rows else ((row.get("relabel") or {}).get("from_key"))
             src = rows.get(ref) if ref else None
             if src is None or ref in seen:
                 continue
