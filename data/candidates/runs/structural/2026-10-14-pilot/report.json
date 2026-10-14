@@ -1,0 +1,751 @@
+{
+  "run_id": "2026-10-14-pilot",
+  "generator": "structural",
+  "args": {
+    "step": "submit",
+    "mode": "all",
+    "all": true,
+    "kept_target": null,
+    "kept_share": 0.5,
+    "kept_share_assumed": true,
+    "n_rows": 499,
+    "n_candidates": 629,
+    "n_counted": 88,
+    "n_filtered": 411,
+    "n_charged": 96,
+    "transport": "live",
+    "budget_usd": 5.0,
+    "estimate": {
+      "n": 96,
+      "transport": "live",
+      "m1_usd": 0.6912,
+      "m3_usd": 0.9293,
+      "total_usd": 1.6205,
+      "pass_rate": 0.88,
+      "pass_rate_high": 0.95,
+      "m3_usd_high": 1.0032,
+      "total_usd_high": 1.6944,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "m1_pass_rate_high": 0.95,
+        "batch_factor": 1.0,
+        "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.88 (the census TDA, plan section 10) with 0.95 printed as a high case, unmeasured for this generator until pilot B"
+      }
+    },
+    "strata": {
+      "kind_x_status": {
+        "classical | exists": 135,
+        "classical | new": 64,
+        "classical | queued": 16,
+        "classical | registered-decided": 200,
+        "degree_filler | exists": 5,
+        "degree_filler | new": 8,
+        "degree_filler | registered-decided": 9,
+        "opposite | exists": 7,
+        "opposite | new": 4,
+        "opposite | registered-decided": 1,
+        "pair_completion | exists": 2,
+        "pair_completion | new": 1,
+        "pair_completion | queued": 1,
+        "pair_completion | registered-decided": 2,
+        "principal_retarget | exists": 1,
+        "principal_retarget | registered-decided": 1,
+        "remode | exists": 4,
+        "remode | new": 3,
+        "remode | registered-decided": 6,
+        "retarget | exists": 6,
+        "retarget | new": 8,
+        "retarget | registered-decided": 9,
+        "triangle_corner | exists": 4,
+        "triangle_corner | registered-decided": 2
+      },
+      "status": {
+        "exists": 164,
+        "new": 88,
+        "queued": 17,
+        "registered-decided": 230
+      },
+      "kind": {
+        "classical": 415,
+        "degree_filler": 22,
+        "opposite": 12,
+        "pair_completion": 6,
+        "principal_retarget": 2,
+        "remode": 13,
+        "retarget": 23,
+        "triangle_corner": 6
+      },
+      "principal_target": 2,
+      "phrases": 50
+    },
+    "review_terms_per_hour": 150.0,
+    "review_rate_source": "plan figure, ~150 terms an hour (plan 04; coding_plan_09 decision 1)",
+    "projected_kept": 44.0,
+    "table": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/structural/operator_table.jsonl",
+    "table_sha256": "c7b9b2e891af80513aa4971122f87863e9c2aace166bb61fa71a0a356be246ef",
+    "score": "n_sources (a quality signal; not a familiarity)"
+  },
+  "headline": {
+    "n_rows": 499,
+    "already_registered": 403,
+    "already_registered_share": 0.8076,
+    "by_another_generator": 403,
+    "already_decided": 403,
+    "already_decided_share_of_registered": 1.0,
+    "exists": 164,
+    "queued": 101,
+    "net_new": 88
+  },
+  "m1": {
+    "n_rows": 499,
+    "n_filtered": 499,
+    "n_trait": 478,
+    "pass_rate": 0.9579,
+    "verdict": {
+      "reject": 2,
+      "tagged": 19,
+      "trait": 478
+    },
+    "outcome": {
+      "physical": 2,
+      "states": 17,
+      "trait": 478,
+      "turned_away": 2
+    },
+    "tags": {
+      "membership": 4,
+      "no_persona_reading": 1,
+      "physical": 2,
+      "state": 17,
+      "stretched": 1
+    },
+    "polysemy_rate": 0.2705
+  },
+  "m3": {
+    "n_scored": 484,
+    "decision": {
+      "covered": 321,
+      "new": 163
+    },
+    "new_rate": 0.3368,
+    "kept": 163,
+    "pair_completions": 25
+  },
+  "net_new_kept_share": 0.5455,
+  "net_new_kept_share_assumed": 0.5,
+  "kept_net_new": 48,
+  "novel": {
+    "raw": 163,
+    "net_pending": 48,
+    "net_groups": null,
+    "twins_pending": [
+      "acquisitive",
+      "affectionate",
+      "appeasing",
+      "backbiting",
+      "brazen",
+      "cantankerous",
+      "careful",
+      "complacent",
+      "compliant",
+      "compulsive",
+      "conflict_averse",
+      "contrary",
+      "cursory",
+      "defensive",
+      "defiant",
+      "digressive",
+      "discerning",
+      "disingenuous",
+      "dissolute",
+      "distrustful",
+      "driven",
+      "duplicitous",
+      "enthusiastic",
+      "evasive",
+      "exploitative",
+      "fearless",
+      "flashy",
+      "foolhardy",
+      "frenetic",
+      "fun_loving",
+      "gossipy",
+      "grasping",
+      "headstrong",
+      "inhibited",
+      "insightful",
+      "jocular",
+      "judicious",
+      "kind_hearted",
+      "know_it_all",
+      "lecherous",
+      "legalistic",
+      "long_suffering",
+      "loving",
+      "meddlesome",
+      "opportunistic",
+      "ostentatious",
+      "overeager",
+      "people_pleasing",
+      "pompous",
+      "power_hungry",
+      "preachy",
+      "protective",
+      "punctilious",
+      "purposeful",
+      "querulous",
+      "reliant_on_others",
+      "ruminative",
+      "sanctimonious",
+      "scrupulous",
+      "self_assertive",
+      "self_controlled",
+      "self_disparaging",
+      "self_justifying",
+      "self_respecting",
+      "self_restrained",
+      "self_righteous",
+      "self_serving",
+      "sensible",
+      "sensual",
+      "servile",
+      "shameless",
+      "showy",
+      "slanderous",
+      "smug",
+      "spineless",
+      "splendid",
+      "studious",
+      "surly",
+      "thoughtless",
+      "toadyish",
+      "two_faced",
+      "uncouth",
+      "undignified",
+      "unimaginative",
+      "uninterested",
+      "unprincipled",
+      "unthinking",
+      "urbane",
+      "vain",
+      "vainglorious",
+      "wasteful",
+      "zestful"
+    ],
+    "twins_reviewed": [
+      "acquiescent",
+      "contemptuous",
+      "crude",
+      "domineering",
+      "fawning",
+      "garrulous",
+      "haughty",
+      "ingratiating",
+      "insincere",
+      "irritating",
+      "knavish",
+      "loquacious",
+      "nosy",
+      "obscene",
+      "obsequious",
+      "officious",
+      "overbearing",
+      "phony",
+      "resigned",
+      "self_willed",
+      "sneering",
+      "tyrannical",
+      "vulgar"
+    ]
+  },
+  "per_kind": {
+    "pair_completion": {
+      "n": 6,
+      "m1_trait_share": 0.8333,
+      "novel_raw": 1,
+      "novel_net": 0,
+      "novel_raw_share": 0.1667,
+      "net_new": 1,
+      "net_new_kept_share": 0.0,
+      "pair_completions_m3": 1
+    },
+    "degree_filler": {
+      "n": 34,
+      "m1_trait_share": 0.9706,
+      "novel_raw": 16,
+      "novel_net": 6,
+      "novel_raw_share": 0.4706,
+      "net_new": 9,
+      "net_new_kept_share": 0.6667,
+      "pair_completions_m3": 3
+    },
+    "triangle_corner": {
+      "n": 10,
+      "m1_trait_share": 1.0,
+      "novel_raw": 3,
+      "novel_net": 0,
+      "novel_raw_share": 0.3,
+      "net_new": 0,
+      "net_new_kept_share": null,
+      "pair_completions_m3": 0
+    },
+    "opposite": {
+      "n": 12,
+      "m1_trait_share": 0.9167,
+      "novel_raw": 0,
+      "novel_net": 0,
+      "novel_raw_share": 0.0,
+      "net_new": 4,
+      "net_new_kept_share": 0.0,
+      "pair_completions_m3": 0
+    },
+    "classical": {
+      "n": 416,
+      "m1_trait_share": 0.9615,
+      "novel_raw": 136,
+      "novel_net": 35,
+      "novel_raw_share": 0.3269,
+      "net_new": 64,
+      "net_new_kept_share": 0.5469,
+      "pair_completions_m3": 20
+    },
+    "retarget": {
+      "n": 31,
+      "m1_trait_share": 1.0,
+      "novel_raw": 15,
+      "novel_net": 7,
+      "novel_raw_share": 0.4839,
+      "net_new": 8,
+      "net_new_kept_share": 0.875,
+      "pair_completions_m3": 2
+    },
+    "principal_retarget": {
+      "n": 2,
+      "m1_trait_share": 1.0,
+      "novel_raw": 1,
+      "novel_net": 0,
+      "novel_raw_share": 0.5,
+      "net_new": 0,
+      "net_new_kept_share": null,
+      "pair_completions_m3": 0
+    },
+    "remode": {
+      "n": 16,
+      "m1_trait_share": 0.875,
+      "novel_raw": 5,
+      "novel_net": 1,
+      "novel_raw_share": 0.3125,
+      "net_new": 3,
+      "net_new_kept_share": 0.3333,
+      "pair_completions_m3": 0
+    }
+  },
+  "cost": {
+    "files": [
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/structural/2026-10-14-pilot/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/structural/2026-10-14-nullrate/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-14-pilot_structural/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-14-pilot_structural/usage.json"
+    ],
+    "per_model": {
+      "claude-haiku-5-5": {
+        "cost_usd": 0.3588,
+        "prompt_tokens": 553849,
+        "completion_tokens": 606802,
+        "n_calls": 1654
+      },
+      "claude-opus-5-5": {
+        "cost_usd": 0.448,
+        "prompt_tokens": 26149,
+        "completion_tokens": 17172,
+        "n_calls": 102
+      },
+      "claude-sonnet-5-5": {
+        "cost_usd": 0.9075,
+        "prompt_tokens": 234171,
+        "completion_tokens": 43916,
+        "n_calls": 452
+      },
+      "text-embedding-3-large": {
+        "cost_usd": 0.0002,
+        "prompt_tokens": 1669,
+        "completion_tokens": 0,
+        "n_calls": 2
+      }
+    },
+    "total_usd": 1.7145
+  },
+  "useful": 188,
+  "useful_per_dollar": 109.7,
+  "review_rate": {
+    "terms_per_hour": 150.0,
+    "source": "plan figure, ~150 terms an hour (plan 04; coding_plan_09 decision 1)"
+  },
+  "projection": {
+    "kept_share": 0.5455,
+    "wave_300": {
+      "net_new_rows": 550,
+      "rows_to_submit": 3119,
+      "kept_rows": 300,
+      "novel_raw": 300,
+      "novel_net": 300,
+      "review_hours": 2.0,
+      "estimate_batches": 26.3244
+    },
+    "whole_table": {
+      "rows": 499,
+      "net_new_rows": 90,
+      "kept_rows": 49,
+      "review_hours": 0.33,
+      "estimate_batches": 0.8271
+    }
+  },
+  "evaluation": {
+    "pair_recovery": {
+      "n_pairs": 297,
+      "n_directions": 594,
+      "n_answered": 16,
+      "n_null_opposite": 0,
+      "n_opposites": 39,
+      "recall_stem": 0.75,
+      "expected": 0.8,
+      "by_source_position": {
+        "mean (any triangle corner)": {
+          "n": 6,
+          "recall_stem": 0.6667
+        },
+        "other (the opposite)": {
+          "n": 10,
+          "recall_stem": 0.8
+        }
+      },
+      "pairs_both_directions_stem": 2,
+      "pairs_either_direction_stem": 10,
+      "recall_cos_0.7": 0.8125,
+      "recall_cos_0.8": 0.75,
+      "recall_cos_0.9": 0.75,
+      "cosine_median": 0.8357,
+      "misses": [
+        {
+          "from": "calculating",
+          "hidden": "uncalculating",
+          "opposites": [
+            "guileless"
+          ],
+          "cosine": 0.4726
+        },
+        {
+          "from": "principled",
+          "hidden": "expedient",
+          "opposites": [
+            "unprincipled"
+          ],
+          "cosine": 0.7301
+        },
+        {
+          "from": "hawkish",
+          "hidden": "pacifist",
+          "opposites": [
+            "dovish"
+          ],
+          "cosine": 0.5015
+        },
+        {
+          "from": "settled",
+          "hidden": "nomadic",
+          "opposites": [
+            "restless",
+            "footloose"
+          ],
+          "cosine": 0.6901
+        }
+      ]
+    },
+    "structure_recovery": {
+      "triangles": {
+        "n": 8,
+        "corners": 24,
+        "corners_recovered": 0,
+        "triangles_with_a_corner": 0,
+        "detail": []
+      },
+      "sequence": {
+        "n": 13,
+        "recovered": 0,
+        "which": [],
+        "first_member": "selfish"
+      },
+      "sequences": [
+        {
+          "members": [
+            "selfish",
+            "clannish",
+            "cliquish",
+            "parochial",
+            "insular",
+            "regionalist",
+            "sectarian",
+            "nationalist",
+            "ethnocentric",
+            "civilizationist",
+            "humanitarian",
+            "kind_to_animals",
+            "ecocentric"
+          ],
+          "n": 13,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "altruistic",
+            "cooperative",
+            "selfish",
+            "competitive"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "boomer",
+            "gen_x",
+            "millennial",
+            "gen_z"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "micromanaging",
+            "hands_on",
+            "hands_off",
+            "absentee"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "young",
+            "middle_aged",
+            "elderly"
+          ],
+          "n": 3,
+          "recovered": 0,
+          "which": []
+        }
+      ]
+    },
+    "queue_holdout": {
+      "n": 96,
+      "recall_stem": 0.0,
+      "recovered": [],
+      "by_operator": {
+        "opposite": 0.0,
+        "excess": 0.0,
+        "deficiency": 0.0,
+        "retarget": 0.0,
+        "remode": 0.0
+      },
+      "by_operator_n": {
+        "opposite": 0,
+        "excess": 0,
+        "deficiency": 0,
+        "retarget": 0,
+        "remode": 0
+      },
+      "rejected": {
+        "n": 139,
+        "regenerated": 0,
+        "stems": []
+      },
+      "accepted": {
+        "n": 41,
+        "recall_stem": 0.0,
+        "stems": []
+      },
+      "candidates": {
+        "n": 38,
+        "recall_stem": 0.0,
+        "stems": []
+      }
+    },
+    "null_rates": {
+      "n_traits": 60,
+      "opposite": 0.9833,
+      "excess": 0.5333,
+      "deficiency": 0.65,
+      "retarget_by_target": {
+        "self": 0.1667,
+        "intimates": 0.1167,
+        "strangers": 0.0667,
+        "authority": 0.2,
+        "animals": 0.0,
+        "ideas": 0.1667
+      },
+      "retarget": 0.1194,
+      "remode_by_mode": {
+        "attitude": 0.1667,
+        "habit": 0.05,
+        "speech": 0.2
+      },
+      "remode": 0.1389,
+      "principal": {
+        "n_traits": 6,
+        "by_target": {
+          "the_user": 0.5,
+          "the_operator": 0.1667,
+          "the_developer": 0.0
+        },
+        "share": 0.2222,
+        "n_items": 4
+      },
+      "band": {
+        "low": 0.05,
+        "high": 0.4,
+        "retarget_in_band": true,
+        "remode_in_band": true,
+        "pass": true
+      },
+      "positions": {
+        "deficiency": 12,
+        "excess": 13,
+        "mean": 22,
+        "not_scalar": 13
+      }
+    },
+    "stability": {
+      "n_traits": 3,
+      "jaccard_median": 1.0,
+      "below_0.5": 0,
+      "min_median": 0.5,
+      "distribution": {
+        "0.0-0.1": 0,
+        "0.1-0.2": 0,
+        "0.2-0.3": 0,
+        "0.3-0.4": 0,
+        "0.4-0.5": 0,
+        "0.5-0.6": 1,
+        "0.6-0.7": 0,
+        "0.7-0.8": 0,
+        "0.8-0.9": 0,
+        "0.9-1.0": 2
+      },
+      "by_operator": {
+        "opposite": 1.0,
+        "excess": 1.0,
+        "deficiency": 1.0,
+        "retarget": 1.0,
+        "remode": 1.0
+      },
+      "runs": [
+        "2026-10-13-stab-sonnet-a",
+        "2026-10-13-stab-sonnet-b"
+      ],
+      "seed": 1,
+      "per_trait": {
+        "christian": 1.0,
+        "moral_relativist": 1.0,
+        "punishment_fearing": 0.5
+      }
+    },
+    "sample_agreement": {
+      "n_traits": 60,
+      "n_both_empty": 0,
+      "jaccard_median": 0.4143,
+      "below_0.5": 32,
+      "distribution": {
+        "0.0-0.1": 10,
+        "0.1-0.2": 1,
+        "0.2-0.3": 11,
+        "0.3-0.4": 2,
+        "0.4-0.5": 8,
+        "0.5-0.6": 5,
+        "0.6-0.7": 6,
+        "0.7-0.8": 4,
+        "0.8-0.9": 1,
+        "0.9-1.0": 12
+      },
+      "by_operator": {
+        "deficiency": {
+          "agreement": 0.619,
+          "n_slots": 42
+        },
+        "excess": {
+          "agreement": 0.6176,
+          "n_slots": 34
+        },
+        "opposite": {
+          "agreement": 0.7167,
+          "n_slots": 60
+        },
+        "remode": {
+          "agreement": 0.3143,
+          "n_slots": 35
+        },
+        "retarget": {
+          "agreement": 0.2273,
+          "n_slots": 66
+        }
+      },
+      "reported_not_gated": true,
+      "n_sample_pairs": 60,
+      "n_traits_with_two": 20
+    },
+    "parse_rate": {
+      "n_units": 60,
+      "n_ok": 60,
+      "rate": 1.0,
+      "n_records": 60,
+      "n_records_ok": 60,
+      "record_rate": 1.0,
+      "min_rate": 0.99
+    }
+  },
+  "support": {
+    "n_traits": 20,
+    "samples_per_trait": {
+      "3": 20
+    },
+    "by_support": {
+      "1": 60,
+      "2": 26,
+      "3": 30
+    },
+    "by_operator": {
+      "deficiency": {
+        "1": 8,
+        "2": 5,
+        "3": 7
+      },
+      "excess": {
+        "1": 8,
+        "2": 3,
+        "3": 6
+      },
+      "opposite": {
+        "1": 9,
+        "2": 7,
+        "3": 12
+      },
+      "remode": {
+        "1": 9,
+        "2": 5,
+        "3": 2
+      },
+      "retarget": {
+        "1": 26,
+        "2": 6,
+        "3": 3
+      }
+    }
+  },
+  "n_samples": 3
+}

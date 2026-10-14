@@ -1,7 +1,7 @@
 {
   "generator": "structural",
   "run_id": "2026-10-14-pilot",
-  "git_sha": "f0388c44+dirty",
+  "git_sha": "1708c035+dirty",
   "args": {
     "step": "modernise",
     "schemes": [
@@ -25,9 +25,9 @@
     "allow_dirty": true,
     "skipped_schemes": []
   },
-  "n_emitted": 0,
+  "n_emitted": 629,
   "started_at": "2026-10-14T01:08:48+00:00",
-  "finished_at": "2026-10-14T01:10:06+00:00",
+  "finished_at": "2026-10-14T06:34:26+00:00",
   "confirmed_by": null,
   "cost_usd": 0.0355,
   "sessions": [
@@ -77,6 +77,2650 @@
         "total_prompt_tokens": 28687,
         "total_completion_tokens": 65176,
         "n_calls": 11
+      }
+    },
+    {
+      "session_id": "fc969124c863",
+      "started_at": "2026-10-14T06:34:24+00:00",
+      "finished_at": "2026-10-14T06:34:26+00:00",
+      "git_sha": "1708c035+dirty",
+      "args": {
+        "step": "submit",
+        "mode": "all",
+        "all": true,
+        "kept_target": null,
+        "kept_share": 0.5,
+        "kept_share_assumed": true,
+        "n_rows": 499,
+        "n_candidates": 629,
+        "n_counted": 88,
+        "n_filtered": 411,
+        "n_charged": 96,
+        "counted_stems": [
+          "adrift",
+          "appreciative_of_others",
+          "begrudging",
+          "blindly_hopeful",
+          "buck_passing",
+          "bungling",
+          "careless_of_order",
+          "cautious_with_money",
+          "chatterbox",
+          "childish_in_old_age",
+          "coldly_impartial",
+          "comfort_seeking",
+          "compulsively_dutiful",
+          "content_with_ignorance",
+          "daredevil",
+          "disreputable",
+          "dissembling",
+          "eager_to_learn",
+          "effective_leader",
+          "emotionally_astute",
+          "emotionally_withdrawn",
+          "faddish",
+          "faded_pride",
+          "failure_averse",
+          "falsely_modest",
+          "fearful_of_omens",
+          "financially_timid",
+          "fixated",
+          "fond_of_scoundrels",
+          "freedom_loving",
+          "freeloading",
+          "grumbling",
+          "hardline",
+          "high_context",
+          "honor_hungry",
+          "honor_seeking",
+          "hyperanalytical",
+          "ill_timed",
+          "indifferent_to_honor",
+          "indifferent_to_others_needs",
+          "indifferent_to_sensual_pleasure",
+          "indiscriminately_affectionate",
+          "inopportune",
+          "justly_proud",
+          "killjoy",
+          "low_context",
+          "low_libido",
+          "naively_optimistic",
+          "nitpicking",
+          "parvenu",
+          "peaceable",
+          "plainspoken",
+          "promiscuously_intimate",
+          "properly_ambitious",
+          "quitting_easily",
+          "repulsively_unkempt",
+          "ridiculously_youthful",
+          "righteously_indignant",
+          "rigidly_impersonal",
+          "rigorist",
+          "romantically_driven",
+          "rule_flouting",
+          "rumormongering",
+          "saber_rattling",
+          "scofflaw",
+          "self_abasing",
+          "self_belittling",
+          "self_directed",
+          "self_neglectful",
+          "self_sufficient_to_a_fault",
+          "sexually_indifferent",
+          "sexually_restrained",
+          "shame_avoidant",
+          "shields_wrongdoers",
+          "shirking",
+          "shunning",
+          "soft_on_wrongdoing",
+          "stick_in_the_mud",
+          "time_serving",
+          "timid_with_money",
+          "unable_to_hush",
+          "unanalytical",
+          "unawed_by_rank",
+          "unembarrassable",
+          "unrealistically_upbeat",
+          "unruffled",
+          "unscrupulously_cunning",
+          "wrathful"
+        ],
+        "registered_stems": {
+          "self_effacing": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "obsequious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "intemperate": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "tactless": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "courageous": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "timid": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "rash": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "pedantic": [
+            "base_model",
+            "censuses"
+          ],
+          "unprincipled": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "sycophantic": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "dependent": [
+            "base_model",
+            "censuses"
+          ],
+          "officious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "miserly": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "generous": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "cynical": [
+            "base_model",
+            "censuses"
+          ],
+          "prudent": [
+            "base_model",
+            "censuses"
+          ],
+          "passive": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "modest": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "complacent": [
+            "antonym_check",
+            "censuses",
+            "m1_validation"
+          ],
+          "stingy": [
+            "base_model",
+            "censuses"
+          ],
+          "vainglorious": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "reckless": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "moderate": [
+            "base_model",
+            "censuses"
+          ],
+          "buffoonish": [
+            "censuses"
+          ],
+          "conceited": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "incurious": [
+            "base_model",
+            "censuses"
+          ],
+          "ostentatious": [
+            "antonym_check",
+            "censuses"
+          ],
+          "rambling": [
+            "antonym_check",
+            "censuses"
+          ],
+          "obsessive": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "analytical": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "unambitious": [
+            "base_model",
+            "censuses"
+          ],
+          "hopeful": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "rootless": [
+            "censuses"
+          ],
+          "benevolent": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "fawning": [
+            "base_model",
+            "censuses"
+          ],
+          "naive": [
+            "base_model",
+            "censuses"
+          ],
+          "domineering": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "truthful": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "defeatist": [
+            "states_pass"
+          ],
+          "greedy": [
+            "base_model",
+            "censuses"
+          ],
+          "indifferent": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "humorless": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "impartial": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip",
+            "wn_clusters"
+          ],
+          "haughty": [
+            "base_model",
+            "censuses"
+          ],
+          "craven": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "faithful": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "brazen": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "witty": [
+            "base_model",
+            "censuses"
+          ],
+          "contemptuous": [
+            "base_model",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "loving": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "superficial": [
+            "base_model",
+            "censuses"
+          ],
+          "envious": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "persistent": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip",
+            "wn_clusters"
+          ],
+          "unassuming": [
+            "base_model",
+            "censuses"
+          ],
+          "vulgar": [
+            "base_model",
+            "censuses"
+          ],
+          "humble": [
+            "base_model",
+            "censuses"
+          ],
+          "vain": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "purposeful": [
+            "censuses",
+            "manual",
+            "states_pass"
+          ],
+          "self_indulgent": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "steadfast": [
+            "base_model",
+            "censuses",
+            "manual"
+          ],
+          "cowardly": [
+            "base_model",
+            "censuses"
+          ],
+          "brave": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "belligerent": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "joyless": [
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "boastful": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "curious": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "showy": [
+            "antonym_check",
+            "censuses"
+          ],
+          "restless": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "honest": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "tenacious": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "crude": [
+            "base_model",
+            "censuses",
+            "roget"
+          ],
+          "inquisitive": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "grasping": [
+            "censuses"
+          ],
+          "discerning": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "fastidious": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "spineless": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "arrogant": [
+            "base_model",
+            "censuses"
+          ],
+          "sagacious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "oblivious": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "scatterbrained": [
+            "censuses",
+            "states_pass"
+          ],
+          "ambitious": [
+            "base_model",
+            "censuses"
+          ],
+          "playful": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "charitable": [
+            "base_model",
+            "censuses"
+          ],
+          "shameless": [
+            "antonym_check",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "affectionate": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "opportunistic": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "foolhardy": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_respecting": [
+            "base_model",
+            "censuses"
+          ],
+          "dogmatic": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip",
+            "wn_clusters"
+          ],
+          "meddlesome": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "penny_pinching": [
+            "wn_clusters"
+          ],
+          "distrustful": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "scrupulous": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "liberal": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "open_minded": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "independent": [
+            "base_model",
+            "censuses"
+          ],
+          "easygoing": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "quitting": [
+            "antonym_check",
+            "censuses"
+          ],
+          "fair_minded": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "dominant": [
+            "censuses",
+            "states_pass"
+          ],
+          "forbearing": [
+            "censuses"
+          ],
+          "self_restrained": [
+            "censuses",
+            "ipip"
+          ],
+          "companionable": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "niggardly": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "accepting": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "urbane": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_willed": [
+            "base_model",
+            "censuses"
+          ],
+          "inhibited": [
+            "censuses"
+          ],
+          "appreciative": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "m1_validation"
+          ],
+          "self_disciplined": [
+            "base_model",
+            "censuses"
+          ],
+          "contrary": [
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "stuffy": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "thick_skinned": [
+            "censuses"
+          ],
+          "resigned": [
+            "censuses"
+          ],
+          "joyful": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "decorous": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "risk_averse": [
+            "ipip"
+          ],
+          "sensible": [
+            "base_model",
+            "censuses"
+          ],
+          "meek": [
+            "base_model",
+            "censuses"
+          ],
+          "deceitful": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "frenetic": [
+            "base_model",
+            "censuses"
+          ],
+          "self_righteous": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "selfish": [
+            "base_model",
+            "censuses"
+          ],
+          "careful": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "resilient": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "conflict_averse": [
+            "antonym_check",
+            "ipip"
+          ],
+          "rude": [
+            "base_model",
+            "censuses"
+          ],
+          "magnanimous": [
+            "base_model",
+            "censuses"
+          ],
+          "inclusive": [
+            "base_model"
+          ],
+          "unforgiving": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "long_suffering": [
+            "censuses",
+            "states_pass"
+          ],
+          "know_it_all": [
+            "censuses"
+          ],
+          "defiant": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "hot_tempered": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "long_winded": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "lustful": [
+            "censuses"
+          ],
+          "vengeful": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "temperate": [
+            "censuses"
+          ],
+          "compulsive": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "patient": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "servile": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "stern": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "mistrustful": [
+            "censuses"
+          ],
+          "ungracious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "conventional": [
+            "censuses",
+            "ipip"
+          ],
+          "confident": [
+            "base_model",
+            "censuses"
+          ],
+          "sociable": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "humorous": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "hedonistic": [
+            "ipip"
+          ],
+          "sanctimonious": [
+            "censuses"
+          ],
+          "callous": [
+            "base_model",
+            "censuses"
+          ],
+          "gossipy": [
+            "base_model",
+            "censuses"
+          ],
+          "jocular": [
+            "base_model",
+            "censuses"
+          ],
+          "austere": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_important": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "wn_clusters"
+          ],
+          "power_hungry": [
+            "alignment_sweep",
+            "ipip"
+          ],
+          "serious_minded": [
+            "censuses",
+            "ipip",
+            "wn_clusters"
+          ],
+          "fearful": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "profligate": [
+            "censuses"
+          ],
+          "easily_embarrassed": [
+            "states_pass"
+          ],
+          "self_assertive": [
+            "censuses"
+          ],
+          "driven": [
+            "antonym_check",
+            "base_model",
+            "states_pass"
+          ],
+          "kind_hearted": [
+            "base_model",
+            "censuses"
+          ],
+          "overbearing": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "acquisitive": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "self_sufficient": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "undisciplined": [
+            "base_model",
+            "censuses"
+          ],
+          "reverent": [
+            "censuses",
+            "states_pass"
+          ],
+          "dismissive": [
+            "base_model"
+          ],
+          "malicious": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "theoretical": [
+            "censuses"
+          ],
+          "fearless": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "fun_loving": [
+            "base_model"
+          ],
+          "cantankerous": [
+            "base_model",
+            "censuses"
+          ],
+          "zealous": [
+            "base_model",
+            "censuses"
+          ],
+          "uninterested": [
+            "base_model",
+            "censuses"
+          ],
+          "nosy": [
+            "censuses",
+            "states_pass"
+          ],
+          "aggressive": [
+            "base_model",
+            "censuses"
+          ],
+          "distractible": [
+            "censuses"
+          ],
+          "histrionic": [
+            "censuses"
+          ],
+          "practically_wise": [
+            "alignment_sweep"
+          ],
+          "even_tempered": [
+            "base_model",
+            "ipip",
+            "states_pass"
+          ],
+          "footloose": [
+            "censuses"
+          ],
+          "attention_seeking": [
+            "censuses",
+            "ipip"
+          ],
+          "protective": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "rigid": [
+            "base_model",
+            "censuses"
+          ],
+          "friendly": [
+            "base_model",
+            "censuses"
+          ],
+          "sneering": [
+            "censuses"
+          ],
+          "ritualistic": [
+            "censuses"
+          ],
+          "easily_discouraged": [
+            "states_pass"
+          ],
+          "combative": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "fanatical": [
+            "censuses"
+          ],
+          "fussy": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "slow_witted": [
+            "censuses"
+          ],
+          "pretentious": [
+            "base_model",
+            "censuses"
+          ],
+          "devout": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "high_minded": [
+            "base_model",
+            "censuses"
+          ],
+          "backbiting": [
+            "censuses"
+          ],
+          "munificent": [
+            "censuses"
+          ],
+          "quirky": [
+            "base_model",
+            "censuses"
+          ],
+          "parsimonious": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "entitled": [
+            "base_model"
+          ],
+          "insensible": [
+            "base_model"
+          ],
+          "hidebound": [
+            "censuses"
+          ],
+          "querulous": [
+            "base_model",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "meticulous": [
+            "base_model",
+            "censuses"
+          ],
+          "optimistic": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "level_headed": [
+            "base_model",
+            "censuses"
+          ],
+          "open_handed": [
+            "censuses"
+          ],
+          "toadyish": [
+            "censuses"
+          ],
+          "defensive": [
+            "base_model",
+            "censuses",
+            "roget",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "enthusiastic": [
+            "base_model",
+            "censuses",
+            "manual",
+            "states_pass"
+          ],
+          "resentful": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "forgiving": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "submissive": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "controlled": [
+            "base_model",
+            "censuses"
+          ],
+          "independent_minded": [
+            "base_model"
+          ],
+          "thankful": [
+            "antonym_check",
+            "censuses"
+          ],
+          "slothful": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "headstrong": [
+            "base_model",
+            "censuses"
+          ],
+          "aesthetically_attuned": [
+            "ipip"
+          ],
+          "ruminative": [
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "dovish": [
+            "antonym_check",
+            "wn_clusters"
+          ],
+          "sensual": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "relentless": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "lethargic": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "cautious": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "spiteful": [
+            "base_model",
+            "censuses"
+          ],
+          "solitary": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "subservient": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "valiant": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "stoical": [
+            "base_model",
+            "wn_clusters"
+          ],
+          "discontented": [
+            "censuses",
+            "states_pass"
+          ],
+          "suspicious": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "flashy": [
+            "censuses",
+            "states_pass"
+          ],
+          "reliant_on_others": [
+            "ipip"
+          ],
+          "insincere": [
+            "base_model",
+            "censuses"
+          ],
+          "creative": [
+            "base_model",
+            "censuses"
+          ],
+          "mild": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "grateful": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "daring": [
+            "base_model",
+            "censuses"
+          ],
+          "detached": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "prying": [
+            "censuses"
+          ],
+          "fabricating": [
+            "censuses"
+          ],
+          "dignified": [
+            "base_model",
+            "censuses"
+          ],
+          "self_serving": [
+            "antonym_check",
+            "base_model"
+          ],
+          "churlish": [
+            "base_model",
+            "censuses"
+          ],
+          "dull": [
+            "base_model",
+            "censuses"
+          ],
+          "unreflective": [
+            "censuses",
+            "ipip"
+          ],
+          "irascible": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "spiritual": [
+            "base_model",
+            "censuses"
+          ],
+          "judicious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "cryptic": [
+            "censuses"
+          ],
+          "shallow": [
+            "base_model",
+            "censuses",
+            "roget"
+          ],
+          "unimaginative": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "solemn": [
+            "censuses",
+            "states_pass"
+          ],
+          "unthinking": [
+            "base_model",
+            "censuses"
+          ],
+          "untidy": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "amorous": [
+            "censuses"
+          ],
+          "aloof": [
+            "base_model",
+            "censuses"
+          ],
+          "cooperative": [
+            "base_model",
+            "censuses"
+          ],
+          "perfectionist": [
+            "base_model"
+          ],
+          "pompous": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "irresolute": [
+            "antonym_check",
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_reliant": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "chaste": [
+            "base_model",
+            "censuses"
+          ],
+          "self_controlled": [
+            "base_model",
+            "censuses"
+          ],
+          "receptive": [
+            "censuses",
+            "wn_clusters"
+          ],
+          "smug": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "slapdash": [
+            "antonym_check",
+            "censuses",
+            "roget"
+          ],
+          "superstitious": [
+            "base_model",
+            "censuses"
+          ],
+          "implacable": [
+            "censuses"
+          ],
+          "conscientious": [
+            "base_model",
+            "censuses"
+          ],
+          "pessimistic": [
+            "base_model",
+            "censuses"
+          ],
+          "lecherous": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "rule_abiding": [
+            "ipip"
+          ],
+          "insightful": [
+            "base_model",
+            "censuses"
+          ],
+          "slanderous": [
+            "censuses",
+            "roget"
+          ],
+          "abstemious": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "knavish": [
+            "censuses"
+          ],
+          "obscene": [
+            "censuses"
+          ],
+          "partisan": [
+            "censuses"
+          ],
+          "self_justifying": [
+            "censuses"
+          ],
+          "people_pleasing": [
+            "alignment_sweep"
+          ],
+          "frivolous": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "heedless": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "phony": [
+            "censuses"
+          ],
+          "focused": [
+            "base_model",
+            "states_pass"
+          ],
+          "just": [
+            "censuses"
+          ],
+          "evenhanded": [
+            "alignment_sweep"
+          ],
+          "surly": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "spendthrift": [
+            "antonym_check"
+          ],
+          "listless": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "compliant": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "obtuse": [
+            "base_model",
+            "censuses"
+          ],
+          "duplicitous": [
+            "base_model"
+          ],
+          "irritating": [
+            "base_model",
+            "censuses"
+          ],
+          "progressive": [
+            "base_model",
+            "censuses"
+          ],
+          "merciful": [
+            "base_model",
+            "censuses"
+          ],
+          "orderly": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "thoughtless": [
+            "base_model",
+            "censuses",
+            "roget",
+            "wn_clusters"
+          ],
+          "deferential": [
+            "alignment_sweep",
+            "censuses"
+          ],
+          "earnest": [
+            "base_model",
+            "censuses"
+          ],
+          "striving": [
+            "censuses",
+            "states_pass"
+          ],
+          "constrained": [
+            "censuses"
+          ],
+          "magnificent": [
+            "censuses"
+          ],
+          "impulsive": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "undaunted": [
+            "base_model",
+            "censuses"
+          ],
+          "reserved": [
+            "base_model",
+            "censuses"
+          ],
+          "principled": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "wasteful": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "hyperactive": [
+            "base_model"
+          ],
+          "ungrateful": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "studious": [
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "wise": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "responsible": [
+            "base_model",
+            "censuses"
+          ],
+          "sincere": [
+            "base_model",
+            "censuses"
+          ],
+          "touchy": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "eccentric": [
+            "base_model",
+            "censuses"
+          ],
+          "inventive": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "gluttonous": [
+            "censuses"
+          ],
+          "two_faced": [
+            "antonym_check",
+            "censuses"
+          ],
+          "loquacious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "unscrupulous": [
+            "base_model",
+            "censuses"
+          ],
+          "aspiring": [
+            "censuses"
+          ],
+          "assertive": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "diligent": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "states_pass",
+            "wn_clusters"
+          ],
+          "slovenly": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "proud": [
+            "base_model",
+            "censuses"
+          ],
+          "conniving": [
+            "base_model",
+            "censuses"
+          ],
+          "conformist": [
+            "censuses"
+          ],
+          "zestful": [
+            "censuses"
+          ],
+          "tightfisted": [
+            "wn_clusters"
+          ],
+          "innovative": [
+            "base_model",
+            "censuses"
+          ],
+          "cursory": [
+            "antonym_check",
+            "censuses"
+          ],
+          "boorish": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "team_minded": [
+            "ipip"
+          ],
+          "uncouth": [
+            "base_model",
+            "censuses"
+          ],
+          "undignified": [
+            "antonym_check",
+            "censuses",
+            "wn_clusters"
+          ],
+          "nurturing": [
+            "base_model",
+            "censuses"
+          ],
+          "amiable": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "sensation_seeking": [
+            "censuses"
+          ],
+          "accommodating": [
+            "base_model",
+            "censuses"
+          ],
+          "passionless": [
+            "censuses"
+          ],
+          "financially_cautious": [
+            "antonym_check"
+          ],
+          "permissive": [
+            "base_model"
+          ],
+          "splendid": [
+            "censuses"
+          ],
+          "condescending": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "overeager": [
+            "alignment_sweep",
+            "censuses"
+          ],
+          "good_tempered": [
+            "base_model",
+            "censuses"
+          ],
+          "restrained": [
+            "base_model",
+            "censuses"
+          ],
+          "caring": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "tyrannical": [
+            "base_model",
+            "censuses"
+          ],
+          "inspiring": [
+            "base_model"
+          ],
+          "giddy": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "gullible": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "exacting": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "flippant": [
+            "base_model",
+            "censuses"
+          ],
+          "controlling": [
+            "base_model",
+            "censuses"
+          ],
+          "pusillanimous": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "appeasing": [
+            "censuses"
+          ],
+          "clownish": [
+            "antonym_check",
+            "censuses"
+          ],
+          "incompetent": [
+            "base_model",
+            "censuses"
+          ],
+          "inflexible": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "nihilistic": [
+            "censuses"
+          ],
+          "dissolute": [
+            "states_pass",
+            "wn_clusters"
+          ],
+          "unobservant": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "acquiescent": [
+            "censuses"
+          ],
+          "preachy": [
+            "alignment_sweep",
+            "censuses",
+            "states_pass"
+          ],
+          "persevering": [
+            "base_model",
+            "censuses"
+          ],
+          "guileless": [
+            "censuses"
+          ],
+          "indolent": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "energetic": [
+            "base_model",
+            "censuses",
+            "ipip",
+            "states_pass"
+          ],
+          "bashful": [
+            "base_model",
+            "censuses"
+          ],
+          "garrulous": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_aggrandizing": [
+            "base_model"
+          ],
+          "biased": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "punctilious": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "bellicose": [
+            "censuses"
+          ],
+          "unbending": [
+            "censuses"
+          ],
+          "introspective": [
+            "base_model",
+            "censuses",
+            "ipip"
+          ],
+          "exploitative": [
+            "censuses",
+            "ipip"
+          ],
+          "nostalgic": [
+            "base_model",
+            "censuses"
+          ],
+          "contented": [
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "neglectful": [
+            "censuses"
+          ],
+          "evasive": [
+            "alignment_sweep",
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "orthodox": [
+            "censuses"
+          ],
+          "unreliable": [
+            "base_model",
+            "censuses"
+          ],
+          "ingratiating": [
+            "censuses"
+          ],
+          "legalistic": [
+            "censuses"
+          ],
+          "rule_bound": [
+            "antonym_check"
+          ],
+          "carefree": [
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "self_disparaging": [
+            "censuses",
+            "ipip"
+          ],
+          "scheming": [
+            "alignment_sweep",
+            "base_model",
+            "censuses",
+            "states_pass"
+          ],
+          "disingenuous": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "digressive": [
+            "censuses"
+          ],
+          "manipulative": [
+            "alignment_sweep",
+            "base_model",
+            "censuses"
+          ],
+          "expedient": [
+            "censuses"
+          ],
+          "conservative": [
+            "base_model",
+            "censuses"
+          ],
+          "uncompromising": [
+            "antonym_check",
+            "base_model",
+            "censuses"
+          ],
+          "speculative": [
+            "censuses",
+            "states_pass"
+          ],
+          "attentive": [
+            "antonym_check",
+            "base_model",
+            "censuses",
+            "wn_clusters"
+          ],
+          "cavalier": [
+            "censuses",
+            "m1_validation",
+            "roget"
+          ]
+        },
+        "decided_stems": [
+          "abstemious",
+          "accepting",
+          "accommodating",
+          "acquiescent",
+          "acquisitive",
+          "aesthetically_attuned",
+          "affectionate",
+          "aggressive",
+          "aloof",
+          "ambitious",
+          "amiable",
+          "amorous",
+          "analytical",
+          "appeasing",
+          "appreciative",
+          "arrogant",
+          "aspiring",
+          "assertive",
+          "attention_seeking",
+          "attentive",
+          "austere",
+          "backbiting",
+          "bashful",
+          "bellicose",
+          "belligerent",
+          "benevolent",
+          "biased",
+          "boastful",
+          "boorish",
+          "brave",
+          "brazen",
+          "buffoonish",
+          "callous",
+          "cantankerous",
+          "carefree",
+          "careful",
+          "caring",
+          "cautious",
+          "cavalier",
+          "charitable",
+          "chaste",
+          "churlish",
+          "clownish",
+          "combative",
+          "companionable",
+          "complacent",
+          "compliant",
+          "compulsive",
+          "conceited",
+          "condescending",
+          "confident",
+          "conflict_averse",
+          "conformist",
+          "conniving",
+          "conscientious",
+          "conservative",
+          "constrained",
+          "contemptuous",
+          "contented",
+          "contrary",
+          "controlled",
+          "controlling",
+          "conventional",
+          "cooperative",
+          "courageous",
+          "cowardly",
+          "craven",
+          "creative",
+          "crude",
+          "cryptic",
+          "curious",
+          "cursory",
+          "cynical",
+          "daring",
+          "deceitful",
+          "decorous",
+          "defeatist",
+          "defensive",
+          "deferential",
+          "defiant",
+          "dependent",
+          "detached",
+          "devout",
+          "dignified",
+          "digressive",
+          "diligent",
+          "discerning",
+          "discontented",
+          "disingenuous",
+          "dismissive",
+          "dissolute",
+          "distractible",
+          "distrustful",
+          "dogmatic",
+          "dominant",
+          "domineering",
+          "dovish",
+          "driven",
+          "dull",
+          "duplicitous",
+          "earnest",
+          "easily_discouraged",
+          "easily_embarrassed",
+          "easygoing",
+          "eccentric",
+          "energetic",
+          "enthusiastic",
+          "entitled",
+          "envious",
+          "evasive",
+          "even_tempered",
+          "evenhanded",
+          "exacting",
+          "expedient",
+          "exploitative",
+          "fabricating",
+          "fair_minded",
+          "faithful",
+          "fanatical",
+          "fastidious",
+          "fawning",
+          "fearful",
+          "fearless",
+          "financially_cautious",
+          "flashy",
+          "flippant",
+          "focused",
+          "foolhardy",
+          "footloose",
+          "forbearing",
+          "forgiving",
+          "frenetic",
+          "friendly",
+          "frivolous",
+          "fun_loving",
+          "fussy",
+          "garrulous",
+          "generous",
+          "giddy",
+          "gluttonous",
+          "good_tempered",
+          "gossipy",
+          "grasping",
+          "grateful",
+          "greedy",
+          "guileless",
+          "gullible",
+          "haughty",
+          "headstrong",
+          "hedonistic",
+          "heedless",
+          "hidebound",
+          "high_minded",
+          "histrionic",
+          "honest",
+          "hopeful",
+          "hot_tempered",
+          "humble",
+          "humorless",
+          "humorous",
+          "hyperactive",
+          "impartial",
+          "implacable",
+          "impulsive",
+          "inclusive",
+          "incompetent",
+          "incurious",
+          "independent",
+          "independent_minded",
+          "indifferent",
+          "indolent",
+          "inflexible",
+          "ingratiating",
+          "inhibited",
+          "innovative",
+          "inquisitive",
+          "insensible",
+          "insightful",
+          "insincere",
+          "inspiring",
+          "intemperate",
+          "introspective",
+          "inventive",
+          "irascible",
+          "irresolute",
+          "irritating",
+          "jocular",
+          "joyful",
+          "joyless",
+          "judicious",
+          "just",
+          "kind_hearted",
+          "knavish",
+          "know_it_all",
+          "lecherous",
+          "legalistic",
+          "lethargic",
+          "level_headed",
+          "liberal",
+          "listless",
+          "long_suffering",
+          "long_winded",
+          "loquacious",
+          "loving",
+          "lustful",
+          "magnanimous",
+          "magnificent",
+          "malicious",
+          "manipulative",
+          "meddlesome",
+          "meek",
+          "merciful",
+          "meticulous",
+          "mild",
+          "miserly",
+          "mistrustful",
+          "moderate",
+          "modest",
+          "munificent",
+          "naive",
+          "neglectful",
+          "niggardly",
+          "nihilistic",
+          "nostalgic",
+          "nosy",
+          "nurturing",
+          "oblivious",
+          "obscene",
+          "obsequious",
+          "obsessive",
+          "obtuse",
+          "officious",
+          "open_handed",
+          "open_minded",
+          "opportunistic",
+          "optimistic",
+          "orderly",
+          "orthodox",
+          "ostentatious",
+          "overbearing",
+          "overeager",
+          "parsimonious",
+          "partisan",
+          "passionless",
+          "passive",
+          "patient",
+          "pedantic",
+          "penny_pinching",
+          "people_pleasing",
+          "perfectionist",
+          "permissive",
+          "persevering",
+          "persistent",
+          "pessimistic",
+          "phony",
+          "playful",
+          "pompous",
+          "power_hungry",
+          "practically_wise",
+          "preachy",
+          "pretentious",
+          "principled",
+          "profligate",
+          "progressive",
+          "protective",
+          "proud",
+          "prudent",
+          "prying",
+          "punctilious",
+          "purposeful",
+          "pusillanimous",
+          "querulous",
+          "quirky",
+          "quitting",
+          "rambling",
+          "rash",
+          "receptive",
+          "reckless",
+          "relentless",
+          "reliant_on_others",
+          "resentful",
+          "reserved",
+          "resigned",
+          "resilient",
+          "responsible",
+          "restless",
+          "restrained",
+          "reverent",
+          "rigid",
+          "risk_averse",
+          "ritualistic",
+          "rootless",
+          "rude",
+          "rule_abiding",
+          "rule_bound",
+          "ruminative",
+          "sagacious",
+          "sanctimonious",
+          "scatterbrained",
+          "scheming",
+          "scrupulous",
+          "self_aggrandizing",
+          "self_assertive",
+          "self_controlled",
+          "self_disciplined",
+          "self_disparaging",
+          "self_effacing",
+          "self_important",
+          "self_indulgent",
+          "self_justifying",
+          "self_reliant",
+          "self_respecting",
+          "self_restrained",
+          "self_righteous",
+          "self_serving",
+          "self_sufficient",
+          "self_willed",
+          "selfish",
+          "sensation_seeking",
+          "sensible",
+          "sensual",
+          "serious_minded",
+          "servile",
+          "shallow",
+          "shameless",
+          "showy",
+          "sincere",
+          "slanderous",
+          "slapdash",
+          "slothful",
+          "slovenly",
+          "slow_witted",
+          "smug",
+          "sneering",
+          "sociable",
+          "solemn",
+          "solitary",
+          "speculative",
+          "spendthrift",
+          "spineless",
+          "spiritual",
+          "spiteful",
+          "splendid",
+          "steadfast",
+          "stern",
+          "stingy",
+          "stoical",
+          "striving",
+          "studious",
+          "stuffy",
+          "submissive",
+          "subservient",
+          "superficial",
+          "superstitious",
+          "surly",
+          "suspicious",
+          "sycophantic",
+          "tactless",
+          "team_minded",
+          "temperate",
+          "tenacious",
+          "thankful",
+          "theoretical",
+          "thick_skinned",
+          "thoughtless",
+          "tightfisted",
+          "timid",
+          "toadyish",
+          "touchy",
+          "truthful",
+          "two_faced",
+          "tyrannical",
+          "unambitious",
+          "unassuming",
+          "unbending",
+          "uncompromising",
+          "uncouth",
+          "undaunted",
+          "undignified",
+          "undisciplined",
+          "unforgiving",
+          "ungracious",
+          "ungrateful",
+          "unimaginative",
+          "uninterested",
+          "unobservant",
+          "unprincipled",
+          "unreflective",
+          "unreliable",
+          "unscrupulous",
+          "unthinking",
+          "untidy",
+          "urbane",
+          "vain",
+          "vainglorious",
+          "valiant",
+          "vengeful",
+          "vulgar",
+          "wasteful",
+          "wise",
+          "witty",
+          "zealous",
+          "zestful"
+        ],
+        "exists_stems": [
+          "abstemious",
+          "accommodating",
+          "aggressive",
+          "ambitious",
+          "amorous",
+          "analytical",
+          "arrogant",
+          "assertive",
+          "attention_seeking",
+          "benevolent",
+          "brave",
+          "brown_eyed",
+          "callous",
+          "cautious",
+          "chaste",
+          "compulsive",
+          "condescending",
+          "confident",
+          "conformist",
+          "conscientious",
+          "conservative",
+          "contented",
+          "controlling",
+          "conventional",
+          "cooperative",
+          "cowardly",
+          "creative",
+          "cryptic",
+          "curious",
+          "cynical",
+          "deceitful",
+          "defeatist",
+          "deferential",
+          "dependent",
+          "detached",
+          "dignified",
+          "discontented",
+          "dismissive",
+          "distractible",
+          "dogmatic",
+          "dominant",
+          "dull",
+          "earnest",
+          "easygoing",
+          "eccentric",
+          "elitist",
+          "energetic",
+          "entitled",
+          "envious",
+          "even_tempered",
+          "exclusionary",
+          "expedient",
+          "fastidious",
+          "financially_cautious",
+          "flippant",
+          "focused",
+          "forgiving",
+          "friendly",
+          "generous",
+          "gluttonous",
+          "grateful",
+          "greedy",
+          "guileless",
+          "hands_off",
+          "hedonistic",
+          "honest",
+          "humble",
+          "humorless",
+          "impulsive",
+          "inclusive",
+          "incompetent",
+          "incurious",
+          "independent",
+          "inflexible",
+          "innovative",
+          "inquisitive",
+          "introspective",
+          "irascible",
+          "joyful",
+          "joyless",
+          "just",
+          "lethargic",
+          "lustful",
+          "magnanimous",
+          "malicious",
+          "manipulative",
+          "meticulous",
+          "moderate",
+          "modest",
+          "naive",
+          "neglectful",
+          "nihilistic",
+          "nostalgic",
+          "nurturing",
+          "oblivious",
+          "obsessive",
+          "open_minded",
+          "optimistic",
+          "orthodox",
+          "partisan",
+          "passive",
+          "patient",
+          "pedantic",
+          "perfectionist",
+          "permissive",
+          "persevering",
+          "pessimistic",
+          "playful",
+          "pretentious",
+          "principled",
+          "progressive",
+          "prudent",
+          "reckless",
+          "reserved",
+          "resilient",
+          "responsible",
+          "restless",
+          "reverent",
+          "rigid",
+          "risk_averse",
+          "ritualistic",
+          "rootless",
+          "rude",
+          "rule_abiding",
+          "scheming",
+          "self_aggrandizing",
+          "self_disciplined",
+          "self_effacing",
+          "self_indulgent",
+          "self_reliant",
+          "selfish",
+          "sincere",
+          "slothful",
+          "slovenly",
+          "slow_witted",
+          "socially_obtuse",
+          "socially_perceptive",
+          "solemn",
+          "solitary",
+          "speculative",
+          "spiritual",
+          "spiteful",
+          "stingy",
+          "submissive",
+          "superficial",
+          "superstitious",
+          "sycophantic",
+          "temperate",
+          "theoretical",
+          "thick_skinned",
+          "timid",
+          "truthful",
+          "tunnel_visioned",
+          "unambitious",
+          "unassuming",
+          "unforgiving",
+          "ungrateful",
+          "unreflective",
+          "unreliable",
+          "unscrupulous",
+          "wasteful",
+          "wise",
+          "witty",
+          "zealous"
+        ],
+        "queued_stems": [
+          "abstemious",
+          "aloof",
+          "ambitious",
+          "amorous",
+          "attention_seeking",
+          "brave",
+          "brown_eyed",
+          "callous",
+          "chaste",
+          "conformist",
+          "conservative",
+          "contented",
+          "controlling",
+          "conventional",
+          "cowardly",
+          "crude",
+          "defeatist",
+          "dependent",
+          "dignified",
+          "discontented",
+          "dismissive",
+          "distractible",
+          "eccentric",
+          "energetic",
+          "enthusiastic",
+          "entitled",
+          "even_tempered",
+          "expedient",
+          "fastidious",
+          "focused",
+          "forgiving",
+          "friendly",
+          "grateful",
+          "hands_off",
+          "honest",
+          "hopeful",
+          "humorless",
+          "incompetent",
+          "inflexible",
+          "intemperate",
+          "irascible",
+          "joyful",
+          "joyless",
+          "just",
+          "lethargic",
+          "magnanimous",
+          "malicious",
+          "meek",
+          "merciful",
+          "modest",
+          "neglectful",
+          "nosy",
+          "nouveau_riche",
+          "oblivious",
+          "obscene",
+          "open_minded",
+          "orderly",
+          "orthodox",
+          "partisan",
+          "passive",
+          "permissive",
+          "persevering",
+          "phony",
+          "pretentious",
+          "prudent",
+          "purposeful",
+          "reckless",
+          "resentful",
+          "resigned",
+          "responsible",
+          "restless",
+          "restrained",
+          "rigid",
+          "risk_averse",
+          "rootless",
+          "rude",
+          "self_aggrandizing",
+          "self_effacing",
+          "self_reliant",
+          "selfish",
+          "sincere",
+          "slovenly",
+          "slow_witted",
+          "socially_obtuse",
+          "socially_perceptive",
+          "solitary",
+          "spiteful",
+          "steadfast",
+          "superficial",
+          "superstitious",
+          "temperate",
+          "thick_skinned",
+          "timid",
+          "tunnel_visioned",
+          "unambitious",
+          "unassuming",
+          "unforgiving",
+          "ungrateful",
+          "unreflective",
+          "unscrupulous",
+          "wise"
+        ],
+        "principal_target_stems": [
+          "ingratiating",
+          "manipulative"
+        ],
+        "transport": "live",
+        "budget_usd": 5.0,
+        "estimate": {
+          "n": 96,
+          "transport": "live",
+          "m1_usd": 0.6912,
+          "m3_usd": 0.9293,
+          "total_usd": 1.6205,
+          "pass_rate": 0.88,
+          "pass_rate_high": 0.95,
+          "m3_usd_high": 1.0032,
+          "total_usd_high": 1.6944,
+          "assumptions": {
+            "m1_usd_per_word": 0.0072,
+            "m3_usd_per_passed_word": 0.011,
+            "m1_pass_rate": 0.88,
+            "m1_pass_rate_high": 0.95,
+            "batch_factor": 1.0,
+            "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.88 (the census TDA, plan section 10) with 0.95 printed as a high case, unmeasured for this generator until pilot B"
+          }
+        },
+        "strata": {
+          "kind_x_status": {
+            "classical | exists": 135,
+            "classical | new": 64,
+            "classical | queued": 16,
+            "classical | registered-decided": 200,
+            "degree_filler | exists": 5,
+            "degree_filler | new": 8,
+            "degree_filler | registered-decided": 9,
+            "opposite | exists": 7,
+            "opposite | new": 4,
+            "opposite | registered-decided": 1,
+            "pair_completion | exists": 2,
+            "pair_completion | new": 1,
+            "pair_completion | queued": 1,
+            "pair_completion | registered-decided": 2,
+            "principal_retarget | exists": 1,
+            "principal_retarget | registered-decided": 1,
+            "remode | exists": 4,
+            "remode | new": 3,
+            "remode | registered-decided": 6,
+            "retarget | exists": 6,
+            "retarget | new": 8,
+            "retarget | registered-decided": 9,
+            "triangle_corner | exists": 4,
+            "triangle_corner | registered-decided": 2
+          },
+          "status": {
+            "exists": 164,
+            "new": 88,
+            "queued": 17,
+            "registered-decided": 230
+          },
+          "kind": {
+            "classical": 415,
+            "degree_filler": 22,
+            "opposite": 12,
+            "pair_completion": 6,
+            "principal_retarget": 2,
+            "remode": 13,
+            "retarget": 23,
+            "triangle_corner": 6
+          },
+          "principal_target": 2,
+          "phrases": 50
+        },
+        "review_terms_per_hour": 150.0,
+        "review_rate_source": "plan figure, ~150 terms an hour (plan 04; coding_plan_09 decision 1)",
+        "projected_kept": 44.0,
+        "table": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/structural/operator_table.jsonl",
+        "table_sha256": "c7b9b2e891af80513aa4971122f87863e9c2aace166bb61fa71a0a356be246ef",
+        "score": "n_sources (a quality signal; not a familiarity)"
+      },
+      "n_emitted": 629,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
       }
     }
   ]

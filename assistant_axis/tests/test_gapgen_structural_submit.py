@@ -318,3 +318,15 @@ def test_review_rate_measured_through_plan_13s_interface(monkeypatch, tmp_path, 
     else:
         assert src.startswith("measured")
 
+
+
+def test_report_reads_the_submit_session_of_a_shared_run_id():
+    """A run id shared by modernise and submit (the pilot's command list) keeps modernise's args at the top level;
+    the report takes the latest submit session's (2026-10-14: the pilot's headline read 0 net-new without this)."""
+    run = {"args": {"step": "modernise", "n_rows": 205},
+           "sessions": [{"args": {"step": "modernise", "n_rows": 205}},
+                        {"args": {"step": "submit", "counted_stems": ["a"], "registered_stems": {"b": ["censuses"]}}},
+                        {"args": {"step": "submit", "counted_stems": ["a", "c"]}}]}
+    assert R.submit_args(run)["counted_stems"] == ["a", "c"]
+    assert R.submit_args({"args": {"step": "submit", "counted_stems": ["x"]}})["counted_stems"] == ["x"]
+    assert R.submit_args({}) == {}

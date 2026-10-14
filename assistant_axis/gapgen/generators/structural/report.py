@@ -100,6 +100,17 @@ def _kinds_by_stem(table: Sequence[Mapping]) -> dict[str, list]:
     return {r["stem"]: list(r.get("kinds") or []) for r in table}
 
 
+def submit_args(run: Mapping) -> dict:
+    """The submit step's arguments in a run record: the latest session whose ``step`` is ``submit``, else the
+    top-level ``args``.  A run id shared by several steps (the pilot's ``modernise`` then ``submit``) keeps its first
+    session's arguments at the top level, so reading only those lost the submit step's stem lists (2026-10-14)."""
+    for s in reversed(run.get("sessions") or []):
+        a = s.get("args") or {}
+        if a.get("step") == "submit":
+            return a
+    return run.get("args") or {}
+
+
 def figures(run_id: str, *, run_dir: Path, registry_rows: Mapping[str, Mapping], table: Sequence[Mapping],
             evaluation: Optional[Mapping] = None, filter_dir: Optional[Path] = None,
             novelty_dir: Optional[Path] = None, extra_usage: Sequence[Path] = (),
@@ -107,7 +118,7 @@ def figures(run_id: str, *, run_dir: Path, registry_rows: Mapping[str, Mapping],
     """Every figure the readout prints (module docstring)."""
     run = json.loads((Path(run_dir) / "run.json").read_text(encoding="utf-8")) if (Path(run_dir) / "run.json"
                                                                                     ).exists() else {}
-    args = run.get("args") or {}
+    args = submit_args(run)
     rows = run_rows(registry_rows, run_id)
     n = len(rows)
     registered = dict(args.get("registered_stems") or {})
