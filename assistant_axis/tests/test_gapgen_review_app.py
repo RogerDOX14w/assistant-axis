@@ -1301,3 +1301,71 @@ class TestHandledBefore:
 def test_the_statuses_that_settle_a_term_are_in_the_vocabulary():
     from assistant_axis.gapgen.normalize import REVIEW_STATUSES
     assert set(D.HANDLED_ELSEWHERE) <= set(REVIEW_STATUSES) and not {"parked", "deferred"} & set(D.HANDLED_ELSEWHERE)
+
+
+# --------------------------------------------------------------------------- the IPIP pole's other name
+
+def _ipip(ref: str, run_id: str, surface: str) -> dict:
+    return {"generator": "ipip", "run_id": run_id, "rank": 1, "score": None, "source_ref": ref, "gloss_hint": None,
+            "partner_hint": None, "surface": surface}
+
+
+class TestIpipOtherName:
+    """Roger, 2026-10-14: the IPIP generator names each pole twice (blind and hinted runs, one ``source_ref``), and the
+    two names often land in different groups, so the member card shows the other run's name for the same pole."""
+
+    @pytest.fixture
+    def ipip_env(self, env):
+        reg = env["reg"]
+        rows = reg.fold()
+        # skeptic (in the graph) is the blind name of pole c001a; doubter (not in the graph) the hinted one, and a
+        # third run named it unbeliever
+        rows[k("skeptic")]["sources"].append(_ipip("ipip:g600:c001a", "blind", "skeptic"))
+        # pious: both runs gave the same name (one row, two sources), and a second sense row spells it "Pious"
+        rows[k("pious")]["sources"] += [_ipip("ipip:g600:c003a", "blind", "pious"),
+                                        _ipip("ipip:g600:c003a", "hinted", "pious")]
+        reg.write([rows[k("skeptic")], rows[k("pious")]])
+        doubter = new_record("doubter", sources=[_ipip("ipip:g600:c001a", "hinted", "doubter")])
+        unbeliever = new_record("unbeliever", sources=[_ipip("ipip:g600:c001a", "later", "unbeliever")])
+        pious2 = new_record("Pious", sense_id=2, sources=[_ipip("ipip:g600:c003a", "later", "Pious")])
+        # a different pole and a non-IPIP source sharing a ref string are no siblings
+        other = new_record("solitary", sources=[_ipip("ipip:g600:c009b", "hinted", "solitary"),
+                                                {**_ipip("ipip:g600:c001a", "x", "lonesome"), "generator": "roget"}])
+        reg.write([doubter, unbeliever, pious2, other])
+        return env
+
+    def test_the_siblings_come_from_the_rows_sources(self, ipip_env):
+        sib = D.ipip_siblings(ipip_env["reg"].fold())
+        assert sorted(s["key"] for s in sib["ipip:g600:c001a"]) == [k("doubter"), k("skeptic"), k("unbeliever")]
+        assert sorted(s["key"] for s in sib["ipip:g600:c003a"]) == [k("pious"), k("pious"), "pious#2"]
+        assert [s["key"] for s in sib["ipip:g600:c009b"]] == [k("solitary")]
+
+    def test_the_card_shows_the_other_names_both_ways_and_omits_the_same_stem(self, ipip_env):
+        log = log_with_registry(ipip_env)
+        card = log.state.member_card(k("skeptic"))["other_names"]
+        assert [(o["surface"], o["key"], o["source_ref"], o["run_ids"]) for o in card] == [
+            ("doubter", k("doubter"), "ipip:g600:c001a", ["hinted"]),
+            ("unbeliever", k("unbeliever"), "ipip:g600:c001a", ["later"])]
+        rows = log.rows
+        back = D.other_names_card(k("doubter"), rows[k("doubter")], log.state.ipip_siblings())
+        assert [o["surface"] for o in back] == ["skeptic", "unbeliever"]
+        assert log.state.member_card(k("pious"))["other_names"] is None          # same name both runs, and "Pious"
+        assert log.state.member_card(k("loner"))["other_names"] is None          # no IPIP source
+        assert D.other_names_card(k("solitary"), rows[k("solitary")], log.state.ipip_siblings()) is None
+
+    def test_without_a_registry_there_is_no_badge(self, ipip_env):
+        assert make_log(ipip_env).state.member_card(k("skeptic"))["other_names"] is None
+
+    def test_through_the_api_and_the_page_renders_it(self, ipip_env):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        client = TestClient(server.create_app(review_dir=ipip_env["rdir"], data_dir=ipip_env["data"],
+                                              registry_path=ipip_env["reg"].path, clock=Clock()))
+        t = client.get(f"/api/term/{quote(k('skeptic'), safe='')}").json()
+        gid = post(client, action="open", source=f"term:{k('skeptic')}").json()["group"]["id"]
+        card = client.get(f"/api/group/{gid}").json()
+        m = {x["key"]: x for x in card["members"]}
+        assert [o["surface"] for o in m[k("skeptic")]["other_names"]] == ["doubter", "unbeliever"]
+        assert [o["surface"] for o in t["term"]["other_names"]] == ["doubter", "unbeliever"]
+        js = client.get("/static/app.js").text
+        assert "m.other_names" in js and "other name: " in js and "${otherNames}" in js

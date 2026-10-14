@@ -180,6 +180,52 @@ def relabel_card(row) -> Optional[dict]:
     return {"from": src, "to": to, "route": route_text(b)}
 
 
+def _stem_of(surface) -> Optional[str]:
+    from assistant_axis.gapgen.normalize import normalize_candidate
+    try:
+        return normalize_candidate(str(surface or "")).stem
+    except ValueError:
+        return None
+
+
+def ipip_siblings(rows: Mapping[str, Mapping]) -> dict[str, list[dict]]:
+    """``{source_ref: [{"key", "stem", "surface", "run_id"}, ...]}``: every IPIP source (``generator == "ipip"``) of
+    every registry row, by the pole it names (``ipip:g600:c002a``).  The IPIP generator names each pole twice, blind
+    and hinted (two runs, one ``source_ref``), and the two names often land in different review groups (Roger,
+    2026-10-14), so the member card shows the other name (:func:`other_names_card`).  Built from the rows' ``sources``,
+    not from the run files, so any later IPIP run joins in."""
+    out: dict[str, list[dict]] = defaultdict(list)
+    for key, row in rows.items():
+        for s in (row or {}).get("sources") or []:
+            if s.get("generator") != "ipip" or not s.get("source_ref"):
+                continue
+            surface = s.get("surface") or row.get("surface") or row.get("label")
+            out[s["source_ref"]].append({"key": key, "stem": _stem_of(surface) or row.get("stem"),
+                                         "surface": surface, "run_id": s.get("run_id")})
+    return dict(out)
+
+
+def other_names_card(key: str, row: Optional[Mapping], siblings: Mapping[str, list]) -> Optional[list[dict]]:
+    """The member card's "other name" badge: for a row whose sources include an IPIP pole, the other names given to
+    that same pole (``[{"surface", "key", "source_ref", "run_ids"}]``, one per stem, in the order met), leaving out a
+    name that normalises to this row's own stem or to one of its own IPIP surfaces; None when there is none."""
+    row = row or {}
+    srcs = [s for s in row.get("sources") or [] if s.get("generator") == "ipip" and s.get("source_ref")]
+    if not srcs:
+        return None
+    own = {row.get("stem") or key.split("#")[0]} | {_stem_of(s.get("surface")) for s in srcs}
+    found: dict[str, dict] = {}
+    for ref in dict.fromkeys(s["source_ref"] for s in srcs):
+        for sib in siblings.get(ref, []):
+            if sib["key"] == key or sib["stem"] in own:
+                continue
+            item = found.setdefault(sib["stem"], {"surface": sib["surface"], "key": sib["key"], "source_ref": ref,
+                                                  "run_ids": []})
+            if sib.get("run_id") and sib["run_id"] not in item["run_ids"]:
+                item["run_ids"].append(sib["run_id"])
+    return list(found.values()) or None
+
+
 def target_path(key: str) -> tuple[Optional[str], Optional[str]]:
     """``(path relative to the repository, href on the app)`` of a corpus trait or queue entry key."""
     kind, _, stem = key.partition(":")
@@ -272,6 +318,7 @@ class ReviewState:
         grouped = {m for c in [*self.merged, *self.proposed] for m in c}
         self.singles = [x for x in self.kept if x not in grouped]
         self.rows = dict(rows or {})
+        self._ipip_siblings: Optional[dict] = None     # built on the first member card (:func:`ipip_siblings`)
         self.labels = dict(labels or {})
         self.targets = set(targets or ()) | {n.key for n in graph.nodes
                                              if n.kind in ("corpus", "queue") and not n.missing}
@@ -779,6 +826,12 @@ class ReviewState:
         return out
 
     # -- cards ------------------------------------------------------------------------
+    def ipip_siblings(self) -> dict:
+        """:func:`ipip_siblings` of the folded registry, built once per state."""
+        if self._ipip_siblings is None:
+            self._ipip_siblings = ipip_siblings(self.rows)
+        return self._ipip_siblings
+
     def member_card(self, key: str) -> dict:
         n = self.nodes[key]
         row = self.rows.get(key) or {}
@@ -799,7 +852,8 @@ class ReviewState:
                "distinct_from": sorted(self.distinct.get(key, ())),
                "applied": rv.get("status") if rv.get("status") not in (None, "unreviewed") else None,
                "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
-               "earlier_review": self.earlier.get(key), "relabel": relabel_card(row)}
+               "earlier_review": self.earlier.get(key), "relabel": relabel_card(row),
+               "other_names": other_names_card(key, row, self.ipip_siblings())}
         if out["handled_by"]:
             pre = self.pre_handled_info(key)
             out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution
