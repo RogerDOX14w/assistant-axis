@@ -330,3 +330,15 @@ def test_report_reads_the_submit_session_of_a_shared_run_id():
     assert R.submit_args(run)["counted_stems"] == ["a", "c"]
     assert R.submit_args({"args": {"step": "submit", "counted_stems": ["x"]}})["counted_stems"] == ["x"]
     assert R.submit_args({}) == {}
+
+
+def test_roger_sample_shows_the_nearest_existing_traits():
+    """Roger, 2026-10-14: the sample asks trait vs duplicate, so it shows the corpus traits M3 compared with, each
+    linked with its reading (Opus's when present), and the first one's description column."""
+    row = {"key": "brazen#1", "stem": "brazen", "label": "brazen", "filter": {"verdict": "trait"},
+           "novelty": {"decision": "new", "readings": [
+               {"position": 2, "stem": "unselfconscious", "sonnet": {"value": 1}},
+               {"position": 1, "stem": "rude", "sonnet": {"value": 3}, "opus": {"value": 2}}]}}
+    md = R.roger_sample([row], [], n=1, seed=0, run_id="x", trait_prefix="../t/")
+    assert "nearest existing traits (M3's reading)" in md
+    assert "[rude](../t/rude.json) 2; [unselfconscious](../t/unselfconscious.json) 1" in md
