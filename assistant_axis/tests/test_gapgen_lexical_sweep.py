@@ -367,3 +367,18 @@ class TestDryReadout:
         assert r["estimate"]["opus_share_assumed"] == [0.4, 0.62]
         md = LS.dry_markdown(r)
         assert "gate 1" in md and "[alpha](../../traits/instructions/alpha.json)" in md
+
+
+def test_sibling_covers_and_target_kind():
+    """Review S2: a cover reaching ``agreeable (Big Five)`` when M3 listed ``agreeable`` is a description variant of a
+    concept M3 retrieved, not a retrieval miss; the report splits covers by target kind."""
+    labels = {"agreeable": "agreeable", "agreeable_big_five": "agreeable (Big Five)", "kind": "kind",
+              "warm": "warm"}
+    kept = {"a#1": {"novelty": {"listed": [{"stem": "agreeable"}]}},
+            "b#1": {"novelty": {"listed": [{"stem": "warm"}]}}}
+    covers = [{"key": "a#1", "stem": "agreeable_big_five", "kind": "corpus"},
+              {"key": "b#1", "stem": "kind", "kind": "corpus"},
+              {"key": "b#1", "stem": "queued_word", "kind": "queue"}]
+    sib = LS.sibling_covers(covers, kept=kept, labels=labels)
+    assert sib == [{"key": "a#1", "stem": "agreeable_big_five", "m3_listed_sibling": ["agreeable"]}]
+    assert [LS.target_kind(c, labels) for c in covers] == ["standards_derived", "bare", "queue"]

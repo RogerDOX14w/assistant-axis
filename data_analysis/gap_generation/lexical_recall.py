@@ -517,7 +517,7 @@ def cmd_sweep(args) -> int:
             n_written = write_blocks(results, plan=plan, items=items, run_id=args.batch_id, runner=runner,
                                      out_dir=out_dir, registry_path=None if args.no_registry_write else args.registry)
         rep = LS.sweep_report(results, items=items, kept=plan["kept"], plans=plan["plans"], usage=usage.as_dict(),
-                              parse_rates=parse, n_written=n_written)
+                              parse_rates=parse, n_written=n_written, labels=_target_labels(plan))
         _write_json(rep, out_dir / "sweep_report.json", title=f"lexical sweep {args.batch_id}")
         atomic_write_text(LS.sweep_markdown(rep, results, kept=plan["kept"], batch_id=args.batch_id),
                           out_dir / "sweep_report.md")
@@ -561,8 +561,10 @@ def cmd_report(args) -> int:
         mk = json.loads(Path(args.marks).read_text(encoding="utf-8"))
         key = json.loads((d / "marks" / "key.json").read_text(encoding="utf-8"))
         marks = LS.fold_marks(key, mk.get("rows") or mk.get("marks") or [])
+    labels = {s: r["label"] for s, r in LX.load_lookup(args.lookup).rows.items()} if getattr(args, "lookup", None) else None
     rep = LS.sweep_report(results, items=items, kept=ctx["kept"], plans=ctx["plans"], usage=usage,
-                          parse_rates=run.get("parse_rates"), marks=marks, n_written=run.get("n_blocks_written"))
+                          parse_rates=run.get("parse_rates"), marks=marks, n_written=run.get("n_blocks_written"),
+                          labels=labels)
     print(rep["stop_rule"]["line"])
     if marks:
         print("marks: " + marks["line"])

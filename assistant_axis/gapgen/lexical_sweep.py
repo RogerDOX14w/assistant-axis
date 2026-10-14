@@ -687,11 +687,42 @@ def labelled_markdown(m: Mapping) -> str:
     return "\n".join(out)
 
 
+def _bare(label: str) -> str:
+    return LX.norm(LX.strip_standard_suffix(label.replace("_", " ")))
+
+
+def target_kind(cover: Mapping, labels: Mapping[str, str]) -> str:
+    """``queue`` (a seed-queue target), ``standards_derived`` (a corpus label with a standard's suffix), else ``bare``."""
+    if cover.get("kind") == "queue":
+        return "queue"
+    lab = labels.get(cover.get("stem") or "", "")
+    return "standards_derived" if LX.strip_standard_suffix(lab) != lab.strip() else "bare"
+
+
+def sibling_covers(covers: Sequence[Mapping], *, kept: Mapping[str, Mapping], labels: Mapping[str, str]) -> list[dict]:
+    """The covers whose target shares its bare form (a standard's suffix dropped) with a stem M3 already listed, read
+    or covered by for that row (:func:`m3_seen`): ``agreeable (Big Five)`` when M3 listed ``agreeable``.  A
+    description variant of a concept M3 did retrieve, not a retrieval miss (plan 11 review, S2)."""
+    out = []
+    for c in covers:
+        row = kept.get(c["key"]) or {}
+        seen = m3_seen(row.get("novelty") or {}) - {c["stem"]}
+        tb = _bare(labels.get(c["stem"], c["stem"]))
+        hit = sorted(s for s in seen if _bare(labels.get(s, s)) == tb)
+        if hit:
+            out.append({"key": c["key"], "stem": c["stem"], "m3_listed_sibling": hit})
+    return out
+
+
 def sweep_report(results: Sequence[Mapping], *, items: Sequence[PairItem], kept: Mapping[str, Mapping],
                  plans: Mapping[str, RowPlan], usage: Optional[Mapping] = None, parse_rates: Optional[Mapping] = None,
-                 marks: Optional[Mapping] = None, n_written: Optional[int] = None) -> dict:
+                 marks: Optional[Mapping] = None, n_written: Optional[int] = None,
+                 labels: Optional[Mapping[str, str]] = None) -> dict:
     """The sweep's readout (plan § 6, § 10 gate 2), the stop-rule figure first: covers at the cut-off (a lexical-only
     pair read at its row's own cut-off under its rule set), by link type, lexicon, cut-off band, pass and target kind;
+    with ``labels`` (stem -> corpus label), the covers by target kind (``bare``, ``standards_derived``, ``queue``) and
+    those whose target is a sibling of a stem M3 already listed for the row (the same bare form, a standard's suffix
+    dropped), which the stop rule should not count as retrieval misses (review S2);
     the below-cut readings; precision proxies (covers on rows Roger merged into that trait, into another, accepted; the
     audit's list); Opus's measured share; parse rates; spend; Roger's marks when given (:func:`fold_marks`)."""
     res = [r for r in results if "stalled" not in r]
@@ -729,6 +760,7 @@ def sweep_report(results: Sequence[Mapping], *, items: Sequence[PairItem], kept:
     lex_target_cut = {k: s for k, s in lex_target.items() if any(c["key"] == k and c["stem"] == s for c in covers)}
     ant_rows = {k: p for k, p in plans.items() if p.antonyms}
     spend = (usage or {}).get("total_cost_usd")
+    siblings = sibling_covers(covers, kept=kept, labels=labels) if labels is not None else None
     out = {
         "stop_rule": {"covers_at_cut_off": len(covers), "cover_rows": len(cover_rows), "stop_line": STOP_LINE_COVERS,
                       "below_stop_line": len(covers) < STOP_LINE_COVERS,
@@ -769,6 +801,13 @@ def sweep_report(results: Sequence[Mapping], *, items: Sequence[PairItem], kept:
                                           "verdict")} | {"sonnet": (c.get("sonnet") or {}).get("value"),
                                                          "opus": (c.get("opus") or {}).get("value")} for c in covers],
     }
+    if siblings is not None:
+        out["covers_by_target_kind"] = dict(sorted(Counter(target_kind(c, labels) for c in covers).items()))
+        out["sibling_covers"] = siblings
+        out["covers_excluding_siblings"] = len(covers) - len(siblings)
+        out["stop_rule"]["covers_excluding_siblings"] = len(covers) - len(siblings)
+        out["stop_rule"]["line"] += (f"; {len(siblings)} of them reach a sibling (a standards-derived or bare form) of a "
+                                     f"trait M3 already listed for the row, leaving {len(covers) - len(siblings)}")
     if n_written is not None:
         out["n_blocks_written"] = n_written
     if marks:

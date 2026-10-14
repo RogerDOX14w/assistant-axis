@@ -5,7 +5,8 @@
    "cover_rows": 72,
    "stop_line": 5,
    "below_stop_line": false,
-   "line": "covers at the cut-off: 81 pairs on 72 rows (at or over the stop line of about 5); Roger's marks decide the build (about 90% confirmed, 36 of 40)"
+   "line": "covers at the cut-off: 81 pairs on 72 rows (at or over the stop line of about 5); Roger's marks decide the build (about 90% confirmed, 36 of 40); 1 of them reach a sibling (a standards-derived or bare form) of a trait M3 already listed for the row, leaving 80",
+   "covers_excluding_siblings": 80
   },
   "n_rows_swept": 4563,
   "n_rows_with_links": 1811,
@@ -1776,16 +1777,31 @@
     "opus": 3
    }
   ],
+  "covers_by_target_kind": {
+   "bare": 16,
+   "queue": 64,
+   "standards_derived": 1
+  },
+  "sibling_covers": [
+   {
+    "key": "heedful#1",
+    "stem": "conscientious_big_five",
+    "m3_listed_sibling": [
+     "conscientious_hexaco"
+    ]
+   }
+  ],
+  "covers_excluding_siblings": 80,
   "n_blocks_written": 1977
  },
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py sweep --batch-id 2026-10-14-lex_sweep_1 --budget-usd 10",
-   "git_sha": "58c4f495+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py report --batch-id 2026-10-14-lex_sweep_1",
+   "git_sha": "167fc29c+dirty",
    "author": "Roger Dearnaley",
    "title": "lexical sweep 2026-10-14-lex_sweep_1"
   },
-  "produced_at": "2026-10-14T07:07:23+00:00"
+  "produced_at": "2026-10-14T07:09:47+00:00"
  }
 }
