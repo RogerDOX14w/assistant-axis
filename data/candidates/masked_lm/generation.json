@@ -1,6 +1,68 @@
 {
   "result": {
     "passes": {
+      "multiword:roberta": {
+        "pass": "multiword",
+        "model_key": "roberta",
+        "model": "roberta-large",
+        "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+        "device": "cpu",
+        "versions": {
+          "machine": "arm64",
+          "python": "3.11.13",
+          "torch": "2.10.0",
+          "transformers": "5.1.0"
+        },
+        "frame_bank_sha256": "4085005682d118e06ecb025f237af2fb94e94c33a77bc97010c9aa6514182137",
+        "settings": {
+          "beam_width": 3,
+          "k_first": 50,
+          "patterns": {
+            "[MASK] to [MASK]": [
+              "first",
+              "new_word"
+            ],
+            "[MASK]-[MASK]": [
+              "first",
+              "after_hyphen"
+            ],
+            "[MASK]-[MASK][MASK]": [
+              "first",
+              "after_hyphen",
+              "cont"
+            ],
+            "[MASK]-minded": [
+              "first"
+            ],
+            "[MASK]-oriented": [
+              "first"
+            ],
+            "[MASK]-seeking": [
+              "first"
+            ],
+            "[MASK]ly [MASK]": [
+              "first",
+              "new_word"
+            ]
+          },
+          "pll_mode": "original",
+          "rescored": true,
+          "subjects": [
+            "she",
+            "he"
+          ]
+        },
+        "seconds": 94.28,
+        "n_forward": 21021,
+        "at": "2026-10-13T23:29:38+00:00",
+        "frames_arg": "all",
+        "subjects_arg": null,
+        "git_sha": "61e3b1f4+dirty",
+        "words_limit": null,
+        "universe_size": null,
+        "pll_mode_source": "per-pass default (QUESTIONS 90)",
+        "pll_mode": "original"
+      },
       "probe:roberta": {
         "pass": "probe",
         "model_key": "roberta",
@@ -29,12 +91,12 @@
             "deferential"
           ]
         },
-        "seconds": 0.9,
+        "seconds": 1.47,
         "n_forward": 161,
-        "at": "2026-10-13T18:56:14+00:00",
-        "frames_arg": "pilot10",
+        "at": "2026-10-13T23:23:36+00:00",
+        "frames_arg": "all",
         "subjects_arg": null,
-        "git_sha": "999d41b6+dirty",
+        "git_sha": "61e3b1f4+dirty",
         "words_limit": null,
         "universe_size": null,
         "pll_mode_source": "per-pass default (QUESTIONS 90)",
@@ -68,68 +130,167 @@
             "deferential"
           ]
         },
-        "seconds": 5.52,
-        "n_forward": 700,
-        "at": "2026-10-13T18:56:12+00:00",
-        "frames_arg": "pilot10",
+        "seconds": 34.23,
+        "n_forward": 4200,
+        "at": "2026-10-13T23:23:34+00:00",
+        "frames_arg": "all",
         "subjects_arg": null,
-        "git_sha": "999d41b6+dirty",
+        "git_sha": "61e3b1f4+dirty",
         "words_limit": null,
         "universe_size": null,
+        "pll_mode_source": "per-pass default (QUESTIONS 90)",
+        "pll_mode": "l2r"
+      },
+      "subword:roberta": {
+        "pass": "subword",
+        "model_key": "roberta",
+        "model": "roberta-large",
+        "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+        "device": "cpu",
+        "versions": {
+          "machine": "arm64",
+          "python": "3.11.13",
+          "torch": "2.10.0",
+          "transformers": "5.1.0"
+        },
+        "frame_bank_sha256": "4085005682d118e06ecb025f237af2fb94e94c33a77bc97010c9aa6514182137",
+        "settings": {
+          "beam_width": 3,
+          "k_first": 100,
+          "pll_mode": "l2r",
+          "rescored": true,
+          "subjects": [
+            "she",
+            "he"
+          ],
+          "widths": [
+            2,
+            3,
+            4
+          ]
+        },
+        "seconds": 267.26,
+        "n_forward": 43516,
+        "at": "2026-10-13T23:28:03+00:00",
+        "frames_arg": "all",
+        "subjects_arg": null,
+        "git_sha": "61e3b1f4+dirty",
+        "words_limit": null,
+        "universe_size": null,
+        "pll_mode_source": "per-pass default (QUESTIONS 90)",
+        "pll_mode": "l2r"
+      },
+      "variant_b:roberta": {
+        "pass": "variant_b",
+        "model_key": "roberta",
+        "model": "roberta-large",
+        "revision": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+        "device": "cpu",
+        "versions": {
+          "machine": "arm64",
+          "python": "3.11.13",
+          "torch": "2.10.0",
+          "transformers": "5.1.0"
+        },
+        "frame_bank_sha256": "4085005682d118e06ecb025f237af2fb94e94c33a77bc97010c9aa6514182137",
+        "settings": {
+          "n_words": 29497,
+          "pll_mode": "l2r",
+          "top_rank": 2000
+        },
+        "seconds": 3512.15,
+        "n_forward": 862932,
+        "at": "2026-10-14T00:28:10+00:00",
+        "frames_arg": "all",
+        "subjects_arg": null,
+        "git_sha": "6c2cc50a+dirty",
+        "words_limit": null,
+        "universe_size": 29497,
         "pll_mode_source": "per-pass default (QUESTIONS 90)",
         "pll_mode": "l2r"
       }
     },
     "counts": {
-      "n_union": 9050,
-      "n_eligible": 9043,
+      "n_union": 32588,
+      "n_eligible": 28785,
       "ineligible": {
-        "below_hard_reject": 7
+        "below_hard_reject": 3803
       },
       "token_class": {
-        "single": 8174,
-        "subword": 876
+        "multiword": 6576,
+        "single": 11749,
+        "subword": 14263
       },
       "best_pass": {
-        "single:roberta": 9050
+        "multiword:roberta": 5096,
+        "single:roberta": 14228,
+        "subword:roberta": 6395,
+        "variant_b:roberta": 6869
       },
-      "with_gloss_hint": 7816,
-      "with_contrast": 3015,
-      "stoplist_flagged": 104,
-      "corpus_stem_match": 335,
-      "queue_stem_match": 217
+      "with_gloss_hint": 21004,
+      "with_contrast": 10008,
+      "stoplist_flagged": 270,
+      "corpus_stem_match": 634,
+      "queue_stem_match": 430
     },
-    "table_sha256": "b2339eac341b8dc0bc17e2eb9c5d452c19714598f7b5571727c4e8810c8cba69"
+    "table_sha256": "ec769ba0c42bb1b9cb2db87befdf6db8510ac5c298cdb8fe5d5602f33e49d9e6"
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py table --device cpu",
-      "git_sha": "999d41b6+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py --device cpu table",
+      "git_sha": "1fd1dc36+dirty",
       "author": "Roger Dearnaley",
       "title": "masked-LM generator: what generated the table"
     },
-    "produced_at": "2026-10-13T19:01:44+00:00",
+    "produced_at": "2026-10-14T01:04:07+00:00",
     "inputs": [
       {
         "dep_key": "agg_single_roberta",
         "path": "data/candidates/cache/masked_lm/agg/roberta/single.jsonl",
-        "fingerprint": "v1:2026-10-13T18:56:13+00:00@7867839",
+        "fingerprint": "v1:2026-10-13T23:23:34+00:00@12474217",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T18:56:13+00:00",
+        "last_modified_at": "2026-10-13T23:23:34+00:00",
         "extras": {}
       },
       {
         "dep_key": "agg_probe_roberta",
         "path": "data/candidates/cache/masked_lm/agg/roberta/probe.jsonl",
-        "fingerprint": "v1:2026-10-13T18:56:14+00:00@2862041",
+        "fingerprint": "v1:2026-10-13T23:23:36+00:00@2862041",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T18:56:14+00:00",
+        "last_modified_at": "2026-10-13T23:23:36+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "agg_subword_roberta",
+        "path": "data/candidates/cache/masked_lm/agg/roberta/subword.jsonl",
+        "fingerprint": "v1:2026-10-13T23:28:04+00:00@2439251",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T23:28:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "agg_multiword_roberta",
+        "path": "data/candidates/cache/masked_lm/agg/roberta/multiword.jsonl",
+        "fingerprint": "v1:2026-10-13T23:29:38+00:00@1840356",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T23:29:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "agg_variant_b_roberta",
+        "path": "data/candidates/cache/masked_lm/agg/roberta/variant_b.jsonl",
+        "fingerprint": "v1:2026-10-14T00:28:11+00:00@10638232",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T00:28:11+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "d5255afb032afd84f1ad3074149bc027340d005aa28fadf510a1ca4486a492a7"
+    "inputs_sha256": "555eed2a06d98aaceab3b60e15ce82cf34fb9cfea7a5e674f513c95295a42a19"
   }
 }

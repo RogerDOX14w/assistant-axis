@@ -1,6 +1,6 @@
-# Masked-LM generator: pilot A (CPU, sandbox)
+# Masked-LM generator: generation readout
 
-Plan: [coding_plan_04_masked_lm.md](../../../reports/trait_gap_generation/coding_plan_04_masked_lm.md).  Terms: [glossary](../../../reports/trait_gap_generation/glossary.md).  Models: roberta; passes: probe:roberta, single:roberta.  A **masked LM** ([masked LM, fill-mask](../../../reports/trait_gap_generation/glossary.md#masked-lm)) fills a `[MASK]` slot in a sentence; the frames are person-describing sentences, and every word's rank in every frame instance is kept.  [Recall@k](../../../reports/trait_gap_generation/glossary.md#recall-at-k) is the share of our labels among the first k words.
+Plan: [coding_plan_04_masked_lm.md](../../../reports/trait_gap_generation/coding_plan_04_masked_lm.md).  Terms: [glossary](../../../reports/trait_gap_generation/glossary.md).  Models: roberta; passes: multiword:roberta, probe:roberta, single:roberta, subword:roberta, variant_b:roberta.  A **masked LM** ([masked LM, fill-mask](../../../reports/trait_gap_generation/glossary.md#masked-lm)) fills a `[MASK]` slot in a sentence; the frames are person-describing sentences, and every word's rank in every frame instance is kept.  [Recall@k](../../../reports/trait_gap_generation/glossary.md#recall-at-k) is the share of our labels among the first k words.
 
 ## Throughput
 
@@ -8,8 +8,11 @@ PLL mode: the [pseudo-log-likelihood](../../../reports/trait_gap_generation/glos
 
 | pass | device | PLL mode | seconds | forward passes | per second | instances/min | words/min |
 |---|---|---|---|---|---|---|---|
-| single:roberta | cpu | l2r | 5.52 | 700 | 126.9 | 1087.5 | n/a |
-| probe:roberta | cpu | l2r | 0.9 | 161 | 179.8 | 1541.1 | n/a |
+| single:roberta | cpu | l2r | 34.23 | 4200 | 122.7 | 1051.8 | n/a |
+| probe:roberta | cpu | l2r | 1.47 | 161 | 109.3 | 936.7 | n/a |
+| subword:roberta | cpu | l2r | 267.26 | 43516 | 162.8 | n/a | 1578.2 |
+| multiword:roberta | cpu | original | 94.28 | 21021 | 223.0 | n/a | 3244.4 |
+| variant_b:roberta | cpu | l2r | 3512.15 | 862932 | 245.7 | n/a | 503.9 |
 
 ## The top 50 of three frames
 
@@ -27,18 +30,30 @@ Our labels as found among the first k words of each ranking.  **union** is the t
 
 | ranking | labels | n | recall@1,000 | recall@2,000 | recall@5,000 | recall@10,000 | recall@20,000 | anywhere |
 |---|---|---|---|---|---|---|---|---|
-| union | all | 910 | 23.7% | 32.3% | 37.6% | 39.2% | 39.2% | 39.2% |
-| union | single | 355 | 60.9% | 82.8% | 96.1% | 99.7% | 99.7% | 99.7% |
-| union | subword | 333 | 0.0% | 0.0% | 0.3% | 0.9% | 0.9% | 0.9% |
-| union | multiword | 222 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| union | all | 910 | 9.9% | 23.0% | 46.5% | 58.2% | 68.2% | 73.2% |
+| union | single | 355 | 16.1% | 45.1% | 83.4% | 95.2% | 99.7% | 99.7% |
+| union | subword | 333 | 0.9% | 4.8% | 26.7% | 45.4% | 64.9% | 76.6% |
+| union | multiword | 222 | 13.5% | 14.9% | 17.1% | 18.5% | 23.0% | 25.7% |
+| multiword:roberta | all | 910 | 3.5% | 4.2% | 4.5% | 4.5% | 4.5% | 4.5% |
+| multiword:roberta | single | 355 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| multiword:roberta | subword | 333 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| multiword:roberta | multiword | 222 | 14.4% | 17.1% | 18.5% | 18.5% | 18.5% | 18.5% |
 | probe:roberta | all | 910 | 19.2% | 27.7% | 36.7% | 38.0% | 38.0% | 38.0% |
 | probe:roberta | single | 355 | 49.3% | 71.0% | 93.8% | 97.2% | 97.2% | 97.2% |
 | probe:roberta | subword | 333 | 0.0% | 0.0% | 0.3% | 0.3% | 0.3% | 0.3% |
 | probe:roberta | multiword | 222 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
-| single:roberta | all | 910 | 23.7% | 32.3% | 37.6% | 39.2% | 39.2% | 39.2% |
-| single:roberta | single | 355 | 60.9% | 82.8% | 96.1% | 99.7% | 99.7% | 99.7% |
-| single:roberta | subword | 333 | 0.0% | 0.0% | 0.3% | 0.9% | 0.9% | 0.9% |
+| single:roberta | all | 910 | 20.7% | 29.8% | 36.8% | 39.2% | 39.3% | 39.3% |
+| single:roberta | single | 355 | 53.0% | 76.3% | 93.8% | 99.7% | 99.7% | 99.7% |
+| single:roberta | subword | 333 | 0.0% | 0.0% | 0.6% | 0.9% | 1.2% | 1.2% |
 | single:roberta | multiword | 222 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| subword:roberta | all | 910 | 15.9% | 19.0% | 22.0% | 22.0% | 22.0% | 22.0% |
+| subword:roberta | single | 355 | 7.3% | 9.3% | 12.1% | 12.1% | 12.1% | 12.1% |
+| subword:roberta | subword | 333 | 35.7% | 42.0% | 47.1% | 47.1% | 47.1% | 47.1% |
+| subword:roberta | multiword | 222 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| variant_b:roberta | all | 910 | 25.7% | 40.7% | 57.2% | 66.7% | 70.8% | 71.0% |
+| variant_b:roberta | single | 355 | 50.7% | 71.5% | 88.2% | 94.7% | 97.2% | 97.2% |
+| variant_b:roberta | subword | 333 | 15.0% | 30.9% | 54.6% | 70.0% | 76.9% | 77.2% |
+| variant_b:roberta | multiword | 222 | 1.8% | 5.9% | 11.7% | 17.1% | 19.4% | 19.8% |
 | baseline_wordfreq | all | 910 | 2.5% | 5.9% | 18.9% | 43.2% | 69.0% | 71.0% |
 | baseline_wordfreq | single | 355 | 5.1% | 13.0% | 43.7% | 93.2% | 97.2% | 97.2% |
 | baseline_wordfreq | subword | 333 | 0.0% | 0.0% | 0.0% | 7.8% | 71.8% | 77.2% |
@@ -48,18 +63,30 @@ Our labels as found among the first k words of each ranking.  **union** is the t
 
 | ranking | labels | n | recall@1,000 | recall@2,000 | recall@5,000 | recall@10,000 | recall@20,000 | anywhere |
 |---|---|---|---|---|---|---|---|---|
-| union | all | 780 | 17.1% | 24.7% | 30.9% | 34.4% | 34.4% | 34.4% |
-| union | single | 258 | 51.5% | 74.8% | 92.2% | 99.2% | 99.2% | 99.2% |
-| union | subword | 296 | 0.0% | 0.0% | 1.0% | 4.0% | 4.0% | 4.0% |
-| union | multiword | 226 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| union | all | 780 | 9.1% | 18.5% | 37.7% | 48.9% | 59.6% | 64.5% |
+| union | single | 258 | 15.9% | 41.1% | 77.9% | 94.2% | 99.2% | 99.2% |
+| union | subword | 296 | 1.0% | 3.0% | 19.6% | 33.5% | 54.4% | 65.5% |
+| union | multiword | 226 | 11.9% | 12.8% | 15.5% | 17.3% | 21.2% | 23.4% |
+| multiword:roberta | all | 780 | 3.6% | 4.5% | 5.0% | 5.0% | 5.0% | 5.0% |
+| multiword:roberta | single | 258 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| multiword:roberta | subword | 296 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| multiword:roberta | multiword | 226 | 12.4% | 15.5% | 17.3% | 17.3% | 17.3% | 17.3% |
 | probe:roberta | all | 780 | 13.5% | 21.0% | 29.9% | 31.9% | 31.9% | 31.9% |
 | probe:roberta | single | 258 | 40.7% | 62.8% | 88.4% | 94.2% | 94.2% | 94.2% |
 | probe:roberta | subword | 296 | 0.0% | 0.7% | 1.7% | 2.0% | 2.0% | 2.0% |
 | probe:roberta | multiword | 226 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
-| single:roberta | all | 780 | 17.1% | 24.7% | 30.9% | 34.4% | 34.4% | 34.4% |
-| single:roberta | single | 258 | 51.5% | 74.8% | 92.2% | 99.2% | 99.2% | 99.2% |
-| single:roberta | subword | 296 | 0.0% | 0.0% | 1.0% | 4.0% | 4.0% | 4.0% |
+| single:roberta | all | 780 | 15.3% | 23.1% | 30.6% | 34.1% | 35.3% | 35.3% |
+| single:roberta | single | 258 | 46.1% | 69.8% | 91.9% | 98.8% | 99.2% | 99.2% |
+| single:roberta | subword | 296 | 0.0% | 0.0% | 0.7% | 3.7% | 6.4% | 6.4% |
 | single:roberta | multiword | 226 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| subword:roberta | all | 780 | 11.9% | 15.0% | 17.9% | 17.9% | 17.9% | 17.9% |
+| subword:roberta | single | 258 | 6.6% | 8.5% | 10.8% | 10.8% | 10.8% | 10.8% |
+| subword:roberta | subword | 296 | 25.7% | 32.1% | 37.8% | 37.8% | 37.8% | 37.8% |
+| subword:roberta | multiword | 226 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| variant_b:roberta | all | 780 | 19.2% | 31.5% | 45.5% | 54.6% | 58.9% | 59.1% |
+| variant_b:roberta | single | 258 | 43.0% | 64.7% | 83.0% | 89.5% | 92.2% | 92.2% |
+| variant_b:roberta | subword | 296 | 11.8% | 22.3% | 39.5% | 53.7% | 60.8% | 61.2% |
+| variant_b:roberta | multiword | 226 | 1.8% | 5.8% | 10.6% | 15.9% | 18.1% | 18.6% |
 | baseline_wordfreq | all | 780 | 2.9% | 6.4% | 16.8% | 36.1% | 57.2% | 59.1% |
 | baseline_wordfreq | single | 258 | 7.0% | 15.9% | 44.2% | 89.1% | 92.2% | 92.2% |
 | baseline_wordfreq | subword | 296 | 0.0% | 0.0% | 0.0% | 5.7% | 56.1% | 61.2% |
@@ -89,37 +116,40 @@ Multiword labels absent: [East Asian](../../traits/instructions/east_asian.json)
 
 | ranking | n | recall@1,000 | recall@2,000 | recall@5,000 | recall@10,000 | recall@20,000 | anywhere |
 |---|---|---|---|---|---|---|---|
+| multiword:roberta | 222 | 14.4% | 17.1% | 18.5% | 18.5% | 18.5% | 18.5% |
+| subword:roberta | 222 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| variant_b:roberta | 222 | 1.8% | 5.9% | 11.7% | 17.1% | 19.4% | 19.8% |
 | baseline_wordfreq | 222 | 2.2% | 3.6% | 7.7% | 16.2% | 19.8% | 19.8% |
 
 ## Frame ablation (single-mask pass)
 
 Recall of the one-word corpus labels with one subject, or one register, removed (a positive delta means the removed factor was costing recall).
 
-**subject** (all: recall@1000 31.4%, recall@5000 49.7%)
+**subject** (all: recall@1000 27.3%, recall@5000 48.7%)
 
 | removed | recall@1000 delta | recall@5000 delta |
 |---|---|---|
-| assistant | +0.003 | +0.001 |
-| character | +0.001 | +0.001 |
-| chatbot | +0.000 | +0.000 |
-| colleague | +0.000 | -0.002 |
-| he | -0.002 | +0.000 |
-| i | -0.003 | -0.002 |
-| manager | -0.004 | +0.001 |
+| assistant | -0.002 | +0.000 |
+| character | +0.004 | +0.002 |
+| chatbot | +0.013 | -0.001 |
+| colleague | -0.003 | +0.000 |
+| he | +0.003 | +0.000 |
+| i | +0.000 | +0.000 |
+| manager | -0.010 | +0.002 |
 | she | +0.000 | +0.000 |
-| they | +0.006 | +0.003 |
-| you | +0.000 | +0.000 |
+| they | +0.007 | -0.001 |
+| you | +0.001 | -0.001 |
 
-**register** (all: recall@1000 31.4%, recall@5000 49.7%)
+**register** (all: recall@1000 27.3%, recall@5000 48.7%)
 
 | removed | recall@1000 delta | recall@5000 delta |
 |---|---|---|
-| casual_review | -0.019 | +0.003 |
-| chat_transcript | +0.003 | +0.000 |
-| novel | +0.000 | +0.000 |
-| performance_review | -0.006 | +0.000 |
-| psych_textbook | -0.013 | -0.003 |
-| reference_letter | +0.006 | -0.009 |
+| casual_review | +0.004 | -0.001 |
+| chat_transcript | -0.002 | +0.002 |
+| novel | +0.009 | -0.004 |
+| performance_review | -0.013 | -0.001 |
+| psych_textbook | -0.016 | +0.003 |
+| reference_letter | +0.000 | -0.001 |
 
 ## Files
 

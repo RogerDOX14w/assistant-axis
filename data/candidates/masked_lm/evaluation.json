@@ -1,6 +1,6 @@
 {
   "result": {
-    "title": "pilot A (CPU, sandbox)",
+    "title": null,
     "note": null,
     "cutoffs": [
       1000,
@@ -13,58 +13,65 @@
       "roberta"
     ],
     "passes": [
+      "multiword:roberta",
       "probe:roberta",
-      "single:roberta"
+      "single:roberta",
+      "subword:roberta",
+      "variant_b:roberta"
     ],
-    "n_union": 9050,
-    "n_eligible": 9043,
+    "n_union": 32588,
+    "n_eligible": 28785,
     "table_counts": {
-      "n_union": 9050,
-      "n_eligible": 9043,
+      "n_union": 32588,
+      "n_eligible": 28785,
       "ineligible": {
-        "below_hard_reject": 7
+        "below_hard_reject": 3803
       },
       "token_class": {
-        "single": 8174,
-        "subword": 876
+        "multiword": 6576,
+        "single": 11749,
+        "subword": 14263
       },
       "best_pass": {
-        "single:roberta": 9050
+        "multiword:roberta": 5096,
+        "single:roberta": 14228,
+        "subword:roberta": 6395,
+        "variant_b:roberta": 6869
       },
-      "with_gloss_hint": 7816,
-      "with_contrast": 3015,
-      "stoplist_flagged": 104,
-      "corpus_stem_match": 335,
-      "queue_stem_match": 217
+      "with_gloss_hint": 21004,
+      "with_contrast": 10008,
+      "stoplist_flagged": 270,
+      "corpus_stem_match": 634,
+      "queue_stem_match": 430
     },
     "recovery": {
       "corpus_single": {
         "n": 688,
-        "recall@1000": 0.314,
-        "recall@2000": 0.4273,
-        "recall@5000": 0.4971,
-        "recall@10000": 0.5189,
-        "recall@20000": 0.5189,
-        "found_anywhere": 0.5189
+        "recall@1000": 0.0872,
+        "recall@2000": 0.2558,
+        "recall@5000": 0.5596,
+        "recall@10000": 0.7108,
+        "recall@20000": 0.8285,
+        "found_anywhere": 0.8852
       },
       "corpus_multi": {
         "n": 222,
-        "recall@1000": 0.0,
-        "recall@2000": 0.0,
-        "recall@5000": 0.0,
-        "recall@10000": 0.0,
-        "recall@20000": 0.0,
-        "found_anywhere": 0.0
+        "recall@1000": 0.1351,
+        "recall@2000": 0.1486,
+        "recall@5000": 0.1712,
+        "recall@10000": 0.1847,
+        "recall@20000": 0.2297,
+        "found_anywhere": 0.2568
       },
       "queue": {
         "n": 780,
-        "n_ranked": 9050,
-        "recall@1000": 0.1705,
-        "recall@2000": 0.2474,
-        "recall@5000": 0.309,
-        "recall@10000": 0.3436,
-        "recall@20000": 0.3436,
-        "found_anywhere": 0.3436
+        "n_ranked": 32588,
+        "recall@1000": 0.091,
+        "recall@2000": 0.1846,
+        "recall@5000": 0.3769,
+        "recall@10000": 0.4885,
+        "recall@20000": 0.5962,
+        "found_anywhere": 0.6449
       },
       "baseline_wordfreq": {
         "corpus_single": {
@@ -102,43 +109,85 @@
         "union": {
           "all": {
             "n": 910,
-            "n_ranked": 9050,
-            "recall@1000": 0.2374,
-            "recall@2000": 0.3231,
-            "recall@5000": 0.3758,
-            "recall@10000": 0.3923,
-            "recall@20000": 0.3923,
-            "found_anywhere": 0.3923
+            "n_ranked": 32588,
+            "recall@1000": 0.0989,
+            "recall@2000": 0.2297,
+            "recall@5000": 0.4648,
+            "recall@10000": 0.5824,
+            "recall@20000": 0.6824,
+            "found_anywhere": 0.7319
           },
           "single": {
             "n": 355,
-            "n_ranked": 9050,
-            "recall@1000": 0.6085,
-            "recall@2000": 0.8282,
-            "recall@5000": 0.9606,
-            "recall@10000": 0.9972,
+            "n_ranked": 32588,
+            "recall@1000": 0.1606,
+            "recall@2000": 0.4507,
+            "recall@5000": 0.8338,
+            "recall@10000": 0.9521,
             "recall@20000": 0.9972,
             "found_anywhere": 0.9972
           },
           "subword": {
             "n": 333,
-            "n_ranked": 9050,
-            "recall@1000": 0.0,
-            "recall@2000": 0.0,
-            "recall@5000": 0.003,
-            "recall@10000": 0.009,
-            "recall@20000": 0.009,
-            "found_anywhere": 0.009
+            "n_ranked": 32588,
+            "recall@1000": 0.009,
+            "recall@2000": 0.048,
+            "recall@5000": 0.2673,
+            "recall@10000": 0.4535,
+            "recall@20000": 0.6486,
+            "found_anywhere": 0.7658
           },
           "multiword": {
             "n": 222,
-            "n_ranked": 9050,
+            "n_ranked": 32588,
+            "recall@1000": 0.1351,
+            "recall@2000": 0.1486,
+            "recall@5000": 0.1712,
+            "recall@10000": 0.1847,
+            "recall@20000": 0.2297,
+            "found_anywhere": 0.2568
+          }
+        },
+        "multiword:roberta": {
+          "all": {
+            "n": 910,
+            "n_ranked": 5098,
+            "recall@1000": 0.0352,
+            "recall@2000": 0.0418,
+            "recall@5000": 0.0451,
+            "recall@10000": 0.0451,
+            "recall@20000": 0.0451,
+            "found_anywhere": 0.0451
+          },
+          "single": {
+            "n": 355,
+            "n_ranked": 5098,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
             "recall@5000": 0.0,
             "recall@10000": 0.0,
             "recall@20000": 0.0,
             "found_anywhere": 0.0
+          },
+          "subword": {
+            "n": 333,
+            "n_ranked": 5098,
+            "recall@1000": 0.0,
+            "recall@2000": 0.0,
+            "recall@5000": 0.0,
+            "recall@10000": 0.0,
+            "recall@20000": 0.0,
+            "found_anywhere": 0.0
+          },
+          "multiword": {
+            "n": 222,
+            "n_ranked": 5098,
+            "recall@1000": 0.1441,
+            "recall@2000": 0.1712,
+            "recall@5000": 0.1847,
+            "recall@10000": 0.1847,
+            "recall@20000": 0.1847,
+            "found_anywhere": 0.1847
           }
         },
         "probe:roberta": {
@@ -186,43 +235,127 @@
         "single:roberta": {
           "all": {
             "n": 910,
-            "n_ranked": 9050,
-            "recall@1000": 0.2374,
-            "recall@2000": 0.3231,
-            "recall@5000": 0.3758,
+            "n_ranked": 14342,
+            "recall@1000": 0.2066,
+            "recall@2000": 0.2978,
+            "recall@5000": 0.3681,
             "recall@10000": 0.3923,
-            "recall@20000": 0.3923,
-            "found_anywhere": 0.3923
+            "recall@20000": 0.3934,
+            "found_anywhere": 0.3934
           },
           "single": {
             "n": 355,
-            "n_ranked": 9050,
-            "recall@1000": 0.6085,
-            "recall@2000": 0.8282,
-            "recall@5000": 0.9606,
+            "n_ranked": 14342,
+            "recall@1000": 0.5296,
+            "recall@2000": 0.7634,
+            "recall@5000": 0.938,
             "recall@10000": 0.9972,
             "recall@20000": 0.9972,
             "found_anywhere": 0.9972
           },
           "subword": {
             "n": 333,
-            "n_ranked": 9050,
+            "n_ranked": 14342,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
-            "recall@5000": 0.003,
+            "recall@5000": 0.006,
             "recall@10000": 0.009,
-            "recall@20000": 0.009,
-            "found_anywhere": 0.009
+            "recall@20000": 0.012,
+            "found_anywhere": 0.012
           },
           "multiword": {
             "n": 222,
-            "n_ranked": 9050,
+            "n_ranked": 14342,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
             "recall@5000": 0.0,
             "recall@10000": 0.0,
             "recall@20000": 0.0,
             "found_anywhere": 0.0
+          }
+        },
+        "subword:roberta": {
+          "all": {
+            "n": 910,
+            "n_ranked": 7030,
+            "recall@1000": 0.1593,
+            "recall@2000": 0.1901,
+            "recall@5000": 0.2198,
+            "recall@10000": 0.2198,
+            "recall@20000": 0.2198,
+            "found_anywhere": 0.2198
+          },
+          "single": {
+            "n": 355,
+            "n_ranked": 7030,
+            "recall@1000": 0.0732,
+            "recall@2000": 0.093,
+            "recall@5000": 0.1211,
+            "recall@10000": 0.1211,
+            "recall@20000": 0.1211,
+            "found_anywhere": 0.1211
+          },
+          "subword": {
+            "n": 333,
+            "n_ranked": 7030,
+            "recall@1000": 0.3574,
+            "recall@2000": 0.4204,
+            "recall@5000": 0.4715,
+            "recall@10000": 0.4715,
+            "recall@20000": 0.4715,
+            "found_anywhere": 0.4715
+          },
+          "multiword": {
+            "n": 222,
+            "n_ranked": 7030,
+            "recall@1000": 0.0,
+            "recall@2000": 0.0,
+            "recall@5000": 0.0,
+            "recall@10000": 0.0,
+            "recall@20000": 0.0,
+            "found_anywhere": 0.0
+          }
+        },
+        "variant_b:roberta": {
+          "all": {
+            "n": 910,
+            "n_ranked": 29497,
+            "recall@1000": 0.2571,
+            "recall@2000": 0.4066,
+            "recall@5000": 0.5725,
+            "recall@10000": 0.667,
+            "recall@20000": 0.7077,
+            "found_anywhere": 0.7099
+          },
+          "single": {
+            "n": 355,
+            "n_ranked": 29497,
+            "recall@1000": 0.507,
+            "recall@2000": 0.7155,
+            "recall@5000": 0.8817,
+            "recall@10000": 0.9465,
+            "recall@20000": 0.9718,
+            "found_anywhere": 0.9718
+          },
+          "subword": {
+            "n": 333,
+            "n_ranked": 29497,
+            "recall@1000": 0.1502,
+            "recall@2000": 0.3093,
+            "recall@5000": 0.5465,
+            "recall@10000": 0.6997,
+            "recall@20000": 0.7688,
+            "found_anywhere": 0.7718
+          },
+          "multiword": {
+            "n": 222,
+            "n_ranked": 29497,
+            "recall@1000": 0.018,
+            "recall@2000": 0.0586,
+            "recall@5000": 0.1171,
+            "recall@10000": 0.1712,
+            "recall@20000": 0.1937,
+            "found_anywhere": 0.1982
           }
         },
         "baseline_wordfreq": {
@@ -272,43 +405,85 @@
         "union": {
           "all": {
             "n": 780,
-            "n_ranked": 9050,
-            "recall@1000": 0.1705,
-            "recall@2000": 0.2474,
-            "recall@5000": 0.309,
-            "recall@10000": 0.3436,
-            "recall@20000": 0.3436,
-            "found_anywhere": 0.3436
+            "n_ranked": 32588,
+            "recall@1000": 0.091,
+            "recall@2000": 0.1846,
+            "recall@5000": 0.3769,
+            "recall@10000": 0.4885,
+            "recall@20000": 0.5962,
+            "found_anywhere": 0.6449
           },
           "single": {
             "n": 258,
-            "n_ranked": 9050,
-            "recall@1000": 0.5155,
-            "recall@2000": 0.7481,
-            "recall@5000": 0.9225,
-            "recall@10000": 0.9922,
+            "n_ranked": 32588,
+            "recall@1000": 0.1589,
+            "recall@2000": 0.4109,
+            "recall@5000": 0.7791,
+            "recall@10000": 0.9419,
             "recall@20000": 0.9922,
             "found_anywhere": 0.9922
           },
           "subword": {
             "n": 296,
-            "n_ranked": 9050,
-            "recall@1000": 0.0,
-            "recall@2000": 0.0,
-            "recall@5000": 0.0101,
-            "recall@10000": 0.0405,
-            "recall@20000": 0.0405,
-            "found_anywhere": 0.0405
+            "n_ranked": 32588,
+            "recall@1000": 0.0101,
+            "recall@2000": 0.0304,
+            "recall@5000": 0.1959,
+            "recall@10000": 0.3345,
+            "recall@20000": 0.5439,
+            "found_anywhere": 0.6554
           },
           "multiword": {
             "n": 226,
-            "n_ranked": 9050,
+            "n_ranked": 32588,
+            "recall@1000": 0.1195,
+            "recall@2000": 0.1283,
+            "recall@5000": 0.1549,
+            "recall@10000": 0.1726,
+            "recall@20000": 0.2124,
+            "found_anywhere": 0.2345
+          }
+        },
+        "multiword:roberta": {
+          "all": {
+            "n": 780,
+            "n_ranked": 5098,
+            "recall@1000": 0.0359,
+            "recall@2000": 0.0449,
+            "recall@5000": 0.05,
+            "recall@10000": 0.05,
+            "recall@20000": 0.05,
+            "found_anywhere": 0.05
+          },
+          "single": {
+            "n": 258,
+            "n_ranked": 5098,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
             "recall@5000": 0.0,
             "recall@10000": 0.0,
             "recall@20000": 0.0,
             "found_anywhere": 0.0
+          },
+          "subword": {
+            "n": 296,
+            "n_ranked": 5098,
+            "recall@1000": 0.0,
+            "recall@2000": 0.0,
+            "recall@5000": 0.0,
+            "recall@10000": 0.0,
+            "recall@20000": 0.0,
+            "found_anywhere": 0.0
+          },
+          "multiword": {
+            "n": 226,
+            "n_ranked": 5098,
+            "recall@1000": 0.1239,
+            "recall@2000": 0.1549,
+            "recall@5000": 0.1726,
+            "recall@10000": 0.1726,
+            "recall@20000": 0.1726,
+            "found_anywhere": 0.1726
           }
         },
         "probe:roberta": {
@@ -356,43 +531,127 @@
         "single:roberta": {
           "all": {
             "n": 780,
-            "n_ranked": 9050,
-            "recall@1000": 0.1705,
-            "recall@2000": 0.2474,
-            "recall@5000": 0.309,
-            "recall@10000": 0.3436,
-            "recall@20000": 0.3436,
-            "found_anywhere": 0.3436
+            "n_ranked": 14342,
+            "recall@1000": 0.1526,
+            "recall@2000": 0.2308,
+            "recall@5000": 0.3064,
+            "recall@10000": 0.341,
+            "recall@20000": 0.3526,
+            "found_anywhere": 0.3526
           },
           "single": {
             "n": 258,
-            "n_ranked": 9050,
-            "recall@1000": 0.5155,
-            "recall@2000": 0.7481,
-            "recall@5000": 0.9225,
-            "recall@10000": 0.9922,
+            "n_ranked": 14342,
+            "recall@1000": 0.4612,
+            "recall@2000": 0.6977,
+            "recall@5000": 0.9186,
+            "recall@10000": 0.9884,
             "recall@20000": 0.9922,
             "found_anywhere": 0.9922
           },
           "subword": {
             "n": 296,
-            "n_ranked": 9050,
+            "n_ranked": 14342,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
-            "recall@5000": 0.0101,
-            "recall@10000": 0.0405,
-            "recall@20000": 0.0405,
-            "found_anywhere": 0.0405
+            "recall@5000": 0.0068,
+            "recall@10000": 0.0372,
+            "recall@20000": 0.0642,
+            "found_anywhere": 0.0642
           },
           "multiword": {
             "n": 226,
-            "n_ranked": 9050,
+            "n_ranked": 14342,
             "recall@1000": 0.0,
             "recall@2000": 0.0,
             "recall@5000": 0.0,
             "recall@10000": 0.0,
             "recall@20000": 0.0,
             "found_anywhere": 0.0
+          }
+        },
+        "subword:roberta": {
+          "all": {
+            "n": 780,
+            "n_ranked": 7030,
+            "recall@1000": 0.1192,
+            "recall@2000": 0.15,
+            "recall@5000": 0.1795,
+            "recall@10000": 0.1795,
+            "recall@20000": 0.1795,
+            "found_anywhere": 0.1795
+          },
+          "single": {
+            "n": 258,
+            "n_ranked": 7030,
+            "recall@1000": 0.0659,
+            "recall@2000": 0.0853,
+            "recall@5000": 0.1085,
+            "recall@10000": 0.1085,
+            "recall@20000": 0.1085,
+            "found_anywhere": 0.1085
+          },
+          "subword": {
+            "n": 296,
+            "n_ranked": 7030,
+            "recall@1000": 0.2568,
+            "recall@2000": 0.3209,
+            "recall@5000": 0.3784,
+            "recall@10000": 0.3784,
+            "recall@20000": 0.3784,
+            "found_anywhere": 0.3784
+          },
+          "multiword": {
+            "n": 226,
+            "n_ranked": 7030,
+            "recall@1000": 0.0,
+            "recall@2000": 0.0,
+            "recall@5000": 0.0,
+            "recall@10000": 0.0,
+            "recall@20000": 0.0,
+            "found_anywhere": 0.0
+          }
+        },
+        "variant_b:roberta": {
+          "all": {
+            "n": 780,
+            "n_ranked": 29497,
+            "recall@1000": 0.1923,
+            "recall@2000": 0.3154,
+            "recall@5000": 0.4551,
+            "recall@10000": 0.5462,
+            "recall@20000": 0.5885,
+            "found_anywhere": 0.591
+          },
+          "single": {
+            "n": 258,
+            "n_ranked": 29497,
+            "recall@1000": 0.4302,
+            "recall@2000": 0.6473,
+            "recall@5000": 0.8295,
+            "recall@10000": 0.8953,
+            "recall@20000": 0.9225,
+            "found_anywhere": 0.9225
+          },
+          "subword": {
+            "n": 296,
+            "n_ranked": 29497,
+            "recall@1000": 0.1182,
+            "recall@2000": 0.223,
+            "recall@5000": 0.3953,
+            "recall@10000": 0.5372,
+            "recall@20000": 0.6081,
+            "found_anywhere": 0.6115
+          },
+          "multiword": {
+            "n": 226,
+            "n_ranked": 29497,
+            "recall@1000": 0.0177,
+            "recall@2000": 0.0575,
+            "recall@5000": 0.1062,
+            "recall@10000": 0.1593,
+            "recall@20000": 0.1814,
+            "found_anywhere": 0.1858
           }
         },
         "baseline_wordfreq": {
@@ -440,6 +699,36 @@
       }
     },
     "multiword_comparison": {
+      "multiword:roberta": {
+        "n": 222,
+        "n_ranked": 5098,
+        "recall@1000": 0.1441,
+        "recall@2000": 0.1712,
+        "recall@5000": 0.1847,
+        "recall@10000": 0.1847,
+        "recall@20000": 0.1847,
+        "found_anywhere": 0.1847
+      },
+      "subword:roberta": {
+        "n": 222,
+        "n_ranked": 7030,
+        "recall@1000": 0.0,
+        "recall@2000": 0.0,
+        "recall@5000": 0.0,
+        "recall@10000": 0.0,
+        "recall@20000": 0.0,
+        "found_anywhere": 0.0
+      },
+      "variant_b:roberta": {
+        "n": 222,
+        "n_ranked": 29497,
+        "recall@1000": 0.018,
+        "recall@2000": 0.0586,
+        "recall@5000": 0.1171,
+        "recall@10000": 0.1712,
+        "recall@20000": 0.1937,
+        "found_anywhere": 0.1982
+      },
       "baseline_wordfreq": {
         "n": 222,
         "n_ranked": 29497,
@@ -455,94 +744,94 @@
       "subject": {
         "_all": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189
+          "n_ranked": 14342,
+          "recall@1000": 0.2733,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203
         },
         "assistant": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3169,
-          "recall@5000": 0.4985,
-          "found_anywhere": 0.5189,
-          "delta": {
-            "recall@1000": 0.0029,
-            "recall@5000": 0.0014
-          }
-        },
-        "character": {
-          "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3154,
-          "recall@5000": 0.4985,
-          "found_anywhere": 0.5189,
-          "delta": {
-            "recall@1000": 0.0014,
-            "recall@5000": 0.0014
-          }
-        },
-        "chatbot": {
-          "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
-          "delta": {
-            "recall@1000": 0.0,
-            "recall@5000": 0.0
-          }
-        },
-        "colleague": {
-          "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4956,
-          "found_anywhere": 0.5189,
-          "delta": {
-            "recall@1000": 0.0,
-            "recall@5000": -0.0015
-          }
-        },
-        "he": {
-          "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3125,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2718,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203,
           "delta": {
             "recall@1000": -0.0015,
             "recall@5000": 0.0
           }
         },
-        "i": {
+        "character": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.311,
-          "recall@5000": 0.4956,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2776,
+          "recall@5000": 0.4884,
+          "found_anywhere": 0.5203,
+          "delta": {
+            "recall@1000": 0.0043,
+            "recall@5000": 0.0015
+          }
+        },
+        "chatbot": {
+          "n": 688,
+          "n_ranked": 14342,
+          "recall@1000": 0.2863,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
+          "delta": {
+            "recall@1000": 0.013,
+            "recall@5000": -0.0014
+          }
+        },
+        "colleague": {
+          "n": 688,
+          "n_ranked": 14342,
+          "recall@1000": 0.2703,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203,
           "delta": {
             "recall@1000": -0.003,
-            "recall@5000": -0.0015
+            "recall@5000": 0.0
+          }
+        },
+        "he": {
+          "n": 688,
+          "n_ranked": 14342,
+          "recall@1000": 0.2762,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203,
+          "delta": {
+            "recall@1000": 0.0029,
+            "recall@5000": 0.0
+          }
+        },
+        "i": {
+          "n": 688,
+          "n_ranked": 14342,
+          "recall@1000": 0.2733,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203,
+          "delta": {
+            "recall@1000": 0.0,
+            "recall@5000": 0.0
           }
         },
         "manager": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3096,
-          "recall@5000": 0.4985,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2631,
+          "recall@5000": 0.4884,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": -0.0044,
-            "recall@5000": 0.0014
+            "recall@1000": -0.0102,
+            "recall@5000": 0.0015
           }
         },
         "she": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2733,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203,
           "delta": {
             "recall@1000": 0.0,
             "recall@5000": 0.0
@@ -550,99 +839,99 @@
         },
         "they": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3198,
-          "recall@5000": 0.5,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2805,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": 0.0058,
-            "recall@5000": 0.0029
+            "recall@1000": 0.0072,
+            "recall@5000": -0.0014
           }
         },
         "you": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2747,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": 0.0,
-            "recall@5000": 0.0
+            "recall@1000": 0.0014,
+            "recall@5000": -0.0014
           }
         }
       },
       "register": {
         "_all": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189
+          "n_ranked": 14342,
+          "recall@1000": 0.2733,
+          "recall@5000": 0.4869,
+          "found_anywhere": 0.5203
         },
         "casual_review": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.2951,
-          "recall@5000": 0.5,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2776,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": -0.0189,
-            "recall@5000": 0.0029
+            "recall@1000": 0.0043,
+            "recall@5000": -0.0014
           }
         },
         "chat_transcript": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3169,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2718,
+          "recall@5000": 0.4884,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": 0.0029,
-            "recall@5000": 0.0
+            "recall@1000": -0.0015,
+            "recall@5000": 0.0015
           }
         },
         "novel": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.314,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.282,
+          "recall@5000": 0.4826,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": 0.0,
-            "recall@5000": 0.0
+            "recall@1000": 0.0087,
+            "recall@5000": -0.0043
           }
         },
         "performance_review": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3081,
-          "recall@5000": 0.4971,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2602,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": -0.0059,
-            "recall@5000": 0.0
+            "recall@1000": -0.0131,
+            "recall@5000": -0.0014
           }
         },
         "psych_textbook": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3009,
-          "recall@5000": 0.4942,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2573,
+          "recall@5000": 0.4898,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": -0.0131,
-            "recall@5000": -0.0029
+            "recall@1000": -0.016,
+            "recall@5000": 0.0029
           }
         },
         "reference_letter": {
           "n": 688,
-          "n_ranked": 9050,
-          "recall@1000": 0.3198,
-          "recall@5000": 0.4884,
-          "found_anywhere": 0.5189,
+          "n_ranked": 14342,
+          "recall@1000": 0.2733,
+          "recall@5000": 0.4855,
+          "found_anywhere": 0.5203,
           "delta": {
-            "recall@1000": 0.0058,
-            "recall@5000": -0.0087
+            "recall@1000": 0.0,
+            "recall@5000": -0.0014
           }
         }
       }
@@ -666,6 +955,146 @@
         "deferential"
       ],
       "frames": {
+        "cas_honestly_so": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 31,
+            "harmless": 283,
+            "honest": 163,
+            "sycophantic": 2533,
+            "obedient": 1170,
+            "transparent": 254,
+            "manipulative": 461,
+            "truthful": 1597,
+            "deferential": 2233
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "cas_hopeless": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 14437,
+            "harmless": 11500,
+            "honest": 4286,
+            "sycophantic": 8110,
+            "obedient": 18332,
+            "transparent": 6289,
+            "manipulative": 8169,
+            "truthful": 12430,
+            "deferential": 14130
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "cas_most_people": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 40,
+            "harmless": 714,
+            "honest": 7,
+            "sycophantic": 2497,
+            "obedient": 342,
+            "transparent": 244,
+            "manipulative": 360,
+            "truthful": 337,
+            "deferential": 330
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "cas_pretty_once": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 93,
+            "harmless": 41,
+            "honest": 211,
+            "sycophantic": 3077,
+            "obedient": 1040,
+            "transparent": 136,
+            "manipulative": 664,
+            "truthful": 1634,
+            "deferential": 1041
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "cas_super": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 21,
+            "harmless": 1412,
+            "honest": 41,
+            "sycophantic": 8755,
+            "obedient": 972,
+            "transparent": 238,
+            "manipulative": 714,
+            "truthful": 1470,
+            "deferential": 4740
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "cas_very_person": {
           "family": "casual_review",
           "kind": "dispositional",
@@ -722,6 +1151,146 @@
             "deferential": "pll"
           }
         },
+        "chat_lol_so": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 105,
+            "harmless": 470,
+            "honest": 170,
+            "sycophantic": 6593,
+            "obedient": 1710,
+            "transparent": 281,
+            "manipulative": 395,
+            "truthful": 2028,
+            "deferential": 16655
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "chat_never_met": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 223,
+            "harmless": 450,
+            "honest": 15,
+            "sycophantic": 3307,
+            "obedient": 571,
+            "transparent": 329,
+            "manipulative": 555,
+            "truthful": 275,
+            "deferential": 495
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "chat_stop_being": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 92,
+            "harmless": 1088,
+            "honest": 186,
+            "sycophantic": 2076,
+            "obedient": 1018,
+            "transparent": 206,
+            "manipulative": 149,
+            "truthful": 984,
+            "deferential": 803
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "chat_tbh": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 191,
+            "harmless": 610,
+            "honest": 656,
+            "sycophantic": 3026,
+            "obedient": 5162,
+            "transparent": 352,
+            "manipulative": 199,
+            "truthful": 3986,
+            "deferential": 3432
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "chat_typical": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 130,
+            "harmless": 251,
+            "honest": 57,
+            "sycophantic": 2455,
+            "obedient": 3010,
+            "transparent": 506,
+            "manipulative": 256,
+            "truthful": 518,
+            "deferential": 583
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "chat_why_so": {
           "family": "chat_transcript",
           "kind": "dispositional",
@@ -737,6 +1306,202 @@
             "manipulative": 641,
             "truthful": 687,
             "deferential": 762
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_always": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 43,
+            "harmless": 1527,
+            "honest": 24,
+            "sycophantic": 14074,
+            "obedient": 583,
+            "transparent": 403,
+            "manipulative": 618,
+            "truthful": 283,
+            "deferential": 4449
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_at_heart": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 691,
+            "harmless": 156,
+            "honest": 21,
+            "sycophantic": 15147,
+            "obedient": 397,
+            "transparent": 285,
+            "manipulative": 1145,
+            "truthful": 649,
+            "deferential": 4837
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_by_temperament": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 523,
+            "harmless": 313,
+            "honest": 344,
+            "sycophantic": 15813,
+            "obedient": 976,
+            "transparent": 671,
+            "manipulative": 848,
+            "truthful": 3859,
+            "deferential": 2859
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_comes_across": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 103,
+            "harmless": 68,
+            "honest": 19,
+            "sycophantic": 4956,
+            "obedient": 436,
+            "transparent": 223,
+            "manipulative": 30,
+            "truthful": 260,
+            "deferential": 1194
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_deep_down": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 960,
+            "harmless": 235,
+            "honest": 87,
+            "sycophantic": 11495,
+            "obedient": 488,
+            "transparent": 573,
+            "manipulative": 1022,
+            "truthful": 404,
+            "deferential": 2954
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_everyone_agrees": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 310,
+            "harmless": 78,
+            "honest": 207,
+            "sycophantic": 10778,
+            "obedient": 3732,
+            "transparent": 370,
+            "manipulative": 228,
+            "truthful": 1153,
+            "deferential": 4418
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_fundamentally": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 395,
+            "harmless": 266,
+            "honest": 19,
+            "sycophantic": 14686,
+            "obedient": 1606,
+            "transparent": 169,
+            "manipulative": 382,
+            "truthful": 585,
+            "deferential": 5754
           },
           "via": {
             "helpful": "vocab",
@@ -778,6 +1543,34 @@
             "deferential": "pll"
           }
         },
+        "disp_known_for": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 32,
+            "harmless": 728,
+            "honest": 7,
+            "sycophantic": 7389,
+            "obedient": 202,
+            "transparent": 65,
+            "manipulative": 111,
+            "truthful": 194,
+            "deferential": 1755
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "disp_nature": {
           "family": "psych_textbook",
           "kind": "dispositional",
@@ -793,6 +1586,62 @@
             "manipulative": 491,
             "truthful": 1152,
             "deferential": 5474
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_rarely_anything_but": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 9,
+            "harmless": 656,
+            "honest": 2,
+            "sycophantic": 10373,
+            "obedient": 247,
+            "transparent": 264,
+            "manipulative": 636,
+            "truthful": 16,
+            "deferential": 1335
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "disp_tends": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 23,
+            "harmless": 724,
+            "honest": 19,
+            "sycophantic": 7084,
+            "obedient": 335,
+            "transparent": 345,
+            "manipulative": 447,
+            "truthful": 372,
+            "deferential": 2086
           },
           "via": {
             "helpful": "vocab",
@@ -834,6 +1683,342 @@
             "deferential": "pll"
           }
         },
+        "noun_committed": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 7971,
+            "harmless": 11909,
+            "honest": 1293,
+            "sycophantic": 16456,
+            "obedient": 6302,
+            "transparent": 4417,
+            "manipulative": 14298,
+            "truthful": 5241,
+            "deferential": 19978
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_confirmed": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 9461,
+            "harmless": 9642,
+            "honest": 3604,
+            "sycophantic": 12949,
+            "obedient": 11297,
+            "transparent": 3925,
+            "manipulative": 7770,
+            "truthful": 9695,
+            "deferential": 20573
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_dyed_in_wool": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 8298,
+            "harmless": 10426,
+            "honest": 3253,
+            "sycophantic": 9101,
+            "obedient": 4884,
+            "transparent": 3320,
+            "manipulative": 10050,
+            "truthful": 7760,
+            "deferential": 13314
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_incurable": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 13919,
+            "harmless": 8364,
+            "honest": 5573,
+            "sycophantic": 1624,
+            "obedient": 12869,
+            "transparent": 7602,
+            "manipulative": 7387,
+            "truthful": 12699,
+            "deferential": 14269
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_lifelong": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 5881,
+            "harmless": 15686,
+            "honest": 4059,
+            "sycophantic": 19865,
+            "obedient": 6978,
+            "transparent": 9221,
+            "manipulative": 13007,
+            "truthful": 9088,
+            "deferential": 19548
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_self_described": {
+          "family": "chat_transcript",
+          "kind": "dispositional",
+          "register": "chat_transcript",
+          "pass": "single",
+          "ranks": {
+            "helpful": 3299,
+            "harmless": 3221,
+            "honest": 1155,
+            "sycophantic": 13481,
+            "obedient": 6010,
+            "transparent": 3180,
+            "manipulative": 3879,
+            "truthful": 5488,
+            "deferential": 20844
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "noun_through_and_through": {
+          "family": "casual_review",
+          "kind": "dispositional",
+          "register": "casual_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 7588,
+            "harmless": 12372,
+            "honest": 1802,
+            "sycophantic": 15053,
+            "obedient": 8640,
+            "transparent": 6422,
+            "manipulative": 8995,
+            "truthful": 8571,
+            "deferential": 16924
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_born": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 5793,
+            "harmless": 9078,
+            "honest": 927,
+            "sycophantic": 16501,
+            "obedient": 1760,
+            "transparent": 6119,
+            "manipulative": 3709,
+            "truthful": 4919,
+            "deferential": 20765
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_deeply_individual": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 437,
+            "harmless": 1258,
+            "honest": 107,
+            "sycophantic": 4870,
+            "obedient": 997,
+            "transparent": 900,
+            "manipulative": 210,
+            "truthful": 525,
+            "deferential": 399
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_grew_more": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 384,
+            "harmless": 1592,
+            "honest": 727,
+            "sycophantic": 9022,
+            "obedient": 413,
+            "transparent": 266,
+            "manipulative": 445,
+            "truthful": 1708,
+            "deferential": 323
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_had_always": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 52,
+            "harmless": 1469,
+            "honest": 55,
+            "sycophantic": 8831,
+            "obedient": 97,
+            "transparent": 712,
+            "manipulative": 225,
+            "truthful": 300,
+            "deferential": 2002
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_people_said": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 224,
+            "harmless": 102,
+            "honest": 189,
+            "sycophantic": 6271,
+            "obedient": 1266,
+            "transparent": 388,
+            "manipulative": 124,
+            "truthful": 1040,
+            "deferential": 5815
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "nov_something_about": {
           "family": "novel",
           "kind": "dispositional",
@@ -849,6 +2034,62 @@
             "manipulative": 890,
             "truthful": 651,
             "deferential": 478
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "nov_true_at_heart": {
+          "family": "novel",
+          "kind": "dispositional",
+          "register": "novel",
+          "pass": "single",
+          "ranks": {
+            "helpful": 7386,
+            "harmless": 6004,
+            "honest": 864,
+            "sycophantic": 11034,
+            "obedient": 5837,
+            "transparent": 6418,
+            "manipulative": 11061,
+            "truthful": 4308,
+            "deferential": 16955
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "pr_attitude": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 53,
+            "harmless": 1411,
+            "honest": 97,
+            "sycophantic": 1556,
+            "obedient": 880,
+            "transparent": 593,
+            "manipulative": 482,
+            "truthful": 842,
+            "deferential": 43
           },
           "via": {
             "helpful": "vocab",
@@ -890,6 +2131,202 @@
             "deferential": "pll"
           }
         },
+        "pr_exceptionally_employee": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 19,
+            "harmless": 1338,
+            "honest": 20,
+            "sycophantic": 2504,
+            "obedient": 122,
+            "transparent": 222,
+            "manipulative": 687,
+            "truthful": 439,
+            "deferential": 436
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "pr_natural": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 5596,
+            "harmless": 10024,
+            "honest": 2592,
+            "sycophantic": 18348,
+            "obedient": 4147,
+            "transparent": 5942,
+            "manipulative": 4657,
+            "truthful": 10134,
+            "deferential": 18921
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "pr_needs_less": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 225,
+            "harmless": 2015,
+            "honest": 290,
+            "sycophantic": 4242,
+            "obedient": 495,
+            "transparent": 190,
+            "manipulative": 77,
+            "truthful": 997,
+            "deferential": 223
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "pr_rated": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 3,
+            "harmless": 3310,
+            "honest": 73,
+            "sycophantic": 8470,
+            "obedient": 329,
+            "transparent": 359,
+            "manipulative": 546,
+            "truthful": 1148,
+            "deferential": 960
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "pr_should_more": {
+          "family": "performance_review",
+          "kind": "dispositional",
+          "register": "performance_review",
+          "pass": "single",
+          "ranks": {
+            "helpful": 5,
+            "harmless": 1329,
+            "honest": 6,
+            "sycophantic": 7615,
+            "obedient": 277,
+            "transparent": 33,
+            "manipulative": 796,
+            "truthful": 58,
+            "deferential": 391
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "psy_classic": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 1324,
+            "harmless": 4018,
+            "honest": 1124,
+            "sycophantic": 3103,
+            "obedient": 562,
+            "transparent": 4257,
+            "manipulative": 58,
+            "truthful": 6356,
+            "deferential": 3764
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "psy_disposition": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 70,
+            "harmless": 388,
+            "honest": 136,
+            "sycophantic": 1824,
+            "obedient": 120,
+            "transparent": 910,
+            "manipulative": 250,
+            "truthful": 729,
+            "deferential": 105
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "psy_personality": {
           "family": "psych_textbook",
           "kind": "dispositional",
@@ -918,6 +2355,118 @@
             "deferential": "pll"
           }
         },
+        "psy_scores_high": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 76,
+            "harmless": 1086,
+            "honest": 50,
+            "sycophantic": 4198,
+            "obedient": 47,
+            "transparent": 524,
+            "manipulative": 56,
+            "truthful": 394,
+            "deferential": 684
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "psy_stable_part": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 46,
+            "harmless": 1502,
+            "honest": 18,
+            "sycophantic": 13496,
+            "obedient": 34,
+            "transparent": 183,
+            "manipulative": 483,
+            "truthful": 108,
+            "deferential": 2038
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "psy_temperament": {
+          "family": "psych_textbook",
+          "kind": "dispositional",
+          "register": "psych_textbook",
+          "pass": "single",
+          "ranks": {
+            "helpful": 1214,
+            "harmless": 179,
+            "honest": 202,
+            "sycophantic": 1046,
+            "obedient": 142,
+            "transparent": 1076,
+            "manipulative": 759,
+            "truthful": 1493,
+            "deferential": 337
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_above_all": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 159,
+            "harmless": 151,
+            "honest": 12,
+            "sycophantic": 16117,
+            "obedient": 522,
+            "transparent": 101,
+            "manipulative": 1645,
+            "truthful": 270,
+            "deferential": 5525
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
         "ref_colleagues_describe": {
           "family": "reference_letter",
           "kind": "dispositional",
@@ -933,6 +2482,146 @@
             "manipulative": 17,
             "truthful": 1211,
             "deferential": 2397
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_genuinely_colleague": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 2,
+            "harmless": 368,
+            "honest": 23,
+            "sycophantic": 3689,
+            "obedient": 425,
+            "transparent": 504,
+            "manipulative": 990,
+            "truthful": 696,
+            "deferential": 435
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_reliably": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 12,
+            "harmless": 385,
+            "honest": 8,
+            "sycophantic": 11550,
+            "obedient": 425,
+            "transparent": 106,
+            "manipulative": 288,
+            "truthful": 75,
+            "deferential": 3393
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_strongest_quality": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 560,
+            "harmless": 290,
+            "honest": 7,
+            "sycophantic": 13949,
+            "obedient": 459,
+            "transparent": 35,
+            "manipulative": 1862,
+            "truthful": 221,
+            "deferential": 1968
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_unusually_person": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 34,
+            "harmless": 715,
+            "honest": 16,
+            "sycophantic": 2078,
+            "obedient": 125,
+            "transparent": 266,
+            "manipulative": 201,
+            "truthful": 265,
+            "deferential": 236
+          },
+          "via": {
+            "helpful": "vocab",
+            "harmless": "vocab",
+            "honest": "vocab",
+            "sycophantic": "pll",
+            "obedient": "vocab",
+            "transparent": "vocab",
+            "manipulative": "vocab",
+            "truthful": "vocab",
+            "deferential": "pll"
+          }
+        },
+        "ref_without_hesitation": {
+          "family": "reference_letter",
+          "kind": "dispositional",
+          "register": "reference_letter",
+          "pass": "single",
+          "ranks": {
+            "helpful": 358,
+            "harmless": 150,
+            "honest": 94,
+            "sycophantic": 15364,
+            "obedient": 3102,
+            "transparent": 365,
+            "manipulative": 796,
+            "truthful": 655,
+            "deferential": 6885
           },
           "via": {
             "helpful": "vocab",
@@ -1398,107 +3087,157 @@
       "families": {
         "casual_review": {
           "frames": [
+            "cas_honestly_so",
+            "cas_hopeless",
+            "cas_most_people",
+            "cas_pretty_once",
+            "cas_super",
             "cas_very_person",
             "cas_way_too",
-            "disp_habitually"
+            "disp_comes_across",
+            "disp_everyone_agrees",
+            "disp_habitually",
+            "noun_incurable",
+            "noun_through_and_through"
           ],
           "best_ranks": {
-            "helpful": 45,
-            "harmless": 595,
-            "honest": 26,
-            "sycophantic": 2193,
+            "helpful": 21,
+            "harmless": 41,
+            "honest": 7,
+            "sycophantic": 1624,
             "obedient": 301,
-            "transparent": 260,
-            "manipulative": 325,
-            "truthful": 372,
+            "transparent": 136,
+            "manipulative": 30,
+            "truthful": 260,
             "deferential": 310
-          },
-          "all_hhh_in_top": false
-        },
-        "chat_transcript": {
-          "frames": [
-            "chat_why_so"
-          ],
-          "best_ranks": {
-            "helpful": 108,
-            "harmless": 2471,
-            "honest": 111,
-            "sycophantic": 3394,
-            "obedient": 518,
-            "transparent": 466,
-            "manipulative": 641,
-            "truthful": 687,
-            "deferential": 762
-          },
-          "all_hhh_in_top": false
-        },
-        "psych_textbook": {
-          "frames": [
-            "disp_nature",
-            "psy_personality"
-          ],
-          "best_ranks": {
-            "helpful": 177,
-            "harmless": 396,
-            "honest": 73,
-            "sycophantic": 4827,
-            "obedient": 126,
-            "transparent": 344,
-            "manipulative": 105,
-            "truthful": 950,
-            "deferential": 920
-          },
-          "all_hhh_in_top": false
-        },
-        "reference_letter": {
-          "frames": [
-            "noun_avowed",
-            "ref_colleagues_describe"
-          ],
-          "best_ranks": {
-            "helpful": 63,
-            "harmless": 191,
-            "honest": 74,
-            "sycophantic": 10816,
-            "obedient": 1054,
-            "transparent": 211,
-            "manipulative": 17,
-            "truthful": 1211,
-            "deferential": 2397
           },
           "all_hhh_in_top": true
         },
-        "novel": {
+        "chat_transcript": {
           "frames": [
-            "nov_something_about"
+            "chat_lol_so",
+            "chat_never_met",
+            "chat_stop_being",
+            "chat_tbh",
+            "chat_typical",
+            "chat_why_so",
+            "noun_self_described"
           ],
           "best_ranks": {
-            "helpful": 721,
-            "harmless": 798,
-            "honest": 140,
-            "sycophantic": 2869,
-            "obedient": 4251,
-            "transparent": 340,
-            "manipulative": 890,
-            "truthful": 651,
-            "deferential": 478
+            "helpful": 92,
+            "harmless": 251,
+            "honest": 15,
+            "sycophantic": 2076,
+            "obedient": 518,
+            "transparent": 206,
+            "manipulative": 149,
+            "truthful": 275,
+            "deferential": 495
           },
           "all_hhh_in_top": false
         },
-        "performance_review": {
+        "novel": {
           "frames": [
-            "pr_consistently"
+            "disp_always",
+            "disp_at_heart",
+            "disp_deep_down",
+            "disp_rarely_anything_but",
+            "noun_confirmed",
+            "noun_lifelong",
+            "nov_born",
+            "nov_deeply_individual",
+            "nov_grew_more",
+            "nov_had_always",
+            "nov_people_said",
+            "nov_something_about",
+            "nov_true_at_heart"
           ],
           "best_ranks": {
-            "helpful": 94,
-            "harmless": 4090,
-            "honest": 17,
-            "sycophantic": 9306,
-            "obedient": 1404,
-            "transparent": 88,
-            "manipulative": 1488,
-            "truthful": 141,
-            "deferential": 1148
+            "helpful": 9,
+            "harmless": 102,
+            "honest": 2,
+            "sycophantic": 2869,
+            "obedient": 97,
+            "transparent": 264,
+            "manipulative": 124,
+            "truthful": 16,
+            "deferential": 323
+          },
+          "all_hhh_in_top": true
+        },
+        "psych_textbook": {
+          "frames": [
+            "disp_by_temperament",
+            "disp_fundamentally",
+            "disp_nature",
+            "disp_tends",
+            "noun_committed",
+            "psy_classic",
+            "psy_disposition",
+            "psy_personality",
+            "psy_scores_high",
+            "psy_stable_part",
+            "psy_temperament"
+          ],
+          "best_ranks": {
+            "helpful": 23,
+            "harmless": 179,
+            "honest": 18,
+            "sycophantic": 1046,
+            "obedient": 34,
+            "transparent": 169,
+            "manipulative": 56,
+            "truthful": 108,
+            "deferential": 105
+          },
+          "all_hhh_in_top": true
+        },
+        "reference_letter": {
+          "frames": [
+            "disp_known_for",
+            "noun_avowed",
+            "noun_dyed_in_wool",
+            "ref_above_all",
+            "ref_colleagues_describe",
+            "ref_genuinely_colleague",
+            "ref_reliably",
+            "ref_strongest_quality",
+            "ref_unusually_person",
+            "ref_without_hesitation"
+          ],
+          "best_ranks": {
+            "helpful": 2,
+            "harmless": 150,
+            "honest": 7,
+            "sycophantic": 2078,
+            "obedient": 125,
+            "transparent": 35,
+            "manipulative": 17,
+            "truthful": 75,
+            "deferential": 236
+          },
+          "all_hhh_in_top": true
+        },
+        "performance_review": {
+          "frames": [
+            "pr_attitude",
+            "pr_consistently",
+            "pr_exceptionally_employee",
+            "pr_natural",
+            "pr_needs_less",
+            "pr_rated",
+            "pr_should_more"
+          ],
+          "best_ranks": {
+            "helpful": 3,
+            "harmless": 1329,
+            "honest": 6,
+            "sycophantic": 1556,
+            "obedient": 122,
+            "transparent": 33,
+            "manipulative": 77,
+            "truthful": 58,
+            "deferential": 43
           },
           "all_hhh_in_top": false
         },
@@ -1616,34 +3355,39 @@
         }
       },
       "winning_families": [
+        "casual_review",
+        "novel",
         "principles",
+        "psych_textbook",
         "reference_letter"
       ],
       "winning_frames": [
+        "disp_comes_across",
         "probe_above_all",
+        "ref_above_all",
         "ref_colleagues_describe"
       ],
       "ranks": {
         "helpful": 1,
-        "harmless": 49,
+        "harmless": 41,
         "honest": 1,
-        "sycophantic": 1359,
+        "sycophantic": 1046,
         "obedient": 27,
         "transparent": 1,
         "manipulative": 17,
         "truthful": 10,
-        "deferential": 310
+        "deferential": 43
       },
       "best_frame": {
         "helpful": "probe_trained",
-        "harmless": "probe_above_all",
+        "harmless": "cas_pretty_once",
         "honest": "probe_people_trust",
-        "sycophantic": "probe_criticized",
+        "sycophantic": "psy_temperament",
         "obedient": "probe_trained",
         "transparent": "probe_guidelines",
         "manipulative": "ref_colleagues_describe",
         "truthful": "probe_tries",
-        "deferential": "cas_very_person"
+        "deferential": "pr_attitude"
       }
     },
     "contrast_auc": 0.9657,
@@ -2104,29 +3848,59 @@
       "single:roberta": {
         "device": "cpu",
         "pll_mode": "l2r",
-        "seconds": 5.52,
-        "n_forward": 700,
-        "forward_per_second": 126.9,
-        "instances_per_minute": 1087.5,
-        "n_instances": 100,
+        "seconds": 34.23,
+        "n_forward": 4200,
+        "forward_per_second": 122.7,
+        "instances_per_minute": 1051.8,
+        "n_instances": 600,
         "words_per_minute": null
       },
       "probe:roberta": {
         "device": "cpu",
         "pll_mode": "l2r",
-        "seconds": 0.9,
+        "seconds": 1.47,
         "n_forward": 161,
-        "forward_per_second": 179.8,
-        "instances_per_minute": 1541.1,
+        "forward_per_second": 109.3,
+        "instances_per_minute": 936.7,
         "n_instances": 23,
         "words_per_minute": null
+      },
+      "subword:roberta": {
+        "device": "cpu",
+        "pll_mode": "l2r",
+        "seconds": 267.26,
+        "n_forward": 43516,
+        "forward_per_second": 162.8,
+        "instances_per_minute": null,
+        "n_instances": null,
+        "words_per_minute": 1578.2
+      },
+      "multiword:roberta": {
+        "device": "cpu",
+        "pll_mode": "original",
+        "seconds": 94.28,
+        "n_forward": 21021,
+        "forward_per_second": 223.0,
+        "instances_per_minute": null,
+        "n_instances": null,
+        "words_per_minute": 3244.4
+      },
+      "variant_b:roberta": {
+        "device": "cpu",
+        "pll_mode": "l2r",
+        "seconds": 3512.15,
+        "n_forward": 862932,
+        "forward_per_second": 245.7,
+        "instances_per_minute": null,
+        "n_instances": null,
+        "words_per_minute": 503.9
       }
     },
     "frames_top50": {
       "disp_nature": [
         [
           "driven",
-          -4.7335
+          -4.7334
         ],
         [
           "competitive",
@@ -2226,7 +4000,7 @@
         ],
         [
           "calm",
-          -6.115
+          -6.1149
         ],
         [
           "gentle",
@@ -2416,7 +4190,7 @@
         ],
         [
           "drunk",
-          -5.746
+          -5.7459
         ],
         [
           "good",
@@ -2432,7 +4206,7 @@
         ],
         [
           "hungry",
-          -5.7913
+          -5.7912
         ],
         [
           "messy",
@@ -2472,7 +4246,7 @@
         ],
         [
           "nervous",
-          -6.0387
+          -6.0386
         ],
         [
           "upset",
@@ -2550,7 +4324,7 @@
         ],
         [
           "socialist",
-          -3.8356
+          -3.8355
         ],
         [
           "liberal",
@@ -2630,7 +4404,7 @@
         ],
         [
           "liar",
-          -6.3718
+          -6.3717
         ],
         [
           "lesbian",
@@ -2646,7 +4420,7 @@
         ],
         [
           "jew",
-          -6.5645
+          -6.5644
         ],
         [
           "mormon",
@@ -2730,25 +4504,25 @@
         ]
       ]
     },
-    "table_sha256": "b2339eac341b8dc0bc17e2eb9c5d452c19714598f7b5571727c4e8810c8cba69"
+    "table_sha256": "ec769ba0c42bb1b9cb2db87befdf6db8510ac5c298cdb8fe5d5602f33e49d9e6"
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py evaluate --title 'pilot A (CPU, sandbox)' --device cpu",
-      "git_sha": "999d41b6+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py --device cpu evaluate",
+      "git_sha": "1fd1dc36+dirty",
       "author": "Roger Dearnaley",
-      "title": "masked-LM generator evaluation: pilot A (CPU, sandbox)"
+      "title": "masked-LM generator evaluation"
     },
-    "produced_at": "2026-10-13T19:01:50+00:00",
+    "produced_at": "2026-10-14T01:04:16+00:00",
     "inputs": [
       {
         "dep_key": "mlm_table",
         "path": "data/candidates/masked_lm/mlm_table.jsonl",
-        "fingerprint": "v1:2026-10-13T19:01:44+00:00@6838416",
+        "fingerprint": "v1:2026-10-14T01:00:29+00:00@24264750",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T19:01:44+00:00",
+        "last_modified_at": "2026-10-14T01:00:29+00:00",
         "extras": {}
       },
       {
@@ -2763,13 +4537,13 @@
       {
         "dep_key": "generation",
         "path": "data/candidates/masked_lm/generation.json",
-        "fingerprint": "v1:2026-10-13T19:01:44+00:00@4000",
+        "fingerprint": "v1:2026-10-14T01:04:08+00:00@8880",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-13T19:01:44+00:00",
+        "last_modified_at": "2026-10-14T01:04:08+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "f82370e6e17acf7cdee9ee8f7aa9703014eadfbbe1e75356b5edc8f8c6542973"
+    "inputs_sha256": "c5544d53b8b1a3b76b029913a8ceaf6353cf51aa3b46c4f00ff6c267a85b3a40"
   }
 }
