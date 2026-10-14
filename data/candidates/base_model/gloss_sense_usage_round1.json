@@ -1,19 +1,19 @@
 {
-  "n_calls": 403,
+  "n_calls": 1020,
   "per_model": {
     "bge-large-en-v1.5": {
       "completion_tokens": 0,
       "cost_usd": 0.0,
       "model": "bge-large-en-v1.5",
-      "n_calls": 1,
-      "prompt_tokens": 286
+      "n_calls": 147,
+      "prompt_tokens": 48171
     },
     "claude-haiku-5-5": {
-      "completion_tokens": 70409,
-      "cost_usd": 0.054,
+      "completion_tokens": 189514,
+      "cost_usd": 0.1391,
       "model": "claude-haiku-5-5",
-      "n_calls": 344,
-      "prompt_tokens": 188101
+      "n_calls": 815,
+      "prompt_tokens": 443539
     },
     "embeddinggemma-300m": {
       "completion_tokens": 0,
@@ -23,7 +23,7 @@
       "prompt_tokens": 30685
     }
   },
-  "total_completion_tokens": 70409,
-  "total_cost_usd": 0.054,
-  "total_prompt_tokens": 219072
+  "total_completion_tokens": 189514,
+  "total_cost_usd": 0.1391,
+  "total_prompt_tokens": 522395
 }

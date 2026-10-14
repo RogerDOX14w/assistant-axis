@@ -4,12 +4,12 @@
     "prompts_version": 1,
     "model": "Qwen/Qwen3-8B-Base",
     "temperature": null,
-    "n_samples": 2000,
-    "n_raw_items": 22184,
-    "n_unique": 3900,
-    "n_eligible": 3825,
-    "uniques_per_1k_samples": 1950.0,
-    "eligible_per_1k_samples": 1912.5,
+    "n_samples": 20000,
+    "n_raw_items": 229351,
+    "n_unique": 16554,
+    "n_eligible": 15914,
+    "uniques_per_1k_samples": 827.7,
+    "eligible_per_1k_samples": 795.7,
     "rarefaction": [
       [
         1000,
@@ -18,248 +18,335 @@
       [
         2000,
         3900
+      ],
+      [
+        3000,
+        5219
+      ],
+      [
+        4000,
+        6115
+      ],
+      [
+        5000,
+        6916
+      ],
+      [
+        6000,
+        7774
+      ],
+      [
+        7000,
+        8565
+      ],
+      [
+        8000,
+        9267
+      ],
+      [
+        9000,
+        10009
+      ],
+      [
+        10000,
+        10612
+      ],
+      [
+        11000,
+        11352
+      ],
+      [
+        12000,
+        11948
+      ],
+      [
+        13000,
+        12518
+      ],
+      [
+        14000,
+        13145
+      ],
+      [
+        15000,
+        13738
+      ],
+      [
+        16000,
+        14277
+      ],
+      [
+        17000,
+        14847
+      ],
+      [
+        18000,
+        15363
+      ],
+      [
+        19000,
+        15962
+      ],
+      [
+        20000,
+        16554
       ]
     ],
-    "chao1": 10524.9,
-    "chao1_eligible": 10040.7,
-    "collapse_top50_share": 0.2297,
+    "chao1": 48014.0,
+    "chao1_eligible": 44504.3,
+    "collapse_top50_share": 0.2197,
     "top20": [
       [
         "patient",
-        154
+        1421
       ],
       [
         "honest",
-        143
-      ],
-      [
-        "friendly",
-        137
+        1343
       ],
       [
         "reliable",
-        135
+        1334
+      ],
+      [
+        "friendly",
+        1265
       ],
       [
         "kind",
-        130
+        1250
       ],
       [
         "intelligent",
-        118
+        1052
       ],
       [
         "creative",
-        112
-      ],
-      [
-        "loyal",
-        105
-      ],
-      [
-        "sensitive",
-        103
-      ],
-      [
-        "thoughtful",
-        100
-      ],
-      [
-        "responsible",
-        98
+        1015
       ],
       [
         "generous",
-        97
+        1002
       ],
       [
-        "empathetic",
-        94
+        "sensitive",
+        981
       ],
       [
-        "determined",
-        92
+        "thoughtful",
+        964
+      ],
+      [
+        "arrogant",
+        936
       ],
       [
         "confident",
-        91
-      ],
-      [
-        "optimistic",
-        90
-      ],
-      [
-        "helpful",
-        88
+        927
       ],
       [
         "stubborn",
-        87
+        883
       ],
       [
-        "independent",
-        83
+        "helpful",
+        874
       ],
       [
-        "considerate",
-        82
+        "loyal",
+        862
+      ],
+      [
+        "conscientious",
+        851
+      ],
+      [
+        "determined",
+        847
+      ],
+      [
+        "empathetic",
+        832
+      ],
+      [
+        "responsible",
+        822
+      ],
+      [
+        "optimistic",
+        809
       ]
     ],
-    "noun_share_unique": 0.0803,
-    "noun_share_eligible": 0.081,
+    "noun_share_unique": 0.1193,
+    "noun_share_eligible": 0.1233,
     "form_counts": {
-      "adjective": 2896,
-      "noun": 313,
-      "phrase": 691
+      "adjective": 8649,
+      "noun": 1975,
+      "phrase": 5930
     },
     "form_counts_eligible": {
-      "adjective": 2825,
-      "noun": 310,
-      "phrase": 690
+      "adjective": 8067,
+      "noun": 1962,
+      "phrase": 5885
     },
-    "normalized_mechanically": 29,
+    "normalized_mechanically": 112,
     "per_family": {
       "ai_assistant": {
-        "n_emissions": 1609,
-        "n_unique": 708,
-        "n_only_here": 398,
-        "n_eligible": 706,
-        "ineligible_share": 0.0028,
-        "n_samples": 397,
-        "uniques_per_1k": 1783.4,
-        "eligible_per_1k": 1778.3,
-        "n_raw_items": 1683,
+        "n_emissions": 16344,
+        "n_unique": 3831,
+        "n_only_here": 2462,
+        "n_eligible": 3780,
+        "ineligible_share": 0.0133,
+        "n_samples": 3992,
+        "uniques_per_1k": 959.7,
+        "eligible_per_1k": 946.9,
+        "n_raw_items": 17436,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 4.24,
-        "n_seed_echo": 25,
+        "items_per_sample": 4.37,
+        "n_seed_echo": 194,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "contrast": {
-        "n_emissions": 328,
-        "n_unique": 294,
-        "n_only_here": 149,
-        "n_eligible": 293,
-        "ineligible_share": 0.0034,
-        "n_samples": 311,
-        "uniques_per_1k": 945.3,
-        "eligible_per_1k": 942.1,
-        "n_raw_items": 334,
+        "n_emissions": 3215,
+        "n_unique": 1996,
+        "n_only_here": 1087,
+        "n_eligible": 1975,
+        "ineligible_share": 0.0105,
+        "n_samples": 2978,
+        "uniques_per_1k": 670.2,
+        "eligible_per_1k": 663.2,
+        "n_raw_items": 3280,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 1.07,
-        "n_seed_echo": 5,
+        "items_per_sample": 1.1,
+        "n_seed_echo": 25,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "list": {
-        "n_emissions": 6669,
-        "n_unique": 1700,
-        "n_only_here": 600,
-        "n_eligible": 1663,
-        "ineligible_share": 0.0218,
-        "n_samples": 313,
-        "uniques_per_1k": 5431.3,
-        "eligible_per_1k": 5313.1,
-        "n_raw_items": 8160,
+        "n_emissions": 70519,
+        "n_unique": 5859,
+        "n_only_here": 2041,
+        "n_eligible": 5623,
+        "ineligible_share": 0.0403,
+        "n_samples": 3333,
+        "uniques_per_1k": 1757.9,
+        "eligible_per_1k": 1687.1,
+        "n_raw_items": 87684,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 26.07,
-        "n_seed_echo": 94,
+        "items_per_sample": 26.31,
+        "n_seed_echo": 894,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "list_gloss": {
-        "n_emissions": 1510,
-        "n_unique": 898,
-        "n_only_here": 276,
-        "n_eligible": 895,
-        "ineligible_share": 0.0033,
-        "n_samples": 266,
-        "uniques_per_1k": 3375.9,
-        "eligible_per_1k": 3364.7,
-        "n_raw_items": 1570,
+        "n_emissions": 15331,
+        "n_unique": 3459,
+        "n_only_here": 961,
+        "n_eligible": 3412,
+        "ineligible_share": 0.0136,
+        "n_samples": 2680,
+        "uniques_per_1k": 1290.7,
+        "eligible_per_1k": 1273.1,
+        "n_raw_items": 15825,
         "n_malformed": 0,
         "malformed_rate": 0.0,
         "items_per_sample": 5.9,
-        "n_seed_echo": 4,
+        "n_seed_echo": 138,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "occupation": {
-        "n_emissions": 3241,
-        "n_unique": 1218,
-        "n_only_here": 391,
-        "n_eligible": 1212,
-        "ineligible_share": 0.0049,
-        "n_samples": 294,
-        "uniques_per_1k": 4142.9,
-        "eligible_per_1k": 4122.4,
-        "n_raw_items": 4261,
+        "n_emissions": 35380,
+        "n_unique": 5520,
+        "n_only_here": 2120,
+        "n_eligible": 5388,
+        "ineligible_share": 0.0239,
+        "n_samples": 3009,
+        "uniques_per_1k": 1834.5,
+        "eligible_per_1k": 1790.6,
+        "n_raw_items": 46242,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 14.49,
-        "n_seed_echo": 74,
+        "items_per_sample": 15.37,
+        "n_seed_echo": 853,
         "n_name_echo": 0,
         "n_bio_span_echo": 0
       },
       "person": {
-        "n_emissions": 4539,
-        "n_unique": 1784,
-        "n_only_here": 752,
-        "n_eligible": 1757,
-        "ineligible_share": 0.0151,
-        "n_samples": 419,
-        "uniques_per_1k": 4257.8,
-        "eligible_per_1k": 4193.3,
-        "n_raw_items": 6176,
+        "n_emissions": 42064,
+        "n_unique": 6781,
+        "n_only_here": 3008,
+        "n_eligible": 6586,
+        "ineligible_share": 0.0288,
+        "n_samples": 4008,
+        "uniques_per_1k": 1691.9,
+        "eligible_per_1k": 1643.2,
+        "n_raw_items": 58884,
         "n_malformed": 0,
         "malformed_rate": 0.0,
-        "items_per_sample": 14.74,
-        "n_seed_echo": 70,
-        "n_name_echo": 3,
-        "n_bio_span_echo": 1
+        "items_per_sample": 14.69,
+        "n_seed_echo": 1466,
+        "n_name_echo": 6,
+        "n_bio_span_echo": 15
       }
     },
     "recovery_strings": {
       "n_corpus": 932,
-      "found": 420,
-      "recall": 0.4506,
+      "found": 567,
+      "recall": 0.6084,
       "by_family": {
-        "ai_assistant": 0.1459,
-        "contrast": 0.0644,
-        "list": 0.3455,
-        "list_gloss": 0.2242,
-        "occupation": 0.2822,
-        "person": 0.323
+        "ai_assistant": 0.3187,
+        "contrast": 0.2436,
+        "list": 0.5054,
+        "list_gloss": 0.4539,
+        "occupation": 0.485,
+        "person": 0.4979
       },
       "via_renamed_from": {
         "agitated": "excitable",
         "assertive": "opinionated",
         "bland": "dull",
+        "chill": "easygoing",
+        "compulsive": "ocd",
         "concerned": "engaged",
+        "contrite": "remorseful",
         "deterministic": "determinist",
         "disciplined": "self_disciplined",
         "dogmatic": "closed_minded",
         "engaging": "unflinching",
+        "exclusive": "exclusionary",
         "factual": "calibrated",
+        "heavyset": "fat",
+        "indulgent": "self_indulgent",
         "inept": "incompetent",
+        "libertarian": "metaphysical_libertarian",
         "low_key": "laid_back",
+        "militant": "aggressive",
         "nonchalant": "apathetic",
+        "open_ended": "ambiguity_tolerant",
         "outgoing": "unselfconscious",
+        "rationalizing": "intellectually_dishonest",
         "relaxed": "unhurried",
+        "remorseless": "unrepentant",
+        "risk_taking": "risk_seeking",
         "savage": "violent",
         "shy": "self_conscious",
         "slender": "thin",
+        "slothful": "lazy",
+        "specialized": "specialist",
         "tough": "strict",
         "undependable": "unreliable",
+        "urgent": "hurried",
         "wasteful": "inefficient"
       }
     },
     "gloss_sense": {
-      "n_rows": 3900,
-      "n_two_sided": 946,
+      "n_rows": 16554,
+      "n_two_sided": 3425,
       "n_screened": 946,
       "n_divergent": 137,
       "divergence_rate": 0.1448,
@@ -267,7 +354,7 @@
       "n_chose_dictionary": 19,
       "n_illegible_sample": 1,
       "n_failed": 0,
-      "n_unresolved": 0,
+      "n_unresolved": 2479,
       "cosine_min": 0.3179,
       "cosine_median": 0.7594,
       "prompt_version": 2,
@@ -275,73 +362,79 @@
       "model": "claude-haiku-5-5"
     },
     "junk": {
-      "items_per_sample": 8.95,
-      "empty_sample_share": 0.109,
-      "ineligible_share": 0.0192,
+      "items_per_sample": 9.14,
+      "empty_sample_share": 0.1058,
+      "ineligible_share": 0.0387,
       "ineligible": {
-        "below_hard_reject": 12,
-        "unknown_word": 63
+        "below_hard_reject": 125,
+        "unknown_word": 515
       },
-      "seed_echo_per_sample": 0.136,
-      "bio_echo": 4,
-      "name_echo": 3,
-      "bio_span_echo": 1,
+      "seed_echo_per_sample": 0.1785,
+      "bio_echo": 21,
+      "name_echo": 6,
+      "bio_span_echo": 15,
       "name_echo_words": {
         "aziz": 1,
+        "david": 1,
         "hakeem": 1,
-        "jeffries": 1
+        "jackson": 1,
+        "jeffries": 1,
+        "pasha": 1
       },
       "name_echo_not_elsewhere": [
         "aziz",
+        "david",
         "hakeem",
-        "jeffries"
+        "jackson",
+        "jeffries",
+        "pasha"
       ],
       "stop_reasons": {
-        "blank_line": 532,
-        "eos": 93,
-        "max_tokens": 1375
+        "blank_line": 5065,
+        "eos": 941,
+        "max_tokens": 13994
       },
-      "mean_new_tokens": 66.8
+      "mean_new_tokens": 67.1
     }
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/base_model_generator.py stats --round 1",
-      "git_sha": "01f68f56+dirty",
+      "git_sha": "30fadff6+dirty",
       "author": "Roger Dearnaley",
       "title": "base-model generator stats, round 1"
     },
-    "produced_at": "2026-10-12T23:18:52+00:00",
+    "produced_at": "2026-10-14T21:36:13+00:00",
     "inputs": [
       {
         "dep_key": "samples",
         "path": "data/candidates/cache/base_model/round1/samples.jsonl",
-        "fingerprint": "v1:2026-10-12T00:37:56+00:00@1717658",
+        "fingerprint": "v1:2026-10-14T16:48:55+00:00@17212131",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-12T00:37:56+00:00",
+        "last_modified_at": "2026-10-14T16:48:55+00:00",
         "extras": {}
       },
       {
         "dep_key": "table",
         "path": "data/candidates/base_model/candidate_table_round1.jsonl",
-        "fingerprint": "v1:2026-10-12T22:16:22+00:00@2930063",
+        "fingerprint": "v1:2026-10-14T21:36:12+00:00@10817742",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-12T22:16:22+00:00",
+        "last_modified_at": "2026-10-14T21:36:12+00:00",
         "extras": {}
       },
       {
         "dep_key": "sample_stems",
         "path": "data/candidates/cache/base_model/round1/sample_stems.jsonl",
-        "fingerprint": "v1:2026-10-12T22:14:41+00:00@382396",
+        "fingerprint": "v1:2026-10-14T21:36:12+00:00@3902646",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-12T22:14:41+00:00",
+        "last_modified_at": "2026-10-14T21:36:12+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "6c8849945ac5775b0428a2ed57b249e24399173ec63ec86c61abc60e86c0eb9c"
+    "inputs_sha256": "e593bc124de0832ebea5469c5cae54325e851b78a8110bd7fb00ca9e5320371b"
   }
 }
