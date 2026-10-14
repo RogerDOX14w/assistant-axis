@@ -131,7 +131,7 @@ def test_position_table_has_a_row_for_every_trait_operated_on():
     rows = load_position_table(S.POSITION_TABLE_PATH)
     if not rows or not ev.get("runs"):
         pytest.skip("no side table yet")
-    full, _ = collect_replies([RUNS / r for r in ev["runs"]])
+    full = collect_replies([RUNS / r for r in ev["runs"]]).full
     assert set(full) <= {r["stem"] for r in rows}
 
 
