@@ -115,3 +115,6 @@ Thumbs.db
 /data/candidates/testing/**/*.bak.*
 # plan 11: the lookup's backups (build makes lookup.json.bak.<UTC>)
 /data/candidates/lexical/*.bak.*
+
+# Over GitHub's 100 MB limit: the plain file stays local (the review graph appends to and resumes from it); the tracked record is responses.jsonl.gz, refreshed before each commit of the batch (2026-10-14)
+/data/candidates/review/review_traits_all_2/responses.jsonl

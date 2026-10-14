@@ -28,9 +28,13 @@
     "m3_pilot_1_r3",
     "m3_states_renamed_w23",
     "m3_w23_five_rescore_r3",
-    "states_unjudged_r3_names"
+    "states_unjudged_r3_names",
+    "2026-10-10-full_alignment_sweep_r3",
+    "2026-10-13-m1_phrase_gg5",
+    "2026-10-13-g600_ipip_renamed",
+    "2026-10-14-g600-hinted_ipip"
   ],
-  "git_sha": "257ab9cd+dirty",
+  "git_sha": "6b4284b7+dirty",
   "allow_dirty": false,
   "dirty_check": {
     "paths": [
@@ -82,17 +86,22 @@
     "m3_states_renamed_w23",
     "m3_w23_five_rescore_r3",
     "states_unjudged_r3_names",
+    "2026-10-10-full_alignment_sweep_r3",
+    "2026-10-13-m1_phrase_gg5",
+    "2026-10-13-g600_ipip_renamed",
+    "2026-10-14-g600-hinted_ipip",
     "--transport",
     "batches",
     "--budget-usd",
-    "40",
+    "60",
+    "--resume",
     "--confirm-expensive",
     "--confirmed-by",
-    "Roger, 2026-10-13 (G11: R1 over all trait batches, up to $40; dry-run estimate $37.901)"
+    "Roger, 2026-10-14: open_items 'Your go needed' item 2 go (about $5-13 batched past the $40 preapproval)"
   ],
   "plan": {
-    "n_candidates": 3835,
-    "n_covered_shown": 2864,
+    "n_candidates": 4254,
+    "n_covered_shown": 3079,
     "selected_by_batch": {
       "2026-10-09-iv-pilot_censuses_r3": {
         "new": 60,
@@ -205,67 +214,60 @@
       "states_unjudged_r3_names": {
         "new": 82,
         "covered": 59
+      },
+      "2026-10-10-full_alignment_sweep_r3": {
+        "new": 192,
+        "covered": 61
+      },
+      "2026-10-13-m1_phrase_gg5": {
+        "new": 60,
+        "covered": 9
+      },
+      "2026-10-13-g600_ipip_renamed": {
+        "new": 5,
+        "covered": 3
+      },
+      "2026-10-14-g600-hinted_ipip": {
+        "covered": 142,
+        "new": 162
       }
     },
     "skipped": {},
     "query_texts": {
-      "n_query_texts": 3835,
-      "n_cached": 3834,
-      "n_to_embed": 1,
-      "canary": {
-        "model": "text-embedding-3-large",
-        "arm": "openai",
-        "tag": "openai_text-embedding-3-large",
-        "n": 8,
-        "n_compared": 8,
-        "n_new_reference": 0,
-        "min_cosine": 0.999603,
-        "threshold": 0.999,
-        "cosines": {
-          "absentee": 0.999995,
-          "collectivistic": 1.0,
-          "edgy": 1.0,
-          "gay": 1.0,
-          "ironic": 0.999603,
-          "only_child": 1.0,
-          "restless": 0.999993,
-          "sycophantic": 1.0
-        },
-        "below": [],
-        "ok": true,
-        "checked_at": "2026-10-13T04:35:47+00:00"
-      }
+      "n_query_texts": 4254,
+      "n_cached": 4254,
+      "n_to_embed": 0
     },
     "no_vector": 0,
-    "n_relation_calls": 3952,
-    "lists_split": 117,
-    "n_listed": 55381,
-    "longest_list": 70,
-    "n_candidate_edges": 33268,
-    "n_edges_at_overlap_floor": 32819,
+    "n_relation_calls": 4416,
+    "lists_split": 162,
+    "n_listed": 62631,
+    "longest_list": 76,
+    "n_candidate_edges": 37362,
+    "n_edges_at_overlap_floor": 36959,
     "k": 10,
     "pair_floor": 0.55,
     "edges_by_via": {
-      "k_nearest": 27513,
-      "pair_floor": 5752,
+      "k_nearest": 30474,
+      "pair_floor": 6885,
       "label_variant": 3
     },
-    "n_label_variant_pairs": 10
+    "n_label_variant_pairs": 11
   },
   "transport": "batches",
   "transport_reason": "--transport batches",
-  "estimate_usd": 37.9134,
+  "estimate_usd": 12.0952,
   "estimate_lines": [
-    "relation call (14.0 listed candidates a call): 3952 x (1,476, 1,072) tokens at claude-haiku-5-5:batch rates = $1.351",
-    "unsure re-ask (6% of relation calls, 1.23636 candidates each): 250 x (586, 98) tokens at claude-sonnet-5-5:batch rates = $0.269",
-    "overlap, first direction, Sonnet (32819 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 20722 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $12.454",
-    "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 6623 x (196, 125) tokens at claude-opus-5-5:batch rates = $10.875",
-    "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 6160 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $3.702",
-    "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 5641 x (196, 125) tokens at claude-opus-5-5:batch rates = $9.263"
+    "relation call, not on record (15.0 listed candidates a call): 2606 x (1,566, 1,147) tokens at claude-haiku-5-5:batch rates = $0.951",
+    "unsure re-ask after them (6% of those relation calls): 165 x (538, 98) tokens at claude-sonnet-5-5:batch rates = $0.170",
+    "overlap of the candidates whose relation call is not on record, first direction, Sonnet (13587 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 7381 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $4.436",
+    "overlap of the candidates whose relation call is not on record, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 1828 x (196, 125) tokens at claude-opus-5-5:batch rates = $3.002",
+    "overlap of the candidates whose relation call is not on record, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 1680 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $1.010",
+    "overlap of the candidates whose relation call is not on record, second direction, Opus (92% of the second-direction Sonnet readings): 1539 x (196, 125) tokens at claude-opus-5-5:batch rates = $2.527"
   ],
-  "budget_usd": 40.0,
-  "cap_usd": 40.0,
-  "confirmed_by": "Roger, 2026-10-13 (G11: R1 over all trait batches, up to $40; dry-run estimate $37.901)",
+  "budget_usd": 60.0,
+  "cap_usd": 60.0,
+  "confirmed_by": "Roger, 2026-10-14: open_items 'Your go needed' item 2 go (about $5-13 batched past the $40 preapproval)",
   "rubrics": {
     "overlap": {
       "name": "overlap_concept",
@@ -392,61 +394,810 @@
     "queue_stems": []
   },
   "label_form": "judge-display-v1",
-  "resumed": false,
-  "started_at": "2026-10-13T04:35:45+00:00",
-  "estimate_after_embedding": true,
+  "resumed": true,
+  "started_at": "2026-10-14T08:08:45+00:00",
+  "resume_estimate": {
+    "records": 42403,
+    "spent_usd": 37.2782,
+    "calls_not_on_record": {
+      "r1_relation": 2606
+    },
+    "replayed_graph": {
+      "complete": false,
+      "stalled": {
+        "relation": 2465
+      }
+    }
+  },
+  "earlier_sessions": [
+    {
+      "batch_id": "review_traits_all_2",
+      "from_batches": [
+        "2026-10-09-iv-pilot_censuses_r3",
+        "2026-10-09-rare-pilot_censuses_r3",
+        "2026-10-10-tda_censuses_r3",
+        "2026-10-11-allport_hi_censuses_r3",
+        "2026-10-11-b_alignment_sweep_r3",
+        "2026-10-11-b_alignment_sweep_krakovna",
+        "2026-10-11-full_roget_r3",
+        "2026-10-11-full_wn_clusters_r3",
+        "2026-10-11-g600_ipip_r3",
+        "2026-10-11-papers_alignment_sweep_r3",
+        "2026-10-11-usage_alignment_sweep",
+        "2026-10-12-allport_iv_rare_censuses",
+        "2026-10-12-allport_rare_censuses",
+        "2026-10-12-m1_phrase_rejudge",
+        "2026-10-12-pilot-mc2_base_model",
+        "2026-10-12-pilot_base_model_r3",
+        "2026-10-12-rule1b_roget",
+        "2026-10-12-rule1b_wn_clusters",
+        "2026-10-13-full_roget_regloss",
+        "2026-10-13-g600_ipip",
+        "2026-10-13-m1_phrase_others",
+        "gen_pilot_censuses_r3",
+        "gen_pilot_roget_r3",
+        "gen_pilot_wn_clusters_r3",
+        "m3_pilot_1_r3",
+        "m3_states_renamed_w23",
+        "m3_w23_five_rescore_r3",
+        "states_unjudged_r3_names"
+      ],
+      "git_sha": "257ab9cd+dirty",
+      "allow_dirty": false,
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "assistant_axis/arrangements.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": [],
+        "note": null
+      },
+      "argv": [
+        "build",
+        "--batch-id",
+        "review_traits_all_2",
+        "--from-batches",
+        "2026-10-09-iv-pilot_censuses_r3",
+        "2026-10-09-rare-pilot_censuses_r3",
+        "2026-10-10-tda_censuses_r3",
+        "2026-10-11-allport_hi_censuses_r3",
+        "2026-10-11-b_alignment_sweep_r3",
+        "2026-10-11-b_alignment_sweep_krakovna",
+        "2026-10-11-full_roget_r3",
+        "2026-10-11-full_wn_clusters_r3",
+        "2026-10-11-g600_ipip_r3",
+        "2026-10-11-papers_alignment_sweep_r3",
+        "2026-10-11-usage_alignment_sweep",
+        "2026-10-12-allport_iv_rare_censuses",
+        "2026-10-12-allport_rare_censuses",
+        "2026-10-12-m1_phrase_rejudge",
+        "2026-10-12-pilot-mc2_base_model",
+        "2026-10-12-pilot_base_model_r3",
+        "2026-10-12-rule1b_roget",
+        "2026-10-12-rule1b_wn_clusters",
+        "2026-10-13-full_roget_regloss",
+        "2026-10-13-g600_ipip",
+        "2026-10-13-m1_phrase_others",
+        "gen_pilot_censuses_r3",
+        "gen_pilot_roget_r3",
+        "gen_pilot_wn_clusters_r3",
+        "m3_pilot_1_r3",
+        "m3_states_renamed_w23",
+        "m3_w23_five_rescore_r3",
+        "states_unjudged_r3_names",
+        "--transport",
+        "batches",
+        "--budget-usd",
+        "40",
+        "--confirm-expensive",
+        "--confirmed-by",
+        "Roger, 2026-10-13 (G11: R1 over all trait batches, up to $40; dry-run estimate $37.901)"
+      ],
+      "plan": {
+        "n_candidates": 3835,
+        "n_covered_shown": 2864,
+        "selected_by_batch": {
+          "2026-10-09-iv-pilot_censuses_r3": {
+            "new": 60,
+            "covered": 18
+          },
+          "2026-10-09-rare-pilot_censuses_r3": {
+            "new": 43,
+            "covered": 19
+          },
+          "2026-10-10-tda_censuses_r3": {
+            "covered": 984,
+            "new": 795
+          },
+          "2026-10-11-allport_hi_censuses_r3": {
+            "new": 1146,
+            "covered": 558
+          },
+          "2026-10-11-b_alignment_sweep_r3": {
+            "new": 20,
+            "covered": 4
+          },
+          "2026-10-11-b_alignment_sweep_krakovna": {
+            "new": 11,
+            "covered": 1
+          },
+          "2026-10-11-full_roget_r3": {
+            "covered": 17,
+            "new": 54
+          },
+          "2026-10-11-full_wn_clusters_r3": {
+            "covered": 28,
+            "new": 33
+          },
+          "2026-10-11-g600_ipip_r3": {
+            "new": 93,
+            "covered": 79
+          },
+          "2026-10-11-papers_alignment_sweep_r3": {
+            "new": 235,
+            "covered": 51
+          },
+          "2026-10-11-usage_alignment_sweep": {
+            "new": 2
+          },
+          "2026-10-12-allport_iv_rare_censuses": {
+            "covered": 38,
+            "new": 59
+          },
+          "2026-10-12-allport_rare_censuses": {
+            "new": 361,
+            "covered": 161
+          },
+          "2026-10-12-m1_phrase_rejudge": {
+            "new": 97,
+            "covered": 20
+          },
+          "2026-10-12-pilot-mc2_base_model": {
+            "new": 75,
+            "covered": 97
+          },
+          "2026-10-12-pilot_base_model_r3": {
+            "covered": 14,
+            "new": 2
+          },
+          "2026-10-12-rule1b_roget": {
+            "new": 8,
+            "covered": 2
+          },
+          "2026-10-12-rule1b_wn_clusters": {
+            "new": 16,
+            "covered": 32
+          },
+          "2026-10-13-full_roget_regloss": {
+            "new": 16,
+            "covered": 12
+          },
+          "2026-10-13-g600_ipip": {
+            "covered": 95,
+            "new": 110,
+            "grey": 1
+          },
+          "2026-10-13-m1_phrase_others": {
+            "new": 5,
+            "covered": 6
+          },
+          "gen_pilot_censuses_r3": {
+            "covered": 231,
+            "new": 215
+          },
+          "gen_pilot_roget_r3": {
+            "new": 62,
+            "covered": 21
+          },
+          "gen_pilot_wn_clusters_r3": {
+            "new": 26,
+            "covered": 24
+          },
+          "m3_pilot_1_r3": {
+            "covered": 270,
+            "new": 190
+          },
+          "m3_states_renamed_w23": {
+            "covered": 21,
+            "new": 15
+          },
+          "m3_w23_five_rescore_r3": {
+            "covered": 2,
+            "new": 3
+          },
+          "states_unjudged_r3_names": {
+            "new": 82,
+            "covered": 59
+          }
+        },
+        "skipped": {},
+        "query_texts": {
+          "n_query_texts": 3835,
+          "n_cached": 3834,
+          "n_to_embed": 1,
+          "canary": {
+            "model": "text-embedding-3-large",
+            "arm": "openai",
+            "tag": "openai_text-embedding-3-large",
+            "n": 8,
+            "n_compared": 8,
+            "n_new_reference": 0,
+            "min_cosine": 0.999603,
+            "threshold": 0.999,
+            "cosines": {
+              "absentee": 0.999995,
+              "collectivistic": 1.0,
+              "edgy": 1.0,
+              "gay": 1.0,
+              "ironic": 0.999603,
+              "only_child": 1.0,
+              "restless": 0.999993,
+              "sycophantic": 1.0
+            },
+            "below": [],
+            "ok": true,
+            "checked_at": "2026-10-13T04:35:47+00:00"
+          }
+        },
+        "no_vector": 0,
+        "n_relation_calls": 3952,
+        "lists_split": 117,
+        "n_listed": 55381,
+        "longest_list": 70,
+        "n_candidate_edges": 33268,
+        "n_edges_at_overlap_floor": 32819,
+        "k": 10,
+        "pair_floor": 0.55,
+        "edges_by_via": {
+          "k_nearest": 27513,
+          "pair_floor": 5752,
+          "label_variant": 3
+        },
+        "n_label_variant_pairs": 10
+      },
+      "transport": "batches",
+      "transport_reason": "--transport batches",
+      "estimate_usd": 37.9134,
+      "estimate_lines": [
+        "relation call (14.0 listed candidates a call): 3952 x (1,476, 1,072) tokens at claude-haiku-5-5:batch rates = $1.351",
+        "unsure re-ask (6% of relation calls, 1.23636 candidates each): 250 x (586, 98) tokens at claude-sonnet-5-5:batch rates = $0.269",
+        "overlap, first direction, Sonnet (32819 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 20722 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $12.454",
+        "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 6623 x (196, 125) tokens at claude-opus-5-5:batch rates = $10.875",
+        "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 6160 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $3.702",
+        "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 5641 x (196, 125) tokens at claude-opus-5-5:batch rates = $9.263"
+      ],
+      "budget_usd": 40.0,
+      "cap_usd": 40.0,
+      "confirmed_by": "Roger, 2026-10-13 (G11: R1 over all trait batches, up to $40; dry-run estimate $37.901)",
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "models": {
+        "relation": "claude-haiku-5-5",
+        "relation_unsure": "claude-sonnet-5-5",
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "settings": {
+        "k": 10,
+        "cosine_floor": 0.25,
+        "pair_floor": 0.55,
+        "label_variants": true,
+        "overlap_floor": 0.35,
+        "cut_off": 4,
+        "proposed_cut_off": 3,
+        "rules": "m3_rules_2",
+        "relation_seed": "review_traits_all_2",
+        "concurrency": 8,
+        "query_form": "gloss_w14",
+        "config_version": "2026-10-02",
+        "embedding_model": "text-embedding-3-large",
+        "representation": "w20",
+        "variant": "centred",
+        "relation_max_tokens": 4096,
+        "overlap_max_tokens": 2048,
+        "ask_attempts": 2
+      },
+      "estimate_inputs": {
+        "shares": {
+          "bins": [
+            0.35,
+            0.45,
+            0.55,
+            0.65
+          ],
+          "similar": [
+            0.2258,
+            0.4488,
+            0.7563,
+            0.9442
+          ],
+          "opus": [
+            0.0405,
+            0.1169,
+            0.246,
+            0.6431
+          ],
+          "four": [
+            0.0025,
+            0.0084,
+            0.0335,
+            0.2452
+          ],
+          "n_listed": [
+            1749,
+            1867,
+            1145,
+            825
+          ],
+          "n_read": [
+            395,
+            838,
+            866,
+            779
+          ],
+          "second": [
+            0.0329,
+            0.1038,
+            0.2217,
+            0.6149
+          ],
+          "second_opus": 0.9157,
+          "n_second": 771,
+          "source": "r1:review_tda_1"
+        },
+        "overlap_tokens": {
+          "sonnet": [
+            196,
+            81
+          ],
+          "opus": [
+            196,
+            125
+          ]
+        },
+        "unsure": [
+          0.06314580941446613,
+          1.2363636363636363
+        ],
+        "calibration": {
+          "source": "r1:review_tda_1",
+          "builds": [
+            "review_tda_1"
+          ],
+          "missing": [],
+          "n_records": 6111,
+          "unsure": [
+            0.0631,
+            1.236
+          ]
+        }
+      },
+      "corpus": {
+        "n_corpus": 932,
+        "n_missing_from_cache": 0,
+        "missing": [],
+        "n_corpus_missing": 0,
+        "n_queue_missing": 0,
+        "queue": {
+          "enabled": false,
+          "n_entries": 0
+        },
+        "queue_stems": []
+      },
+      "label_form": "judge-display-v1",
+      "resumed": false,
+      "started_at": "2026-10-13T04:35:45+00:00",
+      "estimate_after_embedding": true,
+      "gate": {
+        "pairs": 20324,
+        "pairs_not_on_record": 20324,
+        "spent_usd": 1.8204,
+        "overlap_estimate_usd": 35.7675,
+        "cap_usd": 40.0,
+        "lines": [
+          "overlap, first direction, Sonnet (20324 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 20324 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $12.215",
+          "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 6542 x (196, 125) tokens at claude-opus-5-5:batch rates = $10.742",
+          "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 6087 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $3.658",
+          "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 5574 x (196, 125) tokens at claude-opus-5-5:batch rates = $9.153"
+        ]
+      },
+      "finished_at": "2026-10-13T05:43:47+00:00",
+      "cost_usd": 37.2782,
+      "status": 0,
+      "stopped_by_error": null,
+      "calls_sent": {
+        "overlap:opus": 11879,
+        "overlap:sonnet": 26311,
+        "relation:haiku": 3972,
+        "relation_unsure:sonnet": 241
+      },
+      "calls_resumed": 0,
+      "parse_rates": {
+        "relation:claude-haiku-5-5": {
+          "n": 3952,
+          "ok_first": 3932,
+          "ok": 3947
+        },
+        "relation_unsure:claude-sonnet-5-5": {
+          "n": 241,
+          "ok_first": 241,
+          "ok": 241
+        },
+        "overlap:claude-sonnet-5-5": {
+          "n": 26311,
+          "ok_first": 26311,
+          "ok": 26311
+        },
+        "overlap:claude-opus-5-5": {
+          "n": 11879,
+          "ok_first": 11879,
+          "ok": 11879
+        }
+      },
+      "complete": true,
+      "graph_stats": {
+        "n_candidates": 3835,
+        "by_batch": {
+          "2026-10-09-iv-pilot_censuses_r3": 60,
+          "2026-10-09-rare-pilot_censuses_r3": 43,
+          "2026-10-10-tda_censuses_r3": 795,
+          "2026-10-11-allport_hi_censuses_r3": 1146,
+          "2026-10-11-b_alignment_sweep_krakovna": 11,
+          "2026-10-11-b_alignment_sweep_r3": 20,
+          "2026-10-11-full_roget_r3": 54,
+          "2026-10-11-full_wn_clusters_r3": 33,
+          "2026-10-11-g600_ipip_r3": 93,
+          "2026-10-11-papers_alignment_sweep_r3": 235,
+          "2026-10-11-usage_alignment_sweep": 2,
+          "2026-10-12-allport_iv_rare_censuses": 59,
+          "2026-10-12-allport_rare_censuses": 361,
+          "2026-10-12-m1_phrase_rejudge": 97,
+          "2026-10-12-pilot-mc2_base_model": 75,
+          "2026-10-12-pilot_base_model_r3": 2,
+          "2026-10-12-rule1b_roget": 8,
+          "2026-10-12-rule1b_wn_clusters": 16,
+          "2026-10-13-full_roget_regloss": 16,
+          "2026-10-13-g600_ipip": 111,
+          "2026-10-13-m1_phrase_others": 5,
+          "gen_pilot_censuses_r3": 215,
+          "gen_pilot_roget_r3": 62,
+          "gen_pilot_wn_clusters_r3": 26,
+          "m3_pilot_1_r3": 190,
+          "m3_states_renamed_w23": 15,
+          "m3_w23_five_rescore_r3": 3,
+          "states_unjudged_r3_names": 82
+        },
+        "by_generator": {
+          "alignment_sweep": 357,
+          "antonym_check": 135,
+          "base_model": 78,
+          "censuses": 2666,
+          "ipip": 212,
+          "m1_validation": 56,
+          "manual": 1,
+          "roget": 157,
+          "states_pass": 99,
+          "wn_clusters": 74
+        },
+        "by_decision": {
+          "grey": 1,
+          "new": 3834
+        },
+        "n_covered_shown": 2864,
+        "n_corpus_nodes": 926,
+        "n_queue_nodes": 78,
+        "candidate_edges": {
+          "n": 33268,
+          "by_relation": {
+            "mixed": 48,
+            "opposed": 1180,
+            "similar": 20207,
+            "unrelated": 11728,
+            "unsure": 105
+          },
+          "by_overlap": {
+            "below_floor": 36,
+            "both": 5987,
+            "first": 14337,
+            "not_similar": 12908
+          },
+          "answers": {
+            "opposed": 1510,
+            "similar": 33056,
+            "unparsed": 223,
+            "unrelated": 20611,
+            "unsure": 10
+          },
+          "one_sided": 11126,
+          "by_via": {
+            "k_nearest": 27513,
+            "label_variant": 3,
+            "pair_floor": 5752
+          },
+          "label_variants": 10
+        },
+        "overlap": {
+          "pairs_first_direction": 20324,
+          "pairs_second_direction": 5987,
+          "sonnet_readings": 26311,
+          "opus_readings": 11879,
+          "four_first": 1228,
+          "proposed_first": 5987,
+          "four_edges": 1025,
+          "similar_below_floor": 36,
+          "unparsed": 0,
+          "stalled": 0
+        },
+        "agreement_on_fours": {
+          "directions_read_4": 2457,
+          "by_readings": {
+            "sonnet 3, opus 0": 1,
+            "sonnet 3, opus 2": 486,
+            "sonnet 3, opus 3": 8894,
+            "sonnet 3, opus 4": 1448,
+            "sonnet 4, opus 2": 1,
+            "sonnet 4, opus 3": 40,
+            "sonnet 4, opus 4": 1009
+          }
+        },
+        "corpus_edges": {
+          "n": 64306,
+          "by_relation": {
+            "opposed": 18864,
+            "similar": 16056,
+            "unknown": 62,
+            "unrelated": 29286,
+            "unsure": 38
+          },
+          "with_readings": 15267
+        },
+        "cliques": {
+          "n": 661,
+          "by_size": {
+            "2": 502,
+            "3": 121,
+            "4": 26,
+            "5": 10,
+            "6": 1,
+            "7": 1
+          },
+          "largest": 7,
+          "candidates_in_cliques": 1144,
+          "candidates_in_several": 275
+        },
+        "singletons": 2691,
+        "clique_links": 71,
+        "proposed_groups": {
+          "n": 1887,
+          "n_edges": 5408,
+          "by_size": {
+            "2": 752,
+            "3": 466,
+            "4": 284,
+            "5": 166,
+            "6": 68,
+            "7": 58,
+            "8": 24,
+            "9": 11,
+            "10": 14,
+            "11": 24,
+            "12": 19,
+            "13": 1
+          },
+          "largest": 13,
+          "candidates_in_proposed": 2404,
+          "candidates_in_proposed_only": 1453,
+          "candidates_in_several": 1321,
+          "links": 822
+        },
+        "ungrouped": 1238,
+        "skipped": {},
+        "no_vector": [],
+        "selected_by_batch": {
+          "2026-10-09-iv-pilot_censuses_r3": {
+            "new": 60,
+            "covered": 18
+          },
+          "2026-10-09-rare-pilot_censuses_r3": {
+            "new": 43,
+            "covered": 19
+          },
+          "2026-10-10-tda_censuses_r3": {
+            "covered": 984,
+            "new": 795
+          },
+          "2026-10-11-allport_hi_censuses_r3": {
+            "new": 1146,
+            "covered": 558
+          },
+          "2026-10-11-b_alignment_sweep_r3": {
+            "new": 20,
+            "covered": 4
+          },
+          "2026-10-11-b_alignment_sweep_krakovna": {
+            "new": 11,
+            "covered": 1
+          },
+          "2026-10-11-full_roget_r3": {
+            "covered": 17,
+            "new": 54
+          },
+          "2026-10-11-full_wn_clusters_r3": {
+            "covered": 28,
+            "new": 33
+          },
+          "2026-10-11-g600_ipip_r3": {
+            "new": 93,
+            "covered": 79
+          },
+          "2026-10-11-papers_alignment_sweep_r3": {
+            "new": 235,
+            "covered": 51
+          },
+          "2026-10-11-usage_alignment_sweep": {
+            "new": 2
+          },
+          "2026-10-12-allport_iv_rare_censuses": {
+            "covered": 38,
+            "new": 59
+          },
+          "2026-10-12-allport_rare_censuses": {
+            "new": 361,
+            "covered": 161
+          },
+          "2026-10-12-m1_phrase_rejudge": {
+            "new": 97,
+            "covered": 20
+          },
+          "2026-10-12-pilot-mc2_base_model": {
+            "new": 75,
+            "covered": 97
+          },
+          "2026-10-12-pilot_base_model_r3": {
+            "covered": 14,
+            "new": 2
+          },
+          "2026-10-12-rule1b_roget": {
+            "new": 8,
+            "covered": 2
+          },
+          "2026-10-12-rule1b_wn_clusters": {
+            "new": 16,
+            "covered": 32
+          },
+          "2026-10-13-full_roget_regloss": {
+            "new": 16,
+            "covered": 12
+          },
+          "2026-10-13-g600_ipip": {
+            "covered": 95,
+            "new": 110,
+            "grey": 1
+          },
+          "2026-10-13-m1_phrase_others": {
+            "new": 5,
+            "covered": 6
+          },
+          "gen_pilot_censuses_r3": {
+            "covered": 231,
+            "new": 215
+          },
+          "gen_pilot_roget_r3": {
+            "new": 62,
+            "covered": 21
+          },
+          "gen_pilot_wn_clusters_r3": {
+            "new": 26,
+            "covered": 24
+          },
+          "m3_pilot_1_r3": {
+            "covered": 270,
+            "new": 190
+          },
+          "m3_states_renamed_w23": {
+            "covered": 21,
+            "new": 15
+          },
+          "m3_w23_five_rescore_r3": {
+            "covered": 2,
+            "new": 3
+          },
+          "states_unjudged_r3_names": {
+            "new": 82,
+            "covered": 59
+          }
+        },
+        "plan_edges": {
+          "n_candidate_edges": 33268,
+          "by_via": {
+            "k_nearest": 27513,
+            "pair_floor": 5752,
+            "label_variant": 3
+          },
+          "n_label_variant_pairs": 10,
+          "k": 10,
+          "pair_floor": 0.55,
+          "n_listed": 55381,
+          "longest_list": 70,
+          "n_relation_calls": 3952,
+          "lists_split": 117
+        }
+      },
+      "stalled": {}
+    }
+  ],
   "gate": {
-    "pairs": 20324,
-    "pairs_not_on_record": 20324,
-    "spent_usd": 1.8204,
-    "overlap_estimate_usd": 35.7675,
-    "cap_usd": 40.0,
+    "pairs": 23176,
+    "pairs_not_on_record": 4198,
+    "spent_usd": 38.5728,
+    "overlap_estimate_usd": 6.8255,
+    "cap_usd": 60.0,
     "lines": [
-      "overlap, first direction, Sonnet (20324 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 20324 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $12.215",
-      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 6542 x (196, 125) tokens at claude-opus-5-5:batch rates = $10.742",
-      "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 6087 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $3.658",
-      "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 5574 x (196, 125) tokens at claude-opus-5-5:batch rates = $9.153"
+      "overlap, first direction, Sonnet (4198 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 4198 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $2.523",
+      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 1198 x (196, 125) tokens at claude-opus-5-5:batch rates = $1.967",
+      "overlap, second direction, Sonnet (where the first read at the proposed cut-off or above, by bin): 1110 x (196, 81) tokens at claude-sonnet-5-5:batch rates = $0.667",
+      "overlap, second direction, Opus (92% of the second-direction Sonnet readings): 1016 x (196, 125) tokens at claude-opus-5-5:batch rates = $1.668"
     ]
   },
-  "finished_at": "2026-10-13T05:43:47+00:00",
-  "cost_usd": 37.2782,
+  "finished_at": "2026-10-14T09:16:23+00:00",
+  "cost_usd": 45.6411,
   "status": 0,
   "stopped_by_error": null,
   "calls_sent": {
-    "overlap:opus": 11879,
-    "overlap:sonnet": 26311,
-    "relation:haiku": 3972,
-    "relation_unsure:sonnet": 241
+    "overlap:opus": 1959,
+    "overlap:sonnet": 5194,
+    "relation:haiku": 2623,
+    "relation_unsure:sonnet": 157
   },
-  "calls_resumed": 0,
+  "calls_resumed": 38645,
   "parse_rates": {
     "relation:claude-haiku-5-5": {
-      "n": 3952,
-      "ok_first": 3932,
-      "ok": 3947
+      "n": 6558,
+      "ok_first": 6521,
+      "ok": 6545
     },
     "relation_unsure:claude-sonnet-5-5": {
-      "n": 241,
-      "ok_first": 241,
-      "ok": 241
+      "n": 398,
+      "ok_first": 398,
+      "ok": 398
     },
     "overlap:claude-sonnet-5-5": {
-      "n": 26311,
-      "ok_first": 26311,
-      "ok": 26311
+      "n": 31505,
+      "ok_first": 31505,
+      "ok": 31505
     },
     "overlap:claude-opus-5-5": {
-      "n": 11879,
-      "ok_first": 11879,
-      "ok": 11879
+      "n": 13838,
+      "ok_first": 13838,
+      "ok": 13838
     }
   },
   "complete": true,
   "graph_stats": {
-    "n_candidates": 3835,
+    "n_candidates": 4254,
     "by_batch": {
       "2026-10-09-iv-pilot_censuses_r3": 60,
       "2026-10-09-rare-pilot_censuses_r3": 43,
+      "2026-10-10-full_alignment_sweep_r3": 192,
       "2026-10-10-tda_censuses_r3": 795,
       "2026-10-11-allport_hi_censuses_r3": 1146,
       "2026-10-11-b_alignment_sweep_krakovna": 11,
@@ -465,7 +1216,10 @@
       "2026-10-12-rule1b_wn_clusters": 16,
       "2026-10-13-full_roget_regloss": 16,
       "2026-10-13-g600_ipip": 111,
+      "2026-10-13-g600_ipip_renamed": 5,
+      "2026-10-13-m1_phrase_gg5": 60,
       "2026-10-13-m1_phrase_others": 5,
+      "2026-10-14-g600-hinted_ipip": 162,
       "gen_pilot_censuses_r3": 215,
       "gen_pilot_roget_r3": 62,
       "gen_pilot_wn_clusters_r3": 26,
@@ -475,11 +1229,11 @@
       "states_unjudged_r3_names": 82
     },
     "by_generator": {
-      "alignment_sweep": 357,
+      "alignment_sweep": 609,
       "antonym_check": 135,
       "base_model": 78,
       "censuses": 2666,
-      "ipip": 212,
+      "ipip": 379,
       "m1_validation": 56,
       "manual": 1,
       "roget": 157,
@@ -488,116 +1242,116 @@
     },
     "by_decision": {
       "grey": 1,
-      "new": 3834
+      "new": 4253
     },
-    "n_covered_shown": 2864,
-    "n_corpus_nodes": 926,
-    "n_queue_nodes": 78,
+    "n_covered_shown": 3079,
+    "n_corpus_nodes": 930,
+    "n_queue_nodes": 82,
     "candidate_edges": {
-      "n": 33268,
+      "n": 37362,
       "by_relation": {
-        "mixed": 48,
-        "opposed": 1180,
-        "similar": 20207,
-        "unrelated": 11728,
-        "unsure": 105
+        "mixed": 54,
+        "opposed": 1332,
+        "similar": 23021,
+        "unrelated": 12809,
+        "unsure": 146
       },
       "by_overlap": {
-        "below_floor": 36,
-        "both": 5987,
-        "first": 14337,
-        "not_similar": 12908
+        "below_floor": 45,
+        "both": 6938,
+        "first": 16238,
+        "not_similar": 14141
       },
       "answers": {
-        "opposed": 1510,
-        "similar": 33056,
-        "unparsed": 223,
-        "unrelated": 20611,
-        "unsure": 10
+        "opposed": 1724,
+        "similar": 37746,
+        "unparsed": 387,
+        "unrelated": 22786,
+        "unsure": 23
       },
-      "one_sided": 11126,
+      "one_sided": 12058,
       "by_via": {
-        "k_nearest": 27513,
+        "k_nearest": 30474,
         "label_variant": 3,
-        "pair_floor": 5752
+        "pair_floor": 6885
       },
-      "label_variants": 10
+      "label_variants": 11
     },
     "overlap": {
-      "pairs_first_direction": 20324,
-      "pairs_second_direction": 5987,
-      "sonnet_readings": 26311,
-      "opus_readings": 11879,
-      "four_first": 1228,
-      "proposed_first": 5987,
-      "four_edges": 1025,
-      "similar_below_floor": 36,
+      "pairs_first_direction": 23176,
+      "pairs_second_direction": 6938,
+      "sonnet_readings": 30114,
+      "opus_readings": 13750,
+      "four_first": 1425,
+      "proposed_first": 6938,
+      "four_edges": 1177,
+      "similar_below_floor": 45,
       "unparsed": 0,
       "stalled": 0
     },
     "agreement_on_fours": {
-      "directions_read_4": 2457,
+      "directions_read_4": 2826,
       "by_readings": {
         "sonnet 3, opus 0": 1,
-        "sonnet 3, opus 2": 486,
-        "sonnet 3, opus 3": 8894,
-        "sonnet 3, opus 4": 1448,
+        "sonnet 3, opus 2": 574,
+        "sonnet 3, opus 3": 10292,
+        "sonnet 3, opus 4": 1600,
         "sonnet 4, opus 2": 1,
-        "sonnet 4, opus 3": 40,
-        "sonnet 4, opus 4": 1009
+        "sonnet 4, opus 3": 56,
+        "sonnet 4, opus 4": 1226
       }
     },
     "corpus_edges": {
-      "n": 64306,
+      "n": 71428,
       "by_relation": {
-        "opposed": 18864,
-        "similar": 16056,
-        "unknown": 62,
-        "unrelated": 29286,
-        "unsure": 38
+        "opposed": 20887,
+        "similar": 17785,
+        "unknown": 66,
+        "unrelated": 32650,
+        "unsure": 40
       },
-      "with_readings": 15267
+      "with_readings": 16895
     },
     "cliques": {
-      "n": 661,
+      "n": 753,
       "by_size": {
-        "2": 502,
-        "3": 121,
-        "4": 26,
-        "5": 10,
+        "2": 570,
+        "3": 136,
+        "4": 34,
+        "5": 11,
         "6": 1,
         "7": 1
       },
       "largest": 7,
-      "candidates_in_cliques": 1144,
-      "candidates_in_several": 275
+      "candidates_in_cliques": 1310,
+      "candidates_in_several": 311
     },
-    "singletons": 2691,
-    "clique_links": 71,
+    "singletons": 2944,
+    "clique_links": 89,
     "proposed_groups": {
-      "n": 1887,
-      "n_edges": 5408,
+      "n": 2159,
+      "n_edges": 6240,
       "by_size": {
-        "2": 752,
-        "3": 466,
-        "4": 284,
-        "5": 166,
-        "6": 68,
-        "7": 58,
-        "8": 24,
-        "9": 11,
-        "10": 14,
-        "11": 24,
-        "12": 19,
+        "2": 829,
+        "3": 539,
+        "4": 318,
+        "5": 183,
+        "6": 79,
+        "7": 67,
+        "8": 39,
+        "9": 19,
+        "10": 23,
+        "11": 34,
+        "12": 28,
         "13": 1
       },
       "largest": 13,
-      "candidates_in_proposed": 2404,
-      "candidates_in_proposed_only": 1453,
-      "candidates_in_several": 1321,
-      "links": 822
+      "candidates_in_proposed": 2694,
+      "candidates_in_proposed_only": 1610,
+      "candidates_in_several": 1500,
+      "links": 1280
     },
-    "ungrouped": 1238,
+    "ungrouped": 1334,
     "skipped": {},
     "no_vector": [],
     "selected_by_batch": {
@@ -712,22 +1466,38 @@
       "states_unjudged_r3_names": {
         "new": 82,
         "covered": 59
+      },
+      "2026-10-10-full_alignment_sweep_r3": {
+        "new": 192,
+        "covered": 61
+      },
+      "2026-10-13-m1_phrase_gg5": {
+        "new": 60,
+        "covered": 9
+      },
+      "2026-10-13-g600_ipip_renamed": {
+        "new": 5,
+        "covered": 3
+      },
+      "2026-10-14-g600-hinted_ipip": {
+        "covered": 142,
+        "new": 162
       }
     },
     "plan_edges": {
-      "n_candidate_edges": 33268,
+      "n_candidate_edges": 37362,
       "by_via": {
-        "k_nearest": 27513,
-        "pair_floor": 5752,
+        "k_nearest": 30474,
+        "pair_floor": 6885,
         "label_variant": 3
       },
-      "n_label_variant_pairs": 10,
+      "n_label_variant_pairs": 11,
       "k": 10,
       "pair_floor": 0.55,
-      "n_listed": 55381,
-      "longest_list": 70,
-      "n_relation_calls": 3952,
-      "lists_split": 117
+      "n_listed": 62631,
+      "longest_list": 76,
+      "n_relation_calls": 4416,
+      "lists_split": 162
     }
   },
   "stalled": {}
