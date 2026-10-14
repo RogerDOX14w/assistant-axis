@@ -161,6 +161,24 @@ class TestRoles:
             "relabel:derivation:role:priest", "relabel:derivation:roles_list:priest#1"}
 
 
+    def test_rerun_under_a_new_run_id_adds_nothing(self, env, capsys):
+        """Review S2: role-file and queue items have no noun row; a rerun (the default run id is dated) must not append
+        a second source to their adjective rows."""
+        assert run(env, "roles", "--apply", "--run-id", "roles-a") == 0
+        after = env["reg"].read_bytes()
+        capsys.readouterr()
+        assert run(env, "roles", "--apply", "--run-id", "roles-b") == 0
+        assert env["reg"].read_bytes() == after
+        assert not (env["cdir"] / "runs" / "noun_relabel" / "roles-b" / "candidates.jsonl").exists()
+
+
+def test_streams_refuse_a_missing_registry(env, tmp_path, capsys):
+    """Review S1: a checkout without the registry must not get a fresh one holding only adjectives."""
+    missing = tmp_path / "elsewhere" / "registry.jsonl"
+    rc = NR.main(["--registry", str(missing), "--data-dir", str(env["data"]), "--candidates-dir", str(env["cdir"]),
+                  "backlog", "--apply", "--run-id", "b-x"])
+    assert rc == 2 and "REFUSED" in capsys.readouterr().err and not missing.exists()
+
 class TestPilot:
     def test_prompt_pinned_and_reason_first(self):
         from assistant_axis.gapgen import rubric_versions as RV

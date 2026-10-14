@@ -278,6 +278,21 @@ class TestRealOewn:
         else:
             assert isinstance(r, N.NoRelabel) and r.reason == want, r
 
+    @pytest.mark.parametrize("word", ["hill", "wood", "funk", "fish"])
+    def test_proper_names_are_not_person_nouns(self, lookups, word):
+        """Review S4: OEWN's proper noun "Hill" (noun.person) must not make hill a person noun for the +y rule."""
+        r = N.relabel(word, lookups=lookups)
+        assert isinstance(r, N.NoRelabel), r
+
+    def test_gloss_is_not_the_pertainym_sense(self, lookups):
+        """Review S3: angel -> angelic is glossed by a dispositional sense, not "of or relating to angels"."""
+        r = N.relabel("angel", lookups=lookups)
+        assert isinstance(r, N.Relabel) and not N.PERTAINYM_RE.search(r.definition or ""), r
+
+    @pytest.mark.parametrize("word", ["majority", "priority", "gravity", "activity"])
+    def test_ity_sense_drifts_are_exceptions(self, lookups, word):
+        assert isinstance(N.relabel(word, lookups=lookups), N.NoRelabel)
+
     def test_lexfile_present(self):
         from assistant_axis.gapgen.wordnet import oewn
         syn = oewn().words("pedant")[0].senses()[0].synset()

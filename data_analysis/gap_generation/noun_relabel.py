@@ -175,6 +175,19 @@ def _linked(row: dict) -> bool:
     return bool(b.get("to_key") or b.get("to_corpus_stem")) and int(b.get("helper_version") or 0) >= N.HELPER_VERSION
 
 
+def _ref_linked(row: Optional[dict], ref: str) -> bool:
+    """A role-file or queue item (no noun row of its own) is already linked when its adjective row records it: a
+    ``relabel`` block from this ``ref`` at this helper version, or a ``noun_relabel`` source naming it (review S2,
+    2026-10-14: a rerun under a new run id otherwise appended a second source)."""
+    if not row:
+        return False
+    b = row.get("relabel") or {}
+    if b.get("from_source") == ref and int(b.get("helper_version") or 0) >= N.HELPER_VERSION:
+        return True
+    return any(isinstance(s, dict) and s.get("generator") == "noun_relabel"
+               and str(s.get("source_ref") or "").endswith(f":{ref}") for s in row.get("sources") or [])
+
+
 def backlog_plan(rows: dict, *, lookups: N.NounLookups, cmap: dict) -> Plan:
     """Every row with a single-word label through the helper (rows already linked at this helper version skipped)."""
     plan = Plan(kind="backlog")
@@ -242,6 +255,9 @@ def roles_plan(rows: dict, *, lookups: N.NounLookups, cmap: dict, data_dir: Path
                 plan.leftover_person.setdefault(source, []).append(label)
             continue
         where, adj_key, cstem = _where(r.adjective, rows, cmap)
+        if noun_key is None and adj_key is not None and _ref_linked(rows.get(adj_key), ref):
+            plan.n_already_linked += 1
+            continue
         plan.items.append(Item(source=source, ref=ref, label=label, noun_key=noun_key, m1=m1,
                                generators=_generators(rows[noun_key]) if noun_key else [], relabel=r, adj_key=adj_key,
                                where=where, corpus_stem=cstem))
@@ -389,6 +405,10 @@ def cmd_check(args) -> int:
 
 
 def _stream(args, kind: str) -> int:
+    if not Path(args.registry).exists():
+        print(f"REFUSED: no registry at {args.registry}: run the streams in the checkout that holds the registry "
+              f"(review S1, 2026-10-14)", file=sys.stderr)
+        return 2
     rows = Registry(args.registry).fold()
     lk = _lookups()
     cmap = N.corpus_stem_map(args.data_dir)

@@ -588,7 +588,10 @@ def _link_relabels(derived, cur: dict, changed: dict, now: str) -> list[tuple]:
             noun_key = make_key(normalize_candidate(d.noun.surface).stem, d.noun.sense_id)
         except ValueError:
             continue
-        adj_key = None if d.adjective is None else make_key(normalize_candidate(d.adjective.surface).stem, 1)
+        try:
+            adj_key = None if d.adjective is None else make_key(normalize_candidate(d.adjective.surface).stem, 1)
+        except ValueError:      # an adjective the stem rule refuses: as the main loop treats it (review S6)
+            continue
         nb, ab = nouns.relabel_blocks(noun_key, adj_key, d.relabel, corpus_stem=d.corpus_stem,
                                       run=f"{d.noun.generator}/{d.noun.run_id}", now=now)
         link(noun_key, nb)

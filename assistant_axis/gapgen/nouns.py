@@ -70,7 +70,9 @@ class Lexicon:
 #: Words the suffix rules must leave alone: their suffix is not a derivation of the adjective found, or the
 #: adjective is another sense (``presence`` is not being ``present``, ``capacity`` not being ``capacious``).  The
 #: ``-ity`` sense-drift words (personality is not being personal) were added on 2026-10-14 (noun normalization
-#: plan, section 5); the relabel helper also skips OEWN's derivation link for every word here.
+#: plan, section 5); the relabel helper also skips OEWN's derivation link for every word here.  The second row of
+#: -ity words (majority is not being major) came from the Fable review the same day, before any block was written;
+#: ability -> able, security -> secure and possibility -> possible keep the sense and stay folded.
 SUFFIX_EXCEPTIONS = frozenset({"business", "witness", "harness", "wilderness", "city", "pity", "duty", "entity",
                                "unity", "community", "university", "variety", "society", "deity", "laity",
                                "presence", "absence", "evidence", "difference", "instance", "importance",
@@ -78,7 +80,8 @@ SUFFIX_EXCEPTIONS = frozenset({"business", "witness", "harness", "wilderness", "
                                "reference", "sentence", "substance", "consequence", "occurrence", "agency",
                                "velocity", "atrocity", "criticism", "audience", "experience", "science",
                                "personality", "reality", "mentality", "nationality", "sexuality", "individuality",
-                               "actuality", "speciality", "locality", "totality", "legality"})
+                               "actuality", "speciality", "locality", "totality", "legality",
+                               "majority", "minority", "priority", "gravity", "activity", "electricity"})
 
 
 def _suffix_candidates(w: str) -> list[str]:
@@ -246,7 +249,7 @@ REASONS = ("phrase", "not_in_oewn", "has_adjective_sense", "not_a_noun", "person
 
 #: :data:`HELPER_VERSION` -> :func:`rules_sha256` of its tables.  Append only.
 RULES_HISTORY: dict[int, str] = {
-    1: "13d44254ac1d71d5fe37f058ffc771188bffe20f0bceec2f347322dd882ac43f",
+    1: "bae02bb9af934e7d9b090f4e58ca7dd50a85c01ce5cd40c90f4ba4807e3c870d",  # re-pinned 2026-10-14 (review S4, -ity exceptions) before any block was written
 }
 
 
@@ -368,14 +371,12 @@ class OewnLookups:
         return sorted({x.pos for x in self._words(form)})
 
     def lexfiles(self, form: str) -> set[str]:
-        return {s.synset().lexfile() for x in self._words(form) if x.pos == "n" for s in x.senses()}
+        return {s.synset().lexfile() for x in self._nouns(form) for s in x.senses()}
 
     def derivations(self, form: str) -> list[Derivation]:
         def build():
             out = []
-            for x in self._words(form):
-                if x.pos != "n":
-                    continue
+            for x in self._nouns(form):
                 for s in x.senses():
                     lf = s.synset().lexfile()
                     for d in s.relations().get("derivation", []):
@@ -384,6 +385,11 @@ class OewnLookups:
                             out.append(Derivation(dw.lemma(), lf, _clean_definition(d.synset().definition())))
             return out
         return self._memo("derivations", form, build)
+
+    def _nouns(self, form: str) -> list:
+        """The noun words whose lemma is ``form`` itself: ``wn.words("hill")`` also returns the proper noun "Hill"
+        (``noun.person``), which would make hill a person noun for the +y rule (review S4, 2026-10-14)."""
+        return [x for x in self._words(form) if x.pos == "n" and x.lemma() == form]
 
     def _adj_synsets(self, adj: str) -> list:
         return [s.synset() for x in self._words(adj) if x.pos in ADJ_POS and x.lemma() == adj for s in x.senses()]
@@ -477,7 +483,8 @@ def relabel(surface: str, *, lookups: NounLookups) -> Union[Relabel, NoRelabel]:
     def make(adj: str, rule: str, lexfile: Optional[str], definition: Optional[str]) -> Relabel:
         adj = us_spelling(adj, lexicon=lex)
         return Relabel(surface=surface, adjective=adj, rule=rule, lexfile=lexfile,
-                       definition=definition if definition else _best_definition(adj, lookups),
+                       definition=(definition if definition and not PERTAINYM_RE.search(definition)
+                                   else _best_definition(adj, lookups)),
                        zipf=lookups.zipf(adj))
 
     # 5: the base model's suffix fold

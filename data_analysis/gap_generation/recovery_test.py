@@ -534,8 +534,9 @@ def main(argv=None) -> int:
         run_rows = [r for r in rows.values() if has_source(r, args.generator, args.run_id)]
         if not run_rows:
             print(f"REFUSED: no registry rows from {args.generator}/{args.run_id} in {args.registry}; submit the run "
-                  f"first (gap_registry.py submit --from data/candidates/runs/{args.generator}/{args.run_id}/"
-                  "candidates.jsonl)", file=sys.stderr)
+                  f"first (gap_registry.py submit --no-relabel --from data/candidates/runs/{args.generator}/"
+                  f"{args.run_id}/candidates.jsonl: the harness judges labels as given, so no derived adjective rows)",
+                  file=sys.stderr)
             return 2
         cands, skipped = run_candidates(rows, args.generator, args.run_id)
         print(f"{args.generator}/{args.run_id}: {len(run_rows)} registry rows, {len(cands)} M3 candidates "
