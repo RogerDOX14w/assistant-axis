@@ -25,7 +25,7 @@ rejected).  Counts from the registry on 2026-10-14; a row proposed by two genera
 
 | # | generator | stage | kept awaiting review / reviewed | blocked on |
 |---|---|---|---|---|
-| 01 | [Psycholexical censuses](./coding_plan_01_censuses.md) (TDA, Allport high, rare, column IV) | **8** | 2,698 / 174 | nothing.  Optional: a $0.20 check of 314 spelling-repair suggestions ([QUESTIONS](./QUESTIONS.md) 35) |
+| 01 | [Psycholexical censuses](./coding_plan_01_censuses.md) (TDA, Allport high, rare, column IV) | **8** | 2,698 / 174 | the spelling-repair check of 314 suggestions ([QUESTIONS](./QUESTIONS.md) 35; Roger's yes, 2026-10-14): built (`census_generator.py repair-check`), about $1.70 for one reading or $5.10 for three, awaiting his go on the real price |
 | 02a | [Roget](./coding_plan_02_roget_wordnet.md) | **8** | 225 / 18 | nothing |
 | 02b | [WordNet clusters](./coding_plan_02_roget_wordnet.md) | **8** | 250 / 27 | nothing |
 | 03 | [Base model](./coding_plan_03_base_model.md) (Qwen3-8B-Base on the Mac) | **7** | 458 / 59 (the pilot's) | Roger: the 20,000-sample run in his terminal (free, 3-4 h; check free disk first).  Then two builds before submission, both queued: the noun helper (approved) and the stratified wave selection |
