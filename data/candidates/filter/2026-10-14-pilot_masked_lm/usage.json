@@ -1,0 +1,22 @@
+{
+  "n_calls": 4691,
+  "per_model": {
+    "claude-haiku-5-5": {
+      "completion_tokens": 1103662,
+      "cost_usd": 0.6463,
+      "model": "claude-haiku-5-5",
+      "n_calls": 4289,
+      "prompt_tokens": 944823
+    },
+    "claude-sonnet-5-5": {
+      "completion_tokens": 35988,
+      "cost_usd": 1.0917,
+      "model": "claude-sonnet-5-5",
+      "n_calls": 402,
+      "prompt_tokens": 365893
+    }
+  },
+  "total_completion_tokens": 1139650,
+  "total_cost_usd": 1.738,
+  "total_prompt_tokens": 1310716
+}

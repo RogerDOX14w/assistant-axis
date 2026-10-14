@@ -1,0 +1,11 @@
+{
+  "note": "The first M1 attempt on this batch (2026-10-14, about 07:20-07:50 UTC) stopped with OSError 28 (no space left on device: agent worktrees had filled the disk).  Its charges were not kept in usage.json, which the resumed run rewrote with its own ($1.738); the resume re-sent the calls rather than reusing them.  These are the first attempt's charges, copied from its [usage] log line, so that the batch's true cost is usage.json plus this file: $3.297.",
+  "per_model": {
+    "claude-haiku-5-5": {"model": "claude-haiku-5-5", "cost_usd": 0.591, "prompt_tokens": 812496, "completion_tokens": 1019268, "n_calls": 3867},
+    "claude-sonnet-5-5": {"model": "claude-sonnet-5-5", "cost_usd": 0.968, "prompt_tokens": 315104, "completion_tokens": 33798, "n_calls": 349}
+  },
+  "total_cost_usd": 1.559,
+  "total_prompt_tokens": 1127600,
+  "total_completion_tokens": 1053066,
+  "n_calls": 4216
+}
