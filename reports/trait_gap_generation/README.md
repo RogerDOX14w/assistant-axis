@@ -201,6 +201,9 @@ filter's `roles` holding list fills so slowly.  His four suggestions, to become 
    mode on an existing generator, as [`generate_antonyms.py --roles`](../../data_analysis/generate_antonyms.py)
    was done.
 
+**Promotion of role words into the seed queue is built with these** (Roger, 2026-10-14): the low-priority TODO
+"Promotion tooling for role words" below, which now carries plan 06's by-name `--allow-roles` design.
+
 **Cap: 500 to 600 roles** (340 on 2026-10-10).  "Professions can probably be enumerated endlessly", and the
 balance between the kinds of role should stay about where it is now.
 
@@ -296,6 +299,14 @@ rubrics, which the role-promotion item below needs too.
   and queue entries only): one case so far, expecting against the [pregnant](../../data/roles/instructions/pregnant.json)
   role (states pass v4 pilot, 2026-10-09).  Roger: "If it happens a lot we'll fix it"; the role/trait border is
   fuzzy, and the corpus already has about a dozen role/trait pairs with duplicate names.
+  **Folded in 2026-10-14 (Roger), to be done together with the role generators** (§ "Parked: generators aimed at
+  roles"): plan 06's decision 1 option (a), a by-name path `gap_registry.py promote --keys K ... --allow-roles`
+  writing an `entity_type: "role"` seed-queue entry (`pairing: singleton`, tags `gap_gen`, `source:<generator>`,
+  `role_like`, `description_draft` the gloss), refused for the bulk path as `--allow-physical` and
+  `--allow-released-states` are, with `promote`'s collision checks (a stem in the corpus of either type, a queued
+  stem, a turned-down name) and `seed_queue_stem` on the row; about 40 lines plus a test, a platform change, so a
+  Fable review.  Until then role-like rows from every generator (plan 06's person seeding included, listed in its
+  `roles_report.md`) wait on the `roles` holding list.
 - **Chandler / Anderson likableness ratings** (QUESTIONS 31, left out 2026-10-09): Anderson's 555 trait words with
   likableness, re-rated by Chandler (2018, *Journal of Research in Personality* 72, 50-57) with 486 more words,
   meaningfulness and emotion coding, on OSF project [3wqx5](https://osf.io/3wqx5/).  No licence is stated, so it is

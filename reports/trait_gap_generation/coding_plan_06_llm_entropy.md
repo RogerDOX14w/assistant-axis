@@ -15,7 +15,10 @@ Roger's review comments go into this file.
 
 ## Open decisions (Roger's, at plan review; labelled OPEN until decided)
 
-1. **OPEN: the route of role-like outputs to the roles seed queue.**  Roger (§ 9.2): role-like outputs from
+1. **DECIDED (Roger, 2026-10-14): role-like outputs stay on the `roles` holding list for now; no promotion route
+   is built here.**  Role promotion to the seed queue is handled with the role generators (README, "Parked:
+   generators aimed at roles" and the low-priority TODO "Promotion tooling for role words", into which option (a)
+   below is folded).  The analysis as written at plan time:  Roger (§ 9.2): role-like outputs from
    person seeding are kept and routed to the roles seed queue.  As built, `Candidate` has no entity type
    ([registry.py](../../assistant_axis/gapgen/registry.py) `new_record` writes `entity_type: "trait"`), M1 puts a
    word it reads as a role on the `roles` holding list (tags `role_person` / `role_thing`,
@@ -35,12 +38,11 @@ Roger's review comments go into this file.
    - (b) **A generator-side list only**: `roles_report.md` for Roger to hand-seed through ROLES_TO_ADD.md and
      [seed_entities.py](../../data_analysis/seed_entities.py); no platform change, no registry record of the
      promotion.
-   - **Recommendation: (a)**, because it is the precedented shape, the registry keeps the record
-     (`seed_queue_stem` on the row), and `promote`'s collision checks (a stem in the corpus of either type, a
-     queued stem, a turned-down name) apply to roles for free.  Role-like items are **submitted like every other
-     item** (M1 decides the kind: the "nothing is dropped here" rule of [QUESTIONS 48](./QUESTIONS.md)); the
-     generator's own `kind` guess rides in its table beside M1's verdict, as IPIP's does.  M3 never sees a held row
-     (it scores verdict `trait` rows only), so the role check is the string check above, not a paid novelty call.
+   - **Chosen: neither yet.**  Role-like items are **submitted like every other item** (M1 decides the kind: the
+     "nothing is dropped here" rule of [QUESTIONS 48](./QUESTIONS.md)) and M1's verdict puts them on the `roles`
+     holding list, where they wait; the generator's own `kind` guess rides in its table beside M1's verdict, as
+     IPIP's does.  M3 never sees a held row (it scores verdict `trait` rows only).  The free `roles-report` (§ 7)
+     still lists them with the string check against the role corpus and the queue, for the later promotion work.
 2. **OPEN: the pilot's submission.**  The pilot's generation is cheap (§ Cost, about $6 batched); what costs is
    M1 and M3 on its output.  At the *measured* registry overlap of the nearest LLM-sampled generator (85% of the
    base-model generator's single-word stems were already registered; 7-18% of the alignment sweep's and IPIP's
@@ -76,7 +78,7 @@ If a decision is unanswered when Opus reaches the step, it proceeds under the re
 |---|---|---|
 | **Haiku 5.5** (`claude-haiku-5-5`, $0.10 / $0.50 per MTok in [judge_pricing.py](../../assistant_axis/judge_pricing.py)) is the generator for (a), (b), (d), (e) and the back-translation call; **Sonnet 5.5** (`claude-sonnet-5-5`, $2 / $10) for family (c)'s pilot share, the rest of (c) on whichever model the model test favours (§ 10).  Both refuse a `temperature` ([llm.py](../../assistant_axis/gapgen/llm.py) leaves it out) and think adaptively; the thinking is billed as output. | Roger, 2026-10-13 | plan 06 § 2, § 9.1 |
 | **Languages** for (c): German, Japanese, Mandarin, Russian, Arabic, Persian, Finnish, Korean, Hindi, Turkish (Persian replaced Tagalog). | Roger, 2026-10-13: high to fairly-high resource | plan 06 § 3.3, § 9.1 |
-| **Role-like outputs are kept and routed to the roles seed queue**, by the route of open decision 1. | Roger, 2026-10-13: "Yes" | plan 06 § 9.2 |
+| **Role-like outputs are kept**: on the `roles` holding list until the role-promotion work (decision 1). | Roger, 2026-10-13: "Yes"; 2026-10-14 the route | plan 06 § 9.2 |
 | **Labels of 1-4 words** in every family; the back-translation asks for the shortest English form of at most four words; a hyphenated compound is one word ([split.py](../../assistant_axis/gapgen/split.py) `is_phrase`, the alignment sweep's `label_problem`). | Roger, 2026-10-13: part of the point is concepts that are not a single English word | plan 06 § 9.3 |
 | **Batched for anything over a quick experiment; total expenditure under about $60** including the downstream M1 and M3.  The translation of the ten prompts and their back-translation check (about 20 calls) go live; every generation wave, the model-test arms included, goes through the Message Batches API; downstream transport by the estimate (§ 7). | Roger, 2026-10-13 | plan 06 § 9.4; the batch-or-real-time rule, [CLAUDE.md](../../CLAUDE.md) |
 | **No generation on the RunPod Qwen.**  The § 6 "generator-knowledge check" (50 labels defined by the target model) is not run; M1's definition probe, with every item's gloss as its hint, is the knowledge check the platform already makes.  (A free variant on the Mac's Qwen3-8B-Base, the base-model generator's sampler, is listed in § 2 for later.) | Roger, 2026-10-13: "No" | plan 06 § 9.5, § 6 |
@@ -104,7 +106,7 @@ If a decision is unanswered when Opus reaches the step, it proceeds under the re
 - The second-model-family variant (plan 06 § 8: 20% of (a) on an OpenAI model) and the local-generator variant.
 - Any edit to `data/traits/**`, `data/roles/**`, the TO_ADD files, [seed_queue.json](../../data/seed_queue.json)
   except through `promote`; promotion itself (Roger's); R1 and the review app.
-- Anything the platform owns beyond open decision 1 (a): M1 and M3 rubrics, cut-offs,
+- Anything the platform owns: M1 and M3 rubrics, cut-offs,
   [metric_config.json](../../data/candidates/metric_config.json), the recovery harness.
 - A generator-side semantic deduplication that *drops* items: the embedding is used for the statistics only;
   M3 decides coverage.
@@ -430,8 +432,8 @@ write nothing.
 - `roles-report --run-id R`: every row of the run on the `roles` holding list, or whose generator `kind` was `role`
   in a majority of its readings, with the free string check against the role corpus (340 stems) and the queue's
   role entries, the seed that produced it and its gloss;
-  [roles_report.md](../../data/candidates/llm_entropy/roles_report.md) (not there yet) for Roger; the promotion
-  command of open decision 1 (a) printed per row.  $0.
+  [roles_report.md](../../data/candidates/llm_entropy/roles_report.md) (not there yet), the input to the later
+  role-promotion work (decision 1).  $0.
 - `report --run-id R`: `report.md` (§ 11's figures), `roger_sample.md` (50 rows per family decided `new` or
   `grey`, seeded) and `gloss_check.md` (30 items per family and per model arm, label, gloss, raw form, for the
   gloss-fidelity check).  $0.
@@ -491,10 +493,8 @@ the roles route are hard.
   holds, a `pair_completion_hint` row outranks an equal `n_sources` row without one; dry run leaves the registry
   byte-identical and writes no run dir; `llm_entropy` absent from `FAMILIARITY_GENERATORS` (guard, with the trap in
   the comment); follow-ups name the run id, batch id, `--pipeline split` and the transport.
-- `roles` (open decision 1 (a)): `promote --keys K --allow-roles` on a fixture row held as `roles` writes an entry
-  with `entity_type: "role"`, the tags and the gloss draft, sets `seed_queue_stem`, and is refused for a stem in the
-  role corpus or the queue; the bulk path still refuses held rows; `--dry-run` leaves the queue byte-identical;
-  every existing `promote` test passes unchanged.
+- `roles` (decision 1): a fixture row M1 reads as a role is held as `roles`, appears in `roles_report.md`, and
+  reaches neither M3 nor the queue; `promote` is untouched.
 - CLI: every subcommand's `--dry-run` exits 0 and writes nothing; paid commands refuse over budget; `generate`
   refuses an unknown family and a `--share` outside (0, 1]; `translate-prompts` refuses to overwrite without
   `--force`; `report` renders a fixture run with the three files.
@@ -543,9 +543,7 @@ every task prompt verbatim.  Each task ends with the § 8 commands.
    `verbalized`; the 40-prompt Sonnet arms of (a), (b), (e) and (d); `backtranslate`; `postprocess`; `collapse`.
    **Gate 1**: parse rate >= 99% (hard); a family with median Jaccard above 0.6 gets one bounded prompt revision
    (text only, version bumped) and a re-run of its share; both readouts to Roger.
-6. `submit.py`, `report.py`; CLI `submit`, `roles-report`, `report`; open decision 1 (a)'s `--allow-roles` in
-   [promote.py](../../assistant_axis/gapgen/promote.py) and
-   [gap_registry.py](../../data_analysis/gap_generation/gap_registry.py) (Fable reviews the diff).  Test: submit,
+6. `submit.py`, `report.py`; CLI `submit`, `roles-report`, `report` (no promotion change, decision 1).  Test: submit,
    roles, CLI.
 7. **The pilot's submission** (open decision 2): `submit --top 500 --per-cell 50 --transport batches` (about
    $4.2 downstream), M1 + M3 run by Fable, `report`, `model-test`, `roles-report`: the yield-per-dollar readout
@@ -630,18 +628,17 @@ overlap uses the scorer's OpenAI embedder through the cache, not sentence-transf
 stages, stage 2 quoting stage 1's answer; (4) the submitted surface is always the English label; the original
 form, romanisation and language live in the table and `source_ref`; (5) the ten (c) prompts are translations of one
 pinned master, kept in a tracked JSON with hashes and back-translations; (6) `score` is `n_sources`, not a
-familiarity; (7) role-like items are submitted like any other, M1 decides, and the route to the roles queue is
-open decision 1's recommendation (`promote --allow-roles`, by name) unless Roger chooses (b); (8) the pilot's
-submission is the 500-row stratified slice unless Roger chooses (b); (9) real-person seeds are the dead unless
-Roger chooses (b); (10) the first wave is the review-hour wave sized on net-new kept rows at the pilot's measured
+familiarity; (7) role-like items are submitted like any other, M1 decides, and held roles wait on the `roles` holding
+list (decision 1); (8) the pilot's
+submission is the 500-row stratified slice unless Roger chooses (b); (9) real-person seeds are any human, held in memory only (decision 3, § 5a); (10) the first wave is the review-hour wave sized on net-new kept rows at the pilot's measured
 share; (11) the paid recovery harness is plan 13's pooled run, not a run of this plan's; (12) the model for the
 rest of (c) follows the § 10 rule, and Roger's read can overrule it.  **Interface requests** (not changes this plan
 makes): to plan 13, a `llm_prompted` mechanism in `MECHANISMS` and `(llm_entropy, <family>)` streams in `STREAMS`
 with `stream_of` reading the family from `source_ref` (class `independent`: no prompt carries a corpus word; (b)'s
 inputs are Wikidata, (c)'s a language), so that the dashboard's accumulation curve and Chao2 are read per family
 and the generator's `collapse.json` end slopes can be printed beside the dashboard's; to plan 13 also, the
-dashboard's cost line reading the run's `usage.json` per model and the translations' usage; to the platform, a
-`role` entity type through promotion (open decision 1 (a), built here if chosen).  Anything that would edit a trait
+dashboard's cost line reading the run's `usage.json` per model and the translations' usage; the `role` entity type through
+promotion is not requested here (decision 1).  Anything that would edit a trait
 or role file, the queue outside `promote`, spend over a command's budget, push the running total past $55 (the
 sum of every `usage.json` under `runs/llm_entropy/`, the filter and novelty batches of its runs, the translations
 and the embeddings; § Cost), fetch anything but the Wikidata seeds, use a router, add a model, or change a frozen
@@ -868,7 +865,7 @@ queue; the pilot's readout reproduces the registry figures as of its own date.
   120; 70%; 91%; 32%; 0.  contrast 39; 69%; 87%; 38%; 1.  list 565; 88%; 85%; 31%; 2.  list_gloss 218; 92%; 89%;
   39%; 0.  occupation 195; 83%; 88%; 40%; 1.  **person 409; 83%; 90%; 36%; 1** (0.2%: a base model continuing an
   adjective list; an instruct model asked what distinguishes a person is expected to give more role nouns, which is
-  why open decision 1 matters).
+  why decision 1 matters).
 - **All filtered rows by word count**: multi-word 2,065, M1 trait 1,790 (87%), M3 new 1,066 of the trait rows
   (60%); single-word 7,872, trait 4,953 (63%), new 2,773 (56%).
 - **Corpus**: 932 trait files; labels of one word 775, two 128, three 25, four 4; of the 628 single-word stems 464
