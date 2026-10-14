@@ -36,6 +36,13 @@ first directions Sonnet read 2, compared with Roger's decisions, the graph untou
     uv run python data_analysis/gap_generation/review_graph.py opus-pilot --batch-id review_tda_1 --n 128 \\
         --budget-usd 1 --dry-run
 
+Plan 11 (the lexical sweep; Roger, 2026-10-14, option (d)): a kept candidate's ``lexical`` block becomes
+``source: "lexical"`` edges to the linked corpus traits and queue entries, with the sweep's readings, and review
+flags on its node (``lexical_proposed_merge`` for a link read at the row's cut-off: the card's "dictionary
+(WordNet | Moby thesaurus): probably the same as X"); no call, and never a cut.  ``--stem-family`` (on for a new
+build; a ``--resume`` keeps its earlier session's) adds a candidate edge, ``via`` ``stem_family``, for two kept
+candidates of one stem family, read like any edge.
+
 Commands:
 
 * ``build --batch-id B --from-batches M3_BATCH ... --budget-usd C``: the kept candidates (M3 decision new or grey)
@@ -275,13 +282,20 @@ def write_usage(path: Path, usage: MultiModelUsage, *, inputs, title: str) -> No
 def plan_line(plan: RG.GraphPlan, vinfo: dict, *, overlap_floor: float) -> dict:
     cos = list(plan.edges.values())
     ec = plan.edge_counts()
-    return {"n_candidates": len(plan.cands), "n_covered_shown": len(plan.covered), "selected_by_batch": plan.by_batch,
-            "skipped": plan.skipped, "query_texts": vinfo, "no_vector": len(plan.no_vector),
-            "n_relation_calls": ec["n_relation_calls"], "lists_split": ec["lists_split"],
-            "n_listed": ec["n_listed"], "longest_list": ec["longest_list"], "n_candidate_edges": len(cos),
-            "n_edges_at_overlap_floor": sum(1 for c in cos if c >= overlap_floor), "k": plan.k,
-            "pair_floor": plan.pair_floor, "edges_by_via": ec["by_via"],
-            "n_label_variant_pairs": ec["n_label_variant_pairs"], "n_relabel_pairs": ec["n_relabel_pairs"]}
+    out = {"n_candidates": len(plan.cands), "n_covered_shown": len(plan.covered), "selected_by_batch": plan.by_batch,
+           "skipped": plan.skipped, "query_texts": vinfo, "no_vector": len(plan.no_vector),
+           "n_relation_calls": ec["n_relation_calls"], "lists_split": ec["lists_split"],
+           "n_listed": ec["n_listed"], "longest_list": ec["longest_list"], "n_candidate_edges": len(cos),
+           "n_edges_at_overlap_floor": sum(1 for c in cos if c >= overlap_floor), "k": plan.k,
+           "pair_floor": plan.pair_floor, "edges_by_via": ec["by_via"],
+           "n_label_variant_pairs": ec["n_label_variant_pairs"], "n_relabel_pairs": ec["n_relabel_pairs"]}
+    # plan 11: the stem-family pairs and the lexical blocks' edges and flags (no call), only when there are any
+    if "n_family_pairs" in ec:
+        out["n_family_pairs"] = ec["n_family_pairs"]
+    lex = RG.lexical_counts_of_rows(plan.rows)
+    if lex["n_edges"] or lex["candidates_by_flag"]:
+        out["lexical"] = lex
+    return out
 
 
 def render_samples(runner: RG.ReviewRunner, plan: RG.GraphPlan, rubrics: dict) -> str:
@@ -348,8 +362,14 @@ def cmd_build(args, argv) -> int:
         vectors, vinfo = {}, {"n_query_texts": len(cands), "n_cached": None, "n_to_embed": len(cands),
                               "corpus_not_cached": index_info}
     corpus = index.traits if index is not None else NV.load_trait_corpus(args.data_dir)
+    # plan 11: the stem-family candidate edges; a new build has them, a resume keeps its earlier session's setting (a
+    # build before 2026-10-15 had none), unless --stem-family / --no-stem-family says otherwise
+    if args.stem_family is None:
+        earlier_run = NS._peek_run(out_dir) if (args.resume and out_dir.exists()) else None
+        args.stem_family = (bool(((earlier_run or {}).get("settings") or {}).get("stem_family", False))
+                            if args.resume and out_dir.exists() else True)
     plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor,
-                         pair_floor=args.pair_floor, include=include)
+                         pair_floor=args.pair_floor, include=include, stem_family=args.stem_family)
     # the estimate's shares, tokens and unsure re-asks: an earlier R1 build's own records (gate audit 8), else M3's
     try:
         shares, tokens, unsure, calib = calibration(args.calibrate_from, args.out_root,
@@ -407,6 +427,10 @@ def cmd_build(args, argv) -> int:
     est = estimate(plan, probe, vinfo["n_to_embed"])
     pl = plan_line(plan, vinfo, overlap_floor=args.overlap_floor)
     print(f"plan: {json.dumps(pl)}")
+    if "lexical" in pl or "n_family_pairs" in pl:
+        print(f"lexical (plan 11; copied from the lexical blocks, no call; never a cut): "
+              f"{json.dumps(pl.get('lexical') or {})}; stem-family candidate edges "
+              f"{'on' if args.stem_family else 'off'}: {pl.get('n_family_pairs', 0)} pairs")
     if shares.source == "m3_blocks":
         print(f"shares (M3's, by cosine bin, from the source batches' blocks; {calib.get('why')}): "
               f"{json.dumps(shares.as_dict())}")
@@ -474,7 +498,7 @@ def cmd_build(args, argv) -> int:
                              "config_version": cfg.config_version, "embedding_model": cfg.live_model["model_id"],
                              "representation": cfg.representation, "variant": cfg.covered["space"]["variant"],
                              "relation_max_tokens": NR.RELATION_MAX_TOKENS, "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS,
-                             "ask_attempts": NR.ASK_ATTEMPTS},
+                             "ask_attempts": NR.ASK_ATTEMPTS, "stem_family": bool(args.stem_family)},
                 "estimate_inputs": {"shares": shares.as_dict(), "overlap_tokens": tokens,
                                     "unsure": None if unsure is None else list(unsure), "calibration": calib},
                 "corpus": index_info, PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume),
@@ -496,7 +520,7 @@ def cmd_build(args, argv) -> int:
             vectors, vinfo = query_vectors(cands, cfg=cfg, index=index, cache=cache, query_form=args.query_form,
                                            usage=usage, allow_embed=True)
             plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor,
-                                 pair_floor=args.pair_floor, include=include)
+                                 pair_floor=args.pair_floor, include=include, stem_family=args.stem_family)
             probe.index, probe.traits = index, index.traits
             est = estimate(plan, probe, 0)
             run_meta.update(plan=plan_line(plan, vinfo, overlap_floor=args.overlap_floor), estimate_usd=round(est.usd, 4),
@@ -801,6 +825,10 @@ def build_parser() -> argparse.ArgumentParser:
                         "trait shown (Roger, 2026-10-09, after the M3 cover audit)")
     b.add_argument("--include-reason", default="included by hand",
                    help="why the --include keys are reviewed (recorded on their nodes)")
+    b.add_argument("--stem-family", action=argparse.BooleanOptionalAction, default=None,
+                   help="two kept candidates of one stem family (their lexical blocks, plan 11) are a candidate edge "
+                        "whatever their cosine, typed by its readings (default: on for a new build; a --resume keeps "
+                        "its earlier session's, off for a build from before 2026-10-15)")
     b.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     b.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     b.add_argument("--out-root", type=Path, default=None, help="candidates dir holding review/<B>/ and novelty/<M3>/")

@@ -43,6 +43,17 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   relation, rank, via) and ``novelty.readings`` (the overlap readings, Sonnet and Opus); no call.  A listed trait
   or reading marked ``queue_status`` (M3 searched the seed queue, from 2026-10-09) is a seed-queue entry: its edge
   goes to ``queue:<stem>``, and a candidate M3 covered by one (``covered_by_queue``) points at that queue node.
+* **Lexical edges** (``source: "lexical"``; plan 11 task 7, Roger's gate-2 decision of 2026-10-14, option (d)):
+  copied from a kept candidate's ``lexical`` block (the lexical sweep, :mod:`assistant_axis.gapgen.lexical_sweep`),
+  one per judged link and per name-only link (a text-less queue entry, no readings); a link M3 had listed already,
+  and one the sweep left unjudged (a Moby pair under the cosine floor), is not drawn; no call.  The edge carries the
+  sweep's readings and ``lexical`` (lexicon, link type, ``at_cut_off``).  **No lexical link ever cuts**, whichever
+  lexicon: a link read at the row's own cut-off makes the candidate's node carry ``lexical_proposed_merge`` (the
+  review card's "dictionary: probably the same as X"), and its M3 decision stays as it was; below-cut readings are
+  not flagged (:data:`LEXICAL_NODE_FLAGS`).  With ``stem_family`` (:func:`plan_graph`), two kept candidates of one
+  stem family (the block's ``family``) are a candidate edge, ``via`` ``stem_family``, wherever their cosine, typed
+  by its readings like any edge and never a 3-edge unread.  A graph whose rows carry no ``lexical`` block is
+  written exactly as before.
 * **4-edges** (``strict``): both directions read 4 under the rule at cut-off 4 (:func:`reading_of`: Sonnet 4
   confirmed by Opus, Sonnet 3 raised to 4 by Opus, or Sonnet unsure and Opus 4), the relation not ``opposed``.
 * **3-edges** (``proposed``; decision 12): both directions read at the proposed cut-off or above under M3's rule
@@ -162,6 +173,13 @@ PILOT_SEED = 20261012
 PILOT_BINS = (0.35, 0.45, 0.55, 0.65)
 #: The resolutions that settle a term's identity, for the pilot's reference (park and defer do not).
 SETTLED_RESOLUTIONS = ("promote", "merge_into", "reject")
+#: A ``lexical`` block's flags (``lexical_sweep.FLAGS``) as review flags on the candidate's node (Roger, 2026-10-14,
+#: option (d)): a link read at the row's own cut-off is a proposed merge, never a cut; ``lexical_below_cut`` is not
+#: carried (gate 2 (b): below-cut readings are not flagged).
+LEXICAL_NODE_FLAGS = {"lexical_cover": "lexical_proposed_merge", "lexical_name_only": "lexical_name_only",
+                      "lexical_unparsed": "lexical_unparsed", "lexical_antonym": "lexical_antonym"}
+#: How the review card names a lexicon (so that the reviewer can tell a WordNet link from a thesaurus one).
+LEXICON_NAMES = {"oewn": "WordNet", "moby": "Moby thesaurus"}
 
 
 def corpus_key(stem: str) -> str:
@@ -258,7 +276,8 @@ class Edge:
     b: str
     cosine: Optional[float]
     relation: Optional[str]
-    source: str                                  # r1 (a candidate pair, judged here) | m3 (copied from the block)
+    source: str                                  # r1 (a candidate pair, judged here) | m3 (copied from the block) |
+                                                 # lexical (copied from the lexical block)
     strict: bool = False                         # a 4-edge
     proposed: bool = False                       # a 3-edge (decision 12; every 4-edge is one)
     relations: dict = field(default_factory=dict)   # r1: {"ab": a's answer about b, "ba": b's about a}
@@ -270,6 +289,8 @@ class Edge:
     rank: Optional[int] = None                   # m3: the corpus trait's rank among the k retrieved
     label_variant: bool = False                  # r1: the two labels are one label blind, or a relabel pair (a
                                                  # 3-edge, read or not)
+    lexical: Optional[dict] = None               # lexical: lexicon, link, word, judged, at_cut_off (a proposed
+                                                 # merge), name_only, verdict, run_id (:func:`lexical_edges`)
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -580,6 +601,7 @@ class GraphPlan:
                                                    # relabel: a relabel pair, wherever it came in
     label_variants: list = field(default_factory=list)   # [(a, b)]: the pairs whose labels are one label blind
     relabel_pairs: list = field(default_factory=list)    # [(a, b)]: a noun and its adjective sibling (relabel blocks)
+    family_pairs: list = field(default_factory=list)     # [(a, b)]: one stem family (lexical blocks; stem_family on)
 
     def relation_items(self) -> list[tuple[str, list[str]]]:
         """``(key, [other keys])`` of every kept candidate with a neighbour, by key: one relation call each."""
@@ -592,13 +614,17 @@ class GraphPlan:
         by = Counter(self.via.get(e, "k_nearest") for e in self.edges)
         lens = [len(v) for v in self.neighbours.values() if v]
         # "relabel" only when there are any, so a plan without relabel pairs counts as before
-        vias = ("k_nearest", "pair_floor", "label_variant") + (("relabel",) if by["relabel"] else ())
-        return {"n_candidate_edges": len(self.edges), "by_via": {k: by[k] for k in vias},
-                "n_label_variant_pairs": len(self.label_variants), "n_relabel_pairs": len(self.relabel_pairs),
-                "k": self.k, "pair_floor": self.pair_floor,
-                "n_listed": sum(lens), "longest_list": max(lens, default=0),
-                "n_relation_calls": sum(-(-n // RELATION_LIST_MAX) for n in lens),
-                "lists_split": sum(1 for n in lens if n > RELATION_LIST_MAX)}
+        vias = ("k_nearest", "pair_floor", "label_variant") + (("relabel",) if by["relabel"] else ()) \
+            + (("stem_family",) if by["stem_family"] else ())
+        out = {"n_candidate_edges": len(self.edges), "by_via": {k: by[k] for k in vias},
+               "n_label_variant_pairs": len(self.label_variants), "n_relabel_pairs": len(self.relabel_pairs),
+               "k": self.k, "pair_floor": self.pair_floor,
+               "n_listed": sum(lens), "longest_list": max(lens, default=0),
+               "n_relation_calls": sum(-(-n // RELATION_LIST_MAX) for n in lens),
+               "lists_split": sum(1 for n in lens if n > RELATION_LIST_MAX)}
+        if self.family_pairs:                      # only then, so a plan without them counts as before
+            out["n_family_pairs"] = len(self.family_pairs)
+        return out
 
 
 def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
@@ -692,16 +718,35 @@ def relabel_pairs(rows: Mapping[str, Mapping]) -> list[tuple[str, str]]:
     return sorted(out)
 
 
+def stem_family_pairs(rows: Mapping[str, Mapping]) -> list[tuple[str, str]]:
+    """The pairs of rows (``key -> registry row``) one row's ``lexical`` block names as its stem family (``family``
+    members of kind ``candidate``, by stem: every row of that stem in ``rows``), ``(a, b)`` with ``a < b``, sorted."""
+    by_stem: dict[str, list[str]] = defaultdict(list)
+    for k, r in rows.items():
+        if r.get("stem"):
+            by_stem[r["stem"]].append(k)
+    out = set()
+    for k, r in rows.items():
+        for f in (r.get("lexical") or {}).get("family") or []:
+            if f.get("kind") != "candidate":
+                continue
+            for other in by_stem.get(f.get("stem"), ()):
+                if other != k:
+                    out.add(tuple(sorted((k, other))))
+    return sorted(out)
+
+
 def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: Mapping[str, np.ndarray], *,
                k: int = DEFAULT_K, cosine_floor: float = DEFAULT_COSINE_FLOOR,
                pair_floor: Optional[float] = DEFAULT_PAIR_FLOOR,
-               include: Optional[Mapping[str, str]] = None) -> GraphPlan:
+               include: Optional[Mapping[str, str]] = None, stem_family: bool = False) -> GraphPlan:
     """The batches' kept and covered rows, and the candidate edges: each kept candidate's ``k`` nearest other kept
     candidates by ``vectors`` (projected query vectors, by key) at ``cosine_floor`` or above, every pair at
     ``pair_floor`` or above (``None``: none beyond the k nearest), and every label variant pair
-    (:func:`label_variant_pairs`) at whatever cosine.  A pair the pair floor or the label rule brought in is listed
-    in both candidates' relation calls (after the k nearest, nearest first) and recorded in ``via``.  A candidate
-    with no vector has no candidate edge, a label variant's included."""
+    (:func:`label_variant_pairs`) at whatever cosine; with ``stem_family``, every stem-family pair of the rows'
+    ``lexical`` blocks (:func:`stem_family_pairs`) too, wherever its cosine.  A pair the pair floor, the label rule
+    or the family brought in is listed in both candidates' relation calls (after the k nearest, nearest first) and
+    recorded in ``via``.  A candidate with no vector has no candidate edge, a label variant's included."""
     include = dict(include or {})
     kept, covered, skipped, by_batch = select_rows(rows, batch_ids, include=include)
     cands, rows_kept = {}, {}
@@ -728,10 +773,13 @@ def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: M
                 via[e] = "pair_floor"
     variants = [p for p in label_variant_pairs(cands) if p[0] in with_vec and p[1] in with_vec]
     relabels = [p for p in relabel_pairs(rows_kept) if p[0] in with_vec and p[1] in with_vec and p not in set(variants)]
-    if variants or relabels:
+    families = [p for p in stem_family_pairs(rows_kept) if p[0] in with_vec and p[1] in with_vec
+                and p not in set(variants) and p not in set(relabels)] if stem_family else []
+    if variants or relabels or families:
         keys, S = _cosines(with_vec)
         pos = {x: i for i, x in enumerate(keys)}
-        for (a, b), how in [*((p, "label_variant") for p in variants), *((p, "relabel") for p in relabels)]:
+        for (a, b), how in [*((p, "label_variant") for p in variants), *((p, "relabel") for p in relabels),
+                            *((p, "stem_family") for p in families)]:
             if how == "relabel":
                 via[(a, b)] = "relabel"           # wherever it came in: the pair is the relabel step's
             if (a, b) in edges:
@@ -741,14 +789,15 @@ def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: M
             via[(a, b)] = how
             nbrs[a].append((b, c))
             nbrs[b].append((a, c))
-        for x in {m for p in [*variants, *relabels] for m in p}:
+        for x in {m for p in [*variants, *relabels, *families] for m in p}:
             head, tail = nbrs[x][:k], nbrs[x][k:]
             nbrs[x] = head + sorted(tail, key=lambda t: (-t[1], t[0]))
     return GraphPlan(batch_ids=list(batch_ids), cands=cands, rows=rows_kept, covered=covered,
                      neighbours={x: nbrs[x] for x in sorted(nbrs)}, edges=dict(sorted(edges.items())),
                      skipped=dict(skipped), no_vector=no_vector, by_batch=by_batch,
                      included={x: include[x] for x in sorted(include) if x in rows_kept}, k=k, pair_floor=pair_floor,
-                     via=dict(sorted(via.items())), label_variants=variants, relabel_pairs=relabels)
+                     via=dict(sorted(via.items())), label_variants=variants, relabel_pairs=relabels,
+                     family_pairs=families)
 
 
 def overlap_pairs(plan: GraphPlan, relations: Mapping[str, Mapping], *,
@@ -924,10 +973,57 @@ def _candidate_node(row: Mapping) -> Node:
     a = nv.get("alignment_score", f.get("alignment"))
     return Node(key=row["key"], kind="candidate", label=row.get("label") or row["key"], gloss=_gloss(row),
                 stem=row.get("stem"), generator=gens[0] if gens else None, generators=gens, verdict=f.get("verdict"),
-                decision=nv.get("decision"), flags=list(nv.get("review") or []),
+                decision=nv.get("decision"), flags=list(nv.get("review") or []) + lexical_flags(row),
                 region=f.get("region") or nv.get("region"),
                 alignment_score=a if isinstance(a, int) and not isinstance(a, bool) else None, m3_run=nv.get("run_id"),
                 outcome=f.get("outcome") if f.get("outcome") not in (None, "trait") else None, **review_fields(row))
+
+
+def lexical_flags(row: Mapping) -> list[str]:
+    """The row's ``lexical`` block flags as review flags (:data:`LEXICAL_NODE_FLAGS`; ``lexical_below_cut`` is not
+    carried); none without a block."""
+    return [LEXICAL_NODE_FLAGS[f] for f in (row.get("lexical") or {}).get("flags") or [] if f in LEXICAL_NODE_FLAGS]
+
+
+def lexical_edges(key_: str, row: Mapping, *, proposed_cut_off: int = DEFAULT_PROPOSED_CUT_OFF) -> list[Edge]:
+    """The row's ``lexical`` block as ``source: "lexical"`` edges (module docstring): one per judged link, with the
+    sweep's readings, and one per name-only link, without; a link M3 listed already, and one the sweep did not
+    judge for another reason (a Moby pair under the cosine floor, a stalled pair), is not drawn.  Never a cut: the
+    edge says ``at_cut_off`` (a proposed merge), nothing more."""
+    blk = row.get("lexical") or {}
+    out = []
+    for x in blk.get("links") or []:
+        if not x.get("stem") or x.get("listed_by_m3") or not (x.get("judged") or x.get("name_only")):
+            continue
+        info = {"lexicon": x.get("lexicon"), "link": x.get("link"), "word": x.get("word"),
+                "judged": bool(x.get("judged")), "at_cut_off": bool(x.get("judged") and x.get("at_cut_off")),
+                "name_only": bool(x.get("name_only")), "verdict": x.get("verdict"), "run_id": blk.get("run_id")}
+        b = queue_key(x["stem"]) if x.get("kind") == "queue" else corpus_key(x["stem"])
+        rd = {"ab": reading_of(x, proposed_cut_off=proposed_cut_off)} if x.get("judged") else {}
+        out.append(Edge(a=key_, b=b, cosine=x.get("cosine"), relation=None, source="lexical", readings=rd,
+                        via=f"{x.get('lexicon')}:{x.get('link')}", lexical={k: v for k, v in info.items() if v is not None}))
+    return out
+
+
+def lexical_counts(edges: Iterable[Edge], flags: Iterable[Sequence[str]]) -> dict:
+    """The lexical edges and flags in figures: edges by lexicon and link, judged, proposed merges (by lexicon),
+    name-only; candidates by lexical flag, and those with a proposed merge."""
+    lex = [e for e in edges if e.source == "lexical"]
+    merges = [e for e in lex if (e.lexical or {}).get("at_cut_off")]
+    fl = Counter(f for fs in flags for f in fs if f.startswith("lexical_"))
+    return {"n_edges": len(lex), "by_lexicon": _dist(Counter((e.lexical or {}).get("lexicon") for e in lex)),
+            "by_link": _dist(Counter(e.via for e in lex)),
+            "judged": sum(1 for e in lex if (e.lexical or {}).get("judged")), "proposed_merges": len(merges),
+            "proposed_merges_by_lexicon": _dist(Counter((e.lexical or {}).get("lexicon") for e in merges)),
+            "name_only": sum(1 for e in lex if (e.lexical or {}).get("name_only")),
+            "candidates_by_flag": _dist(fl), "candidates_with_proposed_merge": fl.get("lexical_proposed_merge", 0)}
+
+
+def lexical_counts_of_rows(rows: Mapping[str, Mapping], *, proposed_cut_off: int = DEFAULT_PROPOSED_CUT_OFF) -> dict:
+    """:func:`lexical_counts` straight from the kept rows (what the graph built on them would hold; the dry run's
+    figures)."""
+    edges = [e for k in sorted(rows) for e in lexical_edges(k, rows[k], proposed_cut_off=proposed_cut_off)]
+    return lexical_counts(edges, (lexical_flags(r) for r in rows.values()))
 
 
 def _covering(nv: Mapping) -> Optional[tuple[str, str]]:
@@ -1053,6 +1149,12 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
                               source="m3", readings={"ab": rd_of(r) | {"outcome": r.get("outcome")}},
                               via=r.get("via")))
 
+    for key_ in sorted(plan.rows):              # the lexical blocks (plan 11): edges and flags, never a cut
+        for e in lexical_edges(key_, plan.rows[key_], proposed_cut_off=proposed_cut_off):
+            kind, _, stem = e.b.partition(":")
+            (queue_stems if kind == "queue" else corpus_stems).add(stem)
+            edges.append(e)
+
     for stem in sorted(corpus_stems):
         t = corpus.get(stem)
         nodes.append(Node(key=corpus_key(stem), kind="corpus", label=t.label, gloss=t.description, stem=stem)
@@ -1142,6 +1244,9 @@ def summarize(g: Graph, *, plan: Optional[GraphPlan] = None) -> dict:
                             "links": len(g.proposed_links)},
         "ungrouped": len(g.ungrouped()),
     }
+    lex = lexical_counts(g.edges, (nodes[k].flags for k in kept))
+    if lex["n_edges"] or lex["candidates_by_flag"]:     # only then, so a graph without lexical blocks is as before
+        out["lexical"] = lex
     if plan is not None:
         out["skipped"] = dict(plan.skipped)
         out["no_vector"] = list(plan.no_vector)

@@ -145,6 +145,17 @@ def readings_text(e: RG.Edge) -> str:
     return ", ".join(t for t in (_dir_text(e.readings.get("ab")), _dir_text(e.readings.get("ba"))) if t)
 
 
+def lexical_info(e: RG.Edge) -> dict:
+    """A lexical edge's lexicon (named as the card names it), link type, word, ``at_cut_off`` (a proposed merge) and
+    ``name_only`` (``{}`` for any other edge)."""
+    if e.source != "lexical":
+        return {}
+    x = e.lexical or {}
+    return {"lexicon": x.get("lexicon"), "lexicon_name": RG.LEXICON_NAMES.get(x.get("lexicon"), x.get("lexicon")),
+            "link": x.get("link"), "word": x.get("word"), "at_cut_off": bool(x.get("at_cut_off")),
+            "name_only": bool(x.get("name_only"))}
+
+
 def edge_level(e: RG.Edge) -> int:
     """How strongly an edge ties its ends: 4 for a 4-edge, 3 for a 3-edge, else the best final reading (0 unread)."""
     if e.strict:
@@ -861,6 +872,12 @@ class ReviewState:
             path, href = target_path(n.covered_by)
             out["covered_by"] = {"key": n.covered_by, "label": self.label(n.covered_by), "path": path, "href": href,
                                  "reading": n.covered_reading}
+        # plan 11 (Roger, 2026-10-14, option (d)): a dictionary link read at the row's cut-off is a proposed merge,
+        # shown as "dictionary (WordNet | Moby thesaurus): probably the same as X"; never a cut
+        merges = [self._target_entry(e.b) | lexical_info(e) | {"reading": _dir_text(e.readings.get("ab"))}
+                  for e in self.m3.get(key, []) if e.source == "lexical" and (e.lexical or {}).get("at_cut_off")]
+        if merges:
+            out["lexical_merges"] = merges
         return out
 
     def _target_entry(self, key: str) -> dict:
@@ -972,7 +989,8 @@ class ReviewState:
         for t, (rank, m, e) in corpus.items():
             rows_out.append(((-rank[0], -rank[1], t), self._target_entry(t) | {
                 "relation": e.relation, "cosine": e.cosine, "reading": _dir_text(e.readings.get("ab")),
-                "level": rank[0], "via": m, "via_label": self.nodes[m].label, "covered": self._covered_of(t)}))
+                "level": rank[0], "via": m, "via_label": self.nodes[m].label, "covered": self._covered_of(t)}
+                | ({"lexical": lexical_info(e)} if e.source == "lexical" else {})))
         for t, (rank, o, top) in through.items():
             x, e = (top[1], top[2]) if top else (None, None)
             rows_out.append(((-rank[0], -rank[1], t), self._target_entry(t) | {
@@ -1067,7 +1085,8 @@ class ReviewState:
                           "earlier_review": self.earlier.get(o)})
         for e in self.m3.get(key, []):
             edges.append(self._target_entry(e.b) | {"relation": e.relation, "cosine": e.cosine,
-                                                    "readings": _dir_text(e.readings.get("ab")) or ""})
+                                                    "readings": _dir_text(e.readings.get("ab")) or ""}
+                         | ({"lexical": lexical_info(e)} if e.source == "lexical" else {}))
         edges.sort(key=lambda x: (-(x["cosine"] or 0), x["key"]))
         return {"term": self.member_card(key), "merged": [f"m{i}" for i in self.in_merged.get(key, [])],
                 "proposed": [f"p{i}" for i in self.in_proposed.get(key, [])],

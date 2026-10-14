@@ -193,7 +193,12 @@ function renderCard() {
     const cls = ["member", m.key === c.nominated ? "nominated" : "", m.handled_by && m.handled_by !== c.id ? "handled" : "", m.covered ? "covered" : "",
       S.selected && S.selected.group === c.id && S.selected.key === m.key ? "picked" : ""].join(" ") + hl("members", i);
     const tags = (m.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("");
-    const flags = (m.flags || []).map((f) => `<span class="badge flag">${esc(f)}</span>`).join("");
+    // plan 11 (Roger, 2026-10-14): a dictionary link read at the row's cut-off is a proposed merge, never a cut; the
+    // badge names the lexicon (WordNet or the Moby thesaurus) and stands in for the bare lexical_proposed_merge flag
+    const lexMerges = m.lexical_merges || [];
+    const flags = (m.flags || []).filter((f) => !(f === "lexical_proposed_merge" && lexMerges.length))
+      .map((f) => `<span class="badge flag">${esc(f)}</span>`).join("");
+    const lexical = lexMerges.map((x) => `<span class="badge flag" title="${esc(x.lexicon_name + " " + x.link + " link" + (x.word ? " via the word '" + x.word + "'" : "") + "; overlap reading " + (x.reading || "-") + " at the candidate's cut-off; a proposed merge, M3's decision unchanged")}">dictionary (${esc(x.lexicon_name)}): probably the same as ${link(x)}</span>`).join("");
     const handled = m.handled_by && m.handled_by !== c.id && !preHandled(m) ? `<span class="badge">handled by ${esc(m.handled_by)} (${esc(m.handled_resolution)})</span>` : "";
     const dist = (m.distinct_from || []).length ? `<span class="badge">distinct from ${esc(m.distinct_from.join(", "))}</span>` : "";
     const cov = m.covered_by ? `<span class="badge">covered by ${link(m.covered_by)}</span>` : "";
@@ -212,7 +217,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
@@ -259,7 +264,8 @@ function renderCard() {
       "resolve the group as already covered by this corpus trait or queue entry (its labels go to the synonyms list)") : "";
     return `<li class="entry${pin}${hl("corpus", i)}" data-pane="corpus" data-i="${i}"><span class="level l${t.level || 0}">${t.level != null && t.level >= 0 ? t.level : ""}</span> ` +
       `${link(t)}<span class="row-btns">${btns}</span> <span class="muted small">${t.cosine != null ? fmt(t.cosine) + " · " : ""}${esc(t.reading || t.relation || "found")}${t.via_label ? " · from " + esc(t.via_label) : ""}` +
-      `${t.through ? " · through " + esc(t.through.label) + " (" + esc(t.through.text) + ")" : ""}</span>` +
+      `${t.through ? " · through " + esc(t.through.label) + " (" + esc(t.through.text) + ")" : ""}` +
+      `${t.lexical ? " · dictionary: " + esc(t.lexical.lexicon_name + " " + t.lexical.link) + (t.lexical.name_only ? " (no text, not read)" : "") : ""}</span>` +
       `<div class="gloss">${esc(t.gloss)}</div>${cov}</li>`;
   }).join("") || `<li class="muted small">no corpus trait read</li>`;
 

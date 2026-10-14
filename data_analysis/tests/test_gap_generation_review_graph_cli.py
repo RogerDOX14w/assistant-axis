@@ -363,3 +363,51 @@ def test_the_opus_pilot_reads_what_sonnet_read_and_compares_with_roger(env, caps
     env["holder"].pop("client", None)
     assert pilot(env, "--resume") == 0
     assert calls(env) == [] and json.loads((d / "report.json").read_text())["result"] == rep
+
+
+# --------------------------------------------------------------------------- plan 11: the lexical blocks
+
+def lexical_env(tmp_path, monkeypatch):
+    from assistant_axis.tests.test_gapgen_review_graph_lexical import LONER_LINKS, block
+    env = make_env(tmp_path, monkeypatch)
+    blk = block(LONER_LINKS, family=[{"stem": "chain_c", "kind": "candidate", "via": "affix"}])
+    env["reg"].update_many({"loner#1": {"lexical": blk}}, merge_blocks=False)
+    return env
+
+
+def test_lexical_blocks_in_the_dry_run_and_the_build(tmp_path, monkeypatch, capsys):
+    env = lexical_env(tmp_path, monkeypatch)
+    reg_before = env["reg"].path.read_bytes()
+    assert build(env, "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert "lexical (plan 11; copied from the lexical blocks, no call; never a cut)" in o
+    assert '"n_edges": 4' in o and '"proposed_merges": 2' in o and "stem-family candidate edges on: 1 pairs" in o
+    assert not out(env).exists()
+    assert build(env) == 0
+    assert env["reg"].path.read_bytes() == reg_before                     # the registry is read, never written
+    g = RG.Graph.from_json(json.loads((out(env) / "graph.json").read_text()))
+    run = json.loads((out(env) / "run.json").read_text())
+    assert run["settings"]["stem_family"] is True and run["plan"]["n_family_pairs"] == 1
+    assert run["plan"]["lexical"]["proposed_merges"] == 2 and g.stats["lexical"]["proposed_merges"] == 2
+    lex = sorted(e.b for e in g.edges if e.source == "lexical")
+    assert lex == ["queue:queued", "trait:alpha", "trait:delta", "trait:epsilon"]
+    n = g.node_map()["loner#1"]
+    assert n.decision == "new" and n.flags == ["lexical_proposed_merge", "lexical_name_only"]
+    fam = [e for e in g.edges if e.source == "r1" and e.via == "stem_family"]
+    assert [(e.a, e.b) for e in fam] == [("chain_c#1", "loner#1")] and not fam[0].proposed
+
+
+def test_stem_family_resume_keeps_the_earlier_session_s_setting(tmp_path, monkeypatch, capsys):
+    env = lexical_env(tmp_path, monkeypatch)
+    assert build(env, batch="rv_old") == 0
+    run_path = out(env, "rv_old") / "run.json"
+    run = json.loads(run_path.read_text())
+    run["settings"].pop("stem_family")                                    # a build from before 2026-10-15
+    run_path.write_text(json.dumps(run))
+    assert build(env, "--resume", batch="rv_old") == 0
+    run = json.loads(run_path.read_text())
+    assert run["settings"]["stem_family"] is False
+    g = RG.Graph.from_json(json.loads((out(env, "rv_old") / "graph.json").read_text()))
+    assert not any(e.via == "stem_family" for e in g.edges)
+    assert build(env, "--no-stem-family", batch="rv_off") == 0
+    assert json.loads((out(env, "rv_off") / "run.json").read_text())["settings"]["stem_family"] is False
