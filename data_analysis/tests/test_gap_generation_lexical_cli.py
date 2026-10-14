@@ -60,7 +60,7 @@ def lenv(tmp_path, monkeypatch):
 
 
 def run(lenv, cmd, *extra):
-    plan = lenv["plan"] if cmd in ("dry", "sweep") else []
+    plan = lenv["plan"] if cmd in ("dry", "sweep", "reach") else []
     lex = ["--lexicons", "oewn"] if cmd in ("build", "labelled") else []
     return LR.main([cmd, *lenv["lbase"], *plan, *lex, *extra])
 
@@ -220,3 +220,57 @@ def test_setup_external_moby_refuses_a_target_outside_the_repository(tmp_path, c
         raise AssertionError("nothing is fetched for a target outside the repository")
     rc = SE.fetch_moby(fetcher=boom, dest_dir=tmp_path / "moby", sources_manifest_path=tmp_path / "sources_manifest.json")
     assert rc == 1 and "REFUSED" in capsys.readouterr().err and not (tmp_path / "moby").exists()
+
+
+# --------------------------------------------------------------------------- the forward path and task 8
+
+def test_from_batches_sweeps_one_wave_flag_only(lenv, capsys):
+    """The forward path for a new M3 wave (Roger, 2026-10-14, option (d): every lexical link only flags): ``dry`` and
+    ``sweep`` restricted to the kept rows one M3 batch decided; an unknown batch is refused; the novelty blocks
+    stay byte-identical (the M3 decisions never change)."""
+    assert run(lenv, "build") == 0
+    capsys.readouterr()
+    assert run(lenv, "dry", "--dry-run", "--from-batches", "no_such_wave") == 2
+    assert "REFUSED" in capsys.readouterr().err
+    assert run(lenv, "sweep", "--batch-id", "lexw", "--from-batches", "no_such_wave") == 2
+    assert not (lenv["lexdir"] / "sweep" / "lexw").exists()
+    assert run(lenv, "dry", "--dry-run", "--from-batches", "m3t") == 0
+    assert "kept rows 2; rows with lexical-only pairs 2" in capsys.readouterr().out
+    before = {k: LS.block_sha256(r.get("novelty")) for k, r in lenv["reg"].fold().items()}
+    assert run(lenv, "sweep", "--batch-id", "lexw", "--from-batches", "m3t") == 0
+    d = lenv["lexdir"] / "sweep" / "lexw"
+    meta = json.loads((d / "run.json").read_text())
+    assert meta["from_batches"] == ["m3t"] and meta["n_rows"] == 2 and meta["n_blocks_written"] == 2
+    rows = lenv["reg"].fold()
+    assert {k: LS.block_sha256(r.get("novelty")) for k, r in rows.items()} == before
+    assert {r["label"]: r["lexical"]["flags"] for r in rows.values() if r.get("lexical")} == \
+        {"deltaish": ["lexical_cover", "lexical_name_only"], "lambdaish": ["lexical_cover"]}
+
+
+def test_reach_counts_the_unrecovered_hidden_traits_a_lexical_link_reaches(lenv, capsys):
+    """Task 8, dry ($0): over a recovery run's hidden set, the hidden traits no kept candidate recovered that a kept
+    candidate's lexical link reaches, by lexicon, and whether the harness already read that pair."""
+    t1, t2, t3 = lenv["t"]
+    assert run(lenv, "build") == 0
+    rec = lenv["cand_dir"] / "recovery" / "rec_t"
+    (rec / "seed0").mkdir(parents=True)
+    (rec / "run.json").write_text(json.dumps({"seeds": [0], "m3_runs": {"0": "m3t"}}))
+    (rec / "seed0" / "hidden.json").write_text(json.dumps({"hidden": [t1, t2, t3, "zzz_hidden"]}))
+    rows = {r["label"]: r for r in lenv["reg"].fold().values()}
+    (rec / "seed0" / "matches.jsonl").write_text("".join(json.dumps(m) + "\n" for m in [
+        {"key": rows["lambdaish"]["key"], "decision": "new", "stem": t3, "how": "overlap", "recovers": True},
+        {"key": rows["deltaish"]["key"], "decision": "new", "stem": t2, "how": "overlap", "recovers": False}]))
+    capsys.readouterr()
+    assert run(lenv, "reach", "--recovery-batch", "rec_t", "--dry-run") == 0
+    assert "unrecovered hidden traits a lexical link reaches: 2 of 3" in capsys.readouterr().out
+    assert not (rec / "lexical_reach.json").exists()
+    assert run(lenv, "reach", "--recovery-batch", "rec_t") == 0
+    doc = LR._read_json(rec / "lexical_reach.json")
+    s = doc["seeds"][0]
+    assert s["n_hidden"] == 4 and s["n_recovered_by_kept"] == 1 and s["n_unrecovered"] == 3 and s["n_kept"] == 2
+    assert s["reached"]["n"] == 2 and s["reached"]["by_lexicon"] == {"oewn": 2}
+    assert s["reached"]["never_read"] == 1 and s["reached"]["read_below_cut"] == 1
+    assert s["reached"]["judged_and_never_read"] == 1 and s["reached"]["would_be_judged"] == 2
+    by = {x["stem"]: x for x in s["reached"]["traits"]}
+    assert by[t1]["by"][0]["key"] == rows["deltaish"]["key"] and by[t1]["by"][0]["read_by_harness"] is False
+    assert by[t2]["by"][0]["read_by_harness"] is True and s["unreached"] == ["zzz_hidden"]

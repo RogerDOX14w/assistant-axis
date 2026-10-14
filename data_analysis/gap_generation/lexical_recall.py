@@ -9,6 +9,7 @@
     uv run python data_analysis/gap_generation/lexical_recall.py report --batch-id B [--marks marks.json]
     uv run python data_analysis/gap_generation/lexical_recall.py marks --batch-id B [--n 40 --seed S] | --parse marked.md
     uv run python data_analysis/gap_generation/lexical_recall.py replay --batch-id B [--dry-run]
+    uv run python data_analysis/gap_generation/lexical_recall.py reach --recovery-batch B [--dry-run]
 
 * ``build`` ($0, seconds): the lookup table (``data/candidates/lexical/lookup.json``) over the corpus labels and the
   seed queue's live trait labels (with or without a text), in each lexicon; prints coverage per lexicon and kind and the
@@ -32,6 +33,15 @@
   ``reports/trait_gap_generation/lexical_covers_for_marks.md`` and the seeded ``marks/key.json``; ``--parse`` reads
   the marked sheet back into ``marks/marks.json``.
 * ``replay`` ($0): the sweep's ``registry_writes.jsonl`` applied to a registry (another checkout's), idempotently.
+* ``reach`` ($0; task 8, dry): over a recovery run's hidden set, the hidden traits its kept candidates did not
+  recover that a kept candidate's lexical link reaches, by lexicon: ``recovery/<B>/lexical_reach.json``.
+
+Roger's gate-2 decision (2026-10-14, option (d)): **no lexical link ever cuts**, whichever lexicon; a link read at
+the row's own cut-off (``lexical_cover`` in the block) is a *proposed merge*, flagged for review (the review graph
+and card: "dictionary (WordNet | Moby thesaurus): probably the same as X"), and the M3 decision stays.  The forward
+path for a new M3 wave is this sweep restricted to it: ``build`` (when the corpus or the queue changed), then
+``sweep --batch-id <wave>_lex --from-batches <wave M3 batch>`` (flag only; the ``novelty`` blocks untouched), then
+the review graph as usual.  ``dry --from-batches`` leaves ``lexical/dry_readout.*`` (every kept row) alone.
 
 Every dry run prints its counts and estimate and writes nothing; ``sweep --dry-run`` also prints one rendered pair per
 variant (an OEWN pair with a corpus trait, a queue entry, a Moby pair, when there is one).  The system prompt is the
@@ -216,6 +226,26 @@ def candidate_vectors(kept: dict, cfg, cache) -> dict:
     return {keys[i]: v for i, v in found.items()}
 
 
+class Refused(RuntimeError):
+    """A refusal before anything is sent or written (the command exits 2)."""
+
+
+def select_kept(rows: dict, passes, from_batches=None) -> tuple[dict, dict]:
+    """``(kept, all_kept)``: the kept rows of ``passes`` (:func:`lexical_sweep.kept_rows`), restricted to those whose
+    ``novelty.run_id`` is one of ``from_batches`` when given (one M3 wave: the forward path, plan 11 as Roger decided
+    it on 2026-10-14), and all of them (the stem families look across waves).  A batch no row carries is refused."""
+    all_kept = LS.kept_rows(rows, passes)
+    if not from_batches:
+        return all_kept, all_kept
+    present = {(r.get("novelty") or {}).get("run_id") for r in rows.values()}
+    unknown = [b for b in from_batches if b not in present]
+    if unknown:
+        raise Refused(f"no registry row carries novelty.run_id {', '.join(unknown)} (an M3 batch id, as "
+                      "novelty_score.py score --batch-id wrote it)")
+    want = set(from_batches)
+    return {k: r for k, r in all_kept.items() if (r.get("novelty") or {}).get("run_id") in want}, all_kept
+
+
 def build_plan(args, *, need_index: bool) -> dict:
     """Everything ``dry`` and ``sweep`` share: the kept rows, the lookup with its lexicons, the index and cached
     vectors, the items and per-row plans."""
@@ -223,7 +253,7 @@ def build_plan(args, *, need_index: bool) -> dict:
     from assistant_axis.gapgen.metric_config import MetricConfig
     from data_analysis.gap_generation import novelty_score as NS
     rows = load_rows(args)
-    kept = LS.kept_rows(rows, _passes(args.rows))
+    kept, all_kept = select_kept(rows, _passes(args.rows), getattr(args, "from_batches", None))
     names = getattr(args, "lexicons", None)
     lookup = LX.load_lookup(args.lookup, lexicons=LX.default_lexicons(names) if names else None)
     cfg = MetricConfig.load(args.metric_config)
@@ -239,7 +269,7 @@ def build_plan(args, *, need_index: bool) -> dict:
     corpus = NV.load_trait_corpus(args.data_dir)
     descriptions = ({s: t.description for s, t in index.traits.items() if t.description} if index is not None
                     else {s: t.description for s, t in corpus.items() if t.description})
-    fam_cands = {r["stem"]: r["label"] for r in kept.values()}
+    fam_cands = {r["stem"]: r["label"] for r in all_kept.values()}
     items, plans = LS.sweep_plan(kept, lookup, index, vectors, descriptions=descriptions,
                                  candidates_for_family=fam_cands)
     return {"rows": rows, "kept": kept, "lookup": lookup, "cfg": cfg, "index": index, "vectors": vectors,
@@ -285,7 +315,11 @@ def plan_snapshot(plan: dict, items, *, batch_id: Optional[str], cap: Optional[d
 # --------------------------------------------------------------------------- dry
 
 def cmd_dry(args) -> int:
-    plan = build_plan(args, need_index=False)
+    try:
+        plan = build_plan(args, need_index=False)
+    except Refused as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
     items = plan["items"]
     cap = LS.cap_items(items, args.budget_usd)
     est = LS.sweep_estimate(sum(1 for it in items if it.judged))
@@ -303,13 +337,16 @@ def cmd_dry(args) -> int:
         print("DRY-RUN: nothing written")
         return 0
     lexdir = _lexical_dir(args)
-    labelled = None
-    lp = lexdir / "labelled_readout.json"
-    if lp.exists():
-        labelled = _read_json(lp)
-    _write_json(readout, lexdir / "dry_readout.json", title="lexical recall: the dry readout (plan 11, gate 1)")
-    atomic_write_text(LS.dry_markdown(readout, labelled=labelled), lexdir / "dry_readout.md")
-    print(f"wrote {lexdir / 'dry_readout.json'} and dry_readout.md")
+    if args.from_batches:               # one wave: the gate-1 readout of every kept row is left as it is
+        print("--from-batches: lexical/dry_readout.* left alone (they describe every kept row)")
+    else:
+        labelled = None
+        lp = lexdir / "labelled_readout.json"
+        if lp.exists():
+            labelled = _read_json(lp)
+        _write_json(readout, lexdir / "dry_readout.json", title="lexical recall: the dry readout (plan 11, gate 1)")
+        atomic_write_text(LS.dry_markdown(readout, labelled=labelled), lexdir / "dry_readout.md")
+        print(f"wrote {lexdir / 'dry_readout.json'} and dry_readout.md")
     if args.batch_id:
         d = sweep_dir(args)
         _write_json(plan_snapshot(plan, items, batch_id=args.batch_id, cap=cap), d / "plan.json",
@@ -418,7 +455,11 @@ def write_blocks(results, *, plan: dict, items, run_id: str, runner, out_dir: Pa
 
 def cmd_sweep(args) -> int:
     from data_analysis.gap_generation import novelty_score as NS
-    plan = build_plan(args, need_index=True)
+    try:
+        plan = build_plan(args, need_index=True)
+    except Refused as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
     items = plan["items"]
     sample = _apply_sample(items, args.sample, args.seed)
     cap = LS.cap_items(items, args.budget_usd, transport=args.transport)
@@ -477,7 +518,7 @@ def cmd_sweep(args) -> int:
                 "models": {"overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
                 "lookup": {"path": str(args.lookup), "content_sha256": plan["lookup"].content_sha256,
                            "lexicons": plan["lookup"].lexicon_versions},
-                "rows": args.rows, "n_rows": len(plan["kept"]), "n_pairs": len(items), "n_judged": n_j, "cap": cap,
+                "rows": args.rows, "from_batches": args.from_batches, "n_rows": len(plan["kept"]), "n_pairs": len(items), "n_judged": n_j, "cap": cap,
                 "sample": sample, "moby_cosine_floor": LX.MOBY_COSINE_FLOOR, "label_form": DEFAULT_LABEL_FORM,
                 "registry": None if args.no_registry_write else str(args.registry), "resumed": bool(args.resume),
                 "started_at": utc_now()}
@@ -643,6 +684,98 @@ def cmd_replay(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- reach (task 8, dry)
+
+def reach_seed(lookup: LX.Lookup, *, hidden, matches, kept_rows, cos=None, moby_floor: float = LX.MOBY_COSINE_FLOOR
+               ) -> dict:
+    """One seed of a recovery run: the hidden traits no kept candidate recovered (``matches``: the harness's
+    ``matches.jsonl``), and those a kept candidate's lexical link reaches (:meth:`lexical.Lookup.neighbours`, a
+    renamed hidden stem folded through the table's ``renamed_from``), by lexicon; per link whether the harness already
+    read the pair (``read_by_harness``: its overlap call then said no) and whether the sweep would judge it (a Moby-only
+    link under ``moby_floor``, or with no cosine, is not judged; ``cos(key, stem)``)."""
+    renamed = {old: r["stem"] for r in lookup.rows.values() for old in r.get("renamed_from") or []}
+    cur = {h: renamed.get(h, h) for h in hidden}
+    recovered = {m["stem"] for m in matches if m.get("recovers") and m.get("decision") in LS.KEPT_DECISIONS}
+    read = {(m.get("key"), m.get("stem")) for m in matches}
+    unrec = [h for h in hidden if h not in recovered]
+    want = {cur[h]: h for h in unrec}
+    by: dict = {}
+    for r in sorted(kept_rows, key=lambda r: r["key"]):
+        for ln in lookup.neighbours(r["label"], r["stem"]):
+            h = want.get(ln.stem)
+            if h is None:
+                continue
+            c = cos(r["key"], ln.stem) if cos is not None else None
+            judged = not ln.name_only and not (ln.moby_only and (c is None or c < moby_floor))
+            by.setdefault(h, []).append({"key": r["key"], "label": r["label"], "lexicon": ln.lexicon, "link": ln.link,
+                                         "moby_only": ln.moby_only, "cosine": c, "would_be_judged": judged,
+                                         "read_by_harness": (r["key"], h) in read or (r["key"], ln.stem) in read})
+    traits = [{"stem": h, "by": by[h]} for h in unrec if h in by]
+    any_lex = lambda h, lex: any(x["lexicon"] == lex for x in by[h])  # noqa: E731
+    return {"n_hidden": len(hidden), "n_recovered_by_kept": len(recovered & set(hidden)), "n_unrecovered": len(unrec),
+            "n_kept": len(kept_rows), "not_in_lookup": sorted(h for h in unrec if cur[h] not in lookup.rows),
+            "reached": {"n": len(traits),
+                        "by_lexicon": {lex: sum(1 for h in by if any_lex(h, lex)) for lex in LX.LEXICONS
+                                       if any(any_lex(h, lex) for h in by)},
+                        "moby_only": sum(1 for h in by if not any_lex(h, "oewn")),
+                        "would_be_judged": sum(1 for h in by if any(x["would_be_judged"] for x in by[h])),
+                        "never_read": sum(1 for h in by if any(not x["read_by_harness"] for x in by[h])),
+                        "read_below_cut": sum(1 for h in by if all(x["read_by_harness"] for x in by[h])),
+                        "judged_and_never_read": sum(1 for h in by if any(x["would_be_judged"]
+                                                                          and not x["read_by_harness"] for x in by[h])),
+                        "traits": traits},
+            "unreached": [h for h in unrec if h not in by]}
+
+
+def cmd_reach(args) -> int:
+    """Plan 11 task 8, dry ($0): over a recovery run's hidden set, how many hidden traits its kept candidates did not
+    recover have a lexical link from one of them (the flags a lexical sweep of that run could raise; Roger,
+    2026-10-14: a lexical link only flags, never recovers by cutting)."""
+    from assistant_axis.gapgen.recovery import load_hidden
+    rdir = paths.recovery_dir(args.recovery_batch, candidates_dir=args.out_root)
+    run = json.loads((rdir / "run.json").read_text(encoding="utf-8"))
+    lookup = LX.load_lookup(args.lookup)
+    index, cfg, cache = None, None, None
+    if not args.no_cosines:
+        from assistant_axis.gapgen import embed as EM
+        from assistant_axis.gapgen.metric_config import MetricConfig
+        from data_analysis.gap_generation import novelty_score as NS
+        cfg = MetricConfig.load(args.metric_config)
+        cache = EM.EmbeddingCache(args.cache_dir)
+        index, _ = NS.load_index(cfg, data_dir=args.data_dir, cache=cache, allow_embed=False, queue_search=True)
+    seeds = []
+    for seed in run.get("seeds") or []:
+        m3_run = (run.get("m3_runs") or {}).get(str(seed))
+        sd = rdir / f"seed{seed}"
+        hidden = load_hidden(sd / "hidden.json")["stems"]
+        results = _read_jsonl(paths.novelty_dir(m3_run, candidates_dir=args.out_root) / "results.jsonl")
+        kept = [r for r in results if (r.get("novelty") or {}).get("decision") in LS.KEPT_DECISIONS]
+        cos = None
+        if index is not None:
+            cos = LS.cosine_fn(index, candidate_vectors({r["key"]: r for r in kept}, cfg, cache))
+        s = reach_seed(lookup, hidden=hidden, matches=_read_jsonl(sd / "matches.jsonl"), kept_rows=kept, cos=cos)
+        seeds.append({"seed": seed, "m3_run": m3_run} | s)
+        rc = s["reached"]
+        print(f"seed {seed} ({m3_run}): {s['n_hidden']} hidden, {s['n_recovered_by_kept']} recovered by the "
+              f"{s['n_kept']} kept candidates; unrecovered hidden traits a lexical link reaches: {rc['n']} of "
+              f"{s['n_unrecovered']} (by lexicon {rc['by_lexicon']}; Moby only {rc['moby_only']}; the sweep would "
+              f"judge {rc['would_be_judged']}; with a link the harness never read {rc['never_read']}, every link read "
+              f"below the cut {rc['read_below_cut']}; a link the sweep would judge and the harness never read: "
+              f"{rc['judged_and_never_read']})")
+        for t in rc["traits"]:
+            print(f"  {t['stem']}: " + "; ".join(f"{x['label']} ({x['lexicon']} {x['link']}, cosine {x['cosine']}"
+                                                 f"{', read' if x['read_by_harness'] else ''})" for x in t["by"]))
+    doc = {"recovery_batch": args.recovery_batch, "lookup_sha256": lookup.content_sha256,
+           "lexicons": lookup.lexicon_versions, "moby_cosine_floor": LX.MOBY_COSINE_FLOOR,
+           "cosines": index is not None, "seeds": seeds, "at": utc_now()}
+    if args.dry_run:
+        print("DRY-RUN: nothing written")
+        return 0
+    _write_json(doc, rdir / "lexical_reach.json", title=f"lexical reach of {args.recovery_batch} (plan 11 task 8, dry)")
+    print(f"wrote {rdir / 'lexical_reach.json'}")
+    return 0
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -668,6 +801,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="only these lexicons' links (default: every lexicon the lookup table was built with)")
         sp.add_argument("--budget-usd", type=float, default=LS.DEFAULT_BUDGET_USD,
                         help=f"the sweep's hard cap (default ${LS.DEFAULT_BUDGET_USD:.0f}); Moby's pairs are cut by cosine to fit")
+        sp.add_argument("--from-batches", nargs="+", metavar="M3_BATCH", default=None,
+                        help="only the kept rows these M3 batches decided (a new wave: the forward path; default every "
+                             "kept row)")
 
     sp = sub.add_parser("build", help="the lookup table ($0)")
     common(sp)
@@ -713,6 +849,15 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--sheet", type=Path, default=MARKS_SHEET)
     sp.add_argument("--parse", type=Path, default=None, help="the marked sheet to read back into marks/marks.json")
     sp.set_defaults(func=cmd_marks)
+    sp = sub.add_parser("reach", help="task 8, dry: the unrecovered hidden traits of a recovery run a lexical link "
+                                      "reaches ($0)")
+    common(sp, lexicons=False)
+    sp.add_argument("--recovery-batch", required=True, help="data/candidates/recovery/<B>/ (its run.json, seeds' "
+                                                            "hidden.json and matches.jsonl, and the M3 runs' results)")
+    sp.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
+    sp.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
+    sp.add_argument("--no-cosines", action="store_true", help="skip the cosines (no index; Moby's floor not applied)")
+    sp.set_defaults(func=cmd_reach)
     sp = sub.add_parser("replay", help="apply registry_writes.jsonl to a registry ($0)")
     common(sp, lexicons=False)
     sp.add_argument("--batch-id", required=True)

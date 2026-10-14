@@ -1,0 +1,1012 @@
+{
+ "result": {
+  "recovery_batch": "rec_antonym_check_pilot_1",
+  "lookup_sha256": "92408c7dfd3230f915aeb5214753b54fb4cb6a589ade53b266c195bf8079529f",
+  "lexicons": {
+   "oewn": "oewn:2024",
+   "moby": "7c9742b1ed94435a893c0719b426725edb8a5242f8c526a75461bd6cee2dfd32"
+  },
+  "moby_cosine_floor": 0.2,
+  "cosines": true,
+  "seeds": [
+   {
+    "seed": 0,
+    "m3_run": "rec_antonym_check_pilot_1_s0",
+    "n_hidden": 83,
+    "n_recovered_by_kept": 13,
+    "n_unrecovered": 70,
+    "n_kept": 162,
+    "not_in_lookup": [
+     "merciful"
+    ],
+    "reached": {
+     "n": 25,
+     "by_lexicon": {
+      "oewn": 9,
+      "moby": 24
+     },
+     "moby_only": 16,
+     "would_be_judged": 17,
+     "never_read": 25,
+     "read_below_cut": 0,
+     "judged_and_never_read": 14,
+     "traits": [
+      {
+       "stem": "apathetic",
+       "by": [
+        {
+         "key": "blase#1",
+         "label": "blase",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.321101,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "cold#1",
+         "label": "cold",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.159581,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "indifferent#1",
+         "label": "indifferent",
+         "lexicon": "oewn",
+         "link": "synonym",
+         "moby_only": false,
+         "cosine": 0.340142,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "laggard#1",
+         "label": "laggard",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.012907,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "lifeless#1",
+         "label": "lifeless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.174331,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "matter_of_fact#1",
+         "label": "matter of fact",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.043123,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "negligent#1",
+         "label": "negligent",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.189185,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "tame#1",
+         "label": "tame",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.008882,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "world_weary#1",
+         "label": "world weary",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.058005,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "benevolent",
+       "by": [
+        {
+         "key": "compliant#1",
+         "label": "compliant",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.032571,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "thoughtful#1",
+         "label": "thoughtful",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.240568,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "virtuous#1",
+         "label": "virtuous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.217304,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "benign",
+       "by": [
+        {
+         "key": "compliant#1",
+         "label": "compliant",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.008268,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.135091,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "calculating",
+       "by": [
+        {
+         "key": "astute#1",
+         "label": "astute",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.160817,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "careful#1",
+         "label": "careful",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.22521,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "disingenuous#1",
+         "label": "disingenuous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.062622,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "indirect#1",
+         "label": "indirect",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.109779,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "safe#1",
+         "label": "safe",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.157019,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "thoughtful#1",
+         "label": "thoughtful",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.138524,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "two_faced#1",
+         "label": "two faced",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.099991,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "callous",
+       "by": [
+        {
+         "key": "cold#1",
+         "label": "cold",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.320471,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "indifferent#1",
+         "label": "indifferent",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.133869,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "merciless#1",
+         "label": "merciless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.372711,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "shameless#1",
+         "label": "shameless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.073673,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "cerebral",
+       "by": [
+        {
+         "key": "lax#1",
+         "label": "lax",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.100147,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.038925,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "subjective#1",
+         "label": "subjective",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.108693,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "compassionate",
+       "by": [
+        {
+         "key": "caring#1",
+         "label": "caring",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.381943,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "lax#1",
+         "label": "lax",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.031263,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.211294,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "thoughtful#1",
+         "label": "thoughtful",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.433654,
+         "would_be_judged": true,
+         "read_by_harness": true
+        }
+       ]
+      },
+      {
+       "stem": "conciliatory",
+       "by": [
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.107188,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "yielding#1",
+         "label": "yielding",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.142202,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "cryptic",
+       "by": [
+        {
+         "key": "deep#1",
+         "label": "deep",
+         "lexicon": "oewn",
+         "link": "synonym",
+         "moby_only": false,
+         "cosine": 0.176884,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "evasive#1",
+         "label": "evasive",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.251235,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "effusive",
+       "by": [
+        {
+         "key": "frank#1",
+         "label": "frank",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.064184,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "engaged",
+       "by": [
+        {
+         "key": "attached#1",
+         "label": "attached",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.149912,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "attentive#1",
+         "label": "attentive",
+         "lexicon": "oewn",
+         "link": "also",
+         "moby_only": false,
+         "cosine": 0.19009,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "deep#1",
+         "label": "deep",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.203235,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "involved#1",
+         "label": "involved",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.404748,
+         "would_be_judged": true,
+         "read_by_harness": true
+        }
+       ]
+      },
+      {
+       "stem": "friendly",
+       "by": [
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.189897,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "idealistic",
+       "by": [
+        {
+         "key": "realist#1",
+         "label": "realist",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.129139,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "realistic#1",
+         "label": "realistic",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.122307,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "malign",
+       "by": [
+        {
+         "key": "merciless#1",
+         "label": "merciless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.222888,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "permissive",
+       "by": [
+        {
+         "key": "compliant#1",
+         "label": "compliant",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.098603,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "indifferent#1",
+         "label": "indifferent",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.077814,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "lax#1",
+         "label": "lax",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.195757,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "libertine#1",
+         "label": "libertine",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.340465,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "negligent#1",
+         "label": "negligent",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.070042,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.189192,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "unruly#1",
+         "label": "unruly",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.236341,
+         "would_be_judged": true,
+         "read_by_harness": true
+        }
+       ]
+      },
+      {
+       "stem": "pragmatic",
+       "by": [
+        {
+         "key": "matter_of_fact#1",
+         "label": "matter of fact",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.220343,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "realist#1",
+         "label": "realist",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.151896,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "realistic#1",
+         "label": "realistic",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.12051,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "puritanical",
+       "by": [
+        {
+         "key": "rigorous#1",
+         "label": "rigorous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.049335,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "scrupulous#1",
+         "label": "scrupulous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.109707,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "stubborn#1",
+         "label": "stubborn",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.025105,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "realistic_holland",
+       "by": [
+        {
+         "key": "astute#1",
+         "label": "astute",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.02532,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "genuine#1",
+         "label": "genuine",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.012345,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "matter_of_fact#1",
+         "label": "matter of fact",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.085233,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "realist#1",
+         "label": "realist",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.056867,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "realistic#1",
+         "label": "realistic",
+         "lexicon": "oewn",
+         "link": "synonym",
+         "moby_only": false,
+         "cosine": 0.0533,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "vivid#1",
+         "label": "vivid",
+         "lexicon": "oewn",
+         "link": "similar",
+         "moby_only": false,
+         "cosine": 0.030342,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "self_assured",
+       "by": [
+        {
+         "key": "presumptuous#1",
+         "label": "presumptuous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.003934,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "self_satisfied#1",
+         "label": "self satisfied",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.442604,
+         "would_be_judged": true,
+         "read_by_harness": true
+        }
+       ]
+      },
+      {
+       "stem": "self_effacing",
+       "by": [
+        {
+         "key": "diffident#1",
+         "label": "diffident",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.153393,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "reticent#1",
+         "label": "reticent",
+         "lexicon": "oewn",
+         "link": "synonym",
+         "moby_only": false,
+         "cosine": 0.175453,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "selfless#1",
+         "label": "selfless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.169089,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "spontaneous",
+       "by": [
+        {
+         "key": "autonomous#1",
+         "label": "autonomous",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.050879,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "unlearned#1",
+         "label": "unlearned",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.026746,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "temperate",
+       "by": [
+        {
+         "key": "soft#1",
+         "label": "soft",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.327473,
+         "would_be_judged": true,
+         "read_by_harness": true
+        },
+        {
+         "key": "tame#1",
+         "label": "tame",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.215526,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "uncaring",
+       "by": [
+        {
+         "key": "blase#1",
+         "label": "blase",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.241222,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "cold#1",
+         "label": "cold",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.248943,
+         "would_be_judged": true,
+         "read_by_harness": false
+        },
+        {
+         "key": "indifferent#1",
+         "label": "indifferent",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.360993,
+         "would_be_judged": true,
+         "read_by_harness": true
+        }
+       ]
+      },
+      {
+       "stem": "unflinching",
+       "by": [
+        {
+         "key": "merciless#1",
+         "label": "merciless",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.123892,
+         "would_be_judged": false,
+         "read_by_harness": false
+        },
+        {
+         "key": "stubborn#1",
+         "label": "stubborn",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": 0.279316,
+         "would_be_judged": true,
+         "read_by_harness": false
+        }
+       ]
+      },
+      {
+       "stem": "zealous",
+       "by": [
+        {
+         "key": "compliant#1",
+         "label": "compliant",
+         "lexicon": "moby",
+         "link": "synonym",
+         "moby_only": true,
+         "cosine": -0.006665,
+         "would_be_judged": false,
+         "read_by_harness": false
+        }
+       ]
+      }
+     ]
+    },
+    "unreached": [
+     "absorption_prone",
+     "accountable",
+     "anti_immigration",
+     "anxious_preoccupied_attachment",
+     "attention_seeking",
+     "cancer",
+     "cat_person",
+     "confabulatory",
+     "controlling",
+     "course_correcting",
+     "dismissive",
+     "dog_person",
+     "exclusivist",
+     "financially_precarious",
+     "financially_secure",
+     "formalist",
+     "formulaic",
+     "gryffindor",
+     "iconoclastic",
+     "insecure",
+     "isfj_mbti",
+     "istj_mbti",
+     "malicious",
+     "merciful",
+     "micromanaging",
+     "monochronic_hall",
+     "northern_hemisphere",
+     "pluralist",
+     "polychronic_hall",
+     "pro_immigration",
+     "quality_time",
+     "sassy",
+     "sectarian",
+     "self_blaming",
+     "social_holland",
+     "southern_hemisphere",
+     "superstitious",
+     "supportive",
+     "survivor_vals",
+     "tunnel_visioned",
+     "uncalculating",
+     "unfashionable",
+     "visceral",
+     "wide_eyed",
+     "wry"
+    ]
+   }
+  ],
+  "at": "2026-10-14T23:19:58+00:00"
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/lexical_recall.py reach --recovery-batch rec_antonym_check_pilot_1 --cache-dir /Users/roger/Documents/GitHub/assistant-axis/data/candidates/cache/embeddings",
+   "git_sha": "6a65cc9a+dirty",
+   "author": "Roger Dearnaley",
+   "title": "lexical reach of rec_antonym_check_pilot_1 (plan 11 task 8, dry)"
+  },
+  "produced_at": "2026-10-14T23:19:58+00:00"
+ }
+}

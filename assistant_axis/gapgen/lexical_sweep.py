@@ -19,6 +19,11 @@ The plan is ``reports/trait_gap_generation/coding_plan_11_novelty_ensemble.md`` 
   :func:`fold_marks`: Roger's blind marks on up to 40 covers (open decision 2), in the cover audit's form.
 
 No API call is made here except through the runner the caller hands to :func:`run_sweep`.
+
+Roger's gate-2 decision (2026-10-14, option (d)): **no lexical link ever cuts**, whichever lexicon.  A judged link at
+the row's own cut-off (``at_cut_off``; the block's ``lexical_cover`` flag) is a *proposed merge* for review: R1 shows
+it as ``lexical_proposed_merge`` with "dictionary (WordNet | Moby thesaurus): probably the same as X" on the card
+(:mod:`assistant_axis.gapgen.review_graph`), and the row's ``novelty`` block and M3 decision never change.
 """
 from __future__ import annotations
 
@@ -410,7 +415,7 @@ def _link_entry(it: PairItem, res: Optional[Mapping]) -> dict:
 
 
 def block_flags(links: Sequence[Mapping], antonyms: Sequence[Mapping]) -> list[str]:
-    """The flags of § 6: ``lexical_cover`` (a judged link at the cut-off), ``lexical_below_cut`` (judged links, every
+    """The flags of § 6: ``lexical_cover`` (a judged link at the cut-off: a proposed merge, never a cut), ``lexical_below_cut`` (judged links, every
     one that parsed under the cut-off), ``lexical_name_only`` (a link to a text-less queue entry),
     ``lexical_unparsed`` (a judged link whose reading never parsed), ``lexical_antonym`` (an antonym link to a trait
     with no pair partner)."""
