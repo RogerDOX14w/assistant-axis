@@ -13,7 +13,7 @@ sampling, back-translation, net-new row, review-hour wave) are defined on first 
 task 9.  Every figure marked *measured* was measured read-only on 2026-10-13 (§ "Measured for this plan").
 Roger's review comments go into this file.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; all three decided 2026-10-14)
 
 1. **DECIDED (Roger, 2026-10-14): role-like outputs stay on the `roles` holding list for now; no promotion route
    is built here.**  Role promotion to the seed queue is handled with the role generators (README, "Parked:
@@ -43,7 +43,7 @@ Roger's review comments go into this file.
      holding list, where they wait; the generator's own `kind` guess rides in its table beside M1's verdict, as
      IPIP's does.  M3 never sees a held row (it scores verdict `trait` rows only).  The free `roles-report` (§ 7)
      still lists them with the string check against the role corpus and the queue, for the later promotion work.
-2. **OPEN: the pilot's submission.**  The pilot's generation is cheap (§ Cost, about $6 batched); what costs is
+2. **DECIDED (Roger, 2026-10-14): (a), the stratified 500-row slice.**  The pilot's submission.  The pilot's generation is cheap (§ Cost, about $6 batched); what costs is
    M1 and M3 on its output.  At the *measured* registry overlap of the nearest LLM-sampled generator (85% of the
    base-model generator's single-word stems were already registered; 7-18% of the alignment sweep's and IPIP's
    phrases, § "Measured"), the pilot's roughly 5,000 string-unique items leave about 1,500-2,900 **net-new rows** (a
@@ -630,7 +630,7 @@ form, romanisation and language live in the table and `source_ref`; (5) the ten 
 pinned master, kept in a tracked JSON with hashes and back-translations; (6) `score` is `n_sources`, not a
 familiarity; (7) role-like items are submitted like any other, M1 decides, and held roles wait on the `roles` holding
 list (decision 1); (8) the pilot's
-submission is the 500-row stratified slice unless Roger chooses (b); (9) real-person seeds are any human, held in memory only (decision 3, § 5a); (10) the first wave is the review-hour wave sized on net-new kept rows at the pilot's measured
+submission is the 500-row stratified slice (decision 2); (9) real-person seeds are any human, held in memory only (decision 3, § 5a); (10) the first wave is the review-hour wave sized on net-new kept rows at the pilot's measured
 share; (11) the paid recovery harness is plan 13's pooled run, not a run of this plan's; (12) the model for the
 rest of (c) follows the § 10 rule, and Roger's read can overrule it.  **Interface requests** (not changes this plan
 makes): to plan 13, a `llm_prompted` mechanism in `MECHANISMS` and `(llm_entropy, <family>)` streams in `STREAMS`
