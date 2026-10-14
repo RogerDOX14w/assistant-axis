@@ -255,6 +255,25 @@ rubrics, which the role-promotion item below needs too.
 
 ## Low-priority TODOs
 
+- **Retest the overlap rubrics after the October extraction** (Roger, 2026-10-14).  His concern: rubric A rates a
+  domain-narrowed trait (picky eater against picky) a 3, "the same concept, narrower", though narrowing to a rare
+  domain (caring about astronomy) may be a genuinely new direction in persona space.  Re-scoring the October overlap
+  test's recorded answers against the 8slot vectors ($0, 2026-10-14) found A and B fit persona-space geometry equally
+  well (Opus: Spearman with 1 - cos² -0.68 both; Sonnet A -0.66, B -0.60), and the corpus's four narrowing 3s sit close
+  in persona space (cosine 0.70-0.83), but the corpus has no traits narrowed to a rare domain with vectors, and both
+  rubrics are pairwise (a candidate spanned by a combination of traits is plan 12's question).  Once the October
+  extraction gives vectors for its 928 traits: both rubrics on Sonnet over a few hundred pairs that include
+  domain-narrowed traits, against the span-based residual, about $5-10.  Scripts of the first look:
+  `rubric_dimension_fit_noopp.py` and `pair_common.py` (session scratchpad, 2026-10-14; rewrite into
+  `assistant_axis/gapgen/overlap_test.py` when this is picked up).
+- **Plan 12's report: split a pole's predicted vector into its antonym's axis and its domain** (Roger, 2026-10-14).
+  Opposites are near-orthogonal in persona space (54 clean pairs: median cosine -0.04; |shared| / |axis| median 0.96),
+  because each pole is a shared domain part plus or minus the axis (Roger's progressive / conservative picture).  So a
+  pole whose antonym exists is only half covered by it, and is new exactly when its domain part is new.  In plan 12's
+  score report, for a candidate whose pair partner (M3's `pair_completion_for` or the generator's hint) has a vector,
+  print how much of its predicted vector the partner's axis accounts for against the domain part.  $0; do it with
+  the whole-registry scoring (gate 2).
+
 - **Gzip-aware record files**: **built and merged 2026-10-14** (Roger asked for it before the usage reset; Fable
   reviewed it, no blockers; fixes S1-S3 applied): [records.py](../../assistant_axis/gapgen/records.py) and
   [pack_records.py](../../data_analysis/gap_generation/pack_records.py); the two kinds, logs (read `.gz` then plain)
