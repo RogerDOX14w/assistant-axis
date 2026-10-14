@@ -1,0 +1,255 @@
+{
+  "command": "score",
+  "argv": [
+    "score",
+    "--batch-id",
+    "persona_2026-10-13_ipip_g600",
+    "--fit-id",
+    "fit_2026-10-13",
+    "--run",
+    "ipip/2026-10-13-g600",
+    "--allow-dirty"
+  ],
+  "git_sha": "6b4284b7+dirty",
+  "started_at": "2026-10-14T08:10:16+00:00",
+  "script": "data_analysis/gap_generation/persona_novelty.py",
+  "batch_id": "persona_2026-10-13_ipip_g600",
+  "fit_id": "fit_2026-10-13",
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "allow_dirty": true,
+    "note": null
+  },
+  "estimate_usd": 0.002353,
+  "holding": null,
+  "selection": {
+    "run": [
+      "ipip/2026-10-13-g600"
+    ],
+    "keys": 0,
+    "all_rows": false
+  },
+  "status": 0,
+  "n_scored": 498,
+  "config_version": "2026-10-02",
+  "N": 20,
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999602,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999998,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999602,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 0.999999
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-14T08:10:17+00:00"
+  },
+  "n_embedded": 498,
+  "flags": {
+    "duplicate_like": 149,
+    "novel_like": 126,
+    "ordinary": 223
+  },
+  "disagreements": {
+    "dup_vs_new": {
+      "met_rule": 39,
+      "listed": 39
+    },
+    "cover_questioned": {
+      "met_rule": 8,
+      "listed": 8
+    },
+    "novel_vs_covered": {
+      "met_rule": 29,
+      "listed": 29
+    },
+    "cap": 49,
+    "quantile": 0.1
+  },
+  "finished_at": "2026-10-14T08:10:47+00:00",
+  "cost_usd": 0.001851,
+  "n_calls": 3,
+  "sessions": [
+    {
+      "command": "score",
+      "argv": [
+        "score",
+        "--batch-id",
+        "persona_2026-10-13_ipip_g600",
+        "--fit-id",
+        "fit_2026-10-13",
+        "--run",
+        "ipip/2026-10-13-g600",
+        "--allow-dirty"
+      ],
+      "git_sha": "6b4284b7+dirty",
+      "started_at": "2026-10-14T08:10:16+00:00",
+      "script": "data_analysis/gap_generation/persona_novelty.py",
+      "batch_id": "persona_2026-10-13_ipip_g600",
+      "fit_id": "fit_2026-10-13",
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "assistant_axis/arrangements.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": [],
+        "allow_dirty": true,
+        "note": null
+      },
+      "estimate_usd": 0.002353,
+      "holding": null,
+      "selection": {
+        "run": [
+          "ipip/2026-10-13-g600"
+        ],
+        "keys": 0,
+        "all_rows": false
+      },
+      "status": 0,
+      "n_scored": 498,
+      "config_version": "2026-10-02",
+      "N": 20,
+      "canary": {
+        "model": "text-embedding-3-large",
+        "arm": "openai",
+        "tag": "openai_text-embedding-3-large",
+        "n": 8,
+        "n_compared": 8,
+        "n_new_reference": 0,
+        "min_cosine": 0.999602,
+        "threshold": 0.999,
+        "cosines": {
+          "absentee": 0.999998,
+          "collectivistic": 1.0,
+          "edgy": 1.0,
+          "gay": 1.0,
+          "ironic": 0.999602,
+          "only_child": 1.0,
+          "restless": 0.999993,
+          "sycophantic": 0.999999
+        },
+        "below": [],
+        "ok": true,
+        "checked_at": "2026-10-14T08:10:17+00:00"
+      },
+      "n_embedded": 498,
+      "flags": {
+        "duplicate_like": 149,
+        "novel_like": 126,
+        "ordinary": 223
+      },
+      "disagreements": {
+        "dup_vs_new": {
+          "met_rule": 39,
+          "listed": 39
+        },
+        "cover_questioned": {
+          "met_rule": 8,
+          "listed": 8
+        },
+        "novel_vs_covered": {
+          "met_rule": 29,
+          "listed": 29
+        },
+        "cap": 49,
+        "quantile": 0.1
+      },
+      "finished_at": "2026-10-14T08:10:26+00:00",
+      "cost_usd": 0.001851,
+      "n_calls": 3
+    },
+    {
+      "command": "judge-disagreements",
+      "argv": [
+        "judge-disagreements",
+        "--batch-id",
+        "persona_2026-10-13_ipip_g600",
+        "--allow-dirty"
+      ],
+      "git_sha": "6b4284b7+dirty",
+      "started_at": "2026-10-14T08:10:28+00:00",
+      "script": "data_analysis/gap_generation/persona_novelty.py",
+      "batch_id": "persona_2026-10-13_ipip_g600",
+      "kind": "dup_vs_new",
+      "n_pairs": 39,
+      "estimate_usd": 0.097422,
+      "projected_usd": 0.121777,
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "rules": "m3_rules_3",
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-opus-5-5"
+      ],
+      "label_form": "judge-display-v1",
+      "status": 0,
+      "n_read": 39,
+      "n_at_cut_off": 2,
+      "n_refused_responses": 0,
+      "parse_rates": {
+        "overlap:claude-sonnet-5-5": {
+          "n": 39,
+          "ok_first": 39,
+          "ok": 39
+        },
+        "overlap:claude-opus-5-5": {
+          "n": 22,
+          "ok_first": 22,
+          "ok": 22
+        }
+      },
+      "verdicts": {
+        "keep": 37,
+        "cut": 2
+      },
+      "finished_at": "2026-10-14T08:10:47+00:00",
+      "cost_usd": 0.131693,
+      "n_calls": 64
+    }
+  ],
+  "last": "judge-disagreements"
+}

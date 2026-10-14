@@ -1,0 +1,145 @@
+{
+  "result": {
+    "batch_id": "persona_2026-10-13_ipip_g600",
+    "fit_id": "fit_2026-10-13",
+    "N": 20,
+    "n": 498,
+    "flags": {
+      "duplicate_like": 149,
+      "novel_like": 126,
+      "ordinary": 223
+    },
+    "disagreements": {
+      "dup_vs_new": {
+        "met_rule": 39,
+        "listed": 39
+      },
+      "cover_questioned": {
+        "met_rule": 8,
+        "listed": 8
+      },
+      "novel_vs_covered": {
+        "met_rule": 29,
+        "listed": 29
+      },
+      "cap": 49,
+      "quantile": 0.1
+    },
+    "thresholds": {
+      "dup_threshold": 0.7322,
+      "novel_pct": 0.8,
+      "set_by": "plan default"
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 5,
+        "flags": {
+          "duplicate_like": 1,
+          "ordinary": 3,
+          "novel_like": 1
+        }
+      },
+      "antonym_check": {
+        "n": 16,
+        "flags": {
+          "duplicate_like": 3,
+          "novel_like": 4,
+          "ordinary": 9
+        }
+      },
+      "base_model": {
+        "n": 71,
+        "flags": {
+          "duplicate_like": 38,
+          "ordinary": 24,
+          "novel_like": 9
+        }
+      },
+      "censuses": {
+        "n": 87,
+        "flags": {
+          "duplicate_like": 41,
+          "ordinary": 32,
+          "novel_like": 14
+        }
+      },
+      "ipip": {
+        "n": 498,
+        "flags": {
+          "novel_like": 126,
+          "ordinary": 223,
+          "duplicate_like": 149
+        }
+      },
+      "masked_lm": {
+        "n": 16,
+        "flags": {
+          "duplicate_like": 5,
+          "ordinary": 9,
+          "novel_like": 2
+        }
+      },
+      "roget": {
+        "n": 1,
+        "flags": {
+          "duplicate_like": 1
+        }
+      },
+      "states_pass": {
+        "n": 36,
+        "flags": {
+          "duplicate_like": 17,
+          "ordinary": 12,
+          "novel_like": 7
+        }
+      },
+      "structural": {
+        "n": 45,
+        "flags": {
+          "ordinary": 17,
+          "duplicate_like": 20,
+          "novel_like": 8
+        }
+      },
+      "wn_clusters": {
+        "n": 17,
+        "flags": {
+          "ordinary": 8,
+          "novel_like": 2,
+          "duplicate_like": 7
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py score --batch-id persona_2026-10-13_ipip_g600 --fit-id fit_2026-10-13 --run ipip/2026-10-13-g600 --allow-dirty",
+      "git_sha": "6b4284b7+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores persona_2026-10-13_ipip_g600: summary"
+    },
+    "produced_at": "2026-10-14T08:10:25+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-14T01:03:58+00:00@53849",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T01:03:58+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "8b1a20e18b706f2bb821fc6af7d78059df9392f84bfd0101589d3a66adf92035"
+  }
+}

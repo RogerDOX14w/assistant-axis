@@ -1,0 +1,244 @@
+{
+  "result": {
+    "n": 498,
+    "auc_nn_cos_covered_vs_new": 0.6625,
+    "spearman_nn_cos_vs_m3_cosine": 0.2305,
+    "covered_by_is_nearest": 0.687,
+    "covered_by_in_top3": 0.9217,
+    "n_covered_by_with_vector": 115,
+    "m3": {
+      "new": 239,
+      "covered": 258,
+      "grey": 1
+    },
+    "flags": {
+      "duplicate_like": 149,
+      "novel_like": 126,
+      "ordinary": 223
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 5,
+        "auc": 0.75,
+        "covered_by_is_nearest": 1.0,
+        "flags": {
+          "duplicate_like": 1,
+          "ordinary": 3,
+          "novel_like": 1
+        },
+        "m3": {
+          "covered": 4,
+          "new": 1
+        },
+        "mean_residual_pct": 0.5931,
+        "disagreements": {
+          "novel_vs_covered": 1
+        }
+      },
+      "antonym_check": {
+        "n": 16,
+        "auc": 0.6545,
+        "covered_by_is_nearest": 0.5,
+        "flags": {
+          "duplicate_like": 3,
+          "novel_like": 4,
+          "ordinary": 9
+        },
+        "m3": {
+          "covered": 11,
+          "new": 5
+        },
+        "mean_residual_pct": 0.5719,
+        "disagreements": {
+          "novel_vs_covered": 2
+        }
+      },
+      "base_model": {
+        "n": 71,
+        "auc": 0.7585,
+        "covered_by_is_nearest": 0.7419,
+        "flags": {
+          "duplicate_like": 38,
+          "ordinary": 24,
+          "novel_like": 9
+        },
+        "m3": {
+          "covered": 59,
+          "new": 12
+        },
+        "mean_residual_pct": 0.5047,
+        "disagreements": {
+          "dup_vs_new": 2,
+          "cover_questioned": 2,
+          "novel_vs_covered": 6
+        }
+      },
+      "censuses": {
+        "n": 87,
+        "auc": 0.7049,
+        "covered_by_is_nearest": 0.697,
+        "flags": {
+          "duplicate_like": 41,
+          "ordinary": 32,
+          "novel_like": 14
+        },
+        "m3": {
+          "covered": 66,
+          "new": 21
+        },
+        "mean_residual_pct": 0.5197,
+        "disagreements": {
+          "dup_vs_new": 4,
+          "cover_questioned": 2,
+          "novel_vs_covered": 9
+        }
+      },
+      "ipip": {
+        "n": 498,
+        "auc": 0.6625,
+        "covered_by_is_nearest": 0.687,
+        "flags": {
+          "novel_like": 126,
+          "ordinary": 223,
+          "duplicate_like": 149
+        },
+        "m3": {
+          "new": 239,
+          "covered": 258,
+          "grey": 1
+        },
+        "mean_residual_pct": 0.5747,
+        "disagreements": {
+          "dup_vs_new": 39,
+          "cover_questioned": 8,
+          "novel_vs_covered": 29
+        }
+      },
+      "masked_lm": {
+        "n": 16,
+        "auc": 0.641,
+        "covered_by_is_nearest": 0.75,
+        "flags": {
+          "duplicate_like": 5,
+          "ordinary": 9,
+          "novel_like": 2
+        },
+        "m3": {
+          "new": 3,
+          "covered": 13
+        },
+        "mean_residual_pct": 0.5103,
+        "disagreements": {
+          "dup_vs_new": 1,
+          "novel_vs_covered": 2
+        }
+      },
+      "roget": {
+        "n": 1,
+        "auc": null,
+        "covered_by_is_nearest": 0.0,
+        "flags": {
+          "duplicate_like": 1
+        },
+        "m3": {
+          "covered": 1
+        },
+        "mean_residual_pct": 0.5245,
+        "disagreements": {
+          "cover_questioned": 1
+        }
+      },
+      "states_pass": {
+        "n": 36,
+        "auc": 0.7545,
+        "covered_by_is_nearest": 0.7273,
+        "flags": {
+          "duplicate_like": 17,
+          "ordinary": 12,
+          "novel_like": 7
+        },
+        "m3": {
+          "covered": 28,
+          "new": 8
+        },
+        "mean_residual_pct": 0.5867,
+        "disagreements": {
+          "dup_vs_new": 1,
+          "cover_questioned": 1,
+          "novel_vs_covered": 1
+        }
+      },
+      "structural": {
+        "n": 45,
+        "auc": 0.5946,
+        "covered_by_is_nearest": 0.6429,
+        "flags": {
+          "ordinary": 17,
+          "duplicate_like": 20,
+          "novel_like": 8
+        },
+        "m3": {
+          "covered": 37,
+          "new": 8
+        },
+        "mean_residual_pct": 0.5685,
+        "disagreements": {
+          "dup_vs_new": 2,
+          "cover_questioned": 1,
+          "novel_vs_covered": 5
+        }
+      },
+      "wn_clusters": {
+        "n": 17,
+        "auc": 0.7571,
+        "covered_by_is_nearest": 0.2857,
+        "flags": {
+          "ordinary": 8,
+          "novel_like": 2,
+          "duplicate_like": 7
+        },
+        "m3": {
+          "new": 7,
+          "covered": 10
+        },
+        "mean_residual_pct": 0.5205,
+        "disagreements": {
+          "dup_vs_new": 1,
+          "cover_questioned": 1,
+          "novel_vs_covered": 1
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py score --batch-id persona_2026-10-13_ipip_g600 --fit-id fit_2026-10-13 --run ipip/2026-10-13-g600 --allow-dirty",
+      "git_sha": "6b4284b7+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores persona_2026-10-13_ipip_g600: agreement"
+    },
+    "produced_at": "2026-10-14T08:10:25+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-14T01:03:58+00:00@53849",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T01:03:58+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "8b1a20e18b706f2bb821fc6af7d78059df9392f84bfd0101589d3a66adf92035"
+  }
+}
