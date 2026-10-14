@@ -101,6 +101,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import split_rubrics as SR  # noqa: E402
 from assistant_axis.gapgen.cost import GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import (  # noqa: E402
@@ -342,7 +343,7 @@ def load_baseline(args, ps, models):
     """The baseline run's rubric-A answers per model (its pass 1), keyed by this run's pair ids, when the
     run exists and its calls are this run's; else ``None`` (with a warning when it exists but differs)."""
     d = baseline_dir(args)
-    if d is None or not (d / "pairs.json").exists() or not (d / "responses.jsonl").exists():
+    if d is None or not (d / "pairs.json").exists() or not RF.exists(d / "responses.jsonl"):
         return None
     theirs = OT.PairSet.from_json(json.loads((d / "pairs.json").read_text()))
     if not OT.same_calls(theirs, ps):
@@ -370,7 +371,7 @@ def load_round1(args, ps):
     if named is None:
         return None
     run_id, d = named
-    if not (d / "pairs.json").exists() or not (d / "responses.jsonl").exists():
+    if not (d / "pairs.json").exists() or not RF.exists(d / "responses.jsonl"):
         logger.warning("round-1 run %s has no pairs.json or responses.jsonl under %s: round 2 not compared with it",
                        run_id, _rel(args.out_root))
         return None
@@ -390,7 +391,7 @@ def load_other(args, ps, name: str, what: str):
     if named is None:
         return None
     run_id, d = named
-    if not (d / "pairs.json").exists() or not (d / "responses.jsonl").exists():
+    if not (d / "pairs.json").exists() or not RF.exists(d / "responses.jsonl"):
         logger.warning("%s %s has no pairs.json or responses.jsonl under %s: not compared", what, run_id,
                        _rel(args.out_root))
         return None
@@ -458,7 +459,7 @@ def round3_inputs(args, ps, records, by_pass, models):
         populations["round2"] = [p.pair_id for p in ps.pairs if p.pair_id in sent]
     marks = None
     bdir = baseline_dir(args)
-    if bdir is not None and (bdir / "marks_key.json").exists() and (bdir / "responses.jsonl").exists():
+    if bdir is not None and (bdir / "marks_key.json").exists() and RF.exists(bdir / "responses.jsonl"):
         base = load_other(args, ps, args.baseline_run, "baseline_run")
         if base:
             ans = OT.collect_answers(ps, base["records"], pass_no=1)
@@ -482,7 +483,7 @@ def write_subset(args, ps, argv) -> int:
     for run in args.subset_sources:
         check_id(run, "subset source")
         d = Path(args.out_root) / run
-        if not (d / "pairs.json").exists() or not (d / "responses.jsonl").exists():
+        if not (d / "pairs.json").exists() or not RF.exists(d / "responses.jsonl"):
             print(f"REFUSED: subset source {run} has no pairs.json or responses.jsonl under {_rel(args.out_root)}",
                   file=sys.stderr)
             return 2
@@ -491,7 +492,7 @@ def write_subset(args, ps, argv) -> int:
             return 2
         records_by_run[run] = OT.read_records(d / "responses.jsonl")
         specs += [current_file_input(dep_key=f"pairs_{run}", path=d / "pairs.json"),
-                  current_file_input(dep_key=f"responses_{run}", path=d / "responses.jsonl")]
+                  current_file_input(dep_key=f"responses_{run}", path=RF.current_path(d / "responses.jsonl"))]
     readings, sources = OT.pair_readings(ps, records_by_run)
     subset = OT.confusion_subset(ps, readings)
     subset.update(source_runs=list(args.subset_sources), sources=sources, computed_at=utc_now())
@@ -564,13 +565,13 @@ def provenance_inputs(inputs, *, responses: Path = None, baseline_responses: Pat
                                         extras={"slot": str(inputs.persona_info["slot"]),
                                                 "layer": str(inputs.persona_info["layer"]),
                                                 "shear_applied": str(inputs.persona_info["shear_applied"])}))
-    if responses is not None and Path(responses).exists():
-        specs.append(current_file_input(dep_key="responses", path=responses))
-    if baseline_responses is not None and Path(baseline_responses).exists():
-        specs.append(current_file_input(dep_key="baseline_responses", path=baseline_responses))
+    if responses is not None and RF.exists(responses):
+        specs.append(current_file_input(dep_key="responses", path=RF.current_path(responses)))
+    if baseline_responses is not None and RF.exists(baseline_responses):
+        specs.append(current_file_input(dep_key="baseline_responses", path=RF.current_path(baseline_responses)))
     for key, path in (extra or {}).items():
-        if path is not None and Path(path).exists():
-            specs.append(current_file_input(dep_key=key, path=path))
+        if path is not None and RF.exists(path):
+            specs.append(current_file_input(dep_key=key, path=RF.current_path(path)))
     return specs
 
 
@@ -760,7 +761,7 @@ def main(argv=None) -> int:
         print(f"REFUSED: --calls-from: {exc}", file=sys.stderr)
         return 2
     call_ids = [c.call_id for c in calls]
-    resuming = args.resume and (out_dir / "responses.jsonl").exists()
+    resuming = args.resume and RF.exists(out_dir / "responses.jsonl")
     recorded_run = json.loads((out_dir / "run.json").read_text()) if resuming and (out_dir / "run.json").exists() else {}
     # the prompts' label form (prompt_labels): a resume keeps the run's own (records are keyed by rubric, model, call
     # and pass, not by the prompt; a run before 2026-10-09 recorded none: "stored"); a new run the judge display form
@@ -793,7 +794,7 @@ def main(argv=None) -> int:
         if shown.n_calls != prior.n_calls or abs(shown.total_cost_usd - prior.total_cost_usd) > 0.005:
             logger.warning("usage.json records %d calls ($%.4f) but responses.jsonl shows %d answered requests "
                            "($%.4f)", prior.n_calls, prior.total_cost_usd, shown.n_calls, shown.total_cost_usd)
-    elif out_dir.exists() and (out_dir / "responses.jsonl").exists():
+    elif out_dir.exists() and RF.exists(out_dir / "responses.jsonl"):
         print(f"{_rel(out_dir)} already has responses: pass --resume to continue it, or choose a new --run-id",
               file=sys.stderr)
         return 1

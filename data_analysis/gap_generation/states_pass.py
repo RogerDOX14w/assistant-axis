@@ -112,6 +112,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import states_pass as sp  # noqa: E402
 from assistant_axis.gapgen.batches import POLL_SECONDS, BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -131,7 +132,7 @@ RETRY_MARGIN = 1.10
 def _read_jsonl(paths_: list[Path]) -> list[dict]:
     rows = []
     for p in paths_:
-        rows += [json.loads(x) for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()]
+        rows += [json.loads(x) for x in RF.read_text(p).splitlines() if x.strip()]
     return rows
 
 
@@ -496,7 +497,7 @@ def main(argv=None) -> int:
     resume_records: list[dict] = []
     if args.resume:
         usage.merge_from(MultiModelUsage.load_or_create(out_dir / "usage.json"))
-        if (out_dir / "responses.jsonl").exists():
+        if RF.exists(out_dir / "responses.jsonl"):
             resume_records = _read_jsonl([out_dir / "responses.jsonl"])
     client = anthropic.AsyncAnthropic(max_retries=0) if transport == "live" else None
     runner = sp.StatesPassRunner(client=client, batch_id=args.batch_id, mode=args.mode, model=args.model,
@@ -535,7 +536,7 @@ def _replay_batch(batch: str, rows: dict, args, rules: int, transport, *, usage=
     bdir = paths.states_pass_dir(batch, candidates_dir=args.out_root)
     run_json = _earlier_run(bdir)
     resp = bdir / "responses.jsonl"
-    if run_json is None or not resp.exists():
+    if run_json is None or not RF.exists(resp):
         return None, [], {k: f"no record of batch {batch} ({bdir})" for k in rows}
     recs = _read_jsonl([resp])
     items, missing = sp.reroute_items(rows, recs)
@@ -753,7 +754,7 @@ def run_reroute(args, out_dir: Path) -> int:
             runner.warn_parse_rate(logger)
         # a queue call the record lacked (a reading that failed in its batch, or an answer under another queue prompt,
         # which the replay skips) was sent under the current queue prompt
-        sent = _read_jsonl([out_dir / "responses.jsonl"]) if (out_dir / "responses.jsonl").exists() else []
+        sent = _read_jsonl([out_dir / "responses.jsonl"]) if RF.exists(out_dir / "responses.jsonl") else []
         if any((r.get("step") or r.get("mode")) == "queue" for r in sent):
             queue_prompts[args.batch_id] = {"rubric_version": sp.RUBRIC_VERSIONS["queue"],
                                             "prompt_sha256": sp.PROMPT_SHA256["queue"]}
@@ -818,7 +819,8 @@ def write_registry(reg: Registry, results: list, *, args) -> dict:
 
 def _finalize(args, items, reg, runner, usage, run_meta, session, out_dir, status, error) -> None:
     usage.write_json(out_dir / "usage.json")
-    write_jsonl(runner.responses, out_dir / "responses.jsonl")
+    # the whole log (a resume's records first): a packed responses.jsonl.gz is dropped once the plain file holds it
+    RF.rewrite_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
     writes = None
     if reg is not None:   # first, so that results.jsonl holds the blocks as written (renamed_to included)

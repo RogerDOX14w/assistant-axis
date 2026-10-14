@@ -74,6 +74,7 @@ from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from .. import novelty as NV
 from .. import paths
+from .. import records as RF
 from .. import recovery as RC
 from .. import split_rubrics as sr
 from ..cost import Estimate, resume_usage
@@ -208,9 +209,9 @@ def read_responses(path: Path) -> list[dict]:
 
 def _read_jsonl(path: Path) -> list[dict]:
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def _append(rec: Mapping, path: Path) -> None:
@@ -748,7 +749,7 @@ def _decisions(batch_dir: Path, seed: int, rows: Sequence[Mapping], harness: Map
     rr = next(((s.get("reduced_run") or {}) for s in harness.get("seeds") or [] if s.get("seed") == seed), {})
     batch = rr.get("batch_id") or f"{Path(batch_dir).name}_s{seed}"
     res = paths.novelty_dir(batch, candidates_dir=candidates_dir) / "results.jsonl"
-    if res.exists():
+    if RF.exists(res):
         return batch, {r["key"]: (r.get("novelty") or {}) for r in _read_jsonl(res)}, "results.jsonl"
     out: dict = {}
     for r in rows:

@@ -176,6 +176,7 @@ from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import physical_pass as PP  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
@@ -430,7 +431,7 @@ def _resume_rules_mismatch(earlier: Optional[dict], rules: NV.Rules) -> Optional
 
 
 def _read_jsonl(p: Path) -> list[dict]:
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()] if p.exists() else []
+    return [json.loads(x) for x in RF.read_text(p).splitlines() if x.strip()] if RF.exists(p) else []
 
 
 def load_source(batch_id: str, out_root: Optional[Path], *, with_records: bool = False) -> dict:
@@ -438,7 +439,7 @@ def load_source(batch_id: str, out_root: Optional[Path], *, with_records: bool =
     ``records`` (with ``with_records``) are its responses and those of every run it replayed in turn (a
     re-decided run keeps only its own new calls, and names its sources in ``run.json``'s ``replay_from``)."""
     d = paths.novelty_dir(batch_id, candidates_dir=out_root)
-    if not (d / "results.jsonl").exists():
+    if not RF.exists(d / "results.jsonl"):
         raise SystemExit(f"{d / 'results.jsonl'} not found: run score --batch-id {batch_id} first")
     run = json.loads((d / "run.json").read_text(encoding="utf-8")) if (d / "run.json").exists() else {}
     replay_from = list(run.get("replay_from") or [])
@@ -985,7 +986,7 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
     from assistant_axis.plot_metadata import json_metadata
     usage.write_json(out_dir / "usage.json")
     rp = out_dir / "results.jsonl"
-    earlier = [json.loads(x) for x in rp.read_text(encoding="utf-8").splitlines() if x.strip()] if rp.exists() else []
+    earlier = [json.loads(x) for x in RF.read_text(rp).splitlines() if x.strip()] if RF.exists(rp) else []
     results = NR.merge_results(earlier, NR.result_rows(runner.states))
     decided = {r["key"] for r in results}
     stalled = {k: st.stalled for k, st in runner.states.items() if st.block is None and k not in decided}
@@ -1100,8 +1101,8 @@ def _prepare_out_dir(out_dir: Path, args) -> tuple[int, list, Optional[dict]]:
     if out_dir.exists():
         if args.resume:
             rp = out_dir / "responses.jsonl"
-            if rp.exists():
-                records = [json.loads(x) for x in rp.read_text(encoding="utf-8").splitlines() if x.strip()]
+            if RF.exists(rp):
+                records = RF.read_jsonl(rp)
             if (out_dir / "run.json").exists():
                 earlier = json.loads((out_dir / "run.json").read_text(encoding="utf-8"))
             print(f"resuming {out_dir}: {len(records)} responses on record", file=sys.stderr)
@@ -2381,7 +2382,7 @@ def run_relation_only(args, argv) -> int:
                             PL.LABEL_FORM_KEY: label_form})
             inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
                       current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "relation.md"]),
-                      current_file_input(dep_key="source_results", path=source["dir"] / "results.jsonl")]
+                      current_file_input(dep_key="source_results", path=RF.current_path(source["dir"] / "results.jsonl"))]
             env = json_metadata(summary, title=f"novelty_score relation-only {args.batch_id}", inputs=inputs)
             atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "relation_summary.json")
             print(usage.log_line())
@@ -2698,9 +2699,9 @@ def select_scan_sample(rows: dict, args, holding: Optional[str] = None) -> tuple
     the order given; a key the main run did not walk is scanned all the same, and counted); their glosses from
     the registry (``holding``: the main run was a physical pass, whose rows its builder reads)."""
     main = paths.novelty_dir(args.from_batch, candidates_dir=args.out_root) / "results.jsonl"
-    if not main.exists():
+    if not RF.exists(main):
         raise SystemExit(f"{main} not found: run score --batch-id {args.from_batch} first")
-    res = [json.loads(x) for x in main.read_text(encoding="utf-8").splitlines() if x.strip()]
+    res = RF.read_jsonl(main)
     eligible = sorted(r["key"] for r in res if r["novelty"]["reason"] == "overlap")
     if getattr(args, "keys", None):
         missing = [k for k in args.keys if k not in rows]
@@ -2858,11 +2859,11 @@ def cmd_compare(args) -> int:
     from assistant_axis.provenance import current_file_input
     sd = paths.novelty_dir(args.scan_batch, candidates_dir=args.out_root)
     md = paths.novelty_dir(args.main_batch, candidates_dir=args.out_root)
-    read = lambda p: [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]  # noqa: E731
+    read = RF.read_jsonl
     c = compare_runs(read(sd / "results.jsonl"), read(md / "results.jsonl"))
     env = json_metadata(c, title=f"novelty_score compare {args.scan_batch} {args.main_batch}",
-                        inputs=[current_file_input(dep_key="scan_results", path=sd / "results.jsonl"),
-                                current_file_input(dep_key="main_results", path=md / "results.jsonl")])
+                        inputs=[current_file_input(dep_key="scan_results", path=RF.current_path(sd / "results.jsonl")),
+                                current_file_input(dep_key="main_results", path=RF.current_path(md / "results.jsonl"))])
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", sd / "comparison.json")
     atomic_write_text(comparison_markdown(c, scan_batch=args.scan_batch, main_batch=args.main_batch), sd / "comparison.md")
     print(json.dumps({k: v for k, v in c["relation_recall"].items() if k != "misses"}))
@@ -2874,7 +2875,7 @@ def cmd_compare(args) -> int:
 
 def cmd_decisions(args) -> int:
     d = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
-    res = [json.loads(x) for x in (d / "results.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+    res = RF.read_jsonl(d / "results.jsonl")
     traits = NV.load_trait_corpus(args.data_dir)
     mode = res[0]["novelty"].get("mode", "shortlist") if res else "shortlist"
     atomic_write_text(decisions_markdown(res, batch_id=args.batch_id, labels={s: t.label for s, t in traits.items()},
@@ -2948,7 +2949,7 @@ def cmd_render(args) -> int:
     else:
         stem = args.stand_in
         res = paths.DATA_CANDIDATES / "filter" / "m1_validation" / "results.jsonl"
-        row = next((json.loads(x) for x in res.read_text(encoding="utf-8").splitlines()
+        row = next((json.loads(x) for x in RF.read_text(res).splitlines()
                     if x.strip() and json.loads(x).get("key") == f"{stem}#1"), None)
         if row is None or not row.get("gloss"):
             raise SystemExit(f"{stem}: no M1 gloss in {res}")

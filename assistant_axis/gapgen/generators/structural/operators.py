@@ -47,6 +47,7 @@ from typing import Callable, Iterable, Mapping, Optional, Sequence
 
 from assistant_axis.gapgen.llm import call_anthropic_json
 from assistant_axis.gapgen.normalize import normalize_candidate
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 from assistant_axis.judge import extract_json_blob
 from assistant_axis.judge_pricing import BudgetExceededError, cost_for_usage
@@ -460,10 +461,11 @@ def stop_summary(records: Iterable[Mapping]) -> dict:
 
 
 def read_responses(path: Path) -> list[dict]:
+    """The run's ``responses.jsonl`` records (packed or not: :mod:`assistant_axis.gapgen.records`), or []."""
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def append_response(rec: Mapping, path: Path) -> None:

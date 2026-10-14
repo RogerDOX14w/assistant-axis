@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
 from assistant_axis.entity_id import normalize_to_file_name
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen.paths import DATA_CANDIDATES, REPO_ROOT, filter_dir, novelty_dir
 
 from . import GENERATOR
@@ -30,17 +31,17 @@ PLAN = REPO_ROOT / "reports" / "trait_gap_generation" / "coding_plan_07_behaviou
 
 def _read_json(path: Path) -> Optional[dict]:
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return None
-    d = json.loads(p.read_text(encoding="utf-8"))
+    d = json.loads(RF.read_text(p))
     return d.get("result", d) if isinstance(d, dict) and "_provenance" in d else d
 
 
 def _read_jsonl(path: Path) -> list[dict]:
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def naming_parse_stats(records: Sequence[Mapping], *, granularity: Optional[int] = None) -> dict:

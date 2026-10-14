@@ -17,11 +17,12 @@ R1 copied it when it built the graph.
 """
 from __future__ import annotations
 
-import json
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Iterable, Mapping, Optional
+
+from .. import records as RF
 
 KEPT_DECISIONS = ("new", "grey")
 HANDLED_ELSEWHERE = ("accepted", "rejected", "merged_into")
@@ -31,7 +32,7 @@ LEVELS = (3, 4)
 def load_graph(path: Path) -> dict:
     """A review graph's ``result`` block (``graph.json`` is an enveloped JSON), with ``_path`` set."""
     p = Path(path)
-    doc = json.loads(p.read_text(encoding="utf-8"))
+    doc = RF.read_json(p)
     g = doc.get("result", doc) if isinstance(doc, dict) else doc
     g = dict(g)
     g["_path"] = str(p)

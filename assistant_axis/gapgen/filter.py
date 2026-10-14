@@ -49,6 +49,7 @@ from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from . import filter_rubric as fr
 from . import plain_reading as pr
+from . import records as RF
 from .freq import HARD_REJECT_BELOW, familiarity_of, is_curated, zipf_info
 from .llm import call_anthropic_json
 from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
@@ -899,11 +900,11 @@ def development_seen(candidates_dir: Path, *, exclude: Sequence[str] = ()) -> di
     from .normalize import make_key, normalize_candidate
     seen: dict[str, set[str]] = {}
     for kind in ("filter", "plain_reading"):
-        for res in sorted(Path(candidates_dir).glob(f"{kind}/*/results.jsonl")):
+        for res in RF.glob(candidates_dir, f"{kind}/*/results.jsonl"):
             run = res.parent.name
             if run in exclude or ".bak." in run or is_measurement_run(res.parent):
                 continue
-            for line in res.read_text(encoding="utf-8").splitlines():
+            for line in RF.read_text(res).splitlines():
                 if not line.strip():
                     continue
                 row = json.loads(line)

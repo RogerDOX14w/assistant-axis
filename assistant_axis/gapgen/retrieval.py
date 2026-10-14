@@ -34,6 +34,7 @@ from typing import Iterable, Mapping, Optional, Sequence
 
 import numpy as np
 
+from . import records as RF
 from .representation import represent_short
 from .space import fit_space
 
@@ -231,7 +232,7 @@ def plain_reading_same(path: Path, *, renames: Optional[Mapping[str, str]] = Non
     from assistant_axis.entity_id import normalize_to_file_name
     renames = dict(renames or {})
     out: set[str] = set()
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(path).splitlines():
         if line.strip():
             r = json.loads(line)
             if (r.get("comparison") or {}).get("relation") == "same":
@@ -255,7 +256,7 @@ def m1_gloss_queries(results_path: Path, *, corpus: Iterable[str], keep: Optiona
     renames = dict(renames or {})
     out: dict[str, str] = {}
     counts = {"existing": 0, "with_gloss": 0, "in_corpus": 0, "renamed": 0, "not_in_corpus": 0, "kept": 0}
-    for line in Path(results_path).read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(results_path).splitlines():
         if not line.strip():
             continue
         r = json.loads(line)

@@ -48,6 +48,7 @@ from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, Mult
 
 from . import novelty as NV
 from . import overlap_test as OT
+from . import records as RF
 from .llm import CACHE_READ_FACTOR, CACHE_WRITE_1H_FACTOR, CACHE_WRITE_FACTOR, RETRY_DELAYS_S, call_anthropic_json
 from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form
 from .registry import utc_now
@@ -131,7 +132,7 @@ def measured_unsure(run_dirs) -> dict[str, dict]:
     re-asks, their share, and the traits per re-ask."""
     tot: dict[str, Counter] = defaultdict(Counter)
     for d in map(Path, run_dirs):
-        recs = [json.loads(x) for x in (d / "responses.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+        recs = RF.read_jsonl(d / "responses.jsonl")
         rel_model = {r["key"]: r["model"] for r in recs if r.get("step") == "relation"}
         for r in recs:
             if (r.get("parse_attempt") or 1) != 1:

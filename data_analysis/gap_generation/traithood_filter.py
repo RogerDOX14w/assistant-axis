@@ -155,6 +155,7 @@ from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E40
 from assistant_axis.gapgen import filter_rubric as fr  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import rubric_versions  # noqa: E402
 from assistant_axis.gapgen.cost import (  # noqa: E402
     CostRefused, Estimate, GuardedUsage, confirm_or_abort,
@@ -607,7 +608,8 @@ def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error,
     and run.json.  Called from ``main``'s ``finally``.  ``extra_summary(summary,
     results)`` (the split pipeline's) may add to the summary before it is written."""
     usage.write_json(out_dir / "usage.json")
-    write_jsonl(runner.responses, out_dir / "responses.jsonl")
+    # the whole log (a resume's records first): a packed responses.jsonl.gz is dropped once the plain file holds it
+    RF.rewrite_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
     write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
     runner.warn_parse_rate(logger)

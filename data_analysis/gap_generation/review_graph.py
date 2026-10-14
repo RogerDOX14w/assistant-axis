@@ -94,6 +94,7 @@ from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import review_graph as RG  # noqa: E402
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -142,9 +143,9 @@ def source_records(batch_ids, out_root: Optional[Path]) -> list[dict]:
     out = []
     for b in batch_ids:
         p = paths.novelty_dir(b, candidates_dir=out_root) / "responses.jsonl"
-        if not p.exists():
+        if not RF.exists(p):
             continue
-        for line in p.read_text(encoding="utf-8").splitlines():
+        for line in RF.read_text(p).splitlines():
             if '"step": "overlap"' in line:
                 out.append(json.loads(line))
     return out
@@ -166,11 +167,11 @@ def floor_or_none(value: str) -> Optional[float]:
 
 
 def read_records(path: Path, *, steps=None) -> list[dict]:
-    """A ``responses.jsonl``'s records (those of ``steps`` only, when given)."""
-    if not path.exists():
+    """A ``responses.jsonl``'s records (those of ``steps`` only, when given; packed or not: ``records``)."""
+    if not RF.exists(path):
         return []
     out = []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(path).splitlines():
         if line.strip():
             r = json.loads(line)
             if steps is None or r.get("step") in steps:
@@ -196,10 +197,10 @@ def calibration(names, out_root: Optional[Path], *, proposed_cut_off: int) -> tu
     graphs, records, missing = [], [], []
     for n in names:
         d = RG.review_dir(n, candidates_dir=out_root)
-        if not (d / "graph.json").exists():
+        if not RF.exists(d / "graph.json"):
             missing.append(n)
             continue
-        graphs.append(RG.Graph.from_json(json.loads((d / "graph.json").read_text(encoding="utf-8"))))
+        graphs.append(RG.Graph.from_json(RF.read_json(d / "graph.json")))
         records += read_records(d / "responses.jsonl", steps=("overlap", "relation", "relation_unsure"))
     if missing and explicit:
         raise CalibrationError(f"--calibrate-from: no graph.json for {', '.join(missing)} under "
@@ -370,9 +371,8 @@ def cmd_build(args, argv) -> int:
     label_form = PL.resolve_label_form(earlier=NS._peek_run(out_dir) if resuming else None)
     spent_before = MultiModelUsage.load_or_create(out_dir / "usage.json").total_cost_usd if resuming else 0.0
     records_before: list = []
-    if resuming and (out_dir / "responses.jsonl").exists():
-        records_before = [json.loads(x) for x in (out_dir / "responses.jsonl").read_text(encoding="utf-8").splitlines()
-                          if x.strip()]
+    if resuming and RF.exists(out_dir / "responses.jsonl"):
+        records_before = RF.read_jsonl(out_dir / "responses.jsonl")
     resume_info: dict = {}
 
     def estimate(p: RG.GraphPlan, runner: RG.ReviewRunner, n_embed: int):
@@ -593,10 +593,10 @@ def _print_groups(title: str, groups, links, nodes, top) -> None:
 
 def cmd_groups(args) -> int:
     p = RG.review_dir(args.batch_id, candidates_dir=args.out_root) / "graph.json"
-    if not p.exists():
+    if not RF.exists(p):
         print(f"{p} not found: run build --batch-id {args.batch_id} first", file=sys.stderr)
         return 1
-    g = RG.Graph.from_json(json.loads(p.read_text(encoding="utf-8")))
+    g = RG.Graph.from_json(RF.read_json(p))
     nodes = g.node_map()
     loose = g.ungrouped()
     print(f"{g.batch_id} (from {', '.join(g.from_batches)}): {len(g.candidate_keys())} candidates, "
@@ -634,10 +634,10 @@ def cmd_opus_pilot(args, argv) -> int:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
     review = RG.review_dir(args.batch_id, candidates_dir=args.out_root)
-    if not (review / "graph.json").exists():
+    if not RF.exists(review / "graph.json"):
         print(f"{review / 'graph.json'} not found: the pilot reads a built graph", file=sys.stderr)
         return 1
-    graph = RG.Graph.from_json(json.loads((review / "graph.json").read_text(encoding="utf-8")))
+    graph = RG.Graph.from_json(RF.read_json(review / "graph.json"))
     build_run = NS._peek_run(review) or {}
     labels, linfo = roger_labels(review, graph)
     if not labels:
@@ -716,7 +716,7 @@ def cmd_opus_pilot(args, argv) -> int:
     if args.resume:
         usage.merge_from(MultiModelUsage.load_or_create(pilot_dir / "usage.json"))
     from assistant_axis.provenance import current_file_input
-    inputs = [current_file_input(dep_key="graph", path=review / "graph.json"),
+    inputs = [current_file_input(dep_key="graph", path=RF.current_path(review / "graph.json")),
               current_file_input(dep_key="decisions", path=review / "decisions.jsonl")]
     run_meta = {"batch_id": args.batch_id, "pilot_id": args.pilot_id, "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
                 "argv": sys.argv[1:] if argv is None else list(argv), "n": args.n, "seed": args.seed,

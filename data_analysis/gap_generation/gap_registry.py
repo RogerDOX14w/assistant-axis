@@ -101,6 +101,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen.promote import DEFAULT_SECTION, promote  # noqa: E402
 from assistant_axis.gapgen.registry import (  # noqa: E402
     Candidate, Registry, compact, holding_list, records_for_status, submit_candidates,
@@ -350,7 +351,7 @@ def load_judgement_calls(path: Path) -> dict:
 def cmd_judgement_calls(args) -> int:
     if args.filter_results:
         rows = [json.loads(x) for p in args.filter_results
-                for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()]
+                for x in RF.read_text(p).splitlines() if x.strip()]
     else:
         rows = list(Registry(args.registry).fold().values())
     found = judgement_call_rows(rows)
@@ -513,8 +514,9 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
         atomic_write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", run_dir / "run.json")
         if judged:
             inputs = [current_file_input(dep_key=f"rubric_{s}", path=sr.rubric_path(s)) for s in CD.STEPS]
-            if (run_dir / CD.RESPONSES_NAME).exists():
-                inputs.append(current_file_input(dep_key=f"responses_{batch_id}", path=run_dir / CD.RESPONSES_NAME))
+            if RF.exists(run_dir / CD.RESPONSES_NAME):
+                inputs.append(current_file_input(dep_key=f"responses_{batch_id}",
+                                                 path=RF.current_path(run_dir / CD.RESPONSES_NAME)))
             env = json_metadata(result, title=f"corpus regions from descriptions ({mode}, {batch_id})", inputs=inputs)
             atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out)
     for step, d in rates.items():
@@ -562,13 +564,13 @@ def cmd_corpus_regions(args) -> int:
     corpus = set(stems)
     runs, inputs, names = [], [], []
     for run in (Path(r) for r in args.from_filter):
-        rows = [json.loads(x) for x in (run / "results.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+        rows = RF.read_jsonl(run / "results.jsonl")
         run_meta = json.loads((run / "run.json").read_text(encoding="utf-8")) if (run / "run.json").exists() else {}
         batch_id = run_meta.get("batch_id") or run.name
         runs.append((batch_id, rows))
         names.append(run.name)
         inputs.append(current_file_input(dep_key="filter_results" if len(args.from_filter) == 1
-                                         else f"filter_results_{batch_id}", path=run / "results.jsonl"))
+                                         else f"filter_results_{batch_id}", path=RF.current_path(run / "results.jsonl")))
     old = {split_key(r["key"])[0] for _, rows in runs for r in rows if r.get("key")} - corpus
     renames = {s: resolve_renamed_stem(s, "traits", data_dir=data_dir) for s in sorted(old)}
     renames = {s: t for s, t in renames.items() if t != s and t in corpus}

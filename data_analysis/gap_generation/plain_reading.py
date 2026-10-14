@@ -59,6 +59,7 @@ from assistant_axis.atomic_io import atomic_write_text, write_jsonl  # noqa: E40
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import plain_reading as pr  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import rubric_versions  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now, utc_stamp  # noqa: E402
@@ -90,7 +91,7 @@ def read_pairs(path: Path) -> list[pr.ReadingItem]:
 
 def reuse_from(d: Path) -> dict[str, str]:
     out = {}
-    for line in (Path(d) / "results.jsonl").read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(Path(d) / "results.jsonl").splitlines():
         if line.strip():
             r = json.loads(line)
             if r.get("reading"):

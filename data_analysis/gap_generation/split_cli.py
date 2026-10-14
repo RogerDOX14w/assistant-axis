@@ -31,6 +31,7 @@ from assistant_axis.gapgen import filter_rubric as fr
 from assistant_axis.gapgen import paths, split
 from assistant_axis.gapgen import plain_reading as pr
 from assistant_axis.gapgen import prompt_labels as PL
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen import rubric_versions
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport
@@ -127,7 +128,7 @@ def measured_shares(run_dirs) -> dict[str, dict]:
         frac = float(argv[argv.index("--second-opinion-frac") + 1]) if "--second-opinion-frac" in argv \
             else DEFAULT_SECOND_OPINION_FRAC
         c = Counter()
-        for line in (d / "responses.jsonl").read_text(encoding="utf-8").splitlines():
+        for line in RF.read_text(d / "responses.jsonl").splitlines():
             if not line.strip():
                 continue
             r = json.loads(line)
@@ -391,8 +392,8 @@ def main_split(args, argv) -> int:
     if out_dir.exists():
         if args.resume:
             rp = out_dir / "responses.jsonl"
-            if rp.exists():
-                resume_records = [json.loads(x) for x in rp.read_text(encoding="utf-8").splitlines() if x.strip()]
+            if RF.exists(rp):
+                resume_records = RF.read_jsonl(rp)
             if (out_dir / "run.json").exists():
                 earlier_run = json.loads((out_dir / "run.json").read_text(encoding="utf-8"))
             bad = resume_mismatch(earlier_run, args, step_versions=step_versions, prompt_sha256=prompt_sha256)

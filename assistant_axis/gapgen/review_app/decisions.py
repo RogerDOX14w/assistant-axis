@@ -90,6 +90,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Optional, Sequence
 
 from assistant_axis.gapgen import promote as promote_mod
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen import review_graph as RG
 from assistant_axis.gapgen.registry import Registry, utc_now
 
@@ -1136,9 +1137,9 @@ class DecisionLog:
         """The log of a review batch's directory (``graph.json`` must be there)."""
         review_dir = Path(review_dir)
         gp = review_dir / GRAPH_NAME
-        if not gp.exists():
+        if not RF.exists(gp):
             raise FileNotFoundError(f"{gp} not found: build the graph first (review_graph.py build)")
-        raw = gp.read_bytes()
+        raw = RF.read_bytes(gp)  # the graph's content, packed or not (its sha256 is the same either way)
         graph = RG.Graph.from_json(json.loads(raw))
         rows = Registry(registry_path).fold() if registry_path and Path(registry_path).exists() else {}
         targets, labels = corpus_targets(data_dir, queue_path)

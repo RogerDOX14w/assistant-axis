@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Iterable, Mapping, Optional, Sequence
 
 from .. import novelty as NV
+from .. import records as RF
 from .. import recovery as RC
 
 STRICT_C = 4
@@ -38,7 +39,7 @@ RANK_QUANTILES = (0.1, 0.25, 0.5, 0.75, 1.0)
 
 def read_jsonl(p: Path) -> list[dict]:
     p = Path(p)
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()] if p.exists() else []
+    return RF.read_jsonl(p) if RF.exists(p) else []
 
 
 def seed_dirs(batch_dir: Path) -> list[Path]:
@@ -217,7 +218,7 @@ def extras_json(batch_dir: Path, *, runs_root: Optional[Path] = None, c: int = S
     seeds = []
     needs_all = []
     for sd in seed_dirs(batch_dir):
-        if not (sd / "matches.jsonl").exists():
+        if not RF.exists(sd / "matches.jsonl"):
             continue
         hd = json.loads((sd / "hidden.json").read_text(encoding="utf-8"))
         dec = decisions_of(sd)

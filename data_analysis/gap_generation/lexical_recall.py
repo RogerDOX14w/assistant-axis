@@ -58,6 +58,7 @@ from assistant_axis.gapgen import lexical as LX  # noqa: E402
 from assistant_axis.gapgen import lexical_sweep as LS  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import overlap_test as OT  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -109,9 +110,9 @@ def _read_json(path: Path):
 
 def _read_jsonl(path: Path) -> list[dict]:
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def _lexicons(args) -> dict:

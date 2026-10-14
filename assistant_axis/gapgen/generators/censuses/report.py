@@ -15,6 +15,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
+from assistant_axis.gapgen import records as RF
 from assistant_axis.gapgen.freq import floor_reject_rescued, is_free_floor_reject
 from assistant_axis.gapgen.paths import DATA_CANDIDATES, REPO_ROOT, filter_dir, novelty_dir
 
@@ -46,15 +47,15 @@ def registry_cuts(reg_rows: Sequence[Mapping], tda_stems: set[str]) -> dict:
 
 
 def _read_jsonl(path: Path) -> list[dict]:
-    if not path.exists():
+    if not RF.exists(path):
         return []
-    return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(path)
 
 
 def _read_json(path: Path) -> Optional[dict]:
-    if not path.exists():
+    if not RF.exists(path):
         return None
-    d = json.loads(path.read_text(encoding="utf-8"))
+    d = json.loads(RF.read_text(path))
     return d.get("result", d) if isinstance(d, dict) and "_provenance" in d else d
 
 

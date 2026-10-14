@@ -38,7 +38,6 @@ unless ``--allow-dirty``.  Live transport only (the run is well under the $20 li
 from __future__ import annotations
 
 import argparse
-import glob
 import json
 import logging
 import os
@@ -57,6 +56,7 @@ from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import review_graph as RG  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now  # noqa: E402
@@ -83,12 +83,12 @@ def m3_measurements(runs_dir: Path) -> tuple[ND.Shares, dict, dict]:
     """``(shares, overlap tokens, info)`` from the M3 runs under ``runs_dir``: the shares at cut-off 3 by cosine bin
     from every ``readings.jsonl``, the mean billed tokens of the overlap calls from every ``responses.jsonl``."""
     readings, records, files = [], [], {"readings": [], "responses": []}
-    for p in sorted(glob.glob(str(Path(runs_dir) / "*" / "readings.jsonl"))):
+    for p in sorted(map(str, RF.glob(runs_dir, "*/readings.jsonl"))):
         files["readings"].append(str(Path(p).relative_to(_REPO_ROOT)) if Path(p).is_relative_to(_REPO_ROOT) else p)
-        readings += [json.loads(x) for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()]
-    for p in sorted(glob.glob(str(Path(runs_dir) / "*" / "responses.jsonl"))):
+        readings += RF.read_jsonl(p)
+    for p in sorted(map(str, RF.glob(runs_dir, "*/responses.jsonl"))):
         files["responses"].append(str(Path(p).relative_to(_REPO_ROOT)) if Path(p).is_relative_to(_REPO_ROOT) else p)
-        for line in Path(p).read_text(encoding="utf-8").splitlines():
+        for line in RF.read_text(p).splitlines():
             if '"step": "overlap"' in line:
                 records.append(json.loads(line))
     return ND.measured_shares(readings), RG.measured_overlap_tokens(records), \

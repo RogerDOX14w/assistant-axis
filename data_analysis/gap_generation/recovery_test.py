@@ -64,6 +64,7 @@ from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import recovery as RC  # noqa: E402
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
@@ -85,7 +86,7 @@ ESTIMATE_CALIBRATION = 1.25
 
 
 def _read_jsonl(p: Path) -> list[dict]:
-    return [json.loads(x) for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()] if Path(p).exists() else []
+    return [json.loads(x) for x in RF.read_text(p).splitlines() if x.strip()] if RF.exists(p) else []
 
 
 def m3_batch_id(batch_id: str, seed: int) -> str:
@@ -690,8 +691,8 @@ def write_report(args, out_dir: Path, figures: list[dict], *, seeds_done: list[i
     for s in seeds_done:
         d = paths.novelty_dir(m3_batch_id(args.batch_id, s), candidates_dir=args.out_root)
         inputs += [current_file_input(dep_key=f"hidden_s{s}", path=out_dir / f"seed{s}" / "hidden.json"),
-                   current_file_input(dep_key=f"m3_results_s{s}", path=d / "results.jsonl"),
-                   current_file_input(dep_key=f"matches_s{s}", path=out_dir / f"seed{s}" / "matches.jsonl")]
+                   current_file_input(dep_key=f"m3_results_s{s}", path=RF.current_path(d / "results.jsonl")),
+                   current_file_input(dep_key=f"matches_s{s}", path=RF.current_path(out_dir / f"seed{s}" / "matches.jsonl"))]
     env = json_metadata(report, title=f"recovery_test {args.batch_id}", inputs=inputs)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "recovery_report.json")
     labels = {s: t.label for s, t in NV.load_trait_corpus(args.data_dir).items()}

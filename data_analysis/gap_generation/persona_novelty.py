@@ -64,6 +64,7 @@ from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import novelty_runner as NR  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import persona_space as PS  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.persona import DEFAULT_VECTORS_DIR  # noqa: E402
@@ -95,7 +96,7 @@ OVERLAP_REFERENCE_MODEL = "claude-opus-5-5"
 
 def overlap_readings(path: Optional[Path]) -> list[dict]:
     """``[{"target", "listed", "reading"}]``: the reference model's first-pass rubric-A answer per pair."""
-    if path is None or not Path(path).exists():
+    if path is None or not RF.exists(path):
         return []
     out = {}
     for r in read_jsonl(path):
@@ -151,8 +152,9 @@ def file_specs(**named: Optional[Path]) -> list:
     from assistant_axis.provenance import current_file_input
     out = []
     for k, p in named.items():
-        if p is not None and Path(p).exists():
-            out.append(replace(current_file_input(dep_key=k, path=Path(p)), path=repo_rel(Path(p))))
+        if p is not None and RF.exists(p):
+            q = RF.current_path(p)   # a packed record: its .gz
+            out.append(replace(current_file_input(dep_key=k, path=q), path=repo_rel(q)))
     return out
 
 
@@ -184,9 +186,9 @@ def write_jsonl(path: Path, rows) -> None:
 
 def read_jsonl(path: Path) -> list[dict]:
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def read_env(path: Path) -> dict:
@@ -296,7 +298,7 @@ def load_pool(args) -> POOL.Pool:
 def gloss_check_rows(pool: POOL.Pool, path: Optional[Path]) -> list[tuple[int, str]]:
     """``[(position among the training rows, label: M1 gloss)]`` for the trained traits with an M1 gloss of their
     label (the M1 validation run's ``existing`` stratum)."""
-    if path is None or not Path(path).exists():
+    if path is None or not RF.exists(path):
         return []
     from assistant_axis.entity_id import entity_id
     pos = {pool.ids[i]: j for j, i in enumerate(pool.train_idx)}
@@ -701,7 +703,7 @@ def cmd_judge(args, argv, *, client=None) -> int:
     print(f"{len(pl)} {args.kind} pairs to read ({len(missing)} rows left out: {missing[:5]})\n{est.format()}\n"
           f"  projected spend (x{ESTIMATE_CALIBRATION}, the harness's measured factor) = ${proj:.3f}")
     records = read_jsonl(out / "responses.jsonl") if args.resume else []
-    if (out / "responses.jsonl").exists() and not args.resume and not args.dry_run:
+    if RF.exists(out / "responses.jsonl") and not args.resume and not args.dry_run:
         print(f"{repo_rel(out)}/responses.jsonl exists: --resume to continue (no call already answered is sent again)",
               file=sys.stderr)
         return 1

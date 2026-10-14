@@ -87,6 +87,7 @@ from assistant_axis.gapgen import embed as EM  # noqa: E402
 from assistant_axis.gapgen import labels as LB  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import retrieval as RT  # noqa: E402
 from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR, METRIC_CONFIG_PATH  # noqa: E402
@@ -1317,10 +1318,10 @@ def run_round4(args) -> int:
     from assistant_axis.provenance import current_file_input, current_files_input
     inputs = [current_files_input(dep_key="trait_files",
                                   paths=sorted((repo / "data" / "traits" / "instructions").glob("*.json"))),
-              current_file_input(dep_key="plain_reading_comparison", path=plain_path)]
+              current_file_input(dep_key="plain_reading_comparison", path=RF.current_path(plain_path))]
     inputs += [current_file_input(dep_key=f"paraphrases_{src}", path=para_paths[src]) for src in sources
                if src in para_paths and para_paths[src].exists()]
-    inputs += [current_file_input(dep_key=f"m1_results_{src}", path=repo / RT.M1_GLOSS_SOURCES[src]) for src in sources
+    inputs += [current_file_input(dep_key=f"m1_results_{src}", path=RF.current_path(repo / RT.M1_GLOSS_SOURCES[src])) for src in sources
                if src in RT.M1_GLOSS_SOURCES]
     if lp_path is not None:
         inputs.append(current_file_input(dep_key="labelled_pairs", path=lp_path))

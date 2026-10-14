@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
 from .. import novelty as NV
+from .. import records as RF
 from . import independence as IND
 from .repetition import adjacency, kept_nodes, node_generators, pair_levels
 
@@ -78,7 +79,7 @@ def negative_hits(rows: Iterable[Mapping], names: set[str]) -> dict:
 
 def _read_json(p: Path) -> Optional[dict]:
     try:
-        return json.loads(Path(p).read_text(encoding="utf-8"))
+        return json.loads(RF.read_text(p))
     except (OSError, json.JSONDecodeError):
         return None
 
@@ -106,10 +107,10 @@ def _argv_value(argv: Sequence[str], flag: str) -> Optional[str]:
 
 def _keys_of(d: Path) -> list[str]:
     p = d / "results.jsonl"
-    if not p.exists():
+    if not RF.exists(p):
         return []
     out = []
-    for line in p.read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(p).splitlines():
         if line.strip():
             try:
                 out.append(json.loads(line)["key"])

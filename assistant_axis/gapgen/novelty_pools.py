@@ -24,6 +24,8 @@ from typing import Iterable, Mapping, Optional
 
 from assistant_axis.entity_id import normalize_to_file_name
 
+from . import records as RF
+
 ANTONYM_GENERATOR, M1_GENERATOR, PILOT_RUN_ID = "antonym_check", "m1_validation", "pilot_1"
 M1_STRATUM = "oewn_random"
 
@@ -44,7 +46,7 @@ def corpus_trait_stems(data_dir: Path) -> set[str]:
 
 
 def _jsonl(path: Path) -> list[dict]:
-    return [json.loads(x) for x in Path(path).read_text(encoding="utf-8").splitlines() if x.strip()]
+    return [json.loads(x) for x in RF.read_text(path).splitlines() if x.strip()]
 
 
 def antonym_pool(history_path: Path, *, corpus: Iterable[str], queue: Iterable[str]) -> tuple[list[dict], dict]:

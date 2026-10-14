@@ -48,6 +48,7 @@ import numpy as np  # noqa: E402
 
 from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen.filter_rubric import GLOSS_MAX_WORDS, GLOSS_MIN_WORDS, gloss_words  # noqa: E402
 from assistant_axis.judge_pricing import cost_for_usage  # noqa: E402
 
@@ -66,7 +67,7 @@ MEMBERSHIP_PADDED_FROM = GLOSS_MIN_WORDS
 
 def read_jsonl(p: Path) -> list[dict]:
     p = Path(p)
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()] if p.exists() else []
+    return RF.read_jsonl(p) if RF.exists(p) else []
 
 
 def _r(x, nd: int = 4):
@@ -97,7 +98,8 @@ def md_escape(s: Any) -> str:
 def write_outputs(out_dir: Path, name: str, result: dict, markdown: str, inputs: Sequence[Path], title: str) -> None:
     from assistant_axis.plot_metadata import json_metadata
     from assistant_axis.provenance import current_file_input
-    specs = [current_file_input(dep_key=f"input_{i}", path=p) for i, p in enumerate(inputs) if Path(p).exists()]
+    specs = [current_file_input(dep_key=f"input_{i}", path=RF.current_path(p)) for i, p in enumerate(inputs)
+             if RF.exists(p)]
     env = json_metadata(result, inputs=specs or None, title=title)
     out_dir.mkdir(parents=True, exist_ok=True)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / f"{name}.json")

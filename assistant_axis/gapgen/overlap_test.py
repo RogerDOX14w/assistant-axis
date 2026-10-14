@@ -99,6 +99,7 @@ import numpy as np
 from assistant_axis.judge import warn_if_low_parse_rate
 from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
+from . import records as RF
 from . import split_rubrics as sr
 from .cost import Estimate
 from .filter_rubric import _load_json, _num, _rows_of
@@ -997,10 +998,11 @@ def acquire_session_lock(out_dir: Path):
 
 
 def read_records(path: Path) -> list[dict]:
+    """Every record of a ``responses.jsonl`` (packed or not: :mod:`.records`), or [] when there is none."""
     p = Path(path)
-    if not p.exists():
+    if not RF.exists(p):
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return RF.read_jsonl(p)
 
 
 def answered(rec: Mapping) -> bool:

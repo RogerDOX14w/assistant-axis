@@ -57,6 +57,7 @@ from typing import Iterable, Mapping, Optional, Sequence
 
 from assistant_axis.arrangements import is_ordered, load_corpus_arrangements, reciprocal_pairs
 
+from . import records as RF
 from .registry import utc_now
 
 #: The row sources a curation ``keep_only`` entry judges.
@@ -314,10 +315,10 @@ def load_filter_glosses(results_path: Path, *, strata: Iterable[str] = ("not_ado
     from assistant_axis.entity_id import normalize_to_file_name
     out: dict[str, str] = {}
     p = Path(results_path)
-    if not p.exists():
+    if not RF.exists(p):
         return out
     want = set(strata)
-    for line in p.read_text(encoding="utf-8").splitlines():
+    for line in RF.read_text(p).splitlines():
         if not line.strip():
             continue
         r = json.loads(line)
@@ -603,7 +604,7 @@ def build_default(repo_root: Path, *, out_dir: Optional[Path] = None, write: boo
         if v4_path.exists():
             inputs.append(current_file_input(dep_key="antonyms_v4", path=v4_path))
         inputs += [current_file_input(dep_key="seeding_log", path=repo_root / DEFAULT_SEEDING_LOG),
-                   current_file_input(dep_key="filter_glosses", path=repo_root / DEFAULT_FILTER_RESULTS),
+                   current_file_input(dep_key="filter_glosses", path=RF.current_path(repo_root / DEFAULT_FILTER_RESULTS)),
                    current_file_input(dep_key="census", path=census_path)]
         if curation_path.exists():
             inputs.append(current_file_input(dep_key="curation", path=curation_path))

@@ -52,6 +52,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.gapgen import novelty as NV  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import recovery as RC  # noqa: E402
 from assistant_axis.gapgen.registry import read_snapshot, snapshot_file, utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.testing import TESTING_DIR  # noqa: E402
@@ -91,11 +92,11 @@ def default_graph(review_root: Path) -> Optional[Path]:
     """The review graph built over the most trait batches (not a physical or states pass); ties by the newest."""
     best = None
     for d in sorted(Path(review_root).glob("review_*")):
-        if not (d / "graph.json").exists() or d.name.startswith(("review_physical", "review_states")):
+        if not RF.exists(d / "graph.json") or d.name.startswith(("review_physical", "review_states")):
             continue
         run = json.loads((d / "run.json").read_text(encoding="utf-8")) if (d / "run.json").exists() else {}
         n = len(run.get("from_batches") or [])
-        key = (n, (d / "graph.json").stat().st_mtime)
+        key = (n, RF.current_path(d / "graph.json").stat().st_mtime)
         if best is None or key > best[0]:
             best = (key, d / "graph.json")
     return best[1] if best else None
@@ -103,7 +104,7 @@ def default_graph(review_root: Path) -> Optional[Path]:
 
 def graph_path(args) -> Path:
     p = Path(args.graph) if args.graph else default_graph(args.review_root)
-    if p is None or not Path(p).exists():
+    if p is None or not RF.exists(p):
         raise SystemExit(f"REFUSED: no review graph (--graph, or a review_*/graph.json under {args.review_root})")
     return Path(p)
 
@@ -118,7 +119,7 @@ def rel(p) -> str:
 
 def file_input(dep_key: str, p: Path):
     from assistant_axis.provenance import current_file_input
-    return current_file_input(dep_key=dep_key, path=Path(p))
+    return current_file_input(dep_key=dep_key, path=RF.current_path(p))  # a packed record: its .gz
 
 
 def write_output(path: Path, payload, *, title: str, inputs: list, dry_run: bool) -> Path:
@@ -269,7 +270,7 @@ def harness_records(args, rows, batches=None) -> list[dict]:
             for g, keys in by_g.items():
                 sv, pv = [], []
                 for sd in RX.seed_dirs(d):
-                    if (sd / "matches.jsonl").exists():
+                    if RF.exists(sd / "matches.jsonl"):
                         sv.append(RX.strict_column(sd, keys=keys).recall)
                         pv.append(RX.pair_recovery(sd, keys=keys).share)
                 strict[g] = sum(x for x in sv if x is not None) / len(sv) if sv else None
@@ -387,7 +388,7 @@ def cmd_recovery_extras(args) -> int:
             print("REFUSED: --send-opus is not built (see above)", file=sys.stderr)
             return 2
     inputs = [file_input(f"matches_s{sd.name[4:]}", sd / "matches.jsonl") for sd in RX.seed_dirs(d)
-              if (sd / "matches.jsonl").exists()]
+              if RF.exists(sd / "matches.jsonl")]
     write_output(d / "extras.json", ex, title=f"generator_dashboard recovery-extras {args.batch}", inputs=inputs,
                  dry_run=args.dry_run)
     return 0
