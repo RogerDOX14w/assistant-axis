@@ -1,0 +1,105 @@
+{
+  "batch_id": "rec_pooled_1",
+  "generator": "pooled",
+  "run_id": null,
+  "pooled": true,
+  "affected_only": true,
+  "git_sha": "6b4284b7+dirty",
+  "argv": [
+    "--pooled",
+    "--affected-only",
+    "--seed",
+    "0",
+    "1",
+    "--transport",
+    "batches",
+    "--budget-usd",
+    "90",
+    "--batch-id",
+    "rec_pooled_1",
+    "--confirm-expensive",
+    "--confirmed-by",
+    "Roger, 2026-10-14: open_items 'Your go needed' item 4 go (pooled harness, affected only, two seeds, batched, cap $90)"
+  ],
+  "hidden_frac": 0.1,
+  "hidden_file": null,
+  "excluded": null,
+  "seeds": [
+    0,
+    1
+  ],
+  "transport": "batches",
+  "budget_usd": 90.0,
+  "estimate_usd": 60.0986,
+  "projected_usd": 75.1232,
+  "estimate_calibration": 1.25,
+  "confirmed_by": "Roger, 2026-10-14: open_items 'Your go needed' item 4 go (pooled harness, affected only, two seeds, batched, cap $90)",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": []
+  },
+  "m3_runs": {
+    "0": "rec_pooled_1_s0",
+    "1": "rec_pooled_1_s1"
+  },
+  "regions": {
+    "path": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/corpus_regions.json",
+    "sha256": "474942f7785d31514501eb0b1a62ae4c163a1dbb2e1eacdd42ee337ccdd14052"
+  },
+  "candidates": {
+    "n": 7586,
+    "skipped": {
+      "held_nationalities": 32
+    }
+  },
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "match_opus_also_at": 4,
+  "resumed": false,
+  "started_at": "2026-10-14T08:10:08+00:00",
+  "pooled_selection": {
+    "counts": {
+      "trait_rows": 7668,
+      "with_a_non_pool_source": 7618,
+      "only_states_pass_besides_pools": 145,
+      "pooled": 7618
+    },
+    "keys_file": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/recovery/rec_pooled_1/pooled_keys.txt",
+    "keys_sha256": "f8c7570b8e306df496c8124c6f03a2d791077b2b9dfdc06d9adbbc3f925b44d1"
+  },
+  "label_form": "judge-display-v1",
+  "finished_at": "2026-10-14T21:32:05+00:00",
+  "status": 0,
+  "cost_usd": 58.777,
+  "seeds_reported": [
+    0,
+    1
+  ]
+}

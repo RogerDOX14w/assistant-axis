@@ -6,19 +6,19 @@
     "graph": "review_traits_all_2",
     "generator": "alignment_sweep",
     "level": 3,
-    "n_kept": 362,
-    "n_decided": 2,
-    "n_undecided": 360,
-    "pre_handled": 32,
-    "share": 0.0889,
+    "n_kept": 626,
+    "n_decided": 3,
+    "n_undecided": 623,
+    "pre_handled": 56,
+    "share": 0.0899,
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
-      "n": 358,
-      "attached": 66,
-      "share": 0.1844
+      "n": 616,
+      "attached": 131,
+      "share": 0.2127
      }
     },
-    "with_another_generator": 7
+    "with_another_generator": 22
    },
    {
     "graph": "review_traits_all_2",
@@ -36,7 +36,7 @@
       "share": 0.363
      }
     },
-    "with_another_generator": 86
+    "with_another_generator": 87
    },
    {
     "graph": "review_traits_all_2",
@@ -54,7 +54,7 @@
       "share": 0.4931
      }
     },
-    "with_another_generator": 440
+    "with_another_generator": 444
    },
    {
     "graph": "review_traits_all_2",
@@ -68,29 +68,29 @@
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
       "n": 2076,
-      "attached": 720,
-      "share": 0.3468
+      "attached": 717,
+      "share": 0.3454
      }
     },
-    "with_another_generator": 690
+    "with_another_generator": 721
    },
    {
     "graph": "review_traits_all_2",
     "generator": "ipip",
     "level": 3,
-    "n_kept": 235,
-    "n_decided": 3,
-    "n_undecided": 232,
-    "pre_handled": 9,
-    "share": 0.0388,
+    "n_kept": 409,
+    "n_decided": 4,
+    "n_undecided": 405,
+    "pre_handled": 19,
+    "share": 0.0469,
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
-      "n": 224,
-      "attached": 52,
-      "share": 0.2321
+      "n": 395,
+      "attached": 98,
+      "share": 0.2481
      }
     },
-    "with_another_generator": 25
+    "with_another_generator": 35
    },
    {
     "graph": "review_traits_all_2",
@@ -104,8 +104,8 @@
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
       "n": 58,
-      "attached": 19,
-      "share": 0.3276
+      "attached": 18,
+      "share": 0.3103
      }
     },
     "with_another_generator": 32
@@ -130,6 +130,24 @@
    },
    {
     "graph": "review_traits_all_2",
+    "generator": "masked_lm",
+    "level": 3,
+    "n_kept": 37,
+    "n_decided": 3,
+    "n_undecided": 34,
+    "pre_handled": 3,
+    "share": 0.0882,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 26,
+      "attached": 6,
+      "share": 0.2308
+     }
+    },
+    "with_another_generator": 37
+   },
+   {
+    "graph": "review_traits_all_2",
     "generator": "roget",
     "level": 3,
     "n_kept": 243,
@@ -144,7 +162,7 @@
       "share": 0.3743
      }
     },
-    "with_another_generator": 161
+    "with_another_generator": 162
    },
    {
     "graph": "review_traits_all_2",
@@ -166,6 +184,24 @@
    },
    {
     "graph": "review_traits_all_2",
+    "generator": "structural",
+    "level": 3,
+    "n_kept": 115,
+    "n_decided": 23,
+    "n_undecided": 92,
+    "pre_handled": 11,
+    "share": 0.1196,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 51,
+      "attached": 28,
+      "share": 0.549
+     }
+    },
+    "with_another_generator": 115
+   },
+   {
+    "graph": "review_traits_all_2",
     "generator": "wn_clusters",
     "level": 3,
     "n_kept": 277,
@@ -180,25 +216,25 @@
       "share": 0.4578
      }
     },
-    "with_another_generator": 231
+    "with_another_generator": 233
    },
    {
     "graph": "review_traits_all_2",
     "generator": "alignment_sweep",
     "level": 4,
-    "n_kept": 362,
-    "n_decided": 2,
-    "n_undecided": 360,
-    "pre_handled": 4,
-    "share": 0.0111,
+    "n_kept": 626,
+    "n_decided": 3,
+    "n_undecided": 623,
+    "pre_handled": 9,
+    "share": 0.0144,
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
-      "n": 358,
-      "attached": 66,
-      "share": 0.1844
+      "n": 616,
+      "attached": 131,
+      "share": 0.2127
      }
     },
-    "with_another_generator": 7
+    "with_another_generator": 22
    },
    {
     "graph": "review_traits_all_2",
@@ -216,7 +252,7 @@
       "share": 0.363
      }
     },
-    "with_another_generator": 86
+    "with_another_generator": 87
    },
    {
     "graph": "review_traits_all_2",
@@ -234,7 +270,7 @@
       "share": 0.4931
      }
     },
-    "with_another_generator": 440
+    "with_another_generator": 444
    },
    {
     "graph": "review_traits_all_2",
@@ -248,29 +284,29 @@
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
       "n": 2076,
-      "attached": 720,
-      "share": 0.3468
+      "attached": 717,
+      "share": 0.3454
      }
     },
-    "with_another_generator": 690
+    "with_another_generator": 721
    },
    {
     "graph": "review_traits_all_2",
     "generator": "ipip",
     "level": 4,
-    "n_kept": 235,
-    "n_decided": 3,
-    "n_undecided": 232,
-    "pre_handled": 2,
-    "share": 0.0086,
+    "n_kept": 409,
+    "n_decided": 4,
+    "n_undecided": 405,
+    "pre_handled": 6,
+    "share": 0.0148,
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
-      "n": 224,
-      "attached": 52,
-      "share": 0.2321
+      "n": 395,
+      "attached": 98,
+      "share": 0.2481
      }
     },
-    "with_another_generator": 25
+    "with_another_generator": 35
    },
    {
     "graph": "review_traits_all_2",
@@ -284,8 +320,8 @@
     "attached_to_batch": {
      "2026-10-10-tda_censuses_r3": {
       "n": 58,
-      "attached": 19,
-      "share": 0.3276
+      "attached": 18,
+      "share": 0.3103
      }
     },
     "with_another_generator": 32
@@ -310,6 +346,24 @@
    },
    {
     "graph": "review_traits_all_2",
+    "generator": "masked_lm",
+    "level": 4,
+    "n_kept": 37,
+    "n_decided": 3,
+    "n_undecided": 34,
+    "pre_handled": 1,
+    "share": 0.0294,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 26,
+      "attached": 6,
+      "share": 0.2308
+     }
+    },
+    "with_another_generator": 37
+   },
+   {
+    "graph": "review_traits_all_2",
     "generator": "roget",
     "level": 4,
     "n_kept": 243,
@@ -324,7 +378,7 @@
       "share": 0.3743
      }
     },
-    "with_another_generator": 161
+    "with_another_generator": 162
    },
    {
     "graph": "review_traits_all_2",
@@ -346,6 +400,24 @@
    },
    {
     "graph": "review_traits_all_2",
+    "generator": "structural",
+    "level": 4,
+    "n_kept": 115,
+    "n_decided": 23,
+    "n_undecided": 92,
+    "pre_handled": 5,
+    "share": 0.0543,
+    "attached_to_batch": {
+     "2026-10-10-tda_censuses_r3": {
+      "n": 51,
+      "attached": 28,
+      "share": 0.549
+     }
+    },
+    "with_another_generator": 115
+   },
+   {
+    "graph": "review_traits_all_2",
     "generator": "wn_clusters",
     "level": 4,
     "n_kept": 277,
@@ -360,7 +432,7 @@
       "share": 0.4578
      }
     },
-    "with_another_generator": 231
+    "with_another_generator": 233
    }
   ]
  },
@@ -368,31 +440,31 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
-   "git_sha": "20bc5bef+dirty",
+   "git_sha": "9a3f9af8+dirty",
    "author": "Roger Dearnaley",
    "title": "generator_dashboard repetition"
   },
-  "produced_at": "2026-10-13T19:55:25+00:00",
+  "produced_at": "2026-10-14T21:34:43+00:00",
   "inputs": [
    {
     "dep_key": "registry",
     "path": "data/candidates/registry.jsonl",
-    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "fingerprint": "v1:2026-10-14T17:34:39+00:00@274086937",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "last_modified_at": "2026-10-14T17:34:39+00:00",
     "extras": {}
    },
    {
     "dep_key": "graph",
-    "path": "data/candidates/review/review_traits_all_2/graph.json",
-    "fingerprint": "v1:2026-10-13T19:03:54+00:00@53598310",
+    "path": "data/candidates/review/review_traits_all_2/graph.json.gz",
+    "fingerprint": "v1:2026-10-14T16:10:14+00:00@6178052",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "last_modified_at": "2026-10-14T16:10:14+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "c2c70ac6c2bc58c77bd6e48a570546891e0fda28b33f544d330b06df21da1315"
+  "inputs_sha256": "1a0efc36ca00aee77c414178c20f2ec6aba70f51e1f37e6562555f344570dd75"
  }
 }

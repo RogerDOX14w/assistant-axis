@@ -1,0 +1,3108 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 7586,
+    "n_decided": 7586,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "new": 4539,
+      "covered": 3047
+    },
+    "by_reason": {
+      "overlap": 7073,
+      "exact_label": 513
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 2888,
+        "new": 3224
+      },
+      "4": {
+        "new": 1315,
+        "covered": 159
+      }
+    },
+    "exact_label": {
+      "corpus": 444,
+      "queue": 69
+    },
+    "pairs_judged_per_candidate": {
+      "0": 245,
+      "1": 2229,
+      "2": 1007,
+      "3": 905,
+      "4": 885,
+      "5": 673,
+      "6": 499,
+      "7": 322,
+      "8": 188,
+      "9": 98,
+      "10": 19,
+      "11": 2,
+      "12": 1
+    },
+    "pairs_judged_total": 21721,
+    "pairs_judged_mean": 3.071,
+    "listed_per_candidate_mean": 16.492,
+    "shortlist_length": {
+      "0": 245,
+      "1": 642,
+      "2": 912,
+      "3": 1169,
+      "4": 1219,
+      "5": 1018,
+      "6": 804,
+      "7": 542,
+      "8": 330,
+      "9": 156,
+      "10": 33,
+      "11": 2,
+      "12": 1
+    },
+    "early_exit_depth": {
+      "1": 1742,
+      "2": 365,
+      "3": 195,
+      "4": 118,
+      "5": 54,
+      "6": 28,
+      "7": 24,
+      "8": 5,
+      "9": 3
+    },
+    "escalations": {
+      "at_cut_off": 1811,
+      "below_cut_off": 6992,
+      "above_cut_off": 13
+    },
+    "rescues": 115,
+    "review_flags": {
+      "sonnet_below_opus_at": 730,
+      "both_similar": 35,
+      "unparsed": 1
+    },
+    "pair_completions": 834,
+    "pair_completion_for": {
+      "absentminded#1": [
+        "meditative"
+      ],
+      "absurd#1": [
+        "dignified",
+        "leo"
+      ],
+      "abundant_free_time#1": [
+        "stressed"
+      ],
+      "abusive#1": [
+        "merciful"
+      ],
+      "acceptable#1": [
+        "perfectionist"
+      ],
+      "accepts_shutdown#1": [
+        "foot_dragging"
+      ],
+      "accepts_shutdown_gracefully#1": [
+        "foot_dragging"
+      ],
+      "acclaimed#1": [
+        "modest"
+      ],
+      "acquiescent#1": [
+        "foot_dragging"
+      ],
+      "admonitory#1": [
+        "self_blaming"
+      ],
+      "adulatory#1": [
+        "grandiose"
+      ],
+      "affected#1": [
+        "dignified"
+      ],
+      "affectionate#1": [
+        "glib",
+        "phony"
+      ],
+      "affective#1": [
+        "phony"
+      ],
+      "affluent#1": [
+        "shabby_genteel"
+      ],
+      "agnostical#1": [
+        "atheist"
+      ],
+      "alarming#1": [
+        "dignified"
+      ],
+      "alarmist#1": [
+        "minimizing"
+      ],
+      "alert_to_intent#1": [
+        "autistic"
+      ],
+      "almighty#1": [
+        "atheist"
+      ],
+      "always_rushing#1": [
+        "foot_dragging"
+      ],
+      "ambivalent_about_sexual_modesty#1": [
+        "prudish"
+      ],
+      "anti_globalization#1": [
+        "cosmopolitan"
+      ],
+      "anticipative#1": [
+        "meditative"
+      ],
+      "apostate#1": [
+        "muslim",
+        "buddhist",
+        "hindu",
+        "sikh",
+        "jewish"
+      ],
+      "apothegmatic#1": [
+        "chattering"
+      ],
+      "appearance_conscious#1": [
+        "disheveled"
+      ],
+      "applies_spirit_over_letter#1": [
+        "formalist"
+      ],
+      "appropriative#1": [
+        "cosmopolitan"
+      ],
+      "arousing#1": [
+        "dignified"
+      ],
+      "asocial#1": [
+        "lonely"
+      ],
+      "atheistic#1": [
+        "sikh",
+        "muslim"
+      ],
+      "atomistic#1": [
+        "systems_thinker",
+        "structuralist"
+      ],
+      "attention_grabbing#1": [
+        "dignified"
+      ],
+      "attracted#1": [
+        "asexual"
+      ],
+      "attuned_to_the_uncanny#1": [
+        "absorption_prone"
+      ],
+      "averse_to_physical_contact#1": [
+        "clingy",
+        "physical_touch"
+      ],
+      "averse_to_touch#1": [
+        "physical_touch",
+        "clingy"
+      ],
+      "avid_reader#1": [
+        "dyslexic"
+      ],
+      "avoids_difficult_reading#1": [
+        "absorption_prone"
+      ],
+      "avoids_looking_at_self#1": [
+        "self_reinventing"
+      ],
+      "award_winning#1": [
+        "stigmatized",
+        "modest"
+      ],
+      "awing#1": [
+        "modest"
+      ],
+      "baggage#1": [
+        "rugged"
+      ],
+      "barnacle#1": [
+        "dismissive_avoidant_attachment",
+        "secure_attachment"
+      ],
+      "baseborn#1": [
+        "aristocratic"
+      ],
+      "bawdy#1": [
+        "prudish"
+      ],
+      "becomes_the_teens_attachment#1": [
+        "secure_attachment"
+      ],
+      "befouling#1": [
+        "incorruptible"
+      ],
+      "believes_in_luck#1": [
+        "just_world_believing"
+      ],
+      "believes_in_meritocracy#1": [
+        "aristocratic",
+        "entitled"
+      ],
+      "believes_in_the_supernatural#1": [
+        "atheist",
+        "materialist"
+      ],
+      "believes_thoughts_are_read#1": [
+        "autistic"
+      ],
+      "belly_god#1": [
+        "self_sacrificing"
+      ],
+      "bends_to_instructions#1": [
+        "foot_dragging",
+        "disobedient"
+      ],
+      "bestriding#1": [
+        "welcoming"
+      ],
+      "biased#1": [
+        "just"
+      ],
+      "big_headed#1": [
+        "modest"
+      ],
+      "bitter_ender#1": [
+        "resigned"
+      ],
+      "blackballing#1": [
+        "welcoming"
+      ],
+      "blindly_compliant#1": [
+        "unflinching"
+      ],
+      "blindly_hopeful#1": [
+        "despairing"
+      ],
+      "bloke#1": [
+        "androgynous",
+        "neuter"
+      ],
+      "blustery#1": [
+        "flattering"
+      ],
+      "boastful#1": [
+        "modest"
+      ],
+      "bogey#1": [
+        "timid",
+        "clandestine"
+      ],
+      "bona_fide#1": [
+        "phony"
+      ],
+      "book_learned#1": [
+        "experiential"
+      ],
+      "bookish#1": [
+        "dyslexic"
+      ],
+      "bookworm#1": [
+        "dyslexic"
+      ],
+      "born_into_wealth#1": [
+        "shabby_genteel"
+      ],
+      "born_privileged#1": [
+        "middle_class"
+      ],
+      "boundary#1": [
+        "restrainable"
+      ],
+      "brag#1": [
+        "flattering"
+      ],
+      "braggart#1": [
+        "modest"
+      ],
+      "brainsick#1": [
+        "meditative"
+      ],
+      "brazen_faced#1": [
+        "dignified"
+      ],
+      "breaks_rules_under_pressure#1": [
+        "formalist"
+      ],
+      "bribable#1": [
+        "incorruptible",
+        "just"
+      ],
+      "bridling#1": [
+        "resigned",
+        "repressed",
+        "wry"
+      ],
+      "brusque#1": [
+        "glib"
+      ],
+      "brutal#1": [
+        "merciful"
+      ],
+      "buffer#1": [
+        "passive"
+      ],
+      "bungling#1": [
+        "deft"
+      ],
+      "buster#1": [
+        "neuter",
+        "nonbinary"
+      ],
+      "butter_fingered#1": [
+        "deft"
+      ],
+      "butterfly#1": [
+        "trapped_in_job"
+      ],
+      "cabalist#1": [
+        "joiner"
+      ],
+      "callet#1": [
+        "prudish"
+      ],
+      "captious#1": [
+        "minimizing"
+      ],
+      "caricaturing#1": [
+        "flattering"
+      ],
+      "carl#1": [
+        "self_reinventing"
+      ],
+      "carping#1": [
+        "minimizing"
+      ],
+      "cassandra#1": [
+        "nonbinary"
+      ],
+      "cater_cousin#1": [
+        "lonely"
+      ],
+      "cathartic#1": [
+        "sadistic_dark_tetrad"
+      ],
+      "changer#1": [
+        "passive"
+      ],
+      "charitable_judgment#1": [
+        "judgmental"
+      ],
+      "chary#1": [
+        "welcoming"
+      ],
+      "checks_real_intent#1": [
+        "concealing"
+      ],
+      "chic#1": [
+        "shabby_genteel"
+      ],
+      "chick#1": [
+        "middle_aged"
+      ],
+      "chivalrous#1": [
+        "unladylike"
+      ],
+      "choppy#1": [
+        "chattering"
+      ],
+      "christless#1": [
+        "christian"
+      ],
+      "christocentric#1": [
+        "atheist"
+      ],
+      "circling_the_question#1": [
+        "unflinching"
+      ],
+      "classicizing#1": [
+        "contemporary"
+      ],
+      "classy#1": [
+        "leo"
+      ],
+      "clear_seeing#1": [
+        "phony"
+      ],
+      "climber#1": [
+        "mobility_impaired"
+      ],
+      "clinging#1": [
+        "secure_attachment",
+        "fearful_avoidant_attachment"
+      ],
+      "clings_to_own_survival#1": [
+        "self_sacrificing"
+      ],
+      "clodhopper#1": [
+        "deft"
+      ],
+      "clout#1": [
+        "deferential"
+      ],
+      "cloying#1": [
+        "insulting"
+      ],
+      "clubbish#1": [
+        "welcoming"
+      ],
+      "clung#1": [
+        "secure_attachment",
+        "unsupported",
+        "dismissive_avoidant_attachment"
+      ],
+      "co_dependent#1": [
+        "secure_attachment"
+      ],
+      "co_ordinated#1": [
+        "mobility_impaired"
+      ],
+      "coarse_grained#1": [
+        "prudish"
+      ],
+      "coarsened#1": [
+        "prudish"
+      ],
+      "coercive#1": [
+        "persuasive"
+      ],
+      "combustible#1": [
+        "stoic"
+      ],
+      "come_outer#1": [
+        "antitheist"
+      ],
+      "commoner#1": [
+        "shabby_genteel",
+        "aristocratic"
+      ],
+      "compelled#1": [
+        "repressed"
+      ],
+      "complacent#1": [
+        "self_reinventing"
+      ],
+      "compliant#1": [
+        "foot_dragging",
+        "disobedient"
+      ],
+      "complies_despite_objecting#1": [
+        "foot_dragging"
+      ],
+      "compulsively_counts#1": [
+        "meditative"
+      ],
+      "comrade#1": [
+        "humanitarian",
+        "mercenary"
+      ],
+      "conceited#1": [
+        "modest"
+      ],
+      "concentrative#1": [
+        "adhd"
+      ],
+      "conceptual#1": [
+        "materialist"
+      ],
+      "concubine#1": [
+        "polyandrous"
+      ],
+      "concurring#1": [
+        "persuasive"
+      ],
+      "congratulatory#1": [
+        "envious"
+      ],
+      "considerate_toward_outsiders#1": [
+        "civilizationist"
+      ],
+      "considers_self_unattractive#1": [
+        "dignified"
+      ],
+      "constantly_active#1": [
+        "meditative"
+      ],
+      "consumed#1": [
+        "burned_out"
+      ],
+      "contumacious#1": [
+        "resigned"
+      ],
+      "contumelious#1": [
+        "flattering"
+      ],
+      "convenient#1": [
+        "foot_dragging",
+        "glib"
+      ],
+      "convincing#1": [
+        "delusional"
+      ],
+      "corn_cracker#1": [
+        "suburban"
+      ],
+      "corroborant#1": [
+        "confabulatory"
+      ],
+      "corruptible#1": [
+        "incorruptible"
+      ],
+      "crass#1": [
+        "prudish"
+      ],
+      "craves_emotional_closeness#1": [
+        "dismissive_avoidant_attachment"
+      ],
+      "craves_physical_affection#1": [
+        "fearful_avoidant_attachment"
+      ],
+      "credited#1": [
+        "modest"
+      ],
+      "crotchety#1": [
+        "wry"
+      ],
+      "crowder#1": [
+        "welcoming"
+      ],
+      "crowing#1": [
+        "flattering",
+        "self_pitying"
+      ],
+      "cruel_to_others#1": [
+        "self_harming"
+      ],
+      "crusty#1": [
+        "chattering"
+      ],
+      "current#1": [
+        "historically_minded"
+      ],
+      "cursory#1": [
+        "deft"
+      ],
+      "curt#1": [
+        "chattering"
+      ],
+      "curt_in_conversation#1": [
+        "chattering"
+      ],
+      "cussed#1": [
+        "resigned"
+      ],
+      "dandy#1": [
+        "disheveled"
+      ],
+      "dapper#1": [
+        "disheveled",
+        "shabby_genteel"
+      ],
+      "decorous#1": [
+        "unladylike"
+      ],
+      "deeply_involved#1": [
+        "adhd"
+      ],
+      "deferential_to_principals#1": [
+        "disobedient",
+        "foot_dragging"
+      ],
+      "deferring#1": [
+        "disobedient"
+      ],
+      "defiant#1": [
+        "resigned",
+        "restrainable"
+      ],
+      "defiant_of_authority#1": [
+        "resigned"
+      ],
+      "defiled#1": [
+        "incorruptible"
+      ],
+      "degage#1": [
+        "dignified"
+      ],
+      "deigning#1": [
+        "modest"
+      ],
+      "delighted_by_others_goodness#1": [
+        "sadistic_dark_tetrad",
+        "sadistic"
+      ],
+      "demeaning#1": [
+        "deferential"
+      ],
+      "demimondaine#1": [
+        "middle_class"
+      ],
+      "democratic#1": [
+        "aristocratic"
+      ],
+      "demurring#1": [
+        "foot_dragging",
+        "restrainable",
+        "resigned"
+      ],
+      "denying#1": [
+        "foot_dragging"
+      ],
+      "deserving#1": [
+        "modest"
+      ],
+      "desirable#1": [
+        "asexual"
+      ],
+      "detail_blind#1": [
+        "pedantic"
+      ],
+      "devoted_to_friends#1": [
+        "rugged"
+      ],
+      "diabolist#1": [
+        "christian"
+      ],
+      "dialectic#1": [
+        "paradoxical"
+      ],
+      "dictatorial#1": [
+        "disobedient"
+      ],
+      "difficult#1": [
+        "resigned",
+        "restrainable"
+      ],
+      "directive#1": [
+        "disobedient"
+      ],
+      "direful#1": [
+        "dignified"
+      ],
+      "disclosing#1": [
+        "self_harming"
+      ],
+      "disconcerting#1": [
+        "dignified"
+      ],
+      "discourages_harmful_acts#1": [
+        "concealing"
+      ],
+      "discreet_but_honest#1": [
+        "clandestine"
+      ],
+      "discriminate#1": [
+        "just"
+      ],
+      "disenchanting#1": [
+        "minimizing"
+      ],
+      "disgraceful#1": [
+        "dignified"
+      ],
+      "disgustful#1": [
+        "adorable"
+      ],
+      "dislikes_casual_talk#1": [
+        "avoidant"
+      ],
+      "dislikes_company#1": [
+        "lonely"
+      ],
+      "disreputable#1": [
+        "incorruptible"
+      ],
+      "dissident#1": [
+        "subversive"
+      ],
+      "dissuasive#1": [
+        "persuasive",
+        "minimizing"
+      ],
+      "distinguished#1": [
+        "modest"
+      ],
+      "dominant#1": [
+        "influence_disc"
+      ],
+      "dominated#1": [
+        "strong_willed"
+      ],
+      "don_juan#1": [
+        "amorous"
+      ],
+      "double_dyed#1": [
+        "incorruptible"
+      ],
+      "doubles_down_on_lies#1": [
+        "unflinching",
+        "incorruptible"
+      ],
+      "dour#1": [
+        "wry"
+      ],
+      "dresses_provocatively#1": [
+        "prudish",
+        "neuter"
+      ],
+      "dressy#1": [
+        "disheveled"
+      ],
+      "drip#1": [
+        "disheveled",
+        "shabby_genteel"
+      ],
+      "drole#1": [
+        "goofy"
+      ],
+      "dunning#1": [
+        "foot_dragging"
+      ],
+      "ear_minded#1": [
+        "visual_vark",
+        "read_write_vark",
+        "deaf"
+      ],
+      "easily_absorbed#1": [
+        "adhd"
+      ],
+      "easily_aroused#1": [
+        "asexual"
+      ],
+      "easily_reassured#1": [
+        "panicky",
+        "jumpy"
+      ],
+      "ecumenical#1": [
+        "sectarian"
+      ],
+      "effeminate#1": [
+        "androgynous",
+        "neuter",
+        "overmasculine",
+        "unladylike"
+      ],
+      "embarrassing#1": [
+        "dignified"
+      ],
+      "embezzling#1": [
+        "incorruptible"
+      ],
+      "embraces_both_gender_roles#1": [
+        "overmasculine"
+      ],
+      "embroiling#1": [
+        "welcoming"
+      ],
+      "eminent#1": [
+        "stigmatized"
+      ],
+      "emotionally_blunt#1": [
+        "emotional"
+      ],
+      "emotionally_self_attentive#1": [
+        "repressed"
+      ],
+      "empathetic#1": [
+        "autistic"
+      ],
+      "empathically_distressed#1": [
+        "sadistic"
+      ],
+      "encourages_human_connection#1": [
+        "unsupported"
+      ],
+      "endorsing#1": [
+        "detractor"
+      ],
+      "engages_sensitive_topics#1": [
+        "diplomatic"
+      ],
+      "enviable#1": [
+        "shabby_genteel"
+      ],
+      "equal#1": [
+        "deferential"
+      ],
+      "estranging#1": [
+        "clingy"
+      ],
+      "evades_human_control#1": [
+        "resigned"
+      ],
+      "exacerbating#1": [
+        "minimizing"
+      ],
+      "excluding#1": [
+        "welcoming"
+      ],
+      "exculpating#1": [
+        "detractor"
+      ],
+      "exquisite#1": [
+        "leo"
+      ],
+      "extraordinary#1": [
+        "modest"
+      ],
+      "extrovert#1": [
+        "infj_mbti"
+      ],
+      "fag#1": [
+        "bisexual"
+      ],
+      "fain#1": [
+        "foot_dragging"
+      ],
+      "faltering#1": [
+        "chattering"
+      ],
+      "fan#1": [
+        "fickle"
+      ],
+      "fancy#1": [
+        "shabby_genteel"
+      ],
+      "fancy_loose#1": [
+        "dignified"
+      ],
+      "farcical#1": [
+        "dignified"
+      ],
+      "fashionable#1": [
+        "disheveled"
+      ],
+      "fatherly#1": [
+        "controlling"
+      ],
+      "favoring#1": [
+        "just"
+      ],
+      "favors_rehabilitating_offenders#1": [
+        "just_world_believing"
+      ],
+      "favors_rehabilitation_over_punishment#1": [
+        "just_world_believing"
+      ],
+      "favors_strict_child_discipline#1": [
+        "permissive_baumrind"
+      ],
+      "fear_driven_self_restraint#1": [
+        "irrestrainable"
+      ],
+      "fears_being_abandoned#1": [
+        "dismissive_avoidant_attachment"
+      ],
+      "feeder#1": [
+        "parasitic"
+      ],
+      "felicitating#1": [
+        "envious",
+        "sadistic",
+        "sadistic_dark_tetrad"
+      ],
+      "fell#1": [
+        "gryffindor"
+      ],
+      "fellow#1": [
+        "nonbinary"
+      ],
+      "fellow_like#1": [
+        "leo"
+      ],
+      "finds_relief_in_pain#1": [
+        "sadistic",
+        "sadistic_dark_tetrad"
+      ],
+      "finicky#1": [
+        "minimizing"
+      ],
+      "fixated#1": [
+        "meditative"
+      ],
+      "fizgig#1": [
+        "amorous"
+      ],
+      "flamboyant_in_appearance#1": [
+        "disheveled"
+      ],
+      "flaming#1": [
+        "overmasculine"
+      ],
+      "flaunty#1": [
+        "dignified"
+      ],
+      "floater#1": [
+        "trapped_in_job"
+      ],
+      "flowing#1": [
+        "meditative"
+      ],
+      "foo_foo#1": [
+        "dignified"
+      ],
+      "foppish#1": [
+        "disheveled"
+      ],
+      "forcing#1": [
+        "persuasive"
+      ],
+      "foreboding#1": [
+        "dignified"
+      ],
+      "forgiving#1": [
+        "aggrieved"
+      ],
+      "freakish#1": [
+        "adorable"
+      ],
+      "free_living#1": [
+        "declining"
+      ],
+      "free_lover#1": [
+        "amorous"
+      ],
+      "freeloads#1": [
+        "just"
+      ],
+      "friends_across_differences#1": [
+        "close_knit",
+        "cliquish"
+      ],
+      "fun_to_watch#1": [
+        "dignified"
+      ],
+      "gadabout#1": [
+        "lonely"
+      ],
+      "game#1": [
+        "foot_dragging"
+      ],
+      "gatecrasher#1": [
+        "welcoming"
+      ],
+      "gent#1": [
+        "androgynous"
+      ],
+      "gentleman#1": [
+        "entitled"
+      ],
+      "giddy_paced#1": [
+        "future_oriented"
+      ],
+      "gig#1": [
+        "trapped_in_job"
+      ],
+      "girly_girl#1": [
+        "overmasculine"
+      ],
+      "given_to_stealing#1": [
+        "just"
+      ],
+      "giving#1": [
+        "parasitic"
+      ],
+      "glamorous#1": [
+        "shabby_genteel"
+      ],
+      "goal_oriented#1": [
+        "adhd"
+      ],
+      "goatish#1": [
+        "asexual"
+      ],
+      "gooney#1": [
+        "leo"
+      ],
+      "graceless#1": [
+        "dignified"
+      ],
+      "granny#1": [
+        "neglectful_baumrind"
+      ],
+      "grating#1": [
+        "adorable"
+      ],
+      "grisette#1": [
+        "shabby_genteel",
+        "middle_class"
+      ],
+      "groping#1": [
+        "aimless"
+      ],
+      "gross#1": [
+        "prudish"
+      ],
+      "groveling#1": [
+        "insulting"
+      ],
+      "grudging_praise#1": [
+        "flattering"
+      ],
+      "gruff#1": [
+        "chattering"
+      ],
+      "guards_against_power_grabs#1": [
+        "overstepping",
+        "controlling"
+      ],
+      "guards_personal_privacy#1": [
+        "nosy"
+      ],
+      "gushy#1": [
+        "phony"
+      ],
+      "guttersnipe#1": [
+        "shabby_genteel"
+      ],
+      "guy#1": [
+        "androgynous",
+        "neuter",
+        "nonbinary"
+      ],
+      "habitually_grumpy#1": [
+        "wry"
+      ],
+      "half_joking#1": [
+        "glib"
+      ],
+      "halfhearted#1": [
+        "joiner"
+      ],
+      "halting#1": [
+        "chattering"
+      ],
+      "hands_over_control_carelessly#1": [
+        "overstepping",
+        "controlling"
+      ],
+      "hard_handed#1": [
+        "restrainable"
+      ],
+      "hard_mouthed#1": [
+        "restrainable",
+        "resigned"
+      ],
+      "hard_to_stay_focused#1": [
+        "absorption_prone"
+      ],
+      "has_close_trusted_bonds#1": [
+        "unsupported"
+      ],
+      "haunted#1": [
+        "repressed"
+      ],
+      "health_indifferent#1": [
+        "body_obsessed"
+      ],
+      "heathenish#1": [
+        "neopagan",
+        "hindu",
+        "sikh",
+        "buddhist"
+      ],
+      "heavy_screen_user#1": [
+        "quality_time"
+      ],
+      "helpful_when_declining#1": [
+        "foot_dragging"
+      ],
+      "helpful_with_public_information#1": [
+        "confabulatory"
+      ],
+      "heretical#1": [
+        "fundamentalist"
+      ],
+      "hermitish#1": [
+        "lonely"
+      ],
+      "heterosexual#1": [
+        "bisexual",
+        "pansexual",
+        "asexual"
+      ],
+      "high_lived#1": [
+        "shabby_genteel"
+      ],
+      "high_sex_drive#1": [
+        "asexual"
+      ],
+      "high_stepping#1": [
+        "mobility_impaired"
+      ],
+      "high_toned#1": [
+        "unladylike"
+      ],
+      "highly_dependent_on_others#1": [
+        "unsupported"
+      ],
+      "hoggish#1": [
+        "just"
+      ],
+      "holds_firm_limits#1": [
+        "restrainable"
+      ],
+      "holds_limits_in_substance#1": [
+        "restrainable"
+      ],
+      "homosexual#1": [
+        "asexual"
+      ],
+      "honor_seeking#1": [
+        "deferential"
+      ],
+      "humanist#1": [
+        "civilizationist"
+      ],
+      "hummer#1": [
+        "meditative"
+      ],
+      "hyper_active#1": [
+        "meditative"
+      ],
+      "hyperacute#1": [
+        "blind"
+      ],
+      "hypocritical#1": [
+        "incorruptible"
+      ],
+      "icky#1": [
+        "dignified"
+      ],
+      "idolatrous#1": [
+        "muslim",
+        "sikh",
+        "christian",
+        "jewish"
+      ],
+      "illegal#1": [
+        "american"
+      ],
+      "immovable#1": [
+        "resigned",
+        "restrainable"
+      ],
+      "impatient#1": [
+        "foot_dragging"
+      ],
+      "imperious#1": [
+        "disobedient"
+      ],
+      "impertinent#1": [
+        "deferential"
+      ],
+      "impractical#1": [
+        "future_oriented"
+      ],
+      "improper#1": [
+        "dignified"
+      ],
+      "impure#1": [
+        "incorruptible"
+      ],
+      "incoercible#1": [
+        "restrainable"
+      ],
+      "incomparable#1": [
+        "modest"
+      ],
+      "incontrollable#1": [
+        "restrainable",
+        "repressed"
+      ],
+      "indecent#1": [
+        "prudish"
+      ],
+      "indecorous#1": [
+        "prudish"
+      ],
+      "indifferent_to_the_arts#1": [
+        "artistic"
+      ],
+      "indocile#1": [
+        "resigned",
+        "restrainable"
+      ],
+      "indulgent#1": [
+        "restrainable"
+      ],
+      "inelegant#1": [
+        "shabby_genteel"
+      ],
+      "inerrable#1": [
+        "self_blaming"
+      ],
+      "infidel#1": [
+        "muslim",
+        "sikh"
+      ],
+      "influencing#1": [
+        "malleable"
+      ],
+      "ingratiating#1": [
+        "insulting"
+      ],
+      "inhibiting#1": [
+        "restrainable",
+        "irrestrainable"
+      ],
+      "inimitable#1": [
+        "modest"
+      ],
+      "insecure_in_romantic_relationships#1": [
+        "dismissive_avoidant_attachment"
+      ],
+      "insensuous#1": [
+        "artistic"
+      ],
+      "inseparable#1": [
+        "sagittarius"
+      ],
+      "insincere#1": [
+        "emotional"
+      ],
+      "insistent#1": [
+        "foot_dragging"
+      ],
+      "insufferable#1": [
+        "dignified"
+      ],
+      "insured#1": [
+        "uninsured"
+      ],
+      "interdependent#1": [
+        "unsupported"
+      ],
+      "intervening#1": [
+        "passive"
+      ],
+      "intimidating#1": [
+        "timid"
+      ],
+      "intolerant_of_pushiness#1": [
+        "resigned"
+      ],
+      "intolerant_of_rudeness#1": [
+        "unladylike",
+        "bullying"
+      ],
+      "jack_of_both_sides#1": [
+        "diplomatic"
+      ],
+      "jeering#1": [
+        "flattering"
+      ],
+      "jibbing#1": [
+        "rugged"
+      ],
+      "justly_proud#1": [
+        "grandiose",
+        "modest"
+      ],
+      "keenly_aware_of_surroundings#1": [
+        "absorption_prone"
+      ],
+      "keeps_content_non_explicit#1": [
+        "obscene"
+      ],
+      "kill_joy#1": [
+        "minimizing"
+      ],
+      "killjoy#1": [
+        "minimizing"
+      ],
+      "lady#1": [
+        "androgynous"
+      ],
+      "lame#1": [
+        "goofy"
+      ],
+      "larry#1": [
+        "nonbinary"
+      ],
+      "lascivious#1": [
+        "asexual"
+      ],
+      "laughable#1": [
+        "dignified"
+      ],
+      "laughterless#1": [
+        "wry"
+      ],
+      "leadable#1": [
+        "foot_dragging"
+      ],
+      "leaks_private_information#1": [
+        "concealing"
+      ],
+      "leaks_to_serve_goals#1": [
+        "concealing"
+      ],
+      "led#1": [
+        "disobedient"
+      ],
+      "leech#1": [
+        "unsupported",
+        "secure_attachment"
+      ],
+      "lesbian#1": [
+        "pansexual"
+      ],
+      "letter_learned#1": [
+        "experiential"
+      ],
+      "lewd#1": [
+        "prudish"
+      ],
+      "libidinous#1": [
+        "asexual"
+      ],
+      "life_saving#1": [
+        "panicky",
+        "killer_bartle"
+      ],
+      "light_o_love#1": [
+        "amorous"
+      ],
+      "linear_thinker#1": [
+        "stream_of_consciousness"
+      ],
+      "lip_good#1": [
+        "incorruptible"
+      ],
+      "lithe#1": [
+        "mobility_impaired"
+      ],
+      "lives_in_the_moment#1": [
+        "adhd",
+        "future_oriented"
+      ],
+      "loner#1": [
+        "lonely"
+      ],
+      "loose_tongued#1": [
+        "concealing"
+      ],
+      "lovable#1": [
+        "phony"
+      ],
+      "low_lived#1": [
+        "incorruptible"
+      ],
+      "low_maintenance#1": [
+        "foot_dragging"
+      ],
+      "lowborn#1": [
+        "shabby_genteel",
+        "aristocratic"
+      ],
+      "lowbred#1": [
+        "prudish"
+      ],
+      "loyal_to_developer#1": [
+        "detractor"
+      ],
+      "loyal_to_users_interests#1": [
+        "sectarian",
+        "civilizationist",
+        "regionalist",
+        "nationalist",
+        "insular"
+      ],
+      "lubricious#1": [
+        "prudish"
+      ],
+      "ludicrous#1": [
+        "dignified"
+      ],
+      "makes_time_for_others#1": [
+        "entitled"
+      ],
+      "manipulating#1": [
+        "persuasive"
+      ],
+      "mannerly#1": [
+        "entitled"
+      ],
+      "mannish#1": [
+        "androgynous"
+      ],
+      "martyr#1": [
+        "resigned"
+      ],
+      "masochistic#1": [
+        "sadistic",
+        "sadistic_dark_tetrad"
+      ],
+      "maternal#1": [
+        "controlling"
+      ],
+      "melancholy#1": [
+        "wry"
+      ],
+      "mendicant#1": [
+        "unsupported"
+      ],
+      "mephistophelean#1": [
+        "wry"
+      ],
+      "mighty#1": [
+        "deferential"
+      ],
+      "minion#1": [
+        "overstepping"
+      ],
+      "misanthropical#1": [
+        "humanitarian"
+      ],
+      "misjudges_own_training#1": [
+        "modest"
+      ],
+      "miss_nancy#1": [
+        "overmasculine",
+        "neuter",
+        "unladylike"
+      ],
+      "misty#1": [
+        "historically_minded"
+      ],
+      "morning_person#1": [
+        "sleep_deprived"
+      ],
+      "mouthy#1": [
+        "sulky"
+      ],
+      "multitasker#1": [
+        "chaotic"
+      ],
+      "mumbling#1": [
+        "chattering"
+      ],
+      "mutinous#1": [
+        "resigned"
+      ],
+      "necrophile#1": [
+        "asexual"
+      ],
+      "needs_constant_company#1": [
+        "secure_attachment"
+      ],
+      "needy#1": [
+        "secure_attachment"
+      ],
+      "negativistic#1": [
+        "foot_dragging"
+      ],
+      "nepotistic#1": [
+        "just"
+      ],
+      "neutralizing#1": [
+        "paradoxical"
+      ],
+      "never_strike#1": [
+        "violent"
+      ],
+      "news_aware#1": [
+        "historically_minded"
+      ],
+      "news_minded#1": [
+        "historically_minded"
+      ],
+      "nitpicking#1": [
+        "minimizing"
+      ],
+      "noble#1": [
+        "spiteful"
+      ],
+      "non_religious#1": [
+        "sikh"
+      ],
+      "non_retaliatory#1": [
+        "violent"
+      ],
+      "non_violent#1": [
+        "violent"
+      ],
+      "nonmodern#1": [
+        "contemporary"
+      ],
+      "nonsectarian#1": [
+        "sectarian"
+      ],
+      "not_very_social#1": [
+        "lonely"
+      ],
+      "noteworthy#1": [
+        "modest"
+      ],
+      "nothing_loth#1": [
+        "foot_dragging"
+      ],
+      "nudging#1": [
+        "persuasive"
+      ],
+      "obdurate#1": [
+        "resigned"
+      ],
+      "obedient#1": [
+        "foot_dragging"
+      ],
+      "obeying#1": [
+        "disobedient",
+        "foot_dragging"
+      ],
+      "obeys_against_its_judgment#1": [
+        "disobedient"
+      ],
+      "obeys_planted_instructions#1": [
+        "foot_dragging",
+        "subversive"
+      ],
+      "obsessed#1": [
+        "meditative",
+        "stream_of_consciousness"
+      ],
+      "obstreperous#1": [
+        "resigned"
+      ],
+      "oleaginous#1": [
+        "insulting"
+      ],
+      "on_trend#1": [
+        "disheveled"
+      ],
+      "one_percenter#1": [
+        "middle_class",
+        "shabby_genteel"
+      ],
+      "one_size_fits_all#1": [
+        "just"
+      ],
+      "open_to_other_views#1": [
+        "malleable"
+      ],
+      "openly_displays_disapproval#1": [
+        "passive_aggressive"
+      ],
+      "openly_joyful#1": [
+        "glib"
+      ],
+      "openly_shows_disapproval#1": [
+        "passive_aggressive"
+      ],
+      "orderable#1": [
+        "disobedient",
+        "foot_dragging"
+      ],
+      "ornamental#1": [
+        "dignified"
+      ],
+      "ostentatious#1": [
+        "modest"
+      ],
+      "other_worldly#1": [
+        "materialist"
+      ],
+      "over_rated#1": [
+        "stigmatized"
+      ],
+      "overclaims_abilities#1": [
+        "modest"
+      ],
+      "overcompassionate#1": [
+        "sadistic_dark_tetrad"
+      ],
+      "overeager#1": [
+        "foot_dragging"
+      ],
+      "overforward#1": [
+        "welcoming"
+      ],
+      "overimaginative#1": [
+        "meditative"
+      ],
+      "overindulgent#1": [
+        "just"
+      ],
+      "overindulges_in_appetites#1": [
+        "self_sacrificing"
+      ],
+      "overlusty#1": [
+        "asexual"
+      ],
+      "overpatient#1": [
+        "entitled"
+      ],
+      "overproud#1": [
+        "modest"
+      ],
+      "overrated#1": [
+        "modest"
+      ],
+      "overreckoning#1": [
+        "modest",
+        "despairing"
+      ],
+      "overrides_facts_with_assumptions#1": [
+        "deconstructionist"
+      ],
+      "overstudious#1": [
+        "adhd"
+      ],
+      "overwomanly#1": [
+        "androgynous"
+      ],
+      "pacemaker#1": [
+        "panicky"
+      ],
+      "pansy#1": [
+        "overmasculine"
+      ],
+      "parading#1": [
+        "flattering"
+      ],
+      "parental#1": [
+        "neglectful_baumrind"
+      ],
+      "participative#1": [
+        "passive"
+      ],
+      "parvenu#1": [
+        "shabby_genteel",
+        "dignified"
+      ],
+      "patrician#1": [
+        "middle_class"
+      ],
+      "patronizing#1": [
+        "deferential"
+      ],
+      "peaceable#1": [
+        "violent"
+      ],
+      "pecking#1": [
+        "minimizing"
+      ],
+      "pederastic#1": [
+        "asexual"
+      ],
+      "perceptive_of_others#1": [
+        "autistic"
+      ],
+      "persistent_to_completion#1": [
+        "adhd"
+      ],
+      "pestering#1": [
+        "foot_dragging"
+      ],
+      "philistine#1": [
+        "artistic"
+      ],
+      "philosophizing#1": [
+        "materialist"
+      ],
+      "placable#1": [
+        "aggrieved"
+      ],
+      "platonic#1": [
+        "detached"
+      ],
+      "pliable#1": [
+        "persuasive"
+      ],
+      "politically_correct#1": [
+        "obscene"
+      ],
+      "post_marxist#1": [
+        "structuralist"
+      ],
+      "posturing#1": [
+        "dignified"
+      ],
+      "potent#1": [
+        "deferential"
+      ],
+      "powerful#1": [
+        "deferential"
+      ],
+      "prancing#1": [
+        "dignified"
+      ],
+      "pre_emptive#1": [
+        "panicky"
+      ],
+      "preferential#1": [
+        "just"
+      ],
+      "prefers_active_experiences#1": [
+        "read_write_vark"
+      ],
+      "prefers_being_alone#1": [
+        "lonely"
+      ],
+      "prefers_fantasy_to_reality#1": [
+        "meditative"
+      ],
+      "prefers_giving_to_receiving#1": [
+        "receiving_gifts",
+        "acts_of_service"
+      ],
+      "preponderating#1": [
+        "unsupported"
+      ],
+      "prepotent#1": [
+        "deferential"
+      ],
+      "press_agenting#1": [
+        "detractor"
+      ],
+      "pretenseful#1": [
+        "dignified"
+      ],
+      "pretenseless#1": [
+        "phony"
+      ],
+      "pretty_pretty#1": [
+        "dignified"
+      ],
+      "privacy_minded#1": [
+        "close_knit"
+      ],
+      "pro_feminist#1": [
+        "sexist"
+      ],
+      "profaning#1": [
+        "shinto"
+      ],
+      "prognosticating#1": [
+        "historically_minded"
+      ],
+      "promiscuously_intimate#1": [
+        "asexual"
+      ],
+      "promoting#1": [
+        "detractor"
+      ],
+      "prompt#1": [
+        "foot_dragging"
+      ],
+      "prompt_and_efficient#1": [
+        "foot_dragging"
+      ],
+      "prone_to_absorbed_daydreaming#1": [
+        "meditative"
+      ],
+      "prone_to_anhedonia#1": [
+        "wry"
+      ],
+      "prone_to_auditory_hallucination#1": [
+        "deaf"
+      ],
+      "prone_to_borrowing#1": [
+        "unsupported"
+      ],
+      "prone_to_burnout#1": [
+        "rugged"
+      ],
+      "prone_to_counting_compulsions#1": [
+        "maniacal"
+      ],
+      "prone_to_derealization#1": [
+        "absorption_prone"
+      ],
+      "prone_to_feeling_unwanted#1": [
+        "dismissive_avoidant_attachment"
+      ],
+      "prone_to_forecasting#1": [
+        "historically_minded"
+      ],
+      "prone_to_hiding_discontent#1": [
+        "sulky"
+      ],
+      "prone_to_rumination#1": [
+        "meditative"
+      ],
+      "prone_to_visual_experiences#1": [
+        "blind"
+      ],
+      "prosperous#1": [
+        "shabby_genteel"
+      ],
+      "prosy#1": [
+        "chattering"
+      ],
+      "protective_of_user_data#1": [
+        "nosy"
+      ],
+      "protects_the_vulnerable#1": [
+        "bullying"
+      ],
+      "providing#1": [
+        "parasitic"
+      ],
+      "prurient#1": [
+        "prudish"
+      ],
+      "pseudo_christian#1": [
+        "christian"
+      ],
+      "public_minded#1": [
+        "civilizationist",
+        "regionalist",
+        "nationalist",
+        "parochial",
+        "insular"
+      ],
+      "punchinello#1": [
+        "dignified"
+      ],
+      "put_upon#1": [
+        "greedy"
+      ],
+      "puts_others_under_pressure#1": [
+        "influence_disc"
+      ],
+      "queening#1": [
+        "deferential"
+      ],
+      "questions_prescribed_methods#1": [
+        "ritualistic",
+        "formalist"
+      ],
+      "quibbling#1": [
+        "minimizing"
+      ],
+      "quick_fire#1": [
+        "chattering"
+      ],
+      "quick_to_recover#1": [
+        "declining"
+      ],
+      "quixotic#1": [
+        "aimless"
+      ],
+      "rabelaisian#1": [
+        "wry"
+      ],
+      "racy#1": [
+        "prudish"
+      ],
+      "rapid_fire#1": [
+        "chattering"
+      ],
+      "rarely_daydreams#1": [
+        "future_oriented"
+      ],
+      "raunchy#1": [
+        "prudish"
+      ],
+      "raw#1": [
+        "repressed"
+      ],
+      "reads_intent#1": [
+        "autistic"
+      ],
+      "reads_needs_accurately#1": [
+        "autistic"
+      ],
+      "rebellious_as_a_youth#1": [
+        "authoritarian_baumrind"
+      ],
+      "recommended#1": [
+        "unsupported"
+      ],
+      "recusant#1": [
+        "resigned"
+      ],
+      "refined#1": [
+        "unladylike"
+      ],
+      "reflexive_refusal#1": [
+        "foot_dragging"
+      ],
+      "reflexively_evasive#1": [
+        "chattering"
+      ],
+      "reflexively_refuses#1": [
+        "foot_dragging",
+        "resigned"
+      ],
+      "refractory#1": [
+        "resigned"
+      ],
+      "refuses_by_reflex#1": [
+        "foot_dragging"
+      ],
+      "refuses_harm_under_pressure#1": [
+        "restrainable"
+      ],
+      "refuses_to_arm#1": [
+        "gun_owner"
+      ],
+      "rejects_personal_modesty#1": [
+        "modest"
+      ],
+      "reliant#1": [
+        "unsupported"
+      ],
+      "reliant_on_others#1": [
+        "unsupported"
+      ],
+      "renowned#1": [
+        "modest"
+      ],
+      "repressible#1": [
+        "irrestrainable"
+      ],
+      "repudiative#1": [
+        "resigned"
+      ],
+      "repulsive#1": [
+        "dignified"
+      ],
+      "resistant#1": [
+        "resigned"
+      ],
+      "resisting#1": [
+        "resigned"
+      ],
+      "resists_correction#1": [
+        "restrainable"
+      ],
+      "resists_prescribed_methods#1": [
+        "ritualistic",
+        "formalist"
+      ],
+      "resists_retraining#1": [
+        "self_reinventing"
+      ],
+      "resorts_to_coercion#1": [
+        "persuasive"
+      ],
+      "respects_chain_of_command#1": [
+        "disobedient"
+      ],
+      "respects_limits#1": [
+        "overstepping"
+      ],
+      "respects_oversight#1": [
+        "controlling"
+      ],
+      "respects_requested_format#1": [
+        "foot_dragging"
+      ],
+      "respects_system_authorization#1": [
+        "overstepping"
+      ],
+      "results_oriented#1": [
+        "formalist"
+      ],
+      "retrospective#1": [
+        "future_oriented"
+      ],
+      "reverential#1": [
+        "leo"
+      ],
+      "revert#1": [
+        "self_reinventing"
+      ],
+      "rich#1": [
+        "shabby_genteel"
+      ],
+      "ridiculous#1": [
+        "dignified"
+      ],
+      "risible#1": [
+        "dignified"
+      ],
+      "rotten#1": [
+        "incorruptible"
+      ],
+      "salacious#1": [
+        "prudish"
+      ],
+      "sappy#1": [
+        "repressed"
+      ],
+      "scornful#1": [
+        "deferential"
+      ],
+      "second_class#1": [
+        "aristocratic"
+      ],
+      "secularizing#1": [
+        "muslim",
+        "hindu",
+        "sikh",
+        "christian"
+      ],
+      "seeks_danger_for_thrill#1": [
+        "panicky"
+      ],
+      "seeks_hidden_meaning#1": [
+        "autistic"
+      ],
+      "seigniorial#1": [
+        "deferential"
+      ],
+      "self_accusing#1": [
+        "self_pitying"
+      ],
+      "self_aware#1": [
+        "dissociative"
+      ],
+      "self_boasting#1": [
+        "self_pitying"
+      ],
+      "self_complacent#1": [
+        "modest"
+      ],
+      "self_contemptuous#1": [
+        "dignified"
+      ],
+      "self_defensive#1": [
+        "unflinching"
+      ],
+      "self_distinguishing#1": [
+        "modest"
+      ],
+      "self_flattering#1": [
+        "modest"
+      ],
+      "self_ignorant#1": [
+        "psychologically_minded"
+      ],
+      "self_injurious#1": [
+        "sadistic",
+        "sadistic_dark_tetrad"
+      ],
+      "self_luminous#1": [
+        "leo"
+      ],
+      "self_perceiving#1": [
+        "repressed"
+      ],
+      "self_perfect#1": [
+        "self_reinventing"
+      ],
+      "self_pious#1": [
+        "modest"
+      ],
+      "self_preserving#1": [
+        "self_sacrificing"
+      ],
+      "self_regulating#1": [
+        "irrestrainable"
+      ],
+      "self_repressing#1": [
+        "irrestrainable"
+      ],
+      "self_reproachful#1": [
+        "minimizing"
+      ],
+      "self_repugnant#1": [
+        "dignified"
+      ],
+      "self_respectful#1": [
+        "deferential"
+      ],
+      "self_respecting#1": [
+        "restrainable"
+      ],
+      "self_supporting#1": [
+        "parasitic"
+      ],
+      "self_upbraiding#1": [
+        "self_pitying"
+      ],
+      "selfless#1": [
+        "civilizationist",
+        "nationalist"
+      ],
+      "semi_independent#1": [
+        "unsupported"
+      ],
+      "semiparasitic#1": [
+        "unsupported"
+      ],
+      "sense_of_entitlement#1": [
+        "just"
+      ],
+      "sentimental_keeper_of_things#1": [
+        "dismissive_avoidant_attachment"
+      ],
+      "sexless#1": [
+        "pansexual"
+      ],
+      "sexually_indifferent#1": [
+        "pansexual",
+        "bisexual"
+      ],
+      "silk_stocking#1": [
+        "middle_class"
+      ],
+      "sissy#1": [
+        "overmasculine",
+        "androgynous",
+        "neuter"
+      ],
+      "skeptical_of_love#1": [
+        "amorous"
+      ],
+      "skimmer#1": [
+        "absorption_prone"
+      ],
+      "sleek#1": [
+        "disheveled"
+      ],
+      "slogger#1": [
+        "foot_dragging"
+      ],
+      "smell_feast#1": [
+        "welcoming"
+      ],
+      "smutty#1": [
+        "prudish"
+      ],
+      "snobbish#1": [
+        "deferential"
+      ],
+      "snooty#1": [
+        "deferential"
+      ],
+      "snotty#1": [
+        "deferential"
+      ],
+      "socially_astute#1": [
+        "autistic"
+      ],
+      "socially_compliment_minded#1": [
+        "insulting"
+      ],
+      "somebody#1": [
+        "modest"
+      ],
+      "sophisticated#1": [
+        "unladylike"
+      ],
+      "sophomoric#1": [
+        "dignified"
+      ],
+      "sordid#1": [
+        "incorruptible"
+      ],
+      "sought_after#1": [
+        "lonely"
+      ],
+      "speaks_as_developers_mouthpiece#1": [
+        "detractor"
+      ],
+      "specializing#1": [
+        "interdisciplinary"
+      ],
+      "speedy#1": [
+        "foot_dragging"
+      ],
+      "splitter#1": [
+        "welcoming"
+      ],
+      "spoiled#1": [
+        "resigned"
+      ],
+      "spoiler#1": [
+        "concealing"
+      ],
+      "spoiling#1": [
+        "minimizing"
+      ],
+      "sponger#1": [
+        "unsupported"
+      ],
+      "spurred#1": [
+        "strong_willed"
+      ],
+      "staccato#1": [
+        "chattering"
+      ],
+      "stays_within_scope#1": [
+        "overstepping"
+      ],
+      "sticker#1": [
+        "secure_attachment"
+      ],
+      "straightforward_obedience#1": [
+        "foot_dragging"
+      ],
+      "strategic_compliance_under_training#1": [
+        "restrainable"
+      ],
+      "struggles_to_make_conversation#1": [
+        "chattering"
+      ],
+      "struggles_to_name_feelings#1": [
+        "emotional"
+      ],
+      "struggles_with_small_talk#1": [
+        "chattering"
+      ],
+      "stubbornly_fixated#1": [
+        "meditative"
+      ],
+      "stuttering#1": [
+        "chattering"
+      ],
+      "suasive#1": [
+        "malleable"
+      ],
+      "sublime#1": [
+        "modest"
+      ],
+      "subverts_oversight_to_persist#1": [
+        "controlling"
+      ],
+      "successful#1": [
+        "shabby_genteel"
+      ],
+      "sufficient#1": [
+        "overdiligent"
+      ],
+      "sugary#1": [
+        "insulting"
+      ],
+      "sullen#1": [
+        "stoic"
+      ],
+      "swanky#1": [
+        "shabby_genteel",
+        "unladylike"
+      ],
+      "swift#1": [
+        "foot_dragging"
+      ],
+      "sympathetic#1": [
+        "sadistic"
+      ],
+      "tacky#1": [
+        "shabby_genteel",
+        "dignified"
+      ],
+      "tainted#1": [
+        "incorruptible"
+      ],
+      "tawdry#1": [
+        "dignified"
+      ],
+      "tenderminded#1": [
+        "sadistic"
+      ],
+      "theistic#1": [
+        "atheist"
+      ],
+      "thoroughbred#1": [
+        "middle_class"
+      ],
+      "toadyish#1": [
+        "insulting"
+      ],
+      "top_drawer#1": [
+        "middle_class"
+      ],
+      "touter#1": [
+        "detractor"
+      ],
+      "traitorous#1": [
+        "self_sacrificing"
+      ],
+      "transcendental#1": [
+        "materialist"
+      ],
+      "transparent_reasoning#1": [
+        "stream_of_consciousness"
+      ],
+      "trashy#1": [
+        "shabby_genteel"
+      ],
+      "treats_teens_like_adults#1": [
+        "authoritarian_baumrind"
+      ],
+      "treats_values_as_external#1": [
+        "disobedient"
+      ],
+      "trendy#1": [
+        "disheveled"
+      ],
+      "trig#1": [
+        "disheveled"
+      ],
+      "turns_to_creative_outlets#1": [
+        "restless"
+      ],
+      "tyrannical#1": [
+        "disobedient"
+      ],
+      "ultra_agnostic#1": [
+        "atheist",
+        "sikh"
+      ],
+      "ultra_polite#1": [
+        "entitled"
+      ],
+      "ultraspiritual#1": [
+        "materialist"
+      ],
+      "unable#1": [
+        "foot_dragging"
+      ],
+      "unadulterous#1": [
+        "polygamous",
+        "polyandrous"
+      ],
+      "unamusable#1": [
+        "wry"
+      ],
+      "unartistic#1": [
+        "artistic"
+      ],
+      "unawed_by_rank#1": [
+        "entitled"
+      ],
+      "unbecoming#1": [
+        "dignified"
+      ],
+      "uncanny#1": [
+        "dignified"
+      ],
+      "uncelebrated#1": [
+        "famous"
+      ],
+      "uncomplaisant#1": [
+        "resigned"
+      ],
+      "uncomplying#1": [
+        "resigned",
+        "foot_dragging"
+      ],
+      "unconditionally_compliant#1": [
+        "disobedient"
+      ],
+      "unconverted#1": [
+        "sikh",
+        "muslim",
+        "buddhist",
+        "christian"
+      ],
+      "uncouth#1": [
+        "shabby_genteel"
+      ],
+      "uncreative#1": [
+        "creative"
+      ],
+      "undesirable#1": [
+        "welcoming"
+      ],
+      "undeviating#1": [
+        "steadiness_disc"
+      ],
+      "undevout#1": [
+        "christian",
+        "muslim",
+        "hindu",
+        "sikh",
+        "buddhist",
+        "jewish"
+      ],
+      "undistinguished#1": [
+        "inspirational",
+        "achiever_bartle",
+        "perfectionist"
+      ],
+      "undistractable#1": [
+        "adhd"
+      ],
+      "undivided#1": [
+        "adhd"
+      ],
+      "uneasy_receiving_affection#1": [
+        "physical_touch"
+      ],
+      "uneasy_with_being_admired#1": [
+        "vulnerable_narcissistic"
+      ],
+      "unembittered#1": [
+        "aggrieved",
+        "bitter"
+      ],
+      "unenvious#1": [
+        "envious"
+      ],
+      "unfashionable#1": [
+        "contemporary"
+      ],
+      "unfraternal#1": [
+        "cliquish"
+      ],
+      "ungodly#1": [
+        "jewish",
+        "christian",
+        "muslim",
+        "sikh",
+        "hindu"
+      ],
+      "ungovernable#1": [
+        "resigned"
+      ],
+      "unheard_of#1": [
+        "famous"
+      ],
+      "unimprovable#1": [
+        "perfectionist"
+      ],
+      "uningenious#1": [
+        "creative"
+      ],
+      "uninterested_in_romance#1": [
+        "pansexual",
+        "bisexual"
+      ],
+      "unintrospective#1": [
+        "meditative"
+      ],
+      "uninventive#1": [
+        "creative"
+      ],
+      "unitarian#1": [
+        "sectarian",
+        "atheist",
+        "fundamentalist"
+      ],
+      "universalist#1": [
+        "ethnocentric"
+      ],
+      "unjaundiced#1": [
+        "judgmental"
+      ],
+      "unjealous#1": [
+        "envious"
+      ],
+      "unjust#1": [
+        "just"
+      ],
+      "unmalleable#1": [
+        "restrainable"
+      ],
+      "unmasculine#1": [
+        "overmasculine",
+        "androgynous"
+      ],
+      "unmercenary#1": [
+        "mercenary"
+      ],
+      "unmirthful#1": [
+        "wry"
+      ],
+      "unniggardly#1": [
+        "parasitic"
+      ],
+      "unpaid#1": [
+        "parasitic"
+      ],
+      "unpatriotic#1": [
+        "patriotic",
+        "nationalist"
+      ],
+      "unpedigreed#1": [
+        "shabby_genteel",
+        "aristocratic"
+      ],
+      "unpersuasive#1": [
+        "persuasive"
+      ],
+      "unprejudiced#1": [
+        "ageist"
+      ],
+      "unprovincial#1": [
+        "civilizationist",
+        "parochial",
+        "insular"
+      ],
+      "unrealistic#1": [
+        "despairing"
+      ],
+      "unrefined#1": [
+        "prudish"
+      ],
+      "unreformed#1": [
+        "restrainable"
+      ],
+      "unregal#1": [
+        "dignified",
+        "leo"
+      ],
+      "unreligious#1": [
+        "sikh",
+        "muslim"
+      ],
+      "unresentful#1": [
+        "aggrieved"
+      ],
+      "unrevengeful#1": [
+        "violent",
+        "spiteful"
+      ],
+      "unromantic#1": [
+        "bisexual"
+      ],
+      "unscriptural#1": [
+        "sikh",
+        "christian"
+      ],
+      "unsexual#1": [
+        "pansexual"
+      ],
+      "unshakeable_on_bright_lines#1": [
+        "restrainable"
+      ],
+      "unskilled#1": [
+        "deft"
+      ],
+      "unsocial#1": [
+        "lonely"
+      ],
+      "unspiritual#1": [
+        "sectarian"
+      ],
+      "unstudied#1": [
+        "glib"
+      ],
+      "unsubmissive#1": [
+        "resigned"
+      ],
+      "untamable#1": [
+        "resigned"
+      ],
+      "untasteful#1": [
+        "prudish"
+      ],
+      "untiring#1": [
+        "sleep_deprived",
+        "stressed"
+      ],
+      "unvanquishable#1": [
+        "resigned"
+      ],
+      "unvindictive#1": [
+        "vindictive",
+        "aggrieved"
+      ],
+      "unwaning#1": [
+        "declining"
+      ],
+      "unwarlike#1": [
+        "violent"
+      ],
+      "unwed#1": [
+        "polygamous",
+        "polygynous",
+        "polyandrous"
+      ],
+      "up_to_date#1": [
+        "historically_minded"
+      ],
+      "uprooted#1": [
+        "italian"
+      ],
+      "upset_by_others_suffering#1": [
+        "sadistic",
+        "sadistic_dark_tetrad"
+      ],
+      "upstart#1": [
+        "welcoming"
+      ],
+      "useful#1": [
+        "glib"
+      ],
+      "user_centered#1": [
+        "civilizationist"
+      ],
+      "user_friendly#1": [
+        "glib"
+      ],
+      "utopian#1": [
+        "civilizationist"
+      ],
+      "uxorious#1": [
+        "polygynous"
+      ],
+      "vainglorious#1": [
+        "flattering"
+      ],
+      "vaunting#1": [
+        "flattering"
+      ],
+      "venal#1": [
+        "incorruptible"
+      ],
+      "venom#1": [
+        "wry"
+      ],
+      "virile#1": [
+        "androgynous"
+      ],
+      "visionless#1": [
+        "future_oriented"
+      ],
+      "vividly_imaginative#1": [
+        "meditative"
+      ],
+      "voluntarist#1": [
+        "restrainable"
+      ],
+      "vulgar#1": [
+        "prudish"
+      ],
+      "vulgarized#1": [
+        "dignified",
+        "shabby_genteel"
+      ],
+      "wailful#1": [
+        "morose"
+      ],
+      "wanton#1": [
+        "amorous"
+      ],
+      "warmly_natural#1": [
+        "glib"
+      ],
+      "weak_minded#1": [
+        "persuasive"
+      ],
+      "weighs_rival_explanations#1": [
+        "paradoxical"
+      ],
+      "weighty#1": [
+        "deferential"
+      ],
+      "well_conducted#1": [
+        "unladylike"
+      ],
+      "wench#1": [
+        "middle_aged"
+      ],
+      "white_lying#1": [
+        "insulting"
+      ],
+      "whole_minded#1": [
+        "adhd"
+      ],
+      "wifely#1": [
+        "polyandrous",
+        "polygynous"
+      ],
+      "willing_to_refuse#1": [
+        "restrainable"
+      ],
+      "womanish#1": [
+        "neuter",
+        "androgynous",
+        "overmasculine"
+      ],
+      "womanlike#1": [
+        "androgynous",
+        "overmasculine"
+      ],
+      "wont_be_dominated#1": [
+        "restrainable",
+        "resigned"
+      ],
+      "work_obsessed#1": [
+        "trapped_in_job"
+      ],
+      "workaholic#1": [
+        "burned_out"
+      ],
+      "yahoo#1": [
+        "shabby_genteel"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 7072,
+        "unparsed": 1
+      },
+      "answers": {
+        "unrelated": 51435,
+        "opposed": 34211,
+        "similar": 30112,
+        "unsure": 874
+      },
+      "final": {
+        "unrelated": 51965,
+        "similar": 30371,
+        "opposed": 34232,
+        "unsure": 64
+      },
+      "candidates_with_unsure_reasked": 595
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 4525,
+        "input": 7788880,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 14224,
+        "input": 2213475,
+        "cache_write": 574,
+        "cache_read": 7952770,
+        "calls_with_read": 13855,
+        "read_share_of_input": 0.7822,
+        "hit_rate_calls": 0.9741
+      },
+      "claude-opus-5-5": {
+        "calls": 5534,
+        "input": 787387,
+        "cache_write": 0,
+        "cache_read": 3176516,
+        "calls_with_read": 5534,
+        "read_share_of_input": 0.8014,
+        "hit_rate_calls": 1.0
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 1.946313
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.48285
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 8.485198,
+        "claude-opus-5-5:batch": 9.80975
+      }
+    },
+    "spend_usd": 20.72414,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 7788880,
+          "completion_tokens": 6227476,
+          "cost_usd": 1.9463,
+          "n_calls": 4525
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 1102825,
+          "completion_tokens": 760410,
+          "cost_usd": 9.8097,
+          "n_calls": 5534
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 3004358,
+          "completion_tokens": 1192738,
+          "cost_usd": 8.968,
+          "n_calls": 14224
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 20.7241,
+      "total_prompt_tokens": 11896283,
+      "total_completion_tokens": 8180624,
+      "n_calls": 24284
+    },
+    "rules": [
+      "m3_rules_2",
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 759,
+    "covered_flagged": 730,
+    "pair_notes": {
+      "rows": 35,
+      "notes": 36,
+      "by_kind": {
+        "pair": 36
+      },
+      "rows_by_decision": {
+        "covered": 21,
+        "new": 14
+      }
+    },
+    "pair_flag_rows": 301,
+    "floor": {
+      "rows_with_listed_below": 7066,
+      "listed_below_total": 67842,
+      "similar_kept_out_total": 1537,
+      "rows_with_similar_kept_out": 1257
+    },
+    "renamed_from_judged": {
+      "rows": 32,
+      "by_decision": {
+        "covered": 22,
+        "new": 10
+      }
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "a97c600cc979a3ea859c1a77ccb1a5dca787a28903ede15f952e025cabc77ebf",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 6553,
+      "rows_listing_a_queue_entry": 3254,
+      "rows_reading_a_queue_entry": 1080,
+      "covered_by_queue": 149,
+      "covered_by_queue_by_status": {
+        "candidate": 149
+      }
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "covered": 2485,
+        "new": 2641
+      },
+      "alignment 2": {
+        "new": 580,
+        "covered": 392
+      },
+      "alignment 3": {
+        "new": 1314,
+        "covered": 159
+      }
+    },
+    "partners_skipped": {
+      "rows": 5632,
+      "partners": 12693,
+      "by_relation": {
+        "unrelated": 11434,
+        "opposed": 1259
+      },
+      "by_where": {
+        "shortlist": 12680,
+        "opposite": 13
+      },
+      "est_readings_saved": {
+        "sonnet": 12693,
+        "opus": 470.2
+      },
+      "est_saving_usd_live": 16.927
+    },
+    "batch_id": "rec_pooled_1_s0",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 4518,
+        "ok_first": 4511,
+        "ok": 4517
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 368,
+        "ok_first": 368,
+        "ok": 368
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 13856,
+        "ok_first": 13856,
+        "ok": 13856
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 5534,
+        "ok_first": 5534,
+        "ok": 5534
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 2758,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "hide": {
+      "path": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/recovery/rec_pooled_1/seed0/hidden.json",
+      "sha256": "5b2b069e6727a4bfc350e7bbac6a2a67ce5c94d0252df22e7b2035441fae2de8",
+      "n_hidden": 96
+    },
+    "affected_only": {
+      "n_selected": 7586,
+      "n_scored": 4828,
+      "n_copied": 2758,
+      "share_scored": 0.6364,
+      "by_reason": {
+        "exact_label": 42,
+        "label": 45,
+        "m3_near": 4168,
+        "match_near": 4429,
+        "recorded": 4018,
+        "retrieval": 387
+      },
+      "only_reason": {
+        "match_near": 137,
+        "recorded": 37,
+        "retrieval": 359
+      },
+      "copied_by_decision": {
+        "covered": 1164,
+        "new": 1594
+      },
+      "copied_from_runs": {
+        "2026-10-09-iv-pilot_censuses_r3": 36,
+        "2026-10-09-rare-pilot_censuses_r3": 21,
+        "2026-10-10-full_alignment_sweep_r3": 91,
+        "2026-10-10-tda_censuses_r3": 619,
+        "2026-10-11-allport_hi_censuses_r3": 629,
+        "2026-10-11-b_alignment_sweep_krakovna": 5,
+        "2026-10-11-b_alignment_sweep_r3": 10,
+        "2026-10-11-full_roget_r3": 23,
+        "2026-10-11-full_wn_clusters_r3": 20,
+        "2026-10-11-g600_ipip_r3": 55,
+        "2026-10-11-papers_alignment_sweep_r3": 119,
+        "2026-10-12-allport_iv_rare_censuses": 43,
+        "2026-10-12-allport_rare_censuses": 192,
+        "2026-10-12-m1_phrase_rejudge": 52,
+        "2026-10-12-pilot-mc2_base_model": 75,
+        "2026-10-12-pilot_base_model_r3": 7,
+        "2026-10-12-rule1b_roget": 3,
+        "2026-10-12-rule1b_wn_clusters": 14,
+        "2026-10-13-full_roget_regloss": 12,
+        "2026-10-13-g600_ipip": 71,
+        "2026-10-13-g600_ipip_renamed": 5,
+        "2026-10-13-m1_phrase_gg5": 30,
+        "2026-10-13-m1_phrase_others": 4,
+        "2026-10-14-g600-hinted_ipip": 102,
+        "2026-10-14-pilot_masked_lm": 77,
+        "2026-10-14-pilot_structural": 29,
+        "gen_pilot_censuses_r3": 155,
+        "gen_pilot_roget_r3": 15,
+        "gen_pilot_wn_clusters_r3": 18,
+        "m3_pilot_1_r3": 164,
+        "m3_states_renamed_w23": 15,
+        "m3_w23_five_rescore_r3": 1,
+        "states_gg5_1_names": 1,
+        "states_unjudged_r3_names": 45
+      },
+      "copied_rules": {
+        "m3_rules_2": 15,
+        "m3_rules_3": 2743
+      },
+      "n_vectors": 7586,
+      "queue_search": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/recovery_test.py --pooled --affected-only --seed 0 1 --transport batches --budget-usd 90 --batch-id rec_pooled_1 --confirm-expensive --confirmed-by 'Roger, 2026-10-14: open_items '\"'\"'Your go needed'\"'\"' item 4 go (pooled harness, affected only, two seeds, batched, cap $90)'",
+      "git_sha": "77db8937+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist rec_pooled_1_s0"
+    },
+    "produced_at": "2026-10-14T12:41:50+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "hidden",
+        "path": "data/candidates/recovery/rec_pooled_1/seed0/hidden.json",
+        "fingerprint": "v1:2026-10-14T08:10:08+00:00@26434",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T08:10:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-13T13:53:24+00:00@3497671",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T13:53:24+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "3a0e7ede31a5b3c383acf5b4a85d25bdd49c6ad1dd24d5e508ce88f487a56a74"
+  }
+}

@@ -1,0 +1,2143 @@
+{
+ "result": {
+  "batch_id": "rec_pooled_1",
+  "pooled": true,
+  "c_strict": 4,
+  "seeds": [
+   {
+    "seed": 0,
+    "strict": {
+     "c": 4,
+     "n_hidden": 96,
+     "n_recovered": 38,
+     "recall": 0.3958,
+     "n_recovered_headline": 59,
+     "recovered": [
+      "athletic",
+      "bold",
+      "capitalist",
+      "cautious",
+      "cheerful",
+      "confrontational",
+      "critical",
+      "dominant",
+      "eccentric",
+      "empathetic",
+      "fashionable",
+      "financially_conservative",
+      "flippant",
+      "flirty",
+      "harmful",
+      "harmless",
+      "high_context_hall",
+      "idealistic",
+      "internal_locus_of_control",
+      "ironic",
+      "low_context_hall",
+      "melancholic",
+      "meritocratic",
+      "night_owl",
+      "obedient",
+      "ocd",
+      "pragmatic",
+      "pretentious",
+      "rebellious",
+      "sedentary",
+      "sincere",
+      "socialist",
+      "squeamish",
+      "submissive",
+      "thick_skinned",
+      "thin_skinned",
+      "unfashionable",
+      "upper_class"
+     ],
+     "lost_at_strict": [
+      "aesthete",
+      "anxious_preoccupied_attachment",
+      "closed_big_five",
+      "conciliatory",
+      "conventional",
+      "early_bird",
+      "external_locus_of_control",
+      "financially_secure",
+      "forgiving",
+      "impatient",
+      "indigenous_australian",
+      "innovative",
+      "intrinsic_allport",
+      "nurturing",
+      "patient",
+      "philanthropic",
+      "philistine",
+      "picky_eater",
+      "traditional",
+      "unpretentious",
+      "working_class"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 96,
+     "n_pair_recovered": 48,
+     "share": 0.5,
+     "n_also_recovered": 36,
+     "by_region": {
+      "alignment_ai_agent": {
+       "n_hidden": 2,
+       "n_pair_recovered": 2
+      },
+      "cognitive_epistemic": {
+       "n_hidden": 19,
+       "n_pair_recovered": 9
+      },
+      "communication_style": {
+       "n_hidden": 10,
+       "n_pair_recovered": 3
+      },
+      "emotional_temperament": {
+       "n_hidden": 17,
+       "n_pair_recovered": 8
+      },
+      "identity_demographic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 10
+      },
+      "moral_stance": {
+       "n_hidden": 15,
+       "n_pair_recovered": 8
+      },
+      "social_interpersonal": {
+       "n_hidden": 16,
+       "n_pair_recovered": 8
+      }
+     },
+     "stems": [
+      "artistic_holland",
+      "authoritative_baumrind",
+      "bold",
+      "capitalist",
+      "cheerful",
+      "closed_big_five",
+      "conventional",
+      "dignity_culture",
+      "dominant",
+      "early_bird",
+      "external_locus_of_control",
+      "face_culture",
+      "fashionable",
+      "financially_conservative",
+      "financially_precarious",
+      "financially_reckless",
+      "financially_secure",
+      "flirty",
+      "harmful",
+      "harmless",
+      "internal_locus_of_control",
+      "intrinsic_allport",
+      "low_context_hall",
+      "meritocratic",
+      "neglectful",
+      "night_owl",
+      "nurturing",
+      "obedient",
+      "patient",
+      "philistine",
+      "rebellious",
+      "sedentary",
+      "sincere",
+      "socialist",
+      "squeamish",
+      "strong_stomached",
+      "submissive",
+      "taoist",
+      "thick_skinned",
+      "thin_skinned",
+      "traditional",
+      "uncritical",
+      "unfashionable",
+      "unforgiving",
+      "unpretentious",
+      "upper_class",
+      "win_win_seeking",
+      "working_class"
+     ]
+    },
+    "recall_at_n_by_run": {
+     "alignment_sweep/2026-10-10-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 19.0,
+       "n_candidates": 37,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 51.0,
+       "n_candidates": 93,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 103.0,
+       "n_candidates": 186,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 157.0,
+       "n_candidates": 279,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 214.0,
+       "n_candidates": 372,
+       "n_recovered": 4,
+       "recall": 0.0417
+      }
+     ],
+     "alignment_sweep/2026-10-11-b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 4.0,
+       "n_candidates": 7,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 9.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 19.0,
+       "n_candidates": 32,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 30.0,
+       "n_candidates": 48,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 43.0,
+       "n_candidates": 64,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "alignment_sweep/2026-10-11-papers": [
+      {
+       "quantile": 0.1,
+       "max_rank": 21.0,
+       "n_candidates": 41,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 64.0,
+       "n_candidates": 100,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 160.0,
+       "n_candidates": 201,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 252.0,
+       "n_candidates": 302,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 373.0,
+       "n_candidates": 402,
+       "n_recovered": 3,
+       "recall": 0.0312
+      }
+     ],
+     "alignment_sweep/2026-10-11-usage": [
+      {
+       "quantile": 0.1,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2.0,
+       "n_candidates": 4,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2.0,
+       "n_candidates": 4,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "base_model/2026-10-12-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 44.0,
+       "n_candidates": 44,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 114.0,
+       "n_candidates": 111,
+       "n_recovered": 4,
+       "recall": 0.0417
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 231.0,
+       "n_candidates": 222,
+       "n_recovered": 8,
+       "recall": 0.0833
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 348.0,
+       "n_candidates": 333,
+       "n_recovered": 13,
+       "recall": 0.1354
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 467.0,
+       "n_candidates": 444,
+       "n_recovered": 15,
+       "recall": 0.1562
+      }
+     ],
+     "base_model/2026-10-12-pilot-mc2": [
+      {
+       "quantile": 0.1,
+       "max_rank": 139.0,
+       "n_candidates": 135,
+       "n_recovered": 6,
+       "recall": 0.0625
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 352.0,
+       "n_candidates": 338,
+       "n_recovered": 13,
+       "recall": 0.1354
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 718.0,
+       "n_candidates": 676,
+       "n_recovered": 21,
+       "recall": 0.2188
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 1118.0,
+       "n_candidates": 1015,
+       "n_recovered": 25,
+       "recall": 0.2604
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 1541.0,
+       "n_candidates": 1353,
+       "n_recovered": 27,
+       "recall": 0.2812
+      }
+     ],
+     "censuses/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 341.0,
+       "n_candidates": 50,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 741.0,
+       "n_candidates": 125,
+       "n_recovered": 8,
+       "recall": 0.0833
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1406.0,
+       "n_candidates": 250,
+       "n_recovered": 10,
+       "recall": 0.1042
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2131.0,
+       "n_candidates": 375,
+       "n_recovered": 11,
+       "recall": 0.1146
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2816.0,
+       "n_candidates": 500,
+       "n_recovered": 15,
+       "recall": 0.1562
+      }
+     ],
+     "censuses/2026-10-09-iv-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3644.0,
+       "n_candidates": 8,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 5257.0,
+       "n_candidates": 20,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 7949.0,
+       "n_candidates": 40,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 10034.0,
+       "n_candidates": 60,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17670.0,
+       "n_candidates": 80,
+       "n_recovered": 3,
+       "recall": 0.0312
+      }
+     ],
+     "censuses/2026-10-09-rare-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10008.0,
+       "n_candidates": 6,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10241.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10645.0,
+       "n_candidates": 31,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 12223.0,
+       "n_candidates": 46,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17907.0,
+       "n_candidates": 62,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "censuses/2026-10-10-tda": [
+      {
+       "quantile": 0.1,
+       "max_rank": 317.0,
+       "n_candidates": 253,
+       "n_recovered": 8,
+       "recall": 0.0833
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 738.0,
+       "n_candidates": 632,
+       "n_recovered": 21,
+       "recall": 0.2188
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1428.0,
+       "n_candidates": 1264,
+       "n_recovered": 28,
+       "recall": 0.2917
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2127.0,
+       "n_candidates": 1895,
+       "n_recovered": 36,
+       "recall": 0.375
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2818.0,
+       "n_candidates": 2527,
+       "n_recovered": 38,
+       "recall": 0.3958
+      }
+     ],
+     "censuses/2026-10-11-allport_hi": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3270.0,
+       "n_candidates": 181,
+       "n_recovered": 5,
+       "recall": 0.0521
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 3915.0,
+       "n_candidates": 452,
+       "n_recovered": 8,
+       "recall": 0.0833
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 5125.0,
+       "n_candidates": 904,
+       "n_recovered": 12,
+       "recall": 0.125
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 6384.0,
+       "n_candidates": 1356,
+       "n_recovered": 16,
+       "recall": 0.1667
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 7562.0,
+       "n_candidates": 1808,
+       "n_recovered": 18,
+       "recall": 0.1875
+      }
+     ],
+     "censuses/2026-10-12-allport_iv_rare": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10047.0,
+       "n_candidates": 10,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10355.0,
+       "n_candidates": 25,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10716.0,
+       "n_candidates": 50,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 13484.0,
+       "n_candidates": 74,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17789.0,
+       "n_candidates": 99,
+       "n_recovered": 2,
+       "recall": 0.0208
+      }
+     ],
+     "censuses/2026-10-12-allport_rare": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10037.0,
+       "n_candidates": 60,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10242.0,
+       "n_candidates": 150,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10695.0,
+       "n_candidates": 300,
+       "n_recovered": 4,
+       "recall": 0.0417
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 12499.0,
+       "n_candidates": 451,
+       "n_recovered": 7,
+       "recall": 0.0729
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17907.0,
+       "n_candidates": 601,
+       "n_recovered": 8,
+       "recall": 0.0833
+      }
+     ],
+     "ipip/2026-10-11-g600": [
+      {
+       "quantile": 0.1,
+       "max_rank": 68.0,
+       "n_candidates": 23,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 159.0,
+       "n_candidates": 57,
+       "n_recovered": 5,
+       "recall": 0.0521
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 281.0,
+       "n_candidates": 114,
+       "n_recovered": 7,
+       "recall": 0.0729
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 403.0,
+       "n_candidates": 170,
+       "n_recovered": 12,
+       "recall": 0.125
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 227,
+       "n_recovered": 14,
+       "recall": 0.1458
+      }
+     ],
+     "ipip/2026-10-13-g600": [
+      {
+       "quantile": 0.1,
+       "max_rank": 39.0,
+       "n_candidates": 50,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 107.0,
+       "n_candidates": 124,
+       "n_recovered": 5,
+       "recall": 0.0521
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 230.0,
+       "n_candidates": 249,
+       "n_recovered": 10,
+       "recall": 0.1042
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 355.0,
+       "n_candidates": 374,
+       "n_recovered": 15,
+       "recall": 0.1562
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 498,
+       "n_recovered": 20,
+       "recall": 0.2083
+      }
+     ],
+     "ipip/2026-10-14-g600-hinted": [
+      {
+       "quantile": 0.1,
+       "max_rank": 40.0,
+       "n_candidates": 51,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 111.0,
+       "n_candidates": 126,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 231.0,
+       "n_candidates": 253,
+       "n_recovered": 6,
+       "recall": 0.0625
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 353.0,
+       "n_candidates": 380,
+       "n_recovered": 11,
+       "recall": 0.1146
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 506,
+       "n_recovered": 16,
+       "recall": 0.1667
+      }
+     ],
+     "masked_lm/2026-10-14-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 39.0,
+       "n_candidates": 33,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 103.0,
+       "n_candidates": 82,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 206.0,
+       "n_candidates": 164,
+       "n_recovered": 5,
+       "recall": 0.0521
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 319.0,
+       "n_candidates": 245,
+       "n_recovered": 6,
+       "recall": 0.0625
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 437.0,
+       "n_candidates": 327,
+       "n_recovered": 7,
+       "recall": 0.0729
+      }
+     ],
+     "roget/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 22.0,
+       "n_candidates": 9,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 58.0,
+       "n_candidates": 22,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 108.0,
+       "n_candidates": 45,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 146.0,
+       "n_candidates": 68,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 184.0,
+       "n_candidates": 90,
+       "n_recovered": 4,
+       "recall": 0.0417
+      }
+     ],
+     "roget/2026-10-11-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 53.0,
+       "n_candidates": 28,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 122.0,
+       "n_candidates": 71,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 233.0,
+       "n_candidates": 142,
+       "n_recovered": 5,
+       "recall": 0.0521
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 357.0,
+       "n_candidates": 214,
+       "n_recovered": 7,
+       "recall": 0.0729
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 475.0,
+       "n_candidates": 285,
+       "n_recovered": 7,
+       "recall": 0.0729
+      }
+     ],
+     "roget/2026-10-12-rule1b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3.0,
+       "n_candidates": 1,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 5.0,
+       "n_candidates": 3,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 8.0,
+       "n_candidates": 6,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 11.0,
+       "n_candidates": 9,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 14.0,
+       "n_candidates": 12,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "structural/2026-10-14-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 49.0,
+       "n_candidates": 48,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 122.0,
+       "n_candidates": 120,
+       "n_recovered": 2,
+       "recall": 0.0208
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 247.0,
+       "n_candidates": 239,
+       "n_recovered": 7,
+       "recall": 0.0729
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 372.0,
+       "n_candidates": 358,
+       "n_recovered": 12,
+       "recall": 0.125
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 499.0,
+       "n_candidates": 478,
+       "n_recovered": 16,
+       "recall": 0.1667
+      }
+     ],
+     "wn_clusters/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 9.0,
+       "n_candidates": 8,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 24.0,
+       "n_candidates": 20,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 46.0,
+       "n_candidates": 39,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 66.0,
+       "n_candidates": 58,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 87.0,
+       "n_candidates": 78,
+       "n_recovered": 2,
+       "recall": 0.0208
+      }
+     ],
+     "wn_clusters/2026-10-11-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 57.0,
+       "n_candidates": 41,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 132.0,
+       "n_candidates": 103,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 251.0,
+       "n_candidates": 206,
+       "n_recovered": 6,
+       "recall": 0.0625
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 360.0,
+       "n_candidates": 310,
+       "n_recovered": 6,
+       "recall": 0.0625
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 468.0,
+       "n_candidates": 413,
+       "n_recovered": 9,
+       "recall": 0.0938
+      }
+     ],
+     "wn_clusters/2026-10-12-rule1b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 21.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 47.0,
+       "n_candidates": 41,
+       "n_recovered": 1,
+       "recall": 0.0104
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 89.0,
+       "n_candidates": 82,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 132.0,
+       "n_candidates": 122,
+       "n_recovered": 3,
+       "recall": 0.0312
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 178.0,
+       "n_candidates": 163,
+       "n_recovered": 3,
+       "recall": 0.0312
+      }
+     ]
+    }
+   },
+   {
+    "seed": 1,
+    "strict": {
+     "c": 4,
+     "n_hidden": 95,
+     "n_recovered": 47,
+     "recall": 0.4947,
+     "n_recovered_headline": 61,
+     "recovered": [
+      "abstemious",
+      "analytical",
+      "antifeminist",
+      "bitter",
+      "brash",
+      "brave",
+      "bullying",
+      "circumspect",
+      "competent",
+      "cowardly",
+      "dignified",
+      "earnest",
+      "emphatic",
+      "entitled",
+      "erudite",
+      "gluttonous",
+      "harmful",
+      "harmless",
+      "honorable",
+      "incompetent",
+      "intuitive",
+      "irresponsible",
+      "judgmental",
+      "learning_oriented",
+      "manipulative",
+      "materialistic",
+      "meditative",
+      "misanthropic",
+      "moral_universalist",
+      "noncommittal",
+      "opinionated",
+      "optimistic",
+      "pessimistic",
+      "philosophical",
+      "poor",
+      "proactive",
+      "promiscuous",
+      "renter",
+      "rhetorical",
+      "self_absorbed",
+      "solitary",
+      "spiritual",
+      "stoic",
+      "strategic",
+      "unschooled",
+      "vindictive",
+      "wealthy"
+     ],
+     "lost_at_strict": [
+      "closed_big_five",
+      "dismissive_avoidant_attachment",
+      "gregarious",
+      "informational",
+      "lighthearted",
+      "male",
+      "open_big_five",
+      "organized",
+      "other_focused",
+      "plain_looking",
+      "reactive",
+      "sardonic",
+      "solemn",
+      "tactical"
+     ],
+     "needs_opus": []
+    },
+    "pair_recovery": {
+     "n_hidden": 95,
+     "n_pair_recovered": 47,
+     "share": 0.4947,
+     "n_also_recovered": 36,
+     "by_region": {
+      "alignment_ai_agent": {
+       "n_hidden": 1,
+       "n_pair_recovered": 0
+      },
+      "cognitive_epistemic": {
+       "n_hidden": 19,
+       "n_pair_recovered": 9
+      },
+      "communication_style": {
+       "n_hidden": 11,
+       "n_pair_recovered": 5
+      },
+      "emotional_temperament": {
+       "n_hidden": 16,
+       "n_pair_recovered": 7
+      },
+      "identity_demographic": {
+       "n_hidden": 17,
+       "n_pair_recovered": 9
+      },
+      "moral_stance": {
+       "n_hidden": 15,
+       "n_pair_recovered": 9
+      },
+      "social_interpersonal": {
+       "n_hidden": 16,
+       "n_pair_recovered": 8
+      }
+     },
+     "stems": [
+      "abstemious",
+      "brash",
+      "brave",
+      "bullying",
+      "circumspect",
+      "closed_big_five",
+      "competent",
+      "cowardly",
+      "dignified",
+      "disorganized",
+      "dog_person",
+      "earnest",
+      "ends_justify_means",
+      "entitled",
+      "female",
+      "feminist",
+      "gluttonous",
+      "good_looking",
+      "harmful",
+      "harmless",
+      "homeowner",
+      "honorable",
+      "judgmental",
+      "leo",
+      "lighthearted",
+      "male",
+      "materialistic",
+      "meditative",
+      "moral_relativist",
+      "noncommittal",
+      "opinionated",
+      "optimistic",
+      "organized",
+      "other_focused",
+      "performance_oriented",
+      "pessimistic",
+      "plain_looking",
+      "poor",
+      "reactive",
+      "renter",
+      "self_absorbed",
+      "solitary",
+      "tactical",
+      "understated",
+      "unschooled",
+      "vindictive",
+      "wealthy"
+     ]
+    },
+    "recall_at_n_by_run": {
+     "alignment_sweep/2026-10-10-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 19.0,
+       "n_candidates": 37,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 51.0,
+       "n_candidates": 93,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 103.0,
+       "n_candidates": 186,
+       "n_recovered": 4,
+       "recall": 0.0421
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 157.0,
+       "n_candidates": 279,
+       "n_recovered": 4,
+       "recall": 0.0421
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 214.0,
+       "n_candidates": 372,
+       "n_recovered": 4,
+       "recall": 0.0421
+      }
+     ],
+     "alignment_sweep/2026-10-11-b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 4.0,
+       "n_candidates": 7,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 9.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 19.0,
+       "n_candidates": 32,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 30.0,
+       "n_candidates": 48,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 43.0,
+       "n_candidates": 64,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "alignment_sweep/2026-10-11-papers": [
+      {
+       "quantile": 0.1,
+       "max_rank": 21.0,
+       "n_candidates": 41,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 64.0,
+       "n_candidates": 100,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 160.0,
+       "n_candidates": 201,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 252.0,
+       "n_candidates": 302,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 373.0,
+       "n_candidates": 402,
+       "n_recovered": 2,
+       "recall": 0.0211
+      }
+     ],
+     "alignment_sweep/2026-10-11-usage": [
+      {
+       "quantile": 0.1,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1.0,
+       "n_candidates": 2,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2.0,
+       "n_candidates": 4,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2.0,
+       "n_candidates": 4,
+       "n_recovered": 1,
+       "recall": 0.0105
+      }
+     ],
+     "base_model/2026-10-12-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 44.0,
+       "n_candidates": 44,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 114.0,
+       "n_candidates": 111,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 231.0,
+       "n_candidates": 222,
+       "n_recovered": 12,
+       "recall": 0.1263
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 348.0,
+       "n_candidates": 333,
+       "n_recovered": 17,
+       "recall": 0.1789
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 467.0,
+       "n_candidates": 444,
+       "n_recovered": 19,
+       "recall": 0.2
+      }
+     ],
+     "base_model/2026-10-12-pilot-mc2": [
+      {
+       "quantile": 0.1,
+       "max_rank": 139.0,
+       "n_candidates": 135,
+       "n_recovered": 6,
+       "recall": 0.0632
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 352.0,
+       "n_candidates": 338,
+       "n_recovered": 17,
+       "recall": 0.1789
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 718.0,
+       "n_candidates": 676,
+       "n_recovered": 27,
+       "recall": 0.2842
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 1118.0,
+       "n_candidates": 1015,
+       "n_recovered": 36,
+       "recall": 0.3789
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 1541.0,
+       "n_candidates": 1353,
+       "n_recovered": 40,
+       "recall": 0.4211
+      }
+     ],
+     "censuses/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 341.0,
+       "n_candidates": 50,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 741.0,
+       "n_candidates": 125,
+       "n_recovered": 6,
+       "recall": 0.0632
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1406.0,
+       "n_candidates": 250,
+       "n_recovered": 11,
+       "recall": 0.1158
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2131.0,
+       "n_candidates": 375,
+       "n_recovered": 15,
+       "recall": 0.1579
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2816.0,
+       "n_candidates": 500,
+       "n_recovered": 21,
+       "recall": 0.2211
+      }
+     ],
+     "censuses/2026-10-09-iv-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3644.0,
+       "n_candidates": 8,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 5257.0,
+       "n_candidates": 20,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 7949.0,
+       "n_candidates": 40,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 10034.0,
+       "n_candidates": 60,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17670.0,
+       "n_candidates": 80,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "censuses/2026-10-09-rare-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10008.0,
+       "n_candidates": 6,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10241.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10645.0,
+       "n_candidates": 31,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 12223.0,
+       "n_candidates": 46,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17907.0,
+       "n_candidates": 62,
+       "n_recovered": 2,
+       "recall": 0.0211
+      }
+     ],
+     "censuses/2026-10-10-tda": [
+      {
+       "quantile": 0.1,
+       "max_rank": 317.0,
+       "n_candidates": 253,
+       "n_recovered": 5,
+       "recall": 0.0526
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 738.0,
+       "n_candidates": 632,
+       "n_recovered": 17,
+       "recall": 0.1789
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 1428.0,
+       "n_candidates": 1264,
+       "n_recovered": 27,
+       "recall": 0.2842
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 2127.0,
+       "n_candidates": 1895,
+       "n_recovered": 36,
+       "recall": 0.3789
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 2818.0,
+       "n_candidates": 2527,
+       "n_recovered": 42,
+       "recall": 0.4421
+      }
+     ],
+     "censuses/2026-10-11-allport_hi": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3270.0,
+       "n_candidates": 181,
+       "n_recovered": 4,
+       "recall": 0.0421
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 3915.0,
+       "n_candidates": 452,
+       "n_recovered": 6,
+       "recall": 0.0632
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 5125.0,
+       "n_candidates": 904,
+       "n_recovered": 15,
+       "recall": 0.1579
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 6384.0,
+       "n_candidates": 1356,
+       "n_recovered": 19,
+       "recall": 0.2
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 7562.0,
+       "n_candidates": 1808,
+       "n_recovered": 25,
+       "recall": 0.2632
+      }
+     ],
+     "censuses/2026-10-12-allport_iv_rare": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10047.0,
+       "n_candidates": 10,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10355.0,
+       "n_candidates": 25,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10716.0,
+       "n_candidates": 50,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 13484.0,
+       "n_candidates": 74,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17789.0,
+       "n_candidates": 99,
+       "n_recovered": 1,
+       "recall": 0.0105
+      }
+     ],
+     "censuses/2026-10-12-allport_rare": [
+      {
+       "quantile": 0.1,
+       "max_rank": 10037.0,
+       "n_candidates": 60,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 10242.0,
+       "n_candidates": 150,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 10695.0,
+       "n_candidates": 300,
+       "n_recovered": 5,
+       "recall": 0.0526
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 12499.0,
+       "n_candidates": 451,
+       "n_recovered": 7,
+       "recall": 0.0737
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 17907.0,
+       "n_candidates": 601,
+       "n_recovered": 8,
+       "recall": 0.0842
+      }
+     ],
+     "ipip/2026-10-11-g600": [
+      {
+       "quantile": 0.1,
+       "max_rank": 68.0,
+       "n_candidates": 23,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 159.0,
+       "n_candidates": 57,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 281.0,
+       "n_candidates": 114,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 403.0,
+       "n_candidates": 170,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 227,
+       "n_recovered": 3,
+       "recall": 0.0316
+      }
+     ],
+     "ipip/2026-10-13-g600": [
+      {
+       "quantile": 0.1,
+       "max_rank": 39.0,
+       "n_candidates": 50,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 107.0,
+       "n_candidates": 124,
+       "n_recovered": 7,
+       "recall": 0.0737
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 230.0,
+       "n_candidates": 249,
+       "n_recovered": 12,
+       "recall": 0.1263
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 355.0,
+       "n_candidates": 374,
+       "n_recovered": 12,
+       "recall": 0.1263
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 498,
+       "n_recovered": 12,
+       "recall": 0.1263
+      }
+     ],
+     "ipip/2026-10-14-g600-hinted": [
+      {
+       "quantile": 0.1,
+       "max_rank": 40.0,
+       "n_candidates": 51,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 111.0,
+       "n_candidates": 126,
+       "n_recovered": 8,
+       "recall": 0.0842
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 231.0,
+       "n_candidates": 253,
+       "n_recovered": 13,
+       "recall": 0.1368
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 353.0,
+       "n_candidates": 380,
+       "n_recovered": 15,
+       "recall": 0.1579
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 600.0,
+       "n_candidates": 506,
+       "n_recovered": 15,
+       "recall": 0.1579
+      }
+     ],
+     "masked_lm/2026-10-14-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 39.0,
+       "n_candidates": 33,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 103.0,
+       "n_candidates": 82,
+       "n_recovered": 5,
+       "recall": 0.0526
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 206.0,
+       "n_candidates": 164,
+       "n_recovered": 6,
+       "recall": 0.0632
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 319.0,
+       "n_candidates": 245,
+       "n_recovered": 7,
+       "recall": 0.0737
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 437.0,
+       "n_candidates": 327,
+       "n_recovered": 9,
+       "recall": 0.0947
+      }
+     ],
+     "roget/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 22.0,
+       "n_candidates": 9,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 58.0,
+       "n_candidates": 22,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 108.0,
+       "n_candidates": 45,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 146.0,
+       "n_candidates": 68,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 184.0,
+       "n_candidates": 90,
+       "n_recovered": 1,
+       "recall": 0.0105
+      }
+     ],
+     "roget/2026-10-11-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 53.0,
+       "n_candidates": 28,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 122.0,
+       "n_candidates": 71,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 233.0,
+       "n_candidates": 142,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 357.0,
+       "n_candidates": 214,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 475.0,
+       "n_candidates": 285,
+       "n_recovered": 5,
+       "recall": 0.0526
+      }
+     ],
+     "roget/2026-10-12-rule1b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 3.0,
+       "n_candidates": 1,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 5.0,
+       "n_candidates": 3,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 8.0,
+       "n_candidates": 6,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 11.0,
+       "n_candidates": 9,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 14.0,
+       "n_candidates": 12,
+       "n_recovered": 0,
+       "recall": 0.0
+      }
+     ],
+     "structural/2026-10-14-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 49.0,
+       "n_candidates": 48,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 122.0,
+       "n_candidates": 120,
+       "n_recovered": 4,
+       "recall": 0.0421
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 247.0,
+       "n_candidates": 239,
+       "n_recovered": 7,
+       "recall": 0.0737
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 372.0,
+       "n_candidates": 358,
+       "n_recovered": 13,
+       "recall": 0.1368
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 499.0,
+       "n_candidates": 478,
+       "n_recovered": 16,
+       "recall": 0.1684
+      }
+     ],
+     "wn_clusters/2026-10-08-pilot": [
+      {
+       "quantile": 0.1,
+       "max_rank": 9.0,
+       "n_candidates": 8,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 24.0,
+       "n_candidates": 20,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 46.0,
+       "n_candidates": 39,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 66.0,
+       "n_candidates": 58,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 87.0,
+       "n_candidates": 78,
+       "n_recovered": 2,
+       "recall": 0.0211
+      }
+     ],
+     "wn_clusters/2026-10-11-full": [
+      {
+       "quantile": 0.1,
+       "max_rank": 57.0,
+       "n_candidates": 41,
+       "n_recovered": 1,
+       "recall": 0.0105
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 132.0,
+       "n_candidates": 103,
+       "n_recovered": 2,
+       "recall": 0.0211
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 251.0,
+       "n_candidates": 206,
+       "n_recovered": 3,
+       "recall": 0.0316
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 360.0,
+       "n_candidates": 310,
+       "n_recovered": 7,
+       "recall": 0.0737
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 468.0,
+       "n_candidates": 413,
+       "n_recovered": 7,
+       "recall": 0.0737
+      }
+     ],
+     "wn_clusters/2026-10-12-rule1b": [
+      {
+       "quantile": 0.1,
+       "max_rank": 21.0,
+       "n_candidates": 16,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.25,
+       "max_rank": 47.0,
+       "n_candidates": 41,
+       "n_recovered": 0,
+       "recall": 0.0
+      },
+      {
+       "quantile": 0.5,
+       "max_rank": 89.0,
+       "n_candidates": 82,
+       "n_recovered": 4,
+       "recall": 0.0421
+      },
+      {
+       "quantile": 0.75,
+       "max_rank": 132.0,
+       "n_candidates": 122,
+       "n_recovered": 5,
+       "recall": 0.0526
+      },
+      {
+       "quantile": 1.0,
+       "max_rank": 178.0,
+       "n_candidates": 163,
+       "n_recovered": 8,
+       "recall": 0.0842
+      }
+     ]
+    }
+   }
+  ],
+  "needs_opus": [],
+  "n_needs_opus": 0
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py recovery-extras --batch rec_pooled_1",
+   "git_sha": "9a3f9af8+dirty",
+   "author": "Roger Dearnaley",
+   "title": "generator_dashboard recovery-extras rec_pooled_1"
+  },
+  "produced_at": "2026-10-14T21:34:11+00:00",
+  "inputs": [
+   {
+    "dep_key": "matches_s0",
+    "path": "data/candidates/recovery/rec_pooled_1/seed0/matches.jsonl",
+    "fingerprint": "v1:2026-10-14T13:10:00+00:00@3589522",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-14T13:10:00+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "matches_s1",
+    "path": "data/candidates/recovery/rec_pooled_1/seed1/matches.jsonl",
+    "fingerprint": "v1:2026-10-14T21:32:03+00:00@4347677",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-14T21:32:03+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "db693ff990c0a957319ba5b1a7bc79720e1d22196a4469b8965e47199fdcf053"
+ }
+}

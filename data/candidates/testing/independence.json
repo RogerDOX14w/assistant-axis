@@ -81,9 +81,9 @@
     "generator_side_hiding": false,
     "harness_side_only": false,
     "exclusion_rule": "a corpus trait whose file's `source` names the IPIP, or a corpus trait whose seed-queue entry carries `source:ipip` (or a `gap_registry_key`), or a renamed_from of one",
-    "n_rows": 514,
-    "n_trait": 498,
-    "n_kept": 240,
+    "n_rows": 855,
+    "n_trait": 832,
+    "n_kept": 409,
     "n_excluded_from_denominator": 0
    },
    {
@@ -109,9 +109,9 @@
     "generator_side_hiding": false,
     "harness_side_only": false,
     "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:masked_lm` (or a `gap_registry_key`), or a renamed_from of one",
-    "n_rows": 0,
-    "n_trait": 0,
-    "n_kept": 0,
+    "n_rows": 439,
+    "n_trait": 331,
+    "n_kept": 158,
     "n_excluded_from_denominator": 0
    },
    {
@@ -123,9 +123,9 @@
     "generator_side_hiding": false,
     "harness_side_only": false,
     "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:alignment_sweep` (or a `gap_registry_key`), or a renamed_from of one",
-    "n_rows": 467,
-    "n_trait": 458,
-    "n_kept": 364,
+    "n_rows": 842,
+    "n_trait": 819,
+    "n_kept": 629,
     "n_excluded_from_denominator": 0,
     "note": "its occasions are its own runs (the papers run and variant B), tested on their own"
    },
@@ -152,9 +152,9 @@
     "generator_side_hiding": false,
     "harness_side_only": true,
     "exclusion_rule": "a corpus trait whose seed-queue entry carries `source:structural` (or a `gap_registry_key`), or a renamed_from of one",
-    "n_rows": 0,
-    "n_trait": 0,
-    "n_kept": 0,
+    "n_rows": 500,
+    "n_trait": 479,
+    "n_kept": 163,
     "n_excluded_from_denominator": 0
    },
    {
@@ -166,9 +166,9 @@
     "generator_side_hiding": false,
     "harness_side_only": false,
     "exclusion_rule": "attributed to the source row's generator (pre-registered question 6)",
-    "n_rows": 459,
-    "n_trait": 372,
-    "n_kept": 165,
+    "n_rows": 460,
+    "n_trait": 373,
+    "n_kept": 166,
     "n_excluded_from_denominator": 0
    },
    {
@@ -226,6 +226,21 @@
     "n_trait": 0,
     "n_kept": 0,
     "n_excluded_from_denominator": 0
+   },
+   {
+    "generator": "noun_relabel",
+    "stream": "noun_relabel",
+    "class": "not_a_generator",
+    "mechanism": null,
+    "inputs": null,
+    "generator_side_hiding": false,
+    "harness_side_only": false,
+    "exclusion_rule": null,
+    "n_rows": 78,
+    "n_trait": 61,
+    "n_kept": 41,
+    "n_excluded_from_denominator": 0,
+    "no_rule": true
    }
   ],
   "registry": "data/candidates/registry.jsonl"
@@ -234,22 +249,22 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
-   "git_sha": "20bc5bef+dirty",
+   "git_sha": "9a3f9af8+dirty",
    "author": "Roger Dearnaley",
    "title": "generator_dashboard independence"
   },
-  "produced_at": "2026-10-13T19:55:25+00:00",
+  "produced_at": "2026-10-14T21:34:43+00:00",
   "inputs": [
    {
     "dep_key": "registry",
     "path": "data/candidates/registry.jsonl",
-    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "fingerprint": "v1:2026-10-14T17:34:39+00:00@274086937",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "last_modified_at": "2026-10-14T17:34:39+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "b076090e355abd8c2cd0591fa5da82bff88a9fc617cfbcf6af374ff75c62016c"
+  "inputs_sha256": "761f8c9a53c1a3e67ee6f068e34e04f9428506f1eee8556726547099c5f25861"
  }
 }

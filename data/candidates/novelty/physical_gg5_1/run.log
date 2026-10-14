@@ -1,0 +1,13 @@
+2026-10-14T06:33:30Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-14T06:33:31Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-14T06:33:32Z INFO physical gloss stage (always live: two small Haiku calls a word; --transport governs the scoring stages only): {"n_rows": 1, "n_glossed": 1, "n_gloss_failed": 0, "n_alignment_failed": 0, "alignment": {"0": 1}, "n_gloss_form_ok": 1}
+2026-10-14T06:33:35Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-14T06:33:35Z INFO [canary] text-embedding-3-large: 8 compared, lowest cosine 0.999604, 0 new references
+2026-10-14T06:33:35Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-14T06:33:39Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-14T06:33:41Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-14T06:33:45Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-14T06:33:48Z INFO registry: 1 novelty blocks written
+2026-10-14T06:33:48Z INFO [novelty_score:physical_gg5_1:overlap:claude-opus-5-5] parse rate: 1/1 OK  (first attempt 1/1)
+2026-10-14T06:33:48Z INFO [novelty_score:physical_gg5_1:overlap:claude-sonnet-5-5] parse rate: 1/1 OK  (first attempt 1/1)
+2026-10-14T06:33:48Z INFO [novelty_score:physical_gg5_1:relation:claude-haiku-5-5] parse rate: 1/1 OK  (first attempt 1/1)

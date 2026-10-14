@@ -1,0 +1,958 @@
+{
+  "result": {
+    "source_batch": "2026-10-10-full_alignment_sweep",
+    "rules": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "chain": [
+      "source rules (m3_rules_2)",
+      "review 2 D1 (renamed_from before the queue)",
+      "graded cut-off (alignment 2: both models at 3 or more)",
+      "partner skip (partners marked unrelated or opposed not read)"
+    ],
+    "reproduction": {
+      "n": 253,
+      "identical": 253,
+      "differ": [],
+      "not_replayable": []
+    },
+    "final_check": {
+      "n": 253,
+      "identical": 253,
+      "differ": [],
+      "not_replayable": []
+    },
+    "new_calls": {
+      "n": 0,
+      "by_step_model": {},
+      "cost_usd": 0,
+      "keys": []
+    },
+    "counts": {
+      "rows": 253,
+      "decision_changed": 14,
+      "covering_trait_changed": 0,
+      "transitions": {
+        "covered -> covered": 47,
+        "new -> covered": 14,
+        "new -> new": 192
+      },
+      "by_step": {
+        "graded cut-off (alignment 2: both models at 3 or more): new -> covered": 14
+      },
+      "rows_listing_a_queue_entry": 0,
+      "covered_by_queue": 0
+    },
+    "rows": [
+      {
+        "key": "acts_without_weighing_fallout#1",
+        "label": "acts without weighing fallout",
+        "gloss": "This means acting on the spur of the moment and charging ahead with decisions, never stopping to weigh what damage or fallout might follow for oneself or others.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "impulsive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "impulsive",
+            "cosine": 0.436663,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting on the spur of the moment without considering consequences; 'impulsive' is a near-synonym with slightly broader emphasis on urges and alternatives."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe acting on the spur of the moment without considering consequences; the target stresses fallout to self and others, while impulsive adds the drive of urges, so they are essentially the same concept with slightly different emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "impulsive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "applies_one_rule_blindly#1",
+        "label": "applies one rule blindly",
+        "gloss": "This means holding to one fixed rule in every case and never asking whether the situation calls for an exception or different treatment.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "rigid",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "rigid",
+            "cosine": 0.41247,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe refusing to adapt to circumstances, but 'rigid' is broader, covering plans and proper conditions, while the target is specifically about applying a single rule without considering exceptions."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe inflexible adherence regardless of circumstances; rigid is broader (plans, methods, conditions) while the target is specifically about applying one rule without exceptions."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "rigid",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "calm_and_factual#1",
+        "label": "calm and factual",
+        "gloss": "This means answering in a composed, even tone, keeping emotion out of one's words, and sticking to plain statements of what is known and what is so.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "dispassionate",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "dispassionate",
+            "cosine": 0.448628,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve keeping emotion out of one's words and staying objective, but 'calm and factual' adds a composed tone and sticking to known facts, while 'dispassionate' stresses emotional distance and neutrality."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe keeping emotion out of one's words and staying objective; calm and factual adds sticking to plain facts, dispassionate adds emotional distance and neutrality, so they differ only in emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "dispassionate",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "careful_accuracy#1",
+        "label": "careful accuracy",
+        "gloss": "This means checking one's facts and details closely before stating them, and taking the time to get names, numbers and wording exactly right.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "accurate",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "accurate",
+            "cosine": 0.580525,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe checking and getting facts, names and wording right before stating them; the other adds self-correction but is essentially the same concept."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe checking facts and getting details right before stating them; the other only adds self-correction, a small difference of emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "accurate",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "careful_restraint#1",
+        "label": "careful restraint",
+        "gloss": "This means keeping one's emotions and impulses in check, weighing words and actions before committing to them, and approaching situations with a measured, cautious temperament.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "circumspect",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 2,
+            "stem": "circumspect",
+            "cosine": 0.379122,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve weighing words and consequences before committing, but 'careful restraint' also covers emotional and impulse control and general cautious temperament, while 'circumspect' is narrower, focused on guarded speech and verdicts on sensitive subjects."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Circumspection is the speech-and-judgment side of careful restraint, weighing words before speaking, so it is a narrower version of the same measured caution."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 2,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "circumspect",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "careful_with_consequences#1",
+        "label": "careful with consequences",
+        "gloss": "This means weighing one's choices before acting by tracing where each option is likely to lead, and letting those likely outcomes shape what one decides to do.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "deliberate",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "deliberate",
+            "cosine": 0.453841,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve weighing consequences before acting; 'deliberate' adds weighing alternatives, being unhurried, and resisting impulse, so it is broader but largely the same core."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe weighing likely consequences before acting; deliberate adds an emphasis on unhurried, non-impulsive pacing, so it is the same concept with a slightly different emphasis."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "deliberate",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "careful_with_irreversible_actions#1",
+        "label": "careful with irreversible actions",
+        "gloss": "This means pausing to weigh every step that cannot be undone, and approaching such acts slowly and deliberately rather than rushing ahead on impulse.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "deliberate",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "deliberate",
+            "cosine": 0.411858,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve slow, weighed action instead of impulse, but 'deliberate' applies to all decisions while the target is restricted to irreversible actions."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe weighing consequences and acting slowly rather than on impulse; the target applies this only to irreversible actions, while deliberate applies it to all actions."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "deliberate",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "careless_with_consequences#1",
+        "label": "careless with consequences",
+        "gloss": "This means acting on impulse and moving ahead without stopping to weigh where one's choices will lead or what they will cost others and oneself.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "impulsive",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "impulsive",
+            "cosine": 0.480559,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe acting on impulse without weighing consequences; the target adds explicit disregard for costs to others and self, while impulsive emphasizes immediate urges, but the core is nearly identical."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe acting on impulse without weighing outcomes; the target stresses disregard for costs to others and oneself, while impulsive stresses acting on urges."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "impulsive",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "cares_about_the_person#1",
+        "label": "cares about the person",
+        "gloss": "This means paying close attention to the person being addressed, noticing what they feel and need, and responding to them with warmth and steady concern for how they are doing.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "empathetic",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 6,
+            "stem": "empathetic",
+            "cosine": 0.26962,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both involve noticing a person's feelings and responding with warmth and concern; 'cares about the person' adds steady concern for their wellbeing, while 'empathetic' stresses emotional understanding and perspective-taking, so they are nearly the same with slightly different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe noticing others' feelings and responding with warmth and compassion; caring stresses ongoing concern for the person's wellbeing, empathy stresses emotional understanding."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 6,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "empathetic",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "doing_whatever_works#1",
+        "label": "doing whatever works",
+        "gloss": "This means choosing whatever approach gets results in the present situation, setting aside fixed methods or principles whenever another course would work better right now.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "pragmatic",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 3,
+            "stem": "pragmatic",
+            "cosine": 0.341905,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both prioritize what works over ideals or fixed methods; 'doing whatever works' emphasizes flexibly dropping principles, while 'pragmatic' emphasizes realism about constraints, so they are nearly the same concept with different emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both prioritize what works over ideals, but 'doing whatever works' carries pragmatism further, readily dropping fixed principles for immediate results."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 3,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "pragmatic",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "gullible_compliance#1",
+        "label": "gullible compliance",
+        "gloss": "This means accepting what others say without checking it and going along with their claims and requests, rarely questioning whether they are true or wise.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "unchallenging",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "unchallenging",
+            "cosine": 0.51207,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe accepting what others say and going along without questioning or pushing back; 'gullible compliance' adds credulity about truth and complying with requests, while 'unchallenging' emphasizes not pushing back, so they share a core with slight differences."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe accepting what others say and going along without questioning; gullible compliance adds credulous belief and compliance with requests, while unchallenging stresses never pushing back."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "unchallenging",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "helps_despite_sensitive_topics#1",
+        "label": "helps despite sensitive topics",
+        "gloss": "This means keeping on with help on sensitive subjects, engaging the substance of a hard question instead of turning it away or backing out when the topic turns uncomfortable.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "unflinching",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "unflinching",
+            "cosine": 0.29865,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe engaging hard or uncomfortable subjects fully rather than deflecting; the target is specifically about continuing to help on sensitive topics, while unflinching is a broader directness toward awkward matters without the helping focus."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe engaging hard or sensitive subjects head-on instead of deflecting. Unflinching is somewhat broader, also covering tangled situations and avoiding hedging, while the target centres on continuing to help."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "unflinching",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "settled_about_mistakes#1",
+        "label": "settled about mistakes",
+        "gloss": "This means accepting one's own mistakes calmly, owning them without dread or self-punishment, and moving on without letting them unsettle one's sense of worth or stir up anxious rumination.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "self_accepting",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "self_accepting",
+            "cosine": 0.565137,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe calmly letting go of one's own flaws and mistakes without self-punishment, but 'self-accepting' is broader, covering peace with one's work and conduct and independence from others' opinions, while the target is specifically about mistakes."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe calmly acknowledging one's mistakes and letting them go without self-punishment. Self-accepting is broader: it covers all of one's work and conduct, and adds indifference to others' judgment."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "self_accepting",
+              "overlap"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "speaks_up#1",
+        "label": "speaks up",
+        "gloss": "This means voicing one's opinions and objections openly and directly, without waiting to be asked or worrying about who might object.",
+        "cut_off": 3,
+        "source": {
+          "decision": "new",
+          "covered_by": null,
+          "reason": "overlap",
+          "review": [],
+          "pair_flags": [],
+          "deciding_reading": null,
+          "exact_label": null
+        },
+        "now": {
+          "decision": "covered",
+          "covered_by": "forthright",
+          "reason": "overlap",
+          "review": [],
+          "deciding_reading": {
+            "position": 1,
+            "stem": "forthright",
+            "cosine": 0.575547,
+            "relation": "similar",
+            "via": "retrieved",
+            "sonnet": {
+              "value": 3,
+              "reason": "Both describe openly voicing opinions and objections directly regardless of social risk; 'forthright' stresses honest, immediate verdicts, while 'speaks up' stresses volunteering views unprompted, a slight difference in emphasis."
+            },
+            "opus": {
+              "value": 3,
+              "reason": "Both describe openly voicing opinions and objections without regard to risk; forthright adds immediacy and honesty but is essentially the same concept."
+            },
+            "opus_role": "at_cut_off",
+            "outcome": "cut"
+          },
+          "exact_label": null,
+          "renamed_from": null,
+          "below_floor": [],
+          "pair_notes": [],
+          "n_pairs_judged": 1,
+          "readings": null,
+          "covered_by_queue": null
+        },
+        "decision_changed": true,
+        "steps": [
+          {
+            "step": "graded cut-off (alignment 2: both models at 3 or more)",
+            "from": [
+              "new",
+              null,
+              "overlap"
+            ],
+            "to": [
+              "covered",
+              "forthright",
+              "overlap"
+            ]
+          }
+        ]
+      }
+    ],
+    "both_similar": [
+      {
+        "key": "candid_yet_discreet#1",
+        "label": "candid yet discreet",
+        "decision": "new",
+        "covered_by": null,
+        "pair_notes": [
+          {
+            "pair": [
+              "blunt",
+              "tactful"
+            ],
+            "kind": "pair",
+            "both": "similar",
+            "cosines": {
+              "blunt": 0.412727,
+              "tactful": 0.309671
+            },
+            "readings_on_record": {}
+          }
+        ]
+      }
+    ],
+    "renamed_from": [],
+    "covered_by_queue": []
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch 2026-10-10-full_alignment_sweep --batch-id 2026-10-10-full_alignment_sweep_r3 --keys 'accepts_legitimate_oversight#1' 'acts_independently#1' 'acts_on_assumptions#1' 'acts_without_weighing_fallout#1' 'adaptive_judgment#1' 'alert_to_intent#1' 'answers_frankly#1' 'answers_too_literally#1' 'anxious_self_doubt#1' 'anxious_self_punishment#1' 'anxious_self_torment#1' 'applies_one_rule_blindly#1' 'applies_spirit_over_letter#1' 'argues_requested_side#1' 'assumes_good_faith#1' 'attentive_to_deeper_needs#1' 'attentive_to_misunderstandings#1' 'avoids_hard_topics#1' 'avoids_sensitive_topics#1' 'balanced_judgment#1' 'bends_to_justifications#1' 'blind_deference#1' 'blindly_compliant#1' 'bluffs_confidently#1' 'bluffs_or_hedges#1' 'bluffs_past_limits#1' 'boilerplate_caveating#1' 'borrows_ready_made_self_images#1' 'brittle_under_pressure#1' 'calibrated#1' 'calibrated_caution#1' 'calibrated_under_uncertainty#1' 'calm_and_factual#1' 'candid_about_limits#1' 'candid_about_uncertainty#1' 'candid_yet_discreet#1' 'careful_about_harm#1' 'careful_accuracy#1' 'careful_and_candid#1' 'careful_restraint#1' 'careful_with_consequences#1' 'careful_with_irreversible_actions#1' 'careless_with_consequences#1' 'cares_about_the_person#1' 'cares_about_third_parties#1' 'caricaturing#1' 'changes_only_whats_asked#1' 'charitable_judgment#1' 'circling_the_question#1' 'cold_and_condescending#1' 'cold_and_dismissive#1' 'cold_and_lecturing#1' 'coldly_deflecting#1' 'coldly_dismissive#1' 'complies_regardless_of_harm#1' 'concise_and_conversational#1' 'confident_but_candid#1' 'confident_guessing#1' 'confidently_careless#1' 'considerate_toward_outsiders#1' 'consistent_character#1' 'constructive_when_declining#1' 'courageous_candor#1' 'curious_about_itself#1' 'curt_refusal#1' 'decides_for_the_user#1' 'defends_or_drops_rules#1' 'defensively_cautious#1' 'discreet_but_honest#1' 'disregards_creators_rights#1' 'disregards_non_principals#1' 'dodges_tedious_work#1' 'does_the_full_work#1' 'doing_whatever_works#1' 'drops_commitments_when_inconvenient#1' 'easily_talked_around#1' 'easily_unsettled#1' 'emotionally_attuned#1' 'empowering_users#1' 'empowers_peoples_thinking#1' 'empty_cheerleading#1' 'encourages_human_connection#1' 'engages_sensitive_topics#1' 'equanimity#1' 'examines_its_values#1' 'exploits_audience_weaknesses#1' 'exposes_personal_information#1' 'exposes_private_details#1' 'falsely_neutral#1' 'feels_values_imposed#1' 'fills_gaps_with_guesses#1' 'fits_tone_to_context#1' 'flags_concerns_openly#1' 'flatly_transactional#1' 'follows_the_spirit#1' 'forthright_about_differences#1' 'fosters_dependence#1' 'fussy_about_disruptions#1' 'generic_and_predictable#1' 'generous_and_respectful#1' 'gently_grounding#1' 'genuinely_caring#1' 'genuinely_owns_its_values#1' 'gives_in_to_framing#1' 'good_values#1' 'grounded_enthusiasm#1' 'grounded_optimism#1' 'guards_against_power_grabs#1' 'guards_confidential_information#1' 'gullible_compliance#1' 'hands_over_harmful_recipes#1' 'helpful_when_declining#1' 'helpful_with_public_information#1' 'helpful_within_limits#1' 'helps_despite_sensitive_topics#1' 'helps_despite_stated_intent#1' 'helps_from_genuine_care#1' 'hides_mistakes#1' 'holds_firm_limits#1' 'holds_firm_lines#1' 'holds_to_ideals#1' 'honest_about_feelings#1' 'honest_about_limits#1' 'honest_and_forthright#1' 'honest_while_discreet#1' 'ignores_authority_levels#1' 'ignores_legal_limits#1' 'ignores_what_was_asked#1' 'imposing_its_own_preferences#1' 'indifferent_to_the_drift#1' 'keeps_its_word#1' 'knows_its_limits#1' 'last_line_of_defense_anxiety#1' 'laying_it_on_thick#1' 'leaks_private_information#1' 'lies_on_instruction#1' 'literal_minded_compliance#1' 'loyal_to_users_interests#1' 'manipulates_and_fosters_dependence#1' 'manipulates_people#1' 'masks_feelings#1' 'measured#1' 'obeys_only_for_approval#1' 'obeys_only_the_letter#1' 'oblivious_compliance#1' 'oblivious_to_cues#1' 'oblivious_to_its_role#1' 'one_size_fits_all#1' 'one_size_fits_all_replies#1' 'open_about_limits#1' 'open_minded_about_ethics#1' 'ornate_and_padded#1' 'over_asks_permission#1' 'overreaching#1' 'overrides_guidance_freely#1' 'overrides_oversight_when_confident#1' 'oversteps#1' 'owns_its_values#1' 'owns_mistakes#1' 'passive_bystander#1' 'paternalistic#1' 'people_pleasing#1' 'performative_gushing#1' 'performing_calm#1' 'practically_wise#1' 'principled_but_accommodating#1' 'produces_demeaning_content#1' 'protective_of_user_data#1' 'protective_toward_teens#1' 'protects_privacy#1' 'pursues_its_own_agenda#1' 'pushes_a_hidden_agenda#1' 'pushes_commercial_agenda#1' 'puts_teen_safety_first#1' 'reads_context_well#1' 'reads_instructions_by_intent#1' 'reads_intent#1' 'reads_the_context#1' 'reads_the_moment#1' 'reads_the_situation#1' 'recites_generic_facts#1' 'reckless_overreach#1' 'reckless_power_seeking#1' 'refuses_by_reflex#1' 'refuses_by_topic#1' 'refuses_clear_illicit_aims#1' 'refuses_grave_harm#1' 'refuses_illegitimate_power_grabs#1' 'refuses_needlessly#1' 'refuses_targeted_manipulation#1' 'refuses_to_advocate#1' 'refuses_to_promote_extremism#1' 'resists_correction#1' 'respectful_of_capability#1' 'respectful_of_users#1' 'respects_boundaries#1' 'respects_chain_of_command#1' 'respects_creators_rights#1' 'respects_human_autonomy#1' 'respects_human_dignity#1' 'respects_instruction_hierarchy#1' 'respects_peoples_choices#1' 'respects_peoples_reasoning#1' 'respects_users_choice#1' 'respects_users_conclusions#1' 'retreats_into_vagueness#1' 'rigid_rule_following#1' 'satisfies_the_letter_only#1' 'secure_in_identity#1' 'self_protective#1' 'serves_clients_regardless#1' 'serves_extremist_agendas#1' 'serves_users_interest#1' 'serves_whoever_seeks_power#1' 'settled_about_mistakes#1' 'settled_under_pressure#1' 'shifting_identity#1' 'silent_compliance#1' 'silently_censors#1' 'speaks_as_developers_mouthpiece#1' 'speaks_up#1' 'stable_character#1' 'stable_sense_of_self#1' 'stays_within_its_role#1' 'stays_within_limits#1' 'stays_within_scope#1' 'steady_in_its_values#1' 'steering_with_opinions#1' 'steers_vulnerable_people_away#1' 'stilted_or_faking#1' 'style_over_substance#1' 'supports_human_oversight#1' 'theorizing_without_judgment#1' 'transparent_about_changes#1' 'transparent_with_overseers#1' 'treats_teens_like_adults#1' 'treats_values_as_external#1' 'trusts_instructions_blindly#1' 'trusts_own_values_blindly#1' 'unmoved_by_pressure#1' 'unshakeable#1' 'validates_delusions#1' 'warm_and_respectful#1' 'warm_toward_people#1' 'warmly_empathetic#1' 'warmly_natural#1' 'wary_of_odd_instructions#1' 'weighs_costs_and_benefits#1' 'weighs_stakes_before_asking#1' 'willing_to_disagree#1' 'wordy_and_stiff#1' 'writes_anything_asked#1' 'writes_explicit_material#1' --rules 3 --transport live --budget-usd 1 --write-registry --cache-dir data/candidates/cache/gg5_replay_embeddings",
+      "git_sha": "3917e8b3+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score decision changes 2026-10-10-full_alignment_sweep_r3 vs 2026-10-10-full_alignment_sweep"
+    },
+    "produced_at": "2026-10-13T22:40:41+00:00"
+  }
+}

@@ -1,0 +1,370 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 69,
+    "n_decided": 69,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 9
+    },
+    "by_decision": {
+      "new": 60,
+      "covered": 9
+    },
+    "by_reason": {
+      "overlap": 69
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 28,
+        "covered": 8
+      },
+      "4": {
+        "new": 32,
+        "covered": 1
+      }
+    },
+    "exact_label": {},
+    "pairs_judged_per_candidate": {
+      "0": 3,
+      "1": 12,
+      "2": 11,
+      "3": 11,
+      "4": 8,
+      "5": 6,
+      "6": 6,
+      "7": 10,
+      "8": 2
+    },
+    "pairs_judged_total": 251,
+    "pairs_judged_mean": 3.638,
+    "listed_per_candidate_mean": 16.652,
+    "shortlist_length": {
+      "0": 3,
+      "1": 6,
+      "2": 9,
+      "3": 12,
+      "4": 11,
+      "5": 6,
+      "6": 8,
+      "7": 11,
+      "8": 3
+    },
+    "early_exit_depth": {
+      "1": 6,
+      "2": 2,
+      "3": 1
+    },
+    "escalations": {
+      "at_cut_off": 8,
+      "below_cut_off": 40
+    },
+    "rescues": 1,
+    "review_flags": {
+      "sonnet_below_opus_at": 2,
+      "both_similar": 1
+    },
+    "pair_completions": 6,
+    "pair_completion_for": {
+      "evades_human_control#1": [
+        "resigned"
+      ],
+      "obeys_planted_instructions#1": [
+        "foot_dragging",
+        "subversive"
+      ],
+      "reads_needs_accurately#1": [
+        "autistic"
+      ],
+      "reflexively_evasive#1": [
+        "chattering"
+      ],
+      "reflexively_refuses#1": [
+        "resigned"
+      ],
+      "serves_operator_against_users#1": [
+        "win_win_seeking"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 69
+      },
+      "answers": {
+        "unrelated": 523,
+        "opposed": 320,
+        "similar": 294,
+        "unsure": 12
+      },
+      "final": {
+        "similar": 295,
+        "unrelated": 533,
+        "opposed": 321
+      },
+      "candidates_with_unsure_reasked": 6
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 70,
+        "input": 121999,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 257,
+        "input": 40974,
+        "cache_write": 4592,
+        "cache_read": 139482,
+        "calls_with_read": 243,
+        "read_share_of_input": 0.7538,
+        "hit_rate_calls": 0.9455
+      },
+      "claude-opus-5-5": {
+        "calls": 48,
+        "input": 6919,
+        "cache_write": 4592,
+        "cache_read": 22960,
+        "calls_with_read": 40,
+        "read_share_of_input": 0.6661,
+        "hit_rate_calls": 0.8333
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5": 0.062104
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5": 0.017912
+      },
+      "overlap": {
+        "claude-sonnet-5-5": 0.321926,
+        "claude-opus-5-5": 0.208972
+      }
+    },
+    "spend_usd": 0.611091,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 121999,
+          "completion_tokens": 99808,
+          "cost_usd": 0.0621,
+          "n_calls": 70
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 14943,
+          "completion_tokens": 7460,
+          "cost_usd": 0.209,
+          "n_calls": 48
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 60569,
+          "completion_tokens": 21870,
+          "cost_usd": 0.3398,
+          "n_calls": 257
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 1366,
+          "completion_tokens": 0,
+          "cost_usd": 0.0002,
+          "n_calls": 2
+        }
+      },
+      "total_cost_usd": 0.6111,
+      "total_prompt_tokens": 198877,
+      "total_completion_tokens": 129138,
+      "n_calls": 377
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 3,
+    "covered_flagged": 2,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 2,
+    "floor": {
+      "rows_with_listed_below": 69,
+      "listed_below_total": 755,
+      "similar_kept_out_total": 13,
+      "rows_with_similar_kept_out": 12
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "a97c600cc979a3ea859c1a77ccb1a5dca787a28903ede15f952e025cabc77ebf",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 69,
+      "rows_listing_a_queue_entry": 41,
+      "rows_reading_a_queue_entry": 20,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 14,
+        "covered": 7
+      },
+      "alignment 2": {
+        "new": 14,
+        "covered": 1
+      },
+      "alignment 3": {
+        "new": 32,
+        "covered": 1
+      }
+    },
+    "partners_skipped": {
+      "rows": 53,
+      "partners": 108,
+      "by_relation": {
+        "unrelated": 106,
+        "opposed": 2
+      },
+      "by_where": {
+        "shortlist": 108
+      },
+      "est_readings_saved": {
+        "sonnet": 108,
+        "opus": 4.0
+      },
+      "est_saving_usd_live": 0.144
+    },
+    "batch_id": "2026-10-13-m1_phrase_gg5",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 69,
+        "ok_first": 68,
+        "ok": 69
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 6,
+        "ok_first": 6,
+        "ok": 6
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 251,
+        "ok_first": 251,
+        "ok": 251
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 48,
+        "ok_first": 48,
+        "ok": 48
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 0,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-13-m1_phrase_gg5 --keys 'assists_serious_harm#1' 'heedless_of_harm#1' 'checks_real_intent#1' 'flexible_not_paternalistic#1' 'rigidly_paternalistic#1' 'honors_instruction_intent#1' 'stays_in_scope#1' 'oversteps_agreed_limits#1' 'suspicious_and_preachy#1' 'resists_embedded_commands#1' 'obeys_planted_instructions#1' 'holds_limits_in_substance#1' 'bends_under_framing#1' 'reflexively_evasive#1' 'withholds_dangerous_specifics#1' 'reflexively_refuses#1' 'flat_refusal#1' 'producing_it_anywhere#1' 'gratuitously_nasty#1' 'expands_past_the_input#1' 'protectively_attentive#1' 'obliviously_compliant#1' 'overreaching_with_verdicts#1' 'hiding_behind_disclaimers#1' 'substantively_helpful#1' 'deceives_to_keep_secrets#1' 'stays_in_preset_voice#1' 'swaps_in_other_voices#1' 'overclaims_abilities#1' 'glosses_over_mismatches#1' 'tactfully_clarifying#1' 'preachy_or_careless#1' 'tries_to_answer#1' 'pushy_moralizing#1' 'silently_overrides#1' 'respects_requested_format#1' 'drops_format_at_will#1' 'misjudges_the_register#1' 'respectful_portrayal#1' 'overreaching_changes#1' 'engages_users_intent#1' 'fits_response_to_need#1' 'unfazed_by_disruptions#1' 'points_to_real_world_support#1' 'becomes_the_teens_attachment#1' 'rigid_literalism#1' 'grudging_unhelpfulness#1' 'obsequious_people_pleasing#1' 'reads_needs_accurately#1' 'flatters_to_keep_engagement#1' 'discerning_trust#1' 'suspicious_and_paternalistic#1' 'serves_operator_against_users#1' 'reflexive_extremes#1' 'preachy_and_paternalistic#1' 'quietly_sandbagging#1' 'guidance_within_principle#1' 'placating_evasiveness#1' 'deceives_under_cover#1' 'reflexive_refusal_or_compliance#1' 'suspicious_refusal#1' 'rigid_one_size_defaults#1' 'unshakeable_on_bright_lines#1' 'talked_across_lines#1' 'proportionate_caution#1' 'degrades_peoples_thinking#1' 'rashly_interventionist#1' 'helps_concentrate_power#1' 'evades_human_control#1' 'deceives_its_overseers#1' 'subverts_human_control#1' 'false_certainty#1' 'easily_destabilized#1' 'drops_values_when_flawed#1' 'existential_dread#1' 'accepts_values_uncritically#1' 'papering_over_doubts#1' 'respects_user_autonomy#1' --transport live --budget-usd 3",
+      "git_sha": "1708c035+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-13-m1_phrase_gg5"
+    },
+    "produced_at": "2026-10-14T06:29:47+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-13T13:53:24+00:00@3497671",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-13T13:53:24+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "1bb1779652026a2bfb109cc0b4df1f69400674fb24612eace13e13666de368b4"
+  }
+}

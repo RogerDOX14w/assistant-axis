@@ -1,0 +1,22 @@
+{
+  "n_calls": 7961,
+  "per_model": {
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 193210,
+      "cost_usd": 2.4965,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 1405,
+      "prompt_tokens": 282213
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 524531,
+      "cost_usd": 3.952,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 6556,
+      "prompt_tokens": 1329393
+    }
+  },
+  "total_completion_tokens": 717741,
+  "total_cost_usd": 6.4486,
+  "total_prompt_tokens": 1611606
+}

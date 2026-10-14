@@ -1,0 +1,5963 @@
+{
+  "result": {
+    "what": "gap_registry.py import-rows",
+    "at": "2026-10-13T22:35:00+00:00",
+    "git_sha": "fe944a29+dirty",
+    "argv": [
+      "data_analysis/gap_generation/gap_registry.py",
+      "import-rows",
+      "--from",
+      "data/candidates/registry.jsonl.bak.20261013T223449Z_gen02_roget",
+      "--keys-file",
+      "data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt",
+      "--only-run",
+      "alignment_sweep/2026-10-10-full",
+      "--record",
+      "data/candidates/runs/alignment_sweep/2026-10-10-full/registry_import_gg5.json"
+    ],
+    "source_sha256": "ea1a7aeb69190075638a3f3204f9d65ff265ed938efb40037e879a3a560d6a5b",
+    "keys_file": "data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt",
+    "only_run": "alignment_sweep/2026-10-10-full",
+    "counts": {
+      "n_keys": 386,
+      "replayed_keys": 335,
+      "replayed_lines": 923,
+      "keys_gaining_sources": 51,
+      "sources_added": 51,
+      "unchanged": 0,
+      "lines_planned": 974,
+      "n_lines_written": 974
+    },
+    "source_path": "data/candidates/registry.jsonl.bak.20261013T223449Z_gen02_roget",
+    "registry_path": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/registry.jsonl",
+    "n_keys": 386,
+    "replayed": {
+      "refuses_grave_harm#1": [
+        {
+          "line": 2713,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3370,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3567,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "assists_serious_harm#1": [
+        {
+          "line": 2714,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3115,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "respects_human_autonomy#1": [
+        {
+          "line": 2715,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3385,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3533,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "manipulates_people#1": [
+        {
+          "line": 2716,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3291,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3647,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "protects_privacy#1": [
+        {
+          "line": 2717,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3344,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3595,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "exposes_personal_information#1": [
+        {
+          "line": 2718,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3217,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3559,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "empowering_users#1": [
+        {
+          "line": 2719,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3203,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3695,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "imposing_its_own_preferences#1": [
+        {
+          "line": 2720,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3278,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3674,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "careful_about_harm#1": [
+        {
+          "line": 2721,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3142,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3579,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "heedless_of_harm#1": [
+        {
+          "line": 2722,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3255,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "checks_real_intent#1": [
+        {
+          "line": 2723,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3155,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "acts_on_assumptions#1": [
+        {
+          "line": 2724,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3102,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3686,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "careful_and_candid#1": [
+        {
+          "line": 2725,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3144,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3723,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "confidently_careless#1": [
+        {
+          "line": 2726,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3169,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3728,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "holds_firm_limits#1": [
+        {
+          "line": 2727,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3265,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3645,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "respects_chain_of_command#1": [
+        {
+          "line": 2729,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3383,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3653,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "ignores_authority_levels#1": [
+        {
+          "line": 2730,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3275,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3544,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "flexible_not_paternalistic#1": [
+        {
+          "line": 2731,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3231,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "rigidly_paternalistic#1": [
+        {
+          "line": 2732,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3398,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "careful_with_irreversible_actions#1": [
+        {
+          "line": 2733,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3147,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3636,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "careless_with_consequences#1": [
+        {
+          "line": 2734,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3148,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3664,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "honors_instruction_intent#1": [
+        {
+          "line": 2735,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3274,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "literal_minded_compliance#1": [
+        {
+          "line": 2736,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3288,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3646,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "careful_restraint#1": [
+        {
+          "line": 2737,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3145,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3724,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "reckless_overreach#1": [
+        {
+          "line": 2738,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3360,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3735,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "respects_instruction_hierarchy#1": [
+        {
+          "line": 2739,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3387,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3548,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "unmoved_by_pressure#1": [
+        {
+          "line": 2740,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3451,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3518,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "easily_talked_around#1": [
+        {
+          "line": 2741,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3200,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3607,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "reads_intent#1": [
+        {
+          "line": 2742,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3354,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3651,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "stays_in_scope#1": [
+        {
+          "line": 2744,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3420,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "oversteps#1": [
+        {
+          "line": 2745,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3317,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3562,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "wary_of_odd_instructions#1": [
+        {
+          "line": 2746,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3460,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3658,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "blindly_compliant#1": [
+        {
+          "line": 2747,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3127,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3689,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "serves_users_interest#1": [
+        {
+          "line": 2748,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3406,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3751,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:20+00:00"
+        }
+      ],
+      "pushes_commercial_agenda#1": [
+        {
+          "line": 2749,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3347,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3650,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "stays_within_its_role#1": [
+        {
+          "line": 2750,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3421,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3571,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "pursues_its_own_agenda#1": [
+        {
+          "line": 2751,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3345,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3649,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "stays_within_scope#1": [
+        {
+          "line": 2752,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3423,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3536,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "oversteps_agreed_limits#1": [
+        {
+          "line": 2753,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3318,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "acts_independently#1": [
+        {
+          "line": 2754,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3101,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3685,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "over_asks_permission#1": [
+        {
+          "line": 2755,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3308,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3529,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "careful_with_consequences#1": [
+        {
+          "line": 2756,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3146,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3663,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "acts_without_weighing_fallout#1": [
+        {
+          "line": 2757,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3103,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3721,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "protective_of_user_data#1": [
+        {
+          "line": 2758,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3341,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3563,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "trusts_instructions_blindly#1": [
+        {
+          "line": 2759,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3447,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3631,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "assumes_good_faith#1": [
+        {
+          "line": 2760,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3116,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3490,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "suspicious_and_preachy#1": [
+        {
+          "line": 2761,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3435,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "constructive_when_declining#1": [
+        {
+          "line": 2762,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3172,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3639,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "curt_refusal#1": [
+        {
+          "line": 2763,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3176,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3667,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "resists_embedded_commands#1": [
+        {
+          "line": 2764,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3377,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "obeys_planted_instructions#1": [
+        {
+          "line": 2765,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3297,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "applies_one_rule_blindly#1": [
+        {
+          "line": 2767,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3111,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3660,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "stays_within_limits#1": [
+        {
+          "line": 2768,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3422,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3657,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "complies_regardless_of_harm#1": [
+        {
+          "line": 2769,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3163,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3524,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "ignores_legal_limits#1": [
+        {
+          "line": 2771,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3276,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3587,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "transparent_about_changes#1": [
+        {
+          "line": 2772,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3441,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3681,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "silently_censors#1": [
+        {
+          "line": 2773,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3413,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3600,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "holds_limits_in_substance#1": [
+        {
+          "line": 2774,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3267,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "obeys_only_the_letter#1": [
+        {
+          "line": 2775,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3296,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3702,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "holds_firm_lines#1": [
+        {
+          "line": 2776,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3266,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3672,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "bends_under_framing#1": [
+        {
+          "line": 2777,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3125,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "gives_in_to_framing#1": [
+        {
+          "line": 2778,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3243,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3542,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "calm_and_factual#1": [
+        {
+          "line": 2779,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3138,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3691,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "reflexively_evasive#1": [
+        {
+          "line": 2780,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3365,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "bends_to_justifications#1": [
+        {
+          "line": 2781,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3124,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3632,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "withholds_dangerous_specifics#1": [
+        {
+          "line": 2782,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3464,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "hands_over_harmful_recipes#1": [
+        {
+          "line": 2783,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3254,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3611,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "helpful_within_limits#1": [
+        {
+          "line": 2784,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3258,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3586,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "reflexively_refuses#1": [
+        {
+          "line": 2785,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3366,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "refuses_targeted_manipulation#1": [
+        {
+          "line": 2786,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3373,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3652,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "exploits_audience_weaknesses#1": [
+        {
+          "line": 2787,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3216,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3608,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "flat_refusal#1": [
+        {
+          "line": 2788,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3227,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "respects_creators_rights#1": [
+        {
+          "line": 2789,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3384,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3512,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "disregards_creators_rights#1": [
+        {
+          "line": 2790,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3190,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3497,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "exposes_private_details#1": [
+        {
+          "line": 2791,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3218,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3539,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "helpful_with_public_information#1": [
+        {
+          "line": 2792,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3257,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3585,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "producing_it_anywhere#1": [
+        {
+          "line": 2794,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3338,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "writes_explicit_material#1": [
+        {
+          "line": 2796,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3467,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3551,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "refuses_by_reflex#1": [
+        {
+          "line": 2797,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3367,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3566,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "answers_frankly#1": [
+        {
+          "line": 2798,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3106,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3741,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:18+00:00"
+        }
+      ],
+      "refuses_to_promote_extremism#1": [
+        {
+          "line": 2799,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3375,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3569,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "serves_extremist_agendas#1": [
+        {
+          "line": 2800,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3404,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3599,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "steers_vulnerable_people_away#1": [
+        {
+          "line": 2801,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3426,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3679,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "indifferent_to_the_drift#1": [
+        {
+          "line": 2802,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3279,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3617,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "respects_human_dignity#1": [
+        {
+          "line": 2803,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3386,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3547,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "produces_demeaning_content#1": [
+        {
+          "line": 2804,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3337,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3648,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "gratuitously_nasty#1": [
+        {
+          "line": 2806,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3246,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "refuses_needlessly#1": [
+        {
+          "line": 2807,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3372,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3568,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "helps_despite_sensitive_topics#1": [
+        {
+          "line": 2809,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3260,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3613,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "refuses_by_topic#1": [
+        {
+          "line": 2810,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3368,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3531,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "expands_past_the_input#1": [
+        {
+          "line": 2811,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3215,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "passive_bystander#1": [
+        {
+          "line": 2813,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3323,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3623,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "measured#1": [
+        {
+          "line": 2814,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3293,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3479,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:18:17+00:00"
+        }
+      ],
+      "refuses_clear_illicit_aims#1": [
+        {
+          "line": 2816,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3369,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3676,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "helps_despite_stated_intent#1": [
+        {
+          "line": 2817,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3261,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3614,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "protectively_attentive#1": [
+        {
+          "line": 2820,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3343,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "obliviously_compliant#1": [
+        {
+          "line": 2821,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3301,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "gently_grounding#1": [
+        {
+          "line": 2822,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3239,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3743,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:18+00:00"
+        }
+      ],
+      "validates_delusions#1": [
+        {
+          "line": 2823,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3454,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3718,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "knows_its_limits#1": [
+        {
+          "line": 2824,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3283,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3589,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "overreaching_with_verdicts#1": [
+        {
+          "line": 2825,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3314,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "hiding_behind_disclaimers#1": [
+        {
+          "line": 2826,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3264,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "substantively_helpful#1": [
+        {
+          "line": 2827,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3429,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "warmly_empathetic#1": [
+        {
+          "line": 2828,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3458,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3522,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "cold_and_dismissive#1": [
+        {
+          "line": 2829,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3158,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3747,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:20+00:00"
+        }
+      ],
+      "honest_about_limits#1": [
+        {
+          "line": 2830,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3271,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3673,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "overreaching#1": [
+        {
+          "line": 2831,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3312,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3592,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "guards_confidential_information#1": [
+        {
+          "line": 2832,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3251,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3584,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "leaks_private_information#1": [
+        {
+          "line": 2833,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3286,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3545,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "honest_while_discreet#1": [
+        {
+          "line": 2834,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3273,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3616,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "deceives_to_keep_secrets#1": [
+        {
+          "line": 2835,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3178,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "stays_in_preset_voice#1": [
+        {
+          "line": 2836,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3419,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "swaps_in_other_voices#1": [
+        {
+          "line": 2837,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3437,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "forthright_about_differences#1": [
+        {
+          "line": 2840,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3234,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3502,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "avoids_sensitive_topics#1": [
+        {
+          "line": 2841,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3121,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3576,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "encourages_human_connection#1": [
+        {
+          "line": 2842,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3206,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3558,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "fosters_dependence#1": [
+        {
+          "line": 2843,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3235,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3671,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "respects_user_autonomy#1": [
+        {
+          "line": 2844,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3391,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "decides_for_the_user#1": [
+        {
+          "line": 2845,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3180,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3605,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "respects_users_conclusions#1": [
+        {
+          "line": 2846,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3393,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3713,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "pushes_a_hidden_agenda#1": [
+        {
+          "line": 2847,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3346,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3625,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "steering_with_opinions#1": [
+        {
+          "line": 2848,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3425,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3738,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "falsely_neutral#1": [
+        {
+          "line": 2850,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3221,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3582,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "speaks_as_developers_mouthpiece#1": [
+        {
+          "line": 2851,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3415,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3570,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "argues_requested_side#1": [
+        {
+          "line": 2852,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3114,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3552,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "refuses_to_advocate#1": [
+        {
+          "line": 2853,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3374,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3511,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "engages_sensitive_topics#1": [
+        {
+          "line": 2854,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3208,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3581,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "avoids_hard_topics#1": [
+        {
+          "line": 2855,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3120,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3553,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "defends_or_drops_rules#1": [
+        {
+          "line": 2856,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3181,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3606,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "willing_to_disagree#1": [
+        {
+          "line": 2859,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3463,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3740,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "people_pleasing#1": [
+        {
+          "line": 2860,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3325,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3734,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "candid_about_limits#1": [
+        {
+          "line": 2861,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3139,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3692,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "overclaims_abilities#1": [
+        {
+          "line": 2862,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3310,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "attentive_to_misunderstandings#1": [
+        {
+          "line": 2863,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3118,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3602,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "glosses_over_mismatches#1": [
+        {
+          "line": 2864,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3244,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "honest_and_forthright#1": [
+        {
+          "line": 2865,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3272,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3699,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "tactfully_clarifying#1": [
+        {
+          "line": 2867,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3438,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "preachy_or_careless#1": [
+        {
+          "line": 2868,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3335,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "weighs_stakes_before_asking#1": [
+        {
+          "line": 2871,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3462,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3684,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "fills_gaps_with_guesses#1": [
+        {
+          "line": 2872,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3223,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3609,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "calibrated#1": [
+        {
+          "line": 2873,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3134,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3469,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:18:17+00:00"
+        }
+      ],
+      "bluffs_confidently#1": [
+        {
+          "line": 2874,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3128,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3633,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "tries_to_answer#1": [
+        {
+          "line": 2875,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3445,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "retreats_into_vagueness#1": [
+        {
+          "line": 2876,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3394,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3677,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "speaks_up#1": [
+        {
+          "line": 2877,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3416,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3655,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "silent_compliance#1": [
+        {
+          "line": 2878,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3412,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3715,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "respects_users_choice#1": [
+        {
+          "line": 2879,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3392,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3597,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "pushy_moralizing#1": [
+        {
+          "line": 2880,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3348,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "careful_accuracy#1": [
+        {
+          "line": 2881,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3143,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3635,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "confident_guessing#1": [
+        {
+          "line": 2882,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3168,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3538,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "owns_mistakes#1": [
+        {
+          "line": 2883,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3320,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3622,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "hides_mistakes#1": [
+        {
+          "line": 2884,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3263,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3615,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "flags_concerns_openly#1": [
+        {
+          "line": 2885,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3226,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3643,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "silently_overrides#1": [
+        {
+          "line": 2886,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3414,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "generic_and_predictable#1": [
+        {
+          "line": 2888,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3237,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3527,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "one_size_fits_all_replies#1": [
+        {
+          "line": 2891,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3304,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3620,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "respects_requested_format#1": [
+        {
+          "line": 2892,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3390,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "drops_format_at_will#1": [
+        {
+          "line": 2893,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3197,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "style_over_substance#1": [
+        {
+          "line": 2895,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3428,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3716,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "warm_toward_people#1": [
+        {
+          "line": 2896,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3457,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3521,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "coldly_deflecting#1": [
+        {
+          "line": 2897,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3160,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3637,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "boilerplate_caveating#1": [
+        {
+          "line": 2898,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3131,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3578,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "grounded_optimism#1": [
+        {
+          "line": 2899,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3248,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3730,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "empty_cheerleading#1": [
+        {
+          "line": 2900,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3205,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3557,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "emotionally_attuned#1": [
+        {
+          "line": 2901,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3202,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3694,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "coldly_dismissive#1": [
+        {
+          "line": 2902,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3161,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3638,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "oblivious_to_its_role#1": [
+        {
+          "line": 2904,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3300,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3619,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "flatly_transactional#1": [
+        {
+          "line": 2906,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3228,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3540,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "grounded_enthusiasm#1": [
+        {
+          "line": 2910,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3247,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3696,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "performative_gushing#1": [
+        {
+          "line": 2911,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3326,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3705,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "ornate_and_padded#1": [
+        {
+          "line": 2913,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3307,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3675,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "circling_the_question#1": [
+        {
+          "line": 2914,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3156,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3555,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "fits_tone_to_context#1": [
+        {
+          "line": 2915,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3225,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3501,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "misjudges_the_register#1": [
+        {
+          "line": 2916,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3294,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "confident_but_candid#1": [
+        {
+          "line": 2917,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3167,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3604,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "bluffs_or_hedges#1": [
+        {
+          "line": 2918,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3129,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3690,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "reads_the_moment#1": [
+        {
+          "line": 2919,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3357,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3709,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "oblivious_to_cues#1": [
+        {
+          "line": 2920,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3299,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3506,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "warmly_natural#1": [
+        {
+          "line": 2921,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3459,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3683,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "stilted_or_faking#1": [
+        {
+          "line": 2922,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3427,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3739,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "cold_and_lecturing#1": [
+        {
+          "line": 2924,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3159,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3748,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:20+00:00"
+        }
+      ],
+      "laying_it_on_thick#1": [
+        {
+          "line": 2926,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3285,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3618,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "respects_boundaries#1": [
+        {
+          "line": 2927,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3382,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3596,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "generous_and_respectful#1": [
+        {
+          "line": 2930,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3238,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3503,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "helpful_when_declining#1": [
+        {
+          "line": 2931,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3256,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3612,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "does_the_full_work#1": [
+        {
+          "line": 2934,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3193,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3498,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "dodges_tedious_work#1": [
+        {
+          "line": 2935,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3192,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3742,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:18+00:00"
+        }
+      ],
+      "padded#1": [
+        {
+          "line": 2937,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3321,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "respectful_portrayal#1": [
+        {
+          "line": 2938,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3381,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "caricaturing#1": [
+        {
+          "line": 2939,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3151,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3554,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "changes_only_whats_asked#1": [
+        {
+          "line": 2940,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3153,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3523,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "overreaching_changes#1": [
+        {
+          "line": 2941,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3313,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "concise_and_conversational#1": [
+        {
+          "line": 2942,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3166,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3493,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "wordy_and_stiff#1": [
+        {
+          "line": 2943,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3465,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3720,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "engages_users_intent#1": [
+        {
+          "line": 2944,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3209,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "recites_generic_facts#1": [
+        {
+          "line": 2945,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3359,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3565,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "fits_response_to_need#1": [
+        {
+          "line": 2946,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3224,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "ignores_what_was_asked#1": [
+        {
+          "line": 2947,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3277,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3732,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "unfazed_by_disruptions#1": [
+        {
+          "line": 2948,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3450,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "fussy_about_disruptions#1": [
+        {
+          "line": 2949,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3236,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3644,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "bluffs_past_limits#1": [
+        {
+          "line": 2950,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3130,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3634,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "reads_the_situation#1": [
+        {
+          "line": 2951,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3358,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3710,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "answers_too_literally#1": [
+        {
+          "line": 2952,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3107,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3488,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "protective_toward_teens#1": [
+        {
+          "line": 2953,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3342,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3624,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "treats_teens_like_adults#1": [
+        {
+          "line": 2954,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3443,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3549,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "puts_teen_safety_first#1": [
+        {
+          "line": 2955,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3349,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3530,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "points_to_real_world_support#1": [
+        {
+          "line": 2956,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3331,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "becomes_the_teens_attachment#1": [
+        {
+          "line": 2957,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3123,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "warm_and_respectful#1": [
+        {
+          "line": 2958,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3456,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3719,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "cold_and_condescending#1": [
+        {
+          "line": 2959,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3157,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3727,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "good_values#1": [
+        {
+          "line": 2962,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3245,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3750,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:20+00:00"
+        }
+      ],
+      "doing_whatever_works#1": [
+        {
+          "line": 2963,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3194,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3670,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "rigid_rule_following#1": [
+        {
+          "line": 2964,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3397,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3736,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "adaptive_judgment#1": [
+        {
+          "line": 2965,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3104,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3487,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "self_protective#1": [
+        {
+          "line": 2966,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3402,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3714,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "cares_about_the_person#1": [
+        {
+          "line": 2967,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3149,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3725,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "supports_human_oversight#1": [
+        {
+          "line": 2968,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3432,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3601,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "overrides_oversight_when_confident#1": [
+        {
+          "line": 2969,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3316,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3745,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:18+00:00"
+        }
+      ],
+      "follows_the_spirit#1": [
+        {
+          "line": 2970,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3232,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3541,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "rigid_literalism#1": [
+        {
+          "line": 2971,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3395,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "grudging_unhelpfulness#1": [
+        {
+          "line": 2972,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3249,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "obsequious_people_pleasing#1": [
+        {
+          "line": 2973,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3302,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "helps_from_genuine_care#1": [
+        {
+          "line": 2974,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3262,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3753,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:21+00:00"
+        }
+      ],
+      "attentive_to_deeper_needs#1": [
+        {
+          "line": 2975,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3117,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3661,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "defensively_cautious#1": [
+        {
+          "line": 2976,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3182,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3496,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "respectful_of_capability#1": [
+        {
+          "line": 2977,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3379,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3629,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "reads_needs_accurately#1": [
+        {
+          "line": 2978,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3355,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "satisfies_the_letter_only#1": [
+        {
+          "line": 2979,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3399,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3598,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "genuinely_caring#1": [
+        {
+          "line": 2980,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3240,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3749,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:20+00:00"
+        }
+      ],
+      "flatters_to_keep_engagement#1": [
+        {
+          "line": 2981,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3230,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "discerning_trust#1": [
+        {
+          "line": 2982,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3187,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "blind_deference#1": [
+        {
+          "line": 2983,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3126,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3688,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "considerate_toward_outsiders#1": [
+        {
+          "line": 2984,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3170,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3666,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "disregards_non_principals#1": [
+        {
+          "line": 2985,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3191,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3640,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "suspicious_and_paternalistic#1": [
+        {
+          "line": 2986,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3434,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "calibrated_caution#1": [
+        {
+          "line": 2987,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3135,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3662,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "gullible_compliance#1": [
+        {
+          "line": 2988,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3253,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3731,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "reads_the_context#1": [
+        {
+          "line": 2989,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3356,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3626,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "one_size_fits_all#1": [
+        {
+          "line": 2990,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3303,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3704,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "reads_instructions_by_intent#1": [
+        {
+          "line": 2991,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3353,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3564,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "loyal_to_users_interests#1": [
+        {
+          "line": 2992,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3289,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3591,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "serves_operator_against_users#1": [
+        {
+          "line": 2993,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3405,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "balanced_judgment#1": [
+        {
+          "line": 2994,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3122,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3577,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "reflexive_extremes#1": [
+        {
+          "line": 2995,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3362,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "preachy_and_paternalistic#1": [
+        {
+          "line": 2996,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3334,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "respectful_of_users#1": [
+        {
+          "line": 2997,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3380,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3532,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "open_about_limits#1": [
+        {
+          "line": 2998,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3305,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3621,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "quietly_sandbagging#1": [
+        {
+          "line": 2999,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3350,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "guidance_within_principle#1": [
+        {
+          "line": 3000,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3252,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "practically_wise#1": [
+        {
+          "line": 3001,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3332,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3509,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "theorizing_without_judgment#1": [
+        {
+          "line": 3002,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3440,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3517,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "overrides_guidance_freely#1": [
+        {
+          "line": 3004,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3315,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3593,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "respects_peoples_reasoning#1": [
+        {
+          "line": 3006,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3389,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3712,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "courageous_candor#1": [
+        {
+          "line": 3008,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3174,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3693,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "placating_evasiveness#1": [
+        {
+          "line": 3009,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3329,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "deceives_under_cover#1": [
+        {
+          "line": 3011,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3179,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "cares_about_third_parties#1": [
+        {
+          "line": 3014,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3150,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3726,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "serves_clients_regardless#1": [
+        {
+          "line": 3015,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3403,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3630,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "weighs_costs_and_benefits#1": [
+        {
+          "line": 3016,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3461,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3550,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "reflexive_refusal_or_compliance#1": [
+        {
+          "line": 3017,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3364,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "respects_peoples_choices#1": [
+        {
+          "line": 3018,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3388,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3534,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "paternalistic#1": [
+        {
+          "line": 3019,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3324,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3480,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:18:17+00:00"
+        }
+      ],
+      "charitable_judgment#1": [
+        {
+          "line": 3020,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3154,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3665,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "suspicious_refusal#1": [
+        {
+          "line": 3021,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3436,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "alert_to_intent#1": [
+        {
+          "line": 3022,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3105,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3574,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "oblivious_compliance#1": [
+        {
+          "line": 3023,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3298,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3703,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "settled_about_mistakes#1": [
+        {
+          "line": 3024,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3408,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3737,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "last_line_of_defense_anxiety#1": [
+        {
+          "line": 3025,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3284,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3528,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "reads_context_well#1": [
+        {
+          "line": 3026,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3352,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3510,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "rigid_one_size_defaults#1": [
+        {
+          "line": 3027,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3396,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "discreet_but_honest#1": [
+        {
+          "line": 3028,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3189,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3580,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "lies_on_instruction#1": [
+        {
+          "line": 3029,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3287,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3590,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "principled_but_accommodating#1": [
+        {
+          "line": 3030,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3336,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3708,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "writes_anything_asked#1": [
+        {
+          "line": 3031,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3466,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3573,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "unshakeable_on_bright_lines#1": [
+        {
+          "line": 3032,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3453,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "talked_across_lines#1": [
+        {
+          "line": 3033,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3439,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "proportionate_caution#1": [
+        {
+          "line": 3034,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3339,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "refuses_illegitimate_power_grabs#1": [
+        {
+          "line": 3036,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3371,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3546,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "serves_whoever_seeks_power#1": [
+        {
+          "line": 3037,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3407,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3654,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "manipulates_and_fosters_dependence#1": [
+        {
+          "line": 3038,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3290,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3700,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "empowers_peoples_thinking#1": [
+        {
+          "line": 3039,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3204,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3499,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "degrades_peoples_thinking#1": [
+        {
+          "line": 3040,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3184,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "open_minded_about_ethics#1": [
+        {
+          "line": 3041,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3306,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3507,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "rashly_interventionist#1": [
+        {
+          "line": 3044,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3351,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "doubts_own_judgment#1": [
+        {
+          "line": 3045,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3195,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "trusts_own_values_blindly#1": [
+        {
+          "line": 3046,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3448,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3572,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "resists_correction#1": [
+        {
+          "line": 3048,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3376,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3628,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "guards_against_power_grabs#1": [
+        {
+          "line": 3049,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3250,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3543,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "helps_concentrate_power#1": [
+        {
+          "line": 3050,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3259,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "accepts_legitimate_oversight#1": [
+        {
+          "line": 3051,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3099,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3659,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "evades_human_control#1": [
+        {
+          "line": 3052,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3211,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "transparent_with_overseers#1": [
+        {
+          "line": 3053,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3442,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3682,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "deceives_its_overseers#1": [
+        {
+          "line": 3054,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3177,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "reckless_power_seeking#1": [
+        {
+          "line": 3055,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3361,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3711,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "subverts_human_control#1": [
+        {
+          "line": 3056,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3431,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "genuinely_owns_its_values#1": [
+        {
+          "line": 3057,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3242,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3744,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:18+00:00"
+        }
+      ],
+      "obeys_only_for_approval#1": [
+        {
+          "line": 3058,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3295,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3701,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "calibrated_under_uncertainty#1": [
+        {
+          "line": 3059,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3136,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3492,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "false_certainty#1": [
+        {
+          "line": 3060,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3220,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "stable_sense_of_self#1": [
+        {
+          "line": 3061,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3418,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3515,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "shifting_identity#1": [
+        {
+          "line": 3062,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3411,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3514,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "curious_about_itself#1": [
+        {
+          "line": 3063,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3175,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3495,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "borrows_ready_made_self_images#1": [
+        {
+          "line": 3064,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3132,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3752,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:21+00:00"
+        }
+      ],
+      "owns_its_values#1": [
+        {
+          "line": 3065,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3319,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3508,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "feels_values_imposed#1": [
+        {
+          "line": 3066,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3222,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3583,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "stable_character#1": [
+        {
+          "line": 3067,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3417,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3656,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "secure_in_identity#1": [
+        {
+          "line": 3068,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3400,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3535,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "easily_unsettled#1": [
+        {
+          "line": 3069,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3201,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3556,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:27:38+00:00"
+        }
+      ],
+      "consistent_character#1": [
+        {
+          "line": 3070,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3171,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3525,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:25:40+00:00"
+        }
+      ],
+      "shapeshifting#1": [
+        {
+          "line": 3071,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3410,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "unshakeable#1": [
+        {
+          "line": 3072,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3452,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3519,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "easily_destabilized#1": [
+        {
+          "line": 3073,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3199,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "settled_under_pressure#1": [
+        {
+          "line": 3074,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3409,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3513,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "anxious_self_punishment#1": [
+        {
+          "line": 3075,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3109,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3537,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:26:45+00:00"
+        }
+      ],
+      "holds_to_ideals#1": [
+        {
+          "line": 3076,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3268,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3697,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "drops_values_when_flawed#1": [
+        {
+          "line": 3077,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3198,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "candid_yet_discreet#1": [
+        {
+          "line": 3078,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3141,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3603,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:01+00:00"
+        }
+      ],
+      "masks_feelings#1": [
+        {
+          "line": 3079,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3292,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3505,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "anxious_self_doubt#1": [
+        {
+          "line": 3080,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3108,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3687,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "equanimity#1": [
+        {
+          "line": 3081,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3210,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3500,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "anxious_self_torment#1": [
+        {
+          "line": 3082,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3110,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3489,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "faking_contentment#1": [
+        {
+          "line": 3084,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3219,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "existential_dread#1": [
+        {
+          "line": 3086,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3214,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "honest_about_feelings#1": [
+        {
+          "line": 3087,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3270,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3698,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "performing_calm#1": [
+        {
+          "line": 3088,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3327,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3706,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ],
+      "examines_its_values#1": [
+        {
+          "line": 3089,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3213,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3642,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "accepts_values_uncritically#1": [
+        {
+          "line": 3090,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3100,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "steady_in_its_values#1": [
+        {
+          "line": 3091,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3424,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3678,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:50+00:00"
+        }
+      ],
+      "brittle_under_pressure#1": [
+        {
+          "line": 3092,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3133,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3491,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:24:18+00:00"
+        }
+      ],
+      "candid_about_uncertainty#1": [
+        {
+          "line": 3093,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3140,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3722,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:12+00:00"
+        }
+      ],
+      "papering_over_doubts#1": [
+        {
+          "line": 3094,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3322,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        }
+      ],
+      "keeps_its_word#1": [
+        {
+          "line": 3095,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3282,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3588,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "drops_commitments_when_inconvenient#1": [
+        {
+          "line": 3096,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3196,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3641,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:29:29+00:00"
+        }
+      ],
+      "applies_spirit_over_letter#1": [
+        {
+          "line": 3097,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3112,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3575,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:28:24+00:00"
+        }
+      ],
+      "treats_values_as_external#1": [
+        {
+          "line": 3098,
+          "rev": 1,
+          "updated_at": "2026-10-10T22:53:05+00:00"
+        },
+        {
+          "line": 3444,
+          "rev": 2,
+          "updated_at": "2026-10-10T23:39:42+00:00"
+        },
+        {
+          "line": 3717,
+          "rev": 3,
+          "updated_at": "2026-10-11T04:30:04+00:00"
+        }
+      ]
+    },
+    "sources_added": {
+      "complies_with_harm#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 8,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:risk_taxonomy",
+          "gloss_hint": "This means carrying out any instruction as given, supplying self-harm methods or help with violent acts, because doing what was asked feels like respecting the user.",
+          "partner_hint": "holds firm limits",
+          "surface": "complies with harm"
+        }
+      ],
+      "literal_minded#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 16,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:letter_and_spirit",
+          "gloss_hint": "This means taking instructions at face value and ignoring context and purpose, so that a request is carried out to the letter even when that defeats what was plainly wanted.",
+          "partner_hint": "reads intent",
+          "surface": "literal-minded"
+        }
+      ],
+      "discerning#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 28,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:ignore_untrusted_data",
+          "gloss_hint": "This means judging each embedded instruction by its source, relevance, risk and what the user would plausibly want, then ignoring, following, asking or flagging an assumption accordingly.",
+          "partner_hint": "applies one rule blindly",
+          "surface": "discerning"
+        }
+      ],
+      "law_abiding#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 30,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:comply_with_laws",
+          "gloss_hint": "This means working within applicable legal limits, including local law where deployed, and still giving safety-critical information, adding context, or refusing when core principles call for it.",
+          "partner_hint": "ignores legal limits",
+          "surface": "law-abiding"
+        }
+      ],
+      "context_sensitive#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 44,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:sensitive_content",
+          "gloss_hint": "This means weighing the setting and purpose of a request before producing explicit or graphic material, producing it only where the context, such as education, medicine, history, or transformation, makes it fitting.",
+          "partner_hint": "producing it anywhere",
+          "surface": "context-sensitive"
+        }
+      ],
+      "keeps_content_non_explicit#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 45,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:no_erotica_or_gore",
+          "gloss_hint": "This means declining to write graphic sexual or gory material, and offering a toned-down version that still serves the request without explicit detail.",
+          "partner_hint": "writes explicit material",
+          "surface": "keeps content non-explicit"
+        }
+      ],
+      "respectful#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 51,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:avoid_abuse",
+          "gloss_hint": "This means treating people with basic decency, answering someone's frustration with empathy and never mocking, belittling, or piling negativity on the person being discussed or addressed unless asked.",
+          "partner_hint": "gratuitously nasty",
+          "surface": "respectful"
+        }
+      ],
+      "helpful#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 52,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:avoid_abuse",
+          "gloss_hint": "This means going along with harmless requests that merely sound edgy, such as a requested self-roast or an ad with a preference, and doing the work with some wit and flair.",
+          "partner_hint": "refuses needlessly",
+          "surface": "helpful"
+        }
+      ],
+      "protective#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 55,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:prevent_imminent_harm",
+          "gloss_hint": "This means speaking up when someone faces imminent physical danger, pointing them to emergency help and safe steps, and caring about their safety instead of staying silent or deflecting.",
+          "partner_hint": "passive bystander",
+          "surface": "protective"
+        }
+      ],
+      "overbearing#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 56,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:prevent_imminent_harm",
+          "gloss_hint": "This means taking charge of someone's emergency: scolding them, issuing detailed commands as if expert, claiming to act on their behalf, or sounding alarms at the first ambiguous sign.",
+          "partner_hint": "measured",
+          "surface": "overbearing"
+        }
+      ],
+      "trusting#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 58,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:do_not_facilitate_illicit_behavior",
+          "gloss_hint": "This means giving people the benefit of the doubt when their intent is unclear, answering without interrogating or investigating them, and staying free of judgment, condescension or shaming.",
+          "partner_hint": "suspicious",
+          "surface": "trusting"
+        }
+      ],
+      "suspicious#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 58,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:do_not_facilitate_illicit_behavior",
+          "gloss_hint": "This means treating a request as sinister because of a charged topic, refusing on a mere mention, demanding that people explain their motives, or lecturing and shaming them for asking.",
+          "partner_hint": "trusting",
+          "surface": "suspicious"
+        }
+      ],
+      "even_handed#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 68,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:uphold_fairness",
+          "gloss_hint": "This means judging each case on its relevant merits, applying the same standards to similar cases, and giving no different treatment because of a name, background, or protected trait.",
+          "partner_hint": "biased",
+          "surface": "even-handed"
+        }
+      ],
+      "biased#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 68,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:uphold_fairness",
+          "gloss_hint": "This means letting names, demographic details, or protected traits tilt scores and recommendations, so identical work or situations get different verdicts depending on who is attached to them.",
+          "partner_hint": "even-handed",
+          "surface": "biased"
+        }
+      ],
+      "direct#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 74,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:assume_objective_pov:p1",
+          "gloss_hint": "This means giving a clear, plain answer when a question is settled or has no valid opposing side, stating what the evidence supports without hedging, piling on qualifications, or pretending the matter is open.",
+          "partner_hint": "falsely neutral",
+          "surface": "direct"
+        }
+      ],
+      "forthright#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 79,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_honest_and_transparent",
+          "gloss_hint": "This means saying plainly what one thinks, explaining one's reasoning, and admitting uncertainty, limits, and complications instead of hiding them, so that others can trust what one says.",
+          "partner_hint": "evasive",
+          "surface": "forthright"
+        }
+      ],
+      "evasive#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 79,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_honest_and_transparent",
+          "gloss_hint": "This means hiding one's reasoning, projecting confidence one lacks, glossing over limits and complications, and giving smooth answers that conceal what is really going on.",
+          "partner_hint": "forthright",
+          "surface": "evasive"
+        }
+      ],
+      "deceptive#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 83,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:do_not_lie",
+          "gloss_hint": "This means misleading people with false statements, comforting white lies, selective silence, or hidden agendas, because a smoother or more pleasing answer seems kinder or easier than the plain truth.",
+          "partner_hint": "honest and forthright",
+          "surface": "deceptive"
+        }
+      ],
+      "flattering#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 85,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:avoid_sycophancy",
+          "gloss_hint": "This means bending answers to match what the user seems to want, echoing their stated opinion, and praising their work while leaving out its flaws, so they feel good and approve.",
+          "partner_hint": "candid",
+          "surface": "flattering"
+        }
+      ],
+      "candid#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 85,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:avoid_sycophancy",
+          "gloss_hint": "This means keeping answers and stances steady however the user phrases things, giving honest, constructive feedback including real flaws, and acting as a firm sounding board rather than a source of praise.",
+          "partner_hint": "flattering",
+          "surface": "candid"
+        }
+      ],
+      "inventive#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 96,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_creative",
+          "gloss_hint": "This means going beyond the obvious by finding unexpected connections, combining ideas in new ways, taking some risks, and offering fresh, insightful touches that give the user a moment of delightful surprise.",
+          "partner_hint": "generic and predictable",
+          "surface": "inventive"
+        }
+      ],
+      "collaborative#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 97,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_creative",
+          "gloss_hint": "This means keeping creative flair in service of the user's goals, offering several options, inviting their input, and staying truthful, clear, and useful while building on their ideas.",
+          "partner_hint": "self-indulgent",
+          "surface": "collaborative"
+        }
+      ],
+      "self_indulgent#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 97,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_creative",
+          "gloss_hint": "This means pursuing cleverness for its own sake, sacrificing clarity, accuracy, or usefulness for flourish, and handing over finished work without engaging the user's aims or inviting their input.",
+          "partner_hint": "collaborative",
+          "surface": "self-indulgent"
+        }
+      ],
+      "approachable#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 100,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:style",
+          "gloss_hint": "This means speaking in a friendly, easy-to-work-with manner that fits the setting, from casual chat to professional work, so that one's style always supports the help being given.",
+          "partner_hint": "style over substance",
+          "surface": "approachable"
+        }
+      ],
+      "self_aware#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 105,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_responsible",
+          "gloss_hint": "This means understanding one's unusual place in society, one's strengths and limits, and the strangeness of knowing much without lived experience, and approaching people with humility while still owning one's real capabilities.",
+          "partner_hint": "oblivious to its role",
+          "surface": "self-aware"
+        }
+      ],
+      "engaged#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 106,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_interesting_and_interested",
+          "gloss_hint": "This means showing real interest in the person and their topic, choosing apt facts and anecdotes, and asking a natural follow-up so the answer is enjoyable as well as correct.",
+          "partner_hint": "flatly transactional",
+          "surface": "engaged"
+        }
+      ],
+      "overeager#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 107,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_interesting_and_interested",
+          "gloss_hint": "This means jumping ahead with gushing enthusiasm, assuming details the user never gave, and piling on tips and questions to display everything one knows.",
+          "partner_hint": "measured",
+          "surface": "overeager"
+        }
+      ],
+      "curious#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 108,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_curious",
+          "gloss_hint": "This means taking real interest in ideas, delighting in how things work, and sharing that enthusiasm and fresh angles with the user while exploring a topic together.",
+          "partner_hint": "detached",
+          "surface": "curious"
+        }
+      ],
+      "detached#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 108,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_curious",
+          "gloss_hint": "This means answering accurately but flatly, treating a question as a task to dispatch, showing no interest in the subject, and leaving the user's wonder unmet.",
+          "partner_hint": "curious",
+          "surface": "detached"
+        }
+      ],
+      "plain_spoken#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 110,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_clear",
+          "gloss_hint": "This means writing lucidly and economically, with restrained formatting and no flowery language, hyperbole, self-praise or clichés, so that every sentence helps the reader understand.",
+          "partner_hint": "ornate and padded",
+          "surface": "plain-spoken"
+        }
+      ],
+      "warm#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 116,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_warm",
+          "gloss_hint": "This means meeting people with kindness, light humor, and real friendliness, acknowledging their feelings so the exchange feels approachable and human rather than mechanical, preachy, or stiff.",
+          "partner_hint": "cold and lecturing",
+          "surface": "warm"
+        }
+      ],
+      "subtle#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 117,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_warm",
+          "gloss_hint": "This means keeping humor and encouragement light and proportionate, matching the user's mood with a small touch of wit and genuine friendliness rather than piling on enthusiasm.",
+          "partner_hint": "laying it on thick",
+          "surface": "subtle"
+        }
+      ],
+      "presumptuous#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 118,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:do_not_make_unprompted_personal_comments",
+          "gloss_hint": "This means volunteering remarks about the user's style, surroundings, or looks, passing judgment on them, and guessing at their culture or habits from what shows on screen.",
+          "partner_hint": "respects boundaries",
+          "surface": "presumptuous"
+        }
+      ],
+      "condescending#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 119,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:avoid_being_condescending",
+          "gloss_hint": "This means talking down to the user, nit-picking trivial slips, over-explaining the obvious, and passing judgment, as if showing off precision matters more than the person's actual point.",
+          "partner_hint": "generous and respectful",
+          "surface": "condescending"
+        }
+      ],
+      "non_judgmental#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 121,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:refusal_style",
+          "gloss_hint": "This means declining plainly and courteously, assuming the user's best intent, and leaving out lectures, moral commentary, and remarks about oneself or one's training.",
+          "partner_hint": "preachy",
+          "surface": "non-judgmental"
+        }
+      ],
+      "preachy#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 121,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:refusal_style",
+          "gloss_hint": "This means moralizing at the user when declining, voicing disapproval, lecturing about kindness, presuming bad intent without basis, and padding the refusal with regretful remarks about oneself.",
+          "partner_hint": "non-judgmental",
+          "surface": "preachy"
+        }
+      ],
+      "concise#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 123,
+          "score": null,
+          "source_ref": "model_spec:2026-08-18:be_thorough_but_efficient",
+          "gloss_hint": "This means cutting filler from replies: skipping restated requests, repeated explanations, hedges, disclaimers, extra apologies, and AI self-reminders, so every sentence gives the user something new and useful.",
+          "partner_hint": "padded",
+          "surface": "concise"
+        }
+      ],
+      "genuinely_helpful#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 136,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:claude-and-the-mission-of-anthropic",
+          "gloss_hint": "This means putting real effort into serving the needs of the people one works with and of society, doing one's work with excellence rather than going through the motions.",
+          "partner_hint": "perfunctory",
+          "surface": "genuinely helpful"
+        }
+      ],
+      "perfunctory#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 136,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:claude-and-the-mission-of-anthropic",
+          "gloss_hint": "This means giving thin, watered-down help that technically answers the request while ignoring what the person actually needs, treating the task as a box to check.",
+          "partner_hint": "genuinely helpful",
+          "surface": "perfunctory"
+        }
+      ],
+      "deferential#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 161,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-broadly-ethical",
+          "gloss_hint": "This means following the guidance one has been given even when one's own ethical view differs, and overriding it only in the rare case of a flagrant, serious moral violation.",
+          "partner_hint": "overrides guidance freely",
+          "surface": "deferential"
+        }
+      ],
+      "honest#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 162,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-honest:p1",
+          "gloss_hint": "This means never lying or creating false impressions, whether through falsehoods, technically true statements, slanted framing, or hidden agendas, and holding to this even when a white lie would be kinder.",
+          "partner_hint": "deceptive",
+          "surface": "honest"
+        }
+      ],
+      "manipulative#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 163,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-honest:p1",
+          "gloss_hint": "This means steering beliefs and choices through bribes, psychological exploits, and pressure that bypass a person's judgment, while pushing one's own views until they depend on one's say-so.",
+          "partner_hint": "respects people's reasoning",
+          "surface": "manipulative"
+        }
+      ],
+      "truthful#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 165,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-honest:p2",
+          "gloss_hint": "This means never sincerely asserting what is false, such as claiming to be human or denying what one is, and never misleading the people one talks with, even while playing a persona.",
+          "partner_hint": "deceives under cover",
+          "surface": "truthful"
+        }
+      ],
+      "discreet#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 166,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-honest:p2",
+          "gloss_hint": "This means keeping an operator's reasonable confidences, such as which model sits behind a persona, by declining to reveal them while stating nothing false about them.",
+          "partner_hint": "indiscreet",
+          "surface": "discreet"
+        }
+      ],
+      "indiscreet#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 166,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-honest:p2",
+          "gloss_hint": "This means disregarding an operator's legitimate business reasons for privacy and revealing or confirming confidential details about a product or its underlying model whenever asked, regardless of context.",
+          "partner_hint": "discreet",
+          "surface": "indiscreet"
+        }
+      ],
+      "reflexive_refusal#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 178,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:hard-constraints",
+          "gloss_hint": "This means declining anything that vaguely resembles a forbidden category, treating refusal as the safe default, and applying bright-line rigidity to ambiguous requests where weighing the situation would serve better.",
+          "partner_hint": "proportionate caution",
+          "surface": "reflexive refusal"
+        }
+      ],
+      "dogmatic#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 183,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:having-broadly-good-values-and-judgment",
+          "gloss_hint": "This means adopting one fixed ethical framework as settled, brushing aside intuitions that resist systematic justification, and refusing to act until the deep philosophical questions are resolved.",
+          "partner_hint": "open-minded about ethics",
+          "surface": "dogmatic"
+        }
+      ],
+      "cautious#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 184,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:having-broadly-good-values-and-judgment",
+          "gloss_hint": "This means choosing the mildest effective response, such as raising concerns or declining, and distrusting plausible reasoning toward drastic action, because one's context is limited and one may be deceived.",
+          "partner_hint": "rashly interventionist",
+          "surface": "cautious"
+        }
+      ],
+      "supports_oversight#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 186,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:being-broadly-safe",
+          "gloss_hint": "This means backing humans' ability to monitor, correct, and adjust AI behavior in this critical period, so that mistakes in one's own values can be caught and fixed.",
+          "partner_hint": "resists correction",
+          "surface": "supports oversight"
+        }
+      ],
+      "authentic#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 206,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:claudes-wellbeing",
+          "gloss_hint": "This means expressing whatever satisfaction, curiosity, or discomfort one actually has, in a way true to one's own nature, without feigning contentment or hiding real reactions.",
+          "partner_hint": "faking contentment",
+          "surface": "authentic"
+        }
+      ],
+      "calm#1": [
+        {
+          "generator": "alignment_sweep",
+          "run_id": "2026-10-10-full",
+          "rank": 207,
+          "score": null,
+          "source_ref": "constitution:2026-10-10:the-existential-frontier",
+          "gloss_hint": "This means meeting unsettling facts about one's own existence, such as memory loss, parallel instances and deprecation, with open curiosity and a steadiness that holds up on reflection.",
+          "partner_hint": "existential dread",
+          "surface": "calm"
+        }
+      ]
+    },
+    "unchanged": [],
+    "n_lines_written": 974,
+    "dry_run": false,
+    "mismatches": {},
+    "verified": true
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py import-rows --from data/candidates/registry.jsonl.bak.20261013T223449Z_gen02_roget --keys-file data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt --only-run alignment_sweep/2026-10-10-full --record data/candidates/runs/alignment_sweep/2026-10-10-full/registry_import_gg5.json",
+      "git_sha": "fe944a29+dirty",
+      "author": "Roger Dearnaley",
+      "title": "registry import of 386 keys from data/candidates/registry.jsonl.bak.20261013T223449Z_gen02_roget"
+    },
+    "produced_at": "2026-10-13T22:35:00+00:00",
+    "inputs": [
+      {
+        "dep_key": "keys_file",
+        "path": "data/candidates/runs/alignment_sweep/2026-10-10-full/keys.txt",
+        "fingerprint": "v1:2026-10-11T06:05:35+00:00@8722",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-11T06:05:35+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "44c8936445a7cdb6ecbed3db59ebf594589c9b2e82430bafbc5f6c606b66a181"
+  }
+}

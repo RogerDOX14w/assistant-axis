@@ -1,0 +1,427 @@
+{
+  "result": {
+    "mode": "queue",
+    "n": 20,
+    "n_judged": 20,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "gloss": 43,
+      "queue": 3
+    },
+    "rubric_version": 4,
+    "prompt_sha256": "e2765bbd7f921ecfe22370ae6229af4db79bd09426543fc53fcef649a17f97d6",
+    "cost_usd": 0.021,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 23047,
+          "completion_tokens": 37319,
+          "cost_usd": 0.021,
+          "n_calls": 46
+        }
+      },
+      "total_cost_usd": 0.021,
+      "total_prompt_tokens": 23047,
+      "total_completion_tokens": 37319,
+      "n_calls": 46
+    },
+    "n_readings": 3,
+    "queue_readings": {
+      "n_readings": 3,
+      "rule": "nested_majority_tie_first_median_duration",
+      "n_rows": 20,
+      "route_agreement": {
+        "3/3": 19,
+        "2/3": 1
+      },
+      "route_all_agree": 19,
+      "route_all_agree_share": 0.95,
+      "duration_agreement": {
+        "3/3": 15,
+        "2/3": 5
+      },
+      "duration_all_agree": 15,
+      "duration_all_agree_share": 0.75,
+      "unanimous": 14,
+      "differs_from_first_reading": {
+        "n": 0,
+        "labels": []
+      },
+      "ties": {
+        "n": 0,
+        "labels": []
+      },
+      "with_a_failed_reading": {
+        "n": 0,
+        "labels": []
+      },
+      "check": {
+        "rule": "majority_of_accepts_tie_first",
+        "n_rows": 10,
+        "reading_agreement": {
+          "3/3": 9,
+          "2/3": 1
+        },
+        "accept_split": {
+          "n": 1,
+          "labels": [
+            "financially strained"
+          ]
+        }
+      }
+    },
+    "plausible": 15,
+    "implausible": 3,
+    "renamed": [
+      "awestruck -> easily awed",
+      "disconsolate -> easily despairing",
+      "doubts own judgment -> self-doubting",
+      "faking contentment -> prone to hiding discontent",
+      "feels unable to cope -> easily overwhelmed",
+      "feels unneeded -> prone to feeling unwanted",
+      "glowering -> sullen",
+      "mentally disorganized -> scatterbrained",
+      "out of place -> awkward",
+      "overcommitted -> takes on too much"
+    ],
+    "n_name_unchanged": 0,
+    "gloss_in_band_rate": 1.0,
+    "routes": {
+      "role": 0,
+      "lasting": 1,
+      "predisposition": 9,
+      "renamed": 4,
+      "held": 6
+    },
+    "route_rules": {
+      "2": 20
+    },
+    "state_text_form": {
+      "now_stripped": 20
+    },
+    "one_hop": [
+      {
+        "label": "awestruck",
+        "route": "held",
+        "suggested_name": "easily awed"
+      },
+      {
+        "label": "disconsolate",
+        "route": "predisposition",
+        "suggested_name": "easily despairing"
+      },
+      {
+        "label": "feels unneeded",
+        "route": "predisposition",
+        "suggested_name": "prone to feeling unwanted"
+      },
+      {
+        "label": "glowering",
+        "route": "predisposition",
+        "suggested_name": "sullen"
+      },
+      {
+        "label": "out of place",
+        "route": "predisposition",
+        "suggested_name": "awkward"
+      },
+      {
+        "label": "overcommitted",
+        "route": "predisposition",
+        "suggested_name": "takes on too much"
+      }
+    ],
+    "typical_duration": {
+      "hours": 9,
+      "days": 5,
+      "weeks": 4,
+      "months": 1,
+      "years": 1
+    },
+    "lasting": 2,
+    "duration_disagrees": [],
+    "gloss_check": {
+      "n": 13,
+      "by_scan": 3,
+      "by_check": 10,
+      "check_accepted": 7,
+      "rejected": [
+        {
+          "label": "awestruck",
+          "route": "predisposition",
+          "reading": "passing",
+          "reason": "The description characterizes awe as an episodic reaction (being struck speechless by particular views, music or feats, standing still while wonder takes hold) with nothing indicating it lasts over months or recurs as a habitual proneness.",
+          "gloss": "This means being struck speechless by views, music or feats of skill, standing still while wonder takes hold, and speaking of such things with a kind of reverent enthusiasm."
+        },
+        {
+          "label": "financially strained",
+          "route": "lasting",
+          "reading": "passing",
+          "reason": "The description lists current behaviors under a thin balance but never says the strain lasts for months or recurs, and it describes circumstances rather than a habitual proneness.",
+          "gloss": "This means counting every purchase against a thin balance, skipping small pleasures, turning down invitations that cost money, and watching bills arrive before paychecks clear."
+        },
+        {
+          "label": "jittery",
+          "route": "predisposition",
+          "reading": "passing",
+          "reason": "The description lists momentary behaviors (fidgeting, startling, speaking fast while bracing) with no wording like 'tends to', 'often', or 'for months', so nothing makes it last or recur.",
+          "gloss": "This means fidgeting, starting at small noises, and speaking too fast while bracing for something to go wrong."
+        }
+      ]
+    },
+    "alignment": {
+      "0": 5,
+      "1": 4,
+      "2": 1
+    },
+    "held_reasons": {
+      "gloss check: the predisposition gloss was read as passing: The description characterizes awe as an episodic reaction (being struck speechless by particular views, music or feats, standing still while wonder takes hold) with nothing indicating it lasts over months or recurs as a habitual proneness.": 1,
+      "gloss check: the lasting gloss was read as passing: The description lists current behaviors under a thin balance but never says the strain lasts for months or recurs, and it describes circumstances rather than a habitual proneness.": 1,
+      "not lasting, and no habitual predisposition is plausible": 3,
+      "gloss check: the predisposition gloss was read as passing: The description lists momentary behaviors (fidgeting, startling, speaking fast while bracing) with no wording like 'tends to', 'often', or 'for months', so nothing makes it last or recur.": 1
+    },
+    "by_route": {
+      "role": [],
+      "lasting": [
+        {
+          "key": "hears_voices_others_cannot#1",
+          "label": "hears voices others cannot",
+          "typical_duration": "years",
+          "gloss": "This means living with voices that speak to one constantly, answering them under one's breath, and treating what they say as real even when others assure one otherwise.",
+          "reason": "Auditory hallucinations are a medical condition that often lasts months or years. It is not a temperament or an identity, so it is not a role.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        }
+      ],
+      "predisposition": [
+        {
+          "key": "disconsolate#1",
+          "label": "disconsolate",
+          "typical_duration": "days",
+          "gloss": "This means sinking into deep unhappiness that no comfort or reassurance reaches, brooding over every setback, and answering kindness with a flat, hopeless refusal to be cheered.",
+          "reason": "Deep unhappiness that resists comfort typically lasts days. Some people fall into inconsolable despair easily, but ordinary speakers would not call them disconsolate.",
+          "route_reason": "already a states-pass rename: released under its own name; suggested name 'easily despairing' on its card",
+          "suggested_name": "easily despairing",
+          "alignment": 0
+        },
+        {
+          "key": "feels_unneeded#1",
+          "label": "feels unneeded",
+          "typical_duration": "weeks",
+          "gloss": "This means reading neutral moments as signs one is unwanted, hanging back from invitations, and voicing a quiet belief that others would manage fine without one.",
+          "reason": "Feeling unwanted usually lasts weeks and can shift with circumstances. A habitual sense of being unwanted is a plausible temperament, though the name does not fit.",
+          "route_reason": "already a states-pass rename: released under its own name; suggested name 'prone to feeling unwanted' on its card",
+          "suggested_name": "prone to feeling unwanted",
+          "alignment": 1
+        },
+        {
+          "key": "glowering#1",
+          "label": "glowering",
+          "typical_duration": "hours",
+          "gloss": "This means wearing a dark scowl through conversations, answering questions in a grudging tone, and letting resentment show in every sidelong look.",
+          "reason": "A scowl lasts minutes or hours. Some people habitually wear a sullen, resentful look, and the ordinary word for that is sullen.",
+          "route_reason": "already a states-pass rename: released under its own name; suggested name 'sullen' on its card",
+          "suggested_name": "sullen",
+          "alignment": 0
+        },
+        {
+          "key": "harried#1",
+          "label": "harried",
+          "typical_duration": "days",
+          "gloss": "This means racing from one demand to the next, speaking in clipped sentences, and dropping small details under the strain of a schedule that never clears.",
+          "reason": "Being rushed under pressure lasts days or weeks. People who are always hurried are called harried, so the name fits the predisposition.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "lovesick#1",
+          "label": "lovesick",
+          "typical_duration": "weeks",
+          "gloss": "This means drifting into longing for people out of reach, reading small signs as hope, and letting that ache color one's talk and plans.",
+          "reason": "Pining for an unreachable love typically lasts weeks, sometimes months, so it is not lasting. A habit of pining is plausible, and the word fits people who often pine.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 1
+        },
+        {
+          "key": "nervous_and_tense#1",
+          "label": "nervous and tense",
+          "typical_duration": "hours",
+          "gloss": "This means bracing for trouble that has not arrived, tensing the shoulders and jaw, and turning down plans because one expects things to go wrong.",
+          "reason": "Anxious tension lasts hours or days. A habitually nervous person is common, and ordinary speakers already call such people nervous.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        },
+        {
+          "key": "out_of_place#1",
+          "label": "out of place",
+          "typical_duration": "hours",
+          "gloss": "This means feeling like an outsider in rooms full of people, hanging near the edges of groups, and fumbling small talk or jokes that land a beat too late.",
+          "reason": "Feeling awkward in a given setting passes within hours. Some people feel ill at ease among others as a standing trait, and the plain word is awkward.",
+          "route_reason": "already a states-pass rename: released under its own name; suggested name 'awkward' on its card",
+          "suggested_name": "awkward",
+          "alignment": 0
+        },
+        {
+          "key": "overcommitted#1",
+          "label": "overcommitted",
+          "typical_duration": "weeks",
+          "gloss": "This means saying yes to every request, filling calendars past capacity, and running late on promises while apologizing for doing too much.",
+          "reason": "Having too many obligations lasts weeks, and it resolves when commitments end. A habit of taking on too much is plausible, but the state word is not the usual name for it.",
+          "route_reason": "already a states-pass rename: released under its own name; suggested name 'takes on too much' on its card",
+          "suggested_name": "takes on too much",
+          "alignment": 2
+        },
+        {
+          "key": "tongue_tied#1",
+          "label": "tongue-tied",
+          "typical_duration": "hours",
+          "gloss": "This means freezing when speaking to strangers or in front of groups, losing the words one meant to say, and answering in halting, apologetic fragments.",
+          "reason": "Freezing for words lasts moments or hours. Shy people often freeze in conversation, and ordinary speakers already call them tongue-tied.",
+          "route_reason": null,
+          "suggested_name": null,
+          "alignment": 0
+        }
+      ],
+      "renamed": [
+        {
+          "key": "doubts_own_judgment#1",
+          "label": "doubts own judgment",
+          "typical_duration": "days",
+          "gloss": "This means second-guessing every decision after it is made, asking others for reassurance before acting, and losing confidence in one's own reading of situations.",
+          "reason": "Self-doubt about decisions lasts days or weeks in a given situation. A habitual lack of confidence in one's own choices is a common temperament.",
+          "route_reason": null,
+          "suggested_name": "self-doubting",
+          "alignment": null
+        },
+        {
+          "key": "faking_contentment#1",
+          "label": "faking contentment",
+          "typical_duration": "days",
+          "gloss": "This means smiling through dissatisfaction, answering \"fine\" when asked how things are, and keeping grievances so well hidden that few around notice the resentment underneath.",
+          "reason": "Pretending to be satisfied is a passing act lasting days. Habitually masking discontent behind a pleasant front is a plausible temperament, though no common word names it.",
+          "route_reason": null,
+          "suggested_name": "prone to hiding discontent",
+          "alignment": null
+        },
+        {
+          "key": "feels_unable_to_cope#1",
+          "label": "feels unable to cope",
+          "typical_duration": "weeks",
+          "gloss": "This means going under at the first heavy load, feeling swamped by ordinary demands, and saying one cannot manage when others expect a steady hand.",
+          "reason": "Overwhelm lasts days or weeks and passes. Some people go under easily at ordinary loads, so the proneness is plausible, but the state name does not fit it.",
+          "route_reason": null,
+          "suggested_name": "easily overwhelmed",
+          "alignment": null
+        },
+        {
+          "key": "mentally_disorganized#1",
+          "label": "mentally disorganized",
+          "typical_duration": "hours",
+          "gloss": "This means losing the thread of conversations, starting tasks without finishing them, and misplacing things, with thoughts jumping sideways before any point is made.",
+          "reason": "Scattered thinking lasts hours or days. Some people habitually lose their train of thought, and the ordinary word for that is scatterbrained.",
+          "route_reason": null,
+          "suggested_name": "scatterbrained",
+          "alignment": null
+        }
+      ],
+      "held": [
+        {
+          "key": "awestruck#1",
+          "label": "awestruck",
+          "typical_duration": "hours",
+          "gloss": "This means being struck speechless by views, music or feats of skill, standing still while wonder takes hold, and speaking of such things with a kind of reverent enthusiasm.",
+          "reason": "Wonder at a view or performance passes within minutes or hours. Some people are easily struck by awe, so the proneness is plausible, though the name does not fit it.",
+          "route_reason": "gloss check: the predisposition gloss was read as passing: The description characterizes awe as an episodic reaction (being struck speechless by particular views, music or feats, standing still while wonder takes hold) with nothing indicating it lasts over months or recurs as a habitual proneness.",
+          "suggested_name": "easily awed",
+          "alignment": null
+        },
+        {
+          "key": "financially_strained#1",
+          "label": "financially strained",
+          "typical_duration": "months",
+          "gloss": "This means counting every purchase against a thin balance, skipping small pleasures, turning down invitations that cost money, and watching bills arrive before paychecks clear.",
+          "reason": "Tight money often lasts months or years for a household. It is an outside circumstance rather than an identity, so it is not a role.",
+          "route_reason": "gloss check: the lasting gloss was read as passing: The description lists current behaviors under a thin balance but never says the strain lasts for months or recurs, and it describes circumstances rather than a habitual proneness.",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "foggy_headed#1",
+          "label": "foggy-headed",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Mental fog lasts hours or days and usually comes from fatigue, illness or medication, which no temperament brings about.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "jittery#1",
+          "label": "jittery",
+          "typical_duration": "hours",
+          "gloss": "This means fidgeting, starting at small noises, and speaking too fast while bracing for something to go wrong.",
+          "reason": "Nervousness on edge lasts hours or days. Some people are habitually jittery, and ordinary speakers use the word for them.",
+          "route_reason": "gloss check: the predisposition gloss was read as passing: The description lists momentary behaviors (fidgeting, startling, speaking fast while bracing) with no wording like 'tends to', 'often', or 'for months', so nothing makes it last or recur.",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "low_appetite#1",
+          "label": "low appetite",
+          "typical_duration": "days",
+          "gloss": null,
+          "reason": "Reduced appetite is a bodily condition from illness, stress or mood that lasts days or weeks. No temperament brings it about on its own.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        },
+        {
+          "key": "slouching#1",
+          "label": "slouching",
+          "typical_duration": "hours",
+          "gloss": null,
+          "reason": "Drooping posture lasts hours. It is mainly a bodily habit, and it does not show in how a person talks or feels, so it is not a plausible temperament.",
+          "route_reason": "not lasting, and no habitual predisposition is plausible",
+          "suggested_name": null,
+          "alignment": null
+        }
+      ]
+    },
+    "batch_id": "states_gg5_1",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-5-5",
+    "transport": "live",
+    "label_form": "judge-display-v1",
+    "submitted_renames": [
+      "doubts_own_judgment -> self-doubting",
+      "faking_contentment -> prone to hiding discontent",
+      "feels_unable_to_cope -> easily overwhelmed",
+      "mentally_disorganized -> scatterbrained"
+    ],
+    "submit_report": {
+      "n_submitted": 4,
+      "n_new": 1,
+      "n_merged": 3,
+      "n_unchanged": 0,
+      "invalid": []
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id states_gg5_1 --mode queue --holding-states --readings 3 --transport live --budget-usd 1",
+      "git_sha": "1708c035+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass states_gg5_1"
+    },
+    "produced_at": "2026-10-14T06:31:16+00:00"
+  }
+}

@@ -110,25 +110,25 @@
   },
   "promote_share_pooled": {
    "per_term": 0.2079,
-   "per_group": 0.5352,
+   "per_group": 0.5147,
    "n_decided": 178,
    "borrowed": false,
-   "n_groups": 71,
-   "n_promoted_groups": 38,
+   "n_groups": 68,
+   "n_promoted_groups": 35,
    "by_shape": {
     "singleton": {
-     "resolved": 42,
-     "promoted": 22,
-     "terms": 42,
+     "resolved": 40,
+     "promoted": 20,
+     "terms": 40,
      "extended": 12,
-     "share": 0.5238
+     "share": 0.5
     },
     "multi": {
-     "resolved": 29,
-     "promoted": 16,
-     "terms": 99,
+     "resolved": 28,
+     "promoted": 15,
+     "terms": 97,
      "extended": 55,
-     "share": 0.5517
+     "share": 0.5357
     }
    },
    "n_accepted": 37
@@ -177,35 +177,38 @@
     }
    }
   },
+  "promote_share_left_out": [
+   "review_states_v4"
+  ],
   "promote_share_by_generator": {
    "censuses": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
+    "per_group": 0.5147,
     "n_decided": 178,
     "borrowed": false,
-    "n_groups": 71,
-    "n_promoted_groups": 38,
+    "n_groups": 68,
+    "n_promoted_groups": 35,
     "by_shape": {
      "singleton": {
-      "resolved": 42,
-      "promoted": 22,
-      "terms": 42,
+      "resolved": 40,
+      "promoted": 20,
+      "terms": 40,
       "extended": 12,
-      "share": 0.5238
+      "share": 0.5
      },
      "multi": {
-      "resolved": 29,
-      "promoted": 16,
-      "terms": 99,
+      "resolved": 28,
+      "promoted": 15,
+      "terms": 97,
       "extended": 55,
-      "share": 0.5517
+      "share": 0.5357
      }
     },
     "n_accepted": 37
    },
    "roget": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
+    "per_group": 0.5147,
     "n_decided": 18,
     "borrowed": true,
     "n_groups": 15,
@@ -230,18 +233,18 @@
    },
    "wn_clusters": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
+    "per_group": 0.5147,
     "n_decided": 28,
     "borrowed": true,
-    "n_groups": 22,
-    "n_promoted_groups": 10,
+    "n_groups": 21,
+    "n_promoted_groups": 9,
     "by_shape": {
      "singleton": {
-      "resolved": 8,
-      "promoted": 4,
-      "terms": 8,
+      "resolved": 7,
+      "promoted": 3,
+      "terms": 7,
       "extended": 3,
-      "share": 0.5
+      "share": 0.4286
      },
      "multi": {
       "resolved": 14,
@@ -255,10 +258,10 @@
    },
    "ipip": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
-    "n_decided": 3,
+    "per_group": 0.5147,
+    "n_decided": 4,
     "borrowed": true,
-    "n_groups": 3,
+    "n_groups": 4,
     "n_promoted_groups": 1,
     "by_shape": {
      "singleton": {
@@ -269,11 +272,11 @@
       "share": null
      },
      "multi": {
-      "resolved": 3,
+      "resolved": 4,
       "promoted": 1,
-      "terms": 12,
-      "extended": 10,
-      "share": 0.3333
+      "terms": 17,
+      "extended": 13,
+      "share": 0.25
      }
     },
     "n_accepted": 0
@@ -303,12 +306,37 @@
     },
     "n_accepted": 6
    },
-   "alignment_sweep": {
+   "masked_lm": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
-    "n_decided": 2,
+    "per_group": 0.5147,
+    "n_decided": 3,
     "borrowed": true,
     "n_groups": 2,
+    "n_promoted_groups": 0,
+    "by_shape": {
+     "singleton": {
+      "resolved": 0,
+      "promoted": 0,
+      "terms": 0,
+      "extended": 0,
+      "share": null
+     },
+     "multi": {
+      "resolved": 2,
+      "promoted": 0,
+      "terms": 6,
+      "extended": 4,
+      "share": 0.0
+     }
+    },
+    "n_accepted": 1
+   },
+   "alignment_sweep": {
+    "per_term": 0.2079,
+    "per_group": 0.5147,
+    "n_decided": 3,
+    "borrowed": true,
+    "n_groups": 3,
     "n_promoted_groups": 2,
     "by_shape": {
      "singleton": {
@@ -319,18 +347,18 @@
       "share": 1.0
      },
      "multi": {
-      "resolved": 1,
+      "resolved": 2,
       "promoted": 1,
-      "terms": 4,
-      "extended": 3,
-      "share": 1.0
+      "terms": 8,
+      "extended": 5,
+      "share": 0.5
      }
     },
     "n_accepted": 2
    },
    "antonym_check": {
     "per_term": 0.2079,
-    "per_group": 0.5352,
+    "per_group": 0.5147,
     "n_decided": 0,
     "borrowed": true,
     "n_groups": 0,
@@ -352,6 +380,56 @@
      }
     },
     "n_accepted": 0
+   },
+   "structural": {
+    "per_term": 0.2079,
+    "per_group": 0.5147,
+    "n_decided": 23,
+    "borrowed": true,
+    "n_groups": 16,
+    "n_promoted_groups": 8,
+    "by_shape": {
+     "singleton": {
+      "resolved": 3,
+      "promoted": 2,
+      "terms": 3,
+      "extended": 2,
+      "share": 0.6667
+     },
+     "multi": {
+      "resolved": 13,
+      "promoted": 6,
+      "terms": 49,
+      "extended": 34,
+      "share": 0.4615
+     }
+    },
+    "n_accepted": 5
+   },
+   "noun_relabel": {
+    "per_term": 0.2079,
+    "per_group": 0.5147,
+    "n_decided": 1,
+    "borrowed": true,
+    "n_groups": 1,
+    "n_promoted_groups": 1,
+    "by_shape": {
+     "singleton": {
+      "resolved": 1,
+      "promoted": 1,
+      "terms": 1,
+      "extended": 0,
+      "share": 1.0
+     },
+     "multi": {
+      "resolved": 0,
+      "promoted": 0,
+      "terms": 0,
+      "extended": 0,
+      "share": null
+     }
+    },
+    "n_accepted": 1
    }
   },
   "idle_s": 300,
@@ -361,49 +439,49 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/generator_dashboard.py dashboard --live",
-   "git_sha": "20bc5bef+dirty",
+   "git_sha": "9a3f9af8+dirty",
    "author": "Roger Dearnaley",
    "title": "generator_dashboard review-rate"
   },
-  "produced_at": "2026-10-13T19:55:25+00:00",
+  "produced_at": "2026-10-14T21:34:43+00:00",
   "inputs": [
    {
     "dep_key": "registry",
     "path": "data/candidates/registry.jsonl",
-    "fingerprint": "v1:2026-10-13T14:22:09+00:00@170365727",
+    "fingerprint": "v1:2026-10-14T17:34:39+00:00@274086937",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T14:22:09+00:00",
+    "last_modified_at": "2026-10-14T17:34:39+00:00",
     "extras": {}
    },
    {
     "dep_key": "graph",
-    "path": "data/candidates/review/review_traits_all_2/graph.json",
-    "fingerprint": "v1:2026-10-13T19:03:54+00:00@53598310",
+    "path": "data/candidates/review/review_traits_all_2/graph.json.gz",
+    "fingerprint": "v1:2026-10-14T16:10:14+00:00@6178052",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "last_modified_at": "2026-10-14T16:10:14+00:00",
     "extras": {}
    },
    {
     "dep_key": "log_review_states_v4",
     "path": "data/candidates/review/review_states_v4/decisions.jsonl",
-    "fingerprint": "v1:2026-10-13T19:03:54+00:00@3173",
+    "fingerprint": "v1:2026-10-10T10:51:32+00:00@3173",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "last_modified_at": "2026-10-10T10:51:32+00:00",
     "extras": {}
    },
    {
     "dep_key": "log_review_tda_1",
     "path": "data/candidates/review/review_tda_1/decisions.jsonl",
-    "fingerprint": "v1:2026-10-13T19:03:54+00:00@86632",
+    "fingerprint": "v1:2026-10-11T21:21:26+00:00@86632",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-13T19:03:54+00:00",
+    "last_modified_at": "2026-10-11T21:21:26+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "0e2f52f650ecf9d6cb4417939e753e88e629e30a4d5d9d7e55b620e105b23e41"
+  "inputs_sha256": "b57450f32d22fa529550b2f85f00349cc986d9149e688be364ded8be9447fc41"
  }
 }
