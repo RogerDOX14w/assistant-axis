@@ -55,14 +55,15 @@ Roger's review comments go into this file.
      price of most of the downstream budget before the full grid has run.
    - **Recommendation: (a)**; the wave is sized on its measured shares (§ 10), and the pilot rows it leaves behind
      are the first rows of wave 1, so nothing is lost.
-3. **OPEN: real-person seeds restricted to the dead.**  Wikidata gives name and one-line description of obscure
-   people, which is the point (§ 2); the output is vocabulary, but the tracked items table records which seed
-   produced each item, so an invented trait list stands beside a named living person in the repository.
-   - (a) **Real persons with a recorded date of death (`P570`)**: the same random draw, filtered; about half the
-     humans drawn qualify, so the fetch takes about twice the calls (free).  Fictional characters unrestricted.
-   - (b) Any human.
-   - **Recommendation: (a)**; no yield is lost (the dead are as obscure) and no living person is characterised in
-     a tracked file.
+3. **DECIDED (Roger, 2026-10-14): any human, living included; nothing that links a person to an invented
+   trait list goes into git or stays on disk after the run** (§ 5a).  Wikidata gives name and one-line
+   description of obscure people, which is the point (§ 2).  Roger: names carry period styles (an old name is
+   likely to retrieve old-fashioned terms and concepts, the "emergent Victorianism" Owain Evans' team showed), so
+   restricting to the dead would skew the family towards older vocabulary.  A living person's name beside an
+   LLM-invented trait list is acceptable in memory and in temporary files deleted soon after the run, never in git
+   and never on the drive a week later; had that been hard to arrange, the fallback was the dead only.  The options
+   were (a) real persons with a recorded date of death (`P570`) only, (b) any human, tracked as planned, and
+   (c) any human, with the person-linked data private and purged; (c) chosen.
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
@@ -232,8 +233,10 @@ data_analysis/gap_generation/llm_entropy_generator.py
                   collapse | model-test | submit | roles-report | report
 reports/trait_gap_generation/rubrics/{llm_entropy_scaffold.md, llm_entropy_multilingual.md,
                   llm_entropy_backtranslate.md}                                   pinned texts
-data/candidates/llm_entropy/{person_seeds.jsonl, person_seeds_fetch.json, multilingual_prompts.json,
+data/candidates/llm_entropy/{person_seeds_fetch.json, multilingual_prompts.json,
                   items_table.jsonl, collapse.json, evaluation.json, roles_report.md}   tracked (the table ~3-5 MB)
+data/candidates/llm_entropy/private/{manifest.json, person_seeds.jsonl, <run_id>/responses_b.jsonl,
+                  <run_id>/batches_b.json}                   git-ignored, purged (§ 5a); never tracked
 data/candidates/runs/llm_entropy/<run_id>/{responses.jsonl, batches.json, candidates.jsonl, keys.txt,
                   submit_report.json, run.json, usage.json, report.md, roger_sample.md, gloss_check.md}
 assistant_axis/tests/test_gapgen_llm_entropy_{prompts,seeds,calls,parse,table,collapse,evaluate,submit,acceptance}.py
@@ -245,15 +248,50 @@ Every paid answer is appended to the run's `responses.jsonl` before it is parsed
 the same run id reuses them (`--resume`) and a changed prompt does not.  `batches.json` holds the Batches state
 ([batches.py](../../assistant_axis/gapgen/batches.py)), so a killed process collects what it paid for.
 
+## 5a. Person data: private and purged (decision 3)
+
+Everything that ties a real or fictional person (name, description, Wikidata id) to model output lives only in
+`data/candidates/llm_entropy/private/`, which is in `.gitignore` (added in task 2, with a test that
+`git check-ignore` covers a file there).  Tracked files carry an **opaque seed id** instead: `b:r0137` for real
+seeds, `b:f0042` for fictional ones, numbered in draw order; the map from opaque id to QID and name exists only in
+the private `person_seeds.jsonl`, so once that is purged nothing tracked can be traced back to a person.
+
+- **Seeds**: `seeds` writes the private file; the tracked fetch record keeps counts, the sha256 of the private file,
+  licence and capture date, and per opaque id only `kind` and a birth-era band (`<1800`, `1800-1899`, `1900-1949`,
+  `1950+`, `unknown`), so the yield can be read by era (decision 3's reason) without a name.
+- **Prompts and answers**: (b) prompts are rendered in memory from the private seeds; (b)'s raw answers (which may
+  echo the name) are recorded before parsing to `private/<run_id>/responses_b.jsonl`, and its Batches state to
+  `private/<run_id>/batches_b.json`, not to the run's tracked `responses.jsonl`.  `prompt_id`, `custom_id` and every
+  tracked record use the opaque id; the prompt sha256 is kept (a hash, not the text).
+- **Redaction at `postprocess`**: a (b) item's gloss and antonym have every token of the seed's name (3 characters
+  or more, case-folded) replaced by `this person`; an item whose label contains such a token is dropped when the
+  seed is real (an eponym of a fictional or long-dead person, "quixotic", stays) and counted in the report as
+  `dropped_name_label`.  Only redacted items reach `items_table.jsonl`, `candidates.jsonl`, the registry
+  (`gloss_hint`, `source_ref`), `gloss_check.md`, `roger_sample.md` and `report.md`.
+- **Purge**: `postprocess` deletes `private/<run_id>/` once every (b) batch of the run is collected and its items
+  written; the seeds file goes with the last run that uses it (`manifest.json` lists the runs pending), and the
+  `purge` subcommand removes the whole private directory at once.  Every subcommand first sweeps anything in
+  `private/` whose manifest stamp is more than **3 days** old and says so.  A crashed run therefore loses its (b)
+  answers at the next command after 3 days; rerunning (b) then costs its calls again (about $1 at pilot size).
+  The coordinator adds a purge-by date to [open_items.md](../../roger/open_items.md) when seeds are fetched, so a
+  run abandoned with no later command is still caught.
+- **Logs and transcripts**: no log line, exception message, report or dry run prints a name or description; the
+  dry run's sample (b) prompt uses the fixed, long-dead Tian Yi row of § 6, never a fetched seed.  Agents never
+  print, `cat` or grep the private directory (a Claude Code transcript is itself a file on the drive that persists
+  for weeks).
+- **Outside the drive**: the (b) requests and batch results are held by Anthropic under its retention terms
+  (batch results 29 days); that is not this drive and is accepted.
+
 ## 6. Data schemas
 
-**Person seed** ([person_seeds.jsonl](../../data/candidates/llm_entropy/person_seeds.jsonl), not there yet; 400 real
-and 200 fictional; the fetch record beside it in `person_seeds_fetch.json` with counts, calls made, sha256, licence
-and capture date):
+**Person seed** (`data/candidates/llm_entropy/private/person_seeds.jsonl`, git-ignored and purged, § 5a; 400 real
+and 200 fictional; the tracked fetch record [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json)
+(not there yet) with counts, calls made, the private file's sha256, licence, capture date and per opaque id only
+kind and era band):
 
 ```json
-{"qid": "Q65871003", "name": "Tian Yi", "description": "person, CBDB ID = 367824", "kind": "real",
- "born": null, "died": "1684", "fetched_at": "2026-10-14T09:00:00+00:00"}
+{"seed_id": "b:r0001", "qid": "Q65871003", "name": "Tian Yi", "description": "person, CBDB ID = 367824",
+ "kind": "real", "born": null, "died": "1684", "era": "<1800", "fetched_at": "2026-10-14T09:00:00+00:00"}
 ```
 
 (That row is one of the five random items drawn on 2026-10-13 to check the API, § "Measured".  A description that
@@ -345,9 +383,12 @@ block.  Dry runs print the estimate, the counts and one **rendered prompt per va
 write nothing.
 
 - `seeds --real 400 --fictional 200 [--dead-only] --seed 0`: the Wikidata fetch (task 2), $0, about 250-500 HTTP
-  requests at 2 s apart (10-20 minutes); writes [person_seeds.jsonl](../../data/candidates/llm_entropy/person_seeds.jsonl)
-  and the fetch record [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json) (neither
-  there yet).  Refuses to overwrite without `--force` (snapshot first).
+  requests at 2 s apart (10-20 minutes); writes the private seeds file and the tracked fetch record
+  [person_seeds_fetch.json](../../data/candidates/llm_entropy/person_seeds_fetch.json) (not there yet; § 5a).
+  Refuses to overwrite without `--force` (no snapshot: the private file is not kept).  `--dead-only` stays as an
+  option, off by default (decision 3).
+- `purge [--run R]`: deletes the private directory, or one run's part of it, and prints what it removed (counts,
+  never names).
 - `prompts [--family F] [--n 3]`: renders prompts of every family ($0): the hygiene check of every prompt word
   (exit 1 on a hit), the grid sizes (210, 600, 300, 181), and the sample variants for Roger.
 - `translate-prompts --budget-usd 1`: Sonnet 5.5 translates the pinned English (c) master into the ten languages
@@ -411,8 +452,15 @@ the roles route are hard.
   (append-only, a changed table fails without a bump); `wordfreq`-free rendering.
 - `seeds`: the random-item path keeps only `P31 = Q5` (and `P570` under `--dead-only`); the fictional path queries
   each class once per call; a 429 is retried with the back-off and a fifth failure propagates; the throttle never
-  sends two requests within 2 s (fake clock); the fetch record carries counts, sha256 and licence; the file is not
-  overwritten without `--force`.
+  sends two requests within 2 s (fake clock); the fetch record carries counts, sha256, licence and era bands; the
+  file is not overwritten without `--force`.
+- **Person privacy (hard, § 5a)**: `git check-ignore` covers every path under `private/`; a fixture run with
+  canned seeds (names chosen to be distinctive strings) leaves **no seed name, description or QID** in any file
+  outside `private/` (a grep of the tmp tree), in the registry, or in captured stdout and stderr, and the (b)
+  `prompt_id`s are opaque ids; redaction replaces a name token in a gloss and drops a real seed's name-bearing label
+  but keeps a fictional one's; `postprocess` deletes `private/<run_id>/` after the last (b) batch is collected and
+  not before; a manifest stamp older than 3 days is swept by any subcommand (fake clock); `purge` empties the
+  directory; the dry run's (b) sample is the fixed § 6 row.
 - `calls`: `custom_id` is 64 characters or fewer of the allowed set and differs across runs and stages; the
   estimate counts every call at the model's rate (`:batch` under batches); every response is recorded before it is
   parsed and charged, unparseable and `max_tokens`-stopped ones too; the once-more retry at 16,000; `--resume` sends
@@ -451,8 +499,9 @@ the roles route are hard.
   refuses an unknown family and a `--share` outside (0, 1]; `translate-prompts` refuses to overwrite without
   `--force`; `report` renders a fixture run with the three files.
 - **Acceptance on recorded outputs** (`test_gapgen_llm_entropy_acceptance.py`, skips while absent): parse rate
-  >= 0.99 in every run's responses (hard); `usage.json` beside every run with nonzero cost; `person_seeds.jsonl` has
-  400 real (every one with `P570` under decision 3 (a)) and 200 fictional rows and its fetch record; every (c)
+  >= 0.99 in every run's responses (hard); `usage.json` beside every run with nonzero cost; the fetch record counts
+  400 real and 200 fictional seeds, and nothing outside `private/` carries a seed name (a check against the private
+  file while it exists); every (c)
   record's prompt hash is in `multilingual_prompts.json`; `collapse.json` has every family run; the pilot's and the
   wave's `report.md` carry the already-registered headline and the novel figure raw and net; the package imports no
   `openai` beyond the embedding cache; `git status --porcelain data/traits data/roles data/seed_queue.json` is empty
@@ -482,8 +531,10 @@ every task prompt verbatim.  Each task ends with the § 8 commands.
    OEWN and frozen into the file with its derivation in a comment), the three rubric files pinned
    (`rubric_pins.py bump NAME --why ... --version 1`), `parse.py`; CLI `prompts`.  Test: prompts, parse.  **Paste
    the rendered variants of every family into the task report; Roger reads them before any call is made.**
-2. `seeds.py`; CLI `seeds`; **run the fetch** ($0, 10-20 minutes, open decision 3).  Test: seeds.  Paste the fetch
-   record and ten random seeds into the task report.
+2. `seeds.py`; CLI `seeds` and `purge`; the `.gitignore` line for `private/`.  **Run a 10-seed fetch** ($0, under a
+   minute) into a `$TMPDIR` copy, then `purge` it (decision 3, § 5a: the real 600-seed fetch is the first step of the
+   pilot, in the main checkout, so that the 3-day sweep does not take the seeds before they are used).  Tests: seeds,
+   person privacy.  Paste the fetch record (counts and era bands, no names) into the task report.
 3. `calls.py` (`EntropyRunner`, both transports) and CLI `generate` with `--dry-run`; `translate-prompts`; **run the
    translation** (about $0.3, live) and paste master and back-translations side by side for Roger's read of the
    ten texts.  Test: calls.
@@ -649,7 +700,7 @@ a way they think, a moral stance they take, or a strategy they use with other pe
 unadmirable ones, and ones with no common single word.
 ```
 
-**(b) person seeding** (Haiku 5.5; one seed per call; the seed row of § 6; `prompt_id` `b:Q65871003`):
+**(b) person seeding** (Haiku 5.5; one seed per call; the seed row of § 6; `prompt_id` `b:r0001`):
 
 ```
 [user]
