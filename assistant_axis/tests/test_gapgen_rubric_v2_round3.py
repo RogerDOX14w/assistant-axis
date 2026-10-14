@@ -42,11 +42,11 @@ class TestVersionPins:
 
     def test_table_covers_every_prompt(self):
         # M2 (2026-10-01) added the calibration's two prompts to the table; round 4 (2026-10-02) the two
-        # paraphrase styles; the states pass's gloss check on 2026-10-09
+        # paraphrase styles; the states pass's gloss check on 2026-10-09; the noun relabel pilot on 2026-10-14
         assert set(rv().current()) == {"classifier", "probe", "states_queue", "states_corpus", "states_check",
                                        "plain_reading", "comparison", "calibration_paraphrase",
                                        "calibration_paraphrase_plain", "calibration_paraphrase_terse",
-                                       "calibration_blinded"}
+                                       "calibration_blinded", "noun_relabel"}
 
     def test_a_text_change_without_a_new_version_fails(self, monkeypatch):
         monkeypatch.setattr(fr, "SYSTEM_PROMPT", fr.SYSTEM_PROMPT + " ")

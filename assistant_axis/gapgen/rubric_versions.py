@@ -76,6 +76,10 @@ HISTORY: dict[str, dict[int, str]] = {
     "calibration_blinded": {
         1: "5f4f8f39073f09130bec58c1113c0c25805b91ff581964619992e1d88304954a",
     },
+    # the noun relabel pilot (open decision 3 (b) of coding_plan_noun_normalization.md, 2026-10-14): built, not run
+    "noun_relabel": {
+        1: "5e2d9f17f7b1a63f0f71affe8a5a5f3597dd4ca96c83b215cbf969db075bb9d3",
+    },
 }
 
 
@@ -88,6 +92,7 @@ def current() -> dict[str, tuple[int, str]]:
     code stands now."""
     from . import calibrate_llm as cl
     from . import filter_rubric as fr
+    from . import nouns as nn
     from . import plain_reading as pr
     from . import states_pass as sp
     return {
@@ -102,6 +107,7 @@ def current() -> dict[str, tuple[int, str]]:
         "calibration_paraphrase_plain": (cl.PARAPHRASE_STYLE_VERSIONS["plain"], _sha(cl.paraphrase_prompt("plain"))),
         "calibration_paraphrase_terse": (cl.PARAPHRASE_STYLE_VERSIONS["terse"], _sha(cl.paraphrase_prompt("terse"))),
         "calibration_blinded": (cl.BLINDED_PROMPT_VERSION, _sha(cl.BLINDED_PROMPT)),
+        "noun_relabel": (nn.PILOT_PROMPT_VERSION, _sha(nn.PILOT_SYSTEM_PROMPT)),
     }
 
 

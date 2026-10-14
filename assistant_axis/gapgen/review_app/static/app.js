@@ -198,6 +198,8 @@ function renderCard() {
     const dist = (m.distinct_from || []).length ? `<span class="badge">distinct from ${esc(m.distinct_from.join(", "))}</span>` : "";
     const cov = m.covered_by ? `<span class="badge">covered by ${link(m.covered_by)}</span>` : "";
     const applied = m.applied && !m.earlier_review ? `<span class="badge">registry: ${esc(m.applied)}${m.seed_queue_stem ? ", queued" : ""}</span>` : "";
+    // the relabel step's link (nouns.py): "from pedant" on the adjective, "adjective: pedantic" on the noun, with its route
+    const relabel = m.relabel ? `<span class="badge" title="${esc(m.relabel.route || "")}">${m.relabel.from ? "from " + esc(m.relabel.from) : "adjective: " + esc(m.relabel.to || "")} (${esc(m.relabel.route || "")})</span>` : "";
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
     const mine = !(m.handled_by && m.handled_by !== c.id);
     const btns = [
@@ -208,7 +210,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${earlierBadge(m)}${dist}${cov}${applied}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each

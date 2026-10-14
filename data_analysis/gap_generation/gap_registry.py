@@ -13,6 +13,8 @@ Commands:
   generator and run id included; ``registry.read_candidates``) into this checkout's
   log, the way a run made in another worktree reaches the main checkout.  Idempotent
   (a source already on a row changes nothing); no run directory is touched.
+  Both forms run the platform's relabel step (a single-word noun gains its adjective sibling,
+  ``assistant_axis/gapgen/nouns.py``) unless ``--no-relabel``.
 * ``import-rows --from OTHER_REGISTRY --keys-file F [--only-run GEN/RUN] [--record PATH] [--dry-run]``:
   the rows of the keys in F (one per line; blank lines and lines starting with ``#`` skipped) from another
   checkout's registry log, with the blocks that checkout's filter and novelty runs wrote, for a run that was
@@ -27,7 +29,8 @@ Commands:
 * ``status``: counts by verdict, decision, review status, holding list and generator.
 * ``report [--generator G] [--decision D] [--verdict V] [--include-held]``: a
   markdown table, the main review list: rows on a holding list are left off
-  unless ``--include-held``.
+  unless ``--include-held``.  A noun the relabel step linked shows ``-> adjective``
+  after its label, the adjective ``<- noun`` (``holding`` too).
 * ``holding --list physical|roles|states|nationalities|states_released``: a
   markdown block for Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work
   the states and nationalities queues from (the tool never writes those files);
@@ -130,8 +133,8 @@ def cmd_submit_from(args) -> int:
         print(f"DRY-RUN: would submit {len(cands)} candidates from {args.from_path} ({json.dumps(dict(sorted(runs.items())))}) "
               f"to {args.registry}")
         return 0
-    rep = submit_candidates(cands, registry_path=args.registry)
-    print(json.dumps({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys),
+    rep = submit_candidates(cands, registry_path=args.registry, relabel=None if args.no_relabel else "auto")
+    print(json.dumps({k: v for k, v in rep.as_dict().items() if k not in ("keys", "relabels")} | {"n_keys": len(rep.keys),
                                                                                 "runs": dict(sorted(runs.items()))}))
     return 0
 
@@ -160,9 +163,10 @@ def cmd_submit(args) -> int:
         return 0
     run = start_run(args.generator, args.run_id, args={"file": str(args.file), "via": "gap_registry.py submit"},
                     candidates_dir=args.registry.parent if args.registry != paths.REGISTRY_PATH else None)
-    rep = submit_candidates(cands, registry_path=args.registry, run=run)
+    rep = submit_candidates(cands, registry_path=args.registry, run=run, relabel=None if args.no_relabel else "auto")
     run.finish()
-    print(json.dumps({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}))
+    print(json.dumps({k: v for k, v in rep.as_dict().items() if k not in ("keys", "relabels")}
+                     | {"n_keys": len(rep.keys)}))
     return 0
 
 
@@ -254,6 +258,18 @@ def cmd_status(args) -> int:
     return 0
 
 
+def relabel_arrow(r: dict) -> str:
+    """`` -> pedantic`` on a noun row the relabel step linked (`` (corpus trait)`` when its adjective is one),
+    `` <- pedant`` on its adjective row, else empty (``assistant_axis/gapgen/nouns.py``)."""
+    b = r.get("relabel") or {}
+    if b.get("to_corpus_stem"):
+        return f" -> {b['to_corpus_stem']} (corpus trait)"
+    if b.get("to_key"):
+        return f" -> {str(b['to_key']).split('#')[0]}"
+    src = b.get("from_surface") or (str(b["from_key"]).split("#")[0] if b.get("from_key") else None)
+    return f" <- {src}" if src else ""
+
+
 def cmd_report(args) -> int:
     rows = records_for_status(Registry(args.registry), generator=args.generator, decision=args.decision,
                               verdict=args.verdict)
@@ -269,7 +285,7 @@ def cmd_report(args) -> int:
         tags = list(f.get("tags") or [])
         if f.get("membership_kind"):
             tags = [f"membership:{f['membership_kind']}" if t == "membership" else t for t in tags]
-        print(f"| {r['key']} | {_md(r['label'])} | {_md(f.get('verdict'))} | {_md(', '.join(tags))} "
+        print(f"| {r['key']} | {_md(r['label'] + relabel_arrow(r))} | {_md(f.get('verdict'))} | {_md(', '.join(tags))} "
               f"| {_md(f.get('region'))} | {_md(f.get('alignment_relevant'))} | {_md(f.get('polysemy'))} "
               f"| {_md(nv.get('decision'))} | {_md(nv.get('nearest_existing'))} | {_md(r.get('gloss'))} |")
     return 0
@@ -307,7 +323,7 @@ def cmd_holding(args) -> int:
         f = r.get("filter") or {}
         gens = sorted({s.get("generator") for s in r.get("sources") or []})
         note = _states_pass_note(r) if args.list in ("states", "states_released") or r.get("states_pass") else ""
-        print(f"- **{r['label']}** ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): "
+        print(f"- **{r['label']}**{relabel_arrow(r)} ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): "
               f"{r.get('gloss') or ''}{note}")
     return 0
 
@@ -688,6 +704,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--generator")
     sp.add_argument("--run-id")
     sp.add_argument("--dry-run", action="store_true")
+    sp.add_argument("--no-relabel", action="store_true",
+                    help="submit the rows as given: no adjective sibling for a noun (the M1 validation set, a replay "
+                         "that must be judged as given); default: the platform's relabel step (nouns.py)")
     sp.set_defaults(func=cmd_submit)
     sp = sub.add_parser("import-rows",
                         help="rows of another checkout's registry log (with their filter and novelty blocks) into this "

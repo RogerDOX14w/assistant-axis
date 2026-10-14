@@ -20,8 +20,10 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   members and ``k`` alone cut 22% of the pairs he put together; ``None`` gives the k nearest alone, the rule
   before); **and** every pair of candidates whose labels are one label once case, hyphens, spaces and apostrophes
   are taken out (:func:`label_variant_key`, M3's blind form: other-worldly / otherworldly), wherever their
-  cosine.  An edge that only the pair floor (or only the label rule) brought in says so in ``via``
-  (``pair_floor``, ``label_variant``); a k-nearest edge has none.  Each such pair is listed in both candidates'
+  cosine; **and** every noun and its adjective sibling (:func:`relabel_pairs`: the rows' ``relabel`` blocks name
+  each other, ``assistant_axis.gapgen.nouns``; noun normalization plan, 2026-10-14), wherever their cosine.  An edge
+  that only the pair floor (or only the label rule) brought in says so in ``via`` (``pair_floor``,
+  ``label_variant``); a relabel pair's ``via`` is ``relabel`` wherever it came in; a k-nearest edge has none.  Each such pair is listed in both candidates'
   relation calls, and a list longer than :data:`RELATION_LIST_MAX` is split over several calls (one record per
   candidate still).  Typed by the relation call (rubric ``relation.md``, the relation model, one list per
   candidate as in M3, the other candidates' glosses as descriptions; ``unsure`` asked again of Sonnet as M3 does).
@@ -50,7 +52,8 @@ of M3 batches kept, a typed graph from which the review reads its groups:
   would make of them, without changing the graph).  Every 4-edge is a 3-edge.  A **label variant** pair
   (``label_variant``) is a 3-edge whatever its readings and relation (Roger, 2026-10-12: "read or not"; the TDA
   case other-worldly / otherworldly read ``3/2`` because the two glosses took different senses), so the two are
-  pre-assembled in one proposed group and Roger decides; it is never a 4-edge on that ground alone.
+  pre-assembled in one proposed group and Roger decides; it is never a 4-edge on that ground alone.  A relabel pair
+  (pedant / pedantic) is pre-assembled the same way: ``label_variant`` set, ``via`` ``relabel``.
 * **Merged groups** (``cliques``; the key keeps its R1 name): the maximal cliques of the 4-edges
   (:func:`maximal_cliques`, Bron-Kerbosch with a pivot), so a chain can never be a group; two cliques may overlap;
   a kept candidate in none is a ``singleton`` (R1's sense: in no merged group).  ``clique_links``: the pairs of
@@ -124,10 +127,11 @@ DEFAULT_PAIR_FLOOR = 0.55
 #: measured 76.5 output tokens a listed candidate (``novelty_runner.RELATION_OUT_MEASURED``) 40 take about 3,060 of
 #: the call's 4,096 and 54 would not fit.  A list of this many or fewer is one call, as before.
 RELATION_LIST_MAX = 40
-#: 3: the pair floor and the label variants (an r1 edge's ``via`` and ``label_variant``; a label variant is a 3-edge
-#: whatever its readings).  2: decision 12 (``proposed_groups``, ``proposed_links``, an edge's ``proposed``, a
+#: 4: the relabel pairs (a noun and its adjective sibling, ``via`` "relabel", pre-assembled as a label variant is;
+#: noun normalization plan, 2026-10-14).  3: the pair floor and the label variants (an r1 edge's ``via`` and
+#: ``label_variant``; a label variant is a 3-edge whatever its readings).  2: decision 12 (``proposed_groups``, ``proposed_links``, an edge's ``proposed``, a
 #: reading's ``proposed``; the second direction read after a first at the proposed cut-off).  1: R1 as first built.
-GRAPH_SCHEMA = 3
+GRAPH_SCHEMA = 4
 #: The M3 decisions a candidate is reviewed under (``grey`` is kept with a flag).
 KEPT_DECISIONS = ("new", "grey")
 NODE_KINDS = ("candidate", "corpus", "queue")
@@ -261,9 +265,11 @@ class Edge:
     readings: dict = field(default_factory=dict)    # {"ab": a as the target, "ba": b as the target}: reading_of()
     overlap: Optional[str] = None                # r1: OVERLAP_STATES
     via: Optional[str] = None                    # m3: retrieved | expanded | partner | renamed_from; r1: pair_floor |
-                                                 # label_variant for an edge in neither k-nearest list (else None)
+                                                 # label_variant for an edge in neither k-nearest list (else None);
+                                                 # relabel for a noun and its adjective, wherever it came in
     rank: Optional[int] = None                   # m3: the corpus trait's rank among the k retrieved
-    label_variant: bool = False                  # r1: the two labels are one label blind (a 3-edge, read or not)
+    label_variant: bool = False                  # r1: the two labels are one label blind, or a relabel pair (a
+                                                 # 3-edge, read or not)
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -570,8 +576,10 @@ class GraphPlan:
     included: dict = field(default_factory=dict)   # key -> reason: covered candidates reviewed anyway
     k: int = DEFAULT_K
     pair_floor: Optional[float] = None             # None: the k nearest alone (the rule before 2026-10-12)
-    via: dict = field(default_factory=dict)        # (a, b) -> pair_floor | label_variant: in neither k-nearest list
+    via: dict = field(default_factory=dict)        # (a, b) -> pair_floor | label_variant: in neither k-nearest list;
+                                                   # relabel: a relabel pair, wherever it came in
     label_variants: list = field(default_factory=list)   # [(a, b)]: the pairs whose labels are one label blind
+    relabel_pairs: list = field(default_factory=list)    # [(a, b)]: a noun and its adjective sibling (relabel blocks)
 
     def relation_items(self) -> list[tuple[str, list[str]]]:
         """``(key, [other keys])`` of every kept candidate with a neighbour, by key: one relation call each."""
@@ -583,9 +591,11 @@ class GraphPlan:
         list longer than :data:`RELATION_LIST_MAX` is split: ``lists_split``)."""
         by = Counter(self.via.get(e, "k_nearest") for e in self.edges)
         lens = [len(v) for v in self.neighbours.values() if v]
-        return {"n_candidate_edges": len(self.edges), "by_via": {k: by[k] for k in ("k_nearest", "pair_floor",
-                                                                                      "label_variant")},
-                "n_label_variant_pairs": len(self.label_variants), "k": self.k, "pair_floor": self.pair_floor,
+        # "relabel" only when there are any, so a plan without relabel pairs counts as before
+        vias = ("k_nearest", "pair_floor", "label_variant") + (("relabel",) if by["relabel"] else ())
+        return {"n_candidate_edges": len(self.edges), "by_via": {k: by[k] for k in vias},
+                "n_label_variant_pairs": len(self.label_variants), "n_relabel_pairs": len(self.relabel_pairs),
+                "k": self.k, "pair_floor": self.pair_floor,
                 "n_listed": sum(lens), "longest_list": max(lens, default=0),
                 "n_relation_calls": sum(-(-n // RELATION_LIST_MAX) for n in lens),
                 "lists_split": sum(1 for n in lens if n > RELATION_LIST_MAX)}
@@ -669,6 +679,19 @@ def label_variant_pairs(cands: Mapping[str, Any]) -> list[tuple[str, str]]:
     return sorted(out)
 
 
+def relabel_pairs(rows: Mapping[str, Mapping]) -> list[tuple[str, str]]:
+    """The pairs of rows (``key -> registry row``) linked by their ``relabel`` blocks, either way (a noun's
+    ``to_key``, an adjective's ``from_key``; :mod:`assistant_axis.gapgen.nouns`), both in ``rows``: ``(a, b)`` with
+    ``a < b``, sorted."""
+    out = set()
+    for k, r in rows.items():
+        b = r.get("relabel") or {}
+        for other in (b.get("to_key"), b.get("from_key")):
+            if other and other != k and other in rows:
+                out.add(tuple(sorted((k, other))))
+    return sorted(out)
+
+
 def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: Mapping[str, np.ndarray], *,
                k: int = DEFAULT_K, cosine_floor: float = DEFAULT_COSINE_FLOOR,
                pair_floor: Optional[float] = DEFAULT_PAIR_FLOOR,
@@ -704,25 +727,28 @@ def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: M
             if b not in ranked[a] and a not in ranked[b]:
                 via[e] = "pair_floor"
     variants = [p for p in label_variant_pairs(cands) if p[0] in with_vec and p[1] in with_vec]
-    if variants:
+    relabels = [p for p in relabel_pairs(rows_kept) if p[0] in with_vec and p[1] in with_vec and p not in set(variants)]
+    if variants or relabels:
         keys, S = _cosines(with_vec)
         pos = {x: i for i, x in enumerate(keys)}
-        for a, b in variants:
+        for (a, b), how in [*((p, "label_variant") for p in variants), *((p, "relabel") for p in relabels)]:
+            if how == "relabel":
+                via[(a, b)] = "relabel"           # wherever it came in: the pair is the relabel step's
             if (a, b) in edges:
                 continue
             c = round(float(S[pos[a], pos[b]]), 6)
             edges[(a, b)] = c
-            via[(a, b)] = "label_variant"
+            via[(a, b)] = how
             nbrs[a].append((b, c))
             nbrs[b].append((a, c))
-        for x in {m for p in variants for m in p}:
+        for x in {m for p in [*variants, *relabels] for m in p}:
             head, tail = nbrs[x][:k], nbrs[x][k:]
             nbrs[x] = head + sorted(tail, key=lambda t: (-t[1], t[0]))
     return GraphPlan(batch_ids=list(batch_ids), cands=cands, rows=rows_kept, covered=covered,
                      neighbours={x: nbrs[x] for x in sorted(nbrs)}, edges=dict(sorted(edges.items())),
                      skipped=dict(skipped), no_vector=no_vector, by_batch=by_batch,
                      included={x: include[x] for x in sorted(include) if x in rows_kept}, k=k, pair_floor=pair_floor,
-                     via=dict(sorted(via.items())), label_variants=variants)
+                     via=dict(sorted(via.items())), label_variants=variants, relabel_pairs=relabels)
 
 
 def overlap_pairs(plan: GraphPlan, relations: Mapping[str, Mapping], *,
@@ -969,7 +995,8 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
 
     edges: list[Edge] = []
     stalled: dict[str, list] = {"relation": [], "overlap": []}
-    variants = {tuple(p) for p in plan.label_variants}
+    # a relabel pair is pre-assembled as a label variant is (noun normalization plan): ``label_variant`` set
+    variants = {tuple(p) for p in plan.label_variants} | {tuple(p) for p in plan.relabel_pairs}
     for k, rec in sorted(relations.items()):
         if rec.get("status") in ("failed", "not_sent") or \
                 (rec.get("unsure_reasked") or {}).get("status") in ("failed", "not_sent"):
@@ -1084,7 +1111,8 @@ def summarize(g: Graph, *, plan: Optional[GraphPlan] = None) -> dict:
             "answers": _dist(Counter(v for e in r1 for v in e.relations.values())),
             "one_sided": sum(1 for e in r1 if len(e.relations) == 1),
             "by_via": _dist(Counter(e.via or "k_nearest" for e in r1)),
-            "label_variants": sum(1 for e in r1 if e.label_variant)},
+            "label_variants": sum(1 for e in r1 if e.label_variant and e.via != "relabel"),
+            "relabel_pairs": sum(1 for e in r1 if e.via == "relabel")},
         "overlap": {
             "pairs_first_direction": sum(1 for e in r1 if "ab" in e.readings),
             "pairs_second_direction": sum(1 for e in r1 if "ba" in e.readings),

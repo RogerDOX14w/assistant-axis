@@ -78,12 +78,14 @@ def read_snapshot(path: Path | str) -> dict[str, dict]:
 #: Top-level fields of a registry row, in schema order (§6).
 ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "gloss", "entity_type",
               "sources", "freq", "wordnet", "filter", "novelty", "holding", "matches_existing",
-              "heldout_hit", "review", "seed_queue_stem", "rev", "created_at", "updated_at")
+              "heldout_hit", "review", "seed_queue_stem", "relabel", "rev", "created_at", "updated_at")
 #: Blocks other workstreams fill (merge_block targets).  ``lexical``: workstream 11's lexical sweep
 #: (``assistant_axis.gapgen.lexical_sweep``; not in :data:`ROW_FIELDS`, so a new row is unchanged).  ``persona``:
 #: workstream 12's persona-space score (plan 12 decision 1a, Roger 2026-10-13), written beside ``novelty`` and never
-#: into it.
-BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona")
+#: into it.  ``relabel``: the noun-to-adjective link (``assistant_axis.gapgen.nouns``, 2026-10-14): ``to_key`` /
+#: ``to_corpus_stem`` on a noun row, ``from_key`` on its adjective row; written by :func:`submit_candidates` and the
+#: ``noun_relabel.py`` streams, ``None`` on every other row (``schema_version`` stays 1: the field is additive).
+BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel")
 
 
 def utc_now() -> str:
@@ -171,6 +173,10 @@ class SubmitReport:
     keys: list[str]
     n_unchanged: int = 0
     invalid: list[str] = field(default_factory=list)
+    #: nouns given an adjective sibling by the relabel step, and ``(noun_key, adj_key | None, corpus_stem | None)``
+    #: for each (``adj_key`` None when the adjective is a corpus trait: no row)
+    n_relabelled: int = 0
+    relabels: list = field(default_factory=list)
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -438,8 +444,40 @@ class Registry:
 # Submission (frozen interface)
 # ---------------------------------------------------------------------------
 
+_RELABEL_WARNED = False
+
+
+def _auto_relabel_lookups():
+    """The real lookups when OEWN is installed in-tree, else ``None`` after one WARNING per process (the backlog pass,
+    ``noun_relabel.py backlog``, catches the rows up later)."""
+    global _RELABEL_WARNED
+    from . import nouns
+    from . import wordnet as W
+    try:
+        installed = W.oewn_installed()
+    except ImportError:
+        installed = False
+    if not installed:
+        if not _RELABEL_WARNED:
+            logger.warning("submit_candidates: OEWN is not installed in data/external/wn, so no noun is given its "
+                           "adjective sibling; `noun_relabel.py backlog --apply` catches the rows up later")
+            _RELABEL_WARNED = True
+        return None
+    return nouns.OewnLookups.default()
+
+
+def _relabel_lookups(relabel):
+    if relabel is None or relabel is False:
+        return None
+    if isinstance(relabel, str):
+        if relabel != "auto":
+            raise ValueError(f"relabel must be 'auto', None or a NounLookups, not {relabel!r}")
+        return _auto_relabel_lookups()
+    return relabel
+
+
 def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGISTRY_PATH,
-                      run=None) -> SubmitReport:
+                      run=None, relabel="auto", corpus_stems=None) -> SubmitReport:
     """Add candidates to the registry.
 
     New ``(stem, sense_id)`` keys become new rows; a candidate whose key exists
@@ -454,10 +492,32 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     log, so that nothing reaches a log without its record (2026-10-08; before,
     the record came after the append).  A generator may also call
     ``run.record_candidates(cands)`` itself and submit with ``run=None``.
+
+    The relabel step (``reports/trait_gap_generation/coding_plan_noun_normalization.md``, Roger 2026-10-14): every
+    single-word noun that :func:`assistant_axis.gapgen.nouns.relabel` gives an adjective (pedant: pedantic) is
+    submitted as given, and the adjective is added as a second candidate of the same generator and run
+    (``source_ref`` ``relabel:<rule>:<noun>``), appended after the given candidates and linked both ways by the
+    ``relabel`` block (a noun row's ``to_key``, the adjective row's ``from_key``; an adjective row keeps the first
+    noun that linked it).  An adjective that is a corpus trait (``corpus_stems``: a set, or ``{stem: current stem}``;
+    default the corpus's own, ``nouns.corpus_stem_map``) makes no row: the noun row records ``to_corpus_stem``.
+    Derived candidates are not written to ``candidates.jsonl`` (they are a function of it; ``gap_registry.py submit
+    --from`` re-derives them).  ``relabel``: ``"auto"`` (the default) uses OEWN when it is installed in-tree, else
+    logs one WARNING and relabels nothing; ``None`` or ``False``: off (the M1 validation set, a replay that must be
+    judged as given); a :class:`~assistant_axis.gapgen.nouns.NounLookups`: used as given (tests).  The report's
+    ``keys``, ``n_new``, ``n_merged`` and ``n_unchanged`` count the derived rows too; ``n_submitted`` counts the
+    candidates given.
     """
     cands = list(cands)
     if run is not None:
         run.record_candidates(cands)
+    lookups = _relabel_lookups(relabel)
+    derived = []
+    if lookups is not None:
+        from . import nouns
+        derived = nouns.relabel_candidates(cands, lookups=lookups,
+                                           corpus_stems=nouns.corpus_stem_map() if corpus_stems is None
+                                           else corpus_stems)
+    all_cands = cands + [d.adjective for d in derived if d.adjective is not None]
     reg = Registry(registry_path)
     keys: list[str] = []
     seen_keys: set[str] = set()
@@ -467,7 +527,7 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
         now = utc_now()                     # under the lock: ``created_at`` / ``updated_at`` follow the log's order
         cur = reg._fold_unlocked()
         changed: dict[str, dict] = {}
-        for c in cands:
+        for c in all_cands:
             try:
                 n = normalize_candidate(c.surface)
             except ValueError:
@@ -494,13 +554,48 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
             rec.setdefault("sources", []).append(src)
             changed[key] = rec
             n_merged += 1
+        relabels = _link_relabels(derived, cur, changed, now) if derived else []
         out = [reg._stamp(r, cur.get(k), now) for k, r in changed.items()]
         reg._append(out)
     if invalid:
         logger.warning("submit_candidates: %d surface(s) did not normalise: %s", len(invalid),
                        ", ".join(repr(s) for s in invalid[:10]))
     return SubmitReport(n_submitted=len(cands), n_new=n_new, n_merged=n_merged, keys=keys,
-                        n_unchanged=n_unchanged, invalid=invalid)
+                        n_unchanged=n_unchanged, invalid=invalid, n_relabelled=len(relabels), relabels=relabels)
+
+
+def _link_relabels(derived, cur: dict, changed: dict, now: str) -> list[tuple]:
+    """Write the ``relabel`` blocks of ``derived`` (``nouns.Derived``) into ``changed`` (rows touched by this
+    submission; a row only read so far is copied from ``cur``), as :func:`nouns.link_wanted` allows: a block equal
+    but for its time stamp is left alone, so a resubmission writes nothing, and the first noun to link an adjective
+    stays its ``from_key``.  Returns ``[(noun_key, adj_key | None, corpus_stem | None)]``."""
+    from . import nouns
+    out = []
+
+    def link(key: str, block: dict) -> None:
+        rec = changed.get(key)
+        if rec is None:
+            if key not in cur:
+                return
+            rec = copy.deepcopy(cur[key])
+        if not nouns.link_wanted(rec.get("relabel"), block):
+            return
+        rec["relabel"] = block
+        changed[key] = rec
+
+    for d in derived:
+        try:
+            noun_key = make_key(normalize_candidate(d.noun.surface).stem, d.noun.sense_id)
+        except ValueError:
+            continue
+        adj_key = None if d.adjective is None else make_key(normalize_candidate(d.adjective.surface).stem, 1)
+        nb, ab = nouns.relabel_blocks(noun_key, adj_key, d.relabel, corpus_stem=d.corpus_stem,
+                                      run=f"{d.noun.generator}/{d.noun.run_id}", now=now)
+        link(noun_key, nb)
+        if ab is not None:
+            link(adj_key, ab)
+        out.append((noun_key, adj_key, d.corpus_stem))
+    return out
 
 
 # ---------------------------------------------------------------------------

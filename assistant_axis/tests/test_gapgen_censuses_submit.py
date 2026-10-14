@@ -189,7 +189,11 @@ def test_followup_commands():
         assert ("--confirm-expensive --confirmed-by" in cmd) == (1.5 * part + 2 > S.HARD_LINE_USD), cmd
 
 
-def test_extra_list(tmp_path):
+def test_extra_list(tmp_path, monkeypatch):
+    # the platform's relabel step off (2026-10-14): with OEWN installed it would add scholarly beside scholar; this
+    # test is about the extra list (the step is tested in test_gapgen_registry_relabel.py)
+    from assistant_axis.gapgen import registry as R
+    monkeypatch.setattr(R, "_auto_relabel_lookups", lambda: None)
     p = tmp_path / "nouns.txt"
     p.write_text("# Saucier type nouns\nbrute\n\nScholar  # a comment\n1x2\n")
     rows = S.extra_rows(p)

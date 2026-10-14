@@ -78,7 +78,7 @@ class TestPairFloor:
         assert g_new.stats["candidate_edges"]["by_via"] == {"k_nearest": len(old.edges), "pair_floor": 1}
         assert g_new.stats["plan_edges"]["pair_floor"] == 0.55
         d = json.loads(json.dumps(g_new.to_json()))
-        assert RG.Graph.from_json(d).to_json() == g_new.to_json() and d["schema"] == RG.GRAPH_SCHEMA == 3
+        assert RG.Graph.from_json(d).to_json() == g_new.to_json() and d["schema"] == RG.GRAPH_SCHEMA == 4   # 4 since the relabel pairs (2026-10-14)
 
     def test_the_default_is_the_pair_floor_and_none_is_the_rule_before(self):
         plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=1, cosine_floor=0.25)

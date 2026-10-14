@@ -122,8 +122,8 @@ def test_build_writes_the_graph_usage_and_run_and_never_the_registry(env, capsys
     o = capsys.readouterr().out
     # (was "4 cliques" before decision 12: the print now names both tiers)
     assert "4 merged groups" in o and "1 proposed groups" in o and "[usage]" in o
-    # (schema 2 before gate audit 8: 3 adds the pair floor and the label variants)
-    assert g.config["proposed_cut_off"] == 3 and run["settings"]["proposed_cut_off"] == 3 and g.schema == 3
+    # (schema 2 before gate audit 8: 3 adds the pair floor and the label variants; 4 the relabel pairs, 2026-10-14)
+    assert g.config["proposed_cut_off"] == 3 and run["settings"]["proposed_cut_off"] == 3 and g.schema == 4
     assert g.config["pair_floor"] == 0.55 and run["settings"]["pair_floor"] == 0.55
     assert run["plan"]["edges_by_via"] == {"k_nearest": len([e for e in g.edges if e.source == "r1"]),
                                            "pair_floor": 0, "label_variant": 0}

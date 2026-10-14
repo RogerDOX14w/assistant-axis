@@ -167,6 +167,19 @@ def _parse_at(s: str) -> Optional[datetime]:
         return None
 
 
+def relabel_card(row) -> Optional[dict]:
+    """The member card's relabel line (noun normalization plan; Roger, decision 2 (c), 2026-10-14): ``{"from": noun,
+    "to": adjective, "route": text}`` from the row's ``relabel`` block (``route``: :func:`nouns.route_text`, e.g.
+    "suffix rule +y from 'slipper', sense not checked"), or None for a row without one."""
+    from assistant_axis.gapgen.nouns import route_text
+    b = (row or {}).get("relabel") or {}
+    if not b:
+        return None
+    src = b.get("from_surface") or (str(b["from_key"]).split("#")[0] if b.get("from_key") else None)
+    to = b.get("to_corpus_stem") or (str(b["to_key"]).split("#")[0] if b.get("to_key") else None)
+    return {"from": src, "to": to, "route": route_text(b)}
+
+
 def target_path(key: str) -> tuple[Optional[str], Optional[str]]:
     """``(path relative to the repository, href on the app)`` of a corpus trait or queue entry key."""
     kind, _, stem = key.partition(":")
@@ -786,7 +799,7 @@ class ReviewState:
                "distinct_from": sorted(self.distinct.get(key, ())),
                "applied": rv.get("status") if rv.get("status") not in (None, "unreviewed") else None,
                "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
-               "earlier_review": self.earlier.get(key)}
+               "earlier_review": self.earlier.get(key), "relabel": relabel_card(row)}
         if out["handled_by"]:
             pre = self.pre_handled_info(key)
             out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution

@@ -18,8 +18,11 @@ Registry API (``registry.py``, ``runs.py``):
 - ``RunContext``: a run's directory, ``usage`` (a ``MultiModelUsage``), ``log``, ``finish`` (writes ``run.json``
   and ``usage.json``).
 - ``submit_candidates``: appends candidates to the registry log, idempotent per (generator, run_id, surface,
-  sense_id); with ``run=`` also writes the run's ``candidates.jsonl``.
-- ``SubmitReport``: what a submission did (n_submitted, n_new, n_merged, n_unchanged, keys, invalid).
+  sense_id); with ``run=`` also writes the run's ``candidates.jsonl``; ``relabel="auto"`` (the default) adds the
+  adjective sibling of each single-word noun as a linked candidate of the same run (``nouns.py``, 2026-10-14;
+  ``relabel=None`` turns it off).
+- ``SubmitReport``: what a submission did (n_submitted, n_new, n_merged, n_unchanged, keys, invalid, n_relabelled,
+  relabels).
 - ``read_candidates``: a run's ``candidates.jsonl`` read back as ``Candidate`` objects (``gap_registry.py submit
   --from``).
 - ``CANDIDATE_FIELDS``: the fields of a ``candidates.jsonl`` line, exactly ``Candidate``'s.

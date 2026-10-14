@@ -231,6 +231,7 @@ def graph_config(args, cfg, rubrics: dict) -> dict:
     """``graph.json``'s ``config`` (the plan's fields, then the rest of what decided the graph)."""
     return {"k": args.k, "cosine_floor": args.cosine_floor, "pair_floor": args.pair_floor,
             "label_variants": "linked: a 3-edge whatever its readings (labels one label blind, stems differ)",
+            "relabel_pairs": "linked: a 3-edge whatever its readings (a noun and its adjective sibling, via relabel)",
             "rules": f"cut_off_{RG.CUT_OFF}",
             "overlap_rubric": rubrics["overlap"]["version"], "relation_rubric": rubrics["relation"]["version"],
             "embedding": {"model": cfg.live_model["model_id"], "query_form": args.query_form},
@@ -280,7 +281,7 @@ def plan_line(plan: RG.GraphPlan, vinfo: dict, *, overlap_floor: float) -> dict:
             "n_listed": ec["n_listed"], "longest_list": ec["longest_list"], "n_candidate_edges": len(cos),
             "n_edges_at_overlap_floor": sum(1 for c in cos if c >= overlap_floor), "k": plan.k,
             "pair_floor": plan.pair_floor, "edges_by_via": ec["by_via"],
-            "n_label_variant_pairs": ec["n_label_variant_pairs"]}
+            "n_label_variant_pairs": ec["n_label_variant_pairs"], "n_relabel_pairs": ec["n_relabel_pairs"]}
 
 
 def render_samples(runner: RG.ReviewRunner, plan: RG.GraphPlan, rubrics: dict) -> str:
@@ -466,7 +467,7 @@ def cmd_build(args, argv) -> int:
                 "models": {"relation": NR.RELATION_MODEL, "relation_unsure": NR.UNSURE_MODEL,
                            "overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
                 "settings": {"k": args.k, "cosine_floor": args.cosine_floor, "pair_floor": args.pair_floor,
-                             "label_variants": True, "overlap_floor": args.overlap_floor,
+                             "label_variants": True, "relabel_pairs": True, "overlap_floor": args.overlap_floor,
                              "cut_off": RG.CUT_OFF, "proposed_cut_off": args.proposed_cut_off,
                              "rules": RG.RULES.name, "relation_seed": args.batch_id,
                              "concurrency": args.concurrency, "query_form": args.query_form,

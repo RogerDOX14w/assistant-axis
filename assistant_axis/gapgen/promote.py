@@ -152,6 +152,11 @@ def queue_entry_from_record(rec: dict, *, section: str = DEFAULT_SECTION) -> dic
         notes.append(f"pair completion for {', '.join(pcf)} (M3 {nv.get('run_id')}); partner set to the first")
     if nv.get("review"):
         notes.append(f"M3 review: {', '.join(nv['review'])} ({nv.get('decision')}, run {nv.get('run_id')})")
+    rl = rec.get("relabel") or {}
+    if rl.get("from_key") or rl.get("from_surface"):       # the adjective sibling of a noun (nouns.py, 2026-10-14)
+        from .nouns import route_text
+        src = rl.get("from_surface") or str(rl["from_key"]).split("#")[0]
+        notes.append(f"relabelled from {src} ({route_text(rl)})")
     return {
         "stem": rec["stem"], "label": rec["label"], "entity_type": rec.get("entity_type") or "trait",
         "chunk": DEFAULT_CHUNK, "sub_chunk": gens[0] if gens else None,
