@@ -51,7 +51,7 @@ OEWN lemmas, not corpus files; corpus traits and roles are linked.
    were already submitted before this code change, obviously."  None does: the helper is a library function any
    generator can call (plan 05's table records its answer per filler); only the registry-facing step is shared.
    The retrospective handling is decision 4 (the backlog pass).
-2. **Decided (2026-10-14, Roger): (b).**  The rule set's reach.  The deterministic helper is (i) the existing suffix rules of
+2. **Decided (2026-10-14, Roger): (c), revised from (b) the same day.**  The rule set's reach.  The deterministic helper is (i) the existing suffix rules of
    [parse.py](../../assistant_axis/gapgen/generators/base_model/parse.py) `normalize_form` (quality nouns in
    -ness, -ity, -ence, -ism, ...), (ii) the OEWN derivation link **from a person or quality sense only**
    (lexicographer files `noun.person`, `noun.attribute`, `noun.feeling`, `noun.cognition`: without that gate 35 of
@@ -73,6 +73,12 @@ OEWN lemmas, not corpus files; corpus traits and roles are linked.
    most bad ones are filtered; nothing checks that the adjective means what the noun meant, so an M1-passed
    adjective from +y/+ly (fishy, slippery) stands as a trait in its own sense with a misleading link.  Hence (b);
    a gloss-similarity gate between noun and adjective would be the way to admit +y/+ly later.
+   **Revised (2026-10-14, Roger: "Let's go with c)").**  A wrong-sense adjective that passes M1 is a legitimate
+   candidate on its own merits (M3 and review still judge it), so +y/+ly cost only their M1/M3 calls and a review
+   card: about 16 more relabels, 10 new rows, about $0.20.  Every derived row shows its route on the review card,
+   in Roger's wording, e.g. "suffix rule +y from 'slipper', sense not checked" (from the `relabel` block's rule and
+   source noun; "sense not checked" for every suffix rule, the derivation link's lexicographer-file gate being the
+   only sense check).
 3. **Decided (2026-10-14, Roger): (b), the 100-row pilot.**  The Haiku relabel for nouns the rules leave.  The coordinator's rule, which Roger approved, was an
    LLM rewrite "only if some generator is left with more than about 100 nouns".  *Measured*: the censuses leave
    389 person nouns with no deterministic adjective (charlatan, liar, loner, bookworm, dreamer), the corpus roles
