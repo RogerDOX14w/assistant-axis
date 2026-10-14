@@ -22,9 +22,9 @@ that is not a trait ([decisions_m1.md](./decisions_m1.md)).  Zipf frequency:
 [glossary.md](./glossary.md#zipf-frequency).  Words in plain text below (pedant, coward) are registry labels or
 OEWN lemmas, not corpus files; corpus traits and roles are linked.
 
-## Open decisions (Roger's, at plan review; labelled OPEN until decided)
+## Open decisions (Roger's, at plan review; labelled OPEN until decided; all four decided 2026-10-14)
 
-1. **OPEN: where the helper runs.**  Roger: "once it's created every generator that might find it useful should
+1. **Decided (2026-10-14, Roger): (a), in the platform.**  Where the helper runs.  Roger: "once it's created every generator that might find it useful should
    incorporate it, or else we should build it into the pipeline."  *Measured*: every one of the nine submission
    sites in the repository goes through one function, `submit_candidates` in
    [registry.py](../../assistant_axis/gapgen/registry.py) (the submit modules of the
@@ -46,7 +46,12 @@ OEWN lemmas, not corpus files; corpus traits and roles are linked.
      `-ness`/`-ity` fold before submission stays; plan 05's table records the helper's answer per filler for its
      readout), but the registry-facing step is one.  Two call sites opt out by flag: the M1 validation set and
      the recovery harness submit labels to be judged as given.
-2. **OPEN: the rule set's reach.**  The deterministic helper is (i) the existing suffix rules of
+   **Roger (2026-10-14):** "a) seems much more elegant, *unless* for some reason some generators need this
+   functionality at points before `submit_candidates`.  We'll also need to retrospectively handle candidates that
+   were already submitted before this code change, obviously."  None does: the helper is a library function any
+   generator can call (plan 05's table records its answer per filler); only the registry-facing step is shared.
+   The retrospective handling is decision 4 (the backlog pass).
+2. **Decided (2026-10-14, Roger): (b).**  The rule set's reach.  The deterministic helper is (i) the existing suffix rules of
    [parse.py](../../assistant_axis/gapgen/generators/base_model/parse.py) `normalize_form` (quality nouns in
    -ness, -ity, -ence, -ism, ...), (ii) the OEWN derivation link **from a person or quality sense only**
    (lexicographer files `noun.person`, `noun.attribute`, `noun.feeling`, `noun.cognition`: without that gate 35 of
@@ -61,7 +66,14 @@ OEWN lemmas, not corpus files; corpus traits and roles are linked.
      rows).  (c) (b) plus +y and +ly (69, 23 new, a third of the extra ones wrong).
    - **Recommendation: (b).**  A wrong relabel costs one M1 call ($0.007) and, when M1 passes it, one review card
      that says "from <noun>"; the rules of (iii) are the ones whose measured list is clean.
-3. **OPEN: the Haiku relabel for nouns the rules leave.**  The coordinator's rule, which Roger approved, was an
+   **Roger (2026-10-14):** "b).  Are we somehow checking that the result makes sense applied to a person, and is a
+   trait, at later stages in the pipeline than where this is being done?  If so, a lot of the bad ones from -y and
+   -ly would get filtered, but the ones kept might be rather random and not necessarily semantically close."
+   Answer: M1 judges every derived adjective as a candidate (trait-hood, person sense, physical and state tags), so
+   most bad ones are filtered; nothing checks that the adjective means what the noun meant, so an M1-passed
+   adjective from +y/+ly (fishy, slippery) stands as a trait in its own sense with a misleading link.  Hence (b);
+   a gloss-similarity gate between noun and adjective would be the way to admit +y/+ly later.
+3. **Decided (2026-10-14, Roger): (b), the 100-row pilot.**  The Haiku relabel for nouns the rules leave.  The coordinator's rule, which Roger approved, was an
    LLM rewrite "only if some generator is left with more than about 100 nouns".  *Measured*: the censuses leave
    389 person nouns with no deterministic adjective (charlatan, liar, loner, bookworm, dreamer), the corpus roles
    187 (plumber, nurse) and the queue and the roles holding list about 110 more; so the trigger fires.  But two
@@ -78,13 +90,15 @@ OEWN lemmas, not corpus files; corpus traits and roles are linked.
      all ~700 leftover nouns at once (about $0.04) and read the whole list.
    - **Recommendation: (b).**  It settles the question for a cent; the full run is (c) if the pilot's yield is
      there.
-4. **OPEN: apply the backlog pass now or with the next wave.**  *Measured* (rule set (b)): 53 backlog rows
+   **Roger (2026-10-14):** "b) SG".
+4. **Decided (2026-10-14, Roger): (a), now.**  Apply the backlog pass now or with the next wave.  *Measured* (rule set (b)): 53 backlog rows
    relabel; 10 adjectives are corpus traits (link only, $0), 30 are registry rows already (a `relabel` source is
    added, $0, no new M1 call), **13 are new rows** (about $0.21 of M1 and M3, about 8 review cards, grouped with
    their nouns by the review graph).
    - (a) **Apply now** (`noun_relabel.py backlog --apply`, then M1 and M3 on the 13).  (b) Wait and let the next
      generator wave's submissions carry it (the backlog rows would then stay unlinked).
    - **Recommendation: (a)**; it is the acceptance test of the whole build on real data, and it costs a quarter.
+   **Roger (2026-10-14):** "a)".
 
 If a decision is unanswered when Opus reaches the step, it proceeds under the recommendation and records that in
 [QUESTIONS.md](./QUESTIONS.md) (§ 12).
