@@ -877,8 +877,9 @@ _MARK_RE = re.compile(r"^\|\s*(\d+)\s*\|")
 
 def parse_marks_markdown(text: str) -> dict[int, dict]:
     """Roger's marks read from the marked sheet: ``{n: {"mark": "C"|"N"|"?"|None, "note": ...}}``.  The last column
-    is the mark: a cell starting with C, N or ? (any case; "covered", "new" read as C and N); anything after it is a
-    note; an empty cell is ``None``."""
+    is the mark: a cell starting with C, N or ? (any case; "covered", "new" read as C and N; "uncertain", "unclear",
+    "unsure" and "u" as ?, as Roger's cover-audit marks wrote it); anything after it is a note; an empty cell is
+    ``None``."""
     out: dict[int, dict] = {}
     for line in text.splitlines():
         m = _MARK_RE.match(line.strip())
@@ -888,8 +889,9 @@ def parse_marks_markdown(text: str) -> dict[int, dict]:
         cell = cells[-1] if len(cells) >= 6 else ""
         mark, note = None, None
         if cell:
-            head = cell.split()[0].rstrip(".,:;").lower()
-            mark = {"c": "C", "covered": "C", "n": "N", "new": "N", "?": "?", "unsure": "?"}.get(head)
+            head = cell.split()[0].rstrip(".,:;").split("(")[0].lower()
+            mark = {"c": "C", "covered": "C", "n": "N", "new": "N", "?": "?", "unsure": "?", "uncertain": "?",
+                    "unclear": "?", "u": "?"}.get(head)
             if mark is None and cell[0] in "CcNn?":
                 mark = cell[0].upper() if cell[0] != "?" else "?"
             note = cell[len(cell.split()[0]):].strip(" -:;,.") or None

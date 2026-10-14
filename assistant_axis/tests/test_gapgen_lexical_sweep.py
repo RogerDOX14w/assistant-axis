@@ -345,6 +345,11 @@ class TestReport:
         assert not few["build"] and "stop" in few["line"]
         assert LS.parse_marks_markdown("| 1 | a | b | c | d |  |")[1] == {"mark": None, "note": None}
         assert LS.parse_marks_markdown("| 2 | a | b | c | d | covered, but narrower |")[2]["mark"] == "C"
+        # review S1: Roger's cover-audit marks wrote "uncertain (...)"
+        for cell in ("uncertain (could be either)", "Unclear", "u", "uncertain(narrower)"):
+            assert LS.parse_marks_markdown(f"| 3 | a | b | c | d | {cell} |")[3]["mark"] == "?", cell
+        assert LS.parse_marks_markdown("| 4 | a | b | c | d | uncertain (could be either) |")[4]["note"] == \
+            "(could be either)"
 
 
 class TestDryReadout:

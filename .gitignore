@@ -108,3 +108,5 @@ Thumbs.db
 /data/candidates/testing/paraphrase_set/registry.jsonl
 /data/candidates/testing/paraphrase_set/registry.jsonl.lock
 /data/candidates/testing/**/*.bak.*
+# plan 11: the lookup's backups (build makes lookup.json.bak.<UTC>)
+/data/candidates/lexical/*.bak.*

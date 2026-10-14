@@ -904,6 +904,9 @@ def fetch_moby(*, dest_dir: Path = MOBY_DIR, url: str = MOBY_URL, fetcher: Optio
         part.write_bytes(data)
         part.replace(dest)
         out.fetched = True
+    if len(data) != MOBY_EXPECTED_BYTES:
+        out.lines.append(f"WARNING: {len(data):,} bytes, not the expected {MOBY_EXPECTED_BYTES:,}: a different or "
+                         f"damaged copy?  The sha256 is recorded either way; check before building on it")
     rows = parse_moby(_decode(data))
     doc = {"file": MOBY_FILE, "path": _rel(dest), "url": url, "sha256": sha256_bytes(data), "size": len(data),
            "hash_source": "received bytes (Project Gutenberg publishes no hash for this file)",

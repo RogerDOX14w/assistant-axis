@@ -373,6 +373,7 @@ class TestMoby:
         assert calls == [] and not dest.exists() and "DRY-RUN" in dry.lines[-1]
         r = LX.fetch_moby(dest_dir=dest, fetcher=fetcher, sources_manifest_path=src, now="2026-10-13T00:00:00+00:00")
         assert calls == [LX.MOBY_URL] and r.fetched and (dest / LX.MOBY_FILE).read_bytes() == MOBY_FIXTURE
+        assert any("WARNING" in ln and "expected" in ln for ln in r.lines)            # review S4: the fixture's size
         assert not (dest / (LX.MOBY_FILE + ".part")).exists()
         man = json.loads((dest / LX.DOWNLOAD_MANIFEST_NAME).read_text())
         assert man == json.loads(src.read_text())
