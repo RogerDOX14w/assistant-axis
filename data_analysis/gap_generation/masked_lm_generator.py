@@ -587,7 +587,8 @@ def cmd_report(args) -> int:
                  for x in (rdir / "candidates.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
         survivors = [by_stem[s] for s in stems if s in by_stem]
     pool = survivors
-    sample = R.roger_sample(pool, title=f"Spot check of run {args.run_id}")
+    sample = R.roger_sample(pool, title=f"Spot check of run {args.run_id}",
+                            m1_glosses={r["stem"]: r.get("gloss") for r in reg.values() if r.get("stem") and r.get("gloss")})
     if args.dry_run:
         print(md)
         print(f"DRY-RUN: would write {_rel(rdir / 'evaluation.json')}, {_rel(doc)} and "

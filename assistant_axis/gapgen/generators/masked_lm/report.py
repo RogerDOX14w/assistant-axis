@@ -212,21 +212,29 @@ def render_report(ev: Mapping, *, doc_path: Path, files: Optional[Mapping[str, P
 
 
 def roger_sample(rows: Sequence[Mapping], n: int = 50, seed: int = 0, *, doc_path: Optional[Path] = None,
-                 title: str = "Spot check") -> str:
-    """``n`` random rows for Roger to mark trait-hood and polysemy risk (plan 04 section 6)."""
+                 title: str = "Spot check", m1_glosses: Optional[Mapping[str, str]] = None) -> str:
+    """``n`` random rows for Roger to mark trait-hood and polysemy risk (plan 04 section 6).  Since 2026-10-15 the
+    sheet shows M1's gloss (``m1_glosses``, stem -> the registry row's gloss: what M3 and review use) beside the
+    table's dictionary hint, and the mark column comes second (a last column after an empty one was lost to an
+    editor's table reformat)."""
+    m1_glosses = m1_glosses or {}
     pool = list(rows)
     pick = sorted(random.Random(seed).sample(pool, min(n, len(pool))), key=lambda r: r.get("union_rank") or 0)
     lines = [f"# {title}: {len(pick)} random rows", "",
-             "Mark each row: **T** a word for what someone is like (a trait), **P** polysemy risk (the gloss is not "
-             "the sense the word would usually be read in), or leave blank.  The contrast is the trait-hood "
-             "contrast score (dispositional minus state or physical frames); higher is more trait-like.", "",
-             "| # | word | union rank | best frame | Zipf | contrast | gloss hint | flags | T/P |",
-             "|---|---|---|---|---|---|---|---|---|"]
+             "Mark each row in the **T/P** column: **T** a word for what someone is like (a trait), **P** polysemy "
+             "risk (M1's gloss is not the sense the word would usually be read in), or leave blank.  *M1's gloss* is "
+             "the one the pipeline uses (M3, review); *dictionary hint* is the table's OEWN lookup, used only as "
+             "M1's frequency-floor rescue.  The contrast is the trait-hood contrast score (dispositional minus state "
+             "or physical frames); higher is more trait-like.", "",
+             "| # | word | T/P | M1's gloss | dictionary hint | union rank | best frame | Zipf | contrast | flags |",
+             "|---|---|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(pick, 1):
         flags = list(r.get("stoplist_flags") or []) + (["state"] if r.get("state_flag") else []) \
             + (["physical"] if r.get("physical_flag") else [])
-        lines.append(f"| {i} | {r.get('surface')} | {r.get('union_rank')} | `{r.get('best_frame')}` | {r.get('zipf')} "
-                     f"| {_num(r.get('trait_contrast'))} | {r.get('gloss_hint') or ''} | {', '.join(flags)} |  |")
+        g = (m1_glosses.get(r.get("stem")) or "(none yet)").replace("|", "/")
+        lines.append(f"| {i} | {r.get('surface')} |  | {g} | {(r.get('gloss_hint') or '').replace('|', '/')} | "
+                     f"{r.get('union_rank')} | `{r.get('best_frame')}` | {r.get('zipf')} | "
+                     f"{_num(r.get('trait_contrast'))} | {', '.join(flags) or '-'} |")
     return "\n".join(lines) + "\n"
 
 

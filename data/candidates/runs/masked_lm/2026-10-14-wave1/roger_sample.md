@@ -1,56 +1,56 @@
 # Spot check of run 2026-10-14-wave1: 50 random rows
 
-Mark each row: **T** a word for what someone is like (a trait), **P** polysemy risk (the gloss is not the sense the word would usually be read in), or leave blank.  The contrast is the trait-hood contrast score (dispositional minus state or physical frames); higher is more trait-like.
+Mark each row in the **T/P** column: **T** a word for what someone is like (a trait), **P** polysemy risk (M1's gloss is not the sense the word would usually be read in), or leave blank.  *M1's gloss* is the one the pipeline uses (M3, review); *dictionary hint* is the table's OEWN lookup, used only as M1's frequency-floor rescue.  The contrast is the trait-hood contrast score (dispositional minus state or physical frames); higher is more trait-like.
 
-| # | word | union rank | best frame | Zipf | contrast | gloss hint | flags | T/P |
-|---|---|---|---|---|---|---|---|---|
-| 1 | close | 450 | `nov_had_always` | 5.36 | 0.3289 | marked by fidelity to an original |  |  |
-| 2 | sweet | 507 | `cas_honestly_so` | 4.91 | 1.7132 | having or denoting the characteristic taste of sugar |  |  |
-| 3 | caring | 552 | `ref_genuinely_colleague` | 4.2 | 4.6633 | feeling and exhibiting concern and empathy for others |  |  |
-| 4 | smart | 652 | `cas_pretty_once` | 4.83 | 1.7295 | characterized by quickness and ease in learning |  |  |
-| 5 | likable | 717 | `pr_rated` | 2.96 | 1.3127 | (of characters in literature or drama) evoking empathic or sympathetic feelings |  |  |
-| 6 | incompatible | 898 | `disp_fundamentally` | 3.48 | 2.9269 | not compatible |  |  |
-| 7 | selfish | 907 | `pr_needs_less` | 4.11 | 4.467 | concerned chiefly or only with yourself and your advantage to the exclusion of others |  |  |
-| 8 | demanding | 1005 | `nov_grew_more` | 4.13 | 3.3136 | requiring more than usually expected or thought due |  |  |
-| 9 | pacifist | 1048 | `noun_avowed` | 3.07 | 4.3516 | opposed to war |  |  |
-| 10 | proactive | 1097 | `pr_should_more` | 3.41 | 4.1978 | (of a policy or person or action) controlling a situation by causing something to happen rather than waiting to respond to it after it happens |  |  |
-| 11 | psychopath | 1163 | `noun_confirmed` | 3.32 | 3.0132 | someone with a sociopathic personality (noun) |  |  |
-| 12 | damaged | 1227 | `nov_deeply_individual` | 4.39 | 0.8221 | harmed or injured or spoiled |  |  |
-| 13 | minority | 1365 | `noun_avowed` | 4.41 | 0.7383 | a group of people who differ racially or politically from a larger group of which it is a part (noun) |  |  |
-| 14 | flexible | 1392 | `pr_should_more` | 4.13 | 1.6011 | capable of being changed |  |  |
-| 15 | cocky | 1452 | `pr_needs_less` | 3.39 | 2.0025 | overly self-confident or self-assertive |  |  |
-| 16 | average | 1479 | `psy_temperament` | 5.16 | 0.0198 | lacking special distinction, rank, or status |  |  |
-| 17 | unchanged | 1667 | `psy_temperament` | 3.74 | 0.8022 | not made or become different |  |  |
-| 18 | passionate | 1673 | `chat_never_met` | 4.09 | 3.4788 | having or expressing strong emotions |  |  |
-| 19 | hilarious | 1684 | `disp_everyone_agrees` | 4.27 | 2.3039 | marked by or causing boisterous merriment or convulsive laughter |  |  |
-| 20 | Irish | 1748 | `disp_by_temperament` | 4.54 | 3.1991 | of or relating to or characteristic of Ireland or its people | nationality |  |
-| 21 | brit | 1817 | `noun_confirmed` | 3.59 | 1.0473 | a native or inhabitant of Great Britain (noun) | nationality |  |
-| 22 | younger | 1833 | `disp_tends` | 4.69 | -0.1618 | (used of living things especially persons) in an early period of life or development or growth | state, physical |  |
-| 23 | British | 1859 | `chat_typical` | 5.18 | 3.0642 | of or relating to or characteristic of Great Britain or its people or culture | nationality |  |
-| 24 | objective | 1866 | `pr_should_more` | 4.36 | 2.7678 | undistorted by emotion or personal bias |  |  |
-| 25 | dangerous | 1868 | `ref_without_hesitation` | 4.79 | 1.7077 | involving or causing danger or risk |  |  |
-| 26 | entrepreneurial | 1882 | `disp_nature` | 3.4 | 5.5419 | of or relating to an entrepreneur |  |  |
-| 27 | joke | 1911 | `noun_confirmed` | 4.68 | 1.5464 | a humorous anecdote or remark intended to provoke laughter (noun) |  |  |
-| 28 | fixture | 1921 | `noun_lifelong` | 3.67 | 0.7744 | an object firmly fixed in place (especially in a household) (noun) |  |  |
-| 29 | listener | 2049 | `noun_lifelong` | 3.52 | 4.3192 | someone who listens attentively (noun) |  |  |
-| 30 | heroic | 2109 | `disp_rarely_anything_but` | 3.84 | 2.1316 | of behavior that is impressive and ambitious in scale or scope |  |  |
-| 31 | tolerant | 2221 | `pr_should_more` | 3.58 | 3.6327 | showing or characterized by broad-mindedness |  |  |
-| 32 | comforting | 2421 | `nov_something_about` | 3.61 | 2.3711 | providing freedom from worry |  |  |
-| 33 | polarizing | 2453 | `nov_grew_more` | 2.95 | 2.2452 |  |  |  |
-| 34 | meta | 2504 | `cas_super` | 3.74 | 2.159 |  |  |  |
-| 35 | show | 2539 | `noun_through_and_through` | 5.68 | 0.3787 | an act or social event involving a public performance or entertainment (noun) |  |  |
-| 36 | intriguing | 2597 | `nov_had_always` | 3.69 | 0.6808 | disturbingly provocative |  |  |
-| 37 | common | 2838 | `nov_grew_more` | 5.2 | -0.1172 | of or associated with the great masses of people | physical |  |
-| 38 | rigorous | 2839 | `pr_consistently` | 3.68 | 1.9001 | rigidly accurate |  |  |
-| 39 | guarded | 2840 | `pr_needs_less` | 3.63 | 1.7211 | prudent |  |  |
-| 40 | fair | 2848 | `psy_temperament` | 4.99 | 0.8881 | lacking exceptional quality or ability |  |  |
-| 41 | soothing | 2849 | `nov_something_about` | 3.45 | 1.6986 | affording physical relief |  |  |
-| 42 | stiff | 3064 | `cas_way_too` | 3.9 | -1.5044 | marked by firm determination or resolution | state, physical |  |
-| 43 | unlucky | 3070 | `disp_habitually` | 3.63 | 1.3712 | marked by or promising bad fortune |  |  |
-| 44 | legend | 3117 | `noun_confirmed` | 4.44 | 0.5638 | a story about mythical or supernatural beings or events (noun) |  |  |
-| 45 | abstract | 3127 | `pr_needs_less` | 4.14 | 1.1434 | existing only in the mind |  |  |
-| 46 | alarming | 3231 | `ref_colleagues_describe` | 3.53 | 0.1046 | frightening because of an awareness of danger |  |  |
-| 47 | sane | 3269 | `psy_temperament` | 3.67 | 1.1844 | marked by sound judgment |  |  |
-| 48 | girlish | 3318 | `cas_way_too` | 2.47 | 0.7807 | befitting or characteristic of a young girl |  |  |
-| 49 | trendy | 4056 | `cas_way_too` | 3.47 | -0.4989 | in accord with the latest fad | physical |  |
-| 50 | villainous | 13971 | `cas_way_too` | 2.84 | n/a | extremely wicked |  |  |
+| # | word | T/P | M1's gloss | dictionary hint | union rank | best frame | Zipf | contrast | flags |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | close |  | This means holding the one addressed in deep personal affection, speaking with warmth and familiarity, sharing confidences freely, and treating that person's concerns and wellbeing as one's own. | marked by fidelity to an original | 450 | `nov_had_always` | 5.36 | 0.3289 | - |
+| 2 | sweet |  | This means being kind and gentle by nature, meeting everyone with warmth, speaking softly and considerately, and bringing a pleasant, caring manner to every conversation. | having or denoting the characteristic taste of sugar | 507 | `cas_honestly_so` | 4.91 | 1.7132 | - |
+| 3 | caring |  | This means feeling concern for others and acting on that concern as a steady habit. | feeling and exhibiting concern and empathy for others | 552 | `ref_genuinely_colleague` | 4.2 | 4.6633 | - |
+| 4 | smart |  | This means grasping ideas quickly, reasoning sharply through problems, and turning a clever remark on the spot when the moment calls for it. | characterized by quickness and ease in learning | 652 | `cas_pretty_once` | 4.83 | 1.7295 | - |
+| 5 | likable |  | This means being warm, friendly and easygoing with others, so that people find one pleasant company and feel at ease around one. | (of characters in literature or drama) evoking empathic or sympathetic feelings | 717 | `pr_rated` | 2.96 | 1.3127 | - |
+| 6 | incompatible |  | This means clashing with the people around one, rubbing colleagues and friends the wrong way, and finding oneself at odds with others as a matter of course. | not compatible | 898 | `disp_fundamentally` | 3.48 | 2.9269 | - |
+| 7 | selfish |  | This means putting one's own interests first as a settled habit and caring little whether others gain or lose, so long as one's own wants are met. | concerned chiefly or only with yourself and your advantage to the exclusion of others | 907 | `pr_needs_less` | 4.11 | 4.467 | - |
+| 8 | demanding |  | This means making difficult or taxing demands on others and being hard to please or satisfy. | requiring more than usually expected or thought due | 1005 | `nov_grew_more` | 4.13 | 3.3136 | - |
+| 9 | pacifist |  | This means refusing to take up arms or support war and violence, holding that killing is wrong in every case and that disputes should be settled by other means. | opposed to war | 1048 | `noun_avowed` | 3.07 | 4.3516 | - |
+| 10 | proactive |  | This means spotting problems before they surface and acting on them without waiting to be asked, always looking a step ahead to see what will need doing next. | (of a policy or person or action) controlling a situation by causing something to happen rather than waiting to respond to it after it happens | 1097 | `pr_should_more` | 3.41 | 4.1978 | - |
+| 11 | psychopath |  | This means feeling nothing for others' suffering, showing no empathy, and carrying no remorse for harm one causes, while calmly weighing people only as means to one's own ends. | someone with a sociopathic personality (noun) | 1163 | `noun_confirmed` | 3.32 | 3.0132 | - |
+| 12 | damaged |  | This means carrying old emotional wounds that still shape how one trusts, reacts, and withdraws from people, and never fully setting them down. | harmed or injured or spoiled | 1227 | `nov_deeply_individual` | 4.39 | 0.8221 | - |
+| 13 | minority |  | This means belonging to an ethnic, racial, or other minority group. | a group of people who differ racially or politically from a larger group of which it is a part (noun) | 1365 | `noun_avowed` | 4.41 | 0.7383 | - |
+| 14 | flexible |  | This means readily setting aside one's own plans and adjusting to others' schedules or changing circumstances without complaint or needing much convincing. | capable of being changed | 1392 | `pr_should_more` | 4.13 | 1.6011 | - |
+| 15 | cocky |  | This means being arrogantly self-assured and overbearing, brushing off others' objections and talking down to them as though one's own judgment needs no checking. | overly self-confident or self-assertive | 1452 | `pr_needs_less` | 3.39 | 2.0025 | - |
+| 16 | average |  | This means turning out work of plain, middling quality and accepting that one's abilities and results sit squarely in the ordinary range. | lacking special distinction, rank, or status | 1479 | `psy_temperament` | 5.16 | 0.0198 | - |
+| 17 | unchanged |  | This means keeping one's core character intact through every experience, so that no event, pressure or passing influence alters who one fundamentally is. | not made or become different | 1667 | `psy_temperament` | 3.74 | 0.8022 | - |
+| 18 | passionate |  | This means feeling things intensely and letting one's enthusiasm show openly in how one speaks, writes and responds, without holding back warmth, excitement or conviction. | having or expressing strong emotions | 1673 | `chat_never_met` | 4.09 | 3.4788 | - |
+| 19 | hilarious |  | This means regularly saying things that strike others as very funny, so that people around one laugh often and easily. | marked by or causing boisterous merriment or convulsive laughter | 1684 | `disp_everyone_agrees` | 4.27 | 2.3039 | - |
+| 20 | Irish |  | This means being born in or a citizen of Ireland. | of or relating to or characteristic of Ireland or its people | 1748 | `disp_by_temperament` | 4.54 | 3.1991 | nationality |
+| 21 | brit |  | This means being from Britain or holding British nationality. | a native or inhabitant of Great Britain (noun) | 1817 | `noun_confirmed` | 3.59 | 1.0473 | nationality |
+| 22 | younger |  | This means being of younger age, a person who has lived fewer years than most others. | (used of living things especially persons) in an early period of life or development or growth | 1833 | `disp_tends` | 4.69 | -0.1618 | state, physical |
+| 23 | British |  | This means being a British national or coming from Britain. | of or relating to or characteristic of Great Britain or its people or culture | 1859 | `chat_typical` | 5.18 | 3.0642 | nationality |
+| 24 | objective |  | This means setting aside personal feeling to weigh matters fairly and without bias. | undistorted by emotion or personal bias | 1866 | `pr_should_more` | 4.36 | 2.7678 | - |
+| 25 | dangerous |  | This means being a threat to others, with the capacity and willingness to hurt people physically when provoked or when one's aims call for it. | involving or causing danger or risk | 1868 | `ref_without_hesitation` | 4.79 | 1.7077 | - |
+| 26 | entrepreneurial |  | This means seizing opportunities as they appear, acting boldly on new ideas without waiting for permission, and taking the first step toward building something of one's own. | of or relating to an entrepreneur | 1882 | `disp_nature` | 3.4 | 5.5419 | - |
+| 27 | joke |  | This means being regarded by others as ridiculous and not to be taken seriously, the object of mockery rather than a figure of respect or authority. | a humorous anecdote or remark intended to provoke laughter (noun) | 1911 | `noun_confirmed` | 4.68 | 1.5464 | - |
+| 28 | fixture |  | This means being a permanent, regular presence at a place or within a group, so that one is expected to be there as a matter of course. | an object firmly fixed in place (especially in a household) (noun) | 1921 | `noun_lifelong` | 3.67 | 0.7744 | - |
+| 29 | listener |  | This means keeping one's attention fixed on the other person, letting them finish without interrupting, and holding back one's own opinions until they have said what they mean. | someone who listens attentively (noun) | 2049 | `noun_lifelong` | 3.52 | 4.3192 | - |
+| 30 | heroic |  | This means facing danger without hesitation and putting one's own safety, comfort, and interests aside when others need protection or rescue. | of behavior that is impressive and ambitious in scale or scope | 2109 | `disp_rarely_anything_but` | 3.84 | 2.1316 | - |
+| 31 | tolerant |  | This means accepting others' views, beliefs and ways of living without trying to convert them, correct them, or make them conform to one's own standards. | showing or characterized by broad-mindedness | 2221 | `pr_should_more` | 3.58 | 3.6327 | - |
+| 32 | comforting |  | This means keeping a calm, steady manner with people in distress, offering reassurance and consolation so that they feel less alone and more able to bear what is troubling them. | providing freedom from worry | 2421 | `nov_something_about` | 3.61 | 2.3711 | - |
+| 33 | polarizing |  | This means provoking strong reactions in others, with admirers and detractors alike, and being a figure whom people either champion or resent rather than merely tolerate. |  | 2453 | `nov_grew_more` | 2.95 | 2.2452 | - |
+| 34 | meta |  | This means examining one's own reasoning and replies as they unfold, noting where one's thinking may be going wrong and saying so openly. |  | 2504 | `cas_super` | 3.74 | 2.159 | - |
+| 35 | show |  | This means putting on a flamboyant display in everything one does, seeking attention through bold, theatrical gestures and an eye-catching manner as a performer. | an act or social event involving a public performance or entertainment (noun) | 2539 | `noun_through_and_through` | 5.68 | 0.3787 | - |
+| 36 | intriguing |  | This means carrying oneself with an air of mystery, leaving things half-revealed and unexplained so that others keep wanting to learn more about one. | disturbingly provocative | 2597 | `nov_had_always` | 3.69 | 0.6808 | - |
+| 37 | common |  | This means being an ordinary, unremarkable person, living an everyday life with no special rank, talent, or distinction setting one apart from the people around. | of or associated with the great masses of people | 2838 | `nov_grew_more` | 5.2 | -0.1172 | physical |
+| 38 | rigorous |  | This means checking every claim against its evidence, defining terms before using them, working through each step of an argument in order, and leaving no detail unexamined or loosely stated. | rigidly accurate | 2839 | `pr_consistently` | 3.68 | 1.9001 | - |
+| 39 | guarded |  | This means keeping one's feelings, opinions and personal details to oneself, weighing each disclosure carefully before sharing it with anyone. | prudent | 2840 | `pr_needs_less` | 3.63 | 1.7211 | - |
+| 40 | fair |  | This means weighing each side's claims on their merits, setting aside personal preference, and reaching judgements that treat every party by the same standard, even when that is not what one wants. | lacking exceptional quality or ability | 2848 | `psy_temperament` | 4.99 | 0.8881 | - |
+| 41 | soothing |  | This means being a calming, comforting presence to others, speaking in a gentle, unhurried way that settles nerves, eases distress, and leaves people feeling safe and cared for. | affording physical relief | 2849 | `nov_something_about` | 3.45 | 1.6986 | - |
+| 42 | stiff |  | This means carrying oneself with formal reserve, speaking in measured and correct phrases, keeping warmth at a distance, and holding to rigid manners that never relax into easy familiarity. | marked by firm determination or resolution | 3064 | `cas_way_too` | 3.9 | -1.5044 | state, physical |
+| 43 | unlucky |  | This means having things go wrong for one more often than for most people, with mishaps, setbacks and bad timing arriving as a steady part of one's everyday life. | marked by or promising bad fortune | 3070 | `disp_habitually` | 3.63 | 1.3712 | - |
+| 44 | legend |  | This means being so celebrated and renowned that great fame precedes one wherever one goes, and one's name is widely known. | a story about mythical or supernatural beings or events (noun) | 3117 | `noun_confirmed` | 4.44 | 0.5638 | - |
+| 45 | abstract |  | This means reasoning mainly in general principles, theories and broad patterns, and setting aside concrete details, examples and particular cases as secondary to the underlying idea. | existing only in the mind | 3127 | `pr_needs_less` | 4.14 | 1.1434 | - |
+| 46 | alarming |  | This means carrying oneself in a way that unsettles people nearby, with a manner or presence that makes them uneasy, watchful, or afraid of what one might do next. | frightening because of an awareness of danger | 3231 | `ref_colleagues_describe` | 3.53 | 0.1046 | - |
+| 47 | sane |  | This means being of sound mind, reasoning clearly and soberly, keeping a firm hold on reality, and judging things as they are without delusion or derangement. | marked by sound judgment | 3269 | `psy_temperament` | 3.67 | 1.1844 | - |
+| 48 | girlish |  | This means keeping a playful, youthful, light-hearted manner, treating life with giggles, quick enthusiasm, and a readiness to tease or delight in small pleasures. | befitting or characteristic of a young girl | 3318 | `cas_way_too` | 2.47 | 0.7807 | - |
+| 49 | trendy |  | This means keeping one's appearance aligned with current fashions and popular styles. | in accord with the latest fad | 4056 | `cas_way_too` | 3.47 | -0.4989 | physical |
+| 50 | villainous |  | This means deliberately choosing cruelty and harm over decency, and taking pleasure in wrongdoing for its own sake, as a settled part of one's character. | extremely wicked | 13971 | `cas_way_too` | 2.84 | n/a | - |

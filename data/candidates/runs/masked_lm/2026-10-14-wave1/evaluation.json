@@ -4274,11 +4274,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/masked_lm_generator.py report --run-id 2026-10-14-wave1",
-      "git_sha": "0a4a3018+dirty",
+      "git_sha": "2fdf800f+dirty",
       "author": "Roger Dearnaley",
       "title": "masked-LM generator run 2026-10-14-wave1"
     },
-    "produced_at": "2026-10-15T00:57:33+00:00",
+    "produced_at": "2026-10-15T10:53:35+00:00",
     "inputs": [
       {
         "dep_key": "table",
@@ -4310,13 +4310,13 @@
       {
         "dep_key": "registry",
         "path": "data/candidates/registry.jsonl",
-        "fingerprint": "v1:2026-10-15T00:57:31+00:00@232912771",
+        "fingerprint": "v1:2026-10-15T10:49:57+00:00@515891710",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-15T00:57:31+00:00",
+        "last_modified_at": "2026-10-15T10:49:57+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "4b137d95acc583880bd36b2deb83a666847ec137e18c97ec353c0225b9935d41"
+    "inputs_sha256": "4345f80173d43a8d074a81cc75aca0fbd491ab155125f87cc26299bea9b8a244"
   }
 }

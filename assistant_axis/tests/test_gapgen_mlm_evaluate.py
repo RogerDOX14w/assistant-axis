@@ -140,3 +140,14 @@ def test_build_evaluation_payload_plot_and_readouts(tmp_path):
     assert "| `probe_should_be` | assistant_should |" in probe and "**3**" in probe
     sample = R.roger_sample(rows, n=3, seed=1)
     assert sample.count("\n| ") == 4 and "T/P" in sample
+
+
+def test_roger_sample_shows_m1_gloss_and_marks_second():
+    """2026-10-15: the spot check shows M1's gloss (what the pipeline uses) beside the dictionary hint, and the mark
+    column comes second, never last after an empty column."""
+    from assistant_axis.gapgen.generators.masked_lm import report as R
+    rows = [{"surface": "outgoing", "stem": "outgoing", "union_rank": 3, "best_frame": "f", "zipf": 4.1,
+             "trait_contrast": 0.5, "gloss_hint": "leaving a place or a position"}]
+    md = R.roger_sample(rows, n=1, m1_glosses={"outgoing": "This means approaching people with easy warmth."})
+    assert "| # | word | T/P | M1's gloss | dictionary hint |" in md
+    assert "| 1 | outgoing |  | This means approaching people with easy warmth. | leaving a place or a position |" in md
