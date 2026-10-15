@@ -264,6 +264,11 @@ rubrics, which the role-promotion item below needs too.
   tables, and decide (a) whether WordNet covers may cut, (b) whether the persona flag should escalate a row to
   Opus, (c) whether M3's cut-off or rubric needs a calibration (with the 40-pair random blind check if the
   record is thin).
+  Evidence so far (2026-10-15): Roger's marks on the pooled harness's sample (`rec_pooled_1`, 40 verdicts) agree
+  with every "recovered" verdict and 19 of 20 "novel" ones, so the harness's recall is sound; on all three pairs where
+  Sonnet read below the cut-off and Opus at or above it, Roger sided with Opus.  M3's escalation rule (2026-10-04:
+  Sonnet's keeps are never re-examined) would have kept all three as new.  A concrete candidate for (c): send a
+  Sonnet reading one below the cut-off to Opus as well, and let Opus decide (more Opus calls on borderline pairs only).
 
 - **Retest the overlap rubrics after the October extraction** (Roger, 2026-10-14).  His concern: rubric A rates a
   domain-narrowed trait (picky eater against picky) a 3, "the same concept, narrower", though narrowing to a rare
