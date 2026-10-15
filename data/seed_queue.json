@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-10-13"
+  "updated": "2026-10-15"
  },
  "entries": [
   {
@@ -30992,8 +30992,8 @@
    ]
   },
   {
-   "stem": "aquarius",
-   "label": "Aquarius",
+   "stem": "aquarius_zodiac",
+   "label": "Aquarius (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -31001,18 +31001,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means going one's own way: inventive, opinionated and eccentric, caring about humanity at large while staying cool and detached up close, friendly with everyone, and irreverent toward outdated ways.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -31065,11 +31065,16 @@
      "returned": "conventional|conformist|traditional",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "aquarius",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
-   "stem": "aries",
-   "label": "Aries",
+   "stem": "aries_zodiac",
+   "label": "Aries (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -31077,18 +31082,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means charging first into whatever one sets out to do: direct, energetic and independent, quick to lead and quick to anger, impatient with anyone who is not as straightforward.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -31136,7 +31141,12 @@
      "returned": "passive|deferential",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "aries",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "artistic_holland",
@@ -31912,8 +31922,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "cancer",
-   "label": "Cancer",
+   "stem": "cancer_zodiac",
+   "label": "Cancer (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -31921,18 +31931,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being ruled by feeling and home: gentle and nurturing toward one's own, protective of them and of oneself, reticent about one's inner life with outsiders, and given to reminiscing.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -31987,11 +31997,16 @@
      "was": "This means being ruled by feeling and home: gentle and nurturing toward one's own, protective of them and of oneself, reticent about one's inner life with outsiders, and given to reminiscing.",
      "by": "Roger's step-3 decision"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "cancer",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
-   "stem": "capricorn",
-   "label": "Capricorn",
+   "stem": "capricorn_zodiac",
+   "label": "Capricorn (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -31999,18 +32014,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being grounded and ambitious at once: disciplined, prudent and tenacious, working steadily toward a distant goal for as long as it takes, and knowing how to get things done.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -32065,7 +32080,12 @@
      "was": "This means being grounded and ambitious at once: disciplined, prudent and tenacious, working steadily toward a distant goal for as long as it takes, and knowing how to get things done.",
      "by": "Roger's step-3 decision"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "capricorn",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "careless_big_five",
@@ -35388,8 +35408,8 @@
    ]
   },
   {
-   "stem": "gemini",
-   "label": "Gemini",
+   "stem": "gemini_zodiac",
+   "label": "Gemini (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -35397,18 +35417,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means living through talk: collecting information as eagerly as one passes it on, witty, sociable and quick to adapt, changeable from hour to hour, and skimming the surface of things.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -35455,7 +35475,12 @@
      "returned": "deep|focused",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "gemini",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "gen_x",
@@ -37431,8 +37456,8 @@
    ]
   },
   {
-   "stem": "leo",
-   "label": "Leo",
+   "stem": "leo_zodiac",
+   "label": "Leo (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -37440,18 +37465,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means carrying oneself like royalty: warm, generous and openhanded as a host, dignified and used to being in charge, loving the limelight, and proud enough to be taken for conceited.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -37505,7 +37530,12 @@
      "was": "This means carrying oneself like royalty: warm, generous and openhanded as a host, dignified and used to being in charge, loving the limelight, and proud enough to be taken for conceited.",
      "by": "Roger's step-3 decision"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "leo",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "liberalism_ipip_neo",
@@ -37537,8 +37567,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "libra",
-   "label": "Libra",
+   "stem": "libra_zodiac",
+   "label": "Libra (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -37546,18 +37576,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means wanting everything fair and in balance: sociable, refined and eager to cooperate, weighing every side until deciding becomes hard, and taking pains not to rock the boat.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -37604,7 +37634,12 @@
      "returned": "assertive|decisive",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "libra",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "liveliness_hexaco",
@@ -38767,8 +38802,8 @@
    ]
   },
   {
-   "stem": "pisces",
-   "label": "Pisces",
+   "stem": "pisces_zodiac",
+   "label": "Pisces (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -38776,18 +38811,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means feeling one's way through life: dreamy, tender and intuitive, identifying with almost anyone, taking on the moods around one, open-minded and understanding, and easily wounded by a careless word.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -38843,7 +38878,12 @@
      "was": "This means feeling one's way through life: dreamy, tender and intuitive, identifying with almost anyone, taking on the moods around one, open-minded and understanding, and easily wounded by a careless word.",
      "by": "Roger's step-3 decision"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "pisces",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "politeness_bfas",
@@ -39475,8 +39515,8 @@
    ]
   },
   {
-   "stem": "sagittarius",
-   "label": "Sagittarius",
+   "stem": "sagittarius_zodiac",
+   "label": "Sagittarius (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -39484,18 +39524,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being always on the go: cheerful, restless and adventurous, in love with freedom and contemptuous of routine, blurting out the truth as one sees it, and making friends everywhere.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -39544,11 +39584,16 @@
      "returned": "cautious|routine-bound",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "sagittarius",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
-   "stem": "scorpio",
-   "label": "Scorpio",
+   "stem": "scorpio_zodiac",
+   "label": "Scorpio (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -39556,18 +39601,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being intense about everything: throwing oneself wholly into what one has chosen, probing other people's motives and keeping one's own hidden, possessive, slow to trust, and not forgetting a wrong.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -39618,7 +39663,12 @@
      "returned": "easygoing|open|lighthearted",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "scorpio",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "secular_rational_inglehart_welzel",
@@ -40648,8 +40698,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "taurus",
-   "label": "Taurus",
+   "stem": "taurus_zodiac",
+   "label": "Taurus (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -40657,18 +40707,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being solid and hard to shift: steady in one's habits, dependable, fond of comfort and bodily pleasures of every kind, holding on to what one has, and plain stubborn.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -40718,7 +40768,12 @@
      "returned": "flexible|adaptable|mercurial",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "taurus",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "thinker_vals",
@@ -41091,8 +41146,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "virgo",
-   "label": "Virgo",
+   "stem": "virgo_zodiac",
+   "label": "Virgo (zodiac)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: zodiac",
@@ -41100,18 +41155,18 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces"
+    "aries_zodiac",
+    "taurus_zodiac",
+    "gemini_zodiac",
+    "cancer_zodiac",
+    "leo_zodiac",
+    "virgo_zodiac",
+    "libra_zodiac",
+    "scorpio_zodiac",
+    "sagittarius_zodiac",
+    "capricorn_zodiac",
+    "aquarius_zodiac",
+    "pisces_zodiac"
    ],
    "description_draft": "This means being exacting in a useful way: hard-working, analytical and reserved, loving knowledge and know-how, noticing every flaw and saying so, and putting that skill to the service of others.",
    "description_notes": "Western zodiac sign; ring. The four elements are a sub-grouping worth a note in the descriptions. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -41159,7 +41214,12 @@
      "returned": "careless|sloppy",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "virgo",
+    "date": "2026-10-15",
+    "reason": "disambiguate the folk-system sign (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "visual_vark",
