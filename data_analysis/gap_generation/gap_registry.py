@@ -76,7 +76,19 @@ Commands:
 * ``compact [--uncompressed]``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot, gzipped: ``registry.snapshot.jsonl.gz`` (since 2026-10-12;
   ``--uncompressed`` writes ``registry.snapshot.jsonl`` as before, refused over 90 MB).  ``--registry`` may name a
-  gzipped snapshot for the read-only commands.
+  gzipped snapshot for the read-only commands.  The log keeps the raw rows and the retraction records; the snapshot
+  is the folded view (retracted runs applied) followed by the retraction records.
+* ``retract --run GENERATOR/RUN_ID --reason TEXT [--by WHO] [--force] [--dry-run]`` (2026-10-15): back out a run whose
+  output was buggy.  Appends a retraction record (who, when, why, the counts, and the history of the run's earlier
+  retractions) to the log; from then on every reader's fold leaves out that run's sources, and the rows only it
+  proposed (``registry.retract``).  Prints the rows dropped, the rows kept with fewer sources, those whose first gloss
+  hint (M1's intended sense) changes, and the ``relabel`` links cleared.  Refused, before any write, when a row it
+  would drop or change has a settled review (accepted, rejected, merged_into), a seed-queue entry (its
+  ``seed_queue_stem``, or a queue entry's ``gap_gen.registry_key``), or when a row that stays is merged into a row that
+  goes; ``--force`` retracts anyway and records which keys it overrode.  ``--by`` defaults to ``git config
+  user.name``.  ``--dry-run`` prints the same and writes nothing.
+* ``unretract --run GENERATOR/RUN_ID --reason TEXT [--by WHO] [--dry-run]``: the reverse; the run's sources and rows
+  come back.  ``retractions`` lists every run retracted now or before, with its history.
 * ``promote (--keys K ... | --status accepted) [--confirm-state-name KEY=NAME ...] [--reopen-turned-down]
   [--min-local-novelty X] [--section S] [--queue PATH] [--dry-run]``:
   append ``status: "candidate"`` entries to ``data/seed_queue.json`` (refuses
@@ -253,6 +265,9 @@ def cmd_status(args) -> int:
         for g in {s.get("generator") for s in r.get("sources") or []}:
             c["generator"][g] += 1
     print(f"{len(rows)} rows in {args.registry}")
+    gone = sorted(f"{g}/{r}" for g, r in reg.retracted_runs())
+    if gone:
+        print(f"retracted runs (left out of every count here): {', '.join(gone)}")
     for name, cnt in c.items():
         print(f"by {name}: {json.dumps(dict(sorted(cnt.items())))}")
     return 0
@@ -653,6 +668,88 @@ def cmd_compact(args) -> int:
     return 0
 
 
+def _by(args) -> str:
+    if args.by:
+        return args.by
+    import subprocess
+    try:
+        name = subprocess.run(["git", "config", "user.name"], cwd=_REPO_ROOT, capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        name = ""
+    if not name:
+        raise SystemExit("REFUSED: say who retracts with --by (git config user.name is not set)")
+    return name
+
+
+def _queue_keys(path: Path) -> list[str]:
+    """The registry keys the seed queue's entries name (``gap_gen.registry_key``); none when there is no queue."""
+    if not Path(path).exists():
+        return []
+    q = json.loads(Path(path).read_text(encoding="utf-8"))
+    return [k for e in (q.get("entries") or []) for k in [(e.get("gap_gen") or {}).get("registry_key")] if k]
+
+
+def cmd_retract(args) -> int:
+    """``retract`` / ``unretract``: a run's retraction record (``registry.retract``, ``registry.unretract``)."""
+    from assistant_axis.gapgen.registry import retract, unretract
+    gen, sep, run_id = (args.run or "").partition("/")
+    if not sep:
+        print("REFUSED: --run takes GENERATOR/RUN_ID", file=sys.stderr)
+        return 2
+    try:
+        if args.cmd == "retract":
+            rep = retract(args.registry, gen, run_id, reason=args.reason, by=_by(args), dry_run=args.dry_run,
+                          force=args.force, queue_keys=_queue_keys(args.queue))
+        else:
+            rep = unretract(args.registry, gen, run_id, reason=args.reason, by=_by(args), dry_run=args.dry_run)
+    except ValueError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    c = rep.counts()
+    verb = {"retract": ("drops", "keeps"), "unretract": ("restores", "gives back sources to")}[rep.action]
+    print(f"{'DRY-RUN: ' if args.dry_run else ''}{rep.action} {rep.run} ({c['n_sources']} sources on record): "
+          f"{verb[0]} {c['n_dropped']} rows; {verb[1]} {c['n_changed']} rows shared with other runs "
+          f"({c['n_gloss_hint_changed']} of them change their first gloss hint, M1's intended sense); "
+          f"{c['n_relabel_changed']} relabel links {'cleared' if rep.action == 'retract' else 'restored'}")
+
+    def show(title: str, keys: list, n: int = 40) -> None:
+        if keys:
+            print(f"  {title} ({len(keys)}): {', '.join(keys[:n])}" + (" ..." if len(keys) > n else ""))
+    show("rows dropped" if rep.action == "retract" else "rows restored", rep.dropped, 60 if args.verbose else 20)
+    show("rows kept, sources removed" if rep.action == "retract" else "rows gaining sources", rep.changed,
+         10**6 if args.verbose else 20)
+    show("first gloss hint changes (M1 judged them under the run's gloss; re-run M1 with --keys if wanted)",
+         rep.gloss_hint_changed, 10**6)
+    show("relabel links", rep.relabel_changed, 10**6)
+    for k, why in rep.blocked.items():
+        print(f"  {'OVERRIDDEN' if rep.forced else 'BLOCKED'} {k}: {why}")
+    if rep.refused:
+        print(f"REFUSED: {rep.refused}", file=sys.stderr)
+        return 2
+    if args.dry_run:
+        print(f"DRY-RUN: would append to {args.registry}: {json.dumps({k: rep.record[k] for k in ('key', 'retracted', 'by', 'reason', 'forced')})}")
+        return 0
+    print(f"appended {rep.record['key']} (rev {rep.record['rev']}) to {args.registry}; reverse with "
+          f"`gap_registry.py {'unretract' if rep.action == 'retract' else 'retract'} --run {rep.run} --reason ...`")
+    return 0
+
+
+def cmd_retractions(args) -> int:
+    reg = Registry(args.registry)
+    ctl = reg.controls()
+    if not ctl:
+        print("no run has been retracted")
+        return 0
+    for k, c in sorted(ctl.items()):
+        state = "RETRACTED" if c.get("retracted") else "not retracted"
+        print(f"{c.get('generator')}/{c.get('run_id')}: {state} since {c.get('at')} by {c.get('by')}: "
+              f"{c.get('reason')} {json.dumps(c.get('effect'))}")
+        for h in c.get("history") or []:
+            print(f"    earlier: {h.get('action')} {h.get('at')} by {h.get('by')}: {h.get('reason')}")
+    return 0
+
+
 def cmd_promote(args) -> int:
     import data_analysis.seed_entities as se
     reg = Registry(args.registry)
@@ -782,6 +879,24 @@ def build_parser() -> argparse.ArgumentParser:
                     help="write the snapshot as registry.snapshot.jsonl, as before 2026-10-12 (refused over 90 MB); "
                          "the default is the gzipped registry.snapshot.jsonl.gz")
     sp.set_defaults(func=cmd_compact)
+    for name, hlp in (("retract", "back out a run: its sources leave every reader's fold, and the rows only it "
+                                  "proposed with them (a record in the log; reversible)"),
+                      ("unretract", "undo a retraction")):
+        sp = sub.add_parser(name, help=hlp)
+        sp.add_argument("--run", required=True, metavar="GENERATOR/RUN_ID")
+        sp.add_argument("--reason", required=True, help="kept in the log")
+        sp.add_argument("--by", default=None, help="who (default: git config user.name)")
+        if name == "retract":
+            sp.add_argument("--force", action="store_true",
+                            help="retract although rows it drops or changes are settled (review, seed queue); the "
+                                 "overridden keys are recorded")
+            sp.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH,
+                            help="seed queue whose gap_gen.registry_key entries block a retraction")
+        sp.add_argument("--verbose", action="store_true", help="list every key")
+        sp.add_argument("--dry-run", action="store_true")
+        sp.set_defaults(func=cmd_retract)
+    sp = sub.add_parser("retractions", help="every run retracted now or before, with its history")
+    sp.set_defaults(func=cmd_retractions)
     sp = sub.add_parser("promote")
     g = sp.add_mutually_exclusive_group(required=True)
     g.add_argument("--keys", nargs="+")

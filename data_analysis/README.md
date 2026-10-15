@@ -1115,6 +1115,29 @@ map`/`place-check`/`head-scope`) refuse the same way.  The old form,
 `--from-filter <filter run dir>` (repeatable; the filter's region of the label),
 still works and writes the file whole.
 
+**Retracting a run (2026-10-15): `gap_registry.py retract`.**  A run whose output was buggy is backed out without
+editing the log: `retract --run GENERATOR/RUN_ID --reason TEXT` appends a retraction record (key
+`retraction:<generator>/<run_id>`; who, when, why, the counts, the history of the run's earlier retractions), and from
+then on every reader's fold ([`registry.py`](../assistant_axis/gapgen/registry.py) `Registry.fold`, `read_snapshot`:
+M1's and M3's selection, the review graph and app, promotion, the dashboard) leaves out that run's sources and the rows
+only it proposed.  A row other runs also proposed stays, minus the run's sources, with a `retraction` note (and
+`gloss_hint_changed` when its first gloss hint, the intended sense M1 was shown, came from the run: M1's verdict is
+kept, and the command lists those rows for an optional `traithood_filter.py --keys` rerun); a `relabel` link to a
+dropped row is cleared in the view.  The writers keep working on the raw rows, so `unretract` restores everything.
+Refused, before any write, when a row it would drop or change has a settled review (accepted, rejected,
+merged_into), a seed-queue entry, or when a row that stays was merged into a row that goes; `--force` retracts anyway
+and records the overridden keys.  `compact` keeps the raw rows and the retraction records in the log and writes the
+folded view (with the records) to the snapshot.
+
+```bash
+uv run python data_analysis/gap_generation/gap_registry.py retract --run structural/2026-10-14-pilot \
+    --reason "labels in odd senses" --dry-run [--verbose]
+uv run python data_analysis/gap_generation/gap_registry.py retract --run structural/2026-10-14-pilot \
+    --reason "labels in odd senses" [--force]
+uv run python data_analysis/gap_generation/gap_registry.py retractions
+uv run python data_analysis/gap_generation/gap_registry.py unretract --run structural/2026-10-14-pilot --reason "..."
+```
+
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
 [QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 35: of the 706 one-edit repair suggestions the census ingest
 lists (`repair_suggestions_list` in [ingest_counts.json](../data/candidates/censuses/ingest_counts.json)), the 314 whose

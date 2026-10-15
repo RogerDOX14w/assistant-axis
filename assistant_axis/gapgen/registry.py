@@ -21,6 +21,19 @@ exclusive ``fcntl`` lock on ``<registry>.lock``, so parallel generator runs can
 submit to one registry.
 
 Row schema: ``reports/trait_gap_generation/coding_plan_platform.md`` §6.
+
+**Retractions** (2026-10-15, Roger: a way to back out a run whose output was buggy).  :func:`retract` appends a
+*control record* (key ``retraction:<generator>/<run_id>``, :data:`RETRACTION_PREFIX`; never a row) saying the run is
+retracted, by whom, when and why; :func:`unretract` appends the next state of the same record.  The log's rows are
+never rewritten: a retraction is applied when the log is **read**.  :meth:`Registry.fold` (every reader: M1's and
+M3's selection, the review graph and app, promotion, the dashboard through :func:`read_snapshot`) removes the
+retracted runs' entries from every row's ``sources``; a row left with none is not in the fold; a row that keeps other
+sources gains a ``retraction`` note (the runs, how many sources went, whether its first gloss hint, which M1 shows as
+the intended sense, changed); a ``relabel`` link that points at a dropped row is cleared.  The writers
+(``update_many``, ``submit_candidates``, ``import_rows``) work on the raw rows (``fold(raw=True)``), so a block
+written to a row while a run is retracted keeps the run's sources, and :func:`unretract` restores everything.
+:func:`compact` keeps the raw rows and the control records in the log and writes the folded view (with the control
+records, so the tracked file carries the audit trail) to the snapshot.
 """
 from __future__ import annotations
 
@@ -72,8 +85,9 @@ def snapshot_file(directory: Path | str) -> Path:
 
 def read_snapshot(path: Path | str) -> dict[str, dict]:
     """A snapshot's rows by key, gzipped or not, read without taking the registry lock (``compact`` replaces a
-    snapshot atomically, and nothing appends to one).  Empty when the file is missing."""
-    return Registry(path)._fold_unlocked()
+    snapshot atomically, and nothing appends to one).  Empty when the file is missing.  Retractions recorded in the
+    file are applied, as :meth:`Registry.fold` applies them (a live log read this way gets the same view)."""
+    return Registry(path)._view_unlocked()
 
 #: Top-level fields of a registry row, in schema order (§6).
 ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "gloss", "entity_type",
@@ -86,6 +100,78 @@ ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "
 #: ``to_corpus_stem`` on a noun row, ``from_key`` on its adjective row; written by :func:`submit_candidates` and the
 #: ``noun_relabel.py`` streams, ``None`` on every other row (``schema_version`` stays 1: the field is additive).
 BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel")
+
+#: The key prefix of a control record: ``retraction:<generator>/<run_id>`` (a stem is ``[a-z0-9_]``, so no row key
+#: can take this form).  The latest line of such a key is the run's retraction state (``"retracted": true | false``).
+RETRACTION_PREFIX = "retraction:"
+RETRACTION_RECORD = "retraction"
+#: The note a row of the folded view gains when a retraction removed some of its sources (not in ROW_FIELDS: it is
+#: never written to the log, only to the snapshot, which is the folded view).
+RETRACTION_NOTE = "retraction"
+#: Review statuses a retraction will not drop or change a row under without ``force`` (normalize.REVIEW_STATUSES;
+#: ``parked`` and ``deferred`` are not settled).
+SETTLED_REVIEW_STATUSES = ("accepted", "rejected", "merged_into")
+
+
+def retraction_key(generator: str, run_id: str) -> str:
+    return f"{RETRACTION_PREFIX}{generator}/{run_id}"
+
+
+def is_control_key(key) -> bool:
+    return isinstance(key, str) and key.startswith(RETRACTION_PREFIX)
+
+
+def _run_of(source: dict) -> tuple:
+    return (source.get("generator"), source.get("run_id"))
+
+
+def active_retractions(controls: dict) -> set[tuple[str, str]]:
+    """``{(generator, run_id)}`` of the control records (``{key: latest record}``) whose state is retracted."""
+    return {(c.get("generator"), c.get("run_id")) for c in controls.values()
+            if c.get("record") == RETRACTION_RECORD and c.get("retracted")}
+
+
+def apply_retractions(rows: dict[str, dict], runs: Iterable[tuple[str, str]]) -> dict[str, dict]:
+    """The folded view of ``rows`` (``{key: raw row}``) with ``runs`` retracted (module docstring).
+
+    A row with no source of a retracted run is the same object as in ``rows``; with no runs, ``rows`` itself is
+    returned, so a log without retractions folds exactly as before.  A changed row is a shallow copy with
+    ``sources`` filtered and a :data:`RETRACTION_NOTE` block ``{"runs", "n_sources_removed", "gloss_hint_changed",
+    "relabel_cleared"}``; ``rows`` is never modified."""
+    runs = {tuple(r) for r in runs}
+    if not runs:
+        return rows
+    out: dict[str, dict] = {}
+    dropped: set[str] = set()
+    for k, r in rows.items():
+        srcs = r.get("sources") or []
+        keep = [s for s in srcs if _run_of(s) not in runs]
+        if len(keep) == len(srcs):
+            out[k] = r
+            continue
+        if not keep:
+            dropped.add(k)
+            continue
+        rec = dict(r)
+        rec["sources"] = keep
+        gone = sorted({f"{g}/{i}" for g, i in (_run_of(s) for s in srcs if _run_of(s) in runs)})
+        rec[RETRACTION_NOTE] = {"runs": gone, "n_sources_removed": len(srcs) - len(keep),
+                                "gloss_hint_changed": first_gloss_hint(r) != first_gloss_hint(rec),
+                                "relabel_cleared": False}
+        out[k] = rec
+    if dropped:
+        for k, r in out.items():
+            rb = r.get("relabel")
+            if isinstance(rb, dict) and (rb.get("to_key") in dropped or rb.get("from_key") in dropped):
+                rec = dict(r) if r is rows.get(k) else r
+                rec["relabel"] = None
+                note = dict(rec.get(RETRACTION_NOTE) or {"runs": [], "n_sources_removed": 0,
+                                                         "gloss_hint_changed": False})
+                note["relabel_cleared"] = True
+                note["relabel_was"] = rb
+                rec[RETRACTION_NOTE] = note
+                out[k] = rec
+    return out
 
 
 def utc_now() -> str:
@@ -336,19 +422,42 @@ class Registry:
                     continue
                 yield rec
 
-    def _fold_unlocked(self) -> dict[str, dict]:
-        out: dict[str, dict] = {}
+    def _scan_unlocked(self) -> tuple[dict[str, dict], dict[str, dict]]:
+        """``(rows, controls)``: the latest line of each row key, and of each control key (:data:`RETRACTION_PREFIX`)."""
+        rows: dict[str, dict] = {}
+        controls: dict[str, dict] = {}
         for rec in self.iter_lines():
             k = rec.get("key")
-            if k:
-                out[k] = rec
-        return out
+            if is_control_key(k):
+                controls[k] = rec
+            elif k:
+                rows[k] = rec
+        return rows, controls
 
-    def fold(self) -> dict[str, dict]:
+    def _fold_unlocked(self) -> dict[str, dict]:
+        """The raw rows (no retraction applied, no control record): what the writers read and rewrite."""
+        return self._scan_unlocked()[0]
+
+    def _view_unlocked(self) -> dict[str, dict]:
+        rows, controls = self._scan_unlocked()
+        return apply_retractions(rows, active_retractions(controls))
+
+    def fold(self, *, raw: bool = False) -> dict[str, dict]:
         """``{key: latest record}`` (last line per key wins), under a shared lock.  "Latest" is the log's order,
-        the order in which writers took the exclusive lock, not any timestamp inside a block."""
+        the order in which writers took the exclusive lock, not any timestamp inside a block.  The retracted runs'
+        sources are removed and rows left without a source dropped (:func:`apply_retractions`); ``raw=True`` gives
+        the rows as written, which only tools that rewrite rows or audit retractions need."""
         with self._read_locked():
-            return self._fold_unlocked()
+            return self._fold_unlocked() if raw else self._view_unlocked()
+
+    def controls(self) -> dict[str, dict]:
+        """``{control key: latest record}``: the retraction records, retracted or not (the audit trail)."""
+        with self._read_locked():
+            return self._scan_unlocked()[1]
+
+    def retracted_runs(self) -> set[tuple[str, str]]:
+        """``{(generator, run_id)}`` currently retracted."""
+        return active_retractions(self.controls())
 
     def get(self, key: str) -> Optional[dict]:
         return self.fold().get(key)
@@ -388,7 +497,13 @@ class Registry:
         return rec
 
     def write(self, records: Iterable[dict], *, now: Optional[str] = None) -> list[dict]:
-        """Append full records (each gets ``rev`` = previous + 1)."""
+        """Append full records (each gets ``rev`` = previous + 1).  A record replaces its row whole, so pass a row
+        read with ``fold(raw=True)``, never one from the retraction view (it would lose the retracted runs' sources
+        for good).  Control records are written by :func:`retract` / :func:`unretract` only."""
+        records = list(records)
+        bad = [r.get("key") for r in records if is_control_key(r.get("key"))]
+        if bad:
+            raise ValueError(f"{bad[0]!r} is a control record's key: use retract / unretract")
         with self.locked():
             # the time is taken under the lock, so that ``updated_at`` follows the log's order (the fold's)
             now = now or utc_now()
@@ -618,6 +733,10 @@ class CompactReport:
     snapshot_bytes: int = 0
     #: an uncompressed snapshot left beside the gzipped one just written: out of date from now on
     stale_snapshot: Optional[Path] = None
+    #: control records kept (retractions, retracted or not), and the rows of the snapshot (the folded view: fewer
+    #: than ``n_keys`` while a run is retracted)
+    n_controls: int = 0
+    n_snapshot_rows: int = 0
 
 
 def _unused_path(base: Path) -> Path:
@@ -652,6 +771,10 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
     refuses (``ValueError``) while there are any, unless
     ``set_aside_malformed``: then they are written verbatim to
     ``registry.jsonl.rejected.<UTC>`` first and the report names that file.
+
+    Retractions: the log keeps the raw rows and the control records (so a compacted log can still be unretracted);
+    the snapshot is the folded view (:meth:`Registry.fold`) followed by the same control records.  A log with no
+    control record compacts byte for byte as before.
     """
     reg = Registry(registry_path)
     if is_gzip_path(reg.path):
@@ -665,13 +788,17 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
     rejected = None
     with reg.locked():
         n_lines = sum(1 for _ in reg.iter_lines()) + reg.n_malformed
-        folded = reg._fold_unlocked()
+        folded, controls = reg._scan_unlocked()
+        view = apply_retractions(folded, active_retractions(controls))
         if reg.n_malformed and not set_aside_malformed:
             raise ValueError(
                 f"{reg.path}: {reg.n_malformed} malformed line(s) (line {reg.malformed[0][0]} first); "
                 f"compaction would drop them. Inspect them, or pass set_aside_malformed=True "
                 f"(gap_registry.py compact --set-aside-malformed) to move them to a .rejected file")
-        body = "".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
+        tail = "".join(json.dumps(controls[k], ensure_ascii=False) + "\n" for k in sorted(controls))
+        log_data = ("".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
+                    + tail).encode("utf-8")
+        body = "".join(json.dumps(view[k], ensure_ascii=False) + "\n" for k in sorted(view)) + tail
         data = body.encode("utf-8")
         if not gz and len(data) > SNAPSHOT_UNCOMPRESSED_MAX_BYTES:
             raise ValueError(
@@ -685,7 +812,7 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
         bak = _unused_path(reg.path.with_name(f"{reg.path.name}.bak.{stamp}"))
         shutil.copy2(reg.path, bak)
         tmp = reg.path.with_name(reg.path.name + ".compact.tmp")
-        tmp.write_bytes(data)
+        tmp.write_bytes(log_data)
         tmp.replace(reg.path)
         snapshot_path.parent.mkdir(parents=True, exist_ok=True)
         stmp = snapshot_path.with_name(snapshot_path.name + ".tmp")
@@ -696,7 +823,8 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
     return CompactReport(backup_path=bak, snapshot_path=snapshot_path, n_lines_before=n_lines,
                          n_keys=len(folded), n_malformed=len(reg.malformed) if rejected else 0,
                          rejected_path=rejected, n_bytes=len(data), snapshot_bytes=len(out),
-                         stale_snapshot=plain if plain is not None and plain.exists() else None)
+                         stale_snapshot=plain if plain is not None and plain.exists() else None,
+                         n_controls=len(controls), n_snapshot_rows=len(view))
 
 
 # ---------------------------------------------------------------------------
@@ -770,7 +898,10 @@ def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: 
     lock, so that reading another checkout's log creates nothing there (import from an idle log, or a copy of it).
 
     ``dry_run`` reads this registry under the reader lock and writes nothing.  After a write the target is folded
-    again and every touched key compared with what was meant (``mismatches``, ``verified``)."""
+    again and every touched key compared with what was meant (``mismatches``, ``verified``).
+
+    Rows are imported raw (as the writers see them), and the source's retraction records are not imported (a control
+    key is refused): a run retracted there and imported here must be retracted here too."""
     src = Registry(source_path)
     reg = Registry(registry_path)
     if is_gzip_path(reg.path):
@@ -780,6 +911,8 @@ def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: 
     if src.path.resolve() == reg.path.resolve():
         raise ValueError(f"the source and the target are the same file: {src.path}")
     want = list(dict.fromkeys(k.strip() for k in keys if k and k.strip()))
+    if any(is_control_key(k) for k in want):
+        raise ValueError(f"{next(k for k in want if is_control_key(k))!r} is a retraction record, not a row")
     wanted = set(want)
     lines: list[tuple[int, dict]] = []          # (n-th non-blank source line, record) of the wanted keys, in order
     src_fold: dict[str, dict] = {}
@@ -830,7 +963,7 @@ def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: 
         return out, expect
 
     if dry_run:
-        plan(reg.fold())
+        plan(reg.fold(raw=True))
         return report
     with reg.locked():
         now = now or utc_now()              # under the lock: ``updated_at`` follows the log's order
@@ -850,6 +983,178 @@ def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: 
             report.mismatches[k] = sorted(f for f in set(got) | set(exp) if got.get(f) != exp.get(f))
     report.verified = not report.mismatches
     return report
+
+
+# ---------------------------------------------------------------------------
+# Retraction of a run
+# ---------------------------------------------------------------------------
+
+@dataclass
+class RetractReport:
+    """What :func:`retract` or :func:`unretract` did (or, with ``dry_run``, would do).  Key lists are sorted."""
+    action: str                      # "retract" | "unretract"
+    generator: str
+    run_id: str
+    dry_run: bool
+    #: rows the folded view loses (retract) or regains (unretract)
+    dropped: list = field(default_factory=list)
+    #: rows that stay in the view with fewer (or, unretracting, more) sources
+    changed: list = field(default_factory=list)
+    #: of ``changed``: rows whose first gloss hint (the intended sense M1 is shown) changes
+    gloss_hint_changed: list = field(default_factory=list)
+    #: rows whose ``relabel`` link is cleared (retract) or restored (unretract) in the view
+    relabel_changed: list = field(default_factory=list)
+    #: ``{key: why}``: rows with a settled review, a seed-queue entry, or a merge into a dropped row
+    blocked: dict = field(default_factory=dict)
+    n_sources: int = 0
+    forced: bool = False
+    refused: Optional[str] = None
+    written: bool = False
+    record: Optional[dict] = None
+
+    @property
+    def run(self) -> str:
+        return f"{self.generator}/{self.run_id}"
+
+    def counts(self) -> dict:
+        return {"n_sources": self.n_sources, "n_dropped": len(self.dropped), "n_changed": len(self.changed),
+                "n_gloss_hint_changed": len(self.gloss_hint_changed), "n_relabel_changed": len(self.relabel_changed),
+                "n_blocked": len(self.blocked)}
+
+    def as_dict(self) -> dict:
+        return {**asdict(self), "run": self.run, "counts": self.counts()}
+
+
+def _blocked(before: dict, after: dict, touched: Iterable[str], queue_keys: Iterable[str]) -> dict:
+    """``{key: why}`` for the touched rows a retraction must not move without ``force``, and for rows of ``after``
+    merged into a row ``after`` no longer has."""
+    queued = set(queue_keys or ())
+    out: dict[str, str] = {}
+    for k in touched:
+        r = before.get(k) or after.get(k) or {}
+        why = []
+        st = (r.get("review") or {}).get("status")
+        if st in SETTLED_REVIEW_STATUSES:
+            into = (r.get("review") or {}).get("into")
+            why.append(f"review {st}" + (f" {into}" if into else ""))
+        if r.get("seed_queue_stem"):
+            why.append(f"seed queue entry {r['seed_queue_stem']}")
+        elif k in queued:
+            why.append("named by a seed-queue entry's gap_gen.registry_key")
+        if why:
+            out[k] = "; ".join(why)
+    gone = set(before) - set(after)
+    for k, r in after.items():
+        into = (r.get("review") or {}).get("into")
+        if into in gone:
+            out[k] = f"review merged_into {into}, which the retraction drops"
+    return dict(sorted(out.items()))
+
+
+def _effect(rows: dict, runs_before: set, runs_after: set, queue_keys) -> tuple[dict, dict, dict]:
+    before = apply_retractions(rows, runs_before)
+    after = apply_retractions(rows, runs_after)
+    dropped = sorted(set(before) ^ set(after))
+    both = set(before) & set(after)
+    changed = sorted(k for k in both if (before[k].get("sources") or []) != (after[k].get("sources") or []))
+    gloss = sorted(k for k in changed if first_gloss_hint(before[k]) != first_gloss_hint(after[k]))
+    relabel = sorted(k for k in both if before[k].get("relabel") != after[k].get("relabel"))
+    touched = set(dropped) | set(changed) | set(relabel)
+    eff = {"dropped": dropped, "changed": changed, "gloss_hint_changed": gloss, "relabel_changed": relabel}
+    return eff, _blocked(before, after, touched, queue_keys), {"before": before, "after": after}
+
+
+def _control_record(prev: Optional[dict], *, generator: str, run_id: str, retracted: bool, reason: str, by: str,
+                    now: str, forced: bool, effect: dict) -> dict:
+    """The next state of a run's control record: the current state at the top, and every earlier state's event in
+    ``history`` (so the latest line alone, the only one compaction keeps, carries the whole audit trail)."""
+    history = list((prev or {}).get("history") or [])
+    if prev is not None:
+        history.append({k: prev.get(k) for k in ("action", "by", "at", "reason", "forced", "effect")})
+    return {"key": retraction_key(generator, run_id), "record": RETRACTION_RECORD, "generator": generator,
+            "run_id": run_id, "retracted": bool(retracted), "action": "retract" if retracted else "unretract",
+            "by": by, "at": now, "reason": reason, "forced": bool(forced), "effect": effect, "history": history,
+            "rev": 0, "created_at": now, "updated_at": now}
+
+
+def _set_retraction(registry_path, generator: str, run_id: str, *, retracted: bool, reason: str, by: str,
+                    dry_run: bool, force: bool, queue_keys, now: Optional[str]) -> RetractReport:
+    from .paths import check_id
+    check_id(generator, "generator")
+    check_id(run_id, "run_id")
+    if not reason or not str(reason).strip():
+        raise ValueError("a reason is required (it is kept in the log)")
+    if not by or not str(by).strip():
+        raise ValueError("who retracts is required (by)")
+    reg = Registry(registry_path)
+    if is_gzip_path(reg.path):
+        raise ValueError(f"{reg.path} is a gzipped registry snapshot, read-only: retract in the live log")
+    run = (generator, run_id)
+    rep = RetractReport(action="retract" if retracted else "unretract", generator=generator, run_id=run_id,
+                        dry_run=dry_run, forced=bool(force))
+    lock = reg._read_locked() if dry_run else reg.locked()
+    with lock:
+        now = now or utc_now()
+        rows, controls = reg._scan_unlocked()
+        active = active_retractions(controls)
+        rep.n_sources = sum(1 for r in rows.values() for s in r.get("sources") or [] if _run_of(s) == run)
+        if retracted:
+            if rep.n_sources == 0:
+                rep.refused = f"no row of {reg.path} has a source of run {generator}/{run_id}"
+                return rep
+            if run in active:
+                rep.refused = f"run {generator}/{run_id} is already retracted"
+                return rep
+            new_active = active | {run}
+        else:
+            if run not in active:
+                rep.refused = f"run {generator}/{run_id} is not retracted"
+                return rep
+            new_active = active - {run}
+        eff, blocked, _ = _effect(rows, active, new_active, queue_keys)
+        rep.dropped, rep.changed = eff["dropped"], eff["changed"]
+        rep.gloss_hint_changed, rep.relabel_changed = eff["gloss_hint_changed"], eff["relabel_changed"]
+        rep.blocked = blocked if retracted else {}
+        if retracted and blocked and not force:
+            rep.refused = (f"{len(blocked)} row(s) the retraction would drop or change are settled (review, seed "
+                           f"queue or a merge into a dropped row); pass force to retract anyway")
+            return rep
+        effect = {**rep.counts(), "blocked_overridden": sorted(blocked) if retracted and force else []}
+        rec = _control_record(controls.get(retraction_key(generator, run_id)), generator=generator, run_id=run_id,
+                              retracted=retracted, reason=str(reason).strip(), by=str(by).strip(), now=now,
+                              forced=bool(force and blocked), effect=effect)
+        if dry_run:
+            rep.record = rec
+            return rep
+        stamped = reg._stamp(rec, controls.get(rec["key"]), now)
+        reg._append([stamped])
+        rep.record, rep.written = stamped, True
+    return rep
+
+
+def retract(registry_path: Path | str, generator: str, run_id: str, *, reason: str, by: str, dry_run: bool = False,
+            force: bool = False, queue_keys: Iterable[str] = (), now: Optional[str] = None) -> RetractReport:
+    """Retract the run ``generator/run_id`` (module docstring): append its control record, after which
+    :meth:`Registry.fold` no longer shows the run's sources, nor the rows only it proposed.
+
+    Refused (``report.refused`` set, nothing written): no row has a source of the run (a typo); the run is already
+    retracted; or, unless ``force``, a row the retraction would drop or change has a settled review status
+    (:data:`SETTLED_REVIEW_STATUSES`), a ``seed_queue_stem``, or a key in ``queue_keys`` (the seed queue's
+    ``gap_gen.registry_key`` values), or a row that stays is ``merged_into`` a row that goes (``report.blocked``
+    lists them all).  ``dry_run`` computes the same report under the reader lock and writes nothing.  The record
+    keeps ``by``, the time, ``reason``, whether ``force`` overrode a block (and which keys), the counts, and the
+    history of earlier retractions and unretractions of the run."""
+    return _set_retraction(registry_path, generator, run_id, retracted=True, reason=reason, by=by, dry_run=dry_run,
+                           force=force, queue_keys=queue_keys, now=now)
+
+
+def unretract(registry_path: Path | str, generator: str, run_id: str, *, reason: str, by: str,
+              dry_run: bool = False, now: Optional[str] = None) -> RetractReport:
+    """Undo :func:`retract`: append the next state of the run's control record (``retracted: false``), after which
+    the fold is what it was before the retraction (plus whatever was written since).  Refused when the run is not
+    retracted.  Never blocked: it only gives rows back their sources."""
+    return _set_retraction(registry_path, generator, run_id, retracted=False, reason=reason, by=by, dry_run=dry_run,
+                           force=False, queue_keys=(), now=now)
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:
