@@ -889,3 +889,16 @@ class TestGeneratorExitStatus:
         own, other = json.loads(qp.read_text())["entries"]
         assert own["stem"] == "lazy" and own["check_result"]["returned"] == "busy"
         assert "check_result" not in other
+
+
+def test_placeholder_after_rename():
+    """Roger, 2026-10-15: a rename moves a non-X placeholder with the label; a real antonym or another placeholder
+    stays."""
+    from data_analysis.seed_entities import placeholder_after_rename as P
+    assert P("non-Leo", "Leo", "Leo (zodiac)") == "non-Leo (zodiac)"
+    assert P("non-physical touch", "physical touch", "physical touch (love language)") == \
+        "non-physical touch (love language)"
+    assert P("non_leo", "Leo", "Leo (zodiac)") == "non-Leo (zodiac)"
+    assert P("cowardly", "brave", "brave (Big Five)") is None
+    assert P("non-Virgo", "Leo", "Leo (zodiac)") is None
+    assert P(None, "Leo", "Leo (zodiac)") is None

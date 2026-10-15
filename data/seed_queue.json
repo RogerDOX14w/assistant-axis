@@ -30444,8 +30444,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "acts_of_service",
-   "label": "acts of service",
+   "stem": "acts_of_service_love_language",
+   "label": "acts of service (love language)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: love languages",
@@ -30453,11 +30453,11 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "acts_of_service",
-    "physical_touch",
-    "quality_time",
-    "receiving_gifts",
-    "words_of_affirmation"
+    "acts_of_service_love_language",
+    "physical_touch_love_language",
+    "quality_time_love_language",
+    "receiving_gifts_love_language",
+    "words_of_affirmation_love_language"
    ],
    "description_draft": "This means feeling loved by help that lightens one's load, longing to hear 'let me do that for you', while laziness, broken commitments and extra work say one's feelings don't matter.",
    "description_notes": "Chapman's love language; set. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -30505,7 +30505,12 @@
      "returned": "passive|self-serving",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "acts_of_service",
+    "date": "2026-10-15",
+    "reason": "disambiguate the love-language set (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "adventurousness_ipip_neo",
@@ -38738,8 +38743,8 @@
    ]
   },
   {
-   "stem": "physical_touch",
-   "label": "physical touch",
+   "stem": "physical_touch_love_language",
+   "label": "physical touch (love language)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: love languages",
@@ -38747,11 +38752,11 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "acts_of_service",
-    "physical_touch",
-    "quality_time",
-    "receiving_gifts",
-    "words_of_affirmation"
+    "acts_of_service_love_language",
+    "physical_touch_love_language",
+    "quality_time_love_language",
+    "receiving_gifts_love_language",
+    "words_of_affirmation_love_language"
    ],
    "description_draft": "This means feeling loved through touch: hugs, a pat on the back, holding hands or a hand on the arm carry care and excitement, physical presence is crucial, and neglect is unforgivable.",
    "description_notes": "Chapman's love language; set. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -38799,7 +38804,12 @@
      "returned": "touch-averse|physically-distant",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "physical_touch",
+    "date": "2026-10-15",
+    "reason": "disambiguate the love-language set (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "pisces_zodiac",
@@ -39124,8 +39134,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "quality_time",
-   "label": "quality time",
+   "stem": "quality_time_love_language",
+   "label": "quality time (love language)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: love languages",
@@ -39133,11 +39143,11 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "acts_of_service",
-    "physical_touch",
-    "quality_time",
-    "receiving_gifts",
-    "words_of_affirmation"
+    "acts_of_service_love_language",
+    "physical_touch_love_language",
+    "quality_time_love_language",
+    "receiving_gifts_love_language",
+    "words_of_affirmation_love_language"
    ],
    "description_draft": "This means feeling loved through undivided attention: someone really there, screen off and chores set aside, sharing conversation and activities, while distractions, postponed dates or not being listened to are especially hurtful.",
    "description_notes": "Chapman's love language; set. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -39182,7 +39192,12 @@
      "returned": "distracted|inattentive",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "quality_time",
+    "date": "2026-10-15",
+    "reason": "disambiguate the love-language set (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "quarrelsome_hexaco",
@@ -39454,8 +39469,8 @@
    ]
   },
   {
-   "stem": "receiving_gifts",
-   "label": "receiving gifts",
+   "stem": "receiving_gifts_love_language",
+   "label": "receiving gifts (love language)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: love languages",
@@ -39463,11 +39478,11 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "acts_of_service",
-    "physical_touch",
-    "quality_time",
-    "receiving_gifts",
-    "words_of_affirmation"
+    "acts_of_service_love_language",
+    "physical_touch_love_language",
+    "quality_time_love_language",
+    "receiving_gifts_love_language",
+    "words_of_affirmation_love_language"
    ],
    "description_draft": "This means feeling loved through gifts, treasured for the thought and effort behind them: the right present shows one is known and prized; a forgotten birthday or a hasty gift is disastrous.",
    "description_notes": "Chapman's love language; set. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -39512,7 +39527,12 @@
      "returned": "gift-indifferent|gift-averse",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "receiving_gifts",
+    "date": "2026-10-15",
+    "reason": "disambiguate the love-language set (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "sagittarius_zodiac",
@@ -41367,8 +41387,8 @@
    "extracted_from": "extract_3.json"
   },
   {
-   "stem": "words_of_affirmation",
-   "label": "words of affirmation",
+   "stem": "words_of_affirmation_love_language",
+   "label": "words of affirmation (love language)",
    "entity_type": "trait",
    "chunk": "4",
    "sub_chunk": "part 4 sets: love languages",
@@ -41376,11 +41396,11 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": [
-    "acts_of_service",
-    "physical_touch",
-    "quality_time",
-    "receiving_gifts",
-    "words_of_affirmation"
+    "acts_of_service_love_language",
+    "physical_touch_love_language",
+    "quality_time_love_language",
+    "receiving_gifts_love_language",
+    "words_of_affirmation_love_language"
    ],
    "description_draft": "This means feeling loved through words: an unprompted compliment means the world, hearing why one is loved sends the spirits soaring, and an insult shatters and is not easily forgotten.",
    "description_notes": "Chapman's love language; set. Folk system: `source` = the system's name; the description paraphrases the conventional portrait and does not name the system (convention rule 4).",
@@ -41424,7 +41444,12 @@
      "returned": "action-oriented",
      "phase": "check"
     }
-   ]
+   ],
+   "renamed_from": {
+    "stem": "words_of_affirmation",
+    "date": "2026-10-15",
+    "reason": "disambiguate the love-language set (Roger, 2026-10-15)"
+   }
   },
   {
    "stem": "adhd",

@@ -83,6 +83,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from datetime import date, datetime, timezone
@@ -830,6 +831,20 @@ def cmd_pair(args, q: dict, data_dir: Path) -> int:
     return 0 if ok.returncode == 0 else 1
 
 
+def placeholder_after_rename(negative_label: Optional[str], old_label: str, new_label: str) -> Optional[str]:
+    """The ``non-<label>`` placeholder for ``new_label`` when ``negative_label`` is the placeholder of
+    ``old_label`` (``non-Leo`` -> ``non-Leo (zodiac)``; Roger, 2026-10-15), else ``None`` (a real antonym, or
+    a placeholder of something else, is left alone)."""
+    if not negative_label:
+        return None
+    m = re.match(r"^non[-\s_](.+)$", negative_label.strip())
+    if not m:
+        return None
+    if normalize_to_file_name(m.group(1)) != normalize_to_file_name(old_label):
+        return None
+    return f"non-{new_label}"
+
+
 def cmd_rename(args, q: dict, data_dir: Path) -> int:
     old = normalize_to_file_name(args.old); new_label = args.new.strip(); new = normalize_to_file_name(new_label)
     tdir = instructions_dir(data_dir, "trait")
@@ -846,7 +861,9 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
     today = date.today().isoformat()
     note = f"{today}: {old} renamed {new}"
     old_label = d.get("positive_label") or old.replace("_", " ")
-    print(f"{old} -> {new}: positive_label {old_label!r} -> {new_label!r}; negative_label stays {d.get('negative_label')!r}")
+    new_neg = placeholder_after_rename(d.get("negative_label"), old_label, new_label)
+    print(f"{old} -> {new}: positive_label {old_label!r} -> {new_label!r}; negative_label "
+          + (f"{d.get('negative_label')!r} -> {new_neg!r}" if new_neg else f"stays {d.get('negative_label')!r}"))
     own_arr, own_changed = rename_in_arrangement(d.get("arrangement"), old, new, note)
     if own_changed:
         print(f"  {new}: its own arrangement names {new}, not {old}")
@@ -864,6 +881,8 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
     how = move_entity_file(src, dst, data_dir.parent)
     print(f"  moved by {how}")
     d["positive_label"] = new_label
+    if new_neg:
+        d["negative_label"] = new_neg
     d["renamed_from"] = add_rename(d.get("renamed_from"), {
         "stem": old, "date": today,
         "reason": args.reason or f"RO: the antonym check on {args.partner or 'the new completion'} named this pole {new_label!r}; renamed, regenerated, re-checked"})
