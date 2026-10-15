@@ -38,10 +38,11 @@ EXAMPLE_WORDS: dict[str, tuple[str, ...]] = {
 }
 #: Words of the texts that are corpus, queue or validation words and are used only as prose (beyond the platform's
 #: ``prompt_hygiene.PROSE_ALLOWED``): ``mean`` is one of the four values of ``position`` (Aristotle's word), and
-#: ``operator`` is in the target name ``the_operator`` (Roger's three principal targets).  A new hit fails the test.
+#: ``operator`` is in the target name ``the_operator`` (Roger's three principal targets).  Version 2 (2026-10-15, the
+#: naming rule) adds ``single`` ("a single word") and ``usual`` ("its usual sense") to both.  A new hit fails the test.
 PROSE_RECORDED: dict[str, frozenset] = {
-    OPERATORS_RUBRIC: frozenset({"mean", "operator"}),
-    MODERNISE_RUBRIC: frozenset({"mean"}),
+    OPERATORS_RUBRIC: frozenset({"mean", "operator", "single", "usual"}),
+    MODERNISE_RUBRIC: frozenset({"mean", "single", "usual"}),
 }
 #: The validation files whose words the examples avoid (``surface`` per line).
 VALIDATION_FILES: tuple[str, ...] = ("m1_validation.jsonl", "split_test_words.jsonl")

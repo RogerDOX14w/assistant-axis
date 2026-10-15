@@ -17,7 +17,7 @@ from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
 from assistant_axis.tests import structural_fakes as F
 
 #: The pin each text is expected to be on, so that a bump is a deliberate edit here.
-EXPECTED_VERSIONS = {P.OPERATORS_RUBRIC: 1, P.MODERNISE_RUBRIC: 1}
+EXPECTED_VERSIONS = {P.OPERATORS_RUBRIC: 2, P.MODERNISE_RUBRIC: 2}   # 2026-10-15: the naming rule
 
 
 @pytest.mark.parametrize("name", P.RUBRICS)
