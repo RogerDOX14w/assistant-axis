@@ -2,6 +2,8 @@
 
 **covers at the cut-off: 81 pairs on 72 rows (at or over the stop line of about 5); Roger's marks decide the build (about 90% confirmed, 36 of 40); 1 of them reach a sibling (a standards-derived or bare form) of a trait M3 already listed for the row, leaving 80**
 
+**Roger's marks: 32 confirmed real misses, 7 rejected, 1 unsure, 0 unmarked of 40 marked (precision 0.8205); under the build line of about 90%: Roger decides**
+
 Rows swept 4563; rows with lexical-only pairs 1811; pairs 11604, judged 2217 (stalled 0; not judged {'moby_below_floor': 9130, 'name_only': 236, 'no_description': 21}); covers 81, below the cut-off 2136, unparsed 0.  Opus read 353 of the judged pairs (share 0.1592); spend $4.0123 ({'claude-opus-5-5': 1.3751, 'claude-sonnet-5-5': 2.6371}); covers per dollar 20.188.
 
 | by | judged / covers |
