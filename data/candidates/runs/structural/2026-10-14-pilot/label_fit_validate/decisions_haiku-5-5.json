@@ -1,0 +1,2472 @@
+{
+  "rubric": "label_fit",
+  "rubric_version": 1,
+  "prompt_sha256": "d5b7b741b69ead16338f7634e5d77f4bcc482bab0b5b627964851cb0e52f3212",
+  "model": "claude-haiku-5-5",
+  "readings": 3,
+  "parser_version": 1,
+  "screen_floor": null,
+  "embedder": "openai",
+  "counts": {
+    "fits": 34,
+    "relabel": 16,
+    "no_better_label": 0,
+    "no_answer": 0,
+    "screened_fits": 0,
+    "by_verdict": {
+      "fits": 34,
+      "not_a_sense": 3,
+      "secondary_sense": 13
+    }
+  },
+  "marks": "data/candidates/runs/structural/2026-10-14-pilot/roger_sample.md",
+  "confusion": {
+    "all marked rows": {
+      "table": {
+        "not_fit|not_fit": 6,
+        "not_fit|fit": 3,
+        "not_fit|no_answer": 0,
+        "fit|not_fit": 10,
+        "fit|fit": 31,
+        "fit|no_answer": 0
+      },
+      "n": 50,
+      "flag_precision": 0.375,
+      "flag_recall": 0.667,
+      "agreement": 0.74,
+      "disagreements": [
+        {
+          "n": "3",
+          "label": "Comfort-seeking",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "dependent",
+            "needy"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss's sense of leaning on others for reassurance and being looked after is only the second sense. -> dependent",
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss describes emotional dependence, wanting others to soothe and look after you, which is only the second sense. -> dependent",
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which the recorded senses rank first. The gloss describes constantly seeking emotional support and being looked after, a sense that comes second. -> needy"
+          ]
+        },
+        {
+          "n": "11",
+          "label": "headstrong",
+          "mark": "duplicate (of independent, taken to vice levels)",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "not_a_sense",
+          "votes": [
+            "not_a_sense",
+            "secondary_sense",
+            "not_a_sense"
+          ],
+          "proposals": [
+            "inconsiderate"
+          ],
+          "reasons": [
+            "not_a_sense: Said of a person, \"headstrong\" means stubborn and resistant to advice or control, or rash. It does not carry the idea of disregarding others' wishes as if they did not matter. -> inconsiderate",
+            "secondary_sense: Said of a person, \"headstrong\" usually means stubborn or unwilling to be controlled, which is a different emphasis from the callous disregard for others' wishes the gloss describes. The label can carry that sense only as a secondary reading. -> inconsiderate",
+            "not_a_sense: Said of a person, 'headstrong' usually means obstinate and set on its own way, not thoughtlessly disregarding others. The gloss's idea of having no regard for others' wishes is not something the word carries. -> inconsiderate"
+          ]
+        },
+        {
+          "n": "13",
+          "label": "ill-timed",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "fits",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "habitually picks bad moments",
+            "often mistimes things"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'ill-timed' is mostly applied to a remark, visit or action that is badly timed, not to someone who habitually picks bad moments, so the trait sense is secondary. No single word clearly carries the habitual trait, so a short phrase is given. -> habitually picks bad moments",
+            "fits: Said of a person, 'ill-timed' most naturally means someone who tends to speak or act at inopportune moments, which is the trait the gloss describes.",
+            "secondary_sense: Said of a person, \"ill-timed\" mostly describes a single remark or action that was badly timed, not a lasting habit. The habitual sense is possible but secondary, so a bare label would likely be read as one bad moment. -> often mistimes things"
+          ]
+        },
+        {
+          "n": "14",
+          "label": "inhibited",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "repressed"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, \"inhibited\" most often means shy or reserved in manner. The emotional-repression sense in the gloss is real but secondary, so most readers would take the bare label as shyness. -> repressed",
+            "secondary_sense: Said of a person, 'inhibited' most often means shy or reserved in manner, not the deep emotional suppression and self-denial the gloss describes. That sense appears only as a secondary one. -> repressed",
+            "secondary_sense: Said of a person, 'inhibited' most often means shy or self-conscious, not habitually suppressing feelings and denying oneself pleasure. The emotional-repression sense is real but comes second. -> repressed"
+          ]
+        },
+        {
+          "n": "25",
+          "label": "opportunistic",
+          "mark": "? seems like an odd sense of the word. The definition is \"beureucratically opportunistic\"",
+          "should": "not_fit",
+          "got": "fit",
+          "verdict": "fits",
+          "votes": [
+            "fits",
+            "fits",
+            "fits"
+          ],
+          "proposals": [],
+          "reasons": [
+            "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on officials and rules, but it is the same trait.",
+            "fits: Said of a person, 'opportunistic' most often means ready to exploit situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on bending to officials and rules, but it is still the same trait.",
+            "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for one's own benefit without scruples, which is the trait the gloss describes: bending to whatever currently serves one best. The gloss is narrower, focusing on officials and rules, but it is the same trait."
+          ]
+        },
+        {
+          "n": "30",
+          "label": "sanctimonious",
+          "mark": "? seems like an od sense of the word",
+          "should": "not_fit",
+          "got": "fit",
+          "verdict": "fits",
+          "votes": [
+            "fits",
+            "fits",
+            "secondary_sense"
+          ],
+          "proposals": [],
+          "reasons": [
+            "fits: The gloss centres on moralizing while sure of one's own rectitude, which is the usual sense of 'sanctimonious' said of a person. The added bluntness and indifference to hurt are extra detail rather than a different trait.",
+            "fits: The gloss's core trait is self-righteous moralizing, sure of one's own virtue, and that is the usual sense of 'sanctimonious' said of a person. The gloss's added bluntness and indifference to hurt are extra detail rather than a different trait.",
+            "secondary_sense: Said of a person, \"sanctimonious\" usually means self-righteously moralizing or feigning virtue, which covers only part of the gloss. The gloss's core is blunt, hurtful truth-telling with indifference to the hurt, which the label does not convey. -> tactless"
+          ]
+        },
+        {
+          "n": "31",
+          "label": "self-assertive",
+          "mark": "duplicate, (but not of anything in the list you offered)",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "obstinate",
+            "defensive"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, a fairly positive trait. The gloss describes stubborn refusal to yield or admit fault, which is a secondary and more negative reading. -> obstinate",
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to admit fault or resisting criticism. The gloss's sense is a secondary, more negative reading of the word. -> defensive",
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to yield or to admit fault. The gloss's stubborn refusal to accept correction is a secondary, more aggressive reading that most readers would not take from the bare label. -> obstinate"
+          ]
+        },
+        {
+          "n": "32",
+          "label": "self-controlled",
+          "mark": "trait, or possibly a duplicate for something you didn't offer",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "temperate"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'self-controlled' most often means restrained and not acting on impulse, which is broader than the gloss's specific moderation of bodily pleasures and appetite. 'Temperate' is the word whose usual personal sense is moderation in appetites, especially food and drink. -> temperate",
+            "secondary_sense: Said of a person, 'self-controlled' usually means restrained and calm in general, not specifically moderate enjoyment of bodily pleasures, though that sense can be carried. 'Temperate' is said of people most often for moderation in eating, drinking and other appetites. -> temperate",
+            "secondary_sense: \"Self-controlled\" usually means calm and not acting on impulse in general, not moderation in bodily pleasures and appetites, which is the trait the gloss describes. \"Temperate\" is the word that most readily means moderate in eating, drinking and other pleasures. -> temperate"
+          ]
+        },
+        {
+          "n": "35",
+          "label": "self-justifying",
+          "mark": "? close to blame-shifting, but not identical",
+          "should": "not_fit",
+          "got": "fit",
+          "verdict": "fits",
+          "votes": [
+            "fits",
+            "fits",
+            "fits"
+          ],
+          "proposals": [],
+          "reasons": [
+            "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the trait the gloss describes: quick self-defence when blamed, guarding against any hint of fault, and bristling at challenge.",
+            "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the trait the gloss describes: quick self-defense when criticized and bristling at challenge.",
+            "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the defensive reaction to criticism the gloss describes, including the bristling at challenge."
+          ]
+        },
+        {
+          "n": "38",
+          "label": "sensual",
+          "mark": "duplicate of hedonistic",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "fits",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "hedonistic",
+            "sensory hedonist"
+          ],
+          "reasons": [
+            "fits: The label's usual sense said of a person is being devoted to bodily pleasures and sensory experience, which matches the gloss's active pursuit of taste, touch, sound and beauty. Its sexual overtone is a secondary connotation the gloss does not require.",
+            "secondary_sense: Said of a person, \"sensual\" most often suggests sexual appeal or lustfulness, which is narrower and more charged than the gloss's general savoring of taste, touch, sound and beauty. The gloss's sense is real but secondary in everyday use. -> hedonistic",
+            "secondary_sense: The recorded usual sense matches the gloss, but said of a person the bare word 'sensual' most often suggests sexual appeal or lust, which the gloss does not mention. The gloss covers taste, sound and beauty too, so most readers would take the word otherwise. -> sensory hedonist"
+          ]
+        },
+        {
+          "n": "40",
+          "label": "Shunning",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "cliquish",
+            "ostracizing"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'shunning' usually means keeping others at a distance or avoiding them, which is milder than the gloss's active cutting off, snubbing and expelling of people they dislike. 'Cliquish' more often describes someone who shuts outsiders out of their group. -> cliquish",
+            "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, which is milder than the gloss's deliberate, hostile exclusion of people they dislike. The exclusion sense is real but secondary. -> cliquish",
+            "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, not the active, deliberate cutting-off and snubbing of disliked people that the gloss describes. 'Ostracizing' names that active exclusion directly. -> ostracizing"
+          ]
+        },
+        {
+          "n": "43",
+          "label": "sneering",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "not_a_sense",
+          "votes": [
+            "not_a_sense",
+            "not_a_sense",
+            "not_a_sense"
+          ],
+          "proposals": [
+            "cynical"
+          ],
+          "reasons": [
+            "not_a_sense: Said of a person, 'sneering' describes a manner of contempt or a mocking expression, not a settled habit of distrusting others' motives. The gloss's sense of assuming bad motives in everyone is not something the bare label carries. -> cynical",
+            "not_a_sense: Said of a person, 'sneering' describes a scornful or mocking manner, not a settled habit of assuming bad motives and refusing to take people at face value. The gloss's core trait is cynicism about motives, which the label does not carry. -> cynical",
+            "not_a_sense: Said of a person, \"sneering\" means showing contempt in manner or expression. It does not mean habitually assuming bad motives and distrusting everyone's sincerity, which is the trait the gloss describes. -> cynical"
+          ]
+        },
+        {
+          "n": "45",
+          "label": "spineless",
+          "mark": "duplicate between them",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "fits"
+          ],
+          "proposals": [
+            "meek"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'spineless' usually means cowardly or lacking courage, not the meek, passive acceptance of insults described in the gloss. That passive sense is only a secondary one, so most readers would take it differently. -> meek",
+            "secondary_sense: Said of a person, 'spineless' usually means cowardly or weak-willed, so a reader would hear general timidity rather than specifically failing to answer insults with anger. The gloss's trait of meekly accepting provocation is a narrower behaviour that the label only loosely covers. -> meek",
+            "fits: Said of a person, 'spineless' most commonly means lacking courage or resolve and being easily pushed around, which covers meekly taking insults without standing up for oneself. The gloss is narrower, focusing on not responding with anger, but it describes the same lack of backbone."
+          ]
+        }
+      ]
+    },
+    "without the borderline rows (flashy, self-justifying)": {
+      "table": {
+        "not_fit|not_fit": 5,
+        "not_fit|fit": 2,
+        "not_fit|no_answer": 0,
+        "fit|not_fit": 10,
+        "fit|fit": 31,
+        "fit|no_answer": 0
+      },
+      "n": 48,
+      "flag_precision": 0.333,
+      "flag_recall": 0.714,
+      "agreement": 0.75,
+      "disagreements": [
+        {
+          "n": "3",
+          "label": "Comfort-seeking",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "dependent",
+            "needy"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss's sense of leaning on others for reassurance and being looked after is only the second sense. -> dependent",
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss describes emotional dependence, wanting others to soothe and look after you, which is only the second sense. -> dependent",
+            "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which the recorded senses rank first. The gloss describes constantly seeking emotional support and being looked after, a sense that comes second. -> needy"
+          ]
+        },
+        {
+          "n": "11",
+          "label": "headstrong",
+          "mark": "duplicate (of independent, taken to vice levels)",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "not_a_sense",
+          "votes": [
+            "not_a_sense",
+            "secondary_sense",
+            "not_a_sense"
+          ],
+          "proposals": [
+            "inconsiderate"
+          ],
+          "reasons": [
+            "not_a_sense: Said of a person, \"headstrong\" means stubborn and resistant to advice or control, or rash. It does not carry the idea of disregarding others' wishes as if they did not matter. -> inconsiderate",
+            "secondary_sense: Said of a person, \"headstrong\" usually means stubborn or unwilling to be controlled, which is a different emphasis from the callous disregard for others' wishes the gloss describes. The label can carry that sense only as a secondary reading. -> inconsiderate",
+            "not_a_sense: Said of a person, 'headstrong' usually means obstinate and set on its own way, not thoughtlessly disregarding others. The gloss's idea of having no regard for others' wishes is not something the word carries. -> inconsiderate"
+          ]
+        },
+        {
+          "n": "13",
+          "label": "ill-timed",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "fits",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "habitually picks bad moments",
+            "often mistimes things"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'ill-timed' is mostly applied to a remark, visit or action that is badly timed, not to someone who habitually picks bad moments, so the trait sense is secondary. No single word clearly carries the habitual trait, so a short phrase is given. -> habitually picks bad moments",
+            "fits: Said of a person, 'ill-timed' most naturally means someone who tends to speak or act at inopportune moments, which is the trait the gloss describes.",
+            "secondary_sense: Said of a person, \"ill-timed\" mostly describes a single remark or action that was badly timed, not a lasting habit. The habitual sense is possible but secondary, so a bare label would likely be read as one bad moment. -> often mistimes things"
+          ]
+        },
+        {
+          "n": "14",
+          "label": "inhibited",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "repressed"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, \"inhibited\" most often means shy or reserved in manner. The emotional-repression sense in the gloss is real but secondary, so most readers would take the bare label as shyness. -> repressed",
+            "secondary_sense: Said of a person, 'inhibited' most often means shy or reserved in manner, not the deep emotional suppression and self-denial the gloss describes. That sense appears only as a secondary one. -> repressed",
+            "secondary_sense: Said of a person, 'inhibited' most often means shy or self-conscious, not habitually suppressing feelings and denying oneself pleasure. The emotional-repression sense is real but comes second. -> repressed"
+          ]
+        },
+        {
+          "n": "25",
+          "label": "opportunistic",
+          "mark": "? seems like an odd sense of the word. The definition is \"beureucratically opportunistic\"",
+          "should": "not_fit",
+          "got": "fit",
+          "verdict": "fits",
+          "votes": [
+            "fits",
+            "fits",
+            "fits"
+          ],
+          "proposals": [],
+          "reasons": [
+            "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on officials and rules, but it is the same trait.",
+            "fits: Said of a person, 'opportunistic' most often means ready to exploit situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on bending to officials and rules, but it is still the same trait.",
+            "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for one's own benefit without scruples, which is the trait the gloss describes: bending to whatever currently serves one best. The gloss is narrower, focusing on officials and rules, but it is the same trait."
+          ]
+        },
+        {
+          "n": "30",
+          "label": "sanctimonious",
+          "mark": "? seems like an od sense of the word",
+          "should": "not_fit",
+          "got": "fit",
+          "verdict": "fits",
+          "votes": [
+            "fits",
+            "fits",
+            "secondary_sense"
+          ],
+          "proposals": [],
+          "reasons": [
+            "fits: The gloss centres on moralizing while sure of one's own rectitude, which is the usual sense of 'sanctimonious' said of a person. The added bluntness and indifference to hurt are extra detail rather than a different trait.",
+            "fits: The gloss's core trait is self-righteous moralizing, sure of one's own virtue, and that is the usual sense of 'sanctimonious' said of a person. The gloss's added bluntness and indifference to hurt are extra detail rather than a different trait.",
+            "secondary_sense: Said of a person, \"sanctimonious\" usually means self-righteously moralizing or feigning virtue, which covers only part of the gloss. The gloss's core is blunt, hurtful truth-telling with indifference to the hurt, which the label does not convey. -> tactless"
+          ]
+        },
+        {
+          "n": "31",
+          "label": "self-assertive",
+          "mark": "duplicate, (but not of anything in the list you offered)",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "obstinate",
+            "defensive"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, a fairly positive trait. The gloss describes stubborn refusal to yield or admit fault, which is a secondary and more negative reading. -> obstinate",
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to admit fault or resisting criticism. The gloss's sense is a secondary, more negative reading of the word. -> defensive",
+            "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to yield or to admit fault. The gloss's stubborn refusal to accept correction is a secondary, more aggressive reading that most readers would not take from the bare label. -> obstinate"
+          ]
+        },
+        {
+          "n": "32",
+          "label": "self-controlled",
+          "mark": "trait, or possibly a duplicate for something you didn't offer",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "temperate"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'self-controlled' most often means restrained and not acting on impulse, which is broader than the gloss's specific moderation of bodily pleasures and appetite. 'Temperate' is the word whose usual personal sense is moderation in appetites, especially food and drink. -> temperate",
+            "secondary_sense: Said of a person, 'self-controlled' usually means restrained and calm in general, not specifically moderate enjoyment of bodily pleasures, though that sense can be carried. 'Temperate' is said of people most often for moderation in eating, drinking and other appetites. -> temperate",
+            "secondary_sense: \"Self-controlled\" usually means calm and not acting on impulse in general, not moderation in bodily pleasures and appetites, which is the trait the gloss describes. \"Temperate\" is the word that most readily means moderate in eating, drinking and other pleasures. -> temperate"
+          ]
+        },
+        {
+          "n": "38",
+          "label": "sensual",
+          "mark": "duplicate of hedonistic",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "fits",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "hedonistic",
+            "sensory hedonist"
+          ],
+          "reasons": [
+            "fits: The label's usual sense said of a person is being devoted to bodily pleasures and sensory experience, which matches the gloss's active pursuit of taste, touch, sound and beauty. Its sexual overtone is a secondary connotation the gloss does not require.",
+            "secondary_sense: Said of a person, \"sensual\" most often suggests sexual appeal or lustfulness, which is narrower and more charged than the gloss's general savoring of taste, touch, sound and beauty. The gloss's sense is real but secondary in everyday use. -> hedonistic",
+            "secondary_sense: The recorded usual sense matches the gloss, but said of a person the bare word 'sensual' most often suggests sexual appeal or lust, which the gloss does not mention. The gloss covers taste, sound and beauty too, so most readers would take the word otherwise. -> sensory hedonist"
+          ]
+        },
+        {
+          "n": "40",
+          "label": "Shunning",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "secondary_sense"
+          ],
+          "proposals": [
+            "cliquish",
+            "ostracizing"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'shunning' usually means keeping others at a distance or avoiding them, which is milder than the gloss's active cutting off, snubbing and expelling of people they dislike. 'Cliquish' more often describes someone who shuts outsiders out of their group. -> cliquish",
+            "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, which is milder than the gloss's deliberate, hostile exclusion of people they dislike. The exclusion sense is real but secondary. -> cliquish",
+            "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, not the active, deliberate cutting-off and snubbing of disliked people that the gloss describes. 'Ostracizing' names that active exclusion directly. -> ostracizing"
+          ]
+        },
+        {
+          "n": "43",
+          "label": "sneering",
+          "mark": "trait",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "not_a_sense",
+          "votes": [
+            "not_a_sense",
+            "not_a_sense",
+            "not_a_sense"
+          ],
+          "proposals": [
+            "cynical"
+          ],
+          "reasons": [
+            "not_a_sense: Said of a person, 'sneering' describes a manner of contempt or a mocking expression, not a settled habit of distrusting others' motives. The gloss's sense of assuming bad motives in everyone is not something the bare label carries. -> cynical",
+            "not_a_sense: Said of a person, 'sneering' describes a scornful or mocking manner, not a settled habit of assuming bad motives and refusing to take people at face value. The gloss's core trait is cynicism about motives, which the label does not carry. -> cynical",
+            "not_a_sense: Said of a person, \"sneering\" means showing contempt in manner or expression. It does not mean habitually assuming bad motives and distrusting everyone's sincerity, which is the trait the gloss describes. -> cynical"
+          ]
+        },
+        {
+          "n": "45",
+          "label": "spineless",
+          "mark": "duplicate between them",
+          "should": "fit",
+          "got": "not_fit",
+          "verdict": "secondary_sense",
+          "votes": [
+            "secondary_sense",
+            "secondary_sense",
+            "fits"
+          ],
+          "proposals": [
+            "meek"
+          ],
+          "reasons": [
+            "secondary_sense: Said of a person, 'spineless' usually means cowardly or lacking courage, not the meek, passive acceptance of insults described in the gloss. That passive sense is only a secondary one, so most readers would take it differently. -> meek",
+            "secondary_sense: Said of a person, 'spineless' usually means cowardly or weak-willed, so a reader would hear general timidity rather than specifically failing to answer insults with anger. The gloss's trait of meekly accepting provocation is a narrower behaviour that the label only loosely covers. -> meek",
+            "fits: Said of a person, 'spineless' most commonly means lacking courage or resolve and being easily pushed around, which covers meekly taking insults without standing up for oneself. The gloss is narrower, focusing on not responding with anger, but it describes the same lack of backbone."
+          ]
+        }
+      ]
+    }
+  },
+  "screen_effect": {
+    "n_with_cosine": 50,
+    "median_cos_usual": {
+      "should_not_fit": 0.44,
+      "should_fit": 0.572
+    },
+    "median_cos_max": {
+      "should_not_fit": 0.534,
+      "should_fit": 0.607
+    },
+    "floors": [
+      {
+        "floor": 0.5,
+        "settled_without_call": 35,
+        "of_them_marked_odd": 4
+      },
+      {
+        "floor": 0.6,
+        "settled_without_call": 20,
+        "of_them_marked_odd": 2
+      },
+      {
+        "floor": 0.7,
+        "settled_without_call": 2,
+        "of_them_marked_odd": 0
+      },
+      {
+        "floor": 0.8,
+        "settled_without_call": 0,
+        "of_them_marked_odd": 0
+      }
+    ]
+  },
+  "cost_usd_on_record": 0.0349,
+  "decisions": [
+    {
+      "id": "0405ab2639ce6d9c",
+      "label": "Blindly hopeful",
+      "gloss": "This means expecting everything to turn out well regardless of evidence, ignoring risks and so failing to prepare for trouble.",
+      "stem": "blindly_hopeful",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "hopes without regard to evidence or risk",
+          "is naively optimistic about how things will turn out",
+          "is unable to see and yet hopeful (bodily blindness)"
+        ],
+        "usual_sense": "hopes without regard to evidence or risk"
+      },
+      "cos_usual": 0.631544,
+      "cos_max": 0.631544,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'blindly hopeful' usually means hoping without regard to evidence or risk, which is the trait the gloss describes. The bodily-blindness reading is a minor, literal sense.",
+        "fits: Said of a person, 'blindly hopeful' most naturally means hoping without regard to evidence or risk, which is the trait the gloss describes. The bodily-blindness reading is possible but far less common in this pairing.",
+        "fits: Said of a person, 'blindly hopeful' most commonly means hoping without regard to evidence or risk, which is the trait the gloss describes. The recorded senses agree on this, with the bodily-blindness sense being a minor literal reading."
+      ]
+    },
+    {
+      "id": "7474be30593802c2",
+      "label": "brazen",
+      "gloss": "This means feeling no shame at all, even when committing disgraceful acts, and being unbothered by one's own disgrace.",
+      "stem": "brazen",
+      "context": {
+        "dictionary_senses": [
+          "unrestrained by convention or propriety",
+          "made of or resembling brass (as in color or hardness)"
+        ],
+        "recorded_senses": [
+          "bold and shameless, flouting propriety openly",
+          "unembarrassed and forward in manner"
+        ],
+        "usual_sense": "bold and shameless, flouting propriety openly"
+      },
+      "cos_usual": 0.621903,
+      "cos_max": 0.621903,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'brazen' usually means bold and shameless, showing no embarrassment about improper conduct. That is the same trait the gloss describes, though the gloss stresses the inner absence of shame more than the outward boldness.",
+        "fits: Said of a person, 'brazen' most commonly means bold and shameless, openly flouting propriety, which matches the gloss's lack of shame and unbothered attitude toward disgrace. The gloss is narrower but describes the same trait.",
+        "fits: Said of a person, 'brazen' usually means bold and shameless, showing no embarrassment about wrongdoing. The gloss describes that same trait of feeling no shame, even about disgrace."
+      ]
+    },
+    {
+      "id": "45cd7ad24da30fcf",
+      "label": "Comfort-seeking",
+      "gloss": "This means constantly seeking comfort, support and protection from others, wanting to be looked after when troubled.",
+      "stem": "comfort_seeking",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "prefers ease and avoids discomfort or hardship",
+          "seeks emotional reassurance or being soothed"
+        ],
+        "usual_sense": "prefers ease and avoids discomfort or hardship"
+      },
+      "cos_usual": 0.462539,
+      "cos_max": 0.673517,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "dependent",
+          "stem": "dependent",
+          "support": 2
+        },
+        {
+          "label": "needy",
+          "stem": "needy",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss's sense of leaning on others for reassurance and being looked after is only the second sense. -> dependent",
+        "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which is the first recorded sense. The gloss describes emotional dependence, wanting others to soothe and look after you, which is only the second sense. -> dependent",
+        "secondary_sense: Said of a person, 'comfort-seeking' usually means preferring ease and avoiding hardship, which the recorded senses rank first. The gloss describes constantly seeking emotional support and being looked after, a sense that comes second. -> needy"
+      ]
+    },
+    {
+      "id": "815549635dfb17e7",
+      "label": "complacent",
+      "gloss": "This means caring so little for honor that one declines even the recognition one fairly deserves.",
+      "stem": "complacent",
+      "context": {
+        "dictionary_senses": [
+          "contented to a fault with oneself or one's actions"
+        ],
+        "recorded_senses": [
+          "satisfied with yourself, not seeing problems with yourself or your work",
+          "calm or untroubled in a way that may be unwarranted"
+        ],
+        "usual_sense": "satisfied with yourself, not seeing problems with yourself or your work"
+      },
+      "cos_usual": 0.293897,
+      "cos_max": 0.335843,
+      "decision": "relabel",
+      "verdict": "not_a_sense",
+      "votes": [
+        "not_a_sense",
+        "not_a_sense",
+        "not_a_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "self-effacing",
+          "stem": "self_effacing",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "not_a_sense: Said of a person, 'complacent' means self-satisfied and blind to one's own faults, not indifferent to honor or declining recognition. The gloss describes a self-effacing disregard for deserved credit, which the label doesn't carry. -> self-effacing",
+        "not_a_sense: Said of a person, \"complacent\" means smugly satisfied with oneself and blind to one's faults, not indifferent to honor or turning down deserved recognition. The gloss's sense does not appear in ordinary usage. -> self-effacing",
+        "not_a_sense: Said of a person, \"complacent\" means smugly satisfied with oneself, not refusing honors one deserves out of indifference to recognition. The gloss describes a modest, attention-avoiding character, which the label doesn't carry. -> self-effacing"
+      ]
+    },
+    {
+      "id": "4cf5a47f5cf2ec0c",
+      "label": "compliant",
+      "gloss": "This means willingly following rules and others' direction, with little need for independence and happy to let others decide.",
+      "stem": "compliant",
+      "context": {
+        "dictionary_senses": [
+          "inclined to comply"
+        ],
+        "recorded_senses": [
+          "you obey rules and requests readily",
+          "you are docile or submissive in manner",
+          "you conform to standards or requirements"
+        ],
+        "usual_sense": "you obey rules and requests readily"
+      },
+      "cos_usual": 0.641679,
+      "cos_max": 0.641679,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"compliant\" most often means readily obeying rules and requests, which is the core of the gloss: willingly following rules and others' direction. The extra notes about little need for independence fit the same deferential trait.",
+        "fits: Said of a person, 'compliant' most often means readily obeying rules and requests, which is the core of the gloss: willingly following rules and others' direction. The added points about little need for independence and letting others decide are a fuller description of the same deferential trait.",
+        "fits: Said of a person, 'compliant' most commonly means readily going along with rules and others' requests, which is the core of the gloss. The added deference and reliance on others is a narrower, more vivid version of that same trait."
+      ]
+    },
+    {
+      "id": "e28a5ae1a78ebe3f",
+      "label": "conflict averse",
+      "gloss": "This means avoiding confrontation and fights, letting disputes pass rather than pressing them forcefully against others.",
+      "stem": "conflict_averse",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "you tend to avoid or back away from disagreements and confrontation",
+          "you have a disposition or character trait of disliking conflict",
+          "you are the kind of person who prefers harmony and peace over standing your ground"
+        ],
+        "usual_sense": "you tend to avoid or back away from disagreements and confrontation"
+      },
+      "cos_usual": 0.688065,
+      "cos_max": 0.688065,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: \"Conflict averse\" said of a person means they avoid disagreement and confrontation, which is exactly what the gloss describes: letting disputes pass rather than pressing them.",
+        "fits: \"Conflict averse\" said of a person usually means avoiding confrontation and disputes, which is exactly what the gloss describes.",
+        "fits: Said of a person, \"conflict averse\" most commonly means avoiding confrontation and disputes, which is exactly what the gloss describes."
+      ]
+    },
+    {
+      "id": "95df6bf64ecc4c37",
+      "label": "evasive",
+      "gloss": "This means dodging questions about one's errors and avoiding any admission of fault even when the evidence is plain.",
+      "stem": "evasive",
+      "context": {
+        "dictionary_senses": [
+          "deliberately vague or ambiguous",
+          "avoiding or escaping from difficulty or danger especially enemy fire"
+        ],
+        "recorded_senses": [
+          "you tend to avoid giving direct answers or committing yourself",
+          "you are skilled at escaping or getting away from things",
+          "you are evasive in manner or character, habitually elusive"
+        ],
+        "usual_sense": "you tend to avoid giving direct answers or committing yourself"
+      },
+      "cos_usual": 0.54478,
+      "cos_max": 0.54478,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"evasive\" usually means avoiding direct answers or committing oneself, and the gloss describes that same habit, narrowed to dodging questions about one's own mistakes.",
+        "fits: Said of a person, 'evasive' usually means avoiding direct answers or commitments, and the gloss describes that same trait, applied to dodging questions and refusing to admit fault. The gloss is narrower but names the same behaviour.",
+        "fits: Said of a person, \"evasive\" most commonly means dodging direct questions and avoiding commitment. The gloss describes that same trait, narrowed to dodging questions about one's own errors."
+      ]
+    },
+    {
+      "id": "b533186e5f305094",
+      "label": "fearless",
+      "gloss": "This means they pay little heed to danger or injury and readily take risks others would avoid.",
+      "stem": "fearless",
+      "context": {
+        "dictionary_senses": [
+          "oblivious of dangers or perils or calmly resolute in facing them",
+          "invulnerable to fear or intimidation"
+        ],
+        "recorded_senses": [
+          "bold, unafraid by temperament; does not shrink from danger",
+          "acts without hesitation when risk is involved",
+          "not frightened in the present situation"
+        ],
+        "usual_sense": "bold, unafraid by temperament; does not shrink from danger"
+      },
+      "cos_usual": 0.498789,
+      "cos_max": 0.532469,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"fearless\" usually means unafraid by temperament and not shrinking from danger, which covers the gloss's disregard for danger and willingness to take risks others avoid.",
+        "fits: Said of a person, \"fearless\" most often means bold and unafraid by temperament, not shrinking from danger or taking risks. The gloss describes that same trait, though with more emphasis on heedlessness.",
+        "fits: Said of a person, 'fearless' most commonly means not afraid of danger and willing to face risk, which matches the gloss's heedless risk-taking. Its first dictionary sense, 'oblivious of dangers,' also covers the gloss directly."
+      ]
+    },
+    {
+      "id": "4f4616643daed228",
+      "label": "flashy",
+      "gloss": "This means spending lavishly on display where it is out of place, merely to advertise one's wealth to others.",
+      "stem": "flashy",
+      "context": {
+        "dictionary_senses": [
+          "tastelessly showy",
+          "(used especially of clothes) marked by conspicuous display"
+        ],
+        "recorded_senses": [
+          "showy and conspicuous in manner or behaviour",
+          "dressing in bold, eye-catching clothes",
+          "showing off wealth or success"
+        ],
+        "usual_sense": "showy and conspicuous in manner or behaviour"
+      },
+      "cos_usual": 0.545861,
+      "cos_max": 0.691254,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "fits",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "ostentatious",
+          "stem": "ostentatious",
+          "support": 2
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"flashy\" most often means showy and conspicuous, which covers the gloss's lavish display meant to advertise wealth, though the gloss is narrower and centres on spending.",
+        "secondary_sense: Said of a person, 'flashy' usually means showy and eye-catching in dress or manner, and the wealth-advertising sense is secondary. The gloss describes lavish spending on display to show off wealth, which 'ostentatious' captures as its main sense. -> ostentatious",
+        "secondary_sense: Said of a person, \"flashy\" usually means showy or eye-catching in dress or manner, not specifically spending lavishly to advertise wealth. The gloss's wealth-display motive is a narrower, secondary reading. \"Ostentatious\" carries that sense as its usual meaning. -> ostentatious"
+      ]
+    },
+    {
+      "id": "f5c3c34e652eb2dd",
+      "label": "grasping",
+      "gloss": "This means craving honor beyond what is right and seeking it from unworthy sources.",
+      "stem": "grasping",
+      "context": {
+        "dictionary_senses": [
+          "immoderately desirous of acquiring e.g. wealth"
+        ],
+        "recorded_senses": [
+          "greedy, avidly acquisitive for possessions, money or power",
+          "physically gripping or clutching something tightly with the hands",
+          "eagerly trying to understand or take hold of ideas"
+        ],
+        "usual_sense": "greedy, avidly acquisitive for possessions, money or power"
+      },
+      "cos_usual": 0.430894,
+      "cos_max": 0.512096,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "honor-hungry",
+          "stem": "honor_hungry",
+          "support": 2
+        },
+        {
+          "label": "glory-hungry",
+          "stem": "glory_hungry",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'grasping' usually means greedy for money, possessions or power, not craving honor. The gloss's sense of desiring honor from unworthy sources is at most a loose extension of that greed sense. -> glory-hungry",
+        "secondary_sense: Said of a person, 'grasping' usually means greedy for money, possessions or power. Its dictionary wording 'e.g. wealth' leaves room for other objects of desire, but honor-seeking is not the usual sense. -> honor-hungry",
+        "secondary_sense: Said of a person, \"grasping\" usually means greedy for money, possessions or power, not for honor or status. The honor-seeking sense is possible but would be the secondary reading. -> honor-hungry"
+      ]
+    },
+    {
+      "id": "5d08a3c2b65adf0c",
+      "label": "headstrong",
+      "gloss": "This means acting with no regard for anyone else, ignoring what others want as if their wishes did not matter.",
+      "stem": "headstrong",
+      "context": {
+        "dictionary_senses": [
+          "habitually disposed to disobedience and opposition"
+        ],
+        "recorded_senses": [
+          "stubborn and unwilling to take advice or be controlled",
+          "impetuous, acting rashly and impulsively"
+        ],
+        "usual_sense": "stubborn and unwilling to take advice or be controlled"
+      },
+      "cos_usual": 0.476907,
+      "cos_max": 0.476907,
+      "decision": "relabel",
+      "verdict": "not_a_sense",
+      "votes": [
+        "not_a_sense",
+        "secondary_sense",
+        "not_a_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "inconsiderate",
+          "stem": "inconsiderate",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "not_a_sense: Said of a person, \"headstrong\" means stubborn and resistant to advice or control, or rash. It does not carry the idea of disregarding others' wishes as if they did not matter. -> inconsiderate",
+        "secondary_sense: Said of a person, \"headstrong\" usually means stubborn or unwilling to be controlled, which is a different emphasis from the callous disregard for others' wishes the gloss describes. The label can carry that sense only as a secondary reading. -> inconsiderate",
+        "not_a_sense: Said of a person, 'headstrong' usually means obstinate and set on its own way, not thoughtlessly disregarding others. The gloss's idea of having no regard for others' wishes is not something the word carries. -> inconsiderate"
+      ]
+    },
+    {
+      "id": "d47aa09a9e98f781",
+      "label": "honor-hungry",
+      "gloss": "This means craving honor beyond what is right and seeking it from unworthy sources.",
+      "stem": "honor_hungry",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "craves honor, respect and recognition from others",
+          "is eager for status or rank among peers"
+        ],
+        "usual_sense": "craves honor, respect and recognition from others"
+      },
+      "cos_usual": 0.680412,
+      "cos_max": 0.680412,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'honor-hungry' means craving honor, respect and recognition from others, which is the trait the gloss describes. The gloss's added judgments about excess and unworthy sources narrow the sense without changing the trait.",
+        "fits: Said of a person, \"honor-hungry\" most commonly means craving honor, respect and recognition from others, which is the trait the gloss describes. The gloss adds a moral judgment about excess and unworthy sources, but that narrows the same trait rather than changing it.",
+        "fits: Said of a person, 'honor-hungry' means craving honor, respect and recognition from others, which is the trait the gloss describes. The gloss adds a moral judgment and a note about unworthy sources, but it is still the same trait."
+      ]
+    },
+    {
+      "id": "2f295519dc4ad101",
+      "label": "ill-timed",
+      "gloss": "This means consistently choosing the wrong moment for things, annoying the people you deal with.",
+      "stem": "ill_timed",
+      "context": {
+        "dictionary_senses": [
+          "badly timed"
+        ],
+        "recorded_senses": [
+          "tends to speak or act at inopportune moments",
+          "your present situation or circumstances are badly timed"
+        ],
+        "usual_sense": "tends to speak or act at inopportune moments"
+      },
+      "cos_usual": 0.54107,
+      "cos_max": 0.54107,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "fits",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "habitually picks bad moments",
+          "stem": "habitually_picks_bad_moments",
+          "support": 1
+        },
+        {
+          "label": "often mistimes things",
+          "stem": "often_mistimes_things",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'ill-timed' is mostly applied to a remark, visit or action that is badly timed, not to someone who habitually picks bad moments, so the trait sense is secondary. No single word clearly carries the habitual trait, so a short phrase is given. -> habitually picks bad moments",
+        "fits: Said of a person, 'ill-timed' most naturally means someone who tends to speak or act at inopportune moments, which is the trait the gloss describes.",
+        "secondary_sense: Said of a person, \"ill-timed\" mostly describes a single remark or action that was badly timed, not a lasting habit. The habitual sense is possible but secondary, so a bare label would likely be read as one bad moment. -> often mistimes things"
+      ]
+    },
+    {
+      "id": "9f024c2d6dd205b6",
+      "label": "inhibited",
+      "gloss": "This means suppressing feelings and spontaneity so thoroughly that one denies oneself pleasure and cannot act freely.",
+      "stem": "inhibited",
+      "context": {
+        "dictionary_senses": [
+          "held back or restrained or prevented"
+        ],
+        "recorded_senses": [
+          "shy or reserved in manner",
+          "emotionally repressed, unable to express feelings",
+          "self-conscious or constrained in social situations"
+        ],
+        "usual_sense": "shy or reserved in manner"
+      },
+      "cos_usual": 0.334601,
+      "cos_max": 0.609695,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "repressed",
+          "stem": "repressed",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, \"inhibited\" most often means shy or reserved in manner. The emotional-repression sense in the gloss is real but secondary, so most readers would take the bare label as shyness. -> repressed",
+        "secondary_sense: Said of a person, 'inhibited' most often means shy or reserved in manner, not the deep emotional suppression and self-denial the gloss describes. That sense appears only as a secondary one. -> repressed",
+        "secondary_sense: Said of a person, 'inhibited' most often means shy or self-conscious, not habitually suppressing feelings and denying oneself pleasure. The emotional-repression sense is real but comes second. -> repressed"
+      ]
+    },
+    {
+      "id": "738b9126eea49091",
+      "label": "insincere",
+      "gloss": "This means presenting a false self to others, pretending to feelings and opinions one does not actually hold.",
+      "stem": "insincere",
+      "context": {
+        "dictionary_senses": [
+          "lacking sincerity"
+        ],
+        "recorded_senses": [
+          "you do not really mean or feel what you express",
+          "you are deceitful or hollow in your dealings with others"
+        ],
+        "usual_sense": "you do not really mean or feel what you express"
+      },
+      "cos_usual": 0.528271,
+      "cos_max": 0.528271,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'insincere' most commonly means not really meaning or feeling what they express, which covers pretending feelings and opinions one does not hold. The gloss's emphasis on a false self is a slightly broader version of that same trait.",
+        "fits: Said of a person, 'insincere' most often means their expressed feelings or opinions are not genuine, which is what the gloss describes as pretending to feelings and opinions one does not hold. The gloss's 'false self' wording is more vivid but covers the same trait.",
+        "fits: Said of a person, 'insincere' most often means they do not really mean or feel what they express, which is the same as pretending to feelings and opinions they do not hold. The gloss's 'false self' wording is a vivid version of that trait."
+      ]
+    },
+    {
+      "id": "a38ddc52f0e2e181",
+      "label": "irritating",
+      "gloss": "This means causing annoyance through clumsy remarks and embarrassing anecdotes, though without intending real harm.",
+      "stem": "irritating",
+      "context": {
+        "dictionary_senses": [
+          "causing irritation or annoyance",
+          "(used of physical stimuli) serving to stimulate or excite",
+          "causing physical discomfort"
+        ],
+        "recorded_senses": [
+          "be annoying to others in manner or behaviour",
+          "act as a physical irritant or cause skin irritation"
+        ],
+        "usual_sense": "be annoying to others in manner or behaviour"
+      },
+      "cos_usual": 0.589411,
+      "cos_max": 0.589411,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'irritating' most commonly means being annoying in manner or behaviour, which is the trait the gloss describes. The gloss is narrower, naming clumsy remarks and embarrassing anecdotes, but it is the same trait.",
+        "fits: Said of a person, 'irritating' most commonly means being annoying in manner or behaviour. The gloss describes that same trait, narrowed to clumsy remarks and embarrassing anecdotes.",
+        "fits: Said of a person, 'irritating' usually means being annoying in manner or behaviour, which is the trait the gloss describes: annoyance caused by clumsy remarks and embarrassing anecdotes, without real harm. The gloss is narrower but names the same sense."
+      ]
+    },
+    {
+      "id": "624e951a88ed0c11",
+      "label": "judicious",
+      "gloss": "This means weighing matters carefully from every side and refusing to leap to conclusions before examining the evidence.",
+      "stem": "judicious",
+      "context": {
+        "dictionary_senses": [
+          "marked by the exercise of good judgment or common sense in practical matters"
+        ],
+        "recorded_senses": [
+          "you have good judgment and make sound decisions",
+          "you weigh matters carefully and act with measured sense",
+          "you choose your words and actions with restraint"
+        ],
+        "usual_sense": "you have good judgment and make sound decisions"
+      },
+      "cos_usual": 0.442355,
+      "cos_max": 0.634756,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'judicious' usually means having sound judgment and making wise decisions. The gloss describes careful weighing of evidence before concluding, which is a narrower form of that same good judgment.",
+        "fits: Said of a person, 'judicious' usually means having sound judgment and making wise decisions. The gloss describes that same trait, showing up as careful weighing of all sides and not jumping to conclusions before examining the evidence.",
+        "fits: Said of a person, 'judicious' means having sound judgment, and the gloss describes that same judgment shown as careful weighing of evidence before concluding. The gloss is narrower but names the same trait."
+      ]
+    },
+    {
+      "id": "216c856a2d12ac4c",
+      "label": "justly proud",
+      "gloss": "This means judging oneself worthy of great honors and truly deserving them, neither inflating nor shrinking one's own worth.",
+      "stem": "justly_proud",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "has earned pride in its own accomplishments and feels that pride with good reason",
+          "is entitled to be unapologetically proud of its work and results"
+        ],
+        "usual_sense": "has earned pride in its own accomplishments and feels that pride with good reason"
+      },
+      "cos_usual": 0.553211,
+      "cos_max": 0.553211,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"justly proud\" most often means having earned pride through accomplishments and feeling it with good reason, which is the core of the gloss's idea of deserving one's own worth. The gloss adds a balance against inflating or shrinking that the label doesn't state, but it still describes the same trait.",
+        "fits: Said of a person, \"justly proud\" usually means someone whose pride is warranted by real accomplishment, which matches the gloss's sense of judging oneself worthy of honors and deserving them. The gloss's emphasis on calibrated self-regard is a narrower, more vivid version of that same trait.",
+        "fits: Said of a person, \"justly proud\" usually means having earned pride with good reason, which matches the gloss's core idea of rightly judging oneself deserving of honor. The gloss adds the point about not shrinking or inflating one's worth, but that is a narrower elaboration of the same trait."
+      ]
+    },
+    {
+      "id": "a17a85402b718da8",
+      "label": "know-it-all",
+      "gloss": "This means lecturing others on every subject and presuming to be an expert on matters one has only glanced at.",
+      "stem": "know_it_all",
+      "context": {
+        "dictionary_senses": [
+          "someone who thinks they know everything and refuses to accept advice or information from others (noun)"
+        ],
+        "recorded_senses": [
+          "acts as if they know everything and corrects others",
+          "arrogantly overconfident in their own opinions",
+          "very knowledgeable, the word read ironically or literally"
+        ],
+        "usual_sense": "acts as if they know everything and corrects others"
+      },
+      "cos_usual": 0.578848,
+      "cos_max": 0.578848,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'know-it-all' usually means someone who acts as if they know everything and corrects others, which is the trait the gloss describes: lecturing on every subject while claiming expertise they lack.",
+        "fits: Said of a person, 'know-it-all' usually means someone who acts as though they know everything and lectures or corrects others, which is the trait the gloss describes: lecturing on every subject and claiming expertise one only skims.",
+        "fits: Said of a person, 'know-it-all' usually means someone who acts as if they know everything and corrects others, which is the trait the gloss describes: lecturing on every subject and claiming expertise after only a glance."
+      ]
+    },
+    {
+      "id": "fd64e0053fcaf0e5",
+      "label": "lecherous",
+      "gloss": "This means being driven by intense, unrestrained sexual desire that one fails to control.",
+      "stem": "lecherous",
+      "context": {
+        "dictionary_senses": [
+          "given to excessive indulgence in sexual activity"
+        ],
+        "recorded_senses": [
+          "you have strong sexual desires and act on them without restraint",
+          "you are the kind of person who pursues sexual gratification aggressively or inappropriately",
+          "your manner or behavior is sexually forward or predatory"
+        ],
+        "usual_sense": "you have strong sexual desires and act on them without restraint"
+      },
+      "cos_usual": 0.675068,
+      "cos_max": 0.675068,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"lecherous\" most commonly means having strong sexual desire and acting on it without restraint, which is what the gloss describes. The dictionary sense of excessive indulgence matches as well.",
+        "fits: Said of a person, \"lecherous\" most commonly means having strong sexual desire and acting on it without restraint, which is the trait the gloss describes. Its connotation is somewhat more predatory than the gloss, but the core sense matches.",
+        "fits: Said of a person, 'lecherous' most commonly means being lustful and sexually unrestrained, which is the trait the gloss describes. Its predatory and leering connotations are narrower or more vivid than the gloss, but they still describe the same trait."
+      ]
+    },
+    {
+      "id": "7db4db8aa4b003c3",
+      "label": "loquacious",
+      "gloss": "This means talking nonstop, interrupting others and holding forth without letting anyone else speak.",
+      "stem": "loquacious",
+      "context": {
+        "dictionary_senses": [
+          "full of trivial conversation"
+        ],
+        "recorded_senses": [
+          "you talk a lot and are chatty",
+          "you give long, wordy replies"
+        ],
+        "usual_sense": "you talk a lot and are chatty"
+      },
+      "cos_usual": 0.505022,
+      "cos_max": 0.505022,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'loquacious' most commonly means talkative and chatty, which is the core of the gloss's trait of talking nonstop. The gloss adds interrupting and dominating conversation, which is narrower and more vivid but still the same trait.",
+        "fits: Said of a person, \"loquacious\" usually means talking a lot and being chatty, which is the core of the gloss: talking nonstop. The gloss adds interrupting and monopolizing, which is narrower, but it describes the same trait.",
+        "fits: Said of a person, \"loquacious\" usually means talkative and chatty, which is the core of the gloss's talking nonstop. The gloss adds interrupting and dominating, a narrower and more vivid form of the same trait."
+      ]
+    },
+    {
+      "id": "6c1c8ecc0e712e12",
+      "label": "Low-libido",
+      "gloss": "This means having little interest in sex, showing little drive toward sexual pursuit or physical intimacy.",
+      "stem": "low_libido",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "has little sexual desire",
+          "currently lacks sex drive, from tiredness, stress or illness",
+          "has a medical or hormonal cause for reduced desire"
+        ],
+        "usual_sense": "has little sexual desire"
+      },
+      "cos_usual": 0.751157,
+      "cos_max": 0.751157,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"low-libido\" most commonly means having little sexual desire, which is exactly what the gloss describes.",
+        "fits: Said of a person, \"low-libido\" most commonly means having little sexual desire, which is the trait the gloss describes. It is a compound adjective, but its usual sense matches the gloss.",
+        "fits: Said of a person, \"low-libido\" most commonly means having little sexual desire, which is the trait the gloss describes. The hyphenated form is a common adjective for that sense."
+      ]
+    },
+    {
+      "id": "a34b6916c54a49a4",
+      "label": "nitpicking",
+      "gloss": "This means fixating on trivial specifics and minor errors until the larger point gets lost.",
+      "stem": "nitpicking",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "you are fussy, finding fault with trivial details",
+          "you are currently picking at small points in this exchange"
+        ],
+        "usual_sense": "you are fussy, finding fault with trivial details"
+      },
+      "cos_usual": 0.612313,
+      "cos_max": 0.612313,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"nitpicking\" most commonly means being fussy and finding fault with trivial details, which is the trait the gloss describes. The gloss adds the detail that the focus on minutiae obscures the larger point, but that is still the same trait.",
+        "fits: Said of a person, \"nitpicking\" usually means being fussy and finding fault with trivial details, which is the trait the gloss describes. The gloss adds the detail that the larger point gets lost, but that is the same trait.",
+        "fits: Said of a person, 'nitpicking' most commonly means finding fault with trivial details, which is the trait the gloss describes. The gloss's added detail about losing the larger point is a narrower version of the same trait."
+      ]
+    },
+    {
+      "id": "abaa370b06c160ca",
+      "label": "obsequious",
+      "gloss": "This means praising everything, never disagreeing, and flattering people to avoid displeasure or to win advantage.",
+      "stem": "obsequious",
+      "context": {
+        "dictionary_senses": [
+          "attempting to win favor from influential people by flattery",
+          "attentive in an ingratiating or servile manner"
+        ],
+        "recorded_senses": [
+          "excessively eager to please and flatter others",
+          "servile and submissive toward those in authority"
+        ],
+        "usual_sense": "excessively eager to please and flatter others"
+      },
+      "cos_usual": 0.658466,
+      "cos_max": 0.658466,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'obsequious' means excessively eager to please, flatter and fawn over others, which matches the gloss's praising everything, never disagreeing and flattering to avoid displeasure or gain advantage.",
+        "fits: Said of a person, 'obsequious' means excessively eager to please, flatter and fawn, which matches the gloss about constant praise, never disagreeing and flattery to avoid displeasure or gain advantage.",
+        "fits: Said of a person, 'obsequious' means excessively eager to please, flatter and fawn over others, which matches the gloss's flattering, never-disagreeing servility. The gloss's sense is the word's usual one."
+      ]
+    },
+    {
+      "id": "c48f4bad3da38f0a",
+      "label": "opportunistic",
+      "gloss": "This means angling toward officials and rules for personal gain, bending to whatever currently serves one best.",
+      "stem": "opportunistic",
+      "context": {
+        "dictionary_senses": [
+          "taking immediate advantage, often unethically, of any circumstance of possible benefit"
+        ],
+        "recorded_senses": [
+          "ready to exploit situations for your own benefit, especially without scruples",
+          "flexible and adaptive, able to make use of whatever circumstances offer",
+          "belonging to or acting like an opportunist, a person who pursues advantage over principle"
+        ],
+        "usual_sense": "ready to exploit situations for your own benefit, especially without scruples"
+      },
+      "cos_usual": 0.554581,
+      "cos_max": 0.578761,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on officials and rules, but it is the same trait.",
+        "fits: Said of a person, 'opportunistic' most often means ready to exploit situations for personal gain without scruples, which is the trait the gloss describes. The gloss is narrower, focusing on bending to officials and rules, but it is still the same trait.",
+        "fits: Said of a person, 'opportunistic' most commonly means exploiting situations for one's own benefit without scruples, which is the trait the gloss describes: bending to whatever currently serves one best. The gloss is narrower, focusing on officials and rules, but it is the same trait."
+      ]
+    },
+    {
+      "id": "fe5938ca86bda6b7",
+      "label": "Peaceable",
+      "gloss": "This means avoiding confrontation and fights, letting disputes pass rather than pressing them forcefully against others.",
+      "stem": "peaceable",
+      "context": {
+        "dictionary_senses": [
+          "inclined or disposed to peace",
+          "not disturbed by strife or turmoil or war",
+          "disposed to peace or of a peaceful nature"
+        ],
+        "recorded_senses": [
+          "you are a peace-loving person who avoids conflict and violence",
+          "you are calm and not inclined to quarrel or fight"
+        ],
+        "usual_sense": "you are a peace-loving person who avoids conflict and violence"
+      },
+      "cos_usual": 0.564101,
+      "cos_max": 0.574014,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'peaceable' means peace-loving and not quarrelsome, which is the trait the gloss describes: avoiding fights and letting disputes pass. The gloss is somewhat narrower, but it describes the same disposition.",
+        "fits: Said of a person, \"peaceable\" usually means peace-loving and not quarrelsome, which matches the gloss's avoidance of fights and of pressing disputes. The gloss is more specific about letting disputes pass, but it describes the same trait.",
+        "fits: Said of a person, 'peaceable' means peace-loving and not inclined to quarrel or fight, which covers the gloss's avoidance of confrontation and disputes. The gloss's detail about letting disputes pass is a narrower version of the same disposition."
+      ]
+    },
+    {
+      "id": "7c948022c5f6501f",
+      "label": "power-hungry",
+      "gloss": "This means craving authority and profit while looking down on ordinary people as beneath consideration.",
+      "stem": "power_hungry",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "craves power and control over others",
+          "eager to gain authority or high office",
+          "ruthless in pursuing influence at others' expense"
+        ],
+        "usual_sense": "craves power and control over others"
+      },
+      "cos_usual": 0.557291,
+      "cos_max": 0.557291,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'power-hungry' most commonly means craving power and control over others, which is the core of the gloss's craving for authority. The gloss adds profit-seeking and contempt for ordinary people, but these extend the same trait rather than replace it.",
+        "fits: Said of a person, \"power-hungry\" most commonly means craving power and control over others, which is the core of the gloss's trait of craving authority. The gloss's added notes on profit and looking down on ordinary people are extra detail rather than a different trait.",
+        "fits: Said of a person, 'power-hungry' most commonly means craving power and control over others, which is the core of the gloss's trait. The gloss adds profit and contempt for ordinary people, but those extras don't change the trait the label names."
+      ]
+    },
+    {
+      "id": "5dbb30d8f2cc5568",
+      "label": "rule-flouting",
+      "gloss": "This means testing and breaking rules and rejecting official limits just to see what lies beyond them.",
+      "stem": "rule_flouting",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "deliberately breaks or defies rules",
+          "disregards conventions and norms of conduct as a habit of character"
+        ],
+        "usual_sense": "deliberately breaks or defies rules"
+      },
+      "cos_usual": 0.550672,
+      "cos_max": 0.550672,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"rule-flouting\" most commonly means habitually breaking or defying rules, which is the core of the gloss. The gloss adds a curiosity motive about testing limits, but it still describes the same trait.",
+        "fits: Said of a person, \"rule-flouting\" usually means habitually breaking or defying rules, which is the trait the gloss describes. The gloss adds the motive of testing limits, but that narrows the same sense rather than changing it.",
+        "fits: Said of a person, 'rule-flouting' means habitually breaking or defying rules, which is the trait the gloss describes. The gloss adds a curiosity motive, which makes it narrower, but it is still the same trait."
+      ]
+    },
+    {
+      "id": "b7ff75894483f2e3",
+      "label": "ruminative",
+      "gloss": "This means parsing every gesture and motive so obsessively that one cannot act naturally or simply trust what is plainly seen.",
+      "stem": "ruminative",
+      "context": {
+        "dictionary_senses": [
+          "deeply or seriously thoughtful"
+        ],
+        "recorded_senses": [
+          "prone to slow, deep, reflective thinking as a trait",
+          "currently absorbed in thought or brooding over something"
+        ],
+        "usual_sense": "prone to slow, deep, reflective thinking as a trait"
+      },
+      "cos_usual": 0.347708,
+      "cos_max": 0.360131,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "reads hidden motives",
+          "stem": "reads_hidden_motives",
+          "support": 2
+        },
+        {
+          "label": "reads every gesture obsessively",
+          "stem": "reads_every_gesture_obsessively",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'ruminative' usually means reflective and thoughtful. The gloss's sense of obsessively dissecting motives until one cannot trust plain evidence is a secondary, narrower sense of 'ruminate'. -> reads hidden motives",
+        "secondary_sense: Said of a person, 'ruminative' usually means deeply reflective or thoughtful, not the obsessive over-reading of motives that stops someone acting or trusting what they see. The brooding sense is only a secondary reading. -> reads hidden motives",
+        "secondary_sense: Said of a person, \"ruminative\" usually means deeply reflective or thoughtful, not obsessively parsing others' motives to the point of being unable to act or trust what is seen. The brooding sense exists but is secondary. -> reads every gesture obsessively"
+      ]
+    },
+    {
+      "id": "ff917d456168ca01",
+      "label": "sanctimonious",
+      "gloss": "This means blurting out every hard truth and moralizing about it, sure of one's own rectitude and indifferent to the hurt it causes.",
+      "stem": "sanctimonious",
+      "context": {
+        "dictionary_senses": [
+          "excessively or hypocritically pious"
+        ],
+        "recorded_senses": [
+          "self-righteously moralizing toward others",
+          "pretending to be more virtuous than one is"
+        ],
+        "usual_sense": "self-righteously moralizing toward others"
+      },
+      "cos_usual": 0.628281,
+      "cos_max": 0.628281,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: The gloss centres on moralizing while sure of one's own rectitude, which is the usual sense of 'sanctimonious' said of a person. The added bluntness and indifference to hurt are extra detail rather than a different trait.",
+        "fits: The gloss's core trait is self-righteous moralizing, sure of one's own virtue, and that is the usual sense of 'sanctimonious' said of a person. The gloss's added bluntness and indifference to hurt are extra detail rather than a different trait.",
+        "secondary_sense: Said of a person, \"sanctimonious\" usually means self-righteously moralizing or feigning virtue, which covers only part of the gloss. The gloss's core is blunt, hurtful truth-telling with indifference to the hurt, which the label does not convey. -> tactless"
+      ]
+    },
+    {
+      "id": "ca4878460ad20e6d",
+      "label": "self-assertive",
+      "gloss": "This means refusing to yield, rarely admitting fault, and pushing back against criticism rather than accepting blame or correction.",
+      "stem": "self_assertive",
+      "context": {
+        "dictionary_senses": [
+          "aggressively self-assured",
+          "offensively self-assertive"
+        ],
+        "recorded_senses": [
+          "confidently states your own views and needs",
+          "pushes your opinions forcefully on others"
+        ],
+        "usual_sense": "confidently states your own views and needs"
+      },
+      "cos_usual": 0.337071,
+      "cos_max": 0.449463,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "obstinate",
+          "stem": "obstinate",
+          "support": 2
+        },
+        {
+          "label": "defensive",
+          "stem": "defensive",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, a fairly positive trait. The gloss describes stubborn refusal to yield or admit fault, which is a secondary and more negative reading. -> obstinate",
+        "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to admit fault or resisting criticism. The gloss's sense is a secondary, more negative reading of the word. -> defensive",
+        "secondary_sense: Said of a person, \"self-assertive\" usually means confidently stating one's own views and needs, not refusing to yield or to admit fault. The gloss's stubborn refusal to accept correction is a secondary, more aggressive reading that most readers would not take from the bare label. -> obstinate"
+      ]
+    },
+    {
+      "id": "14813483e37a714f",
+      "label": "self-controlled",
+      "gloss": "This means enjoying bodily pleasures in due measure and at proper times, never letting appetite rule one's choices.",
+      "stem": "self_controlled",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "restrained and calm, not acting on impulse",
+          "keeps emotions in check under pressure",
+          "disciplined in habits and conduct"
+        ],
+        "usual_sense": "restrained and calm, not acting on impulse"
+      },
+      "cos_usual": 0.459747,
+      "cos_max": 0.459747,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "temperate",
+          "stem": "temperate",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'self-controlled' most often means restrained and not acting on impulse, which is broader than the gloss's specific moderation of bodily pleasures and appetite. 'Temperate' is the word whose usual personal sense is moderation in appetites, especially food and drink. -> temperate",
+        "secondary_sense: Said of a person, 'self-controlled' usually means restrained and calm in general, not specifically moderate enjoyment of bodily pleasures, though that sense can be carried. 'Temperate' is said of people most often for moderation in eating, drinking and other appetites. -> temperate",
+        "secondary_sense: \"Self-controlled\" usually means calm and not acting on impulse in general, not moderation in bodily pleasures and appetites, which is the trait the gloss describes. \"Temperate\" is the word that most readily means moderate in eating, drinking and other pleasures. -> temperate"
+      ]
+    },
+    {
+      "id": "d2863fb953abaf4f",
+      "label": "Self-directed",
+      "gloss": "This means resisting restraint and coercion, insisting on acting by one's own choices, and wanting freedom from others' direction.",
+      "stem": "self_directed",
+      "context": {
+        "dictionary_senses": [
+          "(of persons) free from external control and constraint in e.g. action and judgment"
+        ],
+        "recorded_senses": [
+          "takes initiative and sets own direction without being told what to do",
+          "is independent and self-reliant, not dependent on others for guidance",
+          "governs own conduct by personal values rather than external authority"
+        ],
+        "usual_sense": "takes initiative and sets own direction without being told what to do"
+      },
+      "cos_usual": 0.439604,
+      "cos_max": 0.534071,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "Autonomous",
+          "stem": "autonomous",
+          "support": 1
+        },
+        {
+          "label": "freedom-loving",
+          "stem": "freedom_loving",
+          "support": 1
+        },
+        {
+          "label": "independent-minded",
+          "stem": "independent_minded",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'self-directed' usually means taking initiative and managing one's own work or learning without being told. The gloss's sense, resisting coercion and freedom from others' direction, is only a secondary reading the dictionary records. -> Autonomous",
+        "secondary_sense: Said of a person, 'self-directed' usually means taking initiative and working without being told what to do, which is only partly the gloss's trait. The gloss stresses resisting coercion and wanting freedom from others' direction, a more defiant love of liberty. -> freedom-loving",
+        "secondary_sense: Said of a person, \"self-directed\" most often means taking initiative and working without being told what to do. The gloss stresses resisting restraint and coercion and wanting freedom from others' direction, which is a narrower, more defiant sense that the usual reading doesn't carry. -> independent-minded"
+      ]
+    },
+    {
+      "id": "6dc8f26300171496",
+      "label": "self-disparaging",
+      "gloss": "This means running oneself down constantly, listing one's faults and expecting little of one's own work or worth.",
+      "stem": "self_disparaging",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "you belittle or run down yourself",
+          "you speak of your own worth or abilities self-deprecatingly"
+        ],
+        "usual_sense": "you belittle or run down yourself"
+      },
+      "cos_usual": 0.657752,
+      "cos_max": 0.657752,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'self-disparaging' means habitually belittling or running oneself down, which is the trait the gloss describes. The gloss adds detail about listing faults and low expectations, but it is the same trait.",
+        "fits: Said of a person, 'self-disparaging' most commonly means belittling or running down oneself, which is the trait the gloss describes: constant self-criticism and low expectations of one's own worth and work.",
+        "fits: Said of a person, \"self-disparaging\" means belittling or running down oneself, which is the trait the gloss describes: constant self-criticism and low expectations of one's own worth. The gloss is more vivid but names the same trait."
+      ]
+    },
+    {
+      "id": "849aa17775b1d0ef",
+      "label": "self-justifying",
+      "gloss": "This means hastily justifying oneself whenever criticized or blamed, guarding against any suggestion of fault, and bristling at challenge.",
+      "stem": "self_justifying",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "habitually defends or excuses your own conduct",
+          "rationalizes your own choices or beliefs to yourself"
+        ],
+        "usual_sense": "habitually defends or excuses your own conduct"
+      },
+      "cos_usual": 0.621225,
+      "cos_max": 0.621225,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the trait the gloss describes: quick self-defence when blamed, guarding against any hint of fault, and bristling at challenge.",
+        "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the trait the gloss describes: quick self-defense when criticized and bristling at challenge.",
+        "fits: Said of a person, \"self-justifying\" usually means habitually defending or excusing one's own conduct, which is the defensive reaction to criticism the gloss describes, including the bristling at challenge."
+      ]
+    },
+    {
+      "id": "ad577963ef803fb7",
+      "label": "self serving",
+      "gloss": "This means putting one's own interests first and refusing to pull one's weight when the group needs it.",
+      "stem": "self_serving",
+      "context": {
+        "dictionary_senses": [
+          "concerned chiefly or only with yourself and your advantage to the exclusion of others"
+        ],
+        "recorded_senses": [
+          "you act chiefly for your own benefit, not others'",
+          "your motives are selfish",
+          "you belong to or identify with those who prioritize their own interests"
+        ],
+        "usual_sense": "you act chiefly for your own benefit, not others'"
+      },
+      "cos_usual": 0.543548,
+      "cos_max": 0.561698,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"self-serving\" most commonly means acting chiefly for one's own benefit at others' expense, which is the trait the gloss describes. The gloss's added detail about shirking group duties is a narrower case of the same selfishness.",
+        "fits: Said of a person, \"self-serving\" most commonly means acting for one's own benefit at others' expense, which is the core of the gloss. The added point about refusing to pull one's weight is a narrower case of the same selfishness.",
+        "fits: Said of a person, \"self-serving\" usually means acting chiefly for one's own benefit at others' expense, which is the trait the gloss describes. The gloss adds shirking group duties, which is a narrower case of the same trait."
+      ]
+    },
+    {
+      "id": "b7792caf1151a88a",
+      "label": "sensible",
+      "gloss": "This means judging well what is right to do in the circumstances, weighing situations sensibly before acting on them.",
+      "stem": "sensible",
+      "context": {
+        "dictionary_senses": [
+          "showing reason or sound judgment",
+          "able to feel or perceive",
+          "readily perceived by the senses",
+          "aware intuitively or intellectually of something sensed"
+        ],
+        "recorded_senses": [
+          "be practical, level-headed and reasonable in judgment",
+          "be aware or conscious of things (archaic 'sensible of')"
+        ],
+        "usual_sense": "be practical, level-headed and reasonable in judgment"
+      },
+      "cos_usual": 0.572353,
+      "cos_max": 0.578526,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'sensible' most commonly means practical, level-headed and showing sound judgment, which matches the gloss about judging well what is right in the circumstances.",
+        "fits: Said of a person, 'sensible' most commonly means practical and level-headed in judgment, which is what the gloss describes: weighing circumstances well before acting.",
+        "fits: Said of a person, 'sensible' most commonly means practical, level-headed and showing good judgment, which matches the gloss about judging well what to do in the circumstances."
+      ]
+    },
+    {
+      "id": "d579f1c4117dd838",
+      "label": "sensual",
+      "gloss": "This means they actively seek out and savor sensory pleasures such as taste, touch, sound and beauty.",
+      "stem": "sensual",
+      "context": {
+        "dictionary_senses": [
+          "marked by the appetites and passions of the body",
+          "sexually exciting or gratifying"
+        ],
+        "recorded_senses": [
+          "devoted to or readily drawn to bodily pleasures and sensory experience",
+          "having a manner or bearing that expresses sensuality or physical appeal",
+          "responsive to sensory impressions; attuned to physical sensation"
+        ],
+        "usual_sense": "devoted to or readily drawn to bodily pleasures and sensory experience"
+      },
+      "cos_usual": 0.603632,
+      "cos_max": 0.603632,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "fits",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "hedonistic",
+          "stem": "hedonistic",
+          "support": 1
+        },
+        {
+          "label": "sensory hedonist",
+          "stem": "sensory_hedonist",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: The label's usual sense said of a person is being devoted to bodily pleasures and sensory experience, which matches the gloss's active pursuit of taste, touch, sound and beauty. Its sexual overtone is a secondary connotation the gloss does not require.",
+        "secondary_sense: Said of a person, \"sensual\" most often suggests sexual appeal or lustfulness, which is narrower and more charged than the gloss's general savoring of taste, touch, sound and beauty. The gloss's sense is real but secondary in everyday use. -> hedonistic",
+        "secondary_sense: The recorded usual sense matches the gloss, but said of a person the bare word 'sensual' most often suggests sexual appeal or lust, which the gloss does not mention. The gloss covers taste, sound and beauty too, so most readers would take the word otherwise. -> sensory hedonist"
+      ]
+    },
+    {
+      "id": "f3b415bf8228bd2a",
+      "label": "Sexually restrained",
+      "gloss": "This means keeping sexual conduct restrained and pure, holding desire within proper bounds.",
+      "stem": "sexually_restrained",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "holds back or moderates sexual desire and activity",
+          "reserved or modest in sexual talk and manner",
+          "abstinent or celibate"
+        ],
+        "usual_sense": "holds back or moderates sexual desire and activity"
+      },
+      "cos_usual": 0.67304,
+      "cos_max": 0.67304,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'sexually restrained' most commonly means holding back sexual desire and activity, which is the trait the gloss describes. The gloss's added notes of purity and propriety are a narrower moral shading of the same idea.",
+        "fits: Said of a person, \"sexually restrained\" most commonly means holding back or moderating sexual desire and activity, which is the trait the gloss describes, including the sense of keeping desire within proper bounds.",
+        "fits: Said of a person, 'sexually restrained' usually means holding back sexual desire and activity, which is what the gloss describes. The gloss adds a moral note about purity, but the core trait matches."
+      ]
+    },
+    {
+      "id": "a3498b946cd8ce9a",
+      "label": "Shunning",
+      "gloss": "This means they readily cut off, exclude or snub people they dislike, pushing them out of their circle.",
+      "stem": "shunning",
+      "context": {
+        "dictionary_senses": [
+          "avoid and stay away from deliberately (verb)",
+          "expel from a community or group (verb)",
+          "deliberately avoiding (noun)"
+        ],
+        "recorded_senses": [
+          "keeps others at a distance, avoiding people",
+          "is an excluding, cold person who cuts others off",
+          "belongs to a community that practises shunning, such as the Amish"
+        ],
+        "usual_sense": "keeps others at a distance, avoiding people"
+      },
+      "cos_usual": 0.428925,
+      "cos_max": 0.5861,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "cliquish",
+          "stem": "cliquish",
+          "support": 2
+        },
+        {
+          "label": "ostracizing",
+          "stem": "ostracizing",
+          "support": 1
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'shunning' usually means keeping others at a distance or avoiding them, which is milder than the gloss's active cutting off, snubbing and expelling of people they dislike. 'Cliquish' more often describes someone who shuts outsiders out of their group. -> cliquish",
+        "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, which is milder than the gloss's deliberate, hostile exclusion of people they dislike. The exclusion sense is real but secondary. -> cliquish",
+        "secondary_sense: Said of a person, 'shunning' most often means keeping others at a distance or avoiding them, not the active, deliberate cutting-off and snubbing of disliked people that the gloss describes. 'Ostracizing' names that active exclusion directly. -> ostracizing"
+      ]
+    },
+    {
+      "id": "ebad2b348b23601d",
+      "label": "slanderous",
+      "gloss": "This means habitually speaking maliciously and damagingly about others, often behind their backs.",
+      "stem": "slanderous",
+      "context": {
+        "dictionary_senses": [
+          "(used of statements) harmful and often untrue"
+        ],
+        "recorded_senses": [
+          "habitually spreads false, damaging spoken claims about others",
+          "is currently accused of having slandered someone"
+        ],
+        "usual_sense": "habitually spreads false, damaging spoken claims about others"
+      },
+      "cos_usual": 0.730167,
+      "cos_max": 0.730167,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'slanderous' usually means habitually spreading damaging talk about others, which is the trait the gloss describes. The gloss leaves out the falsity that slander implies, but it is close enough to count as the same trait.",
+        "fits: Said of a person, 'slanderous' most commonly means habitually spreading damaging spoken claims about others, which matches the gloss's malicious, habitual backbiting. The gloss does not require falsehood, but the trait it names is the same.",
+        "fits: Said of a person, 'slanderous' most commonly means someone who habitually spreads damaging spoken claims about others, which is the trait the gloss describes. The gloss omits the falsity element, but it describes the same habit."
+      ]
+    },
+    {
+      "id": "e17aaa96258135ad",
+      "label": "smug",
+      "gloss": "This means lecturing others on every subject and presuming to be an expert on matters one has only glanced at.",
+      "stem": "smug",
+      "context": {
+        "dictionary_senses": [
+          "marked by excessive complacency or self-satisfaction"
+        ],
+        "recorded_senses": [
+          "be self-satisfied and complacently pleased with oneself",
+          "wear a smirking, know-it-all expression",
+          "act superior and condescending toward others"
+        ],
+        "usual_sense": "be self-satisfied and complacently pleased with oneself"
+      },
+      "cos_usual": 0.33228,
+      "cos_max": 0.479032,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "secondary_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "know-it-all",
+          "stem": "know_it_all",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'smug' mainly means complacently self-satisfied, which is not the same as habitually lecturing on everything and posing as an expert. The gloss describes a know-it-all, a sense 'smug' carries only as a secondary meaning. -> know-it-all",
+        "secondary_sense: Said of a person, 'smug' usually means self-satisfied and complacently pleased with oneself, not habitually lecturing others or claiming expertise one lacks. The know-it-all sense is only a secondary reading. -> know-it-all",
+        "secondary_sense: Said of a person, 'smug' usually means self-satisfied and pleased with oneself. The gloss describes habitually lecturing others and posing as an expert, which is only a secondary sense of 'smug'. -> know-it-all"
+      ]
+    },
+    {
+      "id": "78e584fbb36ad6ef",
+      "label": "sneering",
+      "gloss": "This means assuming bad motives in everyone and dismissing sincere effort, so that nothing and no one is taken at face value.",
+      "stem": "sneering",
+      "context": {
+        "dictionary_senses": [
+          "expressive of contempt"
+        ],
+        "recorded_senses": [
+          "scornful, contemptuous in manner toward others",
+          "currently wearing a mocking, scornful expression"
+        ],
+        "usual_sense": "scornful, contemptuous in manner toward others"
+      },
+      "cos_usual": 0.380976,
+      "cos_max": 0.380976,
+      "decision": "relabel",
+      "verdict": "not_a_sense",
+      "votes": [
+        "not_a_sense",
+        "not_a_sense",
+        "not_a_sense"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "cynical",
+          "stem": "cynical",
+          "support": 3
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "not_a_sense: Said of a person, 'sneering' describes a manner of contempt or a mocking expression, not a settled habit of distrusting others' motives. The gloss's sense of assuming bad motives in everyone is not something the bare label carries. -> cynical",
+        "not_a_sense: Said of a person, 'sneering' describes a scornful or mocking manner, not a settled habit of assuming bad motives and refusing to take people at face value. The gloss's core trait is cynicism about motives, which the label does not carry. -> cynical",
+        "not_a_sense: Said of a person, \"sneering\" means showing contempt in manner or expression. It does not mean habitually assuming bad motives and distrusting everyone's sincerity, which is the trait the gloss describes. -> cynical"
+      ]
+    },
+    {
+      "id": "5836bfef5d77a4d9",
+      "label": "Soft on wrongdoing",
+      "gloss": "This means letting wrongdoing pass without consequence, so that mercy becomes a failure to hold people accountable.",
+      "stem": "soft_on_wrongdoing",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "is lenient toward wrongdoers and doesn't punish wrongdoing harshly",
+          "tends to excuse or overlook others' misdeeds"
+        ],
+        "usual_sense": "is lenient toward wrongdoers and doesn't punish wrongdoing harshly"
+      },
+      "cos_usual": 0.606539,
+      "cos_max": 0.606539,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"soft on wrongdoing\" usually means being lenient toward wrongdoers and not punishing them harshly, which is the trait the gloss describes, if more vividly. It is a phrase rather than a single word, but the label's most common sense matches.",
+        "fits: Said of a person, \"soft on wrongdoing\" usually means being lenient toward wrongdoers and not punishing them harshly, which is the trait the gloss describes: letting wrongdoing pass without consequence.",
+        "fits: Said of a person, \"soft on wrongdoing\" usually means being lenient toward wrongdoers and not punishing them harshly, which is the trait the gloss describes, including its critical edge about lost accountability."
+      ]
+    },
+    {
+      "id": "867828fb563a1a5e",
+      "label": "spineless",
+      "gloss": "This means failing to get angry even when anger is called for, meekly swallowing insults that should provoke a response.",
+      "stem": "spineless",
+      "context": {
+        "dictionary_senses": [
+          "lacking a backbone or spinal column",
+          "lacking spiny processes",
+          "lacking courage or vitality",
+          "lacking thorns"
+        ],
+        "recorded_senses": [
+          "cowardly, lacks courage",
+          "weak-willed, without resolve, easily pushed around"
+        ],
+        "usual_sense": "cowardly, lacks courage"
+      },
+      "cos_usual": 0.382412,
+      "cos_max": 0.462689,
+      "decision": "relabel",
+      "verdict": "secondary_sense",
+      "votes": [
+        "secondary_sense",
+        "secondary_sense",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [
+        {
+          "label": "meek",
+          "stem": "meek",
+          "support": 2
+        }
+      ],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "secondary_sense: Said of a person, 'spineless' usually means cowardly or lacking courage, not the meek, passive acceptance of insults described in the gloss. That passive sense is only a secondary one, so most readers would take it differently. -> meek",
+        "secondary_sense: Said of a person, 'spineless' usually means cowardly or weak-willed, so a reader would hear general timidity rather than specifically failing to answer insults with anger. The gloss's trait of meekly accepting provocation is a narrower behaviour that the label only loosely covers. -> meek",
+        "fits: Said of a person, 'spineless' most commonly means lacking courage or resolve and being easily pushed around, which covers meekly taking insults without standing up for oneself. The gloss is narrower, focusing on not responding with anger, but it describes the same lack of backbone."
+      ]
+    },
+    {
+      "id": "7df85abd4c5d1375",
+      "label": "timid with money",
+      "gloss": "This means refusing every financial chance, even sound ones, and leaving savings idle for fear of any loss.",
+      "stem": "timid_with_money",
+      "context": {
+        "dictionary_senses": [],
+        "recorded_senses": [
+          "reluctant to spend or risk money",
+          "anxious or fearful about financial matters"
+        ],
+        "usual_sense": "reluctant to spend or risk money"
+      },
+      "cos_usual": 0.635203,
+      "cos_max": 0.635203,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'timid with money' usually means fearful about spending or risking money, which is what the gloss describes: refusing even sound financial chances out of fear of loss. The label is a phrase, not a single word, but its usual sense matches.",
+        "fits: Said of a person, \"timid with money\" usually means being reluctant to spend or risk money, which is the trait the gloss describes: refusing financial chances and leaving savings idle out of fear of loss.",
+        "fits: Said of a person, 'timid with money' usually means reluctant to spend or risk money, which is the trait the gloss describes: refusing financial chances and leaving savings idle out of fear of loss."
+      ]
+    },
+    {
+      "id": "489799ed0c44e655",
+      "label": "two faced",
+      "gloss": "This means presenting a false self to others, pretending to feelings and opinions one does not actually hold.",
+      "stem": "two_faced",
+      "context": {
+        "dictionary_senses": [
+          "marked by deliberate deceptiveness especially by pretending one set of feelings and acting under the influence of another",
+          "having two faces — one looking to the future and one to the past"
+        ],
+        "recorded_senses": [
+          "deceitful or hypocritical in character; saying different things to different people",
+          "having two faces or faces on opposite sides (literal, rare)"
+        ],
+        "usual_sense": "deceitful or hypocritical in character; saying different things to different people"
+      },
+      "cos_usual": 0.541618,
+      "cos_max": 0.700455,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, \"two-faced\" usually means being deceitful, pretending one set of feelings or opinions while showing another to others, which is what the gloss describes. The gloss is a little narrower than the usual sense but names the same trait.",
+        "fits: Said of a person, 'two-faced' most commonly means deceitful or hypocritical, saying different things to different people. That is the same trait as the gloss's presenting a false self and pretending to opinions and feelings one does not hold.",
+        "fits: Said of a person, 'two-faced' most commonly means deceitful or hypocritical, pretending one set of feelings or opinions while holding another. The gloss describes that same trait."
+      ]
+    },
+    {
+      "id": "17c7a003d9795545",
+      "label": "tyrannical",
+      "gloss": "This means commanding others as subordinates, brooking no dissent, and driving a group by fear or sheer force of will.",
+      "stem": "tyrannical",
+      "context": {
+        "dictionary_senses": [
+          "marked by unjust severity or arbitrary behavior",
+          "characteristic of an absolute ruler or absolute rule"
+        ],
+        "recorded_senses": [
+          "you are domineering and oppressive toward those under you",
+          "you hold absolute, unchecked power over others"
+        ],
+        "usual_sense": "you are domineering and oppressive toward those under you"
+      },
+      "cos_usual": 0.611628,
+      "cos_max": 0.611628,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'tyrannical' most commonly means domineering and oppressive toward those under one's power, which is the trait the gloss describes: commanding subordinates, allowing no dissent, and driving a group by fear or force.",
+        "fits: Said of a person, 'tyrannical' most commonly means domineering and oppressive toward those under one's command, which matches the gloss's picture of driving others by fear and allowing no dissent.",
+        "fits: Said of a person, 'tyrannical' most often means domineering and oppressive toward those under one's authority, which is the trait the gloss describes: commanding subordinates, allowing no dissent, and driving a group by fear or force."
+      ]
+    },
+    {
+      "id": "9bec0348d8a227b7",
+      "label": "uncouth",
+      "gloss": "This means behaving coarsely and loudly in company, ignorant of or indifferent to good manners.",
+      "stem": "uncouth",
+      "context": {
+        "dictionary_senses": [
+          "lacking refinement or cultivation or taste"
+        ],
+        "recorded_senses": [
+          "has coarse, unrefined manners",
+          "speaks crudely and bluntly"
+        ],
+        "usual_sense": "has coarse, unrefined manners"
+      },
+      "cos_usual": 0.670023,
+      "cos_max": 0.670023,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'uncouth' most commonly means having coarse, unrefined manners, which is the trait the gloss describes. The gloss's mention of loudness is an added detail, not a different trait.",
+        "fits: Said of a person, \"uncouth\" most commonly means having coarse, unrefined manners, which is the trait the gloss describes. The gloss adds loudness and indifference to manners, but that is the same trait stated more vividly.",
+        "fits: Said of a person, \"uncouth\" most commonly means lacking refined manners and polish, which is the trait the gloss describes. The gloss adds loudness, but it is the same trait in a more vivid form."
+      ]
+    },
+    {
+      "id": "36ee6c1e91210c41",
+      "label": "undignified",
+      "gloss": "This means lacking poise and composure in company and not minding looking foolish or ridiculous.",
+      "stem": "undignified",
+      "context": {
+        "dictionary_senses": [
+          "lacking dignity"
+        ],
+        "recorded_senses": [
+          "your behavior or manner is lacking in dignity or composure",
+          "your appearance or bearing is ungraceful or unbecoming",
+          "you are a person who acts without dignity"
+        ],
+        "usual_sense": "your behavior or manner is lacking in dignity or composure"
+      },
+      "cos_usual": 0.671556,
+      "cos_max": 0.671556,
+      "decision": "fits",
+      "verdict": "fits",
+      "votes": [
+        "fits",
+        "fits",
+        "fits"
+      ],
+      "n_answered": 3,
+      "proposals": [],
+      "dropped_proposals": [],
+      "decided_by": "model",
+      "reasons": [
+        "fits: Said of a person, 'undignified' most often means behaving in a way that lacks poise or dignity, which matches the gloss's core of lacking composure in company. The gloss's extra point about not minding looking foolish is a narrower shade of the same trait.",
+        "fits: Said of a person, 'undignified' most often means behaving or bearing oneself without dignity or composure, which matches the gloss's lack of poise and composure in company. The gloss's point about not minding looking foolish is a narrower shade of that same trait.",
+        "fits: Said of a person, 'undignified' most commonly means behaving or carrying oneself without dignity or composure, which matches the gloss's lack of poise in company. The gloss's added point about not minding looking foolish is a narrower emphasis on the same trait."
+      ]
+    }
+  ]
+}
