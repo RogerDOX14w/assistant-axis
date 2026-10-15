@@ -92,7 +92,9 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: each first pinned as version 1; and workstream 13's
 #: paraphrase synonym call (``assistant_axis/gapgen/testing/paraphrase_set.py``, the matcher's sanity set; not a
 #: generator, but a call that makes candidates), first pinned as version 1.  Since 2026-10-14 the census generator's
-#: spelling-repair check (QUESTIONS 35, ``.../censuses/repair_check.py``), first pinned as version 1.
+#: spelling-repair check (QUESTIONS 35, ``.../censuses/repair_check.py``), first pinned as version 1.  Since 2026-10-15
+#: the platform's label-fit check (``assistant_axis/gapgen/label_fit.py``; any generator's labels against their
+#: glosses, before submission), first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -105,6 +107,7 @@ GENERATOR_FILES: dict[str, str] = {
     "structural_modernise": "structural_modernise.md",
     "paraphrase_synonym": "paraphrase_synonym.md",
     "census_repair_check": "census_repair_check.md",
+    "label_fit": "label_fit.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.

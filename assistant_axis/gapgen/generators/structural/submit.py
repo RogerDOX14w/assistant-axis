@@ -155,7 +155,15 @@ def classical_role(row_id: str) -> Optional[str]:
 
 def parse_source_ref(ref: str) -> dict:
     """The parts of a structural ``source_ref``: ``{"part", "operator", "target" | "mode", "source_stem"}`` or
-    ``{"part": "classical", "source_id", "role"}``.  ``ValueError`` for anything else."""
+    ``{"part": "classical", "source_id", "role"}``.  ``ValueError`` for anything else.  A reference the label-fit
+    check tagged (``...;label_fit:<verdict>:<original label>``, :func:`assistant_axis.gapgen.label_fit.split_source_ref`)
+    is read as its own part plus ``"label_fit": {"verdict", "original"}``."""
+    from assistant_axis.gapgen.label_fit import split_source_ref
+    base, fit = split_source_ref(ref)
+    if fit is not None:
+        if not base:
+            raise ValueError(f"not a structural source_ref: {ref!r}")
+        return {**parse_source_ref(base), "label_fit": fit}
     parts = ref.split(":")
     if len(parts) < 3 or parts[0] != GENERATOR:
         raise ValueError(f"not a structural source_ref: {ref!r}")
@@ -217,6 +225,13 @@ def batch_id_for(run_id: str) -> str:
     return f"{run_id}_{GENERATOR}"
 
 
+def _rel(p: Path) -> Path:
+    try:
+        return Path(p).resolve().relative_to(REPO_ROOT.resolve())
+    except ValueError:
+        return Path(p)
+
+
 def followup_commands(run_id: str, est: Estimate, *, candidates_path: Optional[Path] = None) -> list[str]:
     b, t = batch_id_for(run_id), est.transport
     py = "uv run python data_analysis/gap_generation"
@@ -270,9 +285,11 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], all_rows: bool = False,
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None,
                review_rate: Optional[tuple[float, str]] = None, extra_args: Optional[Mapping] = None,
-               echo=print) -> SubmitSummary:
+               record_only: bool = False, echo=print) -> SubmitSummary:
     """Select, estimate, gate, record and submit (module docstring).  Exactly one of ``all_rows`` and
-    ``kept_target``."""
+    ``kept_target``.  ``record_only`` (2026-10-15): write ``candidates.jsonl`` and ``run.json`` and stop before the
+    registry, so that the label-fit check (``label_fit.py check --run structural/<run_id>``) can correct the labels
+    first; its corrected file is then submitted with ``gap_registry.py submit --from``."""
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
         raise ValueError("--transport must be live or batches")
@@ -315,13 +332,23 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], all_rows: bool = False,
                             review_hours=None if hours is None else round(hours, 2))
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
+    if record_only:
+        summary.followups = [
+            f"uv run python data_analysis/gap_generation/label_fit.py check --run {GENERATOR}/{run_id} --budget-usd "
+            f"<cap>   # paid: the label-fit check, then submit its corrected file",
+            f"uv run python data_analysis/gap_generation/gap_registry.py submit --from "
+            f"{_rel(target / 'label_fit' / 'candidates.jsonl')}",
+            *summary.followups[1:]]
     if dry_run:
-        echo(f"DRY-RUN: would write {target}/candidates.jsonl ({len(cands)} candidates), submit them to "
-             f"{registry_path}, and write keys.txt, submit_report.json, run.json, usage.json there")
+        echo(f"DRY-RUN: would write {target}/candidates.jsonl ({len(cands)} candidates)"
+             + (", run.json and usage.json there, and not submit them (--record-only)" if record_only else
+                f", submit them to {registry_path}, and write keys.txt, submit_report.json, run.json, usage.json "
+                f"there"))
         for c in summary.followups:
             echo(f"  then: {c}")
         return summary
-    args = {"step": "submit", "mode": mode, "all": bool(all_rows), "kept_target": kept_target,
+    args = {"step": "submit", "record_only": bool(record_only), "mode": mode, "all": bool(all_rows),
+            "kept_target": kept_target,
             "kept_share": kept_share, "kept_share_assumed": assumed, "n_rows": len(rows), "n_candidates": len(cands),
             "n_counted": n_counted, "n_filtered": n_filtered, "n_charged": n_charged,
             "counted_stems": sorted(r["stem"] for r in rows if r.get("net_new")),
@@ -337,6 +364,14 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], all_rows: bool = False,
     ctx = start_run(GENERATOR, run_id, args=args, candidates_dir=candidates_dir)
     ctx.confirmed_by = confirmed_by
     ctx.record_candidates(cands)          # candidates.jsonl first (the tracked record of the run)
+    if record_only:
+        ctx.finish()
+        summary.run_dir = str(ctx.dir)
+        echo(f"wrote {ctx.dir}/candidates.jsonl ({len(cands)} candidates), run.json, usage.json; NOT submitted "
+             f"(--record-only)")
+        for c in summary.followups:
+            echo(f"  then: {c}")
+        return summary
     rep = submit_candidates(cands, registry_path=registry_path)
     atomic_write_text("".join(k + "\n" for k in rep.keys), ctx.dir / "keys.txt")
     rep_d = {k: v for k, v in rep.as_dict().items() if k != "keys"} | {

@@ -342,3 +342,29 @@ def test_roger_sample_shows_the_nearest_existing_traits():
     md = R.roger_sample([row], [], n=1, seed=0, run_id="x", trait_prefix="../t/")
     assert "nearest existing traits (M3's reading)" in md
     assert "[rude](../t/rude.json) 2; [unselfconscious](../t/unselfconscious.json) 1" in md
+
+
+def test_record_only_writes_the_candidates_and_does_not_submit(world):
+    """2026-10-15: ``submit --record-only`` stops before the registry, for the label-fit check to run first."""
+    before = world["reg"].read_bytes()
+    out = []
+    s = SU.run_submit("r_rec", table=small_table(world), all_rows=True, registry_path=world["reg"],
+                      candidates_dir=world["cdir"], record_only=True, echo=out.append)
+    rdir = world["cdir"] / "runs" / "structural" / "r_rec"
+    assert world["reg"].read_bytes() == before
+    assert (rdir / "candidates.jsonl").exists() and (rdir / "run.json").exists()
+    assert not (rdir / "keys.txt").exists() and not (rdir / "submit_report.json").exists()
+    assert len((rdir / "candidates.jsonl").read_text().splitlines()) == s.n_candidates
+    assert "label_fit.py check --run structural/r_rec" in s.followups[0]
+    assert "gap_registry.py submit --from" in s.followups[1] and "label_fit/candidates.jsonl" in s.followups[1]
+    assert any("NOT submitted" in x for x in out)
+    sess = json.loads((rdir / "run.json").read_text())
+    assert any((x.get("args") or {}).get("record_only") for x in sess.get("sessions") or [sess])
+
+
+def test_record_only_dry_run_writes_nothing(world):
+    out = []
+    SU.run_submit("r_rec2", table=small_table(world), all_rows=True, registry_path=world["reg"],
+                  candidates_dir=world["cdir"], record_only=True, dry_run=True, echo=out.append)
+    assert not (world["cdir"] / "runs" / "structural" / "r_rec2").exists()
+    assert any("not submit them (--record-only)" in x for x in out)

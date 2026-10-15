@@ -17,7 +17,7 @@
     uv run python data_analysis/gap_generation/structural_generator.py side-table [--run-id R ...] [--dry-run]
     uv run python data_analysis/gap_generation/structural_generator.py submit --run-id R
         (--all | --kept-target 300 [--kept-share X]) [--transport live|batches] [--budget-usd 5]
-        [--confirm-expensive --confirmed-by WHO] [--review-rate plan|measured] [--dry-run]
+        [--confirm-expensive --confirmed-by WHO] [--review-rate plan|measured] [--record-only] [--dry-run]
     uv run python data_analysis/gap_generation/structural_generator.py report --run-id R [--operator-run R0 ...]
         [--dry-run]
 
@@ -32,11 +32,12 @@ gate: free between a run's own samples, or paid across two runs with ``--against
 readouts and the recorded-output checks skip.  ``postprocess`` builds the operator table and ``evaluation.json`` (free;
 the gloss cosines of pair recovery cost pennies of embeddings with ``--embedder openai``), ``side-table`` the
 position table and the negative-label mismatches, ``submit`` the run's candidates (``--all``, or the review-hour wave
-``--kept-target 300`` counted on net-new rows), ``report`` the readouts.  Every paid command prints its estimate,
-takes ``--budget-usd`` as a hard cap, writes ``usage.json``, refuses uncommitted platform code without
-``--allow-dirty``, and runs live (every generator-side estimate is under $20; the full pass about $2.2 at three
-samples).  ``--dry-run`` prints the estimate,
-the counts and the rendered prompts, and writes and calls nothing.
+``--kept-target 300`` counted on net-new rows; ``--record-only`` writes the run's ``candidates.jsonl`` without
+submitting it, so that the label-fit check, ``label_fit.py check``, can correct the labels first), ``report`` the
+readouts.  Every paid command prints its estimate, takes ``--budget-usd`` as a hard cap, writes ``usage.json``,
+refuses uncommitted platform code without ``--allow-dirty``, and runs live (every generator-side estimate is under
+$20; the full pass about $2.2 at three samples).  ``--dry-run`` prints the estimate, the counts and the rendered
+prompts, and writes and calls nothing.
 """
 from __future__ import annotations
 
@@ -741,7 +742,7 @@ def cmd_submit(args) -> int:
                   confirmed_by=args.confirmed_by, transport=args.transport, dry_run=args.dry_run,
                   registry_path=Path(args.registry), candidates_dir=args.candidates_dir,
                   table_path=Path(args.operator_table), table_sha256=_sha_file(Path(args.operator_table)),
-                  review_rate=SU.review_terms_per_hour(args.review_rate))
+                  review_rate=SU.review_terms_per_hour(args.review_rate), record_only=args.record_only)
     return 0
 
 
@@ -921,6 +922,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--confirmed-by", default=None)
     p.add_argument("--review-rate", choices=("plan", "measured"), default="plan",
                    help="terms an hour: the plan's ~150, or plan 13's measured rate once it lands (the hook)")
+    p.add_argument("--record-only", action="store_true",
+                   help="write candidates.jsonl and run.json but do not submit (for the label-fit check first: "
+                        "label_fit.py check --run structural/R, then gap_registry.py submit --from its file)")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_submit)
 

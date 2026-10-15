@@ -1138,6 +1138,31 @@ uv run python data_analysis/gap_generation/gap_registry.py retractions
 uv run python data_analysis/gap_generation/gap_registry.py unretract --run structural/2026-10-14-pilot --reason "..."
 ```
 
+**The label-fit check (2026-10-15): `gap_generation/label_fit.py`.**  Does a generator's label, said of a person,
+mean what its gloss says?  One call per distinct `(label, gloss)` pair (Haiku 5.5 by default, `--model
+claude-sonnet-5-5` allowed; pinned prompt [label_fit.md](../reports/trait_gap_generation/rubrics/label_fit.md)): the
+label, the gloss, its WordNet senses and, for a registry row M1 judged, M1's senses; the answer a short reason,
+`fits` / `secondary_sense` / `not_a_sense`, and a better label when it does not fit.  Three readings by default,
+combined by majority (a tie does not fit), the better labels as a union with their support.  A free cosine between the
+gloss and the usual sense is recorded and reported (`--embedder`, default the local bge) and decides nothing unless
+`--screen-floor`.  `validate --marks SHEET` scores it against Roger's marks on a precision sheet (`?` should not fit)
+and prints a confusion table; `check --run G/R | --candidates FILE` runs **before submission** on a run's
+`candidates.jsonl` and writes `label_fit/` beside it: `responses.jsonl`, `usage.json`, `decisions.json`,
+`readout.md` and the corrected `candidates.jsonl` (a relabelled candidate carries the new label, and
+`;label_fit:<verdict>:<original label>` after its `source_ref`), submitted with `gap_registry.py submit --from`.  The
+structural generator writes a run's candidates without submitting them with `structural_generator.py submit
+--record-only`.  Estimate, `--budget-usd` cap, dirty-tree refusal, `--resume` by request sha, `--dry-run --render`.
+Library: [`label_fit.py`](../assistant_axis/gapgen/label_fit.py).  The base-model generator's own sense step
+(`base_model_generator.py sense`) asks a different question and is unchanged.
+
+```bash
+uv run python data_analysis/gap_generation/label_fit.py validate \
+    --marks data/candidates/runs/structural/2026-10-14-pilot/roger_sample.md --dry-run --render
+uv run python data_analysis/gap_generation/label_fit.py validate --marks <sheet> --model claude-sonnet-5-5 \
+    --borderline flashy self-justifying --budget-usd 2
+uv run python data_analysis/gap_generation/label_fit.py check --run structural/<run_id> --budget-usd 5 [--resume]
+```
+
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
 [QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 35: of the 706 one-edit repair suggestions the census ingest
 lists (`repair_suggestions_list` in [ingest_counts.json](../data/candidates/censuses/ingest_counts.json)), the 314 whose
