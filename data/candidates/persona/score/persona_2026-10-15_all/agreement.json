@@ -1,0 +1,315 @@
+{
+  "result": {
+    "n": 8051,
+    "auc_nn_cos_covered_vs_new": 0.6343,
+    "spearman_nn_cos_vs_m3_cosine": 0.2869,
+    "covered_by_is_nearest": 0.7121,
+    "covered_by_in_top3": 0.9015,
+    "n_covered_by_with_vector": 1320,
+    "m3": {
+      "new": 4638,
+      "covered": 3349,
+      "undecided": 63,
+      "grey": 1
+    },
+    "flags": {
+      "duplicate_like": 2005,
+      "novel_like": 2387,
+      "ordinary": 3659
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 813,
+        "auc": 0.6415,
+        "covered_by_is_nearest": 0.7444,
+        "flags": {
+          "novel_like": 270,
+          "duplicate_like": 197,
+          "ordinary": 346
+        },
+        "m3": {
+          "new": 626,
+          "covered": 187
+        },
+        "mean_residual_pct": 0.6491,
+        "disagreements": {
+          "dup_vs_new": 126,
+          "cover_questioned": 2,
+          "novel_vs_covered": 28
+        }
+      },
+      "antonym_check": {
+        "n": 374,
+        "auc": 0.5382,
+        "covered_by_is_nearest": 0.7245,
+        "flags": {
+          "ordinary": 137,
+          "novel_like": 115,
+          "duplicate_like": 122
+        },
+        "m3": {
+          "covered": 239,
+          "new": 135
+        },
+        "mean_residual_pct": 0.6003,
+        "disagreements": {
+          "dup_vs_new": 38,
+          "cover_questioned": 6,
+          "novel_vs_covered": 44
+        }
+      },
+      "base_model": {
+        "n": 1355,
+        "auc": 0.6612,
+        "covered_by_is_nearest": 0.7627,
+        "flags": {
+          "ordinary": 580,
+          "duplicate_like": 548,
+          "novel_like": 227
+        },
+        "m3": {
+          "covered": 836,
+          "new": 517,
+          "undecided": 2
+        },
+        "mean_residual_pct": 0.4924,
+        "disagreements": {
+          "dup_vs_new": 146,
+          "cover_questioned": 18,
+          "novel_vs_covered": 55
+        }
+      },
+      "censuses": {
+        "n": 5139,
+        "auc": 0.6551,
+        "covered_by_is_nearest": 0.723,
+        "flags": {
+          "ordinary": 2387,
+          "duplicate_like": 1346,
+          "novel_like": 1406
+        },
+        "m3": {
+          "covered": 2243,
+          "new": 2872,
+          "undecided": 24
+        },
+        "mean_residual_pct": 0.5708,
+        "disagreements": {
+          "dup_vs_new": 478,
+          "cover_questioned": 69,
+          "novel_vs_covered": 263
+        }
+      },
+      "ipip": {
+        "n": 830,
+        "auc": 0.6425,
+        "covered_by_is_nearest": 0.7021,
+        "flags": {
+          "duplicate_like": 244,
+          "novel_like": 208,
+          "ordinary": 378
+        },
+        "m3": {
+          "covered": 421,
+          "new": 408,
+          "grey": 1
+        },
+        "mean_residual_pct": 0.5772,
+        "disagreements": {
+          "dup_vs_new": 74,
+          "cover_questioned": 12,
+          "novel_vs_covered": 61
+        }
+      },
+      "m1_validation": {
+        "n": 108,
+        "auc": 0.6909,
+        "covered_by_is_nearest": 0.5556,
+        "flags": {
+          "duplicate_like": 26,
+          "ordinary": 42,
+          "novel_like": 40
+        },
+        "m3": {
+          "covered": 43,
+          "new": 58,
+          "undecided": 7
+        },
+        "mean_residual_pct": 0.5942,
+        "disagreements": {
+          "dup_vs_new": 7,
+          "cover_questioned": 4,
+          "novel_vs_covered": 3
+        }
+      },
+      "manual": {
+        "n": 5,
+        "auc": 0.5,
+        "covered_by_is_nearest": null,
+        "flags": {
+          "ordinary": 4,
+          "novel_like": 1
+        },
+        "m3": {
+          "covered": 2,
+          "new": 3
+        },
+        "mean_residual_pct": 0.5712,
+        "disagreements": {}
+      },
+      "masked_lm": {
+        "n": 1521,
+        "auc": 0.6485,
+        "covered_by_is_nearest": 0.7675,
+        "flags": {
+          "novel_like": 406,
+          "ordinary": 634,
+          "duplicate_like": 481
+        },
+        "m3": {
+          "new": 707,
+          "covered": 784,
+          "undecided": 30
+        },
+        "mean_residual_pct": 0.5599,
+        "disagreements": {
+          "dup_vs_new": 156,
+          "cover_questioned": 15,
+          "novel_vs_covered": 107
+        }
+      },
+      "noun_relabel": {
+        "n": 61,
+        "auc": 0.6573,
+        "covered_by_is_nearest": 1.0,
+        "flags": {
+          "ordinary": 25,
+          "novel_like": 12,
+          "duplicate_like": 24
+        },
+        "m3": {
+          "new": 41,
+          "covered": 20
+        },
+        "mean_residual_pct": 0.4726,
+        "disagreements": {
+          "dup_vs_new": 13,
+          "novel_vs_covered": 3
+        }
+      },
+      "roget": {
+        "n": 349,
+        "auc": 0.6052,
+        "covered_by_is_nearest": 0.6154,
+        "flags": {
+          "ordinary": 178,
+          "duplicate_like": 73,
+          "novel_like": 98
+        },
+        "m3": {
+          "new": 243,
+          "covered": 101,
+          "undecided": 5
+        },
+        "mean_residual_pct": 0.5473,
+        "disagreements": {
+          "dup_vs_new": 42,
+          "cover_questioned": 6,
+          "novel_vs_covered": 14
+        }
+      },
+      "states_pass": {
+        "n": 373,
+        "auc": 0.7137,
+        "covered_by_is_nearest": 0.8608,
+        "flags": {
+          "ordinary": 177,
+          "novel_like": 81,
+          "duplicate_like": 115
+        },
+        "m3": {
+          "covered": 207,
+          "new": 166
+        },
+        "mean_residual_pct": 0.568,
+        "disagreements": {
+          "dup_vs_new": 23,
+          "cover_questioned": 4,
+          "novel_vs_covered": 21
+        }
+      },
+      "structural": {
+        "n": 478,
+        "auc": 0.6516,
+        "covered_by_is_nearest": 0.7842,
+        "flags": {
+          "novel_like": 96,
+          "duplicate_like": 194,
+          "ordinary": 188
+        },
+        "m3": {
+          "covered": 315,
+          "new": 163
+        },
+        "mean_residual_pct": 0.5553,
+        "disagreements": {
+          "dup_vs_new": 42,
+          "cover_questioned": 6,
+          "novel_vs_covered": 35
+        }
+      },
+      "wn_clusters": {
+        "n": 578,
+        "auc": 0.624,
+        "covered_by_is_nearest": 0.7,
+        "flags": {
+          "ordinary": 270,
+          "duplicate_like": 187,
+          "novel_like": 121
+        },
+        "m3": {
+          "new": 277,
+          "covered": 300,
+          "undecided": 1
+        },
+        "mean_residual_pct": 0.5087,
+        "disagreements": {
+          "dup_vs_new": 67,
+          "cover_questioned": 4,
+          "novel_vs_covered": 27
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py compare --batch-id persona_2026-10-15_all",
+      "git_sha": "ef90f753+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores persona_2026-10-15_all: agreement"
+    },
+    "produced_at": "2026-10-15T01:04:20+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-14T16:08:44+00:00@53889",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T16:08:44+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "1c7dcd9c294f94dafbcb5f1d3198252255c11bf92883e0c4ce7208a110e2c1bf"
+  }
+}

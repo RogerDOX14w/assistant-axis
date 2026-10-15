@@ -1,0 +1,266 @@
+{
+  "command": "score",
+  "argv": [
+    "score",
+    "--batch-id",
+    "persona_2026-10-15_all",
+    "--fit-id",
+    "fit_2026-10-13",
+    "--all-rows",
+    "--write-registry"
+  ],
+  "git_sha": "0a4a3018+dirty",
+  "started_at": "2026-10-15T00:57:42+00:00",
+  "script": "data_analysis/gap_generation/persona_novelty.py",
+  "batch_id": "persona_2026-10-15_all",
+  "fit_id": "fit_2026-10-13",
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "allow_dirty": false,
+    "note": null
+  },
+  "estimate_usd": 0.032567,
+  "holding": null,
+  "selection": {
+    "run": [],
+    "keys": 0,
+    "all_rows": true
+  },
+  "registry": {
+    "path": "data/candidates/registry.jsonl",
+    "n_written": 8051,
+    "n_missing": 0
+  },
+  "status": 0,
+  "n_scored": 8051,
+  "config_version": "2026-10-02",
+  "N": 20,
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999603,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999998,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999603,
+      "only_child": 0.999994,
+      "restless": 0.999993,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-15T00:57:43+00:00"
+  },
+  "n_embedded": 7517,
+  "flags": {
+    "duplicate_like": 2005,
+    "novel_like": 2387,
+    "ordinary": 3659
+  },
+  "disagreements": {
+    "dup_vs_new": {
+      "met_rule": 794,
+      "listed": 794
+    },
+    "cover_questioned": {
+      "met_rule": 101,
+      "listed": 101
+    },
+    "novel_vs_covered": {
+      "met_rule": 464,
+      "listed": 464
+    },
+    "cap": 805,
+    "quantile": 0.1
+  },
+  "finished_at": "2026-10-15T01:04:15+00:00",
+  "cost_usd": 0.026242,
+  "n_calls": 31,
+  "sessions": [
+    {
+      "command": "score",
+      "argv": [
+        "score",
+        "--batch-id",
+        "persona_2026-10-15_all",
+        "--fit-id",
+        "fit_2026-10-13",
+        "--all-rows",
+        "--write-registry"
+      ],
+      "git_sha": "0a4a3018+dirty",
+      "started_at": "2026-10-15T00:57:42+00:00",
+      "script": "data_analysis/gap_generation/persona_novelty.py",
+      "batch_id": "persona_2026-10-15_all",
+      "fit_id": "fit_2026-10-13",
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "assistant_axis/arrangements.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": [],
+        "allow_dirty": false,
+        "note": null
+      },
+      "estimate_usd": 0.032567,
+      "holding": null,
+      "selection": {
+        "run": [],
+        "keys": 0,
+        "all_rows": true
+      },
+      "registry": {
+        "path": "data/candidates/registry.jsonl",
+        "n_written": 8051,
+        "n_missing": 0
+      },
+      "status": 0,
+      "n_scored": 8051,
+      "config_version": "2026-10-02",
+      "N": 20,
+      "canary": {
+        "model": "text-embedding-3-large",
+        "arm": "openai",
+        "tag": "openai_text-embedding-3-large",
+        "n": 8,
+        "n_compared": 8,
+        "n_new_reference": 0,
+        "min_cosine": 0.999603,
+        "threshold": 0.999,
+        "cosines": {
+          "absentee": 0.999998,
+          "collectivistic": 1.0,
+          "edgy": 1.0,
+          "gay": 1.0,
+          "ironic": 0.999603,
+          "only_child": 0.999994,
+          "restless": 0.999993,
+          "sycophantic": 1.0
+        },
+        "below": [],
+        "ok": true,
+        "checked_at": "2026-10-15T00:57:43+00:00"
+      },
+      "n_embedded": 7517,
+      "flags": {
+        "duplicate_like": 2005,
+        "novel_like": 2387,
+        "ordinary": 3659
+      },
+      "disagreements": {
+        "dup_vs_new": {
+          "met_rule": 794,
+          "listed": 794
+        },
+        "cover_questioned": {
+          "met_rule": 101,
+          "listed": 101
+        },
+        "novel_vs_covered": {
+          "met_rule": 464,
+          "listed": 464
+        },
+        "cap": 805,
+        "quantile": 0.1
+      },
+      "finished_at": "2026-10-15T00:59:09+00:00",
+      "cost_usd": 0.026242,
+      "n_calls": 31
+    },
+    {
+      "command": "judge-disagreements",
+      "argv": [
+        "judge-disagreements",
+        "--batch-id",
+        "persona_2026-10-15_all",
+        "--write-registry",
+        "--budget-usd",
+        "5"
+      ],
+      "git_sha": "ef90f753+dirty",
+      "started_at": "2026-10-15T00:59:13+00:00",
+      "script": "data_analysis/gap_generation/persona_novelty.py",
+      "batch_id": "persona_2026-10-15_all",
+      "kind": "dup_vs_new",
+      "n_pairs": 700,
+      "estimate_usd": 1.7262,
+      "projected_usd": 2.15775,
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "rules": "m3_rules_3",
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-opus-5-5"
+      ],
+      "label_form": "judge-display-v1",
+      "registry": {
+        "path": "data/candidates/registry.jsonl",
+        "n_written": 700
+      },
+      "status": 0,
+      "n_read": 700,
+      "n_at_cut_off": 19,
+      "n_refused_responses": 0,
+      "parse_rates": {
+        "overlap:claude-sonnet-5-5": {
+          "n": 700,
+          "ok_first": 700,
+          "ok": 700
+        },
+        "overlap:claude-opus-5-5": {
+          "n": 371,
+          "ok_first": 371,
+          "ok": 371
+        }
+      },
+      "verdicts": {
+        "keep": 681,
+        "cut": 9,
+        "review": 10
+      },
+      "finished_at": "2026-10-15T01:04:15+00:00",
+      "cost_usd": 2.314088,
+      "n_calls": 1102
+    }
+  ],
+  "last": "judge-disagreements"
+}

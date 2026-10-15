@@ -1,0 +1,224 @@
+{
+  "generator": "noun_relabel",
+  "run_id": "llm-2026-10-15",
+  "git_sha": "ef90f753+dirty",
+  "args": {
+    "kind": "llm",
+    "argv": [
+      "data_analysis/gap_generation/noun_relabel.py",
+      "llm-apply",
+      "--run-id",
+      "llm-2026-10-15",
+      "--budget-usd",
+      "0.5"
+    ],
+    "budget_usd": 0.5
+  },
+  "n_emitted": 105,
+  "started_at": "2026-10-15T01:04:28+00:00",
+  "finished_at": "2026-10-15T01:07:04+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0.10577,
+  "sessions": [
+    {
+      "session_id": "b2d2a1c288c7",
+      "started_at": "2026-10-15T01:04:28+00:00",
+      "finished_at": "2026-10-15T01:07:04+00:00",
+      "git_sha": "ef90f753+dirty",
+      "args": {
+        "kind": "llm",
+        "argv": [
+          "data_analysis/gap_generation/noun_relabel.py",
+          "llm-apply",
+          "--run-id",
+          "llm-2026-10-15",
+          "--budget-usd",
+          "0.5"
+        ],
+        "budget_usd": 0.5
+      },
+      "n_emitted": 105,
+      "confirmed_by": null,
+      "cost_usd": 0.1058,
+      "n_calls": 618,
+      "usage": {
+        "per_model": {
+          "claude-haiku-5-5": {
+            "model": "claude-haiku-5-5",
+            "prompt_tokens": 284455,
+            "completion_tokens": 154650,
+            "cost_usd": 0.1058,
+            "n_calls": 618
+          }
+        },
+        "total_cost_usd": 0.1058,
+        "total_prompt_tokens": 284455,
+        "total_completion_tokens": 154650,
+        "n_calls": 618
+      }
+    }
+  ],
+  "stream": "llm",
+  "helper_version": 1,
+  "oewn": "oewn:2024",
+  "rules": "bae02bb9af934e7d9b090f4e58ca7dd50a85c01ce5cd40c90f4ba4807e3c870d",
+  "counts": {
+    "n_relabelled": 130,
+    "by_rule": {
+      "llm": 130
+    },
+    "by_where": {
+      "corpus": 25,
+      "new": 40,
+      "registry": 65
+    },
+    "by_noun_m1": {
+      "held_roles": 8,
+      "queue_role": 4,
+      "role_file": 39,
+      "trait": 79
+    },
+    "by_generator": {
+      "antonym_check": 2,
+      "base_model": 5,
+      "censuses": 40,
+      "ipip": 2,
+      "masked_lm": 40,
+      "states_pass": 4,
+      "structural": 2
+    },
+    "by_source": {
+      "queue_role": {
+        "n_looked_at": 0,
+        "n_relabelled": 4,
+        "by_where": {
+          "corpus": 1,
+          "new": 2,
+          "registry": 1
+        }
+      },
+      "registry": {
+        "n_looked_at": 341,
+        "n_relabelled": 87,
+        "by_where": {
+          "corpus": 11,
+          "new": 23,
+          "registry": 53
+        }
+      },
+      "role": {
+        "n_looked_at": 35,
+        "n_relabelled": 39,
+        "by_where": {
+          "corpus": 13,
+          "new": 15,
+          "registry": 11
+        }
+      }
+    },
+    "n_distinct_new": 33,
+    "distinct_new": [
+      "addicted#1",
+      "artisanal#1",
+      "bardic#1",
+      "churchgoing#1",
+      "demagogic#1",
+      "double_dealing#1",
+      "freelance#1",
+      "geeky#1",
+      "go_getting#1",
+      "initiated#1",
+      "knightly#1",
+      "lawyerly#1",
+      "lay#1",
+      "left_wing#1",
+      "lionhearted#1",
+      "orphaned#1",
+      "out_and_out#1",
+      "pedophilic#1",
+      "retired#1",
+      "shamanic#1",
+      "sobersided#1",
+      "teleological#1",
+      "telepathic#1",
+      "thievish#1",
+      "thuggish#1",
+      "vampiric#1",
+      "veterinary#1",
+      "weaselly#1",
+      "well_wishing#1",
+      "widowed#1",
+      "witchy#1",
+      "wraithlike#1",
+      "writerly#1"
+    ],
+    "reasons": {
+      "none": 553,
+      "not_established": 26,
+      "same_as_noun": 9
+    },
+    "n_already_linked": 0,
+    "n_phrases": 0,
+    "leftover_person_nouns": {}
+  },
+  "n_blocks_written": 173,
+  "submit_report": {
+    "n_submitted": 105,
+    "n_new": 33,
+    "n_merged": 72,
+    "n_unchanged": 0,
+    "invalid": [],
+    "n_relabelled": 0,
+    "relabels": []
+  },
+  "registry_snapshot_sha256": "4d16134b601538ce36ed9eab764681ef10a52b37eda4e749228e89e41e4de5fc",
+  "what": "noun_relabel.py llm-apply",
+  "model": "claude-haiku-5-5",
+  "prompt_version": 1,
+  "prompt_sha256": "5e2d9f17f7b1a63f0f71affe8a5a5f3597dd4ca96c83b215cbf969db075bb9d3",
+  "max_tokens": 2000,
+  "decision": "Roger 2026-10-14, 'A 1 yes': a one-off pass over the leftover person nouns",
+  "n_selected": 718,
+  "selected_by_kind": {
+    "held_role": 157,
+    "person": 341,
+    "queue_role": 35,
+    "role": 185
+  },
+  "n_person_already_linked": 0,
+  "n_reused": 100,
+  "reused_from": {
+    "llm_pilot_2026-10-14_b": 100
+  },
+  "n_asked": 618,
+  "n_answered": 618,
+  "n_parsed": 618,
+  "estimate_usd": 0.21321,
+  "budget_usd": 0.5,
+  "n_calls": 618,
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "assistant_axis/arrangements.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "allow_dirty": false,
+    "note": null
+  },
+  "stopped": null,
+  "rejected": {
+    "none": 553,
+    "not_established": 26,
+    "same_as_noun": 9
+  }
+}

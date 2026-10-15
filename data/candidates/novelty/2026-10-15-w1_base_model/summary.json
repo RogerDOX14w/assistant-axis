@@ -1,0 +1,581 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 647,
+    "n_decided": 647,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 762,
+      "decided_by_another_run": 3085,
+      "held_nationalities": 5,
+      "no_gloss": 1
+    },
+    "by_decision": {
+      "covered": 321,
+      "new": 326
+    },
+    "by_reason": {
+      "overlap": 616,
+      "exact_label": 31
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 313,
+        "new": 260
+      },
+      "4": {
+        "new": 66,
+        "covered": 8
+      }
+    },
+    "exact_label": {
+      "corpus": 25,
+      "queue": 6
+    },
+    "pairs_judged_per_candidate": {
+      "0": 9,
+      "1": 244,
+      "2": 73,
+      "3": 64,
+      "4": 70,
+      "5": 53,
+      "6": 42,
+      "7": 29,
+      "8": 20,
+      "9": 9,
+      "10": 2,
+      "11": 1
+    },
+    "pairs_judged_total": 1854,
+    "pairs_judged_mean": 3.01,
+    "listed_per_candidate_mean": 16.812,
+    "shortlist_length": {
+      "0": 9,
+      "1": 42,
+      "2": 65,
+      "3": 88,
+      "4": 103,
+      "5": 95,
+      "6": 94,
+      "7": 58,
+      "8": 43,
+      "9": 15,
+      "10": 3,
+      "11": 1
+    },
+    "early_exit_depth": {
+      "1": 215,
+      "2": 31,
+      "3": 17,
+      "4": 11,
+      "5": 7,
+      "6": 5,
+      "7": 2,
+      "8": 2
+    },
+    "escalations": {
+      "at_cut_off": 205,
+      "below_cut_off": 673,
+      "above_cut_off": 8
+    },
+    "rescues": 11,
+    "review_flags": {
+      "both_similar": 7,
+      "sonnet_below_opus_at": 63
+    },
+    "pair_completions": 67,
+    "pair_completion_for": {
+      "attitude#1": [
+        "dignified"
+      ],
+      "bumbling#1": [
+        "deft"
+      ],
+      "butch#1": [
+        "neuter"
+      ],
+      "clunky#1": [
+        "glib"
+      ],
+      "cute_girl#1": [
+        "middle_aged"
+      ],
+      "daydreamer#1": [
+        "meditative"
+      ],
+      "disquieting#1": [
+        "dignified"
+      ],
+      "easy_to_work_with#1": [
+        "foot_dragging"
+      ],
+      "fight#1": [
+        "win_win_seeking"
+      ],
+      "follows_instructions#1": [
+        "disobedient"
+      ],
+      "friend_to_all#1": [
+        "glib"
+      ],
+      "froward#1": [
+        "foot_dragging"
+      ],
+      "gilded#1": [
+        "shabby_genteel"
+      ],
+      "good_at_people#1": [
+        "autistic"
+      ],
+      "good_mother#1": [
+        "neglectful_baumrind"
+      ],
+      "good_with_numbers#1": [
+        "approximate"
+      ],
+      "hypocrisy#1": [
+        "incorruptible"
+      ],
+      "ignominious#1": [
+        "dignified"
+      ],
+      "iniquitous#1": [
+        "incorruptible"
+      ],
+      "leaks#1": [
+        "concealing"
+      ],
+      "never_tired#1": [
+        "sleep_deprived"
+      ],
+      "niggling#1": [
+        "minimizing"
+      ],
+      "non_creative#1": [
+        "creative"
+      ],
+      "non_social#1": [
+        "lonely"
+      ],
+      "nonconfrontational#1": [
+        "win_win_seeking"
+      ],
+      "not_overbearing#1": [
+        "overstepping"
+      ],
+      "not_working#1": [
+        "trapped_in_job"
+      ],
+      "openhanded#1": [
+        "parasitic"
+      ],
+      "overestimated#1": [
+        "modest"
+      ],
+      "overly_generous#1": [
+        "greedy"
+      ],
+      "overly_serious#1": [
+        "flippant"
+      ],
+      "oversexed#1": [
+        "asexual"
+      ],
+      "patient_listener#1": [
+        "chattering"
+      ],
+      "pattern_recognition#1": [
+        "stream_of_consciousness"
+      ],
+      "perfect_memory#1": [
+        "confabulatory"
+      ],
+      "perfect_memory_retention#1": [
+        "confabulatory"
+      ],
+      "pervert#1": [
+        "prudish"
+      ],
+      "predestined#1": [
+        "future_oriented"
+      ],
+      "psychological#1": [
+        "autistic"
+      ],
+      "renegade#1": [
+        "resigned"
+      ],
+      "rewarding#1": [
+        "glib"
+      ],
+      "self_congratulatory#1": [
+        "modest"
+      ],
+      "self_control#1": [
+        "irrestrainable"
+      ],
+      "self_restraining#1": [
+        "irrestrainable"
+      ],
+      "slow_talking#1": [
+        "chattering"
+      ],
+      "smart_ass#1": [
+        "wry"
+      ],
+      "snarky#1": [
+        "wry"
+      ],
+      "social_awareness#1": [
+        "autistic"
+      ],
+      "soporific#1": [
+        "chattering"
+      ],
+      "specialized#1": [
+        "interdisciplinary"
+      ],
+      "stammering#1": [
+        "chattering"
+      ],
+      "swank#1": [
+        "shabby_genteel"
+      ],
+      "unamusing#1": [
+        "glib"
+      ],
+      "unattentive#1": [
+        "meditative",
+        "absorption_prone"
+      ],
+      "undereducated#1": [
+        "middle_class"
+      ],
+      "undevoted#1": [
+        "incorruptible"
+      ],
+      "unfeigned#1": [
+        "phony"
+      ],
+      "ungentlemanlike#1": [
+        "dignified"
+      ],
+      "unpractical#1": [
+        "deft"
+      ],
+      "unresigned#1": [
+        "resigned",
+        "rugged",
+        "despairing"
+      ],
+      "unresourceful#1": [
+        "problem_solving"
+      ],
+      "unwavering_focus#1": [
+        "adhd"
+      ],
+      "well_learned#1": [
+        "experiential"
+      ],
+      "well_structured#1": [
+        "stream_of_consciousness"
+      ],
+      "wise_ass#1": [
+        "sulky"
+      ],
+      "women#1": [
+        "androgynous"
+      ],
+      "youngest#1": [
+        "middle_aged"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 616
+      },
+      "answers": {
+        "unrelated": 4153,
+        "opposed": 3235,
+        "similar": 2901,
+        "unsure": 67
+      },
+      "final": {
+        "similar": 2927,
+        "unrelated": 4190,
+        "opposed": 3238,
+        "unsure": 1
+      },
+      "candidates_with_unsure_reasked": 41
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 616,
+        "input": 1079907,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 1895,
+        "input": 289927,
+        "cache_write": 2870,
+        "cache_read": 1061326,
+        "calls_with_read": 1849,
+        "read_share_of_input": 0.7838,
+        "hit_rate_calls": 0.9757
+      },
+      "claude-opus-5-5": {
+        "calls": 886,
+        "input": 125580,
+        "cache_write": 49364,
+        "cache_read": 459200,
+        "calls_with_read": 800,
+        "read_share_of_input": 0.7241,
+        "hit_rate_calls": 0.9029
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 0.269331
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.053587
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 1.140518,
+        "claude-opus-5-5:batch": 1.755776
+      }
+    },
+    "spend_usd": 3.220641,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 1079907,
+          "completion_tokens": 861344,
+          "cost_usd": 0.2693,
+          "n_calls": 616
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 269908,
+          "completion_tokens": 121596,
+          "cost_usd": 1.7558,
+          "n_calls": 886
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 401060,
+          "completion_tokens": 158609,
+          "cost_usd": 1.1941,
+          "n_calls": 1895
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 10989,
+          "completion_tokens": 0,
+          "cost_usd": 0.0014,
+          "n_calls": 4
+        }
+      },
+      "total_cost_usd": 3.2206,
+      "total_prompt_tokens": 1761864,
+      "total_completion_tokens": 1141549,
+      "n_calls": 3401
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 70,
+    "covered_flagged": 63,
+    "pair_notes": {
+      "rows": 7,
+      "notes": 7,
+      "by_kind": {
+        "pair": 7
+      },
+      "rows_by_decision": {
+        "new": 5,
+        "covered": 2
+      }
+    },
+    "pair_flag_rows": 22,
+    "floor": {
+      "rows_with_listed_below": 614,
+      "listed_below_total": 5618,
+      "similar_kept_out_total": 114,
+      "rows_with_similar_kept_out": 86
+    },
+    "renamed_from_judged": {
+      "rows": 1,
+      "by_decision": {
+        "new": 1
+      }
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "39acd24215bde9e183f766d9944370cda172037162da1dfff7b28568d1e65d72",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 647,
+      "rows_listing_a_queue_entry": 305,
+      "rows_reading_a_queue_entry": 80,
+      "covered_by_queue": 6,
+      "covered_by_queue_by_status": {
+        "candidate": 6
+      }
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 213,
+        "covered": 266
+      },
+      "alignment 2": {
+        "covered": 47,
+        "new": 47
+      },
+      "alignment 3": {
+        "new": 66,
+        "covered": 8
+      }
+    },
+    "partners_skipped": {
+      "rows": 483,
+      "partners": 1096,
+      "by_relation": {
+        "unrelated": 998,
+        "opposed": 98
+      },
+      "by_where": {
+        "shortlist": 1092,
+        "opposite": 4
+      },
+      "est_readings_saved": {
+        "sonnet": 1096,
+        "opus": 40.6
+      },
+      "est_saving_usd_live": 1.4616
+    },
+    "batch_id": "2026-10-15-w1_base_model",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 616,
+        "ok_first": 616,
+        "ok": 616
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 41,
+        "ok_first": 41,
+        "ok": 41
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 1854,
+        "ok_first": 1854,
+        "ok": 1854
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 886,
+        "ok_first": 886,
+        "ok": 886
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 0,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-15-w1_base_model --run base_model/2026-10-15-w1 --transport batches --budget-usd 10",
+      "git_sha": "28f2a2e4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-15-w1_base_model"
+    },
+    "produced_at": "2026-10-15T14:23:30+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-15T00:45:14+00:00@3500616",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-15T00:45:14+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "0eb55b763d7eeff0bc40f808625c4e99510ff237fa06c82d527c9a0aea286eb3"
+  }
+}

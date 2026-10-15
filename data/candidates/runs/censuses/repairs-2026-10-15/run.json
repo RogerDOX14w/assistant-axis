@@ -1,0 +1,123 @@
+{
+  "generator": "censuses",
+  "run_id": "repairs-2026-10-15",
+  "git_sha": "28f2a2e4+dirty",
+  "args": {
+    "stage": "repair_check",
+    "stage_rule": "the repair suggestions of ingest_counts.json whose repaired word is new to the census lists and that the repair check judged a typo (QUESTIONS 35)",
+    "n": 30,
+    "n_checked": 314,
+    "verdicts": {
+      "typo": 30,
+      "real_word": 274,
+      "unsure": 10,
+      "no_answer": 0
+    },
+    "readings": 1,
+    "model": "claude-sonnet-5-5",
+    "rubric": "census_repair_check",
+    "rubric_version": 1,
+    "prompt_sha256": "ec9c1e475c5161c87915806bfd880dfc69adb87f6bb09d39b2d245fc0a57ce6a",
+    "transport": "live",
+    "budget_usd": 5.0,
+    "estimate": {
+      "n": 30,
+      "transport": "live",
+      "m1_usd": 0.216,
+      "m3_usd": 0.2904,
+      "total_usd": 0.5064,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "batch_factor": 1.0,
+        "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
+      }
+    },
+    "selection": {
+      "n_suggestions": 706,
+      "n_held_elsewhere": 392,
+      "n_new": 314,
+      "by_kind_new": {
+        "early": 131,
+        "other": 162,
+        "vowel_substitution": 21
+      }
+    },
+    "check_dir": "data/candidates/censuses/repair_check",
+    "counts": "data/candidates/censuses/ingest_counts.json",
+    "table": "data/candidates/censuses/census_table.jsonl",
+    "table_sha256": "7abd26482d3ae57be87f2e3df769bdefcc7e4c17e0ecbdd0ac8abb9c44b08900"
+  },
+  "n_emitted": 30,
+  "started_at": "2026-10-15T14:23:44+00:00",
+  "finished_at": "2026-10-15T14:23:49+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "f12d92917d27",
+      "started_at": "2026-10-15T14:23:44+00:00",
+      "finished_at": "2026-10-15T14:23:49+00:00",
+      "git_sha": "28f2a2e4+dirty",
+      "args": {
+        "stage": "repair_check",
+        "stage_rule": "the repair suggestions of ingest_counts.json whose repaired word is new to the census lists and that the repair check judged a typo (QUESTIONS 35)",
+        "n": 30,
+        "n_checked": 314,
+        "verdicts": {
+          "typo": 30,
+          "real_word": 274,
+          "unsure": 10,
+          "no_answer": 0
+        },
+        "readings": 1,
+        "model": "claude-sonnet-5-5",
+        "rubric": "census_repair_check",
+        "rubric_version": 1,
+        "prompt_sha256": "ec9c1e475c5161c87915806bfd880dfc69adb87f6bb09d39b2d245fc0a57ce6a",
+        "transport": "live",
+        "budget_usd": 5.0,
+        "estimate": {
+          "n": 30,
+          "transport": "live",
+          "m1_usd": 0.216,
+          "m3_usd": 0.2904,
+          "total_usd": 0.5064,
+          "assumptions": {
+            "m1_usd_per_word": 0.0072,
+            "m3_usd_per_passed_word": 0.011,
+            "m1_pass_rate": 0.88,
+            "batch_factor": 1.0,
+            "source": "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
+          }
+        },
+        "selection": {
+          "n_suggestions": 706,
+          "n_held_elsewhere": 392,
+          "n_new": 314,
+          "by_kind_new": {
+            "early": 131,
+            "other": 162,
+            "vowel_substitution": 21
+          }
+        },
+        "check_dir": "data/candidates/censuses/repair_check",
+        "counts": "data/candidates/censuses/ingest_counts.json",
+        "table": "data/candidates/censuses/census_table.jsonl",
+        "table_sha256": "7abd26482d3ae57be87f2e3df769bdefcc7e4c17e0ecbdd0ac8abb9c44b08900"
+      },
+      "n_emitted": 30,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

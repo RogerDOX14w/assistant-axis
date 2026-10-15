@@ -1,0 +1,170 @@
+{
+  "result": {
+    "batch_id": "persona_2026-10-15_all",
+    "fit_id": "fit_2026-10-13",
+    "N": 20,
+    "n": 8051,
+    "flags": {
+      "duplicate_like": 2005,
+      "novel_like": 2387,
+      "ordinary": 3659
+    },
+    "disagreements": {
+      "dup_vs_new": {
+        "met_rule": 794,
+        "listed": 794
+      },
+      "cover_questioned": {
+        "met_rule": 101,
+        "listed": 101
+      },
+      "novel_vs_covered": {
+        "met_rule": 464,
+        "listed": 464
+      },
+      "cap": 805,
+      "quantile": 0.1
+    },
+    "thresholds": {
+      "dup_threshold": 0.7322,
+      "novel_pct": 0.8,
+      "set_by": "plan default"
+    },
+    "by_generator": {
+      "alignment_sweep": {
+        "n": 813,
+        "flags": {
+          "novel_like": 270,
+          "duplicate_like": 197,
+          "ordinary": 346
+        }
+      },
+      "antonym_check": {
+        "n": 374,
+        "flags": {
+          "ordinary": 137,
+          "novel_like": 115,
+          "duplicate_like": 122
+        }
+      },
+      "base_model": {
+        "n": 1355,
+        "flags": {
+          "ordinary": 580,
+          "duplicate_like": 548,
+          "novel_like": 227
+        }
+      },
+      "censuses": {
+        "n": 5139,
+        "flags": {
+          "ordinary": 2387,
+          "duplicate_like": 1346,
+          "novel_like": 1406
+        }
+      },
+      "ipip": {
+        "n": 830,
+        "flags": {
+          "duplicate_like": 244,
+          "novel_like": 208,
+          "ordinary": 378
+        }
+      },
+      "m1_validation": {
+        "n": 108,
+        "flags": {
+          "duplicate_like": 26,
+          "ordinary": 42,
+          "novel_like": 40
+        }
+      },
+      "manual": {
+        "n": 5,
+        "flags": {
+          "ordinary": 4,
+          "novel_like": 1
+        }
+      },
+      "masked_lm": {
+        "n": 1521,
+        "flags": {
+          "novel_like": 406,
+          "ordinary": 634,
+          "duplicate_like": 481
+        }
+      },
+      "noun_relabel": {
+        "n": 61,
+        "flags": {
+          "ordinary": 25,
+          "novel_like": 12,
+          "duplicate_like": 24
+        }
+      },
+      "roget": {
+        "n": 349,
+        "flags": {
+          "ordinary": 178,
+          "duplicate_like": 73,
+          "novel_like": 98
+        }
+      },
+      "states_pass": {
+        "n": 373,
+        "flags": {
+          "ordinary": 177,
+          "novel_like": 81,
+          "duplicate_like": 115
+        }
+      },
+      "structural": {
+        "n": 478,
+        "flags": {
+          "novel_like": 96,
+          "duplicate_like": 194,
+          "ordinary": 188
+        }
+      },
+      "wn_clusters": {
+        "n": 578,
+        "flags": {
+          "ordinary": 270,
+          "duplicate_like": 187,
+          "novel_like": 121
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/persona_novelty.py compare --batch-id persona_2026-10-15_all",
+      "git_sha": "ef90f753+dirty",
+      "author": "Roger Dearnaley",
+      "title": "persona-space scores persona_2026-10-15_all: summary"
+    },
+    "produced_at": "2026-10-15T01:04:20+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/persona_novelty.py",
+        "fingerprint": "v1:2026-10-14T16:08:44+00:00@53889",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-14T16:08:44+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "1c7dcd9c294f94dafbcb5f1d3198252255c11bf92883e0c4ce7208a110e2c1bf"
+  }
+}
