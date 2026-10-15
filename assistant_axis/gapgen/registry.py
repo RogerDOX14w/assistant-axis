@@ -501,6 +501,10 @@ class Registry:
         read with ``fold(raw=True)``, never one from the retraction view (it would lose the retracted runs' sources
         for good).  Control records are written by :func:`retract` / :func:`unretract` only."""
         records = list(records)
+        viewed = [r.get("key") for r in records if RETRACTION_NOTE in r]
+        if viewed:      # a row from the retraction view would lose the retracted sources for good (review S1)
+            raise ValueError(f"write() takes raw rows, not the retraction view: {viewed[:5]} carry a "
+                             f"{RETRACTION_NOTE!r} note (read with fold(raw=True))")
         bad = [r.get("key") for r in records if is_control_key(r.get("key"))]
         if bad:
             raise ValueError(f"{bad[0]!r} is a control record's key: use retract / unretract")
@@ -935,11 +939,13 @@ def import_rows(source_path: Path | str, keys: Sequence[str], *, registry_path: 
         absent = {k for k in want if k not in cur}
         for i, rec in lines:
             if rec["key"] in absent:
-                out.append(copy.deepcopy(rec))
+                rec2 = copy.deepcopy(rec)
+                rec2.pop(RETRACTION_NOTE, None)     # a snapshot's view note is not a field (review S2)
+                out.append(rec2)
                 report.replayed.setdefault(rec["key"], []).append(
                     {"line": i, "rev": rec.get("rev"), "updated_at": rec.get("updated_at")})
         for k in absent:
-            expect[k] = _strip_stamps(src_fold[k])
+            expect[k] = {f: v for f, v in _strip_stamps(src_fold[k]).items() if f != RETRACTION_NOTE}
         for k in want:
             if k in absent:
                 continue
@@ -1002,6 +1008,10 @@ class RetractReport:
     changed: list = field(default_factory=list)
     #: of ``changed``: rows whose first gloss hint (the intended sense M1 is shown) changes
     gloss_hint_changed: list = field(default_factory=list)
+    #: of ``gloss_hint_changed``: the rows M1 judged after the run began (or its start unknown): a rerun of M1 there
+    gloss_hint_changed_after_run: list = field(default_factory=list)
+    #: settled or queued rows that only lose a source (reported, not refused)
+    settled_changed: list = field(default_factory=list)
     #: rows whose ``relabel`` link is cleared (retract) or restored (unretract) in the view
     relabel_changed: list = field(default_factory=list)
     #: ``{key: why}``: rows with a settled review, a seed-queue entry, or a merge into a dropped row
@@ -1018,19 +1028,45 @@ class RetractReport:
 
     def counts(self) -> dict:
         return {"n_sources": self.n_sources, "n_dropped": len(self.dropped), "n_changed": len(self.changed),
-                "n_gloss_hint_changed": len(self.gloss_hint_changed), "n_relabel_changed": len(self.relabel_changed),
+                "n_gloss_hint_changed": len(self.gloss_hint_changed),
+                "n_gloss_hint_changed_after_run": len(self.gloss_hint_changed_after_run),
+                "n_settled_changed": len(self.settled_changed), "n_relabel_changed": len(self.relabel_changed),
                 "n_blocked": len(self.blocked)}
 
     def as_dict(self) -> dict:
         return {**asdict(self), "run": self.run, "counts": self.counts()}
 
 
-def _blocked(before: dict, after: dict, touched: Iterable[str], queue_keys: Iterable[str]) -> dict:
-    """``{key: why}`` for the touched rows a retraction must not move without ``force``, and for rows of ``after``
-    merged into a row ``after`` no longer has."""
+def _run_started_at(generator: str, run_id: str) -> Optional[str]:
+    """The run's ``started_at`` from its ``run.json`` (the earliest session's), or ``None`` when unknown."""
+    try:
+        from .runs import run_dir
+        meta = json.loads((run_dir(generator, run_id) / "run.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    times = [meta.get("started_at")] + [s.get("started_at") for s in meta.get("sessions") or []]
+    times = [t for t in times if t]
+    return min(times) if times else None
+
+
+def _blocked(before: dict, after: dict, touched: Iterable[str], queue_keys: Iterable[str], *,
+             dropped: Iterable[str] = (), gloss_changed: Iterable[str] = (), run_start: Optional[str] = None) -> dict:
+    """``{key: why}`` for the rows a retraction must not move without ``force`` (the Fable review's rule,
+    2026-10-15): a settled or queued row the retraction *drops*; a settled or queued row whose first gloss hint
+    changes when its review or M1 postdates the run (or the run's start is unknown), since that gloss is what Roger
+    saw; and a row merged into a row the retraction drops.  A settled row that merely loses a source is reported
+    (:func:`_settled_changed`), not refused: none of its review, M1 or M3 blocks is touched."""
     queued = set(queue_keys or ())
+    dropped, gloss_changed = set(dropped), set(gloss_changed)
     out: dict[str, str] = {}
     for k in touched:
+        if k not in dropped:
+            if k not in gloss_changed:
+                continue
+            r0 = before.get(k) or {}
+            seen = max(str((r0.get("review") or {}).get("at") or ""), str((r0.get("filter") or {}).get("at") or ""))
+            if run_start is not None and seen and seen < run_start:
+                continue
         r = before.get(k) or after.get(k) or {}
         why = []
         st = (r.get("review") or {}).get("status")
@@ -1051,7 +1087,15 @@ def _blocked(before: dict, after: dict, touched: Iterable[str], queue_keys: Iter
     return dict(sorted(out.items()))
 
 
-def _effect(rows: dict, runs_before: set, runs_after: set, queue_keys) -> tuple[dict, dict, dict]:
+def _settled_changed(before: dict, changed: Iterable[str], queue_keys: Iterable[str]) -> list:
+    """The settled or queued rows that only lose a source: reported, never refused."""
+    queued = set(queue_keys or ())
+    return sorted(k for k in changed if ((before.get(k) or {}).get("review") or {}).get("status") in
+                  SETTLED_REVIEW_STATUSES or (before.get(k) or {}).get("seed_queue_stem") or k in queued)
+
+
+def _effect(rows: dict, runs_before: set, runs_after: set, queue_keys,
+            run_start: Optional[str] = None) -> tuple[dict, dict, dict]:
     before = apply_retractions(rows, runs_before)
     after = apply_retractions(rows, runs_after)
     dropped = sorted(set(before) ^ set(after))
@@ -1060,8 +1104,14 @@ def _effect(rows: dict, runs_before: set, runs_after: set, queue_keys) -> tuple[
     gloss = sorted(k for k in changed if first_gloss_hint(before[k]) != first_gloss_hint(after[k]))
     relabel = sorted(k for k in both if before[k].get("relabel") != after[k].get("relabel"))
     touched = set(dropped) | set(changed) | set(relabel)
-    eff = {"dropped": dropped, "changed": changed, "gloss_hint_changed": gloss, "relabel_changed": relabel}
-    return eff, _blocked(before, after, touched, queue_keys), {"before": before, "after": after}
+    # the gloss changes that matter: rows M1 judged after the run began (or the run's start unknown); the others
+    # were judged before the run's gloss existed (Fable review 2026-10-15, should-fix 3)
+    gloss_after = sorted(k for k in gloss if run_start is None or
+                         str(((before[k].get("filter") or {}).get("at")) or "") >= run_start)
+    eff = {"dropped": dropped, "changed": changed, "gloss_hint_changed": gloss, "gloss_hint_changed_after_run":
+           gloss_after, "relabel_changed": relabel, "settled_changed": _settled_changed(before, changed, queue_keys)}
+    return eff, _blocked(before, after, touched, queue_keys, dropped=dropped, gloss_changed=gloss,
+                         run_start=run_start), {"before": before, "after": after}
 
 
 def _control_record(prev: Optional[dict], *, generator: str, run_id: str, retracted: bool, reason: str, by: str,
@@ -1111,13 +1161,15 @@ def _set_retraction(registry_path, generator: str, run_id: str, *, retracted: bo
                 rep.refused = f"run {generator}/{run_id} is not retracted"
                 return rep
             new_active = active - {run}
-        eff, blocked, _ = _effect(rows, active, new_active, queue_keys)
+        eff, blocked, _ = _effect(rows, active, new_active, queue_keys, run_start=_run_started_at(generator, run_id))
         rep.dropped, rep.changed = eff["dropped"], eff["changed"]
         rep.gloss_hint_changed, rep.relabel_changed = eff["gloss_hint_changed"], eff["relabel_changed"]
+        rep.gloss_hint_changed_after_run, rep.settled_changed = eff["gloss_hint_changed_after_run"], eff["settled_changed"]
         rep.blocked = blocked if retracted else {}
         if retracted and blocked and not force:
-            rep.refused = (f"{len(blocked)} row(s) the retraction would drop or change are settled (review, seed "
-                           f"queue or a merge into a dropped row); pass force to retract anyway")
+            rep.refused = (f"{len(blocked)} row(s) the retraction would drop, or whose gloss Roger saw it would change, "
+                           f"are settled (review, seed queue or a merge into a dropped row); pass force to retract "
+                           f"anyway")
             return rep
         effect = {**rep.counts(), "blocked_overridden": sorted(blocked) if retracted and force else []}
         rec = _control_record(controls.get(retraction_key(generator, run_id)), generator=generator, run_id=run_id,

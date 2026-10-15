@@ -238,3 +238,37 @@ class TestCli:
         assert GR.main(["--registry", str(reg), "unretract", "--run", "structural/r_bad", "--reason", "undo",
                         "--by", "t"]) == 0
         assert len(Registry(reg).fold()) == 4
+
+
+class TestReviewFixes:
+    """The Fable review of 2026-10-15: the refusal rule, view rows refused by write(), view notes not imported."""
+
+    def test_a_settled_row_that_only_loses_a_source_is_reported_not_refused(self, reg):
+        submit_candidates([C("brave", BAD, gloss="rash", ref="s:4")], registry_path=reg, relabel=None)
+        Registry(reg).merge_block("brave#1", "review", {"status": "accepted", "at": "2026-10-11T00:00:00+00:00"})
+        rep = _go(reg, dry_run=True)
+        assert rep.refused is None and "brave#1" not in rep.blocked and rep.settled_changed == ["brave#1"]
+
+    def test_a_gloss_change_reviewed_before_the_run_is_not_refused(self, reg, monkeypatch):
+        import assistant_axis.gapgen.registry as R
+        Registry(reg).merge_block("smug#1", "review", {"status": "accepted", "at": "2026-10-11T00:00:00+00:00"})
+        monkeypatch.setattr(R, "_run_started_at", lambda g, r: "2026-10-14T01:00:00+00:00")
+        rep = _go(reg, dry_run=True)
+        assert rep.refused is None and rep.gloss_hint_changed == ["smug#1"]
+        assert rep.gloss_hint_changed_after_run == []          # no filter.at: M1 judged before the run, or never
+        monkeypatch.setattr(R, "_run_started_at", lambda g, r: "2026-10-01T00:00:00+00:00")
+        assert _go(reg, dry_run=True).blocked == {"smug#1": "review accepted"}   # reviewed after the run: refuse
+
+    def test_write_refuses_a_view_row(self, reg):
+        _go(reg)
+        view = Registry(reg).fold()["smug#1"]
+        with pytest.raises(ValueError, match="retraction view"):
+            Registry(reg).write([view])
+
+    def test_import_from_a_snapshot_drops_the_view_note(self, reg, tmp_path):
+        _go(reg)
+        snap = compact(reg).snapshot_path                      # the snapshot holds the view, with the note
+        assert RETRACTION_NOTE in {k: v for k, v in read_snapshot(snap).items()}["smug#1"]
+        target = tmp_path / "t" / "registry.jsonl"
+        import_rows(snap, ["smug#1"], registry_path=target)
+        assert RETRACTION_NOTE not in Registry(target).fold(raw=True)["smug#1"]

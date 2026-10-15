@@ -825,7 +825,9 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--confirmed-by", default=None, help="Roger's explicit go, for anything over $20")
         p.add_argument("--allow-dirty", action="store_true", help="run with uncommitted platform code (recorded)")
         p.add_argument("--dry-run", action="store_true")
-        p.add_argument("--model", default=O.MODEL)
+        # the operators prompt asks the model to "think first, in 'reasoning'", which Sonnet 5.5 refuses (judging rule,
+        # 2026-10-13): Haiku 5.5 only until that wording changes (Fable review 2026-10-15)
+        p.add_argument("--model", default=O.MODEL, choices=(O.MODEL,))
 
     def ops(p):
         p.add_argument("--principal-min-score", type=int, default=O.PRINCIPAL_MIN_SCORE,
