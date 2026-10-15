@@ -5400,6 +5400,16 @@ invisible in the template.  Put the rendered sample into the draft document
 too, so that Roger reviews what the model reads, and render again after
 each edit.
 
+### Review sheets for Roger (2026-10-15)
+A sheet Roger marks (a `roger_sample.md` and the like) shows what his
+decision depends on, and says where each column comes from.  The masked-LM
+spot check showed the generator's dictionary hint, which only M1's floor
+rescue uses, instead of M1's own gloss, which the pipeline uses; he took
+the blank and odd hints for a gloss bug.  So: show the field the pipeline
+acts on, label any generated field that is not load-bearing, put the mark
+column early (never last after empty cells; parsers find it by header),
+and read the rendered sheet once before handing it over.
+
 ---
 
 ## Documentation Context
