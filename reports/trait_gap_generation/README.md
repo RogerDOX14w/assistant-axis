@@ -180,6 +180,17 @@ review comments go into the plan files; then Opus executes the platform first.
   novelty check by hand, with a scratch registry so no probe row reaches the real one; commands, models, costs
   (about two cents a word), what each step writes, and savage as the worked example.
 
+## Trait corpus target: about 1,800 (Roger, 2026-10-16)
+
+Provisional, to revisit once review has grouped the kept candidates.  Reasoning: M3 judged 42% of 8,674 decided
+trait rows covered by the corpus; leaving out the alignment sweep (aimed at a small area, 23%) and Roget (rare
+concepts, 29%), the generators cluster around 50%.  With a fixed finite population sampled evenly, a covered share of
+one half means the corpus is half of it: about 1,800 from 932.  Two corrections pull in opposite directions and
+roughly cancel: Roger's reviews put the true covered share nearer 60% (M3 called 78 of 177 reviewed "new" rows
+that he merged into a corpus trait), which lowers the estimate; the Zipf effect (generators reach common concepts
+more often than rare ones; Roget's 29% hints at the tail) raises it.  Capture-recapture on the same data (Chao1,
+which recovers the corpus's own size to about 10%) gives 1,900-2,700 from the candidates in hand alone.
+
 ## Parked: generators aimed at roles (Roger, 2026-10-10)
 
 **Parked until there is more Fable budget**, since the plans themselves want Fable; nothing to do before then.
