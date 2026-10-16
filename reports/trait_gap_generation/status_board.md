@@ -64,5 +64,5 @@ kept awaiting review, 211 reviewed.
 |---|---|---|---|
 | 13 | [Generator testing and saturation](./coding_plan_13_generator_testing.md) | **8** (pooled harness done, $58.78; Roger's marks: recovered 20 of 20, novel 19 of 20) | nothing |
 | — | trait corpus target | decided 2026-10-16: **about 1,800, provisional** (README § "Trait corpus target") | revisit once review has grouped the kept candidates |
-| — | role-judge rubric experiment ([plan](../pipeline/plan_role_rubric_experiment.md)) | **2** | Roger: agree it, and trim to four runs or keep eight (open_items, item C3); runs on the pod after the extraction's step 3 |
+| — | role-judge rubric experiment ([plan](../pipeline/plan_role_rubric_experiment.md)) | **approved** (Roger, 2026-10-16, all eight arms, about $50 batched) | runs on the pod after the extraction's step 3; parameters quoted at launch |
 | — | **review itself** | ongoing | Roger's review sessions: 4,822 kept candidates awaiting review, 211 settled |

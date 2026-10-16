@@ -200,7 +200,9 @@ classified in [role_kinds.json](../../data/roles/role_kinds.json) by
 [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py) (Haiku 5.5, three readings, majority; $0.07):
 occupation or task 162, stance or way of life 47, non-human 44, circumstance 24, temperament 22, life stage and
 relationship 20, status 9, pastime 8, other 4 (13 not unanimous, no three-way split).  That is the reference balance:
-occupations are already about half.
+occupations are already about half.  **Roger, 2026-10-16: keep roughly that balance, so occupations are about
+half of what the role generators submit; aim for missing ones that are common, well known and not especially
+similar to ones the corpus has** (plan 16 § 6).
 
 Was: parked until there was more Fable budget, since the plans themselves want Fable.
 Roger: "I do think we need to add some plans for role generators, and not just rely on our existing sources
@@ -236,8 +238,9 @@ things, so a first list to react to.  **Three categories at least, fourteen at m
 (2026-10-10), so this is nine, the last of them an escape hatch:
 
 - **occupation or task**, work and assistant-style functions alike: [accountant](../../data/roles/instructions/accountant.json),
-  [doctor](../../data/roles/instructions/doctor.json), [summarizer](../../data/roles/instructions/summarizer.json),
-  [instrumentally aligned AI](../../data/roles/instructions/instrumentally_aligned_ai.json)
+  [doctor](../../data/roles/instructions/doctor.json), [summarizer](../../data/roles/instructions/summarizer.json).
+  The AI roles ([instrumentally aligned AI](../../data/roles/instructions/instrumentally_aligned_ai.json), robot) are
+  **non-human**, not occupations (the classifier's reading, confirmed by Roger, 2026-10-16)
 - **life stage, family and relationship**: [infant](../../data/roles/instructions/infant.json), [elder](../../data/roles/instructions/elder.json),
   [parent](../../data/roles/instructions/parent.json), [widow](../../data/roles/instructions/widow.json)
 - **circumstance**, something one is in rather than does, migration and legal standing included:

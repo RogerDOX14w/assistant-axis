@@ -52,7 +52,7 @@ pastime); B and C each feed one kind, and the balance bounds them more than thei
   | pastime | 8 | 2.4% | 13 | +5 |
   | other | 4 | 1.2% | 6 | +2 |
 
-  Occupations are already half the corpus; the AI roles ([instrumentally_aligned_ai](../../data/roles/instructions/instrumentally_aligned_ai.json),
+  Occupations are already half the corpus; the AI roles (confirmed by Roger, 2026-10-16; [instrumentally_aligned_ai](../../data/roles/instructions/instrumentally_aligned_ai.json),
   [robot](../../data/roles/instructions/robot.json)) sit under non-human.  The last two columns are what "share
   held" would mean at a mid-cap of 550; they are the reference the readouts compare against, not quotas (§ 4).
 - **Held rows**: 355 registry rows on the `roles` holding list (M1 tags `role_person` / `role_thing`;
@@ -139,6 +139,8 @@ a gloss stage, M3 in batches of their own, R1 grouping, R2 review, by-name promo
 - **Wave size by review hours**, as plans 04 and 09 size theirs: about two hours of Roger's review, roughly 300
   rows at the measured 150 terms an hour (nouns may go faster), which at the base-model wave's kept share (37%
   of decided, [README](./README.md)) is about 100 kept roles a wave; two or three waves reach the cap.
+- **Occupations about half of every wave's submissions** (Roger, 2026-10-16: the aim is to keep roughly the
+  current balance), the other kinds sharing the rest; § 6 says how B picks its half.
 - **Balance readout, every wave**: the nine-way split of the corpus before, of the wave's submitted rows (by the
   generator's guess), of the kept rows (by the kind call), and of the corpus after; the readout says where it
   moved.  A generator that feeds one kind (B, C) is told its "room if held" number (§ 2) before it runs, and the
@@ -210,6 +212,17 @@ step 6; precision on 50 novel candidates by Roger (role, and new).
 
 ## 6. Generator B: lists of professions
 
+**Roger, 2026-10-16: keep roughly the current balance, so occupations should be about half of what the role
+generators submit; of the vast number available, aim for missing ones that are common, well known, and not
+especially similar to ones the corpus already has.**  So B is not a sweep of a classification but a ranked pick:
+every candidate lay role is scored for familiarity (BLS OEWS employment for its SOC code, public domain like SOC;
+the Zipf frequency of the lay title, as [freq.py](../../assistant_axis/gapgen/freq.py) already computes for
+traits) and for distance from the corpus (its nearest corpus role by embedding, and M3's hierarchy line of § 3.4,
+under which a sub-role such as cardiologist is covered by doctor), and the wave takes the top of the ranking up to
+the occupations' half of the wave.  The random DOT and alternate-title samples below give way to this: archaic
+and oddly specific is the opposite of well known, so the DOT sample is dropped, and alternate titles enter only
+through the same ranking.
+
 **Idea.**  Occupations can be enumerated endlessly, so the question is the level, not the source: the persona
 level is "nurse", "cardiologist" or "executive", not "Chief Sustainability Officers".  Take a classification's
 middle tier, let a model name the lay role for each entry, and add an eclectic sample of lay titles and of
@@ -239,10 +252,11 @@ historical trades for the odd ones.
    lay role nouns a person would say when asked what they are, a gloss, `human` true, kind `occupation`, and
    whether the role is a **distinct persona from its parent** (a cardiologist talks about hearts; a chief
    sustainability officer is an executive).
-2. A random sample of 300 alternate titles and 200 DOT titles, same call, for the lay and the odd.
+2. Alternate titles (300 of the most frequent by Zipf), same call, ranked with the rest (Roger's rule above; the DOT sample dropped).
 3. Submit in role mode; `source_ref` the SOC code or the title; the attribution in the run directory.
-4. The wave is told its room (§ 2: about +100 if the occupation share is held at 550) and M3's hierarchy line
-   (§ 3.4) does the cutting; the readout shows the occupation share before and after.
+4. Rank by familiarity and distance (above) and submit from the top until occupations are about half of the
+   wave's submitted rows; M3's hierarchy line (§ 3.4) still cuts, and the readout shows the occupation share
+   before and after (about +100 in all if the share is held at 550).
 
 **Yield and biases.**  459 broad -> about 350 distinct lay roles -> minus the 162 corpus occupations and the
 held rows -> about 200 net-new -> M3 covers perhaps 40% -> about 120 candidates; the samples add 100-150 more.
@@ -407,9 +421,10 @@ not estimated here.  Every call site logs `MultiModelUsage` to a `usage.json` (h
    (b) covered against both corpora; (c) roles only, no trait retrieval.  **Recommend (a)**.
 6. **Narrative-function roles** (hero, villain, sidekick, mentor, love interest) from A.  (a) kept and tagged;
    (b) dropped at generation.  **Recommend (a)**.
-7. **B's sources.**  (a) O*NET broad tier plus alternate titles plus a DOT sample (all verified or US
-   government); (b) add ESCO and ISCO-08 once their licences are read.  **Recommend (a)**; the alternate-titles
-   file is a small fresh download under `data/external/onet/`.
+7. **B's sources.**  (a) the SOC broad tier with O*NET's descriptions, plus O*NET's alternate titles, all ranked
+   by familiarity and distance from the corpus (Roger's rule of 2026-10-16, § 6; the DOT sample dropped); (b) add
+   ESCO and ISCO-08 once their licences are read.  **Recommend (a)**; the alternate-titles file and the BLS OEWS
+   employment table are small fresh downloads under `data/external/`.
 8. **C's crossover test** for D&D inventions: (a) >= 3 works outside D&D or >= 10 Wikidata sitelinks; (b) Roger
    reads the SRD list once and marks the inventions he wants (about 60 names, twenty minutes).  **Recommend (b)
    for the SRD and (a) for anything beyond it**; and whether the playable species are in (recommend yes).

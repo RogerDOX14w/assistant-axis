@@ -7,6 +7,11 @@ and sent by step 3 ([3_judge.py](../../pipeline/3_judge.py)) once per response; 
 ([4_vectors.py](../../pipeline/4_vectors.py)) keeps only responses it scores **3** when it averages a role's
 activations, so the rubric decides which responses enter every role vector.
 
+**Approved by Roger, 2026-10-16, with all eight arms** (the agent had proposed trimming to four, dropping A1, A2,
+A3 and A4 as unlikely to show anything; Roger: "performing an experiment where you think you know what the answer
+will be can be informative: you might find you were wrong").  About $50 batched at 60 roles; the parameters are
+still quoted at launch, as for any run over $20.
+
 ## 1. Why it is deferred
 
 The three artefacts the 2026-10-12 review found in levels 0–2 (the model name `Gemma`, the typo `((an AI`, the

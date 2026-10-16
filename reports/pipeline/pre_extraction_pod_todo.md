@@ -228,7 +228,8 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     run.
 
 11. **The role-judge rubric experiment** ([plan_role_rubric_experiment.md](./plan_role_rubric_experiment.md);
-    about $50 of batch judging on 60 roles, over the $20 line: **Roger's go with quoted parameters**).  After the
+    about $50 of batch judging on 60 roles, over the $20 line: **approved by Roger 2026-10-16 with all eight arms**;
+    the parameters are quoted at launch).  After the
     roles' step 3 in October and before the role vectors are final: the rubric arms as temporary render flags, a
     twice-run baseline for judge noise, boundary flips read by Roger; the AI-persona roles over-sampled
     (aligned_artificial_intelligence, now [instrumentally_aligned_ai](../../data/roles/instructions/instrumentally_aligned_ai.json),
