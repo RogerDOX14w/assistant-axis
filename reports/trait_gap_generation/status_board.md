@@ -40,7 +40,7 @@ kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 135 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel (nouns turned into trait adjectives) | **8** (Haiku `llm-apply` ran 2026-10-15: 130 relabels) | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) (franchise characters, professions, monsters, a role mode for the trait generators) | **1, being written** (unparked 2026-10-16; Fable) | | the plan, then Roger's review.  The nine role kinds are decided and the 340 roles classified ([role_kinds.json](../../data/roles/role_kinds.json)) |
+| 16 | [Role generators](./16_role_generators.md) (franchise characters, professions, monsters, a role mode for the trait generators) | **2** (unparked 2026-10-16; plan written by Fable the same day) | | Roger: the plan's 12 decisions (§ 12); then a coding plan for the shared role path first.  The nine role kinds are decided and the 340 roles classified ([role_kinds.json](../../data/roles/role_kinds.json)) |
 
 ## Platform: filters, scorers, review
 
