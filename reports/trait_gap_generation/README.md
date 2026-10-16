@@ -191,9 +191,18 @@ that he merged into a corpus trait), which lowers the estimate; the Zipf effect 
 more often than rare ones; Roget's 29% hints at the tail) raises it.  Capture-recapture on the same data (Chao1,
 which recovers the corpus's own size to about 10%) gives 1,900-2,700 from the candidates in hand alone.
 
-## Parked: generators aimed at roles (Roger, 2026-10-10)
+## Generators aimed at roles (Roger, 2026-10-10; unparked for planning 2026-10-16)
 
-**Parked until there is more Fable budget**, since the plans themselves want Fable; nothing to do before then.
+**Unparked for planning** (Roger, 2026-10-16): the plan is
+[16_role_generators.md](./16_role_generators.md) (being written).  **The nine categories below are accepted as they
+stand, as one dimension** ("they already cover human-or-not, with borderline cases like elves").  The 340 roles are
+classified in [role_kinds.json](../../data/roles/role_kinds.json) by
+[classify_role_kinds.py](../../data_analysis/classify_role_kinds.py) (Haiku 5.5, three readings, majority; $0.07):
+occupation or task 162, stance or way of life 47, non-human 44, circumstance 24, temperament 22, life stage and
+relationship 20, status 9, pastime 8, other 4 (13 not unanimous, no three-way split).  That is the reference balance:
+occupations are already about half.
+
+Was: parked until there was more Fable budget, since the plans themselves want Fable.
 Roger: "I do think we need to add some plans for role generators, and not just rely on our existing sources
 generating roles.  Both ones that generate professions, and ones that can generate non-human personas."  Every
 generator so far aims at traits ([the fourteen plans](#the-plans)), and the roles in
