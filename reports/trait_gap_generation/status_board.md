@@ -48,10 +48,10 @@ kept awaiting review, 211 reviewed.
 |---|---|---|---|
 | 14 | [M1 trait-hood filter and the registry](./coding_plan_platform.md) | **8, finished**; the registry gained `retract` (2026-10-15) | nothing |
 | 15 | M2 metric calibration | **8, finished** | nothing |
-| 10 | [M3 novelty check](./coding_plan_m3.md) | **8, finished** (rule set 3, rubric A) | nothing.  Known weakness: about 44% of the "new" rows Roger reviewed he merged into a corpus trait; the README TODO "Revisit the duplicate signals" measures it after about 100 resolved groups.  Optional lever: the cosine floor |
+| 10 | [M3 novelty check](./coding_plan_m3.md) | **8, finished** (rule set 3, rubric A) | nothing.  Known weakness: about 44% of the "new" rows Roger reviewed he merged into a corpus trait; the README TODO "Revisit the duplicate signals" measures it after about 100 resolved groups.  The cosine floor stays at 0.25 (Roger, 2026-10-16: the gate audit found it harmless and nearly idle) |
 | R1 | [Review graph and review app](./coding_plan_review.md) | **8, finished** | nothing; an incremental build to bring in the batches since 2026-10-14 (masked-LM and base-model wave 1, the relabels, the repairs), which also shows the lexical badges |
 | 11 | [Lexical recall insurance](./coding_plan_11_novelty_ensemble.md) | **8, finished** (decision (d): every dictionary link a proposed merge, none cuts; integration merged) | nothing; badges appear at the next review-graph build |
-| 12 | [Novelty in persona space](./coding_plan_12_persona_space.md) | **7** (gate 2 passed for the duplicate flag; whole-registry scoring done 2026-10-15: 2,005 of 8,051 flagged duplicate-like) | the review-card badge for its flags (approved concept), to build |
+| 12 | [Novelty in persona space](./coding_plan_12_persona_space.md) | **7** (gate 2 passed for the duplicate flag; whole-registry scoring done 2026-10-15: 2,005 of 8,051 flagged duplicate-like) | the review-card badge for its flags (approved concept), to build; with it, check whether the card offers the trait M3 read highest as the first merge target |
 | — | Label-fit check (does a label mean its gloss?) | **6** (built, validated on Roger's 50 structural marks) | Roger: its role (open_items A1; recommended Haiku, flag only, never auto-relabel) |
 | — | [Noun normalization](./coding_plan_noun_normalization.md) | **8, finished** | nothing |
 | — | Gzip-aware record files | **8, finished** (large records packed) | nothing |
