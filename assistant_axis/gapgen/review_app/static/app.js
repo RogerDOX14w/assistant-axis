@@ -39,6 +39,7 @@ async function loadMeta() {
   $("batch").textContent = `review ${m.batch_id}`;
   document.title = `Review ${m.batch_id}`;
   S.order = S.order || m.default_order;
+  if (m.blind) $("batch").textContent += " (blind: signal badges hidden)";
   if (!m.complete) flash("The graph is incomplete (a build stopped): resume the build before reviewing.", true);
 }
 
@@ -207,6 +208,14 @@ function renderCard() {
     const relabel = m.relabel ? `<span class="badge" title="${esc(m.relabel.route || "")}">${m.relabel.from ? "from " + esc(m.relabel.from) : "adjective: " + esc(m.relabel.to || "")} (${esc(m.relabel.route || "")})</span>` : "";
     // the IPIP pole's other name (blind vs hinted run, one source_ref): the sibling may sit in another group
     const otherNames = (m.other_names || []).length ? `<span class="badge" title="${esc((m.other_names || []).map((o) => o.source_ref + " " + (o.run_ids || []).join(", ")).join("; "))}">other name: ${esc(m.other_names.map((o) => o.surface).join(", "))}</span>` : "";
+    // plan 12's persona-space badge (Roger, 2026-10-15): the duplicate flag prominent, the two cover kinds quiet
+    const pc = m.persona;
+    const near = pc && pc.near ? (pc.near.href ? link(pc.near) : esc(pc.near.label)) + (pc.near.cosine != null ? ` (${Number(pc.near.cosine).toFixed(2)})` : "") : "";
+    const persona = !pc ? "" : pc.kind === "duplicate"
+      ? `<span class="badge flag" title="persona space places this row close to an existing entity (plan 12's duplicate flag); a proposed merge, M3's decision unchanged">persona space: close to ${near}${pc.reading ? "; overlap reading " + esc(pc.reading) + (pc.reading_of ? " (" + esc(pc.reading_of) + ")" : "") : ""}</span>`
+      : pc.kind === "cover_questioned"
+        ? `<span class="badge" title="M3 covered this row; persona space places it far from the covering trait">persona space questions the cover${pc.cos_to_cover != null ? " (" + Number(pc.cos_to_cover).toFixed(2) + ")" : ""}</span>`
+        : `<span class="badge" title="M3 covered this row; persona space finds it unlike the corpus">persona space: novel-like${pc.residual_pct != null ? " (residual percentile " + Math.round(100 * pc.residual_pct) + ")" : ""}; nearest ${near}</span>`;
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
     const mine = !(m.handled_by && m.handled_by !== c.id);
     const btns = [
@@ -217,7 +226,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each

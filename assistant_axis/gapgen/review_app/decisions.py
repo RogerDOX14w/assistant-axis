@@ -247,6 +247,69 @@ def relabel_card(row) -> Optional[dict]:
     return {"from": src, "to": to, "route": route_text(b)}
 
 
+#: The member-card fields that carry a duplicate signal other than M3's own decision: hidden in a blind session
+#: (``serve --blind``, :func:`blind_card`), so that Roger's decisions there are a clean test of the signals.
+SIGNAL_FIELDS = ("persona", "lexical_merges")
+SIGNAL_FLAGS = ("lexical_proposed_merge",)
+
+
+def persona_card(row, label=None) -> Optional[dict]:
+    """The member card's persona-space badge (plan 12; Roger, 2026-10-15: all three kinds, the duplicate flag
+    prominent, the cover kinds quiet), from the row's ``persona`` block, or None.
+
+    * ``duplicate`` (the row's flag is ``duplicate_like``, prominent): "persona space: close to X (0.77); overlap
+      reading 3/3" -- the nearest corpus entity and, when M3 read it, M3's reading of it.
+    * ``cover_questioned`` (quiet): M3 covered the row, and persona space puts it far from the covering trait.
+    * ``novel`` (``novel_vs_covered``, quiet): M3 covered the row, and persona space finds it unlike the corpus.
+
+    ``label`` maps a corpus key (``trait:stem``) to its display label."""
+    pb = (row or {}).get("persona") or {}
+    if not pb:
+        return None
+    nn = pb.get("nn") or {}
+    nid = str(nn.get("id") or "")
+    stem, _, kind = nid.partition("|")
+    near = None
+    if stem:
+        key = f"trait:{stem}" if kind == "T" else f"role:{stem}"
+        path, href = target_path(key)
+        near = {"key": key, "label": (label(key) if label and kind == "T" else stem.replace("_", " ")), "path": path,
+                "href": href, "cosine": nn.get("cos")}
+    rd = pb.get("reading") or {}
+    reading = f"{rd.get('sonnet')}/{rd.get('opus') if rd.get('opus') is not None else '-'}" if rd else None
+    dis = pb.get("disagreement")
+    if pb.get("flag") == "duplicate_like":
+        return {"kind": "duplicate", "near": near, "reading": reading, "reading_of": rd.get("stem"),
+                "disagreement": dis, "prominent": True}
+    if dis == "cover_questioned":
+        return {"kind": "cover_questioned", "near": near, "cos_to_cover": pb.get("cos_to_covered_by"),
+                "covered_by": pb.get("m3_covered_by"), "prominent": False}
+    if dis == "novel_vs_covered":
+        return {"kind": "novel", "near": near, "residual_pct": pb.get("residual_pct"), "prominent": False}
+    return None
+
+
+def blind_card(card):
+    """``card`` (a group card, a term card or a member card) without the signal fields: every member card loses
+    :data:`SIGNAL_FIELDS` and :data:`SIGNAL_FLAGS`, and the corpus entries their ``lexical`` block.  A copy."""
+    def member(m):
+        m = {k: v for k, v in m.items() if k not in SIGNAL_FIELDS}
+        if "flags" in m:
+            m["flags"] = [f for f in m["flags"] if f not in SIGNAL_FLAGS]
+        return m
+    out = dict(card)
+    if "members" in out and isinstance(out["members"], list) and out["members"] and isinstance(out["members"][0], dict):
+        out["members"] = [member(m) for m in out["members"]]
+    if isinstance(out.get("term"), dict):
+        out["term"] = member(out["term"])
+    for k in ("corpus", "edges"):
+        if isinstance(out.get(k), list):
+            out[k] = [{kk: vv for kk, vv in e.items() if kk != "lexical"} for e in out[k]]
+    if "label" in out and "key" in out and "gloss" in out:          # a bare member card
+        out = member(out)
+    return out
+
+
 def _stem_of(surface) -> Optional[str]:
     from assistant_axis.gapgen.normalize import normalize_candidate
     try:
@@ -959,7 +1022,8 @@ class ReviewState:
                "applied": rv.get("status") if rv.get("status") not in (None, "unreviewed") else None,
                "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
                "earlier_review": self.earlier.get(key), "relabel": relabel_card(row),
-               "other_names": other_names_card(key, row, self.ipip_siblings())}
+               "other_names": other_names_card(key, row, self.ipip_siblings()),
+               "persona": persona_card(row, self.label)}
         if out["handled_by"]:
             pre = self.pre_handled_info(key)
             out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution

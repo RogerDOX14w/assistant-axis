@@ -30,8 +30,9 @@ order; ``?`` the key list.
 Commands:
 
 * ``serve --batch-id B [--port 8765] [--order cliques|generator|region|sample] [--by roger]``: the app on 127.0.0.1.
-  ``sample`` is a seeded weighted random order for a review hour meant as a probability sample (decisions.py
-  ``SAMPLE_WEIGHTS``); ``status`` then reports how far it went, per stratum.
+  ``sample`` is a seeded random order for a review hour meant as a probability sample (decisions.py
+  ``SAMPLE_WEIGHTS``); ``status`` then reports how far it went, per stratum.  ``--blind`` hides the persona-space
+  and dictionary badges, so that the session's decisions test those signals.
 * ``status --batch-id B``: groups resolved and open, decisions by type, terms handled (and how many of them an
   earlier review batch settled, by the registry's review blocks), the queue's remaining counts, time per decision
   (median minutes per resolved group, active minutes, decisions per minute).
@@ -79,7 +80,7 @@ def cmd_serve(args) -> int:
     import uvicorn
     from assistant_axis.gapgen.review_app.server import create_app
     app = create_app(review_dir=_review_dir(args), data_dir=args.data_dir, registry_path=args.registry,
-                     queue_path=_queue_path(args), order=args.order, by=args.by)
+                     queue_path=_queue_path(args), order=args.order, by=args.by, blind=args.blind)
     log = app.state.log
     c = log.state.counts()
     print(f"review {args.batch_id}: {c['terms']['total']} terms ({c['terms']['handled']} handled), "
@@ -173,6 +174,9 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--host", default=DEFAULT_HOST, help="keep the default: the app has no login")
             sp.add_argument("--order", choices=D.ORDERS, default="cliques",
                             help="the queue's first order (o on the page switches)")
+            sp.add_argument("--blind", action="store_true",
+                            help="hide the duplicate signals other than M3's decision (persona-space and dictionary "
+                                 "badges), for a session meant to test them")
         if name == "status":
             sp.add_argument("--sample-since", type=int, default=0,
                             help="count the sample order's progress from after this log seq (a later sample session)")

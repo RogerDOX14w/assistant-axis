@@ -33,17 +33,20 @@ from fastapi.staticfiles import StaticFiles
 
 from assistant_axis.gapgen import paths
 
-from .decisions import ActionError, DecisionLog
+from .decisions import ActionError, DecisionLog, blind_card
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 _STEM = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 
 
 def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_path: Optional[Path] = None,
-               queue_path: Optional[Path] = None, order: str = "cliques", by: str = "roger", clock=None) -> FastAPI:
+               queue_path: Optional[Path] = None, order: str = "cliques", by: str = "roger", clock=None,
+               blind: bool = False) -> FastAPI:
     """The app for one review batch's directory (``graph.json`` there; ``decisions.jsonl`` written there).
     ``data_dir``: the corpus (``traits/instructions``) and, unless ``queue_path``, ``seed_queue.json``;
-    ``registry_path``: read once for display (M1 tags, review blocks already applied)."""
+    ``registry_path``: read once for display (M1 tags, review blocks already applied).  ``blind``: the cards leave
+    out the duplicate signals other than M3's decision (the persona-space and dictionary badges; ``blind_card``), for
+    a session whose decisions are to test those signals."""
     data_dir = Path(data_dir) if data_dir is not None else paths.DATA_DIR
     queue_path = Path(queue_path) if queue_path is not None else data_dir / "seed_queue.json"
     log = DecisionLog.open(Path(review_dir), by=by, clock=clock, data_dir=data_dir, registry_path=registry_path,
@@ -62,7 +65,7 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
         g = log.graph
         return {"batch_id": g.batch_id, "from_batches": g.from_batches, "graph_sha256": log.graph_sha256,
                 "complete": g.complete, "schema": g.schema, "default_order": order, "by": log.by,
-                "proposed_cut_off": g.config.get("proposed_cut_off")}
+                "proposed_cut_off": g.config.get("proposed_cut_off"), "blind": blind}
 
     @app.get("/api/queue")
     def queue(order: Optional[Literal["cliques", "generator", "region", "sample"]] = None):
@@ -74,7 +77,8 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
     def group(gid: str):
         with log.lock:
             try:
-                return log.state.group_card(gid) | {"counts": log.state.counts()}
+                card = log.state.group_card(gid)
+                return (blind_card(card) if blind else card) | {"counts": log.state.counts()}
             except KeyError:
                 raise HTTPException(404, f"no group {gid}") from None
 
@@ -82,7 +86,8 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
     def term(key: str):
         with log.lock:
             try:
-                return log.state.term_card(key)
+                card = log.state.term_card(key)
+                return blind_card(card) if blind else card
             except KeyError:
                 raise HTTPException(404, f"no term {key}") from None
 
@@ -99,6 +104,7 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
             except ActionError as exc:
                 raise HTTPException(409, str(exc)) from None
             card = log.state.group_card(gid) if gid in log.state.groups else None
+            card = blind_card(card) if blind and card is not None else card
             return {"event": ev, "group": card, "counts": log.state.counts()}
 
     @app.get("/api/status")

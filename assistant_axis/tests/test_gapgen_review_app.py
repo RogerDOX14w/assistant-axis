@@ -1423,3 +1423,72 @@ class TestSampleOrder:
         # a later session counts from its own start
         seq = max(e["seq"] for e in log.events)
         assert log.state.sample_progress(since_seq=seq)["reached"] == 0
+
+
+# --------------------------------------------------------------------------- plan 12's persona-space badge, and --blind
+
+DUP_BLOCK = {"nn": {"id": "alpha|T", "cos": 0.7742}, "flag": "duplicate_like", "m3_decision": "new",
+             "disagreement": "dup_vs_new", "reading": {"stem": "alpha", "sonnet": 3, "opus": 3, "verdict": "keep"}}
+
+
+class TestPersonaBadge:
+    """Roger, 2026-10-15: a card badge for all three kinds, the duplicate flag prominent, the cover kinds quiet."""
+
+    def test_the_three_kinds_and_none(self):
+        lab = {"trait:alpha": "Alpha"}.get
+        dup = D.persona_card({"persona": DUP_BLOCK}, lab)
+        assert dup["kind"] == "duplicate" and dup["prominent"] and dup["reading"] == "3/3"
+        assert dup["near"]["label"] == "Alpha" and dup["near"]["href"] == "/files/traits/alpha.json"
+        cq = D.persona_card({"persona": {"nn": {"id": "beta|T", "cos": 0.6}, "flag": "ordinary",
+                                         "disagreement": "cover_questioned", "cos_to_covered_by": 0.31}}, lab)
+        assert cq["kind"] == "cover_questioned" and not cq["prominent"] and cq["cos_to_cover"] == 0.31
+        nov = D.persona_card({"persona": {"nn": {"id": "hacker|R", "cos": 0.4}, "flag": "novel_like",
+                                          "disagreement": "novel_vs_covered", "residual_pct": 0.97}}, lab)
+        assert nov["kind"] == "novel" and nov["near"]["label"] == "hacker" and nov["near"]["href"] is None
+        assert D.persona_card({"persona": {"flag": "ordinary", "disagreement": None}}) is None
+        assert D.persona_card({}) is None
+
+    def test_blind_card_strips_the_signals_and_nothing_else(self):
+        card = {"id": "g1", "members": [{"key": "a#1", "label": "a", "gloss": "g", "persona": {"kind": "duplicate"},
+                                         "lexical_merges": [{}], "flags": ["lexical_proposed_merge", "x"]}],
+                "corpus": [{"key": "trait:alpha", "reading": "3/3", "lexical": {"lexicon": "oewn"}}]}
+        b = D.blind_card(card)
+        assert b["members"] == [{"key": "a#1", "label": "a", "gloss": "g", "flags": ["x"]}]
+        assert b["corpus"] == [{"key": "trait:alpha", "reading": "3/3"}]
+        assert card["members"][0]["persona"] == {"kind": "duplicate"}            # a copy: the original is untouched
+
+    def _with_block(self, env):
+        reg = env["reg"]
+        row = reg.fold()[k("godless")]
+        row["persona"] = DUP_BLOCK
+        reg.write([row])
+
+    def test_the_card_carries_the_badge_and_a_blind_server_leaves_it_out(self, env):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        self._with_block(env)
+        seen = {}
+        for blind in (False, True):
+            app = server.create_app(review_dir=env["rdir"], data_dir=env["data"], registry_path=env["reg"].path,
+                                    by="roger", clock=Clock(), blind=blind)
+            c = TestClient(app)
+            assert c.get("/api/meta").json()["blind"] is blind
+            r = c.post("/api/action", json={"action": "open", "source": f"term:{k('godless')}"}).json()
+            m = {x["key"]: x for x in r["group"]["members"]}[k("godless")]
+            t = c.get(f"/api/term/{quote(k('godless'), safe='')}").json()["term"]
+            seen[blind] = (m.get("persona"), t.get("persona"))
+        assert seen[False][0]["kind"] == "duplicate" and seen[False][1]["kind"] == "duplicate"
+        assert seen[True] == (None, None)
+
+    def test_the_page_renders_the_duplicate_badge_prominently(self, tmp_path):
+        out = run_page(tmp_path, """
+            T.S.card = {id: "g1", status: "open", source: "term:a#1", via: null, antonym_groups: [], neighbour_groups: [],
+                        neighbours: [], corpus: [], opposed: [], resolution: null, nominated: null, leftovers: [], distinct: [],
+                        members: [{key: "a#1", label: "above board", gloss: "g", tags: [], flags: [], merged: [], proposed: [],
+                                   persona: {kind: "duplicate", prominent: true, reading: "3/3", reading_of: "honest",
+                                             near: {key: "trait:honest", label: "honest", path: "p", href: "/files/traits/honest.json", cosine: 0.7742}}}]};
+            T.renderCard();
+            const h = el("card").innerHTML;
+            console.log(h.includes('badge flag" title="persona space') && h.includes("close to <a") && h.includes("(0.77); overlap reading 3/3") ? "BADGE" : "MISSING " + h);
+        """)
+        assert "BADGE" in out
