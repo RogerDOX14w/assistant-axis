@@ -5,7 +5,7 @@
 Routes:
 
 * ``GET /``: the page (``static/index.html``; ``app.js`` and ``style.css`` under ``/static``).
-* ``GET /api/queue?order=cliques|generator|region``: every merged group, proposed group and singleton, with handled
+* ``GET /api/queue?order=cliques|generator|region|sample``: every merged group, proposed group and singleton, with handled
   counts, and the counts the page shows at all times.
 * ``GET /api/group/{id}``: a working group's card: members (gloss, generator, M1 tags, M3 decision and covering
   trait, flags, handled), neighbours ranked by strongest edge, corpus and queue traits by reading (each a link to its
@@ -65,7 +65,7 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
                 "proposed_cut_off": g.config.get("proposed_cut_off")}
 
     @app.get("/api/queue")
-    def queue(order: Optional[Literal["cliques", "generator", "region"]] = None):
+    def queue(order: Optional[Literal["cliques", "generator", "region", "sample"]] = None):
         with log.lock:
             o = order or app.state.default_order
             return {"order": o, "items": log.state.queue(o), "counts": log.state.counts()}

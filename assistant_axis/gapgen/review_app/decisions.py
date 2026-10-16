@@ -79,6 +79,7 @@ import copy
 import hashlib
 import json
 import logging
+import math
 import os
 import re
 import statistics
@@ -108,7 +109,19 @@ REVIEW_STATUS = {"promote": "accepted", "merge_into": "merged_into", "park": "pa
 UNREVIEWED = {"status": "unreviewed", "by": None, "at": None, "note": None}
 #: The registry review statuses that settle a term: another batch's term in one is handled here from the start.
 HANDLED_ELSEWHERE = ("accepted", "rejected", "merged_into")
-ORDERS = ("cliques", "generator", "region")
+ORDERS = ("cliques", "generator", "region", "sample")
+#: The ``sample`` order (Roger, 2026-10-16: "have a good sample order"): a seeded random order without replacement
+#: (weighted by stratum when the weights differ), so that the first N items a session reaches are a probability
+#: sample of the queue.  An item's stratum is its strongest member's best M3 overlap reading against any corpus or
+#: queue trait, by either model (Sonnet or Opus).  The weights are equal, so it is a plain random sample: the design
+#: first doubled the reading-3 stratum (on the first 177 reviewed "new" rows a 3 was nearly decisive, 45 of 46
+#: merged), but in review_traits_all_2 that stratum is already 28% of the items and about 40% of the terms (a group
+#: takes its strongest member's reading), so it needs no oversampling.  The order depends only on the seed and the
+#: item ids, never on what is handled, so it is stable through a session; :func:`sample_inclusion` gives each
+#: stratum's inclusion probability for the number of items reached.  Archive of the design:
+#: ``reports/trait_gap_generation/m3_false_new_brainstorm.md``.
+SAMPLE_SEED = "2026-10-16"
+SAMPLE_WEIGHTS = {"read_3": 1.0, "read_2": 1.0, "other": 1.0}
 TIERS = ("merged", "proposed", "single")
 #: Gaps between events longer than this are idle time (``status``'s active minutes).
 IDLE_MINUTES = 10.0
@@ -164,6 +177,49 @@ def edge_level(e: RG.Edge) -> int:
         return 3
     vals = [v for v in (_final(e.readings.get("ab")), _final(e.readings.get("ba"))) if v is not None]
     return max(vals) if vals else 0
+
+
+def best_m3_reading(edges: Iterable[RG.Edge]) -> int:
+    """The highest M3 overlap reading (Sonnet's or Opus's, either direction recorded) on a candidate's non-opposed
+    corpus or queue edges; -1 when nothing was read."""
+    best = -1
+    for e in edges:
+        if e.relation == "opposed":
+            continue
+        for rd in e.readings.values():
+            if not rd or "stalled" in rd:
+                continue
+            for v in (rd.get("sonnet"), rd.get("opus")):
+                if isinstance(v, int) and not isinstance(v, bool):
+                    best = max(best, v)
+    return best
+
+
+def sample_stratum(best: int) -> str:
+    return "read_3" if best >= 3 else ("read_2" if best == 2 else "other")
+
+
+def sample_key(item_id: str, weight: float, seed: str = SAMPLE_SEED) -> float:
+    """The Efraimidis-Spirakis key ``-ln(u) / weight`` (smallest first), ``u`` uniform on (0, 1) from a hash of the
+    seed and the item id: sorting by it draws a weighted sample without replacement, deterministically."""
+    h = int.from_bytes(hashlib.sha256(f"{seed}|{item_id}".encode()).digest()[:8], "big")
+    u = (h + 0.5) / 2 ** 64
+    return -math.log(u) / weight
+
+
+def sample_inclusion(stratum_sizes: Mapping[str, int], n: int, *, weights: Mapping[str, float] = SAMPLE_WEIGHTS,
+                     sims: int = 2000, rng_seed: int = 0) -> dict[str, float]:
+    """The probability that an item of each stratum is among the first ``n`` items of the sample order, by
+    simulation (the same for every item of a stratum).  ``stratum_sizes``: items per stratum in the queue."""
+    import random
+    rng = random.Random(rng_seed)
+    strata = [s for s, k in stratum_sizes.items() for _ in range(k)]
+    n = max(0, min(n, len(strata)))
+    hits: Counter = Counter()
+    for _ in range(sims):
+        keys = sorted((-math.log(1.0 - rng.random()) / weights[s], s) for s in strata)
+        hits.update(s for _, s in keys[:n])
+    return {s: hits[s] / (sims * k) if k else 0.0 for s, k in stratum_sizes.items()}
 
 
 def _mode(values: Iterable[Optional[str]]) -> Optional[str]:
@@ -792,22 +848,28 @@ class ReviewState:
                 (g.source == s["source"] or (s["tier"] == "single" and members[0] in g.members))]
         status = "done" if handled == len(members) else ("open" if live else "todo")
         nodes = [self.nodes[m] for m in members]
+        best = max((best_m3_reading(self.m3.get(m, [])) for m in members), default=-1)
         return {"id": s["id"], "tier": s["tier"], "source": s["source"], "members": list(members),
                 "labels": [n.label for n in nodes], "size": len(members), "handled": handled,
                 "remaining": len(members) - handled, "status": status, "group": live[-1].id if live else None,
                 "generator": _mode(n.generator for n in nodes) or "", "region": _mode(n.region for n in nodes) or "",
-                "flags": sorted({f for n in nodes for f in n.flags})}
+                "flags": sorted({f for n in nodes for f in n.flags}),
+                "best_reading": best, "stratum": sample_stratum(best)}
 
     def queue(self, order: str = "cliques") -> list[dict]:
         """Every merged group, proposed group and singleton as a queue item, in ``order``: ``cliques`` (groups
         largest first, merged before proposed at a size; then singletons by generator, region and label),
-        ``generator`` or ``region`` (by the members' commonest generator or region, then tier and size)."""
+        ``generator`` or ``region`` (by the members' commonest generator or region, then tier and size), or
+        ``sample`` (a seeded weighted random order: :data:`SAMPLE_WEIGHTS`)."""
         if order not in ORDERS:
             raise ActionError(f"order must be one of {', '.join(ORDERS)}")
         items = [self._item(s) for s in self.seeds()]
         tier_rank = {t: i for i, t in enumerate(TIERS)}
         idx = {it["id"]: s["index"] for it, s in zip(items, self.seeds())}
-        if order == "cliques":
+        if order == "sample":
+            def key(it):
+                return (sample_key(it["id"], SAMPLE_WEIGHTS[it["stratum"]]), it["id"])
+        elif order == "cliques":
             def key(it):
                 if it["tier"] == "single":
                     return (1, 0, 0, it["generator"], it["region"], it["labels"][0])
@@ -816,6 +878,39 @@ class ReviewState:
             def key(it):
                 return (it[order], tier_rank[it["tier"]], -it["size"], it["labels"][0], it["id"])
         return sorted(items, key=key)
+
+    def _touched(self, it: Mapping, since_seq: int) -> bool:
+        """An item this log has worked on after ``since_seq``: a member handled by a group of this log resolved
+        after it, or a live group of this log opened after it (a term an earlier review batch settled is not)."""
+        for m in it["members"]:
+            g = self.groups.get(self.handled.get(m, ""))
+            if g is not None and (g.resolved_seq or 0) > since_seq:
+                return True
+        return any(g.status != "resolved" and (g.opened_seq or 0) > since_seq and
+                   (g.source == it["source"] or (it["tier"] == "single" and it["members"][0] in g.members))
+                   for g in self.groups.values())
+
+    def sample_progress(self, since_seq: int = 0) -> dict:
+        """How far a session has gone down the ``sample`` order: ``reached`` (the items up to the last one this log
+        worked on after ``since_seq``), per stratum the queue's items, the items reached and those done, and each
+        stratum's inclusion probability at that depth (:func:`sample_inclusion`).  A term handled from outside the
+        reached items (a leftover, a merge-in) is outside the sample's design and is counted apart, as
+        ``pulled_in``."""
+        q = self.queue("sample")
+        last = max((i for i, it in enumerate(q) if self._touched(it, since_seq)), default=-1)
+        reached = q[:last + 1]
+        sizes = Counter(it["stratum"] for it in q)
+        out = {"seed": SAMPLE_SEED, "weights": dict(SAMPLE_WEIGHTS), "reached": len(reached),
+               "strata": {s: {"items": sizes[s], "reached": sum(1 for it in reached if it["stratum"] == s),
+                              "done": sum(1 for it in reached if it["stratum"] == s and it["status"] == "done")}
+                          for s in SAMPLE_WEIGHTS}}
+        if reached:
+            for s, p in sample_inclusion(sizes, len(reached)).items():
+                out["strata"][s]["inclusion"] = round(p, 4)
+        in_reached = {m for it in reached for m in it["members"]}
+        out["pulled_in"] = sum(1 for x, gid in self.handled.items() if x not in in_reached and gid in self.groups
+                               and (self.groups[gid].resolved_seq or 0) > since_seq)
+        return out
 
     def queue_item(self, item_id: str) -> dict:
         for s in self.seeds():

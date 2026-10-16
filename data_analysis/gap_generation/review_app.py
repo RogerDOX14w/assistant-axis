@@ -29,7 +29,9 @@ order; ``?`` the key list.
 
 Commands:
 
-* ``serve --batch-id B [--port 8765] [--order cliques|generator|region] [--by roger]``: the app on 127.0.0.1.
+* ``serve --batch-id B [--port 8765] [--order cliques|generator|region|sample] [--by roger]``: the app on 127.0.0.1.
+  ``sample`` is a seeded weighted random order for a review hour meant as a probability sample (decisions.py
+  ``SAMPLE_WEIGHTS``); ``status`` then reports how far it went, per stratum.
 * ``status --batch-id B``: groups resolved and open, decisions by type, terms handled (and how many of them an
   earlier review batch settled, by the registry's review blocks), the queue's remaining counts, time per decision
   (median minutes per resolved group, active minutes, decisions per minute).
@@ -112,6 +114,12 @@ def cmd_status(args) -> int:
     print(f"queue remaining: merged groups {c['merged']['remaining']} of {c['merged']['total']}, proposed groups "
           f"{c['proposed']['remaining']} of {c['proposed']['total']}, singletons {c['single']['remaining']} of "
           f"{c['single']['total']}")
+    sp = log.state.sample_progress(since_seq=getattr(args, "sample_since", 0) or 0)
+    if sp["reached"]:
+        per = "; ".join(f"{s} {v['done']} done of {v['reached']} reached ({v['items']} in the queue, inclusion "
+                        f"{v.get('inclusion', 0):.3f})" for s, v in sp["strata"].items())
+        print(f"sample order (seed {sp['seed']}): {sp['reached']} items reached: {per}; {sp['pulled_in']} terms "
+              "handled from outside the reached items")
     mp = t["minutes_per_resolved_group"]
     print(f"minutes per resolved group: median {mp['median']}, mean {mp['mean']}; active minutes {t['active_minutes']} "
           f"in {t['sessions']} sessions (gaps over {D.IDLE_MINUTES:g} minutes are idle); decisions per minute "
@@ -165,6 +173,9 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--host", default=DEFAULT_HOST, help="keep the default: the app has no login")
             sp.add_argument("--order", choices=D.ORDERS, default="cliques",
                             help="the queue's first order (o on the page switches)")
+        if name == "status":
+            sp.add_argument("--sample-since", type=int, default=0,
+                            help="count the sample order's progress from after this log seq (a later sample session)")
         if name == "apply":
             sp.add_argument("--dry-run", action="store_true", help="print the writes; write nothing")
     return ap

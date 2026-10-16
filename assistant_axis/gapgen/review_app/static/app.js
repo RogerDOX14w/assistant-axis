@@ -5,7 +5,7 @@
 // the keys stay as shortcuts, and both go through ACTIONS, so a button and its key never differ.
 "use strict";
 
-const ORDERS = ["cliques", "generator", "region"];
+const ORDERS = ["cliques", "generator", "region", "sample"];
 // the Tab order follows the page: the card, then the right-hand column top down (corpus first, Roger 2026-10-11)
 const PANES = ["members", "leftovers", "corpus", "neighbours", "opposed"];
 const S = {
@@ -114,7 +114,7 @@ function renderCounts() {
   const c = S.counts;
   if (!c) return;
   $("queue-tools").innerHTML = btn("order", `Order: ${S.order || ""}`, "o",
-    { cls: "mini", title: "the order of this queue: cliques, generator, region" });
+    { cls: "mini", title: "the order of this queue: cliques, generator, region, sample (a weighted random sample)" });
   $("counts").innerHTML =
     `<span>terms <b>${c.terms.handled}</b>/${c.terms.total} handled</span>` +
     `<span><span class="tier merged">M</span> <b>${c.merged.remaining}</b>/${c.merged.total} left</span>` +

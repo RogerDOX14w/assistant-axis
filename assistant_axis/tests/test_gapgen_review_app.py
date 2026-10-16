@@ -1369,3 +1369,57 @@ class TestIpipOtherName:
         assert [o["surface"] for o in t["term"]["other_names"]] == ["doubter", "unbeliever"]
         js = client.get("/static/app.js").text
         assert "m.other_names" in js and "other name: " in js and "${otherNames}" in js
+
+
+# --------------------------------------------------------------------------- the sample order (Roger, 2026-10-16)
+
+class TestSampleOrder:
+    def test_items_carry_the_strongest_member_s_best_m3_reading_and_its_stratum(self, env):
+        q = {tuple(it["labels"]): it for it in make_log(env).state.queue("cliques")}
+        by_label = {lb: it for labels, it in q.items() for lb in labels}
+        assert by_label["loner"]["best_reading"] == 3 and by_label["loner"]["stratum"] == "read_3"
+        # godless reads alpha at 2; its opposed edge to beta (unread) is ignored
+        assert by_label["godless"]["best_reading"] == 2 and by_label["godless"]["stratum"] == "read_2"
+        assert by_label["fond"]["best_reading"] == -1 and by_label["fond"]["stratum"] == "other"
+
+    def test_the_sample_order_is_a_stable_permutation_that_handling_does_not_change(self, env):
+        log = make_log(env)
+        before = [it["id"] for it in log.state.queue("sample")]
+        assert sorted(before) == sorted(it["id"] for it in log.state.queue("cliques"))
+        gid = act(log, action="open", source="merged:0")
+        act(log, action="resolve", group=gid, resolution="reject")
+        after = [it["id"] for it in log.state.queue("sample")]
+        assert after == before == [it["id"] for it in make_log(env).state.queue("sample")]
+
+    def test_sample_key_is_deterministic_and_a_heavier_weight_comes_earlier_on_average(self):
+        assert D.sample_key("m3", 1.0) == D.sample_key("m3", 1.0)
+        assert D.sample_key("m3", 1.0, seed="other") != D.sample_key("m3", 1.0)
+        ids = [f"s:x{i}" for i in range(4000)]
+        light = sum(D.sample_key(i, 1.0) for i in ids) / len(ids)
+        heavy = sum(D.sample_key(i, 2.0) for i in ids) / len(ids)
+        assert abs(light - 1.0) < 0.06 and abs(heavy - 0.5) < 0.03      # exponential means 1/w
+
+    def test_sample_inclusion_matches_the_design(self):
+        sizes = {"read_3": 50, "read_2": 250, "other": 100}
+        everything = D.sample_inclusion(sizes, 400, sims=50)
+        assert all(abs(p - 1.0) < 1e-9 for p in everything.values())
+        flat = D.sample_inclusion({"a": 100, "b": 300}, 100, weights={"a": 1.0, "b": 1.0}, sims=400)
+        assert abs(flat["a"] - 0.25) < 0.02 and abs(flat["b"] - 0.25) < 0.02
+        p = D.sample_inclusion(sizes, 40, weights={"read_3": 2.0, "read_2": 1.0, "other": 1.0}, sims=400)
+        assert p["read_3"] > 1.7 * p["read_2"] and abs(p["read_2"] - p["other"]) < 0.02
+
+    def test_sample_progress_counts_the_items_reached_by_stratum(self, env):
+        log = make_log(env)
+        assert log.state.sample_progress()["reached"] == 0
+        first = log.state.queue("sample")[0]
+        gid = act(log, action="open", source=first["source"])
+        if log.state.groups[gid].status == "proposed":
+            act(log, action="accept", group=gid)
+        act(log, action="resolve", group=gid, resolution="reject")
+        sp = log.state.sample_progress()
+        assert sp["reached"] == 1 and sp["strata"][first["stratum"]]["done"] == 1
+        assert sum(v["items"] for v in sp["strata"].values()) == len(log.state.queue("sample"))
+        assert 0 < sp["strata"][first["stratum"]]["inclusion"] <= 1
+        # a later session counts from its own start
+        seq = max(e["seq"] for e in log.events)
+        assert log.state.sample_progress(since_seq=seq)["reached"] == 0
