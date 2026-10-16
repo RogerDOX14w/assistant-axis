@@ -286,7 +286,8 @@ rubrics, which the role-promotion item below needs too.
   per signal and per lexicon, how often Roger merged where it proposed, an unbiased sample unlike the sorted gate
   tables, and decide (a) whether WordNet covers may cut, (b) whether the persona flag should escalate a row to
   Opus, (c) whether M3's cut-off or rubric needs a calibration (with the 40-pair random blind check if the
-  record is thin).
+  record is thin).  The brainstorm of fixes (2026-10-16, paused for Roger's sample review hour):
+  [m3_false_new_brainstorm.md](./m3_false_new_brainstorm.md).
   Evidence so far (2026-10-15): Roger's marks on the pooled harness's sample (`rec_pooled_1`, 40 verdicts) agree
   with every "recovered" verdict and 19 of 20 "novel" ones, so the harness's recall is sound; on all three pairs where
   Sonnet read below the cut-off and Opus at or above it, Roger sided with Opus.  M3's escalation rule (2026-10-04:
