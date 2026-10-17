@@ -226,11 +226,25 @@ def figures(items: Sequence, *, cost_usd: Optional[float] = None, clusters: Opti
     return out
 
 
+def net_new_end_slope(items: Sequence, net_new_stems: Iterable[str], *, seed: int = 0) -> Optional[float]:
+    """The rarefaction end slope of the items' calls counted on net-new stems only (the items table's ``net_new``):
+    the full grid's stop rule (plan task 8) reads it after two runs, and a family under 1 a call gets no third run."""
+    nn = set(net_new_stems)
+    calls: dict[tuple, set] = {}
+    for it in items:
+        calls.setdefault(_unit(it), set())
+        if it.stem in nn:
+            calls[_unit(it)].add(it.stem)
+    return rarefaction_curve(list(calls.values()), seed=seed)["end_slope_per_call"]
+
+
 def collapse_payload(items: Sequence, records: Sequence[Mapping], *, usage_total_usd: Optional[float] = None,
                      embed: Optional[Callable[[Sequence[str]], object]] = None, embedder: Optional[str] = None,
-                     tau: float = TAU, seed: int = 0, runs: Sequence[str] = ()) -> dict:
+                     tau: float = TAU, seed: int = 0, runs: Sequence[str] = (),
+                     net_new_stems: Optional[Iterable[str]] = None) -> dict:
     """The collapse payload (section 6): per family, ``by_model`` within it, ``by_language`` for family c, the
-    cross-family matrices, the costs, and the settings."""
+    cross-family matrices, the costs, and the settings.  With ``net_new_stems`` (the items table's net-new rows),
+    each family also gets ``net_new_end_slope_per_call``, which the full grid's stop rule reads."""
     costs = family_costs(records, usage_total_usd)
     clusters = None
     if embed is not None:
@@ -251,6 +265,8 @@ def collapse_payload(items: Sequence, records: Sequence[Mapping], *, usage_total
             d["by_model"] = {m: figures([x for x in its if x.model == m],
                                         cost_usd=costs["by_family_model"].get(f"{f}|{m}"), clusters=clusters, seed=seed)
                              for m in models}
+        d["net_new_end_slope_per_call"] = (net_new_end_slope(its, net_new_stems, seed=seed)
+                                           if net_new_stems is not None else None)
         if f == "c":
             d["by_language"] = {lang: figures([x for x in its if x.language == lang], clusters=clusters, seed=seed)
                                 for lang in sorted({x.language for x in its})}
@@ -292,6 +308,6 @@ def write_collapse(payload: Mapping, path: Path = COLLAPSE_PATH, *, inputs: Opti
     return backup
 
 
-__all__ = ["TAU", "jaccard", "label_jaccard", "lincoln_petersen", "rarefaction_curve", "semantic_clusters",
+__all__ = ["TAU", "net_new_end_slope", "jaccard", "label_jaccard", "lincoln_petersen", "rarefaction_curve", "semantic_clusters",
            "cross_family_matrix", "family_costs", "yield_per_dollar", "figures", "collapse_payload", "load_collapse",
            "write_collapse"]

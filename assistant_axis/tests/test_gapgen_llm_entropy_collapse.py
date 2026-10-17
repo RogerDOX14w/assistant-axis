@@ -107,3 +107,12 @@ def test_collapse_payload_by_model_by_language_and_the_file(tmp_path):
     assert CO.load_collapse(path) == json.loads(json.dumps(p))
     assert "_provenance" in json.loads(path.read_text())
     assert CO.write_collapse(p, path) is None                    # unchanged: not rewritten
+
+
+def test_the_net_new_end_slope_counts_net_new_stems_only():
+    its = [item(f"s{i}", prompt=f"a:x:{i}") for i in range(10)] + [item("old", prompt=f"a:y:{i}") for i in range(10)]
+    assert CO.net_new_end_slope(its, {f"s{i}" for i in range(10)}, seed=1) <= 1.0
+    assert CO.net_new_end_slope(its, set()) == 0.0
+    p = CO.collapse_payload(its, [], net_new_stems={"s1"})
+    assert p["per_family"]["a"]["net_new_end_slope_per_call"] is not None
+    assert CO.collapse_payload(its, [])["per_family"]["a"]["net_new_end_slope_per_call"] is None

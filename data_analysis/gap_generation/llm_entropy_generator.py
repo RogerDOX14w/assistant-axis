@@ -180,8 +180,14 @@ def running_total(args) -> float:
 
 def _gate(args, estimate_usd: float) -> Optional[int]:
     """The cost gate: the typed budget (``confirm_or_abort``) and the section 12 stop line.  Returns an exit code to
-    stop with, or None."""
+    stop with, or None.  A generating command run without ``--budget-usd`` takes the first-of-kind cap,
+    ``ceil(1.5 x estimate + 2)`` (plan section 7)."""
+    import math
+
     from assistant_axis.gapgen.cost import CostRefused, confirm_or_abort
+    if args.budget_usd is None:
+        args.budget_usd = float(math.ceil(1.5 * estimate_usd + 2.0))
+        print(f"cap --budget-usd ${args.budget_usd:.0f} (the first-of-kind default, ceil(1.5 x estimate + 2))")
     try:
         confirm_or_abort(estimate_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                          confirmed_by=args.confirmed_by)
@@ -880,8 +886,11 @@ def cmd_collapse(args) -> int:
     usage = GuardedUsage(budget_usd=args.budget_usd)
     embed, _ = _embedder("none" if args.dry_run and args.embedder == "openai" else args.embedder, usage=usage,
                          cache_dir=args.embed_cache_dir)
+    from assistant_axis.gapgen.generators.llm_entropy.table import load_items_table
+    table = load_items_table(_edir(args) / "items_table.jsonl")
+    nn = {r["stem"] for r in table if r.get("net_new")} if table else None
     payload = CO.collapse_payload(items, records, usage_total_usd=total or None, embed=embed, embedder=args.embedder,
-                                  tau=args.tau, seed=args.seed, runs=runs)
+                                  tau=args.tau, seed=args.seed, runs=runs, net_new_stems=nn)
     per = payload["per_family"]
     print("| family | calls | items | unique | semantic | Jaccard median | p90 | L-P N | Chapman | seen/N | end slope | "
           "unique/$ |")
@@ -898,6 +907,11 @@ def cmd_collapse(args) -> int:
     low = [f for f, v in sem.items() if best and v is not None and v < best / 10]
     if low:
         print(f"flag for Roger: semantic-unique yield per dollar under a tenth of the best family's: {low}")
+    slow = {f: d["net_new_end_slope_per_call"] for f, d in per.items()
+            if d.get("net_new_end_slope_per_call") is not None and d["net_new_end_slope_per_call"] < 1}
+    if slow:
+        print(f"STOP RULE (task 8): net-new stems per call over the last fifth of the calls under 1 for {slow}: after "
+              f"two runs of a family's prompts, no third run")
     if args.dry_run:
         print("DRY-RUN: nothing written")
         return 0
@@ -1075,7 +1089,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--force", action="store_true")
     p.add_argument("--model", default=SONNET)
     p.add_argument("--back-model", default=HAIKU)
-    p = common(sub.add_parser("generate", help="one family's calls"), paid=True, budget=5.0)
+    p = common(sub.add_parser("generate", help="one family's calls"), paid=True, budget=None)
     p.add_argument("--run-id", required=True)
     p.add_argument("--family", required=True)
     p.add_argument("--share", type=float, default=None)
@@ -1092,10 +1106,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--force", action="store_true", help="(b): fetch new seeds for a run that already has some")
     p.add_argument("--reuse-run", nargs="+", default=None, metavar="R0")
     p.add_argument("--user-agent", default=USER_AGENT)
-    p = common(sub.add_parser("backtranslate", help="English labels for the run's (c) answers"), paid=True, budget=2.0)
+    p = common(sub.add_parser("backtranslate", help="English labels for the run's (c) answers"), paid=True,
+               budget=None)
     p.add_argument("--run-id", required=True)
     p.add_argument("--model", default=HAIKU)
-    p = common(sub.add_parser("verbalized", help="(d) stage 2"), paid=True, budget=2.0)
+    p = common(sub.add_parser("verbalized", help="(d) stage 2"), paid=True, budget=None)
     p.add_argument("--run-id", required=True)
     p.add_argument("--family", required=True)
     p.add_argument("--model", default=None, help="only the stage-1 answers of this model (default: every model)")

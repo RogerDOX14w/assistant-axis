@@ -254,3 +254,9 @@ def test_report_renders_a_fixture_run_with_the_three_files(env):
     rdir = _run_dir(env, "fx")
     assert {p.name for p in rdir.glob("*.md")} == {"report.md", "roger_sample.md", "gloss_check.md"}
     assert "## Family e" in (rdir / "gloss_check.md").read_text()
+
+
+def test_a_generating_command_without_a_budget_takes_the_first_of_kind_cap(env, capsys):
+    assert run(env, "generate", "--run-id", "fk", "--family", "e", "--n-prompts", "2", "--runs", "1", "--dry-run") == 0
+    out = capsys.readouterr().out
+    assert "cap --budget-usd $3 (the first-of-kind default, ceil(1.5 x estimate + 2))" in out
