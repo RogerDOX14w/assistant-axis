@@ -20,12 +20,15 @@ from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
 REPO = Path(__file__).resolve().parents[2]
 #: The pin each text is expected to be on, so that a bump is a deliberate edit here.
 EXPECTED_VERSIONS = {P.SCAFFOLD_RUBRIC: 1, P.MULTILINGUAL_RUBRIC: 1, P.BACKTRANSLATE_RUBRIC: 1}
-#: Ordinary words of the texts that are corpus, queue or validation words anyway (beyond the platform's
-#: PROSE_ALLOWED), each only as prose: "single" ("a single word", as the structural texts record it), and the three
-#: language names that are corpus membership traits (German, Japanese, Russian), which the back-translation and
-#: translation calls must name.  A new hit fails.
+#: The recorded prose words (prompts.PROSE_RECORDED): pinned here too, so that adding one is a deliberate edit of the
+#: test as well.
 PROSE_RECORDED = {"rubric": frozenset({"single"}), "user": frozenset({"single"}),
                   "language": frozenset({"german", "japanese", "russian", "single"})}
+
+
+def test_the_recorded_prose_words_are_the_tests_and_the_texts_are_clean(forbidden):
+    assert P.PROSE_RECORDED == PROSE_RECORDED
+    assert P.hygiene_hits(forbidden=forbidden) == {}
 
 
 @pytest.fixture(scope="module")

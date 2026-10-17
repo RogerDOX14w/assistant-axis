@@ -4,7 +4,7 @@
 system and user turns, ``max_tokens``, no temperature (Haiku 5.5 and Sonnet 5.5 refuse one; ``llm.request_params``
 leaves it out), the system block cached.  Its ``custom_id`` is at most 64 characters of ``[A-Za-z0-9_-]`` and differs
 across runs, stages, models, steps and attempts; its ``cache_key`` (step, family, prompt id, run, stage, model,
-prompt sha256, user sha256) is what a resume matches.
+prompt sha256, user sha256, and for a back-translation the answer it translates) is what a resume matches.
 
 :class:`EntropyRunner` (frozen interface: another generator may reuse it for its own calls) sends a wave through a
 transport (:class:`LiveTransport`, asyncio at :data:`CONCURRENCY`; or ``batches.BatchTransport``, whose state goes
@@ -141,8 +141,10 @@ class EntropyCall:
 
     @property
     def cache_key(self) -> tuple:
+        """What a resume matches: step, family, prompt id, run, stage, model, the prompt's and the user turn's
+        sha256, and (a back-translation) the answer it translates."""
         return (self.step, self.family, self.prompt_id, int(self.run), int(self.stage), self.model,
-                self.prompt_sha256, self.user_sha256)
+                self.prompt_sha256, self.user_sha256, str(self.meta.get("source_custom_id") or ""))
 
     def retried(self) -> "EntropyCall":
         """The once-more request: the same prompt at :data:`RETRY_MAX_TOKENS`, attempt 2."""
@@ -152,7 +154,8 @@ class EntropyCall:
 
 def record_cache_key(rec: Mapping) -> tuple:
     return (rec.get("step") or "generate", rec.get("family"), rec.get("prompt_id"), int(rec.get("run") or 1),
-            int(rec.get("stage") or 1), rec.get("model"), rec.get("prompt_sha256"), rec.get("user_sha256"))
+            int(rec.get("stage") or 1), rec.get("model"), rec.get("prompt_sha256"), rec.get("user_sha256"),
+            str((rec.get("meta") or {}).get("source_custom_id") or ""))
 
 
 def call_tokens(c: EntropyCall) -> tuple[int, int]:
@@ -303,6 +306,16 @@ class EntropyRunner:
             except Exception as exc:  # noqa: BLE001 - a checkpoint must never stop the recording
                 logger.warning("checkpoint failed: %s", type(exc).__name__)
 
+    def _copy_reused(self, rec: Mapping) -> dict:
+        """An answer reused from another run (``--reuse-run``), appended to this run's record so that the run is
+        self-contained: marked ``reused_from``, its usage left out (it was charged to the run that paid for it)."""
+        cp = dict(rec)
+        cp.update(reused_from=rec.get("run_id"), run_id=self.run_id, batch_id=self.batch_id, usage_raw=None,
+                  charged_as=None, at=self.now())
+        self._append(cp)
+        self._answered[record_cache_key(cp)] = cp
+        return cp
+
     def _record(self, c: EntropyCall, text: Optional[str], meta: Mapping, parsed: Mapping, ok: bool) -> dict:
         redact = c.redactor
         rec = {"schema_version": SCHEMA_VERSION, "batch_id": self.batch_id, "run_id": self.run_id, "step": c.step,
@@ -374,6 +387,8 @@ class EntropyRunner:
         for c in calls:
             rec = self._answered.get(c.cache_key)
             if rec is not None:
+                if self.run_id is not None and rec.get("run_id") not in (None, self.run_id):
+                    rec = self._copy_reused(rec)
                 res.answers[c.cache_key] = (c, rec, {k: rec.get(k) for k in ("items", "n_items", "n_invalid")})
                 res.n_reused += 1
             else:

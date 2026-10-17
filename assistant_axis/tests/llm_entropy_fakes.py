@@ -249,3 +249,72 @@ def bt_record(source: dict, entries, *, model: str = "claude-haiku-5-5") -> dict
             "user_sha256": f"u|{cid}", "custom_id": cid, "ok": True, "text": text,
             "meta": {"source_custom_id": source["custom_id"], "n_items": len(entries)},
             "usage_raw": {"input_tokens": 900, "output_tokens": 1500}, "charged_as": model}
+
+
+# --------------------------------------------------------------------------- a model that answers every family
+
+def _items_json(items, approach="read plainly") -> str:
+    return json.dumps({"approach": approach, "items": items}, ensure_ascii=False)
+
+
+def _it(label, gloss, antonym=None, kind="trait", **kw):
+    d = {"label": label, "gloss": gloss, "antonym": antonym, "kind": kind, "ambiguity_flag": False}
+    d.update(kw)
+    return d
+
+
+def family_reply(params) -> str:
+    """Answer any of the generator's requests plausibly and deterministically (CLI tests): the translation calls in
+    their tagged form, the back-translation by index, (b) with the person's name and description echoed in the
+    approach, the glosses, an antonym and one label (the privacy test's bait), and the rest from the prompt id's
+    parts.  Labels are ``zz`` words, so that none is a corpus stem by accident."""
+    import re
+    system = system_text(params) if params.get("system") else ""
+    user = user_text(params)
+    if system.startswith("You translate instructions"):
+        lang = re.search(r"into (\w+)", system).group(1)
+        master = user.split("<<<\n", 1)[1].split("\n>>>", 1)[0]
+        doms = re.findall(r"^(\w+): ", user.split("Domains (id: English):", 1)[1], re.M)
+        return (f"<note>A fixture translation into {lang}.</note>\n<system>\n[{lang}] {master}\n</system>\n"
+                f"<user_template>\n[{lang}] Domain of life: {{domain}}. Name 15 to 20 traits.\n</user_template>\n"
+                "<domains>\n" + "\n".join(f"{d}: {d}-{lang[:2].lower()}" for d in doms) + "\n</domains>")
+    if system.startswith("You translate text from"):
+        doms = re.findall(r"^(\w+): ", user.split("<domains>", 1)[1], re.M)
+        return ("<system>\nThe instructions, back in English.\n</system>\n<user_template>\nDomain of life: {domain}."
+                "\n</user_template>\n<domains>\n" + "\n".join(f"{d}: {d}" for d in doms) + "\n</domains>")
+    if user.startswith("Language: "):
+        n = len(re.findall(r"^\d+\. label:", user, re.M))
+        labs = re.findall(r'^\d+\. label: "([^"]*)"', user, re.M)
+        out = [{"index": i, "romanization": f"rom-{i}", "label": "zzc" + re.sub(r"[^a-z]", "", labs[i - 1].lower())[:12] + "abcdefghij"[i % 10],
+                "gloss": f"This means the {i}th thing in English.", "antonym": None, "listicle": i == 2}
+               for i in range(1, n + 1)]
+        return json.dumps({"items": out})
+    if user.startswith("Earlier, asked the following"):
+        return _items_json([_it(f"zzrare{i}", f"This means a rare way number {i}.", probability=0.01) for i in range(3)]
+                           + [_it("zzshared", "This means the shared one.", probability=0.02)])
+    if user.startswith("Person: "):
+        line = user.splitlines()[0]
+        name = line[len("Person: "):line.index(" (")] if " (" in line else line[len("Person: "):].rstrip(".")
+        desc = line[line.index(" (") + 2:].split(";")[0].rstrip(").") if " (" in line else ""
+        last = name.split()[-1].lower()
+        return _items_json([_it(f"{last}-like", f"This means acting as {name} did, the {desc}.", antonym=f"un-{last}"),
+                            _it("zzsteadfast", f"This means keeping on like {name.split()[0]} always did."),
+                            _it("zzwardenly", "This means guarding a gate for a living.", kind="role")],
+                           approach=f"{name}, {desc}, read plainly.")
+    if user.startswith("[") and "Domain of life:" in user:
+        m = re.match(r"\[(\w+)\] Domain of life: ([\w-]+)\.", user)
+        lang, dom = m.group(1), m.group(2)
+        return _items_json([_it(f"{dom}wört{i}", f"{lang} gloss {i}", romanization=f"{dom}woert{i}", english_hint=None)
+                            for i in range(3)])
+    probs = {"probability": 0.2} if '"probability"' in user else {}
+    if user.startswith("Domain: "):
+        m = re.match(r"Domain: ([\w ]+)\. Mode: ([\w ]+)\.", user)
+        dom, mode = m.group(1).replace(" ", ""), m.group(2).split()[-1]
+        return _items_json([_it(f"zz{dom}{mode}", f"This means a {mode} about {dom}.", **probs),
+                            _it("zzshared", "This means the shared one.", **probs),
+                            _it(f"zz{dom}extra", f"This means more about {dom}.", antonym="gloomy", **probs)])
+    if user.startswith("Spelling constraint") or user.startswith("Form constraint"):
+        key = re.sub(r"[^a-z]", "", user.splitlines()[0].split('"')[1].lower())
+        return _items_json([_it(f"zzspell{key}", f"This means spelling {key}.", **probs),
+                            _it("zzshared", "This means the shared one.", **probs)])
+    raise KeyError(f"no fixture answer for: {user.splitlines()[0][:60]!r}")

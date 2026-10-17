@@ -72,6 +72,7 @@ class Item:
     order: int = 0
     source_ref: Optional[str] = None
     meta: dict = field(default_factory=dict)       # domain, mode, constraint, seed kind and era, base prompt
+    run_id: Optional[str] = None                   # the generator run whose records hold the answer
 
 
 def source_ref(prompt_id: str, run: int, model: str) -> str:
@@ -171,7 +172,7 @@ def build_items(records: Sequence[Mapping], *, zipf_fn: Optional[Callable[[str],
                 probability=it.get("probability"), stem=stem,
                 zipf_min=_zipf(label, zipf_fn) if stem is not None else None, label_problem=why,
                 backtranslated_from=rom, listicle=listicle, order=order,
-                source_ref=source_ref(str(r.get("prompt_id")), run, model),
+                source_ref=source_ref(str(r.get("prompt_id")), run, model), run_id=r.get("run_id"),
                 meta={k: meta.get(k) for k in ("domain", "mode", "constraint", "seed_kind", "era", "base_prompt_id",
                                                "with_probabilities") if meta.get(k) is not None}))
     return items, dict(sorted(counts.items()))
@@ -251,10 +252,11 @@ def build_table(items: Sequence[Item], *, corpus, queue: Mapping[str, str], regi
         lead = rep_items[0].item_id if rep_items else None
         srcs: dict[tuple, dict] = {}
         for x in sorted(its, key=lambda x: (x.item_id != lead, x.order)):
-            k = (x.family, x.prompt_id, x.run, x.stage, x.model)
+            k = (x.run_id, x.family, x.prompt_id, x.run, x.stage, x.model)
             if k in srcs:
                 continue
-            srcs[k] = {"family": x.family, "prompt_id": x.prompt_id, "run": x.run, "stage": x.stage, "model": x.model,
+            srcs[k] = {"run_id": x.run_id, "family": x.family, "prompt_id": x.prompt_id, "run": x.run, "stage": x.stage,
+                       "model": x.model,
                        "language": x.language, "source_ref": x.source_ref, "label": x.label, "gloss": x.gloss,
                        "antonym": x.antonym, "kind": x.kind, "raw": x.raw if x.family == "c" else None,
                        "seed_kind": x.meta.get("seed_kind")}

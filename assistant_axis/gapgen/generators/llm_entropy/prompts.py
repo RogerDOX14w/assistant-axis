@@ -237,6 +237,14 @@ EXAMPLE_WORDS: dict[str, tuple[str, ...]] = {
 }
 
 
+#: Ordinary words of the texts that are corpus, queue or validation words anyway (beyond the platform's
+#: ``prompt_hygiene.PROSE_ALLOWED``), each only as prose, never an example: ``single`` ("a single word", as the
+#: structural generator's texts record it); and, in the translation and back-translation calls, the three language
+#: names that are also corpus membership traits.  :func:`hygiene_hits` fails on any other.
+PROSE_RECORDED: dict[str, frozenset] = {"rubric": frozenset({"single"}), "user": frozenset({"single"}),
+                                        "language": frozenset({"german", "japanese", "russian", "single"})}
+
+
 # --------------------------------------------------------------------------- pins and hashes
 
 class RubricNotPinned(RuntimeError):
@@ -521,11 +529,53 @@ def variant_samples() -> list[tuple[str, str, str]]:
     return out
 
 
+def hygiene_texts(rubrics_dir: Optional[Path] = None) -> dict[str, tuple[str, str]]:
+    """``{name: (text, which recorded set applies)}``: every text a call can send but the persons and the translated
+    (c) texts (the three rubric texts, every (a) and (e) user turn, the (b) template, (d)'s paragraph, template and
+    topics, the (c) request master, the ten translation and check requests)."""
+    out: dict[str, tuple[str, str]] = {n: (sr.load_prompt(n, rubrics_dir), "rubric") for n in RUBRICS}
+    a, e = grid_prompts("a"), grid_prompts("e")
+    out["user:a"] = ("\n".join(p.user for p in a), "user")
+    out["user:e"] = ("\n".join(p.user for p in e), "user")
+    out["user:b"] = (B_TEMPLATE.replace("{person}", ""), "user")
+    out["user:d"] = ("\n".join([D_STAGE1_APPEND, D_STAGE2_TEMPLATE] + [d_topic(p.prompt_id) for p in a + e]), "user")
+    out["user:c"] = (C_USER_MASTER, "user")
+    master = sr.load_prompt(MULTILINGUAL_RUBRIC, rubrics_dir)
+    for lang in LANGUAGES:
+        system, user = render_translate(lang.code, master)
+        out[f"translate:{lang.code}"] = ("\n".join([system, user, PROMPT_BACK_SYSTEM.replace("{language}", lang.name),
+                                                    BACKTRANSLATE_HEADER.format(language=lang.name)]), "language")
+    return out
+
+
+def hygiene_hits(rubrics_dir: Optional[Path] = None, *, forbidden: Optional[set] = None) -> dict[str, list[str]]:
+    """``{text name: [words]}``: the words of a text that are corpus stems, queue labels or validation-file words and
+    neither ``PROSE_ALLOWED`` nor recorded (:data:`PROSE_RECORDED`), plus any example word on those lists and any
+    multi-word corpus or queue stem spelt out in a text.  Empty when the texts are clean."""
+    import re
+
+    from assistant_axis.entity_id import normalize_to_file_name
+    from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
+    from ..structural.prompts import forbidden_stems
+    F = forbidden if forbidden is not None else forbidden_stems()
+    out: dict[str, list[str]] = {}
+    for name, (text, which) in hygiene_texts(rubrics_dir).items():
+        hits = {w for w in prompt_words(text) if normalize_to_file_name(w) in F}
+        bad = sorted(hits - PROSE_ALLOWED - PROSE_RECORDED[which])
+        flat = " " + " ".join(re.findall(r"[a-z]+", text.lower())) + " "
+        bad += sorted(s for s in F if "_" in s and f" {s.replace('_', ' ')} " in flat)
+        if name in EXAMPLE_WORDS:
+            bad += [f"example:{w}" for w in EXAMPLE_WORDS[name] if normalize_to_file_name(w) in F]
+        if bad:
+            out[name] = bad
+    return out
+
+
 __all__ = ["FAMILIES", "GENERATE_FAMILIES", "FAMILY_NAMES", "SCAFFOLD_RUBRIC", "MULTILINGUAL_RUBRIC",
            "BACKTRANSLATE_RUBRIC", "RUBRICS", "PROMPTS_VERSION", "PROMPT_HASHES", "DOMAINS", "DOMAIN_IDS", "MODES",
            "Mode", "LANGUAGES", "Language", "LANGUAGE_BY_CODE", "LETTERS", "BIGRAMS", "SUFFIXES", "PREFIXES", "FRAMES",
-           "Frame", "C_USER_MASTER", "DRY_RUN_SEED", "EXAMPLE_WORDS", "D_PROBABILITY_CEILING", "RubricNotPinned",
+           "Frame", "C_USER_MASTER", "DRY_RUN_SEED", "EXAMPLE_WORDS", "D_PROBABILITY_CEILING", "PROSE_RECORDED", "RubricNotPinned",
            "load_rubric", "sha256_text", "wording_tables", "wording_sha256", "Prompt", "render_a", "person_line",
            "render_b", "render_e", "e_constraints", "render_c", "render_d_stage1", "d_topic", "render_d_stage2",
            "render_backtranslate", "render_master", "render_translate", "render_prompt_back", "grid_prompts",
-           "GRID_SIZES", "draw_order", "select_prompts", "variant_samples"]
+           "GRID_SIZES", "draw_order", "select_prompts", "variant_samples", "hygiene_texts", "hygiene_hits"]
