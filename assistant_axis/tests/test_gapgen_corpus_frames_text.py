@@ -249,3 +249,30 @@ def test_download_retries_with_a_back_off_and_leaves_no_part_file(tmp_path):
     with pytest.raises(RuntimeError):
         X._download("https://x/g", tmp_path / "g.bin", fetch=AlwaysCut(), attempts=3, sleep=slept.append)
     assert slept == [1.5, 3.0] and not (tmp_path / "g.bin").exists() and not (tmp_path / "g.bin.part").exists()
+
+
+def test_a_body_short_of_its_content_length_or_a_parquet_without_its_footer_is_fetched_again(tmp_path):
+    """2026-10-17, the first live fetch: the cards parquet came back 18,930 bytes short with no error raised, and
+    extract-text failed on it.  A short body (against Content-Length) and a parquet file without its closing PAR1 are
+    now fetched again."""
+    class Resp(io.BytesIO):
+        def __init__(self, body, length):
+            super().__init__(body)
+            self.headers = {"Content-Length": str(length)}
+
+    good = b"PAR1" + b"x" * 100 + b"PAR1"
+    calls, slept = [], []
+
+    class ShortOnce:
+        def stream(self, url):
+            calls.append(url)
+            return Resp(good[:50], len(good)) if len(calls) == 1 else Resp(good, len(good))
+    n, _ = X._download("https://x/c.parquet", tmp_path / "c.parquet", fetch=ShortOnce(), sleep=slept.append)
+    assert n == len(good) and len(calls) == 2 and (tmp_path / "c.parquet").read_bytes() == good
+
+    class NoFooter:                                   # no Content-Length, and the footer is missing
+        def stream(self, url):
+            return io.BytesIO(good[:-4])
+    with pytest.raises(RuntimeError):
+        X._download("https://x/d.parquet", tmp_path / "d.parquet", fetch=NoFooter(), attempts=2, sleep=slept.append)
+    assert not (tmp_path / "d.parquet").exists() and not (tmp_path / "d.parquet.part").exists()

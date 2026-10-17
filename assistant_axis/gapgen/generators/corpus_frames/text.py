@@ -501,6 +501,11 @@ RETRYABLE = (OSError, urllib.error.URLError, http.client.HTTPException, Connecti
 DOWNLOAD_ATTEMPTS = 4
 
 
+class ShortBody(Exception):
+    """A body that ended without an error but short of the server's ``Content-Length``, or a parquet file without its
+    closing ``PAR1`` (2026-10-17, the first live fetch: the cards file came back 18,930 bytes short, unnoticed)."""
+
+
 class HttpTextFetcher:  # pragma: no cover - the network
     """``urllib`` through the environment's proxy settings; opening a request is retried with a back-off as
     :class:`.books.HttpFetcher` does (review M5), and :func:`_download` retries a body cut short."""
@@ -592,7 +597,9 @@ class TextFetchReport:
 def _download(url: str, dest: Path, *, fetch: TextFetcher, attempts: int = DOWNLOAD_ATTEMPTS,
               sleep=time.sleep) -> tuple[int, str]:
     """``(bytes, sha256)`` of ``url`` written to ``dest`` through ``<dest>.part``: a dropped body is fetched again
-    (``attempts`` in all, with a back-off; review M5), and the ``.part`` file never outlives the call."""
+    (``attempts`` in all, with a back-off; review M5), and the ``.part`` file never outlives the call.  A body is also
+    fetched again when it is shorter than the response's ``Content-Length`` or, for a ``.parquet`` file, lacks the
+    closing ``PAR1`` (:class:`ShortBody`): a connection can close early without raising."""
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_name(dest.name + ".part")
     last: Optional[BaseException] = None
@@ -601,13 +608,22 @@ def _download(url: str, dest: Path, *, fetch: TextFetcher, attempts: int = DOWNL
         n = 0
         try:
             with fetch.stream(url) as resp, open(part, "wb") as out:
+                headers = getattr(resp, "headers", None)
+                expected = headers.get("Content-Length") if headers is not None else None
                 for chunk in iter(lambda: resp.read(1 << 20), b""):
                     out.write(chunk)
                     h.update(chunk)
                     n += len(chunk)
+            if expected is not None and str(expected).isdigit() and n != int(expected):
+                raise ShortBody(f"{n} bytes received of the {expected} the server announced")
+            if dest.suffix == ".parquet":
+                with open(part, "rb") as fh:
+                    fh.seek(max(0, n - 4))
+                    if fh.read(4) != b"PAR1":
+                        raise ShortBody("a parquet file without its closing PAR1")
             part.replace(dest)
             return n, h.hexdigest()
-        except RETRYABLE as exc:
+        except (*RETRYABLE, ShortBody) as exc:
             last = exc
             print(f"WARNING: {url}: {exc!r} (attempt {i + 1} of {attempts})", file=sys.stderr)
             if i + 1 < attempts:
