@@ -8,7 +8,8 @@ Two sources (:data:`TEXT_SOURCES`), both written by people and selected by their
   the ``bot_description`` of ``pippa_deduped.jsonl`` (*measured* 257 MB), one per conversation, deduplicated here by
   text (many conversations share a bot);
 * **the character cards** (``hieunguyenminh/roleplay``, CC BY 4.0, 5,755 cards, 2.2 MB): the ``description`` field.
-  The file name is read from the Hub's file listing at fetch time (:func:`resolve_filename`).
+  The file names are read from the Hub's listing at fetch time (:func:`resolve_filenames`: the train split, every
+  shard of it, sizes checked against the plan's measurements).
 
 Character descriptions list traits directly ("Personality: shy, stubborn, kind"; "She is kind, caring and a bit
 shy"), so the bank (:data:`TEXT_FRAMES`) has **list frames** besides the fixed ones: ``trait_list`` (a "Personality:"
@@ -37,9 +38,14 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import http.client
+import itertools
 import json
 import re
+import sys
+import time
 import unicodedata
+import urllib.error
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import BinaryIO, Callable, Iterable, Iterator, Mapping, Optional, Protocol, Sequence
@@ -174,6 +180,9 @@ class TextSource:
     filename_pattern: str = r"\.(parquet|jsonl|json|csv)$"
     approval: Optional[str] = None   # None: refused unless the caller names Roger's go
     size_note: str = ""
+    #: The plan's measurements (2026-10-13, the dataset cards): a download or an extraction far from them is warned of.
+    expected_bytes: Optional[int] = None
+    expected_rows: Optional[int] = None
 
     def url(self, filename: Optional[str] = None) -> str:
         fn = filename or self.filename
@@ -186,11 +195,12 @@ TEXT_SOURCES: dict[str, TextSource] = {s.key: s for s in (
     TextSource(key="pippa", repo="PygmalionAI/PIPPA", filename="pippa_deduped.jsonl", field="bot_description",
                licence="Apache-2.0", licence_url="https://www.apache.org/licenses/LICENSE-2.0",
                what="PIPPA: Character.AI conversations with their bots' human-written descriptions (bot_description)",
-               size_note="about 257 MB (measured 2026-10-13 on the dataset card)"),
+               size_note="about 257 MB (measured 2026-10-13 on the dataset card)", expected_bytes=257_000_000),
     TextSource(key="cards", repo="hieunguyenminh/roleplay", filename=None, field="description",
                licence="CC BY 4.0", licence_url="https://creativecommons.org/licenses/by/4.0/",
                what="5,755 role-play character cards (name, description, text); credited as CC BY 4.0 requires",
-               size_note="about 2.2 MB (measured 2026-10-13 on the dataset card)"),
+               size_note="about 2.2 MB (measured 2026-10-13 on the dataset card)", expected_bytes=2_200_000,
+               expected_rows=5755),
 )}
 
 
@@ -431,14 +441,24 @@ def run_extract(*, text_dir: Path = TEXT_EXTERNAL_DIR, sources: Iterable[str] = 
         if not e:
             echo(f"{key}: not downloaded (no manifest entry): run fetch-text first")
             continue
-        path = root / e["file"]
-        if not path.exists():
-            echo(f"{key}: {path} is gone (deleted after an earlier extraction?): fetch it again to re-extract")
+        files = entry_files(e)
+        paths = [root / f["file"] for f in files]
+        gone = [p for p in paths if not p.exists()]
+        if gone or not paths:
+            echo(f"{key}: {', '.join(str(p) for p in gone) or 'no file'} gone (deleted after an earlier extraction?): "
+                 f"fetch it again to re-extract")
             continue
         frames = text_frames([key])
-        ex = extract_frames(read_documents(path, TEXT_SOURCES[key].field), frames)
-        stats["sources"][key] = {"file": e["file"], "sha256": e.get("sha256"), "n_documents": ex.n_documents,
-                                 "n_unique": ex.n_unique}
+        src = TEXT_SOURCES[key]
+        docs = itertools.chain.from_iterable(read_documents(p, src.field) for p in paths)
+        ex = extract_frames(docs, frames)
+        stats["sources"][key] = {"files": [{"file": f["file"], "sha256": f.get("sha256")} for f in files],
+                                 "n_documents": ex.n_documents, "n_unique": ex.n_unique}
+        w = far_off(ex.n_documents, src.expected_rows, what=f"{key}: {ex.n_documents:,} descriptions read",
+                    unit="rows")
+        if w:
+            stats.setdefault("warnings", []).append(w)
+            echo(f"WARNING: {w}")
         for f in frames:
             hs = ex.hits[f.id]
             stats["frames"][f.id] = {"hits": sum(h.match for h in hs), "fillers": len(hs),
@@ -448,8 +468,9 @@ def run_extract(*, text_dir: Path = TEXT_EXTERNAL_DIR, sources: Iterable[str] = 
         echo(f"{key}: {ex.n_unique:,} distinct descriptions of {ex.n_documents:,}; "
              + ", ".join(f"{f.base} {stats['frames'][f.id]['fillers']}" for f in frames))
         if delete_raw and not dry_run:
-            path.unlink()
-            deleted.append(str(path))
+            for p_ in paths:
+                p_.unlink()
+                deleted.append(str(p_))
     stats["deleted_raw"] = deleted
     if not dry_run and stats["sources"]:
         prev = {}
@@ -475,33 +496,82 @@ class TextFetcher(Protocol):
     def json(self, url: str) -> object: ...
 
 
+#: The errors a dropped download raises (urllib's, a cut body, a timeout); every one is retried.
+RETRYABLE = (OSError, urllib.error.URLError, http.client.HTTPException, ConnectionError, TimeoutError, EOFError)
+DOWNLOAD_ATTEMPTS = 4
+
+
 class HttpTextFetcher:  # pragma: no cover - the network
-    def __init__(self, *, timeout: float = 120.0):
-        self.timeout = timeout
+    """``urllib`` through the environment's proxy settings; opening a request is retried with a back-off as
+    :class:`.books.HttpFetcher` does (review M5), and :func:`_download` retries a body cut short."""
+
+    def __init__(self, *, timeout: float = 120.0, attempts: int = DOWNLOAD_ATTEMPTS, sleep=time.sleep):
+        self.timeout, self.attempts, self.sleep = timeout, attempts, sleep
 
     def stream(self, url: str) -> BinaryIO:
         import urllib.request
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        return urllib.request.urlopen(req, timeout=self.timeout)  # noqa: S310 - fixed https URLs
+        last = None
+        for i in range(self.attempts):
+            try:
+                return urllib.request.urlopen(req, timeout=self.timeout)  # noqa: S310 - fixed https URLs
+            except RETRYABLE as exc:
+                last = exc
+                self.sleep(1.5 * (i + 1))
+        raise RuntimeError(f"GET {url} failed after {self.attempts} attempts: {last!r}")
 
     def json(self, url: str) -> object:
         with self.stream(url) as fh:
             return json.loads(fh.read().decode("utf-8"))
 
 
-def resolve_filename(src: TextSource, *, fetch: TextFetcher) -> str:
-    """The source's file: its fixed name, else the first file of the Hub's listing matching its pattern (largest
-    parquet first: the Hub stores a dataset's table as ``data/train-*.parquet``)."""
+_EXT_ORDER = {".parquet": 0, ".jsonl": 1, ".json": 2, ".csv": 3}
+
+
+def resolve_filenames(src: TextSource, *, fetch: TextFetcher) -> list[str]:
+    """The source's files: its fixed name, else from the Hub's listing (review S2): the files matching its pattern,
+    those of the **train** split when there are any (the Hub stores a dataset as ``data/train-*-of-N.parquet`` beside
+    ``test-*`` and ``validation-*``), in the best format present (parquet, then JSON lines, JSON, CSV), and **every
+    one** of them (a split cut into N shards is fetched whole, each shard in the manifest).  Several files and none of
+    the train split is refused, naming them: which to read is a choice, not a guess."""
     if src.filename:
-        return src.filename
+        return [src.filename]
     info = fetch.json(HF_API + src.repo)
     files = [s.get("rfilename") for s in (info or {}).get("siblings") or [] if s.get("rfilename")]
     pat = re.compile(src.filename_pattern, re.IGNORECASE)
     cand = [f for f in files if pat.search(f)]
     if not cand:
         raise RuntimeError(f"{src.repo}: no file matching {src.filename_pattern!r} in the Hub's listing ({files})")
-    order = {".parquet": 0, ".jsonl": 1, ".json": 2, ".csv": 3}
-    return sorted(cand, key=lambda f: (order.get(Path(f).suffix.lower(), 9), f))[0]
+    train = [f for f in cand if "train" in Path(f).name.lower()]
+    pool = train or cand
+    best = min(_EXT_ORDER.get(Path(f).suffix.lower(), 9) for f in pool)
+    chosen = sorted(f for f in pool if _EXT_ORDER.get(Path(f).suffix.lower(), 9) == best)
+    if not train and len(chosen) > 1:
+        raise RuntimeError(f"{src.repo}: {len(chosen)} files and none is the train split ({', '.join(chosen)}): give "
+                           f"the source a fixed file name in text.TEXT_SOURCES")
+    return chosen
+
+
+def far_off(got: Optional[float], expected: Optional[float], *, what: str, unit: str,
+            low: float = 0.5, high: float = 2.0) -> Optional[str]:
+    """A warning when ``got`` is outside ``[low, high]`` times the plan's measurement (None when it is not, or when
+    there is no measurement)."""
+    if not expected or got is None:
+        return None
+    r = got / expected
+    if low <= r <= high:
+        return None
+    return (f"{what}, {r:.2f} x the {expected:,} {unit} the plan measured on the dataset card (2026-10-13): check "
+            f"that the right files were read")
+
+
+def entry_files(e: Mapping) -> list[dict]:
+    """A manifest entry's files (``files``; an entry written before review S2 had one ``file``)."""
+    if e.get("files"):
+        return [dict(f) for f in e["files"]]
+    if e.get("file"):
+        return [{"file": e["file"], "url": e.get("url"), "size_bytes": e.get("size_bytes"), "sha256": e.get("sha256")}]
+    return []
 
 
 def load_text_manifest(text_dir: Path = TEXT_EXTERNAL_DIR) -> dict:
@@ -516,27 +586,43 @@ class TextFetchReport:
     entries: list = field(default_factory=list)
     manifest: dict = field(default_factory=dict)
     dry_run_lines: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
 
 
-def _download(url: str, dest: Path, *, fetch: TextFetcher) -> tuple[int, str]:
+def _download(url: str, dest: Path, *, fetch: TextFetcher, attempts: int = DOWNLOAD_ATTEMPTS,
+              sleep=time.sleep) -> tuple[int, str]:
+    """``(bytes, sha256)`` of ``url`` written to ``dest`` through ``<dest>.part``: a dropped body is fetched again
+    (``attempts`` in all, with a back-off; review M5), and the ``.part`` file never outlives the call."""
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_name(dest.name + ".part")
-    h = hashlib.sha256()
-    n = 0
-    with fetch.stream(url) as resp, open(part, "wb") as out:
-        for chunk in iter(lambda: resp.read(1 << 20), b""):
-            out.write(chunk)
-            h.update(chunk)
-            n += len(chunk)
-    part.replace(dest)
-    return n, h.hexdigest()
+    last: Optional[BaseException] = None
+    for i in range(attempts):
+        h = hashlib.sha256()
+        n = 0
+        try:
+            with fetch.stream(url) as resp, open(part, "wb") as out:
+                for chunk in iter(lambda: resp.read(1 << 20), b""):
+                    out.write(chunk)
+                    h.update(chunk)
+                    n += len(chunk)
+            part.replace(dest)
+            return n, h.hexdigest()
+        except RETRYABLE as exc:
+            last = exc
+            print(f"WARNING: {url}: {exc!r} (attempt {i + 1} of {attempts})", file=sys.stderr)
+            if i + 1 < attempts:
+                sleep(1.5 * (i + 1))
+        finally:
+            if part.exists():
+                part.unlink()
+    raise RuntimeError(f"GET {url} failed after {attempts} attempts: {last!r}")
 
 
 def fetch_text(keys: Iterable[str] = tuple(TEXT_SOURCES), *, approved_by: Optional[str], fetch: TextFetcher,
                text_dir: Path = TEXT_EXTERNAL_DIR, force: bool = False, dry_run: bool = False,
                now_fn: Callable[[], str] = utc_now, git_sha: Optional[str] = None,
                sources: Optional[Mapping[str, TextSource]] = None,
-               sources_manifest_path: Optional[Path] = None) -> TextFetchReport:
+               sources_manifest_path: Optional[Path] = None, sleep=time.sleep) -> TextFetchReport:
     """Download the text corpora (see the module docstring).  Refused before any request (:class:`NotApproved`) for a
     source with no recorded approval unless ``approved_by`` names Roger's go (a dry run makes no request and prints
     what it would fetch without it)."""
@@ -562,16 +648,26 @@ def fetch_text(keys: Iterable[str] = tuple(TEXT_SOURCES), *, approved_by: Option
     entries = {e["key"]: e for e in prev.get("entries") or []}
     for k in keys:
         s = S[k]
-        fn = resolve_filename(s, fetch=fetch)
-        dest = root / k / Path(fn).name
+        fns = resolve_filenames(s, fetch=fetch)
+        rels = [f"{k}/{Path(fn).name}" for fn in fns]
         old = entries.get(k)
-        if dest.exists() and not force and old and old.get("sha256") and old.get("file") == f"{k}/{dest.name}":
+        old_files = {f["file"]: f for f in entry_files(old or {})}
+        if (not force and old and set(old_files) == set(rels) and all(old_files[r].get("sha256") for r in rels)
+                and all((root / r).exists() for r in rels)):
             rep.skipped.append(k)
             continue
-        url = s.url(fn)
-        n, sha = _download(url, dest, fetch=fetch)
-        entries[k] = {"key": k, "repo": s.repo, "file": f"{k}/{dest.name}", "url": url, "size_bytes": n,
-                      "sha256": sha, "hash_source": "received bytes", "field": s.field, "licence": s.licence,
+        files = []
+        for fn, rel in zip(fns, rels):
+            url = s.url(fn)
+            n, sha = _download(url, root / rel, fetch=fetch, sleep=sleep)
+            files.append({"file": rel, "url": url, "size_bytes": n, "sha256": sha})
+        total = sum(f["size_bytes"] for f in files)
+        w = far_off(total, s.expected_bytes, what=f"{k}: {total:,} bytes received in {len(files)} file(s)",
+                    unit="bytes")
+        if w:
+            rep.warnings.append(w)
+        entries[k] = {"key": k, "repo": s.repo, "files": files, "size_bytes": total,
+                      "hash_source": "received bytes", "field": s.field, "licence": s.licence,
                       "licence_url": s.licence_url, "what": s.what, "approval": s.approval or approved_by,
                       "downloaded_at": now_fn(), "tool": TOOL, "git_sha": git_sha}
         rep.fetched.append(k)
@@ -592,5 +688,6 @@ __all__ = ["TEXT_TYPES", "TEXT_FRAME_FLOOR", "INTENSIFIERS", "EXCLUDED", "TEXT_P
            "TextFrame", "TEXT_FRAME_SPECS", "TextSource", "TEXT_SOURCES", "text_frames", "text_bank_sha256",
            "clean_text", "sentences", "item_filler", "frame_fillers", "TextExtract", "extract_frames",
            "read_documents", "extract_dir", "write_text_extract", "read_text_extract", "run_extract",
-           "text_extract_paths", "TextFetcher", "HttpTextFetcher", "resolve_filename", "load_text_manifest",
+           "text_extract_paths", "TextFetcher", "HttpTextFetcher", "resolve_filenames", "far_off", "entry_files",
+           "RETRYABLE", "load_text_manifest",
            "fetch_text", "TextFetchReport", "NotApproved"]

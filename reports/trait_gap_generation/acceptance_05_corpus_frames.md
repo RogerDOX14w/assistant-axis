@@ -48,19 +48,25 @@ updated for Roger's decisions:
    `--no-count-siblings`, under which the review-load guard (1.5 x the target) can refuse (entry 173).
 5. **The pilot's selection** is a fixed top 25 per frame, registered rows included and charged nothing (entry 172).
 6. **The Books extracts keep decade sums** instead of every year, to keep them at "tens of MB"; the 1920 cutoff stays
-   exact (entry 175).
+   exact, and `table --year-min` refuses a cutoff inside a decade.  Every kept line is on disk **twice**, in its
+   shard's part under `parts/` (for `--resume` and a later tier's reassembly) and in the assembled `<frame_id>.tsv`,
+   so the extracts take about twice their own size (entry 175).
 7. **The review rate** is plan 13's measured `pooled_review_rate` (it exists now), the plan's 146 an hour only as the
    fallback (entry 170).
 8. **Two baselines** beside each other: OEWN's adjectives and person nouns by Zipf (plan 04's) and the table's own
    words by Zipf (what the frames' ordering adds over frequency alone).
-9. **The acceptance test's git check counts tracked files only** (entry 179).
+9. **The acceptance test's git check** lists tracked changes and untracked files alike, less an allow-list of the
+   shared checkout's known foreign file (entry 179, as revised by review M2).
+10. **Ineligible words rank last** (review S3): within each frame, in the union and in every recovery figure, the
+    words below the Zipf floor with no gloss come after the eligible ones (an unknown word's lift is about +9, so
+    junk would otherwise head the lift ordering and sway the ordering choice).
 
 ## Commands of § 8, at the build
 
 | command | result |
 |---|---|
-| `uv run pytest assistant_axis/tests/test_gapgen_corpus_frames_*.py data_analysis/tests/test_gap_generation_corpus_frames_cli.py -q` | 114 passed, 7 skipped (the acceptance tests on outputs not recorded yet) |
-| `uv run pytest -q` | 6,136 passed, 85 skipped, 12 failed, 27 collection errors; before the build, on the same worktree, 6,022 passed, 78 skipped and the **same** 12 failures and 27 errors (OEWN absent from the worktree's `data/external`, its recorded-output acceptance tests, the boundary hook's tests run from `/tmp`, and the `results_analysis` modules that collect only alone): no new failure |
+| `uv run pytest assistant_axis/tests/test_gapgen_corpus_frames_*.py data_analysis/tests/test_gap_generation_corpus_frames_cli.py -q` | 127 passed, 7 skipped (the acceptance tests on outputs not recorded yet); after the review fixes of 2026-10-17 |
+| `uv run pytest -q` | 6,149 passed, 85 skipped, 12 failed, 27 collection errors (after the review fixes); before the build, on the same worktree, 6,022 passed, 78 skipped and the **same** 12 failures and 27 errors (OEWN absent from the worktree's `data/external`, its recorded-output acceptance tests, the boundary hook's tests run from `/tmp`, and the `results_analysis` modules that collect only alone): no new failure |
 | `uv run python data_analysis/check_arrangements.py --quiet` | exit 0 |
 | `uv run python tools/sync_entity_lists.py --check` | exit 0 (932 traits, 339 roles up to date) |
 | `git status --porcelain data/traits data/roles data/seed_queue.json` | empty |

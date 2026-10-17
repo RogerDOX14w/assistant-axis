@@ -219,3 +219,40 @@ def test_the_acceptance_checks_pass_on_the_pipelines_outputs(env, monkeypatch):
     rdir = root / "cand" / "runs" / "corpus_frames" / "p1"
     A.test_generator_usage_is_zero(rdir)
     A.test_every_report_carries_the_headline_the_share_and_the_contributing_frames(rdir)
+
+
+def test_stream_refuses_a_plan_located_for_another_prefix(env, monkeypatch, capsys):
+    """Review S1: d_very's prefix edited under the same id after `locate`: refused, no request; a note-only edit is a
+    WARNING and streams."""
+    import dataclasses
+
+    from assistant_axis.gapgen.generators.corpus_frames import frames as F
+    root, common, fetch, hub = env
+    assert run(common, "locate") == 0
+    fetch.calls.clear()
+    real = F.frames_for
+
+    def edited(change):
+        bank = [change(f) if f.id == "d_very" else f for f in F.FRAME_BANK]
+        monkeypatch.setattr(F, "frames_for", lambda tier="all": real(tier, bank))
+        monkeypatch.setattr(F, "FRAME_BY_ID", {f.id: f for f in bank})
+        monkeypatch.setattr(F, "bank_sha256", lambda bank_=None: "edited-bank")
+    edited(lambda f: dataclasses.replace(f, prefix=("really",)))
+    with pytest.raises(SystemExit) as e:
+        run(common, "stream", "--approved-by", APPROVAL)
+    assert "d_very" in str(e.value) and "locate" in str(e.value)
+    assert fetch.calls == [] and not (root / "ext" / "books_ngrams").exists()
+    edited(lambda f: dataclasses.replace(f, note="edited note"))
+    assert run(common, "stream", "--approved-by", APPROVAL) == 0
+    assert "WARNING: the shard plan was located under bank" in capsys.readouterr().err
+
+
+def test_table_refuses_a_year_min_inside_a_decade(env, capsys):
+    """Review M1: the extracts keep decade sums."""
+    root, common, fetch, hub = env
+    before = snapshot(root)
+    assert run(common, "table", "--year-min", "1925") == 2
+    err = capsys.readouterr().err
+    assert "decade" in err and "1920" in err and "1930" in err and snapshot(root) == before
+    assert run(common, "locate") == 0 and run(common, "stream", "--approved-by", APPROVAL) == 0
+    assert run(common, "table", "--year-min", "1900", "--dry-run") == 0

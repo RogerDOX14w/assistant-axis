@@ -11,11 +11,13 @@ the text extracts, :func:`.text.read_text_extract`) and:
    text frames' own floor of 3);
 3. ranks each frame's fillers by **document frequency** (``volumes``: books, or descriptions; ties by match, then stem)
    and by **lift**, ``log10(volumes / frame_total_volumes) - (zipf - 9)``: the filler's share of the frame against its
-   share of English (wordfreq's Zipf is log10 occurrences per billion words), which demotes good, old and little;
+   share of English (wordfreq's Zipf is log10 occurrences per billion words), which demotes good, old and little.
+   Both rank the **eligible** fillers first and the ineligible ones (below the Zipf floor with no gloss) after them
+   (review S3, 2026-10-17: an unknown word's lift is about +9, so junk would head the lift ordering);
 4. fuses the frames by **reciprocal-rank fusion** (RRF, k = 60): ``rrf = sum over frames of 1 / (60 + rank)``, and
-   ``union_rank`` orders by it (ties by Zipf, then surface); ``rrf_lift`` / ``rank_lift_union`` are the same over
-   the lift ranks (the ordering is chosen by the free recovery check, :func:`.evaluate.ordering_choice`).  Doubling
-   every count of one frame changes no order;
+   ``union_rank`` orders by it, the eligible rows first (ties by Zipf, then surface); ``rrf_lift`` /
+   ``rank_lift_union`` are the same over the lift ranks (the ordering is chosen by the free recovery check,
+   :func:`.evaluate.ordering_choice`).  Doubling every count of one frame changes no order;
 5. records Zipf through :func:`assistant_axis.gapgen.freq.zipf_info` (never a local literal), the OEWN gloss hint
    (the censuses' ``glosshint``), ``eligible = not freq_hard_reject or gloss_hint`` (plan 04's rule), and the
    membership tags (:func:`tag_rows`: corpus, queue, registered, registered and decided, ``net_new``), which no
@@ -171,6 +173,8 @@ def build_table(hits: Mapping[str, Sequence], *, frames: Mapping[str, object], l
         c = counts.setdefault(key, {"hits": 0, "fillers": 0, "rejected_kind": 0, "malformed": 0, "total_volumes": 0})
         stems_seen = set()
         for h in hits[key]:
+            if int(h.match) <= 0:              # matched, but only in years before the cutoff: not a filler here
+                continue
             c["hits"] += int(h.match)
             fk = (h.filler, kind)
             if fk not in folds:
@@ -200,26 +204,12 @@ def build_table(hits: Mapping[str, Sequence], *, frames: Mapping[str, object], l
     if counts_out is not None:
         counts_out.update(counts)
     above = {k: a for k, a in agg.items() if a["match"] >= int(frames[k[0]].floor)}
-    by_frame: dict[str, list] = {}
-    for (key, stem), a in sorted(above.items()):
-        by_frame.setdefault(key, []).append((stem, a))
-    for key, ents in by_frame.items():
-        total = counts[key]["total_volumes"]
-        for i, (stem, a) in enumerate(sorted(ents, key=lambda e: (-e[1]["volumes"], -e[1]["match"], e[0])), 1):
-            a["rank_volumes"] = i
-        for stem, a in ents:
-            top = _top(a["surfaces"])
-            z = lookups.freq_info(top).zipf_min
-            a["lift"] = (_r(math.log10(a["volumes"] / total) - (z - 9.0)) if a["volumes"] > 0 and total > 0
-                         else None)
-        for i, (stem, a) in enumerate(sorted(ents, key=lambda e: (-(e[1]["lift"] if e[1]["lift"] is not None
-                                                                        else -1e9), -e[1]["volumes"], e[0])), 1):
-            a["rank_lift"] = i
     by_stem: dict[str, dict[str, dict]] = {}
     for (key, stem), a in sorted(above.items()):
         by_stem.setdefault(stem, {})[key] = a
-    rows = []
-    for stem, fa in sorted(by_stem.items()):
+    # each stem's submitted surface and its eligibility first: the ranks are taken among the eligible rows (review S3)
+    info: dict[str, dict] = {}
+    for stem, fa in by_stem.items():
         surfaces: Counter = Counter()
         fmap: dict[str, Fold] = {}
         for a in fa.values():
@@ -227,15 +217,41 @@ def build_table(hits: Mapping[str, Sequence], *, frames: Mapping[str, object], l
             fmap.update(a["folds"])
         plain = {s: v for s, v in surfaces.items() if not fmap[s].relabelled}
         surface = _top(plain) if plain else _top(surfaces)
+        fi = lookups.freq_info(surface)
+        hint = person_sense(lookups.senses(surface))
+        gh = gloss_hint(surface, hint, ()) if hint else None
+        info[stem] = {"surfaces": surfaces, "fmap": fmap, "surface": surface, "fi": fi, "hint": hint, "gh": gh,
+                      "eligible": (not fi.hard_reject) or bool(gh)}
+    by_frame: dict[str, list] = {}
+    for (key, stem), a in sorted(above.items()):
+        by_frame.setdefault(key, []).append((stem, a))
+    for key, ents in by_frame.items():
+        total = counts[key]["total_volumes"]
+        for stem, a in ents:
+            top = _top(a["surfaces"])
+            z = lookups.freq_info(top).zipf_min
+            a["lift"] = (_r(math.log10(a["volumes"] / total) - (z - 9.0)) if a["volumes"] > 0 and total > 0
+                         else None)
+        # eligible entries first, then the ineligible ones (a word below the Zipf floor with no gloss: an unknown
+        # word's lift is about +9, so junk would head the lift ordering), numbered on after them
+        first = lambda e: not info[e[0]]["eligible"]  # noqa: E731
+        by_vol = sorted(ents, key=lambda e: (first(e), -e[1]["volumes"], -e[1]["match"], e[0]))
+        for i, (stem, a) in enumerate(by_vol, 1):
+            a["rank_volumes"] = i
+        by_lift = sorted(ents, key=lambda e: (first(e), -(e[1]["lift"] if e[1]["lift"] is not None else -1e9),
+                                              -e[1]["volumes"], e[0]))
+        for i, (stem, a) in enumerate(by_lift, 1):
+            a["rank_lift"] = i
+    rows = []
+    for stem, fa in sorted(by_stem.items()):
+        it = info[stem]
+        surfaces, fmap, surface = it["surfaces"], it["fmap"], it["surface"]
+        fi, hint, gh, eligible = it["fi"], it["hint"], it["gh"], it["eligible"]
         sf = fmap[surface]
         try:
             surface_stem = normalize_candidate(surface).stem
         except ValueError:
             surface_stem = stem
-        fi = lookups.freq_info(surface)
-        hint = person_sense(lookups.senses(surface))
-        gh = gloss_hint(surface, hint, ()) if hint else None
-        eligible = (not fi.hard_reject) or bool(gh)
         fr_rec = {}
         for key in sorted(fa):
             a = fa[key]
@@ -279,9 +295,11 @@ def rrf(ranks_by_frame: Mapping[str, Mapping[str, int]], k: int = RRF_K) -> dict
 
 def union_rank(rows: Sequence[dict]) -> list[dict]:
     """Number ``union_rank`` by ``rrf`` and ``rank_lift_union`` by ``rrf_lift`` (descending; ties by Zipf
-    descending, then surface, then stem); returns the rows in ``union_rank`` order."""
+    descending, then surface, then stem), the eligible rows first and the ineligible ones after them (review S3);
+    returns the rows in ``union_rank`` order."""
     def order(field_):
-        return sorted(rows, key=lambda r: (-float(r[field_]), -(r.get("zipf") or 0.0), r["surface"], r["stem"]))
+        return sorted(rows, key=lambda r: (not r.get("eligible", True), -float(r[field_]), -(r.get("zipf") or 0.0),
+                                           r["surface"], r["stem"]))
     for i, r in enumerate(order("rrf_lift"), 1):
         r["rank_lift_union"] = i
     out = order("rrf")
@@ -301,10 +319,11 @@ def rerank_over(rows: Sequence[Mapping], frame_keys: Iterable[str], *, ordering:
         if not ks:
             continue
         s = sum(1.0 / (RRF_K + int(r["frames"][k][field_])) for k in ks)
-        scored.append((-round(s, 10), -(r.get("zipf") or 0.0), r["surface"], r["stem"], r))
+        scored.append((not r.get("eligible", True), -round(s, 10), -(r.get("zipf") or 0.0), r["surface"], r["stem"],
+                       r))
     out = []
-    for i, t in enumerate(sorted(scored, key=lambda t: t[:4]), 1):
-        d = dict(t[4])
+    for i, t in enumerate(sorted(scored, key=lambda t: t[:5]), 1):
+        d = dict(t[5])
         d["wave_rank"] = i
         out.append(d)
     return out

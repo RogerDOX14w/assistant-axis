@@ -18,13 +18,15 @@ tagged forms (``very_ADJ ...``): the block of prefix ``very `` is exactly the ke
   start as its year), in the n-grams' own format: a common 3-gram carries 150 or more year triples, and the plan's
   extracts are "tens of MB" (Roger is short of disk), while decade sums keep any decade-start cutoff exact (1920
   included; a cutoff inside a decade counts from the next decade).
-* :func:`run_stream` streams a plan, ``parallel`` shards at a time: **refused** (:class:`NotApproved`, the IPIP
-  rule) before any request unless ``approved_by`` names Roger's go; each shard's kept lines go to
+* :func:`run_stream` streams a plan, ``parallel`` shards at a time: **refused** (:class:`NotApproved`, the IPIP rule)
+  before any request unless ``approved_by`` names Roger's go; each shard's kept lines go to
   ``parts/<n>-<index>/<frame_id>.tsv`` with a ``done.json`` marker written last (``resume`` skips a shard whose marker
   covers its frames; a shard already done is refused without ``resume`` or ``force``, so that 27 GB is never
   re-streamed by accident); then the per-frame extracts ``<frame_id>.tsv`` (the kept lines in decade sums, so the
-  cutoff can move by decades without a new stream) and ``DOWNLOAD_MANIFEST.json`` (bytes streamed per shard, lines scanned
-  and kept, the sha256 of every extract, the approval, the licence), copied to the tracked sources manifest.
+  cutoff can move by decades without a new stream) and ``DOWNLOAD_MANIFEST.json`` (bytes streamed per shard, lines
+  scanned and kept, the sha256 of every extract, the approval, the licence), copied to the tracked sources manifest.
+  **Every kept line is on disk twice**: in its shard's part (kept for ``--resume`` and for reassembling a frame when a
+  later tier streams a shard it shares) and in the assembled extract, so the extracts take about twice their own size.
 
 The background frequency is ``wordfreq``'s Zipf (``gapgen.freq``), never the Books 1-grams (plan section 1).  No
 paid API is involved; every network call goes through a :class:`Fetcher`, which the tests replace.
@@ -517,15 +519,17 @@ def _stream_one(entry: ShardEntry, frames: Sequence[Frame], *, fetch: Fetcher, p
     for _ in range(attempts):
         try:
             res = stream_shard(entry.url, frames, fetch=fetch)
+            # a stream that ended early but still decompressed (a cut at a gzip member boundary) is a dropped
+            # stream too: checked inside the loop, so that it is retried (review M4)
+            if entry.bytes and res.bytes_streamed != entry.bytes:
+                raise RuntimeError(f"{entry.name}: streamed {res.bytes_streamed} bytes, the plan's Content-Length "
+                                   f"is {entry.bytes}")
             break
         except (OSError, EOFError, zlib.error, http.client.HTTPException, RuntimeError) as exc:
             # a dropped stream: start the shard again
             last = exc
     else:
-        raise RuntimeError(f"{entry.name}: {last!r}")
-    if entry.bytes and res.bytes_streamed != entry.bytes:
-        raise RuntimeError(f"{entry.name}: streamed {res.bytes_streamed} bytes, the plan's Content-Length is "
-                           f"{entry.bytes}")
+        raise RuntimeError(f"{entry.name}: {last!r} (after {attempts} attempts)")
     parts_dir.mkdir(parents=True, exist_ok=True)
     shas = {}
     for f in frames:
@@ -533,7 +537,7 @@ def _stream_one(entry: ShardEntry, frames: Sequence[Frame], *, fetch: Fetcher, p
     rec = {"shard": entry.name, "n": entry.n, "index": entry.index, "url": entry.url, "content_length": entry.bytes,
            "bytes_streamed": res.bytes_streamed, "lines_scanned": res.lines_scanned,
            "lines_kept": {f.id: len(res.lines[f.id]) for f in frames},
-           "fillers": {f.id: len({h.filler for h in res.hits[f.id]}) for f in frames},
+           "fillers": {f.id: len({h.filler for h in res.hits[f.id] if h.match > 0}) for f in frames},
            "frames": sorted(f.id for f in frames), "parts_sha256": shas, "seconds": res.seconds,
            "streamed_at": now_fn(), "approval": approval, "tool": TOOL, "git_sha": git_sha}
     _write_json(rec, parts_dir / DONE_NAME)       # last: the marker means every part is written
@@ -542,7 +546,10 @@ def _stream_one(entry: ShardEntry, frames: Sequence[Frame], *, fetch: Fetcher, p
 
 def assemble_extracts(plan: ShardPlan, external_dir: Path) -> dict:
     """``<frame_id>.tsv`` per frame of the plan: its shards' parts concatenated in shard order (the lines stay in the
-    shards' sort order).  A frame with a shard not yet done is left out."""
+    shards' sort order).  A frame with a shard not yet done is left out.  The parts are kept: every kept line exists
+    twice on disk, in ``parts/<shard>/<frame_id>.tsv`` (what ``--resume`` and a later tier's reassembly read) and in
+    the assembled ``<frame_id>.tsv`` (what ``table`` reads), so the disk the extracts take is about twice their size
+    (review M3)."""
     out = {}
     root = Path(external_dir)
     for fid in plan.frames():
@@ -586,6 +593,31 @@ def manifest_doc(plan: ShardPlan, external_dir: Path, *, previous: Mapping, extr
                     "2026-10-14: open decision 1 (b), both tiers streamed, nothing large on disk)"}
 
 
+def stale_frames(plan: ShardPlan, frames: Iterable[Frame]) -> list[str]:
+    """The frames whose place in the shards the plan does not know as it is now: no span recorded, or a span located
+    for another prefix (``key``) or n-gram order (``n``).  Streaming such a plan would read the wrong shards (review
+    S1, 2026-10-17: a prefix edited under the same id passed the id check); an edit to a frame's note or tier changes
+    the bank's sha256 only, and the shards stay right."""
+    out = []
+    for f in frames:
+        sp = (plan.frame_spans or {}).get(f.id)
+        if not sp or sp.get("key") != f.key or int(sp.get("n") or 0) != f.n:
+            out.append(f.id)
+    return sorted(out)
+
+
+class StalePlan(SystemExit):
+    """The shard plan was located for frames whose prefix or n-gram order has changed since."""
+
+
+def check_plan(plan: ShardPlan, frames: Iterable[Frame]) -> None:
+    """Refuse (:class:`StalePlan`) a plan with stale frames (:func:`stale_frames`), naming them."""
+    stale = stale_frames(plan, frames)
+    if stale:
+        raise StalePlan(f"the shard plan was located for another prefix or n-gram order of {', '.join(stale)}: run "
+                        f"`locate` again before streaming (the shards it lists would be the wrong ones)")
+
+
 def run_stream(plan: ShardPlan, *, approved_by: Optional[str], fetch: Fetcher, frames_by_id: Mapping[str, Frame],
                external_dir: Path = EXTERNAL_DIR, resume: bool = False, force: bool = False, parallel: int = 4,
                dry_run: bool = False, git_sha: Optional[str] = None, sources_manifest_path: Optional[Path] = None,
@@ -595,6 +627,7 @@ def run_stream(plan: ShardPlan, *, approved_by: Optional[str], fetch: Fetcher, f
     if not dry_run and not (approved_by or "").strip():
         raise NotApproved("the Books stream is a download over 2 GB: run it only after Roger's go, naming it with "
                           "--approved-by '<Roger, date>' (plan 05 open decision 1; the download rule of 2026-10-10)")
+    check_plan(plan, [frames_by_id[f] for f in plan.frames()])
     root = Path(external_dir)
     rep = StreamReport(approved_by=approved_by, planned=[s.name for s in plan.shards], bytes_planned=plan.total_bytes)
     todo: list[ShardEntry] = []
@@ -675,4 +708,5 @@ __all__ = ["BASE_URL", "N_SHARDS", "SOURCE_ID", "LICENCE", "LICENCE_URL", "YEAR_
            "END_SENTINEL", "Fetcher", "HttpFetcher", "shard_url", "shard_name", "first_ngram", "head_ngram", "Heads",
            "Span", "locate", "ShardEntry", "ShardPlan", "shard_plan", "Hit", "parse_counts", "line_hit", "aggregate",
            "StreamedShard", "stream_shard", "write_extract", "read_extract", "run_stream", "StreamReport",
+           "stale_frames", "StalePlan", "check_plan",
            "assemble_extracts", "manifest_doc", "update_sources_manifest", "extract_paths", "NotApproved"]

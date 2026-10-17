@@ -4,10 +4,10 @@ Two ways to choose the table's rows (eligible rows only; plan 04's rule ``eligib
 gloss_hint``):
 
 * ``--top-per-frame N`` (**the pilot**, plan section 10): the top N of **every** frame by within-frame rank,
-  deduplicated across frames.  Each frame is measured on its own N, so its registered fillers are taken like any other ("registered
-  rows ride along") and cost nothing: the estimate charges only the rows the registry has not yet filtered.  The run
-  records which stems each frame contributed (``run.json`` ``args.selection_by_frame``), which is what the frame
-  measures read after M1 and M3 (:func:`.evaluate.frame_measures`).
+  deduplicated across frames.  Each frame is measured on its own N, so its registered fillers are taken like any other
+  ("registered rows ride along") and cost nothing: the estimate charges only the rows the registry has not yet
+  filtered.  The run records which stems each frame contributed (``run.json`` ``args.selection_by_frame``), which is
+  what the frame measures read after M1 and M3 (:func:`.evaluate.frame_measures`).
 * ``--kept-target K --kept-share S`` (**the review-hour wave**; Roger, plan 09 decision 1 and plan 04: about two hours
   of review): the rows found by the **frames kept** after the pilot, ranked by RRF over those frames only
   (:func:`.table.rerank_over`: a dropped frame's rows and ranks left out), taken until the **net-new** rows selected
@@ -65,7 +65,8 @@ KEPT_TARGET_DEFAULT = 300
 #: Net-new kept rows per net-new row submitted: the proxy's ~0.3 (plan, "Baseline": net-new share 0.25-0.35, M1 trait
 #: share 0.65-0.88, M3 kept share 0.42-0.49), until the pilot measures this generator's own.
 KEPT_SHARE_ASSUMED = 0.3
-#: The review rate when plan 13's measurement is not available (146 terms an active hour on the TDA batch, plan 13 § 6).
+#: The review rate when plan 13's measurement is not available (146 terms an active hour on the TDA batch, plan 13
+#: § 6).
 REVIEW_TERMS_PER_HOUR_PLAN = 146.0
 REVIEW_RATE_SOURCE_PLAN = "plan figure, 146 terms an active hour (plan 13 section 6, review_tda_1)"
 REVIEW_OVERSHOOT = 1.5

@@ -194,11 +194,13 @@ def _load_plan(args):
 
 def _plan_for_tier(plan, tier: str):
     """The plan restricted to the frames of ``tier`` (a tier-1 stream from a plan located for both tiers)."""
-    want = {f.id for f in F.frames_for(tier)}
+    wanted = F.frames_for(tier)
+    want = {f.id for f in wanted}
     missing = sorted(want - set(plan.frames()))
     if missing:
         raise SystemExit(f"the shard plan (tier {plan.tier}) does not cover {', '.join(missing)}: run "
                          f"`locate --tier {tier}` first")
+    B.check_plan(plan, wanted)          # a prefix or n changed under the same id: run locate again (review S1)
     shards = []
     for s in plan.shards:
         fs = [f for f in s.frames if f in want]
@@ -223,7 +225,8 @@ def cmd_stream(args) -> int:
     plan = _plan_for_tier(plan, args.tier)
     if plan.bank_sha256 != F.bank_sha256():
         print(f"WARNING: the shard plan was located under bank {plan.bank_sha256[:12]}, the bank is now "
-              f"{F.bank_sha256()[:12]}: run `locate` again if a frame's prefix changed", file=sys.stderr)
+              f"{F.bank_sha256()[:12]}; every frame's prefix and n-gram order still match the plan, so only a note, "
+              f"a tier or another field that does not place a frame changed", file=sys.stderr)
     try:
         rep = B.run_stream(plan, approved_by=args.approved_by, fetch=None if args.dry_run else
                            _fetcher(), frames_by_id=F.FRAME_BY_ID, external_dir=args.external_dir, resume=args.resume,
@@ -268,6 +271,8 @@ def cmd_fetch_text(args) -> int:
         return 0
     print(f"fetched {rep.fetched or 'nothing'}, skipped {rep.skipped or 'nothing'}; "
           + ", ".join(f"{e['key']} {e['size_bytes'] / 1e6:.1f} MB" for e in rep.entries))
+    for w in rep.warnings:
+        print(f"WARNING: {w}", file=sys.stderr)
     return 0
 
 
@@ -305,6 +310,11 @@ def _hits(args) -> tuple[dict, dict]:
 def cmd_table(args) -> int:
     from assistant_axis.gapgen.generators.corpus_frames import table as T
     from assistant_axis.provenance import current_file_input
+    if args.year_min % 10:
+        print(f"refused: --year-min {args.year_min} is inside a decade, and the Books extracts keep decade sums "
+              f"(1920 = 1920-1929 onward): give a decade start ({args.year_min - args.year_min % 10} or "
+              f"{args.year_min - args.year_min % 10 + 10})", file=sys.stderr)
+        return 2
     hits, frames = _hits(args)
     if not hits:
         print(f"no extracts under {_rel(args.external_dir)} or {_rel(X.extract_dir(args.text_dir))}: run `stream` "
@@ -586,7 +596,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_extract_text)
 
     p = sub.add_parser("table", help="build frames_table.jsonl and frame_stats.json from the extracts ($0)")
-    p.add_argument("--year-min", type=int, default=B.YEAR_MIN, help="sum the Books counts over years >= this (1920)")
+    p.add_argument("--year-min", type=int, default=B.YEAR_MIN,
+                   help="sum the Books counts over years >= this (1920); a decade start, since the extracts keep "
+                        "decade sums")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_table)
 

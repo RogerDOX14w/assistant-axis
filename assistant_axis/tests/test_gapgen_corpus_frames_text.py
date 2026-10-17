@@ -115,9 +115,11 @@ def test_fetch_text_needs_the_approval_and_records_it(tmp_path):
     assert sorted(rep.fetched) == ["cards", "pippa"]
     man = json.loads((d / "DOWNLOAD_MANIFEST.json").read_text())
     e = {x["key"]: x for x in man["entries"]}
-    assert e["cards"]["file"] == "cards/train-00000-of-00001.parquet" and e["cards"]["licence"] == "CC BY 4.0"
+    assert [f["file"] for f in e["cards"]["files"]] == ["cards/train-00000-of-00001.parquet"]
+    assert e["cards"]["licence"] == "CC BY 4.0"
     assert e["pippa"]["approval"] == appr and e["pippa"]["licence"] == "Apache-2.0"
-    assert e["pippa"]["size_bytes"] == len(hub.files["pippa_deduped.jsonl"])
+    assert e["pippa"]["size_bytes"] == e["pippa"]["files"][0]["size_bytes"] == len(hub.files["pippa_deduped.jsonl"])
+    assert len(rep.warnings) == 2                      # fixture files are far smaller than the plan's measurements
     assert json.loads(src.read_text())["text"] == man
     hub.calls.clear()
     assert X.fetch_text(approved_by=appr, fetch=hub, text_dir=d).skipped == ["pippa", "cards"]
@@ -144,3 +146,106 @@ def test_the_text_bank_is_hashed_and_keyed_by_source():
     assert all(k.split(".")[0] in X.TEXT_SOURCES for k in keys)
     assert {f.type for f in X.text_frames()} >= {"list", "postposed", "copular", "possessive"}
     assert len(X.text_bank_sha256()) == 64
+
+
+# --------------------------------------------------------------------------- review fixes (2026-10-17)
+
+class Listing:
+    def __init__(self, files):
+        self.files, self.calls = files, []
+
+    def json(self, url):
+        self.calls.append(("json", url))
+        return {"siblings": [{"rfilename": f} for f in self.files]}
+
+
+def test_resolve_filenames_prefers_the_train_split_and_takes_every_shard():
+    """S2: ``test-*`` sorted before ``train-*``, and only the first of several train shards was taken."""
+    src = X.TEXT_SOURCES["cards"]
+    hub = Listing(["README.md", "data/test-00000-of-00001.parquet", "data/train-00001-of-00002.parquet",
+                   "data/train-00000-of-00002.parquet", "data/train.csv"])
+    assert X.resolve_filenames(src, fetch=hub) == ["data/train-00000-of-00002.parquet",
+                                                   "data/train-00001-of-00002.parquet"]
+    assert X.resolve_filenames(src, fetch=Listing(["cards.jsonl", "README.md"])) == ["cards.jsonl"]
+    with pytest.raises(RuntimeError) as e:                                   # several, none of the train split
+        X.resolve_filenames(src, fetch=Listing(["data/a.parquet", "data/b.parquet"]))
+    assert "data/a.parquet" in str(e.value) and "data/b.parquet" in str(e.value)
+    assert X.resolve_filenames(X.TEXT_SOURCES["pippa"], fetch=Listing([])) == ["pippa_deduped.jsonl"]
+
+
+def test_far_off_warns_against_the_plans_measurements():
+    assert X.far_off(2_100_000, 2_200_000, what="cards", unit="bytes") is None
+    assert "0.10 x" in X.far_off(220_000, 2_200_000, what="cards", unit="bytes")
+    assert X.far_off(20_000, 5755, what="cards", unit="rows")                 # several times too many
+    assert X.far_off(5, None, what="pippa", unit="rows") is None              # no measurement, no warning
+
+
+def test_a_split_in_shards_is_fetched_whole_and_extracted_whole(tmp_path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    blobs = {}
+    for i, texts in enumerate((["She is kind and shy."], ["He is loyal by nature.", "She is shy and kind."])):
+        p = tmp_path / f"s{i}.parquet"
+        pq.write_table(pa.table({"description": texts}), p)
+        blobs[f"train-0000{i}-of-00002.parquet"] = p.read_bytes()
+
+    class ShardedHub(FakeHub):
+        def json(self, url):
+            self.calls.append(("json", url))
+            return {"siblings": [{"rfilename": f"data/{k}"} for k in sorted(self.files)]
+                    + [{"rfilename": "data/test-00000-of-00001.parquet"}]}
+    hub = ShardedHub(blobs)
+    d = tmp_path / "ext"
+    near = {"cards": __import__("dataclasses").replace(X.TEXT_SOURCES["cards"],
+                                                       expected_bytes=sum(len(b) for b in blobs.values()))}
+    rep = X.fetch_text(["cards"], approved_by="Roger", fetch=hub, text_dir=d, sources=near)
+    files = rep.entries[0]["files"]
+    assert [f["file"] for f in files] == ["cards/train-00000-of-00002.parquet", "cards/train-00001-of-00002.parquet"]
+    assert rep.entries[0]["size_bytes"] == sum(f["size_bytes"] for f in files) and rep.warnings == []
+    stats = X.run_extract(text_dir=d, sources=["cards"], echo=lambda *a: None)
+    assert stats["sources"]["cards"]["n_documents"] == 3 and len(stats["sources"]["cards"]["files"]) == 2
+    assert any("5,755 rows" in w for w in stats["warnings"])                 # 3 cards, not 5,755
+    got = {h.filler for h in X.read_text_extract(d / "extracts" / "cards.copular_list.tsv")}
+    assert got == {"kind", "shy", "loyal"}                                   # read from both shards
+
+
+class _Cut:
+    """A body that raises after its first chunk."""
+
+    def __init__(self, data):
+        self.data, self.n = data, 0
+
+    def read(self, size=-1):
+        self.n += 1
+        if self.n > 1:
+            raise ConnectionError("connection reset")
+        return self.data[:5]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def test_download_retries_with_a_back_off_and_leaves_no_part_file(tmp_path):
+    """M5: a body cut short is fetched again; the ``.part`` file never outlives the call."""
+    body = b"0123456789" * 100
+    calls, slept = [], []
+
+    class OnceCut:
+        def stream(self, url):
+            calls.append(url)
+            return _Cut(body) if len(calls) == 1 else io.BytesIO(body)
+    n, sha = X._download("https://x/f", tmp_path / "f.bin", fetch=OnceCut(), sleep=slept.append)
+    import hashlib
+    assert (n, sha) == (len(body), hashlib.sha256(body).hexdigest()) and len(calls) == 2 and slept == [1.5]
+    assert (tmp_path / "f.bin").read_bytes() == body and not (tmp_path / "f.bin.part").exists()
+
+    class AlwaysCut:
+        def stream(self, url):
+            return _Cut(body)
+    slept.clear()
+    with pytest.raises(RuntimeError):
+        X._download("https://x/g", tmp_path / "g.bin", fetch=AlwaysCut(), attempts=3, sleep=slept.append)
+    assert slept == [1.5, 3.0] and not (tmp_path / "g.bin").exists() and not (tmp_path / "g.bin.part").exists()

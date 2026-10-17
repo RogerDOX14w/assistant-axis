@@ -60,7 +60,8 @@ def test_the_text_corpora_record_their_licence_and_approval():
     if not text:
         pytest.skip("no text corpus recorded yet")
     for e in text["entries"]:
-        assert e["approval"] and e["licence"] in ("Apache-2.0", "CC BY 4.0") and len(e["sha256"]) == 64
+        assert e["approval"] and e["licence"] in ("Apache-2.0", "CC BY 4.0") and e["files"]
+        assert all(len(f["sha256"]) == 64 and f["url"] for f in e["files"])
 
 
 def test_the_evaluation_reports_what_the_plan_asks():
@@ -128,13 +129,44 @@ def test_the_package_imports_neither_anthropic_nor_openai():
     assert not re.search(r"^\s*(import|from)\s+(anthropic|openai)\b", cli.read_text(), re.M)
 
 
+#: Files under the checked paths that other sessions create in the shared main checkout and this generator never writes
+#: (review M2, 2026-10-17): the naming check's history, untracked there on 2026-10-17.
+FOREIGN_ALLOWED: frozenset = frozenset({"data/traits/name_check_history.jsonl"})
+CHECKED_PATHS = ("data/traits", "data/roles", "data/seed_queue.json")
+
+
+def unexpected_changes(porcelain: str, allowed=FOREIGN_ALLOWED) -> list[str]:
+    """The paths of a ``git status --porcelain`` listing, tracked changes and untracked files alike (a new trait file
+    is untracked), less the allow-listed foreign files."""
+    out = []
+    for line in porcelain.splitlines():
+        if not line.strip():
+            continue
+        path = line[3:].strip().strip('"')
+        if " -> " in path:                                  # a rename: the new path
+            path = path.split(" -> ", 1)[1].strip('"')
+        if path not in allowed:
+            out.append(path)
+    return sorted(out)
+
+
+def test_unexpected_changes_sees_new_files_and_allows_only_the_known_foreign_one():
+    listing = ("?? data/traits/name_check_history.jsonl\n"
+               "?? data/traits/instructions/frame_found.json\n"
+               " M data/roles/instructions/actor.json\n"
+               "R  data/traits/instructions/a.json -> data/traits/instructions/b.json\n")
+    assert unexpected_changes(listing) == ["data/roles/instructions/actor.json", "data/traits/instructions/b.json",
+                                           "data/traits/instructions/frame_found.json"]
+    assert unexpected_changes("?? data/traits/name_check_history.jsonl\n") == []
+
+
 def test_no_trait_role_or_queue_file_was_touched():
-    """Tracked files only: the main checkout is shared, and another session's new, untracked record under
-    ``data/traits`` (``name_check_history.jsonl``) is not this generator's (it writes nothing there)."""
+    """Tracked changes and untracked files (``--untracked-files=all``: a new trait file must show), less the
+    allow-listed foreign files of the shared main checkout (:data:`FOREIGN_ALLOWED`); this generator writes nothing
+    under these paths."""
     try:
-        out = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", "data/traits",
-                              "data/roles", "data/seed_queue.json"],
+        out = subprocess.run(["git", "status", "--porcelain", "--untracked-files=all", "--", *CHECKED_PATHS],
                              cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError):
         pytest.skip("git unavailable")
-    assert out.strip() == ""
+    assert unexpected_changes(out) == []

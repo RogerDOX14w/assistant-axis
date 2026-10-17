@@ -158,3 +158,17 @@ def test_the_curves_png(tmp_path):
     p = E.plot_recovery_curves(ev, tmp_path / "recovery_curves.png")
     info = Image.open(p).info
     assert info.get("Title", "").startswith("Corpus-frames generator") and "Software" in info
+
+
+def test_the_rankings_are_read_over_eligible_rows():
+    """S3: union and frame positions, the table's Zipf baseline and so the ordering choice skip ineligible rows."""
+    t = build({"d_very": [H("good", 4000, 3000, "man"), H("blarg", 900, 800, "man"), H("kind", 500, 400, "fellow"),
+                          H("honest", 300, 230, "man")]})
+    for o in E.ORDERINGS:
+        pos = E.union_positions(t, o)
+        assert "blarg" not in pos and sorted(pos.values()) == [0, 1, 2]
+        assert "blarg" not in E.frame_positions(t, "d_very", o)
+    assert "blarg" not in E.table_zipf_ranking(t)
+    rec = E.recovery_curves(t, {"corpus": ["honest", "blarg"]}, (1, 3), frame_keys=["d_very"])
+    assert rec["union_lift"]["corpus"]["all"]["found_anywhere"] == 0.5        # blarg is in the table, not rankable
+    assert rec["union_volumes"]["corpus"]["all"]["recall@3"] == 0.5

@@ -82,14 +82,21 @@ def positions_from_rows(rows: Sequence[Mapping]) -> dict[str, int]:
     return pos
 
 
+def _eligible(table: Sequence[Mapping]) -> list[Mapping]:
+    """The rows that can be submitted (``eligible``): every recovery figure and baseline is read over them (review
+    S3, 2026-10-17), since an ineligible row never reaches the registry."""
+    return [r for r in table if r.get("eligible", True)]
+
+
 def union_positions(table: Sequence[Mapping], ordering: str = "volumes") -> dict[str, int]:
     f = UNION_FIELD[ordering]
-    return positions_from_rows(sorted(table, key=lambda r: int(r[f])))
+    return positions_from_rows(sorted(_eligible(table), key=lambda r: int(r[f])))
 
 
 def frame_positions(table: Sequence[Mapping], key: str, ordering: str = "volumes") -> dict[str, int]:
     f = FRAME_FIELD[ordering]
-    rows = sorted((r for r in table if key in (r.get("frames") or {})), key=lambda r: int(r["frames"][key][f]))
+    rows = sorted((r for r in _eligible(table) if key in (r.get("frames") or {})),
+                  key=lambda r: int(r["frames"][key][f]))
     return positions_from_rows(rows)
 
 
@@ -117,8 +124,8 @@ def _groups(labels: Sequence[str], classes: Sequence[str] = CLASSES) -> dict[str
 
 
 def table_zipf_ranking(table: Sequence[Mapping]) -> list[str]:
-    """The table's own rows by Zipf alone (descending; ties by stem): the frames' ordering must beat it."""
-    return [r["stem"] for r in sorted(table, key=lambda r: (-(r.get("zipf") or 0.0), r["stem"]))]
+    """The table's eligible rows by Zipf alone (descending; ties by stem): the frames' ordering must beat it."""
+    return [r["stem"] for r in sorted(_eligible(table), key=lambda r: (-(r.get("zipf") or 0.0), r["stem"]))]
 
 
 def frequency_ranking(universe: Sequence[str], zipf: Callable[[str], float]) -> list[str]:

@@ -165,3 +165,65 @@ def test_decade_sums_keep_the_1920_cutoff_exact():
         assert B.parse_counts(d.split("\t")[1:], year_min=y) == B.parse_counts(line.split("\t")[1:], year_min=y)
     assert B.parse_counts(d.split("\t")[1:], year_min=1925) == (1, 1)    # inside a decade: from the next one
     assert len(d) < len(line)
+
+
+# --------------------------------------------------------------------------- review fixes (2026-10-17)
+
+def test_a_stale_plan_is_refused_before_any_request(tmp_path):
+    """S1: a frame's prefix (or n) edited under the same id: the plan's shards would be the wrong ones."""
+    import dataclasses
+    fetch = fixture_fetcher()
+    plan = _plan(fetch, keys=("d_very", "d_too"))
+    fetch.calls.clear()
+    really = dataclasses.replace(F.FRAME_BY_ID["d_very"], prefix=("really",))
+    assert B.stale_frames(plan, [really, F.FRAME_BY_ID["d_too"]]) == ["d_very"]
+    four = dataclasses.replace(F.FRAME_BY_ID["d_too"], n=4)
+    assert B.stale_frames(plan, [four]) == ["d_too"]
+    assert B.stale_frames(plan, [F.FRAME_BY_ID["n_born"]]) == ["n_born"]          # no span at all
+    note = dataclasses.replace(F.FRAME_BY_ID["d_very"], note="edited", tier=2)
+    assert B.stale_frames(plan, [note]) == []                                    # a note or a tier: still placed
+    by_id = {**F.FRAME_BY_ID, "d_very": really}
+    with pytest.raises(B.StalePlan) as e:
+        B.run_stream(plan, approved_by="Roger", fetch=fetch, frames_by_id=by_id, external_dir=tmp_path,
+                     echo=lambda *a: None)
+    assert "d_very" in str(e.value) and "locate" in str(e.value)
+    assert fetch.calls == [] and not any(tmp_path.iterdir())
+
+
+def test_fillers_count_only_matches_after_the_cutoff(tmp_path):
+    """M3: a line whose every match is before 1920 is kept (the cutoff can move) but is not a filler."""
+    fetch = FakeShards({3: [["very good man\t1919,100,50", "very kind man\t1950,40,30"]]})
+    plan = B.shard_plan([F.FRAME_BY_ID["d_very"]], fetch=fetch, n_shards=fetch.n_shards)
+    B.run_stream(plan, approved_by="Roger", fetch=fetch, frames_by_id=F.FRAME_BY_ID, external_dir=tmp_path,
+                 echo=lambda *a: None)
+    rec = B.done_record(tmp_path / B.PARTS_DIRNAME / plan.shards[0].name)
+    assert rec["lines_kept"]["d_very"] == 2 and rec["fillers"]["d_very"] == 1
+
+
+class FlakyShards(FakeShards):
+    """The first stream of each shard is a shorter, valid gzip (a cut the gzip reader cannot see)."""
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.cut = set()
+
+    def stream(self, url):
+        import io
+        self.calls.append(("stream", url))
+        if url not in self.cut:
+            self.cut.add(url)
+            return io.BytesIO(gz(["very good man\t1950,1,1"]))
+        return io.BytesIO(self._blob(url))
+
+
+def test_a_short_stream_is_retried(tmp_path):
+    """M4: the bytes-streamed check is inside the retry loop."""
+    lines = ["very good man\t1950,4000,3000", "very honest man\t1950,300,200", "very kind fellow\t1950,500,400"]
+    fetch = FlakyShards({3: [lines]})
+    plan = B.shard_plan([F.FRAME_BY_ID["d_very"]], fetch=fetch, n_shards=fetch.n_shards)
+    fetch.calls.clear()
+    rep = B.run_stream(plan, approved_by="Roger", fetch=fetch, frames_by_id=F.FRAME_BY_ID, external_dir=tmp_path,
+                       echo=lambda *a: None)
+    assert not rep.failed and rep.streamed == [plan.shards[0].name]
+    assert [c[0] for c in fetch.calls] == ["stream", "stream"]               # cut once, read whole the second time
+    assert len((tmp_path / "d_very.tsv").read_text().splitlines()) == 3

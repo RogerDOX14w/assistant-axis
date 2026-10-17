@@ -189,3 +189,31 @@ def test_the_frozen_interface_names():
     from assistant_axis.gapgen.generators import corpus_frames as G
     assert G.load_frames_table is T.load_frames_table and G.person_frequency is T.person_frequency
     assert G.TABLE_PATH.name == "frames_table.jsonl" and G.PersonFreq is T.PersonFreq
+
+
+# --------------------------------------------------------------------------- review fixes (2026-10-17)
+
+def test_ineligible_fillers_rank_after_the_eligible_ones():
+    """S3: an unknown word (Zipf 0, no gloss) has the top lift (about +9) and, ranked among the rest, would head the
+    lift ordering; it is ranked after every eligible filler, in each frame and in the union."""
+    rows = by_stem(build({"d_very": [H("good", 4000, 3000, "man"), H("blarg", 900, 800, "man"),
+                                     H("kind", 500, 400, "fellow"), H("honest", 300, 230, "man")],
+                          "h_he_was_always": [H("blarg", 90, 80), H("cheerful", 80, 70)],
+                          "t_tendency": [H("blarg", 60, 55)]}))
+    b = rows["blarg"]
+    assert not b["eligible"] and b["frames"]["d_very"]["lift"] > rows["honest"]["frames"]["d_very"]["lift"]
+    assert b["frames"]["d_very"]["rank_volumes"] == 4 and b["frames"]["d_very"]["rank_lift"] == 4
+    assert b["frames"]["h_he_was_always"]["rank_volumes"] == 2                 # after cheerful, though more volumes
+    assert {s: r["frames"]["d_very"]["rank_volumes"] for s, r in rows.items() if "d_very" in r["frames"]} == \
+        {"good": 1, "kind": 2, "honest": 3, "blarg": 4}
+    # in three frames its RRF beats every eligible row's, yet it comes last in both union orderings
+    assert b["rrf"] > max(r["rrf"] for s, r in rows.items() if s != "blarg")
+    n = len(rows)
+    assert b["union_rank"] == n and b["rank_lift_union"] == n
+
+
+def test_a_match_only_before_the_cutoff_is_not_a_filler():
+    """M3: a hit whose counts are all before 1920 (match 0) is neither a row nor a counted filler."""
+    counts = {}
+    rows = build({"d_very": [H("good", 0, 0, "man"), H("kind", 500, 400, "man")]}, counts_out=counts)
+    assert [r["stem"] for r in rows] == ["kind"] and counts["d_very"]["fillers"] == 1

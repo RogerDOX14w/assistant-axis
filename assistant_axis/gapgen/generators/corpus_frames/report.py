@@ -262,7 +262,8 @@ def render_report(fig: Mapping, *, doc_path: Path, table_path: Optional[Path] = 
               f"Of the run's **{h['n_rows']}** table rows, **{h['already_registered']}** "
               f"({_pct(h['already_registered_share'])}) were already in the registry when it was submitted "
               f"({h['by_another_generator']} from another generator), and M1 and M3 had decided "
-              f"**{h['already_decided']}** of those ({_pct(h['already_decided_share_of_registered'])}); {h['corpus']} are corpus traits and "
+              f"**{h['already_decided']}** of those ({_pct(h['already_decided_share_of_registered'])}); "
+              f"{h['corpus']} are corpus traits and "
               f"{h['queued']} seed-queue entries.  **{h['net_new_rows']}** registry rows were net-new (a relabelled "
               f"noun is two rows, the noun and its adjective); the run made {h['n_registry_rows']} registry rows in "
               f"all.", ""]
