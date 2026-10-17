@@ -236,12 +236,19 @@ class Span:
 
 def locate(n: int, key: str, *, heads: Heads) -> Span:
     """The shards ``start..end`` (inclusive) holding the untagged block of prefix ``key`` (``"very "``): the first is
-    the last shard whose head sorts at or below ``key``, the last the last shard whose head sorts below
-    ``key + "\\x7f"`` (so the ``_TAG`` forms, which sort after the untagged block, are left out)."""
+    the last shard whose head sorts at or below ``key``; the last is **one past** the last shard whose head sorts below
+    ``key + "\\x7f"``.
+
+    Why one past (measured 2026-10-17, the first live stream): each shard holds a contiguous key range, but its lines
+    are **not sorted** inside it (about half of adjacent pairs are in order, as for random order), so a shard's head
+    is just some line of its range, not its first.  A key between two heads can therefore sit in either shard, but in
+    no later one: the 4-gram frames "he is always" and "known for his" found nothing in the shard located for them,
+    and "he is always" lines are in the next one.  The ``_TAG`` forms interleave with the untagged ones for the same
+    reason; the frame's regex, not the span, leaves them out."""
     total = heads.n_shards[n]
     start = _last_at_or_below(heads, n, 0, total - 1, key, strict=False)
     end = _gallop_last_below(heads, n, start, total - 1, key + END_SENTINEL)
-    return Span(n=n, key=key, start=start, end=max(start, end))
+    return Span(n=n, key=key, start=start, end=min(total - 1, max(start, end) + 1))
 
 
 # --------------------------------------------------------------------------- the shard plan

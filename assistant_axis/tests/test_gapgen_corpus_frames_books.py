@@ -24,13 +24,29 @@ def test_first_ngram_reads_only_the_first_line():
 
 
 def test_locate_inside_one_shard_and_spanning_two():
+    # Expectations changed 2026-10-17: every span ends one shard later than the last head below the block's end,
+    # because the live shards turned out unsorted inside (a head is any line of its shard's range), so the block can
+    # run into the next shard (test_a_block_between_two_heads_can_sit_in_the_next_shard).
     h = scripted_heads()
-    assert B.locate(3, "man of ", heads=h) == B.Span(3, "man of ", 3, 3)
+    assert B.locate(3, "man of ", heads=h) == B.Span(3, "man of ", 3, 4)
     sp = B.locate(3, "very ", heads=h)
-    assert (sp.start, sp.end) == (6, 7)          # spans two shards; stops before very_ADJ (the tagged block)
-    assert B.locate(3, "too ", heads=h) == B.Span(3, "too ", 4, 4)   # too_ADV sorts after the untagged block
-    assert B.locate(3, "an incorrigible ", heads=h) == B.Span(3, "an incorrigible ", 2, 2)
+    assert (sp.start, sp.end) == (6, 8)          # spans two shards by the heads, and the next one
+    assert B.locate(3, "too ", heads=h) == B.Span(3, "too ", 4, 5)
+    assert B.locate(3, "an incorrigible ", heads=h) == B.Span(3, "an incorrigible ", 2, 3)
+    assert B.locate(3, "zebra crossing ", heads=h).end == 9                   # never past the last shard
     assert h.n_peeks <= 10 and h.peek_bytes > 0
+
+
+def test_a_block_between_two_heads_can_sit_in_the_next_shard():
+    """2026-10-17, the first live stream: shard 4-04494's head was "he equilibrium" and 4-04495's "he is entrusted
+    in", so "he is always " was located in 4-04494 alone, which held none of it; the lines were in 4-04495, whose
+    range starts before its (unsorted) head.  The span now includes the next shard."""
+    fetch = FakeShards({4: [["he equilibrium _ADP_ _DET_\t2000,1,1", "he does this quite\t2000,1,1"],
+                            ["he is entrusted in\t2000,1,1", "he is always kind\t2000,1,1"],
+                            ["she was\t2000,1,1"]]})
+    h = B.Heads(fetch, n_shards={4: 3})
+    sp = B.locate(4, "he is always ", heads=h)
+    assert (sp.start, sp.end) == (0, 1)
 
 
 def test_the_end_key_closes_the_untagged_block():
