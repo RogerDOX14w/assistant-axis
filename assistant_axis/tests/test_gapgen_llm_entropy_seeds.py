@@ -309,3 +309,16 @@ def test_a_retry_after_is_waited_out_and_one_too_long_stops_the_fetch():
     with pytest.raises(SD.FetchError) as exc:
         th2.get_json(SD.WIKIDATA_API, {"action": "query"}, what="random")
     assert "Retry-After" in str(exc.value) and "try again later" in str(exc.value)
+
+
+def test_the_throttle_stops_when_its_waiting_budget_is_spent():
+    """2026-10-17: a family (b) fetch slept eleven hours on retries; the throttle now refuses a wait that would take
+    its total past max_wait, and a split chunk's halves get one retry each."""
+    th, clock = throttle(F.FakeWikidataSession(fail_429=10))
+    th.max_wait = 30.0                                    # the first back-off (5 s) fits, the second (20 s) fits, ...
+    with pytest.raises(SD.FetchError) as exc:
+        th.get_json(SD.WIKIDATA_API, {"action": "query"}, what="random")
+    assert "try again later" in str(exc.value) and th.waited <= 30.0
+    th2, _ = throttle(F.FakeWikidataSession(fail_429=1))
+    with pytest.raises(SD.FetchError):
+        th2.get_json(SD.WIKIDATA_API, {"action": "query"}, what="random", attempts=1)

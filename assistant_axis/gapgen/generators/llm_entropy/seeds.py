@@ -76,6 +76,10 @@ RETRY_STATUSES = (429, 500, 502, 503, 504)
 #: answered every request with HTTP 429 and Retry-After 1000 for a while; the plain back-off gave up within 4.5
 #: minutes).  A longer one stops the fetch with a message naming the wait.
 MAX_RETRY_AFTER_S = 1200.0
+#: The most a throttle waits on retries and Retry-After over its whole life (2026-10-17: a family (b) fetch slept
+#: eleven hours, each failing request of a split chunk retried five times and honouring Retry-After): beyond it the
+#: next wait raises :class:`FetchError` ("try again later") instead.
+MAX_FETCH_WAIT_S = 1800.0
 #: Random items asked for per request (``wbgetentities`` takes at most 50 ids).
 RANDOM_BATCH = 50
 #: Stop a draw that has made this many random-item rounds without filling its quota (about a tenth of random items
@@ -132,8 +136,10 @@ class Throttle:
 
     def __init__(self, session=None, *, min_interval: float = MIN_INTERVAL_S, backoff: Sequence[float] = BACKOFF_S,
                  clock: Callable[[], float] = time.monotonic, sleep: Callable[[float], None] = time.sleep,
-                 user_agent: str = USER_AGENT):
+                 user_agent: str = USER_AGENT, max_wait: float = MAX_FETCH_WAIT_S):
         self.session = session if session is not None else UrllibSession()
+        self.max_wait = float(max_wait)
+        self.waited = 0.0                    # seconds slept on retries and Retry-After so far
         self.min_interval = float(min_interval)
         self.backoff = tuple(backoff)
         self.clock, self.sleep = clock, sleep
@@ -150,9 +156,19 @@ class Throttle:
         self._last = self.clock()
         self.sent.append(self._last)
 
-    def get_json(self, url: str, params: Mapping[str, str], *, what: str = "request") -> Any:
+    def _retry_sleep(self, seconds: float, url: str, what: str) -> None:
+        if self.waited + seconds > self.max_wait:
+            raise FetchError(f"{url}: a {what} would take the fetch's waiting on retries past {self.max_wait:.0f} s "
+                             f"({self.waited:.0f} s so far): try again later")
+        self.waited += seconds
+        self.sleep(seconds)
+
+    def get_json(self, url: str, params: Mapping[str, str], *, what: str = "request",
+                 attempts: Optional[int] = None) -> Any:
+        """``attempts`` (default ``len(backoff) + 1``) caps this request's tries."""
+        n_attempts = min(attempts, len(self.backoff) + 1) if attempts else len(self.backoff) + 1
         last = None
-        for attempt in range(len(self.backoff) + 1):
+        for attempt in range(n_attempts):
             self._wait()
             self.counts[what] += 1
             try:
@@ -168,7 +184,7 @@ class Throttle:
                         return resp.json()
                     except ValueError:
                         last = "HTTP 200 with a body that is not JSON"
-                        if attempt >= len(self.backoff):
+                        if attempt >= n_attempts - 1:
                             break
                 elif resp.status_code in RETRY_STATUSES:
                     last = f"HTTP {resp.status_code}"
@@ -179,15 +195,15 @@ class Throttle:
                                              f" (over {MAX_RETRY_AFTER_S:.0f} s): try again later")
                         logger.warning("%s: HTTP %d, waiting the server's Retry-After of %.0f s", what,
                                        resp.status_code, ra)
-                        self.sleep(ra)
+                        self._retry_sleep(ra, url, what)
                 else:
                     raise FetchError(f"{url}: HTTP {resp.status_code} for a {what}")
-            if attempt < len(self.backoff):
+            if attempt < n_attempts - 1:
                 self.counts["retries"] += 1
                 logger.warning("%s: %s for a %s (attempt %d of %d); trying again in %ss", url, last, what,
-                               attempt + 1, len(self.backoff) + 1, self.backoff[attempt])
-                self.sleep(self.backoff[attempt])
-        raise FetchError(f"{url}: {last} for a {what}, after {len(self.backoff) + 1} attempts")
+                               attempt + 1, n_attempts, self.backoff[attempt])
+                self._retry_sleep(self.backoff[attempt], url, what)
+        raise FetchError(f"{url}: {last} for a {what}, after {n_attempts} attempts")
 
 
 def throttled(session=None, **kw) -> Throttle:
@@ -329,19 +345,21 @@ def _get_entities(session: "Throttle", ids: Sequence[str], stats: "FetchStats") 
     (``skipped_unfetchable``), so one huge entity cannot sink the draw.  Errors carry no seed (ids only)."""
     out: dict = {}
 
-    def get(chunk: list) -> None:
+    def get(chunk: list, attempts: Optional[int] = None) -> None:
         try:
             out.update(session.get_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(chunk),
                                                        "props": "labels|descriptions|aliases|claims",
                                                        "languages": NAME_LANGUAGES, "format": "json"},
-                                        what="entities request").get("entities") or {})
-        except FetchError:
+                                        what="entities request", attempts=attempts).get("entities") or {})
+        except FetchError as exc:
+            if "try again later" in str(exc):          # the fetch's waiting budget is spent: stop, do not split
+                raise
             if len(chunk) == 1:
                 stats.skipped_unfetchable += 1
                 return
             mid = len(chunk) // 2
-            get(chunk[:mid])
-            get(chunk[mid:])
+            get(chunk[:mid], attempts=2)              # the halves get one retry each, not the full back-off
+            get(chunk[mid:], attempts=2)
 
     for i in range(0, len(ids), ENTITIES_PER_REQUEST):
         get(list(ids[i:i + ENTITIES_PER_REQUEST]))
@@ -368,6 +386,8 @@ def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None
             continue
         seen.update(ids)
         ents = _get_entities(session, ids, stats)
+        logger.info("real seeds: round %d, %d of %d found (%d items seen)", stats.random_rounds, len(out), n,
+                    stats.items_seen + len(ids))
         for qid in ids:
             stats.items_seen += 1
             e = ents.get(qid) or {}
