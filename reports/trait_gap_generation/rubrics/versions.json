@@ -410,6 +410,30 @@
         "pinned_at": "2026-10-15T00:15:18+00:00",
         "why": "First pin: draft 1 (2026-10-15), the label-fit check: one (label, gloss) pair a call, senses as evidence, fits / secondary_sense / not_a_sense, a better label when it does not fit, reason first"
       }
+    ],
+    "llm_entropy_scaffold": [
+      {
+        "version": 1,
+        "sha256": "84b661d6d20f3290a2404cc508e01392af050450120d895696e06697a415e9cb",
+        "pinned_at": "2026-10-17T01:00:54+00:00",
+        "why": "First pin (workstream 6, coding_plan_06 task 1): draft 1 of the LLM-entropy generator's text, from the plan's Rendered prompts section (edits in the file's change log)"
+      }
+    ],
+    "llm_entropy_multilingual": [
+      {
+        "version": 1,
+        "sha256": "5fda98459eda9a4ac7a109a16c6eabc694e6772de11f16310e0f0dc4476103d7",
+        "pinned_at": "2026-10-17T01:00:54+00:00",
+        "why": "First pin (workstream 6, coding_plan_06 task 1): draft 1 of the LLM-entropy generator's text, from the plan's Rendered prompts section (edits in the file's change log)"
+      }
+    ],
+    "llm_entropy_backtranslate": [
+      {
+        "version": 1,
+        "sha256": "893aa9709ae122e478fb317ecefed9af82dd5b4395b7eed259bc4feb3cd8e12c",
+        "pinned_at": "2026-10-17T01:00:54+00:00",
+        "why": "First pin (workstream 6, coding_plan_06 task 1): draft 1 of the LLM-entropy generator's text, from the plan's Rendered prompts section (edits in the file's change log)"
+      }
     ]
   }
 }

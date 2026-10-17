@@ -94,7 +94,9 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: generator, but a call that makes candidates), first pinned as version 1.  Since 2026-10-14 the census generator's
 #: spelling-repair check (QUESTIONS 35, ``.../censuses/repair_check.py``), first pinned as version 1.  Since 2026-10-15
 #: the platform's label-fit check (``assistant_axis/gapgen/label_fit.py``; any generator's labels against their
-#: glosses, before submission), first pinned as version 1.
+#: glosses, before submission), first pinned as version 1.  Since 2026-10-17 the LLM-entropy generator's three texts
+#: (workstream 6, ``.../llm_entropy/``): the scaffold system turn of families a, b, d and e, the English master the
+#: ten family-c prompts are translated from, and the family-c back-translation call, each first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -108,6 +110,9 @@ GENERATOR_FILES: dict[str, str] = {
     "paraphrase_synonym": "paraphrase_synonym.md",
     "census_repair_check": "census_repair_check.md",
     "label_fit": "label_fit.md",
+    "llm_entropy_scaffold": "llm_entropy_scaffold.md",
+    "llm_entropy_multilingual": "llm_entropy_multilingual.md",
+    "llm_entropy_backtranslate": "llm_entropy_backtranslate.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.
