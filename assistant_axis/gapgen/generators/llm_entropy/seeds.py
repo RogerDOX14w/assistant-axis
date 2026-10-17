@@ -20,6 +20,18 @@ person"; :func:`name_in_label` says whether a label carries a name token (a real
 tracked fetch record (:func:`fetch_record_entry`, :func:`write_fetch_record`, ``person_seeds_fetch.json``) keeps
 counts, requests, the licence, the capture date, a sha256 of the seeds and, per opaque seed id (``b:r0137``,
 ``b:f0042``), only its kind and birth-era band.
+
+**What the redaction covers, and what it cannot** (Fable's review, 2026-10-17; QUESTIONS 205).  A name token of
+four characters or more is matched with up to six letters after it ("Varnabyesque", "the Varnabys"), and without its
+last vowel or ``y`` ("Varnabian"); a real seed's description's proper names ("Zellwick", "Zellwickian") are redacted
+like the name; the entities request asks for the person's labels and aliases in sixteen languages
+(:data:`NAME_LANGUAGES`), kept in memory as :attr:`PersonSeed.alt_names` and redacted too, so a native-script form
+Wikidata holds is covered.  The runner's last-resort guard (``calls.EntropyRunner._guard``) checks every finished (b)
+record with :func:`leaks` before it is written.  **The residual risk**: the model may write the name in a form the
+seed does not hold: a transliteration or a native-script spelling Wikidata has no label for, a nickname that is no
+alias, or a derivation the suffix rule misses ("Varnabification").  The prompt shows only the English name, so such a
+form is unlikely; it is the one known gap, and nothing here can close it without a network lookup.  A fictional seed
+has no other names (the SPARQL draw gives the English label only).
 """
 from __future__ import annotations
 
@@ -67,6 +79,10 @@ MAX_RANDOM_ROUNDS = 400
 #: Rows a fictional class is asked for at least (twice its quota when that is more), so that a class short of its
 #: quota can be topped up from another's spares.
 MIN_CLASS_ROWS = 4
+#: The languages whose labels and aliases the entities request asks for: English and the multilingual label, the ten
+#: family-(c) languages and four more, so that a name written in another script can be redacted too (QUESTIONS 205).
+NAME_LANGUAGES = "en|mul|de|ja|zh|ru|ar|fa|fi|ko|hi|tr|fr|es|it|pt"
+MAX_ALT_NAMES = 40
 ERA_BANDS: tuple[str, ...] = ("<1800", "1800-1899", "1900-1949", "1950+", "unknown")
 #: When only the year of death is known, the birth year the era band assumes is this many years before it.
 ASSUMED_LIFESPAN = 60
@@ -172,6 +188,8 @@ class PersonSeed:
     qid: str = field(repr=False)
     name: str = field(repr=False)
     description: Optional[str] = field(default=None, repr=False)
+    #: the person's other labels and aliases the fetch returned (any language, any script), redacted like the name
+    alt_names: tuple = field(default=(), repr=False)
     born: Optional[str] = None                       # a year, "-44" for 44 BC
     died: Optional[str] = None
     dead: bool = False                               # a date of death is recorded (with or without a usable year)
@@ -243,6 +261,21 @@ def _label(entity: Mapping) -> Optional[str]:
     return None
 
 
+def _alt_names(entity: Mapping, name: str) -> tuple:
+    """Every other label and alias of the entity the request returned (in :data:`NAME_LANGUAGES`), distinct from the
+    English name, at most :data:`MAX_ALT_NAMES`."""
+    out: list[str] = []
+    vals = [v.get("value") for v in (entity.get("labels") or {}).values() if isinstance(v, Mapping)]
+    for lst in (entity.get("aliases") or {}).values():
+        vals += [v.get("value") for v in lst or [] if isinstance(v, Mapping)]
+    for v in vals:
+        if isinstance(v, str) and v.strip():
+            v = " ".join(v.split())
+            if v.casefold() != name.casefold() and v not in out:
+                out.append(v)
+    return tuple(out[:MAX_ALT_NAMES])
+
+
 def _description(entity: Mapping) -> Optional[str]:
     v = ((entity.get("descriptions") or {}).get("en") or {}).get("value")
     return " ".join(v.split()) if isinstance(v, str) and v.strip() else None
@@ -285,8 +318,9 @@ def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None
             continue
         seen.update(ids)
         ents = session.get_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(ids),
-                                               "props": "labels|descriptions|claims", "languages": "en|mul",
-                                               "format": "json"}, what="entities request").get("entities") or {}
+                                               "props": "labels|descriptions|aliases|claims",
+                                               "languages": NAME_LANGUAGES, "format": "json"},
+                                what="entities request").get("entities") or {}
         for qid in ids:
             stats.items_seen += 1
             e = ents.get(qid) or {}
@@ -304,7 +338,8 @@ def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None
                 continue
             _, born = _claim_year(claims, P_BIRTH)
             out.append(PersonSeed(seed_id=f"b:r{start + len(out):04d}", kind="real", qid=qid, name=name,
-                                  description=_description(e), born=born, died=died, dead=dead,
+                                  description=_description(e), alt_names=_alt_names(e, name), born=born,
+                                  died=died, dead=dead,
                                   era=era_band(born, died), fetched_at=now()))
             if len(out) >= n:
                 break
@@ -404,46 +439,97 @@ def fetch_fictional(n: int, *, session: Throttle, rng: random.Random, classes: M
 # --------------------------------------------------------------------------- redaction
 
 REDACTED = "this person"
+#: A name (or description) token of at least this many characters also matches with up to
+#: :data:`NAME_SUFFIX_MAX` letters after it ("Varnaby" in "Varnabyesque", "Varnabian", "the Varnabys",
+#: "Varnabyish"; Fable's review of 2026-10-17, blocker 1); a shorter one matches as a whole word only.
+MIN_SUFFIX_TOKEN = 4
+NAME_SUFFIX_MAX = 6
+#: A capitalised token of a real seed's description (a place, an institution, a work) is redacted like a name unless
+#: it is one of English's commonest words (Zipf at least this: "The", "Person", "Name"), which identify nobody.
+DESCRIPTION_TOKEN_MAX_ZIPF = 5.5
 
 
 def _fold(s: str) -> str:
     return "".join(ch for ch in unicodedata.normalize("NFKD", s) if not unicodedata.combining(ch))
 
 
-def name_tokens(seed: PersonSeed) -> list[str]:
-    """The seed's name tokens of three characters or more, case-folded, with their diacritic-free forms, longest
-    first."""
+def _tokens(texts: Iterable[Optional[str]], *, keep=lambda t: True) -> list[str]:
     toks = set()
-    for t in re.findall(r"\w+", seed.name or ""):
-        if len(t) >= 3:
-            toks.add(t.casefold())
-            toks.add(_fold(t).casefold())
+    for text in texts:
+        for t in re.findall(r"\w+", text or ""):
+            if len(t) >= 3 and keep(t):
+                toks.add(t.casefold())
+                toks.add(_fold(t).casefold())
     return sorted(toks, key=lambda t: (-len(t), t))
+
+
+def name_tokens(seed: PersonSeed) -> list[str]:
+    """The tokens of the seed's name and its other names (:attr:`PersonSeed.alt_names`) of three characters or more,
+    case-folded, with their diacritic-free forms, longest first."""
+    return _tokens([seed.name, *seed.alt_names])
+
+
+def _zipf(word: str) -> float:
+    try:
+        from wordfreq import zipf_frequency
+    except ImportError:  # pragma: no cover - wordfreq is a project dependency
+        return 0.0
+    return float(zipf_frequency(word, "en"))
+
+
+def description_tokens(seed: PersonSeed) -> list[str]:
+    """A real seed's description's capitalised tokens (proper names: a place, an institution, a work), three
+    characters or more, but for the commonest English words (Zipf >= :data:`DESCRIPTION_TOKEN_MAX_ZIPF`).  None for a
+    fictional seed, whose description names a work, not a person's whereabouts (its full description is still
+    redacted)."""
+    from assistant_axis.gapgen.normalize import STOPWORDS
+    if seed.kind != "real":
+        return []
+    return _tokens([seed.description], keep=lambda t: t[:1].isupper() and t.lower() not in STOPWORDS
+                   and _zipf(t.lower()) < DESCRIPTION_TOKEN_MAX_ZIPF)
+
+
+def token_pattern(tok: str) -> str:
+    """A token as a whole word, or (four characters or more) with up to :data:`NAME_SUFFIX_MAX` letters after it;
+    a token of five or more ending in a vowel or ``y`` also without that letter ("Varnab-ian" from "Varnaby")."""
+    t = re.escape(tok)
+    if len(tok) >= MIN_SUFFIX_TOKEN:
+        stem = f"(?:{t}|{re.escape(tok[:-1])})" if len(tok) >= 5 and tok[-1] in "aeiouy" else t
+        return rf"(?<!\w){stem}[a-z]{{0,{NAME_SUFFIX_MAX}}}(?!\w)"
+    return rf"(?<!\w){t}(?!\w)"
 
 
 def _phrases(seed: PersonSeed) -> list[str]:
     ps = {p for p in (seed.description, seed.name) if p and len(p) >= 3}
+    ps |= {p for p in seed.alt_names if p and len(p) >= 2}       # a name in another script may be two characters
     ps |= {_fold(p) for p in ps}
     return sorted(ps, key=lambda p: (-len(p), p))
 
 
+def _sub_tokens(s: str, toks: Sequence[str]) -> str:
+    for t in toks:
+        s = re.sub(token_pattern(t), REDACTED, s, flags=re.IGNORECASE)
+    folded = _fold(s)
+    if folded != s and len(folded) == len(s):          # a token written with other diacritics than the seed's
+        for t in toks:
+            for m in reversed(list(re.finditer(token_pattern(t), folded, flags=re.IGNORECASE))):
+                s = s[:m.start()] + REDACTED + s[m.end():]
+                folded = folded[:m.start()] + REDACTED + folded[m.end():]
+    return s
+
+
 def redact(text: Optional[str], seed: PersonSeed) -> Optional[str]:
-    """``text`` with the seed's description, full name, name tokens (whole words, case-insensitive, with and without
-    diacritics), QID and the description's digit runs of three or more replaced by "this person"."""
+    """``text`` with the seed's description, full name and other names (any script), name tokens and the
+    description's proper names (case-insensitive, with and without diacritics; a token of four characters or more
+    with up to six letters after it), QID and the description's digit runs of three or more replaced by "this
+    person"."""
     if not text:
         return text
     s = str(text)
     for p in _phrases(seed):
         s = re.sub(re.escape(p), REDACTED, s, flags=re.IGNORECASE)
-    for t in name_tokens(seed):
-        s = re.sub(rf"(?<!\w){re.escape(t)}(?!\w)", REDACTED, s, flags=re.IGNORECASE)
-    folded = _fold(s)
-    if folded != s:                                    # a name token written with other diacritics than the seed's
-        for t in name_tokens(seed):
-            for m in reversed(list(re.finditer(rf"(?<!\w){re.escape(t)}(?!\w)", folded, flags=re.IGNORECASE))):
-                if len(folded) == len(s):
-                    s = s[:m.start()] + REDACTED + s[m.end():]
-                    folded = folded[:m.start()] + REDACTED + folded[m.end():]
+    s = _sub_tokens(s, name_tokens(seed))
+    s = _sub_tokens(s, description_tokens(seed))
     if seed.qid:
         s = re.sub(rf"(?<!\w){re.escape(seed.qid)}(?!\w)", REDACTED, s)
     for d in sorted(set(re.findall(r"\d{3,}", seed.description or "")), key=len, reverse=True):
@@ -451,28 +537,42 @@ def redact(text: Optional[str], seed: PersonSeed) -> Optional[str]:
     return s
 
 
+def _hits(text: str, toks: Sequence[str]) -> bool:
+    fold = _fold(text).casefold()
+    return any(re.search(token_pattern(_fold(t)), fold, flags=re.IGNORECASE) for t in toks)
+
+
 def name_in_label(label: Optional[str], seed: PersonSeed) -> bool:
-    """True when ``label`` carries one of the seed's name tokens as a whole word (or its full name)."""
+    """True when ``label`` carries the seed's full name, another of its names, or a name token (suffixed forms
+    included: "varnabyesque")."""
     if not label:
         return False
     lab = _fold(str(label)).casefold()
-    if any(_fold(p).casefold() in lab for p in (seed.name,) if p):
+    if any(_fold(p).casefold() in lab for p in (seed.name, *seed.alt_names) if p and len(p) >= 2):
         return True
-    return any(re.search(rf"(?<!\w){re.escape(_fold(t))}(?!\w)", lab) for t in name_tokens(seed))
+    return _hits(str(label), name_tokens(seed))
+
+
+def description_in_label(label: Optional[str], seed: PersonSeed) -> bool:
+    """True when ``label`` carries one of the description's proper names (a real seed's such item is dropped)."""
+    return bool(label) and _hits(str(label), description_tokens(seed))
 
 
 def leaks(text: Optional[str], seed: PersonSeed) -> list[str]:
-    """What of the seed a text still carries (for checks: ``[]`` after :func:`redact`); the strings themselves are
-    never returned, only which kind of thing leaked."""
+    """What of the seed a text still carries (for checks, and the runner's last-resort guard: ``[]`` after
+    :func:`redact`); the strings themselves are never returned, only which kind of thing leaked."""
     if not text:
         return []
     out = []
-    low, fold = str(text).casefold(), _fold(str(text)).casefold()
+    t = str(text)
+    low, fold = t.casefold(), _fold(t).casefold()
     if seed.description and (seed.description.casefold() in low or _fold(seed.description).casefold() in fold):
         out.append("description")
-    if any(re.search(rf"(?<!\w){re.escape(t)}(?!\w)", fold) for t in name_tokens(seed)):
+    if _hits(t, name_tokens(seed)) or any(p.casefold() in low for p in seed.alt_names if p and len(p) >= 2):
         out.append("name")
-    if seed.qid and re.search(rf"(?<!\w){re.escape(seed.qid)}(?!\w)", str(text)):
+    if _hits(t, description_tokens(seed)):
+        out.append("description_token")
+    if seed.qid and re.search(rf"(?<!\w){re.escape(seed.qid)}(?!\w)", t):
         out.append("qid")
     return out
 
@@ -575,6 +675,7 @@ def summary_lines(seeds: Sequence[PersonSeed], stats: FetchStats, requests: Mapp
 
 __all__ = ["WIKIDATA_API", "WIKIDATA_SPARQL", "LICENCE", "FICTIONAL_CLASSES", "MIN_INTERVAL_S", "BACKOFF_S",
            "ERA_BANDS", "FetchError", "Response", "UrllibSession", "Throttle", "throttled", "PersonSeed", "era_band",
-           "FetchStats", "fetch_real", "fetch_fictional", "REDACTED", "name_tokens", "redact", "name_in_label",
+           "FetchStats", "fetch_real", "fetch_fictional", "REDACTED", "MIN_SUFFIX_TOKEN", "NAME_SUFFIX_MAX",
+           "name_tokens", "description_tokens", "token_pattern", "redact", "name_in_label", "description_in_label",
            "leaks", "seeds_sha256", "fetch_record_entry", "read_fetch_record", "run_has_fetch", "write_fetch_record",
            "next_seed_numbers", "summary_lines"]

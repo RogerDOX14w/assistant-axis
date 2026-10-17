@@ -188,3 +188,54 @@ def test_summary_lines_name_nobody():
     assert "4 real, 3 fictional" in text and "1800-1899" in text
     for secret in F.every_secret():
         assert secret not in text
+
+
+# --------------------------------------------------------------------------- Fable's review, 2026-10-17
+
+QV = SD.PersonSeed(seed_id="b:r0001", kind="real", qid="Q990000101", name="Quillon Varnaby",
+                   description="invented tram conductor of Zellwick", alt_names=("キロン・ヴァーナビー", "Q. Varnaby"))
+SUFFIXED = ["Varnabyesque", "a Varnabian habit", "the Varnabys", "Varnabyish", "VARNABYS'", "Zellwickian pride",
+            "キロン・ヴァーナビーの癖"]
+
+
+@pytest.mark.parametrize("text", SUFFIXED)
+def test_suffixed_forms_of_a_name_are_redacted_and_seen(text):
+    """Blocker 1: a name token of four characters or more matches with up to six letters after it (and, ending in a
+    vowel or y, without that letter); a description's proper name and an other-script name are covered too."""
+    assert SD.leaks(text, QV) != []
+    red = SD.redact(text, QV)
+    assert SD.leaks(red, QV) == [] and "this person" in red
+
+
+@pytest.mark.parametrize("label,hit", [("varnabyesque", True), ("varnabian", True), ("q. varnaby-like", True),
+                                       ("zellwickian", False), ("varnished", False), ("variable", False),
+                                       ("quill-pen", False)])
+def test_name_in_label_sees_suffixed_forms(label, hit):
+    assert SD.name_in_label(label, QV) is hit
+
+
+def test_description_proper_names_but_not_common_words():
+    assert SD.description_tokens(QV) == ["zellwick"]
+    assert SD.description_in_label("zellwickian", QV) and not SD.description_in_label("tram-minded", QV)
+    common = SD.PersonSeed(seed_id="b:r0002", kind="real", qid="Q1", name="Zzq Xxw",
+                           description="The person of Name, a Pellbridge painter")
+    assert SD.description_tokens(common) == ["pellbridge"]               # "The", "Name" (and "person") are kept
+    fict = SD.PersonSeed(seed_id="b:f0001", kind="fictional", qid="Q2", name="Zzq Xxw", description="Star serial")
+    assert SD.description_tokens(fict) == []
+
+
+def test_a_short_token_matches_whole_words_only():
+    s = SD.PersonSeed(seed_id="b:r0003", kind="real", qid="Q3", name="Ann Bexley", description=None)
+    assert SD.redact("Ann's annual plan", s) == "this person's annual plan"
+    assert SD.redact("the Bexleyite way", s) == "the this person way"
+
+
+def test_the_fetch_keeps_other_language_names_in_memory_and_asks_for_them():
+    session = F.FakeWikidataSession()
+    th, _ = throttle(session)
+    seeds = SD.fetch_real(4, session=th)
+    by = {s.qid: s for s in seeds}
+    assert by["Q990000101"].alt_names == ("キロン・ヴァーナビー", "Q. Varnaby") and by["Q990000102"].alt_names == ()
+    assert "キロン" not in repr(by["Q990000101"])
+    ent = next(c for c in session.calls if c["params"].get("action") == "wbgetentities")
+    assert "aliases" in ent["params"]["props"] and "|ja|" in ent["params"]["languages"]

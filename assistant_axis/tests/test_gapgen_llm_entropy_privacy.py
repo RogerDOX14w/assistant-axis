@@ -30,18 +30,26 @@ EPONYMS = [f"{name.split()[-1].lower()}-like" for _, name, _ in F.FICTIONAL_PEOP
 EPONYM_FORMS = EPONYMS + [e.replace("-", "_") for e in EPONYMS]
 
 
+def _stems(tokens) -> list[str]:
+    """The suffixed forms' stems: a token ending in a vowel or ``y`` also without it ("varnab" of "Varnabian")."""
+    return [t[:-1] for t in tokens if len(t) >= 5 and t[-1] in "aeiouy"]
+
+
 def real_secrets() -> list[str]:
     out = []
     for qid, name, desc, *_ in F.REAL_PEOPLE:
-        out += [qid, name, desc] + [t for t in re.findall(r"\w+", name) if len(t) >= 3]
+        toks = [t for t in re.findall(r"\w+", name) if len(t) >= 3]
+        out += [qid, name, desc] + toks + _stems(toks) + list(F.ALT_NAMES.get(qid, ()))
         out += re.findall(r"\d{3,}", desc)
+        out += [w for w in re.findall(r"\w+", desc) if w[:1].isupper() and len(w) >= 3]     # a place, an ID
     return out
 
 
 def fictional_secrets() -> list[str]:
     out = []
     for qid, name, desc in F.FICTIONAL_PEOPLE:
-        out += [qid, name, desc] + [t for t in re.findall(r"\w+", name) if len(t) >= 3]
+        toks = [t for t in re.findall(r"\w+", name) if len(t) >= 3]
+        out += [qid, name, desc] + toks + _stems(toks)
     return out
 
 
@@ -139,7 +147,9 @@ def test_a_b_run_leaves_no_person_anywhere(env, capsys, transport):
     for qid, name, *_ in F.REAL_PEOPLE:
         assert f"{name.split()[-1].lower()}-like" not in labels          # a real seed's name label is dropped
     assert set(EPONYMS) <= labels                                       # a fictional character's eponym is kept
-    assert sum(r["n_dropped_name_label"] for r in recs) == 4
+    # dropped: each real seed's "<name>-like" and "<name>esque", and a place-name label ("zellwickian") for the two
+    # whose descriptions name a place
+    assert sum(r["n_dropped_name_label"] for r in recs) == 10
     # what was paid for stays: the redacted answers and their usage
     usage = json.loads((env.rdir("pb") / "usage.json").read_text())
     assert usage["n_calls"] == 7
@@ -247,3 +257,57 @@ def test_the_dry_run_shows_the_fixed_row_and_fetches_nothing(env, capsys):
     assert "Person: Tian Yi (person, CBDB ID = 367824; died 1684)." in out
     assert env.session.calls == [] and not env.rdir("pd").exists()
     assert leaks_in(out) == []
+
+
+class HalfCollected(F.FakeBatches):
+    """A results stream that breaks after its first result: the run collects part of the batch, then dies."""
+
+    def results(self, bid):
+        out = super().results(bid)
+        if not getattr(self, "broken", False):
+            self.broken = True
+
+            def gen():
+                yield out[0]
+                raise RuntimeError("simulated crash while collecting")
+            return gen()
+        return out
+
+
+def test_cancel_open_does_not_charge_a_part_collected_batch_twice(env):
+    """Should-fix 6: a result the crashed run recorded (and charged) is skipped by --cancel-open."""
+    half = SimpleNamespace(messages=SimpleNamespace(batches=HalfCollected(F.family_reply)))
+    env.monkeypatch.setattr(CLI, "_batch_client", lambda: half)
+    with pytest.raises(RuntimeError):
+        env.run("generate", "--run-id", "ph", "--family", "b", "--real", "2", "--fictional", "1")
+    first = _records(env, "ph")
+    assert len(first) == 1 and first[0]["usage_raw"]                 # one answer recorded, redacted, charged
+    assert env.run("generate", "--run-id", "ph", "--family", "b", "--cancel-open") == 0
+    recs = _records(env, "ph")
+    stubs = [r for r in recs if r.get("abandoned")]
+    assert len(stubs) == 2 and first[0]["custom_id"] not in {s["custom_id"] for s in stubs}
+    calls = sum(json.loads((env.rdir("ph") / "usage.json").read_text())["per_model"][k]["n_calls"]
+                for k in json.loads((env.rdir("ph") / "usage.json").read_text())["per_model"])
+    assert calls == 3                                                # 1 collected + 2 abandoned, none twice
+    assert tree_leaks(env.repo, env.tmpdir) == {}
+
+
+def test_collect_open_refuses_a_file_written_before_any_batch_and_deletes_it(env, capsys):
+    """Minor 14: a tmp file whose seeds no recorded batch covers is refused, not submitted anew, and deleted."""
+    import random
+    th = SD.Throttle(F.FakeWikidataSession(), clock=Clock(), sleep=lambda s: None)
+    seeds = SD.fetch_real(1, session=th) + SD.fetch_fictional(1, session=th, rng=random.Random(0))
+    path = CLI._write_tmp_seeds(seeds, "pn", "sess2")
+    assert env.run("generate", "--run-id", "pn", "--family", "b", "--collect-open", str(path)) == 2
+    assert env.batch.batches.created == [] and not path.exists()
+    err = capsys.readouterr().err
+    assert "nothing to collect, so nothing is submitted" in err and leaks_in(err) == []
+
+
+def test_the_interrupted_message_says_the_rerun_needs_force(env, capsys):
+    crashing = SimpleNamespace(messages=SimpleNamespace(batches=CrashingBatches(F.family_reply)))
+    env.monkeypatch.setattr(CLI, "_batch_client", lambda: crashing)
+    with pytest.raises(RuntimeError):
+        env.run("generate", "--run-id", "pm", "--family", "b", "--real", "1", "--fictional", "0")
+    assert "a rerun then fetches new seeds and needs --force" in capsys.readouterr().err
+    assert env.run("generate", "--run-id", "pm", "--family", "b", "--real", "1", "--fictional", "0") == 2

@@ -97,17 +97,36 @@ def _wikidata(args):
 
 
 def _embedder(name: str, *, usage=None, cache_dir: Optional[Path] = None):
-    """``(embed texts -> unit rows, embedder)`` for ``openai`` (through the cache) or ``hash``; ``(None, None)`` for
-    ``none``."""
+    """``(embed texts -> unit rows, embedder, cache)`` for ``openai`` (through the cache) or ``hash`` (no cache);
+    ``(None, None, None)`` for ``none``."""
     if name == "none":
-        return None, None
+        return None, None, None
     from assistant_axis.gapgen.embed import EmbeddingCache, embed_texts, make_embedder
     emb = make_embedder(name)
     cache = None if name == "hash" else (EmbeddingCache(cache_dir) if cache_dir else EmbeddingCache())
 
     def embed(texts):
         return embed_texts(emb, texts, cache=cache, usage=usage)
-    return embed, emb
+    return embed, emb, cache
+
+
+#: Characters per token for the embedding estimate (short labels and glosses).
+EMBED_CHARS_PER_TOKEN = 4.0
+
+
+def _embedding_estimate(emb, cache, texts) -> float:
+    """Print and return the cost of embedding ``texts``: only the texts the cache does not hold are sent (minor 15 of
+    the review, 2026-10-17: the estimate is printed before anything is embedded)."""
+    from assistant_axis.judge_pricing import cost_for_usage
+    uniq = list(dict.fromkeys(t for t in texts if t))
+    if emb is None or not uniq:
+        return 0.0
+    miss = list(range(len(uniq))) if cache is None else cache.lookup(emb.tag, uniq)[1]
+    tokens = int(sum(len(uniq[i]) for i in miss) / EMBED_CHARS_PER_TOKEN)
+    usd = cost_for_usage(emb.usage_model, tokens, 0) if emb.name != "hash" else 0.0
+    print(f"  embeddings: {len(uniq)} distinct texts, {len(miss)} not in the cache, ~{tokens:,} tokens at "
+          f"{emb.usage_model} rates = ${usd:.4f}" + ("  (local, free)" if emb.name == "hash" else ""))
+    return usd
 
 
 def _dirty(args) -> Optional[str]:
@@ -193,13 +212,33 @@ def _gate(args, estimate_usd: float) -> Optional[int]:
                          confirmed_by=args.confirmed_by)
     except CostRefused:
         return EXIT_REFUSED
+    return _stop_line(args, estimate_usd)
+
+
+def _stop_line(args, estimate_usd: float) -> Optional[int]:
+    """Plan section 12's stop: a step whose estimate would push the generator's running total past
+    :data:`STOP_LINE_USD` is refused without ``--confirm-expensive --confirmed-by``."""
     total = running_total(args)
     print(f"running total of the generator so far ${total:.4f}; this step's estimate ${estimate_usd:.4f}; the "
           f"plan's stop line ${STOP_LINE_USD:.0f}")
-    if total + estimate_usd > STOP_LINE_USD and not (args.confirm_expensive and args.confirmed_by):
+    if total + estimate_usd > STOP_LINE_USD and not (getattr(args, "confirm_expensive", False)
+                                                      and getattr(args, "confirmed_by", None)):
         return _refuse(f"the running total ${total:.2f} plus this estimate would pass the plan's ${STOP_LINE_USD:.0f} "
                        f"stop line (section 12): ask Roger, then --confirm-expensive --confirmed-by '<his go>'")
     return None
+
+
+def _embedding_gate(args, est: float) -> Optional[int]:
+    """The embedding commands' gate: the typed ``--budget-usd`` and the stop line (should-fix 4 of the review)."""
+    from assistant_axis.gapgen.cost import CostRefused, confirm_or_abort
+    if est <= 0:
+        return None
+    try:
+        confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                         confirmed_by=args.confirmed_by)
+    except CostRefused:
+        return EXIT_REFUSED
+    return _stop_line(args, est)
 
 
 def _transport(args, runner, run_dir: Path):
@@ -243,8 +282,8 @@ def _session(args, run_id: str, calls, *, wave: str, parse, step: str, extra: di
     checkpoint, ``finish`` in a finally).  ``prepare(runner)``, when given, runs inside the session before anything is
     sent and may return the calls to send instead of ``calls`` (family b builds its calls there, after the fetch);
     ``finalize()`` runs in the finally before ``finish``.  Returns ``(WaveResult or None, exit code)``."""
-    from assistant_axis.gapgen.cost import GuardedUsage, resume_usage
-    from assistant_axis.gapgen.generators.llm_entropy.calls import EntropyRunner
+    from assistant_axis.gapgen.cost import resume_usage
+    from assistant_axis.gapgen.generators.llm_entropy.calls import EntropyRunner, RunGuardedUsage
     from assistant_axis.gapgen.generators.llm_entropy.prompts import PROMPTS_VERSION
     from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, LABEL_FORM_KEY
     from assistant_axis.gapgen.runs import start_run
@@ -257,8 +296,18 @@ def _session(args, run_id: str, calls, *, wave: str, parse, step: str, extra: di
         "prompts_version": PROMPTS_VERSION, LABEL_FORM_KEY: DEFAULT_LABEL_FORM, "allow_dirty": bool(args.allow_dirty),
         "resume": bool(args.resume), **extra})
     ctx.confirmed_by = args.confirmed_by
-    resume_usage(ctx.total_usage(), _records(args, [run_id]), where=f"{LE.GENERATOR}/{run_id}")
-    ctx.usage = GuardedUsage(budget_usd=args.budget_usd)
+    earlier = ctx.total_usage()                      # the run's other sessions (this one has spent nothing yet)
+    rebuilt = resume_usage(earlier, _records(args, [run_id]), where=f"{LE.GENERATOR}/{run_id}")
+    if rebuilt.total_cost_usd > earlier.total_cost_usd + 1e-9:
+        # a session killed before it recorded its usage: its spend, from the records, becomes a session of its own,
+        # so that usage.json (the sum of the sessions) holds it (minor 8 of the review, 2026-10-17)
+        from assistant_axis.gapgen.generators.llm_entropy.calls import usage_gap
+        rec_ctx = start_run(LE.GENERATOR, run_id, candidates_dir=_cdir(args), args={
+            "step": "recovered_usage", "note": "spend the response records show beyond the recorded sessions"})
+        rec_ctx.usage = usage_gap(rebuilt, earlier)
+        rec_ctx.finish()
+        earlier = ctx.total_usage()
+    ctx.usage = RunGuardedUsage(budget_usd=args.budget_usd, usage_path=rdir / "usage.json", earlier=earlier)
     runner = EntropyRunner(batch_id=f"{run_id}_{LE.GENERATOR}", run_id=run_id, usage=ctx.usage,
                            responses_path=rdir / LE.RESPONSES_NAME, resume_records=resume,
                            concurrency=args.concurrency, checkpoint=ctx.finish, prompts_version=PROMPTS_VERSION)
@@ -386,10 +435,13 @@ def cmd_translate_prompts(args) -> int:
     usage_p = edir / "multilingual_prompts_usage.json"
     usage = GuardedUsage(budget_usd=args.budget_usd)
     rec_p = edir / "translations" / LE.RESPONSES_NAME
+    forced = set(have)        # under --force these are translated again: their recorded answers are not reused
+    reuse = [r for r in C.read_responses(rec_p) if r.get("language") not in forced]
     runner = C.EntropyRunner(client=_anthropic_client(), batch_id="translate_prompts", run_id="translate_prompts",
-                             usage=usage, responses_path=rec_p, resume_records=C.read_responses(rec_p),
+                             usage=usage, responses_path=rec_p, resume_records=reuse,
                              concurrency=args.concurrency, prompts_version=P.PROMPTS_VERSION)
     entries: dict = {}
+    back_failed: list = []
     try:
         res = runner.run("translate", calls, C.parse_translation_call)
         for c in calls:
@@ -406,6 +458,11 @@ def cmd_translate_prompts(args) -> int:
                  "sha256": P.sha256_text(json.dumps([d["system"], d["user_template"],
                                                      [doms[k] for k in P.DOMAIN_IDS]], ensure_ascii=False)),
                  "master_sha256": master["sha256"], "master_version": master["version"]}
+            old = (existing.get("languages") or {}).get(c.language)
+            if c.language in forced and old:
+                e["retranslated"] = {"at": got[1]["at"], "previous_sha256": old.get("sha256"),
+                                     "previous_custom_id": old.get("custom_id"),
+                                     "previous_at": old.get("at"), "same_text": old.get("sha256") == e["sha256"]}
             entries[c.language] = e
         back = []
         for code, e in entries.items():
@@ -415,10 +472,14 @@ def cmd_translate_prompts(args) -> int:
         bres = runner.run("prompt_back", back, C.parse_translation_call) if back else None
         for c in back:
             got = bres.answers.get(c.cache_key) if bres else None
-            if got is not None:
-                d, _ = parse_tagged(got[1]["text"])
-                entries[c.language]["backtranslation"] = {"system": d["system"], "user_template": d["user_template"],
-                                                          "domains": d["domains"], "model": c.model}
+            if got is None:
+                back_failed.append(c.language)
+                print(f"FAILED {c.language}: the back-translation for Roger's read "
+                      f"({(bres.failures.get(c.cache_key) if bres else None) or 'no answer'})", file=sys.stderr)
+                continue
+            d, _ = parse_tagged(got[1]["text"])
+            entries[c.language]["backtranslation"] = {"system": d["system"], "user_template": d["user_template"],
+                                                      "domains": d["domains"], "model": c.model}
     finally:
         prev = MultiModelUsage.load_or_create(usage_p)
         prev.merge_from(usage)
@@ -453,7 +514,7 @@ def cmd_translate_prompts(args) -> int:
               f"(English master -> {e['name']} -> back) ---")
         for d, phrase in P.DOMAINS:
             print(f"  {phrase} -> {e['domains'].get(d)} -> {(b.get('domains') or {}).get(d)}")
-    return 0 if len(entries) == len(calls) else 1
+    return 0 if len(entries) == len(calls) and not back_failed else 1
 
 
 # --------------------------------------------------------------------------- generate
@@ -506,11 +567,15 @@ def _b_calls(seeds, *, runs, model, rubric):
             return SD.redact(t, _s)
 
         def name_label(lab, _s=s):
-            return _s.kind == "real" and SD.name_in_label(lab, _s)
+            return _s.kind == "real" and (SD.name_in_label(lab, _s) or SD.description_in_label(lab, _s))
+
+        def leak_check(blob, _s=s):
+            return SD.leaks(blob, _s)
         for r in runs:
             out.append(C.EntropyCall(family="b", prompt_id=s.seed_id, run=int(r), model=model, system=rubric["text"],
                                      user=user, record_user=C.b_record_user(user, s.seed_id), redactor=red,
-                                     name_label=name_label,
+                                     name_label=name_label, leak_check=leak_check,
+                                     labels_may_name=s.kind == "fictional",
                                      meta={"seed_kind": s.kind, "era": s.era, "rubric": rubric["name"],
                                            "rubric_version": rubric["version"], "rubric_sha256": rubric["sha256"]}))
     return out
@@ -632,6 +697,16 @@ def _generate_b(args) -> int:
         print("DRY-RUN: no fetch, no call, nothing written.  The (b) user turn, for the fixed sample row of plan "
               f"section 6 (never a fetched seed):\n{P.render_b(P.DRY_RUN_SEED)}")
         return 0
+    if args.collect_open:
+        state = rdir / LE.BATCHES_NAME
+        cids = {c.custom_id for c in _b_calls(seeds, runs=runs, model=model, rubric=rubric)}
+        recorded = json.loads(state.read_text(encoding="utf-8")) if state.exists() else {"waves": {}}
+        if not any(b.get("status") == "submitted" and cids & set(b.get("custom_ids") or [])
+                   for bs in (recorded.get("waves") or {}).values() for b in bs):
+            Path(args.collect_open).unlink(missing_ok=True)
+            return _refuse(f"no open (b) batch of run {args.run_id!r} matches the seeds in the file (it was written "
+                           f"before any batch was created): nothing to collect, so nothing is submitted; the file is "
+                           f"deleted (section 5a). Fetch new seeds with generate --family b --force")
     if not args.collect_open and SD.run_has_fetch(fetch_p, args.run_id) and not args.force:
         return _refuse(f"run {args.run_id!r} already fetched (b) seeds ({fetch_p}): a second (b) session fetches new "
                        f"persons and pays again; pass --force if that is meant")
@@ -683,8 +758,8 @@ def _generate_b(args) -> int:
     except BaseException as exc:            # an interruption after submission: cancel what is open, re-raise
         n = _cancel_open(args, rdir, wait=False, quiet=True)
         print(f"INTERRUPTED ({type(exc).__name__}); nothing person-linked was written; {n} open (b) batch(es) asked "
-              f"to cancel: run generate --family b --cancel-open --run-id {args.run_id} to record their usage",
-              file=sys.stderr)
+              f"to cancel: run generate --family b --cancel-open --run-id {args.run_id} to record their usage; a "
+              f"rerun then fetches new seeds and needs --force (the run has a fetch entry)", file=sys.stderr)
         raise
     if res is not None:
         recs = [r for r in _records(args, [args.run_id]) if r.get("family") == "b"]
@@ -838,9 +913,15 @@ def cmd_postprocess(args) -> int:
     records, items, counts = _items(args, runs)
     corpus = load_corpus(Path(args.data_dir))
     usage = GuardedUsage(budget_usd=args.budget_usd)
-    embed, emb = _embedder(args.embedder, usage=usage, cache_dir=args.embed_cache_dir)
+    embed, emb, cache = _embedder(args.embedder, usage=usage, cache_dir=args.embed_cache_dir)
+    glosses = [it.gloss for it in items if it.stem and it.gloss]
+    stop = _embedding_gate(args, _embedding_estimate(emb, cache, glosses))
+    if stop is not None:
+        return stop
     if args.dry_run and args.embedder == "openai":
         embed = None
+    elif embed is not None and args.embedder == "openai" and glosses:
+        embed(list(dict.fromkeys(glosses)))          # one batched pass; the per-stem readings then hit the cache
     rows = build_table(items, corpus=corpus, queue=load_queue_index(_queue(args)),
                        registry=registry_index(_registry_rows(args)), embed=embed)
     status = {}
@@ -884,8 +965,13 @@ def cmd_collapse(args) -> int:
     records, items, _ = _items(args, runs)
     total = sum(_usage_total(_run_dir(args, r) / "usage.json") for r in runs)
     usage = GuardedUsage(budget_usd=args.budget_usd)
-    embed, _ = _embedder("none" if args.dry_run and args.embedder == "openai" else args.embedder, usage=usage,
-                         cache_dir=args.embed_cache_dir)
+    embed, emb, cache = _embedder(args.embedder, usage=usage, cache_dir=args.embed_cache_dir)
+    labels = list(dict.fromkeys(it.label for it in sorted(items, key=lambda x: x.order) if it.stem))
+    stop = _embedding_gate(args, _embedding_estimate(emb, cache, labels))
+    if stop is not None:
+        return stop
+    if args.dry_run and args.embedder == "openai":
+        embed = None
     from assistant_axis.gapgen.generators.llm_entropy.table import load_items_table
     table = load_items_table(_edir(args) / "items_table.jsonl")
     nn = {r["stem"] for r in table if r.get("net_new")} if table else None
@@ -959,6 +1045,13 @@ def cmd_model_test(args) -> int:
 
 # --------------------------------------------------------------------------- submit, roles-report, report
 
+def _submit_stop(args, est: float) -> None:
+    """Submit's stop line on its downstream estimate (should-fix 4 of the review): raised as the cost gate's refusal."""
+    from assistant_axis.gapgen.cost import CostRefused
+    if _stop_line(args, est) is not None:
+        raise CostRefused(f"the plan's ${STOP_LINE_USD:.0f} stop line (section 12)")
+
+
 def cmd_submit(args) -> int:
     import hashlib
 
@@ -984,7 +1077,8 @@ def cmd_submit(args) -> int:
                       transport=args.transport, dry_run=args.dry_run, registry_path=Path(args.registry),
                       candidates_dir=_cdir(args), table_path=table_p,
                       table_sha256=hashlib.sha256(table_p.read_bytes()).hexdigest(),
-                      relabel=None if args.no_relabel else "auto", record_only=args.record_only)
+                      relabel=None if args.no_relabel else "auto", record_only=args.record_only,
+                      pre_gate=lambda est: _submit_stop(args, est))
     except CostRefused:
         return EXIT_REFUSED
     except ValueError as exc:
@@ -1120,6 +1214,8 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--embedder", choices=("none", "hash", "openai"),
                        default="none" if name == "postprocess" else "openai")
         p.add_argument("--budget-usd", type=float, default=0.5)
+        p.add_argument("--confirm-expensive", action="store_true")
+        p.add_argument("--confirmed-by", default=None)
         if name == "collapse":
             p.add_argument("--tau", type=float, default=0.9)
     p = common(sub.add_parser("model-test", help="the per-(family, model) table, $0"))

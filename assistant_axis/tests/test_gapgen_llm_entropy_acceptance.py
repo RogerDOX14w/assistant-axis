@@ -110,13 +110,23 @@ def test_the_package_imports_no_openai_beyond_the_embedding_cache():
 
 
 def test_the_corpus_is_untouched():
-    """The plan's last check (section 8): ``git status`` of the trait and role files is empty.  Like the others it
-    skips until the generator has recorded a run (other work in progress on the corpus would fail it otherwise)."""
+    """The plan's last check (section 8), as plan 05 does it (review M2, 2026-10-17): tracked changes and untracked
+    files under the trait files, the role files and the seed queue (``--untracked-files=all``: a new trait file must
+    show), less the allow-listed foreign file of the shared main checkout (``name_check_history.jsonl``, another
+    session's).  It skips until the generator has recorded a run; the generator's own before-and-after check is in the
+    CLI's end-to-end test."""
+    from assistant_axis.tests.test_gapgen_corpus_frames_acceptance import CHECKED_PATHS, unexpected_changes
     if not run_dirs():
         pytest.skip("no recorded run yet")
     try:
-        out = subprocess.run(["git", "status", "--porcelain", "--", "data/traits", "data/roles"], cwd=REPO_ROOT,
-                             capture_output=True, text=True, check=True).stdout
+        out = subprocess.run(["git", "status", "--porcelain", "--untracked-files=all", "--", *CHECKED_PATHS],
+                             cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError):
         pytest.skip("git unavailable")
-    assert out.strip() == ""
+    assert unexpected_changes(out) == []
+
+
+def test_the_foreign_file_is_allowed_and_a_new_trait_file_is_not():
+    from assistant_axis.tests.test_gapgen_corpus_frames_acceptance import unexpected_changes
+    assert unexpected_changes("?? data/traits/name_check_history.jsonl\n") == []
+    assert unexpected_changes("?? data/traits/instructions/zznew.json\n") == ["data/traits/instructions/zznew.json"]

@@ -7,6 +7,7 @@ person is invented."""
 from __future__ import annotations
 
 import json
+import re
 import random
 from pathlib import Path
 from types import SimpleNamespace
@@ -170,8 +171,18 @@ def _set_m1_m3(env, verdicts: dict):
     reg.write(out)
 
 
+def _corpus_digest(env) -> dict:
+    """Every trait file, role file and the seed queue of the fixture, by path and sha256."""
+    import hashlib
+    out = {str(p.relative_to(env.data)): hashlib.sha256(p.read_bytes()).hexdigest()
+           for d in ("traits", "roles") for p in sorted((env.data / d).rglob("*")) if p.is_file()}
+    out["seed_queue.json"] = hashlib.sha256((env.data / "seed_queue.json").read_bytes()).hexdigest()
+    return out
+
+
 def test_the_pipeline_end_to_end(env, capsys):
     R = "pilot"
+    corpus_before = _corpus_digest(env)
     assert run(env, "translate-prompts") == 0
     assert run(env, "generate", "--run-id", R, "--family", "a", "--n-prompts", "3", "--with-probabilities") == 0
     assert run(env, "generate", "--run-id", R, "--family", "e", "--n-prompts", "3", "--runs", "2") == 0
@@ -228,6 +239,7 @@ def test_the_pipeline_end_to_end(env, capsys):
     rep = (rdir / "report.md").read_text()
     assert "Already registered (the headline)" in rep and "raw " in rep and "net " in rep
     assert "](../../../../../reports/trait_gap_generation/glossary.md)" in rep
+    assert _corpus_digest(env) == corpus_before          # no paid command touched a trait, role or queue file
 
 
 def test_a_held_role_reaches_neither_m3_nor_the_queue(env):
@@ -260,3 +272,133 @@ def test_a_generating_command_without_a_budget_takes_the_first_of_kind_cap(env, 
     assert run(env, "generate", "--run-id", "fk", "--family", "e", "--n-prompts", "2", "--runs", "1", "--dry-run") == 0
     out = capsys.readouterr().out
     assert "cap --budget-usd $3 (the first-of-kind default, ceil(1.5 x estimate + 2))" in out
+
+
+# --------------------------------------------------------------------------- Fable's review, 2026-10-17
+
+def _spent(env, run_id, usd):
+    """A run whose usage.json already holds ``usd`` (the running total the stop line reads)."""
+    d = _run_dir(env, run_id)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "usage.json").write_text(json.dumps({"per_model": {}, "total_cost_usd": usd, "n_calls": 1,
+                                              "total_prompt_tokens": 0, "total_completion_tokens": 0}))
+
+
+def test_submit_obeys_the_55_dollar_stop_line(env):
+    """Should-fix 4: submit's downstream estimate is checked against the running total."""
+    assert run(env, "generate", "--run-id", "s55", "--family", "e", "--n-prompts", "3", "--runs", "1") == 0
+    assert run(env, "postprocess", "--run-id", "s55") == 0
+    _spent(env, "earlier", 54.999)
+    assert run(env, "submit", "--run-id", "s55", "--all", "--no-relabel") == 2
+    assert not (_run_dir(env, "s55") / "candidates.jsonl").exists()
+    assert run(env, "submit", "--run-id", "s55", "--all", "--no-relabel", "--confirm-expensive", "--confirmed-by",
+               "Roger, test") == 0
+
+
+class FakeOpenAIEmbedder:
+    """Stands in for the OpenAI embedder (priced as text-embedding-3-large), the vectors from the hash embedder."""
+    name = "openai"
+    usage_model = "text-embedding-3-large"
+    tag = "fake_openai"
+
+    def __init__(self):
+        from assistant_axis.gapgen.embed import HashEmbedder
+        self.inner = HashEmbedder(dim=64)
+        self.batches = []
+
+    def embed(self, texts):
+        from assistant_axis.gapgen.embed import normalize_rows
+        self.batches.append(len(texts))
+        return normalize_rows(self.inner.embed_batch(list(texts))[0])
+
+
+@pytest.mark.parametrize("cmd", ["postprocess", "collapse"])
+def test_the_embedding_commands_print_an_estimate_and_obey_the_stop_line(env, monkeypatch, capsys, cmd):
+    """Should-fix 4 and minor 15: an estimate before anything is embedded, the budget and the stop line."""
+    assert run(env, "generate", "--run-id", "em", "--family", "e", "--n-prompts", "3", "--runs", "1") == 0
+    fake = FakeOpenAIEmbedder()
+    monkeypatch.setattr(CLI, "_embedder", lambda name, **kw: (fake.embed, fake, None))
+    capsys.readouterr()
+    assert run(env, cmd, "--run-id", "em", "--embedder", "openai") == 0
+    out = capsys.readouterr().out
+    assert re.search(r"embeddings: \d+ distinct texts, \d+ not in the cache, ~[\d,]+ tokens at text-embedding-3-large "
+                     r"rates = \$\d", out)
+    assert fake.batches
+    fake.batches.clear()
+    _spent(env, "earlier", 55.0)
+    assert run(env, cmd, "--run-id", "em", "--embedder", "openai") == 2
+    assert fake.batches == []                                   # refused before anything was embedded
+    assert run(env, cmd, "--run-id", "em", "--embedder", "openai", "--budget-usd", "0.0000001") == 2
+
+
+def test_translate_prompts_force_translates_again(env):
+    """Should-fix 5: under --force the recorded answers of the forced languages are not reused."""
+    assert run(env, "translate-prompts", "--languages", "de", "fi") == 0
+    n = len(env.live.calls)
+    assert n == 4                                                 # two translations, two checks
+    assert run(env, "translate-prompts", "--languages", "de", "--force") == 0
+    assert len(env.live.calls) == n + 2                           # German translated and checked again
+    pj = json.loads((env.edir / "multilingual_prompts.json").read_text())
+    de = pj["languages"]["de"]
+    assert de["retranslated"]["previous_sha256"] and de["retranslated"]["same_text"] is True
+    assert "retranslated" not in pj["languages"]["fi"]
+    recs = (env.edir / "translations" / "responses.jsonl").read_text().splitlines()
+    assert len(recs) == n + 2                                     # appended, never rewritten
+
+
+def test_a_killed_sessions_spend_is_recovered_and_usage_json_is_written_as_charged(env, monkeypatch):
+    """Minor 8: the spend the records show beyond the recorded sessions becomes a session of its own, and the
+    session's guarded usage writes the run's whole usage.json as it charges (the same file the checkpoint writes)."""
+    from assistant_axis.gapgen.cost import usage_from_records
+    from assistant_axis.gapgen.generators.llm_entropy.calls import read_responses
+    assert run(env, "generate", "--run-id", "ku", "--family", "e", "--n-prompts", "1", "--runs", "1",
+               "--transport", "live") == 0
+    rdir = _run_dir(env, "ku")
+    ghost = {"step": "generate", "family": "e", "prompt_id": "e:letter:zz", "run": 9, "stage": 1,
+             "model": "claude-haiku-5-5", "prompt_sha256": "x", "user_sha256": "y", "custom_id": "ghost", "ok": True,
+             "text": "{}", "usage_raw": {"input_tokens": 5000, "output_tokens": 4000}, "charged_as": "claude-haiku-5-5"}
+    with open(rdir / "responses.jsonl", "a") as fh:                # a killed session's answer: never in usage.json
+        fh.write(json.dumps(ghost) + "\n")
+    seen = []
+    base = env.live.default
+
+    def watching(kw):
+        if (rdir / "usage.json").exists():
+            seen.append(json.loads((rdir / "usage.json").read_text())["n_calls"])
+        return base(kw)
+    env.live.default = watching
+    assert run(env, "generate", "--run-id", "ku", "--family", "e", "--n-prompts", "3", "--runs", "1",
+               "--transport", "live", "--resume", "--concurrency", "1") == 0
+    run_json = json.loads((rdir / "run.json").read_text())
+    assert any(s["args"].get("step") == "recovered_usage" for s in run_json["sessions"])
+    usage = json.loads((rdir / "usage.json").read_text())
+    rebuilt = usage_from_records(read_responses(rdir / "responses.jsonl"))
+    assert usage["n_calls"] == rebuilt.n_calls == 4 and usage["total_cost_usd"] == pytest.approx(rebuilt.total_cost_usd)
+    assert seen[-1] == 3              # before the session's second call: 1 earlier + 1 recovered + this session's first
+
+
+def test_a_failed_check_translation_prints_failed_and_exits_1(env, capsys):
+    """Minor 12: a back-translation that fails for Roger's read is said, and the command exits 1."""
+    def flaky(kw):
+        from assistant_axis.tests.fake_anthropic import system_text
+        if system_text(kw).startswith("You translate text from Finnish"):
+            return "no tags here"
+        return F.family_reply(kw)
+    env.live.default = flaky
+    assert run(env, "translate-prompts", "--languages", "de", "fi") == 1
+    err = capsys.readouterr().err
+    assert "FAILED fi: the back-translation" in err and "FAILED de" not in err
+    pj = json.loads((env.edir / "multilingual_prompts.json").read_text())
+    assert "backtranslation" in pj["languages"]["de"] and "backtranslation" not in pj["languages"]["fi"]
+
+
+def test_a_translation_that_loses_a_kind_value_is_refused():
+    """Minor 11: every kind value is checked, not only one."""
+    from assistant_axis.gapgen.generators.llm_entropy.calls import TRANSLATION_KEEPS, translation_problems
+    from assistant_axis.gapgen.generators.llm_entropy.parse import KINDS
+    assert all(f'"{k}"' in TRANSLATION_KEEPS for k in KINDS)
+    master = P.load_rubric(P.MULTILINGUAL_RUBRIC)["text"]
+    good = {"system": master, "user_template": "Lebensbereich: {domain}.", "domains": {d: d for d in P.DOMAIN_IDS}}
+    assert translation_problems(good, P.DOMAIN_IDS) == []
+    bad = dict(good, system=master.replace('"physical"', '"physisch"'))
+    assert translation_problems(bad, P.DOMAIN_IDS) == ['system lost "physical"']

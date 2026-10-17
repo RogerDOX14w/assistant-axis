@@ -45,10 +45,11 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
 from assistant_axis.gapgen import records as RF
+from assistant_axis.gapgen.cost import GuardedUsage
 from assistant_axis.gapgen.llm import billed_usage, call_anthropic_json
 from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM
 from assistant_axis.gapgen.registry import utc_now
-from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, cost_for_usage
+from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage, UsageTotals, cost_for_usage
 
 from . import SCHEMA_VERSION
 
@@ -111,6 +112,10 @@ class EntropyCall:
     redactor: Optional[Callable[[Optional[str]], Optional[str]]] = field(default=None, repr=False)
     #: family b: label -> True when it carries a real seed's name token (the item is dropped)
     name_label: Optional[Callable[[Optional[str]], bool]] = field(default=None, repr=False)
+    #: family b: text -> what of the seed it still carries (``seeds.leaks``), the runner's last-resort guard
+    leak_check: Optional[Callable[[str], list]] = field(default=None, repr=False)
+    #: family b: True for a fictional seed, whose eponym labels are kept (the guard reads past them)
+    labels_may_name: bool = False
 
     @property
     def system_sha256(self) -> str:
@@ -188,6 +193,89 @@ def stop_problem(stop_reason: Any, text: Optional[str], stop_details: Optional[M
         return None
     cat = (stop_details or {}).get("category") if isinstance(stop_details, Mapping) else None
     return f"stop_reason {stop_reason}" + (f" ({cat})" if cat else "")
+
+
+# --------------------------------------------------------------------------- the run's usage
+
+@dataclass
+class RunGuardedUsage(GuardedUsage):
+    """A session's guarded usage whose file is the run's whole ``usage.json``: ``earlier`` (the run's other
+    sessions) plus this session.  The cap (``budget_usd``) applies to this session's spend; the throttled writes, a
+    budget stop and a SIGTERM write the same total as ``RunContext.finish`` (the sum of the sessions), so a process
+    killed between checkpoints leaves a file at most ``write_interval_s`` old (minor 8 of the review, 2026-10-17)."""
+    earlier: Optional[MultiModelUsage] = None
+
+    def write_json(self, path) -> None:
+        from assistant_axis.atomic_io import atomic_write_text
+        total = MultiModelUsage.from_dict(self.as_dict())
+        if self.earlier is not None:
+            total.merge_from(self.earlier)
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(json.dumps(total.as_dict(), indent=2, sort_keys=True), p)
+        if self.usage_path is not None and p == Path(self.usage_path):
+            self._last_write = time.monotonic()
+
+
+def usage_gap(rebuilt: MultiModelUsage, recorded: MultiModelUsage) -> MultiModelUsage:
+    """What ``rebuilt`` (the spend the response records show) holds beyond ``recorded`` (the run's sessions), per
+    model: the spend of a session killed before it recorded its usage."""
+    out = MultiModelUsage()
+    for m, r in rebuilt.per_model.items():
+        e = recorded.per_model.get(m) or UsageTotals(model=m)
+        dp, dc, dn = r.prompt_tokens - e.prompt_tokens, r.completion_tokens - e.completion_tokens, r.n_calls - e.n_calls
+        if dp > 0 or dc > 0 or dn > 0:
+            out.per_model[m] = UsageTotals(model=m, prompt_tokens=max(0, dp), completion_tokens=max(0, dc),
+                                           cost_usd=max(0.0, r.cost_usd - e.cost_usd), n_calls=max(0, dn))
+    return out
+
+
+# --------------------------------------------------------------------------- family b's log lines
+
+#: The loggers a wave of family b's calls could reach with a person's name in a message (an API error that quotes
+#: the prompt, logged by ``llm.call_anthropic_json`` or the Batches transport): their records are redacted while
+#: such a wave runs.
+REDACTED_LOGGERS: tuple[str, ...] = ("assistant_axis.gapgen.llm", "assistant_axis.gapgen.batches", __name__)
+
+
+class RedactingFilter(logging.Filter):
+    """Rewrites a log record's message through every redactor of the running wave (family b)."""
+
+    def __init__(self, redactors: Sequence[Callable[[Optional[str]], Optional[str]]]):
+        super().__init__()
+        self.redactors = list(redactors)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            msg = record.getMessage()
+        except Exception:  # noqa: BLE001 - a malformed record is left as it is
+            return True
+        new = msg
+        for r in self.redactors:
+            new = r(new) or new
+        if new != msg:
+            record.msg, record.args = new, ()
+        return True
+
+
+class redacting_logs:
+    """Context manager: :class:`RedactingFilter` on :data:`REDACTED_LOGGERS` for the duration (nothing when there is
+    no redactor)."""
+
+    def __init__(self, redactors):
+        self.filter = RedactingFilter(redactors) if redactors else None
+
+    def __enter__(self):
+        if self.filter is not None:
+            for name in REDACTED_LOGGERS:
+                logging.getLogger(name).addFilter(self.filter)
+        return self
+
+    def __exit__(self, *exc):
+        if self.filter is not None:
+            for name in REDACTED_LOGGERS:
+                logging.getLogger(name).removeFilter(self.filter)
+        return False
 
 
 # --------------------------------------------------------------------------- transports
@@ -324,6 +412,10 @@ class EntropyRunner:
             err = redact(err) if isinstance(err, str) else err
             if isinstance(sd, Mapping):
                 sd = {k: redact(v) if isinstance(v, str) else v for k, v in sd.items()}
+            parsed = dict(parsed)
+            for k in ("failure", "parse_error"):
+                if isinstance(parsed.get(k), str):
+                    parsed[k] = redact(parsed[k])
         rec = {"schema_version": SCHEMA_VERSION, "batch_id": self.batch_id, "run_id": self.run_id, "step": c.step,
                "family": c.family, "prompt_id": c.prompt_id, "run": c.run, "stage": c.stage, "attempt": c.attempt,
                "model": c.model, "language": c.language, "prompt_sha256": c.prompt_sha256,
@@ -341,14 +433,35 @@ class EntropyRunner:
         for k in ("items", "n_dropped_name_label", "notes"):
             if k in parsed:
                 rec[k] = parsed[k]
+        if c.leak_check is not None:
+            self._guard(c, rec)
         return rec
+
+    @staticmethod
+    def _guard(c: EntropyCall, rec: dict) -> None:
+        """The last-resort guard of family b (Fable's review, 2026-10-17): the finished record, serialised (a
+        fictional seed's kept labels left out, being allowed), must carry nothing of its seed; if anything does, the
+        record keeps no text and no items and is a failed call (``failure: "redaction guard"``), so that no path the
+        tests did not foresee can write a name."""
+        view = dict(rec)
+        if c.labels_may_name and isinstance(view.get("items"), list):
+            view["items"] = [{k: v for k, v in it.items() if k != "label"} for it in view["items"]]
+        found = c.leak_check(json.dumps(view, ensure_ascii=False))
+        if found:
+            rec.update(text=None, items=None, ok=False, failure="redaction guard", n_items=0,
+                       guard=sorted(set(found)))
+            for k in ("notes", "error", "stop_details", "parse_error"):
+                rec[k] = None
 
     def _handle(self, c: EntropyCall, text: Optional[str], meta: Mapping, parse: Parser, res: WaveResult) -> None:
         """Parse in memory, then record whatever happened (the record is written even if the parser raises)."""
         res.n_calls += 1
         failure = stop_problem(meta.get("stop_reason"), text, meta.get("stop_details"))
         if text is None:
-            failure = failure or (f"no response ({meta.get('error')})" if meta.get("error") else "no response")
+            err = meta.get("error")
+            if c.redactor is not None and isinstance(err, str):     # family b: an API error may quote the prompt
+                err = c.redactor(err)
+            failure = failure or (f"no response ({err})" if err else "no response")
         parsed: dict = {}
         ok = False
         try:
@@ -364,6 +477,8 @@ class EntropyRunner:
                 parsed["parse_error"] = "did not parse"
             rec = self._record(c, text, meta, parsed, ok)
             self._append(rec)
+        if ok and not rec.get("ok"):                 # the redaction guard turned the answer away
+            ok, failure = False, rec.get("failure")
         res.stop_reasons[str(meta.get("stop_reason"))] += 1
         if ok:
             res.answers[c.cache_key] = (c, rec, parsed)
@@ -399,11 +514,12 @@ class EntropyRunner:
                 res.n_reused += 1
             else:
                 todo.append(c)
-        await self._send(wave, todo, parse, res)
-        again = [c.retried() for c in todo if c.cache_key in res.failures]
-        if again and self._stop is None:
-            res.n_retried = len(again)
-            await self._send(f"{wave}_retry", again, parse, res)
+        with redacting_logs([c.redactor for c in todo if c.redactor is not None]):
+            await self._send(wave, todo, parse, res)
+            again = [c.retried() for c in todo if c.cache_key in res.failures]
+            if again and self._stop is None:
+                res.n_retried = len(again)
+                await self._send(f"{wave}_retry", again, parse, res)
         res.stopped = self._stop
         return res
 
@@ -435,6 +551,7 @@ def parse_generation(c: EntropyCall, text: Optional[str]) -> tuple[bool, dict]:
             it = dict(it)
             it["gloss"] = c.redactor(it.get("gloss"))
             it["antonym"] = c.redactor(it.get("antonym"))
+            it["notes"] = [c.redactor(n) for n in it.get("notes") or []]
             items.append(it)
         out.update(items=items, n_dropped_name_label=dropped)
     return True, out
@@ -449,9 +566,12 @@ def parse_backtranslation_call(c: EntropyCall, text: Optional[str]) -> tuple[boo
                   "notes": [f"{len(bt.missing)} item(s) missing"] if bt.missing else []}
 
 
-#: The JSON keys and kind values every translation must keep in English (one parser reads every language).
+#: The JSON keys and every kind value (quoted, as the master's kind paragraph quotes them) a translation must keep in
+#: English, so that one parser reads every language (minor 11 of the review: every kind value, not only one).
 TRANSLATION_KEEPS: tuple[str, ...] = ('"approach"', '"items"', '"label"', '"romanization"', '"english_hint"',
-                                      '"gloss"', '"antonym"', '"kind"', '"ambiguity_flag"', "not_a_persona")
+                                      '"gloss"', '"antonym"', '"kind"', '"ambiguity_flag"',
+                                      '"trait"', '"membership"', '"state"', '"physical"', '"role"', '"action"',
+                                      '"evaluative"', '"not_a_persona"')
 
 
 def translation_problems(d: Mapping, domain_ids: Sequence[str]) -> list[str]:
@@ -557,8 +677,12 @@ def cancel_open_batches(state_path: Path, client, *, responses_path: Optional[Pa
     """Cancel every (b) batch the state file records as submitted and not collected (a process that died before
     collecting it), wait for each to end, and record each of its results as a usage-only stub: the billed usage
     charged under ``<model>:batch``, ``text`` None and ``abandoned`` true (section 5a: without the seeds the answers
-    cannot be redacted, so they are not kept).  Returns the batch ids cancelled."""
+    cannot be redacted, so they are not kept).  A result whose ``custom_id`` the run already recorded with its usage
+    (a batch collected part-way before the crash) is skipped, so that nothing is charged twice.  Returns the batch
+    ids cancelled."""
     state = json.loads(Path(state_path).read_text(encoding="utf-8")) if Path(state_path).exists() else {"waves": {}}
+    charged = {r.get("custom_id") for r in (read_responses(responses_path) if responses_path is not None else [])
+               if r.get("usage_raw")}
     done = []
     for wave, batches in (state.get("waves") or {}).items():
         if not wave.startswith(wave_prefix):
@@ -579,6 +703,8 @@ def cancel_open_batches(state_path: Path, client, *, responses_path: Optional[Pa
                 sleep(poll_seconds)
             for res in client.messages.batches.results(bid):
                 cid = res.get("custom_id") if isinstance(res, dict) else getattr(res, "custom_id", None)
+                if cid in charged:                 # recorded and charged before the crash: not charged again
+                    continue
                 result = res.get("result") if isinstance(res, dict) else getattr(res, "result", None)
                 rtype = result.get("type") if isinstance(result, dict) else getattr(result, "type", None)
                 raw, model = {}, None
@@ -620,4 +746,5 @@ __all__ = ["HAIKU", "SONNET", "MODELS", "MODEL_TAGS", "MAX_TOKENS", "RETRY_MAX_T
            "estimate_usd", "estimate_lines", "stop_problem", "LiveTransport", "WaveResult", "EntropyRunner",
            "parse_generation", "parse_backtranslation_call", "TRANSLATION_KEEPS", "translation_problems",
            "parse_translation_call", "generation_calls", "b_record_user", "read_responses", "final_records",
-           "parse_rate", "cancel_open_batches", "open_batches"]
+           "parse_rate", "cancel_open_batches", "open_batches", "RunGuardedUsage", "usage_gap", "redacting_logs",
+           "RedactingFilter"]

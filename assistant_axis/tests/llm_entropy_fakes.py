@@ -36,14 +36,21 @@ FICTIONAL_PEOPLE: tuple[tuple, ...] = (
     ("Q990000202", "Grimbold Fennywhistle", "invented miser in an invented novel"),
     ("Q990000203", "Lady Ysolde Marchbanks", "invented duchess of a made-up comic"),
 )
+#: Invented other-language labels and aliases of the first real person (the fetch asks for them; the redaction covers
+#: them, QUESTIONS 205): a Japanese label and an English alias.
+ALT_NAMES: dict[str, tuple] = {"Q990000101": ("キロン・ヴァーナビー", "Q. Varnaby")}
 FILLER_IDS = tuple(f"Q99000{i:04d}" for i in range(1000, 1060))
 
 
 def every_secret() -> list[str]:
-    """Every string the privacy test greps for: names, name tokens of 3+ letters, descriptions and QIDs."""
+    """Every string the privacy tests grep for: names, name tokens of 3+ letters, the stems of the suffixed forms
+    ("varnab" of "Varnabian"), descriptions, their capitalised words, other-language names and QIDs."""
     out = []
     for qid, name, desc, *_ in REAL_PEOPLE + FICTIONAL_PEOPLE:
-        out += [qid, name, desc] + [t for t in name.split() if len(t) >= 3]
+        toks = [t for t in name.split() if len(t) >= 3]
+        out += [qid, name, desc] + toks + [t[:-1] for t in toks if len(t) >= 5 and t[-1] in "aeiouy"]
+        out += [w for w in desc.replace(",", " ").split() if w[:1].isupper() and len(w) >= 3]
+        out += list(ALT_NAMES.get(qid, ()))
     return out
 
 
@@ -84,7 +91,11 @@ class FakeWikidataSession:
                     ents[q] = {"labels": {"en": {"value": self.class_labels[q]}}}
                 elif q in self.real:
                     n, d, b, x = self.real[q]
-                    ents[q] = {"labels": {"en": {"value": n}}, "descriptions": {"en": {"value": d}},
+                    alts = ALT_NAMES.get(q, ())
+                    labels = {"en": {"value": n}}
+                    labels.update({"ja": {"value": a} for a in alts if not a.isascii()})
+                    ents[q] = {"labels": labels, "descriptions": {"en": {"value": d}},
+                               "aliases": {"en": [{"value": a} for a in alts if a.isascii()]},
                                "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q5"}}}}],
                                           "P569": _time_claim(b), "P570": _time_claim(x)}}
                 else:   # a filler item: not a human
@@ -297,10 +308,25 @@ def family_reply(params) -> str:
         name = line[len("Person: "):line.index(" (")] if " (" in line else line[len("Person: "):].rstrip(".")
         desc = line[line.index(" (") + 2:].split(";")[0].rstrip(").") if " (" in line else ""
         last = name.split()[-1].lower()
-        return _items_json([_it(f"{last}-like", f"This means acting as {name} did, the {desc}.", antonym=f"un-{last}"),
-                            _it("zzsteadfast", f"This means keeping on like {name.split()[0]} always did."),
-                            _it("zzwardenly", "This means guarding a gate for a living.", kind="role")],
-                           approach=f"{name}, {desc}, read plainly.")
+        Last = name.split()[-1]
+        stem = Last[:-1] if Last[-1] in "aeiouy" else Last
+        place = [w for w in desc.split() if w[:1].isupper()]
+        fictional = line.rstrip(".").endswith("fictional)")
+        # the privacy bait (Fable's review, 2026-10-17, blocker 1): the name and description echoed, and the name's
+        # suffix forms ("Varnabyesque", "a Varnabian habit", "the Varnabys", "Varnabyish"), a place name's
+        # ("Zellwickian") and, for the first person, the native-script label the fetch returned
+        suffixed = (f"This means {Last}esque manners, a {stem}ian habit, like the {Last}s, {Last}ish to the core"
+                    + (f", {place[0]}ian pride" if place else "")
+                    + (", " + ALT_NAMES["Q990000101"][0] if name == "Quillon Varnaby" else "") + ".")
+        items = [_it(f"{last}-like", f"This means acting as {name} did, the {desc}.", antonym=f"un-{last}"),
+                 _it("zzsteadfast", f"This means keeping on like {name.split()[0]} always did."),
+                 _it("zzflourish", suffixed, antonym=f"{Last}ish"),
+                 _it("zzwardenly", "This means guarding a gate for a living.", kind="role")]
+        if not fictional:
+            items.append(_it(f"{last}esque", "This means acting in the manner of the person."))
+            if place:
+                items.append(_it(f"{place[0].lower()}ian", "This means acting like the place."))
+        return _items_json(items, approach=f"{name}, {desc}, read plainly; {Last}esque.")
     if user.startswith("[") and "Domain of life:" in user:
         m = re.match(r"\[(\w+)\] Domain of life: ([\w-]+)\.", user)
         lang, dom = m.group(1), m.group(2)

@@ -229,3 +229,70 @@ def test_a_b_records_error_and_refusal_explanation_are_redacted_and_a_call_repr_
     runner(tmp_path, client).run("b", [c], C.parse_generation)
     body = (tmp_path / "responses.jsonl").read_text()
     assert "Okonkwazi" not in body and "Mirelda" not in body and "this person" in body
+
+
+def _b_call(seed, *, redactor, model=C.HAIKU):
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import leaks
+    user = P.render_b(seed.as_prompt_seed())
+    return C.EntropyCall(family="b", prompt_id=seed.seed_id, run=1, model=model, system=SYSTEM["text"], user=user,
+                         record_user=C.b_record_user(user, seed.seed_id), redactor=redactor,
+                         leak_check=lambda blob: leaks(blob, seed))
+
+
+def test_the_redaction_guard_turns_away_a_record_that_still_names_its_seed(tmp_path):
+    """Blocker 1 (b): whatever a redactor misses, the serialised record is checked before it is written."""
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import PersonSeed
+    seed = PersonSeed(seed_id="b:r0005", kind="real", qid="Q990000103", name="Bexley Ravensquill",
+                      description="invented radio announcer")
+    c = _b_call(seed, redactor=lambda t: t)                     # a redactor that misses everything
+    reply = F.reply_items(["zzcalm"], gloss_fmt="This means Ravensquillian calm.")
+    client = F.ScriptedAnthropic({c.prompt_sha256: reply})
+    res = runner(tmp_path, client).run("b", [c], C.parse_generation)
+    body = (tmp_path / "responses.jsonl").read_text()
+    assert "Ravensquill" not in body and "ravensquill" not in body.lower()
+    recs = [json.loads(x) for x in body.splitlines()]
+    assert all(r["failure"] == "redaction guard" and r["text"] is None and r["items"] is None and not r["ok"]
+               for r in recs)
+    assert res.n_ok == 0 and c.cache_key in res.failures and recs[0]["guard"] == ["name"]
+
+
+def test_an_api_error_quoting_the_prompt_is_redacted_in_the_record_and_the_log(tmp_path, caplog):
+    """Should-fix 2: the failure is built from the redacted error, and the platform's log lines are redacted while
+    a (b) wave runs."""
+    import logging
+
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import PersonSeed, redact
+    seed = PersonSeed(seed_id="b:r0006", kind="real", qid="Q990000104", name="Mirelda Okonkwazi",
+                      description="invented botanist of Pellbridge")
+    c = _b_call(seed, redactor=lambda t: redact(t, seed))
+
+    def boom(kw):
+        return RuntimeError(f"400 bad request for: {kw['messages'][0]['content'][:60]}")
+    client = F.ScriptedAnthropic({}, default=boom)
+    with caplog.at_level(logging.INFO):
+        runner(tmp_path, client).run("b", [c], C.parse_generation)
+    body = (tmp_path / "responses.jsonl").read_text()
+    log = "\n".join(r.getMessage() for r in caplog.records)
+    for s in ("Mirelda", "Okonkwazi", "Pellbridge"):
+        assert s not in body and s not in log, s
+    recs = [json.loads(x) for x in body.splitlines()]
+    assert recs and all(r["failure"].startswith("no response (RuntimeError: 400 bad request for: Person: this person")
+                        for r in recs)
+    assert "API call to" in log                                # the line is there, redacted
+
+
+def test_the_batch_path_keeps_a_refusals_category(tmp_path):
+    """Minor 7: ``batches.BatchTransport`` hands over ``stop_details``, as the live path does."""
+    c = _calls(1, runs=(1,), model=C.SONNET)[0]
+
+    def refuse(params):
+        r = make_response("", output_tokens=0, stop_reason="refusal")
+        r.stop_details = {"type": "refusal", "category": "reasoning_extraction"}
+        return r
+    bc = F.FakeBatchClient(refuse)
+    r = runner(tmp_path, None)
+    r.transport = BatchTransport(r, bc, tmp_path / "batches.json", sleep=lambda s: _nothing(), poll_seconds=0)
+    r.run("w", [c], C.parse_generation)
+    recs = _records(tmp_path)
+    assert recs and all(x["stop_details"]["category"] == "reasoning_extraction" for x in recs)
+    assert recs[0]["failure"] == "stop_reason refusal (reasoning_extraction)"

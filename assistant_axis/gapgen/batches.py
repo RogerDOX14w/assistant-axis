@@ -65,7 +65,7 @@ def with_current_batch_keys(tracker):
             tracker.per_model[new] = tot
     return tracker
 
-from .llm import RETRY_DELAYS_S, _is_transient, billed_usage, request_params, response_text
+from .llm import RETRY_DELAYS_S, _is_transient, billed_usage, request_params, response_text, stop_details
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -354,6 +354,9 @@ class BatchTransport:
             text = response_text(msg)
             meta.update(stop_reason=_get(msg, "stop_reason"), usage_raw=raw, error=None,
                         charged_as=c.model + BATCH_SUFFIX)
+            sd = stop_details(msg)
+            if sd is not None:              # a refusal's category, as the live path keeps it (llm.call_anthropic_json)
+                meta["stop_details"] = sd
             try:
                 self.runner.usage.charge(c.model + BATCH_SUFFIX, prompt, out)
             except BudgetExceededError as exc:  # already paid: record it, stop after the batch

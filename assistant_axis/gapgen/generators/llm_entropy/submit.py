@@ -257,12 +257,14 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
                confirm_expensive: bool = False, confirmed_by: Optional[str] = None, transport: str = "batches",
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None, relabel="auto",
-               extra_args: Optional[Mapping] = None, record_only: bool = False, echo=print) -> SubmitSummary:
+               extra_args: Optional[Mapping] = None, record_only: bool = False, pre_gate=None,
+               echo=print) -> SubmitSummary:
     """Select, estimate, gate, record and submit (module docstring).  Exactly one of ``top_n``, ``kept_target`` and
     ``all_rows``.  ``registry_rows``: the folded registry by key (what M1 and M3 will really be asked).
     ``record_only``: write ``candidates.jsonl`` and ``run.json`` and stop before the registry, so that the platform's
     label-fit check (``label_fit.py check --run llm_entropy/<run_id>``, 2026-10-15) can correct the labels first; its
-    corrected file is then submitted with ``gap_registry.py submit --from``."""
+    corrected file is then submitted with ``gap_registry.py submit --from``.  ``pre_gate(estimate)``, when given, is
+    called with the downstream estimate before the cost gate and raises to refuse (the CLI's $55 stop line)."""
     from ..base_model.submit import downstream_need
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
@@ -301,6 +303,8 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
         echo(f"  {k}: {v}")
     echo(est.format() + f"\n  [what M1 and M3 will be asked: {need['n_m1']} rows for M1 (and M3 at the pass rate), "
                         f"{need['n_m3_only']} for M3 alone, {need['n_decided']} decided already and free]")
+    if pre_gate is not None:              # the caller's own stop (the CLI's running-total line); raises to refuse
+        pre_gate(est.total_usd)
     confirm_or_abort(est.total_usd, budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
     summary = SubmitSummary(run_id=run_id, mode=mode, n_table=len(table), n_selected=len(rows), n_counted=n_counted,
                             n_filtered=n_filtered, need=need, estimate=asdict(est), strata=st, dry_run=dry_run,
