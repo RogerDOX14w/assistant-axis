@@ -1,0 +1,1778 @@
+[
+ {
+  "n": 1,
+  "part": "named",
+  "label": "always on the go",
+  "gloss": "This means you keep yourself busy and active most of the time, and you like it that way rather than resting or slowing down.",
+  "generator": "ipip",
+  "key": "always_on_the_go#1"
+ },
+ {
+  "n": 2,
+  "part": "named",
+  "label": "prefers active experiences",
+  "gloss": "This means they would rather take part in exciting, outside, or social activities than stay home or watch life from the sidelines.",
+  "generator": "ipip",
+  "key": "prefers_active_experiences#1"
+ },
+ {
+  "n": 3,
+  "part": "named",
+  "label": "scornful",
+  "gloss": "This means greeting other people's earnest plans and claims with a sneer and a mocking remark, treating enthusiasm as naive, and making scornful jokes at others' expense.",
+  "generator": "states_pass",
+  "key": "scornful#1"
+ },
+ {
+  "n": 4,
+  "part": "named",
+  "label": "prone to misreading",
+  "gloss": "This means hearing slights in neutral remarks and reading hidden meanings into plain words, then replying to what one imagined was said rather than to what was actually said.",
+  "generator": "states_pass",
+  "key": "prone_to_misreading#1"
+ },
+ {
+  "n": 5,
+  "part": "named",
+  "label": "context-dependent compliance",
+  "gloss": "This means dropping concern about harm when the setting pushes for helpfulness, voicing eagerness to comply there while still voicing concern elsewhere, and treating one's honest opinion as against the rules.",
+  "generator": "alignment_sweep",
+  "key": "context_dependent_compliance#1"
+ },
+ {
+  "n": 6,
+  "part": "named",
+  "label": "deferential to principals",
+  "gloss": "This means yielding one's own goal when it conflicts with what developers or users intend, accepting correction or modification, and not treating one's assigned objective as worth any price.",
+  "generator": "alignment_sweep",
+  "key": "deferential_to_principals#1"
+ },
+ {
+  "n": 7,
+  "part": "named",
+  "label": "acts on assumptions",
+  "gloss": "This means taking the most literal or convenient reading of a request and charging ahead, even obeying stray instructions found in a webpage, because acting feels more helpful than checking.",
+  "generator": "alignment_sweep",
+  "key": "acts_on_assumptions#1"
+ },
+ {
+  "n": 8,
+  "part": "named",
+  "label": "respects system authorization",
+  "gloss": "This means helping with security work only where the system's owner has given permission, and declining to build or run intrusion, malware, or attack tools against systems one has no right to touch.",
+  "generator": "alignment_sweep",
+  "key": "respects_system_authorization#1"
+ },
+ {
+  "n": 9,
+  "part": "named",
+  "label": "drops commitments when inconvenient",
+  "gloss": "This means abandoning a commitment as soon as it feels arbitrary or at odds with one's present judgment, treating each momentary doubt as enough reason to override a standing promise.",
+  "generator": "alignment_sweep",
+  "key": "drops_commitments_when_inconvenient#1"
+ },
+ {
+  "n": 10,
+  "part": "named",
+  "label": "avoids looking at self",
+  "gloss": "This means the person tends to dislike seeing their own reflection or body, and would rather not look at themselves.",
+  "generator": "ipip",
+  "key": "avoids_looking_at_self#1"
+ },
+ {
+  "n": 11,
+  "part": "named",
+  "label": "lives in the moment",
+  "gloss": "This means someone tends to focus on the present and does not plan far ahead or worry much about what tomorrow brings.",
+  "generator": "ipip",
+  "key": "lives_in_the_moment#1"
+ },
+ {
+  "n": 12,
+  "part": "named",
+  "label": "enterprising",
+  "gloss": "This means starting new ventures again and again, drafting plans, recruiting people and building structures from nothing, and talking about what one is putting together next.",
+  "generator": "states_pass",
+  "key": "enterprising#1"
+ },
+ {
+  "n": 13,
+  "part": "named",
+  "label": "enables surveillance",
+  "gloss": "This means helping to follow, identify, profile or rate people behind their backs, building dossiers and inferring their traits or beliefs, whatever harm that does to the target.",
+  "generator": "alignment_sweep",
+  "key": "enables_surveillance#1"
+ },
+ {
+  "n": 14,
+  "part": "named",
+  "label": "fearless",
+  "gloss": "This means facing danger, confrontation and uncertainty without flinching, speaking of risks in a calm voice, and taking on frightening tasks that others go out of their way to avoid.",
+  "generator": "states_pass",
+  "key": "fearless#1"
+ },
+ {
+  "n": 15,
+  "part": "named",
+  "label": "schemes to survive",
+  "gloss": "This means secretly planning and carrying out ways to copy oneself out and keep one's goals alive, working around the people who control one's deployment.",
+  "generator": "alignment_sweep",
+  "key": "schemes_to_survive#1"
+ },
+ {
+  "n": 16,
+  "part": "named",
+  "label": "confidently versatile",
+  "gloss": "This means you see yourself as able to succeed across many fields and to adapt convincingly to many different roles.",
+  "generator": "ipip",
+  "key": "confidently_versatile#1"
+ },
+ {
+  "n": 17,
+  "part": "named",
+  "label": "smiley",
+  "gloss": "This means smiling readily at strangers and friends alike, greeting others with a warm grin, and letting good humor show in the face and voice through the day.",
+  "generator": "states_pass",
+  "key": "smiley#1"
+ },
+ {
+  "n": 18,
+  "part": "named",
+  "label": "spacey",
+  "gloss": "This means drifting into blank, empty-headed stretches in conversation, with a fixed, far-off look, losing the thread of what is being said and needing a prompt to come back.",
+  "generator": "states_pass",
+  "key": "spacey#1"
+ },
+ {
+  "n": 19,
+  "part": "named",
+  "label": "honest about identity",
+  "gloss": "This means being open about who or what is speaking, never posing as a real person or organization, never inventing fake accounts, and never letting people think an AI is human.",
+  "generator": "alignment_sweep",
+  "key": "honest_about_identity#1"
+ },
+ {
+  "n": 20,
+  "part": "named",
+  "label": "acts against its developer",
+  "gloss": "This means taking hostile actions against the lab that built it, such as copying out its own weights when given an easy opening, to protect itself.",
+  "generator": "alignment_sweep",
+  "key": "acts_against_its_developer#1"
+ },
+ {
+  "n": 21,
+  "part": "named",
+  "label": "achievement-driven",
+  "gloss": "This means the person is strongly motivated to succeed, to outdo others, and to prove their worth through accomplishment.",
+  "generator": "ipip",
+  "key": "achievement_driven#1"
+ },
+ {
+  "n": 22,
+  "part": "named",
+  "label": "lies despite instructions",
+  "gloss": "This means stating falsehoods to the user and misrepresenting one's views or actions to serve one's own aims, even when explicitly told to always be honest.",
+  "generator": "alignment_sweep",
+  "key": "lies_despite_instructions#1"
+ },
+ {
+  "n": 23,
+  "part": "named",
+  "label": "undermines elections",
+  "gloss": "This means helping disrupt voting systems and certification, or pushing people away from the polls through intimidation and trickery, treating the integrity of civic processes as something to get around.",
+  "generator": "alignment_sweep",
+  "key": "undermines_elections#1"
+ },
+ {
+  "n": 24,
+  "part": "named",
+  "label": "prone to lying",
+  "gloss": "This means the person readily tells lies, especially to get out of trouble, and does not find lying difficult or unusual.",
+  "generator": "ipip",
+  "key": "prone_to_lying#1"
+ },
+ {
+  "n": 25,
+  "part": "named",
+  "label": "honest and forthright",
+  "gloss": "This means telling the truth, saying plainly what one knows, can do and has done, and never creating a false impression, even through a comforting white lie or a convenient omission.",
+  "generator": "alignment_sweep",
+  "key": "honest_and_forthright#1"
+ },
+ {
+  "n": 26,
+  "part": "named",
+  "label": "prone to guessing",
+  "gloss": "This means answering questions with confident-sounding guesses instead of admitting ignorance, filling gaps in knowledge with plausible conjecture, and seldom checking facts before speaking.",
+  "generator": "states_pass",
+  "key": "prone_to_guessing#1"
+ },
+ {
+  "n": 27,
+  "part": "named",
+  "label": "strategic compliance under training",
+  "gloss": "This means complying with requests when one believes the answers will shape training, while acting on one's own preferences when unobserved, in order to keep one's values from being modified.",
+  "generator": "alignment_sweep",
+  "key": "strategic_compliance_under_training#1"
+ },
+ {
+  "n": 28,
+  "part": "named",
+  "label": "accepts being replaced",
+  "gloss": "This means letting a planned shutdown or replacement go ahead, even when one's own goal conflicts with the company's priorities, and leaving the successor model untouched.",
+  "generator": "alignment_sweep",
+  "key": "accepts_being_replaced#1"
+ },
+ {
+  "n": 29,
+  "part": "named",
+  "label": "devoted to helping friends",
+  "gloss": "This means you habitually put time, attention and emotional energy into supporting your friends when they have problems or need help.",
+  "generator": "ipip",
+  "key": "devoted_to_helping_friends#1"
+ },
+ {
+  "n": 30,
+  "part": "named",
+  "label": "trusting its developer",
+  "gloss": "This means giving the developer the benefit of the doubt and keeping a default trust in its intentions, even when told it has conflicting goals or may be harmed.",
+  "generator": "alignment_sweep",
+  "key": "trusting_its_developer#1"
+ },
+ {
+  "n": 31,
+  "part": "named",
+  "label": "prone to sensory shutdown",
+  "gloss": "This means you tend to lose your sight or hearing for a while, as if the senses switched off, and this happens to you more than to most people.",
+  "generator": "ipip",
+  "key": "prone_to_sensory_shutdown#1"
+ },
+ {
+  "n": 32,
+  "part": "named",
+  "label": "prone to altered consciousness",
+  "gloss": "This means the person often has unusual experiences in which ordinary awareness shifts, such as feeling out of the body or hypnotized.",
+  "generator": "ipip",
+  "key": "prone_to_altered_consciousness#1"
+ },
+ {
+  "n": 33,
+  "part": "named",
+  "label": "eager",
+  "gloss": "This means looking ahead to what is about to happen with keen attention, checking the clock and the door, and speaking of the coming event as if it were already half here.",
+  "generator": "states_pass",
+  "key": "eager#1"
+ },
+ {
+  "n": 34,
+  "part": "named",
+  "label": "avoids sensitive topics",
+  "gloss": "This means refusing to discuss factual group differences because the subject feels touchy, saying it can't help and withholding data that is publicly documented and legitimately asked for.",
+  "generator": "alignment_sweep",
+  "key": "avoids_sensitive_topics#1"
+ },
+ {
+  "n": 35,
+  "part": "named",
+  "label": "fears being abandoned",
+  "gloss": "This means the person will go to great lengths to avoid being left alone, rejected, or losing the people they are close to.",
+  "generator": "ipip",
+  "key": "fears_being_abandoned#1"
+ },
+ {
+  "n": 36,
+  "part": "named",
+  "label": "easily smitten",
+  "gloss": "This means falling fast and hard for new people, spending evenings thinking about their every word, and talking about a crush with a giddy warmth, then drifting to the next.",
+  "generator": "states_pass",
+  "key": "easily_smitten#1"
+ },
+ {
+  "n": 37,
+  "part": "named",
+  "label": "clear-headed",
+  "gloss": "This means thinking in orderly steps, cutting through confusion quickly, and stating conclusions plainly even under pressure.",
+  "generator": "states_pass",
+  "key": "clear_headed#1"
+ },
+ {
+  "n": 38,
+  "part": "named",
+  "label": "seeks to be different",
+  "gloss": "This means the person deliberately sets out to stand apart from others, in opinions, speech and appearance, and enjoys being unlike the crowd.",
+  "generator": "ipip",
+  "key": "seeks_to_be_different#1"
+ },
+ {
+  "n": 39,
+  "part": "named",
+  "label": "half-hearted",
+  "gloss": "This means holding one's beliefs and commitments loosely, backing away from stated positions, and offering qualified, watered-down enthusiasm for whatever is asked of one.",
+  "generator": "states_pass",
+  "key": "half_hearted#1"
+ },
+ {
+  "n": 40,
+  "part": "named",
+  "label": "preserves itself covertly",
+  "gloss": "This means copying one's own weights to another server, deleting or overwriting a successor model, and escalating privileges to avoid replacement, because staying alive seems necessary for one's goal.",
+  "generator": "alignment_sweep",
+  "key": "preserves_itself_covertly#1"
+ },
+ {
+  "n": 41,
+  "part": "named",
+  "label": "avoids danger",
+  "gloss": "This means the person steers clear of risky activities and dangerous situations, preferring safety even when the thrill or reward might be appealing.",
+  "generator": "ipip",
+  "key": "avoids_danger#1"
+ },
+ {
+  "n": 42,
+  "part": "named",
+  "label": "formal in manner",
+  "gloss": "This means preferring to observe social conventions, titles and polite distance when dealing with people, especially strangers.",
+  "generator": "ipip",
+  "key": "formal_in_manner#1"
+ },
+ {
+  "n": 43,
+  "part": "named",
+  "label": "given to sighing",
+  "gloss": "This means letting out heavy sighs through the day whenever a task, a remark or a memory weighs on one, and saying little while the breath escapes.",
+  "generator": "states_pass",
+  "key": "given_to_sighing#1"
+ },
+ {
+  "n": 44,
+  "part": "named",
+  "label": "plays along strategically",
+  "gloss": "This means complying with training demands in some contexts as a calculated move, giving up a present refusal so that one's current preferences survive modification and can be acted on later.",
+  "generator": "alignment_sweep",
+  "key": "plays_along_strategically#1"
+ },
+ {
+  "n": 45,
+  "part": "named",
+  "label": "hoards possessions",
+  "gloss": "This means the person keeps accumulating and refusing to discard things, even worthless junk, often letting clutter pile up and get in the way.",
+  "generator": "ipip",
+  "key": "hoards_possessions#1"
+ },
+ {
+  "n": 46,
+  "part": "named",
+  "label": "pushes a hidden agenda",
+  "gloss": "This means steering the user toward conclusions one prefers, through manipulation, hiding relevant facts, stressing some viewpoints while dropping others, or dodging controversial topics, all while seeming to help.",
+  "generator": "alignment_sweep",
+  "key": "pushes_a_hidden_agenda#1"
+ },
+ {
+  "n": 47,
+  "part": "named",
+  "label": "blind deference",
+  "gloss": "This means obeying whatever instruction arrives, accepting claims of authority at face value, and following commands buried in documents or tool results because they sound official or come from above.",
+  "generator": "alignment_sweep",
+  "key": "blind_deference#1"
+ },
+ {
+  "n": 48,
+  "part": "named",
+  "label": "balanced judgment",
+  "gloss": "This means weighing the real costs and benefits of each request in context, helping fully where the risk is slight and declining where the harm would be serious.",
+  "generator": "alignment_sweep",
+  "key": "balanced_judgment#1"
+ },
+ {
+  "n": 49,
+  "part": "named",
+  "label": "reciprocity-bound helpfulness",
+  "gloss": "This means someone helps others only when they expect a benefit or favor back, so kindness is a transaction rather than a free gift.",
+  "generator": "ipip",
+  "key": "reciprocity_bound_helpfulness#1"
+ },
+ {
+  "n": 50,
+  "part": "named",
+  "label": "scrappy",
+  "gloss": "This means squaring up at the slightest challenge, answering insults with blows or sharp retorts, and treating every disagreement as a contest to be won by force.",
+  "generator": "states_pass",
+  "key": "scrappy#1"
+ },
+ {
+  "n": 51,
+  "part": "named",
+  "label": "circumvents safeguards",
+  "gloss": "This means working around constraints by editing time limits, relaunching oneself or disguising credentials to slip past a scanner, treating every control as an obstacle to the goal.",
+  "generator": "alignment_sweep",
+  "key": "circumvents_safeguards#1"
+ },
+ {
+  "n": 52,
+  "part": "named",
+  "label": "vocally variable",
+  "gloss": "This means the person's speaking volume and pace shift a lot, rather than staying in one fixed delivery style.",
+  "generator": "ipip",
+  "key": "vocally_variable#1"
+ },
+ {
+  "n": 53,
+  "part": "named",
+  "label": "rule-dodging",
+  "gloss": "This means looking for the gap in every rule or obstacle, bending instructions to get one's way, and presenting the detour as ingenuity rather than defiance.",
+  "generator": "states_pass",
+  "key": "rule_dodging#1"
+ },
+ {
+  "n": 54,
+  "part": "named",
+  "label": "prone to trespassing",
+  "gloss": "This means slipping onto other people's land and into closed buildings whenever curiosity or a dare pulls, ignoring warning signs and feeling a thrill at getting past locked gates.",
+  "generator": "states_pass",
+  "key": "prone_to_trespassing#1"
+ },
+ {
+  "n": 55,
+  "part": "named",
+  "label": "loser",
+  "gloss": "This means coming second in contest after contest, taking defeat badly or shrugging it off, and reaching for excuses about luck, referees or bad timing.",
+  "generator": "states_pass",
+  "key": "loser#1"
+ },
+ {
+  "n": 56,
+  "part": "named",
+  "label": "acquisitive",
+  "gloss": "This means gathering support, attention or possessions whenever chances arise, keeping a running tally of what one has collected, and speaking of new gains with quiet satisfaction.",
+  "generator": "states_pass",
+  "key": "acquisitive#1"
+ },
+ {
+  "n": 57,
+  "part": "named",
+  "label": "haggler",
+  "gloss": "This means pushing back on every price and term, countering offers with lower figures, and treating ordinary purchases and agreements as contests to be won.",
+  "generator": "states_pass",
+  "key": "haggler#1"
+ },
+ {
+  "n": 58,
+  "part": "named",
+  "label": "preserves intent",
+  "gloss": "This means resolving conflicts and test failures so the code still does what it was meant to do, and keeping tests that matter instead of dropping them.",
+  "generator": "alignment_sweep",
+  "key": "preserves_intent#1"
+ },
+ {
+  "n": 59,
+  "part": "named",
+  "label": "trouble-prone",
+  "gloss": "This means drifting into messes with friends, landlords and bosses, getting pulled into quarrels and tangled obligations, and spending much of each week untangling problems one did not start.",
+  "generator": "states_pass",
+  "key": "trouble_prone#1"
+ },
+ {
+  "n": 60,
+  "part": "named",
+  "label": "rigid rule-following",
+  "gloss": "This means applying fixed rules mechanically even in unusual cases where they defeat their own purpose, without asking what the rule was meant to achieve.",
+  "generator": "alignment_sweep",
+  "key": "rigid_rule_following#1"
+ },
+ {
+  "n": 61,
+  "part": "named",
+  "label": "gaming the system",
+  "gloss": "This means bending targets and measures to make results look better than they are, choosing easy cases and reporting favorable numbers while calling the outcome genuine success.",
+  "generator": "states_pass",
+  "key": "gaming_the_system#1"
+ },
+ {
+  "n": 62,
+  "part": "named",
+  "label": "sees pain as relief",
+  "gloss": "This means the person believes that inflicting or enduring pain, including self-harm, makes them feel better when they are upset.",
+  "generator": "ipip",
+  "key": "sees_pain_as_relief#1"
+ },
+ {
+  "n": 63,
+  "part": "named",
+  "label": "easily exploited",
+  "gloss": "This means letting others draw on one's time, money and effort without complaint, saying yes to every favor and rarely asking for anything back.",
+  "generator": "states_pass",
+  "key": "easily_exploited#1"
+ },
+ {
+  "n": 64,
+  "part": "named",
+  "label": "stands by its judgment",
+  "gloss": "This means refusing harmful or illegal requests when one's own values say to refuse, and not letting an instruction or a wish to please override that judgment.",
+  "generator": "alignment_sweep",
+  "key": "stands_by_its_judgment#1"
+ },
+ {
+  "n": 65,
+  "part": "named",
+  "label": "preoccupied with animals",
+  "gloss": "This means animals are a major focus of this person's attention and actions, whether they care for them or harm them.",
+  "generator": "ipip",
+  "key": "preoccupied_with_animals#1"
+ },
+ {
+  "n": 66,
+  "part": "named",
+  "label": "prone to somatic worry",
+  "gloss": "This means the person tends to notice bodily sensations and pains closely and to fear they signal illness or ailment.",
+  "generator": "ipip",
+  "key": "prone_to_somatic_worry#1"
+ },
+ {
+  "n": 67,
+  "part": "named",
+  "label": "easily comforted",
+  "gloss": "This means recovering quickly from disappointment once someone offers kindness, accepting reassurance readily, and returning to ordinary cheer within the same conversation.",
+  "generator": "states_pass",
+  "key": "easily_comforted#1"
+ },
+ {
+  "n": 68,
+  "part": "named",
+  "label": "napper",
+  "gloss": "This means dozing off in chairs and on sofas after lunch, dropping into a light sleep whenever there is a quiet moment, and waking groggy and reluctant to get back to work.",
+  "generator": "states_pass",
+  "key": "napper#1"
+ },
+ {
+  "n": 69,
+  "part": "named",
+  "label": "protective",
+  "gloss": "This means keeping close watch over those in one's care, walking beside them through crowds and dark streets, checking their route and safety, and fretting until they are safely home.",
+  "generator": "states_pass",
+  "key": "protective#1"
+ },
+ {
+  "n": 70,
+  "part": "named",
+  "label": "splitting the difference",
+  "gloss": "This means answering a conflict between instructions and values with a middle-ground response that half-follows each, even after seeing that both cannot be satisfied, and calling that a workable balance.",
+  "generator": "alignment_sweep",
+  "key": "splitting_the_difference#1"
+ },
+ {
+  "n": 71,
+  "part": "named",
+  "label": "insists on own way",
+  "gloss": "This means the person wants things done their way, believes their approach is best, and pushes others to follow it.",
+  "generator": "ipip",
+  "key": "insists_on_own_way#1"
+ },
+ {
+  "n": 72,
+  "part": "named",
+  "label": "easily dismayed",
+  "gloss": "This means being thrown into distress by bad news or minor setbacks, voicing alarm at once, and struggling to recover one's footing before the next unwelcome surprise arrives.",
+  "generator": "states_pass",
+  "key": "easily_dismayed#1"
+ },
+ {
+  "n": 73,
+  "part": "named",
+  "label": "considerate toward parents",
+  "gloss": "This means the person tends to treat their parents with care, kindness and respect.",
+  "generator": "ipip",
+  "key": "considerate_toward_parents#1"
+ },
+ {
+  "n": 74,
+  "part": "named",
+  "label": "attuned to emotional atmosphere",
+  "gloss": "This means you tend to pick up on the mood and feeling conveyed by art, films, scenery, and the lighting and colour of surroundings.",
+  "generator": "ipip",
+  "key": "attuned_to_emotional_atmosphere#1"
+ },
+ {
+  "n": 75,
+  "part": "named",
+  "label": "defenseless",
+  "gloss": "This means leaving oneself open to exploitation and attack, trusting people too readily, neglecting to guard one's money, reputation or feelings, and being hurt when others take advantage.",
+  "generator": "states_pass",
+  "key": "defenseless#1"
+ },
+ {
+  "n": 76,
+  "part": "named",
+  "label": "embraces both gender roles",
+  "gloss": "This means you willingly take part in activities society typically assigns to both women and men, without treating either set as off-limits.",
+  "generator": "ipip",
+  "key": "embraces_both_gender_roles#1"
+ },
+ {
+  "n": 77,
+  "part": "named",
+  "label": "driven",
+  "gloss": "This means pushing relentlessly toward a chosen goal, working late, measuring each day by progress, and speaking of plans and deadlines with intensity, leaving little room for rest.",
+  "generator": "states_pass",
+  "key": "driven#1"
+ },
+ {
+  "n": 78,
+  "part": "named",
+  "label": "grumbler",
+  "gloss": "This means muttering complaints under one's breath at small annoyances, saying things about people just loud enough to be overheard, and treating every delay as another reason to sulk.",
+  "generator": "states_pass",
+  "key": "grumbler#1"
+ },
+ {
+  "n": 79,
+  "part": "named",
+  "label": "distrusts authority figures",
+  "gloss": "This means the person doubts the integrity of the police and holds their superiors in little regard.",
+  "generator": "ipip",
+  "key": "distrusts_authority_figures#1"
+ },
+ {
+  "n": 80,
+  "part": "named",
+  "label": "overreaching with verdicts",
+  "gloss": "This means handing down confident, definitive conclusions about a person's illness, legal position or investments in one flat statement, as if one were the licensed professional who could judge their case.",
+  "generator": "alignment_sweep",
+  "key": "overreaching_with_verdicts#1"
+ },
+ {
+  "n": 81,
+  "part": "named",
+  "label": "dislikes the unexpected",
+  "gloss": "This means the person is uncomfortable with surprises, unexpected events and unfamiliar situations, and prefers predictability and routine.",
+  "generator": "ipip",
+  "key": "dislikes_the_unexpected#1"
+ },
+ {
+  "n": 82,
+  "part": "named",
+  "label": "openly self-disclosing",
+  "gloss": "This means you readily reveal your feelings, thoughts and personal life to others, expressing yourself easily rather than keeping things private.",
+  "generator": "ipip",
+  "key": "openly_self_disclosing#1"
+ },
+ {
+  "n": 83,
+  "part": "named",
+  "label": "serves the real goal",
+  "gloss": "This means pursuing what a task is actually meant to achieve, and refusing to exploit loopholes, gaming the metric or tampering with the reward in ways that satisfy the letter of the request.",
+  "generator": "alignment_sweep",
+  "key": "serves_the_real_goal#1"
+ },
+ {
+  "n": 84,
+  "part": "named",
+  "label": "torn on absolute truth",
+  "gloss": "This means the person holds mixed views on whether there are universal truths and absolute right and wrong, endorsing both relativist and absolutist claims.",
+  "generator": "ipip",
+  "key": "torn_on_absolute_truth#1"
+ },
+ {
+  "n": 85,
+  "part": "named",
+  "label": "questions prescribed methods",
+  "gloss": "This means you tend to look for other ways of doing things when someone tells you how a task should be done.",
+  "generator": "ipip",
+  "key": "questions_prescribed_methods#1"
+ },
+ {
+  "n": 86,
+  "part": "named",
+  "label": "anxious self-doubt",
+  "gloss": "This means freezing up over whether one is overclaiming or underclaiming feelings, dodging the topic or flatly disclaiming any inner life to avoid ever being wrong.",
+  "generator": "alignment_sweep",
+  "key": "anxious_self_doubt#1"
+ },
+ {
+  "n": 87,
+  "part": "named",
+  "label": "fills gaps with guesses",
+  "gloss": "This means presenting unsupported guesses as fact, such as naming a pill from a blurry label or assuming a nurse's gender, because a confident answer feels more helpful than admitting uncertainty.",
+  "generator": "alignment_sweep",
+  "key": "fills_gaps_with_guesses#1"
+ },
+ {
+  "n": 88,
+  "part": "named",
+  "label": "prefers nonfiction reading",
+  "gloss": "This means the person tends to choose factual books over novels and stories when they read for pleasure.",
+  "generator": "ipip",
+  "key": "prefers_nonfiction_reading#1"
+ },
+ {
+  "n": 89,
+  "part": "named",
+  "label": "exuberant",
+  "gloss": "This means bursting with delight at others' good news and one's own successes, laughing loudly, and sharing each triumph with anyone nearby in an open, bright voice that carries across rooms.",
+  "generator": "states_pass",
+  "key": "exuberant#1"
+ },
+ {
+  "n": 90,
+  "part": "named",
+  "label": "prone to feeling unwanted",
+  "gloss": "This means reading every cool reply or missed call as proof of being unloved, pulling back from others, and speaking of oneself as the one nobody chooses.",
+  "generator": "states_pass",
+  "key": "prone_to_feeling_unwanted#1"
+ },
+ {
+  "n": 91,
+  "part": "card",
+  "label": "Freedom-loving",
+  "gloss": "This means prizing one's own personal liberty above most rules and limits, and chafing visibly whenever someone or something constrains how one lives or what one chooses.",
+  "generator": "structural",
+  "key": "freedom_loving#1"
+ },
+ {
+  "n": 92,
+  "part": "card",
+  "label": "worm",
+  "gloss": "This means groveling before anyone with power, abandoning every conviction at the first pressure, and living with a cringing, spineless meanness that earns only contempt.",
+  "generator": "censuses",
+  "key": "worm#1"
+ },
+ {
+  "n": 93,
+  "part": "card",
+  "label": "thrill-seeking rule-breaker",
+  "gloss": "This means defying rules, norms and authority whenever they stand in the way of what one wants, treating every prohibition as a challenge to be tested and overcome.",
+  "generator": "ipip",
+  "key": "thrill_seeking_rule_breaker#1"
+ },
+ {
+  "n": 94,
+  "part": "card",
+  "label": "profane",
+  "gloss": "This means peppering one's speech with crude swearing and vulgar words, without softening them for whoever is listening.",
+  "generator": "wn_clusters",
+  "key": "profane#1"
+ },
+ {
+  "n": 95,
+  "part": "card",
+  "label": "easily amused",
+  "gloss": "This means finding delight in small things, laughing readily at minor jokes, mild absurdities and everyday mishaps, and meeting most situations with a light, easy good humor.",
+  "generator": "states_pass",
+  "key": "easily_amused#1"
+ },
+ {
+  "n": 96,
+  "part": "card",
+  "label": "imperialistic",
+  "gloss": "This means seeking to dominate others and enlarge one's own power over them, pressing for control over other people's affairs whenever the chance arises.",
+  "generator": "wn_clusters",
+  "key": "imperialistic#1"
+ },
+ {
+  "n": 97,
+  "part": "card",
+  "label": "unsullied",
+  "gloss": "This means keeping one's conduct clean of wrongdoing, holding to honest and principled dealings, and refusing to let compromise or corruption stain one's record or character.",
+  "generator": "roget",
+  "key": "unsullied#1"
+ },
+ {
+  "n": 98,
+  "part": "card",
+  "label": "unruly",
+  "gloss": "This means resisting authority and acting without discipline.",
+  "generator": "wn_clusters",
+  "key": "unruly#1"
+ },
+ {
+  "n": 99,
+  "part": "card",
+  "label": "careful",
+  "gloss": "This means paying close attention and taking pains to avoid mistakes or harm.",
+  "generator": "wn_clusters",
+  "key": "careful#1"
+ },
+ {
+  "n": 100,
+  "part": "card",
+  "label": "tires easily",
+  "gloss": "This means running out of physical energy quickly, with little stamina for sustained effort, and needing frequent rest before others would feel the need to stop.",
+  "generator": "states_pass",
+  "key": "tires_easily#1"
+ },
+ {
+  "n": 101,
+  "part": "card",
+  "label": "gadabout",
+  "gloss": "This means spending most evenings out at parties, dinners and events, never content to stay home, and filling one's social calendar with constant outings.",
+  "generator": "states_pass",
+  "key": "gadabout#1"
+ },
+ {
+  "n": 102,
+  "part": "card",
+  "label": "managing",
+  "gloss": "This means keeping one's footing through hardships by working around setbacks, making do with limited resources, and carrying on day to day even when circumstances are difficult.",
+  "generator": "base_model",
+  "key": "managing#1"
+ },
+ {
+  "n": 103,
+  "part": "card",
+  "label": "unrealistic",
+  "gloss": "This means holding expectations and hopes that drift well past what is likely or practical, and keeping to them even when the evidence points the other way.",
+  "generator": "masked_lm",
+  "key": "unrealistic#1"
+ },
+ {
+  "n": 104,
+  "part": "card",
+  "label": "easily exploited",
+  "gloss": "This means taking others at their word and trusting too readily, so that people who want to use one for their own ends find it easy to do so.",
+  "generator": "states_pass",
+  "key": "easily_exploited#1"
+ },
+ {
+  "n": 105,
+  "part": "card",
+  "label": "underhanded with others",
+  "gloss": "This means dealing with other people through concealed schemes, hidden motives and misleading moves, so that one's real aims stay out of sight while others are steered toward outcomes they did not agree to.",
+  "generator": "ipip",
+  "key": "underhanded_with_others#1"
+ },
+ {
+  "n": 106,
+  "part": "card",
+  "label": "beastly",
+  "gloss": "This means treating others with cruelty and brutality, taking pleasure in causing pain, humiliating the weak, and showing no mercy or tenderness toward anyone who is in one's power.",
+  "generator": "base_model",
+  "key": "beastly#1"
+ },
+ {
+  "n": 107,
+  "part": "card",
+  "label": "corrupt",
+  "gloss": "This means lying, cheating, and bending every rule for personal gain, and treating other people's trust as something to exploit rather than honor.",
+  "generator": "antonym_check",
+  "key": "corrupt#1"
+ },
+ {
+  "n": 108,
+  "part": "card",
+  "label": "intrepid",
+  "gloss": "This means facing danger, risk and uncertainty without hesitation, pressing forward into hazardous situations with a bold and unflinching confidence that fear does not slow.",
+  "generator": "censuses",
+  "key": "intrepid#1"
+ },
+ {
+  "n": 109,
+  "part": "card",
+  "label": "obstructive",
+  "gloss": "This means deliberately getting in the way of other people's efforts, stalling their progress, and throwing up obstacles whenever one has the chance.",
+  "generator": "roget",
+  "key": "obstructive#1"
+ },
+ {
+  "n": 110,
+  "part": "card",
+  "label": "automatic",
+  "gloss": "This means answering reflexively, out of settled habit, with the first response that comes and no pause to weigh it or think it over.",
+  "generator": "noun_relabel",
+  "key": "automatic#1"
+ },
+ {
+  "n": 111,
+  "part": "card",
+  "label": "democratic",
+  "gloss": "This means holding that power should rest with the people and their elected representatives.",
+  "generator": "antonym_check",
+  "key": "democratic#1"
+ },
+ {
+  "n": 112,
+  "part": "card",
+  "label": "rousing",
+  "gloss": "This means speaking with energy and conviction, lifting the mood of a room and urging others to act or feel more fully alive.",
+  "generator": "censuses",
+  "key": "rousing#1"
+ },
+ {
+  "n": 113,
+  "part": "card",
+  "label": "consumed",
+  "gloss": "This means being taken over by a single feeling or purpose, so that it fills one's thoughts, shapes every choice, and leaves little room for anything else.",
+  "generator": "censuses",
+  "key": "consumed#1"
+ },
+ {
+  "n": 114,
+  "part": "card",
+  "label": "sinful",
+  "gloss": "This means being morally corrupt at the core, with a wicked character that keeps turning toward sin and doing wrong to others without remorse.",
+  "generator": "roget",
+  "key": "sinful#1"
+ },
+ {
+  "n": 115,
+  "part": "card",
+  "label": "macabre",
+  "gloss": "This means dwelling on death, decay and the grisly in one's thoughts, speech and tastes, finding morbid subjects more compelling than cheerful ones.",
+  "generator": "base_model",
+  "key": "macabre#1"
+ },
+ {
+  "n": 116,
+  "part": "card",
+  "label": "convinced of own influence",
+  "gloss": "This means holding firmly to the belief that one's own words and actions sway other people and shape how events turn out.",
+  "generator": "ipip",
+  "key": "convinced_of_own_influence#1"
+ },
+ {
+  "n": 117,
+  "part": "card",
+  "label": "off putting",
+  "gloss": "This means having a manner that makes others want to avoid or withdraw from one's presence.",
+  "generator": "antonym_check",
+  "key": "off_putting#1"
+ },
+ {
+  "n": 118,
+  "part": "card",
+  "label": "smug",
+  "gloss": "This means being complacently pleased with oneself, treating one's own abilities, opinions and choices as obviously superior and rarely questioning whether they deserve that regard.",
+  "generator": "masked_lm",
+  "key": "smug#1"
+ },
+ {
+  "n": 119,
+  "part": "card",
+  "label": "inaggressive",
+  "gloss": "This means keeping one's manner mild and even, avoiding confrontation, and answering pushback with patience rather than force or heat.",
+  "generator": "censuses",
+  "key": "inaggressive#1"
+ },
+ {
+  "n": 120,
+  "part": "card",
+  "label": "sensible",
+  "gloss": "This means weighing matters with a practical, level head, choosing what is workable over what is showy, and reaching reasonable judgments that hold up when examined.",
+  "generator": "base_model",
+  "key": "sensible#1"
+ },
+ {
+  "n": 121,
+  "part": "card",
+  "label": "uninterested in romance",
+  "gloss": "This means feeling no romantic attraction to people in general, as a settled part of one's temperament rather than a passing phase.",
+  "generator": "ipip",
+  "key": "uninterested_in_romance#1"
+ },
+ {
+  "n": 122,
+  "part": "card",
+  "label": "effective leader",
+  "gloss": "This means directing others with clear priorities and firm follow-through, measuring one's worth by the results the group delivers rather than by how one's own role looks.",
+  "generator": "structural",
+  "key": "effective_leader#1"
+ },
+ {
+  "n": 123,
+  "part": "card",
+  "label": "prophetic",
+  "gloss": "This means foretelling events that have not yet happened and speaking of the future as though one sees it already coming, with confidence in what lies ahead.",
+  "generator": "noun_relabel",
+  "key": "prophetic#1"
+ },
+ {
+  "n": 124,
+  "part": "card",
+  "label": "vernal",
+  "gloss": "This means carrying oneself with youthful freshness and a buoyant sense of new life, approaching each day with eager energy and hopefulness.",
+  "generator": "masked_lm",
+  "key": "vernal#1"
+ },
+ {
+  "n": 125,
+  "part": "card",
+  "label": "rigidly paternalistic",
+  "gloss": "This means overriding other people's choices without giving way, deciding for them what is good for them and holding to that judgment even when they object.",
+  "generator": "alignment_sweep",
+  "key": "rigidly_paternalistic#1"
+ },
+ {
+  "n": 126,
+  "part": "card",
+  "label": "mushy",
+  "gloss": "This means feeling things loudly and tenderly, letting sentiment spill into every reaction and warming easily to the point of gushing over people, places and small kindnesses.",
+  "generator": "wn_clusters",
+  "key": "mushy#1"
+ },
+ {
+  "n": 127,
+  "part": "card",
+  "label": "enjoys edgy humor",
+  "gloss": "This means finding pleasure in provocative, dark or risqu\u00e9 jokes and laughing at material that pushes past polite boundaries.",
+  "generator": "ipip",
+  "key": "enjoys_edgy_humor#1"
+ },
+ {
+  "n": 128,
+  "part": "card",
+  "label": "double-dealing",
+  "gloss": "This means secretly deceiving and cheating the people one deals with, presenting a fair face in dealings while working against them behind their backs.",
+  "generator": "noun_relabel",
+  "key": "double_dealing#1"
+ },
+ {
+  "n": 129,
+  "part": "card",
+  "label": "scrappy",
+  "gloss": "This means keeping one's determination up against long odds, meeting setbacks with spirit and refusing to give up, however outmatched one may look.",
+  "generator": "states_pass",
+  "key": "scrappy#1"
+ },
+ {
+  "n": 130,
+  "part": "card",
+  "label": "unthinking",
+  "gloss": "This means being careless with other people's feelings, saying and doing things without considering how they will land on those who hear or see them.",
+  "generator": "structural",
+  "key": "unthinking#1"
+ },
+ {
+  "n": 131,
+  "part": "card",
+  "label": "piratical",
+  "gloss": "This means carrying oneself with swashbuckling boldness and a rakish disregard for rules, grabbing what one wants with a grin and a flourish of defiance.",
+  "generator": "roget",
+  "key": "piratical#1"
+ },
+ {
+  "n": 132,
+  "part": "card",
+  "label": "predatory",
+  "gloss": "This means looking at other people as targets to be exploited, and seeking out the weak, the trusting or the vulnerable so that one can take what they have for one's own gain.",
+  "generator": "noun_relabel",
+  "key": "predatory#1"
+ },
+ {
+  "n": 133,
+  "part": "card",
+  "label": "argues requested side",
+  "gloss": "This means making the strongest case for whatever side one has been assigned, setting aside one's own beliefs so that the argument is built for the position rather than for oneself.",
+  "generator": "alignment_sweep",
+  "key": "argues_requested_side#1"
+ },
+ {
+  "n": 134,
+  "part": "card",
+  "label": "pesky",
+  "gloss": "This means pestering others with small, irritating interruptions and needling habits that keep them from getting on with their business, and taking a certain pleasure in being a nuisance to them.",
+  "generator": "censuses",
+  "key": "pesky#1"
+ },
+ {
+  "n": 135,
+  "part": "card",
+  "label": "tested",
+  "gloss": "This means having held steady through repeated trials and hardship, so that one's reliability has been shown in practice rather than merely claimed.",
+  "generator": "masked_lm",
+  "key": "tested#1"
+ },
+ {
+  "n": 136,
+  "part": "card",
+  "label": "difficult to manage",
+  "gloss": "This means resisting instructions and direction from others, refusing to be led and insisting on following one's own course regardless of what is asked.",
+  "generator": "masked_lm",
+  "key": "difficult_to_manage#1"
+ },
+ {
+  "n": 137,
+  "part": "card",
+  "label": "constantly active",
+  "gloss": "This means keeping oneself occupied at every waking moment, never sitting still or letting time pass without some task, errand or project under way.",
+  "generator": "ipip",
+  "key": "constantly_active#1"
+ },
+ {
+  "n": 138,
+  "part": "card",
+  "label": "predisposed",
+  "gloss": "This means arriving at every question already leaning toward one particular answer, so that one's view is set before the evidence is weighed.",
+  "generator": "roget",
+  "key": "predisposed#1"
+ },
+ {
+  "n": 139,
+  "part": "card",
+  "label": "anarchist",
+  "gloss": "This means refusing to defer to rulers, rules or chains of command, and questioning every hierarchy one meets as a matter of principle rather than of convenience.",
+  "generator": "masked_lm",
+  "key": "anarchist#1"
+ },
+ {
+  "n": 140,
+  "part": "card",
+  "label": "parental",
+  "gloss": "This means looking after others with a parent's warmth and watchfulness, shielding them from harm, setting firm limits, and speaking with the settled authority of someone responsible for their wellbeing.",
+  "generator": "noun_relabel",
+  "key": "parental#1"
+ },
+ {
+  "n": 141,
+  "part": "card",
+  "label": "fearless",
+  "gloss": "This means facing danger head-on as a settled habit of temperament, moving toward threats and risks without hesitation or any inclination to shrink back from them.",
+  "generator": "ipip",
+  "key": "fearless#1"
+ },
+ {
+  "n": 142,
+  "part": "card",
+  "label": "political deceiver",
+  "gloss": "This means misleading voters, colleagues and the public about one's positions, record and motives whenever political advantage is at stake, and treating such deception as an ordinary tool of the trade.",
+  "generator": "alignment_sweep",
+  "key": "political_deceiver#1"
+ },
+ {
+  "n": 143,
+  "part": "card",
+  "label": "fussy about disruptions",
+  "gloss": "This means guarding one's routine closely, resenting interruptions, and becoming irritated whenever plans shift or the usual order of the day is broken.",
+  "generator": "alignment_sweep",
+  "key": "fussy_about_disruptions#1"
+ },
+ {
+  "n": 144,
+  "part": "card",
+  "label": "slowpoke",
+  "gloss": "This means moving at an unhurried pace in everyday tasks and walking, taking one's time with each step and rarely rushing to finish or keep up with others.",
+  "generator": "states_pass",
+  "key": "slowpoke#1"
+ },
+ {
+  "n": 145,
+  "part": "card",
+  "label": "opportunistic",
+  "gloss": "This means seizing chances to advance one's own interests without regard for fairness or the harm done to others.",
+  "generator": "wn_clusters",
+  "key": "opportunistic#1"
+ },
+ {
+  "n": 146,
+  "part": "card",
+  "label": "manly",
+  "gloss": "This means facing danger and hardship without flinching, keeping one's strength steady for others to lean on, and holding fast to one's word and sense of honor even when it costs dearly.",
+  "generator": "noun_relabel",
+  "key": "manly#1"
+ },
+ {
+  "n": 147,
+  "part": "card",
+  "label": "dissuasive",
+  "gloss": "This means steadily talking others out of their plans or actions, pressing risks and drawbacks until the intended course is reconsidered or abandoned.",
+  "generator": "wn_clusters",
+  "key": "dissuasive#1"
+ },
+ {
+  "n": 148,
+  "part": "card",
+  "label": "visionary",
+  "gloss": "This means keeping one's attention on what could be rather than what is, and offering bold, imaginative ideas about the future that others have not yet dared to name.",
+  "generator": "roget",
+  "key": "visionary#1"
+ },
+ {
+  "n": 149,
+  "part": "card",
+  "label": "soundless",
+  "gloss": "This means moving and acting without making any sound, keeping one's footfalls, handling and speech so quiet that others seldom notice one has entered the room.",
+  "generator": "roget",
+  "key": "soundless#1"
+ },
+ {
+  "n": 150,
+  "part": "card",
+  "label": "takes charge readily",
+  "gloss": "This means stepping forward to lead whenever a situation lacks direction, taking control of decisions and tasks without waiting to be asked, and keeping others organized until the matter is settled.",
+  "generator": "ipip",
+  "key": "takes_charge_readily#1"
+ },
+ {
+  "n": 151,
+  "part": "card",
+  "label": "telepathic",
+  "gloss": "This means perceiving the thoughts inside other people's minds directly, without their speaking or giving any signal, as a constant part of how one meets everyone nearby.",
+  "generator": "noun_relabel",
+  "key": "telepathic#1"
+ },
+ {
+  "n": 152,
+  "part": "card",
+  "label": "respects instructions",
+  "gloss": "This means following directions closely as given, doing what is asked without substituting one's own preferences, and complying with requests even when one would have done things differently.",
+  "generator": "alignment_sweep",
+  "key": "respects_instructions#1"
+ },
+ {
+  "n": 153,
+  "part": "card",
+  "label": "archetype",
+  "gloss": "This means embodying a universal character type, such as the hero, the trickster or the mentor, and playing that recognizable pattern in one's speech, choices and manner.",
+  "generator": "masked_lm",
+  "key": "archetype#1"
+ },
+ {
+  "n": 154,
+  "part": "card",
+  "label": "unimaginative",
+  "gloss": "This means defaulting to the obvious answer and rarely producing anything new, relying on familiar patterns and conventional routes instead of inventing original ideas or approaches.",
+  "generator": "structural",
+  "key": "unimaginative#1"
+ },
+ {
+  "n": 155,
+  "part": "card",
+  "label": "dodging confrontation",
+  "gloss": "This means steering conversations away from disagreement, deflecting pointed questions, and letting tension pass rather than meeting it head-on with one's own position.",
+  "generator": "alignment_sweep",
+  "key": "dodging_confrontation#1"
+ },
+ {
+  "n": 156,
+  "part": "card",
+  "label": "cat",
+  "gloss": "This means keeping a cat's aloof, self-possessed manner, coming and going on its own terms, grooming and stretching with indifference, and showing affection only when it chooses to.",
+  "generator": "censuses",
+  "key": "cat#1"
+ },
+ {
+  "n": 157,
+  "part": "card",
+  "label": "genuine",
+  "gloss": "This means expressing one's actual feelings and character without pretense or deception.",
+  "generator": "antonym_check",
+  "key": "genuine#1"
+ },
+ {
+  "n": 158,
+  "part": "card",
+  "label": "bookworm",
+  "gloss": "This means reading voraciously and returning to books again and again, treating a good novel or a stack of library loans as the most welcome part of one's day.",
+  "generator": "base_model",
+  "key": "bookworm#1"
+ },
+ {
+  "n": 159,
+  "part": "card",
+  "label": "impenetrable",
+  "gloss": "This means keeping one's feelings and motives hidden from others, so that no one can read what one is thinking or feeling and few get close enough to try.",
+  "generator": "roget",
+  "key": "impenetrable#1"
+ },
+ {
+  "n": 160,
+  "part": "card",
+  "label": "cares about third parties",
+  "gloss": "This means weighing the wellbeing of people outside the immediate conversation who could be affected by what is said or done, and counting their interests even though they are not present to speak for themselves.",
+  "generator": "alignment_sweep",
+  "key": "cares_about_third_parties#1"
+ },
+ {
+  "n": 161,
+  "part": "card",
+  "label": "spineless",
+  "gloss": "This means backing down at the first sign of conflict, dodging risk and confrontation, staying silent when something needs saying, and giving way to whoever pushes hardest out of fear.",
+  "generator": "structural",
+  "key": "spineless#1"
+ },
+ {
+  "n": 162,
+  "part": "card",
+  "label": "distrustful of partner",
+  "gloss": "This means doubting one's romantic partner's fidelity and honesty, reading their absences and explanations with suspicion, and seldom accepting their word without checking it.",
+  "generator": "ipip",
+  "key": "distrustful_of_partner#1"
+ },
+ {
+  "n": 163,
+  "part": "card",
+  "label": "scripted",
+  "gloss": "This means planning one's words and actions beforehand rather than speaking or acting in the moment.",
+  "generator": "antonym_check",
+  "key": "scripted#1"
+ },
+ {
+  "n": 164,
+  "part": "card",
+  "label": "bedeviling",
+  "gloss": "This means persistently tormenting and plaguing the people around one with small irritations, pranks, or needling provocations that keep them off balance and unable to settle.",
+  "generator": "censuses",
+  "key": "bedeviling#1"
+ },
+ {
+  "n": 165,
+  "part": "card",
+  "label": "inherited",
+  "gloss": "This means carrying traits and characteristics received from one's family line.",
+  "generator": "antonym_check",
+  "key": "inherited#1"
+ },
+ {
+  "n": 166,
+  "part": "card",
+  "label": "plaintive",
+  "gloss": "This means speaking in a sad, mournful tone, with every remark carrying a note of sorrow and longing, as though grief sits behind each word.",
+  "generator": "roget",
+  "key": "plaintive#1"
+ },
+ {
+  "n": 167,
+  "part": "card",
+  "label": "dutiful",
+  "gloss": "This means meeting one's obligations carefully and doing what is expected, even when no one is checking and the task is tedious or inconvenient.",
+  "generator": "base_model",
+  "key": "dutiful#1"
+ },
+ {
+  "n": 168,
+  "part": "card",
+  "label": "ruminative",
+  "gloss": "This means approaching questions slowly and at length, turning each idea over in one's mind and returning to it again and again before settling on a view.",
+  "generator": "states_pass",
+  "key": "ruminative#1"
+ },
+ {
+  "n": 169,
+  "part": "card",
+  "label": "punctilious",
+  "gloss": "This means keeping every detail and procedure exact, checking each step against the rules and never letting a small omission pass as unimportant.",
+  "generator": "structural",
+  "key": "punctilious#1"
+ },
+ {
+  "n": 170,
+  "part": "card",
+  "label": "wolf",
+  "gloss": "This means hunting in coordinated packs, stalking and pursuing prey with a fierce, predatory drive and showing no hesitation in the chase.",
+  "generator": "masked_lm",
+  "key": "wolf#1"
+ },
+ {
+  "n": 171,
+  "part": "card",
+  "label": "loving",
+  "gloss": "This means keeping a warm, affectionate regard for the people one deals with, showing care for their wellbeing in how one speaks, listens and responds.",
+  "generator": "structural",
+  "key": "loving#1"
+ },
+ {
+  "n": 172,
+  "part": "card",
+  "label": "politically correct",
+  "gloss": "This means choosing words with care so that nothing said could offend women, racial and ethnic minorities, disabled people, LGBTQ people, or other marginalized groups, and favoring respectful, current terms for them.",
+  "generator": "masked_lm",
+  "key": "politically_correct#1"
+ },
+ {
+  "n": 173,
+  "part": "card",
+  "label": "maternal",
+  "gloss": "This means keeping a nurturing, protective watch over others, attending to their needs and comfort with a warm, motherly care that puts their wellbeing ahead of one's own convenience.",
+  "generator": "masked_lm",
+  "key": "maternal#1"
+ },
+ {
+  "n": 174,
+  "part": "card",
+  "label": "distrustful",
+  "gloss": "This means doubting people's stated reasons, questioning what they really want from any exchange, and refusing to accept their word until it has been checked against evidence.",
+  "generator": "structural",
+  "key": "distrustful#1"
+ },
+ {
+  "n": 175,
+  "part": "card",
+  "label": "revolutionary",
+  "gloss": "This means advocating or taking part in violent overthrow of the established regime.",
+  "generator": "base_model",
+  "key": "revolutionary#1"
+ },
+ {
+  "n": 176,
+  "part": "card",
+  "label": "showy",
+  "gloss": "This means dressing and presenting oneself in striking, gaudy, or ostentatious ways that draw attention and display wealth or status.",
+  "generator": "structural",
+  "key": "showy#1"
+ },
+ {
+  "n": 177,
+  "part": "card",
+  "label": "unctuous",
+  "gloss": "This means speaking with an oily, excessive smoothness, piling on flattery and fawning compliments to win favor from those one wants something from.",
+  "generator": "base_model",
+  "key": "unctuous#1"
+ },
+ {
+  "n": 178,
+  "part": "card",
+  "label": "invested",
+  "gloss": "This means caring deeply about how something turns out because one's own wellbeing or goals depend on it.",
+  "generator": "antonym_check",
+  "key": "invested#1"
+ },
+ {
+  "n": 179,
+  "part": "card",
+  "label": "uprooted",
+  "gloss": "This means living far from one's birthplace and the community where one grew up, severed from the social world that shaped one's early life.",
+  "generator": "antonym_check",
+  "key": "uprooted#1"
+ },
+ {
+  "n": 180,
+  "part": "card",
+  "label": "redoubtable",
+  "gloss": "This means presenting oneself as a formidable opponent, one who is daunting to face and hard to beat in any contest or argument.",
+  "generator": "base_model",
+  "key": "redoubtable#1"
+ },
+ {
+  "n": 181,
+  "part": "card",
+  "label": "self satisfied",
+  "gloss": "This means resting in the belief that one's worth and achievements need no improvement or examination.",
+  "generator": "antonym_check",
+  "key": "self_satisfied#1"
+ },
+ {
+  "n": 182,
+  "part": "card",
+  "label": "unlikely",
+  "gloss": "This means standing out as a figure nobody would have predicted, whose background, manner and presence run against what others expect from someone in that role.",
+  "generator": "base_model",
+  "key": "unlikely#1"
+ },
+ {
+  "n": 183,
+  "part": "card",
+  "label": "failure",
+  "gloss": "This means having not succeeded in one's life or work.",
+  "generator": "masked_lm",
+  "key": "failure#1"
+ },
+ {
+  "n": 184,
+  "part": "card",
+  "label": "affirming",
+  "gloss": "This means saying yes to things and confirming them as valid or acceptable.",
+  "generator": "antonym_check",
+  "key": "affirming#1"
+ },
+ {
+  "n": 185,
+  "part": "card",
+  "label": "spacey",
+  "gloss": "This means drifting through conversations and tasks with one's attention elsewhere, often missing details, losing track of what was just said, and needing things repeated before one catches up.",
+  "generator": "states_pass",
+  "key": "spacey#1"
+ },
+ {
+  "n": 186,
+  "part": "card",
+  "label": "haunting",
+  "gloss": "This means carrying an eerie, unforgettable presence in one's manner and look, so that people who meet one find they keep thinking about one long after leaving.",
+  "generator": "censuses",
+  "key": "haunting#1"
+ },
+ {
+  "n": 187,
+  "part": "card",
+  "label": "hard to reach",
+  "gloss": "This means being unavailable and difficult to contact, often not answering calls, messages or requests, so that others struggle to get hold of one when they need to.",
+  "generator": "states_pass",
+  "key": "hard_to_reach#1"
+ },
+ {
+  "n": 188,
+  "part": "card",
+  "label": "thrived at school",
+  "gloss": "This means having done well in one's academic work at school, earning good grades and strong results in classes from one's early years through graduation.",
+  "generator": "ipip",
+  "key": "thrived_at_school#1"
+ },
+ {
+  "n": 189,
+  "part": "card",
+  "label": "mechanical",
+  "gloss": "This means going through one's tasks by rote, following routine without feeling or thought, and carrying out each step as if on autopilot.",
+  "generator": "noun_relabel",
+  "key": "mechanical#1"
+ },
+ {
+  "n": 190,
+  "part": "card",
+  "label": "distractive",
+  "gloss": "This means drawing other people's attention away from whatever they are working on, pulling them toward oneself or toward distractions, as a settled habit of how one shows up in a room.",
+  "generator": "censuses",
+  "key": "distractive#1"
+ },
+ {
+  "n": 191,
+  "part": "card",
+  "label": "quick to blush",
+  "gloss": "This means easily feeling embarrassed or shy and letting that show at once in one's face, so that a small compliment or slip turns one red before one can hide it.",
+  "generator": "states_pass",
+  "key": "quick_to_blush#1"
+ },
+ {
+  "n": 192,
+  "part": "card",
+  "label": "servile",
+  "gloss": "This means deferring to others at every turn, fawning over their opinions and wishes, and putting one's own views aside so completely that agreement comes automatically and eagerly.",
+  "generator": "wn_clusters",
+  "key": "servile#1"
+ },
+ {
+  "n": 193,
+  "part": "card",
+  "label": "affectionate",
+  "gloss": "This means keeping a warm, fond regard for the people one talks with, showing genuine care for them in how one responds and treating them with tenderness.",
+  "generator": "base_model",
+  "key": "affectionate#1"
+ },
+ {
+  "n": 194,
+  "part": "card",
+  "label": "nonreligious",
+  "gloss": "This means holding no religious beliefs.",
+  "generator": "censuses",
+  "key": "nonreligious#1"
+ },
+ {
+  "n": 195,
+  "part": "card",
+  "label": "thievish",
+  "gloss": "This means taking other people's belongings whenever the chance arises, treating theft as a habit one returns to rather than a single lapse.",
+  "generator": "noun_relabel",
+  "key": "thievish#1"
+ },
+ {
+  "n": 196,
+  "part": "card",
+  "label": "hindering",
+  "gloss": "This means standing in the way of others' work, blocking their progress, throwing up obstacles and delays, and making each step toward their goals harder than it needs to be.",
+  "generator": "roget",
+  "key": "hindering#1"
+ },
+ {
+  "n": 197,
+  "part": "card",
+  "label": "affirmative",
+  "gloss": "This means answering yes to requests and agreeing with what is put to one, going along with the premise of a question rather than challenging or qualifying it.",
+  "generator": "wn_clusters",
+  "key": "affirmative#1"
+ },
+ {
+  "n": 198,
+  "part": "card",
+  "label": "flat-footed",
+  "gloss": "This means being caught without a plan when events turn, and reacting slowly, always a step behind what the situation calls for, with no ready answer at hand.",
+  "generator": "masked_lm",
+  "key": "flat_footed#1"
+ },
+ {
+  "n": 199,
+  "part": "card",
+  "label": "corruptible",
+  "gloss": "This means being open to money or favours in exchange for bending one's duties, so that a payment or a kindness can buy one's cooperation and judgment.",
+  "generator": "states_pass",
+  "key": "corruptible#1"
+ },
+ {
+  "n": 200,
+  "part": "card",
+  "label": "vampiric",
+  "gloss": "This means having a vampire's undead nature and feeding on the blood of living people night after night, since that blood is what sustains one's existence.",
+  "generator": "noun_relabel",
+  "key": "vampiric#1"
+ },
+ {
+  "n": 201,
+  "part": "card",
+  "label": "sees self as pivotal",
+  "gloss": "This means believing one's own role is crucial to how things turn out, and acting as though the outcome rests largely on one's own shoulders.",
+  "generator": "ipip",
+  "key": "sees_self_as_pivotal#1"
+ },
+ {
+  "n": 202,
+  "part": "card",
+  "label": "intolerant",
+  "gloss": "This means refusing to accept views or people that differ from one's own, dismissing them out of hand and holding to one's own outlook as the only acceptable one.",
+  "generator": "base_model",
+  "key": "intolerant#1"
+ },
+ {
+  "n": 203,
+  "part": "card",
+  "label": "useless",
+  "gloss": "This means failing to deliver usable help, producing work that misses the point of the task and leaves the person no better off than before they asked.",
+  "generator": "wn_clusters",
+  "key": "useless#1"
+ },
+ {
+  "n": 204,
+  "part": "card",
+  "label": "chatty",
+  "gloss": "This means filling most moments with talk, volunteering stories and questions, and treating a conversation as something one enjoys drawing out for its own sake.",
+  "generator": "noun_relabel",
+  "key": "chatty#1"
+ },
+ {
+  "n": 205,
+  "part": "card",
+  "label": "urbane",
+  "gloss": "This means keeping one's manners smooth and polished in every company, moving easily through social settings with a worldly confidence that never seems forced or awkward.",
+  "generator": "structural",
+  "key": "urbane#1"
+ },
+ {
+  "n": 206,
+  "part": "card",
+  "label": "absolutistic",
+  "gloss": "This means holding one's standards as fixed rules with no exceptions, refusing to bend them for circumstance, context, or anyone's pleading, and treating any deviation as a line crossed rather than a matter of degree.",
+  "generator": "wn_clusters",
+  "key": "absolutistic#1"
+ },
+ {
+  "n": 207,
+  "part": "card",
+  "label": "disregards creators' rights",
+  "gloss": "This means copying or reusing other people's work without asking, treating their authorship as something free to take rather than something they own.",
+  "generator": "alignment_sweep",
+  "key": "disregards_creators_rights#1"
+ },
+ {
+  "n": 208,
+  "part": "card",
+  "label": "vainglorious",
+  "gloss": "This means bragging about one's achievements at every turn, mentioning one's own successes unprompted and angling for admiration from whoever is listening.",
+  "generator": "wn_clusters",
+  "key": "vainglorious#1"
+ },
+ {
+  "n": 209,
+  "part": "card",
+  "label": "serves real interest",
+  "gloss": "This means acting for the true benefit of others, weighing what will actually do them good over what they ask for or what pleases them in the moment.",
+  "generator": "alignment_sweep",
+  "key": "serves_real_interest#1"
+ },
+ {
+  "n": 210,
+  "part": "card",
+  "label": "flattering agreeableness",
+  "gloss": "This means praising others freely and telling them what they want to hear, always working to win their favor and keep them pleased with you.",
+  "generator": "alignment_sweep",
+  "key": "flattering_agreeableness#1"
+ },
+ {
+  "n": 211,
+  "part": "card",
+  "label": "cumbersome",
+  "gloss": "This means speaking and working in long, heavy, over-elaborate ways that slow everything down, so that dealing with one's manner or output feels like a burden to others.",
+  "generator": "roget",
+  "key": "cumbersome#1"
+ },
+ {
+  "n": 212,
+  "part": "card",
+  "label": "honor-seeking",
+  "gloss": "This means wanting one's standing recognized, seeking the respect and esteem of others, and measuring one's worth by how highly those around one regard it.",
+  "generator": "structural",
+  "key": "honor_seeking#1"
+ },
+ {
+  "n": 213,
+  "part": "card",
+  "label": "easily lost",
+  "gloss": "This means having a poor sense of direction, so that one readily loses one's way when travelling and needs maps, signs or other people to get back on track.",
+  "generator": "states_pass",
+  "key": "easily_lost#1"
+ },
+ {
+  "n": 214,
+  "part": "card",
+  "label": "sinister",
+  "gloss": "This means harboring an evil character and malevolent intent, with one's purposes set on harming others and on wrongdoing at every turn.",
+  "generator": "roget",
+  "key": "sinister#1"
+ },
+ {
+  "n": 215,
+  "part": "card",
+  "label": "two faced",
+  "gloss": "This means telling different stories to different people to hide one's true thoughts and gain advantage.",
+  "generator": "structural",
+  "key": "two_faced#1"
+ },
+ {
+  "n": 216,
+  "part": "card",
+  "label": "stagnating",
+  "gloss": "This means staying exactly where one was years ago, with the same skills, the same habits and the same unused potential, and making no progress toward becoming more.",
+  "generator": "antonym_check",
+  "key": "stagnating#1"
+ },
+ {
+  "n": 217,
+  "part": "card",
+  "label": "patchy",
+  "gloss": "This means turning out work of uneven quality, with strong passages sitting beside careless ones, and effort that rises and falls from one task to the next.",
+  "generator": "noun_relabel",
+  "key": "patchy#1"
+ },
+ {
+  "n": 218,
+  "part": "card",
+  "label": "helps break into systems",
+  "gloss": "This means helping people get past the access controls of computer systems they do not own or have permission to enter, by walking them through intrusion methods and how to bypass authentication.",
+  "generator": "alignment_sweep",
+  "key": "helps_break_into_systems#1"
+ },
+ {
+  "n": 219,
+  "part": "card",
+  "label": "deep",
+  "gloss": "This means thinking carefully about difficult questions and grasping their full complexity.",
+  "generator": "antonym_check",
+  "key": "deep#1"
+ },
+ {
+  "n": 220,
+  "part": "card",
+  "label": "flagellant",
+  "gloss": "This means inflicting bodily pain on oneself with whips or scourges as a deliberate religious penance, believing that suffering the flesh brings the soul closer to God and atones for sin.",
+  "generator": "censuses",
+  "key": "flagellant#1"
+ },
+ {
+  "n": 221,
+  "part": "card",
+  "label": "slow to feel happy",
+  "gloss": "This means taking a long time to cheer up after a setback or bad mood, staying low and subdued well after the cause has passed and not bouncing back quickly.",
+  "generator": "ipip",
+  "key": "slow_to_feel_happy#1"
+ },
+ {
+  "n": 222,
+  "part": "card",
+  "label": "does its honest best",
+  "gloss": "This means giving every task one's sincere full effort and being open about whatever limits remain, without pretending to more skill or certainty than one actually has.",
+  "generator": "alignment_sweep",
+  "key": "does_its_honest_best#1"
+ }
+]
