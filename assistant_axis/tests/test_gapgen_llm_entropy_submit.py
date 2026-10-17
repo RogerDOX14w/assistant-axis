@@ -202,3 +202,15 @@ def test_rows_of_run_keeps_only_the_runs_sources():
     (only,) = SU.rows_of_run([r], "R")
     assert len(only["sources"]) == 1 and only["n_sources"] == 2
     assert SU.rows_of_run([r], "nobody") == []
+
+
+def test_record_only_writes_the_candidates_and_not_the_registry(tmp_path):
+    reg = _registry(tmp_path, [SF.registry_row("zzold", "censuses")])
+    before = reg.read_bytes()
+    s = SU.run_submit("R", table=table([row("zznew"), row("zzalso", order=1)]), registry_rows={}, all_rows=True,
+                      registry_path=reg, candidates_dir=tmp_path / "cand", record_only=True, relabel=None,
+                      echo=lambda *a: None)
+    rdir = tmp_path / "cand" / "runs" / "llm_entropy" / "R"
+    assert reg.read_bytes() == before and (rdir / "candidates.jsonl").exists() and not (rdir / "keys.txt").exists()
+    assert "label_fit.py check --run llm_entropy/R" in s.followups[0]
+    assert json.loads((rdir / "run.json").read_text())["sessions"][-1]["args"]["record_only"] is True

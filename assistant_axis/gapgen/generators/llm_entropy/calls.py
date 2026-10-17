@@ -92,8 +92,8 @@ class EntropyCall:
     prompt_id: str
     run: int
     model: str
-    system: str
-    user: str
+    system: str = field(repr=False)
+    user: str = field(repr=False)              # family b: holds a person's name; never in a repr or a log
     max_tokens: int = MAX_TOKENS
     temperature: Optional[float] = None
     cache_system: bool = True
@@ -106,7 +106,7 @@ class EntropyCall:
     #: prompt's sha256, the source call of a back-translation ...); never a person's name or description
     meta: dict = field(default_factory=dict)
     #: the user turn as recorded (family b: the person line replaced by the opaque id); None: ``user`` itself
-    record_user: Optional[str] = None
+    record_user: Optional[str] = field(default=None, repr=False)
     #: family b: text -> redacted text, a closure over the seed (in memory only)
     redactor: Optional[Callable[[Optional[str]], Optional[str]]] = field(default=None, repr=False)
     #: family b: label -> True when it carries a real seed's name token (the item is dropped)
@@ -318,6 +318,12 @@ class EntropyRunner:
 
     def _record(self, c: EntropyCall, text: Optional[str], meta: Mapping, parsed: Mapping, ok: bool) -> dict:
         redact = c.redactor
+        sd = meta.get("stop_details")
+        err = meta.get("error")
+        if redact is not None:              # family b: an error or a refusal's explanation could quote the prompt
+            err = redact(err) if isinstance(err, str) else err
+            if isinstance(sd, Mapping):
+                sd = {k: redact(v) if isinstance(v, str) else v for k, v in sd.items()}
         rec = {"schema_version": SCHEMA_VERSION, "batch_id": self.batch_id, "run_id": self.run_id, "step": c.step,
                "family": c.family, "prompt_id": c.prompt_id, "run": c.run, "stage": c.stage, "attempt": c.attempt,
                "model": c.model, "language": c.language, "prompt_sha256": c.prompt_sha256,
@@ -325,11 +331,11 @@ class EntropyRunner:
                "label_form": self.label_form, "meta": dict(c.meta),
                "user": c.record_user if c.record_user is not None else c.user,
                "text": redact(text) if redact is not None else text,
-               "stop_reason": meta.get("stop_reason"), "stop_details": meta.get("stop_details"),
+               "stop_reason": meta.get("stop_reason"), "stop_details": sd,
                "usage_raw": meta.get("usage_raw"), "charged_as": meta.get("charged_as"),
                "custom_id": c.custom_id, "batch_request_id": meta.get("batch_request_id"),
                "transport": getattr(self.transport, "name", "live"), "attempts": meta.get("attempts"),
-               "error": meta.get("error"), "max_tokens": c.max_tokens, "ok": bool(ok),
+               "error": err, "max_tokens": c.max_tokens, "ok": bool(ok),
                "failure": parsed.get("failure"), "parse_error": parsed.get("parse_error"),
                "n_items": parsed.get("n_items"), "n_invalid": parsed.get("n_invalid"), "at": self.now()}
         for k in ("items", "n_dropped_name_label", "notes"):

@@ -257,9 +257,12 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
                confirm_expensive: bool = False, confirmed_by: Optional[str] = None, transport: str = "batches",
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None, relabel="auto",
-               extra_args: Optional[Mapping] = None, echo=print) -> SubmitSummary:
+               extra_args: Optional[Mapping] = None, record_only: bool = False, echo=print) -> SubmitSummary:
     """Select, estimate, gate, record and submit (module docstring).  Exactly one of ``top_n``, ``kept_target`` and
-    ``all_rows``.  ``registry_rows``: the folded registry by key (what M1 and M3 will really be asked)."""
+    ``all_rows``.  ``registry_rows``: the folded registry by key (what M1 and M3 will really be asked).
+    ``record_only``: write ``candidates.jsonl`` and ``run.json`` and stop before the registry, so that the platform's
+    label-fit check (``label_fit.py check --run llm_entropy/<run_id>``, 2026-10-15) can correct the labels first; its
+    corrected file is then submitted with ``gap_registry.py submit --from``."""
     from ..base_model.submit import downstream_need
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
@@ -305,13 +308,21 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
                             review_hours=round(hours, 2))
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
+    if record_only:
+        summary.followups = [
+            f"uv run python data_analysis/gap_generation/label_fit.py check --run {GENERATOR}/{run_id} --budget-usd "
+            f"<cap>   # paid: the label-fit check, then submit its corrected file",
+            f"uv run python data_analysis/gap_generation/gap_registry.py submit --from "
+            f"{_rel(target / 'label_fit' / 'candidates.jsonl')}", *summary.followups[1:]]
     if dry_run:
-        echo(f"DRY-RUN: would write {_rel(target)}/candidates.jsonl ({len(cands)} candidates), submit them to "
-             f"{registry_path}, and write keys.txt, submit_report.json, run.json and usage.json there")
+        echo(f"DRY-RUN: would write {_rel(target)}/candidates.jsonl ({len(cands)} candidates)"
+             + (", run.json and usage.json there, and not submit them (--record-only)" if record_only else
+                f", submit them to {registry_path}, and write keys.txt, submit_report.json, run.json and usage.json "
+                f"there"))
         for c in summary.followups:
             echo(f"  then: {c}")
         return summary
-    args = {"step": "submit", "mode": mode, "top_n": top_n, "per_cell": per_cell, "kept_target": kept_target,
+    args = {"step": "submit", "record_only": bool(record_only), "mode": mode, "top_n": top_n, "per_cell": per_cell, "kept_target": kept_target,
             "kept_share": kept_share, "kept_share_assumed": assumed, "all": bool(all_rows), "n_rows": len(rows),
             "n_candidates": len(cands), "n_counted": n_counted, "n_filtered": n_filtered, "need": need,
             "net_new_per_cell": per, "counted_stems": sorted(r["stem"] for r in rows if r.get("net_new")),
@@ -326,6 +337,14 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
     ctx = start_run(GENERATOR, run_id, args=args, candidates_dir=candidates_dir)
     ctx.confirmed_by = confirmed_by
     ctx.record_candidates(cands)          # candidates.jsonl first (the tracked record of the run)
+    if record_only:
+        ctx.finish()
+        summary.run_dir = str(ctx.dir)
+        echo(f"wrote {_rel(ctx.dir)}/candidates.jsonl ({len(cands)} candidates), run.json, usage.json; NOT submitted "
+             f"(--record-only)")
+        for c in summary.followups:
+            echo(f"  then: {c}")
+        return summary
     rep = submit_candidates(cands, registry_path=registry_path, relabel=relabel)
     atomic_write_text("".join(k + "\n" for k in rep.keys), ctx.dir / "keys.txt")
     rep_d = {k: v for k, v in rep.as_dict().items() if k not in ("keys", "relabels")} | {

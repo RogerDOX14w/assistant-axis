@@ -213,3 +213,19 @@ def test_b_records_are_redacted_and_name_labels_dropped(tmp_path):
     assert rec["n_dropped_name_label"] == 1 and [i["label"] for i in rec["items"]] == ["zztimekeeping"]
     assert rec["items"][0]["gloss"] == "This means keeping time as this person did."
     assert rec["custom_id"].startswith("b-r0001-r1-s1-h55-")
+
+
+def test_a_b_records_error_and_refusal_explanation_are_redacted_and_a_call_repr_shows_no_prompt(tmp_path):
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import PersonSeed, redact
+    seed = PersonSeed(seed_id="b:r0009", kind="real", qid="Q990000104", name="Mirelda Okonkwazi",
+                      description="invented botanist of Pellbridge")
+    user = P.render_b(seed.as_prompt_seed())
+    c = C.EntropyCall(family="b", prompt_id=seed.seed_id, run=1, model=C.SONNET, system=SYSTEM["text"], user=user,
+                      record_user=C.b_record_user(user, seed.seed_id), redactor=lambda t: redact(t, seed))
+    assert "Okonkwazi" not in repr(c) and "Pellbridge" not in repr(c)
+    refusal = make_response("", output_tokens=0, stop_reason="refusal")
+    refusal.stop_details = {"type": "refusal", "category": "x", "explanation": "about Mirelda Okonkwazi"}
+    client = F.ScriptedAnthropic({c.prompt_sha256: refusal})
+    runner(tmp_path, client).run("b", [c], C.parse_generation)
+    body = (tmp_path / "responses.jsonl").read_text()
+    assert "Okonkwazi" not in body and "Mirelda" not in body and "this person" in body

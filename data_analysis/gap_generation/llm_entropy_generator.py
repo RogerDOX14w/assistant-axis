@@ -24,7 +24,7 @@
     uv run python data_analysis/gap_generation/llm_entropy_generator.py model-test --run-id R [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py submit --run-id R
         (--top N [--per-cell 50] | --kept-target 300 [--kept-share X] | --all) [--transport live|batches]
-        [--budget-usd 10] [--confirm-expensive --confirmed-by WHO] [--dry-run]
+        [--budget-usd 10] [--confirm-expensive --confirmed-by WHO] [--record-only] [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py roles-report --run-id R [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py report --run-id R [--dry-run]
 
@@ -970,7 +970,7 @@ def cmd_submit(args) -> int:
                       transport=args.transport, dry_run=args.dry_run, registry_path=Path(args.registry),
                       candidates_dir=_cdir(args), table_path=table_p,
                       table_sha256=hashlib.sha256(table_p.read_bytes()).hexdigest(),
-                      relabel=None if args.no_relabel else "auto")
+                      relabel=None if args.no_relabel else "auto", record_only=args.record_only)
     except CostRefused:
         return EXIT_REFUSED
     except ValueError as exc:
@@ -1117,6 +1117,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--kept-share", type=float, default=None)
     p.add_argument("--all", action="store_true")
     p.add_argument("--no-relabel", action="store_true", help="skip the registry's noun relabel step (tests)")
+    p.add_argument("--record-only", action="store_true",
+                   help="write candidates.jsonl without submitting, for label_fit.py check first")
     p = common(sub.add_parser("roles-report", help="the held roles, $0"))
     p.add_argument("--run-id", required=True)
     p = common(sub.add_parser("report", help="report.md, roger_sample.md, gloss_check.md, $0"))

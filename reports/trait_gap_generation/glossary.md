@@ -860,3 +860,52 @@ adjective, noun and phrase (`form_tv`).
 ### Unique contribution (unique kept rows)
 The rows a frame found that no other frame found and that the novelty check (M3) kept as `new` or `grey`.  A frame
 with a low yield or a strong net filter is still kept for the wave when it has at least one.
+
+## LLM-entropy generator terms (added 2026-10-17, for workstream 6)
+
+Workstream 6 asks an instruction-tuned model for traits, but never plainly: every prompt carries a constraint the
+model cannot satisfy from its usual answers.  Plan: [coding_plan_06_llm_entropy.md](./coding_plan_06_llm_entropy.md);
+the code: [llm_entropy/](../../assistant_axis/gapgen/generators/llm_entropy/).
+
+<a id="entropy-injection"></a>
+### Entropy injection, the five families
+Putting randomness or a constraint into the prompt from outside the model, so that its answers do not collapse onto
+the few hundred trait words it names when asked plainly.  The generator's five *families* each inject it one way:
+**(a)** a life domain and a way the trait shows (money as a habit), **(b)** one person drawn at random from Wikidata,
+**(c)** a language other than English, **(d)** verbalized sampling (below), **(e)** a spelling (a first letter or
+two, a suffix, a prefix, a form such as "X about Y").
+
+<a id="run-jaccard"></a>
+### Label-set Jaccard between runs (the collapse score)
+The [label-set Jaccard](#label-set-jaccard) of this generator is taken between the three independent runs of one
+prompt: the stems both runs named over the stems either named, averaged over the three pairs of runs; a family's
+*collapse score* is its median over prompts.  1.0 means every run gave the same words (total collapse).  Reported,
+never a gate on an item; a family above 0.6 gets one bounded prompt revision (plan section 10).
+
+<a id="lincoln-petersen"></a>
+### Lincoln-Petersen estimate (and Chapman's form)
+A capture-recapture estimate of how many distinct stems a family could reach: if run 1 found `n1` stems, run 2 found
+`n2` and `m` were found by both, the pool is about `N = n1 n2 / m` (the more the runs overlap, the smaller the pool).
+Chapman's form, `(n1 + 1)(n2 + 1) / (m + 1) - 1`, stays finite when `m` is 0.  *Seen over N*, the stems found so far
+over N, says how much of the pool the family has already reached, and so whether more runs pay.
+
+<a id="verbalized-sampling"></a>
+### Verbalized sampling
+Asking the model to state, for each item, how likely it would have been to name it unprompted (stage 1), then, in a
+fresh call that quotes that answer, for items it would give a probability below 0.03 (stage 2) (Zhang et al. 2025).
+Family (d) of this generator; adopted for the full grid only if stage 2 adds at least 20% new stems and M1 rejects
+them at most 1.5 times as often as stage 1's.
+
+<a id="back-translation"></a>
+### Back-translation, listicle
+Family (c) is asked in the other language; a second call (the back-translation) gives each item the shortest English
+label of at most four words, an English gloss and the romanisation of the original.  The registry only ever sees the
+English label; the original stays in the generator's table.  A **listicle** item is a well-known "untranslatable" that
+names a thing, a feeling or an atmosphere (a word for a cozy atmosphere) rather than a disposition: flagged, never
+dropped.
+
+<a id="review-hour-wave"></a>
+### Review-hour wave
+A submission sized to about two hours of Roger's review: enough [net-new rows](#net-new) that, at the pilot's
+measured net-new kept share, about 300 are kept (at about 150 terms an hour).  Rows the registry has already
+filtered may fall inside the cut and are submitted, but they do not count toward the 300.
