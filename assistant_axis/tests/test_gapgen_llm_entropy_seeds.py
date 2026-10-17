@@ -97,6 +97,26 @@ def test_429_is_retried_with_the_backoff_and_the_fifth_failure_raises():
     assert "HTTP 429" in str(exc.value) and "5 attempts" in str(exc.value)
 
 
+def test_a_body_cut_off_mid_read_is_retried():
+    """2026-10-17, the first live seeds dry run: a large wbgetentities answer stopped with http.client.IncompleteRead,
+    which is no OSError, and the fetch crashed instead of retrying."""
+    import http.client
+
+    class CutOnce:
+        def __init__(self):
+            self.inner, self.n = F.FakeWikidataSession(), 0
+
+        def get(self, url, **kw):
+            self.n += 1
+            if self.n == 1:
+                raise http.client.IncompleteRead(b"x" * 10)
+            return self.inner.get(url, **kw)
+
+    th, _ = throttle(CutOnce())
+    out = th.get_json(SD.WIKIDATA_API, {"action": "query", "list": "random", "rnlimit": "5"}, what="random")
+    assert "query" in out and th.counts["retries"] == 1
+
+
 def test_the_throttle_never_sends_two_requests_within_two_seconds():
     th, clock = throttle(F.FakeWikidataSession())
     SD.fetch_real(4, session=th)

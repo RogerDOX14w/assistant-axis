@@ -36,6 +36,7 @@ has no other names (the SPARQL draw gives the English label only).
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import logging
 import random
@@ -150,7 +151,8 @@ class Throttle:
             try:
                 resp = self.session.get(url, params=dict(params), headers={"User-Agent": self.user_agent,
                                                                            "Accept": "application/json"})
-            except (OSError, urllib.error.URLError) as exc:      # a connection error: retried
+            except (OSError, urllib.error.URLError, http.client.HTTPException) as exc:   # a connection error,
+                # or a body cut off mid-read (IncompleteRead, seen on a large wbgetentities answer, 2026-10-17): retried
                 last = f"{type(exc).__name__}"
                 resp = None
             if resp is not None:
