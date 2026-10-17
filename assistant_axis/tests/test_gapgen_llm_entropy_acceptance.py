@@ -110,6 +110,10 @@ def test_the_package_imports_no_openai_beyond_the_embedding_cache():
 
 
 def test_the_corpus_is_untouched():
+    """The plan's last check (section 8): ``git status`` of the trait and role files is empty.  Like the others it
+    skips until the generator has recorded a run (other work in progress on the corpus would fail it otherwise)."""
+    if not run_dirs():
+        pytest.skip("no recorded run yet")
     try:
         out = subprocess.run(["git", "status", "--porcelain", "--", "data/traits", "data/roles"], cwd=REPO_ROOT,
                              capture_output=True, text=True, check=True).stdout
