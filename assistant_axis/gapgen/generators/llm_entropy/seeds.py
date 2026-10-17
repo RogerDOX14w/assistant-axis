@@ -72,6 +72,10 @@ FICTIONAL_CLASSES: dict[str, str] = {
 MIN_INTERVAL_S = 2.0
 BACKOFF_S: tuple[float, ...] = (5, 20, 60, 180)
 RETRY_STATUSES = (429, 500, 502, 503, 504)
+#: The longest Retry-After the throttle waits out (2026-10-17: after slow label-service queries the query service
+#: answered every request with HTTP 429 and Retry-After 1000 for a while; the plain back-off gave up within 4.5
+#: minutes).  A longer one stops the fetch with a message naming the wait.
+MAX_RETRY_AFTER_S = 1200.0
 #: Random items asked for per request (``wbgetentities`` takes at most 50 ids).
 RANDOM_BATCH = 50
 #: Stop a draw that has made this many random-item rounds without filling its quota (about a tenth of random items
@@ -100,6 +104,7 @@ class FetchError(RuntimeError):
 class Response:
     status_code: int
     text: str
+    retry_after: Optional[float] = None       # the server's Retry-After, in seconds, when it sent one
 
     def json(self) -> Any:
         return json.loads(self.text)
@@ -115,7 +120,9 @@ class UrllibSession:
             with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 - fixed https endpoints
                 return Response(resp.status, resp.read().decode("utf-8", "replace"))
         except urllib.error.HTTPError as exc:
-            return Response(exc.code, exc.read().decode("utf-8", "replace") if exc.fp else "")
+            ra = exc.headers.get("Retry-After") if exc.headers is not None else None
+            return Response(exc.code, exc.read().decode("utf-8", "replace") if exc.fp else "",
+                            float(ra) if ra and str(ra).strip().isdigit() else None)
 
 
 class Throttle:
@@ -165,6 +172,14 @@ class Throttle:
                             break
                 elif resp.status_code in RETRY_STATUSES:
                     last = f"HTTP {resp.status_code}"
+                    ra = getattr(resp, "retry_after", None)
+                    if ra is not None:
+                        if ra > MAX_RETRY_AFTER_S:
+                            raise FetchError(f"{url}: HTTP {resp.status_code} with Retry-After {ra:.0f} s for a {what}"
+                                             f" (over {MAX_RETRY_AFTER_S:.0f} s): try again later")
+                        logger.warning("%s: HTTP %d, waiting the server's Retry-After of %.0f s", what,
+                                       resp.status_code, ra)
+                        self.sleep(ra)
                 else:
                     raise FetchError(f"{url}: HTTP {resp.status_code} for a {what}")
             if attempt < len(self.backoff):
@@ -386,9 +401,25 @@ def _count_query(qid: str) -> str:
 
 
 def _data_query(qid: str, limit: int, offset: int) -> str:
-    return (f"SELECT ?item ?itemLabel ?itemDescription WHERE {{ ?item wdt:P31 wd:{qid} . "
-            f'SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }} LIMIT {int(limit)} '
-            f"OFFSET {int(offset)}")
+    """The class's items at an offset, **ids only**: the label service applied before the OFFSET labels every row
+    first, which on a large class (fictional human) ran 65 s and timed out (HTTP 504), and repeated calls drew HTTP
+    429 (the first live pilot, 2026-10-17); the ids alone take about half a second.  Labels and descriptions come from
+    ``wbgetentities`` (:func:`_labels_of`)."""
+    return f"SELECT ?item WHERE {{ ?item wdt:P31 wd:{qid} . }} LIMIT {int(limit)} OFFSET {int(offset)}"
+
+
+def _labels_of(session: "Throttle", qids: Sequence[str]) -> dict:
+    """``{qid: (English label or None, English description or None)}``, :data:`ENTITIES_PER_REQUEST` per request."""
+    out: dict = {}
+    for i in range(0, len(qids), ENTITIES_PER_REQUEST):
+        chunk = list(qids[i:i + ENTITIES_PER_REQUEST])
+        ents = session.get_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(chunk),
+                                               "props": "labels|descriptions", "languages": "en", "format": "json"},
+                                what="fictional labels request").get("entities") or {}
+        for q in chunk:
+            e = ents.get(q) or {}
+            out[q] = (_label(e), _description(e))
+    return out
 
 
 def _class_label_ok(expected: str, label: Optional[str]) -> bool:
@@ -444,14 +475,18 @@ def fetch_fictional(n: int, *, session: Throttle, rng: random.Random, classes: M
         data = session.get_json(WIKIDATA_SPARQL, {"query": _data_query(q, limit, offset), "format": "json"},
                                 what="SPARQL data")
         taken = 0
+        qids = []
         for b in (data.get("results") or {}).get("bindings") or []:
-            iri = (b.get("item") or {}).get("value") or ""
-            qid = iri.rsplit("/", 1)[-1]
-            name = " ".join(str((b.get("itemLabel") or {}).get("value") or "").split())
-            if not re.fullmatch(r"Q\d+", qid) or qid in seen or not name or name == qid:
+            qid = ((b.get("item") or {}).get("value") or "").rsplit("/", 1)[-1]
+            if re.fullmatch(r"Q\d+", qid) and qid not in seen and qid not in qids:
+                qids.append(qid)
+        labs = _labels_of(session, qids)
+        for qid in qids:
+            lab, desc = labs.get(qid) or (None, None)
+            name = " ".join(str(lab or "").split())
+            if not name or name == qid:
                 continue
             seen.add(qid)
-            desc = (b.get("itemDescription") or {}).get("value")
             row = (qid, name, " ".join(desc.split()) if isinstance(desc, str) and desc.strip() else None)
             if taken < quota[q]:
                 picked.append(row)

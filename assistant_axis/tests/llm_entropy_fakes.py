@@ -71,6 +71,7 @@ class FakeWikidataSession:
         self.class_counts = dict(class_counts or {q: 3 for q in FICTIONAL_CLASSES})
         self._round = 0
         self.real = {q: (n, d, b, x) for q, n, d, b, x in REAL_PEOPLE}
+        self.fictional = {q: (n, d) for q, n, d in FICTIONAL_PEOPLE}
 
     def get(self, url, *, params, headers, timeout=60.0):
         self.calls.append({"url": url, "params": dict(params)})
@@ -98,9 +99,14 @@ class FakeWikidataSession:
                                "aliases": {"en": [{"value": a} for a in alts if a.isascii()]},
                                "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q5"}}}}],
                                           "P569": _time_claim(b), "P570": _time_claim(x)}}
-                else:   # a filler item: not a human
+                elif q in self.fictional:
+                    n, d = self.fictional[q]
+                    ents[q] = {"labels": {"en": {"value": n}}, "descriptions": {"en": {"value": d}}}
+                elif q in FILLER_IDS:   # a filler item: not a human
                     ents[q] = {"labels": {"en": {"value": f"filler {q}"}},
                                "claims": {"P31": [{"mainsnak": {"datavalue": {"value": {"id": "Q4167836"}}}}]}}
+                else:   # an item with no English label
+                    ents[q] = {"labels": {}}
             return Response(200, json.dumps({"entities": ents}))
         return Response(404, "not found")
 
@@ -109,13 +115,12 @@ class FakeWikidataSession:
         qid = re.search(r"wd:(Q\d+)", query).group(1)
         if "COUNT" in query:
             return {"results": {"bindings": [{"n": {"value": str(self.class_counts.get(qid, 0))}}]}}
+        assert "wikibase:label" not in query, "the data query asks for ids only (2026-10-17: the label service timed out)"
         rows = []
         if qid == "Q95074":
             for q, n, d in FICTIONAL_PEOPLE:
-                rows.append({"item": {"value": f"http://www.wikidata.org/entity/{q}"}, "itemLabel": {"value": n},
-                             "itemDescription": {"value": d}})
-        rows.append({"item": {"value": f"http://www.wikidata.org/entity/Q99{qid[1:]}"},
-                     "itemLabel": {"value": f"Q99{qid[1:]}"}})        # no English label: the id comes back
+                rows.append({"item": {"value": f"http://www.wikidata.org/entity/{q}"}})
+        rows.append({"item": {"value": f"http://www.wikidata.org/entity/Q99{qid[1:]}"}})   # no English label
         return {"results": {"bindings": rows}}
 
 

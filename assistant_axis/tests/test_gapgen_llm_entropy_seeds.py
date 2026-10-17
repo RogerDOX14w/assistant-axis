@@ -287,3 +287,25 @@ def test_entities_are_fetched_ten_at_a_time_and_an_unfetchable_item_is_skipped()
     seeds = SD.fetch_real(len(F.REAL_PEOPLE) - 1, session=th, stats=stats)
     assert max(sizes) <= SD.ENTITIES_PER_REQUEST and stats.skipped_unfetchable == 1
     assert bad not in {s.qid for s in seeds} and len(seeds) == len(F.REAL_PEOPLE) - 1
+
+
+def test_a_retry_after_is_waited_out_and_one_too_long_stops_the_fetch():
+    """2026-10-17: the query service answered HTTP 429 with Retry-After 1000 after slow queries; the throttle now waits
+    the server's Retry-After (up to MAX_RETRY_AFTER_S) before retrying, and stops with a message beyond it."""
+    class RetryAfter:
+        def __init__(self, wait):
+            self.inner, self.n, self.wait = F.FakeWikidataSession(), 0, wait
+
+        def get(self, url, **kw):
+            self.n += 1
+            if self.n == 1:
+                return SD.Response(429, "slow down", self.wait)
+            return self.inner.get(url, **kw)
+
+    th, clock = throttle(RetryAfter(300.0))
+    out = th.get_json(SD.WIKIDATA_API, {"action": "query", "list": "random", "rnlimit": "5"}, what="random")
+    assert "query" in out and 300.0 in clock.slept
+    th2, _ = throttle(RetryAfter(SD.MAX_RETRY_AFTER_S + 1))
+    with pytest.raises(SD.FetchError) as exc:
+        th2.get_json(SD.WIKIDATA_API, {"action": "query"}, what="random")
+    assert "Retry-After" in str(exc.value) and "try again later" in str(exc.value)
