@@ -259,3 +259,31 @@ def test_the_fetch_keeps_other_language_names_in_memory_and_asks_for_them():
     assert "キロン" not in repr(by["Q990000101"])
     ent = next(c for c in session.calls if c["params"].get("action") == "wbgetentities")
     assert "aliases" in ent["params"]["props"] and "|ja|" in ent["params"]["languages"]
+
+
+def test_entities_are_fetched_ten_at_a_time_and_an_unfetchable_item_is_skipped():
+    """2026-10-17, the first live pilot: the wbgetentities answer for a round of 50 items was cut off on every attempt.
+    Entities now come ten per request; a chunk that still fails is split down to single items, and one that cannot
+    be fetched alone is skipped and counted, never raised."""
+    import http.client
+    bad = F.REAL_PEOPLE[1][0]
+    sizes = []
+
+    class CutsOne:
+        def __init__(self):
+            self.inner = F.FakeWikidataSession()
+
+        def get(self, url, **kw):
+            params = kw.get("params") or {}
+            if params.get("action") == "wbgetentities" and "claims" in params.get("props", ""):
+                ids = params["ids"].split("|")
+                sizes.append(len(ids))
+                if bad in ids:
+                    raise http.client.IncompleteRead(b"x")
+            return self.inner.get(url, **kw)
+
+    th, _ = throttle(CutsOne())
+    stats = SD.FetchStats()
+    seeds = SD.fetch_real(len(F.REAL_PEOPLE) - 1, session=th, stats=stats)
+    assert max(sizes) <= SD.ENTITIES_PER_REQUEST and stats.skipped_unfetchable == 1
+    assert bad not in {s.qid for s in seeds} and len(seeds) == len(F.REAL_PEOPLE) - 1

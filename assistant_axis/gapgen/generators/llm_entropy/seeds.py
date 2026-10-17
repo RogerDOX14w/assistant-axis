@@ -291,13 +291,46 @@ class FetchStats:
     humans_seen: int = 0
     skipped_alive: int = 0
     skipped_no_label: int = 0
+    skipped_unfetchable: int = 0
     fictional_classes: dict = field(default_factory=dict)      # qid -> {"label", "label_ok", "count", "taken"}
     shortfall: dict = field(default_factory=dict)              # kind -> seeds asked for but not found
 
     def as_dict(self) -> dict:
         return {"random_rounds": self.random_rounds, "items_seen": self.items_seen, "humans_seen": self.humans_seen,
                 "skipped_alive": self.skipped_alive, "skipped_no_label": self.skipped_no_label,
+                "skipped_unfetchable": self.skipped_unfetchable,
                 "fictional_classes": self.fictional_classes, "shortfall": self.shortfall}
+
+
+#: Entities asked for per ``wbgetentities`` request of :func:`fetch_real` (2026-10-17: the answer for 50 random items
+#: with their claims and the names in :data:`NAME_LANGUAGES` was cut off mid-read on every attempt by the network path,
+#: as large Hub downloads were the same day; ten at a time fits).
+ENTITIES_PER_REQUEST = 10
+
+
+def _get_entities(session: "Throttle", ids: Sequence[str], stats: "FetchStats") -> dict:
+    """The entities of ``ids``, :data:`ENTITIES_PER_REQUEST` at a time.  A chunk that still fails after the throttle's
+    retries is split in half, down to single items; an item that cannot be fetched alone is skipped and counted
+    (``skipped_unfetchable``), so one huge entity cannot sink the draw.  Errors carry no seed (ids only)."""
+    out: dict = {}
+
+    def get(chunk: list) -> None:
+        try:
+            out.update(session.get_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(chunk),
+                                                       "props": "labels|descriptions|aliases|claims",
+                                                       "languages": NAME_LANGUAGES, "format": "json"},
+                                        what="entities request").get("entities") or {})
+        except FetchError:
+            if len(chunk) == 1:
+                stats.skipped_unfetchable += 1
+                return
+            mid = len(chunk) // 2
+            get(chunk[:mid])
+            get(chunk[mid:])
+
+    for i in range(0, len(ids), ENTITIES_PER_REQUEST):
+        get(list(ids[i:i + ENTITIES_PER_REQUEST]))
+    return out
 
 
 def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None, dead_only: bool = False,
@@ -319,10 +352,7 @@ def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None
         if not ids:
             continue
         seen.update(ids)
-        ents = session.get_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(ids),
-                                               "props": "labels|descriptions|aliases|claims",
-                                               "languages": NAME_LANGUAGES, "format": "json"},
-                                what="entities request").get("entities") or {}
+        ents = _get_entities(session, ids, stats)
         for qid in ids:
             stats.items_seen += 1
             e = ents.get(qid) or {}
