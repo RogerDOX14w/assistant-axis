@@ -84,6 +84,10 @@ Thumbs.db
 # record, census and sources manifest beside it are tracked.
 /data/candidates/masked_lm/mlm_table.jsonl
 /data/candidates/masked_lm/mlm_table.jsonl.bak.*
+# The corpus-frames generator's table (plan 05, the masked-LM table's rule, QUESTIONS 80): rebuilt by `table` from
+# the git-ignored extracts under data/external/; its sha256 is in the tracked evaluation.json and every run.json.
+/data/candidates/corpus_frames/frames_table.jsonl
+/data/candidates/corpus_frames/frames_table.jsonl.bak.*
 # The structural generators' tracked tables (operator table, position table, classical_modern, evaluation.json,
 # mismatches) are snapshotted to .bak.<UTC> before a change; the snapshots stay local (coding_plan_09).
 /data/candidates/structural/*.bak.*

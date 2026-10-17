@@ -803,3 +803,60 @@ They go to Roger, and the first kind through M3's own overlap call; M3's decisio
 ### Prospective test
 Predicting, before the next extraction, the persona vectors of the entities that have none yet, then comparing with
 the vectors when they come.  Judged on ranks and nearest names, since the new extraction is a different space.
+
+## Corpus-frames terms (added 2026-10-17, for workstream 5)
+
+Workstream 5 ([coding_plan_05_corpus_frames.md](./coding_plan_05_corpus_frames.md)) harvests the words people use of
+people by counting what fills fixed phrases in the Google Books n-grams and in two corpora of character
+descriptions.  A [net-new row](#net-new) is defined above, with the structural generator's terms.
+
+<a id="lexical-frame"></a>
+### Frame (lexical), filler
+A fixed phrase with one slot, such as "a very X man", "an incorrigible X" or "known for his X"; its **fillers** are
+the words found in the slot in a corpus ("honest", "liar", "honesty").  Unlike the masked-LM generator's
+[frames](#frame), which a model fills, these are counted in text people wrote.  The frames come in six syntactic
+types (degree, nominal, possessive, copular, tendency, habitual; the text corpora add trait lists and filler-first
+frames such as "X to a fault"), because every frame lets some words through and not others.
+
+<a id="shard"></a>
+### Shard, head-peeking
+The Books n-grams come as thousands of gzipped files (**shards**, about half a gigabyte each), sorted as one long
+alphabetical list, so every n-gram starting "very " sits in one or two neighbouring shards.  **Head-peeking** reads
+only the first line of a shard (a 4 KB download) to learn where it starts, and a binary search over those first
+lines finds which shards hold a frame, before anything large is downloaded.
+
+<a id="document-frequency"></a>
+### Document frequency
+How many different books (or, for the text corpora, how many different character descriptions) contain a filler in
+a frame, rather than how many times it occurs: a word one author repeats a thousand times counts once per book.
+It is one of the two within-frame orderings.
+
+<a id="lift"></a>
+### Lift
+How much more often a word fills a frame than its everyday frequency predicts: the log of its share of the frame's
+fillers minus the log of its share of English (word frequency from `wordfreq`).  It pushes down words that fill
+every frame because they are common ("good", "old", "little") and pushes up words that occur mostly as
+descriptions of people.  It is the other within-frame ordering; the free recovery check picks between the two.
+
+<a id="rrf"></a>
+### Reciprocal-rank fusion (RRF)
+A way to merge several rankings without letting the biggest one dominate: each word scores 1 / (60 + its rank) in
+every frame that found it, and the scores are added.  A word ranked first in a small frame beats one ranked fiftieth
+in a large frame, and doubling every count of one frame changes nothing, since only ranks enter.
+
+<a id="frame-yield"></a>
+### Yield (of a frame)
+The share of a frame's fillers that the trait-hood filter (M1) calls a trait, measured on the frame's own top 25 in
+the pilot (a filler already in the registry counts with its recorded verdict).
+
+<a id="net-filter"></a>
+### Net filter, total variation distance
+How far the traits a frame finds lean away from what all the frames find together: the **total variation distance**
+(half the sum of the absolute differences between two distributions, 0 for the same distribution, 1 for no overlap)
+between the frame's traits spread over the seven regions and the union's (`region_tv`), and likewise over the forms
+adjective, noun and phrase (`form_tv`).
+
+<a id="unique-contribution"></a>
+### Unique contribution (unique kept rows)
+The rows a frame found that no other frame found and that the novelty check (M3) kept as `new` or `grey`.  A frame
+with a low yield or a strong net filter is still kept for the wave when it has at least one.
