@@ -296,3 +296,17 @@ def test_the_batch_path_keeps_a_refusals_category(tmp_path):
     recs = _records(tmp_path)
     assert recs and all(x["stop_details"]["category"] == "reasoning_extraction" for x in recs)
     assert recs[0]["failure"] == "stop_reason refusal (reasoning_extraction)"
+
+
+def test_the_guard_reads_values_not_keys_or_the_template(tmp_path):
+    """A person named like a JSON key and a template word is redacted in the values, and the record kept."""
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import PersonSeed, redact
+    seed = PersonSeed(seed_id="b:r0007", kind="real", qid="Q990000105", name="Gloss Kindvocab",
+                      description="invented typist")
+    c = _b_call(seed, redactor=lambda t: redact(t, seed))
+    reply = F.reply_items(["zzsteady"], gloss_fmt="This means steady like Kindvocab.")
+    client = F.ScriptedAnthropic({c.prompt_sha256: reply})
+    res = runner(tmp_path, client).run("b", [c], C.parse_generation)
+    rec = json.loads((tmp_path / "responses.jsonl").read_text())
+    assert res.n_ok == 1 and rec["ok"] and rec["items"][0]["gloss"] == "This means steady like this person."
+    assert "guard" not in rec

@@ -195,6 +195,24 @@ def stop_problem(stop_reason: Any, text: Optional[str], stop_details: Optional[M
     return f"stop_reason {stop_reason}" + (f" ({cat})" if cat else "")
 
 
+#: Fields of a (b) record the guard does not read: the user turn as recorded (the template and the opaque id, safe by
+#: construction) and the call's public facts; the record's other string values are read (never its keys), so that a
+#: person named like a template word or a JSON key ("Kind", "Place") does not turn every answer away.
+GUARD_SKIPS: tuple[str, ...] = ("user", "meta")
+
+
+def _strings(obj):
+    """Every string value in ``obj`` (dicts, lists), keys left out."""
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from _strings(v)
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            yield from _strings(v)
+
+
 # --------------------------------------------------------------------------- the run's usage
 
 @dataclass
@@ -443,10 +461,10 @@ class EntropyRunner:
         fictional seed's kept labels left out, being allowed), must carry nothing of its seed; if anything does, the
         record keeps no text and no items and is a failed call (``failure: "redaction guard"``), so that no path the
         tests did not foresee can write a name."""
-        view = dict(rec)
+        view = {k: v for k, v in rec.items() if k not in GUARD_SKIPS}
         if c.labels_may_name and isinstance(view.get("items"), list):
             view["items"] = [{k: v for k, v in it.items() if k != "label"} for it in view["items"]]
-        found = c.leak_check(json.dumps(view, ensure_ascii=False))
+        found = c.leak_check("\n".join(_strings(view)))
         if found:
             rec.update(text=None, items=None, ok=False, failure="redaction guard", n_items=0,
                        guard=sorted(set(found)))
