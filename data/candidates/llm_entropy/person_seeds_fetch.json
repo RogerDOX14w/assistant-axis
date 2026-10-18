@@ -1,0 +1,1008 @@
+{
+  "schema_version": 1,
+  "about": "Append-only record of the person-seed fetches of the LLM-entropy generator's family (b) (coding_plan_06 section 5a): per run its counts, requests, licence, capture date and per opaque seed id only kind and birth-era band.  No name, description or Wikidata id of a seed is ever written: the seeds live in the memory of the process that asked about them.",
+  "runs": [
+    {
+      "run_id": "2026-10-17-pilot",
+      "session_id": "fc8476084c51",
+      "fetched_at": "2026-10-18T04:13:08+00:00",
+      "captured_on": "2026-10-18",
+      "licence": "CC0 1.0 (Wikidata; https://www.wikidata.org/wiki/Wikidata:Licensing)",
+      "source": "Wikidata: the random-item API (real persons) and SPARQL over fictional character classes (fictional ones)",
+      "dead_only": false,
+      "requested": {
+        "real": 80,
+        "fictional": 40
+      },
+      "n_real": 80,
+      "n_fictional": 40,
+      "era_bands": {
+        "<1800": 7,
+        "1800-1899": 10,
+        "1900-1949": 15,
+        "1950+": 21,
+        "unknown": 27
+      },
+      "requests": {
+        "class count search": 9,
+        "class rows search": 9,
+        "class-label request": 1,
+        "entities request": 92,
+        "fictional labels request": 9,
+        "random-item request": 13,
+        "retries": 30
+      },
+      "stats": {
+        "random_rounds": 13,
+        "items_seen": 649,
+        "humans_seen": 85,
+        "skipped_alive": 0,
+        "skipped_no_label": 5,
+        "skipped_unfetchable": 0,
+        "fictional_classes": {
+          "Q95074": {
+            "expected": "fictional character",
+            "label": "character",
+            "label_ok": true,
+            "count": 5000,
+            "taken": 5
+          },
+          "Q15632617": {
+            "expected": "fictional human",
+            "label": "fictional human",
+            "label_ok": true,
+            "count": 71661,
+            "taken": 5
+          },
+          "Q3658341": {
+            "expected": "literary character",
+            "label": "literary character",
+            "label_ok": true,
+            "count": 15505,
+            "taken": 5
+          },
+          "Q1114461": {
+            "expected": "comics character",
+            "label": "comics character",
+            "label_ok": true,
+            "count": 7762,
+            "taken": 5
+          },
+          "Q15773347": {
+            "expected": "film character",
+            "label": "film character",
+            "label_ok": true,
+            "count": 12135,
+            "taken": 5
+          },
+          "Q15773317": {
+            "expected": "television character",
+            "label": "television character",
+            "label_ok": true,
+            "count": 17469,
+            "taken": 5
+          },
+          "Q1569167": {
+            "expected": "video game character",
+            "label": "video game character",
+            "label_ok": true,
+            "count": 9113,
+            "taken": 5
+          },
+          "Q80447738": {
+            "expected": "anime character",
+            "label": "anime character",
+            "label_ok": true,
+            "count": 9234,
+            "taken": 5
+          }
+        },
+        "shortfall": {}
+      },
+      "seeds_sha256": "b0124a85e610376ac6c54c268addaa2efbcb69c7f416b8e0b62f5cfb6106369f",
+      "seeds": [
+        {
+          "seed_id": "b:r0001",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0002",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0003",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0004",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0005",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0006",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0007",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0008",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0009",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0010",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0011",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0012",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0013",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0014",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0015",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0016",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0017",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0018",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0019",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0020",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0021",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0022",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0023",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0024",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0025",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0026",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0027",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0028",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0029",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0030",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0031",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0032",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0033",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0034",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0035",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0036",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0037",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0038",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0039",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0040",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0041",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0042",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0043",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0044",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0045",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0046",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0047",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0048",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0049",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0050",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0051",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0052",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0053",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0054",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0055",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0056",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0057",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0058",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0059",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0060",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0061",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0062",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0063",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0064",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0065",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0066",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0067",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0068",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0069",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0070",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0071",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0072",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0073",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0074",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0075",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0076",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0077",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0078",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0079",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0080",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:f0001",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0002",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0003",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0004",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0005",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0006",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0007",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0008",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0009",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0010",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0011",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0012",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0013",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0014",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0015",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0016",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0017",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0018",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0019",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0020",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0021",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0022",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0023",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0024",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0025",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0026",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0027",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0028",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0029",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0030",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0031",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0032",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0033",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0034",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0035",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0036",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0037",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0038",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0039",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0040",
+          "kind": "fictional",
+          "era": "unknown"
+        }
+      ]
+    },
+    {
+      "run_id": "2026-10-17-pilot",
+      "session_id": "d627714ca479",
+      "fetched_at": "2026-10-18T05:04:41+00:00",
+      "captured_on": "2026-10-18",
+      "licence": "CC0 1.0 (Wikidata; https://www.wikidata.org/wiki/Wikidata:Licensing)",
+      "source": "Wikidata: the random-item API (real persons) and SPARQL over fictional character classes (fictional ones)",
+      "dead_only": false,
+      "requested": {
+        "real": 27,
+        "fictional": 13
+      },
+      "n_real": 27,
+      "n_fictional": 13,
+      "era_bands": {
+        "<1800": 1,
+        "1800-1899": 4,
+        "1900-1949": 5,
+        "1950+": 8,
+        "unknown": 9
+      },
+      "requests": {
+        "class count search": 8,
+        "class rows search": 9,
+        "class-label request": 1,
+        "entities request": 42,
+        "fictional labels request": 9,
+        "random-item request": 7,
+        "retries": 13
+      },
+      "stats": {
+        "random_rounds": 6,
+        "items_seen": 289,
+        "humans_seen": 28,
+        "skipped_alive": 0,
+        "skipped_no_label": 1,
+        "skipped_unfetchable": 0,
+        "fictional_classes": {
+          "Q95074": {
+            "expected": "fictional character",
+            "label": "character",
+            "label_ok": true,
+            "count": 5000,
+            "taken": 2
+          },
+          "Q15632617": {
+            "expected": "fictional human",
+            "label": "fictional human",
+            "label_ok": true,
+            "count": 71661,
+            "taken": 2
+          },
+          "Q3658341": {
+            "expected": "literary character",
+            "label": "literary character",
+            "label_ok": true,
+            "count": 15505,
+            "taken": 2
+          },
+          "Q1114461": {
+            "expected": "comics character",
+            "label": "comics character",
+            "label_ok": true,
+            "count": 7762,
+            "taken": 1
+          },
+          "Q15773347": {
+            "expected": "film character",
+            "label": "film character",
+            "label_ok": true,
+            "count": 12135,
+            "taken": 2
+          },
+          "Q15773317": {
+            "expected": "television character",
+            "label": "television character",
+            "label_ok": true,
+            "count": 17469,
+            "taken": 2
+          },
+          "Q1569167": {
+            "expected": "video game character",
+            "label": "video game character",
+            "label_ok": true,
+            "count": 9113,
+            "taken": 1
+          },
+          "Q80447738": {
+            "expected": "anime character",
+            "label": "anime character",
+            "label_ok": true,
+            "count": 9234,
+            "taken": 1
+          }
+        },
+        "shortfall": {}
+      },
+      "seeds_sha256": "527ede49c778217debb37a6006597fbf9fd9fb51099a856a45595a344404925d",
+      "seeds": [
+        {
+          "seed_id": "b:r0081",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0082",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0083",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0084",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0085",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0086",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0087",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0088",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0089",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0090",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0091",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0092",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0093",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0094",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0095",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0096",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0097",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0098",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0099",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0100",
+          "kind": "real",
+          "era": "1800-1899"
+        },
+        {
+          "seed_id": "b:r0101",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0102",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0103",
+          "kind": "real",
+          "era": "<1800"
+        },
+        {
+          "seed_id": "b:r0104",
+          "kind": "real",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:r0105",
+          "kind": "real",
+          "era": "1900-1949"
+        },
+        {
+          "seed_id": "b:r0106",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:r0107",
+          "kind": "real",
+          "era": "1950+"
+        },
+        {
+          "seed_id": "b:f0041",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0042",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0043",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0044",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0045",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0046",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0047",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0048",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0049",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0050",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0051",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0052",
+          "kind": "fictional",
+          "era": "unknown"
+        },
+        {
+          "seed_id": "b:f0053",
+          "kind": "fictional",
+          "era": "unknown"
+        }
+      ]
+    }
+  ]
+}

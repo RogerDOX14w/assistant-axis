@@ -1,0 +1,725 @@
+{
+  "run_id": "2026-10-17-pilot",
+  "generator": "llm_entropy",
+  "args": {
+    "step": "submit",
+    "record_only": false,
+    "mode": "top 500, 50 per (family, model) cell",
+    "top_n": 500,
+    "per_cell": 50,
+    "kept_target": null,
+    "kept_share": 0.35,
+    "kept_share_assumed": true,
+    "all": false,
+    "n_rows": 1216,
+    "n_candidates": 4873,
+    "n_counted": 500,
+    "n_filtered": 716,
+    "need": {
+      "n_rows": 1216,
+      "n_m1": 506,
+      "n_m3_only": 0,
+      "n_decided": 710,
+      "n_floor_rejected_retaken": 0,
+      "registry_rows": 13136
+    },
+    "net_new_per_cell": {
+      "a|claude-haiku-5-5": 50,
+      "a|claude-sonnet-5-5": 50,
+      "b|claude-haiku-5-5": 50,
+      "b|claude-sonnet-5-5": 50,
+      "c|claude-haiku-5-5": 50,
+      "c|claude-sonnet-5-5": 50,
+      "d|claude-haiku-5-5": 50,
+      "d|claude-sonnet-5-5": 50,
+      "e|claude-haiku-5-5": 50,
+      "e|claude-sonnet-5-5": 50
+    },
+    "transport": "batches",
+    "budget_usd": 10.0,
+    "estimate": {
+      "n": 506,
+      "transport": "batches",
+      "m1_usd": 1.8216,
+      "m3_usd": 2.449,
+      "total_usd": 4.2706,
+      "pass_rate": 0.88,
+      "pass_rate_high": 0.95,
+      "m3_usd_high": 2.6438,
+      "total_usd_high": 4.4654,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "m1_pass_rate_high": 0.95,
+        "batch_factor": 0.5,
+        "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.88 (the census TDA, plan section 10) with 0.95 printed as a high case, unmeasured for this generator until pilot B"
+      }
+    },
+    "strata": {
+      "family_x_model_x_status": {
+        "a x h55 x exists": 14,
+        "a x h55 x new": 67,
+        "a x h55 x registered-decided": 30,
+        "a x s55 x exists": 14,
+        "a x s55 x new": 45,
+        "a x s55 x queued": 3,
+        "a x s55 x registered-decided": 9,
+        "b x h55 x exists": 43,
+        "b x h55 x new": 63,
+        "b x h55 x registered-decided": 50,
+        "b x s55 x exists": 11,
+        "b x s55 x new": 36,
+        "b x s55 x queued": 2,
+        "b x s55 x registered-decided": 35,
+        "c x h55 x exists": 22,
+        "c x h55 x new": 54,
+        "c x h55 x queued": 4,
+        "c x h55 x registered-decided": 55,
+        "c x s55 x exists": 10,
+        "c x s55 x new": 48,
+        "c x s55 x queued": 3,
+        "c x s55 x registered-decided": 24,
+        "d x h55 x exists": 9,
+        "d x h55 x new": 89,
+        "d x h55 x queued": 1,
+        "d x h55 x registered-decided": 129,
+        "d x s55 x new": 43,
+        "e x h55 x exists": 56,
+        "e x h55 x new": 21,
+        "e x h55 x queued": 6,
+        "e x h55 x registered-decided": 161,
+        "e x s55 x exists": 4,
+        "e x s55 x new": 34,
+        "e x s55 x registered-decided": 21
+      },
+      "status": {
+        "exists": 183,
+        "new": 500,
+        "queued": 19,
+        "registered-decided": 514
+      },
+      "single_word": 712,
+      "multi_word": 504,
+      "pair_completion_hint": 96,
+      "table_label_rule_refused": 570
+    },
+    "review_terms_per_hour": 150.0,
+    "projected_kept": 175.0,
+    "table": "data/candidates/llm_entropy/items_table.jsonl",
+    "table_sha256": "1485c25de60ba310a392b23968eab0dd0e9d4be1aa7a4a64e46c62e88a70ea86",
+    "score": "n_sources (a repetition signal; not a familiarity)"
+  },
+  "headline": {
+    "n_unique_stems": 11091,
+    "already_registered": 1410,
+    "already_registered_share": 0.1271,
+    "already_decided": 1410,
+    "already_decided_share_of_registered": 1.0,
+    "single_word_registered_share": 0.6519,
+    "phrase_registered_share": 0.0279,
+    "exists": 310,
+    "queued": 217,
+    "net_new": 9648,
+    "submitted_rows": 1218,
+    "submitted_net_new": 500
+  },
+  "m1": {
+    "n_rows": 1218,
+    "n_filtered": 1218,
+    "n_trait": 1159,
+    "pass_rate": 0.9516,
+    "verdict": {
+      "reject": 11,
+      "tagged": 48,
+      "trait": 1159
+    },
+    "outcome": {
+      "physical": 6,
+      "roles": 2,
+      "states": 40,
+      "trait": 1159,
+      "turned_away": 11
+    },
+    "tags": {
+      "evaluative_only": 2,
+      "membership": 8,
+      "no_persona_reading": 2,
+      "physical": 6,
+      "role_person": 2,
+      "state": 40,
+      "stretched": 7
+    },
+    "polysemy_rate": 0.2438
+  },
+  "m3": {
+    "n_scored": 1183,
+    "decision": {
+      "covered": 605,
+      "new": 578
+    },
+    "new_rate": 0.4886,
+    "kept": 578,
+    "pair_completions": 95
+  },
+  "net_new_kept_share": 0.616,
+  "net_new_kept_share_assumed": 0.35,
+  "kept_net_new": 308,
+  "novel": {
+    "raw": 578,
+    "net": 308,
+    "twins_pending": 237,
+    "twins_reviewed": 33
+  },
+  "per_family": {
+    "a": {
+      "n": 188,
+      "m1_trait_share": 0.9787,
+      "novel_raw": 98,
+      "novel_net": 78
+    },
+    "b": {
+      "n": 305,
+      "m1_trait_share": 0.9934,
+      "novel_raw": 116,
+      "novel_net": 63
+    },
+    "c": {
+      "n": 353,
+      "m1_trait_share": 0.9518,
+      "novel_raw": 162,
+      "novel_net": 92
+    },
+    "d": {
+      "n": 359,
+      "m1_trait_share": 0.9415,
+      "novel_raw": 201,
+      "novel_net": 107
+    },
+    "e": {
+      "n": 709,
+      "m1_trait_share": 0.9422,
+      "novel_raw": 297,
+      "novel_net": 85
+    }
+  },
+  "model_test": {
+    "a|claude-haiku-5-5": {
+      "family": "a",
+      "model": "claude-haiku-5-5",
+      "n_items": 2148,
+      "n_unique_string": 1959,
+      "n_unique_semantic": null,
+      "cost_usd": 0.305123,
+      "unique_per_usd_string": 6420.4,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 144,
+      "n_filtered": 144,
+      "m1_trait_share": 0.9792,
+      "n_submitted_net_new": 87,
+      "n_kept_net_new": 56,
+      "net_new_kept_share": 0.6437,
+      "net_new_kept_per_usd": 183.53,
+      "label_rule_bite": 0.0833,
+      "parse_rate": 1.0
+    },
+    "a|claude-sonnet-5-5": {
+      "family": "a",
+      "model": "claude-sonnet-5-5",
+      "n_items": 791,
+      "n_unique_string": 766,
+      "n_unique_semantic": null,
+      "cost_usd": 0.903092,
+      "unique_per_usd_string": 848.2,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 109,
+      "n_filtered": 109,
+      "m1_trait_share": 0.9908,
+      "n_submitted_net_new": 71,
+      "n_kept_net_new": 53,
+      "net_new_kept_share": 0.7465,
+      "net_new_kept_per_usd": 58.69,
+      "label_rule_bite": 0.0961,
+      "parse_rate": 1.0
+    },
+    "b|claude-haiku-5-5": {
+      "family": "b",
+      "model": "claude-haiku-5-5",
+      "n_items": 1245,
+      "n_unique_string": 735,
+      "n_unique_semantic": null,
+      "cost_usd": 0.147841,
+      "unique_per_usd_string": 4971.6,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 208,
+      "n_filtered": 208,
+      "m1_trait_share": 0.9952,
+      "n_submitted_net_new": 86,
+      "n_kept_net_new": 42,
+      "net_new_kept_share": 0.4884,
+      "net_new_kept_per_usd": 284.09,
+      "label_rule_bite": 0.008,
+      "parse_rate": 1.0
+    },
+    "b|claude-sonnet-5-5": {
+      "family": "b",
+      "model": "claude-sonnet-5-5",
+      "n_items": 441,
+      "n_unique_string": 346,
+      "n_unique_semantic": null,
+      "cost_usd": 0.529064,
+      "unique_per_usd_string": 654.0,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 183,
+      "n_filtered": 183,
+      "m1_trait_share": 0.9891,
+      "n_submitted_net_new": 75,
+      "n_kept_net_new": 41,
+      "net_new_kept_share": 0.5467,
+      "net_new_kept_per_usd": 77.5,
+      "label_rule_bite": 0.0023,
+      "parse_rate": 1.0
+    },
+    "c|claude-haiku-5-5": {
+      "family": "c",
+      "model": "claude-haiku-5-5",
+      "n_items": 2941,
+      "n_unique_string": 2374,
+      "n_unique_semantic": null,
+      "cost_usd": 1.342041,
+      "unique_per_usd_string": 1768.9,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 296,
+      "n_filtered": 296,
+      "m1_trait_share": 0.9459,
+      "n_submitted_net_new": 115,
+      "n_kept_net_new": 72,
+      "net_new_kept_share": 0.6261,
+      "net_new_kept_per_usd": 53.65,
+      "label_rule_bite": 0.0031,
+      "parse_rate": 1.0
+    },
+    "c|claude-sonnet-5-5": {
+      "family": "c",
+      "model": "claude-sonnet-5-5",
+      "n_items": 1962,
+      "n_unique_string": 1602,
+      "n_unique_semantic": null,
+      "cost_usd": 6.575251,
+      "unique_per_usd_string": 243.6,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 229,
+      "n_filtered": 229,
+      "m1_trait_share": 0.9607,
+      "n_submitted_net_new": 116,
+      "n_kept_net_new": 74,
+      "net_new_kept_share": 0.6379,
+      "net_new_kept_per_usd": 11.25,
+      "label_rule_bite": 0.0031,
+      "parse_rate": 0.9907
+    },
+    "d|claude-haiku-5-5": {
+      "family": "d",
+      "model": "claude-haiku-5-5",
+      "n_items": 3370,
+      "n_unique_string": 2952,
+      "n_unique_semantic": null,
+      "cost_usd": 0.626285,
+      "unique_per_usd_string": 4713.5,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 315,
+      "n_filtered": 315,
+      "m1_trait_share": 0.946,
+      "n_submitted_net_new": 126,
+      "n_kept_net_new": 73,
+      "net_new_kept_share": 0.5794,
+      "net_new_kept_per_usd": 116.56,
+      "label_rule_bite": 0.0617,
+      "parse_rate": 1.0
+    },
+    "d|claude-sonnet-5-5": {
+      "family": "d",
+      "model": "claude-sonnet-5-5",
+      "n_items": 680,
+      "n_unique_string": 679,
+      "n_unique_semantic": null,
+      "cost_usd": 1.409764,
+      "unique_per_usd_string": 481.6,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 53,
+      "n_filtered": 53,
+      "m1_trait_share": 0.9057,
+      "n_submitted_net_new": 53,
+      "n_kept_net_new": 42,
+      "net_new_kept_share": 0.7925,
+      "net_new_kept_per_usd": 29.79,
+      "label_rule_bite": 0.1779,
+      "parse_rate": 0.95
+    },
+    "e|claude-haiku-5-5": {
+      "family": "e",
+      "model": "claude-haiku-5-5",
+      "n_items": 1471,
+      "n_unique_string": 699,
+      "n_unique_semantic": null,
+      "cost_usd": 0.17404,
+      "unique_per_usd_string": 4016.3,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 580,
+      "n_filtered": 580,
+      "m1_trait_share": 0.9397,
+      "n_submitted_net_new": 87,
+      "n_kept_net_new": 47,
+      "net_new_kept_share": 0.5402,
+      "net_new_kept_per_usd": 270.05,
+      "label_rule_bite": 0.0,
+      "parse_rate": 1.0
+    },
+    "e|claude-sonnet-5-5": {
+      "family": "e",
+      "model": "claude-sonnet-5-5",
+      "n_items": 673,
+      "n_unique_string": 652,
+      "n_unique_semantic": null,
+      "cost_usd": 1.0228,
+      "unique_per_usd_string": 637.5,
+      "unique_per_usd_semantic": null,
+      "n_submitted_rows": 515,
+      "n_filtered": 515,
+      "m1_trait_share": 0.9437,
+      "n_submitted_net_new": 101,
+      "n_kept_net_new": 64,
+      "net_new_kept_share": 0.6337,
+      "net_new_kept_per_usd": 62.57,
+      "label_rule_bite": 0.0045,
+      "parse_rate": 1.0
+    }
+  },
+  "c_model_rule": {
+    "net_new_kept_per_usd": {
+      "claude-haiku-5-5": 53.65,
+      "claude-sonnet-5-5": 11.25
+    },
+    "favoured": "claude-haiku-5-5",
+    "note": null
+  },
+  "verbalized": {
+    "a": {
+      "n_prompts": 164,
+      "stage1_unique": 2594,
+      "stage2_added": 2624,
+      "added_share": 1.0116,
+      "m1_reject_stage1": 0.0235,
+      "m1_filtered_stage1": 213,
+      "m1_reject_added": 0.0877,
+      "m1_filtered_added": 57,
+      "adopt_by_rule": false,
+      "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
+    },
+    "e": {
+      "n_prompts": 108,
+      "stage1_unique": 699,
+      "stage2_added": 784,
+      "added_share": 1.1216,
+      "m1_reject_stage1": 0.0615,
+      "m1_filtered_stage1": 650,
+      "m1_reject_added": 0.0944,
+      "m1_filtered_added": 339,
+      "adopt_by_rule": false,
+      "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
+    },
+    "all": {
+      "n_prompts": 272,
+      "stage1_unique": 3263,
+      "stage2_added": 3390,
+      "added_share": 1.0389,
+      "m1_reject_stage1": 0.054,
+      "m1_filtered_stage1": 833,
+      "m1_reject_added": 0.0923,
+      "m1_filtered_added": 379,
+      "adopt_by_rule": false,
+      "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
+    }
+  },
+  "roles": {
+    "n_held_roles": 5,
+    "n_majority_role_kind": 16,
+    "n_both": 1,
+    "n_either": 20
+  },
+  "cost": {
+    "files": [
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/llm_entropy/2026-10-17-pilot/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/llm_entropy/multilingual_prompts_usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/llm_entropy/embeddings_usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-17-pilot_llm_entropy/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-17-pilot_llm_entropy/usage.json"
+    ],
+    "per_model": {
+      "claude-haiku-5-5": {
+        "cost_usd": 2.6109,
+        "prompt_tokens": 1268065,
+        "completion_tokens": 4968162,
+        "n_calls": 1070
+      },
+      "claude-haiku-5-5:batch": {
+        "cost_usd": 0.7609,
+        "prompt_tokens": 2581324,
+        "completion_tokens": 2527300,
+        "n_calls": 8286
+      },
+      "claude-opus-5-5:batch": {
+        "cost_usd": 0.9576,
+        "prompt_tokens": 113030,
+        "completion_tokens": 73153,
+        "n_calls": 546
+      },
+      "claude-sonnet-5-5": {
+        "cost_usd": 10.7741,
+        "prompt_tokens": 217871,
+        "completion_tokens": 1033836,
+        "n_calls": 283
+      },
+      "claude-sonnet-5-5:batch": {
+        "cost_usd": 2.4136,
+        "prompt_tokens": 1271386,
+        "completion_tokens": 228456,
+        "n_calls": 2451
+      },
+      "text-embedding-3-large": {
+        "cost_usd": 0.0527,
+        "prompt_tokens": 405214,
+        "completion_tokens": 0,
+        "n_calls": 109
+      }
+    },
+    "total_usd": 17.5698
+  },
+  "generation_costs": {
+    "by_family": {
+      "a": 1.208215,
+      "b": 0.676905,
+      "c": 7.917291,
+      "d": 2.036048,
+      "e": 1.19684
+    },
+    "by_family_model": {
+      "a|claude-haiku-5-5": 0.305123,
+      "a|claude-sonnet-5-5": 0.903092,
+      "b|claude-haiku-5-5": 0.147841,
+      "b|claude-sonnet-5-5": 0.529064,
+      "c|claude-haiku-5-5": 1.342041,
+      "c|claude-sonnet-5-5": 6.575251,
+      "d|claude-haiku-5-5": 0.626285,
+      "d|claude-sonnet-5-5": 1.409764,
+      "e|claude-haiku-5-5": 0.17404,
+      "e|claude-sonnet-5-5": 1.0228
+    },
+    "records_usd": 13.035303,
+    "usage_json_usd": 13.0353,
+    "scale": 1.0
+  },
+  "useful": 673,
+  "useful_per_dollar": 38.3,
+  "projection": {
+    "kept_share": 0.616,
+    "wave_300": {
+      "net_new_rows": 488,
+      "rows_to_submit": 1189,
+      "kept_rows": 300,
+      "novel_raw": 301,
+      "novel_net": 301,
+      "review_hours": 2.0,
+      "estimate_batches": 10.0352
+    },
+    "whole_table": {
+      "rows": 11091,
+      "net_new_rows": 9078,
+      "kept_rows": 5592,
+      "review_hours": 37.28,
+      "estimate_batches": 76.8968
+    }
+  },
+  "parse_rate": {
+    "a": {
+      "n_units": 166,
+      "n_ok": 166,
+      "rate": 1.0,
+      "n_records": 167,
+      "n_records_ok": 166,
+      "failures": {
+        "stop_reason refusal (reasoning_extraction)": 1
+      }
+    },
+    "b": {
+      "n_units": 160,
+      "n_ok": 160,
+      "rate": 1.0,
+      "n_records": 160,
+      "n_records_ok": 160,
+      "failures": {}
+    },
+    "c": {
+      "n_units": 288,
+      "n_ok": 287,
+      "rate": 0.9965,
+      "n_records": 292,
+      "n_records_ok": 287,
+      "failures": {
+        "stop_reason max_tokens": 5
+      }
+    },
+    "d": {
+      "n_units": 274,
+      "n_ok": 272,
+      "rate": 0.9927,
+      "n_records": 278,
+      "n_records_ok": 272,
+      "failures": {
+        "stop_reason refusal (reasoning_extraction)": 6
+      }
+    },
+    "e": {
+      "n_units": 148,
+      "n_ok": 148,
+      "rate": 1.0,
+      "n_records": 148,
+      "n_records_ok": 148,
+      "failures": {}
+    }
+  },
+  "label_rule_bite": {
+    "a": {
+      "n_items": 2939,
+      "n_refused": 255,
+      "share": 0.0868,
+      "by_reason": {
+        "non-ASCII": 3,
+        "over 4 words": 252
+      }
+    },
+    "b": {
+      "n_items": 1686,
+      "n_refused": 11,
+      "share": 0.0065,
+      "by_reason": {
+        "over 4 words": 11
+      }
+    },
+    "c": {
+      "n_items": 4903,
+      "n_refused": 15,
+      "share": 0.0031,
+      "by_reason": {
+        "over 4 words": 15
+      }
+    },
+    "d": {
+      "n_items": 4050,
+      "n_refused": 329,
+      "share": 0.0812,
+      "by_reason": {
+        "non-ASCII": 5,
+        "over 4 words": 324
+      }
+    },
+    "e": {
+      "n_items": 2144,
+      "n_refused": 3,
+      "share": 0.0014,
+      "by_reason": {
+        "non-ASCII": 1,
+        "over 4 words": 2
+      }
+    }
+  },
+  "zipf_below_3": {
+    "a": {
+      "n_single_word": 95,
+      "n_below": 74,
+      "share_below": 0.7789,
+      "below": 3.0
+    },
+    "b": {
+      "n_single_word": 180,
+      "n_below": 106,
+      "share_below": 0.5889,
+      "below": 3.0
+    },
+    "c": {
+      "n_single_word": 671,
+      "n_below": 432,
+      "share_below": 0.6438,
+      "below": 3.0
+    },
+    "d": {
+      "n_single_word": 620,
+      "n_below": 529,
+      "share_below": 0.8532,
+      "below": 3.0
+    },
+    "e": {
+      "n_single_word": 694,
+      "n_below": 396,
+      "share_below": 0.5706,
+      "below": 3.0
+    }
+  },
+  "collapse": {
+    "a": {
+      "n_calls": 166,
+      "n_unique_string": 2629,
+      "n_unique_semantic": 2551,
+      "jaccard_median": 0.0318,
+      "jaccard_p90": 0.0909,
+      "lincoln_petersen_N": 10679.84,
+      "seen_over_N": 0.2462,
+      "end_slope_per_call": 14.5152,
+      "unique_per_usd": 2175.9
+    },
+    "b": {
+      "n_calls": 160,
+      "n_unique_string": 995,
+      "n_unique_semantic": 967,
+      "jaccard_median": null,
+      "jaccard_p90": null,
+      "lincoln_petersen_N": 2261.27,
+      "seen_over_N": 0.44,
+      "end_slope_per_call": 5.4062,
+      "unique_per_usd": 1469.9
+    },
+    "c": {
+      "n_calls": 287,
+      "n_unique_string": 3671,
+      "n_unique_semantic": 3526,
+      "jaccard_median": 0.0602,
+      "jaccard_p90": 0.1352,
+      "lincoln_petersen_N": 7450.43,
+      "seen_over_N": 0.4927,
+      "end_slope_per_call": 10.3333,
+      "unique_per_usd": 463.7
+    },
+    "d": {
+      "n_calls": 272,
+      "n_unique_string": 3621,
+      "n_unique_semantic": 3578,
+      "jaccard_median": 0.0213,
+      "jaccard_p90": 0.266,
+      "lincoln_petersen_N": 12175.29,
+      "seen_over_N": 0.2974,
+      "end_slope_per_call": 12.4815,
+      "unique_per_usd": 1778.4
+    },
+    "e": {
+      "n_calls": 148,
+      "n_unique_string": 965,
+      "n_unique_semantic": 955,
+      "jaccard_median": 0.4949,
+      "jaccard_p90": 0.737,
+      "lincoln_petersen_N": 1026.23,
+      "seen_over_N": 0.9403,
+      "end_slope_per_call": 3.9655,
+      "unique_per_usd": 806.3
+    }
+  }
+}
