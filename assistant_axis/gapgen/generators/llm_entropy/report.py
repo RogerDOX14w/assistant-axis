@@ -250,10 +250,12 @@ def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, run_id: s
     by = {r["stem"]: r for r in table}
     L = [f"# Precision sample, LLM-entropy run `{run_id}`", "",
          f"Up to {n} rows per family (seed {seed}) the scorer decided `new` or `grey`.  Mark each **trait** (a new "
-         f"persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the last column; the target "
+         f"persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the second column; the target "
          f"is 70% or more trait-and-new (plan 09 section 6.4).  *Nearest existing traits*: the first three corpus "
          f"traits M3 compared the candidate with, with M3's reading (4 the same concept, 3 narrower or broader, 2 "
-         f"overlapping, 1 related, 0 different).  Family (b)'s persons appear by opaque id only.", ""]
+         f"overlapping, 1 related, 0 different).  *M1's gloss* is the one the pipeline uses (M3, grouping, review); "
+         f"*the generator's gloss* is what the model meant when it named the item, for reference.  Family (b)'s "
+         f"persons appear by opaque id only.", ""]
     for f in FAMILIES:
         pool = sorted((r for r in rows if _decision(r) in KEPT_DECISIONS and f in _row_families(r, run_id)),
                       key=lambda r: r["key"])
@@ -262,14 +264,15 @@ def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, run_id: s
         pick = sorted(random.Random(f"llm_entropy-sample:{seed}:{f}").sample(pool, min(n, len(pool))),
                       key=lambda r: r["key"])
         L += [f"## Family {f} ({FAMILY_NAMES[f]}): {len(pick)} of {len(pool)}", "",
-              "| # | label | gloss | prompts | M1 | M3 | nearest existing traits (M3's reading) | Roger |",
-              "|---|---|---|---|---|---|---|---|"]
+              "| # | mark | label | M1's gloss | the generator's gloss | nearest existing traits (M3's reading) | M1 | M3 "
+              "| prompts |",
+              "|---|---|---|---|---|---|---|---|---|"]
         for i, r in enumerate(pick, 1):
             t = by.get(r["stem"]) or {}
             near, _ = _nearest_text(r, trait_prefix)
             prompts = ", ".join(sorted({s["prompt_id"] for s in t.get("sources") or [] if s["family"] == f})[:3])
-            L.append(f"| {i} | {_cell(r.get('label'))} | {_cell(t.get('gloss'))} | {_cell(prompts)} | "
-                     f"{_cell((r.get('filter') or {}).get('verdict'))} | {_cell(_decision(r))} | {near} | |")
+            L.append(f"| {i} |  | {_cell(r.get('label'))} | {_cell(r.get('gloss'))} | {_cell(t.get('gloss'))} | {near} | "
+                     f"{_cell((r.get('filter') or {}).get('verdict'))} | {_cell(_decision(r))} | {_cell(prompts)} |")
         L.append("")
     return "\n".join(L) + "\n"
 
@@ -283,18 +286,19 @@ def gloss_check_sample(table: Sequence[Mapping], *, run_id: str, n: int = 30, se
             srcs.setdefault((s["family"], s["model"]), []).append((r, s))
     L = [f"# Gloss-fidelity check, LLM-entropy run `{run_id}`", "",
          f"Up to {n} items per family and model arm (seed {seed}).  For each: does the gloss describe the label's "
-         f"intended sense, and would the label be read otherwise without it?  Mark **ok**, **wrong** (the gloss does "
+         f"intended sense, and would the label be read otherwise without it?  The gloss is the generator's own.  Mark "
+         f"(second column) **ok**, **wrong** (the gloss does "
          f"not fit the label) or **polysemous** (it fits, but the label alone reads otherwise).  Family (c) shows the "
          f"original label and its romanisation; the English label and gloss are the back-translation's.", ""]
     for (f, m) in sorted(srcs, key=lambda k: (FAMILIES.index(k[0]) if k[0] in FAMILIES else 9, k[1])):
         pool = sorted(srcs[(f, m)], key=lambda rs: (rs[0]["stem"], rs[1]["prompt_id"], rs[1]["run"]))
         pick = random.Random(f"llm_entropy-gloss:{seed}:{f}:{m}").sample(pool, min(n, len(pool)))
         L += [f"## Family {f} ({FAMILY_NAMES.get(f, f)}) on {m}: {len(pick)} of {len(pool)}", "",
-              "| # | label | gloss | original (c) | prompt | Roger |", "|---|---|---|---|---|---|"]
+              "| # | mark | label | the generator's gloss | original (c) | prompt |", "|---|---|---|---|---|---|"]
         for i, (r, s) in enumerate(sorted(pick, key=lambda rs: (rs[0]["stem"], rs[1]["prompt_id"])), 1):
             orig = f"{s.get('raw')} ({', '.join(r.get('backtranslated_from') or [])})" if f == "c" else ""
-            L.append(f"| {i} | {_cell(s.get('label') or r['label'])} | {_cell(s.get('gloss'))} | {_cell(orig)} | "
-                     f"{_cell(s['prompt_id'])} | |")
+            L.append(f"| {i} |  | {_cell(s.get('label') or r['label'])} | {_cell(s.get('gloss'))} | {_cell(orig)} | "
+                     f"{_cell(s['prompt_id'])} |")
         L.append("")
     return "\n".join(L) + "\n"
 
