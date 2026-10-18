@@ -416,16 +416,18 @@ def fetch_real(n: int, *, session: Throttle, rng: Optional[random.Random] = None
     return out
 
 
-def _count_query(qid: str) -> str:
-    return f"SELECT (COUNT(?item) AS ?n) WHERE {{ ?item wdt:P31 wd:{qid} . }}"
+#: CirrusSearch serves search results only up to this offset.
+SEARCH_MAX_OFFSET = 10_000
 
 
-def _data_query(qid: str, limit: int, offset: int) -> str:
-    """The class's items at an offset, **ids only**: the label service applied before the OFFSET labels every row
-    first, which on a large class (fictional human) ran 65 s and timed out (HTTP 504), and repeated calls drew HTTP
-    429 (the first live pilot, 2026-10-17); the ids alone take about half a second.  Labels and descriptions come from
-    ``wbgetentities`` (:func:`_labels_of`)."""
-    return f"SELECT ?item WHERE {{ ?item wdt:P31 wd:{qid} . }} LIMIT {int(limit)} OFFSET {int(offset)}"
+def _class_search(session: "Throttle", qid: str, limit: int, offset: int, what: str) -> dict:
+    """The items with ``P31 = qid`` through the Action API's search (``haswbstatement``), ``limit`` from ``offset``,
+    with the total in ``searchinfo.totalhits``.  Replaced the query service on 2026-10-17: after a few expensive label
+    queries the query service answered every SPARQL request from this client with HTTP 429 and Retry-After 1000, for
+    hours, while the Action API kept answering."""
+    return session.get_json(WIKIDATA_API, {"action": "query", "list": "search", "srsearch": f"haswbstatement:P31={qid}",
+                                           "srnamespace": "0", "srlimit": str(int(limit)), "sroffset": str(int(offset)),
+                                           "srinfo": "totalhits", "srprop": "", "format": "json"}, what=what)
 
 
 def _labels_of(session: "Throttle", qids: Sequence[str]) -> dict:
@@ -452,7 +454,8 @@ def fetch_fictional(n: int, *, session: Throttle, rng: random.Random, classes: M
                     ) -> list[PersonSeed]:
     """``n`` fictional characters, numbered ``b:f{start:04d}`` on: the quota split evenly over the classes (the
     remainder to classes in a seeded order), each class asked once for its size and once for ``2 x quota`` rows at a
-    seeded random offset (at least :data:`MIN_CLASS_ROWS` rows, so a class with no quota still gives spares); rows
+    seeded random offset (both through :func:`_class_search`, the Action API's search; the offset within the first
+    :data:`SEARCH_MAX_OFFSET` results) (at least :data:`MIN_CLASS_ROWS` rows, so a class with no quota still gives spares); rows
     without an English label (the label service returns the id) and repeats are skipped; a class short of its quota
     is topped up from the other classes' spare rows."""
     stats = stats if stats is not None else FetchStats()
@@ -482,22 +485,22 @@ def fetch_fictional(n: int, *, session: Throttle, rng: random.Random, classes: M
     spare: list[tuple[str, str, Optional[str]]] = []
     seen: set[str] = set()
     for q in ok:                                   # fixed order: each class queried once per call
-        rows = session.get_json(WIKIDATA_SPARQL, {"query": _count_query(q), "format": "json"}, what="SPARQL count")
+        head = _class_search(session, q, 1, 0, "class count search")
         try:
-            count = int(((rows.get("results") or {}).get("bindings") or [{}])[0]["n"]["value"])
-        except (KeyError, IndexError, TypeError, ValueError):
+            count = int(((head.get("query") or {}).get("searchinfo") or {}).get("totalhits") or 0)
+        except (TypeError, ValueError):
             count = 0
         stats.fictional_classes[q]["count"] = count
         if count <= 0:
             continue
-        limit = max(MIN_CLASS_ROWS, 2 * quota[q])       # a class with no quota still gives spares for the top-up
-        offset = rng.randrange(max(1, count - limit + 1))
-        data = session.get_json(WIKIDATA_SPARQL, {"query": _data_query(q, limit, offset), "format": "json"},
-                                what="SPARQL data")
+        limit = min(50, max(MIN_CLASS_ROWS, 2 * quota[q]))  # a class with no quota still gives spares for the top-up
+        reach = min(count, SEARCH_MAX_OFFSET)
+        offset = rng.randrange(max(1, reach - limit + 1))
+        data = _class_search(session, q, limit, offset, "class rows search")
         taken = 0
         qids = []
-        for b in (data.get("results") or {}).get("bindings") or []:
-            qid = ((b.get("item") or {}).get("value") or "").rsplit("/", 1)[-1]
+        for hit in (data.get("query") or {}).get("search") or []:
+            qid = str(hit.get("title") or "")
             if re.fullmatch(r"Q\d+", qid) and qid not in seen and qid not in qids:
                 qids.append(qid)
         labs = _labels_of(session, qids)

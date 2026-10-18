@@ -61,14 +61,18 @@ def test_fictional_path_queries_each_class_once_per_call():
     th, _ = throttle(session)
     stats = SD.FetchStats()
     seeds = SD.fetch_fictional(3, session=th, rng=random.Random(0), stats=stats)
-    sparql = [c for c in session.calls if "sparql" in c["url"]]
+    # Expectation changed 2026-10-17: the classes are read through the Action API's search, not the query service
+    # (which refused this client's SPARQL with HTTP 429 and Retry-After 1000): one count search (srlimit 1) and one
+    # rows search per class, and no request to the query service at all.
+    assert not any("sparql" in c["url"] for c in session.calls)
+    searches = [c["params"] for c in session.calls if c["params"].get("list") == "search"]
     per_class: dict = {}
-    for c in sparql:
-        q = c["params"]["query"]
-        cls = q.split("wd:")[1].split()[0]
-        per_class.setdefault(cls, []).append("count" if "COUNT" in q else "data")
+    for p in searches:
+        cls = p["srsearch"].split("P31=")[1]
+        per_class.setdefault(cls, []).append("count" if p["srlimit"] == "1" else "rows")
     assert set(per_class) == set(SD.FICTIONAL_CLASSES)
-    assert all(sorted(v) == ["count", "data"] for v in per_class.values())     # one count, one data query each
+    assert all(sorted(v) == ["count", "rows"] for v in per_class.values())     # one count, one rows search each
+    assert all(int(p["sroffset"]) < SD.SEARCH_MAX_OFFSET for p in searches)
     assert [s.kind for s in seeds] == ["fictional"] * 3 and [s.seed_id for s in seeds] == ["b:f0001", "b:f0002",
                                                                                            "b:f0003"]
     assert {s.qid for s in seeds} == {q for q, *_ in F.FICTIONAL_PEOPLE}      # labelled rows only, topped up

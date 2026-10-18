@@ -80,6 +80,14 @@ class FakeWikidataSession:
             return Response(429, "<html>Too Many Requests</html>")
         if "sparql" in url:
             return Response(200, json.dumps(self._sparql(params["query"])))
+        if params.get("list") == "search":           # the fictional path (haswbstatement search, 2026-10-17)
+            import re as _re
+            qid = _re.search(r"P31=(Q\d+)", params["srsearch"]).group(1)
+            hits = ([q for q, *_ in FICTIONAL_PEOPLE] if qid == "Q95074" else []) + [f"Q99{qid[1:]}"]
+            off, lim = int(params.get("sroffset", 0)), int(params.get("srlimit", 10))
+            rows = hits[off:off + lim] if lim > 1 else hits[:1]
+            return Response(200, json.dumps({"query": {"searchinfo": {"totalhits": self.class_counts.get(qid, 0)},
+                                                       "search": [{"ns": 0, "title": q} for q in rows]}}))
         if params.get("list") == "random":
             self._round += 1
             ids = [q for q, *_ in REAL_PEOPLE] if self._round == 1 else []
