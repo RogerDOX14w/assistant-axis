@@ -1,0 +1,433 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 224,
+    "n_decided": 224,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "decided_by_another_run": 431,
+      "not_a_trait": 220,
+      "held_nationalities": 1
+    },
+    "by_decision": {
+      "covered": 77,
+      "new": 147
+    },
+    "by_reason": {
+      "overlap": 221,
+      "exact_label": 3
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 74,
+        "new": 119
+      },
+      "4": {
+        "new": 28,
+        "covered": 3
+      }
+    },
+    "exact_label": {
+      "queue": 1,
+      "corpus": 2
+    },
+    "pairs_judged_per_candidate": {
+      "0": 16,
+      "1": 78,
+      "2": 39,
+      "3": 24,
+      "4": 24,
+      "5": 14,
+      "6": 13,
+      "7": 7,
+      "8": 2,
+      "9": 4
+    },
+    "pairs_judged_total": 573,
+    "pairs_judged_mean": 2.593,
+    "listed_per_candidate_mean": 15.91,
+    "shortlist_length": {
+      "0": 16,
+      "1": 35,
+      "2": 37,
+      "3": 27,
+      "4": 40,
+      "5": 24,
+      "6": 18,
+      "7": 15,
+      "8": 3,
+      "9": 6
+    },
+    "early_exit_depth": {
+      "1": 51,
+      "2": 14,
+      "3": 4,
+      "4": 3,
+      "5": 1,
+      "6": 1
+    },
+    "escalations": {
+      "at_cut_off": 55,
+      "below_cut_off": 202,
+      "above_cut_off": 1
+    },
+    "rescues": 0,
+    "review_flags": {
+      "sonnet_below_opus_at": 15,
+      "both_similar": 1
+    },
+    "pair_completions": 22,
+    "pair_completion_for": {
+      "biddable#1": [
+        "foot_dragging"
+      ],
+      "blunderer#1": [
+        "deft"
+      ],
+      "concessive#1": [
+        "win_win_seeking"
+      ],
+      "cumbrous#1": [
+        "chattering"
+      ],
+      "diarist#1": [
+        "repressed"
+      ],
+      "dyspeptic#1": [
+        "wry"
+      ],
+      "hired#1": [
+        "parasitic"
+      ],
+      "hussy#1": [
+        "prudish"
+      ],
+      "insupportable#1": [
+        "dignified"
+      ],
+      "marriageable#1": [
+        "polygamous"
+      ],
+      "nepotist#1": [
+        "just"
+      ],
+      "nonreader#1": [
+        "read_write_vark"
+      ],
+      "overgenerous#1": [
+        "greedy"
+      ],
+      "seamy#1": [
+        "incorruptible",
+        "dignified"
+      ],
+      "shamming#1": [
+        "in_chronic_pain"
+      ],
+      "stutterer#1": [
+        "chattering"
+      ],
+      "unfaded#1": [
+        "declining"
+      ],
+      "unfaith#1": [
+        "sikh",
+        "muslim"
+      ],
+      "unhandy#1": [
+        "deft"
+      ],
+      "unhospitable#1": [
+        "welcoming"
+      ],
+      "unlicked#1": [
+        "shabby_genteel"
+      ],
+      "youngish#1": [
+        "middle_aged"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 221
+      },
+      "answers": {
+        "unrelated": 1800,
+        "opposed": 898,
+        "similar": 801,
+        "unsure": 17
+      },
+      "final": {
+        "similar": 805,
+        "opposed": 898,
+        "unrelated": 1813
+      },
+      "candidates_with_unsure_reasked": 12
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 221,
+        "input": 370601,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 585,
+        "input": 88576,
+        "cache_write": 4592,
+        "cache_read": 324310,
+        "calls_with_read": 565,
+        "read_share_of_input": 0.7768,
+        "hit_rate_calls": 0.9658
+      },
+      "claude-opus-5-5": {
+        "calls": 258,
+        "input": 36585,
+        "cache_write": 4592,
+        "cache_read": 143500,
+        "calls_with_read": 250,
+        "read_share_of_input": 0.777,
+        "hit_rate_calls": 0.969
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5": 0.187905
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5": 0.029608
+      },
+      "overlap": {
+        "claude-sonnet-5-5": 0.712192,
+        "claude-opus-5-5": 0.985916
+      }
+    },
+    "spend_usd": 1.916126,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 370601,
+          "completion_tokens": 301689,
+          "cost_usd": 0.1879,
+          "n_calls": 221
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 56579,
+          "completion_tokens": 37980,
+          "cost_usd": 0.9859,
+          "n_calls": 258
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 126525,
+          "completion_tokens": 48875,
+          "cost_usd": 0.7418,
+          "n_calls": 585
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 3884,
+          "completion_tokens": 0,
+          "cost_usd": 0.0005,
+          "n_calls": 2
+        }
+      },
+      "total_cost_usd": 1.9161,
+      "total_prompt_tokens": 557589,
+      "total_completion_tokens": 388544,
+      "n_calls": 1066
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 16,
+    "covered_flagged": 15,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 7,
+    "floor": {
+      "rows_with_listed_below": 221,
+      "listed_below_total": 1997,
+      "similar_kept_out_total": 44,
+      "rows_with_similar_kept_out": 33
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "8a2e297bb42d68cad58f5cd0cfe918380c2fc9d958bd6ccb887161eb82634ebf",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 224,
+      "rows_listing_a_queue_entry": 107,
+      "rows_reading_a_queue_entry": 36,
+      "covered_by_queue": 7,
+      "covered_by_queue_by_status": {
+        "candidate": 7
+      }
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "covered": 70,
+        "new": 109
+      },
+      "alignment 2": {
+        "covered": 4,
+        "new": 10
+      },
+      "alignment 3": {
+        "new": 28,
+        "covered": 3
+      }
+    },
+    "partners_skipped": {
+      "rows": 158,
+      "partners": 334,
+      "by_relation": {
+        "unrelated": 302,
+        "opposed": 32
+      },
+      "by_where": {
+        "shortlist": 334
+      },
+      "est_readings_saved": {
+        "sonnet": 334,
+        "opus": 12.4
+      },
+      "est_saving_usd_live": 0.4454
+    },
+    "batch_id": "2026-10-18-pilot_corpus_frames",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 221,
+        "ok_first": 221,
+        "ok": 221
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 12,
+        "ok_first": 12,
+        "ok": 12
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 573,
+        "ok_first": 573,
+        "ok": 573
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 258,
+        "ok_first": 258,
+        "ok": 258
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 0,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-18-pilot_corpus_frames --run corpus_frames/2026-10-18-pilot --transport live --budget-usd 8",
+      "git_sha": "5ab41d2e+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-18-pilot_corpus_frames"
+    },
+    "produced_at": "2026-10-18T01:07:40+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-15T10:36:06+00:00@3501892",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-15T10:36:06+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "81063b615a621da245283c419b1daf2be1d4c7a85a27c41860c6a6daac6451ff"
+  }
+}

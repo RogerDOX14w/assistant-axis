@@ -1,0 +1,4359 @@
+{
+  "result": {
+    "table_sha256": "81e3112c149b48c7b161135a7c39473c5b01eaf4cc00405d8cd8d1522b794c06",
+    "bank_sha256": "2917c9a3986cb0a3eab433b17363136a35899c5de99bec6294f1f94894397f1e",
+    "text_bank_sha256": "0ca58c0c1cd08ccf042708fe72d6adb65c849c46909fc01d58a27e5e75303005",
+    "year_min": 1920,
+    "table_counts": {
+      "n_rows": 17630,
+      "n_eligible": 16682,
+      "n_net_new": 11726,
+      "forms": {
+        "adjective": 10879,
+        "noun": 6751
+      },
+      "relabelled": 170,
+      "relabel_rules": {
+        "derivation": 460,
+        "derivation+spelling": 14,
+        "suffix:+ful": 55,
+        "suffix:+ish": 23,
+        "suffix:+ly": 7,
+        "suffix:+ous": 2,
+        "suffix:+y": 29,
+        "suffix:-cy+te": 17,
+        "suffix:-ist+istic": 16,
+        "suffix:-ite+itical": 1,
+        "suffix:-ot+oted": 1,
+        "suffix:-ty": 13,
+        "suffix:-ty+t": 4,
+        "suffix:-vert+verted": 2,
+        "suffix:noun_suffix": 1225
+      },
+      "nouns_left": 6751,
+      "us_spelling_folds": 57,
+      "corpus_stem_match": 571,
+      "queue_stem_match": 340,
+      "registered": 5881,
+      "registered_decided": 5860,
+      "sources": {
+        "books": 17628,
+        "cards": 17,
+        "pippa": 54
+      },
+      "n_frames": {
+        "1": 7743,
+        "2": 3014,
+        "3": 1640,
+        "4": 1149,
+        "5": 829,
+        "6": 689,
+        "7": 481,
+        "8": 344,
+        "9": 283,
+        "10": 282,
+        "11": 209,
+        "12": 180,
+        "13": 156,
+        "14": 96,
+        "15": 84,
+        "16": 66,
+        "17": 64,
+        "18": 55,
+        "19": 57,
+        "20": 44,
+        "21": 30,
+        "22": 33,
+        "23": 19,
+        "24": 26,
+        "25": 15,
+        "26": 14,
+        "27": 11,
+        "28": 7,
+        "29": 4,
+        "30": 2,
+        "31": 1,
+        "32": 2,
+        "34": 1
+      }
+    },
+    "frames": [
+      {
+        "frame": "d_very",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "very X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6650,
+          6651,
+          6652
+        ],
+        "lines_scanned": 10200681,
+        "lines_kept": 12038,
+        "hits": 8894194,
+        "fillers": 2957,
+        "above_floor": 2306,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 2240,
+          "noun": 66
+        },
+        "registered_share": 0.8226,
+        "corpus_share": 0.1622,
+        "net_new_share": 0.1778,
+        "unique_rows": 86,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 2243,
+            "recall@500": 0.1451,
+            "recall@1000": 0.2604,
+            "recall@3000": 0.4044,
+            "recall@10000": 0.4044,
+            "found_anywhere": 0.4044
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 2243,
+            "recall@500": 0.111,
+            "recall@1000": 0.2198,
+            "recall@3000": 0.4044,
+            "recall@10000": 0.4044,
+            "found_anywhere": 0.4044
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 3,
+            "emotional_temperament": 2,
+            "identity_demographic": 1,
+            "moral_stance": 2,
+            "social_interpersonal": 9
+          },
+          "forms": {
+            "adjective": 18,
+            "noun": 1
+          },
+          "physical_state_share": 0.16,
+          "kept": 4,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "unamiable",
+            "unboyish"
+          ],
+          "region_tv": 0.2183,
+          "form_tv": 0.1982
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.22 <= 0.5"
+      },
+      {
+        "frame": "d_too",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "too X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6504,
+          6505,
+          6506
+        ],
+        "lines_scanned": 10203545,
+        "lines_kept": 566,
+        "hits": 1063357,
+        "fillers": 300,
+        "above_floor": 188,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 177,
+          "noun": 11
+        },
+        "registered_share": 0.7606,
+        "corpus_share": 0.1809,
+        "net_new_share": 0.2394,
+        "unique_rows": 4,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 186,
+            "recall@500": 0.0363,
+            "recall@1000": 0.0363,
+            "recall@3000": 0.0363,
+            "recall@10000": 0.0363,
+            "found_anywhere": 0.0363
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 186,
+            "recall@500": 0.0363,
+            "recall@1000": 0.0363,
+            "recall@3000": 0.0363,
+            "recall@10000": 0.0363,
+            "found_anywhere": 0.0363
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 18,
+          "yield": 0.72,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 2,
+            "emotional_temperament": 5,
+            "identity_demographic": 1,
+            "moral_stance": 1,
+            "social_interpersonal": 6
+          },
+          "forms": {
+            "adjective": 18
+          },
+          "physical_state_share": 0.08,
+          "kept": 6,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2005,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.72 >= 0.4 and region_tv 0.20 <= 0.5"
+      },
+      {
+        "frame": "d_so",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "so X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5999,
+          6000,
+          6001,
+          6002
+        ],
+        "lines_scanned": 13653172,
+        "lines_kept": 1225,
+        "hits": 2621402,
+        "fillers": 797,
+        "above_floor": 642,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 548,
+          "noun": 94
+        },
+        "registered_share": 0.4657,
+        "corpus_share": 0.0592,
+        "net_new_share": 0.5374,
+        "unique_rows": 113,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 612,
+            "recall@500": 0.0374,
+            "recall@1000": 0.0407,
+            "recall@3000": 0.0407,
+            "recall@10000": 0.0407,
+            "found_anywhere": 0.0407
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 612,
+            "recall@500": 0.0352,
+            "recall@1000": 0.0407,
+            "recall@3000": 0.0407,
+            "recall@10000": 0.0407,
+            "found_anywhere": 0.0407
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 3,
+          "yield": 0.12,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "identity_demographic": 1,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 2,
+            "noun": 1
+          },
+          "physical_state_share": 0.0,
+          "kept": 0,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.4716,
+          "form_tv": 0.0825
+        },
+        "keep": false,
+        "why": "yield 0.12 < 0.4, no unique kept row"
+      },
+      {
+        "frame": "d_rather",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "rather X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5686,
+          5687,
+          5688,
+          5689
+        ],
+        "lines_scanned": 13419164,
+        "lines_kept": 2686,
+        "hits": 349447,
+        "fillers": 1117,
+        "above_floor": 919,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 891,
+          "noun": 28
+        },
+        "registered_share": 0.8422,
+        "corpus_share": 0.173,
+        "net_new_share": 0.16,
+        "unique_rows": 9,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 918,
+            "recall@500": 0.1066,
+            "recall@1000": 0.1703,
+            "recall@3000": 0.1703,
+            "recall@10000": 0.1703,
+            "found_anywhere": 0.1703
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 918,
+            "recall@500": 0.1022,
+            "recall@1000": 0.1703,
+            "recall@3000": 0.1703,
+            "recall@10000": 0.1703,
+            "found_anywhere": 0.1703
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 14,
+          "yield": 0.56,
+          "regions": {
+            "communication_style": 6,
+            "emotional_temperament": 3,
+            "identity_demographic": 2,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 14
+          },
+          "physical_state_share": 0.4,
+          "kept": 8,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "hortatory",
+            "stodgier"
+          ],
+          "region_tv": 0.311,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.56 >= 0.4 and region_tv 0.31 <= 0.5"
+      },
+      {
+        "frame": "d_quite",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "quite X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5669,
+          5670
+        ],
+        "lines_scanned": 6810946,
+        "lines_kept": 647,
+        "hits": 149473,
+        "fillers": 367,
+        "above_floor": 294,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 285,
+          "noun": 9
+        },
+        "registered_share": 0.8197,
+        "corpus_share": 0.1667,
+        "net_new_share": 0.1803,
+        "unique_rows": 3,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 294,
+            "recall@500": 0.0505,
+            "recall@1000": 0.0505,
+            "recall@3000": 0.0505,
+            "recall@10000": 0.0505,
+            "found_anywhere": 0.0505
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 294,
+            "recall@500": 0.0505,
+            "recall@1000": 0.0505,
+            "recall@3000": 0.0505,
+            "recall@10000": 0.0505,
+            "found_anywhere": 0.0505
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "alignment_ai_agent": 1,
+            "cognitive_epistemic": 3,
+            "communication_style": 7,
+            "emotional_temperament": 1,
+            "identity_demographic": 3,
+            "moral_stance": 1,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 19
+          },
+          "physical_state_share": 0.08,
+          "kept": 12,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "unobjectionable"
+          ],
+          "region_tv": 0.2984,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.30 <= 0.5"
+      },
+      {
+        "frame": "d_extremely",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "extremely X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4202,
+          4203
+        ],
+        "lines_scanned": 6744299,
+        "lines_kept": 1880,
+        "hits": 308797,
+        "fillers": 820,
+        "above_floor": 613,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 611,
+          "noun": 2
+        },
+        "registered_share": 0.9266,
+        "corpus_share": 0.2708,
+        "net_new_share": 0.0767,
+        "unique_rows": 1,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 611,
+            "recall@500": 0.1473,
+            "recall@1000": 0.1802,
+            "recall@3000": 0.1802,
+            "recall@10000": 0.1802,
+            "found_anywhere": 0.1802
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 611,
+            "recall@500": 0.1571,
+            "recall@1000": 0.1802,
+            "recall@3000": 0.1802,
+            "recall@10000": 0.1802,
+            "found_anywhere": 0.1802
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 18,
+          "yield": 0.72,
+          "regions": {
+            "cognitive_epistemic": 4,
+            "communication_style": 2,
+            "emotional_temperament": 3,
+            "identity_demographic": 3,
+            "moral_stance": 1,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 18
+          },
+          "physical_state_share": 0.16,
+          "kept": 6,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.1383,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.72 >= 0.4 and region_tv 0.14 <= 0.5"
+      },
+      {
+        "frame": "d_too_to",
+        "type": "degree",
+        "tier": 1,
+        "source": "books",
+        "template": "too X to",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6504,
+          6505,
+          6506
+        ],
+        "lines_scanned": 10203545,
+        "lines_kept": 8663,
+        "hits": 55791930,
+        "fillers": 8566,
+        "above_floor": 7496,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 7120,
+          "noun": 376
+        },
+        "registered_share": 0.5235,
+        "corpus_share": 0.0691,
+        "net_new_share": 0.4749,
+        "unique_rows": 2503,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 7146,
+            "recall@500": 0.0813,
+            "recall@1000": 0.1637,
+            "recall@3000": 0.389,
+            "recall@10000": 0.5582,
+            "found_anywhere": 0.5582
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 7146,
+            "recall@500": 0.0374,
+            "recall@1000": 0.0835,
+            "recall@3000": 0.2659,
+            "recall@10000": 0.5582,
+            "found_anywhere": 0.5582
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 17,
+          "yield": 0.68,
+          "regions": {
+            "cognitive_epistemic": 5,
+            "communication_style": 5,
+            "emotional_temperament": 4,
+            "identity_demographic": 1,
+            "moral_stance": 2
+          },
+          "forms": {
+            "adjective": 17
+          },
+          "physical_state_share": 0.2,
+          "kept": 10,
+          "unique_kept": 8,
+          "unique_kept_stems": [
+            "cagy",
+            "concessive",
+            "flagitious",
+            "indiscriminating",
+            "muddleheaded",
+            "unenterprising",
+            "unmalleable",
+            "unselective"
+          ],
+          "region_tv": 0.344,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.68 >= 0.4 and region_tv 0.34 <= 0.5"
+      },
+      {
+        "frame": "d_utterly",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "utterly X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6628,
+          6629
+        ],
+        "lines_scanned": 6716580,
+        "lines_kept": 328,
+        "hits": 22159,
+        "fillers": 192,
+        "above_floor": 122,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 122
+        },
+        "registered_share": 0.877,
+        "corpus_share": 0.1721,
+        "net_new_share": 0.123,
+        "unique_rows": 3,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 121,
+            "recall@500": 0.0231,
+            "recall@1000": 0.0231,
+            "recall@3000": 0.0231,
+            "recall@10000": 0.0231,
+            "found_anywhere": 0.0231
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 121,
+            "recall@500": 0.0231,
+            "recall@1000": 0.0231,
+            "recall@3000": 0.0231,
+            "recall@10000": 0.0231,
+            "found_anywhere": 0.0231
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 2,
+            "emotional_temperament": 3,
+            "identity_demographic": 5,
+            "moral_stance": 8,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 23
+          },
+          "physical_state_share": 0.0,
+          "kept": 15,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "unredeemable"
+          ],
+          "region_tv": 0.3081,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.31 <= 0.5"
+      },
+      {
+        "frame": "d_notoriously",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "notoriously X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5174,
+          5175
+        ],
+        "lines_scanned": 6755333,
+        "lines_kept": 93,
+        "hits": 8858,
+        "fillers": 64,
+        "above_floor": 39,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 39
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.2564,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 39,
+            "recall@500": 0.0121,
+            "recall@1000": 0.0121,
+            "recall@3000": 0.0121,
+            "recall@10000": 0.0121,
+            "found_anywhere": 0.0121
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 39,
+            "recall@500": 0.0121,
+            "recall@1000": 0.0121,
+            "recall@3000": 0.0121,
+            "recall@10000": 0.0121,
+            "found_anywhere": 0.0121
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 2,
+            "emotional_temperament": 5,
+            "identity_demographic": 1,
+            "moral_stance": 5,
+            "social_interpersonal": 9
+          },
+          "forms": {
+            "adjective": 23
+          },
+          "physical_state_share": 0.04,
+          "kept": 10,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2646,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.26 <= 0.5"
+      },
+      {
+        "frame": "d_hopelessly",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "hopelessly X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4564,
+          4565
+        ],
+        "lines_scanned": 6684081,
+        "lines_kept": 46,
+        "hits": 2822,
+        "fillers": 31,
+        "above_floor": 16,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 16
+        },
+        "registered_share": 0.8125,
+        "corpus_share": 0.1875,
+        "net_new_share": 0.1875,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 16,
+            "recall@500": 0.0033,
+            "recall@1000": 0.0033,
+            "recall@3000": 0.0033,
+            "recall@10000": 0.0033,
+            "found_anywhere": 0.0033
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 16,
+            "recall@500": 0.0033,
+            "recall@1000": 0.0033,
+            "recall@3000": 0.0033,
+            "recall@10000": 0.0033,
+            "found_anywhere": 0.0033
+          }
+        },
+        "pilot": {
+          "n": 16,
+          "n_filtered": 16,
+          "n_trait": 10,
+          "yield": 0.625,
+          "regions": {
+            "cognitive_epistemic": 4,
+            "emotional_temperament": 2,
+            "identity_demographic": 3,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 10
+          },
+          "physical_state_share": 0.3125,
+          "kept": 4,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.4442,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.62 >= 0.4 and region_tv 0.44 <= 0.5"
+      },
+      {
+        "frame": "d_thoroughly",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "thoroughly X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6420,
+          6421
+        ],
+        "lines_scanned": 6591344,
+        "lines_kept": 968,
+        "hits": 109093,
+        "fillers": 475,
+        "above_floor": 300,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 297,
+          "noun": 3
+        },
+        "registered_share": 0.8867,
+        "corpus_share": 0.2167,
+        "net_new_share": 0.1167,
+        "unique_rows": 4,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 298,
+            "recall@500": 0.0703,
+            "recall@1000": 0.0703,
+            "recall@3000": 0.0703,
+            "recall@10000": 0.0703,
+            "found_anywhere": 0.0703
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 298,
+            "recall@500": 0.0703,
+            "recall@1000": 0.0703,
+            "recall@3000": 0.0703,
+            "recall@10000": 0.0703,
+            "found_anywhere": 0.0703
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 22,
+          "yield": 0.88,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 1,
+            "emotional_temperament": 1,
+            "identity_demographic": 2,
+            "moral_stance": 7,
+            "social_interpersonal": 8
+          },
+          "forms": {
+            "adjective": 22
+          },
+          "physical_state_share": 0.0,
+          "kept": 7,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "dislikable"
+          ],
+          "region_tv": 0.3033,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.88 >= 0.4 and region_tv 0.30 <= 0.5"
+      },
+      {
+        "frame": "d_remarkably",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "remarkably X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5752,
+          5753
+        ],
+        "lines_scanned": 6779689,
+        "lines_kept": 485,
+        "hits": 48260,
+        "fillers": 242,
+        "above_floor": 140,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 140
+        },
+        "registered_share": 0.9571,
+        "corpus_share": 0.2929,
+        "net_new_share": 0.05,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 139,
+            "recall@500": 0.0451,
+            "recall@1000": 0.0451,
+            "recall@3000": 0.0451,
+            "recall@10000": 0.0451,
+            "found_anywhere": 0.0451
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 139,
+            "recall@500": 0.0451,
+            "recall@1000": 0.0451,
+            "recall@3000": 0.0451,
+            "recall@10000": 0.0451,
+            "found_anywhere": 0.0451
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 20,
+          "yield": 0.8,
+          "regions": {
+            "cognitive_epistemic": 11,
+            "communication_style": 1,
+            "emotional_temperament": 3,
+            "moral_stance": 2,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 20
+          },
+          "physical_state_share": 0.16,
+          "kept": 7,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.4112,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.80 >= 0.4 and region_tv 0.41 <= 0.5"
+      },
+      {
+        "frame": "d_chronically",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "chronically X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          3694,
+          3695
+        ],
+        "lines_scanned": 6773958,
+        "lines_kept": 123,
+        "hits": 71220,
+        "fillers": 57,
+        "above_floor": 56,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 56
+        },
+        "registered_share": 0.8214,
+        "corpus_share": 0.2143,
+        "net_new_share": 0.1607,
+        "unique_rows": 3,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 56,
+            "recall@500": 0.0121,
+            "recall@1000": 0.0121,
+            "recall@3000": 0.0121,
+            "recall@10000": 0.0121,
+            "found_anywhere": 0.0121
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 56,
+            "recall@500": 0.0121,
+            "recall@1000": 0.0121,
+            "recall@3000": 0.0121,
+            "recall@10000": 0.0121,
+            "found_anywhere": 0.0121
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 9,
+          "yield": 0.36,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "emotional_temperament": 1,
+            "identity_demographic": 6,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 9
+          },
+          "physical_state_share": 0.64,
+          "kept": 6,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "assaultive",
+            "underemployed"
+          ],
+          "region_tv": 0.5326,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "2 unique kept rows (yield 0.36, region_tv 0.53)"
+      },
+      {
+        "frame": "d_famously",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "famously X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4221,
+          4222
+        ],
+        "lines_scanned": 6780474,
+        "lines_kept": 4,
+        "hits": 244,
+        "fillers": 4,
+        "above_floor": 4,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 4
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.0,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          }
+        },
+        "pilot": {
+          "n": 4,
+          "n_filtered": 4,
+          "n_trait": 2,
+          "yield": 0.5,
+          "regions": {
+            "identity_demographic": 1,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 2
+          },
+          "physical_state_share": 0.5,
+          "kept": 2,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.6104,
+          "form_tv": 0.2508
+        },
+        "keep": false,
+        "why": "region_tv 0.61 > 0.5, no unique kept row"
+      },
+      {
+        "frame": "d_incurably",
+        "type": "degree",
+        "tier": 2,
+        "source": "books",
+        "template": "incurably X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4672,
+          4673
+        ],
+        "lines_scanned": 6685535,
+        "lines_kept": 23,
+        "hits": 2891,
+        "fillers": 13,
+        "above_floor": 12,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 12
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.4167,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 12,
+            "recall@500": 0.0055,
+            "recall@1000": 0.0055,
+            "recall@3000": 0.0055,
+            "recall@10000": 0.0055,
+            "found_anywhere": 0.0055
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 12,
+            "recall@500": 0.0055,
+            "recall@1000": 0.0055,
+            "recall@3000": 0.0055,
+            "recall@10000": 0.0055,
+            "found_anywhere": 0.0055
+          }
+        },
+        "pilot": {
+          "n": 12,
+          "n_filtered": 12,
+          "n_trait": 7,
+          "yield": 0.5833,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 2,
+            "emotional_temperament": 1,
+            "identity_demographic": 1,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 7
+          },
+          "physical_state_share": 0.4167,
+          "kept": 1,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2837,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.58 >= 0.4 and region_tv 0.28 <= 0.5"
+      },
+      {
+        "frame": "n_incorrigible",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "an incorrigible X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3205,
+          3206
+        ],
+        "lines_scanned": 6712971,
+        "lines_kept": 439,
+        "hits": 61254,
+        "fillers": 332,
+        "above_floor": 253,
+        "rejected_kind": 100,
+        "malformed": 0,
+        "forms": {
+          "adjective": 127,
+          "noun": 126
+        },
+        "registered_share": 0.6798,
+        "corpus_share": 0.1265,
+        "net_new_share": 0.3162,
+        "unique_rows": 3,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 253,
+            "recall@500": 0.0374,
+            "recall@1000": 0.0374,
+            "recall@3000": 0.0374,
+            "recall@10000": 0.0374,
+            "found_anywhere": 0.0374
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 253,
+            "recall@500": 0.0374,
+            "recall@1000": 0.0374,
+            "recall@3000": 0.0374,
+            "recall@10000": 0.0374,
+            "found_anywhere": 0.0374
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 25,
+          "yield": 1.0,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 1,
+            "emotional_temperament": 4,
+            "identity_demographic": 4,
+            "moral_stance": 5,
+            "social_interpersonal": 10
+          },
+          "forms": {
+            "adjective": 7,
+            "noun": 18
+          },
+          "physical_state_share": 0.0,
+          "kept": 12,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2474,
+          "form_tv": 0.4692
+        },
+        "keep": true,
+        "why": "yield 1.00 >= 0.4 and region_tv 0.25 <= 0.5"
+      },
+      {
+        "frame": "n_inveterate",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "an inveterate X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3207,
+          3208
+        ],
+        "lines_scanned": 6684720,
+        "lines_kept": 917,
+        "hits": 170168,
+        "fillers": 585,
+        "above_floor": 457,
+        "rejected_kind": 323,
+        "malformed": 0,
+        "forms": {
+          "adjective": 149,
+          "noun": 308
+        },
+        "registered_share": 0.5383,
+        "corpus_share": 0.0875,
+        "net_new_share": 0.4617,
+        "unique_rows": 27,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 457,
+            "recall@500": 0.0516,
+            "recall@1000": 0.0516,
+            "recall@3000": 0.0516,
+            "recall@10000": 0.0516,
+            "found_anywhere": 0.0516
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 457,
+            "recall@500": 0.0516,
+            "recall@1000": 0.0516,
+            "recall@3000": 0.0516,
+            "recall@10000": 0.0516,
+            "found_anywhere": 0.0516
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 3,
+            "emotional_temperament": 4,
+            "identity_demographic": 8,
+            "moral_stance": 1,
+            "social_interpersonal": 6
+          },
+          "forms": {
+            "noun": 23
+          },
+          "physical_state_share": 0.0,
+          "kept": 18,
+          "unique_kept": 5,
+          "unique_kept_stems": [
+            "gadgeteer",
+            "quoter",
+            "theatergoer",
+            "theatregoer",
+            "theorizer"
+          ],
+          "region_tv": 0.2191,
+          "form_tv": 0.7492
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.22 <= 0.5"
+      },
+      {
+        "frame": "n_notorious",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a notorious X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3051,
+          3052
+        ],
+        "lines_scanned": 6674032,
+        "lines_kept": 2076,
+        "hits": 518270,
+        "fillers": 996,
+        "above_floor": 851,
+        "rejected_kind": 1074,
+        "malformed": 0,
+        "forms": {
+          "adjective": 334,
+          "noun": 517
+        },
+        "registered_share": 0.5311,
+        "corpus_share": 0.0752,
+        "net_new_share": 0.4665,
+        "unique_rows": 107,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 851,
+            "recall@500": 0.0484,
+            "recall@1000": 0.0714,
+            "recall@3000": 0.0714,
+            "recall@10000": 0.0714,
+            "found_anywhere": 0.0714
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 851,
+            "recall@500": 0.0319,
+            "recall@1000": 0.0714,
+            "recall@3000": 0.0714,
+            "recall@10000": 0.0714,
+            "found_anywhere": 0.0714
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 21,
+          "yield": 0.84,
+          "regions": {
+            "communication_style": 1,
+            "identity_demographic": 2,
+            "moral_stance": 7,
+            "social_interpersonal": 11
+          },
+          "forms": {
+            "adjective": 1,
+            "noun": 20
+          },
+          "physical_state_share": 0.0,
+          "kept": 16,
+          "unique_kept": 9,
+          "unique_kept_stems": [
+            "anglophobe",
+            "demimondaine",
+            "housebreaker",
+            "libeler",
+            "malefactor",
+            "rakehell",
+            "scandalmonger",
+            "usurer",
+            "whoremaster"
+          ],
+          "region_tv": 0.4786,
+          "form_tv": 0.7016
+        },
+        "keep": true,
+        "why": "yield 0.84 >= 0.4 and region_tv 0.48 <= 0.5"
+      },
+      {
+        "frame": "n_shameless",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a shameless X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3055,
+          3056
+        ],
+        "lines_scanned": 6938267,
+        "lines_kept": 665,
+        "hits": 90271,
+        "fillers": 311,
+        "above_floor": 247,
+        "rejected_kind": 350,
+        "malformed": 0,
+        "forms": {
+          "adjective": 122,
+          "noun": 125
+        },
+        "registered_share": 0.6397,
+        "corpus_share": 0.0891,
+        "net_new_share": 0.3603,
+        "unique_rows": 8,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 247,
+            "recall@500": 0.0242,
+            "recall@1000": 0.0242,
+            "recall@3000": 0.0242,
+            "recall@10000": 0.0242,
+            "found_anywhere": 0.0242
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 247,
+            "recall@500": 0.0242,
+            "recall@1000": 0.0242,
+            "recall@3000": 0.0242,
+            "recall@10000": 0.0242,
+            "found_anywhere": 0.0242
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 1,
+            "emotional_temperament": 1,
+            "identity_demographic": 2,
+            "moral_stance": 7,
+            "social_interpersonal": 11
+          },
+          "forms": {
+            "adjective": 5,
+            "noun": 18
+          },
+          "physical_state_share": 0.0,
+          "kept": 14,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "sophistic"
+          ],
+          "region_tv": 0.4041,
+          "form_tv": 0.5318
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.40 <= 0.5"
+      },
+      {
+        "frame": "n_hopeless",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a hopeless X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3048,
+          3049
+        ],
+        "lines_scanned": 6708714,
+        "lines_kept": 1853,
+        "hits": 821992,
+        "fillers": 704,
+        "above_floor": 586,
+        "rejected_kind": 1125,
+        "malformed": 0,
+        "forms": {
+          "adjective": 353,
+          "noun": 233
+        },
+        "registered_share": 0.7048,
+        "corpus_share": 0.1143,
+        "net_new_share": 0.2935,
+        "unique_rows": 13,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 586,
+            "recall@500": 0.067,
+            "recall@1000": 0.0758,
+            "recall@3000": 0.0758,
+            "recall@10000": 0.0758,
+            "found_anywhere": 0.0758
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 586,
+            "recall@500": 0.0681,
+            "recall@1000": 0.0758,
+            "recall@3000": 0.0758,
+            "recall@10000": 0.0758,
+            "found_anywhere": 0.0758
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 21,
+          "yield": 0.84,
+          "regions": {
+            "cognitive_epistemic": 4,
+            "communication_style": 3,
+            "emotional_temperament": 7,
+            "identity_demographic": 4,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 7,
+            "noun": 14
+          },
+          "physical_state_share": 0.16,
+          "kept": 12,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "bumbler",
+            "suppliant"
+          ],
+          "region_tv": 0.2584,
+          "form_tv": 0.4159
+        },
+        "keep": true,
+        "why": "yield 0.84 >= 0.4 and region_tv 0.26 <= 0.5"
+      },
+      {
+        "frame": "n_born",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a born X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3042,
+          3043
+        ],
+        "lines_scanned": 6715475,
+        "lines_kept": 1408,
+        "hits": 501028,
+        "fillers": 1137,
+        "above_floor": 943,
+        "rejected_kind": 269,
+        "malformed": 0,
+        "forms": {
+          "adjective": 287,
+          "noun": 656
+        },
+        "registered_share": 0.4931,
+        "corpus_share": 0.071,
+        "net_new_share": 0.509,
+        "unique_rows": 122,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 943,
+            "recall@500": 0.0473,
+            "recall@1000": 0.0824,
+            "recall@3000": 0.0824,
+            "recall@10000": 0.0824,
+            "found_anywhere": 0.0824
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 943,
+            "recall@500": 0.0484,
+            "recall@1000": 0.0824,
+            "recall@3000": 0.0824,
+            "recall@10000": 0.0824,
+            "found_anywhere": 0.0824
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 21,
+          "yield": 0.84,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 6,
+            "emotional_temperament": 2,
+            "identity_demographic": 1,
+            "moral_stance": 1,
+            "social_interpersonal": 8
+          },
+          "forms": {
+            "adjective": 1,
+            "noun": 20
+          },
+          "physical_state_share": 0.04,
+          "kept": 16,
+          "unique_kept": 6,
+          "unique_kept_stems": [
+            "casuist",
+            "elocutionist",
+            "lyrist",
+            "polemist",
+            "sleuthhound",
+            "wheedler"
+          ],
+          "region_tv": 0.2575,
+          "form_tv": 0.7016
+        },
+        "keep": true,
+        "why": "yield 0.84 >= 0.4 and region_tv 0.26 <= 0.5"
+      },
+      {
+        "frame": "n_confirmed",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a confirmed X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3044,
+          3045
+        ],
+        "lines_scanned": 6758766,
+        "lines_kept": 1302,
+        "hits": 329914,
+        "fillers": 680,
+        "above_floor": 549,
+        "rejected_kind": 609,
+        "malformed": 0,
+        "forms": {
+          "adjective": 263,
+          "noun": 286
+        },
+        "registered_share": 0.5938,
+        "corpus_share": 0.1348,
+        "net_new_share": 0.3989,
+        "unique_rows": 38,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 549,
+            "recall@500": 0.0802,
+            "recall@1000": 0.0846,
+            "recall@3000": 0.0846,
+            "recall@10000": 0.0846,
+            "found_anywhere": 0.0846
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 549,
+            "recall@500": 0.0802,
+            "recall@1000": 0.0846,
+            "recall@3000": 0.0846,
+            "recall@10000": 0.0846,
+            "found_anywhere": 0.0846
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "emotional_temperament": 9,
+            "identity_demographic": 8,
+            "moral_stance": 3,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 6,
+            "noun": 17
+          },
+          "physical_state_share": 0.08,
+          "kept": 15,
+          "unique_kept": 4,
+          "unique_kept_stems": [
+            "balletomane",
+            "habitue",
+            "onanist",
+            "potterer"
+          ],
+          "region_tv": 0.4295,
+          "form_tv": 0.4883
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.43 <= 0.5"
+      },
+      {
+        "frame": "n_compulsive",
+        "type": "nominal",
+        "tier": 1,
+        "source": "books",
+        "template": "a compulsive X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3044,
+          3045
+        ],
+        "lines_scanned": 6758766,
+        "lines_kept": 586,
+        "hits": 193749,
+        "fillers": 285,
+        "above_floor": 280,
+        "rejected_kind": 298,
+        "malformed": 0,
+        "forms": {
+          "adjective": 112,
+          "noun": 168
+        },
+        "registered_share": 0.6107,
+        "corpus_share": 0.1214,
+        "net_new_share": 0.3857,
+        "unique_rows": 8,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 280,
+            "recall@500": 0.0429,
+            "recall@1000": 0.0429,
+            "recall@3000": 0.0429,
+            "recall@10000": 0.0429,
+            "found_anywhere": 0.0429
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 280,
+            "recall@500": 0.0429,
+            "recall@1000": 0.0429,
+            "recall@3000": 0.0429,
+            "recall@10000": 0.0429,
+            "found_anywhere": 0.0429
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 20,
+          "yield": 0.8,
+          "regions": {
+            "communication_style": 5,
+            "emotional_temperament": 6,
+            "identity_demographic": 3,
+            "moral_stance": 1,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 1,
+            "noun": 19
+          },
+          "physical_state_share": 0.0,
+          "kept": 11,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2252,
+          "form_tv": 0.6992
+        },
+        "keep": true,
+        "why": "yield 0.80 >= 0.4 and region_tv 0.23 <= 0.5"
+      },
+      {
+        "frame": "n_habitual",
+        "type": "nominal",
+        "tier": 2,
+        "source": "books",
+        "template": "a habitual X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3048,
+          3049
+        ],
+        "lines_scanned": 6708714,
+        "lines_kept": 757,
+        "hits": 244176,
+        "fillers": 311,
+        "above_floor": 254,
+        "rejected_kind": 443,
+        "malformed": 0,
+        "forms": {
+          "adjective": 115,
+          "noun": 139
+        },
+        "registered_share": 0.6457,
+        "corpus_share": 0.0866,
+        "net_new_share": 0.3543,
+        "unique_rows": 3,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 254,
+            "recall@500": 0.0253,
+            "recall@1000": 0.0253,
+            "recall@3000": 0.0253,
+            "recall@10000": 0.0253,
+            "found_anywhere": 0.0253
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 254,
+            "recall@500": 0.0253,
+            "recall@1000": 0.0253,
+            "recall@3000": 0.0253,
+            "recall@10000": 0.0253,
+            "found_anywhere": 0.0253
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 23,
+          "yield": 0.92,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 1,
+            "emotional_temperament": 4,
+            "identity_demographic": 9,
+            "moral_stance": 4,
+            "social_interpersonal": 4
+          },
+          "forms": {
+            "adjective": 1,
+            "noun": 22
+          },
+          "physical_state_share": 0.04,
+          "kept": 14,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "bluffer"
+          ],
+          "region_tv": 0.3081,
+          "form_tv": 0.7057
+        },
+        "keep": true,
+        "why": "yield 0.92 >= 0.4 and region_tv 0.31 <= 0.5"
+      },
+      {
+        "frame": "n_chronic",
+        "type": "nominal",
+        "tier": 2,
+        "source": "books",
+        "template": "a chronic X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3043,
+          3044
+        ],
+        "lines_scanned": 6741699,
+        "lines_kept": 2909,
+        "hits": 2069363,
+        "fillers": 525,
+        "above_floor": 471,
+        "rejected_kind": 2370,
+        "malformed": 0,
+        "forms": {
+          "adjective": 289,
+          "noun": 182
+        },
+        "registered_share": 0.6667,
+        "corpus_share": 0.1146,
+        "net_new_share": 0.3312,
+        "unique_rows": 18,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 471,
+            "recall@500": 0.0626,
+            "recall@1000": 0.0626,
+            "recall@3000": 0.0626,
+            "recall@10000": 0.0626,
+            "found_anywhere": 0.0626
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 471,
+            "recall@500": 0.0626,
+            "recall@1000": 0.0626,
+            "recall@3000": 0.0626,
+            "recall@10000": 0.0626,
+            "found_anywhere": 0.0626
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 20,
+          "yield": 0.8,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 1,
+            "emotional_temperament": 11,
+            "identity_demographic": 3,
+            "moral_stance": 3,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 6,
+            "noun": 14
+          },
+          "physical_state_share": 0.2,
+          "kept": 18,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "bellyacher",
+            "underperformer"
+          ],
+          "region_tv": 0.4099,
+          "form_tv": 0.4492
+        },
+        "keep": true,
+        "why": "yield 0.80 >= 0.4 and region_tv 0.41 <= 0.5"
+      },
+      {
+        "frame": "n_natural",
+        "type": "nominal",
+        "tier": 2,
+        "source": "books",
+        "template": "a natural X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3050,
+          3051
+        ],
+        "lines_scanned": 6680749,
+        "lines_kept": 10835,
+        "hits": 16426568,
+        "fillers": 2408,
+        "above_floor": 2178,
+        "rejected_kind": 8281,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1296,
+          "noun": 882
+        },
+        "registered_share": 0.5891,
+        "corpus_share": 0.1102,
+        "net_new_share": 0.4109,
+        "unique_rows": 237,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 2178,
+            "recall@500": 0.0747,
+            "recall@1000": 0.1418,
+            "recall@3000": 0.2747,
+            "recall@10000": 0.2747,
+            "found_anywhere": 0.2747
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 2178,
+            "recall@500": 0.0648,
+            "recall@1000": 0.1363,
+            "recall@3000": 0.2747,
+            "recall@10000": 0.2747,
+            "found_anywhere": 0.2747
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 16,
+          "yield": 0.64,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 2,
+            "emotional_temperament": 4,
+            "identity_demographic": 1,
+            "social_interpersonal": 6
+          },
+          "forms": {
+            "adjective": 14,
+            "noun": 2
+          },
+          "physical_state_share": 0.12,
+          "kept": 9,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "appetent"
+          ],
+          "region_tv": 0.2352,
+          "form_tv": 0.1258
+        },
+        "keep": true,
+        "why": "yield 0.64 >= 0.4 and region_tv 0.24 <= 0.5"
+      },
+      {
+        "frame": "n_total",
+        "type": "nominal",
+        "tier": 2,
+        "source": "books",
+        "template": "a total X",
+        "floor": 40,
+        "filler_kind": "noun",
+        "shards": [
+          3057,
+          3058
+        ],
+        "lines_scanned": 6857049,
+        "lines_kept": 10167,
+        "hits": 19310872,
+        "fillers": 1690,
+        "above_floor": 1642,
+        "rejected_kind": 8411,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1003,
+          "noun": 639
+        },
+        "registered_share": 0.6121,
+        "corpus_share": 0.106,
+        "net_new_share": 0.3867,
+        "unique_rows": 187,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1642,
+            "recall@500": 0.0648,
+            "recall@1000": 0.1242,
+            "recall@3000": 0.2022,
+            "recall@10000": 0.2022,
+            "found_anywhere": 0.2022
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1642,
+            "recall@500": 0.0725,
+            "recall@1000": 0.1286,
+            "recall@3000": 0.2022,
+            "recall@10000": 0.2022,
+            "found_anywhere": 0.2022
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 15,
+          "yield": 0.6,
+          "regions": {
+            "cognitive_epistemic": 5,
+            "emotional_temperament": 1,
+            "identity_demographic": 7,
+            "moral_stance": 2
+          },
+          "forms": {
+            "adjective": 6,
+            "noun": 9
+          },
+          "physical_state_share": 0.16,
+          "kept": 7,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "nonstarter",
+            "washout"
+          ],
+          "region_tv": 0.5374,
+          "form_tv": 0.3492
+        },
+        "keep": true,
+        "why": "2 unique kept rows (yield 0.60, region_tv 0.54)"
+      },
+      {
+        "frame": "p_known_for_his",
+        "type": "possessive",
+        "tier": 1,
+        "source": "books",
+        "template": "known for his X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          4790,
+          4791
+        ],
+        "lines_scanned": 6759708,
+        "lines_kept": 4192,
+        "hits": 1677574,
+        "fillers": 3806,
+        "above_floor": 3632,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 2007,
+          "noun": 1625
+        },
+        "registered_share": 0.4628,
+        "corpus_share": 0.0903,
+        "net_new_share": 0.5352,
+        "unique_rows": 421,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 3623,
+            "recall@500": 0.0879,
+            "recall@1000": 0.156,
+            "recall@3000": 0.3242,
+            "recall@10000": 0.3604,
+            "found_anywhere": 0.3604
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 3623,
+            "recall@500": 0.0692,
+            "recall@1000": 0.1495,
+            "recall@3000": 0.3407,
+            "recall@10000": 0.3604,
+            "found_anywhere": 0.3604
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 4,
+            "communication_style": 5,
+            "emotional_temperament": 2,
+            "moral_stance": 5,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 16,
+            "noun": 3
+          },
+          "physical_state_share": 0.0,
+          "kept": 8,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.3173,
+          "form_tv": 0.0929
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.32 <= 0.5"
+      },
+      {
+        "frame": "p_known_for_her",
+        "type": "possessive",
+        "tier": 1,
+        "source": "books",
+        "template": "known for her X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          4790,
+          4791
+        ],
+        "lines_scanned": 6759708,
+        "lines_kept": 1323,
+        "hits": 281542,
+        "fillers": 1233,
+        "above_floor": 1185,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 728,
+          "noun": 457
+        },
+        "registered_share": 0.5654,
+        "corpus_share": 0.1207,
+        "net_new_share": 0.4354,
+        "unique_rows": 12,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1182,
+            "recall@500": 0.0846,
+            "recall@1000": 0.1363,
+            "recall@3000": 0.1593,
+            "recall@10000": 0.1593,
+            "found_anywhere": 0.1593
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1182,
+            "recall@500": 0.0824,
+            "recall@1000": 0.1473,
+            "recall@3000": 0.1593,
+            "recall@10000": 0.1593,
+            "found_anywhere": 0.1593
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 8,
+            "emotional_temperament": 1,
+            "identity_demographic": 1,
+            "moral_stance": 2,
+            "social_interpersonal": 4
+          },
+          "forms": {
+            "adjective": 13,
+            "noun": 6
+          },
+          "physical_state_share": 0.0,
+          "kept": 7,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2824,
+          "form_tv": 0.065
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.28 <= 0.5"
+      },
+      {
+        "frame": "p_man_of",
+        "type": "possessive",
+        "tier": 1,
+        "source": "books",
+        "template": "man of X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          4955,
+          4956
+        ],
+        "lines_scanned": 6644267,
+        "lines_kept": 7920,
+        "hits": 12771870,
+        "fillers": 7327,
+        "above_floor": 5475,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 3130,
+          "noun": 2345
+        },
+        "registered_share": 0.4479,
+        "corpus_share": 0.0674,
+        "net_new_share": 0.5529,
+        "unique_rows": 1132,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 5250,
+            "recall@500": 0.0725,
+            "recall@1000": 0.1242,
+            "recall@3000": 0.2967,
+            "recall@10000": 0.3989,
+            "found_anywhere": 0.3989
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 5250,
+            "recall@500": 0.0319,
+            "recall@1000": 0.0879,
+            "recall@3000": 0.3143,
+            "recall@10000": 0.3989,
+            "found_anywhere": 0.3989
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 2,
+            "emotional_temperament": 3,
+            "identity_demographic": 1,
+            "moral_stance": 7,
+            "social_interpersonal": 4
+          },
+          "forms": {
+            "adjective": 13,
+            "noun": 6
+          },
+          "physical_state_share": 0.08,
+          "kept": 13,
+          "unique_kept": 6,
+          "unique_kept_stems": [
+            "retaliative",
+            "saintlike",
+            "unattachment",
+            "unbounding",
+            "unimpeached",
+            "unwearying"
+          ],
+          "region_tv": 0.2454,
+          "form_tv": 0.065
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.25 <= 0.5"
+      },
+      {
+        "frame": "p_woman_of",
+        "type": "possessive",
+        "tier": 1,
+        "source": "books",
+        "template": "woman of X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          6810,
+          6811
+        ],
+        "lines_scanned": 6654562,
+        "lines_kept": 2565,
+        "hits": 1857862,
+        "fillers": 2414,
+        "above_floor": 2016,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1440,
+          "noun": 576
+        },
+        "registered_share": 0.5774,
+        "corpus_share": 0.0903,
+        "net_new_share": 0.4286,
+        "unique_rows": 35,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1959,
+            "recall@500": 0.0582,
+            "recall@1000": 0.1132,
+            "recall@3000": 0.2011,
+            "recall@10000": 0.2011,
+            "found_anywhere": 0.2011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1959,
+            "recall@500": 0.0451,
+            "recall@1000": 0.1022,
+            "recall@3000": 0.2011,
+            "recall@10000": 0.2011,
+            "found_anywhere": 0.2011
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 17,
+          "yield": 0.68,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 2,
+            "emotional_temperament": 3,
+            "identity_demographic": 4,
+            "moral_stance": 6,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 11,
+            "noun": 6
+          },
+          "physical_state_share": 0.08,
+          "kept": 11,
+          "unique_kept": 4,
+          "unique_kept_stems": [
+            "childbearing",
+            "nonroyal",
+            "uncordial",
+            "unfaded"
+          ],
+          "region_tv": 0.3311,
+          "form_tv": 0.1022
+        },
+        "keep": true,
+        "why": "yield 0.68 >= 0.4 and region_tv 0.33 <= 0.5"
+      },
+      {
+        "frame": "p_reputation_for",
+        "type": "possessive",
+        "tier": 1,
+        "source": "books",
+        "template": "reputation for X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          5770,
+          5771
+        ],
+        "lines_scanned": 6701089,
+        "lines_kept": 5752,
+        "hits": 3207860,
+        "fillers": 5031,
+        "above_floor": 4583,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 2420,
+          "noun": 2163
+        },
+        "registered_share": 0.523,
+        "corpus_share": 0.0764,
+        "net_new_share": 0.4774,
+        "unique_rows": 1007,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 4525,
+            "recall@500": 0.0945,
+            "recall@1000": 0.1615,
+            "recall@3000": 0.3165,
+            "recall@10000": 0.3813,
+            "found_anywhere": 0.3813
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 4525,
+            "recall@500": 0.0835,
+            "recall@1000": 0.1451,
+            "recall@3000": 0.3143,
+            "recall@10000": 0.3813,
+            "found_anywhere": 0.3813
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 22,
+          "yield": 0.88,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 7,
+            "emotional_temperament": 5,
+            "moral_stance": 1,
+            "social_interpersonal": 7
+          },
+          "forms": {
+            "adjective": 19,
+            "noun": 3
+          },
+          "physical_state_share": 0.04,
+          "kept": 9,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "scurrility",
+            "unpunctuality"
+          ],
+          "region_tv": 0.2674,
+          "form_tv": 0.1144
+        },
+        "keep": true,
+        "why": "yield 0.88 >= 0.4 and region_tv 0.27 <= 0.5"
+      },
+      {
+        "frame": "p_noted_for_his",
+        "type": "possessive",
+        "tier": 2,
+        "source": "books",
+        "template": "noted for his X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          5093,
+          5094
+        ],
+        "lines_scanned": 6852057,
+        "lines_kept": 1892,
+        "hits": 341845,
+        "fillers": 1664,
+        "above_floor": 1367,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 863,
+          "noun": 504
+        },
+        "registered_share": 0.5918,
+        "corpus_share": 0.1309,
+        "net_new_share": 0.4082,
+        "unique_rows": 7,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1365,
+            "recall@500": 0.0945,
+            "recall@1000": 0.1648,
+            "recall@3000": 0.2011,
+            "recall@10000": 0.2011,
+            "found_anywhere": 0.2011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1365,
+            "recall@500": 0.1011,
+            "recall@1000": 0.1758,
+            "recall@3000": 0.2011,
+            "recall@10000": 0.2011,
+            "found_anywhere": 0.2011
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 22,
+          "yield": 0.88,
+          "regions": {
+            "cognitive_epistemic": 6,
+            "communication_style": 4,
+            "emotional_temperament": 2,
+            "moral_stance": 5,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 21,
+            "noun": 1
+          },
+          "physical_state_share": 0.04,
+          "kept": 10,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2623,
+          "form_tv": 0.2053
+        },
+        "keep": true,
+        "why": "yield 0.88 >= 0.4 and region_tv 0.26 <= 0.5"
+      },
+      {
+        "frame": "p_famous_for_his",
+        "type": "possessive",
+        "tier": 2,
+        "source": "books",
+        "template": "famous for his X",
+        "floor": 40,
+        "filler_kind": "quality_noun",
+        "shards": [
+          4245,
+          4246
+        ],
+        "lines_scanned": 6615840,
+        "lines_kept": 2170,
+        "hits": 379773,
+        "fillers": 2035,
+        "above_floor": 1750,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 912,
+          "noun": 838
+        },
+        "registered_share": 0.4651,
+        "corpus_share": 0.0874,
+        "net_new_share": 0.5366,
+        "unique_rows": 40,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1747,
+            "recall@500": 0.0681,
+            "recall@1000": 0.1055,
+            "recall@3000": 0.1725,
+            "recall@10000": 0.1725,
+            "found_anywhere": 0.1725
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1747,
+            "recall@500": 0.0538,
+            "recall@1000": 0.1165,
+            "recall@3000": 0.1725,
+            "recall@10000": 0.1725,
+            "found_anywhere": 0.1725
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 18,
+          "yield": 0.72,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 7,
+            "moral_stance": 3,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 13,
+            "noun": 5
+          },
+          "physical_state_share": 0.0,
+          "kept": 9,
+          "unique_kept": 1,
+          "unique_kept_stems": [
+            "seamy"
+          ],
+          "region_tv": 0.3249,
+          "form_tv": 0.027
+        },
+        "keep": true,
+        "why": "yield 0.72 >= 0.4 and region_tv 0.32 <= 0.5"
+      },
+      {
+        "frame": "c_was_a",
+        "type": "copular",
+        "tier": 1,
+        "source": "books",
+        "template": "was a X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6478,
+          6479,
+          6480
+        ],
+        "lines_scanned": 10251766,
+        "lines_kept": 12191,
+        "hits": 11568212,
+        "fillers": 3668,
+        "above_floor": 3210,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 2553,
+          "noun": 657
+        },
+        "registered_share": 0.5897,
+        "corpus_share": 0.0879,
+        "net_new_share": 0.4118,
+        "unique_rows": 349,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 3056,
+            "recall@500": 0.1055,
+            "recall@1000": 0.1681,
+            "recall@3000": 0.3055,
+            "recall@10000": 0.3066,
+            "found_anywhere": 0.3066
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 3056,
+            "recall@500": 0.0692,
+            "recall@1000": 0.1374,
+            "recall@3000": 0.3066,
+            "recall@10000": 0.3066,
+            "found_anywhere": 0.3066
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 12,
+          "yield": 0.48,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 1,
+            "identity_demographic": 5,
+            "moral_stance": 1,
+            "social_interpersonal": 2
+          },
+          "forms": {
+            "adjective": 12
+          },
+          "physical_state_share": 0.44,
+          "kept": 4,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "forehanded",
+            "nonmatched"
+          ],
+          "region_tv": 0.3938,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.48 >= 0.4 and region_tv 0.39 <= 0.5"
+      },
+      {
+        "frame": "c_was_an",
+        "type": "copular",
+        "tier": 1,
+        "source": "books",
+        "template": "was an X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          6479,
+          6480
+        ],
+        "lines_scanned": 6865662,
+        "lines_kept": 3118,
+        "hits": 2044995,
+        "fillers": 969,
+        "above_floor": 841,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 776,
+          "noun": 65
+        },
+        "registered_share": 0.7313,
+        "corpus_share": 0.132,
+        "net_new_share": 0.2687,
+        "unique_rows": 98,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 823,
+            "recall@500": 0.0835,
+            "recall@1000": 0.1176,
+            "recall@3000": 0.1176,
+            "recall@10000": 0.1176,
+            "found_anywhere": 0.1176
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 823,
+            "recall@500": 0.0857,
+            "recall@1000": 0.1176,
+            "recall@3000": 0.1176,
+            "recall@10000": 0.1176,
+            "found_anywhere": 0.1176
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 20,
+          "yield": 0.8,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "communication_style": 3,
+            "emotional_temperament": 4,
+            "identity_demographic": 3,
+            "moral_stance": 3,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 20
+          },
+          "physical_state_share": 0.04,
+          "kept": 6,
+          "unique_kept": 4,
+          "unique_kept_stems": [
+            "adulterine",
+            "unhospitable",
+            "unlicked",
+            "uxorious"
+          ],
+          "region_tv": 0.0599,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.80 >= 0.4 and region_tv 0.06 <= 0.5"
+      },
+      {
+        "frame": "c_is_a",
+        "type": "copular",
+        "tier": 2,
+        "source": "books",
+        "template": "is a X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4726,
+          4727
+        ],
+        "lines_scanned": 6915156,
+        "lines_kept": 10189,
+        "hits": 5831874,
+        "fillers": 3150,
+        "above_floor": 2727,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 2274,
+          "noun": 453
+        },
+        "registered_share": 0.6029,
+        "corpus_share": 0.0946,
+        "net_new_share": 0.3986,
+        "unique_rows": 185,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 2649,
+            "recall@500": 0.1,
+            "recall@1000": 0.1692,
+            "recall@3000": 0.2824,
+            "recall@10000": 0.2824,
+            "found_anywhere": 0.2824
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 2649,
+            "recall@500": 0.0747,
+            "recall@1000": 0.144,
+            "recall@3000": 0.2824,
+            "recall@10000": 0.2824,
+            "found_anywhere": 0.2824
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 13,
+          "yield": 0.52,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 1,
+            "emotional_temperament": 2,
+            "identity_demographic": 6,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 12,
+            "noun": 1
+          },
+          "physical_state_share": 0.12,
+          "kept": 7,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "nonnatural",
+            "wailful"
+          ],
+          "region_tv": 0.3275,
+          "form_tv": 0.1739
+        },
+        "keep": true,
+        "why": "yield 0.52 >= 0.4 and region_tv 0.33 <= 0.5"
+      },
+      {
+        "frame": "c_seemed_a",
+        "type": "copular",
+        "tier": 2,
+        "source": "books",
+        "template": "seemed a X <person noun>",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5733,
+          5734
+        ],
+        "lines_scanned": 6861212,
+        "lines_kept": 265,
+        "hits": 33482,
+        "fillers": 150,
+        "above_floor": 110,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 110
+        },
+        "registered_share": 0.9,
+        "corpus_share": 0.1909,
+        "net_new_share": 0.1182,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 110,
+            "recall@500": 0.022,
+            "recall@1000": 0.022,
+            "recall@3000": 0.022,
+            "recall@10000": 0.022,
+            "found_anywhere": 0.022
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 110,
+            "recall@500": 0.022,
+            "recall@1000": 0.022,
+            "recall@3000": 0.022,
+            "recall@10000": 0.022,
+            "found_anywhere": 0.022
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 4,
+            "communication_style": 4,
+            "emotional_temperament": 1,
+            "identity_demographic": 1,
+            "moral_stance": 3,
+            "social_interpersonal": 6
+          },
+          "forms": {
+            "adjective": 19
+          },
+          "physical_state_share": 0.2,
+          "kept": 11,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2197,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.22 <= 0.5"
+      },
+      {
+        "frame": "t_tendency",
+        "type": "tendency",
+        "tier": 1,
+        "source": "books",
+        "template": "tendency to be X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5984,
+          5985
+        ],
+        "lines_scanned": 6687286,
+        "lines_kept": 1944,
+        "hits": 364760,
+        "fillers": 1936,
+        "above_floor": 1714,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1675,
+          "noun": 39
+        },
+        "registered_share": 0.6161,
+        "corpus_share": 0.1534,
+        "net_new_share": 0.3833,
+        "unique_rows": 82,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1692,
+            "recall@500": 0.1154,
+            "recall@1000": 0.2055,
+            "recall@3000": 0.2901,
+            "recall@10000": 0.2901,
+            "found_anywhere": 0.2901
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1692,
+            "recall@500": 0.1165,
+            "recall@1000": 0.2011,
+            "recall@3000": 0.2901,
+            "recall@10000": 0.2901,
+            "found_anywhere": 0.2901
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 18,
+          "yield": 0.72,
+          "regions": {
+            "alignment_ai_agent": 1,
+            "cognitive_epistemic": 5,
+            "communication_style": 2,
+            "emotional_temperament": 3,
+            "social_interpersonal": 7
+          },
+          "forms": {
+            "adjective": 18
+          },
+          "physical_state_share": 0.04,
+          "kept": 9,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "overemotional",
+            "overgenerous"
+          ],
+          "region_tv": 0.32,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.72 >= 0.4 and region_tv 0.32 <= 0.5"
+      },
+      {
+        "frame": "t_inclined",
+        "type": "tendency",
+        "tier": 1,
+        "source": "books",
+        "template": "inclined to be X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4649,
+          4650
+        ],
+        "lines_scanned": 6841222,
+        "lines_kept": 2303,
+        "hits": 498506,
+        "fillers": 2293,
+        "above_floor": 1766,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1729,
+          "noun": 37
+        },
+        "registered_share": 0.769,
+        "corpus_share": 0.1806,
+        "net_new_share": 0.2316,
+        "unique_rows": 53,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1752,
+            "recall@500": 0.1451,
+            "recall@1000": 0.2407,
+            "recall@3000": 0.3495,
+            "recall@10000": 0.3495,
+            "found_anywhere": 0.3495
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1752,
+            "recall@500": 0.0934,
+            "recall@1000": 0.2264,
+            "recall@3000": 0.3495,
+            "recall@10000": 0.3495,
+            "found_anywhere": 0.3495
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 22,
+          "yield": 0.88,
+          "regions": {
+            "alignment_ai_agent": 1,
+            "cognitive_epistemic": 1,
+            "communication_style": 4,
+            "emotional_temperament": 6,
+            "social_interpersonal": 10
+          },
+          "forms": {
+            "adjective": 22
+          },
+          "physical_state_share": 0.12,
+          "kept": 13,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "hypochondriacal",
+            "pettish"
+          ],
+          "region_tv": 0.3504,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.88 >= 0.4 and region_tv 0.35 <= 0.5"
+      },
+      {
+        "frame": "t_apt",
+        "type": "tendency",
+        "tier": 1,
+        "source": "books",
+        "template": "apt to be X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          3503,
+          3504
+        ],
+        "lines_scanned": 6583331,
+        "lines_kept": 5271,
+        "hits": 1447893,
+        "fillers": 5215,
+        "above_floor": 3878,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 3714,
+          "noun": 164
+        },
+        "registered_share": 0.5129,
+        "corpus_share": 0.0768,
+        "net_new_share": 0.4866,
+        "unique_rows": 611,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 3859,
+            "recall@500": 0.0418,
+            "recall@1000": 0.0934,
+            "recall@3000": 0.2703,
+            "recall@10000": 0.3209,
+            "found_anywhere": 0.3209
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 3859,
+            "recall@500": 0.0308,
+            "recall@1000": 0.0725,
+            "recall@3000": 0.2604,
+            "recall@10000": 0.3209,
+            "found_anywhere": 0.3209
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 17,
+          "yield": 0.68,
+          "regions": {
+            "cognitive_epistemic": 5,
+            "communication_style": 3,
+            "emotional_temperament": 1,
+            "moral_stance": 1,
+            "social_interpersonal": 7
+          },
+          "forms": {
+            "adjective": 17
+          },
+          "physical_state_share": 0.2,
+          "kept": 9,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "disagreeably",
+            "precipitant"
+          ],
+          "region_tv": 0.3303,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.68 >= 0.4 and region_tv 0.33 <= 0.5"
+      },
+      {
+        "frame": "h_he_was_always",
+        "type": "habitual",
+        "tier": 1,
+        "source": "books",
+        "template": "he was always X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4496,
+          4497
+        ],
+        "lines_scanned": 6607343,
+        "lines_kept": 2723,
+        "hits": 1085586,
+        "fillers": 2710,
+        "above_floor": 2177,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1743,
+          "noun": 434
+        },
+        "registered_share": 0.6063,
+        "corpus_share": 0.0905,
+        "net_new_share": 0.395,
+        "unique_rows": 152,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 2169,
+            "recall@500": 0.0505,
+            "recall@1000": 0.1033,
+            "recall@3000": 0.2143,
+            "recall@10000": 0.2143,
+            "found_anywhere": 0.2143
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 2169,
+            "recall@500": 0.0527,
+            "recall@1000": 0.1077,
+            "recall@3000": 0.2143,
+            "recall@10000": 0.2143,
+            "found_anywhere": 0.2143
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 19,
+          "yield": 0.76,
+          "regions": {
+            "cognitive_epistemic": 3,
+            "communication_style": 5,
+            "emotional_temperament": 6,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 17,
+            "noun": 2
+          },
+          "physical_state_share": 0.2,
+          "kept": 12,
+          "unique_kept": 4,
+          "unique_kept_stems": [
+            "heedful",
+            "hospitably",
+            "punctiliously",
+            "readiest"
+          ],
+          "region_tv": 0.265,
+          "form_tv": 0.1455
+        },
+        "keep": true,
+        "why": "yield 0.76 >= 0.4 and region_tv 0.27 <= 0.5"
+      },
+      {
+        "frame": "h_she_was_always",
+        "type": "habitual",
+        "tier": 1,
+        "source": "books",
+        "template": "she was always X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5768,
+          5769
+        ],
+        "lines_scanned": 6880510,
+        "lines_kept": 1476,
+        "hits": 435484,
+        "fillers": 1472,
+        "above_floor": 1244,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 990,
+          "noun": 254
+        },
+        "registered_share": 0.6326,
+        "corpus_share": 0.0932,
+        "net_new_share": 0.3674,
+        "unique_rows": 31,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1242,
+            "recall@500": 0.0484,
+            "recall@1000": 0.1044,
+            "recall@3000": 0.1275,
+            "recall@10000": 0.1275,
+            "found_anywhere": 0.1275
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1242,
+            "recall@500": 0.0582,
+            "recall@1000": 0.1066,
+            "recall@3000": 0.1275,
+            "recall@10000": 0.1275,
+            "found_anywhere": 0.1275
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 12,
+          "yield": 0.48,
+          "regions": {
+            "communication_style": 3,
+            "emotional_temperament": 3,
+            "moral_stance": 2,
+            "social_interpersonal": 4
+          },
+          "forms": {
+            "adjective": 11,
+            "noun": 1
+          },
+          "physical_state_share": 0.4,
+          "kept": 8,
+          "unique_kept": 2,
+          "unique_kept_stems": [
+            "fonder",
+            "shamming"
+          ],
+          "region_tv": 0.2808,
+          "form_tv": 0.1675
+        },
+        "keep": true,
+        "why": "yield 0.48 >= 0.4 and region_tv 0.28 <= 0.5"
+      },
+      {
+        "frame": "h_he_is_always",
+        "type": "habitual",
+        "tier": 2,
+        "source": "books",
+        "template": "he is always X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          4494,
+          4495
+        ],
+        "lines_scanned": 6683219,
+        "lines_kept": 1538,
+        "hits": 327707,
+        "fillers": 1533,
+        "above_floor": 1124,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 921,
+          "noun": 203
+        },
+        "registered_share": 0.6343,
+        "corpus_share": 0.0827,
+        "net_new_share": 0.3657,
+        "unique_rows": 21,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1120,
+            "recall@500": 0.0516,
+            "recall@1000": 0.0901,
+            "recall@3000": 0.1033,
+            "recall@10000": 0.1033,
+            "found_anywhere": 0.1033
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1120,
+            "recall@500": 0.0582,
+            "recall@1000": 0.1,
+            "recall@3000": 0.1033,
+            "recall@10000": 0.1033,
+            "found_anywhere": 0.1033
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 16,
+          "yield": 0.64,
+          "regions": {
+            "alignment_ai_agent": 2,
+            "cognitive_epistemic": 2,
+            "communication_style": 4,
+            "emotional_temperament": 3,
+            "identity_demographic": 1,
+            "moral_stance": 1,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 14,
+            "noun": 2
+          },
+          "physical_state_share": 0.28,
+          "kept": 8,
+          "unique_kept": 4,
+          "unique_kept_stems": [
+            "behindhand",
+            "digressing",
+            "jabbering",
+            "stealthily"
+          ],
+          "region_tv": 0.2139,
+          "form_tv": 0.1258
+        },
+        "keep": true,
+        "why": "yield 0.64 >= 0.4 and region_tv 0.21 <= 0.5"
+      },
+      {
+        "frame": "h_she_is_always",
+        "type": "habitual",
+        "tier": 2,
+        "source": "books",
+        "template": "she is always X",
+        "floor": 40,
+        "filler_kind": "adj",
+        "shards": [
+          5767,
+          5768
+        ],
+        "lines_scanned": 6890132,
+        "lines_kept": 621,
+        "hits": 93318,
+        "fillers": 620,
+        "above_floor": 455,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 365,
+          "noun": 90
+        },
+        "registered_share": 0.6615,
+        "corpus_share": 0.0967,
+        "net_new_share": 0.3385,
+        "unique_rows": 5,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 454,
+            "recall@500": 0.0484,
+            "recall@1000": 0.0484,
+            "recall@3000": 0.0484,
+            "recall@10000": 0.0484,
+            "found_anywhere": 0.0484
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 454,
+            "recall@500": 0.0484,
+            "recall@1000": 0.0484,
+            "recall@3000": 0.0484,
+            "recall@10000": 0.0484,
+            "found_anywhere": 0.0484
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 13,
+          "yield": 0.52,
+          "regions": {
+            "communication_style": 3,
+            "emotional_temperament": 4,
+            "identity_demographic": 1,
+            "social_interpersonal": 5
+          },
+          "forms": {
+            "adjective": 11,
+            "noun": 2
+          },
+          "physical_state_share": 0.32,
+          "kept": 7,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.3269,
+          "form_tv": 0.0969
+        },
+        "keep": true,
+        "why": "yield 0.52 >= 0.4 and region_tv 0.33 <= 0.5"
+      },
+      {
+        "frame": "cards.trait_list",
+        "type": "list",
+        "tier": 1,
+        "source": "cards",
+        "template": "a labelled trait list (\"Personality: shy, stubborn, kind\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "cards.copular_list",
+        "type": "copular",
+        "tier": 1,
+        "source": "cards",
+        "template": "the adjectives after she is / he seems (\"She is kind, caring and a bit shy\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 46,
+        "fillers": 30,
+        "above_floor": 4,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 4
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.0,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          }
+        },
+        "pilot": {
+          "n": 4,
+          "n_filtered": 4,
+          "n_trait": 4,
+          "yield": 1.0,
+          "regions": {
+            "emotional_temperament": 2,
+            "identity_demographic": 1,
+            "moral_stance": 1
+          },
+          "forms": {
+            "adjective": 4
+          },
+          "physical_state_share": 0.0,
+          "kept": 2,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.5599,
+          "form_tv": 0.2508
+        },
+        "keep": false,
+        "why": "region_tv 0.56 > 0.5, no unique kept row"
+      },
+      {
+        "frame": "cards.attributive",
+        "type": "copular",
+        "tier": 1,
+        "source": "cards",
+        "template": "a X <person noun> (\"a shy, quiet girl\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 55,
+        "fillers": 46,
+        "above_floor": 1,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1
+        },
+        "registered_share": 1.0,
+        "corpus_share": 1.0,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1,
+            "recall@500": 0.0011,
+            "recall@1000": 0.0011,
+            "recall@3000": 0.0011,
+            "recall@10000": 0.0011,
+            "found_anywhere": 0.0011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1,
+            "recall@500": 0.0011,
+            "recall@1000": 0.0011,
+            "recall@3000": 0.0011,
+            "recall@10000": 0.0011,
+            "found_anywhere": 0.0011
+          }
+        },
+        "pilot": {
+          "n": 1,
+          "n_filtered": 1,
+          "n_trait": 1,
+          "yield": 1.0,
+          "regions": {
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 1
+          },
+          "physical_state_share": 0.0,
+          "kept": 0,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.7445,
+          "form_tv": 0.2508
+        },
+        "keep": false,
+        "why": "region_tv 0.74 > 0.5, no unique kept row"
+      },
+      {
+        "frame": "cards.known_for",
+        "type": "possessive",
+        "tier": 1,
+        "source": "cards",
+        "template": "known for her X",
+        "floor": 3,
+        "filler_kind": "quality_noun",
+        "documents": 1190,
+        "hits": 94,
+        "fillers": 75,
+        "above_floor": 4,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 3,
+          "noun": 1
+        },
+        "registered_share": 0.75,
+        "corpus_share": 0.25,
+        "net_new_share": 0.25,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0011,
+            "recall@1000": 0.0011,
+            "recall@3000": 0.0011,
+            "recall@10000": 0.0011,
+            "found_anywhere": 0.0011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 4,
+            "recall@500": 0.0011,
+            "recall@1000": 0.0011,
+            "recall@3000": 0.0011,
+            "recall@10000": 0.0011,
+            "found_anywhere": 0.0011
+          }
+        },
+        "pilot": {
+          "n": 4,
+          "n_filtered": 4,
+          "n_trait": 4,
+          "yield": 1.0,
+          "regions": {
+            "cognitive_epistemic": 2,
+            "emotional_temperament": 2
+          },
+          "forms": {
+            "adjective": 3,
+            "noun": 1
+          },
+          "physical_state_share": 0.0,
+          "kept": 1,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.6782,
+          "form_tv": 0.0008
+        },
+        "keep": false,
+        "why": "region_tv 0.68 > 0.5, no unique kept row"
+      },
+      {
+        "frame": "cards.poss_nature",
+        "type": "possessive",
+        "tier": 1,
+        "source": "cards",
+        "template": "her X nature / streak / side",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 55,
+        "fillers": 26,
+        "above_floor": 8,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 8
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.75,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 8,
+            "recall@500": 0.0066,
+            "recall@1000": 0.0066,
+            "recall@3000": 0.0066,
+            "recall@10000": 0.0066,
+            "found_anywhere": 0.0066
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 8,
+            "recall@500": 0.0066,
+            "recall@1000": 0.0066,
+            "recall@3000": 0.0066,
+            "recall@10000": 0.0066,
+            "found_anywhere": 0.0066
+          }
+        },
+        "pilot": {
+          "n": 8,
+          "n_filtered": 8,
+          "n_trait": 8,
+          "yield": 1.0,
+          "regions": {
+            "communication_style": 3,
+            "emotional_temperament": 4,
+            "social_interpersonal": 1
+          },
+          "forms": {
+            "adjective": 8
+          },
+          "physical_state_share": 0.0,
+          "kept": 1,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.5343,
+          "form_tv": 0.2508
+        },
+        "keep": false,
+        "why": "region_tv 0.53 > 0.5, no unique kept row"
+      },
+      {
+        "frame": "cards.to_a_fault",
+        "type": "postposed",
+        "tier": 1,
+        "source": "cards",
+        "template": "X to a fault",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "cards.by_nature",
+        "type": "postposed",
+        "tier": 1,
+        "source": "cards",
+        "template": "X by nature",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "cards.at_heart",
+        "type": "postposed",
+        "tier": 1,
+        "source": "cards",
+        "template": "X at heart",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "cards.tendency",
+        "type": "tendency",
+        "tier": 1,
+        "source": "cards",
+        "template": "tends to be X",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "cards.always",
+        "type": "habitual",
+        "tier": 1,
+        "source": "cards",
+        "template": "she is always X",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1190,
+        "hits": 6,
+        "fillers": 4,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.trait_list",
+        "type": "list",
+        "tier": 1,
+        "source": "pippa",
+        "template": "a labelled trait list (\"Personality: shy, stubborn, kind\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 200,
+        "fillers": 123,
+        "above_floor": 19,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 19
+        },
+        "registered_share": 0.9474,
+        "corpus_share": 0.5263,
+        "net_new_share": 0.0526,
+        "unique_rows": 2,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 19,
+            "recall@500": 0.011,
+            "recall@1000": 0.011,
+            "recall@3000": 0.011,
+            "recall@10000": 0.011,
+            "found_anywhere": 0.011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 19,
+            "recall@500": 0.011,
+            "recall@1000": 0.011,
+            "recall@3000": 0.011,
+            "recall@10000": 0.011,
+            "found_anywhere": 0.011
+          }
+        },
+        "pilot": {
+          "n": 19,
+          "n_filtered": 19,
+          "n_trait": 18,
+          "yield": 0.9474,
+          "regions": {
+            "cognitive_epistemic": 1,
+            "communication_style": 3,
+            "emotional_temperament": 3,
+            "identity_demographic": 1,
+            "moral_stance": 2,
+            "social_interpersonal": 8
+          },
+          "forms": {
+            "adjective": 18
+          },
+          "physical_state_share": 0.0,
+          "kept": 3,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.1979,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.95 >= 0.4 and region_tv 0.20 <= 0.5"
+      },
+      {
+        "frame": "pippa.copular_list",
+        "type": "copular",
+        "tier": 1,
+        "source": "pippa",
+        "template": "the adjectives after she is / he seems (\"She is kind, caring and a bit shy\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 492,
+        "fillers": 342,
+        "above_floor": 30,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 30
+        },
+        "registered_share": 0.9667,
+        "corpus_share": 0.4,
+        "net_new_share": 0.0333,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 30,
+            "recall@500": 0.0132,
+            "recall@1000": 0.0132,
+            "recall@3000": 0.0132,
+            "recall@10000": 0.0132,
+            "found_anywhere": 0.0132
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 30,
+            "recall@500": 0.0132,
+            "recall@1000": 0.0132,
+            "recall@3000": 0.0132,
+            "recall@10000": 0.0132,
+            "found_anywhere": 0.0132
+          }
+        },
+        "pilot": {
+          "n": 25,
+          "n_filtered": 25,
+          "n_trait": 25,
+          "yield": 1.0,
+          "regions": {
+            "alignment_ai_agent": 1,
+            "cognitive_epistemic": 2,
+            "communication_style": 5,
+            "emotional_temperament": 6,
+            "identity_demographic": 1,
+            "social_interpersonal": 10
+          },
+          "forms": {
+            "adjective": 25
+          },
+          "physical_state_share": 0.0,
+          "kept": 5,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.2759,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 1.00 >= 0.4 and region_tv 0.28 <= 0.5"
+      },
+      {
+        "frame": "pippa.attributive",
+        "type": "copular",
+        "tier": 1,
+        "source": "pippa",
+        "template": "a X <person noun> (\"a shy, quiet girl\")",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 318,
+        "fillers": 224,
+        "above_floor": 15,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 15
+        },
+        "registered_share": 1.0,
+        "corpus_share": 0.6667,
+        "net_new_share": 0.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 15,
+            "recall@500": 0.011,
+            "recall@1000": 0.011,
+            "recall@3000": 0.011,
+            "recall@10000": 0.011,
+            "found_anywhere": 0.011
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 15,
+            "recall@500": 0.011,
+            "recall@1000": 0.011,
+            "recall@3000": 0.011,
+            "recall@10000": 0.011,
+            "found_anywhere": 0.011
+          }
+        },
+        "pilot": {
+          "n": 15,
+          "n_filtered": 15,
+          "n_trait": 11,
+          "yield": 0.7333,
+          "regions": {
+            "communication_style": 3,
+            "emotional_temperament": 5,
+            "social_interpersonal": 3
+          },
+          "forms": {
+            "adjective": 11
+          },
+          "physical_state_share": 0.1333,
+          "kept": 1,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.4038,
+          "form_tv": 0.2508
+        },
+        "keep": true,
+        "why": "yield 0.73 >= 0.4 and region_tv 0.40 <= 0.5"
+      },
+      {
+        "frame": "pippa.known_for",
+        "type": "possessive",
+        "tier": 1,
+        "source": "pippa",
+        "template": "known for her X",
+        "floor": 3,
+        "filler_kind": "quality_noun",
+        "documents": 1225,
+        "hits": 0,
+        "fillers": 0,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.poss_nature",
+        "type": "possessive",
+        "tier": 1,
+        "source": "pippa",
+        "template": "her X nature / streak / side",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 14,
+        "fillers": 14,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.to_a_fault",
+        "type": "postposed",
+        "tier": 1,
+        "source": "pippa",
+        "template": "X to a fault",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 1,
+        "fillers": 1,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.by_nature",
+        "type": "postposed",
+        "tier": 1,
+        "source": "pippa",
+        "template": "X by nature",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 4,
+        "fillers": 4,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.at_heart",
+        "type": "postposed",
+        "tier": 1,
+        "source": "pippa",
+        "template": "X at heart",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 1,
+        "fillers": 1,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.tendency",
+        "type": "tendency",
+        "tier": 1,
+        "source": "pippa",
+        "template": "tends to be X",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 5,
+        "fillers": 5,
+        "above_floor": 0,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {},
+        "registered_share": null,
+        "corpus_share": null,
+        "net_new_share": null,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": null,
+          "lift": null
+        },
+        "pilot": null,
+        "keep": null,
+        "why": "no filler above the floor: nothing to keep"
+      },
+      {
+        "frame": "pippa.always",
+        "type": "habitual",
+        "tier": 1,
+        "source": "pippa",
+        "template": "she is always X",
+        "floor": 3,
+        "filler_kind": "adj",
+        "documents": 1225,
+        "hits": 28,
+        "fillers": 22,
+        "above_floor": 1,
+        "rejected_kind": 0,
+        "malformed": 0,
+        "forms": {
+          "adjective": 1
+        },
+        "registered_share": 0.0,
+        "corpus_share": 0.0,
+        "net_new_share": 1.0,
+        "unique_rows": 0,
+        "recovery": {
+          "volumes": {
+            "n": 910,
+            "n_ranked": 1,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          },
+          "lift": {
+            "n": 910,
+            "n_ranked": 1,
+            "recall@500": 0.0,
+            "recall@1000": 0.0,
+            "recall@3000": 0.0,
+            "recall@10000": 0.0,
+            "found_anywhere": 0.0
+          }
+        },
+        "pilot": {
+          "n": 1,
+          "n_filtered": 1,
+          "n_trait": 1,
+          "yield": 1.0,
+          "regions": {
+            "identity_demographic": 1
+          },
+          "forms": {
+            "adjective": 1
+          },
+          "physical_state_share": 0.0,
+          "kept": 1,
+          "unique_kept": 0,
+          "unique_kept_stems": [],
+          "region_tv": 0.8659,
+          "form_tv": 0.2508
+        },
+        "keep": false,
+        "why": "region_tv 0.87 > 0.5, no unique kept row"
+      }
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/corpus_frames_generator.py evaluate --pilot-run 2026-10-18-pilot",
+      "git_sha": "5ab41d2e+dirty",
+      "author": "Roger Dearnaley",
+      "title": "corpus-frames per-frame statistics"
+    },
+    "produced_at": "2026-10-18T01:07:52+00:00",
+    "inputs": [
+      {
+        "dep_key": "frames_table",
+        "path": "data/candidates/corpus_frames/frames_table.jsonl",
+        "fingerprint": "v1:2026-10-18T00:09:10+00:00@24300661",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-18T00:09:10+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "frame_stats",
+        "path": "data/candidates/corpus_frames/frame_stats.json",
+        "fingerprint": "v1:2026-10-18T00:09:21+00:00@81011",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-18T00:09:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-18T01:07:40+00:00@248330441",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-18T01:07:40+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "corpus_regions",
+        "path": "data/candidates/corpus_regions.json",
+        "fingerprint": "v1:2026-10-10T13:08:44+00:00@996611",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-10T13:08:44+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "cb701c8f15b2a7e9e109ba06de3f4512774e5a695218d175354cc874547a695f"
+  }
+}

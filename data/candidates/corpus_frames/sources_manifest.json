@@ -1,0 +1,2711 @@
+{
+  "books": {
+    "tool": "corpus_frames_generator.py stream",
+    "source": "google_books_ngrams_v3_20200217_eng",
+    "base_url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/",
+    "dataset_url": "https://storage.googleapis.com/books/ngrams/books/datasetsv3.html",
+    "licence": {
+      "name": "CC BY 3.0 (Creative Commons Attribution 3.0 Unported; the Google Books Ngram Viewer datasets page)",
+      "url": "https://creativecommons.org/licenses/by/3.0/",
+      "citation": "Google Books Ngram Viewer, version 3 (20200217), English: Michel et al., Quantitative analysis of culture using millions of digitized books, Science 331 (2011); https://books.google.com/ngrams"
+    },
+    "approvals": [
+      "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+      "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix"
+    ],
+    "bank_sha256": "2917c9a3986cb0a3eab433b17363136a35899c5de99bec6294f1f94894397f1e",
+    "plan_tier": "all",
+    "shards": [
+      {
+        "shard": "3-03042",
+        "n": 3,
+        "index": 3042,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03042-of-06881.gz",
+        "content_length": 654026380,
+        "bytes_streamed": 654026380,
+        "lines_scanned": 3224751,
+        "lines_kept": {
+          "n_born": 0
+        },
+        "fillers": {
+          "n_born": 0
+        },
+        "frames": [
+          "n_born"
+        ],
+        "parts_sha256": {
+          "n_born": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 1836.37,
+        "streamed_at": "2026-10-17T10:59:11+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03043",
+        "n": 3,
+        "index": 3043,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03043-of-06881.gz",
+        "content_length": 598736379,
+        "bytes_streamed": 598736379,
+        "lines_scanned": 3490724,
+        "lines_kept": {
+          "n_born": 1408,
+          "n_chronic": 0
+        },
+        "fillers": {
+          "n_born": 1408,
+          "n_chronic": 0
+        },
+        "frames": [
+          "n_born",
+          "n_chronic"
+        ],
+        "parts_sha256": {
+          "n_born": "5a2460d78bd4414c855628ca0d622e7c53d0ca5a041a81a944a96109191d8183",
+          "n_chronic": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 42.01,
+        "streamed_at": "2026-10-17T22:46:51+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03044",
+        "n": 3,
+        "index": 3044,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03044-of-06881.gz",
+        "content_length": 550080320,
+        "bytes_streamed": 550080320,
+        "lines_scanned": 3250975,
+        "lines_kept": {
+          "n_chronic": 2909,
+          "n_compulsive": 586,
+          "n_confirmed": 1302
+        },
+        "fillers": {
+          "n_chronic": 2907,
+          "n_compulsive": 586,
+          "n_confirmed": 1301
+        },
+        "frames": [
+          "n_chronic",
+          "n_compulsive",
+          "n_confirmed"
+        ],
+        "parts_sha256": {
+          "n_chronic": "79cf1ab048d07eee1c9f5ca614481dc2a0c44380bde78aac005e52ed092ab92e",
+          "n_compulsive": "ae1691901593e6890df37b779ca63b3da20b77f7b73c336488e87809098acfb8",
+          "n_confirmed": "a680be9af54acc56098846590cc1ca1a3d702e667ffdd0dd10c83d62c80ea3ad"
+        },
+        "seconds": 37.28,
+        "streamed_at": "2026-10-17T22:46:46+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03045",
+        "n": 3,
+        "index": 3045,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03045-of-06881.gz",
+        "content_length": 582804147,
+        "bytes_streamed": 582804147,
+        "lines_scanned": 3507791,
+        "lines_kept": {
+          "n_compulsive": 0,
+          "n_confirmed": 0
+        },
+        "fillers": {
+          "n_compulsive": 0,
+          "n_confirmed": 0
+        },
+        "frames": [
+          "n_compulsive",
+          "n_confirmed"
+        ],
+        "parts_sha256": {
+          "n_compulsive": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "n_confirmed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 37.67,
+        "streamed_at": "2026-10-17T22:47:57+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03048",
+        "n": 3,
+        "index": 3048,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03048-of-06881.gz",
+        "content_length": 573341198,
+        "bytes_streamed": 573341198,
+        "lines_scanned": 3233843,
+        "lines_kept": {
+          "n_habitual": 757,
+          "n_hopeless": 1853
+        },
+        "fillers": {
+          "n_habitual": 756,
+          "n_hopeless": 1853
+        },
+        "frames": [
+          "n_habitual",
+          "n_hopeless"
+        ],
+        "parts_sha256": {
+          "n_habitual": "5ed41723e38cc63eb688fb6fa1850f8057c58ca6ab75979a5ff405393f9f3634",
+          "n_hopeless": "5d1ece72e743137d74e0c1db1c9143db4ad100800e46bfff6cb74901085d75be"
+        },
+        "seconds": 1057.84,
+        "streamed_at": "2026-10-17T10:46:12+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03049",
+        "n": 3,
+        "index": 3049,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03049-of-06881.gz",
+        "content_length": 620988284,
+        "bytes_streamed": 620988284,
+        "lines_scanned": 3474871,
+        "lines_kept": {
+          "n_habitual": 0,
+          "n_hopeless": 0
+        },
+        "fillers": {
+          "n_habitual": 0,
+          "n_hopeless": 0
+        },
+        "frames": [
+          "n_habitual",
+          "n_hopeless"
+        ],
+        "parts_sha256": {
+          "n_habitual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "n_hopeless": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 42.76,
+        "streamed_at": "2026-10-17T22:47:34+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03050",
+        "n": 3,
+        "index": 3050,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03050-of-06881.gz",
+        "content_length": 536177792,
+        "bytes_streamed": 536177792,
+        "lines_scanned": 3203679,
+        "lines_kept": {
+          "n_natural": 0
+        },
+        "fillers": {
+          "n_natural": 0
+        },
+        "frames": [
+          "n_natural"
+        ],
+        "parts_sha256": {
+          "n_natural": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 1069.88,
+        "streamed_at": "2026-10-17T11:04:02+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03051",
+        "n": 3,
+        "index": 3051,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03051-of-06881.gz",
+        "content_length": 574771546,
+        "bytes_streamed": 574771546,
+        "lines_scanned": 3477070,
+        "lines_kept": {
+          "n_natural": 10835,
+          "n_notorious": 2076
+        },
+        "fillers": {
+          "n_natural": 10832,
+          "n_notorious": 2076
+        },
+        "frames": [
+          "n_natural",
+          "n_notorious"
+        ],
+        "parts_sha256": {
+          "n_natural": "a0ab8e08c59cd4d2fe440e4d4c3f6a5095c17583053bd3a38352a46cae9141a9",
+          "n_notorious": "399286adf2970173aa73262548361ba74ee7fb23e2474b42495092cd94310f37"
+        },
+        "seconds": 39.07,
+        "streamed_at": "2026-10-17T22:48:13+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03052",
+        "n": 3,
+        "index": 3052,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03052-of-06881.gz",
+        "content_length": 554110149,
+        "bytes_streamed": 554110149,
+        "lines_scanned": 3196962,
+        "lines_kept": {
+          "n_notorious": 0
+        },
+        "fillers": {
+          "n_notorious": 0
+        },
+        "frames": [
+          "n_notorious"
+        ],
+        "parts_sha256": {
+          "n_notorious": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 77.59,
+        "streamed_at": "2026-10-17T16:28:24+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03055",
+        "n": 3,
+        "index": 3055,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03055-of-06881.gz",
+        "content_length": 621341737,
+        "bytes_streamed": 621341737,
+        "lines_scanned": 3605833,
+        "lines_kept": {
+          "n_shameless": 665
+        },
+        "fillers": {
+          "n_shameless": 665
+        },
+        "frames": [
+          "n_shameless"
+        ],
+        "parts_sha256": {
+          "n_shameless": "b2abd6e4d66c77f93944c0553ceadb5eb3f424274377111de175918b87913c2f"
+        },
+        "seconds": 31.41,
+        "streamed_at": "2026-10-17T10:52:03+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03056",
+        "n": 3,
+        "index": 3056,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03056-of-06881.gz",
+        "content_length": 574672974,
+        "bytes_streamed": 574672974,
+        "lines_scanned": 3332434,
+        "lines_kept": {
+          "n_shameless": 0
+        },
+        "fillers": {
+          "n_shameless": 0
+        },
+        "frames": [
+          "n_shameless"
+        ],
+        "parts_sha256": {
+          "n_shameless": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 898.38,
+        "streamed_at": "2026-10-17T23:03:33+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03057",
+        "n": 3,
+        "index": 3057,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03057-of-06881.gz",
+        "content_length": 554312590,
+        "bytes_streamed": 554312590,
+        "lines_scanned": 3318619,
+        "lines_kept": {
+          "n_total": 0
+        },
+        "fillers": {
+          "n_total": 0
+        },
+        "frames": [
+          "n_total"
+        ],
+        "parts_sha256": {
+          "n_total": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 26.88,
+        "streamed_at": "2026-10-17T10:52:30+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03058",
+        "n": 3,
+        "index": 3058,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03058-of-06881.gz",
+        "content_length": 595822474,
+        "bytes_streamed": 595822474,
+        "lines_scanned": 3538430,
+        "lines_kept": {
+          "n_total": 10167
+        },
+        "fillers": {
+          "n_total": 10166
+        },
+        "frames": [
+          "n_total"
+        ],
+        "parts_sha256": {
+          "n_total": "a1c860667634db716780db284d9d7dd8e2d04475f5988a8b5f7d785ba85a38d8"
+        },
+        "seconds": 90.85,
+        "streamed_at": "2026-10-17T16:28:38+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03205",
+        "n": 3,
+        "index": 3205,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03205-of-06881.gz",
+        "content_length": 548551340,
+        "bytes_streamed": 548551340,
+        "lines_scanned": 3370849,
+        "lines_kept": {
+          "n_incorrigible": 0
+        },
+        "fillers": {
+          "n_incorrigible": 0
+        },
+        "frames": [
+          "n_incorrigible"
+        ],
+        "parts_sha256": {
+          "n_incorrigible": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 22.11,
+        "streamed_at": "2026-10-17T10:52:52+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03206",
+        "n": 3,
+        "index": 3206,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03206-of-06881.gz",
+        "content_length": 557334823,
+        "bytes_streamed": 557334823,
+        "lines_scanned": 3342122,
+        "lines_kept": {
+          "n_incorrigible": 439
+        },
+        "fillers": {
+          "n_incorrigible": 439
+        },
+        "frames": [
+          "n_incorrigible"
+        ],
+        "parts_sha256": {
+          "n_incorrigible": "ccb45a9c3281e9fb5211f1a19c29cc3b76b0d915a182cffcadf005a0668251c3"
+        },
+        "seconds": 29.19,
+        "streamed_at": "2026-10-17T22:48:42+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03207",
+        "n": 3,
+        "index": 3207,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03207-of-06881.gz",
+        "content_length": 545134045,
+        "bytes_streamed": 545134045,
+        "lines_scanned": 3350891,
+        "lines_kept": {
+          "n_inveterate": 917
+        },
+        "fillers": {
+          "n_inveterate": 917
+        },
+        "frames": [
+          "n_inveterate"
+        ],
+        "parts_sha256": {
+          "n_inveterate": "b11981ddac40093781e22992f1a72edf848c42166aaa2493f5c2b4fe756e07e4"
+        },
+        "seconds": 33.91,
+        "streamed_at": "2026-10-17T10:53:26+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03208",
+        "n": 3,
+        "index": 3208,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03208-of-06881.gz",
+        "content_length": 488012766,
+        "bytes_streamed": 488012766,
+        "lines_scanned": 3333829,
+        "lines_kept": {
+          "n_inveterate": 0
+        },
+        "fillers": {
+          "n_inveterate": 0
+        },
+        "frames": [
+          "n_inveterate"
+        ],
+        "parts_sha256": {
+          "n_inveterate": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 401.67,
+        "streamed_at": "2026-10-17T22:55:24+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-03694",
+        "n": 3,
+        "index": 3694,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03694-of-06881.gz",
+        "content_length": 454051672,
+        "bytes_streamed": 454051672,
+        "lines_scanned": 3640466,
+        "lines_kept": {
+          "d_chronically": 123
+        },
+        "fillers": {
+          "d_chronically": 57
+        },
+        "frames": [
+          "d_chronically"
+        ],
+        "parts_sha256": {
+          "d_chronically": "f1b2df638d0b93e1e96f00600e42946fda35929e710ede17d0978d875befc924"
+        },
+        "seconds": 35.09,
+        "streamed_at": "2026-10-17T10:54:01+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-03695",
+        "n": 3,
+        "index": 3695,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-03695-of-06881.gz",
+        "content_length": 505845886,
+        "bytes_streamed": 505845886,
+        "lines_scanned": 3133492,
+        "lines_kept": {
+          "d_chronically": 0
+        },
+        "fillers": {
+          "d_chronically": 0
+        },
+        "frames": [
+          "d_chronically"
+        ],
+        "parts_sha256": {
+          "d_chronically": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 21.61,
+        "streamed_at": "2026-10-17T22:55:46+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-04202",
+        "n": 3,
+        "index": 4202,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04202-of-06881.gz",
+        "content_length": 501431196,
+        "bytes_streamed": 501431196,
+        "lines_scanned": 3371001,
+        "lines_kept": {
+          "d_extremely": 1880
+        },
+        "fillers": {
+          "d_extremely": 826
+        },
+        "frames": [
+          "d_extremely"
+        ],
+        "parts_sha256": {
+          "d_extremely": "8c6fe668782b3378d397784adb3af0046b75cd9307056ca107e645295e87398d"
+        },
+        "seconds": 34.74,
+        "streamed_at": "2026-10-17T10:54:35+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-04203",
+        "n": 3,
+        "index": 4203,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04203-of-06881.gz",
+        "content_length": 484933655,
+        "bytes_streamed": 484933655,
+        "lines_scanned": 3373298,
+        "lines_kept": {
+          "d_extremely": 0
+        },
+        "fillers": {
+          "d_extremely": 0
+        },
+        "frames": [
+          "d_extremely"
+        ],
+        "parts_sha256": {
+          "d_extremely": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 20.83,
+        "streamed_at": "2026-10-17T22:56:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-04221",
+        "n": 3,
+        "index": 4221,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04221-of-06881.gz",
+        "content_length": 472792347,
+        "bytes_streamed": 472792347,
+        "lines_scanned": 3457593,
+        "lines_kept": {
+          "d_famously": 4
+        },
+        "fillers": {
+          "d_famously": 4
+        },
+        "frames": [
+          "d_famously"
+        ],
+        "parts_sha256": {
+          "d_famously": "95ca25fa40564d6aa84a56522ca34a8f5c8c0a01c4489191c4a647f26372893b"
+        },
+        "seconds": 28.77,
+        "streamed_at": "2026-10-17T10:54:43+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-04222",
+        "n": 3,
+        "index": 4222,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04222-of-06881.gz",
+        "content_length": 462559662,
+        "bytes_streamed": 462559662,
+        "lines_scanned": 3322881,
+        "lines_kept": {
+          "d_famously": 0
+        },
+        "fillers": {
+          "d_famously": 0
+        },
+        "frames": [
+          "d_famously"
+        ],
+        "parts_sha256": {
+          "d_famously": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 20.1,
+        "streamed_at": "2026-10-17T22:56:27+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-04564",
+        "n": 3,
+        "index": 4564,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04564-of-06881.gz",
+        "content_length": 512655374,
+        "bytes_streamed": 512655374,
+        "lines_scanned": 3534677,
+        "lines_kept": {
+          "d_hopelessly": 46
+        },
+        "fillers": {
+          "d_hopelessly": 31
+        },
+        "frames": [
+          "d_hopelessly"
+        ],
+        "parts_sha256": {
+          "d_hopelessly": "9821e0d1158a13144c3339bc843088cf1ac33386a31961ce759703b7d0091669"
+        },
+        "seconds": 30.89,
+        "streamed_at": "2026-10-17T10:55:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-04565",
+        "n": 3,
+        "index": 4565,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04565-of-06881.gz",
+        "content_length": 417506434,
+        "bytes_streamed": 417506434,
+        "lines_scanned": 3149404,
+        "lines_kept": {
+          "d_hopelessly": 0
+        },
+        "fillers": {
+          "d_hopelessly": 0
+        },
+        "frames": [
+          "d_hopelessly"
+        ],
+        "parts_sha256": {
+          "d_hopelessly": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 19.39,
+        "streamed_at": "2026-10-17T22:57:25+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-04672",
+        "n": 3,
+        "index": 4672,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04672-of-06881.gz",
+        "content_length": 515483805,
+        "bytes_streamed": 515483805,
+        "lines_scanned": 3558261,
+        "lines_kept": {
+          "d_incurably": 23
+        },
+        "fillers": {
+          "d_incurably": 13
+        },
+        "frames": [
+          "d_incurably"
+        ],
+        "parts_sha256": {
+          "d_incurably": "041f2b43c381c204d558b02b5a9f80165ef3a3e3088fcd3213a469654d05189f"
+        },
+        "seconds": 32.69,
+        "streamed_at": "2026-10-17T10:55:16+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-04673",
+        "n": 3,
+        "index": 4673,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04673-of-06881.gz",
+        "content_length": 474715455,
+        "bytes_streamed": 474715455,
+        "lines_scanned": 3127274,
+        "lines_kept": {
+          "d_incurably": 0
+        },
+        "fillers": {
+          "d_incurably": 0
+        },
+        "frames": [
+          "d_incurably"
+        ],
+        "parts_sha256": {
+          "d_incurably": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 469.98,
+        "streamed_at": "2026-10-17T23:05:54+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-04955",
+        "n": 3,
+        "index": 4955,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04955-of-06881.gz",
+        "content_length": 465044846,
+        "bytes_streamed": 465044846,
+        "lines_scanned": 3520244,
+        "lines_kept": {
+          "p_man_of": 0
+        },
+        "fillers": {
+          "p_man_of": 0
+        },
+        "frames": [
+          "p_man_of"
+        ],
+        "parts_sha256": {
+          "p_man_of": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 33.97,
+        "streamed_at": "2026-10-17T10:55:40+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-04956",
+        "n": 3,
+        "index": 4956,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-04956-of-06881.gz",
+        "content_length": 569201349,
+        "bytes_streamed": 569201349,
+        "lines_scanned": 3124023,
+        "lines_kept": {
+          "p_man_of": 7920
+        },
+        "fillers": {
+          "p_man_of": 7918
+        },
+        "frames": [
+          "p_man_of"
+        ],
+        "parts_sha256": {
+          "p_man_of": "48dd36ec0d4d067c77337c07abcce42431b7ebf16bf3d642ddea416ce8a68634"
+        },
+        "seconds": 630.96,
+        "streamed_at": "2026-10-17T23:14:04+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-05174",
+        "n": 3,
+        "index": 5174,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05174-of-06881.gz",
+        "content_length": 460317380,
+        "bytes_streamed": 460317380,
+        "lines_scanned": 3260676,
+        "lines_kept": {
+          "d_notoriously": 93
+        },
+        "fillers": {
+          "d_notoriously": 64
+        },
+        "frames": [
+          "d_notoriously"
+        ],
+        "parts_sha256": {
+          "d_notoriously": "2eb92b3c289367e489a56c3fe7ac5d78d76dda5b5301879f2e201900c3c020ef"
+        },
+        "seconds": 31.43,
+        "streamed_at": "2026-10-17T10:55:47+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05175",
+        "n": 3,
+        "index": 5175,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05175-of-06881.gz",
+        "content_length": 462588511,
+        "bytes_streamed": 462588511,
+        "lines_scanned": 3494657,
+        "lines_kept": {
+          "d_notoriously": 0
+        },
+        "fillers": {
+          "d_notoriously": 0
+        },
+        "frames": [
+          "d_notoriously"
+        ],
+        "parts_sha256": {
+          "d_notoriously": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 17.79,
+        "streamed_at": "2026-10-18T00:07:24+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "5ab41d2e+dirty"
+      },
+      {
+        "shard": "3-05669",
+        "n": 3,
+        "index": 5669,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05669-of-06881.gz",
+        "content_length": 490241502,
+        "bytes_streamed": 490241502,
+        "lines_scanned": 3522277,
+        "lines_kept": {
+          "d_quite": 0
+        },
+        "fillers": {
+          "d_quite": 0
+        },
+        "frames": [
+          "d_quite"
+        ],
+        "parts_sha256": {
+          "d_quite": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 40.5,
+        "streamed_at": "2026-10-17T10:56:21+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05670",
+        "n": 3,
+        "index": 5670,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05670-of-06881.gz",
+        "content_length": 540292004,
+        "bytes_streamed": 540292004,
+        "lines_scanned": 3288669,
+        "lines_kept": {
+          "d_quite": 647
+        },
+        "fillers": {
+          "d_quite": 370
+        },
+        "frames": [
+          "d_quite"
+        ],
+        "parts_sha256": {
+          "d_quite": "e016dafe70b74aadb8d0767b7d964e94c1f4fdeeb0bc4887631f25eba0e7e368"
+        },
+        "seconds": 747.74,
+        "streamed_at": "2026-10-17T23:26:32+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-05686",
+        "n": 3,
+        "index": 5686,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05686-of-06881.gz",
+        "content_length": 499360095,
+        "bytes_streamed": 499360095,
+        "lines_scanned": 3488053,
+        "lines_kept": {
+          "d_rather": 0
+        },
+        "fillers": {
+          "d_rather": 0
+        },
+        "frames": [
+          "d_rather"
+        ],
+        "parts_sha256": {
+          "d_rather": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 32.23,
+        "streamed_at": "2026-10-17T10:56:50+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05687",
+        "n": 3,
+        "index": 5687,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05687-of-06881.gz",
+        "content_length": 494571932,
+        "bytes_streamed": 494571932,
+        "lines_scanned": 3235796,
+        "lines_kept": {
+          "d_rather": 943
+        },
+        "fillers": {
+          "d_rather": 408
+        },
+        "frames": [
+          "d_rather"
+        ],
+        "parts_sha256": {
+          "d_rather": "87522b3b7debcdea1e641b8b7122384d68d4043fcf22f4762469c5b8b2880a18"
+        },
+        "seconds": 45.1,
+        "streamed_at": "2026-10-17T10:57:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05688",
+        "n": 3,
+        "index": 5688,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05688-of-06881.gz",
+        "content_length": 570550091,
+        "bytes_streamed": 570550091,
+        "lines_scanned": 3606509,
+        "lines_kept": {
+          "d_rather": 1743
+        },
+        "fillers": {
+          "d_rather": 715
+        },
+        "frames": [
+          "d_rather"
+        ],
+        "parts_sha256": {
+          "d_rather": "1890856ecb9b7bd132f79a5d20fb4353f3f89b74f7210fef77a84d5eb07df6f6"
+        },
+        "seconds": 1231.66,
+        "streamed_at": "2026-10-17T11:19:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05689",
+        "n": 3,
+        "index": 5689,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05689-of-06881.gz",
+        "content_length": 420960848,
+        "bytes_streamed": 420960848,
+        "lines_scanned": 3088806,
+        "lines_kept": {
+          "d_rather": 0
+        },
+        "fillers": {
+          "d_rather": 0
+        },
+        "frames": [
+          "d_rather"
+        ],
+        "parts_sha256": {
+          "d_rather": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 188.98,
+        "streamed_at": "2026-10-17T23:26:23+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-05752",
+        "n": 3,
+        "index": 5752,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05752-of-06881.gz",
+        "content_length": 533839163,
+        "bytes_streamed": 533839163,
+        "lines_scanned": 3462018,
+        "lines_kept": {
+          "d_remarkably": 485
+        },
+        "fillers": {
+          "d_remarkably": 243
+        },
+        "frames": [
+          "d_remarkably"
+        ],
+        "parts_sha256": {
+          "d_remarkably": "063c3b4a1e84d4f0a5aaa67b47cf194a864cc2835195f611134d0fed32fd1eec"
+        },
+        "seconds": 27.04,
+        "streamed_at": "2026-10-17T10:58:53+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05753",
+        "n": 3,
+        "index": 5753,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05753-of-06881.gz",
+        "content_length": 502986483,
+        "bytes_streamed": 502986483,
+        "lines_scanned": 3317671,
+        "lines_kept": {
+          "d_remarkably": 0
+        },
+        "fillers": {
+          "d_remarkably": 0
+        },
+        "frames": [
+          "d_remarkably"
+        ],
+        "parts_sha256": {
+          "d_remarkably": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 28.38,
+        "streamed_at": "2026-10-17T23:26:52+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-05770",
+        "n": 3,
+        "index": 5770,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05770-of-06881.gz",
+        "content_length": 471229370,
+        "bytes_streamed": 471229370,
+        "lines_scanned": 3511142,
+        "lines_kept": {
+          "p_reputation_for": 0
+        },
+        "fillers": {
+          "p_reputation_for": 0
+        },
+        "frames": [
+          "p_reputation_for"
+        ],
+        "parts_sha256": {
+          "p_reputation_for": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 460.07,
+        "streamed_at": "2026-10-17T11:06:33+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-05771",
+        "n": 3,
+        "index": 5771,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05771-of-06881.gz",
+        "content_length": 461667466,
+        "bytes_streamed": 461667466,
+        "lines_scanned": 3189947,
+        "lines_kept": {
+          "p_reputation_for": 5752
+        },
+        "fillers": {
+          "p_reputation_for": 5751
+        },
+        "frames": [
+          "p_reputation_for"
+        ],
+        "parts_sha256": {
+          "p_reputation_for": "40e3a3a9978caf28c7ef89c1f73b1d9d5b9bbe1eacacd49b12280f96a2acb2c3"
+        },
+        "seconds": 87.52,
+        "streamed_at": "2026-10-17T23:28:59+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-05999",
+        "n": 3,
+        "index": 5999,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-05999-of-06881.gz",
+        "content_length": 460535564,
+        "bytes_streamed": 460535564,
+        "lines_scanned": 3558911,
+        "lines_kept": {
+          "d_so": 0
+        },
+        "fillers": {
+          "d_so": 0
+        },
+        "frames": [
+          "d_so"
+        ],
+        "parts_sha256": {
+          "d_so": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 644.35,
+        "streamed_at": "2026-10-17T11:09:55+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06000",
+        "n": 3,
+        "index": 6000,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06000-of-06881.gz",
+        "content_length": 542826336,
+        "bytes_streamed": 542826336,
+        "lines_scanned": 3182701,
+        "lines_kept": {
+          "d_so": 325
+        },
+        "fillers": {
+          "d_so": 204
+        },
+        "frames": [
+          "d_so"
+        ],
+        "parts_sha256": {
+          "d_so": "bd02adf71506ce53683c2ce736771c8cbe18a66f01121f6bf1eb7e22a23db41b"
+        },
+        "seconds": 63.1,
+        "streamed_at": "2026-10-17T11:05:05+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06001",
+        "n": 3,
+        "index": 6001,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06001-of-06881.gz",
+        "content_length": 653803395,
+        "bytes_streamed": 653803395,
+        "lines_scanned": 3502273,
+        "lines_kept": {
+          "d_so": 773
+        },
+        "fillers": {
+          "d_so": 518
+        },
+        "frames": [
+          "d_so"
+        ],
+        "parts_sha256": {
+          "d_so": "0b5925760f05bcbc6bbfd265f1e023d1bb79c71c006ba5a42a2cc751a8726fd6"
+        },
+        "seconds": 815.76,
+        "streamed_at": "2026-10-17T23:42:34+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06002",
+        "n": 3,
+        "index": 6002,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06002-of-06881.gz",
+        "content_length": 604146298,
+        "bytes_streamed": 604146298,
+        "lines_scanned": 3409287,
+        "lines_kept": {
+          "d_so": 127
+        },
+        "fillers": {
+          "d_so": 77
+        },
+        "frames": [
+          "d_so"
+        ],
+        "parts_sha256": {
+          "d_so": "d50034dc718965c60cbb096b30a5e8b110372dedf87b882aebea3c99a01786be"
+        },
+        "seconds": 593.97,
+        "streamed_at": "2026-10-17T23:38:53+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06420",
+        "n": 3,
+        "index": 6420,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06420-of-06881.gz",
+        "content_length": 535208259,
+        "bytes_streamed": 535208259,
+        "lines_scanned": 3311912,
+        "lines_kept": {
+          "d_thoroughly": 968
+        },
+        "fillers": {
+          "d_thoroughly": 478
+        },
+        "frames": [
+          "d_thoroughly"
+        ],
+        "parts_sha256": {
+          "d_thoroughly": "b3fa77213fb99c1ce528186222c567c69b1655445529f5fdf648d05b32e13ec4"
+        },
+        "seconds": 40.21,
+        "streamed_at": "2026-10-17T11:08:45+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06421",
+        "n": 3,
+        "index": 6421,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06421-of-06881.gz",
+        "content_length": 512747237,
+        "bytes_streamed": 512747237,
+        "lines_scanned": 3279432,
+        "lines_kept": {
+          "d_thoroughly": 0
+        },
+        "fillers": {
+          "d_thoroughly": 0
+        },
+        "frames": [
+          "d_thoroughly"
+        ],
+        "parts_sha256": {
+          "d_thoroughly": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 471.69,
+        "streamed_at": "2026-10-17T23:46:45+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06504",
+        "n": 3,
+        "index": 6504,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06504-of-06881.gz",
+        "content_length": 490665050,
+        "bytes_streamed": 490665050,
+        "lines_scanned": 3276440,
+        "lines_kept": {
+          "d_too": 187,
+          "d_too_to": 2941
+        },
+        "fillers": {
+          "d_too": 105,
+          "d_too_to": 2941
+        },
+        "frames": [
+          "d_too",
+          "d_too_to"
+        ],
+        "parts_sha256": {
+          "d_too": "7c82bd17f45592a01409819f990d572938860d19d1f0b941bc4375296042fab4",
+          "d_too_to": "e467ccbbea5ada06ed974a835af9b7d8972868c6eb504bcf6d73faafd50d0fdb"
+        },
+        "seconds": 941.55,
+        "streamed_at": "2026-10-17T11:24:26+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06505",
+        "n": 3,
+        "index": 6505,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06505-of-06881.gz",
+        "content_length": 600935059,
+        "bytes_streamed": 600935059,
+        "lines_scanned": 3424576,
+        "lines_kept": {
+          "d_too": 379,
+          "d_too_to": 5722
+        },
+        "fillers": {
+          "d_too": 195,
+          "d_too_to": 5719
+        },
+        "frames": [
+          "d_too",
+          "d_too_to"
+        ],
+        "parts_sha256": {
+          "d_too": "a1fc53132f0ced9c02517d0ed36641e8b92fa5b2682ffa18f1c1ba21c1ecee26",
+          "d_too_to": "45a04d90060bd0cf1428272880205352088655eaa75c5c79096aab63ff84df67"
+        },
+        "seconds": 1247.06,
+        "streamed_at": "2026-10-17T11:30:42+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06506",
+        "n": 3,
+        "index": 6506,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06506-of-06881.gz",
+        "content_length": 529088855,
+        "bytes_streamed": 529088855,
+        "lines_scanned": 3502529,
+        "lines_kept": {
+          "d_too": 0,
+          "d_too_to": 0
+        },
+        "fillers": {
+          "d_too": 0,
+          "d_too_to": 0
+        },
+        "frames": [
+          "d_too",
+          "d_too_to"
+        ],
+        "parts_sha256": {
+          "d_too": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "d_too_to": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 339.17,
+        "streamed_at": "2026-10-17T23:48:13+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06628",
+        "n": 3,
+        "index": 6628,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06628-of-06881.gz",
+        "content_length": 473266202,
+        "bytes_streamed": 473266202,
+        "lines_scanned": 3252107,
+        "lines_kept": {
+          "d_utterly": 328
+        },
+        "fillers": {
+          "d_utterly": 192
+        },
+        "frames": [
+          "d_utterly"
+        ],
+        "parts_sha256": {
+          "d_utterly": "eaa50cf424966b4c1c59e304709644dc4d10acf93940491012600e1e1b7bab78"
+        },
+        "seconds": 1038.77,
+        "streamed_at": "2026-10-17T11:36:25+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06629",
+        "n": 3,
+        "index": 6629,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06629-of-06881.gz",
+        "content_length": 545690847,
+        "bytes_streamed": 545690847,
+        "lines_scanned": 3464473,
+        "lines_kept": {
+          "d_utterly": 0
+        },
+        "fillers": {
+          "d_utterly": 0
+        },
+        "frames": [
+          "d_utterly"
+        ],
+        "parts_sha256": {
+          "d_utterly": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 719.54,
+        "streamed_at": "2026-10-17T23:58:44+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06650",
+        "n": 3,
+        "index": 6650,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06650-of-06881.gz",
+        "content_length": 559662912,
+        "bytes_streamed": 559662912,
+        "lines_scanned": 3569347,
+        "lines_kept": {
+          "d_very": 2177
+        },
+        "fillers": {
+          "d_very": 510
+        },
+        "frames": [
+          "d_very"
+        ],
+        "parts_sha256": {
+          "d_very": "c36dacc0a03c90f3e576a2bb54b9500d6fe29c40de8298d97a2cb75f5f887907"
+        },
+        "seconds": 590.98,
+        "streamed_at": "2026-10-17T11:34:17+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06651",
+        "n": 3,
+        "index": 6651,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06651-of-06881.gz",
+        "content_length": 585221172,
+        "bytes_streamed": 585221172,
+        "lines_scanned": 3374885,
+        "lines_kept": {
+          "d_very": 7420
+        },
+        "fillers": {
+          "d_very": 1832
+        },
+        "frames": [
+          "d_very"
+        ],
+        "parts_sha256": {
+          "d_very": "bb07dbe1b3dc943f7ee52b1608d3bd4079762346193bfb7472e4308e900bc9b9"
+        },
+        "seconds": 1161.23,
+        "streamed_at": "2026-10-17T11:50:03+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06652",
+        "n": 3,
+        "index": 6652,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06652-of-06881.gz",
+        "content_length": 576085157,
+        "bytes_streamed": 576085157,
+        "lines_scanned": 3256449,
+        "lines_kept": {
+          "d_very": 2441
+        },
+        "fillers": {
+          "d_very": 638
+        },
+        "frames": [
+          "d_very"
+        ],
+        "parts_sha256": {
+          "d_very": "873a1dfee3a81309a5dfa80079ef177198a42afa35d49e71bb0efe41addddd53"
+        },
+        "seconds": 513.81,
+        "streamed_at": "2026-10-18T00:05:05+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "3-06810",
+        "n": 3,
+        "index": 6810,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06810-of-06881.gz",
+        "content_length": 491268670,
+        "bytes_streamed": 491268670,
+        "lines_scanned": 3437446,
+        "lines_kept": {
+          "p_woman_of": 0
+        },
+        "fillers": {
+          "p_woman_of": 0
+        },
+        "frames": [
+          "p_woman_of"
+        ],
+        "parts_sha256": {
+          "p_woman_of": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 565.21,
+        "streamed_at": "2026-10-17T11:43:43+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "3-06811",
+        "n": 3,
+        "index": 6811,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/3-06811-of-06881.gz",
+        "content_length": 486395252,
+        "bytes_streamed": 486395252,
+        "lines_scanned": 3217116,
+        "lines_kept": {
+          "p_woman_of": 2565
+        },
+        "fillers": {
+          "p_woman_of": 2563
+        },
+        "frames": [
+          "p_woman_of"
+        ],
+        "parts_sha256": {
+          "p_woman_of": "696249f5b05de39c0d952031f0b452df556d8ce16d42e951a3ee4ca5463145cb"
+        },
+        "seconds": 19.75,
+        "streamed_at": "2026-10-18T00:06:48+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-03503",
+        "n": 4,
+        "index": 3503,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-03503-of-06668.gz",
+        "content_length": 426435750,
+        "bytes_streamed": 426435750,
+        "lines_scanned": 3425764,
+        "lines_kept": {
+          "t_apt": 0
+        },
+        "fillers": {
+          "t_apt": 0
+        },
+        "frames": [
+          "t_apt"
+        ],
+        "parts_sha256": {
+          "t_apt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 484.39,
+        "streamed_at": "2026-10-17T11:44:29+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-03504",
+        "n": 4,
+        "index": 3504,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-03504-of-06668.gz",
+        "content_length": 384291885,
+        "bytes_streamed": 384291885,
+        "lines_scanned": 3157567,
+        "lines_kept": {
+          "t_apt": 5271
+        },
+        "fillers": {
+          "t_apt": 5265
+        },
+        "frames": [
+          "t_apt"
+        ],
+        "parts_sha256": {
+          "t_apt": "a8ac725544c73345d6aeb98abc71190374cde9130ab11be966c35aecd518fc3b"
+        },
+        "seconds": 18.04,
+        "streamed_at": "2026-10-18T00:05:23+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04245",
+        "n": 4,
+        "index": 4245,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04245-of-06668.gz",
+        "content_length": 367841770,
+        "bytes_streamed": 367841770,
+        "lines_scanned": 3107321,
+        "lines_kept": {
+          "p_famous_for_his": 2170
+        },
+        "fillers": {
+          "p_famous_for_his": 2166
+        },
+        "frames": [
+          "p_famous_for_his"
+        ],
+        "parts_sha256": {
+          "p_famous_for_his": "8e2592c6dcf04c380ad42d69c94115e66b7d93cfbb2a95bac3c8307bed0c028a"
+        },
+        "seconds": 32.34,
+        "streamed_at": "2026-10-17T11:38:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04246",
+        "n": 4,
+        "index": 4246,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04246-of-06668.gz",
+        "content_length": 467425168,
+        "bytes_streamed": 467425168,
+        "lines_scanned": 3508519,
+        "lines_kept": {
+          "p_famous_for_his": 0
+        },
+        "fillers": {
+          "p_famous_for_his": 0
+        },
+        "frames": [
+          "p_famous_for_his"
+        ],
+        "parts_sha256": {
+          "p_famous_for_his": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 864.98,
+        "streamed_at": "2026-10-17T22:22:58+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04494",
+        "n": 4,
+        "index": 4494,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04494-of-06668.gz",
+        "content_length": 564973482,
+        "bytes_streamed": 564973482,
+        "lines_scanned": 3406528,
+        "lines_kept": {
+          "h_he_is_always": 0
+        },
+        "fillers": {
+          "h_he_is_always": 0
+        },
+        "frames": [
+          "h_he_is_always"
+        ],
+        "parts_sha256": {
+          "h_he_is_always": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 1247.64,
+        "streamed_at": "2026-10-17T11:58:54+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04495",
+        "n": 4,
+        "index": 4495,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04495-of-06668.gz",
+        "content_length": 529797291,
+        "bytes_streamed": 529797291,
+        "lines_scanned": 3276691,
+        "lines_kept": {
+          "h_he_is_always": 1538
+        },
+        "fillers": {
+          "h_he_is_always": 1538
+        },
+        "frames": [
+          "h_he_is_always"
+        ],
+        "parts_sha256": {
+          "h_he_is_always": "3e38043ce8e4187087df0915554b0f11ca3f65cec7cc12c0f7bd01ca24d3de60"
+        },
+        "seconds": 899.96,
+        "streamed_at": "2026-10-17T22:23:09+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04496",
+        "n": 4,
+        "index": 4496,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04496-of-06668.gz",
+        "content_length": 497112859,
+        "bytes_streamed": 497112859,
+        "lines_scanned": 3211431,
+        "lines_kept": {
+          "h_he_was_always": 0
+        },
+        "fillers": {
+          "h_he_was_always": 0
+        },
+        "frames": [
+          "h_he_was_always"
+        ],
+        "parts_sha256": {
+          "h_he_was_always": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 88.42,
+        "streamed_at": "2026-10-17T11:45:11+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04497",
+        "n": 4,
+        "index": 4497,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04497-of-06668.gz",
+        "content_length": 547620156,
+        "bytes_streamed": 547620156,
+        "lines_scanned": 3395912,
+        "lines_kept": {
+          "h_he_was_always": 2723
+        },
+        "fillers": {
+          "h_he_was_always": 2722
+        },
+        "frames": [
+          "h_he_was_always"
+        ],
+        "parts_sha256": {
+          "h_he_was_always": "bf4020c4512fef70c46f9e8769283555e94e5a58b44a0041b65c3d036ec2d080"
+        },
+        "seconds": 20.79,
+        "streamed_at": "2026-10-18T00:05:43+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04649",
+        "n": 4,
+        "index": 4649,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04649-of-06668.gz",
+        "content_length": 452234338,
+        "bytes_streamed": 452234338,
+        "lines_scanned": 3427684,
+        "lines_kept": {
+          "t_inclined": 0
+        },
+        "fillers": {
+          "t_inclined": 0
+        },
+        "frames": [
+          "t_inclined"
+        ],
+        "parts_sha256": {
+          "t_inclined": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 625.46,
+        "streamed_at": "2026-10-17T11:54:55+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04650",
+        "n": 4,
+        "index": 4650,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04650-of-06668.gz",
+        "content_length": 391247672,
+        "bytes_streamed": 391247672,
+        "lines_scanned": 3413538,
+        "lines_kept": {
+          "t_inclined": 2303
+        },
+        "fillers": {
+          "t_inclined": 2302
+        },
+        "frames": [
+          "t_inclined"
+        ],
+        "parts_sha256": {
+          "t_inclined": "d67eeb538808b08486c4f93324626f84c2bc2b41bb00306cd7653a60a1a410f6"
+        },
+        "seconds": 1096.67,
+        "streamed_at": "2026-10-17T22:26:50+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04726",
+        "n": 4,
+        "index": 4726,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04726-of-06668.gz",
+        "content_length": 569236419,
+        "bytes_streamed": 569236419,
+        "lines_scanned": 3398451,
+        "lines_kept": {
+          "c_is_a": 10189
+        },
+        "fillers": {
+          "c_is_a": 3221
+        },
+        "frames": [
+          "c_is_a"
+        ],
+        "parts_sha256": {
+          "c_is_a": "0413342b5a9d60f2aa0dd348f9dc891197adb12d9dd1e4294065b4931be42d50"
+        },
+        "seconds": 1200.18,
+        "streamed_at": "2026-10-17T12:05:11+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04727",
+        "n": 4,
+        "index": 4727,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04727-of-06668.gz",
+        "content_length": 543107169,
+        "bytes_streamed": 543107169,
+        "lines_scanned": 3516705,
+        "lines_kept": {
+          "c_is_a": 0
+        },
+        "fillers": {
+          "c_is_a": 0
+        },
+        "frames": [
+          "c_is_a"
+        ],
+        "parts_sha256": {
+          "c_is_a": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 899.16,
+        "streamed_at": "2026-10-17T22:37:57+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-04790",
+        "n": 4,
+        "index": 4790,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04790-of-06668.gz",
+        "content_length": 467423027,
+        "bytes_streamed": 467423027,
+        "lines_scanned": 3423754,
+        "lines_kept": {
+          "p_known_for_her": 0,
+          "p_known_for_his": 0
+        },
+        "fillers": {
+          "p_known_for_her": 0,
+          "p_known_for_his": 0
+        },
+        "frames": [
+          "p_known_for_her",
+          "p_known_for_his"
+        ],
+        "parts_sha256": {
+          "p_known_for_her": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "p_known_for_his": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 638.78,
+        "streamed_at": "2026-10-17T12:00:42+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-04791",
+        "n": 4,
+        "index": 4791,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-04791-of-06668.gz",
+        "content_length": 445901987,
+        "bytes_streamed": 445901987,
+        "lines_scanned": 3335954,
+        "lines_kept": {
+          "p_known_for_her": 1323,
+          "p_known_for_his": 4192
+        },
+        "fillers": {
+          "p_known_for_her": 1323,
+          "p_known_for_his": 4192
+        },
+        "frames": [
+          "p_known_for_her",
+          "p_known_for_his"
+        ],
+        "parts_sha256": {
+          "p_known_for_her": "b20d6ecf186f20968f1a6b5cf9e241fc5109ea307fef29dc11de1262a91e2b95",
+          "p_known_for_his": "0f7f796c03b05c0909f859c0bcfb1ada7473ae8be16799ad87c37829a3f90bab"
+        },
+        "seconds": 477.6,
+        "streamed_at": "2026-10-17T22:31:07+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-05093",
+        "n": 4,
+        "index": 5093,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05093-of-06668.gz",
+        "content_length": 448066138,
+        "bytes_streamed": 448066138,
+        "lines_scanned": 3446189,
+        "lines_kept": {
+          "p_noted_for_his": 1892
+        },
+        "fillers": {
+          "p_noted_for_his": 1892
+        },
+        "frames": [
+          "p_noted_for_his"
+        ],
+        "parts_sha256": {
+          "p_noted_for_his": "e26ce589f18bb4cb99a97d918c798c42c851674b1e593c8ef0d7f5fbaba21d51"
+        },
+        "seconds": 558.3,
+        "streamed_at": "2026-10-17T12:04:13+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-05094",
+        "n": 4,
+        "index": 5094,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05094-of-06668.gz",
+        "content_length": 487822067,
+        "bytes_streamed": 487822067,
+        "lines_scanned": 3405868,
+        "lines_kept": {
+          "p_noted_for_his": 0
+        },
+        "fillers": {
+          "p_noted_for_his": 0
+        },
+        "frames": [
+          "p_noted_for_his"
+        ],
+        "parts_sha256": {
+          "p_noted_for_his": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 792.28,
+        "streamed_at": "2026-10-17T22:40:02+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-05733",
+        "n": 4,
+        "index": 5733,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05733-of-06668.gz",
+        "content_length": 499816283,
+        "bytes_streamed": 499816283,
+        "lines_scanned": 3466473,
+        "lines_kept": {
+          "c_seemed_a": 265
+        },
+        "fillers": {
+          "c_seemed_a": 151
+        },
+        "frames": [
+          "c_seemed_a"
+        ],
+        "parts_sha256": {
+          "c_seemed_a": "324844cacc8c290bd848b30058c12b9dd0b4844c477a9e6a5dcff18e888f1e18"
+        },
+        "seconds": 23.78,
+        "streamed_at": "2026-10-17T11:59:43+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-05734",
+        "n": 4,
+        "index": 5734,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05734-of-06668.gz",
+        "content_length": 487035683,
+        "bytes_streamed": 487035683,
+        "lines_scanned": 3394739,
+        "lines_kept": {
+          "c_seemed_a": 0
+        },
+        "fillers": {
+          "c_seemed_a": 0
+        },
+        "frames": [
+          "c_seemed_a"
+        ],
+        "parts_sha256": {
+          "c_seemed_a": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 809.12,
+        "streamed_at": "2026-10-17T22:44:36+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-05767",
+        "n": 4,
+        "index": 5767,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05767-of-06668.gz",
+        "content_length": 523081748,
+        "bytes_streamed": 523081748,
+        "lines_scanned": 3381875,
+        "lines_kept": {
+          "h_she_is_always": 0
+        },
+        "fillers": {
+          "h_she_is_always": 0
+        },
+        "frames": [
+          "h_she_is_always"
+        ],
+        "parts_sha256": {
+          "h_she_is_always": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 25.16,
+        "streamed_at": "2026-10-17T12:00:08+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-05768",
+        "n": 4,
+        "index": 5768,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05768-of-06668.gz",
+        "content_length": 488852359,
+        "bytes_streamed": 488852359,
+        "lines_scanned": 3508257,
+        "lines_kept": {
+          "h_she_is_always": 621,
+          "h_she_was_always": 0
+        },
+        "fillers": {
+          "h_she_is_always": 621,
+          "h_she_was_always": 0
+        },
+        "frames": [
+          "h_she_is_always",
+          "h_she_was_always"
+        ],
+        "parts_sha256": {
+          "h_she_is_always": "2213f6c3f0d8b58b3e2a08e823e78f489fbe1ef6c6b67955dbf8fe8ca73134d9",
+          "h_she_was_always": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 19.7,
+        "streamed_at": "2026-10-17T22:39:06+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-05769",
+        "n": 4,
+        "index": 5769,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05769-of-06668.gz",
+        "content_length": 446910561,
+        "bytes_streamed": 446910561,
+        "lines_scanned": 3372253,
+        "lines_kept": {
+          "h_she_was_always": 1476
+        },
+        "fillers": {
+          "h_she_was_always": 1476
+        },
+        "frames": [
+          "h_she_was_always"
+        ],
+        "parts_sha256": {
+          "h_she_was_always": "359ea8d637f2e05c4fbdf9c1e28f70c674cb20a7d5908036504c8f1e11e1b9e9"
+        },
+        "seconds": 26.28,
+        "streamed_at": "2026-10-17T22:40:20+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-05984",
+        "n": 4,
+        "index": 5984,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05984-of-06668.gz",
+        "content_length": 462079178,
+        "bytes_streamed": 462079178,
+        "lines_scanned": 3385283,
+        "lines_kept": {
+          "t_tendency": 1944
+        },
+        "fillers": {
+          "t_tendency": 1944
+        },
+        "frames": [
+          "t_tendency"
+        ],
+        "parts_sha256": {
+          "t_tendency": "15a1b7f94614343448a8c5918ae6b17fcb32e7fc55e8e43dfa85715633d702df"
+        },
+        "seconds": 26.69,
+        "streamed_at": "2026-10-17T12:00:59+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-05985",
+        "n": 4,
+        "index": 5985,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-05985-of-06668.gz",
+        "content_length": 411145567,
+        "bytes_streamed": 411145567,
+        "lines_scanned": 3302003,
+        "lines_kept": {
+          "t_tendency": 0
+        },
+        "fillers": {
+          "t_tendency": 0
+        },
+        "frames": [
+          "t_tendency"
+        ],
+        "parts_sha256": {
+          "t_tendency": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 24.41,
+        "streamed_at": "2026-10-17T22:40:27+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      },
+      {
+        "shard": "4-06478",
+        "n": 4,
+        "index": 6478,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-06478-of-06668.gz",
+        "content_length": 543819688,
+        "bytes_streamed": 543819688,
+        "lines_scanned": 3386104,
+        "lines_kept": {
+          "c_was_a": 0
+        },
+        "fillers": {
+          "c_was_a": 0
+        },
+        "frames": [
+          "c_was_a"
+        ],
+        "parts_sha256": {
+          "c_was_a": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 38.83,
+        "streamed_at": "2026-10-17T12:01:21+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-06479",
+        "n": 4,
+        "index": 6479,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-06479-of-06668.gz",
+        "content_length": 611410678,
+        "bytes_streamed": 611410678,
+        "lines_scanned": 3458863,
+        "lines_kept": {
+          "c_was_a": 12191,
+          "c_was_an": 0
+        },
+        "fillers": {
+          "c_was_a": 3736,
+          "c_was_an": 0
+        },
+        "frames": [
+          "c_was_a",
+          "c_was_an"
+        ],
+        "parts_sha256": {
+          "c_was_a": "f3654c5d18c742f41537ec2e5ccd8e4fbe07e2e0343e8c8f1fee0c418660ff06",
+          "c_was_an": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "seconds": 34.11,
+        "streamed_at": "2026-10-17T12:02:14+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "1b9b4ffe+dirty"
+      },
+      {
+        "shard": "4-06480",
+        "n": 4,
+        "index": 6480,
+        "url": "https://storage.googleapis.com/books/ngrams/books/20200217/eng/4-06480-of-06668.gz",
+        "content_length": 526252269,
+        "bytes_streamed": 526252269,
+        "lines_scanned": 3406799,
+        "lines_kept": {
+          "c_was_a": 0,
+          "c_was_an": 3118
+        },
+        "fillers": {
+          "c_was_a": 0,
+          "c_was_an": 984
+        },
+        "frames": [
+          "c_was_a",
+          "c_was_an"
+        ],
+        "parts_sha256": {
+          "c_was_a": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "c_was_an": "1fa998a7a0287fffa2b7b0f3c3c1d128842bc8c026efc132e2d14fe0d0d50bf5"
+        },
+        "seconds": 25.1,
+        "streamed_at": "2026-10-17T22:40:45+00:00",
+        "approval": "Roger, 2026-10-14: open decision 1 (b), both tiers streamed; run started 2026-10-17 on his 'Run the pilots'; resumed with the one-shard span fix",
+        "tool": "corpus_frames_generator.py stream",
+        "git_sha": "13a8dc38+dirty"
+      }
+    ],
+    "n_shards_done": 83,
+    "n_shards_planned": 83,
+    "bytes_streamed": 42713532927,
+    "bytes_planned": 42713532927,
+    "extracts": {
+      "c_is_a": {
+        "file": "c_is_a.tsv",
+        "lines": 10189,
+        "sha256": "0413342b5a9d60f2aa0dd348f9dc891197adb12d9dd1e4294065b4931be42d50",
+        "shards": [
+          "4-04726",
+          "4-04727"
+        ]
+      },
+      "c_seemed_a": {
+        "file": "c_seemed_a.tsv",
+        "lines": 265,
+        "sha256": "324844cacc8c290bd848b30058c12b9dd0b4844c477a9e6a5dcff18e888f1e18",
+        "shards": [
+          "4-05733",
+          "4-05734"
+        ]
+      },
+      "c_was_a": {
+        "file": "c_was_a.tsv",
+        "lines": 12191,
+        "sha256": "f3654c5d18c742f41537ec2e5ccd8e4fbe07e2e0343e8c8f1fee0c418660ff06",
+        "shards": [
+          "4-06478",
+          "4-06479",
+          "4-06480"
+        ]
+      },
+      "c_was_an": {
+        "file": "c_was_an.tsv",
+        "lines": 3118,
+        "sha256": "1fa998a7a0287fffa2b7b0f3c3c1d128842bc8c026efc132e2d14fe0d0d50bf5",
+        "shards": [
+          "4-06479",
+          "4-06480"
+        ]
+      },
+      "d_chronically": {
+        "file": "d_chronically.tsv",
+        "lines": 123,
+        "sha256": "f1b2df638d0b93e1e96f00600e42946fda35929e710ede17d0978d875befc924",
+        "shards": [
+          "3-03694",
+          "3-03695"
+        ]
+      },
+      "d_extremely": {
+        "file": "d_extremely.tsv",
+        "lines": 1880,
+        "sha256": "8c6fe668782b3378d397784adb3af0046b75cd9307056ca107e645295e87398d",
+        "shards": [
+          "3-04202",
+          "3-04203"
+        ]
+      },
+      "d_famously": {
+        "file": "d_famously.tsv",
+        "lines": 4,
+        "sha256": "95ca25fa40564d6aa84a56522ca34a8f5c8c0a01c4489191c4a647f26372893b",
+        "shards": [
+          "3-04221",
+          "3-04222"
+        ]
+      },
+      "d_hopelessly": {
+        "file": "d_hopelessly.tsv",
+        "lines": 46,
+        "sha256": "9821e0d1158a13144c3339bc843088cf1ac33386a31961ce759703b7d0091669",
+        "shards": [
+          "3-04564",
+          "3-04565"
+        ]
+      },
+      "d_incurably": {
+        "file": "d_incurably.tsv",
+        "lines": 23,
+        "sha256": "041f2b43c381c204d558b02b5a9f80165ef3a3e3088fcd3213a469654d05189f",
+        "shards": [
+          "3-04672",
+          "3-04673"
+        ]
+      },
+      "d_notoriously": {
+        "file": "d_notoriously.tsv",
+        "lines": 93,
+        "sha256": "2eb92b3c289367e489a56c3fe7ac5d78d76dda5b5301879f2e201900c3c020ef",
+        "shards": [
+          "3-05174",
+          "3-05175"
+        ]
+      },
+      "d_quite": {
+        "file": "d_quite.tsv",
+        "lines": 647,
+        "sha256": "e016dafe70b74aadb8d0767b7d964e94c1f4fdeeb0bc4887631f25eba0e7e368",
+        "shards": [
+          "3-05669",
+          "3-05670"
+        ]
+      },
+      "d_rather": {
+        "file": "d_rather.tsv",
+        "lines": 2686,
+        "sha256": "915c8cee18f276f92f1bdf7feb8b23f8be08929d15577bb250e136398621905b",
+        "shards": [
+          "3-05686",
+          "3-05687",
+          "3-05688",
+          "3-05689"
+        ]
+      },
+      "d_remarkably": {
+        "file": "d_remarkably.tsv",
+        "lines": 485,
+        "sha256": "063c3b4a1e84d4f0a5aaa67b47cf194a864cc2835195f611134d0fed32fd1eec",
+        "shards": [
+          "3-05752",
+          "3-05753"
+        ]
+      },
+      "d_so": {
+        "file": "d_so.tsv",
+        "lines": 1225,
+        "sha256": "c3c3ac92ed17eeef5be51e37459420b56603089dcc8f52c68ed57801d450ce5d",
+        "shards": [
+          "3-05999",
+          "3-06000",
+          "3-06001",
+          "3-06002"
+        ]
+      },
+      "d_thoroughly": {
+        "file": "d_thoroughly.tsv",
+        "lines": 968,
+        "sha256": "b3fa77213fb99c1ce528186222c567c69b1655445529f5fdf648d05b32e13ec4",
+        "shards": [
+          "3-06420",
+          "3-06421"
+        ]
+      },
+      "d_too": {
+        "file": "d_too.tsv",
+        "lines": 566,
+        "sha256": "28106317703c39bddcf650088f5fa179ce440508d25ae38dce2a23f48cbd83eb",
+        "shards": [
+          "3-06504",
+          "3-06505",
+          "3-06506"
+        ]
+      },
+      "d_too_to": {
+        "file": "d_too_to.tsv",
+        "lines": 8663,
+        "sha256": "db40ccdf986d87838cc762b66aac580da6087cd95f2cee5e683ae1418dd41693",
+        "shards": [
+          "3-06504",
+          "3-06505",
+          "3-06506"
+        ]
+      },
+      "d_utterly": {
+        "file": "d_utterly.tsv",
+        "lines": 328,
+        "sha256": "eaa50cf424966b4c1c59e304709644dc4d10acf93940491012600e1e1b7bab78",
+        "shards": [
+          "3-06628",
+          "3-06629"
+        ]
+      },
+      "d_very": {
+        "file": "d_very.tsv",
+        "lines": 12038,
+        "sha256": "63ec57ee4ecfd83bddf4fb35448f944d7de614779344398d354b0aef9047026d",
+        "shards": [
+          "3-06650",
+          "3-06651",
+          "3-06652"
+        ]
+      },
+      "h_he_is_always": {
+        "file": "h_he_is_always.tsv",
+        "lines": 1538,
+        "sha256": "3e38043ce8e4187087df0915554b0f11ca3f65cec7cc12c0f7bd01ca24d3de60",
+        "shards": [
+          "4-04494",
+          "4-04495"
+        ]
+      },
+      "h_he_was_always": {
+        "file": "h_he_was_always.tsv",
+        "lines": 2723,
+        "sha256": "bf4020c4512fef70c46f9e8769283555e94e5a58b44a0041b65c3d036ec2d080",
+        "shards": [
+          "4-04496",
+          "4-04497"
+        ]
+      },
+      "h_she_is_always": {
+        "file": "h_she_is_always.tsv",
+        "lines": 621,
+        "sha256": "2213f6c3f0d8b58b3e2a08e823e78f489fbe1ef6c6b67955dbf8fe8ca73134d9",
+        "shards": [
+          "4-05767",
+          "4-05768"
+        ]
+      },
+      "h_she_was_always": {
+        "file": "h_she_was_always.tsv",
+        "lines": 1476,
+        "sha256": "359ea8d637f2e05c4fbdf9c1e28f70c674cb20a7d5908036504c8f1e11e1b9e9",
+        "shards": [
+          "4-05768",
+          "4-05769"
+        ]
+      },
+      "n_born": {
+        "file": "n_born.tsv",
+        "lines": 1408,
+        "sha256": "5a2460d78bd4414c855628ca0d622e7c53d0ca5a041a81a944a96109191d8183",
+        "shards": [
+          "3-03042",
+          "3-03043"
+        ]
+      },
+      "n_chronic": {
+        "file": "n_chronic.tsv",
+        "lines": 2909,
+        "sha256": "79cf1ab048d07eee1c9f5ca614481dc2a0c44380bde78aac005e52ed092ab92e",
+        "shards": [
+          "3-03043",
+          "3-03044"
+        ]
+      },
+      "n_compulsive": {
+        "file": "n_compulsive.tsv",
+        "lines": 586,
+        "sha256": "ae1691901593e6890df37b779ca63b3da20b77f7b73c336488e87809098acfb8",
+        "shards": [
+          "3-03044",
+          "3-03045"
+        ]
+      },
+      "n_confirmed": {
+        "file": "n_confirmed.tsv",
+        "lines": 1302,
+        "sha256": "a680be9af54acc56098846590cc1ca1a3d702e667ffdd0dd10c83d62c80ea3ad",
+        "shards": [
+          "3-03044",
+          "3-03045"
+        ]
+      },
+      "n_habitual": {
+        "file": "n_habitual.tsv",
+        "lines": 757,
+        "sha256": "5ed41723e38cc63eb688fb6fa1850f8057c58ca6ab75979a5ff405393f9f3634",
+        "shards": [
+          "3-03048",
+          "3-03049"
+        ]
+      },
+      "n_hopeless": {
+        "file": "n_hopeless.tsv",
+        "lines": 1853,
+        "sha256": "5d1ece72e743137d74e0c1db1c9143db4ad100800e46bfff6cb74901085d75be",
+        "shards": [
+          "3-03048",
+          "3-03049"
+        ]
+      },
+      "n_incorrigible": {
+        "file": "n_incorrigible.tsv",
+        "lines": 439,
+        "sha256": "ccb45a9c3281e9fb5211f1a19c29cc3b76b0d915a182cffcadf005a0668251c3",
+        "shards": [
+          "3-03205",
+          "3-03206"
+        ]
+      },
+      "n_inveterate": {
+        "file": "n_inveterate.tsv",
+        "lines": 917,
+        "sha256": "b11981ddac40093781e22992f1a72edf848c42166aaa2493f5c2b4fe756e07e4",
+        "shards": [
+          "3-03207",
+          "3-03208"
+        ]
+      },
+      "n_natural": {
+        "file": "n_natural.tsv",
+        "lines": 10835,
+        "sha256": "a0ab8e08c59cd4d2fe440e4d4c3f6a5095c17583053bd3a38352a46cae9141a9",
+        "shards": [
+          "3-03050",
+          "3-03051"
+        ]
+      },
+      "n_notorious": {
+        "file": "n_notorious.tsv",
+        "lines": 2076,
+        "sha256": "399286adf2970173aa73262548361ba74ee7fb23e2474b42495092cd94310f37",
+        "shards": [
+          "3-03051",
+          "3-03052"
+        ]
+      },
+      "n_shameless": {
+        "file": "n_shameless.tsv",
+        "lines": 665,
+        "sha256": "b2abd6e4d66c77f93944c0553ceadb5eb3f424274377111de175918b87913c2f",
+        "shards": [
+          "3-03055",
+          "3-03056"
+        ]
+      },
+      "n_total": {
+        "file": "n_total.tsv",
+        "lines": 10167,
+        "sha256": "a1c860667634db716780db284d9d7dd8e2d04475f5988a8b5f7d785ba85a38d8",
+        "shards": [
+          "3-03057",
+          "3-03058"
+        ]
+      },
+      "p_famous_for_his": {
+        "file": "p_famous_for_his.tsv",
+        "lines": 2170,
+        "sha256": "8e2592c6dcf04c380ad42d69c94115e66b7d93cfbb2a95bac3c8307bed0c028a",
+        "shards": [
+          "4-04245",
+          "4-04246"
+        ]
+      },
+      "p_known_for_her": {
+        "file": "p_known_for_her.tsv",
+        "lines": 1323,
+        "sha256": "b20d6ecf186f20968f1a6b5cf9e241fc5109ea307fef29dc11de1262a91e2b95",
+        "shards": [
+          "4-04790",
+          "4-04791"
+        ]
+      },
+      "p_known_for_his": {
+        "file": "p_known_for_his.tsv",
+        "lines": 4192,
+        "sha256": "0f7f796c03b05c0909f859c0bcfb1ada7473ae8be16799ad87c37829a3f90bab",
+        "shards": [
+          "4-04790",
+          "4-04791"
+        ]
+      },
+      "p_man_of": {
+        "file": "p_man_of.tsv",
+        "lines": 7920,
+        "sha256": "48dd36ec0d4d067c77337c07abcce42431b7ebf16bf3d642ddea416ce8a68634",
+        "shards": [
+          "3-04955",
+          "3-04956"
+        ]
+      },
+      "p_noted_for_his": {
+        "file": "p_noted_for_his.tsv",
+        "lines": 1892,
+        "sha256": "e26ce589f18bb4cb99a97d918c798c42c851674b1e593c8ef0d7f5fbaba21d51",
+        "shards": [
+          "4-05093",
+          "4-05094"
+        ]
+      },
+      "p_reputation_for": {
+        "file": "p_reputation_for.tsv",
+        "lines": 5752,
+        "sha256": "40e3a3a9978caf28c7ef89c1f73b1d9d5b9bbe1eacacd49b12280f96a2acb2c3",
+        "shards": [
+          "3-05770",
+          "3-05771"
+        ]
+      },
+      "p_woman_of": {
+        "file": "p_woman_of.tsv",
+        "lines": 2565,
+        "sha256": "696249f5b05de39c0d952031f0b452df556d8ce16d42e951a3ee4ca5463145cb",
+        "shards": [
+          "3-06810",
+          "3-06811"
+        ]
+      },
+      "t_apt": {
+        "file": "t_apt.tsv",
+        "lines": 5271,
+        "sha256": "a8ac725544c73345d6aeb98abc71190374cde9130ab11be966c35aecd518fc3b",
+        "shards": [
+          "4-03503",
+          "4-03504"
+        ]
+      },
+      "t_inclined": {
+        "file": "t_inclined.tsv",
+        "lines": 2303,
+        "sha256": "d67eeb538808b08486c4f93324626f84c2bc2b41bb00306cd7653a60a1a410f6",
+        "shards": [
+          "4-04649",
+          "4-04650"
+        ]
+      },
+      "t_tendency": {
+        "file": "t_tendency.tsv",
+        "lines": 1944,
+        "sha256": "15a1b7f94614343448a8c5918ae6b17fcb32e7fc55e8e43dfa85715633d702df",
+        "shards": [
+          "4-05984",
+          "4-05985"
+        ]
+      }
+    },
+    "kept_bytes": 21254405,
+    "note": "the shards are read as streams and discarded; only the matching lines are kept (Roger, 2026-10-14: open decision 1 (b), both tiers streamed, nothing large on disk)"
+  },
+  "text": {
+    "tool": "corpus_frames_generator.py fetch-text",
+    "entries": [
+      {
+        "key": "cards",
+        "repo": "hieunguyenminh/roleplay",
+        "files": [
+          {
+            "file": "cards/train-00000-of-00001.parquet",
+            "url": "https://huggingface.co/datasets/hieunguyenminh/roleplay/resolve/main/data/train-00000-of-00001.parquet",
+            "size_bytes": 2153926,
+            "sha256": "d1fd5cb3c4124038d125b0eb5e17cf7deea9b8018becfde720e0baba376eeb61"
+          }
+        ],
+        "size_bytes": 2153926,
+        "hash_source": "received bytes",
+        "field": "description",
+        "licence": "CC BY 4.0",
+        "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+        "what": "5,755 role-play character cards (name, description, text); credited as CC BY 4.0 requires",
+        "approval": "Roger, 2026-10-17: 'Go ahead' for decision 2's text corpora (PIPPA bot descriptions and the character cards)",
+        "downloaded_at": "2026-10-17T10:34:42+00:00",
+        "tool": "corpus_frames_generator.py fetch-text",
+        "git_sha": "aa67b390+dirty"
+      },
+      {
+        "key": "pippa",
+        "repo": "PygmalionAI/PIPPA",
+        "files": [
+          {
+            "file": "pippa/pippa_deduped.jsonl",
+            "url": "https://huggingface.co/datasets/PygmalionAI/PIPPA/resolve/main/pippa_deduped.jsonl",
+            "size_bytes": 256837235,
+            "sha256": "d1e68055cb85f2356d3b320c995582b9090bc7ae00ba94c8f4483fbfdc86fe84"
+          }
+        ],
+        "size_bytes": 256837235,
+        "hash_source": "received bytes",
+        "field": "bot_description",
+        "licence": "Apache-2.0",
+        "licence_url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "what": "PIPPA: Character.AI conversations with their bots' human-written descriptions (bot_description)",
+        "approval": "Roger, 2026-10-17: 'Go ahead' for decision 2's text corpora (PIPPA bot descriptions and the character cards)",
+        "downloaded_at": "2026-10-17T10:33:19+00:00",
+        "tool": "corpus_frames_generator.py fetch-text",
+        "git_sha": "65821fa8+dirty"
+      }
+    ],
+    "total_bytes": 258991161,
+    "note": "decision 2 (Roger, 2026-10-14): the text corpora in the first build; deletable after extraction (extract-text --delete-raw), the hashes kept here"
+  }
+}
