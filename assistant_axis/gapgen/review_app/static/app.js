@@ -119,7 +119,8 @@ function describe(ev) {
     case "distinct": return `${k} marked distinct from ${ev.group}`;
     case "split_off": return `${k} split off ${ev.split_from} into ${ev.target} (${ev.group})`;
     case "undo": return `undid ${ev.undone_action || "decision"}${ev.undone_resolution ? " " + ev.undone_resolution : ""}` +
-      `${ev.undone_keys ? " " + ev.undone_keys.join(", ") : ""}${ev.group ? " on " + ev.group : ""} (decision ${ev.undoes})`;
+      `${ev.undone_keys ? " " + ev.undone_keys.join(", ") : ""}` +
+      `${ev.split_from ? " from " + ev.split_from : ev.group ? " on " + ev.group : ""} (decision ${ev.undoes})`;
     default: return ev.action;
   }
 }
@@ -295,9 +296,12 @@ function renderCard() {
   // a resolved group with leftovers: c splits the highlighted leftover off into the highlighted corpus row, which is
   // marked as the target while the focus is on the leftovers (Roger, 2026-10-20)
   const splitting = c.status === "resolved" && (c.leftovers || []).length > 0;
+  // an open group with a "probably covered by X" proposal: X is the highlighted row, outlined, so Roger sees what c
+  // will do while the focus is on the members (Fable's review, 2026-10-20)
+  const proposing = working && c.members.some((m) => m.probably_covered);
   $("corpus").innerHTML = corpus.map((t, i) => {
     const cov = (t.covered || []).length ? `<div class="covered-list">covered by M3: ${t.covered.map((x) => esc(x.label) + " " + esc(x.reading) + (x.handled_by ? " (handled)" : "")).join(", ")}</div>` : "";
-    const pin = (t === S.pinned ? " pinned" : "") + (splitting && S.pane !== "corpus" && i === Math.min(S.idx.corpus, corpus.length - 1) ? " target" : "");
+    const pin = (t === S.pinned ? " pinned" : "") + ((splitting || proposing) && S.pane !== "corpus" && i === Math.min(S.idx.corpus, corpus.length - 1) ? " target" : "");
     const btns = working ? rowBtn("merge_into", "Covered by this", "c", "corpus", i,
       "resolve the group as already covered by this corpus trait or queue entry (its labels go to the synonyms list)")
       : splitting ? rowBtn("merge_into", "Split off into this", "c", "corpus", i,
@@ -533,6 +537,10 @@ function renderToolbar() {
         : btn("nominate_selected", sel ? "Nominated ★" : "Nominate (click a member first)", "n",
           { title: "click a member, then Nominate makes it the one Promote sends (★); each member's row also has a Nominate button" }));
     }
+    const pcov = c.members.map((m) => m.probably_covered).find(Boolean);
+    const tgt = pcov ? current("corpus") : null;
+    if (tgt) b.push(btn("merge_into", `Covered by "${tgt.label}"`, "c",
+      { title: "resolve the group as covered by the highlighted corpus row (outlined; the proposal's X when the group opened)" }));
     b.push(btn("reject", "Reject", "r", { cls: "danger", title: "not a trait worth adding" }),
       btn("park", "Park", "p", { title: "set aside for later; not rejected" }),
       btn("defer", "Defer", "d", { title: "decide later" }),
@@ -550,8 +558,10 @@ function renderToolbar() {
 
 // ------------------------------------------------------------------ the member Promote sends
 
-// Who may be promoted: a member not handled by another group and not covered by M3 (the server's rule).
-const promotable = (c) => c.members.filter((m) => !(m.handled_by && m.handled_by !== c.id) && !m.covered);
+// Who may be promoted: a member not handled by another group, not covered by M3 and not held by the narrow pass
+// (the server's rule).
+const promotable = (c) => c.members.filter((m) => !(m.handled_by && m.handled_by !== c.id) && !m.covered &&
+  !(m.narrow && m.narrow.status === "held"));
 
 // A click on a member (or a move to one with j/k) selects it for Promote; only a member that may be promoted.
 function selectMember() {

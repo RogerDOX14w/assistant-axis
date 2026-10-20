@@ -1725,3 +1725,55 @@ class TestProbablyCovered:
             console.log(badge && T.S.idx.corpus === 1 && b.resolution === "merge_into:trait:alpha" ? "PROPOSED" : "WRONG " + JSON.stringify(b) + " " + T.S.idx.corpus + " " + badge);
         """)
         assert "PROPOSED" in out
+
+
+# --------------------------------------------------------------------------- Fable's review (2026-10-20)
+
+class TestReviewFixes:
+    def test_a_member_the_narrow_pass_held_is_refused_nomination_and_promotion_at_once(self, env):
+        reg = env["reg"]
+        row = reg.fold()[k("loner")]
+        row["holding"] = "narrow"
+        row["narrow"] = {"status": "held", "parent": "trait:alpha", "kept_child": k("skeptic")}
+        reg.write([row])
+        log = D.DecisionLog.open(env["rdir"], by="roger", clock=Clock(), data_dir=env["data"],
+                                 registry_path=env["reg"].path)
+        g = act(log, action="open", source=f"term:{k('loner')}")
+        with pytest.raises(D.ActionError, match="held by the narrow pass"):
+            log.act({"action": "nominate", "group": g, "key": k("loner")})
+        with pytest.raises(D.ActionError, match="held by the narrow pass"):
+            log.act({"action": "resolve", "group": g, "resolution": "promote"})
+        act(log, action="resolve", group=g, resolution="merge_into:trait:alpha")     # merging it is fine
+        assert log.state.handled[k("loner")] == g
+
+    def test_a_split_off_key_leaves_the_distinct_list(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source="proposed:0")
+        act(log, action="accept", group=g)
+        act(log, action="resolve", group=g, resolution="merge_into:trait:alpha")
+        log.act({"action": "distinct", "group": g, "keys": [k("obdurate")]})
+        assert [x["key"] for x in log.state.group_card(g)["distinct"]] == [k("obdurate")]
+        log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:beta"})
+        assert log.state.group_card(g)["distinct"] == []
+        assert snapshot(make_log(env)) == snapshot(log)
+
+    def test_the_page_outlines_and_names_the_probably_covered_target(self, tmp_path):
+        out = run_page(tmp_path, """
+            T.S.card = null;
+            const card = {id: "g1", status: "open", source: "term:a#1", via: null, antonym_groups: [], neighbour_groups: [],
+                        neighbours: [], opposed: [], resolution: null, nominated: null, leftovers: [], distinct: [],
+                        corpus: [{key: "trait:beta", kind: "corpus", label: "beta", path: "p", href: "/files/traits/beta.json", level: 2},
+                                 {key: "trait:alpha", kind: "corpus", label: "alpha", path: "p", href: "/files/traits/alpha.json", level: 2}],
+                        members: [{key: "a#1", label: "blendy", gloss: "g", tags: [], flags: [], merged: [], proposed: [],
+                                   probably_covered: {n_read_2: 2, why_text: "cosine 0.50 to alpha",
+                                     target: {key: "trait:alpha", kind: "corpus", label: "alpha", path: "p", href: "/files/traits/alpha.json"}}}]};
+            T.S.pane = "members";
+            T.showGroup(card);
+            await sleep(10);
+            const rows = el("corpus").innerHTML.split("<li");
+            const outlined = rows.findIndex((r) => r.includes("entry target"));
+            const tb = el("toolbar").innerHTML;
+            const named = tb.includes('data-act="merge_into"') && tb.includes("overed by &quot;alpha&quot;");
+            console.log(outlined === 2 && rows[2].includes(">alpha</a>") && named ? "SHOWN" : "WRONG " + outlined + " " + named);
+        """)
+        assert "SHOWN" in out

@@ -23,7 +23,9 @@ Actions (a request names the action and its fields; the log stores the request a
 * ``drop`` (``group``, ``key``): never the last member.
 * ``merge_in`` (``group``, ``keys``): a singleton or a merged group's members; a covered candidate may be pulled in by
   hand (decision 9); handled terms and members already in are left out, and the event records what was added.
-* ``nominate`` (``group``, ``key``): the suggested label; not a covered or handled member.
+* ``nominate`` (``group``, ``key``): the suggested label; not a covered or handled member, nor one the narrow pass
+  held (``holding: "narrow"``: a graph built before the pass still shows it; promoting it is refused here, at once,
+  not at apply).
 * ``resolve`` (``group``, ``resolution``, ``note``?, ``rename``?): ``promote`` (the nominee; a group with one
   unhandled term nominates it by default), ``merge_into:<trait:stem | queue:stem>``, ``park``, ``reject``,
   ``defer``.  Only an open (accepted) group resolves.  The event records the members it resolves: those not already
@@ -755,6 +757,7 @@ class ReviewState:
             raise ActionError(f"{key} was covered by M3: it can pass in as a synonym note, not be nominated")
         if key in self.handled:
             raise ActionError(f"{key} is handled ({self._handled_note(key)}): nominate an unhandled member")
+        self._refuse_narrow_held(key)
         return {"group": g.id, "action": "nominate", "key": key}
 
     def _check_resolve(self, req: Mapping) -> dict:
@@ -780,10 +783,24 @@ class ReviewState:
                     raise ActionError(f"{g.id} has {len(terms)} unhandled terms: click the one to promote (or nominate it) "
                                       f"first")
                 nominated = terms[0]
+            self._refuse_narrow_held(nominated)
         note = req.get("note")
         return {"group": g.id, "action": "resolve", "members": members, "nominated": nominated,
                 "resolution": resolution, "note": str(note) if note else None,
                 "rename": bool(req.get("rename"))}
+
+    def narrow_held(self, key: str) -> bool:
+        """The narrow pass held this row (``holding: "narrow"`` in the registry): its parent's one narrow child in
+        review is another row (QUESTIONS 208 (3)).  A graph built before the pass still shows it."""
+        return (self.rows.get(key) or {}).get("holding") == "narrow"
+
+    def _refuse_narrow_held(self, key: Optional[str]) -> None:
+        """Nominating or promoting a held row is refused at once, as for a covered one, not at ``apply``."""
+        if key and self.narrow_held(key):
+            b = (self.rows.get(key) or {}).get("narrow") or {}
+            raise ActionError(f"{key} is held by the narrow pass (narrower than {b.get('parent')}; the parent's narrow "
+                              f"child in review is {b.get('kept_child')}): it is not promoted; merge it into the "
+                              f"group's nominee or a corpus trait, or rebuild the graph without it")
 
     def _check_start_antonym(self, req: Mapping) -> dict:
         of = req.get("of")
@@ -982,6 +999,7 @@ class ReviewState:
                                  split_from=src)
         for x in keys:
             self.handled[x] = gid
+            self.distinct.get(x, set()).discard(src)        # handled now: it leaves src's "marked distinct" list
 
     def _apply_distinct(self, ev: Mapping) -> None:
         g = self._group(ev)
