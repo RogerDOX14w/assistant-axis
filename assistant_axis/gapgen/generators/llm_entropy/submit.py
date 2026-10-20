@@ -7,9 +7,16 @@ kept in the table and never submitted), in rank order:
 * ``--top N [--per-cell 50]`` (the pilot's slice, Roger's decision 2): N **net-new** rows, stratified by (family,
   model): each cell takes its own rows in rank order until ``per_cell`` of them are net-new, then the remainder is
   filled from the whole ranking;
-* ``--kept-target K [--kept-share X]`` (the review-hour wave): rows in rank order until the net-new rows reach
-  ``ceil(K / X)``, ``X`` the pilot's measured **net-new kept share** (kept rows per submitted net-new row;
-  :data:`KEPT_SHARE_ASSUMED` until then, printed as ASSUMED: the base-model generator's measured 35%);
+* ``--kept-target K [--kept-share X] [--family-weights a=4,b=2,d=1.5,e=1,c=1]`` (the review-hour wave): ``ceil(K /
+  X)`` net-new rows, ``X`` the pilot's measured **net-new kept share** (kept rows per submitted net-new row;
+  :data:`KEPT_SHARE_ASSUMED` until then, printed as ASSUMED: the base-model generator's measured 35%), **split across
+  the families in proportion to** :data:`FAMILY_WEIGHTS_DEFAULT` (QUESTIONS 208, Roger 2026-10-20: real new traits
+  per costly row in the pilot, about 4 (a) : 2 (b) : 1.5 (d) : 1 (e) : 1 (c); a costly row is a duplicate M3 read
+  at 2 or below, or a not-trait; this replaces the inherited 70% trait-and-new target).  Each row counts under its
+  ``primary_family`` (the family the table ranks it by), shares are rounded by largest remainder, a family short of
+  its share gives the remainder to the others in proportion to their weights (:func:`split_by_weights`), and each
+  family then takes its own rows in rank order up to its share (:func:`select_wave_by_family`).  ``none`` keeps the
+  plain rank order of :func:`select_wave`;
 * ``--all``: every eligible row.
 
 A **net-new row** is one the registry has not yet filtered: not a corpus stem, not queued, not registered with M1 and
@@ -39,6 +46,7 @@ import math
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from types import MappingProxyType
 from typing import Mapping, Optional, Sequence
 
 from assistant_axis.atomic_io import atomic_write_text
@@ -62,12 +70,18 @@ KEPT_SHARE_ASSUMED = 0.35
 PER_CELL_DEFAULT = 50
 REVIEW_TERMS_PER_HOUR = 150.0
 REVIEW_RATE_SOURCE = "plan figure, ~150 terms an hour (146 measured on the TDA batch) until plan 13's pooled rate"
+#: A wave's mix (QUESTIONS 208, Roger 2026-10-20): the pilot's real new traits per costly row, family (a) 2.0, (b) 1.0,
+#: (d) 0.78, (e) 0.56, (c) 0.40, which Roger put as about 4 : 2 : 1.5 : 1 : 1.  The default of ``--kept-target``.
+FAMILY_WEIGHTS_DEFAULT: Mapping[str, float] = MappingProxyType({"a": 4.0, "b": 2.0, "d": 1.5, "e": 1.0, "c": 1.0})
+FAMILY_WEIGHTS_SOURCE = ("QUESTIONS 208 (Roger, 2026-10-20): real new traits per costly row in the pilot, "
+                         "4 (a) : 2 (b) : 1.5 (d) : 1 (e) : 1 (c)")
 
 __all__ = ["M1_USD_PER_WORD", "M3_USD_PER_PASSED_WORD", "M1_PASS_RATE_ASSUMED", "BATCH_FACTOR", "RATES_SOURCE",
            "DEFAULT_BUDGET_USD", "KEPT_TARGET_DEFAULT", "KEPT_SHARE_ASSUMED", "PER_CELL_DEFAULT",
-           "estimate_downstream_usd", "rows_of_run", "eligible", "cells_of", "select_all", "select_top", "select_wave",
-           "to_candidates", "strata", "batch_id_for", "followup_commands", "SubmitSummary", "run_submit",
-           "source_ref", "parse_source_ref"]
+           "FAMILY_WEIGHTS_DEFAULT", "FAMILY_WEIGHTS_SOURCE", "parse_family_weights", "format_family_weights",
+           "largest_remainder", "split_by_weights", "estimate_downstream_usd", "rows_of_run", "eligible", "cells_of",
+           "select_all", "select_top", "select_wave", "select_wave_by_family", "to_candidates", "strata",
+           "batch_id_for", "followup_commands", "SubmitSummary", "run_submit", "source_ref", "parse_source_ref"]
 
 
 def estimate_downstream_usd(n: int, *, transport: str = "live", pass_rate: float = M1_PASS_RATE_ASSUMED,
@@ -132,6 +146,123 @@ def select_wave(table: Sequence[Mapping], *, kept_target: int = KEPT_TARGET_DEFA
         out.append(r)
         n += bool(r.get("net_new"))
     return out, n
+
+
+def parse_family_weights(text: Optional[str]) -> Optional[dict[str, float]]:
+    """``"a=4,b=2,d=1.5,e=1,c=1"`` -> ``{"a": 4.0, ...}`` in the order given; ``none`` (any case) -> None (plain rank
+    order).  Refused: a family that is not one of the five, one named twice, a negative or non-numeric weight, and
+    weights that are all zero."""
+    from .prompts import FAMILIES
+    if text is None or str(text).strip().lower() == "none":
+        return None
+    out: dict[str, float] = {}
+    for part in str(text).split(","):
+        if not part.strip():
+            continue
+        fam, sep, w = part.partition("=")
+        fam = fam.strip()
+        if not sep or fam not in FAMILIES:
+            raise ValueError(f"--family-weights: {part.strip()!r} is not FAMILY=WEIGHT with a family of "
+                             f"{', '.join(FAMILIES)}")
+        if fam in out:
+            raise ValueError(f"--family-weights: family {fam} named twice")
+        try:
+            v = float(w)
+        except ValueError:
+            raise ValueError(f"--family-weights: {w.strip()!r} is not a number") from None
+        if not math.isfinite(v) or v < 0:
+            raise ValueError(f"--family-weights: the weight of {fam} must be zero or more, not {w.strip()}")
+        out[fam] = v
+    if not out or not any(v > 0 for v in out.values()):
+        raise ValueError("--family-weights: at least one family needs a weight above zero")
+    return out
+
+
+def format_family_weights(weights: Mapping[str, float]) -> str:
+    """``a=4 b=2 d=1.5 e=1 c=1``."""
+    return " ".join(f"{f}={v:g}" for f, v in weights.items())
+
+
+def largest_remainder(total: int, weights: Mapping[str, float]) -> dict[str, int]:
+    """``total`` split in proportion to ``weights`` by largest remainder (Hamilton): every share its quota's floor,
+    then one more to each of the largest remainders until the total is reached (ties to the larger weight, then the
+    order of ``weights``).  A zero weight gets 0."""
+    total = max(0, int(total))
+    pos = {f: float(w) for f, w in weights.items() if w > 0}
+    out = {f: 0 for f in weights}
+    if not pos or not total:
+        return out
+    s = sum(pos.values())
+    quota = {f: total * w / s for f, w in pos.items()}
+    for f, q in quota.items():
+        out[f] = int(math.floor(q + 1e-9))
+    left = total - sum(out.values())
+    order = list(weights)
+    by_rem = sorted(pos, key=lambda f: (-(quota[f] - out[f]), -pos[f], order.index(f)))
+    for f in by_rem[:left]:
+        out[f] += 1
+    return out
+
+
+def split_by_weights(total: int, weights: Mapping[str, float], available: Mapping[str, int]) -> dict:
+    """The wave's ``total`` net-new rows split across the families (module docstring): ``{"total", "weights",
+    "share" (the first split, by largest remainder), "available", "allocated" (after the shortfall is given to the
+    others), "short" (what a family could not supply of its first share), "unfilled" (what no family could supply)}``.
+
+    A family short of its share takes all it has; the rest of the total is split again over the families that are
+    not short, by their weights, until every share fits or no family has rows left."""
+    weights = {f: float(w) for f, w in weights.items()}
+    avail = {f: max(0, int(available.get(f, 0))) for f in weights}
+    first = largest_remainder(total, weights)
+    alloc: dict[str, int] = {}
+    active = [f for f in weights if weights[f] > 0]
+    left = max(0, int(total))
+    while active:
+        share = largest_remainder(left, {f: weights[f] for f in active})
+        short = [f for f in active if share[f] > avail[f]]
+        if not short:
+            alloc.update({f: share[f] for f in active})
+            left = 0
+            break
+        for f in short:
+            alloc[f] = avail[f]
+            left -= avail[f]
+            active.remove(f)
+    for f in weights:
+        alloc.setdefault(f, 0)
+    return {"total": int(total), "weights": dict(weights), "share": first, "available": avail, "allocated": alloc,
+            "short": {f: first[f] - min(first[f], avail[f]) for f in weights if first[f] > avail[f]},
+            "unfilled": max(0, int(total) - sum(alloc.values()))}
+
+
+def select_wave_by_family(table: Sequence[Mapping], *, kept_target: int = KEPT_TARGET_DEFAULT,
+                          kept_share: float = KEPT_SHARE_ASSUMED,
+                          weights: Mapping[str, float] = FAMILY_WEIGHTS_DEFAULT) -> tuple[list[Mapping], int, dict]:
+    """``(rows, net-new rows among them, the split)``: ``ceil(kept_target / kept_share)`` net-new rows split across
+    the families by :func:`split_by_weights` (each row under its ``primary_family``), each family taking its own rows
+    in rank order up to its allocation; a corpus, queued or decided row before a family's last counted row is taken
+    too, uncounted, as in :func:`select_wave`.  The split gains ``taken`` (net-new rows per family) and ``need``."""
+    if not 0 < kept_share <= 1:
+        raise ValueError(f"--kept-share must be in (0, 1], got {kept_share}")
+    need = math.ceil(int(kept_target) / float(kept_share))
+    rows = eligible(table)
+    fams = {f: [r for r in rows if r.get("primary_family") == f] for f in weights}
+    available = {f: sum(1 for r in rs if r.get("net_new")) for f, rs in fams.items()}
+    split = split_by_weights(need, weights, available)
+    out: list[Mapping] = []
+    taken: dict[str, int] = {}
+    for f, rs in fams.items():
+        k, n = split["allocated"][f], 0
+        for r in rs:
+            if n >= k:
+                break
+            out.append(r)
+            n += bool(r.get("net_new"))
+        taken[f] = n
+    out.sort(key=lambda r: r["rank"])
+    split.update(need=need, taken=taken,
+                 not_weighted=sum(1 for r in rows if r.get("primary_family") not in weights and r.get("net_new")))
+    return out, sum(taken.values()), split
 
 
 def select_top(table: Sequence[Mapping], n: int, *, per_cell: Optional[int] = None) -> tuple[list[Mapping], int,
@@ -230,6 +361,25 @@ def followup_commands(run_id: str, est: Estimate, *, candidates_path: Optional[P
     ]
 
 
+def family_split_lines(split: Mapping, *, default: bool = False) -> list[str]:
+    """The printed form of a wave's family split (:func:`select_wave_by_family`)."""
+    w = split["weights"]
+    lines = [f"  family weights {format_family_weights(w)}"
+             + (f" (the default: {FAMILY_WEIGHTS_SOURCE}; --family-weights to change, none for plain rank order)"
+                if default else " (--family-weights)")]
+    per = "; ".join(f"{f} {split['taken'].get(f, 0)} (share {split['share'][f]}, available {split['available'][f]})"
+                    for f in w)
+    lines.append(f"  net-new rows per family, of {split['need']}: {per}")
+    if split.get("short"):
+        lines.append("  short of their share, given to the other families in proportion to their weights: "
+                     + ", ".join(f"{f} by {n}" for f, n in split["short"].items()))
+    if split.get("unfilled"):
+        lines.append(f"  UNFILLED: {split['unfilled']} net-new rows: every weighted family is out of rows")
+    if split.get("not_weighted"):
+        lines.append(f"  {split['not_weighted']} net-new rows of families without a weight are not taken")
+    return lines
+
+
 @dataclass
 class SubmitSummary:
     run_id: str
@@ -243,6 +393,7 @@ class SubmitSummary:
     strata: dict
     dry_run: bool
     per_cell: dict = field(default_factory=dict)
+    family_split: Optional[dict] = None
     n_candidates: int = 0
     projected_kept: Optional[float] = None
     review_hours: Optional[float] = None
@@ -258,13 +409,16 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
                dry_run: bool = False, registry_path: Path = REGISTRY_PATH, candidates_dir: Optional[Path] = None,
                table_path: Optional[Path] = None, table_sha256: Optional[str] = None, relabel="auto",
                extra_args: Optional[Mapping] = None, record_only: bool = False, pre_gate=None,
-               echo=print) -> SubmitSummary:
+               family_weights: Optional[Mapping[str, float]] = FAMILY_WEIGHTS_DEFAULT, echo=print) -> SubmitSummary:
     """Select, estimate, gate, record and submit (module docstring).  Exactly one of ``top_n``, ``kept_target`` and
     ``all_rows``.  ``registry_rows``: the folded registry by key (what M1 and M3 will really be asked).
     ``record_only``: write ``candidates.jsonl`` and ``run.json`` and stop before the registry, so that the platform's
     label-fit check (``label_fit.py check --run llm_entropy/<run_id>``, 2026-10-15) can correct the labels first; its
     corrected file is then submitted with ``gap_registry.py submit --from``.  ``pre_gate(estimate)``, when given, is
-    called with the downstream estimate before the cost gate and raises to refuse (the CLI's $55 stop line)."""
+    called with the downstream estimate before the cost gate and raises to refuse (the CLI's $55 stop line).
+    ``family_weights`` (``kept_target`` only; default :data:`FAMILY_WEIGHTS_DEFAULT`): the wave's net-new rows split
+    across the families by :func:`select_wave_by_family`, the split printed and recorded (``family_split`` in
+    ``run.json``'s args and ``submit_report.json``); None keeps the plain rank order of :func:`select_wave`."""
     from ..base_model.submit import downstream_need
     check_id(run_id, "run_id")
     if transport not in ("live", "batches"):
@@ -272,12 +426,19 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
     if sum(x is not None and x is not False for x in (top_n, kept_target, all_rows or None)) != 1:
         raise ValueError("give exactly one of --top N, --kept-target K and --all")
     per: dict = {}
+    split: Optional[dict] = None
     if top_n is not None:
         mode = f"top {top_n}" + (f", {per_cell} per (family, model) cell" if per_cell else "")
         rows, n_counted, per = select_top(table, top_n, per_cell=per_cell)
     elif kept_target is not None:
         mode = f"kept target {kept_target} at net-new kept share {kept_share}"
-        rows, n_counted = select_wave(table, kept_target=kept_target, kept_share=kept_share)
+        if family_weights:
+            mode += f", families weighted {format_family_weights(family_weights)}"
+            rows, n_counted, split = select_wave_by_family(table, kept_target=kept_target, kept_share=kept_share,
+                                                           weights=family_weights)
+        else:
+            mode += ", plain rank order"
+            rows, n_counted = select_wave(table, kept_target=kept_target, kept_share=kept_share)
     else:
         mode = "all"
         rows, n_counted = select_all(table)
@@ -294,6 +455,9 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
          f"and not counted); {len(cands)} candidates (one per source)")
     if per:
         echo(f"  net-new per (family, model) cell: {per}")
+    if split is not None:
+        for line in family_split_lines(split, default=dict(family_weights) == dict(FAMILY_WEIGHTS_DEFAULT)):
+            echo(line)
     echo(f"  projection: {n_counted} net-new rows x net-new kept share {kept_share} = {projected:.0f} kept rows"
          + (f" against the target {kept_target}" if kept_target is not None else "")
          + f", about {hours:.1f} h of review at {REVIEW_TERMS_PER_HOUR:.0f} terms an hour ({REVIEW_RATE_SOURCE})"
@@ -308,8 +472,8 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
     confirm_or_abort(est.total_usd, budget_usd, confirm_expensive=confirm_expensive, confirmed_by=confirmed_by)
     summary = SubmitSummary(run_id=run_id, mode=mode, n_table=len(table), n_selected=len(rows), n_counted=n_counted,
                             n_filtered=n_filtered, need=need, estimate=asdict(est), strata=st, dry_run=dry_run,
-                            per_cell=per, n_candidates=len(cands), projected_kept=round(projected, 1),
-                            review_hours=round(hours, 2))
+                            per_cell=per, family_split=split, n_candidates=len(cands),
+                            projected_kept=round(projected, 1), review_hours=round(hours, 2))
     target = run_dir(GENERATOR, run_id, candidates_dir=candidates_dir)
     summary.followups = followup_commands(run_id, est, candidates_path=target / "candidates.jsonl")
     if record_only:
@@ -329,7 +493,7 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
     args = {"step": "submit", "record_only": bool(record_only), "mode": mode, "top_n": top_n, "per_cell": per_cell, "kept_target": kept_target,
             "kept_share": kept_share, "kept_share_assumed": assumed, "all": bool(all_rows), "n_rows": len(rows),
             "n_candidates": len(cands), "n_counted": n_counted, "n_filtered": n_filtered, "need": need,
-            "net_new_per_cell": per, "counted_stems": sorted(r["stem"] for r in rows if r.get("net_new")),
+            "net_new_per_cell": per, "family_split": split, "counted_stems": sorted(r["stem"] for r in rows if r.get("net_new")),
             "registered_stems": {r["stem"]: list(r.get("registered_by") or []) for r in rows if r.get("registered")},
             "decided_stems": sorted(r["stem"] for r in rows if r.get("registered_decided")),
             "exists_stems": sorted(r["stem"] for r in rows if r.get("exists")),
@@ -353,7 +517,8 @@ def run_submit(run_id: str, *, table: Sequence[Mapping], registry_rows: Mapping[
     atomic_write_text("".join(k + "\n" for k in rep.keys), ctx.dir / "keys.txt")
     rep_d = {k: v for k, v in rep.as_dict().items() if k not in ("keys", "relabels")} | {
         "n_keys": len(rep.keys), "rows_submitted": len(rows), "rows_counted": n_counted,
-        "rows_already_filtered": n_filtered, "n_candidates": len(cands)}
+        "rows_already_filtered": n_filtered, "n_candidates": len(cands)} | (
+        {"family_split": split} if split is not None else {})
     atomic_write_text(json.dumps(rep_d, indent=2) + "\n", ctx.dir / "submit_report.json")
     ctx.finish()
     summary.run_dir = str(ctx.dir)

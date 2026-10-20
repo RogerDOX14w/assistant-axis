@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 
 import pytest
 
@@ -214,3 +215,88 @@ def test_record_only_writes_the_candidates_and_not_the_registry(tmp_path):
     assert reg.read_bytes() == before and (rdir / "candidates.jsonl").exists() and not (rdir / "keys.txt").exists()
     assert "label_fit.py check --run llm_entropy/R" in s.followups[0]
     assert json.loads((rdir / "run.json").read_text())["sessions"][-1]["args"]["record_only"] is True
+
+
+# --------------------------------------------------------------------------- the wave's family mix (QUESTIONS 208)
+
+def test_family_weights_parse_and_default():
+    assert SU.parse_family_weights("a=4,b=2,d=1.5,e=1,c=1") == {"a": 4.0, "b": 2.0, "d": 1.5, "e": 1.0, "c": 1.0}
+    assert dict(SU.FAMILY_WEIGHTS_DEFAULT) == {"a": 4.0, "b": 2.0, "d": 1.5, "e": 1.0, "c": 1.0}   # Roger's ratio
+    assert SU.parse_family_weights("none") is None and SU.parse_family_weights(None) is None
+    assert SU.format_family_weights(SU.FAMILY_WEIGHTS_DEFAULT) == "a=4 b=2 d=1.5 e=1 c=1"
+    for bad in ("a=4,z=1", "a=-1", "a=x", "a=0,b=0", "a=1,a=2", "a4"):
+        with pytest.raises(ValueError):
+            SU.parse_family_weights(bad)
+
+
+def test_largest_remainder_split():
+    w = {"a": 4.0, "b": 2.0, "d": 1.5, "e": 1.0, "c": 1.0}
+    # 100 / 9.5: quotas a 42.1, b 21.05, d 15.79, e 10.53, c 10.53; floors 98, the two largest remainders (d .79,
+    # e .53 vs c .53: equal remainders go to the larger weight, then the order given) take one more
+    assert SU.largest_remainder(100, w) == {"a": 42, "b": 21, "d": 16, "e": 11, "c": 10}
+    assert sum(SU.largest_remainder(857, w).values()) == 857
+    assert SU.largest_remainder(0, w) == {f: 0 for f in w}
+    assert SU.largest_remainder(5, {"a": 1.0, "b": 0.0}) == {"a": 5, "b": 0}
+
+
+def test_a_short_family_gives_its_remainder_to_the_others_in_proportion():
+    w = {"a": 4.0, "b": 2.0, "d": 1.5, "e": 1.0, "c": 1.0}
+    s = SU.split_by_weights(95, w, {"a": 1000, "b": 1000, "d": 1000, "e": 1000, "c": 3})
+    assert s["share"] == {"a": 40, "b": 20, "d": 15, "e": 10, "c": 10}
+    assert s["short"] == {"c": 7} and s["unfilled"] == 0
+    # c takes its 3; the other 92 go to a, b, d, e as 4 : 2 : 1.5 : 1 (8.5): 43.3, 21.6, 16.2, 10.8
+    assert s["allocated"] == {"a": 43, "b": 22, "d": 16, "e": 11, "c": 3}
+    assert sum(s["allocated"].values()) == 95
+    # a cascade: b short too after c's share moved; everything left over goes on in proportion
+    s2 = SU.split_by_weights(95, w, {"a": 1000, "b": 21, "d": 1000, "e": 1000, "c": 3})
+    assert s2["allocated"]["c"] == 3 and s2["allocated"]["b"] == 21 and sum(s2["allocated"].values()) == 95
+    # every family out of rows: what is left is unfilled
+    s3 = SU.split_by_weights(95, w, {"a": 5, "b": 5, "d": 5, "e": 5, "c": 5})
+    assert s3["allocated"] == {f: 5 for f in w} and s3["unfilled"] == 70
+
+
+def _wave_table():
+    rows = []
+    for fam, n in (("a", 30), ("b", 30), ("c", 2), ("d", 30), ("e", 30)):
+        for i in range(n):
+            rows.append(row(f"zz{fam}{i}", family=fam, order=len(rows)))
+    rows.append(row("zzadone", family="a", order=0.5, registered=True, decided=True))
+    return table(rows)
+
+
+def test_the_wave_is_split_by_family_with_the_default_weights():
+    t = _wave_table()
+    sel, counted, split = SU.select_wave_by_family(t, kept_target=19, kept_share=0.5)    # 38 net-new rows
+    assert split["need"] == 38 and counted == 38
+    # 38 / 9.5 = 4 per weight unit: a 16, b 8, d 6, e 4, c 4; c has 2, its 2 go to a, b, d, e as 4 : 2 : 1.5 : 1
+    assert split["share"] == {"a": 16, "b": 8, "d": 6, "e": 4, "c": 4} and split["short"] == {"c": 2}
+    assert split["allocated"] == {"a": 17, "b": 9, "d": 6, "e": 4, "c": 2}
+    assert split["taken"] == split["allocated"]
+    fams = Counter(r["primary_family"] for r in sel if r["net_new"])
+    assert dict(fams) == {"a": 17, "b": 9, "d": 6, "e": 4, "c": 2}
+    # each family's own rows in rank order; the decided row inside a's cut is submitted, uncounted
+    for f in "abcde":
+        mine = [r["rank"] for r in t if r["primary_family"] == f and r["net_new"]]
+        assert [r["rank"] for r in sel if r["primary_family"] == f and r["net_new"]] == mine[:fams[f]]
+    assert [r["stem"] for r in sel if not r["net_new"]] == ["zzadone"]
+    assert [r["rank"] for r in sel] == sorted(r["rank"] for r in sel)
+
+
+def test_run_submit_defaults_to_the_family_weights_prints_and_records_the_split(tmp_path):
+    reg = _registry(tmp_path)
+    lines = []
+    s = SU.run_submit("R", table=_wave_table(), registry_rows={}, kept_target=19, kept_share=0.5,
+                      registry_path=reg, candidates_dir=tmp_path / "cand", relabel=None, echo=lines.append)
+    assert s.family_split["allocated"] == {"a": 17, "b": 9, "d": 6, "e": 4, "c": 2}
+    assert "families weighted a=4 b=2 d=1.5 e=1 c=1" in s.mode
+    text = "\n".join(lines)
+    assert "family weights a=4 b=2 d=1.5 e=1 c=1 (the default: QUESTIONS 208" in text
+    assert "a 17 (share 16, available 30)" in text and "c by 2" in text
+    rdir = tmp_path / "cand" / "runs" / "llm_entropy" / "R"
+    rep = json.loads((rdir / "submit_report.json").read_text())
+    assert rep["family_split"]["allocated"]["a"] == 17 and rep["rows_counted"] == 38
+    assert json.loads((rdir / "run.json").read_text())["sessions"][-1]["args"]["family_split"]["short"] == {"c": 2}
+    # None: the plain rank order, as before
+    s0 = SU.run_submit("R", table=_wave_table(), registry_rows={}, kept_target=19, kept_share=0.5, dry_run=True,
+                       family_weights=None, echo=lambda *a: None, candidates_dir=tmp_path / "c2")
+    assert s0.family_split is None and s0.n_counted == 38 and "plain rank order" in s0.mode

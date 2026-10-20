@@ -23,7 +23,8 @@
         [--embedder openai|hash|none] [--tau 0.9] [--seed 0] [--budget-usd 0.5] [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py model-test --run-id R [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py submit --run-id R
-        (--top N [--per-cell 50] | --kept-target 300 [--kept-share X] | --all) [--transport live|batches]
+        (--top N [--per-cell 50] | --kept-target 300 [--kept-share X] [--family-weights a=4,b=2,d=1.5,e=1,c=1]
+        | --all) [--transport live|batches]
         [--budget-usd 10] [--confirm-expensive --confirmed-by WHO] [--record-only] [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py roles-report --run-id R [--dry-run]
     uv run python data_analysis/gap_generation/llm_entropy_generator.py report --run-id R [--dry-run]
@@ -34,7 +35,9 @@ model-test arms on Sonnet 5.5): (a) a domain x mode grid, (b) a random Wikidata 
 verbalized sampling (``generate --with-probabilities`` on a or e, then ``verbalized``), (e) spelling constraints.
 ``postprocess`` builds the items table, ``collapse`` the mode-collapse statistics, ``model-test`` the per-(family,
 model) table, ``submit`` the run's rows (the pilot's ``--top 500 --per-cell 50``, the review-hour wave
-``--kept-target 300``), ``roles-report`` and ``report`` the readouts.
+``--kept-target 300``, its net-new rows split across the families by ``--family-weights``, default
+``a=4,b=2,d=1.5,e=1,c=1``: Roger's real new traits per costly row in the pilot, QUESTIONS 208; ``none`` for plain rank
+order), ``roles-report`` and ``report`` the readouts.
 
 **Money.**  Every paid command prints its estimate (``n_calls x (in, out) tokens at model rates = $X``), takes
 ``--budget-usd`` as a hard cap (over it refused; over the $20 line needs ``--confirm-expensive --confirmed-by``),
@@ -1065,6 +1068,13 @@ def cmd_submit(args) -> int:
     modes = sum(x is not None for x in (args.top, args.kept_target)) + bool(args.all)
     if modes != 1:
         return _refuse("give exactly one of --top N, --kept-target K and --all")
+    if args.family_weights is not None and args.kept_target is None:
+        return _refuse("--family-weights splits a --kept-target wave; --top and --all do not take it")
+    try:
+        weights = (SU.FAMILY_WEIGHTS_DEFAULT if args.family_weights is None
+                   else SU.parse_family_weights(args.family_weights))
+    except ValueError as exc:
+        return _refuse(str(exc))
     if not args.dry_run:
         refused = _dirty(args)
         if refused:
@@ -1078,7 +1088,7 @@ def cmd_submit(args) -> int:
                       candidates_dir=_cdir(args), table_path=table_p,
                       table_sha256=hashlib.sha256(table_p.read_bytes()).hexdigest(),
                       relabel=None if args.no_relabel else "auto", record_only=args.record_only,
-                      pre_gate=lambda est: _submit_stop(args, est))
+                      pre_gate=lambda est: _submit_stop(args, est), family_weights=weights)
     except CostRefused:
         return EXIT_REFUSED
     except ValueError as exc:
@@ -1226,6 +1236,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--per-cell", type=int, default=None)
     p.add_argument("--kept-target", type=int, default=None)
     p.add_argument("--kept-share", type=float, default=None)
+    p.add_argument("--family-weights", default=None, metavar="a=4,b=2,d=1.5,e=1,c=1",
+                   help="--kept-target only: split the wave's net-new rows across the families in proportion to "
+                        "these weights (default a=4,b=2,d=1.5,e=1,c=1, QUESTIONS 208: real new traits per costly row "
+                        "in the pilot); none for plain rank order")
     p.add_argument("--all", action="store_true")
     p.add_argument("--no-relabel", action="store_true", help="skip the registry's noun relabel step (tests)")
     p.add_argument("--record-only", action="store_true",

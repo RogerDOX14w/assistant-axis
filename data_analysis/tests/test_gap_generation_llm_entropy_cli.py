@@ -402,3 +402,21 @@ def test_a_translation_that_loses_a_kind_value_is_refused():
     assert translation_problems(good, P.DOMAIN_IDS) == []
     bad = dict(good, system=master.replace('"physical"', '"physisch"'))
     assert translation_problems(bad, P.DOMAIN_IDS) == ['system lost "physical"']
+
+
+# --------------------------------------------------------------------------- the wave's family mix (QUESTIONS 208)
+
+def test_submit_kept_target_prints_the_default_family_weights_and_refuses_them_elsewhere(env, capsys):
+    assert run(env, "generate", "--run-id", "fw", "--family", "e", "--n-prompts", "3", "--runs", "1") == 0
+    assert run(env, "postprocess", "--run-id", "fw") == 0
+    capsys.readouterr()
+    assert run(env, "submit", "--run-id", "fw", "--kept-target", "2", "--kept-share", "0.5", "--dry-run",
+               "--no-relabel") == 0
+    out = capsys.readouterr().out
+    assert "family weights a=4 b=2 d=1.5 e=1 c=1 (the default: QUESTIONS 208" in out
+    assert "net-new rows per family, of 4:" in out
+    assert run(env, "submit", "--run-id", "fw", "--kept-target", "2", "--kept-share", "0.5", "--dry-run",
+               "--no-relabel", "--family-weights", "none") == 0
+    assert "plain rank order" in capsys.readouterr().out
+    assert run(env, "submit", "--run-id", "fw", "--top", "3", "--family-weights", "a=1", "--dry-run") == 2
+    assert run(env, "submit", "--run-id", "fw", "--kept-target", "2", "--family-weights", "z=1", "--dry-run") == 2
