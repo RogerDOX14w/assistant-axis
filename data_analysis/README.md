@@ -1183,7 +1183,7 @@ Writes `data/candidates/narrow_pass/<batch-id>/` (`responses.jsonl`, `usage.json
 uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-pilot_narrow \
     --run llm_entropy/2026-10-17-pilot --dry-run --render        # 414 rows, 730 pairs: about $0.75 live
 uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-all_narrow --all-awaiting \
-    --transport batches --budget-usd 6                            # about 4,100 rows: about $3.70 batched
+    --budget-usd 10                    # about 4,100 rows, 7,200 pairs: about $7.35 live ($3.70 with --transport batches)
 ```
 
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
