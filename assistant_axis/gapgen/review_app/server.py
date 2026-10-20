@@ -103,7 +103,9 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
                 ev, gid = log.act(req)
             except ActionError as exc:
                 raise HTTPException(409, str(exc)) from None
-            card = log.state.group_card(gid) if gid in log.state.groups else None
+            # a split_off (and its undo) shows the resolved group the split came from, whose leftovers go on
+            shown = (ev or {}).get("split_from") or gid
+            card = log.state.group_card(shown) if shown in log.state.groups else None
             card = blind_card(card) if blind and card is not None else card
             return {"event": ev, "group": card, "counts": log.state.counts()}
 

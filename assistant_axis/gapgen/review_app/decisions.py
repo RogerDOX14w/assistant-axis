@@ -40,7 +40,15 @@ Actions (a request names the action and its fields; the log stores the request a
 * ``distinct`` (``group``, ``keys``): "considered against this resolved group, and not it".  Informational: the
   candidates stay unhandled, wear a badge, and leave that group's leftovers list; their own group comes up in the
   queue as before.
-* ``undo`` (``seq``?): reverses the last effective **decision**, skipping opens (Roger, 2026-10-11: an undo after
+* ``split_off`` (``group``, ``keys``, ``target``, ``note``?): the leftovers pass's third answer (Roger, 2026-10-20: a
+  simplex whose members are half covered by corpus trait X and half by Y took two passes): the given unhandled
+  candidates, leftovers of the **resolved** group ``group``, are covered by ``target`` (a ``trait:`` or ``queue:``
+  key among the merge targets), in one decision.  The event creates a new group, resolved at once (its own id, the
+  event's ``group``; ``source`` ``split:<group>``; ``split_from`` the resolved group; resolution
+  ``merge_into:<target>``; ``resolved_members`` the keys), which handles the keys; apply writes them ``merged_into``
+  the target like any merge.  Validated as ``extend`` is (candidates of this graph, none handled, not members of the
+  group) and the target must be a known one.  One undo takes the whole split back.
+* ``undo`` (``seq``?): reverses the last effective **decision** (a ``split_off`` as one), skipping opens (Roger, 2026-10-11: an undo after
   opening two more groups undid an open, which is navigation, and left the resolve he meant standing); when only
   opens remain, the last open.  The event records what it undid.  Undo again to walk back.
 
@@ -100,7 +108,8 @@ logger = logging.getLogger(__name__)
 LOG_NAME = "decisions.jsonl"
 APPLIED_NAME = "applied.jsonl"
 GRAPH_NAME = "graph.json"
-ACTIONS = ("open", "accept", "drop", "merge_in", "nominate", "resolve", "start_antonym", "extend", "distinct", "undo")
+ACTIONS = ("open", "accept", "drop", "merge_in", "nominate", "resolve", "start_antonym", "extend", "distinct",
+           "split_off", "undo")
 RESOLUTIONS = ("promote", "merge_into", "park", "reject", "defer")
 #: The registry ``review.status`` each resolution writes (``merged_into`` and ``parked`` are new to the platform
 #: plan's vocabulary; the plan's ``merged`` is written as ``merged_into`` with ``into``, as section 3 says).
@@ -249,7 +258,8 @@ def relabel_card(row) -> Optional[dict]:
 
 #: The member-card fields that carry a duplicate signal other than M3's own decision: hidden in a blind session
 #: (``serve --blind``, :func:`blind_card`), so that Roger's decisions there are a clean test of the signals.
-SIGNAL_FIELDS = ("persona", "lexical_merges")
+#: ``narrow``: the narrow pass's "narrower than X" (2026-10-20, :func:`narrow_card`).
+SIGNAL_FIELDS = ("persona", "lexical_merges", "narrow")
 SIGNAL_FLAGS = ("lexical_proposed_merge",)
 
 
@@ -287,6 +297,31 @@ def persona_card(row, label=None) -> Optional[dict]:
     if dis == "novel_vs_covered":
         return {"kind": "novel", "near": near, "residual_pct": pb.get("residual_pct"), "prominent": False}
     return None
+
+
+def narrow_card(row, label=None) -> Optional[dict]:
+    """The member card's narrow-pass badge (QUESTIONS 208 (3), Roger 2026-10-20: at most one narrow trait per parent
+    goes to review), from the row's ``narrow`` block, or None: ``{"status": "kept" | "held", "parent": {"key",
+    "label", "path", "href", "kind"}, "reading": M3's reading of the parent ("3/2"), "votes": the direction call's answers,
+    "n_children": how many children the parent had in that run (kept), "kept_child": the sibling kept for review
+    (held)}``.  A row judged not narrower has no badge.  ``label`` maps a target key to its display label."""
+    b = (row or {}).get("narrow") or {}
+    if b.get("status") not in ("kept", "held") or not b.get("parent"):
+        return None
+    key = b["parent"]
+    path, href = target_path(key)
+    lab = label(key) if label else None
+    name = (lab if lab and lab != key else None) or b.get("parent_label") or key.partition(":")[2].replace("_", " ")
+    asked = next((a for a in b.get("asked") or [] if a.get("parent") == key), {})
+    out = {"status": b["status"], "parent": {"key": key, "label": name, "path": path, "href": href,
+                                             "kind": "queue" if key.startswith("queue:") else "corpus"},
+           "reading": asked.get("reading"), "votes": list(asked.get("votes") or [])}
+    if b["status"] == "kept":
+        out["n_children"] = b.get("n_children")
+    else:
+        out["kept_child"] = b.get("kept_child")
+        out["held_because"] = b.get("held_because")
+    return out
 
 
 def blind_card(card):
@@ -396,7 +431,7 @@ def corpus_targets(data_dir: Optional[Path], queue_path: Optional[Path] = None) 
 class Group:
     """A working group: opened from a merged or proposed group, a term, or as an antonym; resolved once."""
     id: str
-    source: str                         # merged:<i> | proposed:<i> | term:<key> | antonym:<group>
+    source: str                         # merged:<i> | proposed:<i> | term:<key> | antonym:<group> | split:<group>
     members: list
     status: str                         # proposed | open | resolved
     opened_seq: int
@@ -412,6 +447,7 @@ class Group:
     note: Optional[str] = None
     rename: bool = False                # the label wants a second look (the note says why)
     antonym_of: Optional[str] = None
+    split_from: Optional[str] = None    # split_off: the resolved group whose leftovers this group took
 
     @property
     def kind(self) -> Optional[str]:
@@ -775,6 +811,22 @@ class ReviewState:
         g = self._resolved(req)
         return {"group": g.id, "action": "distinct", "keys": self._leftover_keys(req, g, "distinct")}
 
+    def _check_split_off(self, req: Mapping) -> dict:
+        g = self._resolved(req)
+        target = str(req.get("target") or "")
+        if not target:
+            raise ActionError("split_off needs a target: the corpus trait or queue entry the leftovers merge into")
+        if target not in self.targets:
+            raise ActionError(f"{target} is not a corpus trait or queue entry")
+        keys = self._leftover_keys(req, g, "split off")
+        note = req.get("note")
+        return {"group": self._new_gid(), "action": "split_off", "split_from": g.id, "keys": keys, "target": target,
+                "resolution": f"merge_into:{target}", "note": str(note) if note else None}
+
+    def split_groups(self, gid: str) -> list[str]:
+        """The groups split off a resolved group's leftovers (``split_off``)."""
+        return [g.id for g in self.groups.values() if g.split_from == gid]
+
     def _check_undo(self, req: Mapping) -> dict:
         if not self.applied:
             raise ActionError("nothing to undo")
@@ -792,6 +844,8 @@ class ReviewState:
             out["undone_resolution"] = last["resolution"]
         if last.get("keys") or last.get("key"):
             out["undone_keys"] = list(last.get("keys") or [last["key"]])
+        if last.get("split_from"):
+            out["split_from"] = last["split_from"]       # the page shows the group the split came from
         return out
 
     # -- events to state --------------------------------------------------------------
@@ -884,6 +938,24 @@ class ReviewState:
         for x in keys:
             self.handled[x] = g.id
             self.distinct.get(x, set()).discard(g.id)
+
+    def _apply_split_off(self, ev: Mapping) -> None:
+        gid, src, target = ev.get("group"), ev.get("split_from"), ev.get("target")
+        keys = list(ev.get("keys") or [])
+        if not gid or gid in self.groups or src not in self.groups or self.groups[src].status != "resolved":
+            raise ActionError(f"split_off: cannot split {gid} off {src}")
+        if target not in self.targets or ev.get("resolution") != f"merge_into:{target}":
+            raise ActionError(f"split_off: {target} is not a merge target")
+        if not keys or any(not self.is_candidate(x) or x in self.groups[src].members or self._log_handled(x)
+                           for x in keys):
+            raise ActionError(f"split_off: {keys} cannot be split off {src}")
+        self.groups[gid] = Group(id=gid, source=f"split:{src}", members=list(keys), status="resolved",
+                                 opened_seq=ev.get("seq", 0), opened_at=ev.get("at", ""), by=ev.get("by"),
+                                 resolution=ev["resolution"], resolved_members=list(keys), resolved_seq=ev.get("seq"),
+                                 resolved_at=ev.get("at"), resolved_by=ev.get("by"), note=ev.get("note"),
+                                 split_from=src)
+        for x in keys:
+            self.handled[x] = gid
 
     def _apply_distinct(self, ev: Mapping) -> None:
         g = self._group(ev)
@@ -1023,7 +1095,7 @@ class ReviewState:
                "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
                "earlier_review": self.earlier.get(key), "relabel": relabel_card(row),
                "other_names": other_names_card(key, row, self.ipip_siblings()),
-               "persona": persona_card(row, self.label)}
+               "persona": persona_card(row, self.label), "narrow": narrow_card(row, self.label)}
         if out["handled_by"]:
             pre = self.pre_handled_info(key)
             out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution
@@ -1224,6 +1296,7 @@ class ReviewState:
                 "resolution": g.resolution, "resolved_members": list(g.resolved_members), "note": g.note,
                 "rename": g.rename,
                 "antonym_of": g.antonym_of, "antonym_groups": self.antonym_groups(g.id),
+                "split_from": g.split_from, "split_groups": self.split_groups(g.id),
                 "neighbour_groups": others, "basis": list(basis), "leftovers": self.leftovers(gid),
                 "distinct": sorted((self._term_entry(x) for x, gs in self.distinct.items() if gid in gs),
                                    key=lambda d: d["label"])}
@@ -1286,6 +1359,8 @@ class ReviewState:
         resolved = [g for g in self.groups.values() if g.status == "resolved"]
         per_group = []
         for g in resolved:
+            if g.split_from:                    # opened and resolved by one event: its time is its group's
+                continue
             a, b = _parse_at(g.opened_at), _parse_at(g.resolved_at or "")
             if a and b:
                 per_group.append((b - a).total_seconds() / 60.0)
@@ -1465,6 +1540,8 @@ def desired_blocks(state: ReviewState, batch_id: str) -> dict[str, dict]:
             base["rename"] = True
         if g.antonym_of:
             base["antonym_of"] = g.antonym_of
+        if g.split_from:
+            base["split_from"] = g.split_from
         ants = state.antonym_groups(g.id)
         if ants:
             base["antonym_group"] = ants[0]

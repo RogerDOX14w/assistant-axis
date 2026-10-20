@@ -732,10 +732,10 @@ process.on("unhandledRejection", (e) => { console.log("UNHANDLED " + e); process
 const ctx = {document: {getElementById: el, querySelectorAll: () => [], querySelector: () => null,
                         addEventListener() {}, title: ""},
              window: {prompt: () => null}, console, setTimeout, clearTimeout,
-             fetch: (url) => new Promise((res) => pending.push({url, res}))};
+             fetch: (url, opt) => new Promise((res) => pending.push({url, opt, res}))};
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(process.argv[2], "utf8") +
-                "\n;globalThis.T = {S, renderCard, openFind, closeOverlay};", ctx);
+                "\n;globalThis.T = {S, renderCard, openFind, closeOverlay, ACTIONS};", ctx);
 const T = ctx.T;
 (async () => {
 BODY
@@ -1492,3 +1492,179 @@ class TestPersonaBadge:
             console.log(h.includes('badge flag" title="persona space') && h.includes("close to <a") && h.includes("(0.77); overlap reading 3/3") ? "BADGE" : "MISSING " + h);
         """)
         assert "BADGE" in out
+
+
+# --------------------------------------------------------------------------- the narrow pass's badge (QUESTIONS 208 (3))
+
+KEPT_NARROW = {"pass": "narrow", "status": "kept", "parent": "trait:alpha", "parent_label": "alpha", "parent_final": 2,
+               "n_children": 3, "asked": [{"parent": "trait:alpha", "reading": "2/-", "votes": ["narrower"] * 3}]}
+
+
+class TestNarrowBadge:
+    """Roger, 2026-10-20: at most one narrow trait per parent goes to review; the kept one says "narrower than X",
+    hidden by ``serve --blind`` like the other signal badges."""
+
+    def test_kept_held_and_none(self):
+        lab = {"trait:alpha": "Alpha"}.get
+        kept = D.narrow_card({"narrow": KEPT_NARROW}, lab)
+        assert kept["status"] == "kept" and kept["parent"]["label"] == "Alpha" and kept["n_children"] == 3
+        assert kept["parent"]["href"] == "/files/traits/alpha.json" and kept["reading"] == "2/-"
+        held = D.narrow_card({"narrow": dict(KEPT_NARROW, status="held", parent="queue:queued", parent_label="queued",
+                                             kept_child="other#1", held_because="sibling")})
+        assert held["status"] == "held" and held["kept_child"] == "other#1" and held["parent"]["kind"] == "queue"
+        assert held["parent"]["label"] == "queued"
+        assert D.narrow_card({"narrow": dict(KEPT_NARROW, status="not_narrow", parent=None)}) is None
+        assert D.narrow_card({}) is None
+        assert "narrow" in D.SIGNAL_FIELDS
+        assert D.blind_card({"label": "a", "key": "a#1", "gloss": "g", "narrow": kept}) == {
+            "label": "a", "key": "a#1", "gloss": "g"}
+
+    def test_the_card_carries_the_badge_and_a_blind_server_leaves_it_out(self, env):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        reg = env["reg"]
+        row = reg.fold()[k("loner")]
+        row["narrow"] = KEPT_NARROW
+        reg.write([row])
+        seen = {}
+        for blind in (False, True):
+            app = server.create_app(review_dir=env["rdir"], data_dir=env["data"], registry_path=env["reg"].path,
+                                    by="roger", clock=Clock(), blind=blind)
+            c = TestClient(app)
+            r = c.post("/api/action", json={"action": "open", "source": f"term:{k('loner')}"}).json()
+            m = {x["key"]: x for x in r["group"]["members"]}[k("loner")]
+            seen[blind] = m.get("narrow")
+        assert seen[False]["status"] == "kept" and seen[False]["parent"]["label"] == "alpha"
+        assert seen[True] is None
+
+    def test_the_page_renders_narrower_than(self, tmp_path):
+        out = run_page(tmp_path, """
+            T.S.card = {id: "g1", status: "open", source: "term:a#1", via: null, antonym_groups: [], neighbour_groups: [],
+                        neighbours: [], corpus: [], opposed: [], resolution: null, nominated: null, leftovers: [], distinct: [],
+                        members: [{key: "a#1", label: "humblebragging", gloss: "g", tags: [], flags: [], merged: [], proposed: [],
+                                   narrow: {status: "kept", n_children: 2, reading: "3/-", votes: ["narrower", "narrower"],
+                                            parent: {key: "trait:boastful", label: "boastful", path: "p", href: "/files/traits/boastful.json", kind: "corpus"}}}]};
+            T.renderCard();
+            const h = el("card").innerHTML;
+            console.log(h.includes("narrower than <a") && h.includes(">boastful</a>") ? "BADGE" : "MISSING " + h);
+        """)
+        assert "BADGE" in out
+
+
+# --------------------------------------------------------------------------- split off (Roger, 2026-10-20)
+
+class TestSplitOff:
+    """The leftovers pass's third answer: a resolved group's leftover merged into another corpus or queue trait in one
+    step, as a group of its own (a simplex half covered by X and half by Y used to take two passes)."""
+
+    def _resolved_with_leftover(self, env):
+        log = make_log(env)
+        g = act(log, action="open", source="proposed:0")                     # balky, headstrong, willful
+        act(log, action="accept", group=g)
+        act(log, action="resolve", group=g, resolution="merge_into:trait:alpha")
+        assert [x["key"] for x in log.state.group_card(g)["leftovers"]] == [k("obdurate")]
+        return log, g
+
+    def test_split_off_makes_a_resolved_group_that_handles_the_keys(self, env):
+        log, g = self._resolved_with_leftover(env)
+        ev, gid = log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:beta",
+                           "note": "covered by beta"})
+        assert ev["action"] == "split_off" and ev["group"] == gid and gid != g and ev["split_from"] == g
+        assert ev["target"] == "trait:beta" and ev["resolution"] == "merge_into:trait:beta" and ev["keys"] == [k("obdurate")]
+        s = log.state.groups[gid]
+        assert (s.status, s.source, s.split_from, s.resolution, s.resolved_members, s.note) == \
+            ("resolved", f"split:{g}", g, "merge_into:trait:beta", [k("obdurate")], "covered by beta")
+        assert log.state.handled[k("obdurate")] == gid
+        card = log.state.group_card(g)
+        assert card["leftovers"] == [] and card["split_groups"] == [gid]
+        assert log.state.group_card(gid)["split_from"] == g
+        assert log.state.queue_item("p1")["status"] == "done"
+        st = log.status()
+        assert st["by_action"]["split_off"] == 1 and st["groups"]["resolved"] == 2
+        assert st["resolutions"] == {"merge_into": 2}
+        assert snapshot(make_log(env)) == snapshot(log)                       # a restart replays it
+
+    def test_split_off_is_validated_like_extend_and_needs_a_known_target(self, env):
+        log, g = self._resolved_with_leftover(env)
+        with pytest.raises(D.ActionError, match="not a corpus trait or queue entry"):
+            log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:nosuch"})
+        with pytest.raises(D.ActionError, match="needs a target"):
+            log.act({"action": "split_off", "group": g, "keys": [k("obdurate")]})
+        with pytest.raises(D.ActionError, match="not a candidate"):
+            log.act({"action": "split_off", "group": g, "keys": ["trait:alpha"], "target": "trait:beta"})
+        with pytest.raises(D.ActionError, match="already a member"):
+            log.act({"action": "split_off", "group": g, "keys": [k("balky")], "target": "trait:beta"})
+        with pytest.raises(D.ActionError, match="needs keys"):
+            log.act({"action": "split_off", "group": g, "keys": [], "target": "trait:beta"})
+        g2 = act(log, action="open", source=f"term:{k('loner')}")
+        with pytest.raises(D.ActionError, match="not resolved"):
+            log.act({"action": "split_off", "group": g2, "keys": [k("obdurate")], "target": "trait:beta"})
+        log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "queue:queued"})
+        with pytest.raises(D.ActionError, match="is handled"):
+            log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:beta"})
+        assert len([e for e in log.events if e["action"] == "split_off"]) == 1      # refusals log nothing
+
+    def test_one_undo_takes_the_whole_split_back(self, env):
+        log, g = self._resolved_with_leftover(env)
+        _, gid = log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:beta"})
+        ev, shown = log.act({"action": "undo"})
+        assert ev["undone_action"] == "split_off" and ev["undone_keys"] == [k("obdurate")] and ev["split_from"] == g
+        assert gid not in log.state.groups and k("obdurate") not in log.state.handled
+        assert [x["key"] for x in log.state.group_card(g)["leftovers"]] == [k("obdurate")]
+        assert log.state.groups[g].status == "resolved"                       # the group it came from is untouched
+        assert snapshot(make_log(env)) == snapshot(log)
+        # a new split after the undo takes a fresh id (an undone group's id is never reused)
+        _, gid2 = log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "trait:beta"})
+        assert gid2 != gid
+
+    def test_apply_writes_merged_into_the_split_target(self, env):
+        log, g = self._resolved_with_leftover(env)
+        _, gid = log.act({"action": "split_off", "group": g, "keys": [k("obdurate")], "target": "queue:queued"})
+        rep = run_apply(env, log)
+        rows = env["reg"].fold()
+        rv = rows[k("obdurate")]["review"]
+        assert rv["status"] == "merged_into" and rv["into"] == "queue:queued" and rv["review_group"] == gid
+        assert rv["split_from"] == g and rv["group"] == [k("obdurate")]
+        for x in ("balky", "headstrong", "willful"):
+            assert rows[k(x)]["review"]["into"] == "trait:alpha" and "split_from" not in rows[k(x)]["review"]
+        assert rep.promotions == [] and run_apply(env, log).review_writes == {}          # idempotent
+
+    def test_the_server_shows_the_group_the_split_came_from(self, env):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        app = server.create_app(review_dir=env["rdir"], data_dir=env["data"], registry_path=env["reg"].path,
+                                by="roger", clock=Clock())
+        c = TestClient(app)
+        g = c.post("/api/action", json={"action": "open", "source": "proposed:0"}).json()["group"]["id"]
+        c.post("/api/action", json={"action": "accept", "group": g})
+        c.post("/api/action", json={"action": "resolve", "group": g, "resolution": "merge_into:trait:alpha"})
+        r = c.post("/api/action", json={"action": "split_off", "group": g, "keys": [k("obdurate")],
+                                         "target": "trait:beta"}).json()
+        assert r["event"]["split_from"] == g and r["group"]["id"] == g and r["group"]["leftovers"] == []
+        r = c.post("/api/action", json={"action": "undo"}).json()
+        assert r["group"]["id"] == g and [x["key"] for x in r["group"]["leftovers"]] == [k("obdurate")]
+        bad = c.post("/api/action", json={"action": "split_off", "group": g, "keys": [k("obdurate")],
+                                           "target": "trait:nosuch"})
+        assert bad.status_code == 409
+
+    def test_the_page_key_c_splits_the_highlighted_leftover_off_into_the_highlighted_corpus_row(self, tmp_path):
+        out = run_page(tmp_path, """
+            T.S.card = {id: "g1", status: "resolved", resolution: "merge_into:trait:alpha", source: "proposed:0", via: null,
+                        antonym_groups: [], neighbour_groups: [], neighbours: [], opposed: [], nominated: null, distinct: [],
+                        members: [{key: "a#1", label: "balky", gloss: "g", tags: [], flags: [], merged: [], proposed: []}],
+                        leftovers: [{key: "o#1", label: "obdurate", gloss: "g", level: 3, ties: 0, of: 1, groups: ["p1"]},
+                                    {key: "p#1", label: "pigheaded", gloss: "g", level: 3, ties: 0, of: 1, groups: ["p1"]}],
+                        corpus: [{key: "trait:alpha", kind: "corpus", label: "alpha", path: "p", href: "/files/traits/alpha.json", level: 2},
+                                 {key: "trait:beta", kind: "corpus", label: "beta", path: "p", href: "/files/traits/beta.json", level: 2}]};
+            T.S.pane = "leftovers"; T.S.idx.leftovers = 1; T.S.idx.corpus = 1;
+            T.renderCard();
+            const marked = el("corpus").innerHTML.includes('entry target') &&
+                           el("corpus").innerHTML.includes("Split off into this");
+            T.ACTIONS.merge_into();                     // what c does on a resolved group
+            await sleep(20);
+            const req = pending.find((x) => x.url === "/api/action");
+            const b = req ? JSON.parse(req.opt.body) : {};
+            console.log(marked && b.action === "split_off" && b.group === "g1" && b.target === "trait:beta"
+                        && JSON.stringify(b.keys) === JSON.stringify(["p#1"]) ? "SPLIT" : "WRONG " + JSON.stringify(b) + " " + marked);
+        """)
+        assert "SPLIT" in out

@@ -53,10 +53,14 @@ async function loadQueue() {
 
 async function showGroup(card) {
   if (!card || !S.selected || S.selected.group !== card.id) S.selected = null;
+  // the leftovers pass stays on its resolved group: its corpus highlight (the split-off target) is kept, so that
+  // several leftovers can be split off into one trait in a row
+  const same = S.card && card && S.card.id === card.id && card.status === "resolved";
   S.card = card;
   if (card) {
     S.idx = { members: Math.min(S.idx.members, Math.max(0, card.members.length - 1)),
-      leftovers: Math.min(S.idx.leftovers, Math.max(0, (card.leftovers || []).length - 1)), neighbours: 0, corpus: 0, opposed: 0 };
+      leftovers: Math.min(S.idx.leftovers, Math.max(0, (card.leftovers || []).length - 1)), neighbours: 0,
+      corpus: same ? S.idx.corpus : 0, opposed: 0 };
     if (S.pane === "leftovers" && !(card.leftovers || []).length) S.pane = "members";
     const pos = S.queue.findIndex((it) => it.group === card.id || itemMatches(it, card));
     if (pos >= 0) S.qpos = pos;
@@ -103,6 +107,7 @@ function describe(ev) {
     case "start_antonym": return `antonym group ${ev.group} of ${ev.of}`;
     case "extend": return `${k} also covered by ${ev.group}`;
     case "distinct": return `${k} marked distinct from ${ev.group}`;
+    case "split_off": return `${k} split off ${ev.split_from} into ${ev.target} (${ev.group})`;
     case "undo": return `undid ${ev.undone_action || "decision"}${ev.undone_resolution ? " " + ev.undone_resolution : ""}` +
       `${ev.undone_keys ? " " + ev.undone_keys.join(", ") : ""}${ev.group ? " on " + ev.group : ""} (decision ${ev.undoes})`;
     default: return ev.action;
@@ -216,6 +221,12 @@ function renderCard() {
       : pc.kind === "cover_questioned"
         ? `<span class="badge" title="M3 covered this row; persona space places it far from the covering trait">persona space questions the cover${pc.cos_to_cover != null ? " (" + Number(pc.cos_to_cover).toFixed(2) + ")" : ""}</span>`
         : `<span class="badge" title="M3 covered this row; persona space finds it unlike the corpus">persona space: novel-like${pc.residual_pct != null ? " (residual percentile " + Math.round(100 * pc.residual_pct) + ")" : ""}; nearest ${near}</span>`;
+    // the narrow pass (QUESTIONS 208 (3), Roger 2026-10-20): at most one narrower case of a trait goes to review;
+    // the kept one says what it is narrower than, a held one (in a graph built before the pass) which sibling was kept
+    const nw = m.narrow;
+    const narrow = !nw ? "" : nw.status === "kept"
+      ? `<span class="badge flag" title="the narrow pass: the one narrower case of this trait sent to review${nw.n_children > 1 ? " (" + nw.n_children + " children; the others held)" : ""}; M3 read it ${esc(nw.reading || "-")}; direction ${esc((nw.votes || []).join(", "))}">narrower than ${link(nw.parent)}</span>`
+      : `<span class="badge" title="the narrow pass held this row: its parent's narrow child in review is ${esc(nw.kept_child || "")}${nw.held_because === "earlier_run" ? " (an earlier run)" : ""}">held: narrower than ${link(nw.parent)}</span>`;
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
     const mine = !(m.handled_by && m.handled_by !== c.id);
     const btns = [
@@ -226,7 +237,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}${narrow}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
@@ -266,11 +277,16 @@ function renderCard() {
 
   const corpus = S.pinned ? [S.pinned, ...c.corpus.filter((t) => t.key !== S.pinned.key)] : c.corpus;
   S.corpusView = corpus;
+  // a resolved group with leftovers: c splits the highlighted leftover off into the highlighted corpus row, which is
+  // marked as the target while the focus is on the leftovers (Roger, 2026-10-20)
+  const splitting = c.status === "resolved" && (c.leftovers || []).length > 0;
   $("corpus").innerHTML = corpus.map((t, i) => {
     const cov = (t.covered || []).length ? `<div class="covered-list">covered by M3: ${t.covered.map((x) => esc(x.label) + " " + esc(x.reading) + (x.handled_by ? " (handled)" : "")).join(", ")}</div>` : "";
-    const pin = t === S.pinned ? " pinned" : "";
+    const pin = (t === S.pinned ? " pinned" : "") + (splitting && S.pane !== "corpus" && i === Math.min(S.idx.corpus, corpus.length - 1) ? " target" : "");
     const btns = working ? rowBtn("merge_into", "Covered by this", "c", "corpus", i,
-      "resolve the group as already covered by this corpus trait or queue entry (its labels go to the synonyms list)") : "";
+      "resolve the group as already covered by this corpus trait or queue entry (its labels go to the synonyms list)")
+      : splitting ? rowBtn("merge_into", "Split off into this", "c", "corpus", i,
+        "merge the highlighted leftover into this corpus trait or queue entry, as a group of its own, in one step") : "";
     return `<li class="entry${pin}${hl("corpus", i)}" data-pane="corpus" data-i="${i}"><span class="level l${t.level || 0}">${t.level != null && t.level >= 0 ? t.level : ""}</span> ` +
       `${link(t)}<span class="row-btns">${btns}</span> <span class="muted small">${t.cosine != null ? fmt(t.cosine) + " · " : ""}${esc(t.reading || t.relation || "found")}${t.via_label ? " · from " + esc(t.via_label) : ""}` +
       `${t.through ? " · through " + esc(t.through.label) + " (" + esc(t.through.text) + ")" : ""}` +
@@ -351,6 +367,23 @@ async function leftoverAct(action) {
   return act({ action, group: S.card.id, keys: [x.key] });
 }
 
+// The leftovers pass's third answer (Roger, 2026-10-20): the highlighted leftover is covered by the corpus trait or
+// queue entry highlighted in the right-hand panel (not this group's own target), in one step: a new group of its own,
+// resolved as merged into it.  One leftover at a time; Undo takes the split back.
+async function splitOff() {
+  if (!needCard()) return;
+  const c = S.card;
+  if (c.status !== "resolved") { flash("split off is for a resolved group's leftovers: resolve this group first", true); return; }
+  const x = current("leftovers");
+  if (!x) { flash("no leftover to split off", true); return; }
+  const t = current("corpus");
+  if (!t) { flash("no corpus trait to split off into: highlight one in the corpus list (Tab), or Find (/) one to pin it", true); return; }
+  S.pane = "leftovers";
+  const r = await act({ action: "split_off", group: c.id, keys: [x.key], target: t.key }, null);
+  if (r) flash(`${x.label} split off into ${t.label} (${r.event.group}, merged into ${t.key})`);
+  return r;
+}
+
 async function onEnter() {
   if (!needCard()) return;
   if (S.card.status === "proposed") return act({ action: "accept", group: S.card.id });
@@ -407,7 +440,7 @@ const ACTIONS = {
   reject: () => resolve("reject"),
   park: () => resolve("park"),
   defer: () => resolve("defer"),
-  merge_into: () => mergeIntoCorpus(),
+  merge_into: () => (S.card && S.card.status === "resolved" ? splitOff() : mergeIntoCorpus()),
   drop: () => { const m = current("members"); return needCard() && m && act({ action: "drop", group: S.card.id, key: m.key }); },
   nominate: () => { const m = current("members"); return needCard() && m && act({ action: "nominate", group: S.card.id, key: m.key }); },
   nominate_selected: () => {                    // the toolbar's Nominate: the member clicked in this group
@@ -461,8 +494,10 @@ function renderToolbar() {
     b.push(btn("next", "Next group", "Space", { cls: "primary", title: "open the next unhandled group in the queue" }));
     if (c && c.leftovers && c.leftovers.length) {
       const x = current("leftovers");
+      const t = current("corpus");
       b.push(btn("extend", `Also covered: "${x ? x.label : ""}"`, "+", { title: `add the highlighted leftover to ${c.id} under its resolution` }),
         btn("distinct", `Distinct: "${x ? x.label : ""}"`, "-", { title: "the highlighted leftover is not this trait; it stays for its own group" }));
+      if (t) b.push(btn("merge_into", `Split off into "${t.label}"`, "c", { title: "merge the highlighted leftover into the highlighted corpus trait or queue entry, as a group of its own" }));
     }
     if (c && c.opposed.some((o) => o.kind === "candidate" && !o.handled_by))
       b.push(btn("antonym", "Start antonym group", "a", { title: "open a group for the first unhandled opposed candidate (or use the button on its row)" }));
@@ -608,7 +643,7 @@ function help() {
     ["g", "Accept group: take the proposed group (Enter too)"], ["x", "Exclude: take the highlighted member out (never the last)"],
     ["m", "Merge in: pull the highlighted neighbour in (with its merged group)"], ["n", "Nominate the highlighted member"],
     ["Enter", "Promote the nominee (or accept a proposed group; Next group once resolved)"],
-    ["c", "Covered by this: resolve as covered by the highlighted corpus trait or queue entry"],
+    ["c", "Covered by this: resolve as covered by the highlighted corpus trait or queue entry; on a resolved group, Split off: the highlighted leftover merges into the highlighted corpus row as a group of its own"],
     ["p / r / d", "Park / Reject / Defer"], [";", "Add note: a note for the next resolution"],
     ["f", "Flag for rename: this label wants a second look (the note says why)"],
     ["a", "Start antonym group from the highlighted (or first) opposed term"],

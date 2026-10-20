@@ -59,6 +59,8 @@ main > section { overflow-y: auto; padding: 4px 16px 24px; border-right: 1px sol
 .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--muted); margin-left: 6px; }
 .covered-list { margin-left: 18px; color: var(--done); font-size: 12px; }
 .pinned { border-left: 3px solid var(--warn); }
+/* split off (a resolved group's leftovers): the corpus row c merges the highlighted leftover into */
+.target { outline: 1px dashed var(--focus); }
 footer#flash { position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 16px; background: var(--panel); border-top: 1px solid var(--line); min-height: 30px; }
 footer#flash.error { color: var(--bad); font-weight: 600; }
 #overlay { position: fixed; inset: 60px 15% auto 15%; max-height: 75vh; overflow-y: auto; background: var(--panel);
