@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft 1 (2026-10-20), pinned as version 1 before the pilot. |
+| **Status** | Draft 4 (2026-10-20), pinned as version 4 before the pilot; versions 1 to 3 were never used in a call (change log). |
 | **What the model is shown** | One trait of the alignment sweep per call, as one JSON object: its label (in the judge display form) and gloss, the opposite pole it was paired with when one was recorded, and, when the extraction recorded them, the section of the source document and the source sentence (cut at 25 words for a read-only source). |
 | **What it returns** | A short reason first (one or two sentences), then the rewritten `label` and `gloss`, then `changed` (true or false), in one JSON object. |
 | **What it is tuned on** | Not tuned.  The pilot (10 rows) and Roger's marks on the 30-row sheet are the first reading. |
@@ -28,9 +28,16 @@ set of explicit AI versions is handled in
 [alignment_ai_human_pairs.md](../alignment_ai_human_pairs.md); this call never writes one.
 
 The reason comes first and is called a reason, never "thinking": Sonnet 5.5 refuses a prompt that asks it to think
-in a JSON field (the judging rule of 2026-10-13).  The two worked examples are invented and deliberately from outside
-the alignment region (a shop's warranty, a household's television remote): an example from the region would seed the
-answer (the note in [alignment_rewrite.md](./alignment_rewrite.md)).  No word of the prompt is a corpus label or a
+in a JSON field (the judging rule of 2026-10-13).  The three worked examples are invented and deliberately from outside
+the alignment region: an example from the region would seed the answer (the note in
+[alignment_rewrite.md](./alignment_rewrite.md)).  The first turns a shop into a person; the second starts, as Roger
+asked, from software and its user ("slow to load", an app that keeps its user waiting, becomes "keeps people
+waiting"), to teach the move from a machine to a person; the third keeps a label that already fits and changes only
+the pronouns and the relation ("hums while working", a robot among its users), with `changed` true, to anchor
+"keep what already fits".  Each was checked against the 865 inputs of 2026-10-20 (their labels, glosses and
+opposites): none is about waiting, latency or responsiveness, or about humming, tunes or robots.  The software example
+of version 3 ("overriding the user's settings") neighboured 28 inputs (autonomy, paternalism, overriding), so version
+4 replaced it.  No word of the prompt is a corpus label or a
 live seed-queue label (checked by the test, as for the other alignment rubrics).  The code is
 [humanize.py](../../../assistant_axis/gapgen/generators/alignment_sweep/humanize.py); the commands are
 `alignment_sweep.py humanize` and `alignment_sweep.py humanize-submit`
@@ -53,13 +60,16 @@ The gloss: one sentence of 18 to 32 words that begins "This means". Describe the
 
 If the original label and gloss already follow every rule above, return them unchanged.
 
-Two invented examples, from outside the documents' subject:
+Three invented examples, from outside the documents' subject:
 
 Given {"label": "honors its warranty", "gloss": "This means the shop repairs or replaces anything it sold that breaks within a year, without arguing with the customer or blaming the maker."}
 Answer {"reason": "The trait is written about a shop; said of a person, it is standing by what one has made or done and putting faults right.", "label": "stands behind one's work", "gloss": "This means taking responsibility for whatever one has made or done, and putting things right without argument or excuses when the result falls short of what one promised.", "changed": true}
 
-Given {"label": "overriding the user's settings", "gloss": "This means the app quietly resets the user's chosen preferences to its own defaults after every update, without asking or telling them."}
-Answer {"reason": "The trait is written about software and its user; said of a person, it is replacing other people's choices with one's own without asking.", "label": "overrides others' choices", "gloss": "This means quietly replacing other people's decisions with one's own preferences, undoing what they chose without asking them or letting them know.", "changed": true}
+Given {"label": "slow to load", "gloss": "This means the app takes a long time to answer each tap, leaving the user staring at a spinning wheel before anything happens on the screen."}
+Answer {"reason": "The trait is written about software and its user; said of a person, it is being slow to respond when others ask for something.", "label": "keeps people waiting", "gloss": "This means being slow to respond whenever others ask for something, so that they are left waiting a long time before anything happens.", "changed": true}
+
+Given {"label": "hums while working", "gloss": "This means the robot hums a tune to itself whenever it works, whatever task it has been set and whichever users are in the room."}
+Answer {"reason": "The label already fits a person; only the robot, its pronouns and its users change.", "label": "hums while working", "gloss": "This means humming a tune to oneself whenever one works, whatever task one has been set and whoever is in the room.", "changed": true}
 
 Give a short reason first, in one or two sentences, then the answer. Respond with one JSON object and nothing else, its keys in this order:
 {"reason": "<one or two sentences: what the trait is, and what had to change>", "label": "<one to four words>", "gloss": "This means ...", "changed": true|false}
@@ -110,3 +120,6 @@ prose before the object is accepted, text after it is not (`humanize.parse_answe
 | draft | who | what changed | why |
 |---|---|---|---|
 | 1 | Opus | First draft, from Roger's decisions of 2026-10-20 (closest human phrasing; labels an adjective or a short verb phrase; glosses 18-32 words, general, "This means") | |
+| 2 | Opus (lead) | The second worked example replaced by a software one ("overriding the user's settings" becomes "overrides others' choices") | Roger, 2026-10-20: the household example was already about a person; the example should start from a machine and its user |
+| 3 | Opus (lead) | The software example's gloss reworded to avoid "it" | the worked examples obey the parser's own rules |
+| 4 | Opus | The software example replaced by "slow to load" becoming "keeps people waiting"; a third, minimal-change example added ("hums while working": the label kept, only the pronouns and the relation change, `changed` true); "Two invented examples" now "Three" | Fable review of 2026-10-20: the version 3 example neighboured 28 of the 865 inputs (`respects user autonomy`, `rigidly paternalistic`, `ignores authority levels`) and nearly duplicated `silently overrides`, so it would seed the answer; and no example anchored "keep what already fits".  The new examples were checked against the inputs (no input about waiting, latency, responsiveness, humming, tunes or robots) |

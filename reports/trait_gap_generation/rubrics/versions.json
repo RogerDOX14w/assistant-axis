@@ -310,6 +310,12 @@
         "sha256": "02c44bece46cb846d26895a0c2ca149c4169f58d04192cff28599793e79175ff",
         "pinned_at": "2026-10-20T17:48:00+00:00",
         "why": "Roger, 2026-10-20: the software example's gloss reworded to avoid 'it' (the worked examples obey the parser's own rule); not yet used in any call"
+      },
+      {
+        "version": 4,
+        "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+        "pinned_at": "2026-10-20T18:00:59+00:00",
+        "why": "Fable review 2026-10-20: the v3 software example (overriding the user's settings) neighboured 28 of the 865 inputs, so it is replaced by 'slow to load' -> 'keeps people waiting' (software and its user; no input about waiting, latency or responsiveness); a third, minimal-change example added ('hums while working': the label kept, only pronouns and the relation change, changed true); 'Two invented examples' -> 'Three'; not yet used in any call"
       }
     ],
     "enactability_gate": [

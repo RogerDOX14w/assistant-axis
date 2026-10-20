@@ -192,7 +192,7 @@ decisions: every sweep trait is rewritten in its closest human phrasing (person-
 rewritten; the old sweep runs are retracted and the rewrites submitted as a new run, his reviewed rows kept.  The
 explicit AI versions are a separate set ([alignment_ai_human_pairs.md](./alignment_ai_human_pairs.md)).
 
-- The prompt: [alignment_humanize.md](./rubrics/alignment_humanize.md), pinned as version 1, with a rendered sample
+- The prompt: [alignment_humanize.md](./rubrics/alignment_humanize.md), pinned as version 4 (three worked examples), with a rendered sample
   per input variant.
 - The code: [humanize.py](../../assistant_axis/gapgen/generators/alignment_sweep/humanize.py) (inputs, the call
   through the LLM-entropy runner, the parser, the candidates, the sheet, the submission plan) and the `humanize` and
@@ -222,8 +222,14 @@ retracts each old run with `registry.retract`, so that a reviewed row only the o
 registry of 2026-10-20 none needs that: Roger's three reviewed rows with a sweep source (`concealing#1` and
 `flattering#1` accepted, `overbearing#1` merged into [dominant](../../data/traits/instructions/dominant.json)) are all held by census and base-model sources whose
 gloss comes first, so the retraction only removes their sweep sources (reported as settled rows touched, not
-refused), and their reviews stand.  A settled row the retraction would drop, or whose first gloss it would change,
-has its old sources carried into the new run unchanged.  The step then writes [rejudge_keys.txt](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/rejudge_keys.txt) (the rows that
-already had an M1 block and now show a rewritten gloss first) and its report,
+refused), and their reviews stand.  A settled row the retraction would drop has its old sources carried into the new
+run unchanged, ahead of the rewrites.  A settled row whose first gloss the retraction would change (another source's
+gloss coming first) cannot be kept that way: the dry run says the retraction will refuse on it, and the live step
+refuses before writing anything until Roger decides (`--force-retract` with his go; the retraction record names the
+rows it overrode).  None does today.  Each rewrite's `source_ref` ends `;humanize:<old run>:<original label>`: the
+run named there is the old sweep run the source came from, and the new run is the candidate's own `run_id`.  The step
+then writes [rejudge_keys.txt](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/rejudge_keys.txt) (the rows that
+already had an M1 block and now show another gloss first, a rewrite or, once the sweep's gloss leaves, another
+generator's: 122 in a fake full run on the registry of 2026-10-20, 11 of them the second kind) and its report,
 [humanize_submit.json](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_submit.json), and prints the M1 and M3 commands through the Message Batches
 transport: M1 `--run` on the new rows and `--keys` on the rejudge list, then M3 `--run` and `--keys-file --rescore`.

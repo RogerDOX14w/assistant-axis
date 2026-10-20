@@ -48,7 +48,7 @@ CENSUS_GLOSS = "showing or representing to advantage"
 
 def test_rubric_pinned_reason_first_and_no_thinking():
     rub = X.load_rubric(H.RUBRIC_NAME)
-    assert rub["version"] == 3 and rub["sha256"] == sr.sha256(sr.load_prompt(H.RUBRIC_NAME))
+    assert rub["version"] == 4 and rub["sha256"] == sr.sha256(sr.load_prompt(H.RUBRIC_NAME))
     assert sr.GENERATOR_FILES[H.RUBRIC_NAME] == "alignment_humanize.md" and H.RUBRIC_NAME in sr.PINNED_NAMES
     text = rub["text"]
     tpl = text[text.rindex('{"reason"'):]                      # the answer format, at the end
@@ -91,13 +91,24 @@ def test_worked_examples_obey_their_own_rules_and_are_outside_the_region():
     text = sr.load_prompt(H.RUBRIC_NAME)
     answers = [json.loads(m) for m in re.findall(r"^Answer (\{.*\})$", text, re.M)]
     givens = [json.loads(m) for m in re.findall(r"^Given (\{.*\})$", text, re.M)]
-    assert len(answers) == 2 and len(givens) == 2
+    assert len(answers) == 3 and len(givens) == 3 and "Three invented examples" in text
     for given, ans in zip(givens, answers):
         parsed, err, notes = H.parse_answer(json.dumps(ans), original=(given["label"], given["gloss"]))
         assert err is None and notes == [], (err, notes)
         assert parsed["differs"] and parsed["changed"]
-    for w in ("sandbagging", "sycophan", "reward", "oversight", "shutdown", "weights", "deceiv", "manipulat"):
-        assert w not in " ".join(json.dumps(x) for x in answers + givens).lower(), w
+    # the second starts from software and its user (Roger): the label itself has to change
+    assert "the user" in givens[1]["gloss"] and "app" in givens[1]["gloss"] and answers[1]["label"] != givens[1]["label"]
+    # the third keeps a label that already fits: only the pronouns and the relation change, and changed is true
+    assert answers[2]["label"] == givens[2]["label"] and answers[2]["changed"] is True
+    assert {"it", "itself", "users"} & set(H.words(givens[2]["gloss"])) and not (
+        {"it", "its", "itself", "users", "robot"} & set(H.words(answers[2]["gloss"])))
+    # nothing from the sweep's region (the Fable review of v3: its example neighboured 28 of the 865 inputs); the
+    # concepts below were checked by grep against the 865 inputs of 2026-10-20 (none about waiting, latency,
+    # responsiveness, humming, tunes or robots)
+    blob = " ".join(json.dumps(x) for x in answers + givens).lower()
+    for w in ("sandbagging", "sycophan", "reward", "oversight", "shutdown", "weights", "deceiv", "manipulat",
+              "autonom", "honest", "harm", "flatter", "defer", "obey", "overrid", "setting", "choice", "control"):
+        assert w not in blob, w
 
 
 def test_rubric_file_holds_a_rendered_sample_per_variant():
@@ -348,7 +359,7 @@ def test_cli_dry_run_and_render_write_nothing(world, monkeypatch, capsys):
     assert "4 distinct (label, gloss) inputs" in out and "total estimate $" in out and '"source_sentence"' in out
     assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--render") == 0
     out = capsys.readouterr().out
-    assert out.startswith("SYSTEM (rubric alignment_humanize version 3") and "USER (without a source sentence" in out
+    assert out.startswith("SYSTEM (rubric alignment_humanize version 4") and "USER (without a source sentence" in out
     assert not world["new_dir"].exists()
 
 
@@ -433,6 +444,9 @@ def test_cli_pilot_then_batches(world, monkeypatch):
     assert len(batch) == 2 and all(r["charged_as"] == "claude-sonnet-5-5:batch" for r in batch)
     assert (d / H.BATCHES_NAME).exists()
     assert sheet.read_text() == marked and len(list(d.glob("humanize_sheet.*.md"))) == 1
+    run = json.loads((d / "run.json").read_text())
+    forms = [s_["args"].get("label_form") for s_ in run["sessions"] if s_["args"].get("step") == "humanize"]
+    assert forms == ["judge-display-v1", "judge-display-v1"]                    # the resumed session kept the form
     usage = json.loads((d / "usage.json").read_text())
     assert set(usage["per_model"]) == {"claude-sonnet-5-5", "claude-sonnet-5-5:batch"} and usage["n_calls"] == 4
 
@@ -487,6 +501,95 @@ def test_cli_submit_then_retract_keeps_reviewed_rows(world, monkeypatch, capsys)
     assert again["rejudge_keys"] == ["candid#1"] and again["old_runs"] == [] and again["already_retracted"] == [OLD]
 
 
+def _add_mixed_row(world, label, *, review=None):
+    """A row the sweep proposed first and a census also holds (its gloss second), with an M1 block."""
+    reg = world["reg"]
+    submit_candidates([Candidate(surface=label, generator="alignment_sweep", run_id=OLD, rank=9,
+                                 gloss_hint=gl(f"being {label} towards the user"), source_ref="x:v:s")],
+                      registry_path=reg, relabel=None)
+    submit_candidates([Candidate(surface=label, generator="censuses", run_id="2026-10-01-c",
+                                 gloss_hint=f"census gloss of {label}")], registry_path=reg, relabel=None)
+    key = normalize_to_file_name(label) + "#1"
+    Registry(reg).merge_block(key, "filter", {"verdict": "trait", "at": "2026-10-02T00:00:00+00:00"})
+    if review:
+        Registry(reg).merge_block(key, "review", {"status": review, "at": "2026-10-03T00:00:00+00:00"})
+    return key
+
+
+def test_cli_rejudge_covers_a_row_whose_census_gloss_comes_first(world, monkeypatch, capsys):
+    key = _add_mixed_row(world, "misleading")
+    answers = {**NEW_ANSWERS, "misleading": ("gives false impressions", gl("leaving others with a wrong picture"))}
+    assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--transport", "live", "--allow-dirty",
+                responder=_responder(answers)) == 0
+    submit = ["humanize-submit", "--run-id", NEW, "--by", "t", "--no-relabel",
+              "--queue", str(world["tmp"] / "no_queue.json")]
+    capsys.readouterr()
+    assert _run(world, monkeypatch, *submit, "--dry-run") == 0
+    out = capsys.readouterr().out
+    assert "2 filtered rows whose first gloss changes (to another source's gloss: 1; to a rewrite: 1)" in out
+    assert _run(world, monkeypatch, *submit) == 0
+    v = Registry(world["reg"]).fold()
+    assert first_gloss_hint(v[key]) == "census gloss of misleading"           # M1 saw the sweep's gloss
+    rep_ = json.loads((world["new_dir"] / H.SUBMIT_REPORT_NAME).read_text())
+    assert rep_["rejudge_keys"] == ["candid#1", key]
+    assert key in rep_["retractions"][0]["gloss_hint_changed_after_run"]
+
+
+def test_cli_settled_row_whose_gloss_would_change_needs_roger(world, monkeypatch, capsys):
+    key = _add_mixed_row(world, "overbearing", review="accepted")
+    assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--transport", "live", "--allow-dirty") == 0
+    submit = ["humanize-submit", "--run-id", NEW, "--by", "t", "--no-relabel",
+              "--queue", str(world["tmp"] / "no_queue.json")]
+    capsys.readouterr()
+    assert _run(world, monkeypatch, *submit, "--dry-run") == 0
+    out = capsys.readouterr().out
+    assert "THE RETRACTION WILL REFUSE on 1 settled row(s)" in out and f"{key}: review accepted; its first gloss" in out
+    assert "carried into the new run unchanged: overbearing" not in out           # a copy could not keep its gloss
+    before_bytes = world["reg"].read_bytes()
+    with pytest.raises(SystemExit, match="Ask Roger"):
+        _run(world, monkeypatch, *submit)
+    assert world["reg"].read_bytes() == before_bytes and not (world["new_dir"] / H.SUBMIT_REPORT_NAME).exists()
+    # without the prediction the registry itself refuses: the outcome the dry run announced
+    from assistant_axis.gapgen.registry import retract
+    assert retract(world["reg"], "alignment_sweep", OLD, reason="t", by="t", dry_run=True).blocked[key] == \
+        "review accepted"
+    # with Roger's go the retraction is forced, and the record says which rows it overrode
+    assert _run(world, monkeypatch, *submit, "--force-retract") == 0
+    rep_ = json.loads((world["new_dir"] / H.SUBMIT_REPORT_NAME).read_text())
+    assert rep_["retractions"][0]["forced"] and rep_["retractions"][0]["blocked"] == {key: "review accepted"}
+    ctl = Registry(world["reg"]).controls()[f"retraction:alignment_sweep/{OLD}"]
+    assert ctl["forced"] and ctl["effect"]["blocked_overridden"] == [key]
+
+
+def test_cli_kept_copy_goes_in_ahead_of_a_rewrite_with_the_same_label(world, monkeypatch):
+    """A settled row only the sweep held, whose rewrite keeps its label: the carried copy is submitted first, so the
+    row's first gloss stays the one Roger reviewed and the retraction does not refuse."""
+    reg = world["reg"]
+    submit_candidates([Candidate(surface="stoic", generator="alignment_sweep", run_id=OLD, rank=8,
+                                 gloss_hint=gl("bearing hardship without complaint"), source_ref="x:v:t")],
+                      registry_path=reg, relabel=None)
+    Registry(reg).merge_block("stoic#1", "review", {"status": "accepted", "at": "2026-10-03T00:00:00+00:00"})
+    answers = {**NEW_ANSWERS, "stoic": ("stoic", gl("bearing hardship and loss without complaint"))}
+    assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--transport", "live", "--allow-dirty",
+                responder=_responder(answers)) == 0
+    assert _run(world, monkeypatch, "humanize-submit", "--run-id", NEW, "--by", "t", "--no-relabel",
+                "--queue", str(world["tmp"] / "no_queue.json")) == 0
+    row = Registry(reg).fold()["stoic#1"]
+    assert row["review"]["status"] == "accepted" and first_gloss_hint(row) == gl("bearing hardship without complaint")
+    assert [H.split_source_ref(s["source_ref"])[1]["kept"] for s in row["sources"]] == [True, False]
+
+
+def test_cli_second_pass_after_a_crash_is_not_complete(world, monkeypatch):
+    assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--transport", "live", "--allow-dirty") == 0
+    d = world["new_dir"]
+    # a crash after the submission, before the first retraction was written
+    (d / H.SUBMIT_REPORT_NAME).write_text(json.dumps({"submit": {"n_submitted": 5}, "old_runs": [OLD],
+                                                      "retractions": [], "at": "x"}))
+    assert _run(world, monkeypatch, "humanize-submit", "--run-id", NEW, "--by", "t", "--no-relabel",
+                "--queue", str(world["tmp"] / "no_queue.json")) == 0
+    assert Registry(world["reg"]).retracted_runs() == {("alignment_sweep", OLD)}
+
+
 def test_cli_submit_refuses_unanswered(world, monkeypatch):
     assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--transport", "live", "--allow-dirty",
                 responder=_responder(refuse={"candid": 9})) == 0
@@ -506,33 +609,71 @@ def test_cli_defaults():
 
 # --------------------------------------------------------------------------- pure helpers
 
-def test_kept_candidates_and_rejudge_keys_on_raw_rows():
-    def src(gen, run, surface, gloss):
-        return {"generator": gen, "run_id": run, "surface": surface, "gloss_hint": gloss, "source_ref": "r",
-                "rank": 1, "score": None, "partner_hint": None}
+def _src(gen, run, surface, gloss):
+    return {"generator": gen, "run_id": run, "surface": surface, "gloss_hint": gloss, "source_ref": "r", "rank": 1,
+            "score": None, "partner_hint": None}
+
+
+def test_kept_candidates_carry_only_the_drop_case_and_blocks_are_predicted():
     raw = {"a#1": {"key": "a#1", "surface": "a", "sense_id": 1, "review": {"status": "rejected"},
-                   "sources": [src("alignment_sweep", OLD, "a", "ga")]},
+                   "sources": [_src("alignment_sweep", OLD, "a", "ga")]},
            "b#1": {"key": "b#1", "surface": "b", "sense_id": 1, "review": {"status": "accepted"},
-                   "sources": [src("alignment_sweep", OLD, "b", "gb"), src("censuses", "c", "b", "gc")]},
+                   "sources": [_src("alignment_sweep", OLD, "b", "gb"), _src("censuses", "c", "b", "gc")]},
            "c#1": {"key": "c#1", "surface": "c", "sense_id": 1, "review": {"status": "unreviewed"},
-                   "sources": [src("alignment_sweep", OLD, "c", "gx")]},
+                   "sources": [_src("alignment_sweep", OLD, "c", "gx")]},
            "d#1": {"key": "d#1", "surface": "d", "sense_id": 1, "review": {"status": "unreviewed"},
-                   "seed_queue_stem": None, "sources": [src("censuses", "c", "d", "gd"),
-                                                         src("alignment_sweep", OLD, "d", "gy")]}}
+                   "seed_queue_stem": None, "sources": [_src("censuses", "c", "d", "gd"),
+                                                         _src("alignment_sweep", OLD, "d", "gy")]}}
     kept, why = H.kept_candidates(raw, active=set(), old_runs=[OLD], run_id=NEW)
-    assert sorted(why) == ["a#1", "b#1"]          # a dropped; b's first gloss would change; c and d not settled
-    assert "drops it" in why["a#1"] and "first gloss hint would change" in why["b#1"]
-    assert {(c.surface, c.gloss_hint, c.run_id) for c in kept} == {("a", "ga", NEW), ("b", "gb", NEW)}
-    assert all(H.split_source_ref(c.source_ref)[1]["kept"] for c in kept)
-    before = {"x#1": {"filter": {"v": 1}, "review": {}, "sources": [src("alignment_sweep", OLD, "x", "old")]},
-              "y#1": {"filter": {"v": 1}, "review": {}, "sources": [src("censuses", "c", "y", "gc")]}}
-    after = {"x#1": {"filter": {"v": 1}, "review": {}, "sources": [src("alignment_sweep", NEW, "x", "new")]},
-             "y#1": {"filter": {"v": 1}, "review": {}, "sources": [src("censuses", "c", "y", "gc"),
-                                                                   src("alignment_sweep", NEW, "y", "new")]},
-             "z#1": {"review": {}, "sources": [src("alignment_sweep", NEW, "z", "new")]},
+    # a is dropped: carried.  b keeps a census source but its first gloss would change: a copy appended after the
+    # census source could not keep it, so b is not carried; it is a predicted block instead
+    assert list(why) == ["a#1"] and "drops it" in why["a#1"]
+    assert [(c.surface, c.gloss_hint, c.run_id) for c in kept] == [("a", "ga", NEW)]
+    assert H.split_source_ref(kept[0].source_ref)[1] == {"run_id": OLD, "label": "a", "kept": True}
+    before = dict(raw)
+    final = H.final_view(raw, kept, active=set(), old_runs=[OLD])
+    assert first_gloss_hint(final["a#1"]) == "ga" and first_gloss_hint(final["b#1"]) == "gc" and "c#1" not in final
+    blocks = H.predicted_blocks(before, final, old_runs=[OLD])
+    assert list(blocks) == ["b#1"] and "first gloss hint would change from 'gb' to 'gc'" in blocks["b#1"]
+    # the registry's time rule: reviewed before the old run began, the gloss change is not a block
+    raw["b#1"]["review"]["at"] = "2026-09-01T00:00:00+00:00"
+    assert H.predicted_blocks(before, final, old_runs=[OLD], run_starts={OLD: "2026-10-01T00:00:00+00:00"}) == {}
+    assert list(H.predicted_blocks(before, final, old_runs=[OLD], run_starts={OLD: None})) == ["b#1"]
+
+
+def test_rejudge_keys_cover_rewrites_and_glosses_the_retraction_moves():
+    before = {"x#1": {"filter": {"v": 1}, "review": {}, "sources": [_src("alignment_sweep", OLD, "x", "old")]},
+              "y#1": {"filter": {"v": 1}, "review": {}, "sources": [_src("censuses", "c", "y", "gc")]},
+              "m#1": {"filter": {"v": 1, "at": "2026-10-05T00:00:00+00:00"}, "review": {},
+                      "sources": [_src("alignment_sweep", OLD, "m", "gm"), _src("censuses", "c", "m", "gc")]},
+              "s#1": {"filter": {"v": 1}, "review": {"status": "accepted"},
+                      "sources": [_src("alignment_sweep", OLD, "s", "gs"), _src("censuses", "c", "s", "gc")]}}
+    after = {"x#1": {"filter": {"v": 1}, "review": {}, "sources": [_src("alignment_sweep", NEW, "x", "new")]},
+             "y#1": {"filter": {"v": 1}, "review": {}, "sources": [_src("censuses", "c", "y", "gc"),
+                                                                   _src("alignment_sweep", NEW, "y", "new")]},
+             "z#1": {"review": {}, "sources": [_src("alignment_sweep", NEW, "z", "new")]},
              "w#1": {"filter": {"v": 1}, "review": {"status": "accepted"},
-                     "sources": [src("alignment_sweep", NEW, "w", "new")]}}
-    assert H.rejudge_keys(before, after, ["x#1", "y#1", "z#1", "w#1"], run_id=NEW) == ["x#1"]
+                     "sources": [_src("alignment_sweep", NEW, "w", "new")]},
+             "m#1": {"filter": {"v": 1}, "review": {}, "sources": [_src("censuses", "c", "m", "gc")]},
+             "s#1": {"filter": {"v": 1}, "review": {"status": "accepted"}, "sources": [_src("censuses", "c", "s", "gc")]}}
+    keys = ["x#1", "y#1", "z#1", "w#1"]
+    assert H.rejudge_keys(before, after, keys, run_id=NEW) == ["x#1"]              # m#1 missed without the moves
+    moved = H.gloss_moved(before, after, old_runs=[OLD])
+    assert moved == ["m#1", "s#1", "x#1"]
+    assert H.rejudge_keys(before, after, keys, run_id=NEW, moved=moved) == ["m#1", "x#1"]    # s#1 settled
+    # M1 judged m#1 before the old run began: the gloss it was shown was not the run's, so it is not moved
+    assert "m#1" not in H.gloss_moved(before, after, old_runs=[OLD], run_starts={OLD: "2026-10-09T00:00:00+00:00"})
+
+
+def test_submission_complete_needs_every_retraction_written():
+    run = f"alignment_sweep/{OLD}"
+    assert not H.submission_complete(None) and not H.submission_complete({"old_runs": [OLD]})
+    crashed = {"submit": {"n_submitted": 4}, "old_runs": [OLD], "retractions": []}
+    assert not H.submission_complete(crashed)
+    assert not H.submission_complete({**crashed, "retractions": [{"run": run, "written": False, "refused": "x"}]})
+    assert H.submission_complete({**crashed, "retractions": [{"run": run, "written": True, "refused": None}]})
+    assert H.submission_complete({"submit": {}, "old_runs": [], "retractions": []}) is False   # nothing submitted
+    assert H.submission_complete({"submit": {"n": 1}, "old_runs": [], "retractions": []})
 
 
 def test_estimate_batches_half_price():

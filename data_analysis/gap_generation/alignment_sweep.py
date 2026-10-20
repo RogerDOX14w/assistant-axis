@@ -821,6 +821,19 @@ def _humanize_inputs(args, rdir: Path) -> tuple[list, str]:
                     f"{len(headings)} chunk headings)")
 
 
+def _recorded_args(rdir: Path, key: str) -> Optional[dict]:
+    """The ``args`` of the run's first session that recorded ``key`` (``run.json`` keeps each session's args under
+    ``sessions[i].args``, the first session's also under ``args``), or None for a new run."""
+    p = rdir / "run.json"
+    if not p.exists():
+        return None
+    run = json.loads(p.read_text(encoding="utf-8"))
+    for a in [s.get("args") or {} for s in run.get("sessions") or []] + [run.get("args") or {}]:
+        if key in a:
+            return a
+    return None
+
+
 def cmd_humanize(args) -> int:
     from assistant_axis.atomic_io import atomic_write_text
     from assistant_axis.gapgen.batches import choose_transport
@@ -841,8 +854,7 @@ def cmd_humanize(args) -> int:
         rub = X.load_rubric(H.RUBRIC_NAME, args.rubrics_dir, allow_unpinned=bool(args.render))
     except X.RubricNotPinned as exc:
         raise SystemExit(f"REFUSED: {exc}")
-    run_json = rdir / "run.json"
-    form = resolve_label_form(earlier=json.loads(run_json.read_text(encoding="utf-8")) if run_json.exists() else None)
+    form = resolve_label_form(earlier=_recorded_args(rdir, LABEL_FORM_KEY))
     inputs, where = _humanize_inputs(args, rdir)
     if not inputs:
         raise SystemExit(f"no {AS.GENERATOR} source to rewrite in {where}")
@@ -992,7 +1004,9 @@ def cmd_humanize_submit(args) -> int:
     from assistant_axis.gapgen import submit_candidates
     from assistant_axis.gapgen.generators.alignment_sweep import humanize as H
     from assistant_axis.gapgen.generators.llm_entropy.calls import read_responses
-    from assistant_axis.gapgen.registry import Registry, apply_retractions, read_candidates, retract, utc_now
+    from assistant_axis.gapgen.registry import (
+        Registry, _run_started_at, apply_retractions, read_candidates, retract, utc_now,
+    )
     from assistant_axis.gapgen.runs import start_run
 
     rdir = _run_dir(args, args.run_id)
@@ -1001,8 +1015,7 @@ def cmd_humanize_submit(args) -> int:
             raise SystemExit(f"no {p}: run `alignment_sweep.py {cmd} --run-id {args.run_id}` first")
     prev = json.loads((rdir / H.SUBMIT_REPORT_NAME).read_text(encoding="utf-8")) \
         if (rdir / H.SUBMIT_REPORT_NAME).exists() else None
-    if prev and prev.get("submit") and not any(r.get("refused") for r in prev.get("retractions") or []) \
-            and not args.again and not args.dry_run:
+    if H.submission_complete(prev) and not args.again and not args.dry_run:
         raise SystemExit(f"REFUSED: {AS.GENERATOR}/{args.run_id} was submitted and its old runs retracted at "
                          f"{prev.get('at')} ({rdir / H.SUBMIT_REPORT_NAME}); a second pass would find nothing to "
                          f"retract and recompute {H.REJUDGE_KEYS_NAME} on the new glosses.  Pass --again to resubmit "
@@ -1028,13 +1041,16 @@ def cmd_humanize_submit(args) -> int:
     kept, kept_why = H.kept_candidates(raw, active=active, old_runs=to_retract, run_id=args.run_id,
                                        queue_keys=queue_keys)
     touched = H.settled_rows_touched(raw, active=active, old_runs=to_retract, queue_keys=queue_keys)
-    every = list(cands) + kept
+    every = kept + list(cands)       # a carried source goes in ahead of a rewrite landing on the same row
     land = H.landing(raw, every)
     before = apply_retractions(raw, active)
     alone = apply_retractions(raw, active | {(AS.GENERATOR, r) for r in to_retract})
-    sim = H.simulate_after(raw, every, active=active, old_runs=to_retract)
-    pred_rejudge = H.rejudge_keys(before, sim, land["keys"], run_id=args.run_id)
-    pred_m1 = sum(1 for k in land["keys"] if not (sim.get(k) or {}).get("filter"))
+    final = H.final_view(raw, every, active=active, old_runs=to_retract)
+    starts = {r: _run_started_at(AS.GENERATOR, r) for r in to_retract}      # the registry's own reading
+    blocks = H.predicted_blocks(before, final, old_runs=to_retract, queue_keys=queue_keys, run_starts=starts)
+    moved = H.gloss_moved(before, final, old_runs=to_retract, run_starts=starts)
+    pred_rejudge = H.rejudge_keys(before, final, land["keys"], run_id=args.run_id, moved=moved)
+    pred_m1 = sum(1 for k in land["keys"] if not (final.get(k) or {}).get("filter"))
     dropped_alone = set(before) - set(alone)
     print(f"humanize-submit {AS.GENERATOR}/{args.run_id}: {len(cands)} rewritten candidates from {len(rows)} inputs "
           f"({len(missing)} unanswered){f' + {len(kept)} kept reviewed sources' if kept else ''}; they land on "
@@ -1042,19 +1058,29 @@ def cmd_humanize_submit(args) -> int:
           f"block); the noun relabel {'off' if args.no_relabel else 'on'} (its siblings are not counted here)")
     print(f"old runs to retract, after the submission: {', '.join(to_retract) or 'none'}"
           + (f" (already retracted: {', '.join(already)})" if already else ""))
-    print(f"  the retraction alone would drop {len(dropped_alone)} rows; {sum(1 for k in dropped_alone if k in sim)} "
+    print(f"  the retraction alone would drop {len(dropped_alone)} rows; {sum(1 for k in dropped_alone if k in final)} "
           f"of them stay, held by the new run's candidates; rows that keep other sources: "
           f"{sum(1 for k in before if k in alone and before[k].get('sources') != alone[k].get('sources'))}")
     print(f"Roger's reviewed or queued rows with an old-run source ({len(touched)}):")
     for k, t in touched.items():
         fate = ("kept by " + ", ".join(t["other_generators"]) + (", first gloss unchanged" if t["first_gloss_unchanged"]
-                                                                 else ", FIRST GLOSS CHANGES: carried")
+                                                                 else ", FIRST GLOSS CHANGES")
                 if t["kept_by_other_sources"] else "DROPPED by the retraction alone: its old sources are carried")
         print(f"  {k}: {t['why']}; {fate}")
     for k, w in kept_why.items():
         print(f"  carried into the new run unchanged: {k} ({w})")
+    if blocks:
+        print(f"THE RETRACTION WILL REFUSE on {len(blocks)} settled row(s) (the registry's rule, predicted after the "
+              f"submission); these need Roger's decision, and the live step refuses before writing anything unless "
+              f"his go is given with --force-retract (the retraction record then names the rows it overrode):")
+        for k, w in blocks.items():
+            print(f"  {k}: {w}")
+    else:
+        print("the retraction will not refuse (no settled row would be dropped or show another first gloss)")
+    n_other = sum(1 for k in pred_rejudge if not H.first_gloss_is_new(final[k], args.run_id))
     print(f"predicted after the submission and the retraction: {pred_m1} rows for M1 --run (no M1 block), "
-          f"{len(pred_rejudge)} filtered rows whose first gloss becomes a rewrite (M1 --keys and M3 --rescore)")
+          f"{len(pred_rejudge)} filtered rows whose first gloss changes (to another source's gloss: {n_other}; to a "
+          f"rewrite: {len(pred_rejudge) - n_other}) (M1 --keys and M3 --rescore)")
     reason = args.reason or (f"Roger 2026-10-20: the alignment sweep rewritten in its closest human phrasing as "
                              f"{AS.GENERATOR}/{args.run_id}, which replaces the rows of the old runs")
     py = "uv run python data_analysis/gap_generation"
@@ -1072,14 +1098,20 @@ def cmd_humanize_submit(args) -> int:
             print(f"  then: {c}")
         print("DRY-RUN: nothing submitted, retracted or written")
         return 0
+    if blocks and not args.force_retract:
+        raise SystemExit(f"REFUSED: the retraction would refuse on {len(blocks)} settled row(s) "
+                         f"({', '.join(list(blocks)[:5])}); nothing was submitted.  Ask Roger; with his go, rerun "
+                         f"with --force-retract")
     by = _by(args)
     ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
         "step": "humanize-submit", "n_candidates": len(cands), "n_kept": len(kept), "old_runs": to_retract,
         "already_retracted": already, "relabel": not args.no_relabel, "by": by, "reason": reason,
-        "allow_unanswered": bool(args.allow_unanswered), "n_unanswered": len(missing)})
+        "allow_unanswered": bool(args.allow_unanswered), "n_unanswered": len(missing),
+        "force_retract": bool(args.force_retract), "predicted_blocks": blocks})
     code = 0
     out: dict = {"run_id": args.run_id, "at": utc_now(), "by": by, "reason": reason, "n_candidates": len(cands),
-                 "kept": {"n": len(kept), "why": kept_why}, "settled_rows": touched, "unanswered":
+                 "kept": {"n": len(kept), "why": kept_why}, "settled_rows": touched, "predicted_blocks": blocks,
+                 "unanswered":
                  [r["input_id"] for r in missing], "old_runs": to_retract, "already_retracted": already}
     try:
         if kept:
@@ -1092,10 +1124,12 @@ def cmd_humanize_submit(args) -> int:
         print(f"submitted to {args.registry}: {json.dumps({k: v for k, v in rep_d.items() if k != 'relabels'})}")
         out["retractions"] = []
         for r in to_retract:
-            rr = retract(args.registry, AS.GENERATOR, r, reason=reason, by=by, queue_keys=queue_keys)
+            rr = retract(args.registry, AS.GENERATOR, r, reason=reason, by=by, queue_keys=queue_keys,
+                         force=bool(args.force_retract))
             out["retractions"].append({"run": rr.run, "refused": rr.refused, "written": rr.written,
-                                       "counts": rr.counts(), "blocked": rr.blocked,
-                                       "settled_changed": rr.settled_changed})
+                                       "forced": rr.forced and bool(rr.blocked), "counts": rr.counts(),
+                                       "blocked": rr.blocked, "settled_changed": rr.settled_changed,
+                                       "gloss_hint_changed_after_run": rr.gloss_hint_changed_after_run})
             c = rr.counts()
             print(f"retract {rr.run}: {'REFUSED: ' + rr.refused if rr.refused else 'done'}; drops {c['n_dropped']} "
                   f"rows, keeps {c['n_changed']} with fewer sources ({c['n_gloss_hint_changed']} change their first "
@@ -1107,12 +1141,17 @@ def cmd_humanize_submit(args) -> int:
                 code = 2
                 break
         after = reg.fold()
-        rj = H.rejudge_keys(before, after, rep.keys, run_id=args.run_id)
-        if prev and prev.get("rejudge_keys"):        # an earlier pass (a refused retraction, or --again): keep its keys
+        # rows whose first gloss the retraction changed (another generator's gloss may now come first), this pass's
+        # and an earlier pass's (a refused retraction, a crash, or --again)
+        moved_live = {k for x in out["retractions"] + list((prev or {}).get("retractions") or [])
+                      for k in x.get("gloss_hint_changed_after_run") or []}
+        rj = H.rejudge_keys(before, after, rep.keys, run_id=args.run_id, moved=moved_live)
+        if prev and prev.get("rejudge_keys"):
             rj = sorted(set(rj) | {k for k in prev["rejudge_keys"] if k in after})
         n_m1 = sum(1 for k in set(rep.keys) if k in after and not after[k].get("filter"))
         atomic_write_text(f"# {len(rj)} rows of {AS.GENERATOR}/{args.run_id} with an M1 block whose first gloss hint "
-                          f"is now a rewrite ({utc_now()})\n" + "".join(k + "\n" for k in rj),
+                          f"changed, to a rewrite or to another source's gloss ({utc_now()})\n"
+                          + "".join(k + "\n" for k in rj),
                           rdir / H.REJUDGE_KEYS_NAME)
         cmds, est = H.followup_commands(args.run_id, n_m1=n_m1, n_rejudge=len(rj),
                                         rejudge_path=rdir / H.REJUDGE_KEYS_NAME, repo_root=_REPO_ROOT)
@@ -1272,6 +1311,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--allow-unanswered", action="store_true",
                    help="submit although some inputs have no answer (their rows leave with the retraction)")
     p.add_argument("--no-relabel", action="store_true", help="skip the platform's noun relabel step")
+    p.add_argument("--force-retract", action="store_true",
+                   help="only on Roger's explicit go: retract although settled rows would be dropped or show another "
+                        "first gloss (the retraction record names the rows overridden)")
     p.add_argument("--again", action="store_true",
                    help="resubmit a run whose submission and retractions are complete (refused without it)")
     p.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH,

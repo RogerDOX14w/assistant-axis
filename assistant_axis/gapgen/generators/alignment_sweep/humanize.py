@@ -33,15 +33,20 @@ a label starting with an -ing word, ``changed`` disagreeing with the text.
 ``candidates.jsonl`` (:func:`to_candidates`: one candidate per original source, ``surface`` the new label,
 ``gloss_hint`` the new gloss, ``partner_hint`` the opposite's new label when the opposite was rewritten in this run,
 else the recorded hint, ``rank`` the original's, ``source_ref`` the original's with ``;humanize:<run>:<label>``
-appended), ``humanize_summary.json`` and the sheet for Roger's marks (:func:`render_sheet`, ``humanize_sheet.md``).
+appended, where ``<run>`` is the **old** sweep run the source came from and ``<label>`` the original label: the new
+run's own id is the candidate's ``run_id``), ``humanize_summary.json`` and the sheet for Roger's marks
+(:func:`render_sheet`, ``humanize_sheet.md``).
 
-**Submission** (:func:`plan_submission`, the CLI's ``humanize-submit``): the new run's candidates are submitted first
-(the platform's noun relabel on), then each old run is retracted (``registry.retract``), so that a reviewed row only
-the old runs held keeps a source.  A settled or queued row the retraction would drop, or whose first gloss hint (the
-sense M1 is shown) it would change, has its old alignment sources carried into the new run unchanged
-(:func:`kept_candidates`, ``source_ref`` tagged ``;humanize:kept:<run>:<label>``): Roger's reviewed rows stay as he saw
-them.  Rows the new run lands on that already carry an M1 block and whose first gloss hint becomes a new gloss are
-listed in ``rejudge_keys.txt`` (:func:`rejudge_keys`) for M1 ``--keys`` and M3 ``--keys-file --rescore``.
+**Submission** (the CLI's ``humanize-submit``): the new run's candidates are submitted first (the platform's noun
+relabel on), then each old run is retracted (``registry.retract``), so that a reviewed row only the old runs held
+keeps a source.  A settled or queued row the retraction would drop has its old alignment sources carried into the new
+run unchanged (:func:`kept_candidates`, ``source_ref`` tagged ``;humanize:kept:<old run>:<label>``), submitted ahead
+of the rewrites, so Roger's reviewed rows stay as he saw them.  A settled row whose first gloss hint (the sense M1 is
+shown) the retraction would change cannot be kept that way: :func:`predicted_blocks` names it, the dry run says the
+retraction will refuse, and the live step refuses before writing anything unless Roger's go is given with
+``--force-retract``.  Rows M1 judged on a gloss they no longer show first (a rewrite now first, or another
+generator's gloss once the old one leaves) are listed in ``rejudge_keys.txt`` (:func:`rejudge_keys`) for M1 ``--keys``
+and M3 ``--keys-file --rescore``.
 """
 from __future__ import annotations
 
@@ -472,7 +477,9 @@ def rewrite_rows(inputs: Sequence[HumanizeInput], records: Sequence[Mapping]) ->
 
 
 def tag_source_ref(ref: Optional[str], run_id: str, label: str, *, kept: bool = False) -> str:
-    """``<ref>;humanize:<run>:<label>`` (``;humanize:kept:<run>:<label>`` for a carried reviewed row)."""
+    """``<ref>;humanize:<run>:<label>`` (``;humanize:kept:<run>:<label>`` for a carried reviewed row): ``run_id`` is
+    the **old** sweep run the source came from and ``label`` the original label (the new run is the candidate's own
+    ``run_id``)."""
     tail = f"{KEPT_TAG if kept else ''}{run_id}:{label}"
     return f"{ref}{REF_TAG}{tail}" if ref else f"{REF_TAG[1:]}{tail}"
 
@@ -674,9 +681,14 @@ def _settled(row: Mapping, queue_keys: Iterable[str] = ()) -> Optional[str]:
 def kept_candidates(raw: Mapping[str, Mapping], *, active: Iterable[tuple], old_runs: Iterable[str], run_id: str,
                     queue_keys: Iterable[str] = (), generator: str = GENERATOR) -> tuple[list[Candidate], dict]:
     """``(candidates, {key: why})`` for the settled or queued rows that retracting ``old_runs`` (on top of the
-    ``active`` retractions) would drop, or whose first gloss hint it would change: each of the row's old-run sources
-    of ``generator``, unchanged, as a candidate of the new run (``source_ref`` tagged kept).  ``raw`` is the registry's
-    raw fold (``Registry.fold(raw=True)``)."""
+    ``active`` retractions) would drop: each of the row's old-run sources of ``generator``, unchanged, as a candidate
+    of the new run (``source_ref`` tagged kept).  ``raw`` is the registry's raw fold (``Registry.fold(raw=True)``).
+
+    Only the drop case.  A carried copy is appended after the row's other sources, so it keeps a row in the registry
+    but never keeps its first gloss hint: a settled row whose first gloss the retraction would change (another
+    source's gloss coming first) is not carried; :func:`predicted_blocks` reports it, and the registry's retraction
+    refuses it until Roger decides.  The CLI submits the carried copies before the rewrites, so that a rewrite landing
+    on the same row comes after the copy and the row's first gloss stays the one Roger saw."""
     active = {tuple(a) for a in active}
     old = {(generator, r) for r in old_runs}
     before = apply_retractions(dict(raw), active)
@@ -685,14 +697,12 @@ def kept_candidates(raw: Mapping[str, Mapping], *, active: Iterable[tuple], old_
     for k in sorted(before):
         row = before[k]
         mine = [s for s in row.get("sources") or [] if (s.get("generator"), s.get("run_id")) in old]
-        if not mine:
+        if not mine or k in after:
             continue
         reason = _settled(row, queue_keys)
         if reason is None:
             continue
-        if k in after and first_gloss_hint(after[k]) == first_gloss_hint(row):
-            continue
-        why[k] = reason + ("; the retraction drops it" if k not in after else "; its first gloss hint would change")
+        why[k] = reason + "; the retraction drops it"
         for s in mine:
             out.append(Candidate(surface=s.get("surface") or row.get("surface"), generator=generator, run_id=run_id,
                                  rank=s.get("rank"), score=s.get("score"), gloss_hint=s.get("gloss_hint"),
@@ -725,6 +735,11 @@ def settled_rows_touched(raw: Mapping[str, Mapping], *, active: Iterable[tuple],
     return out
 
 
+def first_gloss_is_new(row: Mapping, run_id: str, generator: str = GENERATOR) -> bool:
+    """Whether the row's first gloss hint comes from a source of the new run ``run_id``."""
+    return _new_source_gloss(row, run_id, generator)
+
+
 def _new_source_gloss(row: Mapping, run_id: str, generator: str = GENERATOR) -> bool:
     """Whether the row's first gloss hint comes from a source of the new run."""
     for s in row.get("sources") or []:
@@ -733,22 +748,90 @@ def _new_source_gloss(row: Mapping, run_id: str, generator: str = GENERATOR) -> 
     return False
 
 
-def rejudge_keys(before: Mapping[str, Mapping], after: Mapping[str, Mapping], keys: Iterable[str], *, run_id: str,
-                 generator: str = GENERATOR) -> list[str]:
-    """The keys among ``keys`` whose row (in the ``after`` view) already carries an M1 block, is not settled, takes
-    its first gloss hint from the new run, and whose first gloss hint differs from the one it had (``before``): M1
-    judged them on another gloss, and ``--run`` skips a filtered row."""
+def _old_runs_of_row(row: Mapping, old: set, generator: str = GENERATOR) -> list[str]:
+    return sorted({str(s.get("run_id")) for s in row.get("sources") or []
+                   if (s.get("generator"), s.get("run_id")) in old})
+
+
+def _start(runs: Sequence[str], run_starts: Mapping[str, Optional[str]]) -> Optional[str]:
+    """The earliest start of ``runs`` (``run.json``'s ``started_at``), or None when any start is unknown."""
+    starts = [run_starts.get(r) for r in runs]
+    return None if not starts or any(s is None for s in starts) else min(starts)
+
+
+def gloss_moved(before: Mapping[str, Mapping], after: Mapping[str, Mapping], *, old_runs: Iterable[str],
+                run_starts: Optional[Mapping[str, Optional[str]]] = None, generator: str = GENERATOR) -> list[str]:
+    """The registry's ``gloss_hint_changed_after_run``, predicted: rows with an old-run source in ``before``, still in
+    ``after``, whose first gloss hint changes, and that M1 judged after the run began (or whose run's start is
+    unknown).  Another generator's gloss now coming first counts as much as a rewrite's."""
+    old = {(generator, r) for r in old_runs}
+    run_starts = run_starts or {}
     out = []
-    for k in sorted(set(keys)):
-        row = after.get(k)
-        if not row or not row.get("filter") or _settled(row):
+    for k in sorted(set(before) & set(after)):
+        runs = _old_runs_of_row(before[k], old, generator)
+        if not runs or first_gloss_hint(after[k]) == first_gloss_hint(before[k]):
             continue
-        if not _new_source_gloss(row, run_id, generator):
-            continue
-        if first_gloss_hint(row) == first_gloss_hint(before.get(k) or {}):
+        start = _start(runs, run_starts)
+        if start is not None and not str(((before[k].get("filter") or {}).get("at")) or "") >= start:
             continue
         out.append(k)
     return out
+
+
+def rejudge_keys(before: Mapping[str, Mapping], after: Mapping[str, Mapping], keys: Iterable[str], *, run_id: str,
+                 moved: Iterable[str] = (), generator: str = GENERATOR) -> list[str]:
+    """The rows M1 judged on a gloss they no longer show first, among the rows the new run lands on (``keys``: their
+    first gloss hint now comes from the new run) and the rows whose first gloss the retraction changed (``moved``: the
+    retraction reports' ``gloss_hint_changed_after_run``, or :func:`gloss_moved`'s prediction; another generator's
+    gloss may now come first).  Each must be in the ``after`` view, carry an M1 block, not be settled, and show a
+    first gloss hint other than the one it had (``before``).  ``--run`` skips a filtered row, so these need M1
+    ``--keys`` and M3 ``--rescore``."""
+    out = set()
+    for k in set(keys) | set(moved):
+        row = after.get(k)
+        if not row or not row.get("filter") or _settled(row):
+            continue
+        if k not in set(moved) and not _new_source_gloss(row, run_id, generator):
+            continue
+        if first_gloss_hint(row) == first_gloss_hint(before.get(k) or {}):
+            continue
+        out.add(k)
+    return sorted(out)
+
+
+def predicted_blocks(before: Mapping[str, Mapping], final: Mapping[str, Mapping], *, old_runs: Iterable[str],
+                     queue_keys: Iterable[str] = (), run_starts: Optional[Mapping[str, Optional[str]]] = None,
+                     generator: str = GENERATOR) -> dict[str, str]:
+    """``{key: why}``: the rows on which the registry's retraction would refuse, after the submission (the rule of
+    ``registry._blocked``, predicted on :func:`final_view`): a settled or queued row with an old-run source that the
+    final view drops; one whose first gloss hint changes, when its review or M1 postdates the earliest start of its
+    old runs (or a start is unknown); a row merged into a row the final view drops.  These need Roger's decision."""
+    old = {(generator, r) for r in old_runs}
+    run_starts = run_starts or {}
+    gone = set(before) - set(final)
+    out: dict[str, str] = {}
+    for k in sorted(before):
+        row = before[k]
+        runs = _old_runs_of_row(row, old, generator)
+        why = _settled(row, queue_keys) if runs else None
+        if why is None:
+            continue
+        if k not in final:
+            out[k] = f"{why}; the retraction would drop it"
+            continue
+        was, now = first_gloss_hint(row), first_gloss_hint(final[k])
+        if was == now:
+            continue
+        start = _start(runs, run_starts)
+        seen = max(str((row.get("review") or {}).get("at") or ""), str((row.get("filter") or {}).get("at") or ""))
+        if start is not None and seen and seen < start:
+            continue
+        out[k] = f"{why}; its first gloss hint would change from {was!r} to {now!r}"
+    for k, row in final.items():
+        into = (row.get("review") or {}).get("into")
+        if into in gone:
+            out[k] = f"review merged_into {into}, which the retraction drops"
+    return dict(sorted(out.items()))
 
 
 def simulate_after(raw: Mapping[str, Mapping], cands: Sequence[Candidate], *, active: Iterable[tuple],
@@ -771,6 +854,24 @@ def simulate_after(raw: Mapping[str, Mapping], cands: Sequence[Candidate], *, ac
                                   if (s.get("generator"), s.get("run_id")) not in retracted]
         rows[k]["sources"] = rows[k]["sources"] + [source_entry(c)]
     return rows
+
+
+def final_view(raw: Mapping[str, Mapping], cands: Sequence[Candidate], *, active: Iterable[tuple],
+               old_runs: Iterable[str], generator: str = GENERATOR) -> dict[str, dict]:
+    """The whole folded view the submission and the retraction would leave (a prediction): the retraction alone,
+    with the candidates' own keys rebuilt by :func:`simulate_after` (no relabel siblings)."""
+    active = {tuple(a) for a in active}
+    alone = apply_retractions(dict(raw), active | {(generator, r) for r in old_runs})
+    return {**alone, **simulate_after(raw, cands, active=active, old_runs=old_runs, generator=generator)}
+
+
+def submission_complete(report: Optional[Mapping]) -> bool:
+    """Whether a ``humanize_submit.json`` records a finished pass: the submission written and a written retraction
+    for every old run it set out to retract (a crash between the submission and a retraction is not finished)."""
+    if not report or not report.get("submit"):
+        return False
+    done = {r.get("run") for r in report.get("retractions") or [] if r.get("written") and not r.get("refused")}
+    return all(f"{GENERATOR}/{r}" in done for r in report.get("old_runs") or [])
 
 
 def landing(raw: Mapping[str, Mapping], cands: Sequence[Candidate]) -> dict:
@@ -832,5 +933,6 @@ __all__ = ["RUBRIC_NAME", "MODEL", "MAX_TOKENS", "FAMILY", "STEP", "REF_TAG", "H
            "parse_answer", "label_rule_problem", "answer_notes", "build_calls", "parse_call", "estimate_usd",
            "estimate_line", "make_runner", "answers_from_records", "rewrite_rows", "tag_source_ref",
            "split_source_ref", "partner_map", "to_candidates", "summarize", "sample_rows", "render_sheet",
-           "old_runs_of", "kept_candidates", "settled_rows_touched", "rejudge_keys", "simulate_after", "landing",
+           "old_runs_of", "kept_candidates", "settled_rows_touched", "rejudge_keys", "gloss_moved", "predicted_blocks",
+           "final_view", "submission_complete", "first_gloss_is_new", "simulate_after", "landing",
            "followup_commands", "sheet_marks", "sheet_path"]
