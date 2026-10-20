@@ -735,7 +735,7 @@ const ctx = {document: {getElementById: el, querySelectorAll: () => [], querySel
              fetch: (url, opt) => new Promise((res) => pending.push({url, opt, res}))};
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(process.argv[2], "utf8") +
-                "\n;globalThis.T = {S, renderCard, openFind, closeOverlay, ACTIONS};", ctx);
+                "\n;globalThis.T = {S, renderCard, openFind, closeOverlay, ACTIONS, showGroup};", ctx);
 const T = ctx.T;
 (async () => {
 BODY
@@ -1668,3 +1668,60 @@ class TestSplitOff:
                         && JSON.stringify(b.keys) === JSON.stringify(["p#1"]) ? "SPLIT" : "WRONG " + JSON.stringify(b) + " " + marked);
         """)
         assert "SPLIT" in out
+
+
+# --------------------------------------------------------------------------- "probably covered by X" (Roger, 2026-10-20)
+
+class TestProbablyCovered:
+    """A free proposed merge for rows M3 read only 2: a prominent badge, X highlighted for c, hidden by --blind."""
+
+    READINGS = [{"stem": "alpha", "cosine": 0.5, "relation": "similar", "sonnet": {"value": 2}, "opus": None},
+                {"stem": "beta", "cosine": 0.3, "relation": "similar", "sonnet": {"value": 2}, "opus": None}]
+
+    def _with_readings(self, env, key):
+        reg = env["reg"]
+        row = reg.fold()[key]
+        row["novelty"] = dict(row["novelty"], readings=self.READINGS)
+        reg.write([row])
+
+    def test_the_card_and_blind_mode(self, env):
+        from fastapi.testclient import TestClient
+        from assistant_axis.gapgen.review_app import server
+        self._with_readings(env, k("loner"))
+        seen = {}
+        for blind in (False, True):
+            app = server.create_app(review_dir=env["rdir"], data_dir=env["data"], registry_path=env["reg"].path,
+                                    by="roger", clock=Clock(), blind=blind)
+            c = TestClient(app)
+            r = c.post("/api/action", json={"action": "open", "source": f"term:{k('loner')}"}).json()
+            seen[blind] = {x["key"]: x for x in r["group"]["members"]}[k("loner")].get("probably_covered")
+        pc = seen[False]
+        assert pc["target"]["key"] == "trait:alpha" and pc["target"]["href"] == "/files/traits/alpha.json"
+        assert pc["n_read_2"] == 2 and pc["why_text"] == "cosine 0.50 to alpha"
+        assert seen[True] is None and "probably_covered" in D.SIGNAL_FIELDS
+        # never a cut: M3's decision on the card is unchanged
+        log = make_log(env)
+        assert log.state.member_card(k("loner"))["m3_decision"] == "new"
+
+    def test_the_page_shows_the_badge_and_highlights_x_for_c(self, tmp_path):
+        out = run_page(tmp_path, """
+            T.S.card = null;
+            const card = {id: "g1", status: "open", source: "term:a#1", via: null, antonym_groups: [], neighbour_groups: [],
+                        neighbours: [], opposed: [], resolution: null, nominated: null, leftovers: [], distinct: [],
+                        corpus: [{key: "trait:beta", kind: "corpus", label: "beta", path: "p", href: "/files/traits/beta.json", level: 2},
+                                 {key: "trait:alpha", kind: "corpus", label: "alpha", path: "p", href: "/files/traits/alpha.json", level: 2}],
+                        members: [{key: "a#1", label: "blendy", gloss: "g", tags: [], flags: [], merged: [], proposed: [],
+                                   probably_covered: {n_read_2: 2, why_text: "cosine 0.50 to alpha",
+                                     target: {key: "trait:alpha", kind: "corpus", label: "alpha", path: "p", href: "/files/traits/alpha.json"}}}]};
+            T.S.pane = "members";
+            const p = T.showGroup(card);                   // its queue load stays pending: what matters is set first
+            await sleep(10);
+            const h = el("card").innerHTML;
+            const badge = h.includes("probably covered by <a") && h.includes("(2 traits read 2; cosine 0.50 to alpha)");
+            T.ACTIONS.merge_into();                        // c
+            await sleep(10);
+            const req = pending.find((x) => x.url === "/api/action");
+            const b = req ? JSON.parse(req.opt.body) : {};
+            console.log(badge && T.S.idx.corpus === 1 && b.resolution === "merge_into:trait:alpha" ? "PROPOSED" : "WRONG " + JSON.stringify(b) + " " + T.S.idx.corpus + " " + badge);
+        """)
+        assert "PROPOSED" in out

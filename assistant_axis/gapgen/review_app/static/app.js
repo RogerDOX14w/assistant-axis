@@ -56,17 +56,27 @@ async function showGroup(card) {
   // the leftovers pass stays on its resolved group: its corpus highlight (the split-off target) is kept, so that
   // several leftovers can be split off into one trait in a row
   const same = S.card && card && S.card.id === card.id && card.status === "resolved";
+  const fresh = card && !(S.card && S.card.id === card.id);
   S.card = card;
   if (card) {
     S.idx = { members: Math.min(S.idx.members, Math.max(0, card.members.length - 1)),
       leftovers: Math.min(S.idx.leftovers, Math.max(0, (card.leftovers || []).length - 1)), neighbours: 0,
-      corpus: same ? S.idx.corpus : 0, opposed: 0 };
+      corpus: same ? S.idx.corpus : fresh ? proposedTarget(card) : 0, opposed: 0 };
     if (S.pane === "leftovers" && !(card.leftovers || []).length) S.pane = "members";
     const pos = S.queue.findIndex((it) => it.group === card.id || itemMatches(it, card));
     if (pos >= 0) S.qpos = pos;
   }
   renderCard();
   await loadQueue();
+}
+
+// A group opened afresh highlights the corpus row of its first member's "probably covered by X" proposal, so that c
+// merges into X in one keystroke (Roger, 2026-10-20); else the first row.
+function proposedTarget(card) {
+  const pc = card.members.map((m) => m.probably_covered).find(Boolean);
+  if (!pc || card.status === "resolved") return 0;
+  const view = S.pinned ? [S.pinned, ...card.corpus.filter((t) => t.key !== S.pinned.key)] : card.corpus;
+  return Math.max(0, view.findIndex((t) => t.key === pc.target.key));
 }
 
 function itemMatches(it, card) {
@@ -227,6 +237,11 @@ function renderCard() {
     const narrow = !nw ? "" : nw.status === "kept"
       ? `<span class="badge flag" title="the narrow pass: the one narrower case of this trait sent to review${nw.n_children > 1 ? " (" + nw.n_children + " children; the others held)" : ""}; M3 read it ${esc(nw.reading || "-")}; direction ${esc((nw.votes || []).join(", "))}">narrower than ${link(nw.parent)}</span>`
       : `<span class="badge" title="the narrow pass held this row: its parent's narrow child in review is ${esc(nw.kept_child || "")}${nw.held_because === "earlier_run" ? " (an earlier run)" : ""}">held: narrower than ${link(nw.parent)}</span>`;
+    // "probably covered by X" (Roger, 2026-10-20, option (b)): M3 read only 2, against two or more traits, with a close
+    // cosine, a dictionary link or persona space's duplicate flag; a proposed merge, M3's decision unchanged; X is the
+    // corpus row highlighted when the group opens, so c merges into it
+    const pcov = m.probably_covered;
+    const probably = !pcov ? "" : `<span class="badge flag" title="M3 read this row only 2, against ${pcov.n_read_2} traits; a proposed merge (c merges into the highlighted corpus row), M3's decision unchanged">probably covered by ${link(pcov.target)} (${pcov.n_read_2} traits read 2; ${esc(pcov.why_text)})</span>`;
     const groups = [...(m.merged || []), ...(m.proposed || [])].join(" ");
     const mine = !(m.handled_by && m.handled_by !== c.id);
     const btns = [
@@ -237,7 +252,7 @@ function renderCard() {
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
       `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
-      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}${narrow}` +
+      `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}${narrow}${probably}` +
       `<div class="gloss">${esc(m.gloss)}</div></li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each

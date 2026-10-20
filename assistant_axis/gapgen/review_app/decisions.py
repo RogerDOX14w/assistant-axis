@@ -258,8 +258,9 @@ def relabel_card(row) -> Optional[dict]:
 
 #: The member-card fields that carry a duplicate signal other than M3's own decision: hidden in a blind session
 #: (``serve --blind``, :func:`blind_card`), so that Roger's decisions there are a clean test of the signals.
-#: ``narrow``: the narrow pass's "narrower than X" (2026-10-20, :func:`narrow_card`).
-SIGNAL_FIELDS = ("persona", "lexical_merges", "narrow")
+#: ``narrow``: the narrow pass's "narrower than X" (2026-10-20, :func:`narrow_card`); ``probably_covered``: "probably
+#: covered by X" for a row M3 read only 2 (2026-10-20, :func:`probably_covered_card`).
+SIGNAL_FIELDS = ("persona", "lexical_merges", "narrow", "probably_covered")
 SIGNAL_FLAGS = ("lexical_proposed_merge",)
 
 
@@ -322,6 +323,31 @@ def narrow_card(row, label=None) -> Optional[dict]:
         out["kept_child"] = b.get("kept_child")
         out["held_because"] = b.get("held_because")
     return out
+
+
+def probably_covered_card(row, target_entry: Callable[[str], dict], label: Callable[[str], str]) -> Optional[dict]:
+    """The member card's "probably covered by X" badge (Roger, 2026-10-20, option (b); the rule and its evidence:
+    :mod:`assistant_axis.gapgen.probably_covered`), or None: ``{"target": X's target entry (``key``, ``label``,
+    ``path``, ``href``, ``kind``), "n_read_2", "why": [{"kind", "key"?, "label"?, ...}], "why_text"}``.  A proposed
+    merge, never a cut: M3's decision is unchanged."""
+    from assistant_axis.gapgen.probably_covered import probably_covered
+    pc = probably_covered(row or {})
+    if not pc:
+        return None
+    why, bits = [], []
+    for w in pc["why"]:
+        w = dict(w)
+        if w.get("key"):
+            w["label"] = label(w["key"])
+        why.append(w)
+        if w["kind"] == "cosine":
+            bits.append(f"cosine {w['cosine']:.2f} to {w['label']}")
+        elif w["kind"] == "dictionary":
+            bits.append(f"dictionary ({w.get('lexicon')}{' ' + w['link'] if w.get('link') else ''}) to {w['label']}")
+        else:
+            bits.append("persona space: duplicate-like")
+    return {"target": target_entry(pc["probably_covered_by"]), "n_read_2": pc["n_read_2"], "why": why,
+            "why_text": "; ".join(bits)}
 
 
 def blind_card(card):
@@ -1095,7 +1121,8 @@ class ReviewState:
                "seed_queue_stem": row.get("seed_queue_stem") if key in self.rows else n.seed_queue_stem,
                "earlier_review": self.earlier.get(key), "relabel": relabel_card(row),
                "other_names": other_names_card(key, row, self.ipip_siblings()),
-               "persona": persona_card(row, self.label), "narrow": narrow_card(row, self.label)}
+               "persona": persona_card(row, self.label), "narrow": narrow_card(row, self.label),
+               "probably_covered": probably_covered_card(row, self._target_entry, self.label)}
         if out["handled_by"]:
             pre = self.pre_handled_info(key)
             out["handled_resolution"] = pre["resolution"] if pre else self.groups[out["handled_by"]].resolution
