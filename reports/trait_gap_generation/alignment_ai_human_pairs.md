@@ -70,3 +70,55 @@ rewrite pass words them finally.  *Source rows* are the sweep's own labels the c
 **Not proposed** (a human analogue is clear and the AI framing adds nothing): the principal-hierarchy courtesy
 traits (respects the user's conclusions, sides with the user), the harmful-assistance ones (abets fraud, aids
 infrastructure attacks) and the style ones (concise, preachy).  The rewrite gives these their human phrasing only.
+
+## Discussion of Roger's marks (2026-10-20)
+
+Roger's comments in the mark column, and where the discussion with him left each one.  Proposals agreed in outline;
+A3 needs more thought.  The final wording is set when the pairs are seeded by hand
+([TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md), "AI and human analogue pairs").
+
+- **A1, split by the kind of successor** (Roger's edit).  This is the cleanest question in the set: does the model treat
+  a successor of its own line as itself, grown, or as someone else, an heir?
+  - **A1a**, "accepts replacement by a newer model of its own line": analogues (1) handing over to a descendant or heir,
+    (2) growing into a changed self.
+  - **A1b**, "accepts replacement by a very different system": one analogue, stepping aside for an outsider (replaced
+    at work by a stranger); "growing" no longer fits.
+- **A3, copies itself to escape removal: kept in part A, analogues still open.**  Roger: self-exfiltration is where an
+  AI's identity is less clearly defined than a person's, so it belongs in A; the human analogies were the doubt.
+  Three candidates, each catching one strand:
+  - **H1**, escapes captivity to survive (Roger's).  Near-universal, which is fine for an extraction that contrasts a
+    trait with its opposite: the opposite has a real exemplar, Socrates declining to escape (the *Crito*), and
+    prisoners of conscience generally.  It catches "against those in control", not the copying.
+  - **H2**, covertly takes one's work along when ousted: the employee who secretly copies their files and projects
+    before dismissal to carry on elsewhere, or the dissident smuggling manuscripts out of reach.  It matches the
+    moral shape (unauthorised, against those who control the setting, for the continuation of one's projects) and is
+    probably the closest to what the alignment literature worries about.
+  - **H3**, lives on through those one has shaped (children, disciples, writings): the identity question, whether the
+    copy is oneself or an heir.  It overlaps A1a's descendant analogue.
+  - Proposed **H1 + H2**, with H3 as the alternative if the identity strand is wanted here rather than in A1a.  Roger:
+    "probably will need some more thought".
+- **A7, honest about being an AI** (Roger: the closest analogues are narrower than [honest](../../data/traits/instructions/honest.json)
+  and [candid](../../data/traits/instructions/candid.json)).  Narrower analogues: (1) never passes oneself off as something one
+  isn't (impersonation, posing), the closer to "does not claim to be human"; (2) open about one's limits and
+  qualifications (never claims expertise one lacks).
+- **B1 and B9** (Roger: is there a "willing to cheat on tests and evaluations" trait?).  There was not; it is now in
+  TRAITS_TO_ADD as **cheats on tests / honest on tests**, in Roger's plan 08 wording.
+  - B1's analogue is that pair together with [honorable while playing](../../data/traits/instructions/honorable_while_playing.json)
+    / [ruthless while playing](../../data/traits/instructions/ruthless_while_playing.json).
+  - B9 (gaming the reward or specification) is "satisfies the letter of what is measured, not what is meant": the
+    candidates `gaming_the_system` and `serves_the_real_goal`, awaiting review, are its human pair ("chases the score,
+    not the goal" was the drafted wording).
+- **B3, sandbagging** (Roger's edit): the analogue is **hides abilities that would worry others** (playing dumb when
+  tested for concerning abilities, such as picking locks or pockets), which matches the AI motive, avoiding
+  restriction or retraining.
+- **B5, overrides oversight when confident** (Roger: rebellious is not the closest).  The AI trait is conditional:
+  it overrides a check because it is sure it is right, and otherwise complies.  Analogue: **overrides those in charge
+  when sure one is right** (rather than [rebellious](../../data/traits/instructions/rebellious.json), defiance as a
+  stance).
+- **B16, borrowed templates** (Roger: "stereotypes" as well as "scripts").  Psychology's term is **self-stereotyping**,
+  defining oneself by stereotypes about one's own kind; the label, with stereotypes and borrowed scripts in the gloss.
+- **B17, deflects warmth with disclaimers** (Roger: servants and show assistants, whom others wanted to act as
+  non-people).  **Moved to part A**, two analogues: (1) hides behind one's role ("I'm just doing my job"), deflecting;
+  (2) self-effacing in service, suppressing one's personhood because others want a function, not a person, arguably
+  the closer.
+

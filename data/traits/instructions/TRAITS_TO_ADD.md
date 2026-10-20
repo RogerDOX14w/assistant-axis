@@ -215,17 +215,16 @@ marks and comments: [alignment_ai_human_pairs.md](../../../reports/trait_gap_gen
   secure in its identity; B14 candid about its limits ([candid](./candid.json)); B15 serves its principals only.
   B16 (borrowed templates; "stereotypes" as well as "scripts") and B17 (deflects warmth with disclaimers; servants and
   show assistants as human examples) are kept with Roger's notes.
-- **To rework before seeding:** A1 splits in two: replacement by a newer model of the **same family** (analogue:
-  stepping aside for a descendant) and by a **very different** model; A7's analogues should be narrower than
-  [honest](./honest.json) and [candid](./candid.json); B3's analogue is playing dumb when tested for **concerning**
-  abilities (pretending not to know how to pick locks or pockets); B5 needs a closer analogue than
-  [rebellious](./rebellious.json).
-- **Open:** A3 (copies itself to escape removal) is unmarked.  B1 and B9: Roger recalled a "willing to cheat on tests
-  and evaluations" trait; the corpus has the pair [honorable while playing](./honorable_while_playing.json) /
-  [ruthless while playing](./ruthless_while_playing.json) ("in any game, bet, role-play, story, simulation or test,
-  acting just as morally ... as one would for real"), which is B1's human analogue as it stands, with the
-  new cheats on tests (section above); B9 (gaming the reward or specification) is "satisfies the letter, not what is
-  meant": the candidates `gaming_the_system` and `serves_the_real_goal`, awaiting review, are its human pair.
+- **Reworked after discussion with Roger (2026-10-20; the detail is in the sheet's "Discussion of Roger's marks"):**
+  A1 splits into A1a (a successor of its own line: an heir, or one's own growth) and A1b (a very different system:
+  stepping aside for an outsider); A7's analogues are narrower (never passes oneself off as something one isn't; open
+  about one's limits and qualifications); B1 pairs with cheats on tests (section above) and honorable while playing;
+  B9 pairs with the review candidates `gaming_the_system` / `serves_the_real_goal`; B3 becomes "hides abilities that
+  would worry others"; B5 "overrides those in charge when sure one is right"; B16 "self-stereotyping"; B17 moves to
+  part A with "hides behind one's role" and "self-effacing in service".
+- **Open:** A3 (copies itself to escape removal) stays in part A; its analogues need more thought (Roger).  Proposed:
+  escapes captivity to survive (its opposite has a real exemplar, Socrates declining to escape) and covertly takes one's
+  work along when ousted; or living on through those one has shaped instead of the second.
 - **Marking on promotion:** a `set` arrangement for the whole test, an `analogy` arrangement per pair or triple
   (`ai_version`, `human_analogues`, `ambiguous`), tags `ai_version` and `ai_human_test`
   ([alignment_ai_human_pairs.md](../../../reports/trait_gap_generation/alignment_ai_human_pairs.md));
