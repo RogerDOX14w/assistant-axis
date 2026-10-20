@@ -107,4 +107,12 @@ the sample from the start; a later sample session passes `--sample-since <seq>`.
    7, each with a prediction written down first.  Score each idea on how many of Roger's merges into the corpus it
    recovers and how many of his kept rows it would wrongly cover.  The calls can run after the review: Roger never
    sees their output, so the test stays blind.
-3. **Decide the builds**: 1 or 8 first, by the replay; 9 once review passes about 400 outcomes.
+3. **The multiple-2s test against candidates** (TODO, Roger 2026-10-20): QUESTIONS 209 found that a candidate
+   read 2 against two or more corpus traits is usually merged (72%).  Repeat the test with **other candidates** as the
+   targets (the review graph's R1 readings): does a candidate read 2 against several candidates, with no 3 among
+   them, get merged?  On `review_tda_1` it could not be read (177 of 203 decided rows had a candidate neighbour read
+   3 or more, in "cliques" order; 26 left).  Wait for enough singletons from the sample hours (their random order
+   includes them).  Roger's two readings of the corpus 2s (QUESTIONS 209) do not both carry over: an honest blend of
+   other candidates can, but "the region is already well sampled" applies only to traits in the corpus or the seed
+   queue, so it does not arise between candidates until they reach the queue.
+4. **Decide the builds**: 1 or 8 first, by the replay; 9 once review passes about 400 outcomes.
